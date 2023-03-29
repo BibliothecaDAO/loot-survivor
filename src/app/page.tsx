@@ -64,8 +64,9 @@ export default function Home() {
 
   return (
     <main className={`container mx-auto p-8 flex flex-wrap`}>
-      <div className="w-full">
-        <ul>
+      <div className="w-full justify-between flex">
+        <h1>Loot Survivors</h1>
+        <ul className="self-end">
           {connectors.map((connector) => (
             <li key={connector.id()}>
               <Button onClick={() => connect(connector)}>
@@ -82,7 +83,7 @@ export default function Home() {
           buttonsData={menu}
           onButtonClick={(value) => setSelected(value)}
         />
-        <h1>Loot Survivors</h1>
+
         {/* <Button onClick={() => addToCalls(tx)}>start</Button>
         <Button onClick={() => write()}>start</Button> */}
 

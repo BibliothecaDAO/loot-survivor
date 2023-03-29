@@ -7,7 +7,7 @@
   } */
   
   h1 {
-    @apply my-4 text-3xl sm:text-4xl md:text-5xl sm:my-6 md:my-8;
+    @apply text-3xl sm:text-4xl md:text-5xl sm:mt-6 md:mt-8;
   }
   
   h2 {

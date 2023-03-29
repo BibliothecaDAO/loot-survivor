@@ -54,7 +54,10 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
           variant={selectedIndex === index ? "default" : "outline"}
-          onClick={() => onButtonClick(buttonData.value)}
+          onClick={() => {
+            setSelectedIndex(index);
+            onButtonClick(buttonData.value);
+          }}
         >
           {buttonData.label}
         </Button>

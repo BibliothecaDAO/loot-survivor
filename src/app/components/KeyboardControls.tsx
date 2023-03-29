@@ -44,7 +44,10 @@ const KeyboardControl = ({ buttonsData }: ButtonProps) => {
           ref={(ref) => (buttonRefs.current[index] = ref)}
           className={selectedIndex === index ? "animate-pulse" : ""}
           variant={selectedIndex === index ? "default" : "outline"}
-          onClick={buttonData.action}
+          onClick={() => {
+            setSelectedIndex(index);
+            buttonData.action;
+          }}
         >
           {buttonData.label}
         </Button>
