@@ -11,6 +11,7 @@ export const useWriteContract = () => {
   const [calls, setCalls] = useState<any>([]);
 
   const addToCalls = ({ contractAddress, selector, calldata }: any) => {
+    console.log("addToCalls", contractAddress, selector, calldata);
     const tx = {
       contractAddress: contractAddress,
       entrypoint: selector,
@@ -30,7 +31,7 @@ export const useWriteContract = () => {
   //   setCalls((calls: any) => [...calls, tx]);
   // }, [address]);
 
-  const { write } = useContractWrite({ calls });
+  const { writeAsync } = useContractWrite({ calls });
 
-  return { write, calls, addToCalls };
+  return { writeAsync, calls, addToCalls };
 };

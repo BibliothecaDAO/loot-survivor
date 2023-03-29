@@ -1,8 +1,10 @@
 "use client";
 
 import "./globals.css";
-import { Connect } from "./providers/Connect";
 import { VT323 } from "next/font/google";
+import { InjectedConnector, StarknetConfig } from "@starknet-react/core";
+import CartridgeConnector from "@cartridge/connector";
+import { useMemo } from "react";
 
 // export const metadata = {
 //   title: "Create Next App",
@@ -20,12 +22,28 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const connectors = useMemo(
+    () => [
+      new InjectedConnector({ options: { id: "argentX" } }),
+      // new InjectedConnector({ options: { id: "braavos" } }),
+      // new InjectedConnector({ options: { id: "guildly" } }),
+      // new CartridgeConnector([
+      //   {
+      //     target: ModuleAddr.Labor,
+      //     method: 'harvest',
+      //   },
+      // ]),
+    ],
+    []
+  );
   return (
     <html lang="en">
       <body
         className={`${vt323.variable} font-mono bg-terminal-black text-terminal-green`}
       >
-        <Connect>{children}</Connect>
+        <StarknetConfig connectors={connectors} autoConnect>
+          {children}
+        </StarknetConfig>
       </body>
     </html>
   );

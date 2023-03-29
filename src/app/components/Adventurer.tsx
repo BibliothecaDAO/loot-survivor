@@ -3,7 +3,7 @@ import { useWriteContract } from "../hooks/useWriteContract";
 import KeyboardControl, { ButtonData } from "./KeyboardControls";
 
 const Adventurer = () => {
-  const { write, addToCalls } = useWriteContract();
+  const { writeAsync, addToCalls } = useWriteContract();
   const { AdventurerContract } = useContracts();
 
   const tx = {
@@ -21,7 +21,7 @@ const Adventurer = () => {
     {
       id: 2,
       label: "Explore",
-      action: () => write(),
+      action: async () => await writeAsync(),
     },
     {
       id: 3,
@@ -31,9 +31,7 @@ const Adventurer = () => {
   ];
   return (
     <div>
-      <h1>
-        <KeyboardControl buttonsData={buttonsData} />
-      </h1>
+      <KeyboardControl buttonsData={buttonsData} />
     </div>
   );
 };

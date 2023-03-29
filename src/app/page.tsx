@@ -1,9 +1,6 @@
 "use client";
 
 import { useConnectors } from "@starknet-react/core";
-import { useWriteContract } from "./hooks/useWriteContract";
-import { useContracts } from "./hooks/useContracts";
-import KeyboardControl, { ButtonData } from "./components/KeyboardControls";
 import { Button } from "./components/Button";
 import HorizontalKeyboardControl from "./components/HorizontalMenu";
 import { useState } from "react";
@@ -13,36 +10,7 @@ import Adventurer from "./components/Adventurer";
 
 export default function Home() {
   const { connect, connectors } = useConnectors();
-
-  const { write, addToCalls } = useWriteContract();
-
-  const { AdventurerContract } = useContracts();
-
   const [selected, setSelected] = useState("start");
-
-  const tx = {
-    contractAddress: AdventurerContract?.address,
-    entrypoint: "mint",
-    calldata: [],
-  };
-
-  const buttonsData: ButtonData[] = [
-    {
-      id: 1,
-      label: "Start",
-      action: () => addToCalls(tx),
-    },
-    {
-      id: 2,
-      label: "Explore",
-      action: () => write(),
-    },
-    {
-      id: 3,
-      label: "Buy",
-      action: () => console.log("Button 3 clicked"),
-    },
-  ];
 
   const menu = [
     {
@@ -64,7 +32,7 @@ export default function Home() {
 
   return (
     <main className={`container mx-auto p-8 flex flex-wrap`}>
-      <div className="w-full justify-between flex">
+      <div className="flex justify-between w-full">
         <h1>Loot Survivors</h1>
         <ul className="self-end">
           {connectors.map((connector) => (
@@ -78,7 +46,7 @@ export default function Home() {
       </div>
 
       <div className="w-full">
-        <div className="h-4 bg-terminal-green w-full my-2"></div>
+        <div className="w-full h-4 my-2 bg-terminal-green"></div>
         <HorizontalKeyboardControl
           buttonsData={menu}
           onButtonClick={(value) => setSelected(value)}
@@ -90,9 +58,6 @@ export default function Home() {
         {selected === "start" && <Adventurer />}
         {selected === "explore" && <Explore />}
         {selected === "market" && <Marketplace />}
-
-        {/* market component */}
-        {/* <Market /> */}
       </div>
     </main>
   );
