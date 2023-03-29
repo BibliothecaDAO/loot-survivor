@@ -1,91 +1,98 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
-import styles from './page.module.css'
+"use client";
 
-const inter = Inter({ subsets: ['latin'] })
+import { useConnectors } from "@starknet-react/core";
+import { useWriteContract } from "./hooks/useWriteContract";
+import { useContracts } from "./hooks/useContracts";
+import KeyboardControl, { ButtonData } from "./components/KeyboardControls";
+import { Button } from "./components/Button";
+import HorizontalKeyboardControl from "./components/HorizontalMenu";
+import { useState } from "react";
+import Explore from "./components/Explore";
+import Marketplace from "./components/Marketplace";
+import Adventurer from "./components/Adventurer";
 
 export default function Home() {
+  const { connect, connectors } = useConnectors();
+
+  const { write, addToCalls } = useWriteContract();
+
+  const { AdventurerContract } = useContracts();
+
+  const [selected, setSelected] = useState("start");
+
+  const tx = {
+    contractAddress: AdventurerContract?.address,
+    entrypoint: "mint",
+    calldata: [],
+  };
+
+  const buttonsData: ButtonData[] = [
+    {
+      id: 1,
+      label: "Start",
+      action: () => addToCalls(tx),
+    },
+    {
+      id: 2,
+      label: "Explore",
+      action: () => write(),
+    },
+    {
+      id: 3,
+      label: "Buy",
+      action: () => console.log("Button 3 clicked"),
+    },
+  ];
+
+  const menu = [
+    {
+      id: 1,
+      label: "Start",
+      value: "start",
+    },
+    {
+      id: 2,
+      label: "Explore",
+      value: "explore",
+    },
+    {
+      id: 3,
+      label: "Market",
+      value: "market",
+    },
+  ];
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
+    <main className={`container mx-auto p-8 flex flex-wrap`}>
+      <div className="w-full">
+        <ul>
+          {connectors.map((connector) => (
+            <li key={connector.id()}>
+              <Button onClick={() => connect(connector)}>
+                Connect {connector.id()}
+              </Button>
+            </li>
+          ))}
+        </ul>
       </div>
 
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+      <div className="w-full">
+        <div className="h-4 bg-terminal-green w-full my-2"></div>
+        <HorizontalKeyboardControl
+          buttonsData={menu}
+          onButtonClick={(value) => setSelected(value)}
         />
-        <div className={styles.thirteen}>
-          <Image src="/thirteen.svg" alt="13" width={40} height={31} priority />
-        </div>
-      </div>
+        <h1>Loot Survivors</h1>
+        {/* <Button onClick={() => addToCalls(tx)}>start</Button>
+        <Button onClick={() => write()}>start</Button> */}
 
-      <div className={styles.grid}>
-        <a
-          href="https://beta.nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+        {selected === "start" && <Adventurer />}
+        {selected === "explore" && <Explore />}
+        {selected === "market" && <Marketplace />}
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={inter.className}>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p className={inter.className}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+        {/* market component */}
+        {/* <Market /> */}
       </div>
     </main>
-  )
+  );
 }
