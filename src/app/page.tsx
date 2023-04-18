@@ -18,6 +18,8 @@ export default function Home() {
   const { account } = useAccount();
   const { adventurer } = useAdventurer();
 
+  console.log("test");
+
   const adventurerStats = adventurer ?? NullAdventurerProps;
 
   const upgrade = false;
