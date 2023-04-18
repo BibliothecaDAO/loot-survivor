@@ -1,30 +1,49 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Button } from "./Button";
 
-export interface ButtonData {
+interface ButtonData {
   id: number;
   label: string;
+  value: any;
   action: () => void;
 }
 
-interface ButtonProps {
+interface VerticalKeyboardControlProps {
   buttonsData: ButtonData[];
+  onButtonClick: (value: any) => void;
+  onEnterPress?: (value: any) => void;
 }
 
-const KeyboardControl = ({ buttonsData }: ButtonProps) => {
+const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
+  buttonsData,
+  onButtonClick,
+  onEnterPress,
+}) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
+  useEffect(() => {
+    onButtonClick(buttonsData[selectedIndex].value);
+  }, [selectedIndex]);
+
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
-      case "ArrowUp":
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-        break;
       case "ArrowDown":
-        setSelectedIndex((prev) => Math.min(prev + 1, buttonsData.length - 1));
+        setSelectedIndex((prev) => {
+          const newIndex = Math.min(prev + 1, buttonsData.length - 1);
+          return newIndex;
+        });
+        break;
+      case "ArrowUp":
+        setSelectedIndex((prev) => {
+          const newIndex = Math.max(prev - 1, 0);
+          return newIndex;
+        });
         break;
       case "Enter":
-        buttonsData[selectedIndex].action();
+        if (onEnterPress) {
+          buttonsData[selectedIndex].value();
+        }
         break;
     }
   };
@@ -45,8 +64,9 @@ const KeyboardControl = ({ buttonsData }: ButtonProps) => {
           className={selectedIndex === index ? "animate-pulse" : ""}
           variant={selectedIndex === index ? "default" : "outline"}
           onClick={() => {
-            buttonData.action();
             setSelectedIndex(index);
+            buttonData.action();
+            onButtonClick(buttonData.value);
           }}
         >
           {buttonData.label}
@@ -56,4 +76,4 @@ const KeyboardControl = ({ buttonsData }: ButtonProps) => {
   );
 };
 
-export default KeyboardControl;
+export default VerticalKeyboardControl;

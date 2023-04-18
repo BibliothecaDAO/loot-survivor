@@ -1,64 +1,154 @@
 "use client";
 
-import { useConnectors } from "@starknet-react/core";
+import { useAccount, useConnectors } from "@starknet-react/core";
 import { Button } from "./components/Button";
 import HorizontalKeyboardControl from "./components/HorizontalMenu";
-import { useState } from "react";
-import Explore from "./components/Explore";
+import { useState, useEffect } from "react";
+import Actions from "./components/Actions";
 import Marketplace from "./components/Marketplace";
 import Adventurer from "./components/Adventurer";
+import { displayAddress } from "./lib/utils";
+import { useAdventurer } from "./context/AdventurerProvider";
+import { NullAdventurerProps } from "./types";
+import Inventory from "./components/Inventory";
+import TransactionBar from "./components/TransactionBar";
 
 export default function Home() {
-  const { connect, connectors } = useConnectors();
-  const [selected, setSelected] = useState("start");
+  const { connect, disconnect, connectors } = useConnectors();
+  const { account } = useAccount();
+  const { adventurer } = useAdventurer();
 
-  const menu = [
+  const adventurerStats = adventurer ?? NullAdventurerProps;
+
+  const upgrade = false;
+
+  const [menu, setMenu] = useState([
     {
       id: 1,
       label: "Start",
       value: "start",
     },
-    {
-      id: 2,
-      label: "Explore",
-      value: "explore",
-    },
-    {
-      id: 3,
-      label: "Market",
-      value: "market",
-    },
-  ];
+  ]);
+
+  const [selected, setSelected] = useState(menu[0].value);
+
+  useEffect(() => {
+    let newMenu = [
+      {
+        id: 1,
+        label: "Start",
+        value: "start",
+      },
+    ];
+
+    if (adventurer?.adventurer) {
+      newMenu = [
+        ...newMenu,
+        {
+          id: 2,
+          label: "Actions",
+          value: "actions",
+        },
+        {
+          id: 3,
+          label: "Market",
+          value: "market",
+        },
+        {
+          id: 4,
+          label: "Inventory",
+          value: "inventory",
+        },
+      ];
+
+      if (adventurer?.adventurer.beast) {
+        newMenu.push({
+          id: 5,
+          label: "Beast",
+          value: "beast",
+        });
+      }
+    }
+
+    setMenu(newMenu);
+  }, [adventurer, account]);
+
+  console.log(adventurer);
 
   return (
     <main className={`container mx-auto p-8 flex flex-wrap`}>
       <div className="flex justify-between w-full">
         <h1>Loot Survivors</h1>
         <ul className="self-end">
-          {connectors.map((connector) => (
-            <li key={connector.id()}>
-              <Button onClick={() => connect(connector)}>
-                Connect {connector.id()}
-              </Button>
-            </li>
-          ))}
+          {account ? (
+            <Button onClick={() => disconnect()}>
+              {displayAddress(account.address)}
+            </Button>
+          ) : (
+            connectors.map((connector) => (
+              <li key={connector.id()}>
+                <Button onClick={() => connect(connector)}>
+                  Connect {connector.id()}
+                </Button>
+              </li>
+            ))
+          )}
         </ul>
       </div>
+      <div className="w-full h-6 my-2 bg-terminal-green"></div>
 
-      <div className="w-full">
-        <div className="w-full h-4 my-2 bg-terminal-green"></div>
-        <HorizontalKeyboardControl
-          buttonsData={menu}
-          onButtonClick={(value) => setSelected(value)}
-        />
+      {account ? (
+        <div className="w-full">
+          {adventurer?.adventurer ? (
+            <div className="absolute bottom-1 w-5/6 flex flew-row font-medium bg-terminal-black text-white justify-evenly ml-3">
+              {adventurerStats.adventurer?.name}
+              <p className="text-lg">
+                HEALTH: {adventurerStats.adventurer?.health}
+              </p>
+              <p className="text-lg ">
+                GOLD: {adventurerStats.adventurer?.gold}
+              </p>
+              <p className="text-lg">
+                BEAST: {adventurerStats.adventurer?.beast}
+              </p>
+              <p className="text-lg">
+                LEVEL: {adventurerStats.adventurer?.level}
+              </p>
+              <p className="text-lg">XP: {adventurerStats.adventurer?.xp}</p>
+            </div>
+          ) : null}
 
-        {/* <Button onClick={() => addToCalls(tx)}>start</Button>
-        <Button onClick={() => write()}>start</Button> */}
+          {!upgrade ? (
+            <>
+              <div className="gap-10 pb-2">
+                <HorizontalKeyboardControl
+                  buttonsData={menu}
+                  onButtonClick={(value) => {
+                    setSelected(value);
+                  }}
+                />
+              </div>
 
-        {selected === "start" && <Adventurer />}
-        {selected === "explore" && <Explore />}
-        {selected === "market" && <Marketplace />}
-      </div>
+              {selected === "start" && <Adventurer />}
+              {selected === "actions" && <Actions />}
+              {selected === "market" && <Marketplace />}
+              {selected === "inventory" && <Inventory />}
+            </>
+          ) : (
+            <div className="flex w-full mt-[200px]">
+              <p className="mx-auto items-center text-[50px] hover:text-white animate-pulse dark:bg-slate-50 dark:text-slate-900 shadow-inner">
+                Please select upgrade!
+              </p>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="flex w-full mt-[200px]">
+          <p className="mx-auto items-center text-[50px] hover:text-white animate-pulse dark:bg-slate-50 dark:text-slate-900 shadow-inner">
+            Please Connect Wallet
+          </p>
+        </div>
+      )}
     </main>
   );
 }

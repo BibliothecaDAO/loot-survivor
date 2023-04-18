@@ -2,29 +2,37 @@ import { useContract } from "@starknet-react/core";
 import Adventurer from "../abi/Adventurer.json";
 import LootMarketArcade from "../abi/LootMarketArcade.json";
 import Beast from "../abi/Beast.json";
+import Lords_ERC20_Mintable from "../abi/Lords_ERC20_Mintable.json";
 
 export const useContracts = () => {
-  const { contract: AdventurerContract } = useContract({
+  const { contract: adventurerContract } = useContract({
     address:
-      "0x047ce016a470b9fb3fd212ac0ce8e7cf035919a715e3381cfff9624eec1a3815",
+      "0x035d755a23ec72df90819f584d9a1849bbc21fa77f96d25e03f1736883895248",
     abi: Adventurer,
   });
 
-  const { contract: LootMarketArcadeContract } = useContract({
+  const { contract: lootMarketArcadeContract } = useContract({
     address:
-      "0x01b73f18ffe0364d5634ddebdd6a428110a183861e4bf962b7e6f69bb9ddc1e5",
+      "0x065669e15c8f1a7f17b7062e4eb1b709b922b931b93c59577f1848a85c30ab1f",
     abi: LootMarketArcade,
   });
 
-  const { contract: BeastContract } = useContract({
+  const { contract: beastContract } = useContract({
     address:
-      "0x0372dc195187c789a4f97487911fb3db895d180b2fc53bfa69f85f933e8424e6",
+      "0x000f4dbfe5d15792aa91025e42ee1d74c22bdeb1eef0b9bc19a37216377290c1",
     abi: Beast,
   });
 
+  const { contract: lordsContract } = useContract({
+    address:
+      "0x023b86be0b3da5c2fdbd80d1d57f1b54391588ba338acecdd014a208d47ba9ca",
+    abi: Lords_ERC20_Mintable,
+  });
+
   return {
-    AdventurerContract,
-    LootMarketArcadeContract,
-    BeastContract,
+    adventurerContract,
+    lootMarketArcadeContract,
+    beastContract,
+    lordsContract,
   };
 };
