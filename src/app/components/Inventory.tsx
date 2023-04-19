@@ -48,12 +48,14 @@ const Inventory: React.FC = () => {
     refetch: itemsByAdventurerRefetch,
   } = useQuery(getItemsByAdventurer, {
     variables: {
-      id: formatAdventurer.adventurer?.id,
+      adventurer: formatAdventurer.adventurer?.id,
     },
     pollInterval: 5000,
   });
 
   const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
+
+  console.log(items);
 
   const handleAddEquipItem = (itemId: any) => {
     if (adventurerContract && formatAddress) {
@@ -83,11 +85,261 @@ const Inventory: React.FC = () => {
   };
 
   const ItemDisplay = (item: any) => {
-    console.log(item);
+    const formatItem = item.item;
     return (
-      <>{`${item?.item?.item} [Rank ${item?.item?.rank}, ${item?.item?.xp}XP]`}</>
+      <>
+        {formatItem
+          ? `${formatItem.item} [Rank ${formatItem.rank}, ${formatItem.xp}XP]`
+          : "Nothing"}
+      </>
     );
   };
+
+  const testItems = [
+    {
+      bag: null,
+      bidder: null,
+      claimedTime: null,
+      createdBlock: 1681911407,
+      equippedAdventurerId: 41,
+      expiry: null,
+      greatness: 1,
+      id: 143,
+      item: "Club",
+      lastUpdated: "2023-04-19T13:36:47",
+      marketId: null,
+      material: "Oak Hardwood",
+      owner:
+        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
+      ownerAdventurerId: 41,
+      prefix1: null,
+      prefix2: null,
+      price: null,
+      rank: 5,
+      slot: "Weapon",
+      status: null,
+      suffix: null,
+      type: "Bludgeon Weapon",
+      xp: 0,
+      __typename: "Item",
+    },
+    {
+      bag: null,
+      bidder: null,
+      claimedTime: null,
+      createdBlock: 1681911407,
+      equippedAdventurerId: 41,
+      expiry: null,
+      greatness: 1,
+      id: 144,
+      item: "Club",
+      lastUpdated: "2023-04-19T13:36:47",
+      marketId: null,
+      material: "Oak Hardwood",
+      owner:
+        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
+      ownerAdventurerId: 41,
+      prefix1: null,
+      prefix2: null,
+      price: null,
+      rank: 5,
+      slot: "Weapon",
+      status: null,
+      suffix: null,
+      type: "Bludgeon Weapon",
+      xp: 0,
+      __typename: "Item",
+    },
+    {
+      bag: null,
+      bidder: null,
+      claimedTime: null,
+      createdBlock: 1681911407,
+      equippedAdventurerId: 41,
+      expiry: null,
+      greatness: 1,
+      id: 145,
+      item: "Club",
+      lastUpdated: "2023-04-19T13:36:47",
+      marketId: null,
+      material: "Oak Hardwood",
+      owner:
+        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
+      ownerAdventurerId: 41,
+      prefix1: null,
+      prefix2: null,
+      price: null,
+      rank: 5,
+      slot: "Weapon",
+      status: null,
+      suffix: null,
+      type: "Bludgeon Weapon",
+      xp: 0,
+      __typename: "Item",
+    },
+    {
+      bag: null,
+      bidder: null,
+      claimedTime: null,
+      createdBlock: 1681911407,
+      equippedAdventurerId: 41,
+      expiry: null,
+      greatness: 1,
+      id: 146,
+      item: "Club",
+      lastUpdated: "2023-04-19T13:36:47",
+      marketId: null,
+      material: "Oak Hardwood",
+      owner:
+        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
+      ownerAdventurerId: 41,
+      prefix1: null,
+      prefix2: null,
+      price: null,
+      rank: 5,
+      slot: "Weapon",
+      status: null,
+      suffix: null,
+      type: "Bludgeon Weapon",
+      xp: 0,
+      __typename: "Item",
+    },
+    {
+      bag: null,
+      bidder: null,
+      claimedTime: null,
+      createdBlock: 1681911407,
+      equippedAdventurerId: 41,
+      expiry: null,
+      greatness: 1,
+      id: 147,
+      item: "Club",
+      lastUpdated: "2023-04-19T13:36:47",
+      marketId: null,
+      material: "Oak Hardwood",
+      owner:
+        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
+      ownerAdventurerId: 41,
+      prefix1: null,
+      prefix2: null,
+      price: null,
+      rank: 5,
+      slot: "Weapon",
+      status: null,
+      suffix: null,
+      type: "Bludgeon Weapon",
+      xp: 0,
+      __typename: "Item",
+    },
+    {
+      bag: null,
+      bidder: null,
+      claimedTime: null,
+      createdBlock: 1681911407,
+      equippedAdventurerId: 41,
+      expiry: null,
+      greatness: 1,
+      id: 148,
+      item: "Club",
+      lastUpdated: "2023-04-19T13:36:47",
+      marketId: null,
+      material: "Oak Hardwood",
+      owner:
+        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
+      ownerAdventurerId: 41,
+      prefix1: null,
+      prefix2: null,
+      price: null,
+      rank: 5,
+      slot: "Weapon",
+      status: null,
+      suffix: null,
+      type: "Bludgeon Weapon",
+      xp: 0,
+      __typename: "Item",
+    },
+    {
+      bag: null,
+      bidder: null,
+      claimedTime: null,
+      createdBlock: 1681911407,
+      equippedAdventurerId: 41,
+      expiry: null,
+      greatness: 1,
+      id: 149,
+      item: "Club",
+      lastUpdated: "2023-04-19T13:36:47",
+      marketId: null,
+      material: "Oak Hardwood",
+      owner:
+        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
+      ownerAdventurerId: 41,
+      prefix1: null,
+      prefix2: null,
+      price: null,
+      rank: 5,
+      slot: "Weapon",
+      status: null,
+      suffix: null,
+      type: "Bludgeon Weapon",
+      xp: 0,
+      __typename: "Item",
+    },
+    {
+      bag: null,
+      bidder: null,
+      claimedTime: null,
+      createdBlock: 1681911407,
+      equippedAdventurerId: 41,
+      expiry: null,
+      greatness: 1,
+      id: 150,
+      item: "Club",
+      lastUpdated: "2023-04-19T13:36:47",
+      marketId: null,
+      material: "Oak Hardwood",
+      owner:
+        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
+      ownerAdventurerId: 41,
+      prefix1: null,
+      prefix2: null,
+      price: null,
+      rank: 5,
+      slot: "Weapon",
+      status: null,
+      suffix: null,
+      type: "Bludgeon Weapon",
+      xp: 0,
+      __typename: "Item",
+    },
+    {
+      bag: null,
+      bidder: null,
+      claimedTime: null,
+      createdBlock: 1681911407,
+      equippedAdventurerId: 41,
+      expiry: null,
+      greatness: 1,
+      id: 151,
+      item: "Club",
+      lastUpdated: "2023-04-19T13:36:47",
+      marketId: null,
+      material: "Oak Hardwood",
+      owner:
+        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
+      ownerAdventurerId: 41,
+      prefix1: null,
+      prefix2: null,
+      price: null,
+      rank: 5,
+      slot: "Weapon",
+      status: null,
+      suffix: null,
+      type: "Bludgeon Weapon",
+      xp: 0,
+      __typename: "Item",
+    },
+  ];
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
@@ -120,69 +372,71 @@ const Inventory: React.FC = () => {
         </p>
         <p className="text-terminal-green">
           HEAD -{" "}
-          {
-            items.find(
+          <ItemDisplay
+            item={items.find(
               (item: any) => item.id == formatAdventurer.adventurer?.headId
-            )?.item
-          }
+            )}
+          />
         </p>
         <p className="text-terminal-green">
           CHEST -{" "}
-          {
-            items.find(
+          <ItemDisplay
+            item={items.find(
               (item: any) => item.id == formatAdventurer.adventurer?.chestId
-            )?.item
-          }
+            )}
+          />
         </p>
         <p className="text-terminal-green">
           FOOT -{" "}
-          {
-            items.find(
+          <ItemDisplay
+            item={items.find(
               (item: any) => item.id == formatAdventurer.adventurer?.feetId
-            )?.item
-          }
+            )}
+          />
         </p>
         <p className="text-terminal-green">
           HAND -{" "}
-          {
-            items.find(
+          <ItemDisplay
+            item={items.find(
               (item: any) => item.id == formatAdventurer.adventurer?.handsId
-            )?.item
-          }
+            )}
+          />
         </p>
         <p className="text-terminal-green">
           WAIST -{" "}
-          {
-            items.find(
+          <ItemDisplay
+            item={items.find(
               (item: any) => item.id == formatAdventurer.adventurer?.waistId
-            )?.item
-          }
+            )}
+          />
         </p>
       </div>
       <div className="flex flex-col gap-10">
         <div className="text-xl font-medium text-white">OWNED</div>
-        {itemsByAdventurerData?.items.map((item: any, index: number) => (
-          <div key={index} className="flex flex-row gap-5">
-            <ItemDisplay item={item} />
-            <Button
-              key={index}
-              ref={(ref) => (buttonRefs.current[index] = ref)}
-              className={
-                selectedIndex === index
-                  ? item.equippedAdventurerId
-                    ? "animate-pulse bg-white"
-                    : "animate-pulse"
-                  : ""
-              }
-              variant={selectedIndex === index ? "subtle" : "outline"}
-              onClick={() => {
-                handleAddEquipItem(item.id);
-              }}
-            >
-              {item.equippedAdventurerId ? "Equipped" : "Equip"}
-            </Button>
-          </div>
-        ))}
+        <div className="flex flex-col gap-5">
+          {testItems.map((item: any, index: number) => (
+            <div key={index} className="flex flex-row items-center gap-5">
+              <ItemDisplay item={item} />
+              <Button
+                key={index}
+                ref={(ref) => (buttonRefs.current[index] = ref)}
+                className={
+                  selectedIndex === index
+                    ? item.equippedAdventurerId
+                      ? "animate-pulse bg-white"
+                      : "animate-pulse"
+                    : ""
+                }
+                variant={selectedIndex === index ? "subtle" : "outline"}
+                onClick={() => {
+                  handleAddEquipItem(item.id);
+                }}
+              >
+                {item.equippedAdventurerId ? "Equipped" : "Equip"}
+              </Button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
     // <div className="flex flex-row items-center mx-2 text-lg">

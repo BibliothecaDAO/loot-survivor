@@ -37,7 +37,7 @@ const getAdventurer = gql`
 `;
 
 const getBeasts = gql`
-query get_beasts {
+  query get_beasts {
     beasts {
       adventurerId
       armorType
@@ -55,7 +55,7 @@ query get_beasts {
 `;
 
 const getDiscoveries = gql`
-query get_discoveries {
+  query get_discoveries {
     discoveries {
       adventurerId
       discoveryTime
@@ -69,7 +69,7 @@ query get_discoveries {
 `;
 
 const getItems = gql`
-query get_items {
+  query get_items {
     items {
       adventurerId
       bag
@@ -188,15 +188,15 @@ const getBeastById = gql`
 `;
 
 const getDiscoveryByTxHash = gql`
-query get_discovery($txHash: HexValue) {
-    discoveries(where: {txHash: {eq: $txHash}}) {
-        adventurerId
-        discoveryTime
-        discoveryType
-        entityId
-        outputAmount
-        subDiscoveryType
-        txHash
+  query get_discovery($txHash: HexValue) {
+    discoveries(where: { txHash: { eq: $txHash } }) {
+      adventurerId
+      discoveryTime
+      discoveryType
+      entityId
+      outputAmount
+      subDiscoveryType
+      txHash
     }
   }
 `;
@@ -291,9 +291,9 @@ const getMarketItems = gql`
   }
 `;
 
-const getMarketItems = gql`
-query get_market_items {
-    items(limit: 20, orderBy: {createdBlock: {desc: true}}) {
+const getItemsByOwner = gql`
+  query get_items_by_owner($owner: HexValue) {
+    items(where: { owner: { eq: $owner } }) {
       bag
       bidder
       claimedTime
@@ -321,21 +321,23 @@ query get_market_items {
   }
 `;
 
-const getItemsByOwner = gql`
-  query get_items_by_owner($owner: HexValue) {
-    items(where: { owner: { eq: $owner } }) {
-      adventurerId
+const getItemsByAdventurer = gql`
+  query get_items_by_adventurer($adventurer: FeltValue) {
+    items(where: { ownerAdventurerId: { eq: $adventurer } }) {
       bag
       bidder
       claimedTime
       createdBlock
+      equippedAdventurerId
       expiry
       greatness
       id
       item
+      lastUpdated
       marketId
       material
       owner
+      ownerAdventurerId
       prefix1
       prefix2
       price
@@ -350,15 +352,16 @@ const getItemsByOwner = gql`
 `;
 
 export {
-    getAdventurer,
-    getBeasts,
-    getDiscoveries,
-    getItems,
-    getAdventurersByOwner,
-    getAdventurerById,
-    getBeastsById,
-    getDiscoveryByTxHash,
-    getItemsByTokenId,
-    getMarketItems,
-    getItemsByOwner,
+  getAdventurer,
+  getBeasts,
+  getDiscoveries,
+  getItems,
+  getAdventurersByOwner,
+  getAdventurerById,
+  getBeastById,
+  getDiscoveryByTxHash,
+  getItemsByTokenId,
+  getMarketItems,
+  getItemsByOwner,
+  getItemsByAdventurer,
 };
