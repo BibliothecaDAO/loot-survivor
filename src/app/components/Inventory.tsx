@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { useWriteContract } from "../hooks/useWriteContract";
 import {
@@ -18,18 +18,21 @@ import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
 import Image from "next/image";
 import { padAddress } from "../lib/utils";
+// import { GameData } from "./GameData";
 
 const Inventory: React.FC = () => {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";
-
   const { writeAsync, addToCalls, calls } = useWriteContract();
   const { adventurerContract } = useContracts();
   const [hash, setHash] = useState<string | undefined>(undefined);
   const { hashes, addTransaction } = useTransactionManager();
   const { adventurer } = useAdventurer();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const transactions = useTransactions({ hashes });
 
+  // const gameData = new GameData();
   const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
 
   const { data, isLoading, error } = useWaitForTransaction({
@@ -44,12 +47,14 @@ const Inventory: React.FC = () => {
     refetch: itemsByAdventurerRefetch,
   } = useQuery(getItemsByAdventurer, {
     variables: {
-      owner: padAddress(formatAddress),
+      id: formatAdventurer.adventurer?.id,
     },
     pollInterval: 5000,
   });
 
-  useEffect(() => {
+  console.log(itemsByAdventurerData, itemsByAdventurerError);
+
+  const handleAddEquipItem = (itemId: any) => {
     if (adventurerContract && formatAddress) {
       const equipItem = {
         contractAddress: adventurerContract?.address,
@@ -58,7 +63,32 @@ const Inventory: React.FC = () => {
       };
       addToCalls(equipItem);
     }
-  }, [adventurerContract, formatAddress, addToCalls, calls]);
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    switch (event.key) {
+      case "ArrowUp":
+        setSelectedIndex((prev) => Math.max(prev - 1, 0));
+        break;
+      case "ArrowDown":
+        setSelectedIndex((prev) =>
+          Math.min(prev + 1, itemsByAdventurerData?.items.length - 1)
+        );
+        break;
+      case "Enter":
+        handleAddEquipItem(itemsByAdventurerData?.items[selectedIndex].item.id);
+        break;
+    }
+  };
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedIndex]);
+
+  useEffect(() => {}, [adventurerContract, formatAddress, addToCalls, calls]);
 
   return (
     <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-full p-20 gap-10">
@@ -92,9 +122,22 @@ const Inventory: React.FC = () => {
         </p>
       </div>
       <div className="flex flex-col gap-10">
-        {/* {itemsByAdventurerData.items.map((item, index) => (
-          <div key={index} className="">{item}</div>
-        ))} */}
+        {itemsByAdventurerData?.items.map((item: any, index: number) => (
+          <div key={index} className="flex flex-row gap-5">
+            <p>{item.item}</p>
+            <Button
+              key={index}
+              ref={(ref) => (buttonRefs.current[index] = ref)}
+              className={selectedIndex === index ? "animate-pulse" : ""}
+              variant={selectedIndex === index ? "default" : "outline"}
+              onClick={() => {
+                handleAddEquipItem(item.id);
+              }}
+            >
+              Equip
+            </Button>
+          </div>
+        ))}
       </div>
     </div>
     // <div className="flex flex-row items-center mx-2 text-lg">

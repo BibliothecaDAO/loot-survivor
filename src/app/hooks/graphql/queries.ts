@@ -233,18 +233,20 @@ const getDiscoveryByTxHash = gql`
 const getItemsByTokenId = gql`
   query get_items($id: FeltValue) {
     items(where: { id: { eq: $id } }) {
-      adventurerId
       bag
       bidder
       claimedTime
       createdBlock
+      equippedAdventurerId
       expiry
       greatness
       id
       item
+      lastUpdated
       marketId
       material
       owner
+      ownerAdventurerId
       prefix1
       prefix2
       price
@@ -261,18 +263,50 @@ const getItemsByTokenId = gql`
 const getItemsByTokenIds = gql`
   query get_items($ids: [FeltValue]) {
     items(where: { id: { In: $ids } }) {
-      adventurerId
       bag
       bidder
       claimedTime
       createdBlock
+      equippedAdventurerId
       expiry
       greatness
       id
       item
+      lastUpdated
       marketId
       material
       owner
+      ownerAdventurerId
+      prefix1
+      prefix2
+      price
+      rank
+      slot
+      status
+      suffix
+      type
+      xp
+    }
+  }
+`;
+
+const getMarketItems = gql`
+  query get_market_items {
+    items(limit: 20, orderBy: { createdBlock: { desc: true } }) {
+      bag
+      bidder
+      claimedTime
+      createdBlock
+      equippedAdventurerId
+      expiry
+      greatness
+      id
+      item
+      lastUpdated
+      marketId
+      material
+      owner
+      ownerAdventurerId
       prefix1
       prefix2
       price
@@ -288,19 +322,21 @@ const getItemsByTokenIds = gql`
 
 const getItemsByAdventurer = gql`
   query get_items($id: FeltValue) {
-    items(limit: 20, orderBy: { createdBlock: { desc: true } }) {
-      adventurerId
+    items(where: { ownerAdventurerId: { eq: $id } }) {
       bag
       bidder
       claimedTime
       createdBlock
+      equippedAdventurerId
       expiry
       greatness
       id
       item
+      lastUpdated
       marketId
       material
       owner
+      ownerAdventurerId
       prefix1
       prefix2
       price
@@ -354,6 +390,7 @@ export {
   getDiscoveryByTxHash,
   getItemsByTokenId,
   getItemsByTokenIds,
+  getMarketItems,
   getItemsByAdventurer,
   getItemsByOwner,
 };
