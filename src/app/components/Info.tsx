@@ -17,8 +17,8 @@ export default function Info() {
       {!loading ? (
         <>
           <div className="flex flex-row justify-evenly">
-            <div className="flex flex-row m-4 ">
-              <div className="w-[160px] h-[160px] relative border-4 border-white ">
+            <div className="flex flex-row">
+              <div className="w-[160px] h-[160px] relative border-4 border-white mt-5 mr-5 ">
                 <Image
                   src="/MIKE.png"
                   alt="adventurer-image"
@@ -26,7 +26,7 @@ export default function Info() {
                   style={{ objectFit: "contain" }}
                 />
               </div>
-              <div className="flex flex-col items-center mt-9">
+              <div className="flex flex-col items-center mt-9 ml-2">
                 <div className="text-xl font-medium text-white">
                   {formatAdventurer.adventurer?.name}
                 </div>

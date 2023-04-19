@@ -19,7 +19,7 @@ export default function RootLayout({
   const connectors = useMemo(
     () => [
       new InjectedConnector({ options: { id: "argentX" } }),
-      // new InjectedConnector({ options: { id: "braavos" } }),
+      new InjectedConnector({ options: { id: "braavos" } }),
       // new InjectedConnector({ options: { id: "guildly" } }),
       // new CartridgeConnector([
       //   {

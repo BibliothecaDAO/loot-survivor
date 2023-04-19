@@ -69,10 +69,6 @@ export default function Beast() {
     },
   ];
 
-  // const handlePurchase = (health: number) => {
-  //   console.log(`Purchased ${health} health.`);
-  // };
-
   return (
     <div className="flex flex-row mt-5">
       {!loading ? (
@@ -83,8 +79,6 @@ export default function Beast() {
       <div className="w-1/4">
         <KeyboardControl buttonsData={buttonsData} />
       </div>
-      {/* <p>Health Purchase</p>
-        <HealthSlider onPurchase={handlePurchase} /> */}
 
       <div className="flex flex-col w-1/2 bg-terminal-black">HLLO</div>
     </div>

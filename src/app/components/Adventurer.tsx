@@ -14,18 +14,6 @@ const Adventurer = () => {
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
   const [selected, setSelected] = useState<String>("");
 
-  // const navigateToAdventurersList = () => {
-  //   setSelected("choose adventurer");
-  // };
-
-  // const navigateToCreateAdventurer = () => {
-  //   setSelected("create adventurer");
-  // };
-
-  // const navigateToAbout = () => {
-  //   setSelected("about");
-  // };
-
   const menu = [
     {
       id: 1,
@@ -49,15 +37,10 @@ const Adventurer = () => {
 
   return (
     <div className="flex flex-row gap-2">
-      <div className="w-1/3 my-7">
+      <div className="w-1/3">
         <VerticalKeyboardControl
           buttonsData={menu}
           onButtonClick={(value) => setSelected(value)}
-          // onEnterPress={
-          //   selected === "choose adventurer"
-          //     ? navigateToAdventurersList
-          //     : undefined
-          // }
         />
       </div>
 

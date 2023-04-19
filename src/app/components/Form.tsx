@@ -97,7 +97,10 @@ const FormComponent: React.FC = () => {
     console.log(calls);
     await writeAsync().then((tx) => {
       setHash(tx.transaction_hash);
-      addTransaction({ hash: tx.transaction_hash, metadata: { test: true } });
+      addTransaction({
+        hash: tx.transaction_hash,
+        metadata: { method: "Minting adventurer" },
+      });
     });
   };
 

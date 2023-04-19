@@ -11,7 +11,7 @@ import { displayAddress } from "./lib/utils";
 import { useAdventurer } from "./context/AdventurerProvider";
 import { NullAdventurerProps } from "./types";
 import Inventory from "./components/Inventory";
-import TransactionBar from "./components/TransactionBar";
+import TransactionCart from "./components/TransactionCart";
 
 export default function Home() {
   const { connect, disconnect, connectors } = useConnectors();
@@ -73,27 +73,28 @@ export default function Home() {
     setMenu(newMenu);
   }, [adventurer, account]);
 
-  console.log(adventurer);
-
   return (
     <main className={`container mx-auto p-8 flex flex-wrap`}>
       <div className="flex justify-between w-full">
         <h1>Loot Survivors</h1>
-        <ul className="self-end">
-          {account ? (
-            <Button onClick={() => disconnect()}>
-              {displayAddress(account.address)}
-            </Button>
-          ) : (
-            connectors.map((connector) => (
-              <li key={connector.id()}>
-                <Button onClick={() => connect(connector)}>
-                  Connect {connector.id()}
-                </Button>
-              </li>
-            ))
-          )}
-        </ul>
+        <div className="flex flex-row gap-2 self-end">
+          {account && <TransactionCart />}
+          <ul className="flex flex-row gap-2">
+            {account ? (
+              <Button onClick={() => disconnect()}>
+                {displayAddress(account.address)}
+              </Button>
+            ) : (
+              connectors.map((connector) => (
+                <li key={connector.id()}>
+                  <Button onClick={() => connect(connector)}>
+                    Connect {connector.id()}
+                  </Button>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
       </div>
       <div className="w-full h-6 my-2 bg-terminal-green"></div>
 
@@ -136,7 +137,7 @@ export default function Home() {
             </>
           ) : (
             <div className="flex w-full mt-[200px]">
-              <p className="mx-auto items-center text-[50px] hover:text-white animate-pulse dark:bg-slate-50 dark:text-slate-900 shadow-inner">
+              <p className="mx-auto items-center text-[50px] animate-pulse">
                 Please select upgrade!
               </p>
             </div>
@@ -144,7 +145,7 @@ export default function Home() {
         </div>
       ) : (
         <div className="flex w-full mt-[200px]">
-          <p className="mx-auto items-center text-[50px] hover:text-white animate-pulse dark:bg-slate-50 dark:text-slate-900 shadow-inner">
+          <p className="mx-auto items-center text-[50px] animate-pulse">
             Please Connect Wallet
           </p>
         </div>

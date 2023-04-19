@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { useWriteContract } from "../hooks/useWriteContract";
+import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import {
   useAccount,
   useWaitForTransaction,
@@ -45,14 +46,9 @@ const Inventory: React.FC = () => {
   return (
     <div className="flex flex-row items-center mx-2 text-lg">
       <div className="flex p-1 flex-col">
-        <>
-          {hash && <div className="flex flex-col">Hash: {hash}</div>}
-          {isLoading && hash && (
-            <div className="loading-ellipsis">Loading...</div>
-          )}
-          {error && <div>Error: {JSON.stringify(error)}</div>}
-          {data && <div>Status: {data.status}</div>}
-        </>
+        <div className="w-1/4">
+          <Button>Mint Daily Loot Items</Button>
+        </div>
       </div>
     </div>
   );
