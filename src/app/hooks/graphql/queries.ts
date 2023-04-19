@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 const getAdventurer = gql`
-query get_adventurer($owner: HexValue) {
-    adventurers(where: {owner: {eq: $owner}}) {
+  query get_adventurer($owner: HexValue) {
+    adventurers(where: { owner: { eq: $owner } }) {
       beastId
       charisma
       chestId
@@ -36,21 +36,20 @@ query get_adventurer($owner: HexValue) {
   }
 `;
 
-
 const getBeasts = gql`
 query get_beasts {
     beasts {
-        adventurerId
-        armorType
-        attackType
-        beast
-        health
-        id
-        level
-        prefix1
-        prefix2
-        rank
-        xp
+      adventurerId
+      armorType
+      attackType
+      beast
+      health
+      id
+      level
+      prefix1
+      prefix2
+      rank
+      xp
     }
   }
 `;
@@ -58,13 +57,13 @@ query get_beasts {
 const getDiscoveries = gql`
 query get_discoveries {
     discoveries {
-        adventurerId
-        discoveryTime
-        discoveryType
-        entityId
-        outputAmount
-        subDiscoveryType
-        TxHash
+      adventurerId
+      discoveryTime
+      discoveryType
+      entityId
+      outputAmount
+      subDiscoveryType
+      TxHash
     }
   }
 `;
@@ -72,34 +71,34 @@ query get_discoveries {
 const getItems = gql`
 query get_items {
     items {
-        adventurerId
-        bag
-        bidder
-        claimedTime
-        createdBlock
-        expiry
-        greatness
-        id
-        item
-        marketId
-        material
-        owner
-        prefix1
-        prefix2
-        price
-        rank
-        slot
-        status
-        suffix
-        type
-        xp
+      adventurerId
+      bag
+      bidder
+      claimedTime
+      createdBlock
+      expiry
+      greatness
+      id
+      item
+      marketId
+      material
+      owner
+      prefix1
+      prefix2
+      price
+      rank
+      slot
+      status
+      suffix
+      type
+      xp
     }
   }
 `;
 
 const getAdventurersByOwner = gql`
-query get_adventurers_by_owner($owner: HexValue) {
-    adventurers(where: {owner: {eq: $owner}}) {
+  query get_adventurers_by_owner($owner: HexValue) {
+    adventurers(where: { owner: { eq: $owner } }) {
       beastId
       charisma
       chestId
@@ -134,8 +133,8 @@ query get_adventurers_by_owner($owner: HexValue) {
 `;
 
 const getAdventurerById = gql`
-query get_adventurer_by_id($id: FeltValue) {
-    adventurers(where: {id: {eq: $id}}) {
+  query get_adventurer_by_id($id: FeltValue) {
+    adventurers(where: { id: { eq: $id } }) {
       beastId
       charisma
       chestId
@@ -169,9 +168,9 @@ query get_adventurer_by_id($id: FeltValue) {
   }
 `;
 
-const getBeastsById = gql`
-query get_beasts_by_id($id: number) {
-    beasts(where: {id: {eq: $id}}) {
+const getBeastById = gql`
+  query get_beast_by_id($id: number) {
+    beasts(where: { id: { eq: $id } }) {
       adventurerId
       armorType
       attackType
@@ -203,29 +202,91 @@ query get_discovery($txHash: HexValue) {
 `;
 
 const getItemsByTokenId = gql`
-query get_items($id: FeltValue) {
-    items(where: {id: {eq: $id}}) {
-        adventurerId
-        bag
-        bidder
-        claimedTime
-        createdBlock
-        expiry
-        greatness
-        id
-        item
-        marketId
-        material
-        owner
-        prefix1
-        prefix2
-        price
-        rank
-        slot
-        status
-        suffix
-        type
-        xp
+  query get_items($id: FeltValue) {
+    items(where: { id: { eq: $id } }) {
+      bag
+      bidder
+      claimedTime
+      createdBlock
+      equippedAdventurerId
+      expiry
+      greatness
+      id
+      item
+      lastUpdated
+      marketId
+      material
+      owner
+      ownerAdventurerId
+      prefix1
+      prefix2
+      price
+      rank
+      slot
+      status
+      suffix
+      type
+      xp
+    }
+  }
+`;
+
+const getItemsByTokenIds = gql`
+  query get_items($ids: [FeltValue]) {
+    items(where: { id: { In: $ids } }) {
+      bag
+      bidder
+      claimedTime
+      createdBlock
+      equippedAdventurerId
+      expiry
+      greatness
+      id
+      item
+      lastUpdated
+      marketId
+      material
+      owner
+      ownerAdventurerId
+      prefix1
+      prefix2
+      price
+      rank
+      slot
+      status
+      suffix
+      type
+      xp
+    }
+  }
+`;
+
+const getMarketItems = gql`
+  query get_market_items {
+    items(limit: 20, orderBy: { createdBlock: { desc: true } }) {
+      bag
+      bidder
+      claimedTime
+      createdBlock
+      equippedAdventurerId
+      expiry
+      greatness
+      id
+      item
+      lastUpdated
+      marketId
+      material
+      owner
+      ownerAdventurerId
+      prefix1
+      prefix2
+      price
+      rank
+      slot
+      status
+      suffix
+      type
+      xp
     }
   }
 `;
@@ -261,29 +322,29 @@ query get_market_items {
 `;
 
 const getItemsByOwner = gql`
-query get_items_by_owner($owner: HexValue) {
-    items(where: {owner: {eq: $owner}}) {
+  query get_items_by_owner($owner: HexValue) {
+    items(where: { owner: { eq: $owner } }) {
       adventurerId
-        bag
-        bidder
-        claimedTime
-        createdBlock
-        expiry
-        greatness
-        id
-        item
-        marketId
-        material
-        owner
-        prefix1
-        prefix2
-        price
-        rank
-        slot
-        status
-        suffix
-        type
-        xp
+      bag
+      bidder
+      claimedTime
+      createdBlock
+      expiry
+      greatness
+      id
+      item
+      marketId
+      material
+      owner
+      prefix1
+      prefix2
+      price
+      rank
+      slot
+      status
+      suffix
+      type
+      xp
     }
   }
 `;

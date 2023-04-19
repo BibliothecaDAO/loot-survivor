@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import Actions from "./components/Actions";
 import Marketplace from "./components/Marketplace";
 import Adventurer from "./components/Adventurer";
+import Beast from "./components/Beast";
 import { displayAddress } from "./lib/utils";
 import { useAdventurer } from "./context/AdventurerProvider";
 import { NullAdventurerProps } from "./types";
@@ -59,15 +60,12 @@ export default function Home() {
           label: "Inventory",
           value: "inventory",
         },
-      ];
-
-      if (adventurer?.adventurer.beast) {
-        newMenu.push({
+        {
           id: 5,
           label: "Beast",
           value: "beast",
-        });
-      }
+        },
+      ];
     }
 
     setMenu(newMenu);
@@ -134,6 +132,7 @@ export default function Home() {
               {selected === "actions" && <Actions />}
               {selected === "market" && <Marketplace />}
               {selected === "inventory" && <Inventory />}
+              {selected === "beast" && <Beast />}
             </>
           ) : (
             <div className="flex w-full mt-[200px]">
