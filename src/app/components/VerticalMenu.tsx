@@ -11,13 +11,17 @@ interface ButtonData {
 interface VerticalKeyboardControlProps {
   buttonsData: ButtonData[];
   onButtonClick: (value: any) => void;
-  onEnterPress?: (value: any) => void;
+  onEnterPress?: () => void;
+  isActive: boolean;
+  setActiveMenu: (value: number) => void;
 }
 
 const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
   buttonsData,
   onButtonClick,
   onEnterPress,
+  isActive,
+  setActiveMenu,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -41,19 +45,22 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
         });
         break;
       case "Enter":
-        if (onEnterPress) {
-          buttonsData[selectedIndex].value();
-        }
+        setActiveMenu(buttonsData[selectedIndex].id);
         break;
     }
   };
+  console.log(isActive);
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
+    if (isActive) {
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      window.removeEventListener("keydown", handleKeyDown);
+    }
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedIndex]);
+  }, [isActive, selectedIndex]);
 
   return (
     <div className="flex flex-col w-full">
@@ -61,7 +68,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
         <Button
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
-          className={selectedIndex === index ? "animate-pulse" : ""}
+          className={selectedIndex === index && isActive ? "animate-pulse" : ""}
           variant={selectedIndex === index ? "default" : "outline"}
           onClick={() => {
             setSelectedIndex(index);

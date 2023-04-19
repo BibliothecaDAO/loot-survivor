@@ -12,6 +12,7 @@ const Adventurer = () => {
   const { writeAsync, addToCalls } = useWriteContract();
   const { adventurerContract } = useContracts();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
+  const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
 
   const menu = [
@@ -35,23 +36,33 @@ const Adventurer = () => {
     },
   ];
 
+  console.log(activeMenu);
+
   return (
     <div className="flex flex-row gap-2">
       <div className="w-1/3">
         <VerticalKeyboardControl
           buttonsData={menu}
           onButtonClick={(value) => setSelected(value)}
+          isActive={activeMenu == 0}
+          setActiveMenu={setActiveMenu}
         />
       </div>
 
       {selected === "choose adventurer" && (
         <div className="w-2/3">
-          <AdventurersList />
+          <AdventurersList
+            isActive={activeMenu == 1}
+            onEscape={() => setActiveMenu(0)}
+          />
         </div>
       )}
       {selected === "create adventurer" && (
         <div className="w-2/3">
-          <CreateAdventurer />
+          <CreateAdventurer
+            isActive={activeMenu == 2}
+            onEscape={() => setActiveMenu(0)}
+          />
         </div>
       )}
       {selected === "about" && (

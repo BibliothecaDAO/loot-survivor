@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "./Button";
 import Info from "./Info";
 import { useAccount } from "@starknet-react/core";
@@ -8,8 +8,18 @@ import { padAddress } from "../lib/utils";
 import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import { useAdventurer } from "../context/AdventurerProvider";
 
-export const AdventurersList = () => {
+export interface AdventurerListProps {
+  isActive: boolean;
+  onEscape: () => void;
+}
+
+export const AdventurersList = ({
+  isActive,
+  onEscape,
+}: AdventurerListProps) => {
   const { account } = useAccount();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const accountAddress = account ? account.address : "0x0";
   const {
@@ -28,7 +38,7 @@ export const AdventurersList = () => {
     ? adventurersByOwnerData.adventurers
     : [];
   const { handleUpdateAdventurer } = useAdventurer();
-  const buttonsData = [];
+  const buttonsData: ButtonData[] = [];
   for (let i = 0; i < adventurers.length; i++) {
     buttonsData.push({
       id: i + 1,
@@ -37,14 +47,59 @@ export const AdventurersList = () => {
     });
   }
 
+  const handleKeyDown = (event: KeyboardEvent) => {
+    switch (event.key) {
+      case "ArrowUp":
+        setSelectedIndex((prev) => Math.max(prev - 1, 0));
+        break;
+      case "ArrowDown":
+        setSelectedIndex((prev) => Math.min(prev + 1, buttonsData.length - 1));
+        break;
+      case "Enter":
+        buttonsData[selectedIndex].action();
+        break;
+      case "Escape":
+        onEscape();
+        break;
+    }
+  };
+
+  useEffect(() => {
+    if (isActive) {
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      window.removeEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isActive, selectedIndex]);
+
+  console.log(isActive);
+
   return (
     <>
       {adventurers.length > 0 ? (
         <div className="flex basis-2/3">
-          <div className="w-full">
-            <Info />
+          <div className="w-1/2">
+            <Info adventurer={adventurers[selectedIndex]} />
           </div>
-          <KeyboardControl buttonsData={buttonsData} />
+          <div className="flex flex-col w-1/2">
+            {buttonsData.map((buttonData, index) => (
+              <Button
+                key={buttonData.id}
+                ref={(ref) => (buttonRefs.current[index] = ref)}
+                className={selectedIndex === index ? "animate-pulse" : ""}
+                variant={selectedIndex === index ? "default" : "outline"}
+                onClick={() => {
+                  buttonData.action();
+                  setSelectedIndex(index);
+                }}
+              >
+                {buttonData.label}
+              </Button>
+            ))}
+          </div>
         </div>
       ) : (
         <p className="text-lg loading-ellipsis">

@@ -74,12 +74,12 @@ const Inventory: React.FC = () => {
         setSelectedIndex((prev) => Math.max(prev - 1, 0));
         break;
       case "ArrowDown":
-        setSelectedIndex((prev) =>
-          Math.min(prev + 1, itemsByAdventurerData?.items.length - 1)
-        );
+        setSelectedIndex((prev) => Math.min(prev + 1, testItems.length - 1));
         break;
       case "Enter":
-        handleAddEquipItem(itemsByAdventurerData?.items[selectedIndex].item.id);
+        !testItems[selectedIndex].equippedAdventurerId
+          ? handleAddEquipItem(testItems[selectedIndex].id)
+          : null;
         break;
     }
   };
@@ -89,7 +89,7 @@ const Inventory: React.FC = () => {
     return (
       <>
         {formatItem
-          ? `${formatItem.item} [Rank ${formatItem.rank}, ${formatItem.xp}XP]`
+          ? `${formatItem.item} [Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp}XP]`
           : "Nothing"}
       </>
     );
@@ -348,11 +348,19 @@ const Inventory: React.FC = () => {
     };
   }, [selectedIndex]);
 
-  useEffect(() => {}, [adventurerContract, formatAddress, addToCalls, calls]);
+  // useEffect(() => {
+  //   const button = buttonRefs.current[selectedIndex];
+  //   if (button) {
+  //     button.scrollIntoView({
+  //       behavior: "smooth",
+  //       block: "nearest",
+  //     });
+  //   }
+  // }, [selectedIndex]);
 
   return (
-    <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-full p-20 gap-10">
-      <div className="w-[160px] h-[160px] relative border-2 border-white my-auto">
+    <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-full p-10 gap-10">
+      <div className="w-[250px] h-[250px] relative border-2 border-white my-auto">
         <Image
           src="/MIKE.png"
           alt="adventurer-image"
@@ -413,7 +421,7 @@ const Inventory: React.FC = () => {
       </div>
       <div className="flex flex-col gap-10">
         <div className="text-xl font-medium text-white">OWNED</div>
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 h-[400px] w-[600px] overflow-auto">
           {testItems.map((item: any, index: number) => (
             <div key={index} className="flex flex-row items-center gap-5">
               <ItemDisplay item={item} />
@@ -429,7 +437,9 @@ const Inventory: React.FC = () => {
                 }
                 variant={selectedIndex === index ? "subtle" : "outline"}
                 onClick={() => {
-                  handleAddEquipItem(item.id);
+                  !testItems[selectedIndex].equippedAdventurerId
+                    ? handleAddEquipItem(testItems[selectedIndex].id)
+                    : null;
                 }}
               >
                 {item.equippedAdventurerId ? "Equipped" : "Equip"}
@@ -439,18 +449,6 @@ const Inventory: React.FC = () => {
         </div>
       </div>
     </div>
-    // <div className="flex flex-row items-center mx-2 text-lg">
-    //   <div className="flex p-1 flex-col">
-    //     <>
-    //       {hash && <div className="flex flex-col">Hash: {hash}</div>}
-    //       {isLoading && hash && (
-    //         <div className="loading-ellipsis">Loading...</div>
-    //       )}
-    //       {error && <div>Error: {JSON.stringify(error)}</div>}
-    //       {data && <div>Status: {data.status}</div>}
-    //     </>
-    //   </div>
-    // </div>
   );
 };
 
