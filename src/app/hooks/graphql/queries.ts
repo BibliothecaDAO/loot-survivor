@@ -36,8 +36,8 @@ const getAdventurer = gql`
   }
 `;
 
-const getBeast = gql`
-  query get_beast($owner: HexValue) {
+const getBeasts = gql`
+query get_beasts {
     beasts {
       adventurerId
       armorType
@@ -54,8 +54,8 @@ const getBeast = gql`
   }
 `;
 
-const getDiscovery = gql`
-  query get_discovery($owner: HexValue) {
+const getDiscoveries = gql`
+query get_discoveries {
     discoveries {
       adventurerId
       discoveryTime
@@ -69,7 +69,7 @@ const getDiscovery = gql`
 `;
 
 const getItems = gql`
-  query get_items($owner: HexValue) {
+query get_items {
     items {
       adventurerId
       bag
@@ -187,45 +187,16 @@ const getBeastById = gql`
   }
 `;
 
-const getItemsByMarketId = gql`
-  query get_items_by_market_id {
-    items {
-      adventurerId
-      bag
-      bidder
-      claimedTime
-      createdBlocks
-      expiry
-      greatness
-      id
-      item
-      lastUpdated
-      marketId
-      material
-      owner
-      prefix1
-      prefix2
-      price
-      rank
-      slot
-      status
-      suffix
-      type
-      xp
-    }
-  }
-`;
-
 const getDiscoveryByTxHash = gql`
-  query get_discovery($TxHash: HexValue) {
-    discoveries(where: { TxHash: { eq: $TxHash } }) {
-      adventurerId
-      discoveryTime
-      discoveryType
-      entityId
-      outputAmount
-      subDiscoveryType
-      TxHash
+query get_discovery($txHash: HexValue) {
+    discoveries(where: {txHash: {eq: $txHash}}) {
+        adventurerId
+        discoveryTime
+        discoveryType
+        entityId
+        outputAmount
+        subDiscoveryType
+        txHash
     }
   }
 `;
@@ -320,9 +291,9 @@ const getMarketItems = gql`
   }
 `;
 
-const getItemsByAdventurer = gql`
-  query get_items($id: FeltValue) {
-    items(where: { ownerAdventurerId: { eq: $id } }) {
+const getMarketItems = gql`
+query get_market_items {
+    items(limit: 20, orderBy: {createdBlock: {desc: true}}) {
       bag
       bidder
       claimedTime
@@ -379,18 +350,15 @@ const getItemsByOwner = gql`
 `;
 
 export {
-  getAdventurer,
-  getBeast,
-  getDiscovery,
-  getItems,
-  getAdventurersByOwner,
-  getAdventurerById,
-  getBeastById,
-  getItemsByMarketId,
-  getDiscoveryByTxHash,
-  getItemsByTokenId,
-  getItemsByTokenIds,
-  getMarketItems,
-  getItemsByAdventurer,
-  getItemsByOwner,
+    getAdventurer,
+    getBeasts,
+    getDiscoveries,
+    getItems,
+    getAdventurersByOwner,
+    getAdventurerById,
+    getBeastsById,
+    getDiscoveryByTxHash,
+    getItemsByTokenId,
+    getMarketItems,
+    getItemsByOwner,
 };

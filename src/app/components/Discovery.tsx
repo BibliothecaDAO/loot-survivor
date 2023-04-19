@@ -7,14 +7,10 @@ import { NullDiscovery } from "../types";
 import { NullAdventurerProps } from "../types";
 import { useAdventurer } from "../context/AdventurerProvider";
 
-const [loading, setLoading] = useState(false);
-
 const { adventurer, handleUpdateAdventurer } = useAdventurer();
-
-const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
-
 const [hash, setHash] = useState<string | undefined>(undefined);
 const transactions = useTransaction({ hash });
+const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
 
 const {
   loading: discoveryByTxHashLoading,
@@ -34,7 +30,7 @@ const Discovery = () => {
   const accountAddress = account ? account.address : "0x0";
   const { data: discoveryData } = useQuery(getDiscoveryByTxHash, {
     variables: {
-      owner: accountAddress,
+      id: "",
       hash: "",
     },
   });
@@ -45,8 +41,8 @@ const Discovery = () => {
 
   return (
     <div className="bg-black">
-      <p>{discovery.discoveryType}</p>
-      <p>{discovery.discoveryEmoji}</p>
+      <p>{discovery.type}</p>
+      <p>{discovery.emoji}</p>
     </div>
   );
 };

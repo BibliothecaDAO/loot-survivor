@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { useWriteContract } from "../hooks/useWriteContract";
+import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import {
   useAccount,
   useWaitForTransaction,

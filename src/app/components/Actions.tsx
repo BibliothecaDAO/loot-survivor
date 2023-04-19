@@ -8,38 +8,55 @@ import {
   useTransaction,
   useTransactions,
   useTransactionManager,
+  useWaitForTransaction,
 } from "@starknet-react/core";
 import Image from "next/image";
 import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import HealthSlider from "./HealthSlider";
 import Info from "./Info";
-import TransactionBar from "./TransactionBar";
+import Discovery from "./Discovery";
 
 export default function Actions() {
   const [loading, setLoading] = useState(false);
-
   const { writeAsync, addToCalls, calls } = useWriteContract();
   const { adventurerContract } = useContracts();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
+  const [hash, setHash] = useState<string | undefined>(undefined);
+  const { hashes, addTransaction } = useTransactionManager();
+  const { data, isLoading, error } = useWaitForTransaction({
+    hash,
+    watch: true,
+  });
 
   const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
 
-  // const [hash, setHash] = useState<string | undefined>(undefined);
+  const explore = {
+    contractAddress: adventurerContract?.address,
+    selector: "explore",
+    calldata: [adventurer?.adventurer?.id || 0, "0"],
+  };
 
-  // const explore = {
-  //   contractAddress: lootContract?.address,
-  //   selector: "explore",
-  //   calldata: [formatAddress],
-  // };
+  const handlePurchase = (health: number) => {
+    console.log(`Purchased ${health} health.`);
+  };
 
   const buttonsData: ButtonData[] = [
     {
       id: 1,
       label: "Explore",
       action: async () => {
-        // addToCalls(explore);
-        // console.log(calls);
-        // await writeAsync().then((tx) => setHash(tx.transaction_hash));
+        {
+          addToCalls(explore);
+          console.log(explore);
+          console.log(calls);
+          await writeAsync().then((tx) => {
+            addTransaction({
+              hash: tx.transaction_hash,
+              metadata: { test: true },
+            });
+            setHash(tx.transaction_hash);
+          });
+        }
       },
     },
     {
@@ -54,10 +71,6 @@ export default function Actions() {
     },
   ];
 
-  const handlePurchase = (health: number) => {
-    console.log(`Purchased ${health} health.`);
-  };
-
   return (
     <div className="flex flex-row mt-5">
       {!loading ? (
@@ -65,13 +78,23 @@ export default function Actions() {
           <Info />
         </div>
       ) : null}
-      <div className="w-1/4">
+      <div className="w-1/4 my-auto">
         <KeyboardControl buttonsData={buttonsData} />
       </div>
       {/* <p>Health Purchase</p>
         <HealthSlider onPurchase={handlePurchase} /> */}
 
-      <div className="flex flex-col w-1/2 bg-terminal-black"></div>
+      <div className="flex flex-col w-1/2 bg-terminal-black m-2 p-2">
+        <>
+          {hash && <div className="flex flex-col">Hash: {hash}</div>}
+          {isLoading && hash && (
+            <div className="loading-ellipsis">Loading...</div>
+          )}
+          {error && <div>Error: {JSON.stringify(error)}</div>}
+          {data && <div>Status: {data.status}</div>}
+        </>
+        <div></div>
+      </div>
     </div>
   );
 }

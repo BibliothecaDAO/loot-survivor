@@ -26,7 +26,7 @@ export default function Info() {
                   style={{ objectFit: "contain" }}
                 />
               </div>
-              <div className="flex flex-col items-center mt-9">
+              <div className="flex flex-col items-center mt-9 ml-2">
                 <div className="text-xl font-medium text-white">
                   {formatAdventurer.adventurer?.name}
                 </div>

@@ -135,8 +135,6 @@ export default function Beast() {
           {data && <div>Status: {data.status}</div>}
         </>
       </div>
-      {/* <p>Health Purchase</p>
-        <HealthSlider onPurchase={handlePurchase} /> */}
 
       <div className="flex flex-col w-1/3 bg-terminal-black">
         {formatAdventurer.adventurer?.beast ? (
