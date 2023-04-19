@@ -52,7 +52,7 @@ const Inventory: React.FC = () => {
     pollInterval: 5000,
   });
 
-  console.log(itemsByAdventurerData, itemsByAdventurerError);
+  const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
 
   const handleAddEquipItem = (itemId: any) => {
     if (adventurerContract && formatAddress) {
@@ -81,6 +81,13 @@ const Inventory: React.FC = () => {
     }
   };
 
+  const ItemDisplay = (item: any) => {
+    console.log(item);
+    return (
+      <>{`${item?.item?.item} [Rank ${item?.item?.rank}, ${item?.item?.xp}XP]`}</>
+    );
+  };
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
@@ -103,38 +110,75 @@ const Inventory: React.FC = () => {
       <div className="flex flex-col gap-10">
         <div className="text-xl font-medium text-white">EQUIPPED</div>
         <p className="text-terminal-green">
-          WEAPON - {formatAdventurer.adventurer?.weaponId}
+          WEAPON -{" "}
+          <ItemDisplay
+            item={items.find(
+              (item: any) => item.id == formatAdventurer.adventurer?.weaponId
+            )}
+          />
         </p>
         <p className="text-terminal-green">
-          HEAD - {formatAdventurer.adventurer?.headId}
+          HEAD -{" "}
+          {
+            items.find(
+              (item: any) => item.id == formatAdventurer.adventurer?.headId
+            )?.item
+          }
         </p>
         <p className="text-terminal-green">
-          CHEST - {formatAdventurer.adventurer?.chestId}
+          CHEST -{" "}
+          {
+            items.find(
+              (item: any) => item.id == formatAdventurer.adventurer?.chestId
+            )?.item
+          }
         </p>
         <p className="text-terminal-green">
-          FOOT - {formatAdventurer.adventurer?.feetId}
+          FOOT -{" "}
+          {
+            items.find(
+              (item: any) => item.id == formatAdventurer.adventurer?.feetId
+            )?.item
+          }
         </p>
         <p className="text-terminal-green">
-          HAND - {formatAdventurer.adventurer?.handsId}
+          HAND -{" "}
+          {
+            items.find(
+              (item: any) => item.id == formatAdventurer.adventurer?.handsId
+            )?.item
+          }
         </p>
         <p className="text-terminal-green">
-          WAIST - {formatAdventurer.adventurer?.waistId}
+          WAIST -{" "}
+          {
+            items.find(
+              (item: any) => item.id == formatAdventurer.adventurer?.waistId
+            )?.item
+          }
         </p>
       </div>
       <div className="flex flex-col gap-10">
+        <div className="text-xl font-medium text-white">OWNED</div>
         {itemsByAdventurerData?.items.map((item: any, index: number) => (
           <div key={index} className="flex flex-row gap-5">
-            <p>{item.item}</p>
+            <ItemDisplay item={item} />
             <Button
               key={index}
               ref={(ref) => (buttonRefs.current[index] = ref)}
-              className={selectedIndex === index ? "animate-pulse" : ""}
-              variant={selectedIndex === index ? "default" : "outline"}
+              className={
+                selectedIndex === index
+                  ? item.equippedAdventurerId
+                    ? "animate-pulse bg-white"
+                    : "animate-pulse"
+                  : ""
+              }
+              variant={selectedIndex === index ? "subtle" : "outline"}
               onClick={() => {
                 handleAddEquipItem(item.id);
               }}
             >
-              Equip
+              {item.equippedAdventurerId ? "Equipped" : "Equip"}
             </Button>
           </div>
         ))}
