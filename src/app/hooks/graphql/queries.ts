@@ -258,6 +258,34 @@ const getItemsByTokenId = gql`
   }
 `;
 
+const getItemsByTokenIds = gql`
+  query get_items($ids: [FeltValue]) {
+    items(where: { id: { In: $ids } }) {
+      adventurerId
+      bag
+      bidder
+      claimedTime
+      createdBlock
+      expiry
+      greatness
+      id
+      item
+      marketId
+      material
+      owner
+      prefix1
+      prefix2
+      price
+      rank
+      slot
+      status
+      suffix
+      type
+      xp
+    }
+  }
+`;
+
 const getItemsByAdventurer = gql`
   query get_items($id: FeltValue) {
     items(limit: 20, orderBy: { createdBlock: { desc: true } }) {
@@ -325,6 +353,7 @@ export {
   getItemsByMarketId,
   getDiscoveryByTxHash,
   getItemsByTokenId,
+  getItemsByTokenIds,
   getItemsByAdventurer,
   getItemsByOwner,
 };

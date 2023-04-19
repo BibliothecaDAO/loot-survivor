@@ -111,6 +111,8 @@ export default function Beast() {
     },
   ];
 
+  console.log(formatAdventurer.adventurer?.beast);
+
   // const handlePurchase = (health: number) => {
   //   console.log(`Purchased ${health} health.`);
   // };
@@ -137,30 +139,40 @@ export default function Beast() {
         <HealthSlider onPurchase={handlePurchase} /> */}
 
       <div className="flex flex-col w-1/3 bg-terminal-black">
-        <div className="w-[250px] h-[250px] relative ">
-          <Image
-            src="/pheonix.png"
-            alt="beast-image"
-            fill={true}
-            style={{ objectFit: "contain" }}
-          />
-        </div>
-        <div className="flex flex-col items-center mt-9">
-          <div className="text-xl font-medium text-white">
-            {beastData.beast}
-          </div>
-          <p className="text-lg text-terminal-green">
-            HEALTH {beastData.health}
+        {formatAdventurer.adventurer?.beast ? (
+          <>
+            <div className="w-[250px] h-[250px] relative ">
+              <Image
+                src="/pheonix.png"
+                alt="beast-image"
+                fill={true}
+                style={{ objectFit: "contain" }}
+              />
+            </div>
+            <div className="flex flex-col items-center mt-9">
+              <div className="text-xl font-medium text-white">
+                {beastData.beast}
+              </div>
+              <p className="text-lg text-terminal-green">
+                HEALTH {beastData.health}
+              </p>
+              <p className="text-lg text-terminal-yellow">
+                RANK {beastData.rank}
+              </p>
+              <p className="text-lg text-terminal-yellow">XP {beastData.xp}</p>
+              <p className="text-lg text-red-600">
+                ATTACK TYPE {beastData.attackType}
+              </p>
+              <p className="text-lg text-red-600">
+                ARMOR TYPE {beastData.armorType}
+              </p>
+            </div>
+          </>
+        ) : (
+          <p className="text-lg text-terminal-green mx-auto">
+            BEAST NOT YET DISCOVERED
           </p>
-          <p className="text-lg text-terminal-yellow">RANK {beastData.rank}</p>
-          <p className="text-lg text-terminal-yellow">XP {beastData.xp}</p>
-          <p className="text-lg text-red-600">
-            ATTACK TYPE {beastData.attackType}
-          </p>
-          <p className="text-lg text-red-600">
-            ARMOR TYPE {beastData.armorType}
-          </p>
-        </div>
+        )}
       </div>
     </div>
   );
