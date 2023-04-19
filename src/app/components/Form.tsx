@@ -99,7 +99,10 @@ const FormComponent: React.FC = () => {
       setHash(tx.transaction_hash);
       addTransaction({
         hash: tx.transaction_hash,
-        metadata: { method: "Minting adventurer" },
+        metadata: {
+          method: "Minting adventurer",
+          description: "Adventurer is being minted!",
+        },
       });
     });
   };
@@ -213,13 +216,6 @@ const FormComponent: React.FC = () => {
           {error && <div>Error: {JSON.stringify(error)}</div>}
           {data && <div>Status: {data.status}</div>}
         </>
-      </div>
-      <div className="flex flex-col gap-4">
-        <Button>Generate Image</Button>
-        <Button>Regenerate Image</Button>
-      </div>
-      <div className="w-[200px] h-[200px] bg-white m-8 text-center justify-center">
-        IMAGE
       </div>
     </div>
   );

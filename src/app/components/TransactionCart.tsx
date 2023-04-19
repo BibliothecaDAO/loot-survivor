@@ -23,7 +23,7 @@ const TransactionCart = () => {
     setIsOpen(!isOpen);
   };
 
-  const hasActiveTransactions = transactions.length > 0;
+  const hasTransactions = transactions.length > 0;
 
   return (
     <div className="relative">
@@ -38,7 +38,7 @@ const TransactionCart = () => {
           </span> */}
       </button>
       {isOpen ? (
-        hasActiveTransactions ? (
+        hasTransactions ? (
           <div className="absolute right-0 top-10 z-10 w-96 h-96 p-2 bg-terminal-black border border-terminal-green">
             <h1>TRANSACTIONS</h1>
             <ul>
@@ -63,7 +63,7 @@ const TransactionCart = () => {
           </div>
         ) : (
           <div className="absolute right-0 top-10 z-10 w-96 h-96 bg-terminal-black border border-terminal-green">
-            <p className="p-2 text-white">No active transactions</p>
+            <p className="p-2 text-white">No transactions</p>
           </div>
         )
       ) : null}
