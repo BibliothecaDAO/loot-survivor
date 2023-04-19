@@ -61,11 +61,6 @@ export default function Actions() {
     },
     {
       id: 2,
-      label: "Swap Item",
-      action: async () => await writeAsync(),
-    },
-    {
-      id: 3,
       label: "Purchase Health",
       action: async () => await writeAsync(),
     },

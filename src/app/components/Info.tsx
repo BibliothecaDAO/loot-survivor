@@ -17,8 +17,8 @@ export default function Info() {
       {!loading ? (
         <>
           <div className="flex flex-row justify-evenly">
-            <div className="flex flex-row">
-              <div className="w-[160px] h-[160px] relative border-4 border-white mt-5 mr-5 ">
+            <div className="flex flex-row m-4 gap-5">
+              <div className="w-[160px] h-[160px] relative border-4 border-white ">
                 <Image
                   src="/MIKE.png"
                   alt="adventurer-image"
