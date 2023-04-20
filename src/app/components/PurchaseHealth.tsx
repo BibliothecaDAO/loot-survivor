@@ -33,7 +33,7 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
 
   const handlePurchaseHealth = async () => {
     addToCalls(purchaseHealthTx);
-    await writeAsync().then((tx) => {
+    await writeAsync().then((tx: any) => {
       addTransaction({
         hash: tx.transaction_hash,
         metadata: { test: true },
