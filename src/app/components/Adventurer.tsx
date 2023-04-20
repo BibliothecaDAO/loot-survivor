@@ -36,7 +36,7 @@ const Adventurer = () => {
       <div className="w-1/3">
         <VerticalKeyboardControl
           buttonsData={menu}
-          onButtonClick={(value) => setSelected(value)}
+          onSelected={(value) => setSelected(value)}
           isActive={activeMenu == 0}
           setActiveMenu={setActiveMenu}
         />

@@ -1,36 +1,28 @@
 import React, { useState } from "react";
 
 interface SliderProps {
-  onPurchase: (health: number) => void;
+  purchaseAmount: number;
+  setPurchaseAmount: (health: number) => void;
 }
 
-const HealthSlider: React.FC<SliderProps> = ({ onPurchase }) => {
-  const [health, setHealth] = useState(1);
-
+const HealthSlider: React.FC<SliderProps> = ({
+  purchaseAmount,
+  setPurchaseAmount,
+}) => {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(event.target.value, 10);
-    setHealth(value);
-  };
-
-  const purchaseHealth = () => {
-    onPurchase(health);
+    setPurchaseAmount(value);
   };
 
   return (
-    <div className="health-slider">
-      <input
-        type="range"
-        min="1"
-        max="10"
-        value={health}
-        onChange={handleChange}
-        className="slider"
-      />
-      <p>
-        Health to purchase: <strong>{health}</strong>
-      </p>
-      <button onClick={purchaseHealth}>Purchase Health</button>
-    </div>
+    <input
+      type="range"
+      min="1"
+      max="10"
+      value={purchaseAmount}
+      onChange={handleChange}
+      className="slider"
+    />
   );
 };
 

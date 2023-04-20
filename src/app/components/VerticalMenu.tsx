@@ -10,24 +10,24 @@ interface ButtonData {
 
 interface VerticalKeyboardControlProps {
   buttonsData: ButtonData[];
-  onButtonClick: (value: any) => void;
-  onEnterPress?: () => void;
-  isActive: boolean;
-  setActiveMenu: (value: number) => void;
+  onSelected: (value: any) => void;
+  onEnterAction?: boolean;
+  isActive?: boolean;
+  setActiveMenu?: (value: number) => void;
 }
 
 const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
   buttonsData,
-  onButtonClick,
-  onEnterPress,
-  isActive,
+  onSelected,
+  onEnterAction,
+  isActive = true,
   setActiveMenu,
 }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
-    onButtonClick(buttonsData[selectedIndex].value);
+    onSelected(buttonsData[selectedIndex].value);
   }, [selectedIndex]);
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -45,7 +45,8 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
         });
         break;
       case "Enter":
-        setActiveMenu(buttonsData[selectedIndex].id);
+        setActiveMenu && setActiveMenu(buttonsData[selectedIndex].id);
+        onEnterAction && buttonsData[selectedIndex].action();
         break;
     }
   };
@@ -72,7 +73,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
           onClick={() => {
             setSelectedIndex(index);
             buttonData.action();
-            onButtonClick(buttonData.value);
+            onSelected(buttonData.value);
           }}
         >
           {buttonData.label}
