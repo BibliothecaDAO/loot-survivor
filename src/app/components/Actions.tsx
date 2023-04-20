@@ -11,8 +11,9 @@ import {
   useWaitForTransaction,
 } from "@starknet-react/core";
 import Image from "next/image";
-import KeyboardControl, { ButtonData } from "./KeyboardControls";
+import VerticalKeyboardControl from "./VerticalMenu";
 import HealthSlider from "./HealthSlider";
+import PurchaseHealth from "./PurchaseHealth";
 import Info from "./Info";
 import Discovery from "./Discovery";
 
@@ -21,46 +22,52 @@ export default function Actions() {
   const { writeAsync, addToCalls, calls } = useWriteContract();
   const { adventurerContract } = useContracts();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
-  const [hash, setHash] = useState<string | undefined>(undefined);
   const { hashes, addTransaction } = useTransactionManager();
-  const { data, isLoading, error } = useWaitForTransaction({
-    hash,
-    watch: true,
-  });
   const [selected, setSelected] = useState<String>("");
+  const [potionNumber, setPotionNumber] = useState(0);
 
   const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
 
-  const explore = {
+  const exploreTx = {
     contractAddress: adventurerContract?.address,
     selector: "explore",
-    calldata: [adventurer?.adventurer?.id || 0, "0"],
+    calldata: [adventurer?.adventurer?.id, "0"],
   };
 
   const handlePurchase = (health: number) => {
     console.log(`Purchased ${health} health.`);
   };
 
-  const buttonsData: ButtonData[] = [
+  const buttonsData = [
     {
       id: 1,
       label: "Explore",
+      value: "explore",
       action: async () => {
         {
-          addToCalls(explore);
-          await writeAsync().then((tx) => {
+          const tx = await adventurerContract?.invoke("explore", [
+            [adventurer?.adventurer?.id, "0"],
+          ]);
+          if (tx) {
             addTransaction({
-              hash: tx.transaction_hash,
-              metadata: { test: true },
+              hash: tx?.transaction_hash,
+              metadata: { method: "explore" },
             });
-            setHash(tx.transaction_hash);
-          });
+          }
+          // addToCalls(exploreTx);
+          // await writeAsync().then((tx) => {
+          // addTransaction({
+          //   hash: tx.transaction_hash,
+          //   metadata: { method: "explore" },
+          // });
+          // });
         }
       },
     },
     {
       id: 2,
       label: "Purchase Health",
+      value: "purchase health",
       action: async () => await writeAsync(),
     },
   ];
@@ -73,14 +80,16 @@ export default function Actions() {
         </div>
       ) : null}
       <div className="w-1/3 my-auto">
-        <KeyboardControl buttonsData={buttonsData} />
+        <VerticalKeyboardControl
+          buttonsData={buttonsData}
+          onSelected={(value) => setSelected(value)}
+          onEnterAction={true}
+        />
       </div>
-      {/* <p>Health Purchase</p>
-        <HealthSlider onPurchase={handlePurchase} /> */}
 
       <div className="flex flex-col w-1/2 bg-terminal-black m-2 p-2">
-        {/* {selected == <Discovery />} */}
-        <div></div>
+        {selected == "explore" && <Discovery />}
+        {selected == "purchase health" && <PurchaseHealth />}
       </div>
     </div>
   );

@@ -54,16 +54,34 @@ const getBeasts = gql`
   }
 `;
 
-const getDiscoveries = gql`
-  query get_discoveries {
-    discoveries {
+const getLatestDiscoveries = gql`
+  query get_discoveries($adventurerId: FeltValue) {
+    discoveries(
+      where: { adventurerId: { eq: $adventurerId } }
+      limit: 10
+      orderBy: { discoveryTime: { desc: true } }
+    ) {
       adventurerId
       discoveryTime
       discoveryType
       entityId
       outputAmount
       subDiscoveryType
-      TxHash
+      txHash
+    }
+  }
+`;
+
+const getDiscoveryByTxHash = gql`
+  query get_discovery($txHash: HexValue) {
+    discoveries(where: { txHash: { eq: $txHash } }) {
+      adventurerId
+      discoveryTime
+      discoveryType
+      entityId
+      outputAmount
+      subDiscoveryType
+      txHash
     }
   }
 `;
@@ -187,53 +205,9 @@ const getBeastById = gql`
   }
 `;
 
-const getDiscoveryByTxHash = gql`
-  query get_discovery($txHash: HexValue) {
-    discoveries(where: { txHash: { eq: $txHash } }) {
-      adventurerId
-      discoveryTime
-      discoveryType
-      entityId
-      outputAmount
-      subDiscoveryType
-      txHash
-    }
-  }
-`;
-
 const getItemsByTokenId = gql`
   query get_items($id: FeltValue) {
     items(where: { id: { eq: $id } }) {
-      bag
-      bidder
-      claimedTime
-      createdBlock
-      equippedAdventurerId
-      expiry
-      greatness
-      id
-      item
-      lastUpdated
-      marketId
-      material
-      owner
-      ownerAdventurerId
-      prefix1
-      prefix2
-      price
-      rank
-      slot
-      status
-      suffix
-      type
-      xp
-    }
-  }
-`;
-
-const getItemsByOwner = gql`
-  query get_items($ids: [FeltValue]) {
-    items(where: { id: { In: $ids } }) {
       bag
       bidder
       claimedTime
@@ -358,12 +332,12 @@ const getItemsByOwner = gql`
 export {
   getAdventurer,
   getBeasts,
-  getDiscoveries,
+  getLatestDiscoveries,
+  getDiscoveryByTxHash,
   getItems,
   getAdventurersByOwner,
   getAdventurerById,
   getBeastById,
-  getDiscoveryByTxHash,
   getItemsByTokenId,
   getLatestMarketItems,
   getItemsByOwner,

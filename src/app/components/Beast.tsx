@@ -22,10 +22,9 @@ export default function Beast() {
 
   const { writeAsync, addToCalls, calls } = useWriteContract();
   const { beastContract } = useContracts();
-  const { hashes, addTransaction } = useTransactionManager();
+  const { hashes, addTransaction, transactions } = useTransactionManager();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
   const [hash, setHash] = useState<string | undefined>(undefined);
-
   const { data, isLoading, error } = useWaitForTransaction({
     hash,
     watch: true,
