@@ -23,16 +23,10 @@ const Adventurer = () => {
       value: "create adventurer",
       action: () => setSelected,
     },
-    {
-      id: 3,
-      label: "About",
-      value: "about",
-      action: () => setSelected,
-    },
   ];
 
   return (
-    <div className="flex flex-row gap-2">
+    <div className="flex flex-row gap-2 p-4">
       <div className="w-1/3">
         <VerticalKeyboardControl
           buttonsData={menu}
@@ -56,11 +50,6 @@ const Adventurer = () => {
             isActive={activeMenu == 2}
             onEscape={() => setActiveMenu(0)}
           />
-        </div>
-      )}
-      {selected === "about" && (
-        <div className="w-2/3">
-          <About />
         </div>
       )}
     </div>

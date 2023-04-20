@@ -3,9 +3,12 @@ import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
 import { useTransactionCart } from "../context/TransactionCartProvider";
 import { useAdventurer } from "../context/AdventurerProvider";
-import { NullAdventurerProps } from "../types";
+import { NullAdventurer } from "../types";
 import { useQuery } from "@apollo/client";
-import { getBeastById } from "../hooks/graphql/queries";
+import {
+  getBeastById,
+  getLatestBattlesByAdventurer,
+} from "../hooks/graphql/queries";
 import {
   useTransaction,
   useTransactions,
@@ -30,7 +33,7 @@ export default function Beast() {
     watch: true,
   });
 
-  const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
+  const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
 
   const {
     loading: beastByTokenIdLoading,
@@ -39,10 +42,24 @@ export default function Beast() {
     refetch: beastByTokenIdRefetch,
   } = useQuery(getBeastById, {
     variables: {
-      id: formatAdventurer.adventurer?.beast,
+      id: formatAdventurer?.beastId,
     },
     pollInterval: 5000,
   });
+
+  const {
+    loading: battlesByAdventurerLoading,
+    error: battlesByAdventurerError,
+    data: battlesByAdventurerData,
+    refetch: battlesByAdventurerRefetch,
+  } = useQuery(getLatestBattlesByAdventurer, {
+    variables: {
+      adventurerId: formatAdventurer?.beastId,
+    },
+    pollInterval: 5000,
+  });
+
+  console.log(battlesByAdventurerData);
 
   useEffect(() => {
     beastByTokenIdRefetch();
@@ -64,13 +81,13 @@ export default function Beast() {
   const attack = {
     contractAddress: beastContract?.address,
     selector: "attack",
-    calldata: [formatAdventurer.adventurer?.id, "0"],
+    calldata: [formatAdventurer?.beastId, "0"],
   };
 
   const flee = {
     contractAddress: beastContract?.address,
     selector: "flee",
-    calldata: [formatAdventurer.adventurer?.id, "0"],
+    calldata: [formatAdventurer?.beastId, "0"],
   };
 
   const buttonsData: ButtonData[] = [
@@ -110,7 +127,7 @@ export default function Beast() {
     },
   ];
 
-  console.log(formatAdventurer.adventurer?.beast);
+  const txLoading = data?.status == "RECEIVED" || data?.status == "PENDING";
 
   return (
     <div className="flex flex-row mt-5">
@@ -122,18 +139,18 @@ export default function Beast() {
       <div className="flex flex-col w-1/3">
         <KeyboardControl buttonsData={buttonsData} />
         <>
-          {hashes && <div className="flex flex-col">Hash: {hashes[-1]}</div>}
-          {isLoading && hashes && (
+          {txLoading && hashes && (
             <div className="loading-ellipsis">Loading</div>
           )}
+          {hashes && <div className="flex flex-col">Hash: {hashes[-1]}</div>}
           {error && <div>Error: {JSON.stringify(error)}</div>}
           {data && <div>Status: {data.status}</div>}
         </>
       </div>
 
-      <div className="flex flex-col w-1/3 bg-terminal-black">
-        {formatAdventurer.adventurer?.beast ? (
-          <>
+      <div className="flex flex-row w-1/3 bg-terminal-black">
+        {formatAdventurer?.beastId ? (
+          <div className="flex flex-col">
             <div className="w-[250px] h-[250px] relative ">
               <Image
                 src="/pheonix.png"
@@ -160,7 +177,7 @@ export default function Beast() {
                 ARMOR TYPE {beastData.armorType}
               </p>
             </div>
-          </>
+          </div>
         ) : (
           <p className="text-lg text-terminal-green m-auto">
             BEAST NOT YET DISCOVERED

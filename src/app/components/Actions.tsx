@@ -3,7 +3,7 @@ import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
 import { useTransactionCart } from "../context/TransactionCartProvider";
 import { useAdventurer } from "../context/AdventurerProvider";
-import { NullAdventurerProps } from "../types";
+import { NullAdventurer } from "../types";
 import {
   useTransaction,
   useTransactions,
@@ -25,13 +25,14 @@ export default function Actions() {
   const { hashes, addTransaction } = useTransactionManager();
   const [selected, setSelected] = useState<String>("");
   const [activeMenu, setActiveMenu] = useState(0);
+  const [hash, setHash] = useState();
 
-  const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
+  const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
 
   const exploreTx = {
     contractAddress: adventurerContract?.address,
     selector: "explore",
-    calldata: [adventurer?.adventurer?.id, "0"],
+    calldata: [formatAdventurer?.id, "0"],
   };
 
   const buttonsData = [
@@ -42,7 +43,8 @@ export default function Actions() {
       action: async () => {
         {
           addToCalls(exploreTx);
-          await writeAsync().then((tx) => {
+          await writeAsync().then((tx: any) => {
+            setHash(tx.transaction_hash);
             addTransaction({
               hash: tx.transaction_hash,
               metadata: { method: "explore" },
@@ -75,7 +77,7 @@ export default function Actions() {
       </div>
 
       <div className="flex flex-col w-1/3 bg-terminal-black m-2 p-2">
-        {selected == "explore" && <Discovery />}
+        {selected == "explore" && <Discovery hash={hash} />}
         {selected == "purchase health" && (
           <PurchaseHealth
             isActive={activeMenu == 1}

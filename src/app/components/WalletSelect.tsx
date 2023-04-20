@@ -4,7 +4,7 @@ import { useConnectors } from "@starknet-react/core";
 const WalletSelect = () => {
   const { connectors, connect } = useConnectors();
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col p-8 h-screen max-h-screen">
       <div className="w-full h-6 my-2 bg-terminal-green" />
       <h1>ABOUT</h1>
       <div className="flex text-lg">

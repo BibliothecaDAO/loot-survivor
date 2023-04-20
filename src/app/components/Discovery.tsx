@@ -16,18 +16,15 @@ import { NullDiscovery } from "../types";
 import { NullAdventurer } from "../types";
 import { useAdventurer } from "../context/AdventurerProvider";
 
-const Discovery = () => {
-  const { account } = useAccount();
+interface DiscoveryProps {
+  hash: any;
+}
+
+const Discovery = ({ hash }: DiscoveryProps) => {
   const { hashes } = useTransactionManager();
 
   const currentHash = hashes[hashes.length - 1];
   const currentTransaction = useTransaction({ hash: currentHash });
-  console.log(
-    currentTransaction.data?.entry_point_selector,
-    currentTransaction
-  );
-  const checkExplore =
-    currentTransaction.data?.entry_point_selector == "explore";
 
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
   const { data, status, isLoading, error } = useWaitForTransaction({
@@ -50,14 +47,13 @@ const Discovery = () => {
 
   return (
     <div className="flex flex-col gap-5 m-auto">
-      {(checkExplore && data?.status != "ACCEPTED_ON_L2") ||
-      (checkExplore && data?.status != "ACCEPTED_ON_L1") ? (
+      {(hash && data?.status != "ACCEPTED_ON_L2") ||
+      (hash && data?.status != "ACCEPTED_ON_L1") ? (
         <>
+          {(data?.status == "RECEIVED" || data?.status == "PENDING") && (
+            <div className="loading-ellipsis">Loading</div>
+          )}
           <div className="flex flex-col">Hash: {currentHash}</div>
-          {data?.status == "RECEIVED" ||
-            (data?.status == "PENDING" && (
-              <div className="loading-ellipsis">Loading</div>
-            ))}
           {error && <div>Error: {JSON.stringify(error)}</div>}
           {data && <div>Status: {data.status}</div>}
         </>

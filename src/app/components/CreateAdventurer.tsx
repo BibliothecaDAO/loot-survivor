@@ -176,10 +176,12 @@ export const CreateAdventurer = ({
     };
   }, [isActive, selectedIndex]);
 
+  const loading = data?.status == "RECEIVED" || data?.status == "PENDING";
+
   return (
     <div className="flex bg-black border">
       <div className="flex flex-row items-center mx-2 text-lg">
-        <div className="flex p-1 flex-col gap-2">
+        <div className="flex p-1 flex-row gap-2">
           <form onSubmit={handleSubmit} className="flex p-1 flex-col gap-2">
             <label>
               Name:
@@ -273,14 +275,12 @@ export const CreateAdventurer = ({
               Submit
             </button>
           </form>
-          <>
+          <div className="flex flex-col">
+            {loading && hash && <div className="loading-ellipsis">Loading</div>}
             {hash && <div className="flex flex-col">Hash: {hash}</div>}
-            {isLoading && hash && (
-              <div className="loading-ellipsis">Loading...</div>
-            )}
-            {error && <div>Error: {JSON.stringify(error)}</div>}
+            {/* {error && <div>Error: {JSON.stringify(error)}</div>} */}
             {data && <div>Status: {data.status}</div>}
-          </>
+          </div>
         </div>
       </div>
     </div>
