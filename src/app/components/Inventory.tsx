@@ -359,16 +359,21 @@ const Inventory: React.FC = () => {
   // }, [selectedIndex]);
 
   return (
-    <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-full p-10 gap-10">
-      <div className="w-[250px] h-[250px] relative border-2 border-white my-auto">
-        <Image
-          src="/MIKE.png"
-          alt="adventurer-image"
-          fill={true}
-          style={{ objectFit: "contain" }}
-        />
+    <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-[480px] overflow-auto p-8 gap-6">
+      <div>
+        <p className="text-2xl text-white capitalize">
+          {formatAdventurer.adventurer?.name}
+        </p>
+        <div className="w-[250px] h-[250px] relative border-2 border-white my-auto">
+          <Image
+            src="/MIKE.png"
+            alt="adventurer-image"
+            fill={true}
+            style={{ objectFit: "contain" }}
+          />
+        </div>
       </div>
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-6">
         <div className="text-xl font-medium text-white">EQUIPPED</div>
         <p className="text-terminal-green">
           WEAPON -{" "}
@@ -418,12 +423,28 @@ const Inventory: React.FC = () => {
             )}
           />
         </p>
+        <p className="text-terminal-green">
+          NECK -{" "}
+          <ItemDisplay
+            item={items.find(
+              (item: any) => item.id == formatAdventurer.adventurer?.neckId
+            )}
+          />
+        </p>
+        <p className="text-terminal-green">
+          RING -{" "}
+          <ItemDisplay
+            item={items.find(
+              (item: any) => item.id == formatAdventurer.adventurer?.ringId
+            )}
+          />
+        </p>
       </div>
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-6">
         <div className="text-xl font-medium text-white">OWNED</div>
         <div className="flex flex-col gap-5 h-[400px] w-[600px] overflow-auto">
           {testItems.map((item: any, index: number) => (
-            <div key={index} className="flex flex-row items-center gap-5">
+            <div key={index} className="flex flex-row items-center gap-5 m-2">
               <ItemDisplay item={item} />
               <Button
                 key={index}

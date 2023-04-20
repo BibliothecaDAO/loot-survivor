@@ -187,7 +187,7 @@ export const CreateAdventurer = ({
                 type="text"
                 name="name"
                 onChange={handleChange}
-                className="bg-terminal-black m-2"
+                className="bg-terminal-black m-2 p-1"
                 onKeyDown={handleKeyDown}
               />
             </label>
@@ -196,7 +196,7 @@ export const CreateAdventurer = ({
               <select
                 name="race"
                 onChange={handleChange}
-                className="bg-terminal-black m-2"
+                className="bg-terminal-black m-2 p-1"
               >
                 <option value="">Select a race</option>
                 <option value="Elf">Elf</option>
@@ -219,7 +219,7 @@ export const CreateAdventurer = ({
                 min="1"
                 max="8000"
                 onChange={handleChange}
-                className="bg-terminal-black m-2"
+                className="bg-terminal-black m-2 p-1"
               />
             </label>
             <label>
@@ -227,7 +227,7 @@ export const CreateAdventurer = ({
               <select
                 name="order"
                 onChange={handleChange}
-                className="bg-terminal-black m-2"
+                className="bg-terminal-black m-2 p-1"
               >
                 <option value="">Select an order</option>
                 <optgroup label="Order of Light">
@@ -257,7 +257,7 @@ export const CreateAdventurer = ({
               <select
                 name="startingWeapon"
                 onChange={handleChange}
-                className="bg-terminal-black m-2"
+                className="bg-terminal-black m-2 p-1"
               >
                 <option value="">Select a weapon</option>
                 <option value="Wand">Wand</option>

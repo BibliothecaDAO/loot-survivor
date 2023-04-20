@@ -52,6 +52,7 @@ export interface Adventurer {
 
 export interface Item {
     id?: number; // item id 1 - 100
+    item?: string; // name
     slot?: number; // weapon, head, chest, etc
     type?: number; // weapon.blade, armor.metal, jewelry.ring
     material?: number; // the material of the item
@@ -75,6 +76,7 @@ export interface Item {
 
 export interface MarketItem {
     id?: number; // item id 1 - 100
+    item?: string; // name
     slot?: number; // weapon, head, chest, etc
     type?: number; // weapon.blade, armor.metal, jewelry.ring
     material?: number; // the material of the item
@@ -185,6 +187,7 @@ export const NullDiscovery = {
 
 export const NullItem = {
     id: 0, // item id 1 - 100
+    item: "",
     slot: 0, // weapon, head, chest, etc
     type: 0, // weapon.blade, armor.metal, jewelry.ring
     material: 0, // the material of the item

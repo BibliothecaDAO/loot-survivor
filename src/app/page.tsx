@@ -12,13 +12,16 @@ import { displayAddress } from "./lib/utils";
 import { useAdventurer } from "./context/AdventurerProvider";
 import { NullAdventurerProps } from "./types";
 import Inventory from "./components/Inventory";
-import TransactionCart from "./components/TransactionCart";
+import TransactionHistory from "./components/TransactionHistory";
 import Upgrade from "./components/Upgrade";
+import { useTransactionCart } from "./context/TransactionCartProvider";
+import TransactionCart from "./components/TransactionCart";
 
 export default function Home() {
   const { connect, disconnect, connectors } = useConnectors();
   const { account } = useAccount();
   const { adventurer } = useAdventurer();
+  const { calls } = useTransactionCart();
 
   const adventurerStats = adventurer ?? NullAdventurerProps;
 
@@ -77,7 +80,8 @@ export default function Home() {
       <div className="flex justify-between w-full">
         <h1>Loot Survivors</h1>
         <div className="flex flex-row gap-2 self-end">
-          {account && <TransactionCart />}
+          {account && calls.length > 0 && <TransactionCart />}
+          {account && <TransactionHistory />}
           <ul className="flex flex-row gap-2">
             {account ? (
               <Button onClick={() => disconnect()}>
@@ -107,9 +111,6 @@ export default function Home() {
               </p>
               <p className="text-lg ">
                 GOLD: {adventurerStats.adventurer?.gold}
-              </p>
-              <p className="text-lg">
-                BEAST: {adventurerStats.adventurer?.beast}
               </p>
               <p className="text-lg">
                 LEVEL: {adventurerStats.adventurer?.level}

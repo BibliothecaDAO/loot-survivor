@@ -75,7 +75,7 @@ export default function Actions() {
   return (
     <div className="flex flex-row mt-5">
       {!loading ? (
-        <div className="w-1/4">
+        <div className="w-1/3">
           <Info adventurer={adventurer?.adventurer} />
         </div>
       ) : null}
@@ -87,7 +87,7 @@ export default function Actions() {
         />
       </div>
 
-      <div className="flex flex-col w-1/2 bg-terminal-black m-2 p-2">
+      <div className="flex flex-col w-1/3 bg-terminal-black m-2 p-2">
         {selected == "explore" && <Discovery />}
         {selected == "purchase health" && <PurchaseHealth />}
       </div>

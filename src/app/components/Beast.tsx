@@ -124,7 +124,7 @@ export default function Beast() {
         <>
           {hashes && <div className="flex flex-col">Hash: {hashes[-1]}</div>}
           {isLoading && hashes && (
-            <div className="loading-ellipsis">Loading...</div>
+            <div className="loading-ellipsis">Loading</div>
           )}
           {error && <div>Error: {JSON.stringify(error)}</div>}
           {data && <div>Status: {data.status}</div>}
