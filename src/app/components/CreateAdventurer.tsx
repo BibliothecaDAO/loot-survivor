@@ -1,6 +1,6 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useWriteContract } from "../hooks/useWriteContract";
+import { useTransactionCart } from "../context/TransactionCartProvider";
 import { stringToFelt } from "../lib/utils";
 import {
   useAccount,
@@ -50,7 +50,7 @@ export const CreateAdventurer = ({
       "0x12e0839c07c8fac67dd47a88e38317e0a56180faacf5e81f78d09a4c6338021",
   });
 
-  const { writeAsync, addToCalls, calls } = useWriteContract();
+  const { writeAsync, addToCalls, calls } = useTransactionCart();
   const { adventurerContract, lordsContract } = useContracts();
   const [hash, setHash] = useState<string | undefined>(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -107,7 +107,7 @@ export const CreateAdventurer = ({
     };
     addToCalls(mintAdventurer);
     console.log(calls);
-    await writeAsync().then((tx) => {
+    await writeAsync().then((tx: any) => {
       setHash(tx.transaction_hash);
       addTransaction({
         hash: tx.transaction_hash,

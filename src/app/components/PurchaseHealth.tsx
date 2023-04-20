@@ -3,7 +3,7 @@ import HealthSlider from "./HealthSlider";
 import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
 import { useAdventurer } from "../context/AdventurerProvider";
-import { useWriteContract } from "../hooks/useWriteContract";
+import { useTransactionCart } from "../context/TransactionCartProvider";
 import { useTransactionManager } from "@starknet-react/core";
 import { NullAdventurer } from "../types";
 
@@ -11,7 +11,7 @@ const PurchaseHealth = () => {
   const [healthAmount, setHealthAmount] = useState(1);
   const { adventurerContract } = useContracts();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
-  const { writeAsync, addToCalls } = useWriteContract();
+  const { writeAsync, addToCalls } = useTransactionCart();
   const { addTransaction } = useTransactionManager();
 
   const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
@@ -39,7 +39,7 @@ const PurchaseHealth = () => {
         disabled={hasBalance}
         onClick={async () => {
           addToCalls(purchaseHealthTx);
-          await writeAsync().then((tx) => {
+          await writeAsync().then((tx: any) => {
             addTransaction({
               hash: tx.transaction_hash,
               metadata: { test: true },
