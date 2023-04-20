@@ -2,13 +2,14 @@ import { MarketItem } from "../types";
 import { useState, useEffect, useRef } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { useWriteContract } from "../hooks/useWriteContract";
+import { useTransactionCart } from "../context/TransactionCartProvider";
 import {
   useAccount,
   useWaitForTransaction,
   useTransactionManager,
   useTransactions,
 } from "@starknet-react/core";
-import { BidButton } from "./Bid";
+import { BidBox } from "./Bid";
 import { Button } from "./Button";
 import HorizontalKeyboardControl from "./HorizontalMenu";
 import { useQuery } from "@apollo/client";
@@ -18,21 +19,21 @@ import { NullAdventurerProps } from "../types";
 
 const Marketplace: React.FC = () => {
   const { account } = useAccount();
-  const formatAddress = account ? account.address : "0x0";
-  const { writeAsync, addToCalls, calls } = useWriteContract();
+  const { adventurer } = useAdventurer();
+  const { writeAsync, addToCalls, calls } = useTransactionCart();
   const { lootMarketArcadeContract } = useContracts();
-  const [hash, setHash] = useState<string | undefined>(undefined);
   const { hashes, addTransaction } = useTransactionManager();
-  const { adventurer, handleUpdateAdventurer } = useAdventurer();
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const transactions = useTransactions({ hashes });
-  const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
+  const [hash, setHash] = useState<string | undefined>(undefined);
+  const [showBidBox, setShowBidBox] = useState(-1);
 
   const { data, isLoading, error } = useWaitForTransaction({
     hash,
     watch: true,
   });
+
+  const formatAddress = account ? account.address : "0x0";
+  const transactions = useTransactions({ hashes });
+  const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
 
   const {
     loading: marketLatestItemsLoading,
@@ -47,16 +48,21 @@ const Marketplace: React.FC = () => {
     ? marketLatestItemsData.items
     : [];
 
-  console.log(marketLatestItems);
-
   const mintDailyItems = {
     contractAddress: lootMarketArcadeContract?.address,
     selector: "mint_daily_items",
     calldata: [],
   };
 
+  const bidExists = (marketId: number) => {
+    return calls.some(
+      (call: any) =>
+        call.entrypoint == "bid_on_item" && call.calldata[2] == marketId
+    );
+  };
+
   const headings = [
-    "Id",
+    "Market Id",
     "Slot",
     "Type",
     "Material",
@@ -78,11 +84,11 @@ const Marketplace: React.FC = () => {
 
   return (
     <div className="w-full">
-      <div className="w-full">
+      <div className="flex flex-row m-1">
         <Button
-          onClick={() => {
+          onClick={async () => {
             addToCalls(mintDailyItems);
-            writeAsync().then((tx) => {
+            await writeAsync().then((tx: any) => {
               setHash(tx.transaction_hash);
               addTransaction({
                 hash: tx.transaction_hash,
@@ -96,40 +102,64 @@ const Marketplace: React.FC = () => {
         >
           Mint daily items
         </Button>
-        <table className="w-full border-terminal-green border m-2">
+      </div>
+      <div className="h-[430px] overflow-auto w-full">
+        {marketLatestItemsLoading && (
+          <p className="text-xl loading-ellipsis">LOADING...GETTING DATA</p>
+        )}
+        {marketLatestItemsError && (
+          <p className="text-xl"> ERROR... {marketLatestItemsError.message}</p>
+        )}
+        <table className="w-full border-terminal-green border">
           <thead>
-            <tr className="p-3 border-b border-terminal-green">
+            <tr className="sticky top-0 border border-terminal-green bg-terminal-black">
               {headings.map((heading, index) => (
                 <th key={index}>{heading}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {marketLatestItems.map((item: any, index: number) => (
-              <tr key={index}>
-                <td className="p-2 text-center">{item.id}</td>
-                <td className="p-2 text-center">{item.slot}</td>
-                <td className="p-2 text-center">{item.type}</td>
-                <td className="p-2 text-center">{item.material}</td>
-                <td className="p-2 text-center">{item.rank}</td>
-                <td className="p-2 text-center">{item.prefix_1}</td>
-                <td className="p-2 text-center">{item.prefix_2}</td>
-                <td className="p-2 text-center">{item.suffix}</td>
-                <td className="p-2 text-center">{item.greatness}</td>
-                <td className="p-2 text-center">{item.createdBlock}</td>
-                <td className="p-2 text-center">{item.xp}</td>
-                <td className="p-2 text-center">{item.adventurer}</td>
-                <td className="p-2 text-center">{item.bidder}</td>
-                <td className="p-2 text-center">{item.price}</td>
-                <td className="p-2 text-center">{item.expiry}</td>
-                <td className="p-2 text-center">{item.status}</td>
-                <td className="p-2 text-center">{item.claimedTime}</td>
-                <td className="p-2 text-center">
-                  <BidButton />
-                  <Button>CLAIM</Button>
-                </td>
-              </tr>
-            ))}
+            {!marketLatestItemsLoading &&
+              !marketLatestItemsError &&
+              marketLatestItems.map((item: any, index: number) => (
+                <tr
+                  key={index}
+                  className="border-b border-terminal-green hover:bg-terminal-black"
+                >
+                  <td className=" text-center">{item.marketid}</td>
+                  <td className=" text-center">{item.slot}</td>
+                  <td className=" text-center">{item.type}</td>
+                  <td className=" text-center">{item.material}</td>
+                  <td className=" text-center">{item.rank}</td>
+                  <td className=" text-center">{item.prefix_1}</td>
+                  <td className=" text-center">{item.prefix_2}</td>
+                  <td className=" text-center">{item.suffix}</td>
+                  <td className=" text-center">{item.greatness}</td>
+                  <td className=" text-center">{item.createdBlock}</td>
+                  <td className=" text-center">{item.xp}</td>
+                  <td className=" text-center">{item.adventurer}</td>
+                  <td className=" text-center">{item.bidder}</td>
+                  <td className=" text-center">{item.price}</td>
+                  <td className=" text-center">{item.expiry}</td>
+                  <td className=" text-center">{item.status}</td>
+                  <td className=" text-center">{item.claimedTime}</td>
+                  <td className=" text-center">
+                    <Button
+                      onClick={() => setShowBidBox(index)}
+                      disabled={bidExists(item.marketId)}
+                      className={bidExists(item.marketId) ? "bg-white" : ""}
+                    >
+                      Bid
+                    </Button>
+                    <BidBox
+                      showBidBox={showBidBox == index}
+                      close={() => setShowBidBox(-1)}
+                      marketId={item.marketId}
+                    />
+                    <Button>CLAIM</Button>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

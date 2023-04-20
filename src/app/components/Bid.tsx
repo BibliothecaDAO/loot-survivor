@@ -1,15 +1,48 @@
 import { useState } from "react";
 import { Button } from "./Button";
+import { useContracts } from "../hooks/useContracts";
+import { useWriteContract } from "../hooks/useWriteContract";
+import { useTransactionCart } from "../context/TransactionCartProvider";
+import {
+  useAccount,
+  useWaitForTransaction,
+  useTransactionManager,
+  useTransactions,
+} from "@starknet-react/core";
+import { useAdventurer } from "../context/AdventurerProvider";
+import { NullAdventurerProps } from "../types";
 
-export function BidButton() {
-  const [showBidBox, setShowBidBox] = useState(false);
+interface BidBoxProps {
+  showBidBox: Boolean;
+  close: () => void;
+  marketId: number;
+}
+
+export function BidBox({ showBidBox, close, marketId }: BidBoxProps) {
+  const { account } = useAccount();
+  const { adventurer } = useAdventurer();
+  const { writeAsync, addToCalls, calls } = useTransactionCart();
+  const { lootMarketArcadeContract } = useContracts();
+  const { hashes, addTransaction } = useTransactionManager();
+  const transactions = useTransactions({ hashes });
   const [bidPrice, setBidPrice] = useState<number | undefined>(undefined);
 
-  const handleBid = () => {
-    if (bidPrice !== undefined && bidPrice >= 3) {
-      // Place bid logic
-      console.log(`Bid placed for ${bidPrice} gold`);
-      setShowBidBox(false);
+  const formatAddress = account ? account.address : "0x0";
+  const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
+
+  const handleBid = (marketId: number) => {
+    if (bidPrice != undefined && bidPrice >= 3) {
+      if (lootMarketArcadeContract && formatAddress) {
+        const BidTx = {
+          contractAddress: lootMarketArcadeContract?.address,
+          selector: "bid_on_item",
+          calldata: [formatAdventurer.adventurer?.id, "0", marketId, "0"],
+        };
+        addToCalls(BidTx);
+        // Place bid logic
+        console.log(`Bid placed for ${bidPrice} gold`);
+        close();
+      }
     } else {
       alert("Bid price must be at least 3 gold");
     }
@@ -17,21 +50,20 @@ export function BidButton() {
 
   return (
     <>
-      <Button onClick={() => setShowBidBox(true)}>Bid</Button>
       {showBidBox && (
-        <div className="absolute right-0 mt-2 p-2 bg-white border border-gray-300 rounded-md shadow-lg">
+        <div className="absolute right-0 mt-2 p-2 bg-black border border-terminal-green rounded-md shadow-lg">
           <div className="flex items-center justify-between mb-2">
-            <label htmlFor="bid-price">Bid price (minimum 3 gold)</label>
-            <Button onClick={() => setShowBidBox(false)}>Close</Button>
+            <label>Bid price (minimum 3 gold)</label>
+            <Button onClick={() => close()}>Close</Button>
           </div>
           <input
-            id="bid-price"
+            id="bid"
             type="number"
             min="3"
             onChange={(e) => setBidPrice(parseInt(e.target.value, 10))}
-            className="border border-gray-300 rounded-md px-3 py-2"
+            className="border border-terminal-black rounded-md px-3 py-2"
           />
-          <Button onClick={handleBid} className="mt-2">
+          <Button onClick={() => handleBid(marketId)} className="mt-2">
             Place Bid
           </Button>
         </div>

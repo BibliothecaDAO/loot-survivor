@@ -238,7 +238,7 @@ const getItemsByTokenId = gql`
 const getLatestMarketItems = gql`
   query get_latest_market_items {
     items(
-      where: { marketId: { gt: "0" } }
+      where: { marketId: { gt: 0 } }
       limit: 20
       orderBy: { createdBlock: { desc: true } }
     ) {

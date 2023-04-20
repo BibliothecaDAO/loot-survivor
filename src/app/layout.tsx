@@ -4,6 +4,7 @@ import { InjectedConnector, StarknetConfig } from "@starknet-react/core";
 import CartridgeConnector from "@cartridge/connector";
 import { useMemo } from "react";
 import { AdventurerProvider } from "./context/AdventurerProvider";
+import { TransactionCartProvider } from "./context/TransactionCartProvider";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 
 // export const metadata = {
@@ -41,7 +42,9 @@ export default function RootLayout({
       <body className="bg-black text-terminal-green">
         <ApolloProvider client={client}>
           <StarknetConfig connectors={connectors} autoConnect>
-            <AdventurerProvider>{children}</AdventurerProvider>
+            <TransactionCartProvider>
+              <AdventurerProvider>{children}</AdventurerProvider>
+            </TransactionCartProvider>
           </StarknetConfig>
         </ApolloProvider>
       </body>
