@@ -7,7 +7,11 @@ import VerticalKeyboardControl from "./VerticalMenu";
 import { useQuery } from "@apollo/client";
 import { getItemsByAdventurer } from "../hooks/graphql/queries";
 
-export default function Info(adventurer: any) {
+interface InfoProps {
+  adventurer: any;
+}
+
+export default function Info({ adventurer }: InfoProps) {
   const [loading, setLoading] = useState(false);
 
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
@@ -25,8 +29,6 @@ export default function Info(adventurer: any) {
   });
 
   const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
-
-  console.log(items, itemsByAdventurerError);
 
   const ItemDisplay = (item: any) => {
     const formatItem = item.item;

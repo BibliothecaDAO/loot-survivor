@@ -49,7 +49,6 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
         break;
     }
   };
-  console.log(isActive);
 
   useEffect(() => {
     if (isActive) {

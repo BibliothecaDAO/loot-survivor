@@ -107,10 +107,26 @@ const FormComponent: React.FC = () => {
     });
   };
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      const form = event.currentTarget.form;
+      if (!form) return;
+
+      const inputs = Array.from(form.querySelectorAll("input, select"));
+      const currentIndex = inputs.indexOf(event.currentTarget);
+      const newIndex =
+        event.key === "ArrowDown"
+          ? Math.min(currentIndex + 1, inputs.length - 1)
+          : Math.max(currentIndex - 1, 0);
+      (inputs[newIndex] as HTMLElement).focus();
+      event.preventDefault();
+    }
+  };
+
   return (
     <div className="flex flex-row items-center mx-2 text-lg">
-      <div className="flex p-1 flex-col">
-        <form onSubmit={handleSubmit}>
+      <div className="flex p-1 flex-col gap-2">
+        <form onSubmit={handleSubmit} className="flex p-1 flex-col gap-2">
           <label>
             Name:
             <input
@@ -118,9 +134,9 @@ const FormComponent: React.FC = () => {
               name="name"
               onChange={handleChange}
               className="bg-terminal-black m-2"
+              onKeyDown={handleKeyDown}
             />
           </label>
-          <br />
           <label>
             Race:
             <select
@@ -141,7 +157,6 @@ const FormComponent: React.FC = () => {
               <option value="Frog">Frog</option>
             </select>
           </label>
-          <br />
           <label>
             Home Realm ID:
             <input
@@ -153,7 +168,6 @@ const FormComponent: React.FC = () => {
               className="bg-terminal-black m-2"
             />
           </label>
-          <br />
           <label>
             Order of Divinity:
             <select
@@ -184,7 +198,6 @@ const FormComponent: React.FC = () => {
               </optgroup>
             </select>
           </label>
-          <br />
           <label>
             Starting Weapon:
             <select
@@ -199,7 +212,6 @@ const FormComponent: React.FC = () => {
               <option value="Club">Club</option>
             </select>
           </label>
-          <br />
           <button
             type="submit"
             className="bg-terminal-black border border-terminal-green m-2 p-2 hover:bg-terminal-green/80 hover:animate-pulse hover:text-black"
@@ -207,7 +219,6 @@ const FormComponent: React.FC = () => {
             Submit
           </button>
         </form>
-
         <>
           {hash && <div className="flex flex-col">Hash: {hash}</div>}
           {isLoading && hash && (

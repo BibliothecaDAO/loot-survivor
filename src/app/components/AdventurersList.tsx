@@ -75,8 +75,6 @@ export const AdventurersList = ({
     };
   }, [isActive, selectedIndex]);
 
-  console.log(isActive);
-
   return (
     <>
       {adventurers.length > 0 ? (

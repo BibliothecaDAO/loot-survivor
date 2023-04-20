@@ -71,7 +71,7 @@ export default function Actions() {
     <div className="flex flex-row mt-5">
       {!loading ? (
         <div className="w-1/4">
-          <Info />
+          <Info adventurer={adventurer?.adventurer} />
         </div>
       ) : null}
       <div className="w-1/4 my-auto">

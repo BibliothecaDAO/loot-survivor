@@ -13,6 +13,7 @@ import { useAdventurer } from "./context/AdventurerProvider";
 import { NullAdventurerProps } from "./types";
 import Inventory from "./components/Inventory";
 import TransactionCart from "./components/TransactionCart";
+import Upgrade from "./components/Upgrade";
 
 export default function Home() {
   const { connect, disconnect, connectors } = useConnectors();
@@ -21,7 +22,7 @@ export default function Home() {
 
   const adventurerStats = adventurer ?? NullAdventurerProps;
 
-  const upgrade = false;
+  const upgrade = true;
 
   const [menu, setMenu] = useState([
     {
@@ -135,11 +136,7 @@ export default function Home() {
               {selected === "beast" && <Beast />}
             </>
           ) : (
-            <div className="flex w-full mt-[200px]">
-              <p className="mx-auto items-center text-[50px] animate-pulse">
-                Please select upgrade!
-              </p>
-            </div>
+            <Upgrade />
           )}
         </div>
       ) : (

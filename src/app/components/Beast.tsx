@@ -121,7 +121,7 @@ export default function Beast() {
     <div className="flex flex-row mt-5">
       {!loading ? (
         <div className="w-1/3">
-          <Info />
+          <Info adventurer={adventurer?.adventurer} />
         </div>
       ) : null}
       <div className="flex flex-col w-1/3">
@@ -167,7 +167,7 @@ export default function Beast() {
             </div>
           </>
         ) : (
-          <p className="text-lg text-terminal-green mx-auto">
+          <p className="text-lg text-terminal-green m-auto">
             BEAST NOT YET DISCOVERED
           </p>
         )}

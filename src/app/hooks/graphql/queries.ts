@@ -263,30 +263,34 @@ const getItemsByTokenIds = gql`
 
 const getMarketItems = gql`
   query get_market_items {
-    items(where: {marketId: {gt: "0"}} limit: 20 orderBy: {createdBlock: {desc: true}}) {
+    items(
+      where: { marketId: { gt: "0" } }
+      limit: 20
+      orderBy: { createdBlock: { desc: true } }
+    ) {
       bag
-        bidder
-        claimedTime
-        createdBlock
-        equippedAdventurerId
-        expiry
-        greatness
-        id
-        item
-        lastUpdated
-        marketId
-        material
-        owner
-        ownerAdventurerId
-        prefix1
-        prefix2
-        price
-        rank
-        slot
-        status
-        suffix
-        type
-        xp
+      bidder
+      claimedTime
+      createdBlock
+      equippedAdventurerId
+      expiry
+      greatness
+      id
+      item
+      lastUpdated
+      marketId
+      material
+      owner
+      ownerAdventurerId
+      prefix1
+      prefix2
+      price
+      rank
+      slot
+      status
+      suffix
+      type
+      xp
     }
   }
 `;
@@ -294,6 +298,36 @@ const getMarketItems = gql`
 const getItemsByAdventurer = gql`
   query get_items_by_adventurer($adventurer: FeltValue) {
     items(where: { ownerAdventurerId: { eq: $adventurer } }) {
+      bag
+      bidder
+      claimedTime
+      createdBlock
+      equippedAdventurerId
+      expiry
+      greatness
+      id
+      item
+      lastUpdated
+      marketId
+      material
+      owner
+      ownerAdventurerId
+      prefix1
+      prefix2
+      price
+      rank
+      slot
+      status
+      suffix
+      type
+      xp
+    }
+  }
+`;
+
+const getItemsByOwner = gql`
+  query get_items_by_owner($owner: HexValue) {
+    items(where: { owner: { eq: $owner } }) {
       bag
       bidder
       claimedTime
