@@ -22,7 +22,7 @@ export default function Home() {
 
   const adventurerStats = adventurer ?? NullAdventurerProps;
 
-  const upgrade = true;
+  const upgrade = false;
 
   const [menu, setMenu] = useState([
     {

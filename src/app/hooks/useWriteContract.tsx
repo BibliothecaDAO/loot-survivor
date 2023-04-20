@@ -3,7 +3,7 @@ import {
   useContract,
   useContractWrite,
 } from "@starknet-react/core";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 
 export const useWriteContract = () => {
   // const { address } = useAccount();
@@ -20,16 +20,6 @@ export const useWriteContract = () => {
 
     setCalls((calls: any) => [...calls, tx]);
   };
-
-  // useMemo(() => {
-  //   const tx = {
-  //     contractAddress: contractAddress,
-  //     entrypoint: selector,
-  //     calldata: calldata,
-  //   };
-
-  //   setCalls((calls: any) => [...calls, tx]);
-  // }, [address]);
 
   const { writeAsync } = useContractWrite({ calls });
 

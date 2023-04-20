@@ -231,40 +231,40 @@ const getItemsByTokenId = gql`
   }
 `;
 
-const getItemsByOwner = gql`
-  query get_items($ids: [FeltValue]) {
-    items(where: { id: { In: $ids } }) {
-      bag
-      bidder
-      claimedTime
-      createdBlock
-      equippedAdventurerId
-      expiry
-      greatness
-      id
-      item
-      lastUpdated
-      marketId
-      material
-      owner
-      ownerAdventurerId
-      prefix1
-      prefix2
-      price
-      rank
-      slot
-      status
-      suffix
-      type
-      xp
-    }
-  }
-`;
+// const getItemsByOwner = gql`
+//   query get_items($ids: [FeltValue]) {
+//     items(where: { id: { In: $ids } }) {
+//       bag
+//       bidder
+//       claimedTime
+//       createdBlock
+//       equippedAdventurerId
+//       expiry
+//       greatness
+//       id
+//       item
+//       lastUpdated
+//       marketId
+//       material
+//       owner
+//       ownerAdventurerId
+//       prefix1
+//       prefix2
+//       price
+//       rank
+//       slot
+//       status
+//       suffix
+//       type
+//       xp
+//     }
+//   }
+// `;
 
 const getLatestMarketItems = gql`
   query get_latest_market_items {
     items(
-      where: { marketId: { gt: "0" } }
+      where: { marketId: { gt: 0 } }
       limit: 20
       orderBy: { createdBlock: { desc: true } }
     ) {
