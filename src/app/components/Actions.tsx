@@ -47,8 +47,6 @@ export default function Actions() {
       action: async () => {
         {
           addToCalls(explore);
-          console.log(explore);
-          console.log(calls);
           await writeAsync().then((tx) => {
             addTransaction({
               hash: tx.transaction_hash,
@@ -69,17 +67,17 @@ export default function Actions() {
   return (
     <div className="flex flex-row mt-5">
       {!loading ? (
-        <div className="w-1/4">
+        <div className="w-1/3">
           <Info />
         </div>
       ) : null}
-      <div className="w-1/4 my-auto">
+      <div className="w-1/3 my-auto">
         <KeyboardControl buttonsData={buttonsData} />
       </div>
       {/* <p>Health Purchase</p>
         <HealthSlider onPurchase={handlePurchase} /> */}
 
-      <div className="flex flex-col w-1/2 bg-terminal-black m-2 p-2">
+      <div className="flex flex-col w-1/3 bg-terminal-black m-2 p-2">
         <>
           {hash && <div className="flex flex-col">Hash: {hash}</div>}
           {isLoading && hash && (
