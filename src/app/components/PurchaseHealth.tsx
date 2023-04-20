@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HealthSlider from "./HealthSlider";
 import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
@@ -7,7 +7,12 @@ import { useWriteContract } from "../hooks/useWriteContract";
 import { useTransactionManager } from "@starknet-react/core";
 import { NullAdventurer } from "../types";
 
-const PurchaseHealth = () => {
+interface PurchaseHealthProps {
+  isActive: boolean;
+  onEscape: () => void;
+}
+
+const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
   const [healthAmount, setHealthAmount] = useState(1);
   const { adventurerContract } = useContracts();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
@@ -25,6 +30,48 @@ const PurchaseHealth = () => {
     formatAdventurer?.gold && formatAdventurer?.gold <= purchaseGoldAmount
       ? true
       : false;
+
+  const handlePurchaseHealth = async () => {
+    addToCalls(purchaseHealthTx);
+    await writeAsync().then((tx) => {
+      addTransaction({
+        hash: tx.transaction_hash,
+        metadata: { test: true },
+      });
+    });
+  };
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    switch (event.key) {
+      case "ArrowRight":
+        setHealthAmount((prev) => {
+          const newAmount = Math.min(prev + 1, 10);
+          return newAmount;
+        });
+        break;
+      case "ArrowLeft":
+        setHealthAmount((prev) => {
+          const newAmount = Math.max(prev - 1, 1);
+          return newAmount;
+        });
+        break;
+      case "Enter":
+        handlePurchaseHealth();
+        break;
+    }
+  };
+
+  useEffect(() => {
+    if (isActive) {
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      window.removeEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isActive, healthAmount]);
+
   return (
     <div className="flex flex-col m-auto gap-5">
       <HealthSlider
@@ -38,13 +85,7 @@ const PurchaseHealth = () => {
       <Button
         disabled={hasBalance}
         onClick={async () => {
-          addToCalls(purchaseHealthTx);
-          await writeAsync().then((tx) => {
-            addTransaction({
-              hash: tx.transaction_hash,
-              metadata: { test: true },
-            });
-          });
+          handlePurchaseHealth();
         }}
       >
         Purchase Health

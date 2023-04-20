@@ -24,7 +24,7 @@ export default function Actions() {
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
   const { hashes, addTransaction } = useTransactionManager();
   const [selected, setSelected] = useState<String>("");
-  const [potionNumber, setPotionNumber] = useState(0);
+  const [activeMenu, setActiveMenu] = useState(0);
 
   const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
 
@@ -34,10 +34,6 @@ export default function Actions() {
     calldata: [adventurer?.adventurer?.id, "0"],
   };
 
-  const handlePurchase = (health: number) => {
-    console.log(`Purchased ${health} health.`);
-  };
-
   const buttonsData = [
     {
       id: 1,
@@ -45,22 +41,13 @@ export default function Actions() {
       value: "explore",
       action: async () => {
         {
-          const tx = await adventurerContract?.invoke("explore", [
-            [adventurer?.adventurer?.id, "0"],
-          ]);
-          if (tx) {
+          addToCalls(exploreTx);
+          await writeAsync().then((tx) => {
             addTransaction({
-              hash: tx?.transaction_hash,
+              hash: tx.transaction_hash,
               metadata: { method: "explore" },
             });
-          }
-          // addToCalls(exploreTx);
-          // await writeAsync().then((tx) => {
-          // addTransaction({
-          //   hash: tx.transaction_hash,
-          //   metadata: { method: "explore" },
-          // });
-          // });
+          });
         }
       },
     },
@@ -68,7 +55,7 @@ export default function Actions() {
       id: 2,
       label: "Purchase Health",
       value: "purchase health",
-      action: async () => await writeAsync(),
+      action: () => setActiveMenu(1),
     },
   ];
 
@@ -89,7 +76,12 @@ export default function Actions() {
 
       <div className="flex flex-col w-1/2 bg-terminal-black m-2 p-2">
         {selected == "explore" && <Discovery />}
-        {selected == "purchase health" && <PurchaseHealth />}
+        {selected == "purchase health" && (
+          <PurchaseHealth
+            isActive={activeMenu == 1}
+            onEscape={() => setActiveMenu(0)}
+          />
+        )}
       </div>
     </div>
   );

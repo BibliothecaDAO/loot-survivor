@@ -170,6 +170,13 @@ export default function Beast() {
             BEAST NOT YET DISCOVERED
           </p>
         )}
+        <div className="flex flex-col gap-5 items-center">
+          <p>Recent Encounters:</p>
+          <div className="flex flex-col gap-2">
+            <p>Attacked Pheonix for 7 damage</p>
+            <p>Attacked by Pheonix taking 5 damage</p>
+          </div>
+        </div>
       </div>
     </div>
   );

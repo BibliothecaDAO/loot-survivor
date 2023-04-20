@@ -87,8 +87,12 @@ export const AdventurersList = ({
               <Button
                 key={buttonData.id}
                 ref={(ref) => (buttonRefs.current[index] = ref)}
-                className={selectedIndex === index ? "animate-pulse" : ""}
-                variant={selectedIndex === index ? "default" : "outline"}
+                className={
+                  selectedIndex === index && isActive ? "animate-pulse" : ""
+                }
+                variant={
+                  selectedIndex === index && isActive ? "default" : "outline"
+                }
                 onClick={() => {
                   buttonData.action();
                   setSelectedIndex(index);
