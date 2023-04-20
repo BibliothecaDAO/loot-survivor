@@ -16,12 +16,12 @@ const TransactionCart = () => {
     <>
       <button
         onClick={toggleDropdown}
-        className="flex p-2 bg-black border border-terminal-green relative"
+        className="flex p-2 bg-black border border-terminal-greenrelative"
       >
         {isOpen ? "Hide Cart" : "Show Cart"}
       </button>
       {isOpen ? (
-        <div className="absolute right-0 top-10 z-10 w-96 h-96 p-2 bg-terminal-black border border-terminal-green">
+        <div className="absolute right-0 top-10 z-10 w-96 h-96 p-4 m-2 bg-terminal-black border border-terminal-green">
           <h1>TRANSACTIONS</h1>
           <ul>
             {calls.map((call, i) => (

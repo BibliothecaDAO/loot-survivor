@@ -31,7 +31,7 @@ const TransactionHistory = () => {
         onClick={toggleDropdown}
         className="flex p-2 bg-black border border-terminal-green relative"
       >
-        {isOpen ? "Hide Transactions" : "Show Transactions"}
+        {isOpen ? "Hide Ledger" : "Show Ledger"}
         {/* {hasActiveTransactions && (
           <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
             1
@@ -39,8 +39,8 @@ const TransactionHistory = () => {
       </button>
       {isOpen ? (
         hasTransactions ? (
-          <div className="absolute right-0 top-10 z-10 w-96 h-96 p-2 bg-terminal-black border border-terminal-green">
-            <h1>TRANSACTIONS</h1>
+          <div className="absolute right-0 top-10 z-10 w-96 h-96 p-2 bg-terminal-black border border-terminal-green focus:ring-offset-terminal-green">
+            <h1>LEDGER</h1>
             <ul>
               {transactions.map(({ data, status }, i) => (
                 <li key={i}>
@@ -54,7 +54,7 @@ const TransactionHistory = () => {
                         <div className="loading-ellipsis">Loading</div>
                       )}
                       {error && <div>Error: {JSON.stringify(error)}</div>}
-                      {data && <div>Status: {status}</div>}
+                      {data && <div>Status: </div>}
                     </>
                   </div>
                 </li>

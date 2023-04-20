@@ -83,7 +83,8 @@ export default function Home() {
           <div className="flex justify-between w-full">
             <h1>Loot Survivors</h1>
             <div className="flex flex-row gap-2 self-end">
-              {account && <TransactionCart />}
+              {account && calls.length > 0 && <TransactionCart />}
+              {account && <TransactionHistory />}
               <ul className="flex flex-row gap-2">
                 {account ? (
                   <Button onClick={() => disconnect()}>

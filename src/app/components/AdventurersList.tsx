@@ -88,7 +88,7 @@ export const AdventurersList = ({
                   selectedIndex === index && isActive ? "animate-pulse" : ""
                 }
                 variant={
-                  selectedIndex === index && isActive ? "default" : "outline"
+                  selectedIndex === index && isActive ? "default" : "ghost"
                 }
                 onClick={() => {
                   buttonData.action();
