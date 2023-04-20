@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useWriteContract } from "../hooks/useWriteContract";
+import { useTransactionCart } from "../context/TransactionCartProvider";
 import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import {
   useAccount,
@@ -24,7 +24,7 @@ import { padAddress } from "../lib/utils";
 const Inventory: React.FC = () => {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";
-  const { writeAsync, addToCalls, calls } = useWriteContract();
+  const { writeAsync, addToCalls, calls } = useTransactionCart();
   const { adventurerContract } = useContracts();
   const [hash, setHash] = useState<string | undefined>(undefined);
   const { hashes, addTransaction } = useTransactionManager();

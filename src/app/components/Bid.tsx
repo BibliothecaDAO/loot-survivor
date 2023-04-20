@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
-import { useWriteContract } from "../hooks/useWriteContract";
 import { useTransactionCart } from "../context/TransactionCartProvider";
 import {
   useAccount,
@@ -36,7 +35,13 @@ export function BidBox({ showBidBox, close, marketId }: BidBoxProps) {
         const BidTx = {
           contractAddress: lootMarketArcadeContract?.address,
           selector: "bid_on_item",
-          calldata: [formatAdventurer.adventurer?.id, "0", marketId, "0"],
+          calldata: [
+            marketId,
+            "0",
+            formatAdventurer.adventurer?.id,
+            "0",
+            bidPrice,
+          ],
         };
         addToCalls(BidTx);
         // Place bid logic

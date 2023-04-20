@@ -1,7 +1,6 @@
 import { MarketItem } from "../types";
 import { useState, useEffect, useRef } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useWriteContract } from "../hooks/useWriteContract";
 import { useTransactionCart } from "../context/TransactionCartProvider";
 import {
   useAccount,
@@ -48,16 +47,34 @@ const Marketplace: React.FC = () => {
     ? marketLatestItemsData.items
     : [];
 
-  const mintDailyItems = {
+  const mintDailyItemsTx = {
     contractAddress: lootMarketArcadeContract?.address,
     selector: "mint_daily_items",
     calldata: [],
   };
 
+  const claimItemTx = {
+    contractAddress: lootMarketArcadeContract?.address,
+    selector: "claim_item",
+    calldata: [
+      marketLatestItemsData?.marketId,
+      "0",
+      formatAdventurer.adventurer?.id,
+      "0",
+    ],
+  };
+
   const bidExists = (marketId: number) => {
     return calls.some(
       (call: any) =>
-        call.entrypoint == "bid_on_item" && call.calldata[2] == marketId
+        call.entrypoint == "bid_on_item" && call.calldata[0] == marketId
+    );
+  };
+
+  const claimExists = (marketId: number) => {
+    return calls.some(
+      (call: any) =>
+        call.entrypoint == "claim_item" && call.calldata[0] == marketId
     );
   };
 
@@ -67,52 +84,32 @@ const Marketplace: React.FC = () => {
     "Type",
     "Material",
     "Rank",
-    "Prefix_1",
-    "Prefix_2",
-    "Suffix",
     "Greatness",
-    "CreatedBlock",
     "XP",
-    "Adventurer",
-    "Bidder",
     "Price",
+    "Bidder",
     "Expiry",
     "Status",
-    "Claimed Time",
     "Actions",
   ];
 
   return (
     <div className="w-full">
       <div className="flex flex-row m-1">
-        <Button
-          onClick={async () => {
-            addToCalls(mintDailyItems);
-            await writeAsync().then((tx: any) => {
-              setHash(tx.transaction_hash);
-              addTransaction({
-                hash: tx.transaction_hash,
-                metadata: {
-                  method: "Minting loot items",
-                  description: "Market Items are being minted!",
-                },
-              });
-            });
-          }}
-        >
+        <Button onClick={() => addToCalls(mintDailyItemsTx)}>
           Mint daily items
         </Button>
       </div>
       <div className="h-[430px] overflow-auto w-full">
         {marketLatestItemsLoading && (
-          <p className="text-xl loading-ellipsis">LOADING...GETTING DATA</p>
+          <p className="text-xl loading-ellipsis">LOADING</p>
         )}
         {marketLatestItemsError && (
-          <p className="text-xl"> ERROR... {marketLatestItemsError.message}</p>
+          <p className="text-xl">ERROR {marketLatestItemsError.message}</p>
         )}
-        <table className="w-full border-terminal-green border">
+        <table className="w-full border-terminal-green border min-width: 640px">
           <thead>
-            <tr className="sticky top-0 border border-terminal-green bg-terminal-black">
+            <tr className="sticky top-0 border-2 border-terminal-green bg-terminal-black">
               {headings.map((heading, index) => (
                 <th key={index}>{heading}</th>
               ))}
@@ -126,24 +123,18 @@ const Marketplace: React.FC = () => {
                   key={index}
                   className="border-b border-terminal-green hover:bg-terminal-black"
                 >
-                  <td className=" text-center">{item.marketid}</td>
-                  <td className=" text-center">{item.slot}</td>
-                  <td className=" text-center">{item.type}</td>
-                  <td className=" text-center">{item.material}</td>
-                  <td className=" text-center">{item.rank}</td>
-                  <td className=" text-center">{item.prefix_1}</td>
-                  <td className=" text-center">{item.prefix_2}</td>
-                  <td className=" text-center">{item.suffix}</td>
-                  <td className=" text-center">{item.greatness}</td>
-                  <td className=" text-center">{item.createdBlock}</td>
-                  <td className=" text-center">{item.xp}</td>
-                  <td className=" text-center">{item.adventurer}</td>
-                  <td className=" text-center">{item.bidder}</td>
-                  <td className=" text-center">{item.price}</td>
-                  <td className=" text-center">{item.expiry}</td>
-                  <td className=" text-center">{item.status}</td>
-                  <td className=" text-center">{item.claimedTime}</td>
-                  <td className=" text-center">
+                  <td className="text-center">{item.marketId}</td>
+                  <td className="text-center">{item.slot}</td>
+                  <td className="text-center">{item.type}</td>
+                  <td className="text-center">{item.material}</td>
+                  <td className="text-center">{item.rank}</td>
+                  <td className="text-center">{item.greatness}</td>
+                  <td className="text-center">{item.xp}</td>
+                  <td className="text-center">{item.price}</td>
+                  <td className="text-center">{item.bidder}</td>
+                  <td className="text-center">{item.expiry}</td>
+                  <td className="text-center">{item.status}</td>
+                  <td className="text-center">
                     <Button
                       onClick={() => setShowBidBox(index)}
                       disabled={bidExists(item.marketId)}
@@ -156,7 +147,13 @@ const Marketplace: React.FC = () => {
                       close={() => setShowBidBox(-1)}
                       marketId={item.marketId}
                     />
-                    <Button>CLAIM</Button>
+                    <Button
+                      onClick={() => addToCalls(claimItemTx)}
+                      disabled={claimExists(item.marketId)}
+                      className={claimExists(item.marketId) ? "bg-white" : ""}
+                    >
+                      CLAIM
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -168,3 +165,17 @@ const Marketplace: React.FC = () => {
 };
 
 export default Marketplace;
+
+// onClick={async () => {
+//   addToCalls(mintDailyItems);
+//   await writeAsync().then((tx: any) => {
+//     setHash(tx.transaction_hash);
+//     addTransaction({
+//       hash: tx.transaction_hash,
+//       metadata: {
+//         method: "Minting loot items",
+//         description: "Market Items are being minted!",
+//       },
+//     });
+//   });
+// }}

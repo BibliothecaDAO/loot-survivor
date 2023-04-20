@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
-import { useWriteContract } from "../hooks/useWriteContract";
+import { useTransactionCart } from "../context/TransactionCartProvider";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
 import {
@@ -18,7 +18,7 @@ import Discovery from "./Discovery";
 
 export default function Actions() {
   const [loading, setLoading] = useState(false);
-  const { writeAsync, addToCalls, calls } = useWriteContract();
+  const { writeAsync, addToCalls, calls } = useTransactionCart();
   const { adventurerContract } = useContracts();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
   const [hash, setHash] = useState<string | undefined>(undefined);
@@ -48,7 +48,7 @@ export default function Actions() {
       action: async () => {
         {
           addToCalls(explore);
-          await writeAsync().then((tx) => {
+          await writeAsync().then((tx: any) => {
             addTransaction({
               hash: tx.transaction_hash,
               metadata: { test: true },
