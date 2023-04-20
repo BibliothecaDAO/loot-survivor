@@ -27,6 +27,7 @@ export default function Actions() {
     hash,
     watch: true,
   });
+  const [selected, setSelected] = useState<String>("");
 
   const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
 
@@ -77,15 +78,8 @@ export default function Actions() {
       {/* <p>Health Purchase</p>
         <HealthSlider onPurchase={handlePurchase} /> */}
 
-      <div className="flex flex-col w-1/3 bg-terminal-black m-2 p-2">
-        <>
-          {hash && <div className="flex flex-col">Hash: {hash}</div>}
-          {isLoading && hash && (
-            <div className="loading-ellipsis">Loading...</div>
-          )}
-          {error && <div>Error: {JSON.stringify(error)}</div>}
-          {data && <div>Status: {data.status}</div>}
-        </>
+      <div className="flex flex-col w-1/2 bg-terminal-black m-2 p-2">
+        {/* {selected == <Discovery />} */}
         <div></div>
       </div>
     </div>

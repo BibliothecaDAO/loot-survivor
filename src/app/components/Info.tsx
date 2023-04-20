@@ -1,16 +1,37 @@
 import { useState } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { useAdventurer } from "../context/AdventurerProvider";
-import { NullAdventurerProps } from "../types";
+import { NullAdventurer } from "../types";
 import Image from "next/image";
 import VerticalKeyboardControl from "./VerticalMenu";
+import { useQuery } from "@apollo/client";
+import { getItemsByAdventurer } from "../hooks/graphql/queries";
 
-export default function Info() {
+export default function Info(adventurer: any) {
   const [loading, setLoading] = useState(false);
 
-  const { adventurer, handleUpdateAdventurer } = useAdventurer();
+  const formatAdventurer = adventurer ? adventurer : NullAdventurer;
 
-  const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
+  const {
+    loading: itemsByAdventurerLoading,
+    error: itemsByAdventurerError,
+    data: itemsByAdventurerData,
+    refetch: itemsByAdventurerRefetch,
+  } = useQuery(getItemsByAdventurer, {
+    variables: {
+      adventurer: formatAdventurer.id,
+    },
+    pollInterval: 5000,
+  });
+
+  const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
+
+  console.log(items, itemsByAdventurerError);
+
+  const ItemDisplay = (item: any) => {
+    const formatItem = item.item;
+    return <>{formatItem ? formatItem.item : "Nothing"}</>;
+  };
 
   return (
     <div className="p-2 bg-terminal-black">
@@ -28,19 +49,19 @@ export default function Info() {
               </div>
               <div className="flex flex-col items-center mt-9 ml-2">
                 <div className="text-xl font-medium text-white">
-                  {formatAdventurer.adventurer?.name}
+                  {formatAdventurer.name}
                 </div>
                 <p className="text-lg text-terminal-green">
-                  HEALTH {formatAdventurer.adventurer?.health}
+                  HEALTH {formatAdventurer.health}
                 </p>
                 <p className="text-lg text-terminal-yellow">
-                  GOLD {formatAdventurer.adventurer?.gold}
+                  GOLD {formatAdventurer.gold}
                 </p>
                 <p className="text-lg text-red-600">
-                  BEAST {formatAdventurer.adventurer?.beast}
+                  BEAST {formatAdventurer.beast}
                 </p>
                 <p className="text-lg text-terminal-green">
-                  XP {formatAdventurer.adventurer?.xp}
+                  XP {formatAdventurer.xp}
                 </p>
               </div>
             </div>
@@ -49,43 +70,73 @@ export default function Info() {
             <div className="flex flex-col m-2">
               <div className="text-xl font-medium text-white">ITEMS</div>
               <p className="text-terminal-green">
-                WEAPON - {formatAdventurer.adventurer?.weaponId}
+                WEAPON -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.weaponId
+                  )}
+                />
               </p>
               <p className="text-terminal-green">
-                HEAD - {formatAdventurer.adventurer?.headId}
+                HEAD -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.headId
+                  )}
+                />
               </p>
               <p className="text-terminal-green">
-                CHEST - {formatAdventurer.adventurer?.chestId}
+                CHEST -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.chestId
+                  )}
+                />
               </p>
               <p className="text-terminal-green">
-                FOOT - {formatAdventurer.adventurer?.feetId}
+                FOOT -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.feetId
+                  )}
+                />
               </p>
               <p className="text-terminal-green">
-                HAND - {formatAdventurer.adventurer?.handsId}
+                HAND -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.handsId
+                  )}
+                />
               </p>
               <p className="text-terminal-green">
-                WAIST - {formatAdventurer.adventurer?.waistId}
+                WAIST -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.waistId
+                  )}
+                />
               </p>
             </div>
             <div className="flex flex-col m-2">
               <div className="text-xl font-medium text-white">STATISTICS</div>
               <p className="text-terminal-green">
-                STRENGTH - {formatAdventurer.adventurer?.strength}
+                STRENGTH - {formatAdventurer.strength}
               </p>
               <p className="text-terminal-green">
-                DEXTERITY - {formatAdventurer.adventurer?.dexterity}
+                DEXTERITY - {formatAdventurer.dexterity}
               </p>
               <p className="text-terminal-green">
-                INTELLIGENCE - {formatAdventurer.adventurer?.intelligence}
+                INTELLIGENCE - {formatAdventurer.intelligence}
               </p>
               <p className="text-terminal-green">
-                VITALITY - {formatAdventurer.adventurer?.vitality}
+                VITALITY - {formatAdventurer.vitality}
               </p>
               <p className="text-terminal-green">
-                WISDOM - {formatAdventurer.adventurer?.wisdom}
+                WISDOM - {formatAdventurer.wisdom}
               </p>
               <p className="text-terminal-green">
-                LUCK - {formatAdventurer.adventurer?.luck}
+                LUCK - {formatAdventurer.luck}
               </p>
             </div>
           </div>
