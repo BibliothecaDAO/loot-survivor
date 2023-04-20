@@ -12,6 +12,8 @@ import { displayAddress } from "./lib/utils";
 import { useAdventurer } from "./context/AdventurerProvider";
 import { NullAdventurerProps } from "./types";
 import Inventory from "./components/Inventory";
+import TransactionHistory from "./components/TransactionHistory";
+import { useTransactionCart } from "./context/TransactionCartProvider";
 import TransactionCart from "./components/TransactionCart";
 import Upgrade from "./components/Upgrade";
 import Intro from "./components/Intro";
@@ -20,6 +22,7 @@ export default function Home() {
   const { connect, disconnect, connectors } = useConnectors();
   const { account } = useAccount();
   const { adventurer } = useAdventurer();
+  const { calls } = useTransactionCart();
 
   const adventurerStats = adventurer ?? NullAdventurerProps;
 
@@ -110,9 +113,6 @@ export default function Home() {
                   </p>
                   <p className="text-lg ">
                     GOLD: {adventurerStats.adventurer?.gold}
-                  </p>
-                  <p className="text-lg">
-                    BEAST: {adventurerStats.adventurer?.beast}
                   </p>
                   <p className="text-lg">
                     LEVEL: {adventurerStats.adventurer?.level}

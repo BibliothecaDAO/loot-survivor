@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
-import { useWriteContract } from "../hooks/useWriteContract";
+import { useTransactionCart } from "../context/TransactionCartProvider";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
 import { useQuery } from "@apollo/client";
@@ -20,7 +20,7 @@ import Info from "./Info";
 export default function Beast() {
   const [loading, setLoading] = useState(false);
 
-  const { writeAsync, addToCalls, calls } = useWriteContract();
+  const { writeAsync, addToCalls, calls } = useTransactionCart();
   const { beastContract } = useContracts();
   const { hashes, addTransaction, transactions } = useTransactionManager();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
@@ -79,13 +79,13 @@ export default function Beast() {
       label: "ATTACK BEAST!",
       action: async () => {
         addToCalls(attack);
-        await writeAsync().then((tx) => {
+        await writeAsync().then((tx: any) => {
           setHash(tx.transaction_hash);
           addTransaction({
             hash: tx.transaction_hash,
             metadata: {
               method: "Attack Beast",
-              desription: "Attacking Pheonix!",
+              desription: "Attacking Beast!",
             },
           });
         });
@@ -96,13 +96,13 @@ export default function Beast() {
       label: "FLEE BEAST",
       action: async () => {
         addToCalls(flee);
-        await writeAsync().then((tx) => {
+        await writeAsync().then((tx: any) => {
           setHash(tx.transaction_hash);
           addTransaction({
             hash: tx.transaction_hash,
             metadata: {
               method: "Flee Beast",
-              desription: "Flee from Pheonix!",
+              desription: "Flee from Beast!",
             },
           });
         });
@@ -111,10 +111,6 @@ export default function Beast() {
   ];
 
   console.log(formatAdventurer.adventurer?.beast);
-
-  // const handlePurchase = (health: number) => {
-  //   console.log(`Purchased ${health} health.`);
-  // };
 
   return (
     <div className="flex flex-row mt-5">
@@ -128,7 +124,7 @@ export default function Beast() {
         <>
           {hashes && <div className="flex flex-col">Hash: {hashes[-1]}</div>}
           {isLoading && hashes && (
-            <div className="loading-ellipsis">Loading...</div>
+            <div className="loading-ellipsis">Loading</div>
           )}
           {error && <div>Error: {JSON.stringify(error)}</div>}
           {data && <div>Status: {data.status}</div>}

@@ -25,12 +25,17 @@ export function useTransactionCart(): TransactionCartState {
 export const useTransactionCartContext = () => {
   const [calls, setCalls] = useState<any>([]);
 
-  const addToCalls = ({ contractAddress, selector, calldata }: any) => {
-    console.log("addToCalls", contractAddress, selector, calldata);
+  const addToCalls = ({
+    contractAddress,
+    selector,
+    calldata,
+    metadata,
+  }: any) => {
     const tx = {
       contractAddress: contractAddress,
       entrypoint: selector,
       calldata: calldata,
+      metadata: metadata,
     };
 
     setCalls((calls: any) => [...calls, tx]);

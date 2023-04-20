@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
-import { useWriteContract } from "../hooks/useWriteContract";
+import { useTransactionCart } from "../context/TransactionCartProvider";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
 import {
@@ -19,7 +19,7 @@ import Discovery from "./Discovery";
 
 export default function Actions() {
   const [loading, setLoading] = useState(false);
-  const { writeAsync, addToCalls, calls } = useWriteContract();
+  const { writeAsync, addToCalls, calls } = useTransactionCart();
   const { adventurerContract } = useContracts();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
   const { hashes, addTransaction } = useTransactionManager();
@@ -62,7 +62,7 @@ export default function Actions() {
   return (
     <div className="flex flex-row mt-5">
       {!loading ? (
-        <div className="w-1/4">
+        <div className="w-1/3">
           <Info adventurer={adventurer?.adventurer} />
         </div>
       ) : null}
@@ -74,7 +74,7 @@ export default function Actions() {
         />
       </div>
 
-      <div className="flex flex-col w-1/2 bg-terminal-black m-2 p-2">
+      <div className="flex flex-col w-1/3 bg-terminal-black m-2 p-2">
         {selected == "explore" && <Discovery />}
         {selected == "purchase health" && (
           <PurchaseHealth

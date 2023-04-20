@@ -59,8 +59,8 @@ export default function Info({ adventurer }: InfoProps) {
                 <p className="text-lg text-terminal-yellow">
                   GOLD {formatAdventurer.gold}
                 </p>
-                <p className="text-lg text-red-600">
-                  BEAST {formatAdventurer.beast}
+                <p className="text-lg text-white">
+                  LEVEL {formatAdventurer.level}
                 </p>
                 <p className="text-lg text-terminal-green">
                   XP {formatAdventurer.xp}

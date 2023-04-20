@@ -1,16 +1,11 @@
 import { useState } from "react";
-import { useContracts } from "../hooks/useContracts";
-import { useWriteContract } from "../hooks/useWriteContract";
 import { useAdventurer } from "../context/AdventurerProvider";
-import { useQuery } from "@apollo/client";
 import { AdventurersList } from "./AdventurersList";
 import { CreateAdventurer } from "./CreateAdventurer";
 import About from "./About";
 import VerticalKeyboardControl from "./VerticalMenu";
 
 const Adventurer = () => {
-  const { writeAsync, addToCalls } = useWriteContract();
-  const { adventurerContract } = useContracts();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");

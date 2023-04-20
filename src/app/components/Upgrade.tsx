@@ -1,6 +1,6 @@
 import { ReactElement, ReactNode, useState } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useWriteContract } from "../hooks/useWriteContract";
+import { useTransactionCart } from "../context/TransactionCartProvider";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { getKeyFromValue } from "../lib/utils";
 import { GameData } from "./GameData";
@@ -9,7 +9,7 @@ import { useTransactionManager } from "@starknet-react/core";
 
 const Upgrade = () => {
   const { adventurerContract } = useContracts();
-  const { writeAsync, addToCalls } = useWriteContract();
+  const { writeAsync, addToCalls } = useTransactionCart();
   const { adventurer } = useAdventurer();
   const { addTransaction } = useTransactionManager();
   const [selected, setSelected] = useState("");
@@ -67,7 +67,7 @@ const Upgrade = () => {
 
   const handleUpgradeTx = async () => {
     addToCalls(upgradeTx);
-    await writeAsync().then((tx) => {
+    await writeAsync().then((tx: any) => {
       addTransaction({
         hash: tx.transaction_hash,
         metadata: { test: true },

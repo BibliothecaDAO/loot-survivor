@@ -79,9 +79,6 @@ export const AdventurersList = ({
     <>
       {adventurers.length > 0 ? (
         <div className="flex basis-2/3">
-          <div className="w-1/2">
-            <Info adventurer={adventurers[selectedIndex]} />
-          </div>
           <div className="flex flex-col w-1/2">
             {buttonsData.map((buttonData, index) => (
               <Button
@@ -101,6 +98,9 @@ export const AdventurersList = ({
                 {buttonData.label}
               </Button>
             ))}
+          </div>
+          <div className="w-1/2">
+            <Info adventurer={adventurers[selectedIndex]} />
           </div>
         </div>
       ) : (
