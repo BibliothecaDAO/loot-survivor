@@ -361,7 +361,7 @@ const Inventory: React.FC = () => {
   return (
     <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-[480px] overflow-auto p-8 gap-6">
       <div>
-        <p className="text-2xl text-white capitalize">
+        <p className="text-2xl text-white">
           {formatAdventurer.adventurer?.name}
         </p>
         <div className="w-[250px] h-[250px] relative border-2 border-white my-auto">

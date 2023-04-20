@@ -42,7 +42,7 @@ export default function Actions() {
       action: async () => {
         {
           addToCalls(exploreTx);
-          await writeAsync().then((tx) => {
+          await writeAsync().then((tx: any) => {
             addTransaction({
               hash: tx.transaction_hash,
               metadata: { method: "explore" },
