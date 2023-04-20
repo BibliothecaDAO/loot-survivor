@@ -48,8 +48,6 @@ export default function Actions() {
       action: async () => {
         {
           addToCalls(explore);
-          console.log(explore);
-          console.log(calls);
           await writeAsync().then((tx) => {
             addTransaction({
               hash: tx.transaction_hash,
@@ -74,7 +72,7 @@ export default function Actions() {
           <Info adventurer={adventurer?.adventurer} />
         </div>
       ) : null}
-      <div className="w-1/4 my-auto">
+      <div className="w-1/3 my-auto">
         <KeyboardControl buttonsData={buttonsData} />
       </div>
       {/* <p>Health Purchase</p>

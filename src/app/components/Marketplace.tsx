@@ -1,17 +1,59 @@
 import { MarketItem } from "../types";
+import { useState, useEffect, useRef } from "react";
+import { useContracts } from "../hooks/useContracts";
+import { useWriteContract } from "../hooks/useWriteContract";
+import {
+  useAccount,
+  useWaitForTransaction,
+  useTransactionManager,
+  useTransactions,
+} from "@starknet-react/core";
 import { BidButton } from "./Bid";
 import { Button } from "./Button";
 import HorizontalKeyboardControl from "./HorizontalMenu";
 import { useQuery } from "@apollo/client";
-import { getMarketItems } from "../hooks/graphql/queries";
+import { getLatestMarketItems } from "../hooks/graphql/queries";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
-import { useAccount } from "@starknet-react/core";
 
-const Marketplace = () => {
+const Marketplace: React.FC = () => {
   const { account } = useAccount();
+  const formatAddress = account ? account.address : "0x0";
+  const { writeAsync, addToCalls, calls } = useWriteContract();
+  const { lootMarketArcadeContract } = useContracts();
+  const [hash, setHash] = useState<string | undefined>(undefined);
+  const { hashes, addTransaction } = useTransactionManager();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const transactions = useTransactions({ hashes });
   const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
+
+  const { data, isLoading, error } = useWaitForTransaction({
+    hash,
+    watch: true,
+  });
+
+  const {
+    loading: marketLatestItemsLoading,
+    error: marketLatestItemsError,
+    data: marketLatestItemsData,
+    refetch: marketLatestItemsRefetch,
+  } = useQuery(getLatestMarketItems, {
+    pollInterval: 5000,
+  });
+
+  const marketLatestItems = marketLatestItemsData
+    ? marketLatestItemsData.items
+    : [];
+
+  console.log(marketLatestItems);
+
+  const mintDailyItems = {
+    contractAddress: lootMarketArcadeContract?.address,
+    selector: "mint_daily_items",
+    calldata: [],
+  };
 
   const headings = [
     "Id",
@@ -34,21 +76,27 @@ const Marketplace = () => {
     "Actions",
   ];
 
-  const {
-    loading: marketItemsLoading,
-    error: marketItemsError,
-    data: marketItemsData,
-    refetch: marketItemsRefetch,
-  } = useQuery(getMarketItems, {
-    pollInterval: 5000,
-  });
-
-  const marketItems = marketItemsData ? marketItemsData.items : [];
-
   return (
     <div className="w-full">
       <div className="w-full">
-        <table className="w-full border-terminal-green border">
+        <Button
+          onClick={() => {
+            addToCalls(mintDailyItems);
+            writeAsync().then((tx) => {
+              setHash(tx.transaction_hash);
+              addTransaction({
+                hash: tx.transaction_hash,
+                metadata: {
+                  method: "Minting loot items",
+                  description: "Market Items are being minted!",
+                },
+              });
+            });
+          }}
+        >
+          Mint daily items
+        </Button>
+        <table className="w-full border-terminal-green border m-2">
           <thead>
             <tr className="p-3 border-b border-terminal-green">
               {headings.map((heading, index) => (
@@ -57,7 +105,7 @@ const Marketplace = () => {
             </tr>
           </thead>
           <tbody>
-            {marketItems.map((item: any, index: number) => (
+            {marketLatestItems.map((item: any, index: number) => (
               <tr key={index}>
                 <td className="p-2 text-center">{item.id}</td>
                 <td className="p-2 text-center">{item.slot}</td>

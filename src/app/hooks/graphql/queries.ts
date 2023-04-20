@@ -231,7 +231,7 @@ const getItemsByTokenId = gql`
   }
 `;
 
-const getItemsByTokenIds = gql`
+const getItemsByOwner = gql`
   query get_items($ids: [FeltValue]) {
     items(where: { id: { In: $ids } }) {
       bag
@@ -261,8 +261,8 @@ const getItemsByTokenIds = gql`
   }
 `;
 
-const getMarketItems = gql`
-  query get_market_items {
+const getLatestMarketItems = gql`
+  query get_latest_market_items {
     items(
       where: { marketId: { gt: "0" } }
       limit: 20
@@ -365,7 +365,7 @@ export {
   getBeastById,
   getDiscoveryByTxHash,
   getItemsByTokenId,
-  getMarketItems,
+  getLatestMarketItems,
   getItemsByOwner,
   getItemsByAdventurer,
 };
