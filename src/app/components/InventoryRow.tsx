@@ -40,7 +40,7 @@ export const InventoryRow = ({
     return (
       <>
         {formatItem
-          ? `${formatItem.item} [Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp}XP]`
+          ? `${formatItem.item} [Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`
           : "Nothing"}
       </>
     );
@@ -81,7 +81,6 @@ export const InventoryRow = ({
     <div className="flex flex-row gap-5 w-full overflow-auto">
       {items?.map((item: any, index: number) => (
         <div key={index} className="flex flex-col items-center">
-          <ItemDisplay item={item} />
           <Button
             key={index}
             ref={(ref) => (buttonRefs.current[index] = ref)}
@@ -100,7 +99,7 @@ export const InventoryRow = ({
                 : null;
             }}
           >
-            {item.equippedAdventurerId ? "Equipped" : "Equip"}
+            <ItemDisplay item={item} />
           </Button>
         </div>
       ))}

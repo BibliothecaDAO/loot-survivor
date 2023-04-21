@@ -90,7 +90,7 @@ const Inventory: React.FC = () => {
     return (
       <>
         {formatItem
-          ? `${formatItem.item} [Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp}XP]`
+          ? `${formatItem.item} [Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`
           : "Nothing"}
       </>
     );
