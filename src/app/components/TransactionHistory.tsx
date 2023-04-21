@@ -33,8 +33,8 @@ const TransactionHistory = () => {
       </button>
       {isOpen ? (
         queuedTransactions ? (
-          <div className="absolute right-0 top-10 z-10 w-[650px] h-[300px] p-2 bg-terminal-black border border-terminal-green overflow-x-auto">
-            <h1>LEDGER</h1>
+          <div className="absolute right-0 top-10 z-10 w-[650px] h-[250px] p-2 bg-terminal-black border border-terminal-green overflow-x-auto">
+            <p className="text-2xl">LEDGER</p>
             <div className="border border-terminal-green w-full" />
             {queuedTransactions
               .slice()

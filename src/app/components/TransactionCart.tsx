@@ -33,37 +33,40 @@ const TransactionCart = () => {
         {isOpen ? "Hide Cart" : "Show Cart"}
       </button>
       {isOpen ? (
-        <div className="absolute right-0 top-20 z-10 w-96 h-96 p-4 bg-terminal-black border border-terminal-green">
-          <h1>TRANSACTIONS</h1>
-          <div className="flex flex-row w-full border border-terminal-green">
+        <div className="absolute right-[262px] top-20 z-10 w-[400px] h-[400px] p-3 bg-terminal-black border border-terminal-green">
+          <p className="text-2xl">TRANSACTIONS</p>
+          <div className="w-full border border-terminal-green "></div>
+          <div className="flex flex-col h-[200px] overflow-auto">
             {calls.map((call, i) => (
               <div key={i}>
-                <div className="flex flex-row gap-2">
-                  {call && <p>{call.selector}</p>}
+                <div className="flex flex-col gap-2">
+                  {/* {call && <p>{call.selector}</p>} */}
                   {call && <p>{call.entrypoint}</p>}
                   {/* {call && <p>{call.metadata.method}</p>}
-                  {call && <p>{call.metadata.description}</p>} */}
+                    {call && <p>{call.metadata.description}</p>} */}
                 </div>
               </div>
             ))}
           </div>
-          <Button
-            onClick={async () =>
-              await handleSubmitCalls().then((tx: any) => {
-                setHash(tx.transaction_hash);
-                addTransaction({
-                  hash: tx.transaction_hash,
-                  metadata: {
-                    method: "Performing multicall",
-                    description: "Transactions have been batched and sent!",
-                  },
-                });
-              })
-            }
-            className="absolute bottom-4"
-          >
-            Submit all Transactions
-          </Button>
+          <div className="m-2">
+            <Button
+              onClick={async () =>
+                await handleSubmitCalls().then((tx: any) => {
+                  setHash(tx.transaction_hash);
+                  addTransaction({
+                    hash: tx.transaction_hash,
+                    metadata: {
+                      method: "Performing multicall",
+                      description: "Transactions have been batched and sent!",
+                    },
+                  });
+                })
+              }
+              className="absolute bottom-4"
+            >
+              Submit all Transactions
+            </Button>
+          </div>
           <>
             {txLoading && hash && (
               <div className="loading-ellipsis">Loading</div>
