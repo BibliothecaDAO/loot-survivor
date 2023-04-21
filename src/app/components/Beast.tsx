@@ -45,7 +45,7 @@ export default function Beast() {
     pollInterval: 5000,
   });
 
-  console.log(beastByTokenIdData, beastByTokenIdError);
+  console.log(beastByTokenIdData, beastByTokenIdError, calls);
 
   const {
     loading: battlesByAdventurerLoading,

@@ -4,6 +4,7 @@ import {
   useTransactions,
   useWaitForTransaction,
 } from "@starknet-react/core";
+import { TxStatus } from "./TxStatus";
 
 const TransactionHistory = () => {
   const {
@@ -11,7 +12,6 @@ const TransactionHistory = () => {
     transactions: queuedTransactions,
     addTransaction,
   } = useTransactionManager();
-  const transactions = useTransactions({ hashes });
   const [isOpen, setIsOpen] = useState(false);
   const [hash, setHash] = useState<string | undefined>(undefined);
   const { data, isLoading, error } = useWaitForTransaction({
@@ -23,8 +23,6 @@ const TransactionHistory = () => {
     setIsOpen(!isOpen);
   };
 
-  const hasTransactions = transactions.length > 0;
-
   return (
     <div className="relative">
       <button
@@ -32,34 +30,22 @@ const TransactionHistory = () => {
         className="flex p-2 bg-black border border-terminal-green relative"
       >
         {isOpen ? "Hide Ledger" : "Show Ledger"}
-        {/* {hasActiveTransactions && (
-          <span className="absolute top-0 right-0 text-xs bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center">
-            1
-          </span> */}
       </button>
       {isOpen ? (
-        hasTransactions ? (
-          <div className="absolute right-0 top-10 z-10 w-96 h-96 p-2 bg-terminal-black border border-terminal-green focus:ring-offset-terminal-green">
+        queuedTransactions ? (
+          <div className="absolute right-0 top-10 z-10 w-[650px] h-[300px] p-2 bg-terminal-black border border-terminal-green overflow-x-auto">
             <h1>LEDGER</h1>
-            <ul>
-              {transactions.map(({ data, status }, i) => (
+            <div className="border border-terminal-green w-full" />
+            {queuedTransactions.map((tx, i) => (
+              <ul>
                 <li key={i}>
-                  <h1>{data && data.transaction_hash}</h1>
-                  <div className="flex flex-row gap-2">
-                    <>
-                      {data?.transaction_hash && (
-                        <div>Hash: {data?.transaction_hash}</div>
-                      )}
-                      {isLoading && hash && (
-                        <div className="loading-ellipsis">Loading</div>
-                      )}
-                      {error && <div>Error: {JSON.stringify(error)}</div>}
-                      {data && <div>Status: </div>}
-                    </>
+                  <div className="flex flex-row flex-wrap gap-2">
+                    <div className="mr-4">Hash: {tx.hash}</div>
+                    <TxStatus hash={tx.hash} />
                   </div>
                 </li>
-              ))}
-            </ul>
+              </ul>
+            ))}
           </div>
         ) : (
           <div className="absolute right-0 top-10 z-10 w-96 h-96 bg-terminal-black border border-terminal-green">
