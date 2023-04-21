@@ -4,11 +4,16 @@ import {
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
+import { Metadata } from "../types";
 import { Button } from "./Button";
 
 const TransactionCart = () => {
   const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
-  const { addTransaction } = useTransactionManager();
+  const {
+    hashes,
+    transactions: queuedTransactions,
+    addTransaction,
+  } = useTransactionManager();
   const [isOpen, setIsOpen] = useState(false);
   const [hash, setHash] = useState<string | undefined>(undefined);
   const { data, isLoading, error } = useWaitForTransaction({
@@ -18,11 +23,11 @@ const TransactionCart = () => {
 
   const txLoading = data?.status == "RECEIVED" || data?.status == "PENDING";
 
+  const method = (queuedTransactions[0]?.metadata as Metadata)?.method;
+
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
-
-  console.log(calls);
 
   return (
     <>
@@ -40,10 +45,10 @@ const TransactionCart = () => {
             {calls.map((call, i) => (
               <div key={i}>
                 <div className="flex flex-col gap-2">
-                  {/* {call && <p>{call.selector}</p>} */}
+                  {/* {call && <p>{call.selector}</p>}  */}
                   {call && <p>{call.entrypoint}</p>}
-                  {/* {call && <p>{call.metadata.method}</p>}
-                    {call && <p>{call.metadata.description}</p>} */}
+                  {/* {call && <p>{call.method}</p>}
+                  {call && <p>{call.metadata.description}</p>} */}
                 </div>
               </div>
             ))}
@@ -53,11 +58,23 @@ const TransactionCart = () => {
               onClick={async () =>
                 await handleSubmitCalls().then((tx: any) => {
                   setHash(tx.transaction_hash);
+                  const marketIds = [];
+
+                  for (const dict of calls) {
+                    if (
+                      dict.hasOwnProperty("selector") &&
+                      dict["selector"] === "bid_on_item"
+                    ) {
+                      marketIds.push(dict.calldata[0]);
+                    }
+                  }
+
                   addTransaction({
                     hash: tx.transaction_hash,
                     metadata: {
                       method: "Performing multicall",
                       description: "Transactions have been batched and sent!",
+                      marketIds: marketIds,
                     },
                   });
                 })
