@@ -56,7 +56,7 @@ export function BidBox({ showBidBox, close, marketId }: BidBoxProps) {
   return (
     <>
       {showBidBox && (
-        <div className="absolute right-0 mt-2 p-2 bg-black border border-terminal-green rounded-md shadow-lg">
+        <div className="relative right-0 mt-2 p-2 bg-black border border-terminal-green rounded-md shadow-lg">
           <div className="flex items-center justify-between mb-2">
             <label>Bid price (minimum 3 gold)</label>
             <Button onClick={() => close()}>Close</Button>

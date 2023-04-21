@@ -8,7 +8,7 @@ const WalletSelect = () => {
       <div className="w-full h-6 my-2 bg-terminal-green" />
       <div className="flex flex-col">
         <h1>ABOUT</h1>
-        <div className="flex text-lg">
+        <div className="flex text-xl">
           <p className="p-4">
             Welcome, brave traveler! Prepare to embark on an extraordinary
             journey through the mystic lands of Eldarath, a high fantasy realm
@@ -19,6 +19,12 @@ const WalletSelect = () => {
             secrets hidden within the mists of time.
           </p>
         </div>
+      </div>
+      <div className="flex flex-row mx-auto text-2xl">
+        <p>
+          ...NOTE: LOOT SURVIVORS IS CURRENTLY ON TESTNET, CHECK YOUR WALLET IS
+          ON GOERLI...
+        </p>
       </div>
       <div className="flex flex-col gap-5 m-auto w-1/2">
         {connectors.map((connector) => (
