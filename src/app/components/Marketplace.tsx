@@ -51,18 +51,11 @@ const Marketplace: React.FC = () => {
     contractAddress: lootMarketArcadeContract?.address,
     selector: "mint_daily_items",
     calldata: [],
+    metadata: `Minting Loot Items!`,
   };
 
-  const claimItemTx = {
-    contractAddress: lootMarketArcadeContract?.address,
-    selector: "claim_item",
-    calldata: [
-      marketLatestItemsData?.marketId,
-      "0",
-      formatAdventurer.adventurer?.id,
-      "0",
-    ],
-  };
+  const currentTime = new Date().getTime(); // Get the current time in milliseconds
+  console.log(currentTime, new Date(marketLatestItems[0]?.expiry).getTime());
 
   const bidExists = (marketId: number) => {
     return calls.some(
@@ -144,7 +137,7 @@ const Marketplace: React.FC = () => {
                           disabled={bidExists(item.marketId)}
                           className={bidExists(item.marketId) ? "bg-white" : ""}
                         >
-                          Bid
+                          BID
                         </Button>
                         <BidBox
                           showBidBox={showBidBox == index}
@@ -152,8 +145,26 @@ const Marketplace: React.FC = () => {
                           marketId={item.marketId}
                         />
                         <Button
-                          onClick={() => addToCalls(claimItemTx)}
-                          disabled={claimExists(item.marketId)}
+                          onClick={() => {
+                            const claimItemTx = {
+                              contractAddress:
+                                lootMarketArcadeContract?.address,
+                              selector: "claim_item",
+                              calldata: [
+                                item.marketId,
+                                "0",
+                                formatAdventurer.adventurer?.id,
+                                "0",
+                              ],
+                              metadata: `Claiming ${item.item}`,
+                            };
+                            addToCalls(claimItemTx);
+                          }}
+                          disabled={
+                            claimExists(item.marketId) ||
+                            !item.expiry ||
+                            new Date(item.expiry).getTime() > currentTime
+                          }
                           className={
                             claimExists(item.marketId) ? "bg-white" : ""
                           }

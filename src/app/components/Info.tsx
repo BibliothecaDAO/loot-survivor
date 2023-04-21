@@ -69,7 +69,7 @@ export default function Info({ adventurer }: InfoProps) {
             </div>
           </div>
           <div className="flex flex-row justify-evenly mt-4">
-            <div className="flex flex-col m-2">
+            <div className="flex flex-col">
               <div className="text-xl font-medium text-white">ITEMS</div>
               <p className="text-terminal-green">
                 WEAPON -{" "}
@@ -120,7 +120,7 @@ export default function Info({ adventurer }: InfoProps) {
                 />
               </p>
             </div>
-            <div className="flex flex-col m-2">
+            <div className="flex flex-col">
               <div className="text-xl font-medium text-white">STATISTICS</div>
               <p className="text-terminal-green">
                 STRENGTH - {formatAdventurer.strength}

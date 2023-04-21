@@ -42,6 +42,7 @@ export function BidBox({ showBidBox, close, marketId }: BidBoxProps) {
             "0",
             bidPrice,
           ],
+          metadata: `Bidding on ${marketId}`,
         };
         addToCalls(BidTx);
         // Place bid logic

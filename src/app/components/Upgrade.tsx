@@ -91,23 +91,23 @@ const Upgrade = () => {
   };
 
   const Strength = (): ReactElement => (
-    <p className="text-[30px]">Strength increases attack damage by 10%</p>
+    <p className="text-[28px]">Strength increases attack damage by 10%</p>
   );
   const Dexterity = (): ReactElement => (
-    <p className="text-[30px]">Dexterity increases chance of fleeing</p>
+    <p className="text-[28px]">Dexterity increases chance of fleeing</p>
   );
   const Vitality = (): ReactElement => (
-    <p className="text-[30px]">
+    <p className="text-[28px]">
       Vitality increases health by 20hp, including max health
     </p>
   );
   const Intelligence = (): ReactElement => (
-    <p className="text-[30px]">
+    <p className="text-[28px]">
       Intelligence increases chance of avoiding Obstacles
     </p>
   );
   const Wisdom = (): ReactElement => (
-    <p className="text-[30px]">
+    <p className="text-[28px]">
       Wisdom increases chance of avoiding a Beast ambush
     </p>
   );

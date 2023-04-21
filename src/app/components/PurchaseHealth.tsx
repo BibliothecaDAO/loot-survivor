@@ -24,6 +24,7 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
     contractAddress: adventurerContract?.address,
     selector: "purchase_health",
     calldata: [formatAdventurer?.id, "0", healthAmount],
+    metadata: `Purchasing ${healthAmount}`,
   };
   const purchaseGoldAmount = healthAmount * 5;
   const hasBalance =

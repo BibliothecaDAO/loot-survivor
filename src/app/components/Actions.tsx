@@ -79,7 +79,7 @@ export default function Actions() {
         />
       </div>
 
-      <div className="flex flex-col w-1/3 bg-terminal-black m-2 p-2">
+      <div className="flex flex-col w-1/3 bg-terminal-black p-2">
         {selected == "explore" && <Discovery hash={hash} />}
         {selected == "purchase health" && (
           <PurchaseHealth
