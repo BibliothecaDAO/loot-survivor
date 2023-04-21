@@ -1,15 +1,21 @@
 import Image from "next/image";
+import { getValueFromKey } from "../lib/utils";
+import { GameData } from "./GameData";
 
 interface BeastDisplayProps {
   beastData: any;
 }
 
 export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
+  const gameData = new GameData();
   return (
     <div className="flex flex-col">
       <div className="w-[250px] h-[250px] relative mt-4">
         <Image
-          src="/pheonix.png"
+          src={
+            getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
+            "/phoenix.png"
+          }
           alt="beast-image"
           fill={true}
           style={{ objectFit: "contain" }}

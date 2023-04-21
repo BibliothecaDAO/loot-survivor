@@ -1,4 +1,5 @@
 export type Dict<T> = { [key: number]: T };
+export type DictString<T> = { [key: string]: T };
 
 export class GameData {
   BEASTS: Dict<string>;
@@ -16,6 +17,7 @@ export class GameData {
   ITEM_SUFFIXES: Dict<string>;
   STATUS: Dict<string>;
   SLOTS: Dict<string>;
+  BEAST_IMAGES: DictString<string>;
 
   constructor() {
     this.BEASTS = {
@@ -447,6 +449,29 @@ export class GameData {
       6: "Hand",
       7: "Neck",
       8: "Ring",
+    };
+
+    this.BEAST_IMAGES = {
+      Phoenix: "/phoenix.png",
+      Griffin: "/griffin.png",
+      Minotaur: "/minotaur.png",
+      Basilisk: "/basilisk.png",
+      Gnome: "/gnome.png",
+      Wraith: "/wraith.png",
+      Ghoul: "/ghoul.png",
+      Goblin: "/goblin.png",
+      Skeleton: "/skeleton.png",
+      Golem: "/golem.png",
+      Giant: "/giant.png",
+      Yeti: "/yeti.png",
+      Orc: "/orc.png",
+      Berserker: "/berserker.png",
+      Ogre: "/ogre.png",
+      Dragon: "/dragon.png",
+      Vampire: "/vampire.png",
+      Werewolf: "/werewolf.png",
+      Spider: "/spider.png",
+      Rat: "/rat.png",
     };
   }
 }

@@ -172,7 +172,10 @@ export default function Beast() {
         <Info adventurer={adventurer?.adventurer} />
       </div>
       <div className="flex flex-col gap-10 w-1/3">
-        <KeyboardControl buttonsData={buttonsData} />
+        <KeyboardControl
+          buttonsData={buttonsData}
+          disabled={formatAdventurer?.beastId == undefined}
+        />
         <div className="flex flex-col p-4">
           {txLoading && hash && <div className="loading-ellipsis">Loading</div>}
           {hash && <div className="flex flex-col">Hash: {hash}</div>}

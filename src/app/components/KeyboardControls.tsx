@@ -9,9 +9,10 @@ export interface ButtonData {
 
 interface ButtonProps {
   buttonsData: ButtonData[];
+  disabled?: boolean;
 }
 
-const KeyboardControl = ({ buttonsData }: ButtonProps) => {
+const KeyboardControl = ({ buttonsData, disabled }: ButtonProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -48,6 +49,7 @@ const KeyboardControl = ({ buttonsData }: ButtonProps) => {
             buttonData.action();
             setSelectedIndex(index);
           }}
+          disabled={disabled}
         >
           {buttonData.label}
         </Button>
