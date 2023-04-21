@@ -39,6 +39,12 @@ export default function Home() {
   const [selected, setSelected] = useState(menu[0].value);
 
   useEffect(() => {
+    if (!adventurer || adventurer.adventurer?.health == 0) {
+      setSelected(menu[0].value);
+    }
+  }, [adventurer]);
+
+  useEffect(() => {
     let newMenu = [
       {
         id: 1,

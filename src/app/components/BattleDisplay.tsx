@@ -13,7 +13,7 @@ export const BattleDisplay = ({
       {battleData.attacker == "Adventurer" ? (
         battleData.targetHealth > 0 ? (
           <p>
-            You attacked {beastName} for {battleData.damage} damage
+            You attacked the {beastName} for {battleData.damage} damage
           </p>
         ) : battleData.fled ? (
           <p>You fled the {beastName}</p>
@@ -30,7 +30,8 @@ export const BattleDisplay = ({
           </p>
         ) : (
           <p>
-            Attacked by the {beastName} taking {battleData.damage} damage
+            Counter attacked by the {beastName} taking {battleData.damage}{" "}
+            damage
           </p>
         )
       ) : (

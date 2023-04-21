@@ -75,7 +75,7 @@ const Inventory: React.FC = () => {
         setSelectedIndex((prev) => Math.max(prev - 1, 0));
         break;
       case "ArrowDown":
-        setSelectedIndex((prev) => Math.min(prev + 1, items.length - 1));
+        setSelectedIndex((prev) => Math.min(prev + 1, 8 - 1));
         break;
       case "Enter":
         !items[selectedIndex].equippedAdventurerId
@@ -130,121 +130,63 @@ const Inventory: React.FC = () => {
           {formatAdventurer.adventurer?.name}
         </p>
       </div>
-      <div className="flex flex-col gap-7 text-[30px] mt-10">
-        <p>WEAPONS</p>
-        <p>HEAD</p>
-        <p>CHEST</p>
-        <p>FEET</p>
-        <p>HANDS</p>
-        <p>WAIST</p>
-        <p>NECK</p>
-        <p>RING</p>
-      </div>
-      <div className="flex flex-col gap-6">
-        <div className="text-xl font-medium text-white">EQUIPPED</div>
-        <div className="flex flex-col gap-12">
-          <p className="text-terminal-green">
-            <ItemDisplay
-              item={items.find(
-                (item: any) => item.id == formatAdventurer.adventurer?.weaponId
-              )}
-            />
-          </p>
-          <p className="text-terminal-green">
-            <ItemDisplay
-              item={items.find(
-                (item: any) => item.id == formatAdventurer.adventurer?.headId
-              )}
-            />
-          </p>
-          <p className="text-terminal-green">
-            <ItemDisplay
-              item={items.find(
-                (item: any) => item.id == formatAdventurer.adventurer?.chestId
-              )}
-            />
-          </p>
-          <p className="text-terminal-green">
-            <ItemDisplay
-              item={items.find(
-                (item: any) => item.id == formatAdventurer.adventurer?.feetId
-              )}
-            />
-          </p>
-          <p className="text-terminal-green">
-            <ItemDisplay
-              item={items.find(
-                (item: any) => item.id == formatAdventurer.adventurer?.handsId
-              )}
-            />
-          </p>
-          <p className="text-terminal-green">
-            <ItemDisplay
-              item={items.find(
-                (item: any) => item.id == formatAdventurer.adventurer?.waistId
-              )}
-            />
-          </p>
-          <p className="text-terminal-green">
-            <ItemDisplay
-              item={items.find(
-                (item: any) => item.id == formatAdventurer.adventurer?.neckId
-              )}
-            />
-          </p>
-          <p className="text-terminal-green">
-            <ItemDisplay
-              item={items.find(
-                (item: any) => item.id == formatAdventurer.adventurer?.ringId
-              )}
-            />
-          </p>
-        </div>
-      </div>
-      <div className="flex flex-col gap-6">
-        <div className="text-xl font-medium text-white">OWNED</div>
-        <div className="flex flex-col gap-7">
-          <InventoryRow
-            items={groupedItems["Weapon"]}
-            activeMenu={0}
-            isActive={false}
-          />
-          <InventoryRow
-            items={groupedItems["Head"]}
-            activeMenu={0}
-            isActive={false}
-          />
-          <InventoryRow
-            items={groupedItems["Chest"]}
-            activeMenu={0}
-            isActive={false}
-          />
-          <InventoryRow
-            items={groupedItems["Foot"]}
-            activeMenu={0}
-            isActive={false}
-          />
-          <InventoryRow
-            items={groupedItems["Hand"]}
-            activeMenu={0}
-            isActive={false}
-          />
-          <InventoryRow
-            items={groupedItems["Waist"]}
-            activeMenu={0}
-            isActive={false}
-          />
-          <InventoryRow
-            items={groupedItems["Neck"]}
-            activeMenu={0}
-            isActive={false}
-          />
-          <InventoryRow
-            items={groupedItems["Ring"]}
-            activeMenu={0}
-            isActive={false}
-          />
-        </div>
+      <div className="flex flex-col gap-8">
+        <InventoryRow
+          title={"Weapon"}
+          items={groupedItems["Weapon"]}
+          activeMenu={selectedIndex}
+          isActive={selectedIndex == 0}
+          equippedItemId={adventurer?.adventurer?.weaponId}
+        />
+        <InventoryRow
+          title={"Head Armour"}
+          items={groupedItems["Head"]}
+          activeMenu={selectedIndex}
+          isActive={selectedIndex == 1}
+          equippedItemId={adventurer?.adventurer?.headId}
+        />
+        <InventoryRow
+          title={"Chest Armour"}
+          items={groupedItems["Chest"]}
+          activeMenu={selectedIndex}
+          isActive={selectedIndex == 2}
+          equippedItemId={adventurer?.adventurer?.chestId}
+        />
+        <InventoryRow
+          title={"Feet Armour"}
+          items={groupedItems["Foot"]}
+          activeMenu={selectedIndex}
+          isActive={selectedIndex == 3}
+          equippedItemId={adventurer?.adventurer?.feetId}
+        />
+        <InventoryRow
+          title={"Hands Armour"}
+          items={groupedItems["Hand"]}
+          activeMenu={selectedIndex}
+          isActive={selectedIndex == 4}
+          equippedItemId={adventurer?.adventurer?.handsId}
+        />
+        <InventoryRow
+          title={"Waist Armour"}
+          items={groupedItems["Waist"]}
+          activeMenu={selectedIndex}
+          isActive={selectedIndex == 5}
+          equippedItemId={adventurer?.adventurer?.waistId}
+        />
+        <InventoryRow
+          title={"Neck Jewelry"}
+          items={groupedItems["Neck"]}
+          activeMenu={selectedIndex}
+          isActive={selectedIndex == 6}
+          equippedItemId={adventurer?.adventurer?.neckId}
+        />
+        <InventoryRow
+          title={"Ring Jewelry"}
+          items={groupedItems["Ring"]}
+          activeMenu={selectedIndex}
+          isActive={selectedIndex == 7}
+          equippedItemId={adventurer?.adventurer?.ringId}
+        />
       </div>
     </div>
   );

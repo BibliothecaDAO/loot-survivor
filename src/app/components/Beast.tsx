@@ -188,7 +188,7 @@ export default function Beast() {
           <>
             <BeastDisplay beastData={beastData} />
             <div className="flex flex-col gap-5 items-center">
-              <p>Recent Encounters:</p>
+              <p>Battle log:</p>
               <div className="flex flex-col gap-2">
                 {formatBattles.map((battle: any, index: number) => (
                   <BattleDisplay
