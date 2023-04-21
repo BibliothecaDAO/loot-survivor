@@ -1,19 +1,19 @@
 "use client";
 
 import { useAccount, useConnectors } from "@starknet-react/core";
+import { useState, useEffect } from "react";
+import { useAdventurer } from "./context/AdventurerProvider";
+import { useTransactionCart } from "./context/TransactionCartProvider";
 import { Button } from "./components/Button";
 import HorizontalKeyboardControl from "./components/HorizontalMenu";
-import { useState, useEffect } from "react";
 import Actions from "./components/Actions";
 import Marketplace from "./components/Marketplace";
 import Adventurer from "./components/Adventurer";
 import Beast from "./components/Beast";
 import { displayAddress } from "./lib/utils";
-import { useAdventurer } from "./context/AdventurerProvider";
 import { NullAdventurerProps } from "./types";
 import Inventory from "./components/Inventory";
 import TransactionHistory from "./components/TransactionHistory";
-import { useTransactionCart } from "./context/TransactionCartProvider";
 import TransactionCart from "./components/TransactionCart";
 import Upgrade from "./components/Upgrade";
 import Intro from "./components/Intro";
@@ -107,20 +107,12 @@ export default function Home() {
           {account ? (
             <div className="w-full">
               {adventurer?.adventurer ? (
-                <div className="absolute bottom-1 w-5/6 flex flew-row font-medium bg-terminal-black text-white justify-evenly ml-3">
+                <div className="absolute text-lg w-4/5 ml-10 bottom-1 flex flew-row font-medium bg-terminal-black text-white justify-evenly">
                   {adventurerStats.adventurer?.name}
-                  <p className="text-lg">
-                    HEALTH: {adventurerStats.adventurer?.health}
-                  </p>
-                  <p className="text-lg ">
-                    GOLD: {adventurerStats.adventurer?.gold}
-                  </p>
-                  <p className="text-lg">
-                    LEVEL: {adventurerStats.adventurer?.level}
-                  </p>
-                  <p className="text-lg">
-                    XP: {adventurerStats.adventurer?.xp}
-                  </p>
+                  <p>HEALTH: {adventurerStats.adventurer?.health}</p>
+                  <p>GOLD: {adventurerStats.adventurer?.gold}</p>
+                  <p>LEVEL: {adventurerStats.adventurer?.level}</p>
+                  <p>XP: {adventurerStats.adventurer?.xp}</p>
                 </div>
               ) : null}
 

@@ -112,7 +112,7 @@ const Marketplace: React.FC = () => {
             )}
             <table className="w-full border-terminal-green border min-width: 640px">
               <thead>
-                <tr className="sticky top-0 border-2 border-terminal-green bg-terminal-black">
+                <tr className="sticky top-0 border border-terminal-green bg-terminal-black">
                   {headings.map((heading, index) => (
                     <th key={index}>{heading}</th>
                   ))}
