@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import { Adventurer } from "../types";
 import { useLazyQuery } from "@apollo/client";
 import { getAdventurerById } from "../hooks/graphql/queries";
+import { useQuery } from "@apollo/client";
 
 export interface AdventurerProps {
   adventurer: Adventurer | undefined;
@@ -50,6 +51,23 @@ export const useAdventurerContext = () => {
       },
     });
   };
+
+  const { data: updatedAdventurerData, error: testError } = useQuery(
+    getAdventurerById,
+    {
+      variables: {
+        id: adventurer?.adventurer?.id,
+      },
+      pollInterval: 5000,
+    }
+  );
+
+  useEffect(() => {
+    setAdventurer({
+      adventurer: updatedAdventurerData?.adventurers[0],
+      image: undefined, // Set this to the image URL
+    });
+  }, [updatedAdventurerData]);
 
   return {
     adventurer,

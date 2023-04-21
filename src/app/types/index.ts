@@ -121,6 +121,12 @@ export interface Discoveries {
   subDiscoveryType: string;
 }
 
+export interface Metadata {
+  method?: string;
+  description?: string;
+  marketIds?: any[];
+}
+
 export const NullAdventurer: Adventurer = {
   id: 0,
   owner: "",

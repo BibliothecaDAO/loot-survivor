@@ -5,6 +5,7 @@ import {
   useWaitForTransaction,
 } from "@starknet-react/core";
 import { TxStatus } from "./TxStatus";
+import { Metadata } from "../types";
 
 const TransactionHistory = () => {
   const {

@@ -47,7 +47,7 @@ export default function Home() {
       },
     ];
 
-    if (adventurer?.adventurer) {
+    if (adventurer?.adventurer && adventurer?.adventurer.health > 0) {
       newMenu = [
         ...newMenu,
         {

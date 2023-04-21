@@ -62,15 +62,15 @@ const Upgrade = () => {
     },
   ];
 
-  const upgradeTx = {
-    contractAddress: adventurerContract?.address,
-    selector: "upgrade_stat",
-    calldata: [
-      adventurer?.adventurer?.id,
-      "0",
-      getKeyFromValue(gameData.STATS, selected),
-    ],
-  };
+  // const upgradeTx = {
+  //   contractAddress: adventurerContract?.address,
+  //   selector: "upgrade_stat",
+  //   calldata: [
+  //     adventurer?.adventurer?.id,
+  //     "0",
+  //     getKeyFromValue(gameData.STATS, selected),
+  //   ],
+  // };
 
   const handleUpgradeTx = async () => {
     await adventurerContract

@@ -81,15 +81,15 @@ export default function Beast() {
     pollInterval: 5000,
   });
 
-  const { data: updatedAdventurerData, error: testError } = useQuery(
-    getAdventurerById,
-    {
-      variables: {
-        id: formatAdventurer?.id,
-      },
-      pollInterval: 5000,
-    }
-  );
+  // const { data: updatedAdventurerData, error: testError } = useQuery(
+  //   getAdventurerById,
+  //   {
+  //     variables: {
+  //       id: formatAdventurer?.id,
+  //     },
+  //     pollInterval: 5000,
+  //   }
+  // );
 
   useEffect(() => {
     beastByTokenIdRefetch();
@@ -159,12 +159,12 @@ export default function Beast() {
 
   const txLoading = data?.status == "RECEIVED" || data?.status == "PENDING";
 
-  useEffect(() => {
-    setAdventurer({
-      adventurer: updatedAdventurerData?.adventurers[0],
-      image: undefined, // Set this to the image URL
-    });
-  }, [updatedAdventurerData]);
+  // useEffect(() => {
+  //   setAdventurer({
+  //     adventurer: updatedAdventurerData?.adventurers[0],
+  //     image: undefined, // Set this to the image URL
+  //   });
+  // }, [updatedAdventurerData]);
 
   return (
     <div className="flex flex-row mt-5">
