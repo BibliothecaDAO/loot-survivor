@@ -18,7 +18,8 @@ import {
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
 import Image from "next/image";
-import { padAddress } from "../lib/utils";
+import { padAddress, groupBySlot } from "../lib/utils";
+import { InventoryRow } from "./InventoryRow";
 // import { GameData } from "./GameData";
 
 const Inventory: React.FC = () => {
@@ -74,11 +75,11 @@ const Inventory: React.FC = () => {
         setSelectedIndex((prev) => Math.max(prev - 1, 0));
         break;
       case "ArrowDown":
-        setSelectedIndex((prev) => Math.min(prev + 1, testItems.length - 1));
+        setSelectedIndex((prev) => Math.min(prev + 1, items.length - 1));
         break;
       case "Enter":
-        !testItems[selectedIndex].equippedAdventurerId
-          ? handleAddEquipItem(testItems[selectedIndex].id)
+        !items[selectedIndex].equippedAdventurerId
+          ? handleAddEquipItem(items[selectedIndex].id)
           : null;
         break;
     }
@@ -95,258 +96,14 @@ const Inventory: React.FC = () => {
     );
   };
 
-  const testItems = [
-    {
-      bag: null,
-      bidder: null,
-      claimedTime: null,
-      createdBlock: 1681911407,
-      equippedAdventurerId: 41,
-      expiry: null,
-      greatness: 1,
-      id: 143,
-      item: "Club",
-      lastUpdated: "2023-04-19T13:36:47",
-      marketId: null,
-      material: "Oak Hardwood",
-      owner:
-        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
-      ownerAdventurerId: 41,
-      prefix1: null,
-      prefix2: null,
-      price: null,
-      rank: 5,
-      slot: "Weapon",
-      status: null,
-      suffix: null,
-      type: "Bludgeon Weapon",
-      xp: 0,
-      __typename: "Item",
-    },
-    {
-      bag: null,
-      bidder: null,
-      claimedTime: null,
-      createdBlock: 1681911407,
-      equippedAdventurerId: 41,
-      expiry: null,
-      greatness: 1,
-      id: 144,
-      item: "Club",
-      lastUpdated: "2023-04-19T13:36:47",
-      marketId: null,
-      material: "Oak Hardwood",
-      owner:
-        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
-      ownerAdventurerId: 41,
-      prefix1: null,
-      prefix2: null,
-      price: null,
-      rank: 5,
-      slot: "Weapon",
-      status: null,
-      suffix: null,
-      type: "Bludgeon Weapon",
-      xp: 0,
-      __typename: "Item",
-    },
-    {
-      bag: null,
-      bidder: null,
-      claimedTime: null,
-      createdBlock: 1681911407,
-      equippedAdventurerId: 41,
-      expiry: null,
-      greatness: 1,
-      id: 145,
-      item: "Club",
-      lastUpdated: "2023-04-19T13:36:47",
-      marketId: null,
-      material: "Oak Hardwood",
-      owner:
-        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
-      ownerAdventurerId: 41,
-      prefix1: null,
-      prefix2: null,
-      price: null,
-      rank: 5,
-      slot: "Weapon",
-      status: null,
-      suffix: null,
-      type: "Bludgeon Weapon",
-      xp: 0,
-      __typename: "Item",
-    },
-    {
-      bag: null,
-      bidder: null,
-      claimedTime: null,
-      createdBlock: 1681911407,
-      equippedAdventurerId: 41,
-      expiry: null,
-      greatness: 1,
-      id: 146,
-      item: "Club",
-      lastUpdated: "2023-04-19T13:36:47",
-      marketId: null,
-      material: "Oak Hardwood",
-      owner:
-        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
-      ownerAdventurerId: 41,
-      prefix1: null,
-      prefix2: null,
-      price: null,
-      rank: 5,
-      slot: "Weapon",
-      status: null,
-      suffix: null,
-      type: "Bludgeon Weapon",
-      xp: 0,
-      __typename: "Item",
-    },
-    {
-      bag: null,
-      bidder: null,
-      claimedTime: null,
-      createdBlock: 1681911407,
-      equippedAdventurerId: 41,
-      expiry: null,
-      greatness: 1,
-      id: 147,
-      item: "Club",
-      lastUpdated: "2023-04-19T13:36:47",
-      marketId: null,
-      material: "Oak Hardwood",
-      owner:
-        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
-      ownerAdventurerId: 41,
-      prefix1: null,
-      prefix2: null,
-      price: null,
-      rank: 5,
-      slot: "Weapon",
-      status: null,
-      suffix: null,
-      type: "Bludgeon Weapon",
-      xp: 0,
-      __typename: "Item",
-    },
-    {
-      bag: null,
-      bidder: null,
-      claimedTime: null,
-      createdBlock: 1681911407,
-      equippedAdventurerId: 41,
-      expiry: null,
-      greatness: 1,
-      id: 148,
-      item: "Club",
-      lastUpdated: "2023-04-19T13:36:47",
-      marketId: null,
-      material: "Oak Hardwood",
-      owner:
-        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
-      ownerAdventurerId: 41,
-      prefix1: null,
-      prefix2: null,
-      price: null,
-      rank: 5,
-      slot: "Weapon",
-      status: null,
-      suffix: null,
-      type: "Bludgeon Weapon",
-      xp: 0,
-      __typename: "Item",
-    },
-    {
-      bag: null,
-      bidder: null,
-      claimedTime: null,
-      createdBlock: 1681911407,
-      equippedAdventurerId: 41,
-      expiry: null,
-      greatness: 1,
-      id: 149,
-      item: "Club",
-      lastUpdated: "2023-04-19T13:36:47",
-      marketId: null,
-      material: "Oak Hardwood",
-      owner:
-        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
-      ownerAdventurerId: 41,
-      prefix1: null,
-      prefix2: null,
-      price: null,
-      rank: 5,
-      slot: "Weapon",
-      status: null,
-      suffix: null,
-      type: "Bludgeon Weapon",
-      xp: 0,
-      __typename: "Item",
-    },
-    {
-      bag: null,
-      bidder: null,
-      claimedTime: null,
-      createdBlock: 1681911407,
-      equippedAdventurerId: 41,
-      expiry: null,
-      greatness: 1,
-      id: 150,
-      item: "Club",
-      lastUpdated: "2023-04-19T13:36:47",
-      marketId: null,
-      material: "Oak Hardwood",
-      owner:
-        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
-      ownerAdventurerId: 41,
-      prefix1: null,
-      prefix2: null,
-      price: null,
-      rank: 5,
-      slot: "Weapon",
-      status: null,
-      suffix: null,
-      type: "Bludgeon Weapon",
-      xp: 0,
-      __typename: "Item",
-    },
-    {
-      bag: null,
-      bidder: null,
-      claimedTime: null,
-      createdBlock: 1681911407,
-      equippedAdventurerId: 41,
-      expiry: null,
-      greatness: 1,
-      id: 151,
-      item: "Club",
-      lastUpdated: "2023-04-19T13:36:47",
-      marketId: null,
-      material: "Oak Hardwood",
-      owner:
-        "0x07642a1c8d575b0c0f9a7ad7cceb5517c02f36e5f3b36b25429cc7c99383ed0a",
-      ownerAdventurerId: 41,
-      prefix1: null,
-      prefix2: null,
-      price: null,
-      rank: 5,
-      slot: "Weapon",
-      status: null,
-      suffix: null,
-      type: "Bludgeon Weapon",
-      xp: 0,
-      __typename: "Item",
-    },
-  ];
-
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [selectedIndex]);
+
+  const groupedItems = groupBySlot(items);
 
   // useEffect(() => {
   //   const button = buttonRefs.current[selectedIndex];
@@ -359,11 +116,8 @@ const Inventory: React.FC = () => {
   // }, [selectedIndex]);
 
   return (
-    <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-[480px] overflow-auto p-8 gap-6">
-      <div>
-        <p className="text-2xl text-white">
-          {formatAdventurer.adventurer?.name}
-        </p>
+    <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-full p-8 gap-6">
+      <div className="flex flex-col items-center my-auto">
         <div className="w-[250px] h-[250px] relative border-2 border-white my-auto">
           <Image
             src="/MIKE.png"
@@ -372,101 +126,124 @@ const Inventory: React.FC = () => {
             style={{ objectFit: "contain" }}
           />
         </div>
+        <p className="text-2xl text-white mx-auto">
+          {formatAdventurer.adventurer?.name}
+        </p>
+      </div>
+      <div className="flex flex-col gap-7 text-[30px] mt-10">
+        <p>WEAPONS</p>
+        <p>HEAD</p>
+        <p>CHEST</p>
+        <p>FEET</p>
+        <p>HANDS</p>
+        <p>WAIST</p>
+        <p>NECK</p>
+        <p>RING</p>
       </div>
       <div className="flex flex-col gap-6">
         <div className="text-xl font-medium text-white">EQUIPPED</div>
-        <p className="text-terminal-green">
-          WEAPON -{" "}
-          <ItemDisplay
-            item={items.find(
-              (item: any) => item.id == formatAdventurer.adventurer?.weaponId
-            )}
-          />
-        </p>
-        <p className="text-terminal-green">
-          HEAD -{" "}
-          <ItemDisplay
-            item={items.find(
-              (item: any) => item.id == formatAdventurer.adventurer?.headId
-            )}
-          />
-        </p>
-        <p className="text-terminal-green">
-          CHEST -{" "}
-          <ItemDisplay
-            item={items.find(
-              (item: any) => item.id == formatAdventurer.adventurer?.chestId
-            )}
-          />
-        </p>
-        <p className="text-terminal-green">
-          FOOT -{" "}
-          <ItemDisplay
-            item={items.find(
-              (item: any) => item.id == formatAdventurer.adventurer?.feetId
-            )}
-          />
-        </p>
-        <p className="text-terminal-green">
-          HAND -{" "}
-          <ItemDisplay
-            item={items.find(
-              (item: any) => item.id == formatAdventurer.adventurer?.handsId
-            )}
-          />
-        </p>
-        <p className="text-terminal-green">
-          WAIST -{" "}
-          <ItemDisplay
-            item={items.find(
-              (item: any) => item.id == formatAdventurer.adventurer?.waistId
-            )}
-          />
-        </p>
-        <p className="text-terminal-green">
-          NECK -{" "}
-          <ItemDisplay
-            item={items.find(
-              (item: any) => item.id == formatAdventurer.adventurer?.neckId
-            )}
-          />
-        </p>
-        <p className="text-terminal-green">
-          RING -{" "}
-          <ItemDisplay
-            item={items.find(
-              (item: any) => item.id == formatAdventurer.adventurer?.ringId
-            )}
-          />
-        </p>
+        <div className="flex flex-col gap-12">
+          <p className="text-terminal-green">
+            <ItemDisplay
+              item={items.find(
+                (item: any) => item.id == formatAdventurer.adventurer?.weaponId
+              )}
+            />
+          </p>
+          <p className="text-terminal-green">
+            <ItemDisplay
+              item={items.find(
+                (item: any) => item.id == formatAdventurer.adventurer?.headId
+              )}
+            />
+          </p>
+          <p className="text-terminal-green">
+            <ItemDisplay
+              item={items.find(
+                (item: any) => item.id == formatAdventurer.adventurer?.chestId
+              )}
+            />
+          </p>
+          <p className="text-terminal-green">
+            <ItemDisplay
+              item={items.find(
+                (item: any) => item.id == formatAdventurer.adventurer?.feetId
+              )}
+            />
+          </p>
+          <p className="text-terminal-green">
+            <ItemDisplay
+              item={items.find(
+                (item: any) => item.id == formatAdventurer.adventurer?.handsId
+              )}
+            />
+          </p>
+          <p className="text-terminal-green">
+            <ItemDisplay
+              item={items.find(
+                (item: any) => item.id == formatAdventurer.adventurer?.waistId
+              )}
+            />
+          </p>
+          <p className="text-terminal-green">
+            <ItemDisplay
+              item={items.find(
+                (item: any) => item.id == formatAdventurer.adventurer?.neckId
+              )}
+            />
+          </p>
+          <p className="text-terminal-green">
+            <ItemDisplay
+              item={items.find(
+                (item: any) => item.id == formatAdventurer.adventurer?.ringId
+              )}
+            />
+          </p>
+        </div>
       </div>
       <div className="flex flex-col gap-6">
         <div className="text-xl font-medium text-white">OWNED</div>
-        <div className="flex flex-col gap-5 h-[400px] w-[600px] overflow-auto">
-          {testItems.map((item: any, index: number) => (
-            <div key={index} className="flex flex-row items-center gap-5 m-2">
-              <ItemDisplay item={item} />
-              <Button
-                key={index}
-                ref={(ref) => (buttonRefs.current[index] = ref)}
-                className={
-                  selectedIndex === index
-                    ? item.equippedAdventurerId
-                      ? "animate-pulse bg-white"
-                      : "animate-pulse"
-                    : ""
-                }
-                variant={selectedIndex === index ? "subtle" : "outline"}
-                onClick={() => {
-                  !testItems[selectedIndex].equippedAdventurerId
-                    ? handleAddEquipItem(testItems[selectedIndex].id)
-                    : null;
-                }}
-              >
-                {item.equippedAdventurerId ? "Equipped" : "Equip"}
-              </Button>
-            </div>
-          ))}
+        <div className="flex flex-col gap-7">
+          <InventoryRow
+            items={groupedItems["Weapon"]}
+            activeMenu={0}
+            isActive={false}
+          />
+          <InventoryRow
+            items={groupedItems["Head"]}
+            activeMenu={0}
+            isActive={false}
+          />
+          <InventoryRow
+            items={groupedItems["Chest"]}
+            activeMenu={0}
+            isActive={false}
+          />
+          <InventoryRow
+            items={groupedItems["Foot"]}
+            activeMenu={0}
+            isActive={false}
+          />
+          <InventoryRow
+            items={groupedItems["Hand"]}
+            activeMenu={0}
+            isActive={false}
+          />
+          <InventoryRow
+            items={groupedItems["Waist"]}
+            activeMenu={0}
+            isActive={false}
+          />
+          <InventoryRow
+            items={groupedItems["Neck"]}
+            activeMenu={0}
+            isActive={false}
+          />
+          <InventoryRow
+            items={groupedItems["Ring"]}
+            activeMenu={0}
+            isActive={false}
+          />
         </div>
       </div>
     </div>

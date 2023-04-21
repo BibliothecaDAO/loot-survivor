@@ -21,8 +21,6 @@ import HealthSlider from "./HealthSlider";
 import Info from "./Info";
 
 export default function Beast() {
-  const [loading, setLoading] = useState(false);
-
   const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
   const { beastContract } = useContracts();
   const { hashes, addTransaction, transactions } = useTransactionManager();
@@ -131,21 +129,16 @@ export default function Beast() {
 
   return (
     <div className="flex flex-row mt-5">
-      {!loading ? (
-        <div className="w-1/3">
-          <Info adventurer={adventurer?.adventurer} />
-        </div>
-      ) : null}
-      <div className="flex flex-col w-1/3">
+      <div className="w-1/3">
+        <Info adventurer={adventurer?.adventurer} />
+      </div>
+      <div className="flex flex-col gap-10 w-1/3">
         <KeyboardControl buttonsData={buttonsData} />
-        <>
-          {txLoading && hashes && (
-            <div className="loading-ellipsis">Loading</div>
-          )}
-          {hashes && <div className="flex flex-col">Hash: {hashes[-1]}</div>}
-          {error && <div>Error: {JSON.stringify(error)}</div>}
+        <div className="flex flex-col p-4">
+          {txLoading && hash && <div className="loading-ellipsis">Loading</div>}
+          {hash && <div className="flex flex-col">Hash: {hash}</div>}
           {data && <div>Status: {data.status}</div>}
-        </>
+        </div>
       </div>
 
       <div className="flex flex-row w-1/3 bg-terminal-black">

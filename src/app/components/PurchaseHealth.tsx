@@ -27,7 +27,7 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
   };
   const purchaseGoldAmount = healthAmount * 5;
   const hasBalance =
-    formatAdventurer?.gold && formatAdventurer?.gold <= purchaseGoldAmount
+    formatAdventurer?.gold && formatAdventurer?.gold >= purchaseGoldAmount
       ? true
       : false;
 
@@ -77,14 +77,14 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
         cost you <strong>{purchaseGoldAmount}</strong> gold!
       </p>
       <Button
-        disabled={hasBalance}
+        disabled={!hasBalance}
         onClick={async () => {
           handlePurchaseHealth();
         }}
       >
         Purchase Health
       </Button>
-      {hasBalance && (
+      {!hasBalance && (
         <p className="m-auto text-red-600">Not enough gold to purchase!</p>
       )}
     </div>

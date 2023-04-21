@@ -1,9 +1,9 @@
-import { ClassValue, clsx } from "clsx"
-import { twMerge } from "tailwind-merge"
-import BN from "bn.js"
+import { ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+import BN from "bn.js";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
 
 export function indexAddress(address: string) {
@@ -28,36 +28,56 @@ export function displayAddress(string: string) {
   return string.substring(0, 6) + "..." + string.substring(string.length - 4);
 }
 
-
-const P = new BN("800000000000011000000000000000000000000000000000000000000000001", 16)
+const P = new BN(
+  "800000000000011000000000000000000000000000000000000000000000001",
+  16
+);
 
 export function feltToString(felt: BN) {
-    const newStrB = Buffer.from(felt.toString(16), 'hex')
-    return newStrB.toString()
+  const newStrB = Buffer.from(felt.toString(16), "hex");
+  return newStrB.toString();
 }
 
 export function stringToFelt(str: string) {
-    return "0x" + Buffer.from(str).toString('hex')
+  return "0x" + Buffer.from(str).toString("hex");
 }
 
 export function toNegativeNumber(felt: BN) {
-    const added = felt.sub(P);
-    return (added.abs() < felt.abs())
-        ? added
-        : felt;
+  const added = felt.sub(P);
+  return added.abs() < felt.abs() ? added : felt;
 }
 
 type DataDictionary = Record<number, string>;
 
-export function getValueFromKey(data: DataDictionary, key: number): string | null {
+export function getValueFromKey(
+  data: DataDictionary,
+  key: number
+): string | null {
   return data[key] || null;
 }
 
-export function getKeyFromValue(data: DataDictionary, value: string): string | null {
+export function getKeyFromValue(
+  data: DataDictionary,
+  value: string
+): string | null {
   for (const key in data) {
     if (data[key] === value) {
       return key;
     }
   }
   return null;
+}
+
+export function groupBySlot(items: any[]) {
+  const groups: any = {};
+
+  items.forEach((item) => {
+    if (!groups[item.slot]) {
+      groups[item.slot] = [];
+    }
+
+    groups[item.slot].push(item);
+  });
+
+  return groups;
 }

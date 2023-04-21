@@ -75,38 +75,42 @@ export const AdventurersList = ({
     };
   }, [isActive, selectedIndex]);
 
+  console.log(adventurersByOwnerLoading);
+
   return (
     <>
-      {adventurers.length > 0 ? (
-        <div className="flex basis-2/3">
-          <div className="flex flex-col w-1/2">
-            {buttonsData.map((buttonData, index) => (
-              <Button
-                key={buttonData.id}
-                ref={(ref) => (buttonRefs.current[index] = ref)}
-                className={
-                  selectedIndex === index && isActive ? "animate-pulse" : ""
-                }
-                variant={
-                  selectedIndex === index && isActive ? "default" : "ghost"
-                }
-                onClick={() => {
-                  buttonData.action();
-                  setSelectedIndex(index);
-                }}
-              >
-                {buttonData.label}
-              </Button>
-            ))}
+      {!adventurersByOwnerLoading ? (
+        adventurers.length > 0 ? (
+          <div className="flex basis-2/3">
+            <div className="flex flex-col w-1/2">
+              {buttonsData.map((buttonData, index) => (
+                <Button
+                  key={buttonData.id}
+                  ref={(ref) => (buttonRefs.current[index] = ref)}
+                  className={
+                    selectedIndex === index && isActive ? "animate-pulse" : ""
+                  }
+                  variant={
+                    selectedIndex === index && isActive ? "default" : "ghost"
+                  }
+                  onClick={() => {
+                    buttonData.action();
+                    setSelectedIndex(index);
+                  }}
+                >
+                  {buttonData.label}
+                </Button>
+              ))}
+            </div>
+            <div className="w-1/2">
+              <Info adventurer={adventurers[selectedIndex]} />
+            </div>
           </div>
-          <div className="w-1/2">
-            <Info adventurer={adventurers[selectedIndex]} />
-          </div>
-        </div>
+        ) : (
+          <p className="text-lg">You do not have any adventurers!</p>
+        )
       ) : (
-        <p className="text-lg loading-ellipsis">
-          You do not have any adventurers!{" "}
-        </p>
+        <p className="text-lg loading-ellipsis">Loading adventurers</p>
       )}
     </>
   );
