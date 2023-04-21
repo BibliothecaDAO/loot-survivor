@@ -225,6 +225,49 @@ const getLatestBattlesByAdventurer = gql`
   }
 `;
 
+const getBattlesByBeast = gql`
+  query get_battles_by_beast($adventurerId: FeltValue, $beastId: FeltValue) {
+    battles(
+      where: { adventurerId: { eq: $adventurerId }, beastId: { eq: $beastId } }
+      orderBy: { timestamp: { desc: true } }
+    ) {
+      adventurerId
+      ambushed
+      attacker
+      beastId
+      damage
+      fled
+      goldEarned
+      targetHealth
+      timestamp
+      txHash
+      xpEarned
+    }
+  }
+`;
+
+const getLastBattleByAdventurer = gql`
+  query get_latest_battle_by_adventurer($adventurerId: FeltValue) {
+    battles(
+      limit: 1
+      where: { adventurerId: { eq: $adventurerId } }
+      orderBy: { timestamp: { desc: true } }
+    ) {
+      adventurerId
+      ambushed
+      attacker
+      beastId
+      damage
+      fled
+      goldEarned
+      targetHealth
+      timestamp
+      txHash
+      xpEarned
+    }
+  }
+`;
+
 const getItemsByTokenId = gql`
   query get_items($id: FeltValue) {
     items(where: { id: { eq: $id } }) {
@@ -358,6 +401,8 @@ export {
   getBeasts,
   getBeastById,
   getLatestBattlesByAdventurer,
+  getBattlesByBeast,
+  getLastBattleByAdventurer,
   getItems,
   getItemsByTokenId,
   getLatestMarketItems,

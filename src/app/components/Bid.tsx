@@ -20,7 +20,7 @@ interface BidBoxProps {
 export function BidBox({ showBidBox, close, marketId }: BidBoxProps) {
   const { account } = useAccount();
   const { adventurer } = useAdventurer();
-  const { writeAsync, addToCalls, calls } = useTransactionCart();
+  const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
   const { lootMarketArcadeContract } = useContracts();
   const { hashes, addTransaction } = useTransactionManager();
   const transactions = useTransactions({ hashes });

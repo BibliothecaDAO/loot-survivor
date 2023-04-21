@@ -9,15 +9,15 @@ export interface AdventurerProps {
 }
 
 export interface AdventurerState {
-  /** The connected guild object. */
   adventurer?: AdventurerProps;
-  /** The emblem image string. */
   handleUpdateAdventurer: (id: number) => void;
+  setAdventurer: (value: any) => void;
 }
 
 const ADVENTURER_INITIAL_STATE: AdventurerState = {
   adventurer: undefined,
   handleUpdateAdventurer: () => undefined,
+  setAdventurer: () => undefined,
 };
 
 const AdventurerContext = createContext<AdventurerState>(
@@ -49,12 +49,12 @@ export const useAdventurerContext = () => {
         id: id,
       },
     });
-    console.log(id);
   };
 
   return {
     adventurer,
     handleUpdateAdventurer,
+    setAdventurer,
   };
 };
 
