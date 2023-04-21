@@ -187,7 +187,7 @@ const getAdventurerById = gql`
 `;
 
 const getBeastById = gql`
-  query get_beast_by_id($id: number) {
+  query get_beast_by_id($id: FeltValue) {
     beasts(where: { id: { eq: $id } }) {
       adventurerId
       armorType

@@ -24,7 +24,7 @@ import { padAddress } from "../lib/utils";
 const Inventory: React.FC = () => {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";
-  const { writeAsync, addToCalls, calls } = useTransactionCart();
+  const { addToCalls, calls } = useTransactionCart();
   const { adventurerContract } = useContracts();
   const [hash, setHash] = useState<string | undefined>(undefined);
   const { hashes, addTransaction } = useTransactionManager();

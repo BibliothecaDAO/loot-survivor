@@ -5,51 +5,58 @@ import { useAdventurer } from "../context/AdventurerProvider";
 import { getKeyFromValue } from "../lib/utils";
 import { GameData } from "./GameData";
 import VerticalKeyboardControl from "./VerticalMenu";
-import { useTransactionManager } from "@starknet-react/core";
+import {
+  useTransactionManager,
+  useWaitForTransaction,
+} from "@starknet-react/core";
 
 const Upgrade = () => {
   const { adventurerContract } = useContracts();
-  const { writeAsync, addToCalls } = useTransactionCart();
   const { adventurer } = useAdventurer();
   const { addTransaction } = useTransactionManager();
   const [selected, setSelected] = useState("");
+  const [hash, setHash] = useState("");
+  const { data, status, isLoading, error } = useWaitForTransaction({
+    hash: hash,
+    watch: true,
+  });
 
   const gameData = new GameData();
 
   const upgradeMenu = [
     {
       id: 1,
-      label: "Strength",
+      label: `Strength - ${adventurer?.adventurer?.strength}`,
       value: "Strength",
       action: async () => handleUpgradeTx(),
     },
     {
       id: 2,
-      label: "Dexterity",
+      label: `Dexterity - ${adventurer?.adventurer?.dexterity}`,
       value: "Dexterity",
       action: async () => handleUpgradeTx(),
     },
     {
       id: 3,
-      label: "Vitality",
+      label: `Vitality - ${adventurer?.adventurer?.vitality}`,
       value: "Vitality",
       action: async () => handleUpgradeTx(),
     },
     {
       id: 4,
-      label: "Intelligence",
+      label: `Intelligence - ${adventurer?.adventurer?.intelligence}`,
       value: "Intelligence",
       action: async () => handleUpgradeTx(),
     },
     {
       id: 5,
-      label: "Wisdom",
+      label: `Wisdom - ${adventurer?.adventurer?.wisdom}`,
       value: "Wisdom",
       action: async () => handleUpgradeTx(),
     },
     {
       id: 6,
-      label: "Charisma",
+      label: `Charisma - ${adventurer?.adventurer?.charisma}`,
       value: "Charisma",
       action: async () => handleUpgradeTx(),
     },
@@ -66,13 +73,21 @@ const Upgrade = () => {
   };
 
   const handleUpgradeTx = async () => {
-    addToCalls(upgradeTx);
-    await writeAsync().then((tx: any) => {
-      addTransaction({
-        hash: tx.transaction_hash,
-        metadata: { test: true },
+    await adventurerContract
+      ?.invoke("upgrade_stat", [
+        [adventurer?.adventurer?.id, "0"],
+        getKeyFromValue(gameData.STATS, selected),
+      ])
+      .then((tx) => {
+        setHash(tx.transaction_hash);
+        addTransaction({
+          hash: tx.transaction_hash,
+          metadata: {
+            method: "Upgrade Stat",
+            description: `Upgrading ${selected}`,
+          },
+        });
       });
-    });
   };
 
   const Strength = (): ReactElement => (
@@ -104,26 +119,39 @@ const Upgrade = () => {
 
   return (
     <div className="flex flex-col gap-10 w-full mt-[100px]">
-      <p className="mx-auto items-center text-[80px] animate-pulse">
-        Please select upgrade!
-      </p>
-      <div className="flex flex-row">
-        <div className="w-1/2">
-          <VerticalKeyboardControl
-            buttonsData={upgradeMenu}
-            onSelected={(value) => setSelected(value)}
-            onEnterAction={true}
-          />
+      {hash ? (
+        <div className="m-auto">
+          {(data?.status == "RECEIVED" || data?.status == "PENDING") && (
+            <div className="loading-ellipsis">Loading</div>
+          )}
+          <div className="flex flex-col">Hash: {hash}</div>
+          {data && <div>Status: {data.status}</div>}
         </div>
-        <div className="flex items-center justify-center w-1/2 bg-black border">
-          {selected == "Strength" && <Strength />}
-          {selected == "Dexterity" && <Dexterity />}
-          {selected == "Vitality" && <Vitality />}
-          {selected == "Intelligence" && <Intelligence />}
-          {selected == "Wisdom" && <Wisdom />}
-          {selected == "Charisma" && <Charisma />}
-        </div>
-      </div>
+      ) : (
+        <>
+          <p className="mx-auto items-center text-[60px] animate-pulse">
+            You are now level {adventurer?.adventurer?.level}, please select
+            upgrade!
+          </p>
+          <div className="flex flex-row">
+            <div className="w-1/2">
+              <VerticalKeyboardControl
+                buttonsData={upgradeMenu}
+                onSelected={(value) => setSelected(value)}
+                onEnterAction={true}
+              />
+            </div>
+            <div className="flex items-center justify-center w-1/2 bg-black border">
+              {selected == "Strength" && <Strength />}
+              {selected == "Dexterity" && <Dexterity />}
+              {selected == "Vitality" && <Vitality />}
+              {selected == "Intelligence" && <Intelligence />}
+              {selected == "Wisdom" && <Wisdom />}
+              {selected == "Charisma" && <Charisma />}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

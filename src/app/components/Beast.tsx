@@ -23,7 +23,7 @@ import Info from "./Info";
 export default function Beast() {
   const [loading, setLoading] = useState(false);
 
-  const { writeAsync, addToCalls, calls } = useTransactionCart();
+  const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
   const { beastContract } = useContracts();
   const { hashes, addTransaction, transactions } = useTransactionManager();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
@@ -47,6 +47,8 @@ export default function Beast() {
     pollInterval: 5000,
   });
 
+  console.log(beastByTokenIdData, beastByTokenIdError);
+
   const {
     loading: battlesByAdventurerLoading,
     error: battlesByAdventurerError,
@@ -54,12 +56,10 @@ export default function Beast() {
     refetch: battlesByAdventurerRefetch,
   } = useQuery(getLatestBattlesByAdventurer, {
     variables: {
-      adventurerId: formatAdventurer?.beastId,
+      adventurerId: formatAdventurer?.id,
     },
     pollInterval: 5000,
   });
-
-  console.log(battlesByAdventurerData);
 
   useEffect(() => {
     beastByTokenIdRefetch();
@@ -96,13 +96,13 @@ export default function Beast() {
       label: "ATTACK BEAST!",
       action: async () => {
         addToCalls(attack);
-        await writeAsync().then((tx: any) => {
+        await handleSubmitCalls().then((tx: any) => {
           setHash(tx.transaction_hash);
           addTransaction({
             hash: tx.transaction_hash,
             metadata: {
               method: "Attack Beast",
-              desription: "Attacking Beast!",
+              description: `Attacking ${beastData.beast}`,
             },
           });
         });
@@ -113,13 +113,13 @@ export default function Beast() {
       label: "FLEE BEAST",
       action: async () => {
         addToCalls(flee);
-        await writeAsync().then((tx: any) => {
+        await handleSubmitCalls().then((tx: any) => {
           setHash(tx.transaction_hash);
           addTransaction({
             hash: tx.transaction_hash,
             metadata: {
               method: "Flee Beast",
-              desription: "Flee from Beast!",
+              description: `Fleeing from ${beastData.beast}`,
             },
           });
         });
@@ -169,13 +169,12 @@ export default function Beast() {
               <p className="text-lg text-terminal-yellow">
                 RANK {beastData.rank}
               </p>
+              <p className="text-lg text-terminal-yellow">
+                LEVEL {beastData.level}
+              </p>
               <p className="text-lg text-terminal-yellow">XP {beastData.xp}</p>
-              <p className="text-lg text-red-600">
-                ATTACK TYPE {beastData.attackType}
-              </p>
-              <p className="text-lg text-red-600">
-                ARMOR TYPE {beastData.armorType}
-              </p>
+              <p className="text-lg text-red-600">{beastData.attackType}</p>
+              <p className="text-lg text-red-600">{beastData.armorType}</p>
             </div>
           </div>
         ) : (

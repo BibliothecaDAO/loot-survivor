@@ -19,7 +19,7 @@ import { NullAdventurerProps } from "../types";
 const Marketplace: React.FC = () => {
   const { account } = useAccount();
   const { adventurer } = useAdventurer();
-  const { writeAsync, addToCalls, calls } = useTransactionCart();
+  const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
   const { lootMarketArcadeContract } = useContracts();
   const { hashes, addTransaction } = useTransactionManager();
   const [hash, setHash] = useState<string | undefined>(undefined);

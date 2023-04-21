@@ -54,7 +54,6 @@ const Discovery = ({ hash }: DiscoveryProps) => {
             <div className="loading-ellipsis">Loading</div>
           )}
           <div className="flex flex-col">Hash: {currentHash}</div>
-          {error && <div>Error: {JSON.stringify(error)}</div>}
           {data && <div>Status: {data.status}</div>}
         </>
       ) : latestDiscoveries.length > 0 ? (

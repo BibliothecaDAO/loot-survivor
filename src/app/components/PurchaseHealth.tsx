@@ -16,7 +16,7 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
   const [healthAmount, setHealthAmount] = useState(1);
   const { adventurerContract } = useContracts();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
-  const { writeAsync, addToCalls } = useTransactionCart();
+  const { handleSubmitCalls, addToCalls } = useTransactionCart();
   const { addTransaction } = useTransactionManager();
 
   const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
@@ -33,12 +33,6 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
 
   const handlePurchaseHealth = async () => {
     addToCalls(purchaseHealthTx);
-    await writeAsync().then((tx: any) => {
-      addTransaction({
-        hash: tx.transaction_hash,
-        metadata: { test: true },
-      });
-    });
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {

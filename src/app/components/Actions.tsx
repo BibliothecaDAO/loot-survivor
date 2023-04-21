@@ -19,7 +19,7 @@ import Discovery from "./Discovery";
 
 export default function Actions() {
   const [loading, setLoading] = useState(false);
-  const { writeAsync, addToCalls, calls } = useTransactionCart();
+  const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
   const { adventurerContract } = useContracts();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
   const { hashes, addTransaction } = useTransactionManager();
@@ -43,11 +43,14 @@ export default function Actions() {
       action: async () => {
         {
           addToCalls(exploreTx);
-          await writeAsync().then((tx: any) => {
+          await handleSubmitCalls().then((tx: any) => {
             setHash(tx.transaction_hash);
             addTransaction({
               hash: tx.transaction_hash,
-              metadata: { method: "explore" },
+              metadata: {
+                method: "Explore",
+                description: `Exploring with ${formatAdventurer?.name}`,
+              },
             });
           });
         }

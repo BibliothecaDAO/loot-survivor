@@ -4,7 +4,7 @@ import { useTransactionManager } from "@starknet-react/core";
 import { Button } from "./Button";
 
 const TransactionCart = () => {
-  const { writeAsync, addToCalls, calls } = useTransactionCart();
+  const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
   const { addTransaction } = useTransactionManager();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -36,7 +36,7 @@ const TransactionCart = () => {
           </ul>
           <Button
             onClick={async () =>
-              await writeAsync().then((tx: any) =>
+              await handleSubmitCalls().then((tx: any) =>
                 addTransaction({
                   hash: tx.transaction_hash,
                   metadata: {

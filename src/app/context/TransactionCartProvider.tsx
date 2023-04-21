@@ -3,15 +3,17 @@ import { useContractWrite } from "@starknet-react/core";
 
 export interface TransactionCartState {
   /** The connected guild object. */
-  writeAsync: any;
+  handleSubmitCalls: any;
   calls: any[];
   addToCalls: (value: any) => void;
+  removeFromCalls: (value: any) => void;
 }
 
 const TRANSACTION_CART_INITIAL_STATE: TransactionCartState = {
-  writeAsync: () => undefined,
+  handleSubmitCalls: () => undefined,
   calls: [],
   addToCalls: (value: any) => undefined,
+  removeFromCalls: (value: any) => undefined,
 };
 
 const TransactionCartContext = createContext<TransactionCartState>(
@@ -41,9 +43,34 @@ export const useTransactionCartContext = () => {
     setCalls((calls: any) => [...calls, tx]);
   };
 
+  const removeFromCalls = ({
+    contractAddress,
+    selector,
+    calldata,
+  }: {
+    contractAddress: string;
+    selector: string;
+    calldata: string;
+  }) => {
+    setCalls((calls: any) =>
+      calls.filter(
+        (call: any) =>
+          call.contractAddress !== contractAddress ||
+          call.entrypoint !== selector ||
+          call.calldata !== calldata
+      )
+    );
+  };
+
   const { writeAsync } = useContractWrite({ calls });
 
-  return { writeAsync, calls, addToCalls };
+  const handleSubmitCalls = async () => {
+    const tx = await writeAsync();
+    setCalls([]);
+    return tx;
+  };
+
+  return { handleSubmitCalls, calls, addToCalls, removeFromCalls };
 };
 
 export function TransactionCartProvider({
