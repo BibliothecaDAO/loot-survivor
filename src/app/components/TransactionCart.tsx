@@ -12,33 +12,37 @@ const TransactionCart = () => {
     setIsOpen(!isOpen);
   };
 
+  console.log(calls);
+
   return (
     <>
       <button
         onClick={toggleDropdown}
-        className="flex p-2 bg-black border border-terminal-greenrelative"
+        className="flex p-2 bg-black border border-terminal-green relative"
       >
         {isOpen ? "Hide Cart" : "Show Cart"}
       </button>
       {isOpen ? (
         <div className="absolute right-0 top-10 z-10 w-96 h-96 p-4 m-2 bg-terminal-black border border-terminal-green">
           <h1>TRANSACTIONS</h1>
-          <ul>
+          <div className="flex flex-row w-full border border-terminal-green">
             {calls.map((call, i) => (
               <li key={i}>
-                <div>
-                  <p>{call.selector}</p>
-                  {/* {call.metadata.method}
-                  {call.metadata.description} */}
+                <div className="flex flex-row gap-2">
+                  <>
+                    {call && <div>{call.selector}</div>}
+                    {call && <div>{call.metadata.method}</div>}
+                    {call && <div>{call.metadata.description}</div>}
+                  </>
                 </div>
               </li>
             ))}
-          </ul>
+          </div>
           <Button
             onClick={async () =>
               await handleSubmitCalls().then((tx: any) =>
                 addTransaction({
-                  hash: tx.transaction_hash,
+                  hash: tx.hash,
                   metadata: {
                     method: "Performing multicall",
                     description: "Transactions have been batched and sent!",
