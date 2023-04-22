@@ -123,6 +123,7 @@ const Marketplace: React.FC = () => {
     "Bidder",
     "Expiry",
     "Status",
+    "Claimed",
     "Actions",
   ];
 
@@ -146,7 +147,7 @@ const Marketplace: React.FC = () => {
             )}
             <table className="w-full border-terminal-green border min-width: 640px">
               <thead>
-                <tr className="sticky top-0 border z-10 border-terminal-green bg-terminal-black">
+                <tr className="sticky top-0 border z-5 border-terminal-green bg-terminal-black">
                   {headings.map((heading, index) => (
                     <th key={index}>{heading}</th>
                   ))}
@@ -181,6 +182,7 @@ const Marketplace: React.FC = () => {
                       </td>
                       <td className="text-center">{item.expiry}</td>
                       <td className="text-center">{item.status}</td>
+                      <td className="text-center">{item.claimedTime}</td>
                       <td className="text-center">
                         <Button
                           onClick={() => setShowBidBox(index)}
