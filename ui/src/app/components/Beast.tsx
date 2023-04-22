@@ -159,13 +159,6 @@ export default function Beast() {
 
   const txLoading = data?.status == "RECEIVED" || data?.status == "PENDING";
 
-  // useEffect(() => {
-  //   setAdventurer({
-  //     adventurer: updatedAdventurerData?.adventurers[0],
-  //     image: undefined, // Set this to the image URL
-  //   });
-  // }, [updatedAdventurerData]);
-
   return (
     <div className="flex flex-row mt-5">
       <div className="w-1/3">

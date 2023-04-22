@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { getValueFromKey } from "../lib/utils";
 import { GameData } from "./GameData";
+import { ANSIArt } from "./ANSIGenerator";
 
 interface BeastDisplayProps {
   beastData: any;
@@ -8,6 +9,11 @@ interface BeastDisplayProps {
 
 export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
   const gameData = new GameData();
+  const ansiImage = ANSIArt({
+    imageUrl:
+      getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) || "/phoenix.png",
+    newWidth: 20,
+  });
   return (
     <div className="flex flex-col">
       <div className="w-[160px] h-[160px] border-4 border-white relative m-4">
@@ -20,6 +26,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
           fill={true}
           style={{ objectFit: "contain" }}
         />
+        {/* {ansiImage} */}
       </div>
       <div className="flex flex-col items-center mt-5">
         <div className="text-xl font-medium text-white">{beastData?.beast}</div>
