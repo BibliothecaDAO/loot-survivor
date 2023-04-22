@@ -10,7 +10,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
   const gameData = new GameData();
   return (
     <div className="flex flex-col">
-      <div className="w-[250px] h-[250px] relative mt-4">
+      <div className="w-[160px] h-[160px] border-4 border-white relative m-4">
         <Image
           src={
             getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
@@ -21,7 +21,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
           style={{ objectFit: "contain" }}
         />
       </div>
-      <div className="flex flex-col items-center mt-9">
+      <div className="flex flex-col items-center mt-5">
         <div className="text-xl font-medium text-white">{beastData?.beast}</div>
         <p className="text-lg text-terminal-green">
           HEALTH {beastData?.health}

@@ -12,7 +12,10 @@ import { BidBox } from "./Bid";
 import { Button } from "./Button";
 import HorizontalKeyboardControl from "./HorizontalMenu";
 import { useQuery } from "@apollo/client";
-import { getLatestMarketItems } from "../hooks/graphql/queries";
+import {
+  getLatestMarketItems,
+  getAdventurersInList,
+} from "../hooks/graphql/queries";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
 
@@ -47,6 +50,32 @@ const Marketplace: React.FC = () => {
     ? marketLatestItemsData.items
     : [];
 
+  const bidders: number[] = [];
+
+  for (const dict of marketLatestItems) {
+    if (dict.bidder && !bidders.includes(dict.bidder)) {
+      bidders.push(dict.bidder);
+    }
+  }
+
+  const {
+    loading: adventurersInListLoading,
+    error: adventurersInListError,
+    data: adventurersInListData,
+    refetch: adventurersInListRefetch,
+  } = useQuery(getAdventurersInList, {
+    variables: {
+      ids: bidders,
+    },
+    pollInterval: 5000,
+  });
+
+  console.log(adventurersInListData, adventurersInListError);
+
+  const formatAdventurers = adventurersInListData
+    ? adventurersInListData.adventurers
+    : [];
+
   const mintDailyItemsTx = {
     contractAddress: lootMarketArcadeContract?.address,
     selector: "mint_daily_items",
@@ -56,19 +85,16 @@ const Marketplace: React.FC = () => {
 
   const convertExpiryTime = (expiry: string) => {
     const expiryTime = new Date(expiry);
-    console.log(expiryTime.getTime());
 
     // Convert the offset to milliseconds
     const timezoneOffsetMilliseconds = 60 * 60 * 1000;
 
     // Add the offset to the expiry time to get the correct UTC Unix timestamp
     const expiryTimeUTC = expiryTime.getTime() + timezoneOffsetMilliseconds;
-    console.log(expiryTimeUTC);
     return expiryTimeUTC;
   };
 
   const currentTime = new Date().getTime(); // Get the current time in milliseconds
-  console.log(currentTime, convertExpiryTime(marketLatestItems[3]?.expiry));
 
   const bidExists = (marketId: number) => {
     return calls.some(
@@ -100,6 +126,8 @@ const Marketplace: React.FC = () => {
     "Actions",
   ];
 
+  console.log(formatAdventurers, bidders);
+
   return (
     <>
       {adventurer?.adventurer?.level != 1 ? (
@@ -118,7 +146,7 @@ const Marketplace: React.FC = () => {
             )}
             <table className="w-full border-terminal-green border min-width: 640px">
               <thead>
-                <tr className="sticky top-0 border border-terminal-green bg-terminal-black">
+                <tr className="sticky top-0 border z-10 border-terminal-green bg-terminal-black">
                   {headings.map((heading, index) => (
                     <th key={index}>{heading}</th>
                   ))}
@@ -141,7 +169,16 @@ const Marketplace: React.FC = () => {
                       <td className="text-center">{item.greatness}</td>
                       <td className="text-center">{item.xp}</td>
                       <td className="text-center">{item.price}</td>
-                      <td className="text-center">{item.bidder}</td>
+                      <td className="text-center">
+                        {item.bidder
+                          ? `${
+                              formatAdventurers.find(
+                                (adventurer: any) =>
+                                  adventurer.id == item.bidder
+                              )?.name
+                            } - ${item.bidder}`
+                          : ""}
+                      </td>
                       <td className="text-center">{item.expiry}</td>
                       <td className="text-center">{item.status}</td>
                       <td className="text-center">
@@ -176,7 +213,8 @@ const Marketplace: React.FC = () => {
                           disabled={
                             claimExists(item.marketId) ||
                             !item.expiry ||
-                            convertExpiryTime(item.expiry) > currentTime
+                            convertExpiryTime(item.expiry) > currentTime ||
+                            formatAdventurer.adventurer?.id != item.bidder
                           }
                           className={
                             claimExists(item.marketId) ? "bg-white" : ""

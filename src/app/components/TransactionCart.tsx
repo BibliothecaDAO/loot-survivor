@@ -47,6 +47,9 @@ const TransactionCart = () => {
                 <div className="flex flex-col gap-2">
                   {/* {call && <p>{call.selector}</p>}  */}
                   {call && <p>{call.entrypoint}</p>}
+                  {/* <p className="text-white text-xl">
+                    {(call?.metadata as Metadata)?.method}:{" "}
+                  </p> */}
                   {/* {call && <p>{call.method}</p>}
                   {call && <p>{call.metadata.description}</p>} */}
                 </div>

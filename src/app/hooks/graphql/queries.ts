@@ -186,6 +186,42 @@ const getAdventurerById = gql`
   }
 `;
 
+const getAdventurersInList = gql`
+  query get_adventurer_by_id($ids: [FeltValue!]) {
+    adventurers(where: { id: { In: $ids } }) {
+      beastId
+      charisma
+      chestId
+      dexterity
+      feetId
+      handsId
+      headId
+      health
+      id
+      imageHash1
+      imageHash2
+      intelligence
+      level
+      luck
+      name
+      neckId
+      order
+      owner
+      race
+      ringId
+      status
+      strength
+      upgrading
+      vitality
+      waistId
+      weaponId
+      wisdom
+      xp
+      gold
+    }
+  }
+`;
+
 const getBeastById = gql`
   query get_beast_by_id($id: FeltValue) {
     beasts(where: { id: { eq: $id } }) {
@@ -398,6 +434,7 @@ export {
   getDiscoveryByTxHash,
   getAdventurersByOwner,
   getAdventurerById,
+  getAdventurersInList,
   getBeasts,
   getBeastById,
   getLatestBattlesByAdventurer,

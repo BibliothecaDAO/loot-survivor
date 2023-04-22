@@ -42,7 +42,7 @@ export const InventoryRow = ({
   const ItemDisplay = (item: any) => {
     const formatItem = item.item;
     return (
-      <p className="w-full">
+      <p className="w-full whitespace-nowrap">
         {formatItem
           ? `${formatItem.item} [Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`
           : "Nothing"}
@@ -82,12 +82,12 @@ export const InventoryRow = ({
     };
   }, [isActive, selectedIndex]);
   return (
-    <div className="flex flex-row gap-10 w-full">
-      <p className="text-2xl w-60">{title}</p>
+    <div className="flex flex-row gap-3 w-full">
+      <p className="text-xl w-60 whitespace-nowrap">{title}</p>
       <ItemDisplay
         item={items?.find((item: any) => item.id == equippedItemId)}
       />
-      <div className="flex flex-row gap-5 w-full overflow-auto">
+      <div className="flex flex-row gap-4 w-full overflow-auto">
         {items?.map((item: any, index: number) => (
           <>
             {item.id != equippedItemId ? (

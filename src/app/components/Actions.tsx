@@ -22,7 +22,7 @@ export default function Actions() {
   const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
   const { adventurerContract } = useContracts();
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
-  const { hashes, addTransaction } = useTransactionManager();
+  const { hashes, transactions, addTransaction } = useTransactionManager();
   const [selected, setSelected] = useState<String>("");
   const [activeMenu, setActiveMenu] = useState(0);
   const [hash, setHash] = useState();

@@ -116,9 +116,9 @@ const Inventory: React.FC = () => {
   // }, [selectedIndex]);
 
   return (
-    <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-full p-8 gap-6">
-      <div className="flex flex-col items-center my-auto">
-        <div className="w-[250px] h-[250px] relative border-2 border-white my-auto">
+    <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-[500px] p-8 gap-6">
+      <div className="flex flex-col items-center">
+        <div className="w-[250px] h-[250px] relative border-2 border-white m-2">
           <Image
             src="/MIKE.png"
             alt="adventurer-image"
