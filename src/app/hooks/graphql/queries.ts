@@ -335,11 +335,11 @@ const getItemsByTokenId = gql`
 `;
 
 const getLatestMarketItems = gql`
-  query get_latest_market_items {
+  query get_latest_market_items($itemsNumber: Int) {
     items(
       where: { marketId: { gt: 0 } }
-      limit: 20
-      orderBy: { createdBlock: { desc: true }, marketId: { asc: true }}
+      limit: $itemsNumber
+      orderBy: { createdBlock: { desc: true }, marketId: { asc: true } }
     ) {
       bag
       bidder
@@ -428,6 +428,15 @@ const getItemsByOwner = gql`
   }
 `;
 
+const getLatestMarketItemsNumber = gql`
+  query get_market_items_number {
+    market(limit: 1, orderBy: { timestamp: { desc: true } })
+    caller
+    itemsNumber
+    timestamp
+  }
+`;
+
 export {
   getAdventurer,
   getLatestDiscoveries,
@@ -445,4 +454,5 @@ export {
   getLatestMarketItems,
   getItemsByOwner,
   getItemsByAdventurer,
+  getLatestMarketItemsNumber,
 };
