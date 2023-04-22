@@ -75,7 +75,7 @@ const Upgrade = () => {
   const handleUpgradeTx = async () => {
     await adventurerContract
       ?.invoke("upgrade_stat", [
-        [adventurer?.adventurer?.id, "0"],
+        { low: adventurer?.adventurer?.id, high: "0" },
         getKeyFromValue(gameData.STATS, selected),
       ])
       .then((tx) => {

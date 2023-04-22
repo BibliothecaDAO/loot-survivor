@@ -54,8 +54,21 @@ const Marketplace: React.FC = () => {
     metadata: `Minting Loot Items!`,
   };
 
+  const convertExpiryTime = (expiry: string) => {
+    const expiryTime = new Date(expiry);
+    console.log(expiryTime.getTime());
+
+    // Convert the offset to milliseconds
+    const timezoneOffsetMilliseconds = 60 * 60 * 1000;
+
+    // Add the offset to the expiry time to get the correct UTC Unix timestamp
+    const expiryTimeUTC = expiryTime.getTime() + timezoneOffsetMilliseconds;
+    console.log(expiryTimeUTC);
+    return expiryTimeUTC;
+  };
+
   const currentTime = new Date().getTime(); // Get the current time in milliseconds
-  console.log(currentTime, new Date(marketLatestItems[0]?.expiry).getTime());
+  console.log(currentTime, convertExpiryTime(marketLatestItems[3]?.expiry));
 
   const bidExists = (marketId: number) => {
     return calls.some(
@@ -163,7 +176,7 @@ const Marketplace: React.FC = () => {
                           disabled={
                             claimExists(item.marketId) ||
                             !item.expiry ||
-                            new Date(item.expiry).getTime() > currentTime
+                            convertExpiryTime(item.expiry) > currentTime
                           }
                           className={
                             claimExists(item.marketId) ? "bg-white" : ""

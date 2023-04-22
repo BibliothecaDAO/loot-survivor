@@ -15,6 +15,7 @@ import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import { NullDiscovery } from "../types";
 import { NullAdventurer } from "../types";
 import { useAdventurer } from "../context/AdventurerProvider";
+import { TxActivity } from "./TxActivity";
 
 interface DiscoveryProps {
   hash: any;
@@ -49,13 +50,7 @@ const Discovery = ({ hash }: DiscoveryProps) => {
     <div className="flex flex-col gap-5 m-auto">
       {(hash && data?.status != "ACCEPTED_ON_L2") ||
       (hash && data?.status != "ACCEPTED_ON_L1") ? (
-        <>
-          {(data?.status == "RECEIVED" || data?.status == "PENDING") && (
-            <div className="loading-ellipsis">Loading</div>
-          )}
-          <div className="flex flex-col">Hash: {currentHash}</div>
-          {data && <div>Status: {data.status}</div>}
-        </>
+        <TxActivity hash={hash} />
       ) : latestDiscoveries.length > 0 ? (
         <>
           <p>Recent discoveries:</p>
