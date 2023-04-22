@@ -11,7 +11,8 @@ export const TxActivity = ({ hash }: TxActivityProps) => {
     hash,
     watch: true,
   });
-  console.log(chain);
+  const network = useNetwork();
+  console.log(network);
 
   return (
     <>
@@ -23,11 +24,7 @@ export const TxActivity = ({ hash }: TxActivityProps) => {
           )}
           <div className="flex flex-col">
             Hash:{" "}
-            <a
-              href={`https://https://testnet.starkscan.co/tx/${padAddress(
-                hash
-              )}`}
-            >
+            <a href={`https://testnet.starkscan.co/tx/${padAddress(hash)}`}>
               {displayAddress(hash)}
             </a>
           </div>

@@ -7,7 +7,6 @@ export const BattleDisplay = ({
   battleData,
   beastName,
 }: BattleDisplayProps) => {
-  console.log(beastName);
   return (
     <>
       {battleData.attacker == "Adventurer" ? (
@@ -19,7 +18,8 @@ export const BattleDisplay = ({
           <p>You fled the {beastName}</p>
         ) : (
           <p>
-            You killed the {beastName} after inflicting {battleData.damage}
+            You killed the {beastName} after inflicting {battleData.damage}{" "}
+            damage
           </p>
         )
       ) : battleData.targetHealth > 0 ? (

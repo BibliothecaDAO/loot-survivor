@@ -33,7 +33,7 @@ export const InventoryRow = ({
       const equipItem = {
         contractAddress: adventurerContract?.address,
         selector: "equip_item",
-        calldata: [formatAdventurer?.id, itemId],
+        calldata: [formatAdventurer?.id, "0", itemId, "0"],
       };
       addToCalls(equipItem);
     }
@@ -71,6 +71,8 @@ export const InventoryRow = ({
         break;
     }
   };
+
+  console.log(items);
   useEffect(() => {
     if (isActive) {
       window.addEventListener("keydown", handleKeyDown);

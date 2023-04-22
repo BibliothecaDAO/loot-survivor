@@ -16,6 +16,7 @@ import { NullDiscovery } from "../types";
 import { NullAdventurer } from "../types";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { TxActivity } from "./TxActivity";
+import { DiscoveryDisplay } from "./DiscoveryDisplay";
 
 interface DiscoveryProps {
   hash: any;
@@ -56,7 +57,9 @@ const Discovery = ({ hash }: DiscoveryProps) => {
           <p>Recent discoveries:</p>
           <div className="flex flex-col gap-2">
             {latestDiscoveries.map((discovery: any, index: number) => (
-              <p key={index}>Discovered {discovery.discoveryType}</p>
+              <div key={index}>
+                <DiscoveryDisplay discoveryData={discovery} />
+              </div>
             ))}
           </div>
         </>

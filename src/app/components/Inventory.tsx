@@ -56,8 +56,6 @@ const Inventory: React.FC = () => {
 
   const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
 
-  console.log(items);
-
   const handleAddEquipItem = (itemId: any) => {
     if (adventurerContract && formatAddress) {
       const equipItem = {
