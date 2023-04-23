@@ -1,6 +1,6 @@
 "use client";
 
-import { useAccount, useConnectors } from "@starknet-react/core";
+import { useAccount, useConnectors, useNetwork } from "@starknet-react/core";
 import { useState, useEffect } from "react";
 import { useAdventurer } from "./context/AdventurerProvider";
 import { useTransactionCart } from "./context/TransactionCartProvider";
@@ -17,10 +17,12 @@ import TransactionHistory from "./components/TransactionHistory";
 import TransactionCart from "./components/TransactionCart";
 import Upgrade from "./components/Upgrade";
 import Intro from "./components/Intro";
+import { AddDevnetButton } from "./components/DevnetConnectors";
 
 export default function Home() {
   const { connect, disconnect, connectors } = useConnectors();
   const { account } = useAccount();
+  console.log(account);
   const { adventurer } = useAdventurer();
   const { calls } = useTransactionCart();
 
@@ -150,6 +152,7 @@ export default function Home() {
               </p>
             </div>
           )}
+          {/* <AddDevnetButton /> */}
         </>
       ) : (
         <Intro />

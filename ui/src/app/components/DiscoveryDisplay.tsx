@@ -11,7 +11,14 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       ) : discoveryData.discoveryType == "Beast" ? (
         <p>You discovered a beast!</p>
       ) : discoveryData.discoveryType == "Obstacle" ? (
-        <p>You discovered an obstacle!</p>
+        discoveryData.outputAmount == 0 ? (
+          <p>You avoided the {discoveryData.subDiscoveryType} obstacle!</p>
+        ) : (
+          <p>
+            You discovered the {discoveryData.subDiscoveryType} obstacle, it did{" "}
+            {discoveryData.outputAmount} damage!
+          </p>
+        )
       ) : discoveryData.discoveryType == "Item" ? (
         discoveryData.subDiscoveryType == "Gold" ? (
           <p>You discovered {discoveryData.amount} gold!</p>

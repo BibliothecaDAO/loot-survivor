@@ -207,6 +207,27 @@ class Config:
 
         self.ITEM_DISCOVERY_TYPES = {0: "Gold", 1: "Loot", 2: "Health"}
 
+        self.SUB_DISCOVERY_TYPES = {
+            1: "Demonic Alter",
+            2: "Curse",
+            3: "Hex",
+            4: "Magic Lock",
+            5: "Dark Mist",
+            6: "Collapsing Ceiling",
+            7: "Crushing Walls",
+            8: "Rockslide",
+            9: "Tumbling Boulders",
+            10: "Swinging Logs",
+            11: "Pendulum Blades",
+            12: "Flame Jet",
+            13: "Poision Dart",
+            14: "Spiked Pit",
+            15: "Hidden Arrow",
+            16: "Gold",
+            17: "Loot",
+            18: "Health",
+        }
+
         self.ITEM_TYPES = {
             0: "Generic",
             100: "Generic Weapon",

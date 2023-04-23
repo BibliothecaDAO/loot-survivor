@@ -231,13 +231,17 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data: List[FieldElement],
     ):
         d = decode_discovery_event(data)
+        if d.discovery_type == 1:
+            sub_discovery_type = d.sub_discovery_type + 16
+        else:
+            sub_discovery_type = d.sub_discovery_type
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": check_exists_int(d.adventurer_id),
-            "discoveryType": check_exists_int(d.discovery_type),
-            "subDiscoveryType": check_exists_int(d.sub_discovery_type),
+            "discoveryType": encode_int_as_bytes(d.discovery_type),
+            "subDiscoveryType": check_exists_int(sub_discovery_type),
             "entityId": check_exists_int(d.entity_id),
-            "outputAmount": check_exists_int(d.output_amount),
+            "outputAmount": encode_int_as_bytes(d.output_amount),
             "discoveryTime": block_time,
         }
         await info.storage.insert_one("discoveries", discovery_doc)

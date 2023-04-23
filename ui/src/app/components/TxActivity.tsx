@@ -24,7 +24,10 @@ export const TxActivity = ({ hash }: TxActivityProps) => {
           )}
           <div className="flex flex-col">
             Hash:{" "}
-            <a href={`https://testnet.starkscan.co/tx/${padAddress(hash)}`}>
+            <a
+              href={`https://testnet.starkscan.co/tx/${padAddress(hash)}`}
+              target="_blank"
+            >
               {displayAddress(hash)}
             </a>
           </div>

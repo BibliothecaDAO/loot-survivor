@@ -84,13 +84,13 @@ def serialize_discovery(value):
 
 
 def parse_sub_discovery(value):
-    felt = get_key_by_value(value, config.ITEM_DISCOVERY_TYPES)
+    felt = get_key_by_value(value, config.SUB_DISCOVERY_TYPES)
     return felt.to_bytes(32, "big")
 
 
 def serialize_sub_discovery(value):
     felt = int.from_bytes(value, "big")
-    return config.ITEM_DISCOVERY_TYPES.get(felt)
+    return config.SUB_DISCOVERY_TYPES.get(felt)
 
 
 def parse_obstacle(value):
