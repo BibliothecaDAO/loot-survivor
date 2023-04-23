@@ -2,7 +2,11 @@ import { useAccount } from "@starknet-react/core";
 import { Button } from "./Button";
 import { mintEth } from "../api/api";
 
-export const AddDevnetButton = () => {
+interface AddDevnetButtonProps {
+  isDisabled: boolean;
+}
+
+export const AddDevnetButton = ({ isDisabled }: AddDevnetButtonProps) => {
   const { connector } = useAccount();
   const wallet = (connector as any)?._wallet;
 
@@ -19,10 +23,20 @@ export const AddDevnetButton = () => {
     });
   };
 
-  return <Button onClick={() => handleAddDevnet()}>Add Devnet</Button>;
+  return (
+    <Button onClick={() => handleAddDevnet()} disabled={isDisabled}>
+      Add Devnet
+    </Button>
+  );
 };
 
-export const SwitchToDevnetButton = () => {
+interface SwitchDevnetButtonProps {
+  isDisabled: boolean;
+}
+
+export const SwitchToDevnetButton = ({
+  isDisabled,
+}: SwitchDevnetButtonProps) => {
   const { connector } = useAccount();
   const wallet = (connector as any)?._wallet;
 
@@ -42,7 +56,9 @@ export const SwitchToDevnetButton = () => {
   };
 
   return (
-    <Button onClick={() => handeleSwitchToDevnet()}>Switch To Devnet</Button>
+    <Button onClick={() => handeleSwitchToDevnet()} disabled={isDisabled}>
+      Switch To Devnet
+    </Button>
   );
 };
 

@@ -1,6 +1,10 @@
 "use client";
 import "./globals.css";
-import { InjectedConnector, StarknetConfig } from "@starknet-react/core";
+import {
+  InjectedConnector,
+  StarknetConfig,
+  useAccount,
+} from "@starknet-react/core";
 import CartridgeConnector from "@cartridge/connector";
 import { useMemo } from "react";
 import { AdventurerProvider } from "./context/AdventurerProvider";
@@ -17,6 +21,8 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const { account } = useAccount();
+
   const connectors = useMemo(
     () => [
       new InjectedConnector({ options: { id: "argentX" } }),
@@ -33,7 +39,10 @@ export default function RootLayout({
   );
 
   const client = new ApolloClient({
-    uri: "http://3.215.42.99:8080/graphql",
+    uri:
+      (account as any)?.baseUrl == "http://3.215.42.99:5050"
+        ? "http://3.215.42.99:8081/graphql"
+        : "http://3.215.42.99:8080/graphql",
     cache: new InMemoryCache(),
   });
 

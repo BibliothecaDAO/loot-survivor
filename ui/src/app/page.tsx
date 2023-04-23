@@ -145,14 +145,7 @@ export default function Home() {
                 <Upgrade />
               )}
             </div>
-          ) : (
-            <div className="flex w-full mt-[200px]">
-              <p className="mx-auto items-center text-[50px] animate-pulse">
-                Please Connect Wallet
-              </p>
-            </div>
-          )}
-          {/* <AddDevnetButton /> */}
+          ) : null}
         </>
       ) : (
         <Intro />

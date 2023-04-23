@@ -85,7 +85,7 @@ export const InventoryRow = ({
   }, [isActive, selectedIndex]);
   return (
     <div className="flex flex-row gap-3 w-full">
-      <p className="text-xl w-60 whitespace-nowrap">{title}</p>
+      <p className="text-xl w-96 whitespace-nowrap">{title}</p>
       <ItemDisplay
         item={items?.find((item: any) => item.id == equippedItemId)}
       />

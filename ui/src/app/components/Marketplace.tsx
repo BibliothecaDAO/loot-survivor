@@ -138,7 +138,7 @@ const Marketplace: React.FC = () => {
               Mint daily items
             </Button>
           </div>
-          <div className="h-[430px] overflow-auto w-full">
+          <div className="h-screen-full overflow-auto w-full">
             {marketLatestItemsLoading && (
               <p className="text-xl loading-ellipsis">LOADING</p>
             )}
@@ -195,6 +195,7 @@ const Marketplace: React.FC = () => {
                           showBidBox={showBidBox == index}
                           close={() => setShowBidBox(-1)}
                           marketId={item.marketId}
+                          item={item}
                         />
                         <Button
                           onClick={() => {

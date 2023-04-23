@@ -1,8 +1,17 @@
 import { Button } from "./Button";
-import { useConnectors } from "@starknet-react/core";
+import { useConnectors, useAccount } from "@starknet-react/core";
+import {
+  AddDevnetButton,
+  SwitchToDevnetButton,
+} from "../components/DevnetConnectors";
 
-const WalletSelect = () => {
+interface WalletSelectProps {
+  screen: number;
+}
+
+const WalletSelect = ({ screen }: WalletSelectProps) => {
   const { connectors, connect } = useConnectors();
+  const { account } = useAccount();
   return (
     <div className="flex flex-col p-8 h-screen max-h-screen">
       <div className="w-full h-6 my-2 bg-terminal-green" />
@@ -20,23 +29,37 @@ const WalletSelect = () => {
           </p>
         </div>
       </div>
-      <div className="flex flex-row mx-auto text-2xl">
-        <p>
-          ...NOTE: LOOT SURVIVORS IS CURRENTLY ON TESTNET, CHECK YOUR WALLET IS
-          ON GOERLI...
-        </p>
-      </div>
-      <div className="flex flex-col gap-5 m-auto w-1/2">
-        {connectors.map((connector) => (
-          <Button
-            onClick={() => connect(connector)}
-            key={connector.id()}
-            className="w-full"
-          >
-            Connect {connector.id()}
-          </Button>
-        ))}
-      </div>
+      {screen == 2 ? (
+        <div className="flex flex-col gap-5 m-auto w-1/2">
+          {connectors.map((connector) => (
+            <Button
+              onClick={() => connect(connector)}
+              key={connector.id()}
+              className="w-full"
+            >
+              Connect {connector.id()}
+            </Button>
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-5 m-auto w-1/2">
+          {connectors.map((connector) => (
+            <>
+              {connector.id() == "argentX" ? (
+                <Button
+                  onClick={() => connect(connector)}
+                  key={connector.id()}
+                  className="w-full"
+                >
+                  Connect {connector.id()}
+                </Button>
+              ) : null}
+            </>
+          ))}
+          <AddDevnetButton isDisabled={typeof account?.address !== undefined} />
+          <SwitchToDevnetButton isDisabled={false} />
+        </div>
+      )}
       <div className="w-full h-6 my-2 bg-terminal-green" />
     </div>
   );

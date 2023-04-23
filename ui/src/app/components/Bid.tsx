@@ -15,9 +15,10 @@ interface BidBoxProps {
   showBidBox: Boolean;
   close: () => void;
   marketId: number;
+  item: any;
 }
 
-export function BidBox({ showBidBox, close, marketId }: BidBoxProps) {
+export function BidBox({ showBidBox, close, marketId, item }: BidBoxProps) {
   const { account } = useAccount();
   const { adventurer } = useAdventurer();
   const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
@@ -70,7 +71,11 @@ export function BidBox({ showBidBox, close, marketId }: BidBoxProps) {
             onChange={(e) => setBidPrice(parseInt(e.target.value, 10))}
             className="border border-terminal-black rounded-md px-3 py-2"
           />
-          <Button onClick={() => handleBid(marketId)} className="mt-2">
+          <Button
+            onClick={() => handleBid(marketId)}
+            disabled={typeof bidPrice === "undefined" || item.price >= bidPrice}
+            className="mt-2"
+          >
             Place Bid
           </Button>
         </div>

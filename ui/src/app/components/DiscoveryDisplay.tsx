@@ -7,7 +7,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   return (
     <>
       {discoveryData.discoveryType == "Nothing" ? (
-        <p>You discovered xp!</p>
+        <p>You discovered {discoveryData.outputAmount} xp!</p>
       ) : discoveryData.discoveryType == "Beast" ? (
         <p>You discovered a beast!</p>
       ) : discoveryData.discoveryType == "Obstacle" ? (
