@@ -6,9 +6,11 @@ import {
 } from "@starknet-react/core";
 import { Metadata } from "../types";
 import { Button } from "./Button";
+import { MdClose } from "react-icons/md";
 
 const TransactionCart = () => {
-  const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
+  const { handleSubmitCalls, calls, addToCalls, removeFromCalls } =
+    useTransactionCart();
   const {
     hashes,
     transactions: queuedTransactions,
@@ -29,6 +31,10 @@ const TransactionCart = () => {
     setIsOpen(!isOpen);
   };
 
+  // const reorderCards = useCallback((dragIndex: number, hoverIndex: number) => {
+  //   txQueue.reorderQueue(dragIndex, hoverIndex);
+  // }, []);
+
   return (
     <>
       <button
@@ -38,20 +44,32 @@ const TransactionCart = () => {
         {isOpen ? "Hide Cart" : "Show Cart"}
       </button>
       {isOpen ? (
-        <div className="absolute right-[262px] top-20 z-10 w-[400px] h-[400px] p-3 bg-terminal-black border border-terminal-green">
+        <div className="absolute right-[280px] top-20 z-10 w-[400px] h-[400px] p-3 bg-terminal-black border border-terminal-green">
           <p className="text-2xl">TRANSACTIONS</p>
           <div className="w-full border border-terminal-green "></div>
           <div className="flex flex-col h-[200px] overflow-auto">
             {calls.map((call, i) => (
               <div key={i}>
                 <div className="flex flex-col gap-2">
-                  {/* {call && <p>{call.selector}</p>}  */}
-                  {call && <p>{call.entrypoint}</p>}
-                  {/* <p className="text-white text-xl">
-                    {(call?.metadata as Metadata)?.method}:{" "}
-                  </p> */}
-                  {/* {call && <p>{call.method}</p>}
-                  {call && <p>{call.metadata.description}</p>} */}
+                  {call && (
+                    <div className="flex items-center justify-between">
+                      <p>{call.entrypoint}</p>
+                      <p>{call.calldata}</p>
+                      <p>{call.metadata}</p>
+                      <button
+                        onClick={() =>
+                          removeFromCalls({
+                            selector: call.entrypoint,
+                            calldata: call.calldata,
+                            metadata: call.metadata,
+                          })
+                        }
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <MdClose size={20} />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

@@ -41,7 +41,7 @@ export default function Info({ adventurer }: InfoProps) {
         <>
           <div className="flex flex-row justify-evenly">
             <div className="flex flex-row m-4 gap-5">
-              <div className="w-[160px] h-[160px] relative border-4 border-white ">
+              <div className="w-[170px] h-[160px] relative border-4 border-white ">
                 <Image
                   src="/MIKE.png"
                   alt="adventurer-image"

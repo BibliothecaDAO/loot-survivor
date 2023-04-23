@@ -430,12 +430,14 @@ const getItemsByOwner = gql`
 
 const getLatestMarketItemsNumber = gql`
   query get_market_items_number {
-    market(limit: 1, orderBy: { timestamp: { desc: true } })
-    caller
-    itemsNumber
-    timestamp
+    market(limit: 1, orderBy: { timestamp: { desc: true } }) {
+      caller
+      itemsNumber
+      timestamp
+    }
   }
 `;
+
 
 export {
   getAdventurer,

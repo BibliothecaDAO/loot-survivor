@@ -71,7 +71,7 @@ export default function Actions() {
           <Info adventurer={adventurer?.adventurer} />
         </div>
       ) : null}
-      <div className="w-1/3 my-auto">
+      <div className="w-1/3 m-auto">
         <VerticalKeyboardControl
           buttonsData={buttonsData}
           onSelected={(value) => setSelected(value)}
@@ -79,7 +79,7 @@ export default function Actions() {
         />
       </div>
 
-      <div className="flex flex-col w-1/3 bg-terminal-black p-2">
+      <div className="flex flex-col w-1/3 bg-terminal-black">
         {selected == "explore" && <Discovery hash={hash} />}
         {selected == "purchase health" && (
           <PurchaseHealth

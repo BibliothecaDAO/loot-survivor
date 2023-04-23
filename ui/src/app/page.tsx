@@ -115,7 +115,7 @@ export default function Home() {
           {account ? (
             <div className="w-full">
               {adventurer?.adventurer ? (
-                <div className="absolute text-lg w-4/5 ml-10 bottom-1 flex flew-row font-medium bg-terminal-black text-white justify-evenly">
+                <div className="fixed text-lg w-[1280px] bottom-1 flex flew-row items-center bg-terminal-black border-2 border-terminal-green text-white justify-evenly">
                   {adventurerStats.adventurer?.name}
                   <p>HEALTH: {adventurerStats.adventurer?.health}</p>
                   <p>GOLD: {adventurerStats.adventurer?.gold}</p>
