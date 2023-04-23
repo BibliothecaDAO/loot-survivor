@@ -1,0 +1,147 @@
+@import "@fontsource/vt323";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: "VT323", monospace;
+  font-weight: 400;
+}
+
+h1 {
+  @apply text-3xl mt-6;
+}
+
+h2 {
+  @apply my-3 text-3xl;
+}
+
+h3 {
+  @apply my-0 text-2xl;
+}
+
+h4 {
+  @apply my-1 text-xl;
+}
+
+h5 {
+  @apply my-1 text-lg;
+}
+
+h6 {
+  @apply my-1 text-base;
+}
+
+/* Responsive styles */
+@media (min-width: 640px) {
+  h1 {
+    @apply text-4xl mt-6;
+  }
+
+  h2 {
+    @apply text-4xl my-5;
+  }
+
+  h3 {
+    @apply text-3xl my-1;
+  }
+
+  h4 {
+    @apply text-2xl my-3;
+  }
+
+  h5 {
+    @apply text-xl my-2;
+  }
+
+  h6 {
+    @apply text-lg my-1;
+  }
+}
+
+@media (min-width: 768px) {
+  h1 {
+    @apply text-5xl mt-8;
+  }
+
+  h2 {
+    @apply text-5xl my-6;
+  }
+
+  h3 {
+    @apply text-4xl my-2;
+  }
+
+  h4 {
+    @apply text-3xl my-4;
+  }
+
+  h5 {
+    @apply text-2xl my-3;
+  }
+
+  h6 {
+    @apply text-xl my-2;
+  }
+}
+
+@layer components {
+  .loading-ellipsis::after {
+    content  : "";
+    animation: ellipsis 1s infinite;
+  }
+}
+
+@keyframes ellipsis {
+  0% {
+    content: "";
+  }
+
+  25% {
+    content: ".";
+  }
+
+  50% {
+    content: "..";
+  }
+
+  75% {
+    content: "...";
+  }
+
+  100% {
+    content: "";
+  }
+}
+
+/* Slider CSS */
+.slider {
+  -webkit-appearance: none;
+  width             : 100%;
+  height            : 10px;
+  border-radius     : 5px;
+  background        : #d3d3d3;
+  outline           : none;
+  opacity           : 0.7;
+  -webkit-transition: .2s;
+  transition        : opacity .2s;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance        : none;
+  width             : 20px;
+  height            : 20px;
+  border-radius     : 50%;
+  background        : greenyellow;
+  cursor            : pointer;
+}
+
+.slider::-moz-range-thumb {
+  width        : 20px;
+  height       : 20px;
+  border-radius: 50%;
+  background   : greenyellow;
+  cursor       : pointer;
+}

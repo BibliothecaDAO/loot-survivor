@@ -1,0 +1,40 @@
+{
+  "name": "LootSurvivors",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@apollo/client": "^3.7.11",
+    "@cartridge/connector": "^0.3.15",
+    "@cartridge/controller": "^0.3.15",
+    "@fontsource/vt323": "^4.5.10",
+    "@starknet-react/core": "^0.16.0",
+    "@types/node": "18.15.11",
+    "@types/react": "18.0.31",
+    "@types/react-dom": "18.0.11",
+    "autoprefixer": "^10.4.14",
+    "class-variance-authority": "^0.4.0",
+    "clsx": "^1.2.1",
+    "encoding": "^0.1.13",
+    "eslint": "8.37.0",
+    "eslint-config-next": "13.2.4",
+    "graphql": "^16.6.0",
+    "next": "13.2.4",
+    "postcss": "^8.4.21",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-icons": "^4.8.0",
+    "starknet": "^5.6.1",
+    "tailwind-merge": "^1.10.0",
+    "tailwindcss": "^3.3.0",
+    "typescript": "5.0.2"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.1"
+  }
+}
