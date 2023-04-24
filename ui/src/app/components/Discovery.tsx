@@ -48,7 +48,7 @@ const Discovery = ({ hash }: DiscoveryProps) => {
     : [];
 
   return (
-    <div className="flex flex-col gap-5 m-auto">
+    <div className="flex flex-col gap-5 m-auto text-xl items-center">
       {(hash && data?.status != "ACCEPTED_ON_L2") ||
       (hash && data?.status != "ACCEPTED_ON_L1") ? (
         <TxActivity hash={hash} />

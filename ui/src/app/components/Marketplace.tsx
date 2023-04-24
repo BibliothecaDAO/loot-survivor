@@ -151,14 +151,14 @@ const Marketplace: React.FC = () => {
               Mint daily items
             </Button>
           </div>
-          <div className=" overflow-auto w-full h-[520px]">
+          <div className=" overflow-auto w-full h-[430px]">
             {marketLatestItemsLoading && (
               <p className="text-xl loading-ellipsis">LOADING</p>
             )}
             {marketLatestItemsError && (
               <p className="text-xl">ERROR {marketLatestItemsError.message}</p>
             )}
-            <table className="w-full border-terminal-green border mt-4">
+            <table className="w-full border-terminal-green border mt-4 h-[425px]">
               <thead className="sticky top-0 ">
                 <tr className="sticky top-0 border z-5 border-terminal-green bg-terminal-black">
                   {headings.map((heading, index) => (
