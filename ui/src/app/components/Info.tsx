@@ -70,8 +70,8 @@ export default function Info({ adventurer }: InfoProps) {
           </div>
           <div className="flex flex-row justify-evenly mt-4">
             <div className="flex flex-col">
-              <div className="text-xl font-medium text-white">ITEMS</div>
-              <p className="text-terminal-green">
+              <div className="text-2xl font-medium text-white">ITEMS</div>
+              <p className="text-terminal-green text-xl">
                 WEAPON -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -79,7 +79,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 HEAD -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -87,7 +87,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 CHEST -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -95,7 +95,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 FOOT -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -103,7 +103,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 HAND -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -111,7 +111,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 WAIST -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -121,23 +121,23 @@ export default function Info({ adventurer }: InfoProps) {
               </p>
             </div>
             <div className="flex flex-col">
-              <div className="text-xl font-medium text-white">STATISTICS</div>
-              <p className="text-terminal-green">
+              <div className="text-2xl font-medium text-white">STATISTICS</div>
+              <p className="text-terminal-green text-xl">
                 STRENGTH - {formatAdventurer.strength}
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 DEXTERITY - {formatAdventurer.dexterity}
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 INTELLIGENCE - {formatAdventurer.intelligence}
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 VITALITY - {formatAdventurer.vitality}
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 WISDOM - {formatAdventurer.wisdom}
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 LUCK - {formatAdventurer.luck}
               </p>
             </div>

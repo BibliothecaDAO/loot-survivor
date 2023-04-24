@@ -101,7 +101,7 @@ export default function Home() {
   }, [adventurer, account]);
 
   return (
-    <main className={`container mx-auto flex flex-wrap h-[520px]`}>
+    <main className={`container mx-auto flex flex-wrap`}>
       {onboarded ? (
         <>
           <div className="flex justify-between w-full ">
