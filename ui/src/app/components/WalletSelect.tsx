@@ -79,7 +79,8 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
             </>
           ))}
           <AddDevnetButton
-            isDisabled={typeof account?.address !== undefined}
+            // isDisabled={!account?.address}
+            isDisabled={false}
             setAddDevnet={setAddedDevnet}
           />
           <SwitchToDevnetButton isDisabled={addedDevnet} />
