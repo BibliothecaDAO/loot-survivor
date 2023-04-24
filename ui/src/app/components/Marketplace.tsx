@@ -48,7 +48,7 @@ const Marketplace: React.FC = () => {
   });
 
   const latestMarketItemsNumber = latestMarketItemsNumberData
-    ? latestMarketItemsNumberData.market[0].itemsNumber
+    ? latestMarketItemsNumberData.market[0]?.itemsNumber
     : [];
 
   const {
@@ -151,7 +151,7 @@ const Marketplace: React.FC = () => {
               Mint daily items
             </Button>
           </div>
-          <div className=" overflow-auto w-full h-[430px]">
+          <div className=" overflow-auto w-full h-[432px]">
             {marketLatestItemsLoading && (
               <p className="text-xl loading-ellipsis">LOADING</p>
             )}

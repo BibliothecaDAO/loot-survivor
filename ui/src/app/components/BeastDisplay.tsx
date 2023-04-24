@@ -29,9 +29,11 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
         {/* {ansiImage} */}
       </div>
       <div className="flex flex-col items-center mt-5">
-        <div className="text-xl font-medium text-white">{beastData?.beast}</div>
+        <div className="text-2xl font-medium text-white">
+          {beastData?.beast}
+        </div>
         <p
-          className={`text-lg ${
+          className={`text-2xl ${
             beastData?.health === 0
               ? "text-terminal-red"
               : "text-terminal-green"

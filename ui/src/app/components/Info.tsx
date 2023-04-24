@@ -50,19 +50,19 @@ export default function Info({ adventurer }: InfoProps) {
                 />
               </div>
               <div className="flex flex-col items-center mt-9 ml-2">
-                <div className="text-xl font-medium text-white">
+                <div className="text-2xl font-medium text-white">
                   {formatAdventurer.name}
                 </div>
-                <p className="text-lg text-terminal-green">
+                <p className="text-2xl text-terminal-green">
                   HEALTH {formatAdventurer.health}
                 </p>
-                <p className="text-lg text-terminal-yellow">
+                <p className="text-2xl text-terminal-yellow">
                   GOLD {formatAdventurer.gold}
                 </p>
-                <p className="text-lg text-white">
+                <p className="text-2xl text-white">
                   LEVEL {formatAdventurer.level}
                 </p>
-                <p className="text-lg text-terminal-green">
+                <p className="text-2xl text-terminal-green">
                   XP {formatAdventurer.xp}
                 </p>
               </div>
@@ -79,7 +79,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green text-xl">
+              <p className="text-terminal-green text-l">
                 HEAD -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -87,7 +87,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green text-xl">
+              <p className="text-terminal-green text-l">
                 CHEST -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -95,15 +95,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green text-xl">
-                FOOT -{" "}
-                <ItemDisplay
-                  item={items.find(
-                    (item: any) => item.id == formatAdventurer.feetId
-                  )}
-                />
-              </p>
-              <p className="text-terminal-green text-xl">
+              <p className="text-terminal-green text-l">
                 HAND -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -111,11 +103,35 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green text-xl">
+              <p className="text-terminal-green text-l">
                 WAIST -{" "}
                 <ItemDisplay
                   item={items.find(
                     (item: any) => item.id == formatAdventurer.waistId
+                  )}
+                />
+              </p>
+              <p className="text-terminal-green text-l">
+                FOOT -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.feetId
+                  )}
+                />
+              </p>
+              <p className="text-terminal-green text-l">
+                NECK -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.neckId
+                  )}
+                />
+              </p>
+              <p className="text-terminal-green text-l">
+                RING -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.ringId
                   )}
                 />
               </p>

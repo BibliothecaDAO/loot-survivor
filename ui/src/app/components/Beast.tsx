@@ -169,7 +169,7 @@ export default function Beast() {
           buttonsData={buttonsData}
           disabled={formatAdventurer?.beastId == undefined}
         />
-        <div className="flex flex-col p-4">
+        <div className="flex flex-col p-4 items-center">
           {txLoading && hash && <div className="loading-ellipsis">Loading</div>}
           {hash && <div className="flex flex-col">Hash: {hash}</div>}
           {data && <div>Status: {data.status}</div>}
