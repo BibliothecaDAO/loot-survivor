@@ -28,17 +28,6 @@ export const InventoryRow = ({
 
   const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
 
-  const handleAddEquipItem = (itemId: any) => {
-    if (adventurerContract) {
-      const equipItem = {
-        contractAddress: adventurerContract?.address,
-        selector: "equip_item",
-        calldata: [formatAdventurer?.id, "0", itemId, "0"],
-      };
-      addToCalls(equipItem);
-    }
-  };
-
   const ItemDisplay = (item: any) => {
     const formatItem = item.item;
     return (
@@ -48,6 +37,18 @@ export const InventoryRow = ({
           : "Nothing"}
       </p>
     );
+  };
+
+  const handleAddEquipItem = (itemId: any) => {
+    if (adventurerContract) {
+      const equipItem = {
+        contractAddress: adventurerContract?.address,
+        selector: "equip_item",
+        calldata: [formatAdventurer?.id, "0", itemId, "0"],
+        metadata: `Equipping ${itemId}!`,
+      };
+      addToCalls(equipItem);
+    }
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {

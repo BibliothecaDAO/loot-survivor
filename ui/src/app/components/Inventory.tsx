@@ -128,7 +128,7 @@ const Inventory: React.FC = () => {
           {formatAdventurer.adventurer?.name}
         </p>
       </div>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-5">
         <InventoryRow
           title={"Weapon"}
           items={groupedItems["Weapon"]}
