@@ -73,7 +73,6 @@ export const InventoryRow = ({
     }
   };
 
-  console.log(items);
   useEffect(() => {
     if (isActive) {
       window.addEventListener("keydown", handleKeyDown);
