@@ -39,11 +39,13 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
         >
           HEALTH {beastData?.health}
         </p>
-        <p className="text-lg text-terminal-yellow">RANK {beastData?.rank}</p>
-        <p className="text-lg text-terminal-yellow">LEVEL {beastData?.level}</p>
-        <p className="text-lg text-terminal-yellow">XP {beastData?.xp}</p>
-        <p className="text-lg text-red-600">{beastData?.attackType}</p>
-        <p className="text-lg text-red-600">{beastData?.armorType}</p>
+        <p className="text-2xl text-terminal-yellow">RANK {beastData?.rank}</p>
+        <p className="text-2xl text-terminal-yellow">
+          LEVEL {beastData?.level}
+        </p>
+        <p className="text-2xl text-terminal-yellow">XP {beastData?.xp}</p>
+        <p className="text-2xl text-red-600">{beastData?.attackType}</p>
+        <p className="text-2xl text-red-600">{beastData?.armorType}</p>
       </div>
     </div>
   );
