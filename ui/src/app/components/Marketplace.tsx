@@ -151,7 +151,7 @@ const Marketplace: React.FC = () => {
               Mint daily items
             </Button>
           </div>
-          <div className="h-screen-full overflow-auto w-full max-h-96">
+          <div className=" overflow-auto w-full h-[520px]">
             {marketLatestItemsLoading && (
               <p className="text-xl loading-ellipsis">LOADING</p>
             )}

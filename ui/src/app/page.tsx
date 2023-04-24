@@ -101,10 +101,10 @@ export default function Home() {
   }, [adventurer, account]);
 
   return (
-    <main className={`container mx-auto flex flex-wrap`}>
+    <main className={`container mx-auto flex flex-wrap h-[520px]`}>
       {onboarded ? (
         <>
-          <div className="flex justify-between w-full">
+          <div className="flex justify-between w-full ">
             <h1>Loot Survivors</h1>
             <div className="flex flex-row gap-2 self-end">
               {account && calls.length > 0 && <TransactionCart />}

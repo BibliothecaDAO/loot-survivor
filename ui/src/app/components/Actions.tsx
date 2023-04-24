@@ -65,7 +65,7 @@ export default function Actions() {
   ];
 
   return (
-    <div className="flex flex-row mt-5">
+    <div className="flex flex-row mt-5 h-[520px] ">
       {!loading ? (
         <div className="w-1/3">
           <Info adventurer={adventurer?.adventurer} />
