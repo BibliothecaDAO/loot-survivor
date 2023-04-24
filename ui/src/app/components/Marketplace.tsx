@@ -98,20 +98,6 @@ const Marketplace: React.FC = () => {
     metadata: `Minting Loot Items!`,
   };
 
-  // const equipItemTx = {
-  //   contractAddress:
-  //     adventurerContract?.address,
-  //   selector: "equip_item",
-  //   calldata: [
-  //     itemId,
-  //     "0",
-  //     formatAdventurer.adventurer?.id,
-  //     "0",
-  //   ],
-  //   metadata: `Equipping ${item.item}`,
-  // };
-  // addToCalls(equipItemTx);
-
   const convertExpiryTime = (expiry: string) => {
     const expiryTime = new Date(expiry);
 
@@ -241,6 +227,7 @@ const Marketplace: React.FC = () => {
                             addToCalls(claimItemTx);
                           }}
                           disabled={
+                            item.claimedTime ||
                             claimExists(item.marketId) ||
                             !item.expiry ||
                             convertExpiryTime(item.expiry) > currentTime ||

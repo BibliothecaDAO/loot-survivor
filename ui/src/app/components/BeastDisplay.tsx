@@ -30,7 +30,13 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
       </div>
       <div className="flex flex-col items-center mt-5">
         <div className="text-xl font-medium text-white">{beastData?.beast}</div>
-        <p className="text-lg text-terminal-green">
+        <p
+          className={`text-lg ${
+            beastData?.health === 0
+              ? "text-terminal-red"
+              : "text-terminal-green"
+          }`}
+        >
           HEALTH {beastData?.health}
         </p>
         <p className="text-lg text-terminal-yellow">RANK {beastData?.rank}</p>
