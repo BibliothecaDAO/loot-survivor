@@ -36,7 +36,7 @@ export default function Info({ adventurer }: InfoProps) {
   };
 
   return (
-    <div className="p-2 bg-terminal-black">
+    <div className="p-2 bg-terminal-black h-[520px]">
       {!loading ? (
         <>
           <div className="flex flex-row justify-evenly">
