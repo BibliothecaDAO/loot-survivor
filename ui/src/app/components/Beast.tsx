@@ -98,13 +98,13 @@ export default function Beast() {
   let beastData = beastByTokenIdData
     ? beastByTokenIdData.beasts[0]
     : {
-        beast: "Pheonix",
-        health: "100",
-        rank: "1",
-        xp: "0",
-        attackType: "Blade",
-        armorType: "Cloth",
-      };
+      beast: "Pheonix",
+      health: "100",
+      rank: "1",
+      xp: "0",
+      attackType: "Blade",
+      armorType: "Cloth",
+    };
 
   // const [hash, setHash] = useState<string | undefined>(undefined);
 
@@ -164,7 +164,7 @@ export default function Beast() {
       <div className="w-1/3">
         <Info adventurer={adventurer?.adventurer} />
       </div>
-      <div className="flex flex-col gap-10 w-1/3">
+      <div className="flex flex-col w-1/3 gap-10">
         <KeyboardControl
           buttonsData={buttonsData}
           disabled={formatAdventurer?.beastId == undefined}
@@ -180,11 +180,12 @@ export default function Beast() {
         {formatAdventurer?.beastId || lastBattleData?.battles[0] ? (
           <>
             <BeastDisplay beastData={beastData} />
-            <div className="flex flex-col gap-5 items-center">
+            <div className="flex flex-col items-center gap-5">
               <p>Battle log:</p>
               <div className="flex flex-col gap-2">
                 {formatBattles.map((battle: any, index: number) => (
                   <BattleDisplay
+                    key={index}
                     battleData={battle}
                     beastName={beastData.beast}
                   />
@@ -193,8 +194,8 @@ export default function Beast() {
             </div>
           </>
         ) : (
-          <p className="text-lg text-terminal-green m-auto">
-            BEAST NOT YET DISCOVERED
+          <p className="m-auto text-lg uppercase text-terminal-green">
+            Beast not yet discovered.
           </p>
         )}
       </div>
