@@ -24,6 +24,8 @@ export const AddDevnetButton = ({
         chainId: "LS_DEVNET",
         baseUrl: "http://3.215.42.99:5050",
         rpcUrls: ["http://3.215.42.99:5050/rpc"],
+        accountImplementation:
+          "0x58d97f7d76e78f44905cc30cb65b91ea49a4b908a76703c54197bca90f81773",
       },
     });
   };
@@ -56,10 +58,6 @@ export const SwitchToDevnetButton = ({
       type: "wallet_switchStarknetChain",
       params: {
         id: "90013",
-        name: "Loot Survivor Devnet",
-        chainId: "LS_DEVNET",
-        baseUrl: "http://3.215.42.99:5050",
-        rpcUrls: ["http://3.215.42.99:5050/rpc"],
       },
     });
   };
