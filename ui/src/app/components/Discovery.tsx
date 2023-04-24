@@ -54,7 +54,7 @@ const Discovery = ({ hash }: DiscoveryProps) => {
         <TxActivity hash={hash} />
       ) : latestDiscoveries.length > 0 ? (
         <>
-          <p className="text-xl">Recent discoveries:</p>
+          <p className="text-xl text-center">Recent discoveries:</p>
           <div className="flex flex-col gap-2 items-center">
             {latestDiscoveries.map((discovery: any, index: number) => (
               <div key={index}>
