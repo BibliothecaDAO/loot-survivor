@@ -39,8 +39,8 @@ const TransactionHistory = () => {
               .slice()
               .reverse()
               .map((tx, i) => (
-                <ul>
-                  <li key={i}>
+                <ul key={i}>
+                  <li>
                     <div className="flex flex-row flex-wrap gap-1">
                       <p className="text-white text-xl">
                         {(tx?.metadata as Metadata)?.method}:{" "}
