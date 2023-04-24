@@ -15,6 +15,7 @@ import { useQuery } from "@apollo/client";
 import {
   getLatestMarketItems,
   getAdventurersInList,
+  getLatestMarketItemsNumber,
 } from "../hooks/graphql/queries";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
@@ -23,7 +24,7 @@ const Marketplace: React.FC = () => {
   const { account } = useAccount();
   const { adventurer } = useAdventurer();
   const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
-  const { lootMarketArcadeContract } = useContracts();
+  const { lootMarketArcadeContract, adventurerContract } = useContracts();
   const { hashes, addTransaction } = useTransactionManager();
   const [hash, setHash] = useState<string | undefined>(undefined);
   const [showBidBox, setShowBidBox] = useState(-1);
@@ -38,11 +39,27 @@ const Marketplace: React.FC = () => {
   const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
 
   const {
+    loading: latestMarketItemsNumberLoading,
+    error: latestMarketItemsNumberError,
+    data: latestMarketItemsNumberData,
+    refetch: latestMarketItemsNumberRefetch,
+  } = useQuery(getLatestMarketItemsNumber, {
+    pollInterval: 5000,
+  });
+
+  const latestMarketItemsNumber = latestMarketItemsNumberData
+    ? latestMarketItemsNumberData.market[0].itemsNumber
+    : [];
+
+  const {
     loading: marketLatestItemsLoading,
     error: marketLatestItemsError,
     data: marketLatestItemsData,
     refetch: marketLatestItemsRefetch,
   } = useQuery(getLatestMarketItems, {
+    variables: {
+      itemsNumber: latestMarketItemsNumber,
+    },
     pollInterval: 5000,
   });
 
@@ -80,6 +97,20 @@ const Marketplace: React.FC = () => {
     calldata: [],
     metadata: `Minting Loot Items!`,
   };
+
+  // const equipItemTx = {
+  //   contractAddress:
+  //     adventurerContract?.address,
+  //   selector: "equip_item",
+  //   calldata: [
+  //     itemId,
+  //     "0",
+  //     formatAdventurer.adventurer?.id,
+  //     "0",
+  //   ],
+  //   metadata: `Equipping ${item.item}`,
+  // };
+  // addToCalls(equipItemTx);
 
   const convertExpiryTime = (expiry: string) => {
     const expiryTime = new Date(expiry);
@@ -134,15 +165,15 @@ const Marketplace: React.FC = () => {
               Mint daily items
             </Button>
           </div>
-          <div className="h-screen-full overflow-auto w-full">
+          <div className="h-screen-full overflow-auto w-full max-h-96">
             {marketLatestItemsLoading && (
               <p className="text-xl loading-ellipsis">LOADING</p>
             )}
             {marketLatestItemsError && (
               <p className="text-xl">ERROR {marketLatestItemsError.message}</p>
             )}
-            <table className="w-full border-terminal-green border min-width: 640px">
-              <thead>
+            <table className="w-full border-terminal-green border mt-4">
+              <thead className="sticky top-0 ">
                 <tr className="sticky top-0 border z-5 border-terminal-green bg-terminal-black">
                   {headings.map((heading, index) => (
                     <th key={index}>{heading}</th>
@@ -194,7 +225,7 @@ const Marketplace: React.FC = () => {
                           item={item}
                         />
                         <Button
-                          onClick={() => {
+                          onClick={async () => {
                             const claimItemTx = {
                               contractAddress:
                                 lootMarketArcadeContract?.address,

@@ -44,20 +44,20 @@ export const useTransactionCartContext = () => {
   };
 
   const removeFromCalls = ({
-    contractAddress,
     selector,
     calldata,
+    metadata,
   }: {
-    contractAddress: string;
     selector: string;
     calldata: string;
+    metadata: any;
   }) => {
     setCalls((calls: any) =>
       calls.filter(
         (call: any) =>
-          call.contractAddress !== contractAddress ||
           call.entrypoint !== selector ||
-          call.calldata !== calldata
+          call.calldata !== calldata ||
+          call.metadata !== metadata
       )
     );
   };
