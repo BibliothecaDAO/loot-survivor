@@ -70,8 +70,6 @@ const Marketplace: React.FC = () => {
     pollInterval: 5000,
   });
 
-  console.log(adventurersInListData, adventurersInListError);
-
   const formatAdventurers = adventurersInListData
     ? adventurersInListData.adventurers
     : [];
@@ -126,8 +124,6 @@ const Marketplace: React.FC = () => {
     "Claimed",
     "Actions",
   ];
-
-  console.log(formatAdventurers, bidders);
 
   return (
     <>

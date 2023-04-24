@@ -1,4 +1,4 @@
-import { useNetwork, useWaitForTransaction } from "@starknet-react/core";
+import { useWaitForTransaction } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../lib/utils";
 
 export interface TxActivityProps {
@@ -6,13 +6,10 @@ export interface TxActivityProps {
 }
 
 export const TxActivity = ({ hash }: TxActivityProps) => {
-  const { chain } = useNetwork();
   const { data, status, isLoading, error } = useWaitForTransaction({
     hash,
     watch: true,
   });
-  const network = useNetwork();
-  console.log(network);
 
   return (
     <>

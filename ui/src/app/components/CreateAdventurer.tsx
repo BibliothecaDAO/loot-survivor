@@ -75,7 +75,6 @@ export const CreateAdventurer = ({
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log(formData);
     const mintLords = {
       contractAddress: lordsContract?.address,
       selector: "mint",

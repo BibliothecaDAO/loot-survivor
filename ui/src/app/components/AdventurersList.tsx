@@ -75,8 +75,6 @@ export const AdventurersList = ({
     };
   }, [isActive, selectedIndex]);
 
-  console.log(adventurersByOwnerLoading);
-
   return (
     <>
       {!adventurersByOwnerLoading ? (

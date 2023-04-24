@@ -17,14 +17,16 @@ import TransactionHistory from "./components/TransactionHistory";
 import TransactionCart from "./components/TransactionCart";
 import Upgrade from "./components/Upgrade";
 import Intro from "./components/Intro";
-import { AddDevnetButton } from "./components/DevnetConnectors";
+import { useUI } from "./context/UIProvider";
+import { useIndexer } from "./context/IndexerProvider";
 
 export default function Home() {
   const { connect, disconnect, connectors } = useConnectors();
   const { account } = useAccount();
-  console.log(account);
   const { adventurer } = useAdventurer();
   const { calls } = useTransactionCart();
+  const { onboarded, setOnboarded } = useUI();
+  const { setIndexer } = useIndexer();
 
   const adventurerStats = adventurer ?? NullAdventurerProps;
 
@@ -45,6 +47,20 @@ export default function Home() {
       setSelected(menu[0].value);
     }
   }, [adventurer]);
+
+  useEffect(() => {
+    if (!account?.address) {
+      setOnboarded(false);
+    }
+  }, [account]);
+
+  useEffect(() => {
+    setIndexer(
+      (account as any)?.baseUrl == "http://3.215.42.99:5050"
+        ? "http://3.215.42.99:8081/graphql"
+        : "http://3.215.42.99:8080/graphql"
+    );
+  }, [account]);
 
   useEffect(() => {
     let newMenu = [
@@ -86,7 +102,7 @@ export default function Home() {
 
   return (
     <main className={`container mx-auto flex flex-wrap`}>
-      {account ? (
+      {onboarded ? (
         <>
           <div className="flex justify-between w-full">
             <h1>Loot Survivors</h1>

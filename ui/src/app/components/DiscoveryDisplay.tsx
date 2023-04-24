@@ -3,7 +3,6 @@ interface DiscoveryProps {
 }
 
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
-  console.log(discoveryData);
   return (
     <>
       {discoveryData.discoveryType == "Nothing" ? (

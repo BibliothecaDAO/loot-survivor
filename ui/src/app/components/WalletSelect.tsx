@@ -1,9 +1,11 @@
+import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import { useConnectors, useAccount } from "@starknet-react/core";
 import {
   AddDevnetButton,
   SwitchToDevnetButton,
 } from "../components/DevnetConnectors";
+import { useUI } from "../context/UIProvider";
 
 interface WalletSelectProps {
   screen: number;
@@ -12,6 +14,26 @@ interface WalletSelectProps {
 const WalletSelect = ({ screen }: WalletSelectProps) => {
   const { connectors, connect } = useConnectors();
   const { account } = useAccount();
+  const [addedDevnet, setAddedDevnet] = useState<boolean>(false);
+  const { setOnboarded } = useUI();
+
+  useEffect(() => {
+    if (screen == 1) {
+      if (
+        (account as any)?.provider?.baseUrl == "http://3.215.42.99:5050" ||
+        (account as any)?.baseUrl == "http://3.215.42.99:5050"
+      ) {
+        setOnboarded(true);
+      }
+    }
+
+    if (screen == 2) {
+      if ((account as any)?.baseUrl == "https://alpha4.starknet.io") {
+        setOnboarded(true);
+      }
+    }
+  }, [account]);
+
   return (
     <div className="flex flex-col p-8 h-screen max-h-screen">
       <div className="w-full h-6 my-2 bg-terminal-green" />
@@ -56,8 +78,11 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
               ) : null}
             </>
           ))}
-          <AddDevnetButton isDisabled={typeof account?.address !== undefined} />
-          <SwitchToDevnetButton isDisabled={false} />
+          <AddDevnetButton
+            isDisabled={typeof account?.address !== undefined}
+            setAddDevnet={setAddedDevnet}
+          />
+          <SwitchToDevnetButton isDisabled={addedDevnet} />
         </div>
       )}
       <div className="w-full h-6 my-2 bg-terminal-green" />
