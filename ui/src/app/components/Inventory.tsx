@@ -122,65 +122,81 @@ const Inventory: React.FC = () => {
         <InventoryRow
           title={"Weapon"}
           items={groupedItems["Weapon"]}
+          menuIndex={0}
           isActive={activeMenu == 0}
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 0}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.weaponId}
         />
         <InventoryRow
           title={"Head Armour"}
           items={groupedItems["Head"]}
+          menuIndex={1}
           isActive={activeMenu == 1}
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 1}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.headId}
         />
         <InventoryRow
           title={"Chest Armour"}
           items={groupedItems["Chest"]}
+          menuIndex={2}
           isActive={activeMenu == 2}
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 2}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.chestId}
         />
         <InventoryRow
           title={"Feet Armour"}
           items={groupedItems["Foot"]}
+          menuIndex={3}
           isActive={activeMenu == 3}
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 3}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.feetId}
         />
         <InventoryRow
           title={"Hands Armour"}
           items={groupedItems["Hand"]}
+          menuIndex={4}
           isActive={activeMenu == 4}
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 4}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.handsId}
         />
         <InventoryRow
           title={"Waist Armour"}
           items={groupedItems["Waist"]}
+          menuIndex={5}
           isActive={activeMenu == 5}
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 5}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.waistId}
         />
         <InventoryRow
           title={"Neck Jewelry"}
           items={groupedItems["Neck"]}
+          menuIndex={6}
           isActive={activeMenu == 6}
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 6}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.neckId}
         />
         <InventoryRow
           title={"Ring Jewelry"}
           items={groupedItems["Ring"]}
+          menuIndex={7}
           isActive={activeMenu == 7}
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 7}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.ringId}
         />
       </div>

@@ -8,18 +8,22 @@ import { Button } from "./Button";
 interface InventoryRowProps {
   title: string;
   items: any[];
+  menuIndex: number;
   isActive: boolean;
   setActiveMenu: (value: any) => void;
   isSelected: boolean;
+  setSelected: (value: any) => void;
   equippedItemId: number | undefined;
 }
 
 export const InventoryRow = ({
   title,
   items,
+  menuIndex,
   isActive,
   setActiveMenu,
   isSelected,
+  setSelected,
   equippedItemId,
 }: InventoryRowProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -99,6 +103,10 @@ export const InventoryRow = ({
         <Button
           className={isSelected && !isActive ? "animate-pulse" : ""}
           variant={isSelected ? "default" : "ghost"}
+          onClick={() => {
+            setSelected(menuIndex);
+            setActiveMenu(menuIndex);
+          }}
         >
           <p className="text-xl w-40 whitespace-nowrap">{title}</p>
         </Button>
