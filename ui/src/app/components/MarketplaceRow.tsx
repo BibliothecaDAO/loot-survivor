@@ -106,7 +106,6 @@ const MarketplaceRow = ({
   return (
     <tr
       ref={ref}
-      key={index}
       className={
         "border-b border-terminal-green hover:bg-terminal-black" +
         (selectedIndex === index + 1 ? " bg-terminal-black" : "")

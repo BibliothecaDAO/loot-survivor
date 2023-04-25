@@ -57,8 +57,8 @@ export default function Home() {
   useEffect(() => {
     setIndexer(
       (account as any)?.baseUrl == "http://3.215.42.99:5050"
-        ? "http://3.215.42.99:8081/graphql"
-        : "http://3.215.42.99:8080/graphql"
+        ? "http://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql"
+        : "http://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql"
     );
     // setIndexer(
     //   (account as any)?.baseUrl == "http://3.215.42.99:5050"

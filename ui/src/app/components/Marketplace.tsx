@@ -19,7 +19,7 @@ import {
 } from "../hooks/graphql/queries";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
-import UTCClock from "./UTCClock";
+import { UTCClock, Countdown } from "./Clock";
 import MarketplaceRow from "./MarketplaceRow";
 
 const Marketplace: React.FC = () => {
@@ -156,20 +156,29 @@ const Marketplace: React.FC = () => {
     "Actions",
   ];
 
-  console.log(selectedIndex);
+  const nextMint = new Date(
+    new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
+      8 * 60 * 60 * 1000
+  );
 
   return (
     <>
       {adventurer?.adventurer?.level != 1 ? (
         <div className="w-full">
           <div className="flex flex-row m-1 justify-between">
-            <Button
-              onClick={() => addToCalls(mintDailyItemsTx)}
-              className={selectedIndex == 0 ? "animate-pulse" : ""}
-              variant={selectedIndex == 0 ? "default" : "ghost"}
-            >
-              Mint daily items
-            </Button>
+            <div className="flex flex-row align-items">
+              <Button
+                onClick={() => addToCalls(mintDailyItemsTx)}
+                className={selectedIndex == 0 ? "animate-pulse" : ""}
+                variant={selectedIndex == 0 ? "default" : "ghost"}
+              >
+                Mint daily items
+              </Button>
+              <Countdown
+                endTime={nextMint}
+                finishedMessage="Items can be minted!"
+              />
+            </div>
             <UTCClock />
           </div>
           <div className=" overflow-auto w-full h-[432px]">
@@ -199,6 +208,7 @@ const Marketplace: React.FC = () => {
                       adventurers={formatAdventurers}
                       isActive={activeMenu == index + 1}
                       setActiveMenu={setActiveMenu}
+                      key={index}
                     />
                   ))}
               </tbody>

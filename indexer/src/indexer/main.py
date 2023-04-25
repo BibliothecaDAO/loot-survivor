@@ -57,15 +57,15 @@ async def start(
 
 
 @cli.command()
-@click.option("--mongo-url", default=None, help="MongoDB url.")
+@click.option("--mongo_goerli", default=None, help="Mongo url for goerli.")
+@click.option("--mongo_devnet", default=None, help="Mongo url for devnet.")
 @click.option("--port", default=None, help="Port number.")
-@click.option("--network", default=None, help="Network id.")
 @async_command
-async def graphql(mongo_url, port, network):
+async def graphql(mongo_goerli, mongo_devnet, port):
     """Start the GraphQL server."""
-    if mongo_url is None:
-        mongo_url = "mongodb://apibara:apibara@localhost:27017"
     if port is None:
         port = "8080"
 
-    await run_graphql_api(mongo_url=mongo_url, port=port, network=network)
+    await run_graphql_api(
+        mongo_goerli=mongo_goerli, mongo_devnet=mongo_devnet, port=port
+    )
