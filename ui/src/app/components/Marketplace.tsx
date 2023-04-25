@@ -160,7 +160,7 @@ const Marketplace: React.FC = () => {
 
   const nextMint = new Date(
     new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
-      8 * currentTimezoneOffsetMinutes * 60 * 1000
+      (8 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
   return (
