@@ -43,7 +43,9 @@ export default function Info({ adventurer }: InfoProps) {
             <div className="flex flex-row m-4 gap-5">
               <div className="w-[170px] h-[160px] relative border-4 border-white ">
                 <Image
-                  src="/MIKE.png"
+                  src={
+                    formatAdventurer.health == 0 ? "/skull.png" : "/MIKE.png"
+                  }
                   alt="adventurer-image"
                   fill={true}
                   style={{ objectFit: "contain" }}

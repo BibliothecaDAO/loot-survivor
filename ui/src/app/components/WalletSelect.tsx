@@ -34,6 +34,8 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     }
   }, [account]);
 
+  console.log(account);
+
   return (
     <div className="flex flex-col p-8 h-screen max-h-screen">
       <div className="w-full h-6 my-2 bg-terminal-green" />
@@ -76,6 +78,15 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
                   Connect {connector.id()}
                 </Button>
               ) : null}
+              {/* {connector.id() == "braavos" ? (
+                <Button
+                  onClick={() => connect(connector)}
+                  key={connector.id()}
+                  className="w-full"
+                >
+                  Connect {connector.id()}
+                </Button>
+              ) : null} */}
             </>
           ))}
           <AddDevnetButton
