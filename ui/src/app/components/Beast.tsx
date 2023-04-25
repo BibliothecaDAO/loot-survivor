@@ -187,6 +187,7 @@ export default function Beast() {
                   <BattleDisplay
                     battleData={battle}
                     beastName={beastData.beast}
+                    key={index}
                   />
                 ))}
               </div>

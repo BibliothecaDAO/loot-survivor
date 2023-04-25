@@ -35,11 +35,11 @@ const TransactionHistory = () => {
           <div className="absolute right-0 top-10 z-10 w-[650px] h-[250px] p-2 bg-terminal-black border border-terminal-green overflow-x-auto">
             <p className="text-2xl">LEDGER</p>
             <div className="border border-terminal-green w-full" />
-            {transactions
-              .slice()
-              .reverse()
-              .map((tx, i) => (
-                <ul>
+            <ul>
+              {transactions
+                .slice()
+                .reverse()
+                .map((tx, i) => (
                   <li key={i}>
                     <div className="flex flex-row flex-wrap gap-1">
                       <p className="text-white text-xl">
@@ -54,8 +54,8 @@ const TransactionHistory = () => {
                       <TxStatus hash={tx.hash} />
                     </div>
                   </li>
-                </ul>
-              ))}
+                ))}
+            </ul>
           </div>
         ) : (
           <div className="absolute right-0 top-10 z-10 w-96 h-96 bg-terminal-black border border-terminal-green">
