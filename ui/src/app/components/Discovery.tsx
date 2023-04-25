@@ -23,14 +23,9 @@ interface DiscoveryProps {
 }
 
 const Discovery = ({ hash }: DiscoveryProps) => {
-  const { hashes } = useTransactionManager();
-
-  const currentHash = hashes[hashes.length - 1];
-  const currentTransaction = useTransaction({ hash: currentHash });
-
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
   const { data, status, isLoading, error } = useWaitForTransaction({
-    hash: currentHash,
+    hash: hash,
     watch: true,
   });
   const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;

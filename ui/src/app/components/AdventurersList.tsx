@@ -80,7 +80,7 @@ export const AdventurersList = ({
       {!adventurersByOwnerLoading ? (
         adventurers.length > 0 ? (
           <div className="flex basis-2/3">
-            <div className="flex flex-col w-1/2">
+            <div className="flex flex-col w-1/2 overflow-auto">
               {buttonsData.map((buttonData, index) => (
                 <Button
                   key={buttonData.id}
