@@ -1448,8 +1448,8 @@ class IndexerGraphQLView(GraphQLView):
 async def run_graphql_api(mongo_goerli=None, mongo_devnet=None, port="8080"):
     mongo_goerli = MongoClient(mongo_goerli)
     mongo_devnet = MongoClient(mongo_devnet)
-    db_name_goerli = "loot-survivor-indexer-goerli"
-    db_name_devnet = "loot-survivor-indexer-devnet"
+    db_name_goerli = "loot-survivor-indexer-goerli".replace("-", "_")
+    db_name_devnet = "loot-survivor-indexer-devnet".replace("-", "_")
     db_goerli = mongo_goerli[db_name_goerli]
     db_devnet = mongo_devnet[db_name_devnet]
 
