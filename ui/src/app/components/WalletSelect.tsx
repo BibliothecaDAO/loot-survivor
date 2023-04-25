@@ -80,10 +80,10 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
           ))}
           <AddDevnetButton
             // isDisabled={!account?.address}
-            isDisabled={false}
+            isDisabled={addedDevnet}
             setAddDevnet={setAddedDevnet}
           />
-          <SwitchToDevnetButton isDisabled={addedDevnet} />
+          <SwitchToDevnetButton isDisabled={false} />
         </div>
       )}
       <div className="w-full h-6 my-2 bg-terminal-green" />

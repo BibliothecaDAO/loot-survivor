@@ -19,6 +19,7 @@ import {
 } from "../hooks/graphql/queries";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
+import UTCClock from "./UTCClock";
 
 const Marketplace: React.FC = () => {
   const { account } = useAccount();
@@ -125,6 +126,18 @@ const Marketplace: React.FC = () => {
     );
   };
 
+  const checkBidBalance = () => {
+    if (formatAdventurer.adventurer?.gold) {
+      const sum = calls
+        .filter((call: any) => call.entrypoint == "bid_on_item")
+        .reduce(
+          (accumulator, current) => accumulator + (current.calldata[4] || 0),
+          0
+        );
+      return sum;
+    }
+  };
+
   const headings = [
     "Market Id",
     "Item",
@@ -146,10 +159,11 @@ const Marketplace: React.FC = () => {
     <>
       {adventurer?.adventurer?.level != 1 ? (
         <div className="w-full">
-          <div className="flex flex-row m-1">
+          <div className="flex flex-row m-1 justify-between">
             <Button onClick={() => addToCalls(mintDailyItemsTx)}>
               Mint daily items
             </Button>
+            <UTCClock />
           </div>
           <div className=" overflow-auto w-full h-[432px]">
             {marketLatestItemsLoading && (
@@ -199,7 +213,9 @@ const Marketplace: React.FC = () => {
                       <td className="text-center">
                         <Button
                           onClick={() => setShowBidBox(index)}
-                          disabled={bidExists(item.marketId)}
+                          disabled={
+                            bidExists(item.marketId) || checkBidBalance()
+                          }
                           className={bidExists(item.marketId) ? "bg-white" : ""}
                         >
                           BID

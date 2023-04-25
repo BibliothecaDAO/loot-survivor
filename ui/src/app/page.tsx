@@ -60,6 +60,11 @@ export default function Home() {
         ? "http://3.215.42.99:8081/graphql"
         : "http://3.215.42.99:8080/graphql"
     );
+    // setIndexer(
+    //   (account as any)?.baseUrl == "http://3.215.42.99:5050"
+    //     ? "https://ec2-3-215-42-99.compute-1.amazonaws.com/graphql"
+    //     : "https://ec2-3-215-42-99.compute-1.amazonaws.com:8443/graphql"
+    // );
   }, [account]);
 
   useEffect(() => {
@@ -131,7 +136,7 @@ export default function Home() {
           {account ? (
             <div className="w-full">
               {adventurer?.adventurer ? (
-                <div className="fixed text-lg w-[1280px] bottom-1 flex flew-row items-center bg-terminal-black border-2 border-terminal-green text-white justify-evenly">
+                <div className="fixed text-lg w-5/6 bottom-1 inset-x-auto flex flew-row items-center bg-terminal-black border-2 border-terminal-green text-white justify-evenly">
                   {adventurerStats.adventurer?.name}
                   <p>HEALTH: {adventurerStats.adventurer?.health}</p>
                   <p>GOLD: {adventurerStats.adventurer?.gold}</p>

@@ -31,7 +31,7 @@ export const InventoryRow = ({
   const ItemDisplay = (item: any) => {
     const formatItem = item.item;
     return (
-      <p className="w-full whitespace-nowrap">
+      <p className="whitespace-nowrap">
         {formatItem
           ? `${formatItem.item} [Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`
           : "Nothing"}
@@ -85,7 +85,7 @@ export const InventoryRow = ({
   }, [isActive, selectedIndex]);
   return (
     <div className="flex flex-row gap-3 w-full">
-      <p className="text-xl w-96 whitespace-nowrap">{title}</p>
+      <p className="text-xl w-40 whitespace-nowrap">{title}</p>
       <ItemDisplay
         item={items?.find((item: any) => item.id == equippedItemId)}
       />

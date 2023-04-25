@@ -57,7 +57,7 @@ export const SwitchToDevnetButton = ({
     await wallet?.request({
       type: "wallet_switchStarknetChain",
       params: {
-        id: "90013",
+        chainId: "LS_DEVNET",
       },
     });
   };
