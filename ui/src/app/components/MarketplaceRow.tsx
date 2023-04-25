@@ -36,7 +36,8 @@ const MarketplaceRow = ({
     const expiryTime = new Date(expiry);
 
     // Convert the offset to milliseconds
-    const timezoneOffsetMilliseconds = 60 * 60 * 1000;
+    const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
+    const timezoneOffsetMilliseconds = currentTimezoneOffsetMinutes * 60 * 1000;
 
     // Add the offset to the expiry time to get the correct UTC Unix timestamp
     const expiryTimeUTC = expiryTime.getTime() + timezoneOffsetMilliseconds;

@@ -156,9 +156,11 @@ const Marketplace: React.FC = () => {
     "Actions",
   ];
 
+  const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
+
   const nextMint = new Date(
     new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
-      8 * 60 * 60 * 1000
+      8 * currentTimezoneOffsetMinutes * 60 * 1000
   );
 
   return (
@@ -175,6 +177,7 @@ const Marketplace: React.FC = () => {
                 Mint daily items
               </Button>
               <Countdown
+                countingMessage="Next mint in:"
                 endTime={nextMint}
                 finishedMessage="Items can be minted!"
               />

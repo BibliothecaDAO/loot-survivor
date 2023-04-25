@@ -25,14 +25,15 @@ export const UTCClock: React.FC = () => {
 
 interface CountdownProps {
   endTime: Date;
+  countingMessage: string;
   finishedMessage: string;
 }
 
 export const Countdown: React.FC<CountdownProps> = ({
   endTime,
+  countingMessage,
   finishedMessage,
 }) => {
-  console.log(endTime);
   const startTime = new Date();
   const initialDifferenceInSeconds = Math.floor(
     (endTime.getTime() - startTime.getTime()) / 1000
@@ -61,7 +62,11 @@ export const Countdown: React.FC<CountdownProps> = ({
 
   return (
     <div>
-      <p>{seconds <= 0 ? finishedMessage : formatTime(seconds)}</p>
+      <p>
+        {seconds <= 0
+          ? finishedMessage
+          : `${countingMessage} ${formatTime(seconds)}`}
+      </p>
     </div>
   );
 };
