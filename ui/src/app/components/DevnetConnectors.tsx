@@ -22,8 +22,8 @@ export const AddDevnetButton = ({
         id: "90013",
         chainName: "Loot Survivor Devnet",
         chainId: "LS_DEVNET",
-        baseUrl: "http://3.215.42.99:5050",
-        rpcUrls: ["http://3.215.42.99:5050/rpc"],
+        baseUrl: "https://3.215.42.99:5050",
+        rpcUrls: ["https://3.215.42.99:5050/rpc"],
         // accountImplementation:
         //   "0x58d97f7d76e78f44905cc30cb65b91ea49a4b908a76703c54197bca90f81773",
       },
