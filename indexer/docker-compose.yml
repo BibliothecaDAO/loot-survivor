@@ -76,55 +76,40 @@ services:
     restart: always
     command:
     - start
-    - --server-url
-    - "apibara:7171"
     - --mongo-url
     - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-devnet:27018"
     - --network
     - "devnet"
     - --adventurer
-    - "0x037e26f2adab0b4ac64ce408881457686a4fd97d07e7bd7459e5a519bc647811"
+    - "0x07a6771c44602b93e8375610f886cefde0e3752073a5761b0fe2566281debf8e"
     - --beast
-    - "0x01adcc3cee58a8573e0d3568f01166f4099892d6fa51af27cd000297b15a2e7b"
+    - "0x03b2879fae55706b2412c7798570877b0e42712f7010910bb7c92912b0c6c7f3"
     - --loot
-    - "0x05b883f6b530da72886e128cfebd46fee77c583baf25279bdace1d2d4aa0d935"
+    - "0x04fd9fd16370c0dd2c562cb7aa2d6b973142da85c0cfb740ea69841009e98380"
+    - --start_block
+    - "30"
     environment:
       PYTHONUNBUFFERED: "1"
     links:
     - mongo-devnet
 
-  graphql-goerli:
+  graphql:
     image: starknetdev/loot-survivor-indexer:latest
     restart: always
     command:
     - graphql
-    - --mongo-url
+    - --mongo_goerli
     - "mongodb://${GOERLI_DB_USERNAME}:${GOERLI_DB_PASSWORD}@mongo-goerli:27017"
-    - --network
-    - "goerli"
+    - --mongo_devnet
+    - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-devnet:27018"
+    - --port
+    - "8080"
     environment:
       PYTHONUNBUFFERED: "1"
     ports:
       - 8080:8080
     links:
     - mongo-goerli
-
-  graphql-devnet:
-    image: starknetdev/loot-survivor-indexer:latest
-    restart: always
-    command:
-    - graphql
-    - --mongo-url
-    - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-goerli:27017"
-    - --port
-    - "8081"
-    - --network
-    - "devnet"
-    environment:
-      PYTHONUNBUFFERED: "1"
-    ports:
-      - 8081:8081
-    links:
     - mongo-devnet
 
 volumes:

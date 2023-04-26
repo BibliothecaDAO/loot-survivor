@@ -19,24 +19,18 @@ import {
 } from "../hooks/graphql/queries";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
+import { UTCClock, Countdown } from "./Clock";
+import MarketplaceRow from "./MarketplaceRow";
+import { sortByKey } from "../lib/utils";
 
 const Marketplace: React.FC = () => {
-  const { account } = useAccount();
   const { adventurer } = useAdventurer();
-  const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
+  const { addToCalls } = useTransactionCart();
   const { lootMarketArcadeContract, adventurerContract } = useContracts();
-  const { hashes, addTransaction } = useTransactionManager();
-  const [hash, setHash] = useState<string | undefined>(undefined);
-  const [showBidBox, setShowBidBox] = useState(-1);
-
-  const { data, isLoading, error } = useWaitForTransaction({
-    hash,
-    watch: true,
-  });
-
-  const formatAddress = account ? account.address : "0x0";
-  const transactions = useTransactions({ hashes });
-  const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [activeMenu, setActiveMenu] = useState<number | undefined>();
+  const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
+  const [itemsCount, setItemsCount] = useState(0);
 
   const {
     loading: latestMarketItemsNumberLoading,
@@ -48,7 +42,7 @@ const Marketplace: React.FC = () => {
   });
 
   const latestMarketItemsNumber = latestMarketItemsNumberData
-    ? latestMarketItemsNumberData.market[0].itemsNumber
+    ? latestMarketItemsNumberData.market[0]?.itemsNumber
     : [];
 
   const {
@@ -98,46 +92,53 @@ const Marketplace: React.FC = () => {
     metadata: `Minting Loot Items!`,
   };
 
-  // const equipItemTx = {
-  //   contractAddress:
-  //     adventurerContract?.address,
-  //   selector: "equip_item",
-  //   calldata: [
-  //     itemId,
-  //     "0",
-  //     formatAdventurer.adventurer?.id,
-  //     "0",
-  //   ],
-  //   metadata: `Equipping ${item.item}`,
-  // };
-  // addToCalls(equipItemTx);
+  useEffect(() => {
+    if (marketLatestItems) {
+      setItemsCount(marketLatestItems.length);
+    }
+    console.log(marketLatestItems.length);
+  }, [selectedIndex]);
 
-  const convertExpiryTime = (expiry: string) => {
-    const expiryTime = new Date(expiry);
-
-    // Convert the offset to milliseconds
-    const timezoneOffsetMilliseconds = 60 * 60 * 1000;
-
-    // Add the offset to the expiry time to get the correct UTC Unix timestamp
-    const expiryTimeUTC = expiryTime.getTime() + timezoneOffsetMilliseconds;
-    return expiryTimeUTC;
+  const handleKeyDown = (event: KeyboardEvent) => {
+    switch (event.key) {
+      case "ArrowDown":
+        setSelectedIndex((prev) => {
+          const newIndex = Math.min(prev + 1, itemsCount - 1);
+          return newIndex;
+        });
+        break;
+      case "ArrowUp":
+        setSelectedIndex((prev) => {
+          const newIndex = Math.max(prev - 1, 0);
+          return newIndex;
+        });
+        break;
+      case "Enter":
+        setActiveMenu(selectedIndex);
+        break;
+    }
   };
 
-  const currentTime = new Date().getTime(); // Get the current time in milliseconds
+  useEffect(() => {
+    if (!activeMenu) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [activeMenu]);
 
-  const bidExists = (marketId: number) => {
-    return calls.some(
-      (call: any) =>
-        call.entrypoint == "bid_on_item" && call.calldata[0] == marketId
-    );
-  };
-
-  const claimExists = (marketId: number) => {
-    return calls.some(
-      (call: any) =>
-        call.entrypoint == "claim_item" && call.calldata[0] == marketId
-    );
-  };
+  useEffect(() => {
+    if (!activeMenu) {
+      const button = rowRefs.current[selectedIndex];
+      if (button) {
+        button.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+        });
+      }
+    }
+  }, [selectedIndex]);
 
   const headings = [
     "Market Id",
@@ -156,23 +157,42 @@ const Marketplace: React.FC = () => {
     "Actions",
   ];
 
+  const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
+
+  const nextMint = new Date(
+    new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
+      (8 + currentTimezoneOffsetMinutes) * 60 * 1000
+  );
+
   return (
     <>
       {adventurer?.adventurer?.level != 1 ? (
         <div className="w-full">
-          <div className="flex flex-row m-1">
-            <Button onClick={() => addToCalls(mintDailyItemsTx)}>
-              Mint daily items
-            </Button>
+          <div className="flex flex-row m-1 justify-between">
+            <div className="flex flex-row align-items">
+              <Button
+                onClick={() => addToCalls(mintDailyItemsTx)}
+                className={selectedIndex == 0 ? "animate-pulse" : ""}
+                variant={selectedIndex == 0 ? "default" : "ghost"}
+              >
+                Mint daily items
+              </Button>
+              <Countdown
+                countingMessage="Next mint in:"
+                endTime={nextMint}
+                finishedMessage="Items can be minted!"
+              />
+            </div>
+            <UTCClock />
           </div>
-          <div className="h-screen-full overflow-auto w-full max-h-96">
+          <div className=" overflow-auto w-full h-[432px]">
             {marketLatestItemsLoading && (
               <p className="text-xl loading-ellipsis">LOADING</p>
             )}
             {marketLatestItemsError && (
               <p className="text-xl">ERROR {marketLatestItemsError.message}</p>
             )}
-            <table className="w-full border-terminal-green border mt-4">
+            <table className="w-full border-terminal-green border mt-4 h-[425px]">
               <thead className="sticky top-0 ">
                 <tr className="sticky top-0 border z-5 border-terminal-green bg-terminal-black">
                   {headings.map((heading, index) => (
@@ -184,76 +204,16 @@ const Marketplace: React.FC = () => {
                 {!marketLatestItemsLoading &&
                   !marketLatestItemsError &&
                   marketLatestItems.map((item: any, index: number) => (
-                    <tr
+                    <MarketplaceRow
+                      ref={(ref: any) => (rowRefs.current[index] = ref)}
+                      item={item}
+                      index={index}
+                      selectedIndex={selectedIndex}
+                      adventurers={formatAdventurers}
+                      isActive={activeMenu == index + 1}
+                      setActiveMenu={setActiveMenu}
                       key={index}
-                      className="border-b border-terminal-green hover:bg-terminal-black"
-                    >
-                      <td className="text-center">{item.marketId}</td>
-                      <td className="text-center">{item.item}</td>
-                      <td className="text-center">{item.rank}</td>
-                      <td className="text-center">{item.slot}</td>
-                      <td className="text-center">{item.type}</td>
-                      <td className="text-center">{item.material}</td>
-                      <td className="text-center">{item.greatness}</td>
-                      <td className="text-center">{item.xp}</td>
-                      <td className="text-center">{item.price}</td>
-                      <td className="text-center">
-                        {item.bidder
-                          ? `${
-                              formatAdventurers.find(
-                                (adventurer: any) =>
-                                  adventurer.id == item.bidder
-                              )?.name
-                            } - ${item.bidder}`
-                          : ""}
-                      </td>
-                      <td className="text-center">{item.expiry}</td>
-                      <td className="text-center">{item.status}</td>
-                      <td className="text-center">{item.claimedTime}</td>
-                      <td className="text-center">
-                        <Button
-                          onClick={() => setShowBidBox(index)}
-                          disabled={bidExists(item.marketId)}
-                          className={bidExists(item.marketId) ? "bg-white" : ""}
-                        >
-                          BID
-                        </Button>
-                        <BidBox
-                          showBidBox={showBidBox == index}
-                          close={() => setShowBidBox(-1)}
-                          marketId={item.marketId}
-                          item={item}
-                        />
-                        <Button
-                          onClick={async () => {
-                            const claimItemTx = {
-                              contractAddress:
-                                lootMarketArcadeContract?.address,
-                              selector: "claim_item",
-                              calldata: [
-                                item.marketId,
-                                "0",
-                                formatAdventurer.adventurer?.id,
-                                "0",
-                              ],
-                              metadata: `Claiming ${item.item}`,
-                            };
-                            addToCalls(claimItemTx);
-                          }}
-                          disabled={
-                            claimExists(item.marketId) ||
-                            !item.expiry ||
-                            convertExpiryTime(item.expiry) > currentTime ||
-                            formatAdventurer.adventurer?.id != item.bidder
-                          }
-                          className={
-                            claimExists(item.marketId) ? "bg-white" : ""
-                          }
-                        >
-                          CLAIM
-                        </Button>
-                      </td>
-                    </tr>
+                    />
                   ))}
               </tbody>
             </table>
@@ -271,17 +231,3 @@ const Marketplace: React.FC = () => {
 };
 
 export default Marketplace;
-
-// onClick={async () => {
-//   addToCalls(mintDailyItems);
-//   await writeAsync().then((tx: any) => {
-//     setHash(tx.transaction_hash);
-//     addTransaction({
-//       hash: tx.transaction_hash,
-//       metadata: {
-//         method: "Minting loot items",
-//         description: "Market Items are being minted!",
-//       },
-//     });
-//   });
-// }}

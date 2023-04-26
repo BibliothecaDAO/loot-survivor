@@ -6,7 +6,6 @@ import About from "./About";
 import VerticalKeyboardControl from "./VerticalMenu";
 
 const Adventurer = () => {
-  const { adventurer, handleUpdateAdventurer } = useAdventurer();
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
 

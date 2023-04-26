@@ -5,11 +5,12 @@ import {
   StarknetConfig,
   useAccount,
 } from "@starknet-react/core";
-import CartridgeConnector from "@cartridge/connector";
 import { useMemo } from "react";
 import { AdventurerProvider } from "./context/AdventurerProvider";
 import { TransactionCartProvider } from "./context/TransactionCartProvider";
+import { UIProvider } from "./context/UIProvider";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import { IndexerProvider } from "./context/IndexerProvider";
 
 // export const metadata = {
 //   title: "Create Next App",
@@ -38,24 +39,18 @@ export default function RootLayout({
     []
   );
 
-  const client = new ApolloClient({
-    uri:
-      (account as any)?.baseUrl == "http://3.215.42.99:5050"
-        ? "http://3.215.42.99:8081/graphql"
-        : "http://3.215.42.99:8080/graphql",
-    cache: new InMemoryCache(),
-  });
-
   return (
     <html lang="en">
       <body className="bg-black text-terminal-green">
-        <ApolloProvider client={client}>
+        <IndexerProvider>
           <StarknetConfig connectors={connectors} autoConnect>
-            <TransactionCartProvider>
-              <AdventurerProvider>{children}</AdventurerProvider>
-            </TransactionCartProvider>
+            <UIProvider>
+              <TransactionCartProvider>
+                <AdventurerProvider>{children}</AdventurerProvider>
+              </TransactionCartProvider>
+            </UIProvider>
           </StarknetConfig>
-        </ApolloProvider>
+        </IndexerProvider>
       </body>
     </html>
   );

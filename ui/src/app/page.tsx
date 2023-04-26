@@ -17,14 +17,16 @@ import TransactionHistory from "./components/TransactionHistory";
 import TransactionCart from "./components/TransactionCart";
 import Upgrade from "./components/Upgrade";
 import Intro from "./components/Intro";
-import { AddDevnetButton } from "./components/DevnetConnectors";
+import { useUI } from "./context/UIProvider";
+import { useIndexer } from "./context/IndexerProvider";
 
 export default function Home() {
   const { connect, disconnect, connectors } = useConnectors();
   const { account } = useAccount();
-  console.log(account);
   const { adventurer } = useAdventurer();
   const { calls } = useTransactionCart();
+  const { onboarded, setOnboarded } = useUI();
+  const { setIndexer } = useIndexer();
 
   const adventurerStats = adventurer ?? NullAdventurerProps;
 
@@ -45,6 +47,20 @@ export default function Home() {
       setSelected(menu[0].value);
     }
   }, [adventurer]);
+
+  useEffect(() => {
+    if (!account?.address) {
+      setOnboarded(false);
+    }
+  }, [account]);
+
+  useEffect(() => {
+    setIndexer(
+      (account as any)?.baseUrl == "http://3.215.42.99:5050"
+        ? "https://survivor-indexer.bibliothecadao.xyz/devnet-graphql"
+        : "https://survivor-indexer.bibliothecadao.xyz/goerli-graphql"
+    );
+  }, [account]);
 
   useEffect(() => {
     let newMenu = [
@@ -85,10 +101,10 @@ export default function Home() {
   }, [adventurer, account]);
 
   return (
-    <main className={`container mx-auto flex flex-wrap`}>
-      {account ? (
+    <main className={`min-h-screen container mx-auto flex flex-col`}>
+      {onboarded ? (
         <>
-          <div className="flex justify-between w-full">
+          <div className="flex justify-between w-full ">
             <h1>Loot Survivors</h1>
             <div className="flex flex-row gap-2 self-end">
               {account && calls.length > 0 && <TransactionCart />}
@@ -113,17 +129,7 @@ export default function Home() {
           <div className="w-full h-6 my-2 bg-terminal-green" />
 
           {account ? (
-            <div className="w-full">
-              {adventurer?.adventurer ? (
-                <div className="fixed text-lg w-[1280px] bottom-1 flex flew-row items-center bg-terminal-black border-2 border-terminal-green text-white justify-evenly">
-                  {adventurerStats.adventurer?.name}
-                  <p>HEALTH: {adventurerStats.adventurer?.health}</p>
-                  <p>GOLD: {adventurerStats.adventurer?.gold}</p>
-                  <p>LEVEL: {adventurerStats.adventurer?.level}</p>
-                  <p>XP: {adventurerStats.adventurer?.xp}</p>
-                </div>
-              ) : null}
-
+            <div className="w-full flex-grow">
               {!upgrade ? (
                 <>
                   <div className="gap-10 pb-2">
@@ -144,6 +150,15 @@ export default function Home() {
               ) : (
                 <Upgrade />
               )}
+              {adventurer?.adventurer ? (
+                <div className="fixed text-lg w-5/6 bottom-1 left-1/2 transform -translate-x-1/2 flex flew-row items-center bg-terminal-black border-2 border-terminal-green text-white justify-evenly">
+                  {adventurerStats.adventurer?.name}
+                  <p>HEALTH: {adventurerStats.adventurer?.health}</p>
+                  <p>GOLD: {adventurerStats.adventurer?.gold}</p>
+                  <p>LEVEL: {adventurerStats.adventurer?.level}</p>
+                  <p>XP: {adventurerStats.adventurer?.xp}</p>
+                </div>
+              ) : null}
             </div>
           ) : null}
         </>

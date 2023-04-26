@@ -339,7 +339,7 @@ const getLatestMarketItems = gql`
     items(
       where: { marketId: { gt: 0 } }
       limit: $itemsNumber
-      orderBy: { createdBlock: { desc: true }, marketId: { asc: true } }
+      orderBy: { createdBlock: { desc: true } }
     ) {
       bag
       bidder
@@ -437,7 +437,6 @@ const getLatestMarketItemsNumber = gql`
     }
   }
 `;
-
 
 export {
   getAdventurer,

@@ -54,7 +54,7 @@ const TransactionCart = () => {
                   {call && (
                     <div className="flex items-center justify-between">
                       <p>{call.entrypoint}</p>
-                      <p>{call.calldata}</p>
+                      {/* <p>{call.calldata}</p> */}
                       <p>{call.metadata}</p>
                       <button
                         onClick={() =>

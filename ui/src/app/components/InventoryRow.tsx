@@ -8,16 +8,22 @@ import { Button } from "./Button";
 interface InventoryRowProps {
   title: string;
   items: any[];
-  activeMenu: number;
+  menuIndex: number;
   isActive: boolean;
+  setActiveMenu: (value: any) => void;
+  isSelected: boolean;
+  setSelected: (value: any) => void;
   equippedItemId: number | undefined;
 }
 
 export const InventoryRow = ({
   title,
   items,
-  activeMenu,
+  menuIndex,
   isActive,
+  setActiveMenu,
+  isSelected,
+  setSelected,
   equippedItemId,
 }: InventoryRowProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -28,33 +34,40 @@ export const InventoryRow = ({
 
   const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
 
+  const ItemDisplay = (item: any) => {
+    const formatItem = item.item;
+    return (
+      <div className="flex flex-row gap-2">
+        <p className="whitespace-nowrap">
+          {formatItem ? formatItem.item : "Nothing"}
+        </p>
+        <p className="whitespace-nowrap">
+          {formatItem &&
+            `[Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`}
+        </p>
+      </div>
+    );
+  };
+
   const handleAddEquipItem = (itemId: any) => {
     if (adventurerContract) {
       const equipItem = {
         contractAddress: adventurerContract?.address,
         selector: "equip_item",
         calldata: [formatAdventurer?.id, "0", itemId, "0"],
+        metadata: `Equipping ${itemId}!`,
       };
       addToCalls(equipItem);
     }
   };
 
-  const ItemDisplay = (item: any) => {
-    const formatItem = item.item;
-    return (
-      <p className="w-full whitespace-nowrap">
-        {formatItem
-          ? `${formatItem.item} [Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`
-          : "Nothing"}
-      </p>
-    );
-  };
+  const unequippedItems = items?.filter((item) => item.id != equippedItemId);
 
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
       case "ArrowDown":
         setSelectedIndex((prev) => {
-          const newIndex = Math.min(prev + 1, items?.length - 1);
+          const newIndex = Math.min(prev + 1, unequippedItems?.length - 1);
           return newIndex;
         });
         break;
@@ -65,14 +78,14 @@ export const InventoryRow = ({
         });
         break;
       case "Enter":
-        !items[selectedIndex].equippedAdventurerId
-          ? handleAddEquipItem(items[selectedIndex].id)
-          : null;
+        handleAddEquipItem(unequippedItems[selectedIndex]?.id);
+        break;
+      case "Escape":
+        setActiveMenu(undefined);
         break;
     }
   };
 
-  console.log(items);
   useEffect(() => {
     if (isActive) {
       window.addEventListener("keydown", handleKeyDown);
@@ -83,43 +96,57 @@ export const InventoryRow = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isActive, selectedIndex]);
+
   return (
-    <div className="flex flex-row gap-3 w-full">
-      <p className="text-xl w-96 whitespace-nowrap">{title}</p>
-      <ItemDisplay
-        item={items?.find((item: any) => item.id == equippedItemId)}
-      />
-      <div className="flex flex-row gap-4 w-full overflow-auto">
-        {items?.map((item: any, index: number) => (
-          <>
-            {item.id != equippedItemId ? (
-              <div key={index} className="flex flex-col items-center">
-                <ItemDisplay item={item} />
-                <Button
-                  key={index}
-                  ref={(ref) => (buttonRefs.current[index] = ref)}
-                  className={
-                    selectedIndex === index && isActive
-                      ? item.equippedAdventurerId
-                        ? "animate-pulse bg-white"
-                        : "animate-pulse"
-                      : "h-[20px]"
-                  }
-                  variant={selectedIndex === index ? "subtle" : "outline"}
-                  size={"xs"}
-                  onClick={() => {
-                    !items[selectedIndex].equippedAdventurerId
-                      ? handleAddEquipItem(items[selectedIndex].id)
-                      : null;
-                  }}
-                >
-                  Equip
-                </Button>
-              </div>
-            ) : null}
-          </>
-        ))}
+    <>
+      <div className="flex flex-row gap-3 w-full align-center">
+        <Button
+          className={isSelected && !isActive ? "animate-pulse" : ""}
+          variant={isSelected ? "default" : "ghost"}
+          onClick={() => {
+            setSelected(menuIndex);
+            setActiveMenu(menuIndex);
+          }}
+        >
+          <p className="text-xl w-40 whitespace-nowrap">{title}</p>
+        </Button>
+        <ItemDisplay
+          item={items?.find((item: any) => item.id == equippedItemId)}
+        />
       </div>
-    </div>
+      <div className="absolute top-1/3 left-2/3 flex flex-col gap-4 w-full overflow-auto">
+        {isSelected && unequippedItems?.length > 0 ? (
+          <>
+            <p>Equip:</p>
+            {unequippedItems.map((item: any, index: number) => (
+              <>
+                <div key={index} className="flex flex-row items-center">
+                  <ItemDisplay item={item} />
+                  <Button
+                    key={index}
+                    ref={(ref) => (buttonRefs.current[index] = ref)}
+                    className={
+                      selectedIndex === index && isSelected
+                        ? item.equippedAdventurerId
+                          ? "animate-pulse bg-white"
+                          : "animate-pulse"
+                        : "h-[20px]"
+                    }
+                    variant={selectedIndex === index ? "subtle" : "outline"}
+                    size={"xs"}
+                    onClick={() => {
+                      setSelectedIndex(index);
+                      handleAddEquipItem(items[selectedIndex].id);
+                    }}
+                  >
+                    Equip
+                  </Button>
+                </div>
+              </>
+            ))}
+          </>
+        ) : null}
+      </div>
+    </>
   );
 };

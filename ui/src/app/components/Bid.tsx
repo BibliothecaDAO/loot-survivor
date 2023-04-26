@@ -47,7 +47,6 @@ export function BidBox({ showBidBox, close, marketId, item }: BidBoxProps) {
         };
         addToCalls(BidTx);
         // Place bid logic
-        console.log(`Bid placed for ${bidPrice} gold`);
         close();
       }
     } else {

@@ -23,14 +23,9 @@ interface DiscoveryProps {
 }
 
 const Discovery = ({ hash }: DiscoveryProps) => {
-  const { hashes } = useTransactionManager();
-
-  const currentHash = hashes[hashes.length - 1];
-  const currentTransaction = useTransaction({ hash: currentHash });
-
   const { adventurer, handleUpdateAdventurer } = useAdventurer();
   const { data, status, isLoading, error } = useWaitForTransaction({
-    hash: currentHash,
+    hash: hash,
     watch: true,
   });
   const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
@@ -48,13 +43,13 @@ const Discovery = ({ hash }: DiscoveryProps) => {
     : [];
 
   return (
-    <div className="flex flex-col gap-5 m-auto">
+    <div className="flex flex-col gap-5 m-auto text-xl items-center">
       {(hash && data?.status != "ACCEPTED_ON_L2") ||
       (hash && data?.status != "ACCEPTED_ON_L1") ? (
         <TxActivity hash={hash} />
       ) : latestDiscoveries.length > 0 ? (
         <>
-          <p className="text-xl">Recent discoveries:</p>
+          <p className="text-xl text-center">Recent discoveries:</p>
           <div className="flex flex-col gap-2 items-center">
             {latestDiscoveries.map((discovery: any, index: number) => (
               <div key={index}>

@@ -1,12 +1,17 @@
+import { useState } from "react";
 import { useAccount } from "@starknet-react/core";
 import { Button } from "./Button";
 import { mintEth } from "../api/api";
 
 interface AddDevnetButtonProps {
   isDisabled: boolean;
+  setAddDevnet: (value: boolean) => void;
 }
 
-export const AddDevnetButton = ({ isDisabled }: AddDevnetButtonProps) => {
+export const AddDevnetButton = ({
+  isDisabled,
+  setAddDevnet,
+}: AddDevnetButtonProps) => {
   const { connector } = useAccount();
   const wallet = (connector as any)?._wallet;
 
@@ -19,12 +24,20 @@ export const AddDevnetButton = ({ isDisabled }: AddDevnetButtonProps) => {
         chainId: "LS_DEVNET",
         baseUrl: "http://3.215.42.99:5050",
         rpcUrls: ["http://3.215.42.99:5050/rpc"],
+        // accountImplementation:
+        //   "0x58d97f7d76e78f44905cc30cb65b91ea49a4b908a76703c54197bca90f81773",
       },
     });
   };
 
   return (
-    <Button onClick={() => handleAddDevnet()} disabled={isDisabled}>
+    <Button
+      onClick={async () => {
+        await handleAddDevnet();
+        setAddDevnet(true);
+      }}
+      disabled={isDisabled}
+    >
       Add Devnet
     </Button>
   );
@@ -41,22 +54,21 @@ export const SwitchToDevnetButton = ({
   const wallet = (connector as any)?._wallet;
 
   const handeleSwitchToDevnet = async () => {
-    console.log(
-      await wallet?.request({
-        type: "wallet_switchStarknetChain",
-        params: {
-          id: "90013",
-          name: "Loot Survivor Devnet",
-          chainId: "LS_DEVNET",
-          baseUrl: "http://3.215.42.99:5050",
-          rpcUrls: ["http://3.215.42.99:5050/rpc"],
-        },
-      })
-    );
+    await wallet?.request({
+      type: "wallet_switchStarknetChain",
+      params: {
+        chainId: "LS_DEVNET",
+      },
+    });
   };
 
   return (
-    <Button onClick={() => handeleSwitchToDevnet()} disabled={isDisabled}>
+    <Button
+      onClick={async () => {
+        await handeleSwitchToDevnet();
+      }}
+      disabled={isDisabled}
+    >
       Switch To Devnet
     </Button>
   );

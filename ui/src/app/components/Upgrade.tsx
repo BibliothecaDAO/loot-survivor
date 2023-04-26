@@ -28,37 +28,37 @@ const Upgrade = () => {
       id: 1,
       label: `Strength - ${adventurer?.adventurer?.strength}`,
       value: "Strength",
-      action: async () => handleUpgradeTx(),
+      action: async () => handleUpgradeTx("Strength"),
     },
     {
       id: 2,
       label: `Dexterity - ${adventurer?.adventurer?.dexterity}`,
       value: "Dexterity",
-      action: async () => handleUpgradeTx(),
+      action: async () => handleUpgradeTx("Dexterity"),
     },
     {
       id: 3,
       label: `Vitality - ${adventurer?.adventurer?.vitality}`,
       value: "Vitality",
-      action: async () => handleUpgradeTx(),
+      action: async () => handleUpgradeTx("Vitality"),
     },
     {
       id: 4,
       label: `Intelligence - ${adventurer?.adventurer?.intelligence}`,
       value: "Intelligence",
-      action: async () => handleUpgradeTx(),
+      action: async () => handleUpgradeTx("Intelligence"),
     },
     {
       id: 5,
       label: `Wisdom - ${adventurer?.adventurer?.wisdom}`,
       value: "Wisdom",
-      action: async () => handleUpgradeTx(),
+      action: async () => handleUpgradeTx("Wisdom"),
     },
     {
       id: 6,
       label: `Charisma - ${adventurer?.adventurer?.charisma}`,
       value: "Charisma",
-      action: async () => handleUpgradeTx(),
+      action: async () => handleUpgradeTx("Charisma"),
     },
   ];
 
@@ -72,7 +72,8 @@ const Upgrade = () => {
   //   ],
   // };
 
-  const handleUpgradeTx = async () => {
+  const handleUpgradeTx = async (selected: any) => {
+    console.log(`Upgrading ${selected}`);
     await adventurerContract
       ?.invoke("upgrade_stat", [
         { low: adventurer?.adventurer?.id, high: "0" },
@@ -137,7 +138,7 @@ const Upgrade = () => {
             <div className="w-1/2">
               <VerticalKeyboardControl
                 buttonsData={upgradeMenu}
-                onSelected={(value) => setSelected(value)}
+                onSelected={setSelected}
                 onEnterAction={true}
               />
             </div>

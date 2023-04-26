@@ -36,33 +36,35 @@ export default function Info({ adventurer }: InfoProps) {
   };
 
   return (
-    <div className="p-2 bg-terminal-black">
+    <div className="p-2 bg-terminal-black h-full">
       {!loading ? (
         <>
           <div className="flex flex-row justify-evenly">
             <div className="flex flex-row m-4 gap-5">
               <div className="w-[170px] h-[160px] relative border-4 border-white ">
                 <Image
-                  src="/MIKE.png"
+                  src={
+                    formatAdventurer.health == 0 ? "/skull.png" : "/MIKE.png"
+                  }
                   alt="adventurer-image"
                   fill={true}
                   style={{ objectFit: "contain" }}
                 />
               </div>
               <div className="flex flex-col items-center mt-9 ml-2">
-                <div className="text-xl font-medium text-white">
+                <div className="text-2xl font-medium text-white">
                   {formatAdventurer.name}
                 </div>
-                <p className="text-lg text-terminal-green">
+                <p className="text-2xl text-terminal-green">
                   HEALTH {formatAdventurer.health}
                 </p>
-                <p className="text-lg text-terminal-yellow">
+                <p className="text-2xl text-terminal-yellow">
                   GOLD {formatAdventurer.gold}
                 </p>
-                <p className="text-lg text-white">
+                <p className="text-2xl text-white">
                   LEVEL {formatAdventurer.level}
                 </p>
-                <p className="text-lg text-terminal-green">
+                <p className="text-2xl text-terminal-green">
                   XP {formatAdventurer.xp}
                 </p>
               </div>
@@ -70,8 +72,8 @@ export default function Info({ adventurer }: InfoProps) {
           </div>
           <div className="flex flex-row justify-evenly mt-4">
             <div className="flex flex-col">
-              <div className="text-xl font-medium text-white">ITEMS</div>
-              <p className="text-terminal-green">
+              <div className="text-2xl font-medium text-white">ITEMS</div>
+              <p className="text-terminal-green text-xl">
                 WEAPON -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -79,7 +81,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-l">
                 HEAD -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -87,7 +89,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-l">
                 CHEST -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -95,15 +97,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green">
-                FOOT -{" "}
-                <ItemDisplay
-                  item={items.find(
-                    (item: any) => item.id == formatAdventurer.feetId
-                  )}
-                />
-              </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-l">
                 HAND -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -111,7 +105,7 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-l">
                 WAIST -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -119,25 +113,49 @@ export default function Info({ adventurer }: InfoProps) {
                   )}
                 />
               </p>
+              <p className="text-terminal-green text-l">
+                FOOT -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.feetId
+                  )}
+                />
+              </p>
+              <p className="text-terminal-green text-l">
+                NECK -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.neckId
+                  )}
+                />
+              </p>
+              <p className="text-terminal-green text-l">
+                RING -{" "}
+                <ItemDisplay
+                  item={items.find(
+                    (item: any) => item.id == formatAdventurer.ringId
+                  )}
+                />
+              </p>
             </div>
             <div className="flex flex-col">
-              <div className="text-xl font-medium text-white">STATISTICS</div>
-              <p className="text-terminal-green">
+              <div className="text-2xl font-medium text-white">STATISTICS</div>
+              <p className="text-terminal-green text-xl">
                 STRENGTH - {formatAdventurer.strength}
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 DEXTERITY - {formatAdventurer.dexterity}
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 INTELLIGENCE - {formatAdventurer.intelligence}
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 VITALITY - {formatAdventurer.vitality}
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 WISDOM - {formatAdventurer.wisdom}
               </p>
-              <p className="text-terminal-green">
+              <p className="text-terminal-green text-xl">
                 LUCK - {formatAdventurer.luck}
               </p>
             </div>

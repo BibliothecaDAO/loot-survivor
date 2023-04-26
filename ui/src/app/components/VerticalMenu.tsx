@@ -73,7 +73,6 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
           onClick={() => {
             setSelectedIndex(index);
             buttonData.action();
-            onSelected(buttonData.value);
           }}
         >
           {buttonData.label}

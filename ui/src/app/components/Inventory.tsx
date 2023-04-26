@@ -31,6 +31,7 @@ const Inventory: React.FC = () => {
   const { hashes, addTransaction } = useTransactionManager();
   const { adventurer } = useAdventurer();
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const transactions = useTransactions({ hashes });
 
@@ -76,30 +77,19 @@ const Inventory: React.FC = () => {
         setSelectedIndex((prev) => Math.min(prev + 1, 8 - 1));
         break;
       case "Enter":
-        !items[selectedIndex].equippedAdventurerId
-          ? handleAddEquipItem(items[selectedIndex].id)
-          : null;
+        setActiveMenu(selectedIndex);
         break;
     }
   };
 
-  const ItemDisplay = (item: any) => {
-    const formatItem = item.item;
-    return (
-      <>
-        {formatItem
-          ? `${formatItem.item} [Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`
-          : "Nothing"}
-      </>
-    );
-  };
-
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [selectedIndex]);
+    if (!activeMenu) {
+      window.addEventListener("keydown", handleKeyDown);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [activeMenu]);
 
   const groupedItems = groupBySlot(items);
 
@@ -114,7 +104,7 @@ const Inventory: React.FC = () => {
   // }, [selectedIndex]);
 
   return (
-    <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-[520px] p-8 gap-6">
+    <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-[520px] p-8 gap-6 overflow-hidden">
       <div className="flex flex-col items-center">
         <div className="w-[250px] h-[250px] relative border-2 border-white m-2">
           <Image
@@ -128,61 +118,85 @@ const Inventory: React.FC = () => {
           {formatAdventurer.adventurer?.name}
         </p>
       </div>
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-5">
         <InventoryRow
           title={"Weapon"}
           items={groupedItems["Weapon"]}
-          activeMenu={selectedIndex}
-          isActive={selectedIndex == 0}
+          menuIndex={0}
+          isActive={activeMenu == 0}
+          setActiveMenu={setActiveMenu}
+          isSelected={selectedIndex == 0}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.weaponId}
         />
         <InventoryRow
           title={"Head Armour"}
           items={groupedItems["Head"]}
-          activeMenu={selectedIndex}
-          isActive={selectedIndex == 1}
+          menuIndex={1}
+          isActive={activeMenu == 1}
+          setActiveMenu={setActiveMenu}
+          isSelected={selectedIndex == 1}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.headId}
         />
         <InventoryRow
           title={"Chest Armour"}
           items={groupedItems["Chest"]}
-          activeMenu={selectedIndex}
-          isActive={selectedIndex == 2}
+          menuIndex={2}
+          isActive={activeMenu == 2}
+          setActiveMenu={setActiveMenu}
+          isSelected={selectedIndex == 2}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.chestId}
         />
         <InventoryRow
           title={"Feet Armour"}
           items={groupedItems["Foot"]}
-          activeMenu={selectedIndex}
-          isActive={selectedIndex == 3}
+          menuIndex={3}
+          isActive={activeMenu == 3}
+          setActiveMenu={setActiveMenu}
+          isSelected={selectedIndex == 3}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.feetId}
         />
         <InventoryRow
           title={"Hands Armour"}
           items={groupedItems["Hand"]}
-          activeMenu={selectedIndex}
-          isActive={selectedIndex == 4}
+          menuIndex={4}
+          isActive={activeMenu == 4}
+          setActiveMenu={setActiveMenu}
+          isSelected={selectedIndex == 4}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.handsId}
         />
         <InventoryRow
           title={"Waist Armour"}
           items={groupedItems["Waist"]}
-          activeMenu={selectedIndex}
-          isActive={selectedIndex == 5}
+          menuIndex={5}
+          isActive={activeMenu == 5}
+          setActiveMenu={setActiveMenu}
+          isSelected={selectedIndex == 5}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.waistId}
         />
         <InventoryRow
           title={"Neck Jewelry"}
           items={groupedItems["Neck"]}
-          activeMenu={selectedIndex}
-          isActive={selectedIndex == 6}
+          menuIndex={6}
+          isActive={activeMenu == 6}
+          setActiveMenu={setActiveMenu}
+          isSelected={selectedIndex == 6}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.neckId}
         />
         <InventoryRow
           title={"Ring Jewelry"}
           items={groupedItems["Ring"]}
-          activeMenu={selectedIndex}
-          isActive={selectedIndex == 7}
+          menuIndex={7}
+          isActive={activeMenu == 7}
+          setActiveMenu={setActiveMenu}
+          isSelected={selectedIndex == 7}
+          setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.ringId}
         />
       </div>

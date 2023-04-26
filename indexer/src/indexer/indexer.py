@@ -707,6 +707,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "$set": claim_item_doc,
             },
         )
+        # Here we implement a fix for minting a mart item
+        await info.storage.delete_one(
+            "items", {"id": check_exists_int(ci.item_token_id), "marketId": None}
+        )
         print("- [claim item]", ci.market_token_id, "->", ci.item_token_id)
 
     async def update_merchant_item(

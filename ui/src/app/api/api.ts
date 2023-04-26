@@ -24,7 +24,6 @@ export const mintEth = async ({ address }: MintEthProps) => {
 
     // Check for a specific condition in the response to determine success
     if (response.ok && data.new_balance == "10000000000000000000") {
-      console.log(data);
       return true;
     } else {
       console.error("Error in response:", data);
