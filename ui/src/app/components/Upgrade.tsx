@@ -14,6 +14,7 @@ const Upgrade = () => {
   const { adventurerContract } = useContracts();
   const { adventurer } = useAdventurer();
   const { addTransaction } = useTransactionManager();
+  const { handleSubmitCalls, addToCalls } = useTransactionCart();
   const [selected, setSelected] = useState("");
   const [hash, setHash] = useState("");
   const { data, status, isLoading, error } = useWaitForTransaction({
@@ -62,33 +63,29 @@ const Upgrade = () => {
     },
   ];
 
-  // const upgradeTx = {
-  //   contractAddress: adventurerContract?.address,
-  //   selector: "upgrade_stat",
-  //   calldata: [
-  //     adventurer?.adventurer?.id,
-  //     "0",
-  //     getKeyFromValue(gameData.STATS, selected),
-  //   ],
-  // };
+  const upgradeTx = {
+    contractAddress: adventurerContract?.address,
+    selector: "upgrade_stat",
+    calldata: [
+      adventurer?.adventurer?.id,
+      "0",
+      getKeyFromValue(gameData.STATS, selected),
+    ],
+  };
 
   const handleUpgradeTx = async (selected: any) => {
     console.log(`Upgrading ${selected}`);
-    await adventurerContract
-      ?.invoke("upgrade_stat", [
-        { low: adventurer?.adventurer?.id, high: "0" },
-        getKeyFromValue(gameData.STATS, selected),
-      ])
-      .then((tx) => {
-        setHash(tx.transaction_hash);
-        addTransaction({
-          hash: tx.transaction_hash,
-          metadata: {
-            method: "Upgrade Stat",
-            description: `Upgrading ${selected}`,
-          },
-        });
+    addToCalls(upgradeTx);
+    handleSubmitCalls().then((tx: any) => {
+      setHash(tx.transaction_hash);
+      addTransaction({
+        hash: tx.transaction_hash,
+        metadata: {
+          method: "Upgrade Stat",
+          description: `Upgrading ${selected}`,
+        },
       });
+    });
   };
 
   const Strength = (): ReactElement => (

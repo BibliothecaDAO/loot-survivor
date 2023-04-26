@@ -98,13 +98,13 @@ export default function Beast() {
   let beastData = beastByTokenIdData
     ? beastByTokenIdData.beasts[0]
     : {
-      beast: "Pheonix",
-      health: "100",
-      rank: "1",
-      xp: "0",
-      attackType: "Blade",
-      armorType: "Cloth",
-    };
+        beast: "Pheonix",
+        health: "100",
+        rank: "1",
+        xp: "0",
+        attackType: "Blade",
+        armorType: "Cloth",
+      };
 
   // const [hash, setHash] = useState<string | undefined>(undefined);
 
@@ -188,7 +188,6 @@ export default function Beast() {
                     key={index}
                     battleData={battle}
                     beastName={beastData.beast}
-                    key={index}
                   />
                 ))}
               </div>
