@@ -49,8 +49,8 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
   useEffect(() => {
     if (screen == 1) {
       if (
-        (account as any)?.provider?.baseUrl == "http://3.215.42.99:5050" ||
-        (account as any)?.baseUrl == "http://3.215.42.99:5050"
+        (account as any)?.provider?.baseUrl == "https://3.215.42.99:5050" ||
+        (account as any)?.baseUrl == "https://3.215.42.99:5050"
       ) {
         setOnboarded(true);
       }
