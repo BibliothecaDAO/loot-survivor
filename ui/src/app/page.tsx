@@ -57,14 +57,9 @@ export default function Home() {
   useEffect(() => {
     setIndexer(
       (account as any)?.baseUrl == "http://3.215.42.99:5050"
-        ? "http://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql"
-        : "http://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql"
+        ? "https://survivor-indexer.bibliothecadao.xyz/devnet-graphql"
+        : "https://survivor-indexer.bibliothecadao.xyz/goerli-graphql"
     );
-    // setIndexer(
-    //   (account as any)?.baseUrl == "http://3.215.42.99:5050"
-    //     ? "https://ec2-3-215-42-99.compute-1.amazonaws.com/graphql"
-    //     : "https://ec2-3-215-42-99.compute-1.amazonaws.com:8443/graphql"
-    // );
   }, [account]);
 
   useEffect(() => {

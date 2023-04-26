@@ -21,6 +21,7 @@ import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
 import { UTCClock, Countdown } from "./Clock";
 import MarketplaceRow from "./MarketplaceRow";
+import { sortByKey } from "../lib/utils";
 
 const Marketplace: React.FC = () => {
   const { adventurer } = useAdventurer();

@@ -81,3 +81,17 @@ export function groupBySlot(items: any[]) {
 
   return groups;
 }
+
+type Dictionary = { [key: string]: any };
+
+export const sortByKey = (key: string) => {
+  return (a: Dictionary, b: Dictionary) => {
+    if (a[key] < b[key]) {
+      return -1;
+    } else if (a[key] > b[key]) {
+      return 1;
+    } else {
+      return 0;
+    }
+  };
+};
