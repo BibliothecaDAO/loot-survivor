@@ -63,7 +63,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
         setOnboarded(true);
       }
     }
-  }, [account]);
+  }, [account, screen]);
 
   console.log(account);
 
@@ -110,7 +110,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
                     onClick={() => connect(connector)}
                     key={connector.id()}
                     className="w-full"
-                    disabled={typeof account != undefined}
+                    disabled={account ? true : false}
                   >
                     Connect {connector.id()}
                   </Button>
