@@ -12,13 +12,16 @@ export const mintEth = async ({ address }: MintEthProps) => {
       // Add other data you want to send in the request body
     };
 
-    const response = await fetch("http://http://3.215.42.99:5050/mint", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
+    const response = await fetch(
+      "http://survivor-indexer.bibliothecadao.xyz:5050/mint",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      }
+    );
 
     const data = await response.json();
 
