@@ -35,11 +35,11 @@ You will find the app at http://localhost:3000/.
 
 Setting up devnet:
 
-- Select "Launch on Devnet".
+- Select "Launch on Devnet"
 - Select "Connect ArgentX"
-- Select "Add Devnet"
-- Select "Switch to Devnet"
-- Create an account within ArgentX. You will be given 1 ETH as a starting balance.
+- Select "Add Devnet" (confirm in Argent)
+- Select "Switch to Devnet" (confirm in Argent)
+- Open Argent and create an account. You will be given 1 ETH as a starting balance.
 
 
 ## Game Description
