@@ -21,7 +21,7 @@ export const useIndexerContext = () => {
   const [indexer, setIndexer] = useState<string | undefined>(undefined);
   const [client, setClient] = useState<any>(
     new ApolloClient({
-      uri: "https://3.215.42.99:8080/graphql",
+      uri: "http://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql",
       cache: new InMemoryCache(),
     })
   );

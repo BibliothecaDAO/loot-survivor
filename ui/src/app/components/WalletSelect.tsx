@@ -49,8 +49,10 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
   useEffect(() => {
     if (screen == 1) {
       if (
-        (account as any)?.provider?.baseUrl == "https://3.215.42.99:5050" ||
-        (account as any)?.baseUrl == "https://3.215.42.99:5050"
+        (account as any)?.provider?.baseUrl ==
+          "http://survivor-indexer.bibliothecadao.xyz:5050" ||
+        (account as any)?.baseUrl ==
+          "http://survivor-indexer.bibliothecadao.xyz:5050"
       ) {
         setOnboarded(true);
       }
@@ -108,7 +110,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
                     onClick={() => connect(connector)}
                     key={connector.id()}
                     className="w-full"
-                    disabled={typeof account !== undefined}
+                    disabled={typeof account != undefined}
                   >
                     Connect {connector.id()}
                   </Button>
