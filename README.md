@@ -27,8 +27,11 @@ Set up server:
 ```
 cd ui
 yarn
-yarn run
+yarn build
+yarn start
 ```
+
+You will find the app at http://localhost:3000/.
 
 Setting up devnet:
 
