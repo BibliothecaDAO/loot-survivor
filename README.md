@@ -6,7 +6,7 @@ This repository includes both the client and indexer that form the game Loot Sur
 
 Currently we are running the app locally until we fix an issue with running devnet over https.
 
-Installed yarn? Skip until git clone. Else install it:
+### If you don't have yarn installed
 
 Install nodejs https://nodejs.org/en/download/. 
 
@@ -15,6 +15,8 @@ Install yarn:
 ```
 npm install --global yarn
 ```
+
+### Start app
 
 Clone repo:
 
