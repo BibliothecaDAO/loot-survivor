@@ -20,8 +20,8 @@ export const AddDevnetButton = ({
       type: "wallet_addStarknetChain",
       params: {
         id: "90013",
-        chainName: "Loot Survivor Devnet",
-        chainId: "LS_DEVNET",
+        chainName: "Loot Survivor Devnet 2",
+        chainId: "LS_DEVNET_2",
         baseUrl: "http://survivor-indexer.bibliothecadao.xyz:5050",
         rpcUrls: ["http://survivor-indexer.bibliothecadao.xyz:5050/rpc"],
         // accountImplementation:

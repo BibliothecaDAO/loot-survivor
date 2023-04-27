@@ -76,18 +76,18 @@ services:
     restart: always
     command:
     - start
+    - --server-url
+    - "apibara:7171"
     - --mongo-url
     - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-devnet:27018"
     - --network
     - "devnet"
     - --adventurer
-    - "0x07a6771c44602b93e8375610f886cefde0e3752073a5761b0fe2566281debf8e"
+    - "0x009056f46cb33d53c479b1d7c063c196bcd4e3549d58c9c9555b8bd2fea5ff4d"
     - --beast
-    - "0x03b2879fae55706b2412c7798570877b0e42712f7010910bb7c92912b0c6c7f3"
+    - "0x028298b791b7d938a063be38799ca1e217afc9a18e2af085031920f50cd4e006"
     - --loot
-    - "0x04fd9fd16370c0dd2c562cb7aa2d6b973142da85c0cfb740ea69841009e98380"
-    - --start_block
-    - "30"
+    - "0x0216071afae3defb274a33c6de4b5480fe3a4dd40c4832f69363b65f1ccd4614"
     environment:
       PYTHONUNBUFFERED: "1"
     links:
@@ -111,7 +111,11 @@ services:
     links:
     - mongo-goerli
     - mongo-devnet
+    volumes:
+      - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/fullchain.pem:/app/fullchain.pem
+      - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/privkey.pem:/app/privkey.pem
 
 volumes:
   mongo-data:
   apibara-data:
+  certs:
