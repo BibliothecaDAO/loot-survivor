@@ -45,6 +45,8 @@ Setting up devnet:
 - Select "Switch to Devnet" (confirm in Argent)
 - Open Argent and create an account. You will be given 1 ETH as a starting balance. (May take a few seconds to create)
 
+To see your ETH balance add token address `0x49D36570D4E46F48E99674BD3FCC84644DDD6B96F7C741B1562B82F9E004DC7`
+
 
 ## Game Description
 
