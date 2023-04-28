@@ -13,7 +13,7 @@ Install nodejs https://nodejs.org/en/download/.
 Install yarn:
 
 ```
-npm install --global yarn
+sudo npm install --global yarn
 ```
 
 ### Start app
@@ -27,7 +27,7 @@ git clone https://github.com/BibliothecaDAO/loot-survivor.git
 Set up server:
 
 ```
-cd ui
+cd loot-survivor/ui
 yarn
 yarn build
 yarn start
@@ -41,7 +41,7 @@ Setting up devnet:
 - Select "Connect ArgentX"
 - Select "Add Devnet" (confirm in Argent)
 - Select "Switch to Devnet" (confirm in Argent)
-- Open Argent and create an account. You will be given 1 ETH as a starting balance.
+- Open Argent and create an account. You will be given 1 ETH as a starting balance. (May take a few seconds to create)
 
 
 ## Game Description
