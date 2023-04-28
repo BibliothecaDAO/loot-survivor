@@ -3,6 +3,7 @@ import { Button } from "./Button";
 import { useConnectors, useAccount } from "@starknet-react/core";
 import {
   AddDevnetButton,
+  AddDevnetEthButton,
   SwitchToDevnetButton,
 } from "../components/DevnetConnectors";
 import { useUI } from "../context/UIProvider";

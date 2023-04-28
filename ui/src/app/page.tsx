@@ -19,6 +19,7 @@ import Upgrade from "./components/Upgrade";
 import Intro from "./components/Intro";
 import { useUI } from "./context/UIProvider";
 import { useIndexer } from "./context/IndexerProvider";
+import { AddDevnetEthButton } from "./components/DevnetConnectors";
 
 export default function Home() {
   const { connect, disconnect, connectors } = useConnectors();
@@ -110,6 +111,7 @@ export default function Home() {
             <div className="flex flex-row gap-2 self-end">
               {account && calls.length > 0 && <TransactionCart />}
               {account && <TransactionHistory />}
+              {account && <AddDevnetEthButton />}
               <ul className="flex flex-row gap-2">
                 {account ? (
                   <Button onClick={() => disconnect()}>

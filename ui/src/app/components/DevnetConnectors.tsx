@@ -20,8 +20,8 @@ export const AddDevnetButton = ({
       type: "wallet_addStarknetChain",
       params: {
         id: "90013",
-        chainName: "Loot Survivor Devnet 2",
-        chainId: "LS_DEVNET_2",
+        chainName: "Loot Survivor Devnet",
+        chainId: "LS_DEVNET",
         baseUrl: "http://survivor-indexer.bibliothecadao.xyz:5050",
         rpcUrls: ["http://survivor-indexer.bibliothecadao.xyz:5050/rpc"],
         // accountImplementation:
@@ -88,7 +88,7 @@ export const AddDevnetEthButton = () => {
             "0x49D36570D4E46F48E99674BD3FCC84644DDD6B96F7C741B1562B82F9E004DC7",
           symbol: "ETH",
           decimals: 18,
-          name: "ETher",
+          name: "Ether",
         },
       },
     });
