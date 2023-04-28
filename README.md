@@ -13,8 +13,10 @@ Install nodejs https://nodejs.org/en/download/.
 Install yarn:
 
 ```
-sudo npm install --global yarn
+npm install --global yarn
 ```
+
+If permissions error `sudo npm install --global yarn`
 
 ### Start app
 
