@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { Button } from "./Button";
+
 import { useContracts } from "../hooks/useContracts";
 import { useTransactionCart } from "../context/TransactionCartProvider";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurer } from "../types";
 import {
-  useTransaction,
-  useTransactions,
+
   useTransactionManager,
-  useWaitForTransaction,
+
 } from "@starknet-react/core";
-import Image from "next/image";
+
 import VerticalKeyboardControl from "./VerticalMenu";
-import HealthSlider from "./HealthSlider";
+
 import PurchaseHealth from "./PurchaseHealth";
 import Info from "./Info";
 import Discovery from "./Discovery";
@@ -21,8 +20,8 @@ export default function Actions() {
   const [loading, setLoading] = useState(false);
   const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
   const { adventurerContract } = useContracts();
-  const { adventurer, handleUpdateAdventurer } = useAdventurer();
-  const { hashes, transactions, addTransaction } = useTransactionManager();
+  const { adventurer } = useAdventurer();
+  const { addTransaction } = useTransactionManager();
   const [selected, setSelected] = useState<String>("");
   const [activeMenu, setActiveMenu] = useState(0);
   const [hash, setHash] = useState();

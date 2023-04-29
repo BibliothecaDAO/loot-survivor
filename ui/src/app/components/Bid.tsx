@@ -4,7 +4,6 @@ import { useContracts } from "../hooks/useContracts";
 import { useTransactionCart } from "../context/TransactionCartProvider";
 import {
   useAccount,
-  useWaitForTransaction,
   useTransactionManager,
   useTransactions,
 } from "@starknet-react/core";
@@ -57,7 +56,7 @@ export function BidBox({ showBidBox, close, marketId, item }: BidBoxProps) {
   return (
     <>
       {showBidBox && (
-        <div className="fixed top-24 right-10 mt-2 p-2 bg-black border border-terminal-green rounded-md shadow-lg">
+        <div className="fixed p-2 mt-2 bg-black border rounded-md shadow-lg top-24 right-10 border-terminal-green">
           <p>You are bidding on {marketId} </p>
           <div className="flex items-center justify-between mb-2">
             <label>Bid price (minimum 3 gold)</label>
@@ -68,7 +67,7 @@ export function BidBox({ showBidBox, close, marketId, item }: BidBoxProps) {
             type="number"
             min="3"
             onChange={(e) => setBidPrice(parseInt(e.target.value, 10))}
-            className="border border-terminal-black rounded-md px-3 py-2"
+            className="px-3 py-2 border rounded-md border-terminal-black"
           />
           <Button
             onClick={() => handleBid(marketId)}

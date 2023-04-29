@@ -5,7 +5,7 @@ import { useAccount } from "@starknet-react/core";
 import { useQuery } from "@apollo/client";
 import { getAdventurersByOwner } from "../hooks/graphql/queries";
 import { padAddress } from "../lib/utils";
-import KeyboardControl, { ButtonData } from "./KeyboardControls";
+import { ButtonData } from "./KeyboardControls";
 import { useAdventurer } from "../context/AdventurerProvider";
 
 export interface AdventurerListProps {

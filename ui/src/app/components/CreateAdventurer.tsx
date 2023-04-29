@@ -9,9 +9,8 @@ import {
   useTransactions,
   useTransaction,
 } from "@starknet-react/core";
-import { getValueFromKey, getKeyFromValue } from "../lib/utils";
+import { getKeyFromValue } from "../lib/utils";
 import { GameData } from "./GameData";
-import { Button } from "./Button";
 
 export interface CreateAdventurerProps {
   isActive: boolean;

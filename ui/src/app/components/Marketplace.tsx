@@ -1,16 +1,7 @@
-import { MarketItem } from "../types";
 import { useState, useEffect, useRef } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { useTransactionCart } from "../context/TransactionCartProvider";
-import {
-  useAccount,
-  useWaitForTransaction,
-  useTransactionManager,
-  useTransactions,
-} from "@starknet-react/core";
-import { BidBox } from "./Bid";
 import { Button } from "./Button";
-import HorizontalKeyboardControl from "./HorizontalMenu";
 import { useQuery } from "@apollo/client";
 import {
   getLatestMarketItems,
@@ -18,10 +9,8 @@ import {
   getLatestMarketItemsNumber,
 } from "../hooks/graphql/queries";
 import { useAdventurer } from "../context/AdventurerProvider";
-import { NullAdventurerProps } from "../types";
 import { UTCClock, Countdown } from "./Clock";
 import MarketplaceRow from "./MarketplaceRow";
-import { sortByKey } from "../lib/utils";
 
 const Marketplace: React.FC = () => {
   const { adventurer } = useAdventurer();
@@ -161,14 +150,14 @@ const Marketplace: React.FC = () => {
 
   const nextMint = new Date(
     new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
-      (8 + currentTimezoneOffsetMinutes) * 60 * 1000
+    (8 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
   return (
     <>
       {adventurer?.adventurer?.level != 1 ? (
         <div className="w-full">
-          <div className="flex flex-row m-1 justify-between">
+          <div className="flex flex-row justify-between m-1">
             <div className="flex flex-row align-items">
               <Button
                 onClick={() => addToCalls(mintDailyItemsTx)}

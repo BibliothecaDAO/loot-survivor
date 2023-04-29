@@ -46,7 +46,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className=" text-terminal-green bg-conic-to-br to-black from-terminal-black" >
+      <body className=" text-terminal-green bg-conic-to-br to-black from-terminal-black bg-b" >
         <IndexerProvider>
           <StarknetConfig connectors={connectors} autoConnect>
             <UIProvider>

@@ -1,18 +1,10 @@
-import { useState } from "react";
 import {
-  useAccount,
   useWaitForTransaction,
-  useTransactionManager,
-  useTransactions,
-  useTransaction,
 } from "@starknet-react/core";
 import { useQuery } from "@apollo/client";
 import {
-  getDiscoveryByTxHash,
   getLatestDiscoveries,
 } from "../hooks/graphql/queries";
-import KeyboardControl, { ButtonData } from "./KeyboardControls";
-import { NullDiscovery } from "../types";
 import { NullAdventurer } from "../types";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { TxActivity } from "./TxActivity";
@@ -43,14 +35,14 @@ const Discovery = ({ hash }: DiscoveryProps) => {
     : [];
 
   return (
-    <div className="flex flex-col gap-5 m-auto text-xl items-center">
+    <div className="flex flex-col items-center gap-5 m-auto text-xl">
       {(hash && data?.status != "ACCEPTED_ON_L2") ||
-      (hash && data?.status != "ACCEPTED_ON_L1") ? (
+        (hash && data?.status != "ACCEPTED_ON_L1") ? (
         <TxActivity hash={hash} />
       ) : latestDiscoveries.length > 0 ? (
         <>
           <p className="text-xl text-center">Recent discoveries:</p>
-          <div className="flex flex-col gap-2 items-center">
+          <div className="flex flex-col items-center gap-2">
             {latestDiscoveries.map((discovery: any, index: number) => (
               <div key={index}>
                 <DiscoveryDisplay discoveryData={discovery} />
