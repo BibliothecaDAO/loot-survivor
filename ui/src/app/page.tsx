@@ -103,7 +103,7 @@ export default function Home() {
   }, [adventurer, account]);
 
   return (
-    <main className={`min-h-screen container mx-auto flex flex-col`}>
+    <main className={`min-h-screen container mx-auto flex flex-col bezel`}>
       {onboarded ? (
         <>
           <div className="flex justify-between w-full ">
