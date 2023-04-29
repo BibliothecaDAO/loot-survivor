@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { useAdventurer } from "../context/AdventurerProvider";
 import { AdventurersList } from "./AdventurersList";
 import { CreateAdventurer } from "./CreateAdventurer";
-import About from "./About";
 import VerticalKeyboardControl from "./VerticalMenu";
 
 const Adventurer = () => {
@@ -26,7 +24,7 @@ const Adventurer = () => {
 
   return (
     <div className="flex flex-row gap-2 p-4">
-      <div className="w-1/3">
+      <div className="w-2/12">
         <VerticalKeyboardControl
           buttonsData={menu}
           onSelected={(value) => setSelected(value)}
@@ -44,7 +42,7 @@ const Adventurer = () => {
         </div>
       )}
       {selected === "create adventurer" && (
-        <div className="w-2/3">
+        <div className="w-1/3">
           <CreateAdventurer
             isActive={activeMenu == 2}
             onEscape={() => setActiveMenu(0)}

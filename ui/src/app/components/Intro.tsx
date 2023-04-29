@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import WalletSelect from "./WalletSelect";
+import { TypeAnimation } from 'react-type-animation';
+import { prologue } from "../lib/constants";
 
 const Intro = () => {
   const [screen, setScreen] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
+
+  const [introComplete, setIntroComplete] = useState<boolean>(false);
 
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
@@ -35,30 +39,55 @@ const Intro = () => {
   return (
     <>
       {screen == 0 ? (
-        <div className="flex flex-col w-full p-8 h-screen max-h-screen">
-          <div className="w-full h-6 my-2 bg-terminal-green" />
-          <h1 className="m-auto text-[100px]">LOOT SURVIVOR</h1>
-          <div className="flex flex-row gap-10 m-auto">
-            <Button
-              onClick={() => setScreen(1)}
-              className={
-                "m-auto w-40" + (selectedIndex == 0 ? "animate-pulse" : "")
-              }
-              variant={selectedIndex == 0 ? "default" : "ghost"}
-            >
-              <p className="text-base whitespace-nowrap">LAUNCH ON DEVNET</p>
-            </Button>
-            <Button
-              onClick={() => setScreen(2)}
-              className={
-                "m-auto w-40" + (selectedIndex == 1 ? "animate-pulse" : "")
-              }
-              variant={selectedIndex == 1 ? "default" : "ghost"}
-            >
-              <p className="text-base whitespace-nowrap">LAUNCH ON GOERLI</p>
-            </Button>
+        <div className="flex flex-col w-full h-screen max-h-screen p-8">
+
+          <div className="flex">
+            <p className="p-4 text-xl leading-tight">
+              <TypeAnimation
+                sequence={[
+                  prologue,
+                  () => {
+                    setIntroComplete(true)
+                  },
+                ]}
+                wrapper="div"
+                cursor={true}
+                speed={15}
+                // repeat={Infinity}
+                style={{ fontSize: '2em' }}
+              />
+
+            </p>
+
           </div>
-          <div className="w-full h-6 my-2 bg-terminal-green" />
+          <div>
+            <Button onClick={() => setIntroComplete(true)} variant={"outline"}>skip</Button>
+          </div>
+
+          {introComplete && (
+            <div className="flex flex-row gap-10 m-auto">
+              <Button
+                onClick={() => setScreen(1)}
+                className={
+                  "m-auto w-40" + (selectedIndex == 0 ? "animate-pulse" : "")
+                }
+                variant={selectedIndex == 0 ? "default" : "ghost"}
+              >
+                <p className="text-base whitespace-nowrap">LAUNCH ON DEVNET</p>
+              </Button>
+              <Button
+                onClick={() => setScreen(2)}
+                className={
+                  "m-auto w-40" + (selectedIndex == 1 ? "animate-pulse" : "")
+                }
+                variant={selectedIndex == 1 ? "default" : "ghost"}
+              >
+                <p className="text-base whitespace-nowrap">LAUNCH ON GOERLI</p>
+              </Button>
+            </div>
+          )}
+
+
         </div>
       ) : (
         <WalletSelect screen={screen} />

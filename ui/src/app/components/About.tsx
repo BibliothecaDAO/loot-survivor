@@ -2,8 +2,8 @@ import React from "react";
 
 const About = () => {
   return (
-    <div className="flex text-lg">
-      <p className="p-4">
+    <div className="flex">
+      <p className="p-4 text-2xl">
         Welcome, brave traveler! Prepare to embark on an extraordinary journey
         through the mystic lands of Eldarath, a high fantasy realm where
         Dragons, Ogres, Skeletons, and Phoenixes roam free, vying for supremacy

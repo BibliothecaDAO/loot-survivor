@@ -177,26 +177,27 @@ export const CreateAdventurer = ({
   const loading = data?.status == "RECEIVED" || data?.status == "PENDING";
 
   return (
-    <div className="flex bg-black border">
-      <div className="flex flex-row items-center mx-2 text-lg">
-        <div className="flex p-1 flex-row gap-2">
-          <form onSubmit={handleSubmit} className="flex p-1 flex-col gap-2">
-            <label>
-              Name:
+    <div className="flex w-full border border-terminal-green">
+      <div className="flex flex-row items-center w-full mx-2 text-lg">
+        <div className="flex flex-row w-full gap-2 p-1">
+          <form onSubmit={handleSubmit} className="flex flex-col w-full gap-2 p-1 text-2xl">
+            <label className="flex justify-between">
+              <span className="self-center">Name:</span>
+
               <input
                 type="text"
                 name="name"
                 onChange={handleChange}
-                className="bg-terminal-black m-2 p-1"
+                className="p-1 m-2 bg-terminal-black"
                 onKeyDown={handleKeyDown}
               />
             </label>
-            <label>
-              Race:
+            <label className="flex justify-between">
+              <span className="self-center">Race:</span>
               <select
                 name="race"
                 onChange={handleChange}
-                className="bg-terminal-black m-2 p-1"
+                className="p-1 m-2 bg-terminal-black"
               >
                 <option value="">Select a race</option>
                 <option value="Elf">Elf</option>
@@ -211,23 +212,23 @@ export const CreateAdventurer = ({
                 <option value="Frog">Frog</option>
               </select>
             </label>
-            <label>
-              Home Realm ID:
+            <label className="flex justify-between">
+              <span className="self-center">Home Realm:</span>
               <input
                 type="number"
                 name="homeRealmId"
                 min="1"
                 max="8000"
                 onChange={handleChange}
-                className="bg-terminal-black m-2 p-1"
+                className="p-1 m-2 bg-terminal-black"
               />
             </label>
-            <label>
-              Order of Divinity:
+            <label className="flex justify-between">
+              <span className="self-center">Order of Divinity:</span>
               <select
                 name="order"
                 onChange={handleChange}
-                className="bg-terminal-black m-2 p-1"
+                className="p-1 m-2 bg-terminal-black"
               >
                 <option value="">Select an order</option>
                 <optgroup label="Order of Light">
@@ -252,12 +253,12 @@ export const CreateAdventurer = ({
                 </optgroup>
               </select>
             </label>
-            <label>
-              Starting Weapon:
+            <label className="flex justify-between">
+              <span className="self-center">Starting Weapon:</span>
               <select
                 name="startingWeapon"
                 onChange={handleChange}
-                className="bg-terminal-black m-2 p-1"
+                className="p-1 m-2 bg-terminal-black"
               >
                 <option value="">Select a weapon</option>
                 <option value="Wand">Wand</option>
@@ -268,9 +269,9 @@ export const CreateAdventurer = ({
             </label>
             <button
               type="submit"
-              className="bg-terminal-black border border-terminal-green m-2 p-2 hover:bg-terminal-green/80 hover:animate-pulse hover:text-black"
+              className="p-2 m-2 border bg-terminal-black border-terminal-green hover:bg-terminal-green/80 hover:animate-pulse hover:text-black"
             >
-              Submit
+              Spawn
             </button>
           </form>
           <div className="flex flex-col">

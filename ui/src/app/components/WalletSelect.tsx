@@ -7,6 +7,8 @@ import {
   SwitchToDevnetButton,
 } from "../components/DevnetConnectors";
 import { useUI } from "../context/UIProvider";
+import { prologue } from "../lib/constants";
+import { TypeAnimation } from 'react-type-animation';
 
 interface WalletSelectProps {
   screen: number;
@@ -51,9 +53,9 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     if (screen == 1) {
       if (
         (account as any)?.provider?.baseUrl ==
-          "http://survivor-indexer.bibliothecadao.xyz:5050" ||
+        "http://survivor-indexer.bibliothecadao.xyz:5050" ||
         (account as any)?.baseUrl ==
-          "http://survivor-indexer.bibliothecadao.xyz:5050"
+        "http://survivor-indexer.bibliothecadao.xyz:5050"
       ) {
         setOnboarded(true);
       }
@@ -66,70 +68,62 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     }
   }, [account, screen]);
 
-  console.log(account);
+
 
   return (
-    <div className="flex flex-col p-8 h-screen max-h-screen">
+    <div className="flex flex-col h-screen max-h-screen p-8">
       <div className="w-full h-6 my-2 bg-terminal-green" />
-      <div className="flex flex-col">
-        <h1>ABOUT</h1>
-        <div className="flex text-xl">
-          <p className="p-4">
-            Welcome, brave traveler! Prepare to embark on an extraordinary
-            journey through the mystic lands of Eldarath, a high fantasy realm
-            where Dragons, Ogres, Skeletons, and Phoenixes roam free, vying for
-            supremacy amidst the remnants of a fallen empire. As a lone
-            survivor, you are destined to traverse this beguiling world,
-            battling fearsome beasts, unearthing lost relics, and uncovering
-            secrets hidden within the mists of time.
-          </p>
-        </div>
+
+      <div className="flex flex-col self-center my-auto">
+        <h1 className="mb-10">It's Time to Survive </h1>
+        {screen == 2 ? (
+          <div className="flex flex-col w-1/2 gap-5 m-auto">
+            {connectors.length > 0 ? (
+              connectors.map((connector) => (
+                <Button
+
+                  onClick={() => connect(connector)}
+                  key={connector.id()}
+                  className="w-full"
+                >
+                  Connect {connector.id()}
+                </Button>
+              ))
+            ) : (
+              <h1>You must have Argent or Braavos installed!</h1>
+            )}
+          </div>
+        ) : (
+          <div className="flex flex-col w-1/2 gap-5 m-auto">
+            {connectors.some((connector: any) => connector.id() == "argentX") ? (
+              connectors.map((connector) => (
+                <>
+                  {connector.id() == "argentX" ? (
+                    <Button
+                      onClick={() => connect(connector)}
+                      key={connector.id()}
+                      className="w-full"
+                      disabled={account ? true : false}
+                    >
+                      Connect {connector.id()}
+                    </Button>
+                  ) : null}
+                </>
+              ))
+            ) : (
+              <h1>To use devnet you must have an Argent wallet!</h1>
+            )}
+            <AddDevnetButton
+              // isDisabled={!account?.address}
+              isDisabled={addedDevnet}
+              setAddDevnet={setAddedDevnet}
+            />
+            <SwitchToDevnetButton isDisabled={false} />
+          </div>
+        )}
       </div>
-      {screen == 2 ? (
-        <div className="flex flex-col gap-5 m-auto w-1/2">
-          {connectors.length > 0 ? (
-            connectors.map((connector) => (
-              <Button
-                onClick={() => connect(connector)}
-                key={connector.id()}
-                className="w-full"
-              >
-                Connect {connector.id()}
-              </Button>
-            ))
-          ) : (
-            <h1>You must have Argent or Braavos installed!</h1>
-          )}
-        </div>
-      ) : (
-        <div className="flex flex-col gap-5 m-auto w-1/2">
-          {connectors.some((connector: any) => connector.id() == "argentX") ? (
-            connectors.map((connector) => (
-              <>
-                {connector.id() == "argentX" ? (
-                  <Button
-                    onClick={() => connect(connector)}
-                    key={connector.id()}
-                    className="w-full"
-                    disabled={account ? true : false}
-                  >
-                    Connect {connector.id()}
-                  </Button>
-                ) : null}
-              </>
-            ))
-          ) : (
-            <h1>To use devnet you must have an Argent wallet!</h1>
-          )}
-          <AddDevnetButton
-            // isDisabled={!account?.address}
-            isDisabled={addedDevnet}
-            setAddDevnet={setAddedDevnet}
-          />
-          <SwitchToDevnetButton isDisabled={false} />
-        </div>
-      )}
-      <div className="w-full h-6 my-2 bg-terminal-green" />
+
+      <div className="w-full h-6 my-2 mt-auto bg-terminal-green" />
     </div>
   );
 };
