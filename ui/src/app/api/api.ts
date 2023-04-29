@@ -8,7 +8,7 @@ export const mintEth = async ({ address }: MintEthProps) => {
   try {
     const requestBody = {
       address: address,
-      key2: "10000000000000000000",
+      amount: 10000000000000000000,
       // Add other data you want to send in the request body
     };
 
@@ -26,7 +26,7 @@ export const mintEth = async ({ address }: MintEthProps) => {
     const data = await response.json();
 
     // Check for a specific condition in the response to determine success
-    if (response.ok && data.new_balance == "10000000000000000000") {
+    if (response.ok) {
       return true;
     } else {
       console.error("Error in response:", data);

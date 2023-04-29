@@ -1,5 +1,7 @@
 import { useAccount } from "@starknet-react/core";
 import { Button } from "./Button";
+import { mintEth } from "../api/api";
+
 interface AddDevnetButtonProps {
   isDisabled: boolean;
   setAddDevnet: (value: boolean) => void;
@@ -96,14 +98,14 @@ export const AddDevnetEthButton = () => {
   );
 };
 
-// export const MintEthButton = () => {
-//   const { account } = useAccount();
+export const MintEthButton = () => {
+  const { account } = useAccount();
 
-//   const handeleMintEth = () => {
-//     if (account?.address) {
-//       mintEth(account?.address);
-//     }
-//   };
+  const handeleMintEth = async () => {
+    if (account?.address) {
+      await mintEth({ address: account?.address });
+    }
+  };
 
-//   return <Button onClick={() => handeleMintEth()}>Mint ETH</Button>;
-// };
+  return <Button onClick={() => handeleMintEth()}>Mint ETH</Button>;
+};
