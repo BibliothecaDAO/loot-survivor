@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "./Button";
+import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 
 interface ButtonData {
   id: number;
@@ -23,6 +24,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
   isActive = true,
   setActiveMenu,
 }) => {
+  const { play } = useUiSounds(soundSelector.click)
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -33,18 +35,21 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
       case "ArrowDown":
+        play()
         setSelectedIndex((prev) => {
           const newIndex = Math.min(prev + 1, buttonsData.length - 1);
           return newIndex;
         });
         break;
       case "ArrowUp":
+        play()
         setSelectedIndex((prev) => {
           const newIndex = Math.max(prev - 1, 0);
           return newIndex;
         });
         break;
       case "Enter":
+        play()
         setActiveMenu && setActiveMenu(buttonsData[selectedIndex].id);
         onEnterAction && buttonsData[selectedIndex].action();
         break;

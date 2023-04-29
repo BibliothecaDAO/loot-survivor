@@ -1,8 +1,11 @@
+"use client"
+
 import * as React from "react";
 import { VariantProps, cva } from "class-variance-authority";
 
 import { cn } from "@/app/lib/utils";
 import Link from "next/link";
+import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 
 const buttonVariants = cva(
   "active:scale-95 inline-flex items-center justify-center text-sm font-medium transition-colors focus:outline-none focus:ring-offset-2 dark:hover:bg-slate-800 dark:hover:text-slate-100 disabled:bg-terminal-black disabled:text-terminal-green dark:focus:ring-slate-400 disabled:pointer-events-none dark:focus:ring-offset-slate-900 data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800 uppercase font-sans-serif mx-1",
@@ -37,13 +40,17 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   children: React.ReactNode;
   href?: string;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, className, variant, size, href, ...props }, ref) => {
+
+  ({ children, className, variant, size, href, onClick, ...props }, ref) => {
+
+    const { play } = useUiSounds(soundSelector.click)
+
     if (href) {
       return (
         <Link
@@ -56,6 +63,10 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     }
     return (
       <button
+        onClick={(event) => {
+          onClick?.(event);
+          play();
+        }}
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
         {...props}
@@ -69,4 +80,3 @@ Button.displayName = "Button";
 
 export { Button, buttonVariants };
 
-// focus:ring-2 focus:ring-terminal-green focus:ring-offset-2

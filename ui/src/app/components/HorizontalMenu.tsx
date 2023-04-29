@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "./Button";
+import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 
 interface ButtonData {
   id: number;
@@ -16,6 +17,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
   buttonsData,
   onButtonClick,
 }) => {
+  const { play } = useUiSounds(soundSelector.click)
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -26,12 +28,14 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
       case "ArrowLeft":
+        play()
         setSelectedIndex((prev) => {
           const newIndex = Math.max(prev - 1, 0);
           return newIndex;
         });
         break;
       case "ArrowRight":
+        play()
         setSelectedIndex((prev) => {
           const newIndex = Math.min(prev + 1, buttonsData.length - 1);
           return newIndex;
