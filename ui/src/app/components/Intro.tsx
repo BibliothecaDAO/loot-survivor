@@ -61,7 +61,8 @@ const Intro = () => {
 
           </div>
           <div>
-            <Button onClick={() => setIntroComplete(true)} variant={"outline"}>skip</Button>
+            {!introComplete && (<Button onClick={() => setIntroComplete(true)} variant={"outline"}>skip</Button>)}
+
           </div>
 
           {introComplete && (
