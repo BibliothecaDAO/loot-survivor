@@ -1,12 +1,8 @@
 import { useState } from "react";
-import { useContracts } from "../hooks/useContracts";
-import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurer } from "../types";
 import Image from "next/image";
-import VerticalKeyboardControl from "./VerticalMenu";
 import { useQuery } from "@apollo/client";
 import { getItemsByAdventurer } from "../hooks/graphql/queries";
-
 interface InfoProps {
   adventurer: any;
 }
@@ -36,11 +32,11 @@ export default function Info({ adventurer }: InfoProps) {
   };
 
   return (
-    <div className="p-2 bg-terminal-black h-full">
+    <div className="h-full p-2 bg-terminal-black">
       {!loading ? (
         <>
           <div className="flex flex-row justify-evenly">
-            <div className="flex flex-row m-4 gap-5">
+            <div className="flex flex-row gap-5 m-4">
               <div className="w-[170px] h-[160px] relative border-4 border-white ">
                 <Image
                   src={
@@ -51,7 +47,7 @@ export default function Info({ adventurer }: InfoProps) {
                   style={{ objectFit: "contain" }}
                 />
               </div>
-              <div className="flex flex-col items-center mt-9 ml-2">
+              <div className="flex flex-col items-center ml-2 mt-9">
                 <div className="text-2xl font-medium text-white">
                   {formatAdventurer.name}
                 </div>
@@ -70,10 +66,10 @@ export default function Info({ adventurer }: InfoProps) {
               </div>
             </div>
           </div>
-          <div className="flex flex-row justify-evenly mt-4">
+          <div className="flex flex-row mt-4 justify-evenly">
             <div className="flex flex-col">
               <div className="text-2xl font-medium text-white">ITEMS</div>
-              <p className="text-terminal-green text-xl">
+              <p className="text-xl text-terminal-green">
                 WEAPON -{" "}
                 <ItemDisplay
                   item={items.find(
@@ -140,22 +136,22 @@ export default function Info({ adventurer }: InfoProps) {
             </div>
             <div className="flex flex-col">
               <div className="text-2xl font-medium text-white">STATISTICS</div>
-              <p className="text-terminal-green text-xl">
+              <p className="text-xl text-terminal-green">
                 STRENGTH - {formatAdventurer.strength}
               </p>
-              <p className="text-terminal-green text-xl">
+              <p className="text-xl text-terminal-green">
                 DEXTERITY - {formatAdventurer.dexterity}
               </p>
-              <p className="text-terminal-green text-xl">
+              <p className="text-xl text-terminal-green">
                 INTELLIGENCE - {formatAdventurer.intelligence}
               </p>
-              <p className="text-terminal-green text-xl">
+              <p className="text-xl text-terminal-green">
                 VITALITY - {formatAdventurer.vitality}
               </p>
-              <p className="text-terminal-green text-xl">
+              <p className="text-xl text-terminal-green">
                 WISDOM - {formatAdventurer.wisdom}
               </p>
-              <p className="text-terminal-green text-xl">
+              <p className="text-xl text-terminal-green">
                 LUCK - {formatAdventurer.luck}
               </p>
             </div>

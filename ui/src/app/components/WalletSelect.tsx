@@ -3,13 +3,10 @@ import { Button } from "./Button";
 import { useConnectors, useAccount } from "@starknet-react/core";
 import {
   AddDevnetButton,
-  AddDevnetEthButton,
+
   SwitchToDevnetButton,
 } from "../components/DevnetConnectors";
 import { useUI } from "../context/UIProvider";
-import { prologue } from "../lib/constants";
-import { TypeAnimation } from 'react-type-animation';
-
 interface WalletSelectProps {
   screen: number;
 }

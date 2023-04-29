@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   useTransactionManager,
-  useTransactions,
   useWaitForTransaction,
 } from "@starknet-react/core";
 import { TxStatus } from "./TxStatus";
@@ -26,7 +25,7 @@ const TransactionHistory = () => {
     <div className="relative">
       <button
         onClick={toggleDropdown}
-        className="flex p-2 bg-black border border-terminal-green relative"
+        className="relative flex p-2 bg-black border border-terminal-green"
       >
         {isOpen ? "Hide Ledger" : "Show Ledger"}
       </button>
@@ -34,7 +33,7 @@ const TransactionHistory = () => {
         transactions ? (
           <div className="absolute right-0 top-10 z-10 w-[650px] h-[250px] p-2 bg-terminal-black border border-terminal-green overflow-x-auto">
             <p className="text-2xl">LEDGER</p>
-            <div className="border border-terminal-green w-full" />
+            <div className="w-full border border-terminal-green" />
             <ul>
               {transactions
                 .slice()
@@ -42,10 +41,10 @@ const TransactionHistory = () => {
                 .map((tx, i) => (
                   <li key={i}>
                     <div className="flex flex-row flex-wrap gap-1">
-                      <p className="text-white text-xl">
+                      <p className="text-xl text-white">
                         {(tx?.metadata as Metadata)?.method}:{" "}
                       </p>
-                      <p className="text-white text-xl">
+                      <p className="text-xl text-white">
                         {(tx?.metadata as Metadata)?.description}
                       </p>
                     </div>
@@ -58,7 +57,7 @@ const TransactionHistory = () => {
             </ul>
           </div>
         ) : (
-          <div className="absolute right-0 top-10 z-10 w-96 h-96 bg-terminal-black border border-terminal-green">
+          <div className="absolute right-0 z-10 border top-10 w-96 h-96 bg-terminal-black border-terminal-green">
             <p className="p-2 text-white">No transactions</p>
           </div>
         )

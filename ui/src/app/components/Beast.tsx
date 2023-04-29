@@ -1,35 +1,28 @@
 import { useState, useEffect } from "react";
-import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
 import { useTransactionCart } from "../context/TransactionCartProvider";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurer } from "../types";
-import { useQuery, useLazyQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import {
   getBeastById,
-  getLatestBattlesByAdventurer,
   getBattlesByBeast,
-  getAdventurerById,
   getLastBattleByAdventurer,
 } from "../hooks/graphql/queries";
 import {
-  useTransaction,
-  useTransactions,
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
-import Image from "next/image";
 import KeyboardControl, { ButtonData } from "./KeyboardControls";
-import HealthSlider from "./HealthSlider";
 import Info from "./Info";
 import { BattleDisplay } from "./BattleDisplay";
 import { BeastDisplay } from "./BeastDisplay";
 
 export default function Beast() {
-  const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
+  const { handleSubmitCalls, addToCalls } = useTransactionCart();
   const { beastContract } = useContracts();
-  const { hashes, addTransaction, transactions } = useTransactionManager();
-  const { adventurer, handleUpdateAdventurer, setAdventurer } = useAdventurer();
+  const { addTransaction } = useTransactionManager();
+  const { adventurer } = useAdventurer();
   const [hash, setHash] = useState<string | undefined>(undefined);
   const { data, isLoading, error } = useWaitForTransaction({
     hash,
@@ -98,13 +91,13 @@ export default function Beast() {
   let beastData = beastByTokenIdData
     ? beastByTokenIdData.beasts[0]
     : {
-        beast: "Pheonix",
-        health: "100",
-        rank: "1",
-        xp: "0",
-        attackType: "Blade",
-        armorType: "Cloth",
-      };
+      beast: "Pheonix",
+      health: "100",
+      rank: "1",
+      xp: "0",
+      attackType: "Blade",
+      armorType: "Cloth",
+    };
 
   // const [hash, setHash] = useState<string | undefined>(undefined);
 
@@ -169,7 +162,7 @@ export default function Beast() {
           buttonsData={buttonsData}
           disabled={formatAdventurer?.beastId == undefined}
         />
-        <div className="flex flex-col p-4 items-center">
+        <div className="flex flex-col items-center p-4">
           {txLoading && hash && <div className="loading-ellipsis">Loading</div>}
           {hash && <div className="flex flex-col">Hash: {hash}</div>}
           {data && <div>Status: {data.status}</div>}

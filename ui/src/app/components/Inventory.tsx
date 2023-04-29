@@ -1,39 +1,32 @@
 import { useState, useEffect, useRef } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { useTransactionCart } from "../context/TransactionCartProvider";
-import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import {
   useAccount,
   useWaitForTransaction,
   useTransactionManager,
   useTransactions,
 } from "@starknet-react/core";
-import { Button } from "./Button";
 import { useQuery } from "@apollo/client";
 import {
   getItemsByAdventurer,
-  getItemsByOwner,
-  getAdventurersByOwner,
 } from "../hooks/graphql/queries";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
 import Image from "next/image";
-import { padAddress, groupBySlot } from "../lib/utils";
+import { groupBySlot } from "../lib/utils";
 import { InventoryRow } from "./InventoryRow";
 // import { GameData } from "./GameData";
 
 const Inventory: React.FC = () => {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";
-  const { addToCalls, calls } = useTransactionCart();
+  const { addToCalls } = useTransactionCart();
   const { adventurerContract } = useContracts();
   const [hash, setHash] = useState<string | undefined>(undefined);
-  const { hashes, addTransaction } = useTransactionManager();
   const { adventurer } = useAdventurer();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
-  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
-  const transactions = useTransactions({ hashes });
 
   // const gameData = new GameData();
   const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
@@ -114,7 +107,7 @@ const Inventory: React.FC = () => {
             style={{ objectFit: "contain" }}
           />
         </div>
-        <p className="text-2xl text-white mx-auto">
+        <p className="mx-auto text-2xl text-white">
           {formatAdventurer.adventurer?.name}
         </p>
       </div>
