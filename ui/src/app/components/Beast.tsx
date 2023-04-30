@@ -161,17 +161,21 @@ export default function Beast() {
         <Info adventurer={adventurer?.adventurer} />
       </div>
       <div className="flex flex-col w-1/3 gap-10">
-        {!isBeastDead ? (<>
-          <KeyboardControl
-            buttonsData={buttonsData}
-            disabled={formatAdventurer?.beastId == undefined || txLoading}
-          />
-          <div className="flex flex-col items-center p-4">
-            {txLoading && hash && <div className="loading-ellipsis">Attacking</div>}
-            {hash && <div className="flex flex-col">Hash: {shortenHex(hash)}</div>}
-            {data && <div>Status: {data.status}</div>}
-          </div>
-        </>
+
+
+        {!isBeastDead ? (
+          <>
+            {!txLoading && (<KeyboardControl
+              buttonsData={buttonsData}
+              disabled={formatAdventurer?.beastId == undefined || txLoading}
+            />)}
+
+            <div className="flex flex-col items-center p-4">
+              {txLoading && hash && <div className="loading-ellipsis">Attacking</div>}
+              {hash && <div className="flex flex-col">Hash: {shortenHex(hash)}</div>}
+              {data && <div>Status: {data.status}</div>}
+            </div>
+          </>
         ) : (
           ""
         )}
