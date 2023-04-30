@@ -176,10 +176,13 @@ export const CreateAdventurer = ({
   const loading = data?.status == "RECEIVED" || data?.status == "PENDING";
 
   return (
-    <div className="flex w-full border border-terminal-green">
-      <div className="flex flex-row items-center w-full mx-2 text-lg">
+    <div className="flex flex-row w-full">
+      <div className="flex items-center w-1/2 mx-2 text-lg border border-terminal-green">
         <div className="flex flex-row w-full gap-2 p-1">
-          <form onSubmit={handleSubmit} className="flex flex-col w-full gap-2 p-1 text-2xl">
+          <form
+            onSubmit={handleSubmit}
+            className="flex flex-col w-full gap-2 p-1 text-2xl"
+          >
             <label className="flex justify-between">
               <span className="self-center">Name:</span>
 
@@ -273,13 +276,13 @@ export const CreateAdventurer = ({
               Spawn
             </button>
           </form>
-          <div className="flex flex-col">
-            {loading && hash && <div className="loading-ellipsis">Loading</div>}
-            {hash && <div className="flex flex-col">Hash: {hash}</div>}
-            {/* {error && <div>Error: {JSON.stringify(error)}</div>} */}
-            {data && <div>Status: {data.status}</div>}
-          </div>
         </div>
+      </div>
+      <div className="flex flex-col w-1/2">
+        {loading && hash && <div className="loading-ellipsis">Loading</div>}
+        {hash && <div className="flex flex-col">Hash: {hash}</div>}
+        {/* {error && <div>Error: {JSON.stringify(error)}</div>} */}
+        {data && <div>Status: {data.status}</div>}
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { formatTime } from "../lib/utils";
 
 export const UTCClock: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -12,13 +13,9 @@ export const UTCClock: React.FC = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const formatUTCTime = (date: Date) => {
-    return date.toISOString().slice(0, 19); // Extract the time portion (hh:mm:ss) from the ISO string
-  };
-
   return (
     <div>
-      <p>{formatUTCTime(currentTime)}</p>
+      <p>{`Time: ${formatTime(currentTime)} UTC`}</p>
     </div>
   );
 };
@@ -27,29 +24,43 @@ interface CountdownProps {
   endTime: Date;
   countingMessage: string;
   finishedMessage: string;
+  nextMintTime?: Date;
 }
 
 export const Countdown: React.FC<CountdownProps> = ({
   endTime,
   countingMessage,
   finishedMessage,
+  nextMintTime,
 }) => {
-  const startTime = new Date();
-  const initialDifferenceInSeconds = Math.floor(
-    (endTime.getTime() - startTime.getTime()) / 1000
-  );
-  const [seconds, setSeconds] = useState(initialDifferenceInSeconds);
+  const [seconds, setSeconds] = useState(0);
+  const [displayTime, setDisplayTime] = useState("");
 
   useEffect(() => {
-    if (seconds <= 0) return;
+    if (nextMintTime) {
+      const updateCountdown = () => {
+        const currentTime = new Date().getTime();
+        const timeRemaining = nextMintTime.getTime() - currentTime;
 
-    const timer = setInterval(() => {
-      setSeconds((prevSeconds) => prevSeconds - 1);
-    }, 1000);
+        setSeconds(Math.floor(timeRemaining / 1000));
+      };
 
-    // Clean up the timer when the component is unmounted
-    return () => clearInterval(timer);
-  }, [seconds]);
+      updateCountdown();
+      const interval = setInterval(updateCountdown, 1000);
+
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [nextMintTime]);
+
+  useEffect(() => {
+    if (seconds <= 0) {
+      setDisplayTime(finishedMessage);
+    } else {
+      setDisplayTime(`${countingMessage} ${formatTime(seconds)}`);
+    }
+  }, [seconds, countingMessage, finishedMessage]);
 
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
@@ -62,11 +73,11 @@ export const Countdown: React.FC<CountdownProps> = ({
 
   return (
     <div>
-      <p>
-        {seconds <= 0
-          ? finishedMessage
-          : `${countingMessage} ${formatTime(seconds)}`}
-      </p>
+      {nextMintTime ? (
+        <p>{displayTime}</p>
+      ) : (
+        <p className="loading-ellipsis">Loading</p>
+      )}
     </div>
   );
 };

@@ -42,7 +42,7 @@ const Adventurer = () => {
         </div>
       )}
       {selected === "create adventurer" && (
-        <div className="w-1/3">
+        <div className="w-full">
           <CreateAdventurer
             isActive={activeMenu == 2}
             onEscape={() => setActiveMenu(0)}

@@ -24,7 +24,7 @@ export const AddDevnetButton = ({
         baseUrl: "http://survivor-indexer.bibliothecadao.xyz:5050",
         rpcUrls: ["http://survivor-indexer.bibliothecadao.xyz:5050/rpc"],
         // accountImplementation:
-        //   "0x58d97f7d76e78f44905cc30cb65b91ea49a4b908a76703c54197bca90f81773",
+        //   "0x3ebe39375ba9e0f8cc21d5ee38c48818e8ed6612fa2e4e04702a323d64b96ba",
       },
     });
   };

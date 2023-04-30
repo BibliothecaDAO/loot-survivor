@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "./Button";
 import WalletSelect from "./WalletSelect";
-import { TypeAnimation } from 'react-type-animation';
+import { TypeAnimation } from "react-type-animation";
 import { prologue } from "../lib/constants";
 
 const Intro = () => {
@@ -40,29 +40,32 @@ const Intro = () => {
     <>
       {screen == 0 ? (
         <div className="flex flex-col w-full h-full p-8">
-
           <div className="flex">
             <p className="p-4 text-xl leading-tight">
               <TypeAnimation
                 sequence={[
                   prologue,
                   () => {
-                    setIntroComplete(true)
+                    setIntroComplete(true);
                   },
                 ]}
                 wrapper="div"
                 cursor={true}
-                speed={15}
+                speed={45}
                 // repeat={Infinity}
-                style={{ fontSize: '2em' }}
+                style={{ fontSize: "2em" }}
               />
-
             </p>
-
           </div>
           <div>
-            {!introComplete && (<Button onClick={() => setIntroComplete(true)} variant={"outline"}>skip</Button>)}
-
+            {!introComplete && (
+              <Button
+                onClick={() => setIntroComplete(true)}
+                variant={"outline"}
+              >
+                skip
+              </Button>
+            )}
           </div>
 
           {introComplete && (
@@ -87,8 +90,6 @@ const Intro = () => {
               </Button>
             </div>
           )}
-
-
         </div>
       ) : (
         <WalletSelect screen={screen} />

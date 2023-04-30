@@ -42,6 +42,7 @@ const getBeasts = gql`
       adventurerId
       armorType
       attackType
+      attackLocation
       beast
       health
       id
@@ -62,6 +63,7 @@ const getLatestDiscoveries = gql`
       orderBy: { discoveryTime: { desc: true } }
     ) {
       adventurerId
+      attackLocation
       discoveryTime
       discoveryType
       entityId
@@ -76,6 +78,7 @@ const getDiscoveryByTxHash = gql`
   query get_discovery($txHash: HexValue) {
     discoveries(where: { txHash: { eq: $txHash } }) {
       adventurerId
+      attackLocation
       discoveryTime
       discoveryType
       entityId
@@ -228,6 +231,7 @@ const getBeastById = gql`
       adventurerId
       armorType
       attackType
+      attackLocation
       beast
       health
       id

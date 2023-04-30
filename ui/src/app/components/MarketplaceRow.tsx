@@ -5,6 +5,8 @@ import { useContracts } from "../hooks/useContracts";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurer } from "../types";
 import { useTransactionCart } from "../context/TransactionCartProvider";
+import { formatTime } from "../lib/utils";
+import { convertTime } from "../lib/utils";
 
 interface MarketplaceRowProps {
   ref: any;
@@ -32,19 +34,7 @@ const MarketplaceRow = ({
   const [showBidBox, setShowBidBox] = useState(-1);
   const { calls, addToCalls } = useTransactionCart();
 
-  const convertExpiryTime = (expiry: string) => {
-    const expiryTime = new Date(expiry);
-
-    // Convert the offset to milliseconds
-    const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
-    const timezoneOffsetMilliseconds = currentTimezoneOffsetMinutes * 60 * 1000;
-
-    // Add the offset to the expiry time to get the correct UTC Unix timestamp
-    const expiryTimeUTC = expiryTime.getTime() + timezoneOffsetMilliseconds;
-    return expiryTimeUTC;
-  };
-
-  const currentTime = new Date().getTime(); // Get the current time in milliseconds
+  const currentTime = new Date().getTime();
 
   const bidExists = (marketId: number) => {
     return calls.some(
@@ -68,8 +58,9 @@ const MarketplaceRow = ({
           (accumulator, current) => accumulator + (current.calldata[4] || 0),
           0
         );
-      return sum;
+      return sum >= formatAdventurer.gold;
     }
+    return true;
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -106,7 +97,7 @@ const MarketplaceRow = ({
 
   const status = () => {
     const currentDate = new Date();
-    const itemExpiryDate = new Date(item.expiry);
+    const itemExpiryDate = new Date(convertTime(item.expiry));
 
     if (item.status == "Closed" && item.expiry == null) {
       return "No bids";
@@ -138,17 +129,23 @@ const MarketplaceRow = ({
       <td className="text-center">{item.price}</td>
       <td className="text-center">
         {item.bidder
-          ? `${adventurers.find(
-            (adventurer: any) => adventurer.id == item.bidder
-          )?.name
-          } - ${item.bidder}`
+          ? `${
+              adventurers.find(
+                (adventurer: any) => adventurer.id == item.bidder
+              )?.name
+            } - ${item.bidder}`
           : ""}
       </td>
-      <td className="text-center">{item.expiry}</td>
+      <td className="text-center">
+        {item.expiry ? formatTime(new Date(convertTime(item.expiry))) : ""}
+      </td>
       <td className="text-center">{status()}</td>
-      <td className="text-center">{item.claimedTime}</td>
+      <td className="text-center">
+        {item.claimedTime
+          ? formatTime(new Date(convertTime(item.claimedTime)))
+          : ""}
+      </td>
       <td className="w-64 text-center">
-
         {showBidBox == index ? (
           <BidBox
             showBidBox={showBidBox == index}
@@ -160,7 +157,11 @@ const MarketplaceRow = ({
           <div>
             <Button
               onClick={() => setShowBidBox(index)}
-              disabled={bidExists(item.marketId) || checkBidBalance()}
+              disabled={
+                bidExists(item.marketId) ||
+                checkBidBalance() ||
+                item.claimedTime
+              }
               className={bidExists(item.marketId) ? "bg-white" : ""}
             >
               bid
@@ -179,7 +180,7 @@ const MarketplaceRow = ({
                 item.claimedTime ||
                 claimExists(item.marketId) ||
                 !item.expiry ||
-                convertExpiryTime(item.expiry) > currentTime ||
+                convertTime(item.expiry) > currentTime ||
                 formatAdventurer?.id != item.bidder
               }
               className={claimExists(item.marketId) ? "" : ""}
@@ -188,8 +189,6 @@ const MarketplaceRow = ({
             </Button>
           </div>
         )}
-
-
       </td>
     </tr>
   );
