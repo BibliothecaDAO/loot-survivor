@@ -102,3 +102,15 @@ export const formatTime = (date: Date) => {
     date.toISOString().slice(0, 10) + " " + date.toISOString().slice(11, 19)
   ); // Extract the time portion (hh:mm:ss) from the ISO string
 };
+
+
+export function shortenHex(hexString: string, numDigits = 6) {
+  if (hexString.length <= numDigits) {
+    return hexString;
+  }
+
+  const halfDigits = Math.floor(numDigits / 2);
+  const firstHalf = hexString.slice(0, halfDigits);
+  const secondHalf = hexString.slice(-halfDigits);
+  return `${firstHalf}...${secondHalf}`;
+}

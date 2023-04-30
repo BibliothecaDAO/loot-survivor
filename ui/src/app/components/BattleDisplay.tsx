@@ -11,6 +11,7 @@ export const BattleDisplay = ({
 }: BattleDisplayProps) => {
   return (
     <div key={key}>
+
       {battleData.attacker == "Adventurer" ? (
         battleData.targetHealth > 0 ? (
           <p>

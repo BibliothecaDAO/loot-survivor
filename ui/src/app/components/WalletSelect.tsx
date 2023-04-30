@@ -68,8 +68,8 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
 
 
   return (
-    <div className="flex flex-col h-screen max-h-screen p-8">
-      <div className="w-full h-6 my-2 bg-terminal-green" />
+    <div className="flex flex-col p-8">
+
 
       <div className="flex flex-col self-center my-auto">
         <h1 className="mb-10">It's Time to Survive </h1>
@@ -120,7 +120,6 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
         )}
       </div>
 
-      <div className="w-full h-6 my-2 mt-auto bg-terminal-green" />
     </div>
   );
 };

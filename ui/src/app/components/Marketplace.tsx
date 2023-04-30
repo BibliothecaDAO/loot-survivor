@@ -177,7 +177,7 @@ const Marketplace: React.FC = () => {
             </div>
             <UTCClock />
           </div>
-          <div className=" overflow-auto w-full h-[432px]">
+          <div className="w-full overflow-auto ">
             {marketLatestItemsLoading && (
               <p className="text-xl loading-ellipsis">LOADING</p>
             )}
@@ -209,8 +209,8 @@ const Marketplace: React.FC = () => {
                   ))}
               </tbody>
             </table>
-          </div>
-        </div>
+          </div >
+        </div >
       ) : (
         <div className="flex w-full mt-[200px]">
           <p className="mx-auto items-center text-[50px] animate-pulse">

@@ -39,7 +39,7 @@ const Intro = () => {
   return (
     <>
       {screen == 0 ? (
-        <div className="flex flex-col w-full h-screen max-h-screen p-8">
+        <div className="flex flex-col w-full h-full p-8">
 
           <div className="flex">
             <p className="p-4 text-xl leading-tight">

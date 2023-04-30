@@ -106,12 +106,12 @@ export default function Home() {
   }, [adventurer, account]);
 
   return (
-    <main className={`min-h-screen container mx-auto flex flex-col`}>
+    <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
       {onboarded ? (
         <>
           <div className="flex justify-between w-full ">
             <h1>Loot Survivors</h1>
-            <div className="flex flex-row gap-2 self-end">
+            <div className="flex flex-row self-end gap-2">
               {account && calls.length > 0 && <TransactionCart />}
               {account && <TransactionHistory />}
               {account && <AddDevnetEthButton />}
@@ -136,7 +136,7 @@ export default function Home() {
           <div className="w-full h-6 my-2 bg-terminal-green" />
 
           {account ? (
-            <div className="w-full flex-grow">
+            <div className="flex-grow w-full">
               {!upgrade ? (
                 <>
                   <div className="gap-10 pb-2">
@@ -157,15 +157,15 @@ export default function Home() {
               ) : (
                 <Upgrade />
               )}
-              {adventurer?.adventurer ? (
-                <div className="fixed text-lg w-5/6 bottom-1 left-1/2 transform -translate-x-1/2 flex flew-row items-center bg-terminal-black border-2 border-terminal-green text-white justify-evenly">
+              {/* {adventurer?.adventurer ? (
+                <div className="fixed flex items-center w-5/6 text-lg text-white transform -translate-x-1/2 border-2 bottom-1 left-1/2 flew-row bg-terminal-black border-terminal-green justify-evenly">
                   {adventurerStats.adventurer?.name}
                   <p>HEALTH: {adventurerStats.adventurer?.health}</p>
                   <p>GOLD: {adventurerStats.adventurer?.gold}</p>
                   <p>LEVEL: {adventurerStats.adventurer?.level}</p>
                   <p>XP: {adventurerStats.adventurer?.xp}</p>
                 </div>
-              ) : null}
+              ) : null} */}
             </div>
           ) : null}
         </>

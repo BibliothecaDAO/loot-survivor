@@ -3,7 +3,6 @@ import "./globals.css";
 import {
   InjectedConnector,
   StarknetConfig,
-  useAccount,
 } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector";
 import { useMemo } from "react";
@@ -28,6 +27,7 @@ const controllerConnector = new ControllerConnector([
     method: "mint_with_starting_weapon",
   },
 ]);
+
 export default function RootLayout({
   children,
 }: {
@@ -46,7 +46,11 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className=" text-terminal-green bg-conic-to-br to-black from-terminal-black bg-b" >
+      <head>
+        <title>Loot Survivors</title>
+      </head>
+      <body className=" text-terminal-green bg-conic-to-br to-terminal-black from-terminal-black bg-b bezel-container" >
+        <img src="/crt_green_mask.png" className="absolute w-full pointer-events-none crt-frame" />
         <IndexerProvider>
           <StarknetConfig connectors={connectors} autoConnect>
             <UIProvider>

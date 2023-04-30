@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export const ANSIArt = ({ imageUrl, newWidth = 60 }: any) => {
+export const ANSIArt = ({ src, newWidth = 60 }: any) => {
   const [ansiArt, setAnsiArt] = useState("");
 
   useEffect(() => {
@@ -11,7 +11,7 @@ export const ANSIArt = ({ imageUrl, newWidth = 60 }: any) => {
 
     const loadAndRenderImage = async () => {
       const img = new Image();
-      img.src = imageUrl;
+      img.src = src;
 
       await new Promise((resolve) => {
         img.onload = resolve;
@@ -28,7 +28,7 @@ export const ANSIArt = ({ imageUrl, newWidth = 60 }: any) => {
       ctx.drawImage(img, 0, 0, newWidth, height);
 
       const imageData = ctx.getImageData(0, 0, newWidth, height).data;
-      const blockSize = 1;
+      const blockSize = 4;
       let ansiArtHtml = "";
 
       for (let y = 0; y < height; y += blockSize) {
@@ -47,11 +47,11 @@ export const ANSIArt = ({ imageUrl, newWidth = 60 }: any) => {
     };
 
     loadAndRenderImage();
-  }, [imageUrl, newWidth]);
+  }, [src, newWidth]);
 
   return (
     <div
-      className="leading-none"
+      className="leading-none ansi"
       dangerouslySetInnerHTML={{ __html: ansiArt }}
     ></div>
   );

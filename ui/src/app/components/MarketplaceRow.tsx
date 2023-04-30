@@ -106,11 +106,26 @@ const MarketplaceRow = ({
     }
   }, [isActive]);
 
+  const status = () => {
+    const currentDate = new Date();
+    const itemExpiryDate = new Date(item.expiry);
+
+    if (item.status == "Closed" && item.expiry == null) {
+      return "No bids";
+    } else if (item.expiry == null) {
+      return "Open";
+    } else if (itemExpiryDate < currentDate) {
+      return "Expired";
+    } else {
+      return "Bids";
+    }
+  };
+
   return (
     <tr
       ref={ref}
       className={
-        "border-b border-terminal-green hover:bg-terminal-black" +
+        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black" +
         (selectedIndex === index + 1 ? " bg-terminal-black" : "")
       }
     >
@@ -135,42 +150,46 @@ const MarketplaceRow = ({
       <td className="text-center">{formatTime(new Date(item.expiry))}</td>
       <td className="text-center">{item.status}</td>
       <td className="text-center">{item.claimedTime}</td>
-      <td className="text-center">
-        <Button
-          onClick={() => setShowBidBox(index)}
-          disabled={bidExists(item.marketId) || checkBidBalance()}
-          className={bidExists(item.marketId) ? "bg-white" : ""}
-        >
-          BID
-        </Button>
-        <BidBox
-          showBidBox={showBidBox == index}
-          close={() => setShowBidBox(-1)}
-          marketId={item.marketId}
-          item={item}
-        />
-        <Button
-          onClick={async () => {
-            const claimItemTx = {
-              contractAddress: lootMarketArcadeContract?.address,
-              selector: "claim_item",
-              calldata: [item.marketId, "0", formatAdventurer?.id, "0"],
-              metadata: `Claiming ${item.item}`,
-            };
-            addToCalls(claimItemTx);
-          }}
-          disabled={
-            item.claimedTime ||
-            claimExists(item.marketId) ||
-            !item.expiry ||
-            convertExpiryTime(item.expiry) > currentTime ||
-            currentTime - convertExpiryTime(item.expiry) < 30 * 60 * 1000 ||
-            formatAdventurer?.id != item.bidder
-          }
-          className={claimExists(item.marketId) ? "bg-white" : ""}
-        >
-          CLAIM
-        </Button>
+      <td className="w-64 text-center">
+        {showBidBox == index ? (
+          <BidBox
+            showBidBox={showBidBox == index}
+            close={() => setShowBidBox(-1)}
+            marketId={item.marketId}
+            item={item}
+          />
+        ) : (
+          <div>
+            <Button
+              onClick={() => setShowBidBox(index)}
+              disabled={bidExists(item.marketId) || checkBidBalance()}
+              className={bidExists(item.marketId) ? "bg-white" : ""}
+            >
+              bid
+            </Button>
+            <Button
+              onClick={async () => {
+                const claimItemTx = {
+                  contractAddress: lootMarketArcadeContract?.address,
+                  selector: "claim_item",
+                  calldata: [item.marketId, "0", formatAdventurer?.id, "0"],
+                  metadata: `Claiming ${item.item}`,
+                };
+                addToCalls(claimItemTx);
+              }}
+              disabled={
+                item.claimedTime ||
+                claimExists(item.marketId) ||
+                !item.expiry ||
+                convertExpiryTime(item.expiry) > currentTime ||
+                formatAdventurer?.id != item.bidder
+              }
+              className={claimExists(item.marketId) ? "" : ""}
+            >
+              claim
+            </Button>
+          </div>
+        )}
       </td>
     </tr>
   );
