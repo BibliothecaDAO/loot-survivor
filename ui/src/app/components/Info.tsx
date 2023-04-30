@@ -4,6 +4,7 @@ import { getItemsByAdventurer } from "../hooks/graphql/queries";
 import { ANSIArt } from "./ANSIGenerator";
 import Heart from "../../../public/heart.svg";
 import Coin from "../../../public/coin.svg";
+import { ItemDisplay } from "./ItemDisplay";
 interface InfoProps {
   adventurer: any;
 }
@@ -24,25 +25,20 @@ export default function Info({ adventurer }: InfoProps) {
 
   const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
 
-  const ItemDisplay = (item: any) => {
-    const formatItem = item.item;
-    return <>{formatItem ? formatItem.item : "Nothing"}</>;
-  };
-
   return (
     <div className="h-full border border-terminal-green">
       {!itemsByAdventurerLoading ? (
         <>
 
           <div className="flex flex-row gap-2 p-1">
-            <div>
+            {/* <div>
               <ANSIArt
                 newWidth={240}
                 src={
                   formatAdventurer.health == 0 ? "/skull.png" : "/MIKE.png"
                 }
               />
-            </div>
+            </div> */}
 
             <div className="flex flex-col w-full p-2 uppercase">
               <div className="flex justify-between w-full text-4xl font-medium border-b border-terminal-green">
@@ -132,7 +128,7 @@ export default function Info({ adventurer }: InfoProps) {
                     />
                   </p>
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col p-4">
                   <p className="">
                     STRENGTH - {formatAdventurer.strength}
                   </p>

@@ -8,12 +8,12 @@ import Link from "next/link";
 import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 
 const buttonVariants = cva(
-  "active:scale-95 inline-flex items-center justify-center text-sm font-medium transition-colors focus:outline-none focus:ring-offset-2 dark:hover:bg-slate-800 dark:hover:text-slate-100 disabled:bg-terminal-black disabled:text-terminal-green dark:focus:ring-slate-400 disabled:pointer-events-none dark:focus:ring-offset-slate-900 data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800 uppercase font-sans-serif mx-1",
+  "active:scale-95 inline-flex items-center justify-center text-sm font-medium transition-colors focus:outline-none focus:ring-offset-2 dark:hover:bg-slate-800 dark:hover:text-slate-100 disabled:bg-terminal-black disabled:text-terminal-green dark:focus:ring-slate-400 disabled:pointer-events-none dark:focus:ring-offset-slate-900 data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800 uppercase font-sans-serif mx-1 border border-transparent",
   {
     variants: {
       variant: {
         default:
-          "bg-terminal-green text-black hover:bg-terminal-green/80 hover:animate-pulse shadow-inner",
+          "bg-terminal-green text-black hover:bg-terminal-green/80 hover:animate-pulse shadow-inner ",
         destructive:
           "bg-red-500 text-white hover:bg-red-600 dark:hover:bg-red-600",
         outline:

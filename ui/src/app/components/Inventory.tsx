@@ -17,6 +17,8 @@ import Image from "next/image";
 import { groupBySlot } from "../lib/utils";
 import { InventoryRow } from "./InventoryRow";
 import Info from "./Info";
+import { ItemDisplay } from "./ItemDisplay";
+import { Button } from "./Button";
 // import { GameData } from "./GameData";
 
 const Inventory: React.FC = () => {
@@ -56,7 +58,8 @@ const Inventory: React.FC = () => {
       const equipItem = {
         contractAddress: adventurerContract?.address,
         selector: "equip_item",
-        calldata: [formatAdventurer.adventurer?.id, itemId],
+        calldata: [formatAdventurer?.adventurer?.id, "0", itemId, "0"],
+        metadata: `Equipping ${itemId}!`,
       };
       addToCalls(equipItem);
     }
@@ -97,12 +100,50 @@ const Inventory: React.FC = () => {
   //   }
   // }, [selectedIndex]);
 
+  enum Menu {
+    Weapon = "Weapon",
+    Head = "Head",
+    Chest = "Chest",
+    Feet = "Feet",
+    Hands = "Hands",
+    Waist = "Waist",
+    Neck = "Neck",
+    Ring = "Ring",
+  }
+
+  function getValueByIndex(enumObject: object, index: number): string | undefined {
+    const values = Object.values(enumObject);
+    return values[index];
+  }
+
+  const selected = getValueByIndex(Menu, selectedIndex)
+
+  const selectedItemType = groupedItems[selected || "Weapon"] || [];
+
+  function selectedIds(obj: any, keys: any) {
+    const values = [];
+
+    for (const key of keys) {
+      if (obj.hasOwnProperty(key)) {
+        values.push(obj[key]);
+      }
+    }
+
+    return values;
+  }
+
+  const equipedItemIds = selectedIds(formatAdventurer.adventurer, ["weaponId", "headId", "chestId", "feetId", "handsId", "waistId", "neckId", "ringId"]);
+
+
+  console.log(equipedItemIds)
+
+  const filteredItems = selectedItemType.filter((item: any) => !equipedItemIds.includes(item.id));
+
   return (
-    <div className="flex flex-row p-1 space-x-4 overflow-hidden border-2 bg-terminal-black border-terminal-green">
+    <div className="flex flex-row space-x-4 overflow-hidden ">
       <div className="w-1/3">
         <Info adventurer={formatAdventurer.adventurer} />
       </div>
-
       <div className="flex flex-col">
         <InventoryRow
           title={"Weapon"}
@@ -184,6 +225,18 @@ const Inventory: React.FC = () => {
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.adventurer?.ringId}
         />
+      </div>
+      <div>
+        <h4>Loot</h4>
+        <div className="flex flex-col space-y-1">
+          {filteredItems.length ? filteredItems.map((item: any, index: number) => (
+            <div className="flex">
+              <ItemDisplay key={index} item={item} />
+              <Button onClick={() => handleAddEquipItem(item.id)}>equip</Button>
+            </div>
+          )) : <div>You have no unequipped {selected} Loot</div>}
+
+        </div>
       </div>
     </div>
   );

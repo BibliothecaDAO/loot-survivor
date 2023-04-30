@@ -156,7 +156,7 @@ export default function Beast() {
   const isBeastDead = beastData.health == "0";
 
   return (
-    <div className="flex flex-row mt-5 space-x-8">
+    <div className="flex flex-row space-x-6">
       <div className="w-1/3">
         <Info adventurer={adventurer?.adventurer} />
       </div>
@@ -170,22 +170,28 @@ export default function Beast() {
             {txLoading && hash && <div className="loading-ellipsis">Attacking</div>}
             {hash && <div className="flex flex-col">Hash: {shortenHex(hash)}</div>}
             {data && <div>Status: {data.status}</div>}
-          </div></>) : (<>        {formatAdventurer?.beastId || lastBattleData?.battles[0] ? (
-            <>
-              <div className="flex flex-col items-center gap-5 p-2">
-                <div className="text-xl uppercase">Battle log with {beastData.beast}</div>
-                <div className="flex flex-col gap-2">
-                  {formatBattles.map((battle: any, index: number) => (
-                    <BattleDisplay
-                      key={index}
-                      battleData={battle}
-                      beastName={beastData.beast}
-                    />
-                  ))}
-                </div>
+          </div>
+        </>
+        ) : (
+          ""
+        )}
+
+        {formatAdventurer?.beastId || lastBattleData?.battles[0] ? (
+          <>
+            <div className="flex flex-col items-center gap-5 p-2">
+              <div className="text-xl uppercase">Battle log with {beastData.beast}</div>
+              <div className="flex flex-col gap-2">
+                {formatBattles.map((battle: any, index: number) => (
+                  <BattleDisplay
+                    key={index}
+                    battleData={battle}
+                    beastName={beastData.beast}
+                  />
+                ))}
               </div>
-            </>
-          ) : ""}</>)}
+            </div>
+          </>
+        ) : ""}
 
 
       </div>

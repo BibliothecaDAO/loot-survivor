@@ -157,7 +157,7 @@ export default function Home() {
               ) : (
                 <Upgrade />
               )}
-              {adventurer?.adventurer ? (
+              {/* {adventurer?.adventurer ? (
                 <div className="fixed flex items-center w-5/6 text-lg text-white transform -translate-x-1/2 border-2 bottom-1 left-1/2 flew-row bg-terminal-black border-terminal-green justify-evenly">
                   {adventurerStats.adventurer?.name}
                   <p>HEALTH: {adventurerStats.adventurer?.health}</p>
@@ -165,7 +165,7 @@ export default function Home() {
                   <p>LEVEL: {adventurerStats.adventurer?.level}</p>
                   <p>XP: {adventurerStats.adventurer?.xp}</p>
                 </div>
-              ) : null}
+              ) : null} */}
             </div>
           ) : null}
         </>

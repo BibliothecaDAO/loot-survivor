@@ -4,6 +4,7 @@ import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurer } from "../types";
 import { useTransactionCart } from "../context/TransactionCartProvider";
 import { Button } from "./Button";
+import { ItemDisplay } from "./ItemDisplay";
 
 interface InventoryRowProps {
   title: string;
@@ -33,21 +34,6 @@ export const InventoryRow = ({
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
-
-  const ItemDisplay = (item: any) => {
-    const formatItem = item.item;
-    return (
-      <div className="flex flex-row gap-2 p-2 border border-terminal-green">
-        <p className="whitespace-nowrap">
-          {formatItem ? formatItem.item : "Nothing"}
-        </p>
-        <p className="whitespace-nowrap">
-          {formatItem &&
-            `[Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`}
-        </p>
-      </div>
-    );
-  };
 
   const handleAddEquipItem = (itemId: any) => {
     if (adventurerContract) {
@@ -103,6 +89,7 @@ export const InventoryRow = ({
         <Button
           className={isSelected && !isActive ? "animate-pulse" : ""}
           variant={isSelected ? "default" : "ghost"}
+          size={'lg'}
           onClick={() => {
             setSelected(menuIndex);
             setActiveMenu(menuIndex);
@@ -110,11 +97,11 @@ export const InventoryRow = ({
         >
           <p className="w-40 text-xl whitespace-nowrap">{title}</p>
         </Button>
-        <ItemDisplay
+        {/* <ItemDisplay
           item={items?.find((item: any) => item.id == equippedItemId)}
-        />
+        /> */}
       </div>
-      <div className="absolute flex flex-col w-full gap-4 overflow-auto top-1/3 left-2/3">
+      {/* <div className="absolute flex flex-col w-full gap-4 overflow-auto top-1/3 left-2/3">
         {isSelected && unequippedItems?.length > 0 ? (
           <>
             <p>Equip:</p>
@@ -146,7 +133,7 @@ export const InventoryRow = ({
             ))}
           </>
         ) : null}
-      </div>
+      </div> */}
     </>
   );
 };
