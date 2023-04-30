@@ -78,8 +78,8 @@ Adventurers receive 1+ upgrade on each level up to help them survive as they exp
 
 ## Efficacies
 
-- There are 3 types of weapons; Blade, Bludgeon & Magic
-- There are 3 types of armour material; Cloth, Hide & Metal 
+- There are 3 types of weapons: Blade, Bludgeon & Magic
+- There are 3 types of armour material: Cloth, Hide & Metal 
 
 **Weapon vs Armour Efficacy**
 
