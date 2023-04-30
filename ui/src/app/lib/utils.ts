@@ -100,7 +100,7 @@ export const sortByKey = (key: string) => {
 export const formatTime = (date: Date) => {
   return (
     date.toISOString().slice(0, 10) + " " + date.toISOString().slice(11, 19)
-  ); // Extract the time portion (hh:mm:ss) from the ISO string
+  ); 
 };
 
 
@@ -114,3 +114,15 @@ export function shortenHex(hexString: string, numDigits = 6) {
   const secondHalf = hexString.slice(-halfDigits);
   return `${firstHalf}...${secondHalf}`;
 }
+
+export function convertTime (time: string) {
+
+  const dateTime = new Date(time);
+
+  // Convert the offset to milliseconds
+  const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
+  const timezoneOffsetMilliseconds = currentTimezoneOffsetMinutes * 60 * 1000;
+
+  const TimeUTC = dateTime.getTime() + timezoneOffsetMilliseconds;
+  return TimeUTC;
+};

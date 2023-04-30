@@ -8,9 +8,7 @@ import {
   useTransactions,
 } from "@starknet-react/core";
 import { useQuery } from "@apollo/client";
-import {
-  getItemsByAdventurer,
-} from "../hooks/graphql/queries";
+import { getItemsByAdventurer } from "../hooks/graphql/queries";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
 import Image from "next/image";
@@ -104,19 +102,22 @@ const Inventory: React.FC = () => {
     Weapon = "Weapon",
     Head = "Head",
     Chest = "Chest",
-    Feet = "Feet",
-    Hands = "Hands",
+    Feet = "Foot",
+    Hands = "Hand",
     Waist = "Waist",
     Neck = "Neck",
     Ring = "Ring",
   }
 
-  function getValueByIndex(enumObject: object, index: number): string | undefined {
+  function getValueByIndex(
+    enumObject: object,
+    index: number
+  ): string | undefined {
     const values = Object.values(enumObject);
     return values[index];
   }
 
-  const selected = getValueByIndex(Menu, selectedIndex)
+  const selected = getValueByIndex(Menu, selectedIndex);
 
   const selectedItemType = groupedItems[selected || "Weapon"] || [];
 
@@ -132,12 +133,22 @@ const Inventory: React.FC = () => {
     return values;
   }
 
-  const equipedItemIds = selectedIds(formatAdventurer.adventurer, ["weaponId", "headId", "chestId", "feetId", "handsId", "waistId", "neckId", "ringId"]);
+  const equipedItemIds = selectedIds(formatAdventurer.adventurer, [
+    "weaponId",
+    "headId",
+    "chestId",
+    "feetId",
+    "handsId",
+    "waistId",
+    "neckId",
+    "ringId",
+  ]);
 
+  console.log(groupedItems["Hand"]);
 
-  console.log(equipedItemIds)
-
-  const filteredItems = selectedItemType.filter((item: any) => !equipedItemIds.includes(item.id));
+  const filteredItems = selectedItemType.filter(
+    (item: any) => !equipedItemIds.includes(item.id)
+  );
 
   return (
     <div className="flex flex-row space-x-4 overflow-hidden ">
@@ -229,13 +240,18 @@ const Inventory: React.FC = () => {
       <div>
         <h4>Loot</h4>
         <div className="flex flex-col space-y-1">
-          {filteredItems.length ? filteredItems.map((item: any, index: number) => (
-            <div className="flex">
-              <ItemDisplay key={index} item={item} />
-              <Button onClick={() => handleAddEquipItem(item.id)}>equip</Button>
-            </div>
-          )) : <div>You have no unequipped {selected} Loot</div>}
-
+          {filteredItems.length ? (
+            filteredItems.map((item: any, index: number) => (
+              <div className="flex">
+                <ItemDisplay key={index} item={item} />
+                <Button onClick={() => handleAddEquipItem(item.id)}>
+                  equip
+                </Button>
+              </div>
+            ))
+          ) : (
+            <div>You have no unequipped {selected} Loot</div>
+          )}
         </div>
       </div>
     </div>
