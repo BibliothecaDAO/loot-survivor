@@ -3,7 +3,6 @@ import { Button } from "./Button";
 import { useConnectors, useAccount } from "@starknet-react/core";
 import {
   AddDevnetButton,
-
   SwitchToDevnetButton,
 } from "../components/DevnetConnectors";
 import { useUI } from "../context/UIProvider";
@@ -50,9 +49,9 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     if (screen == 1) {
       if (
         (account as any)?.provider?.baseUrl ==
-        "http://survivor-indexer.bibliothecadao.xyz:5050" ||
+          "http://survivor-indexer.bibliothecadao.xyz:5050" ||
         (account as any)?.baseUrl ==
-        "http://survivor-indexer.bibliothecadao.xyz:5050"
+          "http://survivor-indexer.bibliothecadao.xyz:5050"
       ) {
         setOnboarded(true);
       }
@@ -65,20 +64,17 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     }
   }, [account, screen]);
 
-
-
   return (
-    <div className="flex flex-col p-8">
-
+    <div className="flex flex-col h-screen max-h-screen p-8">
+      <div className="w-full h-6 my-2 bg-terminal-green" />
 
       <div className="flex flex-col self-center my-auto">
-        <h1 className="mb-10">It's Time to Survive </h1>
+        <h1 className="mb-10">It&apos;s Time to Survive </h1>
         {screen == 2 ? (
           <div className="flex flex-col w-1/2 gap-5 m-auto">
             {connectors.length > 0 ? (
               connectors.map((connector) => (
                 <Button
-
                   onClick={() => connect(connector)}
                   key={connector.id()}
                   className="w-full"
@@ -92,7 +88,9 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
           </div>
         ) : (
           <div className="flex flex-col w-1/2 gap-5 m-auto">
-            {connectors.some((connector: any) => connector.id() == "argentX") ? (
+            {connectors.some(
+              (connector: any) => connector.id() == "argentX"
+            ) ? (
               connectors.map((connector) => (
                 <>
                   {connector.id() == "argentX" ? (
@@ -120,6 +118,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
         )}
       </div>
 
+      <div className="w-full h-6 my-2 mt-auto bg-terminal-green" />
     </div>
   );
 };
