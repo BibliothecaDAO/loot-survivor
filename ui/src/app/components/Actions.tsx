@@ -4,11 +4,7 @@ import { useContracts } from "../hooks/useContracts";
 import { useTransactionCart } from "../context/TransactionCartProvider";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurer } from "../types";
-import {
-
-  useTransactionManager,
-
-} from "@starknet-react/core";
+import { useTransactionManager } from "@starknet-react/core";
 
 import VerticalKeyboardControl from "./VerticalMenu";
 

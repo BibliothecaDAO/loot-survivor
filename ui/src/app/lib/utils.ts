@@ -97,6 +97,13 @@ export const sortByKey = (key: string) => {
 };
 
 
+export const formatTime = (date: Date) => {
+  return (
+    date.toISOString().slice(0, 10) + " " + date.toISOString().slice(11, 19)
+  ); // Extract the time portion (hh:mm:ss) from the ISO string
+};
+
+
 export function shortenHex(hexString: string, numDigits = 6) {
   if (hexString.length <= numDigits) {
     return hexString;

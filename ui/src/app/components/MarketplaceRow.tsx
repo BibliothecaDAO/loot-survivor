@@ -5,6 +5,7 @@ import { useContracts } from "../hooks/useContracts";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurer } from "../types";
 import { useTransactionCart } from "../context/TransactionCartProvider";
+import { formatTime } from "../lib/utils";
 
 interface MarketplaceRowProps {
   ref: any;
@@ -68,8 +69,9 @@ const MarketplaceRow = ({
           (accumulator, current) => accumulator + (current.calldata[4] || 0),
           0
         );
-      return sum;
+      return sum >= formatAdventurer.gold;
     }
+    return true;
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -106,7 +108,7 @@ const MarketplaceRow = ({
 
   const status = () => {
     const currentDate = new Date();
-    const itemExpiryDate = new Date(item.expiry);
+    const itemExpiryDate = new Date(convertExpiryTime(item.expiry));
 
     if (item.status == "Closed" && item.expiry == null) {
       return "No bids";
@@ -138,17 +140,21 @@ const MarketplaceRow = ({
       <td className="text-center">{item.price}</td>
       <td className="text-center">
         {item.bidder
-          ? `${adventurers.find(
-            (adventurer: any) => adventurer.id == item.bidder
-          )?.name
-          } - ${item.bidder}`
+          ? `${
+              adventurers.find(
+                (adventurer: any) => adventurer.id == item.bidder
+              )?.name
+            } - ${item.bidder}`
           : ""}
       </td>
-      <td className="text-center">{item.expiry}</td>
+      <td className="text-center">
+        {item.expiry
+          ? formatTime(new Date(convertExpiryTime(item.expiry)))
+          : ""}
+      </td>
       <td className="text-center">{status()}</td>
       <td className="text-center">{item.claimedTime}</td>
       <td className="w-64 text-center">
-
         {showBidBox == index ? (
           <BidBox
             showBidBox={showBidBox == index}
@@ -188,8 +194,6 @@ const MarketplaceRow = ({
             </Button>
           </div>
         )}
-
-
       </td>
     </tr>
   );

@@ -92,13 +92,13 @@ export default function Beast() {
   let beastData = beastByTokenIdData
     ? beastByTokenIdData.beasts[0]
     : {
-      beast: "Pheonix",
-      health: "100",
-      rank: "1",
-      xp: "0",
-      attackType: "Blade",
-      armorType: "Cloth",
-    };
+        beast: "Pheonix",
+        health: "100",
+        rank: "1",
+        xp: "0",
+        attackType: "Blade",
+        armorType: "Cloth",
+      };
 
   // const [hash, setHash] = useState<string | undefined>(undefined);
 
@@ -153,7 +153,7 @@ export default function Beast() {
 
   const txLoading = data?.status == "RECEIVED" || data?.status == "PENDING";
 
-  const isBeastDead = beastData.health == "0";
+  const isBeastDead = beastData?.health == "0";
 
   return (
     <div className="flex flex-row space-x-6">
@@ -161,17 +161,22 @@ export default function Beast() {
         <Info adventurer={adventurer?.adventurer} />
       </div>
       <div className="flex flex-col w-1/3 gap-10">
-        {!isBeastDead ? (<>
-          <KeyboardControl
-            buttonsData={buttonsData}
-            disabled={formatAdventurer?.beastId == undefined || txLoading}
-          />
-          <div className="flex flex-col items-center p-4">
-            {txLoading && hash && <div className="loading-ellipsis">Attacking</div>}
-            {hash && <div className="flex flex-col">Hash: {shortenHex(hash)}</div>}
-            {data && <div>Status: {data.status}</div>}
-          </div>
-        </>
+        {!isBeastDead ? (
+          <>
+            <KeyboardControl
+              buttonsData={buttonsData}
+              disabled={formatAdventurer?.beastId == undefined || txLoading}
+            />
+            <div className="flex flex-col items-center p-4">
+              {txLoading && hash && (
+                <div className="loading-ellipsis">Attacking</div>
+              )}
+              {hash && (
+                <div className="flex flex-col">Hash: {shortenHex(hash)}</div>
+              )}
+              {data && <div>Status: {data.status}</div>}
+            </div>
+          </>
         ) : (
           ""
         )}
@@ -179,7 +184,9 @@ export default function Beast() {
         {formatAdventurer?.beastId || lastBattleData?.battles[0] ? (
           <>
             <div className="flex flex-col items-center gap-5 p-2">
-              <div className="text-xl uppercase">Battle log with {beastData.beast}</div>
+              <div className="text-xl uppercase">
+                Battle log with {beastData.beast}
+              </div>
               <div className="flex flex-col gap-2">
                 {formatBattles.map((battle: any, index: number) => (
                   <BattleDisplay
@@ -191,9 +198,9 @@ export default function Beast() {
               </div>
             </div>
           </>
-        ) : ""}
-
-
+        ) : (
+          ""
+        )}
       </div>
 
       <div className="flex flex-row w-1/3 ">

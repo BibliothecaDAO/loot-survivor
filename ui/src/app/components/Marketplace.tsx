@@ -150,8 +150,10 @@ const Marketplace: React.FC = () => {
 
   const nextMint = new Date(
     new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
-    (8 + currentTimezoneOffsetMinutes) * 60 * 1000
+      (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
+
+  console.log("Next mint:", nextMint);
 
   return (
     <>
@@ -170,6 +172,7 @@ const Marketplace: React.FC = () => {
                 countingMessage="Next mint in:"
                 endTime={nextMint}
                 finishedMessage="Items can be minted!"
+                nextMintTime={nextMint}
               />
             </div>
             <UTCClock />
