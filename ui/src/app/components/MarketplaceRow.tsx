@@ -5,6 +5,7 @@ import { useContracts } from "../hooks/useContracts";
 import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurer } from "../types";
 import { useTransactionCart } from "../context/TransactionCartProvider";
+import { formatTime } from "../lib/utils";
 
 interface MarketplaceRowProps {
   ref: any;
@@ -68,8 +69,9 @@ const MarketplaceRow = ({
           (accumulator, current) => accumulator + (current.calldata[4] || 0),
           0
         );
-      return sum;
+      return sum >= formatAdventurer.gold;
     }
+    return true;
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -130,7 +132,7 @@ const MarketplaceRow = ({
             } - ${item.bidder}`
           : ""}
       </td>
-      <td className="text-center">{item.expiry}</td>
+      <td className="text-center">{formatTime(new Date(item.expiry))}</td>
       <td className="text-center">{item.status}</td>
       <td className="text-center">{item.claimedTime}</td>
       <td className="text-center">
@@ -162,6 +164,7 @@ const MarketplaceRow = ({
             claimExists(item.marketId) ||
             !item.expiry ||
             convertExpiryTime(item.expiry) > currentTime ||
+            currentTime - convertExpiryTime(item.expiry) < 30 * 60 * 1000 ||
             formatAdventurer?.id != item.bidder
           }
           className={claimExists(item.marketId) ? "bg-white" : ""}

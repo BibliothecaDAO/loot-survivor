@@ -8,7 +8,7 @@ export const mintEth = async ({ address }: MintEthProps) => {
   try {
     const requestBody = {
       address: address,
-      amount: "10000000000000000000",
+      amount: 10000000000000000000,
       // Add other data you want to send in the request body
     };
 

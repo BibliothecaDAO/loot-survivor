@@ -63,18 +63,17 @@ const Upgrade = () => {
     },
   ];
 
-  const upgradeTx = {
-    contractAddress: adventurerContract?.address,
-    selector: "upgrade_stat",
-    calldata: [
-      adventurer?.adventurer?.id,
-      "0",
-      getKeyFromValue(gameData.STATS, selected),
-    ],
-  };
-
   const handleUpgradeTx = async (selected: any) => {
     console.log(`Upgrading ${selected}`);
+    const upgradeTx = {
+      contractAddress: adventurerContract?.address,
+      selector: "upgrade_stat",
+      calldata: [
+        adventurer?.adventurer?.id,
+        "0",
+        getKeyFromValue(gameData.STATS, selected),
+      ],
+    };
     addToCalls(upgradeTx);
     handleSubmitCalls().then((tx: any) => {
       setHash(tx.transaction_hash);
@@ -114,6 +113,8 @@ const Upgrade = () => {
       Luck increases chance of hitting critical damage
     </p>
   );
+
+  console.log(selected);
 
   return (
     <div className="flex flex-col gap-10 w-full mt-[100px]">
