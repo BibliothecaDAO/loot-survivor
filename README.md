@@ -47,6 +47,19 @@ Setting up devnet:
 
 To see your ETH balance add token address `0x49D36570D4E46F48E99674BD3FCC84644DDD6B96F7C741B1562B82F9E004DC7`
 
+If you get a 'Class with hash 0x3343...' error follow below to resolve:
+
+- Go to ArgentX wallet 
+- Select Settings cog icon
+- Select Developer settings
+- Select Manage networks
+- Select Loot Survivor Devnet
+- Select Advanced settings 
+- Add address into the Account class hash field: 0x3ebe39375ba9e0f8cc21d5ee38c48818e8ed6612fa2e4e04702a323d64b96ba
+- Save and refresh page
+
+If you receive an error after, create a new account in Loot Survivor Devnet (1 eth should be loaded) to resolve.
+
 
 ## Game Description
 
