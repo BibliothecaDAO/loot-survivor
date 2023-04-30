@@ -50,6 +50,7 @@ export default function RootLayout({
         <title>Loot Survivors</title>
       </head>
       <body className=" text-terminal-green bg-conic-to-br to-terminal-black from-terminal-black bg-b bezel-container" >
+        <img src="/crt_green_mask.png" className="absolute w-full pointer-events-none crt-frame" />
         <IndexerProvider>
           <StarknetConfig connectors={connectors} autoConnect>
             <UIProvider>
