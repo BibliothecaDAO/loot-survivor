@@ -32,6 +32,8 @@ export default function Home() {
   const { onboarded, setOnboarded } = useUI();
   const { setIndexer } = useIndexer();
 
+  const testnet_addr = "http://survivor-indexer.bibliothecadao.xyz:5050";
+
   const adventurerStats = adventurer ?? NullAdventurerProps;
 
   const upgrade = adventurer?.adventurer?.upgrading;
@@ -114,8 +116,10 @@ export default function Home() {
             <div className="flex flex-row self-end gap-2">
               {account && calls.length > 0 && <TransactionCart />}
               {account && <TransactionHistory />}
-              {account && <AddDevnetEthButton />}
-              {account && <MintEthButton />}
+              {(account as any)?.baseUrl == testnet_addr && (
+                <AddDevnetEthButton />
+              )}
+              {(account as any)?.baseUrl == testnet_addr && <MintEthButton />}
               <ul className="flex flex-row gap-2">
                 {account ? (
                   <Button onClick={() => disconnect()}>
