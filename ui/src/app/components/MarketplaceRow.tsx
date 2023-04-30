@@ -108,7 +108,7 @@ const MarketplaceRow = ({
 
   const status = () => {
     const currentDate = new Date();
-    const itemExpiryDate = new Date(item.expiry);
+    const itemExpiryDate = new Date(convertExpiryTime(item.expiry));
 
     if (item.status == "Closed" && item.expiry == null) {
       return "No bids";
@@ -147,7 +147,11 @@ const MarketplaceRow = ({
             } - ${item.bidder}`
           : ""}
       </td>
-      <td className="text-center">{formatTime(new Date(item.expiry))}</td>
+      <td className="text-center">
+        {item.expiry
+          ? formatTime(new Date(convertExpiryTime(item.expiry)))
+          : ""}
+      </td>
       <td className="text-center">{status()}</td>
       <td className="text-center">{item.claimedTime}</td>
       <td className="w-64 text-center">

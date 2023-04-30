@@ -15,7 +15,7 @@ export const UTCClock: React.FC = () => {
 
   return (
     <div>
-      <p>{`Current Time: ${formatTime(currentTime)} UTC`}</p>
+      <p>{`Time: ${formatTime(currentTime)} UTC`}</p>
     </div>
   );
 };
