@@ -148,7 +148,7 @@ const MarketplaceRow = ({
           : ""}
       </td>
       <td className="text-center">{formatTime(new Date(item.expiry))}</td>
-      <td className="text-center">{item.status}</td>
+      <td className="text-center">{status()}</td>
       <td className="text-center">{item.claimedTime}</td>
       <td className="w-64 text-center">
         {showBidBox == index ? (
