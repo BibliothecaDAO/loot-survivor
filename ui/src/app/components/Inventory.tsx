@@ -16,6 +16,7 @@ import { NullAdventurerProps } from "../types";
 import Image from "next/image";
 import { groupBySlot } from "../lib/utils";
 import { InventoryRow } from "./InventoryRow";
+import Info from "./Info";
 // import { GameData } from "./GameData";
 
 const Inventory: React.FC = () => {
@@ -97,21 +98,12 @@ const Inventory: React.FC = () => {
   // }, [selectedIndex]);
 
   return (
-    <div className="flex flex-row bg-terminal-black border-2 border-terminal-green h-[520px] p-8 gap-6 overflow-hidden">
-      <div className="flex flex-col items-center">
-        <div className="w-[250px] h-[250px] relative border-2 border-white m-2">
-          <Image
-            src="/MIKE.png"
-            alt="adventurer-image"
-            fill={true}
-            style={{ objectFit: "contain" }}
-          />
-        </div>
-        <p className="mx-auto text-2xl text-white">
-          {formatAdventurer.adventurer?.name}
-        </p>
+    <div className="flex flex-row p-1 space-x-4 overflow-hidden border-2 bg-terminal-black border-terminal-green">
+      <div className="w-1/3">
+        <Info adventurer={formatAdventurer.adventurer} />
       </div>
-      <div className="flex flex-col gap-5">
+
+      <div className="flex flex-col">
         <InventoryRow
           title={"Weapon"}
           items={groupedItems["Weapon"]}

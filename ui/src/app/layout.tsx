@@ -49,7 +49,7 @@ export default function RootLayout({
       <head>
         <title>Loot Survivors</title>
       </head>
-      <body className=" text-terminal-green bg-conic-to-br to-black from-terminal-black bg-b bezel-container" >
+      <body className=" text-terminal-green bg-conic-to-br to-terminal-black from-terminal-black bg-b bezel-container" >
         <IndexerProvider>
           <StarknetConfig connectors={connectors} autoConnect>
             <UIProvider>

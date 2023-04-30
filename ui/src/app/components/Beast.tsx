@@ -17,6 +17,7 @@ import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import Info from "./Info";
 import { BattleDisplay } from "./BattleDisplay";
 import { BeastDisplay } from "./BeastDisplay";
+import { shortenHex } from "../lib/utils";
 
 export default function Beast() {
   const { handleSubmitCalls, addToCalls } = useTransactionCart();
@@ -152,39 +153,47 @@ export default function Beast() {
 
   const txLoading = data?.status == "RECEIVED" || data?.status == "PENDING";
 
+  const isBeastDead = beastData.health == "0";
+
   return (
-    <div className="flex flex-row mt-5">
+    <div className="flex flex-row mt-5 space-x-8">
       <div className="w-1/3">
         <Info adventurer={adventurer?.adventurer} />
       </div>
       <div className="flex flex-col w-1/3 gap-10">
-        <KeyboardControl
-          buttonsData={buttonsData}
-          disabled={formatAdventurer?.beastId == undefined}
-        />
-        <div className="flex flex-col items-center p-4">
-          {txLoading && hash && <div className="loading-ellipsis">Loading</div>}
-          {hash && <div className="flex flex-col">Hash: {hash}</div>}
-          {data && <div>Status: {data.status}</div>}
-        </div>
+        {!isBeastDead ? (<>
+          <KeyboardControl
+            buttonsData={buttonsData}
+            disabled={formatAdventurer?.beastId == undefined || txLoading}
+          />
+          <div className="flex flex-col items-center p-4">
+            {txLoading && hash && <div className="loading-ellipsis">Attacking</div>}
+            {hash && <div className="flex flex-col">Hash: {shortenHex(hash)}</div>}
+            {data && <div>Status: {data.status}</div>}
+          </div></>) : (<>        {formatAdventurer?.beastId || lastBattleData?.battles[0] ? (
+            <>
+              <div className="flex flex-col items-center gap-5 p-2">
+                <div className="text-xl uppercase">Battle log with {beastData.beast}</div>
+                <div className="flex flex-col gap-2">
+                  {formatBattles.map((battle: any, index: number) => (
+                    <BattleDisplay
+                      key={index}
+                      battleData={battle}
+                      beastName={beastData.beast}
+                    />
+                  ))}
+                </div>
+              </div>
+            </>
+          ) : ""}</>)}
+
+
       </div>
 
-      <div className="flex flex-row w-1/3 bg-terminal-black">
+      <div className="flex flex-row w-1/3 ">
         {formatAdventurer?.beastId || lastBattleData?.battles[0] ? (
           <>
             <BeastDisplay beastData={beastData} />
-            <div className="flex flex-col items-center gap-5">
-              <p>Battle log:</p>
-              <div className="flex flex-col gap-2">
-                {formatBattles.map((battle: any, index: number) => (
-                  <BattleDisplay
-                    key={index}
-                    battleData={battle}
-                    beastName={beastData.beast}
-                  />
-                ))}
-              </div>
-            </div>
           </>
         ) : (
           <p className="m-auto text-lg uppercase text-terminal-green">

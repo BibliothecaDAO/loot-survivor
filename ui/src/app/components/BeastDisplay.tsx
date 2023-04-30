@@ -2,7 +2,7 @@ import Image from "next/image";
 import { getValueFromKey } from "../lib/utils";
 import { GameData } from "./GameData";
 import { ANSIArt } from "./ANSIGenerator";
-
+import Heart from "../../../public/heart.svg";
 interface BeastDisplayProps {
   beastData: any;
 }
@@ -15,37 +15,38 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
     newWidth: 20,
   });
   return (
-    <div className="flex flex-col">
-      <div className="w-[160px] h-[160px] border-4 border-white relative m-4">
-        <Image
+    <div className="flex w-full p-1 border border-terminal-green">
+      <div >
+        <ANSIArt
+          newWidth={240}
           src={
             getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
             "/phoenix.png"
           }
-          alt="beast-image"
-          fill={true}
-          style={{ objectFit: "contain" }}
         />
-        {/* {ansiImage} */}
+
       </div>
-      <div className="flex flex-col items-center mt-5">
-        <div className="text-2xl font-medium text-white">
+      <div className="flex flex-col w-full p-2">
+        <div className="flex justify-between w-full text-2xl border-b border-terminal-green">
           {beastData?.beast}
+
+          <span className={`text-2xl flex ${beastData?.health === 0
+            ? "text-red-600"
+            : "text-terminal-green"
+            }`}>
+            <Heart className="self-center w-6 h-6 fill-current" /> {beastData?.health}
+          </span>
         </div>
-        <p
-          className={`text-2xl ${
-            beastData?.health === 0
-              ? "text-terminal-red"
-              : "text-terminal-green"
-          }`}
-        >
-          HEALTH {beastData?.health}
-        </p>
-        <p className="text-2xl text-terminal-yellow">RANK {beastData?.rank}</p>
-        <p className="text-2xl text-terminal-yellow">
-          LEVEL {beastData?.level}
-        </p>
-        <p className="text-2xl text-terminal-yellow">XP {beastData?.xp}</p>
+        <div className="flex justify-between">
+          <p className="text-2xl text-terminal-yellow">
+            Level {beastData?.level}
+          </p>
+          <p className="text-2xl text-terminal-yellow">XP {beastData?.xp}</p>
+          <p className="text-2xl text-terminal-yellow">Rank {beastData?.rank}</p>
+
+        </div>
+
+
         <p className="text-2xl text-red-600">{beastData?.attackType}</p>
         <p className="text-2xl text-red-600">{beastData?.armorType}</p>
       </div>

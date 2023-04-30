@@ -17,7 +17,7 @@ interface BidBoxProps {
   item: any;
 }
 
-export function BidBox({ showBidBox, close, marketId, item }: BidBoxProps) {
+export function BidBox({ close, marketId, item }: BidBoxProps) {
   const { account } = useAccount();
   const { adventurer } = useAdventurer();
   const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
@@ -54,30 +54,24 @@ export function BidBox({ showBidBox, close, marketId, item }: BidBoxProps) {
   };
 
   return (
-    <>
-      {showBidBox && (
-        <div className="fixed p-2 mt-2 bg-black border rounded-md shadow-lg top-24 right-10 border-terminal-green">
-          <p>You are bidding on {marketId} </p>
-          <div className="flex items-center justify-between mb-2">
-            <label>Bid price (minimum 3 gold)</label>
-            <Button onClick={() => close()}>Close</Button>
-          </div>
-          <input
-            id="bid"
-            type="number"
-            min="3"
-            onChange={(e) => setBidPrice(parseInt(e.target.value, 10))}
-            className="px-3 py-2 border rounded-md border-terminal-black"
-          />
-          <Button
-            onClick={() => handleBid(marketId)}
-            disabled={typeof bidPrice === "undefined" || item.price >= bidPrice}
-            className="mt-2"
-          >
-            Place Bid
-          </Button>
-        </div>
-      )}
-    </>
+    <div className="flex w-full">
+      <input
+        id="bid"
+        type="number"
+        min="3"
+        onChange={(e) => setBidPrice(parseInt(e.target.value, 10))}
+        className="w-12 px-3 py-2 border rounded-md bg-terminal-black border-terminal-green text-terminal-green"
+      />
+      <Button
+        onClick={() => handleBid(marketId)}
+        disabled={typeof bidPrice === "undefined" || item.price >= bidPrice}
+
+      >
+        Place Bid
+      </Button>
+      <Button variant={"outline"} onClick={() => close()}>Close</Button>
+    </div>
+
+
   );
 }

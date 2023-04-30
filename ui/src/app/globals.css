@@ -10,6 +10,11 @@ body {
   text-shadow: rgb(39, 168, 115, 0.9) 1px 0 10px;
 }
 
+.ansi {
+  text-shadow: none;
+  font-size: 6px;
+}
+
 h1 {
   @apply mt-6 text-3xl;
 }

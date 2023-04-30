@@ -37,7 +37,7 @@ export const InventoryRow = ({
   const ItemDisplay = (item: any) => {
     const formatItem = item.item;
     return (
-      <div className="flex flex-row gap-2">
+      <div className="flex flex-row gap-2 p-2 border border-terminal-green">
         <p className="whitespace-nowrap">
           {formatItem ? formatItem.item : "Nothing"}
         </p>
@@ -99,7 +99,7 @@ export const InventoryRow = ({
 
   return (
     <>
-      <div className="flex flex-row gap-3 w-full align-center">
+      <div className="flex flex-row w-full gap-3 align-center">
         <Button
           className={isSelected && !isActive ? "animate-pulse" : ""}
           variant={isSelected ? "default" : "ghost"}
@@ -108,13 +108,13 @@ export const InventoryRow = ({
             setActiveMenu(menuIndex);
           }}
         >
-          <p className="text-xl w-40 whitespace-nowrap">{title}</p>
+          <p className="w-40 text-xl whitespace-nowrap">{title}</p>
         </Button>
         <ItemDisplay
           item={items?.find((item: any) => item.id == equippedItemId)}
         />
       </div>
-      <div className="absolute top-1/3 left-2/3 flex flex-col gap-4 w-full overflow-auto">
+      <div className="absolute flex flex-col w-full gap-4 overflow-auto top-1/3 left-2/3">
         {isSelected && unequippedItems?.length > 0 ? (
           <>
             <p>Equip:</p>
@@ -128,7 +128,7 @@ export const InventoryRow = ({
                     className={
                       selectedIndex === index && isSelected
                         ? item.equippedAdventurerId
-                          ? "animate-pulse bg-white"
+                          ? "animate-pulse "
                           : "animate-pulse"
                         : "h-[20px]"
                     }
