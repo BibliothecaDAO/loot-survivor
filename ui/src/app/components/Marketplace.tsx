@@ -153,8 +153,6 @@ const Marketplace: React.FC = () => {
       (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
-  console.log("Next mint:", nextMint);
-
   return (
     <>
       {adventurer?.adventurer?.level != 1 ? (
