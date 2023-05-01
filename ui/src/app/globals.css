@@ -28,6 +28,10 @@ body::after {
   );
 }
 
+::selection {
+  @apply text-terminal-black bg-terminal-yellow;
+}
+
 .crt-frame {
   pointer-events: none;
   overflow: hidden;
