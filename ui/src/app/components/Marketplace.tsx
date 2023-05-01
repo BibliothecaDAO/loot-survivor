@@ -12,7 +12,7 @@ import { useAdventurer } from "../context/AdventurerProvider";
 import { UTCClock, Countdown } from "./Clock";
 import MarketplaceRow from "./MarketplaceRow";
 
-const Marketplace: React.FC = () => {
+const Marketplace = () => {
   const { adventurer } = useAdventurer();
   const { addToCalls } = useTransactionCart();
   const { lootMarketArcadeContract, adventurerContract } = useContracts();
@@ -150,7 +150,7 @@ const Marketplace: React.FC = () => {
 
   const nextMint = new Date(
     new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
-      (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+    (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
   return (
@@ -175,22 +175,22 @@ const Marketplace: React.FC = () => {
             </div>
             <UTCClock />
           </div>
-          <div className="w-full overflow-auto">
+          <div className="w-full overflow-y-auto border h-96 border-terminal-green">
             {marketLatestItemsLoading && (
               <p className="text-xl loading-ellipsis">LOADING</p>
             )}
             {marketLatestItemsError && (
               <p className="text-xl">ERROR {marketLatestItemsError.message}</p>
             )}
-            <table className="w-full border-terminal-green border mt-4 h-[425px]">
-              <thead className="sticky top-0 ">
-                <tr className="sticky top-0 border z-5 border-terminal-green bg-terminal-black">
+            <table className="w-full border border-terminal-green ">
+              <thead className="sticky top-0 border z-5 border-terminal-green bg-terminal-black">
+                <tr className="">
                   {headings.map((heading, index) => (
                     <th key={index}>{heading}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="">
                 {!marketLatestItemsLoading &&
                   !marketLatestItemsError &&
                   marketLatestItems.map((item: any, index: number) => (
