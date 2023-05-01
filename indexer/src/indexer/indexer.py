@@ -38,6 +38,7 @@ from indexer.utils import (
     check_exists_int,
     check_exists_timestamp,
     encode_int_as_bytes,
+    get_key_by_value,
 )
 
 # Print apibara logs
@@ -231,7 +232,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data: List[FieldElement],
     ):
         d = decode_discovery_event(data)
-        if d.discovery_type == 1:
+        if d.discovery_type == 3:
             sub_discovery_type = d.sub_discovery_type + 16
         else:
             sub_discovery_type = d.sub_discovery_type
@@ -242,6 +243,11 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "subDiscoveryType": check_exists_int(sub_discovery_type),
             "entityId": check_exists_int(d.entity_id),
             "outputAmount": encode_int_as_bytes(d.output_amount),
+            "attackLocation": check_exists_int(
+                self.config.OBSTACLE_ATTACK_LOCATIONS[sub_discovery_type]
+                if d.discovery_type == 2
+                else 0
+            ),
             "discoveryTime": block_time,
         }
         await info.storage.insert_one("discoveries", discovery_doc)
@@ -300,6 +306,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "createdDate": block_time,
             "beast": check_exists_int(cb.beast_state["Id"]),
             "attackType": check_exists_int(cb.beast_state["AttackType"]),
+            "attackLocation": check_exists_int(
+                self.config.BEAST_ATTACK_LOCATIONS[cb.beast_state["Id"]]
+            ),
             "armorType": check_exists_int(cb.beast_state["ArmorType"]),
             "rank": check_exists_int(cb.beast_state["Rank"]),
             "prefix1": check_exists_int(cb.beast_state["Prefix_1"]),
@@ -327,6 +336,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "adventurerId": check_exists_int(ub.beast_state["Adventurer"]),
             "beast": check_exists_int(ub.beast_state["Id"]),
             "attackType": check_exists_int(ub.beast_state["AttackType"]),
+            "attackLocation": check_exists_int(
+                self.config.BEAST_ATTACK_LOCATIONS[ub.beast_state["Id"]]
+            ),
             "armorType": check_exists_int(ub.beast_state["ArmorType"]),
             "rank": check_exists_int(ub.beast_state["Rank"]),
             "prefix1": check_exists_int(ub.beast_state["Prefix_1"]),

@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime
 from typing import List, NewType, Optional, Dict
 import socket
+import ssl
 
 import strawberry
 import aiohttp_cors
@@ -615,6 +616,7 @@ class DiscoveriesFilter:
     subDiscoveryType: Optional[StringFilter] = None
     entityId: Optional[FeltValueFilter] = None
     outputAmount: Optional[FeltValueFilter] = None
+    attackLocation: Optional[SlotFilter] = None
     discoveryTime: Optional[DateTimeFilter] = None
     txHash: Optional[HexValueFilter] = None
 
@@ -625,6 +627,7 @@ class BeastsFilter:
     adventurerId: Optional[FeltValueFilter] = None
     beast: Optional[BeastFilter] = None
     attackType: Optional[TypeFilter] = None
+    attackLocation: Optional[SlotFilter] = None
     armorType: Optional[TypeFilter] = None
     rank: Optional[FeltValueFilter] = None
     prefix1: Optional[NamePrefixFilter] = None
@@ -729,6 +732,7 @@ class DiscoveriesOrderByInput:
     subDiscoveryType: Optional[OrderByInput] = None
     entityId: Optional[OrderByInput] = None
     outputAmount: Optional[OrderByInput] = None
+    attackLocation: Optional[OrderByInput] = None
     discoveryTime: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
 
@@ -739,6 +743,7 @@ class BeastsOrderByInput:
     adventurerId: Optional[OrderByInput] = None
     beastType: Optional[OrderByInput] = None
     attackType: Optional[OrderByInput] = None
+    attackLocation: Optional[OrderByInput] = None
     armorType: Optional[OrderByInput] = None
     rank: Optional[OrderByInput] = None
     prefixes: Optional[OrderByInput] = None
@@ -878,6 +883,7 @@ class Discovery:
     subDiscoveryType: Optional[SubDiscoveryValue]
     entityId: Optional[FeltValue]
     outputAmount: Optional[FeltValue]
+    attackLocation: Optional[SlotValue]
     discoveryTime: Optional[datetime]
     txHash: Optional[HexValue]
 
@@ -889,6 +895,7 @@ class Discovery:
             subDiscoveryType=data["subDiscoveryType"],
             entityId=data["entityId"],
             outputAmount=data["outputAmount"],
+            attackLocation=data["attackLocation"],
             discoveryTime=data["discoveryTime"],
             txHash=data["txHash"],
         )
@@ -907,6 +914,7 @@ class Beast:
     adventurerId: Optional[FeltValue]
     beast: Optional[BeastValue]
     attackType: Optional[TypeValue]
+    attackLocation: Optional[SlotValue]
     armorType: Optional[TypeValue]
     rank: Optional[FeltValue]
     prefix1: Optional[NamePrefixValue]
@@ -924,6 +932,7 @@ class Beast:
             adventurerId=data["adventurerId"],
             beast=data["beast"],
             attackType=data["attackType"],
+            attackLocation=data["attackLocation"],
             armorType=data["armorType"],
             rank=data["rank"],
             prefix1=data["prefix1"],
@@ -1208,6 +1217,7 @@ def get_discoveries(
                 isinstance(value, StringFilter)
                 | isinstance(value, DiscoveryFilter)
                 | isinstance(value, SubDiscoveryFilter)
+                | isinstance(value, SlotFilter)
             ):
                 filter[key] = get_str_filters(value)
             elif isinstance(value, HexValueFilter):
@@ -1258,6 +1268,7 @@ def get_beasts(
                 | isinstance(value, BeastFilter)
                 | isinstance(value, NamePrefixFilter)
                 | isinstance(value, NameSuffixFilter)
+                | isinstance(value, SlotFilter)
             ):
                 filter[key] = get_str_filters(value)
             elif isinstance(value, HexValueFilter):
@@ -1479,6 +1490,11 @@ async def run_graphql_api(mongo_goerli=None, mongo_devnet=None, port="8080"):
     #     },
     # )
 
+    ssl_cert = "/app/fullchain.pem"
+    ssl_key = "/app/privkey.pem"
+    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    ssl_context.load_cert_chain(ssl_cert, ssl_key)
+
     resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
     resource_devnet = cors.add(app.router.add_resource("/devnet-graphql"))
 
@@ -1518,7 +1534,7 @@ async def run_graphql_api(mongo_goerli=None, mongo_devnet=None, port="8080"):
 
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", int(port))
+    site = web.TCPSite(runner, "0.0.0.0", int(port), ssl_context=ssl_context)
     await site.start()
 
     print(f"GraphQL server started on port {port}")
