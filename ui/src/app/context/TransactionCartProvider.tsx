@@ -62,11 +62,13 @@ export const useTransactionCartContext = () => {
     );
   };
 
+  // useEffect(() => {}, []);
+
   const { writeAsync } = useContractWrite({ calls });
 
   const handleSubmitCalls = async () => {
-    const tx = await writeAsync();
     setCalls([]);
+    const tx = await writeAsync();
     return tx;
   };
 
