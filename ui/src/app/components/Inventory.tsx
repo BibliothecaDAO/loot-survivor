@@ -144,8 +144,6 @@ const Inventory: React.FC = () => {
     "ringId",
   ]);
 
-  console.log(groupedItems["Hand"]);
-
   const filteredItems = selectedItemType.filter(
     (item: any) => !equipedItemIds.includes(item.id)
   );

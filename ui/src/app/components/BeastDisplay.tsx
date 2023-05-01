@@ -49,7 +49,10 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
         </div>
 
         <p className="text-2xl text-red-600">{beastData?.attackType}</p>
-        <p className="text-2xl text-red-600">{beastData?.attackLocation}</p>
+        <p className="text-2xl text-red-600">
+          {" "}
+          Attacks {beastData?.attackLocation}
+        </p>
         <p className="text-2xl text-red-600">{beastData?.armorType}</p>
       </div>
     </div>

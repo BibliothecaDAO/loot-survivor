@@ -23,6 +23,7 @@ import {
   AddDevnetEthButton,
   MintEthButton,
 } from "./components/DevnetConnectors";
+import Leaderboard from "./components/Leaderboard";
 
 export default function Home() {
   const { connect, disconnect, connectors } = useConnectors();
@@ -101,6 +102,11 @@ export default function Home() {
           label: "Beast",
           value: "beast",
         },
+        {
+          id: 6,
+          label: "Leaderboard",
+          value: "leaderboard",
+        },
       ];
     }
 
@@ -157,6 +163,7 @@ export default function Home() {
                   {selected === "market" && <Marketplace />}
                   {selected === "inventory" && <Inventory />}
                   {selected === "beast" && <Beast />}
+                  {selected === "leaderboard" && <Leaderboard />}
                 </>
               ) : (
                 <Upgrade />
