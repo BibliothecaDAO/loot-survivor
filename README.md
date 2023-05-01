@@ -31,8 +31,7 @@ Set up server:
 ```
 cd loot-survivor/ui
 yarn
-yarn build
-yarn start
+yarn dev
 ```
 
 You will find the app at http://localhost:3000/.
