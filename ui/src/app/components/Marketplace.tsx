@@ -153,8 +153,6 @@ const Marketplace: React.FC = () => {
       (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
-  console.log("Next mint:", nextMint);
-
   return (
     <>
       {adventurer?.adventurer?.level != 1 ? (
@@ -177,7 +175,7 @@ const Marketplace: React.FC = () => {
             </div>
             <UTCClock />
           </div>
-          <div className="w-full overflow-auto ">
+          <div className="w-full overflow-auto">
             {marketLatestItemsLoading && (
               <p className="text-xl loading-ellipsis">LOADING</p>
             )}
@@ -209,8 +207,8 @@ const Marketplace: React.FC = () => {
                   ))}
               </tbody>
             </table>
-          </div >
-        </div >
+          </div>
+        </div>
       ) : (
         <div className="flex w-full mt-[200px]">
           <p className="mx-auto items-center text-[50px] animate-pulse">

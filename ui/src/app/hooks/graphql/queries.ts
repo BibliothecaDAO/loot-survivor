@@ -225,6 +225,45 @@ const getAdventurersInList = gql`
   }
 `;
 
+const getAdventurerByGold = gql`
+  query get_adventurer_by_gold {
+    adventurers(orderBy: { gold: { desc: true } }, limit: 10) {
+      id
+      name
+      gold
+      beastId
+      birthdate
+      charisma
+      chestId
+      dexterity
+      feetId
+      handsId
+      headId
+      health
+      homeRealm
+      imageHash1
+      imageHash2
+      intelligence
+      lastUpdated
+      level
+      luck
+      neckId
+      order
+      owner
+      race
+      ringId
+      status
+      strength
+      upgrading
+      vitality
+      waistId
+      weaponId
+      wisdom
+      xp
+    }
+  }
+`;
+
 const getBeastById = gql`
   query get_beast_by_id($id: FeltValue) {
     beasts(where: { id: { eq: $id } }) {
@@ -246,7 +285,7 @@ const getBeastById = gql`
 `;
 
 const getLatestBattlesByAdventurer = gql`
-  query get_latest_batlles($adventurerId: FeltValue) {
+  query get_latest_battles($adventurerId: FeltValue) {
     battles(
       limit: 10
       orderBy: { timestamp: { desc: true } }
@@ -449,6 +488,7 @@ export {
   getAdventurersByOwner,
   getAdventurerById,
   getAdventurersInList,
+  getAdventurerByGold,
   getBeasts,
   getBeastById,
   getLatestBattlesByAdventurer,
