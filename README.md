@@ -4,7 +4,7 @@ This repository includes both the client and indexer that form the game Loot Sur
 
 ## Setup
 
-Currently we are running the app locally until we fix an issue with running devnet over https.
+Currently we are running the app locally until we fix an issue with running devnet over https. If you are only using goerli thhen simply go the app https://loot-survivor.vercel.app/.
 
 ### If you don't have yarn installed
 

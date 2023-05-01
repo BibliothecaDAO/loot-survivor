@@ -240,8 +240,8 @@ const Inventory: React.FC = () => {
         <div className="flex flex-col space-y-1">
           {filteredItems.length ? (
             filteredItems.map((item: any, index: number) => (
-              <div className="flex">
-                <ItemDisplay key={index} item={item} />
+              <div className="flex" key={index}>
+                <ItemDisplay item={item} />
                 <Button onClick={() => handleAddEquipItem(item.id)}>
                   equip
                 </Button>
