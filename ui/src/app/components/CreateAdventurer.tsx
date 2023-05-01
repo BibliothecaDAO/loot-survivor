@@ -190,7 +190,7 @@ export const CreateAdventurer = ({
                 type="text"
                 name="name"
                 onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black"
+                className="p-1 m-2 bg-terminal-black border border-slate-500"
                 onKeyDown={handleKeyDown}
               />
             </label>
@@ -222,7 +222,7 @@ export const CreateAdventurer = ({
                 min="1"
                 max="8000"
                 onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black"
+                className="p-1 m-2 bg-terminal-black border border-slate-500"
               />
             </label>
             <label className="flex justify-between">

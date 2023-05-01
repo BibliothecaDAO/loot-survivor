@@ -1,15 +1,13 @@
 "use client";
 import "./globals.css";
-import {
-  InjectedConnector,
-  StarknetConfig,
-} from "@starknet-react/core";
+import { InjectedConnector, StarknetConfig } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector";
 import { useMemo } from "react";
 import { AdventurerProvider } from "./context/AdventurerProvider";
 import { TransactionCartProvider } from "./context/TransactionCartProvider";
 import { UIProvider } from "./context/UIProvider";
 import { IndexerProvider } from "./context/IndexerProvider";
+import { LoadingProvider } from "./context/Loading";
 import { contracts } from "./hooks/useContracts";
 
 // NOT WORKING PROPERLY
@@ -33,7 +31,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-
   const connectors = useMemo(
     () => [
       new InjectedConnector({ options: { id: "argentX" } }),
@@ -49,13 +46,18 @@ export default function RootLayout({
       <head>
         <title>Loot Survivors</title>
       </head>
-      <body className=" text-terminal-green bg-conic-to-br to-terminal-black from-terminal-black bg-b bezel-container" >
-        <img src="/crt_green_mask.png" className="absolute w-full pointer-events-none crt-frame" />
+      <body className=" text-terminal-green bg-conic-to-br to-terminal-black from-terminal-black bg-b bezel-container">
+        <img
+          src="/crt_green_mask.png"
+          className="absolute w-full pointer-events-none crt-frame"
+        />
         <IndexerProvider>
           <StarknetConfig connectors={connectors} autoConnect>
             <UIProvider>
               <TransactionCartProvider>
-                <AdventurerProvider>{children}</AdventurerProvider>
+                <LoadingProvider>
+                  <AdventurerProvider>{children}</AdventurerProvider>
+                </LoadingProvider>
               </TransactionCartProvider>
             </UIProvider>
           </StarknetConfig>

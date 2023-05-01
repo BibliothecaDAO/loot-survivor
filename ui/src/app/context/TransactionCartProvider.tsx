@@ -62,12 +62,18 @@ export const useTransactionCartContext = () => {
     );
   };
 
+  // useEffect(() => {}, []);
+
   const { writeAsync } = useContractWrite({ calls });
 
   const handleSubmitCalls = async () => {
-    const tx = await writeAsync();
-    setCalls([]);
-    return tx;
+    try {
+      const tx = await writeAsync();
+      setCalls([]);
+      return tx;
+    } catch (error) {
+      setCalls([]);
+    }
   };
 
   return { handleSubmitCalls, calls, addToCalls, removeFromCalls };

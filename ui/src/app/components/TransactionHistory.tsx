@@ -5,6 +5,7 @@ import {
 } from "@starknet-react/core";
 import { TxStatus } from "./TxStatus";
 import { Metadata } from "../types";
+import { Button } from "./Button";
 
 const TransactionHistory = () => {
   const { hashes, transactions, addTransaction } = useTransactionManager();
@@ -23,12 +24,12 @@ const TransactionHistory = () => {
 
   return (
     <div className="relative">
-      <button
+      <Button
         onClick={toggleDropdown}
-        className="relative flex p-2 bg-black border border-terminal-green"
+
       >
         {isOpen ? "Hide Ledger" : "Show Ledger"}
-      </button>
+      </Button>
       {isOpen ? (
         transactions ? (
           <div className="absolute right-0 top-10 z-10 w-[650px] h-[250px] p-2 bg-terminal-black border border-terminal-green overflow-x-auto">

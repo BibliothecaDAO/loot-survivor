@@ -34,10 +34,10 @@ const Leaderboard: React.FC = () => {
   let rankOffset = 0;
 
   return (
-    <div className="w-1/2 m-auto min-h-screen flex flex-col items-center">
-      <table className="w-full border border-terminal-green mt-4 text-4xl">
-        <thead className="sticky top-0 ">
-          <tr className="sticky top-0 border justify-evenly">
+    <div className="flex flex-col items-center w-1/2 m-auto">
+      <table className="w-full mt-4 text-4xl border border-terminal-green">
+        <thead className="sticky top-0 border border-terminal-green">
+          <tr>
             <th>Rank</th>
             <th>Adventurer</th>
             <th>Gold</th>
@@ -72,11 +72,17 @@ const Leaderboard: React.FC = () => {
           })}
         </tbody>
       </table>
-      <div className="flex justify-center mt-4">
-        <Button onClick={() => handleClick(currentPage - 1)}>back</Button>
+      <div className="flex justify-center mt-8">
+        <Button
+          variant={"outline"}
+          onClick={() => handleClick(currentPage - 1)}
+        >
+          back
+        </Button>
         {Array.from({ length: totalPages }, (_, i) => i + 1).map(
           (pageNum: number) => (
             <Button
+              variant={"outline"}
               key={pageNum}
               onClick={() => handleClick(pageNum)}
               className={currentPage === pageNum ? "animate-pulse" : ""}
@@ -85,7 +91,12 @@ const Leaderboard: React.FC = () => {
             </Button>
           )
         )}
-        <Button onClick={() => handleClick(currentPage + 1)}>next</Button>
+        <Button
+          variant={"outline"}
+          onClick={() => handleClick(currentPage + 1)}
+        >
+          next
+        </Button>
       </div>
     </div>
   );
