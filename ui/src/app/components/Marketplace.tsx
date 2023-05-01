@@ -11,15 +11,19 @@ import {
 import { useAdventurer } from "../context/AdventurerProvider";
 import { UTCClock, Countdown } from "./Clock";
 import MarketplaceRow from "./MarketplaceRow";
+import Coin from "../../../public/coin.svg";
+import { NullAdventurer } from "../types";
 
 const Marketplace = () => {
   const { adventurer } = useAdventurer();
-  const { addToCalls } = useTransactionCart();
+  const { calls, addToCalls } = useTransactionCart();
   const { lootMarketArcadeContract, adventurerContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
   const [itemsCount, setItemsCount] = useState(0);
+
+  const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
 
   const {
     loading: latestMarketItemsNumberLoading,
@@ -146,11 +150,18 @@ const Marketplace = () => {
     "Actions",
   ];
 
+  const sum = calls
+    .filter((call: any) => call.entrypoint == "bid_on_item")
+    .reduce(
+      (accumulator, current) => accumulator + (current.calldata[4] || 0),
+      0
+    );
+
   const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
 
   const nextMint = new Date(
     new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
-    (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+      (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
   return (
@@ -172,6 +183,13 @@ const Marketplace = () => {
                 finishedMessage="Items can be minted!"
                 nextMintTime={nextMint}
               />
+            </div>
+            <div>
+              <span className="flex text-terminal-yellow text-xl">
+                Gold Balance:
+                <Coin className="self-center w-8 h-8 fill-current" />
+                {formatAdventurer?.gold ? formatAdventurer?.gold - sum : ""}
+              </span>
             </div>
             <UTCClock />
           </div>

@@ -110,7 +110,7 @@ const TransactionCart = () => {
               <div className="loading-ellipsis">Loading</div>
             )}
             {hash && <div className="flex flex-col">Hash: {hash[-1]}</div>}
-            {error && <div>Error: {JSON.stringify(error)}</div>}
+            {/* {error && <div>Error: {JSON.stringify(error)}</div>} */}
             {data && <div>Status: {data.status}</div>}
           </>
         </div>
