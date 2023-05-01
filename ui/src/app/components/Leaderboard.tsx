@@ -30,10 +30,10 @@ const Leaderboard: React.FC = () => {
   );
 
   return (
-    <div className="w-1/2 m-auto min-h-screen flex flex-col items-center">
-      <table className="w-full border border-terminal-green mt-4 text-4xl">
-        <thead className="sticky top-0 ">
-          <tr className="sticky top-0 border justify-evenly">
+    <div className="flex flex-col items-center w-1/2 m-auto">
+      <table className="w-full mt-4 text-4xl border border-terminal-green">
+        <thead className="sticky top-0 border border-terminal-green">
+          <tr>
             <th>Rank</th>
             <th>Adventurer</th>
             <th>Gold</th>
@@ -43,12 +43,12 @@ const Leaderboard: React.FC = () => {
           {displayAdventurers.map((adventurer: any, index: number) => (
             <tr
               key={adventurer.id}
-              className="border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black text-center"
+              className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black"
             >
               <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
               <td>{`${adventurer.name} - ${adventurer.id}`}</td>
               <td>
-                <span className="flex text-terminal-yellow justify-center">
+                <span className="flex justify-center text-terminal-yellow">
                   <Coin className="self-center w-6 h-6 fill-current" />
                   {adventurer.gold}
                 </span>
@@ -57,11 +57,12 @@ const Leaderboard: React.FC = () => {
           ))}
         </tbody>
       </table>
-      <div className="flex justify-center mt-4">
-        <Button onClick={() => handleClick(currentPage - 1)}>back</Button>
+      <div className="flex justify-center mt-8">
+        <Button variant={"outline"} onClick={() => handleClick(currentPage - 1)}>back</Button>
         {Array.from({ length: totalPages }, (_, i) => i + 1).map(
           (pageNum: number) => (
             <Button
+              variant={"outline"}
               key={pageNum}
               onClick={() => handleClick(pageNum)}
               className={currentPage === pageNum ? "animate-pulse" : ""}
@@ -70,7 +71,7 @@ const Leaderboard: React.FC = () => {
             </Button>
           )
         )}
-        <Button onClick={() => handleClick(currentPage + 1)}>next</Button>
+        <Button variant={"outline"} onClick={() => handleClick(currentPage + 1)}>next</Button>
       </div>
     </div>
   );
