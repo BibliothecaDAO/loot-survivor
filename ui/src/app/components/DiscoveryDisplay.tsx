@@ -1,8 +1,12 @@
+import { GameData } from "./GameData";
+import { getValueFromKey } from "../lib/utils";
+
 interface DiscoveryProps {
   discoveryData: any;
 }
 
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
+  const gameData = new GameData();
   return (
     <>
       {discoveryData.discoveryType == "Nothing" ? (
@@ -22,7 +26,10 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         discoveryData.subDiscoveryType == "Gold" ? (
           <p>You discovered {discoveryData.amount} gold!</p>
         ) : discoveryData.subDiscoveryType == "Loot" ? (
-          <p>You discovered a loot item!</p>
+          <p>
+            You discovered a{" "}
+            {getValueFromKey(gameData.ITEMS, discoveryData.entityId)}!
+          </p>
         ) : discoveryData.subDiscoveryType == "Health" ? (
           <p>You discovered {discoveryData.outputAmount} health!</p>
         ) : null
