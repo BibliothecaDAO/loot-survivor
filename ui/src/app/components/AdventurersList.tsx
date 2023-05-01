@@ -42,7 +42,7 @@ export const AdventurersList = ({
   for (let i = 0; i < adventurers.length; i++) {
     buttonsData.push({
       id: i + 1,
-      label: adventurers[i].name,
+      label: `${adventurers[i].name} - ${adventurers[i].id}`,
       action: () => handleUpdateAdventurer(adventurers[i].id),
     });
   }
