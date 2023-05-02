@@ -4010,9 +4010,9 @@ starknet@^4.17.1:
     url-join "^4.0.1"
 
 starknet@^5.6.1:
-  version "5.8.0"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.8.0.tgz#ac18f7eb978aa5649e51defbb50b03f1ef6c2f43"
-  integrity sha512-PZ1+ulh9lxSNG1ukWx+rguWAHdxhyI6EBrWkJH/ifHAxK6tWoRJslI7PSD+Zt3nGJKC27b+RAE2UhD617K1t+g==
+  version "5.9.1"
+  resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.9.1.tgz#716d1230a698eafdafe25cde9e90df0b118c2d6f"
+  integrity sha512-rxO/px6jaQ5z8Czm+e7KGsFhyyGVQ4onMY+SqKR2o6FUp+ybNARhIkuTeim+UUZHO4Y6UQRdg/YSt02jU8PyZw==
   dependencies:
     "@noble/curves" "^0.8.2"
     isomorphic-fetch "^3.0.0"
