@@ -13,7 +13,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     variables: { id: discoveryData.entityId },
   });
 
-  const itemName = data ? data.items[0].item : "";
+  const itemName = data ? data.items[0]?.item : "";
 
   return (
     <>
