@@ -43,7 +43,7 @@ export default function Info({ adventurer }: InfoProps) {
                   {formatAdventurer.health}
                 </span>
               </div>
-              <div className="flex justify-between w-full text-2xl border-b border-terminal-green">
+              <div className="flex justify-between w-full text-2xl">
                 <LevelBar
                   xp={formatAdventurer.xp}
                   level={formatAdventurer.level}
