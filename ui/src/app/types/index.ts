@@ -1,4 +1,4 @@
-import { AdventurerProps } from "../context/AdventurerProvider";
+import { AdventurerProps } from "../hooks/useAdventurerStore";
 
 export interface Adventurer {
   // static stats
