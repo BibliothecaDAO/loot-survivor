@@ -1,5 +1,7 @@
 import { GameData } from "./GameData";
 import { getValueFromKey } from "../lib/utils";
+import { useQuery } from "@apollo/client";
+import { getItemsByTokenId } from "../hooks/graphql/queries";
 
 interface DiscoveryProps {
   discoveryData: any;
@@ -7,6 +9,12 @@ interface DiscoveryProps {
 
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const gameData = new GameData();
+  const { data } = useQuery(getItemsByTokenId, {
+    variables: { id: discoveryData.entityId },
+  });
+
+  const itemName = data ? data.items[0]?.item : "";
+
   return (
     <>
       {discoveryData.discoveryType == "Nothing" ? (
@@ -26,10 +34,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         discoveryData.subDiscoveryType == "Gold" ? (
           <p>You discovered {discoveryData.amount} gold!</p>
         ) : discoveryData.subDiscoveryType == "Loot" ? (
-          <p>
-            You discovered a{" "}
-            {getValueFromKey(gameData.ITEMS, discoveryData.entityId)}!
-          </p>
+          <p>You discovered {itemName}!</p>
         ) : discoveryData.subDiscoveryType == "Health" ? (
           <p>You discovered {discoveryData.outputAmount} health!</p>
         ) : null

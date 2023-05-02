@@ -27,6 +27,21 @@ const Leaderboard: React.FC = () => {
     currentPage * itemsPerPage
   );
 
+  let previousGold = -1;
+  let currentRank = 0;
+  let rankOffset = 0;
+
+  const rankGold = (adventurer: any, index: number) => {
+    if (adventurer.gold !== previousGold) {
+      currentRank = index + 1 + (currentPage - 1) * itemsPerPage;
+      rankOffset = 0;
+    } else {
+      rankOffset++;
+    }
+    previousGold = adventurer.gold;
+    return currentRank;
+  };
+
   return (
     <div className="flex flex-col items-center w-1/2 m-auto">
       <table className="w-full mt-4 text-4xl border border-terminal-green">
@@ -38,21 +53,23 @@ const Leaderboard: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {displayAdventurers.map((adventurer: any, index: number) => (
-            <tr
-              key={adventurer.id}
-              className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black"
-            >
-              <td>{(currentPage - 1) * itemsPerPage + index + 1}</td>
-              <td>{`${adventurer.name} - ${adventurer.id}`}</td>
-              <td>
-                <span className="flex justify-center text-terminal-yellow">
-                  <Coin className="self-center w-6 h-6 fill-current" />
-                  {adventurer.gold}
-                </span>
-              </td>
-            </tr>
-          ))}
+          {displayAdventurers.map((adventurer: any, index: number) => {
+            return (
+              <tr
+                key={adventurer.id}
+                className="border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black text-center"
+              >
+                <td>{rankGold(adventurer, index)}</td>
+                <td>{`${adventurer.name} - ${adventurer.id}`}</td>
+                <td>
+                  <span className="flex text-terminal-yellow justify-center">
+                    <Coin className="self-center w-6 h-6 fill-current" />
+                    {adventurer.gold}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
       <div className="flex justify-center mt-8">

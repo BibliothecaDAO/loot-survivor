@@ -156,8 +156,8 @@ export default function Home() {
     <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
       {onboarded ? (
         <>
-          <div className="flex justify-between w-full align-center">
-            <h1>Loot Survivors</h1>
+          <div className="flex justify-between w-full ">
+            <h1 className="glitch">Loot Survivors</h1>
             <div className="flex flex-row self-end gap-2">
               <TxActivity />
               {account && calls.length > 0 && <TransactionCart />}

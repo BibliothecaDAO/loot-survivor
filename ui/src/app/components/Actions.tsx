@@ -55,7 +55,7 @@ export default function Actions() {
   const buttonsData = [
     {
       id: 1,
-      label: "Explore",
+      label: "Into the mist",
       value: "explore",
       action: async () => {
         {
@@ -81,7 +81,7 @@ export default function Actions() {
     },
     {
       id: 2,
-      label: "Purchase Health",
+      label: "Buy Health",
       value: "purchase health",
       action: () => setActiveMenu(1),
       disabled: formatAdventurer?.status !== "Idle",

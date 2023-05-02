@@ -11,6 +11,8 @@ import { UTCClock, Countdown } from "./Clock";
 import MarketplaceRow from "./MarketplaceRow";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import Coin from "../../../public/coin.svg";
+import { NullAdventurer } from "../types";
 
 const Marketplace = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -20,6 +22,8 @@ const Marketplace = () => {
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
   const [itemsCount, setItemsCount] = useState(0);
+
+  const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
 
   const {
     loading: latestMarketItemsNumberLoading,
@@ -146,6 +150,13 @@ const Marketplace = () => {
     "Actions",
   ];
 
+  const sum = calls
+    .filter((call: any) => call.entrypoint == "bid_on_item")
+    .reduce(
+      (accumulator, current) => accumulator + (current.calldata[4] || 0),
+      0
+    );
+
   const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
 
   const nextMint = new Date(
@@ -166,16 +177,25 @@ const Marketplace = () => {
               >
                 Mint daily items
               </Button>
-              <Countdown
-                countingMessage="Next mint in:"
-                endTime={nextMint}
-                finishedMessage="Items can be minted!"
-                nextMintTime={nextMint}
-              />
+              <div className="self-center">
+                <Countdown
+                  countingMessage="Next mint in:"
+                  endTime={nextMint}
+                  finishedMessage="Items can be minted!"
+                  nextMintTime={nextMint}
+                />
+              </div>
+            </div>
+            <div>
+              <span className="flex text-xl text-terminal-yellow">
+                Gold Balance:
+                <Coin className="self-center w-8 h-8 fill-current" />
+                {formatAdventurer?.gold ? formatAdventurer?.gold - sum : ""}
+              </span>
             </div>
             <UTCClock />
           </div>
-          <div className="w-full overflow-y-auto border h-96 border-terminal-green">
+          <div className="w-full overflow-y-auto border h-[650px] border-terminal-green">
             {marketLatestItemsLoading && (
               <p className="text-xl loading-ellipsis">LOADING</p>
             )}

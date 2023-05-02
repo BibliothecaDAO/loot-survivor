@@ -7,7 +7,7 @@ import { formatTime } from "../lib/utils";
 import { convertTime } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
-
+import LootIcon from "./LootIcon";
 interface MarketplaceRowProps {
   ref: any;
   item: any;
@@ -97,15 +97,19 @@ const MarketplaceRow = ({
     }
   }, [isActive]);
 
-  const status = () => {
+  const checkExpired = () => {
     const currentDate = new Date();
     const itemExpiryDate = new Date(convertTime(item.expiry));
 
+    return itemExpiryDate < currentDate;
+  };
+
+  const status = () => {
     if (item.status == "Closed" && item.expiry == null) {
       return "No bids";
     } else if (item.expiry == null) {
       return "Open";
-    } else if (itemExpiryDate < currentDate) {
+    } else if (checkExpired()) {
       return "Expired";
     } else {
       return "Bids";
@@ -123,7 +127,10 @@ const MarketplaceRow = ({
       <td className="text-center">{item.marketId}</td>
       <td className="text-center">{item.item}</td>
       <td className="text-center">{item.rank}</td>
-      <td className="text-center">{item.slot}</td>
+      <td className="flex justify-center space-x-1 text-center ">
+        {" "}
+        <LootIcon className="self-center pt-3" type={item.slot} />{" "}
+      </td>
       <td className="text-center">{item.type}</td>
       <td className="text-center">{item.material}</td>
       <td className="text-center">{item.greatness}</td>
@@ -160,9 +167,9 @@ const MarketplaceRow = ({
             <Button
               onClick={() => setShowBidBox(index)}
               disabled={
-                bidExists(item.marketId) ||
                 checkBidBalance() ||
-                item.claimedTime
+                item.claimedTime ||
+                (item.expiry && checkExpired())
               }
               className={bidExists(item.marketId) ? "bg-white" : ""}
             >

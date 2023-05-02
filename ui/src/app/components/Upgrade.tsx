@@ -151,7 +151,7 @@ const Upgrade = () => {
                 onEnterAction={true}
               />
             </div>
-            <div className="flex items-center justify-center w-1/2 bg-black border">
+            <div className="flex items-center justify-center w-1/2">
               {selected == "Strength" && <Strength />}
               {selected == "Dexterity" && <Dexterity />}
               {selected == "Vitality" && <Vitality />}

@@ -266,7 +266,7 @@ export const CreateAdventurer = ({
                 <option value="">Select a weapon</option>
                 <option value="Wand">Wand</option>
                 <option value="Book">Book</option>
-                <option value="ShortSword">Short Sword</option>
+                <option value="Short Sword">Short Sword</option>
                 <option value="Club">Club</option>
               </select>
             </label>
