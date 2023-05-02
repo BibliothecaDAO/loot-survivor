@@ -44,7 +44,7 @@ export default function RootLayout({
       <head>
         <title>Loot Survivors</title>
       </head>
-      <body suppressHydrationWarning={true} className=" text-terminal-green bg-conic-to-br to-terminal-black from-terminal-black bg-b bezel-container">
+      <body suppressHydrationWarning={true} className="text-terminal-green bg-conic-to-br to-terminal-black from-terminal-black bg-b bezel-container">
         <img
           src="/crt_green_mask.png"
           className="absolute w-full pointer-events-none crt-frame"

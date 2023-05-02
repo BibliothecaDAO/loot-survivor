@@ -138,11 +138,10 @@ const MarketplaceRow = ({
       <td className="text-center">{item.price}</td>
       <td className="text-center">
         {item.bidder
-          ? `${
-              adventurers.find(
-                (adventurer: any) => adventurer.id == item.bidder
-              )?.name
-            } - ${item.bidder}`
+          ? `${adventurers.find(
+            (adventurer: any) => adventurer.id == item.bidder
+          )?.name
+          } - ${item.bidder}`
           : ""}
       </td>
       <td className="text-center">
