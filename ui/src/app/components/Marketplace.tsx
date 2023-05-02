@@ -16,6 +16,7 @@ import { NullAdventurer } from "../types";
 
 const Marketplace = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { lootMarketArcadeContract, adventurerContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -151,11 +152,12 @@ const Marketplace = () => {
   ];
 
   const sum = calls
-    .filter((call: any) => call.entrypoint == "bid_on_item")
-    .reduce(
-      (accumulator, current) => accumulator + (current.calldata[4] || 0),
-      0
-    );
+    .filter((call) => call.entrypoint === "bid_on_item")
+    .reduce((accumulator, current) => {
+      const value = current.calldata[4];
+      const parsedValue = value ? parseInt(value.toString(), 10) : 0;
+      return accumulator + (isNaN(parsedValue) ? 0 : parsedValue);
+    }, 0);
 
   const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
 
