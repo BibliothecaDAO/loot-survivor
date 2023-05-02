@@ -118,7 +118,7 @@ export default function Home() {
       {onboarded ? (
         <>
           <div className="flex justify-between w-full ">
-            <h1>Loot Survivors</h1>
+            <h1 className="glitch">Loot Survivors</h1>
             <div className="flex flex-row self-end gap-2">
               {account && calls.length > 0 && <TransactionCart />}
               {account && <TransactionHistory />}

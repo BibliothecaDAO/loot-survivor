@@ -33,7 +33,7 @@ export default function Actions() {
   const buttonsData = [
     {
       id: 1,
-      label: "Explore",
+      label: "Into the mist",
       value: "explore",
       action: async () => {
         {
@@ -53,7 +53,7 @@ export default function Actions() {
     },
     {
       id: 2,
-      label: "Purchase Health",
+      label: "Buy Health",
       value: "purchase health",
       action: () => setActiveMenu(1),
     },
@@ -74,7 +74,7 @@ export default function Actions() {
         />
       </div>
 
-      <div className="flex flex-col w-1/3 bg-terminal-black">
+      <div className="flex flex-col w-1/3">
         {selected == "explore" && <Discovery hash={hash} />}
         {selected == "purchase health" && (
           <PurchaseHealth

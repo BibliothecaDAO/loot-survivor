@@ -49,7 +49,7 @@ const Intro = () => {
                     setIntroComplete(true);
                   },
                 ]}
-                wrapper="p"
+                wrapper="span"
                 cursor={true}
                 speed={45}
                 // repeat={Infinity}
