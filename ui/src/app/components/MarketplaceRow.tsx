@@ -7,7 +7,7 @@ import { NullAdventurer } from "../types";
 import { useTransactionCart } from "../context/TransactionCartProvider";
 import { formatTime } from "../lib/utils";
 import { convertTime } from "../lib/utils";
-
+import LootIcon from "./LootIcon";
 interface MarketplaceRowProps {
   ref: any;
   item: any;
@@ -121,7 +121,7 @@ const MarketplaceRow = ({
       <td className="text-center">{item.marketId}</td>
       <td className="text-center">{item.item}</td>
       <td className="text-center">{item.rank}</td>
-      <td className="text-center">{item.slot}</td>
+      <td className="flex justify-center space-x-1 text-center "> <LootIcon className="self-center pt-3" type={item.slot} /> </td>
       <td className="text-center">{item.type}</td>
       <td className="text-center">{item.material}</td>
       <td className="text-center">{item.greatness}</td>
@@ -129,11 +129,10 @@ const MarketplaceRow = ({
       <td className="text-center">{item.price}</td>
       <td className="text-center">
         {item.bidder
-          ? `${
-              adventurers.find(
-                (adventurer: any) => adventurer.id == item.bidder
-              )?.name
-            } - ${item.bidder}`
+          ? `${adventurers.find(
+            (adventurer: any) => adventurer.id == item.bidder
+          )?.name
+          } - ${item.bidder}`
           : ""}
       </td>
       <td className="text-center">

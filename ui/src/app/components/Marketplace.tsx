@@ -161,7 +161,7 @@ const Marketplace = () => {
 
   const nextMint = new Date(
     new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
-      (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+    (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
   return (
@@ -177,15 +177,19 @@ const Marketplace = () => {
               >
                 Mint daily items
               </Button>
-              <Countdown
-                countingMessage="Next mint in:"
-                endTime={nextMint}
-                finishedMessage="Items can be minted!"
-                nextMintTime={nextMint}
-              />
+              <div className="self-center">
+                <Countdown
+                  countingMessage="Next mint in:"
+                  endTime={nextMint}
+                  finishedMessage="Items can be minted!"
+                  nextMintTime={nextMint}
+
+                />
+              </div>
+
             </div>
             <div>
-              <span className="flex text-terminal-yellow text-xl">
+              <span className="flex text-xl text-terminal-yellow">
                 Gold Balance:
                 <Coin className="self-center w-8 h-8 fill-current" />
                 {formatAdventurer?.gold ? formatAdventurer?.gold - sum : ""}
@@ -193,7 +197,7 @@ const Marketplace = () => {
             </div>
             <UTCClock />
           </div>
-          <div className="w-full overflow-y-auto border h-96 border-terminal-green">
+          <div className="w-full overflow-y-auto border h-[650px] border-terminal-green">
             {marketLatestItemsLoading && (
               <p className="text-xl loading-ellipsis">LOADING</p>
             )}

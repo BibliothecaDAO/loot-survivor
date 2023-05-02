@@ -17,18 +17,23 @@ interface ItemDisplayProps {
     className?: string;
 }
 
-const Components: { [key in any]: ReactElement } = {
-    chest: <Chest className="w-4 fill-current" />,
-    weapon: <Weapon className="w-4 fill-current" />,
-    head: <Head className="w-4 fill-current" />,
-    hand: <Hand className="w-4 fill-current" />,
-    waist: <Waist className="w-4 fill-current" />,
-    foot: <Foot className="w-4 fill-current" />,
-    neck: <Neck className="w-4 fill-current" />,
-    ring: <Ring className="w-4 fill-current" />,
-};
+
 
 const ItemDisplay = ({ type, size = "w-5", className }: ItemDisplayProps) => {
+
+    const classes = `fill-current ${size} ${className}`;
+    const Components: { [key in any]: ReactElement } = {
+
+        chest: <Chest className={classes} />,
+        weapon: <Weapon className={classes} />,
+        head: <Head className={classes} />,
+        hand: <Hand className={classes} />,
+        waist: <Waist className={classes} />,
+        foot: <Foot className={classes} />,
+        neck: <Neck className={classes} />,
+        ring: <Ring className={classes} />,
+    };
+
     return Components[type.toLowerCase()];
 };
 

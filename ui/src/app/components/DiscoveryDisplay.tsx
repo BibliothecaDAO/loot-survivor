@@ -7,6 +7,8 @@ interface DiscoveryProps {
 
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const gameData = new GameData();
+
+  console.log(discoveryData)
   return (
     <>
       {discoveryData.discoveryType == "Nothing" ? (
