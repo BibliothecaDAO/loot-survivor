@@ -95,15 +95,19 @@ const MarketplaceRow = ({
     }
   }, [isActive]);
 
-  const status = () => {
+  const checkExpired = () => {
     const currentDate = new Date();
     const itemExpiryDate = new Date(convertTime(item.expiry));
 
+    return itemExpiryDate < currentDate;
+  };
+
+  const status = () => {
     if (item.status == "Closed" && item.expiry == null) {
       return "No bids";
     } else if (item.expiry == null) {
       return "Open";
-    } else if (itemExpiryDate < currentDate) {
+    } else if (checkExpired()) {
       return "Expired";
     } else {
       return "Bids";
@@ -160,7 +164,7 @@ const MarketplaceRow = ({
           <div>
             <Button
               onClick={() => setShowBidBox(index)}
-              disabled={checkBidBalance() || item.claimedTime || item.expiry}
+              disabled={checkBidBalance() || item.claimedTime || checkExpired()}
               className={bidExists(item.marketId) ? "bg-white" : ""}
             >
               bid
