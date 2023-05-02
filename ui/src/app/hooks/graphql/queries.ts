@@ -191,7 +191,10 @@ const getAdventurerById = gql`
 
 const getAdventurersInList = gql`
   query get_adventurer_by_id($ids: [FeltValue!]) {
-    adventurers(where: { id: { In: $ids } }) {
+    adventurers(
+      where: { id: { In: $ids } }
+      limit: 10000000
+    ) {
       beastId
       charisma
       chestId
@@ -227,7 +230,7 @@ const getAdventurersInList = gql`
 
 const getAdventurerByGold = gql`
   query get_adventurer_by_gold {
-    adventurers(orderBy: { gold: { desc: true } }, limit: 10) {
+    adventurers(orderBy: { gold: { desc: true } }, limit: 10000000) {
       id
       name
       gold
@@ -292,9 +295,11 @@ const getLatestBattlesByAdventurer = gql`
       where: { adventurerId: { eq: $adventurerId } }
     ) {
       adventurerId
+      ambushed
       attacker
       beastId
       damage
+      fled
       goldEarned
       targetHealth
       timestamp
@@ -413,7 +418,7 @@ const getLatestMarketItems = gql`
 
 const getItemsByAdventurer = gql`
   query get_items_by_adventurer($adventurer: FeltValue) {
-    items(where: { ownerAdventurerId: { eq: $adventurer } }) {
+    items( where: { ownerAdventurerId: { eq: $adventurer } } limit: 10000000) {
       bag
       bidder
       claimedTime
@@ -443,7 +448,7 @@ const getItemsByAdventurer = gql`
 
 const getItemsByOwner = gql`
   query get_items_by_owner($owner: HexValue) {
-    items(where: { owner: { eq: $owner } }) {
+    items(where: { owner: { eq: $owner } } limit: 10000000) {
       bag
       bidder
       claimedTime

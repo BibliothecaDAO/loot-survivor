@@ -1,29 +1,31 @@
 import React, { useState } from "react";
-import { useTransactionCart } from "../context/TransactionCartProvider";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import {
   useTransactionManager,
   useWaitForTransaction,
+  useContractWrite,
 } from "@starknet-react/core";
 import { Metadata } from "../types";
 import { Button } from "./Button";
 import { MdClose } from "react-icons/md";
+import useLoadingStore from "../hooks/useLoadingStore";
 
-const TransactionCart = () => {
-  const { handleSubmitCalls, calls, addToCalls, removeFromCalls } =
-    useTransactionCart();
+const TransactionCart: React.FC = () => {
+  const calls = useTransactionCartStore((state) => state.calls);
+  const removeFromCalls = useTransactionCartStore(
+    (state) => state.removeFromCalls
+  );
+  const handleSubmitCalls = useTransactionCartStore(
+    (state) => state.handleSubmitCalls
+  );
+  const startLoading = useLoadingStore((state) => state.startLoading);
   const {
     hashes,
     transactions: queuedTransactions,
     addTransaction,
   } = useTransactionManager();
+  const { writeAsync } = useContractWrite({ calls });
   const [isOpen, setIsOpen] = useState(false);
-  const [hash, setHash] = useState<string | undefined>(undefined);
-  const { data, isLoading, error } = useWaitForTransaction({
-    hash,
-    watch: true,
-  });
-
-  const txLoading = data?.status == "RECEIVED" || data?.status == "PENDING";
 
   const method = (queuedTransactions[0]?.metadata as Metadata)?.method;
 
@@ -48,7 +50,7 @@ const TransactionCart = () => {
           <p className="text-2xl">TRANSACTIONS</p>
           <div className="w-full border border-terminal-green "></div>
           <div className="flex flex-col h-[200px] overflow-auto">
-            {calls.map((call, i) => (
+            {calls.map((call: any, i: number) => (
               <div key={i}>
                 <div className="flex flex-col gap-2">
                   {call && (
@@ -57,13 +59,7 @@ const TransactionCart = () => {
                       {/* <p>{call.calldata}</p> */}
                       <p>{call.metadata}</p>
                       <button
-                        onClick={() =>
-                          removeFromCalls({
-                            selector: call.entrypoint,
-                            calldata: call.calldata,
-                            metadata: call.metadata,
-                          })
-                        }
+                        onClick={() => removeFromCalls(call)}
                         className="text-red-500 hover:text-red-700"
                       >
                         <MdClose size={20} />
@@ -77,14 +73,19 @@ const TransactionCart = () => {
           <div className="m-2">
             <Button
               onClick={async () =>
-                await handleSubmitCalls().then((tx: any) => {
-                  setHash(tx.transaction_hash);
+                await handleSubmitCalls(writeAsync).then((tx: any) => {
+                  startLoading(
+                    "Multicall",
+                    tx?.transaction_hash,
+                    "Muticalling",
+                    ""
+                  );
                   const marketIds = [];
 
                   for (const dict of calls) {
                     if (
-                      dict.hasOwnProperty("selector") &&
-                      dict["selector"] === "bid_on_item"
+                      dict.hasOwnProperty("entrypoint") &&
+                      dict["entrypoint"] === "bid_on_item"
                     ) {
                       marketIds.push(dict.calldata[0]);
                     }
@@ -105,14 +106,6 @@ const TransactionCart = () => {
               Submit all Transactions
             </Button>
           </div>
-          <>
-            {txLoading && hash && (
-              <div className="loading-ellipsis">Loading</div>
-            )}
-            {hash && <div className="flex flex-col">Hash: {hash[-1]}</div>}
-            {/* {error && <div>Error: {JSON.stringify(error)}</div>} */}
-            {data && <div>Status: {data.status}</div>}
-          </>
         </div>
       ) : null}
     </>

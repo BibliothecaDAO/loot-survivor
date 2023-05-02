@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { Button } from "./Button";
 import { BidBox } from "./Bid";
 import { useContracts } from "../hooks/useContracts";
-import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurer } from "../types";
-import { useTransactionCart } from "../context/TransactionCartProvider";
 import { formatTime } from "../lib/utils";
 import { convertTime } from "../lib/utils";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import LootIcon from "./LootIcon";
 interface MarketplaceRowProps {
   ref: any;
@@ -29,10 +29,11 @@ const MarketplaceRow = ({
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
   const { lootMarketArcadeContract, adventurerContract } = useContracts();
-  const { adventurer } = useAdventurer();
+  const adventurer = useAdventurerStore((state) => state.adventurer);
   const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
   const [showBidBox, setShowBidBox] = useState(-1);
-  const { calls, addToCalls } = useTransactionCart();
+  const calls = useTransactionCartStore((state) => state.calls);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
   const currentTime = new Date().getTime();
 
@@ -53,11 +54,12 @@ const MarketplaceRow = ({
   const checkBidBalance = () => {
     if (formatAdventurer?.gold) {
       const sum = calls
-        .filter((call: any) => call.entrypoint == "bid_on_item")
-        .reduce(
-          (accumulator, current) => accumulator + (current.calldata[4] || 0),
-          0
-        );
+        .filter((call) => call.entrypoint == "bid_on_item")
+        .reduce((accumulator, current) => {
+          const value = current.calldata[4];
+          const parsedValue = value ? parseInt(value.toString(), 10) : 0;
+          return accumulator + (isNaN(parsedValue) ? 0 : parsedValue);
+        }, 0);
       return sum >= formatAdventurer.gold;
     }
     return true;
@@ -95,15 +97,19 @@ const MarketplaceRow = ({
     }
   }, [isActive]);
 
-  const status = () => {
+  const checkExpired = () => {
     const currentDate = new Date();
     const itemExpiryDate = new Date(convertTime(item.expiry));
 
+    return itemExpiryDate < currentDate;
+  };
+
+  const status = () => {
     if (item.status == "Closed" && item.expiry == null) {
       return "No bids";
     } else if (item.expiry == null) {
       return "Open";
-    } else if (itemExpiryDate < currentDate) {
+    } else if (checkExpired()) {
       return "Expired";
     } else {
       return "Bids";
@@ -121,7 +127,10 @@ const MarketplaceRow = ({
       <td className="text-center">{item.marketId}</td>
       <td className="text-center">{item.item}</td>
       <td className="text-center">{item.rank}</td>
-      <td className="flex justify-center space-x-1 text-center "> <LootIcon className="self-center pt-3" type={item.slot} /> </td>
+      <td className="flex justify-center space-x-1 text-center ">
+        {" "}
+        <LootIcon className="self-center pt-3" type={item.slot} />{" "}
+      </td>
       <td className="text-center">{item.type}</td>
       <td className="text-center">{item.material}</td>
       <td className="text-center">{item.greatness}</td>
@@ -157,11 +166,9 @@ const MarketplaceRow = ({
             <Button
               onClick={() => setShowBidBox(index)}
               disabled={
-                status() == "Expired"
-                // bidExists(item.marketId) ||
-                // checkBidBalance() ||
-                // item.claimedTime
-                // item.expiry
+                checkBidBalance() ||
+                item.claimedTime ||
+                (item.expiry && checkExpired())
               }
               className={bidExists(item.marketId) ? "bg-white" : ""}
             >
@@ -170,8 +177,8 @@ const MarketplaceRow = ({
             <Button
               onClick={async () => {
                 const claimItemTx = {
-                  contractAddress: lootMarketArcadeContract?.address,
-                  selector: "claim_item",
+                  contractAddress: lootMarketArcadeContract?.address ?? "",
+                  entrypoint: "claim_item",
                   calldata: [item.marketId, "0", formatAdventurer?.id, "0"],
                   metadata: `Claiming ${item.item}`,
                 };

@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useTransactionCart } from "../context/TransactionCartProvider";
-import { useAdventurer } from "../context/AdventurerProvider";
-import { NullAdventurer } from "../types";
+import { NullAdventurer, NullBeast } from "../types";
 import { useQuery } from "@apollo/client";
 import {
   getBeastById,
@@ -12,23 +10,32 @@ import {
 import {
   useTransactionManager,
   useWaitForTransaction,
+  useContractWrite,
 } from "@starknet-react/core";
 import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import Info from "./Info";
 import { BattleDisplay } from "./BattleDisplay";
 import { BeastDisplay } from "./BeastDisplay";
 import { shortenHex } from "../lib/utils";
+import { TxActivity } from "./TxActivity";
+import useLoadingStore from "../hooks/useLoadingStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 export default function Beast() {
-  const { handleSubmitCalls, addToCalls } = useTransactionCart();
+  const calls = useTransactionCartStore((state) => state.calls);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const handleSubmitCalls = useTransactionCartStore(
+    (state) => state.handleSubmitCalls
+  );
   const { beastContract } = useContracts();
   const { addTransaction } = useTransactionManager();
-  const { adventurer } = useAdventurer();
-  const [hash, setHash] = useState<string | undefined>(undefined);
-  const { data, isLoading, error } = useWaitForTransaction({
-    hash,
-    watch: true,
-  });
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const { writeAsync } = useContractWrite({ calls });
+  const loading = useLoadingStore((state) => state.loading);
+  const startLoading = useLoadingStore((state) => state.startLoading);
+  const type = useLoadingStore((state) => state.type);
+  const updateData = useLoadingStore((state) => state.updateData);
 
   const formatAdventurer = adventurer ? adventurer?.adventurer : NullAdventurer;
 
@@ -75,43 +82,18 @@ export default function Beast() {
     pollInterval: 5000,
   });
 
-  // const { data: updatedAdventurerData, error: testError } = useQuery(
-  //   getAdventurerById,
-  //   {
-  //     variables: {
-  //       id: formatAdventurer?.id,
-  //     },
-  //     pollInterval: 5000,
-  //   }
-  // );
-
-  useEffect(() => {
-    beastByTokenIdRefetch();
-  }, [data?.status]);
-
-  let beastData = beastByTokenIdData
-    ? beastByTokenIdData.beasts[0]
-    : {
-      beast: "Pheonix",
-      health: "100",
-      rank: "1",
-      xp: "0",
-      attackType: "Blade",
-      armorType: "Cloth",
-    };
-
-  // const [hash, setHash] = useState<string | undefined>(undefined);
+  let beastData = beastByTokenIdData ? beastByTokenIdData.beasts[0] : NullBeast;
 
   const attack = {
-    contractAddress: beastContract?.address,
-    selector: "attack",
-    calldata: [formatAdventurer?.beastId, "0"],
+    contractAddress: beastContract?.address ?? "",
+    entrypoint: "attack",
+    calldata: [formatAdventurer?.beastId ?? "", "0"],
   };
 
   const flee = {
-    contractAddress: beastContract?.address,
-    selector: "flee",
-    calldata: [formatAdventurer?.beastId, "0"],
+    contractAddress: beastContract?.address ?? "",
+    entrypoint: "flee",
+    calldata: [formatAdventurer?.beastId ?? "", "0"],
   };
 
   const buttonsData: ButtonData[] = [
@@ -120,10 +102,15 @@ export default function Beast() {
       label: "ATTACK BEAST!",
       action: async () => {
         addToCalls(attack);
-        await handleSubmitCalls().then((tx: any) => {
-          setHash(tx.transaction_hash);
+        await handleSubmitCalls(writeAsync).then((tx: any) => {
+          startLoading(
+            "Attack",
+            tx?.transaction_hash,
+            "Attacking",
+            formatBattles
+          );
           addTransaction({
-            hash: tx.transaction_hash,
+            hash: tx?.transaction_hash,
             metadata: {
               method: "Attack Beast",
               description: `Attacking ${beastData.beast}`,
@@ -137,10 +124,10 @@ export default function Beast() {
       label: "FLEE BEAST",
       action: async () => {
         addToCalls(flee);
-        await handleSubmitCalls().then((tx: any) => {
-          setHash(tx.transaction_hash);
+        await handleSubmitCalls(writeAsync).then((tx: any) => {
+          startLoading("Flee", tx?.transaction_hash, "Fleeing", formatBattles);
           addTransaction({
-            hash: tx.transaction_hash,
+            hash: tx?.transaction_hash,
             metadata: {
               method: "Flee Beast",
               description: `Fleeing from ${beastData.beast}`,
@@ -151,9 +138,13 @@ export default function Beast() {
     },
   ];
 
-  const txLoading = data?.status == "RECEIVED" || data?.status == "PENDING";
-
   const isBeastDead = beastData?.health == "0";
+
+  useEffect(() => {
+    if (loading && (type == "Attack" || type == "Flee")) {
+      updateData(formatBattles);
+    }
+  }, [formatBattles]);
 
   return (
     <div className="flex flex-row space-x-6">
@@ -161,27 +152,14 @@ export default function Beast() {
         <Info adventurer={adventurer?.adventurer} />
       </div>
       <div className="flex flex-col w-1/3 gap-10">
-        {!isBeastDead ? (
-          <>
-            <KeyboardControl
-              buttonsData={buttonsData}
-              disabled={formatAdventurer?.beastId == undefined || txLoading}
-            />
-            <div className="flex flex-col items-center p-4">
-              {txLoading && hash && (
-                <div className="loading-ellipsis">Attacking</div>
-              )}
-              {hash && (
-                <div className="flex flex-col">Hash: {shortenHex(hash)}</div>
-              )}
-              {data && <div>Status: {data.status}</div>}
-            </div>
-          </>
-        ) : (
-          ""
+        {!isBeastDead && (
+          <KeyboardControl
+            buttonsData={buttonsData}
+            disabled={formatAdventurer?.beastId == undefined || loading}
+          />
         )}
 
-        {formatAdventurer?.beastId || lastBattleData?.battles[0] ? (
+        {(formatAdventurer?.beastId || lastBattleData?.battles[0]) && (
           <>
             <div className="flex flex-col items-center gap-5 p-2">
               <div className="text-xl uppercase">
@@ -198,8 +176,6 @@ export default function Beast() {
               </div>
             </div>
           </>
-        ) : (
-          ""
         )}
       </div>
 

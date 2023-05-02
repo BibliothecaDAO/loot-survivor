@@ -1,11 +1,18 @@
 import { useState } from "react";
+import { useQuery } from "@apollo/client";
+import { useAccount } from "@starknet-react/core";
+import { getAdventurersByOwner } from "../hooks/graphql/queries";
+import { padAddress } from "../lib/utils";
 import { AdventurersList } from "./AdventurersList";
 import { CreateAdventurer } from "./CreateAdventurer";
 import VerticalKeyboardControl from "./VerticalMenu";
 
 const Adventurer = () => {
+  const { account } = useAccount();
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
+
+  const accountAddress = account ? account.address : "0x0";
 
   const menu = [
     {
@@ -13,14 +20,32 @@ const Adventurer = () => {
       label: "Choose Adventurer",
       value: "choose adventurer",
       action: () => setSelected,
+      disabled: false,
     },
     {
       id: 2,
       label: "Create Adventurer",
       value: "create adventurer",
       action: () => setSelected,
+      disabled: false,
     },
   ];
+
+  const {
+    loading: adventurersByOwnerLoading,
+    error: adventurersByOwnerError,
+    data: adventurersByOwnerData,
+    refetch: adventurersByOwnerRefetch,
+  } = useQuery(getAdventurersByOwner, {
+    variables: {
+      owner: padAddress(accountAddress),
+    },
+    pollInterval: 5000,
+  });
+
+  const adventurers = adventurersByOwnerData
+    ? adventurersByOwnerData.adventurers
+    : [];
 
   return (
     <div className="flex flex-row gap-2 p-4">
@@ -38,6 +63,7 @@ const Adventurer = () => {
           <AdventurersList
             isActive={activeMenu == 1}
             onEscape={() => setActiveMenu(0)}
+            adventurers={adventurers}
           />
         </div>
       )}
@@ -46,6 +72,7 @@ const Adventurer = () => {
           <CreateAdventurer
             isActive={activeMenu == 2}
             onEscape={() => setActiveMenu(0)}
+            adventurers={adventurers}
           />
         </div>
       )}

@@ -11,7 +11,8 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
   const gameData = new GameData();
   const ansiImage = ANSIArt({
     imageUrl:
-      getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) || "/phoenix.png",
+      getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
+      "/beasts/phoenix.png",
     newWidth: 20,
   });
   return (
@@ -21,7 +22,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
           newWidth={240}
           src={
             getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
-            "/phoenix.png"
+            "/beasts/phoenix.png"
           }
         />
       </div>

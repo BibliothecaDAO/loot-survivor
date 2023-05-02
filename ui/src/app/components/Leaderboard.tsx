@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { useAdventurer } from "../context/AdventurerProvider";
 import { useQuery } from "@apollo/client";
 import { getAdventurerByGold } from "../hooks/graphql/queries";
 import { Button } from "./Button";
 import Coin from "../../../public/coin.svg";
 
 const Leaderboard: React.FC = () => {
-  const adventurer = useAdventurer();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
 
@@ -33,6 +31,17 @@ const Leaderboard: React.FC = () => {
   let currentRank = 0;
   let rankOffset = 0;
 
+  const rankGold = (adventurer: any, index: number) => {
+    if (adventurer.gold !== previousGold) {
+      currentRank = index + 1 + (currentPage - 1) * itemsPerPage;
+      rankOffset = 0;
+    } else {
+      rankOffset++;
+    }
+    previousGold = adventurer.gold;
+    return currentRank;
+  };
+
   return (
     <div className="flex flex-col items-center w-1/2 m-auto">
       <table className="w-full mt-4 text-4xl border border-terminal-green">
@@ -45,21 +54,12 @@ const Leaderboard: React.FC = () => {
         </thead>
         <tbody>
           {displayAdventurers.map((adventurer: any, index: number) => {
-            if (adventurer.gold !== previousGold) {
-              currentRank += rankOffset + 1;
-              rankOffset = 0;
-            } else {
-              rankOffset++;
-            }
-
-            previousGold = adventurer.gold;
-
             return (
               <tr
                 key={adventurer.id}
                 className="border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black text-center"
               >
-                <td>{currentRank}</td>
+                <td>{rankGold(adventurer, index)}</td>
                 <td>{`${adventurer.name} - ${adventurer.id}`}</td>
                 <td>
                   <span className="flex text-terminal-yellow justify-center">

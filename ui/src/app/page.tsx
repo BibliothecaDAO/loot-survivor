@@ -1,9 +1,7 @@
 "use client";
 
-import { useAccount, useConnectors, useNetwork } from "@starknet-react/core";
+import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect } from "react";
-import { useAdventurer } from "./context/AdventurerProvider";
-import { useTransactionCart } from "./context/TransactionCartProvider";
 import { Button } from "./components/Button";
 import HorizontalKeyboardControl from "./components/HorizontalMenu";
 import Actions from "./components/Actions";
@@ -11,31 +9,40 @@ import Marketplace from "./components/Marketplace";
 import Adventurer from "./components/Adventurer";
 import Beast from "./components/Beast";
 import { displayAddress } from "./lib/utils";
-import { NullAdventurerProps } from "./types";
 import Inventory from "./components/Inventory";
 import TransactionHistory from "./components/TransactionHistory";
 import TransactionCart from "./components/TransactionCart";
 import Upgrade from "./components/Upgrade";
 import Intro from "./components/Intro";
-import { useUI } from "./context/UIProvider";
-import { useIndexer } from "./context/IndexerProvider";
 import {
   AddDevnetEthButton,
   MintEthButton,
 } from "./components/DevnetConnectors";
 import Leaderboard from "./components/Leaderboard";
+import { TxActivity } from "./components/TxActivity";
+import useLoadingStore from "./hooks/useLoadingStore";
+import useAdventurerStore from "./hooks/useAdventurerStore";
+import usePrevious from "use-previous";
+import { useLazyQuery } from "@apollo/client";
+import { getAdventurerById } from "./hooks/graphql/queries";
+import useUIStore from "./hooks/useUIStore";
+import useIndexerStore from "./hooks/useIndexerStore";
+import useTransactionCartStore from "./hooks/useTransactionCartStore";
 
 export default function Home() {
-  const { connect, disconnect, connectors } = useConnectors();
+  const loading = useLoadingStore((state) => state.loading);
+  const stopLoading = useLoadingStore((state) => state.stopLoading);
+  const data = useLoadingStore((state) => state.data);
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
+  const { disconnect } = useConnectors();
   const { account } = useAccount();
-  const { adventurer } = useAdventurer();
-  const { calls } = useTransactionCart();
-  const { onboarded, setOnboarded } = useUI();
-  const { setIndexer } = useIndexer();
+  const calls = useTransactionCartStore((state) => state.calls);
+  const onboarded = useUIStore((state) => state.onboarded);
+  const setOnboarded = useUIStore((state) => state.setOnboarded);
+  const setIndexer = useIndexerStore((state) => state.setIndexer);
 
   const testnet_addr = "http://survivor-indexer.bibliothecadao.xyz:5050";
-
-  const adventurerStats = adventurer ?? NullAdventurerProps;
 
   const upgrade = adventurer?.adventurer?.upgrading;
 
@@ -113,6 +120,38 @@ export default function Home() {
     setMenu(newMenu);
   }, [adventurer, account]);
 
+  const [getData, _] = useLazyQuery(getAdventurerById, {
+    onCompleted: (data) => {
+      setAdventurer({
+        adventurer: data.adventurers[0],
+        image: undefined, // Set this to the image URL
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (adventurer) {
+      getData({
+        variables: {
+          id: adventurer.adventurer?.id,
+        },
+      });
+    }
+  }, [adventurer]);
+
+  const prevData = usePrevious(data);
+
+  useEffect(() => {
+    if (
+      loading &&
+      data &&
+      prevData &&
+      JSON.stringify(data) !== JSON.stringify(prevData)
+    ) {
+      stopLoading();
+    }
+  }, [loading, data, prevData, stopLoading]);
+
   return (
     <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
       {onboarded ? (
@@ -120,27 +159,18 @@ export default function Home() {
           <div className="flex justify-between w-full ">
             <h1 className="glitch">Loot Survivors</h1>
             <div className="flex flex-row self-end gap-2">
+              <TxActivity />
               {account && calls.length > 0 && <TransactionCart />}
               {account && <TransactionHistory />}
               {(account as any)?.baseUrl == testnet_addr && (
                 <AddDevnetEthButton />
               )}
               {(account as any)?.baseUrl == testnet_addr && <MintEthButton />}
-              <ul className="flex flex-row gap-2">
-                {account ? (
-                  <Button onClick={() => disconnect()}>
-                    {displayAddress(account.address)}
-                  </Button>
-                ) : (
-                  connectors.map((connector) => (
-                    <li key={connector.id()}>
-                      <Button onClick={() => connect(connector)}>
-                        Connect {connector.id()}
-                      </Button>
-                    </li>
-                  ))
-                )}
-              </ul>
+              {account && (
+                <Button onClick={() => disconnect()}>
+                  {displayAddress(account.address)}
+                </Button>
+              )}
             </div>
           </div>
           <div className="w-full h-6 my-2 bg-terminal-green" />

@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useTransactionCart } from "../context/TransactionCartProvider";
 import { Button } from "./Button";
 import { useQuery } from "@apollo/client";
 import {
@@ -8,15 +7,17 @@ import {
   getAdventurersInList,
   getLatestMarketItemsNumber,
 } from "../hooks/graphql/queries";
-import { useAdventurer } from "../context/AdventurerProvider";
 import { UTCClock, Countdown } from "./Clock";
 import MarketplaceRow from "./MarketplaceRow";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import Coin from "../../../public/coin.svg";
 import { NullAdventurer } from "../types";
 
 const Marketplace = () => {
-  const { adventurer } = useAdventurer();
-  const { calls, addToCalls } = useTransactionCart();
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const calls = useTransactionCartStore((state) => state.calls);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { lootMarketArcadeContract, adventurerContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
@@ -79,8 +80,8 @@ const Marketplace = () => {
     : [];
 
   const mintDailyItemsTx = {
-    contractAddress: lootMarketArcadeContract?.address,
-    selector: "mint_daily_items",
+    contractAddress: lootMarketArcadeContract?.address ?? "",
+    entrypoint: "mint_daily_items",
     calldata: [],
     metadata: `Minting Loot Items!`,
   };
@@ -151,17 +152,18 @@ const Marketplace = () => {
   ];
 
   const sum = calls
-    .filter((call: any) => call.entrypoint == "bid_on_item")
-    .reduce(
-      (accumulator, current) => accumulator + (current.calldata[4] || 0),
-      0
-    );
+    .filter((call) => call.entrypoint === "bid_on_item")
+    .reduce((accumulator, current) => {
+      const value = current.calldata[4];
+      const parsedValue = value ? parseInt(value.toString(), 10) : 0;
+      return accumulator + (isNaN(parsedValue) ? 0 : parsedValue);
+    }, 0);
 
   const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
 
   const nextMint = new Date(
     new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
-    (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+      (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
   return (
@@ -183,10 +185,8 @@ const Marketplace = () => {
                   endTime={nextMint}
                   finishedMessage="Items can be minted!"
                   nextMintTime={nextMint}
-
                 />
               </div>
-
             </div>
             <div>
               <span className="flex text-xl text-terminal-yellow">

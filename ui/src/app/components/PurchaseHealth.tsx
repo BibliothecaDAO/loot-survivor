@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import HealthSlider from "./HealthSlider";
 import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
-import { useAdventurer } from "../context/AdventurerProvider";
-import { useTransactionCart } from "../context/TransactionCartProvider";
 import { useTransactionManager } from "@starknet-react/core";
 import { NullAdventurer } from "../types";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 interface PurchaseHealthProps {
   isActive: boolean;
@@ -15,15 +15,15 @@ interface PurchaseHealthProps {
 const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
   const [healthAmount, setHealthAmount] = useState(1);
   const { adventurerContract } = useContracts();
-  const { adventurer, handleUpdateAdventurer } = useAdventurer();
-  const { handleSubmitCalls, addToCalls } = useTransactionCart();
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { addTransaction } = useTransactionManager();
 
   const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
   const purchaseHealthTx = {
-    contractAddress: adventurerContract?.address,
-    selector: "purchase_health",
-    calldata: [formatAdventurer?.id, "0", healthAmount],
+    contractAddress: adventurerContract?.address ?? "",
+    entrypoint: "purchase_health",
+    calldata: [formatAdventurer?.id ?? "", "0", healthAmount],
     metadata: `Purchasing ${healthAmount}`,
   };
   const purchaseGoldAmount = healthAmount * 5;

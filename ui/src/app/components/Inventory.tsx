@@ -1,41 +1,28 @@
 import { useState, useEffect, useRef } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useTransactionCart } from "../context/TransactionCartProvider";
-import {
-  useAccount,
-  useWaitForTransaction,
-  useTransactionManager,
-  useTransactions,
-} from "@starknet-react/core";
+import { useAccount } from "@starknet-react/core";
 import { useQuery } from "@apollo/client";
 import { getItemsByAdventurer } from "../hooks/graphql/queries";
-import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurerProps } from "../types";
-import Image from "next/image";
 import { groupBySlot } from "../lib/utils";
 import { InventoryRow } from "./InventoryRow";
 import Info from "./Info";
 import { ItemDisplay } from "./ItemDisplay";
 import { Button } from "./Button";
-// import { GameData } from "./GameData";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 const Inventory: React.FC = () => {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";
-  const { addToCalls } = useTransactionCart();
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { adventurerContract } = useContracts();
-  const [hash, setHash] = useState<string | undefined>(undefined);
-  const { adventurer } = useAdventurer();
+  const adventurer = useAdventurerStore((state) => state.adventurer);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
 
   // const gameData = new GameData();
   const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
-
-  const { data, isLoading, error } = useWaitForTransaction({
-    hash,
-    watch: true,
-  });
 
   const {
     loading: itemsByAdventurerLoading,
@@ -55,7 +42,7 @@ const Inventory: React.FC = () => {
     if (adventurerContract && formatAddress) {
       const equipItem = {
         contractAddress: adventurerContract?.address,
-        selector: "equip_item",
+        entrypoint: "equip_item",
         calldata: [formatAdventurer?.adventurer?.id, "0", itemId, "0"],
         metadata: `Equipping ${itemId}!`,
       };

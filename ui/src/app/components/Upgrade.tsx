@@ -1,26 +1,34 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, useState, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useTransactionCart } from "../context/TransactionCartProvider";
-import { useAdventurer } from "../context/AdventurerProvider";
 import { getKeyFromValue } from "../lib/utils";
 import { GameData } from "./GameData";
 import VerticalKeyboardControl from "./VerticalMenu";
 import {
   useTransactionManager,
   useWaitForTransaction,
+  useContractWrite,
 } from "@starknet-react/core";
+import useLoadingStore from "../hooks/useLoadingStore";
+import { TxActivity } from "./TxActivity";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 const Upgrade = () => {
   const { adventurerContract } = useContracts();
-  const { adventurer } = useAdventurer();
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const loading = useLoadingStore((state) => state.loading);
+  const startLoading = useLoadingStore((state) => state.startLoading);
+  const type = useLoadingStore((state) => state.type);
+  const updateData = useLoadingStore((state) => state.updateData);
+
   const { addTransaction } = useTransactionManager();
-  const { handleSubmitCalls, addToCalls } = useTransactionCart();
+  const calls = useTransactionCartStore((state) => state.calls);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const handleSubmitCalls = useTransactionCartStore(
+    (state) => state.handleSubmitCalls
+  );
+  const { writeAsync } = useContractWrite({ calls });
   const [selected, setSelected] = useState("");
-  const [hash, setHash] = useState("");
-  const { data, status, isLoading, error } = useWaitForTransaction({
-    hash: hash,
-    watch: true,
-  });
 
   const gameData = new GameData();
 
@@ -30,53 +38,58 @@ const Upgrade = () => {
       label: `Strength - ${adventurer?.adventurer?.strength}`,
       value: "Strength",
       action: async () => handleUpgradeTx("Strength"),
+      disabled: false,
     },
     {
       id: 2,
       label: `Dexterity - ${adventurer?.adventurer?.dexterity}`,
       value: "Dexterity",
       action: async () => handleUpgradeTx("Dexterity"),
+      disabled: false,
     },
     {
       id: 3,
       label: `Vitality - ${adventurer?.adventurer?.vitality}`,
       value: "Vitality",
       action: async () => handleUpgradeTx("Vitality"),
+      disabled: false,
     },
     {
       id: 4,
       label: `Intelligence - ${adventurer?.adventurer?.intelligence}`,
       value: "Intelligence",
       action: async () => handleUpgradeTx("Intelligence"),
+      disabled: false,
     },
     {
       id: 5,
       label: `Wisdom - ${adventurer?.adventurer?.wisdom}`,
       value: "Wisdom",
       action: async () => handleUpgradeTx("Wisdom"),
+      disabled: false,
     },
     {
       id: 6,
       label: `Charisma - ${adventurer?.adventurer?.charisma}`,
       value: "Charisma",
       action: async () => handleUpgradeTx("Charisma"),
+      disabled: false,
     },
   ];
 
   const handleUpgradeTx = async (selected: any) => {
-    console.log(`Upgrading ${selected}`);
     const upgradeTx = {
-      contractAddress: adventurerContract?.address,
-      selector: "upgrade_stat",
+      contractAddress: adventurerContract?.address ?? "",
+      entrypoint: "upgrade_stat",
       calldata: [
-        adventurer?.adventurer?.id,
+        adventurer?.adventurer?.id ?? "",
         "0",
-        getKeyFromValue(gameData.STATS, selected),
+        getKeyFromValue(gameData.STATS, selected) ?? "",
       ],
     };
     addToCalls(upgradeTx);
-    handleSubmitCalls().then((tx: any) => {
-      setHash(tx.transaction_hash);
+    handleSubmitCalls(writeAsync).then((tx: any) => {
+      startLoading("Upgrade", tx?.transaction_hash, "Upgrading", adventurer);
       addTransaction({
         hash: tx.transaction_hash,
         metadata: {
@@ -114,18 +127,16 @@ const Upgrade = () => {
     </p>
   );
 
-  console.log(selected);
+  useEffect(() => {
+    if (loading && type == "Upgrade") {
+      updateData(adventurer);
+    }
+  }, [adventurer]);
 
   return (
     <div className="flex flex-col gap-10 w-full mt-[100px]">
-      {hash ? (
-        <div className="m-auto">
-          {(data?.status == "RECEIVED" || data?.status == "PENDING") && (
-            <div className="loading-ellipsis">Loading</div>
-          )}
-          <div className="flex flex-col">Hash: {hash}</div>
-          {data && <div>Status: {data.status}</div>}
-        </div>
+      {loading ? (
+        <TxActivity />
       ) : (
         <>
           <p className="mx-auto items-center text-[60px] animate-pulse">
