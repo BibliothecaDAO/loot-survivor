@@ -164,7 +164,11 @@ const MarketplaceRow = ({
           <div>
             <Button
               onClick={() => setShowBidBox(index)}
-              disabled={checkBidBalance() || item.claimedTime || checkExpired()}
+              disabled={
+                checkBidBalance() ||
+                item.claimedTime ||
+                (item.expiry && checkExpired())
+              }
               className={bidExists(item.marketId) ? "bg-white" : ""}
             >
               bid
