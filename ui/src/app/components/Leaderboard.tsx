@@ -1,12 +1,10 @@
 import React, { useState } from "react";
-import { useAdventurer } from "../context/AdventurerProvider";
 import { useQuery } from "@apollo/client";
 import { getAdventurerByGold } from "../hooks/graphql/queries";
 import { Button } from "./Button";
 import Coin from "../../../public/coin.svg";
 
 const Leaderboard: React.FC = () => {
-  const adventurer = useAdventurer();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
 
@@ -58,7 +56,12 @@ const Leaderboard: React.FC = () => {
         </tbody>
       </table>
       <div className="flex justify-center mt-8">
-        <Button variant={"outline"} onClick={() => handleClick(currentPage - 1)}>back</Button>
+        <Button
+          variant={"outline"}
+          onClick={() => handleClick(currentPage - 1)}
+        >
+          back
+        </Button>
         {Array.from({ length: totalPages }, (_, i) => i + 1).map(
           (pageNum: number) => (
             <Button
@@ -71,7 +74,12 @@ const Leaderboard: React.FC = () => {
             </Button>
           )
         )}
-        <Button variant={"outline"} onClick={() => handleClick(currentPage + 1)}>next</Button>
+        <Button
+          variant={"outline"}
+          onClick={() => handleClick(currentPage + 1)}
+        >
+          next
+        </Button>
       </div>
     </div>
   );

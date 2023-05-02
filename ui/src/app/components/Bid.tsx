@@ -1,14 +1,10 @@
 import { useState } from "react";
 import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
-import { useTransactionCart } from "../context/TransactionCartProvider";
-import {
-  useAccount,
-  useTransactionManager,
-  useTransactions,
-} from "@starknet-react/core";
-import { useAdventurer } from "../context/AdventurerProvider";
+import { useAccount } from "@starknet-react/core";
 import { NullAdventurerProps } from "../types";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 interface BidBoxProps {
   showBidBox: Boolean;
@@ -19,11 +15,9 @@ interface BidBoxProps {
 
 export function BidBox({ close, marketId, item }: BidBoxProps) {
   const { account } = useAccount();
-  const { adventurer } = useAdventurer();
-  const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { lootMarketArcadeContract } = useContracts();
-  const { hashes, addTransaction } = useTransactionManager();
-  const transactions = useTransactions({ hashes });
   const [bidPrice, setBidPrice] = useState<number | undefined>(undefined);
 
   const formatAddress = account ? account.address : "0x0";
@@ -34,7 +28,7 @@ export function BidBox({ close, marketId, item }: BidBoxProps) {
       if (lootMarketArcadeContract && formatAddress) {
         const BidTx = {
           contractAddress: lootMarketArcadeContract?.address,
-          selector: "bid_on_item",
+          entrypoint: "bid_on_item",
           calldata: [
             marketId,
             "0",
@@ -65,13 +59,12 @@ export function BidBox({ close, marketId, item }: BidBoxProps) {
       <Button
         onClick={() => handleBid(marketId)}
         disabled={typeof bidPrice === "undefined" || item.price >= bidPrice}
-
       >
         Place Bid
       </Button>
-      <Button variant={"outline"} onClick={() => close()}>Close</Button>
+      <Button variant={"outline"} onClick={() => close()}>
+        Close
+      </Button>
     </div>
-
-
   );
 }

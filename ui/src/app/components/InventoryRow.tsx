@@ -1,10 +1,9 @@
 import { useEffect, useState, useRef } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurer } from "../types";
-import { useTransactionCart } from "../context/TransactionCartProvider";
 import { Button } from "./Button";
-import { ItemDisplay } from "./ItemDisplay";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 interface InventoryRowProps {
   title: string;
@@ -29,9 +28,8 @@ export const InventoryRow = ({
 }: InventoryRowProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { adventurerContract } = useContracts();
-  const { adventurer } = useAdventurer();
-  const { addToCalls } = useTransactionCart();
-  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
   const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
 
@@ -39,7 +37,7 @@ export const InventoryRow = ({
     if (adventurerContract) {
       const equipItem = {
         contractAddress: adventurerContract?.address,
-        selector: "equip_item",
+        entrypoint: "equip_item",
         calldata: [formatAdventurer?.id, "0", itemId, "0"],
         metadata: `Equipping ${itemId}!`,
       };
@@ -89,7 +87,7 @@ export const InventoryRow = ({
         <Button
           className={isSelected && !isActive ? "animate-pulse" : ""}
           variant={isSelected ? "default" : "ghost"}
-          size={'lg'}
+          size={"lg"}
           onClick={() => {
             setSelected(menuIndex);
             setActiveMenu(menuIndex);
@@ -97,43 +95,7 @@ export const InventoryRow = ({
         >
           <p className="w-40 text-xl whitespace-nowrap">{title}</p>
         </Button>
-        {/* <ItemDisplay
-          item={items?.find((item: any) => item.id == equippedItemId)}
-        /> */}
       </div>
-      {/* <div className="absolute flex flex-col w-full gap-4 overflow-auto top-1/3 left-2/3">
-        {isSelected && unequippedItems?.length > 0 ? (
-          <>
-            <p>Equip:</p>
-            {unequippedItems.map((item: any, index: number) => (
-              <>
-                <div key={index} className="flex flex-row items-center">
-                  <ItemDisplay item={item} />
-                  <Button
-                    key={index}
-                    ref={(ref) => (buttonRefs.current[index] = ref)}
-                    className={
-                      selectedIndex === index && isSelected
-                        ? item.equippedAdventurerId
-                          ? "animate-pulse "
-                          : "animate-pulse"
-                        : "h-[20px]"
-                    }
-                    variant={selectedIndex === index ? "subtle" : "outline"}
-                    size={"xs"}
-                    onClick={() => {
-                      setSelectedIndex(index);
-                      handleAddEquipItem(items[selectedIndex].id);
-                    }}
-                  >
-                    Equip
-                  </Button>
-                </div>
-              </>
-            ))}
-          </>
-        ) : null}
-      </div> */}
     </>
   );
 };

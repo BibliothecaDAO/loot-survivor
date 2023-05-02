@@ -5,7 +5,8 @@ import {
   AddDevnetButton,
   SwitchToDevnetButton,
 } from "../components/DevnetConnectors";
-import { useUI } from "../context/UIProvider";
+import useUIStore from "../hooks/useUIStore";
+
 interface WalletSelectProps {
   screen: number;
 }
@@ -14,7 +15,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
   const { connectors, connect } = useConnectors();
   const { account } = useAccount();
   const [addedDevnet, setAddedDevnet] = useState<boolean>(false);
-  const { setOnboarded } = useUI();
+  const setOnboarded = useUIStore((state) => state.setOnboarded);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   // const handleKeyDown = (event: KeyboardEvent) => {
@@ -49,9 +50,9 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     if (screen == 1) {
       if (
         (account as any)?.provider?.baseUrl ==
-        "http://survivor-indexer.bibliothecadao.xyz:5050" ||
+          "http://survivor-indexer.bibliothecadao.xyz:5050" ||
         (account as any)?.baseUrl ==
-        "http://survivor-indexer.bibliothecadao.xyz:5050"
+          "http://survivor-indexer.bibliothecadao.xyz:5050"
       ) {
         setOnboarded(true);
       }
@@ -66,8 +67,6 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
 
   return (
     <div className="flex flex-col p-8">
-
-
       <div className="flex flex-col self-center my-auto">
         <h1 className="mb-10">It&apos;s Time to Survive </h1>
         {screen == 2 ? (
@@ -117,7 +116,6 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
           </div>
         )}
       </div>
-
     </div>
   );
 };

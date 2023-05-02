@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useTransactionCart } from "../context/TransactionCartProvider";
 import { Button } from "./Button";
 import { useQuery } from "@apollo/client";
 import {
@@ -8,13 +7,14 @@ import {
   getAdventurersInList,
   getLatestMarketItemsNumber,
 } from "../hooks/graphql/queries";
-import { useAdventurer } from "../context/AdventurerProvider";
 import { UTCClock, Countdown } from "./Clock";
 import MarketplaceRow from "./MarketplaceRow";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 const Marketplace = () => {
-  const { adventurer } = useAdventurer();
-  const { addToCalls } = useTransactionCart();
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { lootMarketArcadeContract, adventurerContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
@@ -75,8 +75,8 @@ const Marketplace = () => {
     : [];
 
   const mintDailyItemsTx = {
-    contractAddress: lootMarketArcadeContract?.address,
-    selector: "mint_daily_items",
+    contractAddress: lootMarketArcadeContract?.address ?? "",
+    entrypoint: "mint_daily_items",
     calldata: [],
     metadata: `Minting Loot Items!`,
   };
@@ -150,7 +150,7 @@ const Marketplace = () => {
 
   const nextMint = new Date(
     new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
-    (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+      (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
   return (

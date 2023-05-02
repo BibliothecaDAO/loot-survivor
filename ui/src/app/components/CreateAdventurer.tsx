@@ -1,20 +1,20 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useTransactionCart } from "../context/TransactionCartProvider";
 import { stringToFelt } from "../lib/utils";
 import {
   useAccount,
-  useWaitForTransaction,
   useTransactionManager,
-  useTransactions,
-  useTransaction,
+  useContractWrite,
 } from "@starknet-react/core";
 import { getKeyFromValue } from "../lib/utils";
 import { GameData } from "./GameData";
+import useLoadingStore from "../hooks/useLoadingStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
   onEscape: () => void;
+  adventurers: any[];
 }
 
 interface FormData {
@@ -31,11 +31,10 @@ interface FormData {
 export const CreateAdventurer = ({
   isActive,
   onEscape,
+  adventurers,
 }: CreateAdventurerProps) => {
   const { account } = useAccount();
-  const { hashes, addTransaction } = useTransactionManager();
-  const currentHash = hashes[hashes.length - 1];
-  const currentTransaction = useTransaction({ hash: currentHash });
+  const { addTransaction } = useTransactionManager();
   const formatAddress = account ? account.address : "0x0";
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -49,17 +48,16 @@ export const CreateAdventurer = ({
       "0x12e0839c07c8fac67dd47a88e38317e0a56180faacf5e81f78d09a4c6338021",
   });
 
-  const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
+  const calls = useTransactionCartStore((state) => state.calls);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const handleSubmitCalls = useTransactionCartStore(
+    (state) => state.handleSubmitCalls
+  );
+  const startLoading = useLoadingStore((state) => state.startLoading);
+  const type = useLoadingStore((state) => state.type);
+  const { writeAsync } = useContractWrite({ calls });
   const { adventurerContract, lordsContract } = useContracts();
-  const [hash, setHash] = useState<string | undefined>(undefined);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const transactions = useTransactions({ hashes });
-
-  const { data, isLoading, error } = useWaitForTransaction({
-    hash,
-    watch: true,
-  });
-
   const gameData = new GameData();
 
   const handleChange = (
@@ -75,39 +73,44 @@ export const CreateAdventurer = ({
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const mintLords = {
-      contractAddress: lordsContract?.address,
-      selector: "mint",
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "mint",
       calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
     };
     addToCalls(mintLords);
 
     const approveLords = {
-      contractAddress: lordsContract?.address,
-      selector: "approve",
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "approve",
       calldata: [adventurerContract?.address, (100 * 10 ** 18).toString(), "0"],
     };
     addToCalls(approveLords);
 
     const mintAdventurer = {
-      contractAddress: adventurerContract?.address,
-      selector: "mint_with_starting_weapon",
+      contractAddress: adventurerContract?.address ?? "",
+      entrypoint: "mint_with_starting_weapon",
       calldata: [
         formatAddress,
         getKeyFromValue(gameData.RACES, formData.race)?.toString(),
         formData.homeRealmId,
         stringToFelt(formData.name),
-        getKeyFromValue(gameData.ORDERS, formData.order),
+        getKeyFromValue(gameData.ORDERS, formData.order) ?? "",
         formData.imageHash1,
         formData.imageHash2,
-        getKeyFromValue(gameData.ITEMS, formData.startingWeapon),
+        getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         formData.interfaceaddress,
       ],
     };
     addToCalls(mintAdventurer);
-    await handleSubmitCalls().then((tx: any) => {
-      setHash(tx.transaction_hash);
+    await handleSubmitCalls(writeAsync).then((tx: any) => {
+      startLoading(
+        "Create",
+        tx?.transaction_hash,
+        "Spawning Adventurer",
+        adventurers
+      );
       addTransaction({
-        hash: tx.transaction_hash,
+        hash: tx?.transaction_hash,
         metadata: {
           method: "Minting adventurer",
           description: "Adventurer is being minted!",
@@ -172,8 +175,6 @@ export const CreateAdventurer = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isActive, selectedIndex]);
-
-  const loading = data?.status == "RECEIVED" || data?.status == "PENDING";
 
   return (
     <div className="flex flex-row w-full">
@@ -277,12 +278,6 @@ export const CreateAdventurer = ({
             </button>
           </form>
         </div>
-      </div>
-      <div className="flex flex-col w-1/2">
-        {loading && hash && <div className="loading-ellipsis">Loading</div>}
-        {hash && <div className="flex flex-col">Hash: {hash}</div>}
-        {/* {error && <div>Error: {JSON.stringify(error)}</div>} */}
-        {data && <div>Status: {data.status}</div>}
       </div>
     </div>
   );

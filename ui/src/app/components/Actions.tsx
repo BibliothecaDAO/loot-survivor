@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useContracts } from "../hooks/useContracts";
-import { useTransactionCart } from "../context/TransactionCartProvider";
-import { useAdventurer } from "../context/AdventurerProvider";
 import { NullAdventurer } from "../types";
-import { useTransactionManager } from "@starknet-react/core";
+import { useTransactionManager, useContractWrite } from "@starknet-react/core";
+import { getLatestDiscoveries } from "../hooks/graphql/queries";
+import { useQuery } from "@apollo/client";
+import useLoadingStore from "../hooks/useLoadingStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 import VerticalKeyboardControl from "./VerticalMenu";
 
@@ -13,21 +16,40 @@ import Info from "./Info";
 import Discovery from "./Discovery";
 
 export default function Actions() {
-  const [loading, setLoading] = useState(false);
-  const { handleSubmitCalls, addToCalls, calls } = useTransactionCart();
+  const calls = useTransactionCartStore((state) => state.calls);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const handleSubmitCalls = useTransactionCartStore(
+    (state) => state.handleSubmitCalls
+  );
   const { adventurerContract } = useContracts();
-  const { adventurer } = useAdventurer();
+  const adventurer = useAdventurerStore((state) => state.adventurer);
   const { addTransaction } = useTransactionManager();
-  const [selected, setSelected] = useState<String>("");
+  const { writeAsync } = useContractWrite({ calls });
+  const loading = useLoadingStore((state) => state.loading);
+  const startLoading = useLoadingStore((state) => state.startLoading);
+  const type = useLoadingStore((state) => state.type);
+  const updateData = useLoadingStore((state) => state.updateData);
+  const [selected, setSelected] = useState<string>("");
   const [activeMenu, setActiveMenu] = useState(0);
-  const [hash, setHash] = useState();
 
   const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
 
+  const { data: latestDiscoveriesData, loading: latestDiscoverieslLoading } =
+    useQuery(getLatestDiscoveries, {
+      variables: {
+        adventurerId: formatAdventurer?.id,
+      },
+      pollInterval: 5000,
+    });
+
+  const latestDiscoveries = latestDiscoveriesData
+    ? latestDiscoveriesData.discoveries
+    : [];
+
   const exploreTx = {
-    contractAddress: adventurerContract?.address,
-    selector: "explore",
-    calldata: [formatAdventurer?.id, "0"],
+    contractAddress: adventurerContract?.address ?? "",
+    entrypoint: "explore",
+    calldata: [formatAdventurer?.id ?? "", "0"],
   };
 
   const buttonsData = [
@@ -38,10 +60,15 @@ export default function Actions() {
       action: async () => {
         {
           addToCalls(exploreTx);
-          await handleSubmitCalls().then((tx: any) => {
-            setHash(tx.transaction_hash);
+          await handleSubmitCalls(writeAsync).then((tx: any) => {
+            startLoading(
+              "Explore",
+              tx?.transaction_hash,
+              "Exploring",
+              latestDiscoveries
+            );
             addTransaction({
-              hash: tx.transaction_hash,
+              hash: tx?.transaction_hash,
               metadata: {
                 method: "Explore",
                 description: `Exploring with ${formatAdventurer?.name}`,
@@ -50,23 +77,29 @@ export default function Actions() {
           });
         }
       },
+      disabled: formatAdventurer?.status !== "Idle",
     },
     {
       id: 2,
       label: "Purchase Health",
       value: "purchase health",
       action: () => setActiveMenu(1),
+      disabled: formatAdventurer?.status !== "Idle",
     },
   ];
 
+  useEffect(() => {
+    if (loading && type == "Explore") {
+      updateData(latestDiscoveries);
+    }
+  }, [loading, latestDiscoveries]);
+
   return (
     <div className="flex flex-row space-x-6 ">
-      {!loading ? (
-        <div className="w-1/3">
-          <Info adventurer={adventurer?.adventurer} />
-        </div>
-      ) : null}
-      <div className="w-1/3 m-auto">
+      <div className="w-1/3">
+        <Info adventurer={adventurer?.adventurer} />
+      </div>
+      <div className="flex flex-col w-1/3 m-auto">
         <VerticalKeyboardControl
           buttonsData={buttonsData}
           onSelected={(value) => setSelected(value)}
@@ -75,13 +108,16 @@ export default function Actions() {
       </div>
 
       <div className="flex flex-col w-1/3 bg-terminal-black">
-        {selected == "explore" && <Discovery hash={hash} />}
-        {selected == "purchase health" && (
-          <PurchaseHealth
-            isActive={activeMenu == 1}
-            onEscape={() => setActiveMenu(0)}
-          />
-        )}
+        {selected == "explore" && <Discovery discoveries={latestDiscoveries} />}
+        {selected == "purchase health" &&
+          (formatAdventurer?.status == "Idle" ? (
+            <PurchaseHealth
+              isActive={activeMenu == 1}
+              onEscape={() => setActiveMenu(0)}
+            />
+          ) : (
+            <p>You are in a battle!</p>
+          ))}
       </div>
     </div>
   );

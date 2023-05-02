@@ -7,6 +7,7 @@ interface ButtonData {
   label: string;
   value: any;
   action: () => void;
+  disabled: boolean;
 }
 
 interface VerticalKeyboardControlProps {
@@ -24,7 +25,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
   isActive = true,
   setActiveMenu,
 }) => {
-  const { play } = useUiSounds(soundSelector.click)
+  const { play } = useUiSounds(soundSelector.click);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -35,21 +36,21 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
       case "ArrowDown":
-        play()
+        play();
         setSelectedIndex((prev) => {
           const newIndex = Math.min(prev + 1, buttonsData.length - 1);
           return newIndex;
         });
         break;
       case "ArrowUp":
-        play()
+        play();
         setSelectedIndex((prev) => {
           const newIndex = Math.max(prev - 1, 0);
           return newIndex;
         });
         break;
       case "Enter":
-        play()
+        play();
         setActiveMenu && setActiveMenu(buttonsData[selectedIndex].id);
         onEnterAction && buttonsData[selectedIndex].action();
         break;
@@ -79,6 +80,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
             setSelectedIndex(index);
             buttonData.action();
           }}
+          disabled={buttonData.disabled}
         >
           {buttonData.label}
         </Button>
