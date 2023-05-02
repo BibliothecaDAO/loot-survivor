@@ -121,7 +121,10 @@ const MarketplaceRow = ({
       <td className="text-center">{item.marketId}</td>
       <td className="text-center">{item.item}</td>
       <td className="text-center">{item.rank}</td>
-      <td className="flex justify-center space-x-1 text-center "> <LootIcon className="self-center pt-3" type={item.slot} /> </td>
+      <td className="flex justify-center space-x-1 text-center ">
+        {" "}
+        <LootIcon className="self-center pt-3" type={item.slot} />{" "}
+      </td>
       <td className="text-center">{item.type}</td>
       <td className="text-center">{item.material}</td>
       <td className="text-center">{item.greatness}</td>
@@ -129,10 +132,11 @@ const MarketplaceRow = ({
       <td className="text-center">{item.price}</td>
       <td className="text-center">
         {item.bidder
-          ? `${adventurers.find(
-            (adventurer: any) => adventurer.id == item.bidder
-          )?.name
-          } - ${item.bidder}`
+          ? `${
+              adventurers.find(
+                (adventurer: any) => adventurer.id == item.bidder
+              )?.name
+            } - ${item.bidder}`
           : ""}
       </td>
       <td className="text-center">
@@ -156,12 +160,7 @@ const MarketplaceRow = ({
           <div>
             <Button
               onClick={() => setShowBidBox(index)}
-              disabled={
-                bidExists(item.marketId) ||
-                checkBidBalance() ||
-                item.claimedTime ||
-                item.expiry
-              }
+              disabled={checkBidBalance() || item.claimedTime || item.expiry}
               className={bidExists(item.marketId) ? "bg-white" : ""}
             >
               bid
