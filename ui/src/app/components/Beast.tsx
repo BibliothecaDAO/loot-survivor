@@ -103,19 +103,21 @@ export default function Beast() {
       action: async () => {
         addToCalls(attack);
         await handleSubmitCalls(writeAsync).then((tx: any) => {
-          startLoading(
-            "Attack",
-            tx?.transaction_hash,
-            "Attacking",
-            formatBattles
-          );
-          addTransaction({
-            hash: tx?.transaction_hash,
-            metadata: {
-              method: "Attack Beast",
-              description: `Attacking ${beastData.beast}`,
-            },
-          });
+          if (tx) {
+            startLoading(
+              "Attack",
+              tx.transaction_hash,
+              "Attacking",
+              formatBattles
+            );
+            addTransaction({
+              hash: tx.transaction_hash,
+              metadata: {
+                method: "Attack Beast",
+                description: `Attacking ${beastData.beast}`,
+              },
+            });
+          }
         });
       },
     },
@@ -125,14 +127,16 @@ export default function Beast() {
       action: async () => {
         addToCalls(flee);
         await handleSubmitCalls(writeAsync).then((tx: any) => {
-          startLoading("Flee", tx?.transaction_hash, "Fleeing", formatBattles);
-          addTransaction({
-            hash: tx?.transaction_hash,
-            metadata: {
-              method: "Flee Beast",
-              description: `Fleeing from ${beastData.beast}`,
-            },
-          });
+          if (tx) {
+            startLoading("Flee", tx.transaction_hash, "Fleeing", formatBattles);
+            addTransaction({
+              hash: tx.transaction_hash,
+              metadata: {
+                method: "Flee Beast",
+                description: `Fleeing from ${beastData.beast}`,
+              },
+            });
+          }
         });
       },
     },

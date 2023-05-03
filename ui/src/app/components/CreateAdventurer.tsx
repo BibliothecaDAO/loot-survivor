@@ -103,19 +103,21 @@ export const CreateAdventurer = ({
     };
     addToCalls(mintAdventurer);
     await handleSubmitCalls(writeAsync).then((tx: any) => {
-      startLoading(
-        "Create",
-        tx?.transaction_hash,
-        "Spawning Adventurer",
-        adventurers
-      );
-      addTransaction({
-        hash: tx?.transaction_hash,
-        metadata: {
-          method: "Minting adventurer",
-          description: "Adventurer is being minted!",
-        },
-      });
+      if (tx) {
+        startLoading(
+          "Create",
+          tx?.transaction_hash,
+          "Spawning Adventurer",
+          adventurers
+        );
+        addTransaction({
+          hash: tx?.transaction_hash,
+          metadata: {
+            method: "Minting adventurer",
+            description: "Adventurer is being minted!",
+          },
+        });
+      }
     });
   };
 

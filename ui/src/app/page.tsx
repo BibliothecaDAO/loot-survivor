@@ -1,5 +1,5 @@
 "use client";
-
+import { StarknetConfig } from "@starknet-react/core";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect } from "react";
 import { Button } from "./components/Button";
@@ -30,7 +30,9 @@ import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { useMusic, musicSelector } from "./hooks/useMusic";
 
+
 export default function Home() {
+
   const loading = useLoadingStore((state) => state.loading);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const data = useLoadingStore((state) => state.data);
@@ -85,7 +87,7 @@ export default function Home() {
   useEffect(() => {
     setIndexer(
       (account as any)?.baseUrl ==
-        "http://survivor-indexer.bibliothecadao.xyz:5050"
+        testnet_addr || (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io"
         ? "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql"
         : "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql"
     );
@@ -167,6 +169,9 @@ export default function Home() {
   }, [loading, data, prevData, stopLoading]);
 
   return (
+
+
+
     <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
       {onboarded ? (
         <>

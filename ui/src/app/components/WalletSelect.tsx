@@ -50,16 +50,16 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     if (screen == 1) {
       if (
         (account as any)?.provider?.baseUrl ==
-          "http://survivor-indexer.bibliothecadao.xyz:5050" ||
+        "http://survivor-indexer.bibliothecadao.xyz:5050" ||
         (account as any)?.baseUrl ==
-          "http://survivor-indexer.bibliothecadao.xyz:5050"
+        "http://survivor-indexer.bibliothecadao.xyz:5050"
       ) {
         setOnboarded(true);
       }
     }
 
     if (screen == 2) {
-      if ((account as any)?.baseUrl == "https://alpha4.starknet.io") {
+      if ((account as any)?.baseUrl == "https://alpha4.starknet.io" || (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io") {
         setOnboarded(true);
       }
     }
