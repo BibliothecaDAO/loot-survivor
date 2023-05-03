@@ -62,13 +62,11 @@ export default function Home() {
     }
   }, [adventurer]);
 
-  useEffect(() => {
-
-    console.log(account)
-    if (!account) {
-      setOnboarded(false);
-    }
-  }, [account]);
+  // useEffect(() => {
+  //   if (!account?.address) {
+  //     setOnboarded(false);
+  //   }
+  // }, [account]);
 
   useEffect(() => {
     setIndexer(
