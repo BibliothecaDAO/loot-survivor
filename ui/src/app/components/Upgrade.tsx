@@ -89,14 +89,21 @@ const Upgrade = () => {
     };
     addToCalls(upgradeTx);
     handleSubmitCalls(writeAsync).then((tx: any) => {
-      startLoading("Upgrade", tx?.transaction_hash, "Upgrading", adventurer);
-      addTransaction({
-        hash: tx.transaction_hash,
-        metadata: {
-          method: "Upgrade Stat",
-          description: `Upgrading ${selected}`,
-        },
-      });
+      if (tx) {
+        startLoading(
+          "Upgrade",
+          tx?.transaction_hash,
+          `Upgrading ${selected}`,
+          adventurer
+        );
+        addTransaction({
+          hash: tx.transaction_hash,
+          metadata: {
+            method: "Upgrade Stat",
+            description: `Upgrading ${selected}`,
+          },
+        });
+      }
     });
   };
 
@@ -135,33 +142,27 @@ const Upgrade = () => {
 
   return (
     <div className="flex flex-col gap-10 w-full mt-[100px]">
-      {loading ? (
-        <TxActivity />
-      ) : (
-        <>
-          <p className="mx-auto items-center text-[60px] animate-pulse">
-            You are now level {adventurer?.adventurer?.level}, please select
-            upgrade!
-          </p>
-          <div className="flex flex-row">
-            <div className="w-1/2">
-              <VerticalKeyboardControl
-                buttonsData={upgradeMenu}
-                onSelected={setSelected}
-                onEnterAction={true}
-              />
-            </div>
-            <div className="flex items-center justify-center w-1/2">
-              {selected == "Strength" && <Strength />}
-              {selected == "Dexterity" && <Dexterity />}
-              {selected == "Vitality" && <Vitality />}
-              {selected == "Intelligence" && <Intelligence />}
-              {selected == "Wisdom" && <Wisdom />}
-              {selected == "Charisma" && <Charisma />}
-            </div>
-          </div>
-        </>
-      )}
+      <p className="mx-auto items-center text-[60px] animate-pulse">
+        You are now level {adventurer?.adventurer?.level}, please select
+        upgrade!
+      </p>
+      <div className="flex flex-row">
+        <div className="w-1/2">
+          <VerticalKeyboardControl
+            buttonsData={upgradeMenu}
+            onSelected={setSelected}
+            onEnterAction={true}
+          />
+        </div>
+        <div className="flex items-center justify-center w-1/2">
+          {selected == "Strength" && <Strength />}
+          {selected == "Dexterity" && <Dexterity />}
+          {selected == "Vitality" && <Vitality />}
+          {selected == "Intelligence" && <Intelligence />}
+          {selected == "Wisdom" && <Wisdom />}
+          {selected == "Charisma" && <Charisma />}
+        </div>
+      </div>
     </div>
   );
 };

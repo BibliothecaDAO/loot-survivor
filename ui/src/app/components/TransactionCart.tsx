@@ -74,31 +74,33 @@ const TransactionCart: React.FC = () => {
             <Button
               onClick={async () =>
                 await handleSubmitCalls(writeAsync).then((tx: any) => {
-                  startLoading(
-                    "Multicall",
-                    tx?.transaction_hash,
-                    "Muticalling",
-                    ""
-                  );
-                  const marketIds = [];
+                  if (tx) {
+                    startLoading(
+                      "Multicall",
+                      tx?.transaction_hash,
+                      "Muticalling",
+                      ""
+                    );
+                    const marketIds = [];
 
-                  for (const dict of calls) {
-                    if (
-                      dict.hasOwnProperty("entrypoint") &&
-                      dict["entrypoint"] === "bid_on_item"
-                    ) {
-                      marketIds.push(dict.calldata[0]);
+                    for (const dict of calls) {
+                      if (
+                        dict.hasOwnProperty("entrypoint") &&
+                        dict["entrypoint"] === "bid_on_item"
+                      ) {
+                        marketIds.push(dict.calldata[0]);
+                      }
                     }
-                  }
 
-                  addTransaction({
-                    hash: tx.transaction_hash,
-                    metadata: {
-                      method: "Performing multicall",
-                      description: "Transactions have been batched and sent!",
-                      marketIds: marketIds,
-                    },
-                  });
+                    addTransaction({
+                      hash: tx.transaction_hash,
+                      metadata: {
+                        method: "Performing multicall",
+                        description: "Transactions have been batched and sent!",
+                        marketIds: marketIds,
+                      },
+                    });
+                  }
                 })
               }
               className="absolute bottom-4"

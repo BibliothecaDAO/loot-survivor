@@ -10,7 +10,6 @@ export const useLoader = ({ data }: UseLoaderProps) => {
   const loading = useLoadingStore((state) => state.loading);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const prevData = usePrevious(data);
-  console.log(data, prevData);
 
   useEffect(() => {
     if (data && prevData && JSON.stringify(data) !== JSON.stringify(prevData)) {

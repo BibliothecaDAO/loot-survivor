@@ -61,19 +61,21 @@ export default function Actions() {
         {
           addToCalls(exploreTx);
           await handleSubmitCalls(writeAsync).then((tx: any) => {
-            startLoading(
-              "Explore",
-              tx?.transaction_hash,
-              "Exploring",
-              latestDiscoveries
-            );
-            addTransaction({
-              hash: tx?.transaction_hash,
-              metadata: {
-                method: "Explore",
-                description: `Exploring with ${formatAdventurer?.name}`,
-              },
-            });
+            if (tx) {
+              startLoading(
+                "Explore",
+                tx.transaction_hash,
+                "Exploring",
+                latestDiscoveries
+              );
+              addTransaction({
+                hash: tx.transaction_hash,
+                metadata: {
+                  method: "Explore",
+                  description: `Exploring with ${formatAdventurer?.name}`,
+                },
+              });
+            }
           });
         }
       },
