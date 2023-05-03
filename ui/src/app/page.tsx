@@ -63,7 +63,7 @@ export default function Home() {
   }, [adventurer]);
 
   useEffect(() => {
-    if (!account?.address) {
+    if (!account) {
       setOnboarded(false);
     }
   }, [account]);
