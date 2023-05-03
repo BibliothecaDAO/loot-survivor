@@ -9,9 +9,9 @@ import Neck from "../../../public/icons/loot/neck.svg";
 import Ring from "../../../public/icons/loot/ring.svg";
 
 // export type ItemType = "chest" | "weapon" | "head" | "hand" | "waist" | "foot" | "neck" | "ring";
-type IconSize = "w-5" | "w-6" | "w-7" | "w-8";
+export type IconSize = "w-5" | "w-6" | "w-7" | "w-8";
 
-interface ItemDisplayProps {
+export interface ItemDisplayProps {
     type: any;
     size?: IconSize;
     className?: string;

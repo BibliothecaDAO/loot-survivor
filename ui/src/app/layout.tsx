@@ -8,33 +8,33 @@ import useIndexerStore from "./hooks/useIndexerStore";
 import { ApolloProvider } from "@apollo/client";
 
 // NOT WORKING PROPERLY
-const controllerConnector = new ControllerConnector([
-  {
-    target: contracts.goerli.lords_erc20_mintable,
-    method: "mint",
-  },
-  {
-    target: contracts.goerli.lords_erc20_mintable,
-    method: "approve",
-  },
-  {
-    target: contracts.goerli.adventurer,
-    method: "mint_with_starting_weapon",
-  },
-]);
+
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const controllerConnector = new ControllerConnector([
+    {
+      target: contracts.goerli.lords_erc20_mintable,
+      method: "mint",
+    },
+    {
+      target: contracts.goerli.lords_erc20_mintable,
+      method: "approve",
+    },
+    {
+      target: contracts.goerli.adventurer,
+      method: "mint_with_starting_weapon",
+    },
+  ]);
   const client = useIndexerStore((state) => state.client);
   const connectors = useMemo(
     () => [
       new InjectedConnector({ options: { id: "argentX" } }),
       new InjectedConnector({ options: { id: "braavos" } }),
       controllerConnector as any,
-      // new InjectedConnector({ options: { id: "guildly" } }),
     ],
     []
   );

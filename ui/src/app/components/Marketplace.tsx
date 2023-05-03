@@ -13,6 +13,7 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import Coin from "../../../public/coin.svg";
 import { NullAdventurer } from "../types";
+import LootIconLoader from "./Loader";
 
 const Marketplace = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -163,7 +164,7 @@ const Marketplace = () => {
 
   const nextMint = new Date(
     new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
-      (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+    (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
   return (
@@ -199,7 +200,10 @@ const Marketplace = () => {
           </div>
           <div className="w-full overflow-y-auto border h-[650px] border-terminal-green">
             {marketLatestItemsLoading && (
-              <p className="text-xl loading-ellipsis">LOADING</p>
+              <div className="flex justify-center p-10 text-center">
+                <LootIconLoader />
+              </div>
+
             )}
             {marketLatestItemsError && (
               <p className="text-xl">ERROR {marketLatestItemsError.message}</p>
