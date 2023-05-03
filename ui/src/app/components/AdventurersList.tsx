@@ -26,7 +26,7 @@ export const AdventurersList = ({
       id: i + 1,
       label: `${adventurers[i].name} - ${adventurers[i].id}`,
       action: () =>
-        setAdventurer({ adventurer: adventurers[i], image: undefined }),
+        setAdventurer(adventurers[i]),
     });
   }
 

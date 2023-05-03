@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@apollo/client";
 import { useAccount } from "@starknet-react/core";
 import { getAdventurersByOwner } from "../hooks/graphql/queries";
@@ -6,6 +6,7 @@ import { padAddress } from "../lib/utils";
 import { AdventurersList } from "./AdventurersList";
 import { CreateAdventurer } from "./CreateAdventurer";
 import VerticalKeyboardControl from "./VerticalMenu";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 const Adventurer = () => {
   const { account } = useAccount();

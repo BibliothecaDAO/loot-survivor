@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { NullAdventurer } from "../types";
+import { Adventurer, NullAdventurer } from "../types";
 import { AdventurerClass } from "../lib/classes";
 
 export interface AdventurerProps {
@@ -9,14 +9,18 @@ export interface AdventurerProps {
 
 type State = {
   adventurer?: AdventurerClass | undefined;
-  setAdventurer: (value: AdventurerProps) => void;
+  setAdventurer: (value: Adventurer) => void;
   image?: string;
   setImage: (value: string) => void;
 };
 
 const useAdventurerStore = create<State>((set) => ({
   adventurer: new AdventurerClass(NullAdventurer),
-  setAdventurer: (value) => set(value),
+  setAdventurer: (value) =>
+    set((state) => ({
+      ...state,
+      adventurer: new AdventurerClass(value),
+    })),
   image: undefined,
   setImage: (value) => set({ image: value }),
 }));
