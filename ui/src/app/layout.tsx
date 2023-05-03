@@ -6,6 +6,7 @@ import ControllerConnector from "@cartridge/connector";
 import { contracts } from "./hooks/useContracts";
 import useIndexerStore from "./hooks/useIndexerStore";
 import { ApolloProvider } from "@apollo/client";
+import { connectors } from "./lib/connectors";
 
 
 export default function RootLayout({
@@ -25,9 +26,9 @@ export default function RootLayout({
           src="/crt_green_mask.png"
           className="absolute w-full pointer-events-none crt-frame"
         />
-
-        <ApolloProvider client={client}>{children}</ApolloProvider>
-
+        <StarknetConfig connectors={connectors} autoConnect>
+          <ApolloProvider client={client}>{children}</ApolloProvider>
+        </StarknetConfig>
       </body>
     </html>
   );
