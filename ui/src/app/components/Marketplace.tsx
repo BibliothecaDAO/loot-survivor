@@ -12,20 +12,17 @@ import MarketplaceRow from "./MarketplaceRow";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import Coin from "../../../public/coin.svg";
-import { NullAdventurer } from "../types";
 import LootIconLoader from "./Loader";
 
 const Marketplace = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const { lootMarketArcadeContract, adventurerContract } = useContracts();
+  const { lootMarketArcadeContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
   const [itemsCount, setItemsCount] = useState(0);
-
-  const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
 
   const {
     loading: latestMarketItemsNumberLoading,
@@ -76,7 +73,7 @@ const Marketplace = () => {
     pollInterval: 5000,
   });
 
-  const formatAdventurers = adventurersInListData
+  const adventurers = adventurersInListData
     ? adventurersInListData.adventurers
     : [];
 
@@ -169,7 +166,7 @@ const Marketplace = () => {
 
   return (
     <>
-      {adventurer?.adventurer?.level != 1 ? (
+      {adventurer?.level != 1 ? (
         <div className="w-full">
           <div className="flex flex-row justify-between m-1">
             <div className="flex flex-row align-items">
@@ -193,7 +190,7 @@ const Marketplace = () => {
               <span className="flex text-xl text-terminal-yellow">
                 Gold Balance:
                 <Coin className="self-center w-8 h-8 fill-current" />
-                {formatAdventurer?.gold ? formatAdventurer?.gold - sum : ""}
+                {adventurer?.gold ? adventurer?.gold - sum : ""}
               </span>
             </div>
             <UTCClock />
@@ -225,7 +222,7 @@ const Marketplace = () => {
                       item={item}
                       index={index}
                       selectedIndex={selectedIndex}
-                      adventurers={formatAdventurers}
+                      adventurers={adventurers}
                       isActive={activeMenu == index + 1}
                       setActiveMenu={setActiveMenu}
                       key={index}
