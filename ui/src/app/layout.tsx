@@ -2,42 +2,40 @@
 import "./globals.css";
 import { InjectedConnector, StarknetConfig } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector";
-import { useMemo } from "react";
 import { contracts } from "./hooks/useContracts";
 import useIndexerStore from "./hooks/useIndexerStore";
 import { ApolloProvider } from "@apollo/client";
 
 // NOT WORKING PROPERLY
+const controllerConnector = new ControllerConnector([
+  {
+    target: contracts.goerli.lords_erc20_mintable,
+    method: "mint",
+  },
+  {
+    target: contracts.goerli.lords_erc20_mintable,
+    method: "approve",
+  },
+  {
+    target: contracts.goerli.adventurer,
+    method: "mint_with_starting_weapon",
+  },
+]);
 
+export const argentConnector = new InjectedConnector({
+  options: {
+    id: "argentX",
+  },
+});
+
+export const connectors = [controllerConnector as any, argentConnector];
 
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const controllerConnector = new ControllerConnector([
-    {
-      target: contracts.goerli.lords_erc20_mintable,
-      method: "mint",
-    },
-    {
-      target: contracts.goerli.lords_erc20_mintable,
-      method: "approve",
-    },
-    {
-      target: contracts.goerli.adventurer,
-      method: "mint_with_starting_weapon",
-    },
-  ]);
   const client = useIndexerStore((state) => state.client);
-  const connectors = useMemo(
-    () => [
-      new InjectedConnector({ options: { id: "argentX" } }),
-      new InjectedConnector({ options: { id: "braavos" } }),
-      controllerConnector as any,
-    ],
-    []
-  );
 
   return (
     <html lang="en">
