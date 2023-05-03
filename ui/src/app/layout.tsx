@@ -30,6 +30,7 @@ export const argentConnector = new InjectedConnector({
 
 export const connectors = [controllerConnector as any, argentConnector];
 
+
 export default function RootLayout({
   children,
 }: {
