@@ -185,17 +185,19 @@ h6 {
   cursor       : pointer;
 }
 
-body::-webkit-scrollbar {
+body::-webkit-scrollbar,
+table::-webkit-scrollbar {
   width: 1em;
 }
 
-body::-webkit-scrollbar-track {
+body::-webkit-scrollbar-track,
+table::-webkit-scrollbar-track {
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
 
-body::-webkit-scrollbar-thumb {
-  background-color: darkgrey;
-  outline         : 1px solid slategrey;
+body::-webkit-scrollbar-thumb,
+table::-webkit-scrollbar-thumb {
+  @apply bg-terminal-green;
 }
 
 .notification-enter {

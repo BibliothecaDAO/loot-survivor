@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-
 import { useContracts } from "../hooks/useContracts";
 import { NullAdventurer } from "../types";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
@@ -11,9 +10,7 @@ import { useQuery } from "@apollo/client";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
-
 import VerticalKeyboardControl from "./VerticalMenu";
-
 import PurchaseHealth from "./PurchaseHealth";
 import Info from "./Info";
 import Discovery from "./Discovery";
@@ -32,15 +29,14 @@ export default function Actions() {
   const startLoading = useLoadingStore((state) => state.startLoading);
   const type = useLoadingStore((state) => state.type);
   const updateData = useLoadingStore((state) => state.updateData);
+
   const [selected, setSelected] = useState<string>("");
   const [activeMenu, setActiveMenu] = useState(0);
-
-  const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
 
   const { data: latestDiscoveriesData, loading: latestDiscoverieslLoading } =
     useQuery(getLatestDiscoveries, {
       variables: {
-        adventurerId: formatAdventurer?.id,
+        adventurerId: adventurer?.id,
       },
       pollInterval: 5000,
     });
@@ -76,7 +72,11 @@ export default function Actions() {
       value: "explore",
       action: async () => {
         {
-          addToCalls(exploreTx);
+          addToCalls({
+            contractAddress: adventurerContract?.address ?? "",
+            entrypoint: "explore",
+            calldata: [adventurer?.id ?? "", "0"],
+          });
           await handleSubmitCalls(writeAsync).then((tx: any) => {
             if (tx) {
               startLoading(
@@ -90,21 +90,21 @@ export default function Actions() {
                 hash: tx.transaction_hash,
                 metadata: {
                   method: "Explore",
-                  description: `Exploring with ${formatAdventurer?.name}`,
+                  description: `Exploring with ${adventurer?.name}`,
                 },
               });
             }
           });
         }
       },
-      disabled: formatAdventurer?.status !== "Idle",
+      disabled: adventurer?.status !== "Idle",
     },
     {
       id: 2,
       label: "Buy Health",
       value: "purchase health",
       action: () => setActiveMenu(1),
-      disabled: formatAdventurer?.status !== "Idle",
+      disabled: adventurer?.status !== "Idle",
     },
   ];
 
@@ -117,7 +117,7 @@ export default function Actions() {
   return (
     <div className="flex flex-row space-x-6 ">
       <div className="w-1/3">
-        <Info adventurer={adventurer?.adventurer} />
+        <Info adventurer={adventurer} />
       </div>
       <div className="flex flex-col w-1/3 m-auto">
         <VerticalKeyboardControl
@@ -130,7 +130,7 @@ export default function Actions() {
       <div className="flex flex-col w-1/3 bg-terminal-black">
         {selected == "explore" && <Discovery discoveries={latestDiscoveries} />}
         {selected == "purchase health" &&
-          (formatAdventurer?.status == "Idle" ? (
+          (adventurer?.status == "Idle" ? (
             <PurchaseHealth
               isActive={activeMenu == 1}
               onEscape={() => setActiveMenu(0)}

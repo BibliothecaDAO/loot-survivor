@@ -22,7 +22,6 @@ const Inventory: React.FC = () => {
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
 
   // const gameData = new GameData();
-  const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
 
   const {
     loading: itemsByAdventurerLoading,
@@ -31,7 +30,7 @@ const Inventory: React.FC = () => {
     refetch: itemsByAdventurerRefetch,
   } = useQuery(getItemsByAdventurer, {
     variables: {
-      adventurer: formatAdventurer.adventurer?.id,
+      adventurer: adventurer?.id,
     },
     pollInterval: 5000,
   });
@@ -43,7 +42,7 @@ const Inventory: React.FC = () => {
       const equipItem = {
         contractAddress: adventurerContract?.address,
         entrypoint: "equip_item",
-        calldata: [formatAdventurer?.adventurer?.id, "0", itemId, "0"],
+        calldata: [adventurer?.id, "0", itemId, "0"],
         metadata: `Equipping ${itemId}!`,
       };
       addToCalls(equipItem);
@@ -120,7 +119,7 @@ const Inventory: React.FC = () => {
     return values;
   }
 
-  const equipedItemIds = selectedIds(formatAdventurer.adventurer, [
+  const equipedItemIds = selectedIds(adventurer, [
     "weaponId",
     "headId",
     "chestId",
@@ -138,7 +137,7 @@ const Inventory: React.FC = () => {
   return (
     <div className="flex flex-row space-x-4 overflow-hidden ">
       <div className="w-1/3">
-        <Info adventurer={formatAdventurer.adventurer} />
+        <Info adventurer={adventurer} />
       </div>
       <div className="flex flex-col">
         <InventoryRow
@@ -149,7 +148,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 0}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.adventurer?.weaponId}
+          equippedItemId={adventurer?.weaponId}
         />
         <InventoryRow
           title={"Head Armour"}
@@ -159,7 +158,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 1}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.adventurer?.headId}
+          equippedItemId={adventurer?.headId}
         />
         <InventoryRow
           title={"Chest Armour"}
@@ -169,7 +168,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 2}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.adventurer?.chestId}
+          equippedItemId={adventurer?.chestId}
         />
         <InventoryRow
           title={"Feet Armour"}
@@ -179,7 +178,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 3}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.adventurer?.feetId}
+          equippedItemId={adventurer?.feetId}
         />
         <InventoryRow
           title={"Hands Armour"}
@@ -189,7 +188,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 4}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.adventurer?.handsId}
+          equippedItemId={adventurer?.handsId}
         />
         <InventoryRow
           title={"Waist Armour"}
@@ -199,7 +198,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 5}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.adventurer?.waistId}
+          equippedItemId={adventurer?.waistId}
         />
         <InventoryRow
           title={"Neck Jewelry"}
@@ -209,7 +208,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 6}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.adventurer?.neckId}
+          equippedItemId={adventurer?.neckId}
         />
         <InventoryRow
           title={"Ring Jewelry"}
@@ -219,7 +218,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 7}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.adventurer?.ringId}
+          equippedItemId={adventurer?.ringId}
         />
       </div>
       <div>

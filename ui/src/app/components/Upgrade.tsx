@@ -5,11 +5,9 @@ import { GameData } from "./GameData";
 import VerticalKeyboardControl from "./VerticalMenu";
 import {
   useTransactionManager,
-  useWaitForTransaction,
   useContractWrite,
 } from "@starknet-react/core";
 import useLoadingStore from "../hooks/useLoadingStore";
-import { TxActivity } from "./TxActivity";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
@@ -35,42 +33,42 @@ const Upgrade = () => {
   const upgradeMenu = [
     {
       id: 1,
-      label: `Strength - ${adventurer?.adventurer?.strength}`,
+      label: `Strength - ${adventurer?.strength}`,
       value: "Strength",
       action: async () => handleUpgradeTx("Strength"),
       disabled: false,
     },
     {
       id: 2,
-      label: `Dexterity - ${adventurer?.adventurer?.dexterity}`,
+      label: `Dexterity - ${adventurer?.dexterity}`,
       value: "Dexterity",
       action: async () => handleUpgradeTx("Dexterity"),
       disabled: false,
     },
     {
       id: 3,
-      label: `Vitality - ${adventurer?.adventurer?.vitality}`,
+      label: `Vitality - ${adventurer?.vitality}`,
       value: "Vitality",
       action: async () => handleUpgradeTx("Vitality"),
       disabled: false,
     },
     {
       id: 4,
-      label: `Intelligence - ${adventurer?.adventurer?.intelligence}`,
+      label: `Intelligence - ${adventurer?.intelligence}`,
       value: "Intelligence",
       action: async () => handleUpgradeTx("Intelligence"),
       disabled: false,
     },
     {
       id: 5,
-      label: `Wisdom - ${adventurer?.adventurer?.wisdom}`,
+      label: `Wisdom - ${adventurer?.wisdom}`,
       value: "Wisdom",
       action: async () => handleUpgradeTx("Wisdom"),
       disabled: false,
     },
     {
       id: 6,
-      label: `Charisma - ${adventurer?.adventurer?.charisma}`,
+      label: `Charisma - ${adventurer?.charisma}`,
       value: "Charisma",
       action: async () => handleUpgradeTx("Charisma"),
       disabled: false,
@@ -82,7 +80,7 @@ const Upgrade = () => {
       contractAddress: adventurerContract?.address ?? "",
       entrypoint: "upgrade_stat",
       calldata: [
-        adventurer?.adventurer?.id ?? "",
+        adventurer?.id ?? "",
         "0",
         getKeyFromValue(gameData.STATS, selected) ?? "",
       ],
@@ -144,7 +142,7 @@ const Upgrade = () => {
   return (
     <div className="flex flex-col gap-10 w-full mt-[100px]">
       <p className="mx-auto items-center text-[60px] animate-pulse">
-        You are now level {adventurer?.adventurer?.level}, please select
+        You are now level {adventurer?.level}, please select
         upgrade!
       </p>
       <div className="flex flex-row">

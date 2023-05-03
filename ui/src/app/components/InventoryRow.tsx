@@ -31,14 +31,12 @@ export const InventoryRow = ({
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
-  const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
-
   const handleAddEquipItem = (itemId: any) => {
     if (adventurerContract) {
       const equipItem = {
         contractAddress: adventurerContract?.address,
         entrypoint: "equip_item",
-        calldata: [formatAdventurer?.id, "0", itemId, "0"],
+        calldata: [adventurer?.id, "0", itemId, "0"],
         metadata: `Equipping ${itemId}!`,
       };
       addToCalls(equipItem);
