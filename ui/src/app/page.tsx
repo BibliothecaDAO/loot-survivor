@@ -1,6 +1,5 @@
 "use client";
-import { InjectedConnector, StarknetConfig } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector";
+import { StarknetConfig } from "@starknet-react/core";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect } from "react";
 import { Button } from "./components/Button";
@@ -29,32 +28,11 @@ import { getAdventurerById } from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
-import { ApolloProvider } from "@apollo/client";
-import { contracts } from "./hooks/useContracts";
+import { connectors } from "./lib/connectors";
+
 
 // NOT WORKING PROPERLY
-const controllerConnector = new ControllerConnector([
-  {
-    target: contracts.goerli.lords_erc20_mintable,
-    method: "mint",
-  },
-  {
-    target: contracts.goerli.lords_erc20_mintable,
-    method: "approve",
-  },
-  {
-    target: contracts.goerli.adventurer,
-    method: "mint_with_starting_weapon",
-  },
-]);
 
-export const argentConnector = new InjectedConnector({
-  options: {
-    id: "argentX",
-  },
-});
-
-export const connectors = [controllerConnector as any, argentConnector];
 
 export default function Home() {
   const client = useIndexerStore((state) => state.client);
