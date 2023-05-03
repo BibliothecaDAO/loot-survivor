@@ -93,6 +93,8 @@ export default function Home() {
     );
   }, [account]);
 
+
+
   useEffect(() => {
     let newMenu = [
       {
@@ -102,7 +104,7 @@ export default function Home() {
       },
     ];
 
-    if (adventurer && adventurer?.health > 0) {
+    if (adventurer && adventurer.health > 0) {
       newMenu = [
         ...newMenu,
         {
@@ -138,10 +140,8 @@ export default function Home() {
 
   const [getData, _] = useLazyQuery(getAdventurerById, {
     onCompleted: (data) => {
-      setAdventurer({
-        adventurer: data.adventurers[0],
-        image: undefined, // Set this to the image URL
-      });
+      setAdventurer(
+        data.adventurers[0]);
     },
   });
 
