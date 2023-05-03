@@ -1,5 +1,6 @@
 "use client";
-
+import { InjectedConnector, StarknetConfig } from "@starknet-react/core";
+import ControllerConnector from "@cartridge/connector";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect } from "react";
 import { Button } from "./components/Button";
@@ -28,8 +29,35 @@ import { getAdventurerById } from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
+import { ApolloProvider } from "@apollo/client";
+import { contracts } from "./hooks/useContracts";
+
+// NOT WORKING PROPERLY
+const controllerConnector = new ControllerConnector([
+  {
+    target: contracts.goerli.lords_erc20_mintable,
+    method: "mint",
+  },
+  {
+    target: contracts.goerli.lords_erc20_mintable,
+    method: "approve",
+  },
+  {
+    target: contracts.goerli.adventurer,
+    method: "mint_with_starting_weapon",
+  },
+]);
+
+export const argentConnector = new InjectedConnector({
+  options: {
+    id: "argentX",
+  },
+});
+
+export const connectors = [controllerConnector as any, argentConnector];
 
 export default function Home() {
+  const client = useIndexerStore((state) => state.client);
   const loading = useLoadingStore((state) => state.loading);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const data = useLoadingStore((state) => state.data);
@@ -153,52 +181,55 @@ export default function Home() {
   }, [loading, data, prevData, stopLoading]);
 
   return (
-    <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
-      {onboarded ? (
-        <>
-          <div className="flex justify-between w-full ">
-            <h1 className="glitch">Loot Survivors</h1>
-            <div className="flex flex-row self-end gap-2">
-              <TxActivity />
-              {account && calls.length > 0 && <TransactionCart />}
-              {account && <TransactionHistory />}
-              {(account as any)?.baseUrl == testnet_addr && (
-                <AddDevnetEthButton />
-              )}
-              {(account as any)?.baseUrl == testnet_addr && <MintEthButton />}
-              {account && (
-                <Button onClick={() => disconnect()}>
-                  {displayAddress(account.address)}
-                </Button>
-              )}
+    <StarknetConfig connectors={connectors} autoConnect>
+
+
+      <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
+        {onboarded ? (
+          <>
+            <div className="flex justify-between w-full ">
+              <h1 className="glitch">Loot Survivors</h1>
+              <div className="flex flex-row self-end gap-2">
+                <TxActivity />
+                {account && calls.length > 0 && <TransactionCart />}
+                {account && <TransactionHistory />}
+                {(account as any)?.baseUrl == testnet_addr && (
+                  <AddDevnetEthButton />
+                )}
+                {(account as any)?.baseUrl == testnet_addr && <MintEthButton />}
+                {account && (
+                  <Button onClick={() => disconnect()}>
+                    {displayAddress(account.address)}
+                  </Button>
+                )}
+              </div>
             </div>
-          </div>
-          <div className="w-full h-6 my-2 bg-terminal-green" />
+            <div className="w-full h-6 my-2 bg-terminal-green" />
 
-          {account ? (
-            <div className="flex-grow w-full">
-              {!upgrade ? (
-                <>
-                  <div className="gap-10 pb-2">
-                    <HorizontalKeyboardControl
-                      buttonsData={menu}
-                      onButtonClick={(value) => {
-                        setSelected(value);
-                      }}
-                    />
-                  </div>
+            {account ? (
+              <div className="flex-grow w-full">
+                {!upgrade ? (
+                  <>
+                    <div className="gap-10 pb-2">
+                      <HorizontalKeyboardControl
+                        buttonsData={menu}
+                        onButtonClick={(value) => {
+                          setSelected(value);
+                        }}
+                      />
+                    </div>
 
-                  {selected === "start" && <Adventurer />}
-                  {selected === "actions" && <Actions />}
-                  {selected === "market" && <Marketplace />}
-                  {selected === "inventory" && <Inventory />}
-                  {selected === "beast" && <Beast />}
-                  {selected === "leaderboard" && <Leaderboard />}
-                </>
-              ) : (
-                <Upgrade />
-              )}
-              {/* {adventurer?.adventurer ? (
+                    {selected === "start" && <Adventurer />}
+                    {selected === "actions" && <Actions />}
+                    {selected === "market" && <Marketplace />}
+                    {selected === "inventory" && <Inventory />}
+                    {selected === "beast" && <Beast />}
+                    {selected === "leaderboard" && <Leaderboard />}
+                  </>
+                ) : (
+                  <Upgrade />
+                )}
+                {/* {adventurer?.adventurer ? (
                 <div className="fixed flex items-center w-5/6 text-lg text-white transform -translate-x-1/2 border-2 bottom-1 left-1/2 flew-row bg-terminal-black border-terminal-green justify-evenly">
                   {adventurerStats.adventurer?.name}
                   <p>HEALTH: {adventurerStats.adventurer?.health}</p>
@@ -207,12 +238,14 @@ export default function Home() {
                   <p>XP: {adventurerStats.adventurer?.xp}</p>
                 </div>
               ) : null} */}
-            </div>
-          ) : null}
-        </>
-      ) : (
-        <Intro />
-      )}
-    </main>
+              </div>
+            ) : null}
+          </>
+        ) : (
+          <Intro />
+        )}
+      </main>
+
+    </StarknetConfig>
   );
 }
