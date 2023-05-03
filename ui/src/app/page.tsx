@@ -63,6 +63,8 @@ export default function Home() {
   }, [adventurer]);
 
   useEffect(() => {
+
+    console.log(account)
     if (!account) {
       setOnboarded(false);
     }
