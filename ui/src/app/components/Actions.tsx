@@ -49,7 +49,7 @@ export default function Actions() {
     getLastDiscovery,
     {
       variables: {
-        adventurerId: formatAdventurer?.id,
+        adventurerId: adventurer?.id,
       },
       pollInterval: 5000,
     }
@@ -62,7 +62,7 @@ export default function Actions() {
   const exploreTx = {
     contractAddress: adventurerContract?.address ?? "",
     entrypoint: "explore",
-    calldata: [formatAdventurer?.id ?? "", "0"],
+    calldata: [adventurer?.id ?? "", "0"],
   };
 
   const buttonsData = [

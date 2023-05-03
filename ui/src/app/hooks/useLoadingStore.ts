@@ -15,7 +15,7 @@ type LoadingState = {
     data: any,
     notificationData: any
   ) => void;
-  stopLoading: (notification: string) => void;
+  stopLoading: () => void;
   updateData: (data: any) => void;
 };
 
@@ -39,7 +39,11 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
     });
   },
   stopLoading: () => {
-    setTimeout(() => set({ showNotification: true }), 5000);
+    set({ showNotification: true });
+    setTimeout(
+      () => set({ notificationData: "", showNotification: false }),
+      5000
+    );
     set({
       loading: false,
       pendingMessage: undefined,

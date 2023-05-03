@@ -7,10 +7,7 @@ import {
   getBattlesByBeast,
   getLastBattleByAdventurer,
 } from "../hooks/graphql/queries";
-import {
-  useTransactionManager,
-  useContractWrite,
-} from "@starknet-react/core";
+import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import Info from "./Info";
 import { BattleDisplay } from "./BattleDisplay";
@@ -29,6 +26,7 @@ export default function Beast() {
   const { addTransaction } = useTransactionManager();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const { writeAsync } = useContractWrite({ calls });
+  const hash = useLoadingStore((state) => state.hash);
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const type = useLoadingStore((state) => state.type);
@@ -42,6 +40,18 @@ export default function Beast() {
   } = useQuery(getLastBattleByAdventurer, {
     variables: {
       adventurerId: adventurer?.id,
+    },
+    pollInterval: 5000,
+  });
+
+  const {
+    loading: battleLoading,
+    error: battleError,
+    data: battleData,
+    refetch: battleRefetch,
+  } = useQuery(getLastBattleByAdventurer, {
+    variables: {
+      txHash: hash,
     },
     pollInterval: 5000,
   });
@@ -104,7 +114,7 @@ export default function Beast() {
               tx.transaction_hash,
               "Attacking",
               formatBattles,
-              lastBattleData
+              battleData
             );
             addTransaction({
               hash: tx.transaction_hash,
@@ -129,7 +139,7 @@ export default function Beast() {
               tx.transaction_hash,
               "Fleeing",
               formatBattles,
-              lastBattleData
+              battleData
             );
             addTransaction({
               hash: tx.transaction_hash,

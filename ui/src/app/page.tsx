@@ -166,7 +166,7 @@ export default function Home() {
       prevData &&
       JSON.stringify(loadingData) !== JSON.stringify(prevData)
     ) {
-      // stopLoading();
+      stopLoading();
     }
   }, [loading, loadingData, prevData, stopLoading]);
 

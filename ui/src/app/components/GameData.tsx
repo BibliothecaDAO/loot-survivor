@@ -502,8 +502,7 @@ export class GameData {
       DiscoverBeast: "drawSword",
       AvoidObstacle: "jump",
       HitByObstacle: "damage",
+      Multicall: "discoverItem",
     };
   }
 }
-
-const gameData = new GameData();

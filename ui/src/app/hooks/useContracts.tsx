@@ -9,12 +9,12 @@ const testnet_addr = "http://survivor-indexer.bibliothecadao.xyz:5050";
 export const contracts = {
   testnet: {
     adventurer:
-      "0x06e948393d1923fa6a2d098f64a6bbc1f5b3c691fbc195db7356174635badb7e",
+      "0x00473b70f183c27ab4dac4139c39f364244ae89680810ff7f1f8cb6d754b2067",
     lootMarketArcade:
-      "0x021ea287f5e8f8f5cba96182c3d497b9b66038b9858b89171f671e383a9fd9d7",
-    beast: "0x009c5e78ebba0180bca7a7ffac236432ca72ebdb556d52987677d0c3878dacca",
+      "0x043d77e798f65a5284b4fde31051ee3b80f74a73817f607958e65d7504684ea0",
+    beast: "0x0128dc5af5038e745c83c57230a3203cce571f90320042e295744763953c0306",
     lords_erc20_mintable:
-      "0x028fe19e538bbdd6326b9450812e512dc8c0918296edb930c50dec4c8da6aaf7",
+      "0x0171f44786f43f8c8ac26595385c3dedf1b9a5b2f10d39afacc40c2576084f0e",
   },
   goerli: {
     adventurer:

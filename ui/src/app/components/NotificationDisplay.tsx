@@ -13,32 +13,49 @@ const processAnimation = (type: string, notificationData: any) => {
   if (type == "Flee") {
     if (notificationData.fled) {
       return gameData.ADVENTURER_ANIMATIONS["Flee"];
-    } else if (notificationData.ambush) {
-      if (notificationData.targetHealth == 0) {
-        return gameData.ADVENTURER_ANIMATIONS["Dead"];
-      } else {
-        return gameData.ADVENTURER_ANIMATIONS["Ambush"];
-      }
+    } else if (
+      Array.isArray(notificationData) &&
+      notificationData.some((data: any) => {
+        data.ambush == true && data.targetHealth == 0;
+      })
+    ) {
+      return gameData.ADVENTURER_ANIMATIONS["Dead"];
+    } else if (
+      Array.isArray(notificationData) &&
+      notificationData.some((data: any) => {
+        data.ambush == true;
+      })
+    ) {
+      return gameData.ADVENTURER_ANIMATIONS["Ambush"];
     }
   } else if (type == "Attack") {
     if (
-      notificationData.attacker == "Beast" &&
-      notificationData.targetHealth == 0
+      Array.isArray(notificationData) &&
+      notificationData.some((data: any) => {
+        data.attacker == "Beast" && data.targetHealth == 0;
+      })
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
+    } else if (
+      Array.isArray(notificationData) &&
+      notificationData.some((data: any) => {
+        data.attacker == "Beast" && data.targetHealth == 0;
+      })
+    ) {
+      return gameData.ADVENTURER_ANIMATIONS["attack2"];
     } else {
       return gameData.ADVENTURER_ANIMATIONS[type];
     }
   } else if (type == "Explore") {
-    if (notificationData.discoveryType == "Beast") {
+    if (notificationData?.discoveryType == "Beast") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverBeast"];
     } else if (notificationData.discoveryType == "Obstacle") {
-      if (notificationData.outputAmount > 0) {
+      if (notificationData?.outputAmount > 0) {
         return gameData.ADVENTURER_ANIMATIONS["HitByObstacle"];
       } else {
         return gameData.ADVENTURER_ANIMATIONS["AvoidObstacle"];
       }
-    } else if (notificationData.discoveryType == "Item") {
+    } else if (notificationData?.discoveryType == "Item") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
     }
   } else {

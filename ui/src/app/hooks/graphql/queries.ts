@@ -368,6 +368,27 @@ const getLastBattleByAdventurer = gql`
   }
 `;
 
+const getBattleByTxHash = gql`
+  query get_latest_battle_by_tx($txHash: He) {
+    battles(
+      where: { txHash: { eq: $txHash } }
+      orderBy: { timestamp: { desc: true } }
+    ) {
+      adventurerId
+      ambushed
+      attacker
+      beastId
+      damage
+      fled
+      goldEarned
+      targetHealth
+      timestamp
+      txHash
+      xpEarned
+    }
+  }
+`;
+
 const getItemsByTokenId = gql`
   query get_items($id: FeltValue) {
     items(where: { id: { eq: $id } }) {
@@ -516,6 +537,7 @@ export {
   getLatestBattlesByAdventurer,
   getBattlesByBeast,
   getLastBattleByAdventurer,
+  getBattleByTxHash,
   getItems,
   getItemsByTokenId,
   getLatestMarketItems,
