@@ -30,9 +30,7 @@ import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { useMusic, musicSelector } from "./hooks/useMusic";
 
-
 export default function Home() {
-
   const loading = useLoadingStore((state) => state.loading);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const data = useLoadingStore((state) => state.data);
@@ -44,6 +42,7 @@ export default function Home() {
   const onboarded = useUIStore((state) => state.onboarded);
   const setOnboarded = useUIStore((state) => state.setOnboarded);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
+  const [isMuted, setIsMuted] = useState(false);
 
   const testnet_addr = "http://survivor-indexer.bibliothecadao.xyz:5050";
 
@@ -52,6 +51,7 @@ export default function Home() {
   const { play, stop } = useMusic(musicSelector.backgroundMusic, {
     volume: 0.5,
     loop: true,
+    isMuted: isMuted,
   });
 
   useEffect(() => {
@@ -86,8 +86,8 @@ export default function Home() {
 
   useEffect(() => {
     setIndexer(
-      (account as any)?.baseUrl ==
-        testnet_addr || (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io"
+      (account as any)?.baseUrl == testnet_addr ||
+        (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io"
         ? "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql"
         : "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql"
     );
@@ -169,9 +169,6 @@ export default function Home() {
   }, [loading, data, prevData, stopLoading]);
 
   return (
-
-
-
     <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
       {onboarded ? (
         <>
@@ -179,6 +176,9 @@ export default function Home() {
             <h1 className="glitch">Loot Survivors</h1>
             <div className="flex flex-row self-end gap-2">
               <TxActivity />
+              <Button onClick={() => setIsMuted(!isMuted)}>
+                {isMuted ? "Unmute" : "Mute"}
+              </Button>
               {account && calls.length > 0 && <TransactionCart />}
               {account && <TransactionHistory />}
               {(account as any)?.baseUrl == testnet_addr && (
