@@ -1,4 +1,4 @@
-import { BattleDisplay } from "./BattleDisplay";
+import { NotificationBattleDisplay } from "./BattleDisplay";
 import { DiscoveryDisplay } from "./DiscoveryDisplay";
 import SpriteAnimation from "./SpriteAnimation";
 import { GameData } from "./GameData";
@@ -65,7 +65,9 @@ const processAnimation = (type: string, notificationData: any) => {
 
 const proccessNotification = (type: string, notificationData: any) => {
   if (type == "Attack" || type == "Flee") {
-    return <BattleDisplay battleData={notificationData} beastName="" />;
+    return (
+      <NotificationBattleDisplay battleData={notificationData} beastName="" />
+    );
   } else if (type == "Explore") {
     return <DiscoveryDisplay discoveryData={notificationData} />;
   } else {
