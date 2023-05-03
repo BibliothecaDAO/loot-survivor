@@ -11,30 +11,30 @@ export const BattleDisplay = ({
 }: BattleDisplayProps) => {
   return (
     <div key={key}>
-
       {battleData.attacker == "Adventurer" ? (
         battleData.targetHealth > 0 ? (
           <p>
-            You attacked the {beastName} for {battleData.damage} damage
+            You attacked the {beastName} with a mighty strike and dealt{" "}
+            {battleData.damage} damage!
           </p>
         ) : battleData.fled ? (
-          <p>You fled the {beastName}</p>
+          <p>You fled the {beastName}!</p>
         ) : (
           <p>
-            You killed the {beastName} after inflicting {battleData.damage}{" "}
-            damage
+            You slayed the {beastName} after inflicting {battleData.damage}{" "}
+            damage!
           </p>
         )
       ) : battleData.targetHealth > 0 ? (
         battleData.ambushed ? (
           <p>
             You were ambushed by the {beastName} taking {battleData.damage}{" "}
-            damage
+            damage!
           </p>
         ) : (
           <p>
-            Counter attacked by the {beastName} taking {battleData.damage}{" "}
-            damage
+            You were counter attacked by the {beastName} taking{" "}
+            {battleData.damage} damage!
           </p>
         )
       ) : (

@@ -481,7 +481,7 @@ export class GameData {
       Giant: "/beasts/giant.png",
       Yeti: "/beasts/yeti.png",
       Orc: "/beasts/orc.png",
-      Berserker: "/beasts/berserker.png",
+      Beserker: "/beasts/beserker.png",
       Ogre: "/beasts/ogre.png",
       Dragon: "/beasts/dragon.png",
       Vampire: "/beasts/vampire.png",

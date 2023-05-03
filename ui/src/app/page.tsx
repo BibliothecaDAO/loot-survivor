@@ -28,6 +28,7 @@ import { getAdventurerById } from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
+import { useMusic, musicSelector } from "./hooks/useMusic";
 
 export default function Home() {
   const loading = useLoadingStore((state) => state.loading);
@@ -45,6 +46,19 @@ export default function Home() {
   const testnet_addr = "http://survivor-indexer.bibliothecadao.xyz:5050";
 
   const upgrade = adventurer?.adventurer?.upgrading;
+
+  const { play, stop } = useMusic(musicSelector.backgroundMusic, {
+    volume: 0.5,
+    loop: true,
+  });
+
+  useEffect(() => {
+    play();
+
+    return () => {
+      stop();
+    };
+  }, [play, stop]);
 
   const [menu, setMenu] = useState([
     {
