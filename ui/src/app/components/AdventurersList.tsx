@@ -3,6 +3,7 @@ import { Button } from "./Button";
 import Info from "./Info";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { ButtonData } from "./KeyboardControls";
+import useLoadingStore from "../hooks/useLoadingStore";
 
 export interface AdventurerListProps {
   isActive: boolean;

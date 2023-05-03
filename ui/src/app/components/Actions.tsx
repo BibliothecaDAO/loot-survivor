@@ -3,7 +3,10 @@ import { useState, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { NullAdventurer } from "../types";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import { getLatestDiscoveries } from "../hooks/graphql/queries";
+import {
+  getLatestDiscoveries,
+  getLastDiscovery,
+} from "../hooks/graphql/queries";
 import { useQuery } from "@apollo/client";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
@@ -46,6 +49,20 @@ export default function Actions() {
     ? latestDiscoveriesData.discoveries
     : [];
 
+  const { data: lastDiscoveryData, loading: lastDiscoveryLoading } = useQuery(
+    getLastDiscovery,
+    {
+      variables: {
+        adventurerId: formatAdventurer?.id,
+      },
+      pollInterval: 5000,
+    }
+  );
+
+  const lastDiscovery = lastDiscoveryData
+    ? lastDiscoveryData.discoveries[0]
+    : [];
+
   const exploreTx = {
     contractAddress: adventurerContract?.address ?? "",
     entrypoint: "explore",
@@ -66,7 +83,8 @@ export default function Actions() {
                 "Explore",
                 tx.transaction_hash,
                 "Exploring",
-                latestDiscoveries
+                latestDiscoveries,
+                lastDiscovery
               );
               addTransaction({
                 hash: tx.transaction_hash,

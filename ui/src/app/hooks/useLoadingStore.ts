@@ -5,41 +5,49 @@ type LoadingState = {
   type: string;
   hash: string;
   pendingMessage: string;
-  data: any;
+  loadingData: any;
+  showNotification: boolean;
+  notificationData: any;
   startLoading: (
     type: string,
     hash: string,
     pendingMessage: string,
-    data: any
+    data: any,
+    notificationData: any
   ) => void;
-  stopLoading: () => void;
+  stopLoading: (notification: string) => void;
   updateData: (data: any) => void;
 };
 
-const useLoadingStore = create<LoadingState>((set) => ({
+const useLoadingStore = create<LoadingState>((set, get) => ({
   loading: false,
   type: "",
   hash: "",
   pendingMessage: "",
-  data: "",
-  startLoading: (type, hash, pendingMessage, data) => {
+  loadingData: "",
+  notification: "",
+  showNotification: false,
+  notificationData: undefined,
+  startLoading: (type, hash, pendingMessage, loadingData, notificationData) => {
     set({
       loading: true,
       type: type,
       hash,
       pendingMessage,
-      data,
+      loadingData,
+      notificationData,
     });
   },
   stopLoading: () => {
+    setTimeout(() => set({ showNotification: true }), 5000);
     set({
       loading: false,
       pendingMessage: undefined,
-      data: "",
+      loadingData: "",
     });
   },
-  updateData: (data) => {
-    set({ data });
+  updateData: (loadingData) => {
+    set({ loadingData });
   },
 }));
 

@@ -1,17 +1,14 @@
 interface BattleDisplayProps {
   battleData: any;
   beastName: string;
-  key: number;
 }
 
 export const BattleDisplay = ({
   battleData,
   beastName,
-  key,
 }: BattleDisplayProps) => {
   return (
-    <div key={key}>
-
+    <div>
       {battleData.attacker == "Adventurer" ? (
         battleData.targetHealth > 0 ? (
           <p>

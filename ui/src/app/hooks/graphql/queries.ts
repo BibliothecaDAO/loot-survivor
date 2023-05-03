@@ -74,6 +74,25 @@ const getLatestDiscoveries = gql`
   }
 `;
 
+const getLastDiscovery = gql`
+  query get_discoveries($adventurerId: FeltValue) {
+    discoveries(
+      where: { adventurerId: { eq: $adventurerId } }
+      limit: 1
+      orderBy: { discoveryTime: { desc: true } }
+    ) {
+      adventurerId
+      attackLocation
+      discoveryTime
+      discoveryType
+      entityId
+      outputAmount
+      subDiscoveryType
+      txHash
+    }
+  }
+`;
+
 const getDiscoveryByTxHash = gql`
   query get_discovery($txHash: HexValue) {
     discoveries(where: { txHash: { eq: $txHash } }) {
@@ -191,10 +210,7 @@ const getAdventurerById = gql`
 
 const getAdventurersInList = gql`
   query get_adventurer_by_id($ids: [FeltValue!]) {
-    adventurers(
-      where: { id: { In: $ids } }
-      limit: 10000000
-    ) {
+    adventurers(where: { id: { In: $ids } }, limit: 10000000) {
       beastId
       charisma
       chestId
@@ -418,7 +434,7 @@ const getLatestMarketItems = gql`
 
 const getItemsByAdventurer = gql`
   query get_items_by_adventurer($adventurer: FeltValue) {
-    items( where: { ownerAdventurerId: { eq: $adventurer } } limit: 10000000) {
+    items(where: { ownerAdventurerId: { eq: $adventurer } }, limit: 10000000) {
       bag
       bidder
       claimedTime
@@ -448,7 +464,7 @@ const getItemsByAdventurer = gql`
 
 const getItemsByOwner = gql`
   query get_items_by_owner($owner: HexValue) {
-    items(where: { owner: { eq: $owner } } limit: 10000000) {
+    items(where: { owner: { eq: $owner } }, limit: 10000000) {
       bag
       bidder
       claimedTime
@@ -489,6 +505,7 @@ const getLatestMarketItemsNumber = gql`
 export {
   getAdventurer,
   getLatestDiscoveries,
+  getLastDiscovery,
   getDiscoveryByTxHash,
   getAdventurersByOwner,
   getAdventurerById,

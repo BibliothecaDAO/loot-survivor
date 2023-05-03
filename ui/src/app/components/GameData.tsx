@@ -19,6 +19,7 @@ export class GameData {
   STATUS: Dict<string>;
   SLOTS: Dict<string>;
   BEAST_IMAGES: DictString<string>;
+  ADVENTURER_ANIMATIONS: DictString<string>;
 
   constructor() {
     this.CONTRACTS = {
@@ -488,6 +489,19 @@ export class GameData {
       Werewolf: "/beasts/werewolf.png",
       Spider: "/beasts/spider.png",
       Rat: "/beasts/rat.png",
+    };
+
+    this.ADVENTURER_ANIMATIONS = {
+      Create: "idle",
+      Flee: "run",
+      Ambush: "damage",
+      Attack: "attack1",
+      Die: "die",
+      Upgrade: "drawSword",
+      DiscoverItem: "discoverItem",
+      DiscoverBeast: "drawSword",
+      AvoidObstacle: "jump",
+      HitByObstacle: "damage",
     };
   }
 }

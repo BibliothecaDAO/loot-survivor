@@ -108,7 +108,8 @@ export default function Beast() {
               "Attack",
               tx.transaction_hash,
               "Attacking",
-              formatBattles
+              formatBattles,
+              lastBattleData
             );
             addTransaction({
               hash: tx.transaction_hash,
@@ -128,7 +129,13 @@ export default function Beast() {
         addToCalls(flee);
         await handleSubmitCalls(writeAsync).then((tx: any) => {
           if (tx) {
-            startLoading("Flee", tx.transaction_hash, "Fleeing", formatBattles);
+            startLoading(
+              "Flee",
+              tx.transaction_hash,
+              "Fleeing",
+              formatBattles,
+              lastBattleData
+            );
             addTransaction({
               hash: tx.transaction_hash,
               metadata: {

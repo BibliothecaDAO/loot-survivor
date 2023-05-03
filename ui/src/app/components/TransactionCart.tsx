@@ -79,7 +79,8 @@ const TransactionCart: React.FC = () => {
                       "Multicall",
                       tx?.transaction_hash,
                       "Muticalling",
-                      ""
+                      "",
+                      `Multicall complete!`
                     );
                     const marketIds = [];
 

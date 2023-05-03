@@ -1,0 +1,5 @@
+.sprite {
+    background-image : url("/adventurer-sprites.png");
+    display          : inline-block;
+    background-repeat: no-repeat;
+}

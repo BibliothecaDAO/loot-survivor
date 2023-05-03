@@ -1,5 +1,4 @@
 "use client";
-import { StarknetConfig } from "@starknet-react/core";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect } from "react";
 import { Button } from "./components/Button";
@@ -28,13 +27,17 @@ import { getAdventurerById } from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
-
+import SpriteAnimation from "./components/SpriteAnimation";
+import { CSSTransition } from "react-transition-group";
+import { NotificationDisplay } from "./components/NotificationDisplay";
 
 export default function Home() {
-
   const loading = useLoadingStore((state) => state.loading);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const data = useLoadingStore((state) => state.data);
+  const loadingData = useLoadingStore((state) => state.loadingData);
+  const type = useLoadingStore((state) => state.type);
+  const notificationData = useLoadingStore((state) => state.notificationData);
+  const showNotification = useLoadingStore((state) => state.showNotification);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const { disconnect } = useConnectors();
@@ -43,7 +46,6 @@ export default function Home() {
   const onboarded = useUIStore((state) => state.onboarded);
   const setOnboarded = useUIStore((state) => state.setOnboarded);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
-
   const testnet_addr = "http://survivor-indexer.bibliothecadao.xyz:5050";
 
   const upgrade = adventurer?.adventurer?.upgrading;
@@ -72,8 +74,8 @@ export default function Home() {
 
   useEffect(() => {
     setIndexer(
-      (account as any)?.baseUrl ==
-        testnet_addr || (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io"
+      (account as any)?.baseUrl == testnet_addr ||
+        (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io"
         ? "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql"
         : "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql"
     );
@@ -141,23 +143,20 @@ export default function Home() {
     }
   }, [adventurer]);
 
-  const prevData = usePrevious(data);
+  const prevData = usePrevious(loadingData);
 
   useEffect(() => {
     if (
       loading &&
-      data &&
+      loadingData &&
       prevData &&
-      JSON.stringify(data) !== JSON.stringify(prevData)
+      JSON.stringify(loadingData) !== JSON.stringify(prevData)
     ) {
-      stopLoading();
+      // stopLoading();
     }
-  }, [loading, data, prevData, stopLoading]);
+  }, [loading, loadingData, prevData, stopLoading]);
 
   return (
-
-
-
     <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
       {onboarded ? (
         <>
@@ -179,6 +178,19 @@ export default function Home() {
             </div>
           </div>
           <div className="w-full h-6 my-2 bg-terminal-green" />
+          <CSSTransition
+            in={showNotification}
+            timeout={500}
+            classNames="notification"
+            unmountOnExit
+          >
+            <div className="fixed flex flex-row border rounded-lg border-terminal-green w-1/4 bg-terminal-black">
+              <NotificationDisplay
+                type={type}
+                notificationData={notificationData}
+              />
+            </div>
+          </CSSTransition>
 
           {account ? (
             <div className="flex-grow w-full">

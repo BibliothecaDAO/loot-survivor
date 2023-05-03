@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { useAccount } from "@starknet-react/core";
 import { getAdventurersByOwner } from "../hooks/graphql/queries";
@@ -6,11 +6,15 @@ import { padAddress } from "../lib/utils";
 import { AdventurersList } from "./AdventurersList";
 import { CreateAdventurer } from "./CreateAdventurer";
 import VerticalKeyboardControl from "./VerticalMenu";
+import useLoadingStore from "../hooks/useLoadingStore";
 
 const Adventurer = () => {
   const { account } = useAccount();
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
+  const loading = useLoadingStore((state) => state.loading);
+  const updateData = useLoadingStore((state) => state.updateData);
+  const type = useLoadingStore((state) => state.type);
 
   const accountAddress = account ? account.address : "0x0";
 
@@ -46,6 +50,12 @@ const Adventurer = () => {
   const adventurers = adventurersByOwnerData
     ? adventurersByOwnerData.adventurers
     : [];
+
+  useEffect(() => {
+    if (loading && type == "Create") {
+      updateData(adventurers);
+    }
+  }, [loading, adventurers]);
 
   return (
     <div className="flex flex-row gap-2 p-4">

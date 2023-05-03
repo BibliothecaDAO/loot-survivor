@@ -94,7 +94,8 @@ const Upgrade = () => {
           "Upgrade",
           tx?.transaction_hash,
           `Upgrading ${selected}`,
-          adventurer
+          adventurer,
+          `You upgraded ${selected}!`
         );
         addTransaction({
           hash: tx.transaction_hash,
