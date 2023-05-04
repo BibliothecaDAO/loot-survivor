@@ -1,18 +1,14 @@
 import { useState, useEffect } from "react";
 import { useSpring, animated } from "react-spring";
 import { useContracts } from "../hooks/useContracts";
-import { NullAdventurer, NullBeast } from "../types";
+import { NullBeast } from "../types";
 import { useQuery } from "@apollo/client";
 import {
   getBeastById,
   getBattlesByBeast,
   getLastBattleByAdventurer,
 } from "../hooks/graphql/queries";
-import {
-  useTransactionManager,
-  useWaitForTransaction,
-  useContractWrite,
-} from "@starknet-react/core";
+import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import BattleInfo from "./Info";
 import { BattleDisplay } from "./BattleDisplay";
@@ -48,7 +44,7 @@ export default function Beast() {
     refetch: lastBattleRefetch,
   } = useQuery(getLastBattleByAdventurer, {
     variables: {
-      adventurerId: formatAdventurer?.id,
+      adventurerId: adventurer?.id,
     },
     pollInterval: 5000,
   });
@@ -60,9 +56,9 @@ export default function Beast() {
     refetch: battlesByBeastRefetch,
   } = useQuery(getBattlesByBeast, {
     variables: {
-      adventurerId: formatAdventurer?.id,
-      beastId: formatAdventurer?.beastId
-        ? formatAdventurer?.beastId
+      adventurerId: adventurer?.id,
+      beastId: adventurer?.beastId
+        ? adventurer?.beastId
         : lastBattleData?.battles[0]?.beastId,
     },
     pollInterval: 5000,
@@ -77,8 +73,8 @@ export default function Beast() {
     refetch: beastByTokenIdRefetch,
   } = useQuery(getBeastById, {
     variables: {
-      id: formatAdventurer?.beastId
-        ? formatAdventurer?.beastId
+      id: adventurer?.beastId
+        ? adventurer?.beastId
         : lastBattleData?.battles[0]?.beastId,
     },
     pollInterval: 5000,
@@ -89,13 +85,13 @@ export default function Beast() {
   const attack = {
     contractAddress: beastContract?.address ?? "",
     entrypoint: "attack",
-    calldata: [formatAdventurer?.beastId ?? "", "0"],
+    calldata: [adventurer?.beastId ?? "", "0"],
   };
 
   const flee = {
     contractAddress: beastContract?.address ?? "",
     entrypoint: "flee",
-    calldata: [formatAdventurer?.beastId ?? "", "0"],
+    calldata: [adventurer?.beastId ?? "", "0"],
   };
 
   const buttonsData: ButtonData[] = [

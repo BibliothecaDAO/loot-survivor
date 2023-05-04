@@ -21,7 +21,6 @@ export function BidBox({ close, marketId, item }: BidBoxProps) {
   const [bidPrice, setBidPrice] = useState<number | undefined>(undefined);
 
   const formatAddress = account ? account.address : "0x0";
-  const formatAdventurer = adventurer ? adventurer : NullAdventurerProps;
 
   const handleBid = (marketId: number) => {
     if (bidPrice != undefined && bidPrice >= 3) {
@@ -32,7 +31,7 @@ export function BidBox({ close, marketId, item }: BidBoxProps) {
           calldata: [
             marketId,
             "0",
-            formatAdventurer.adventurer?.id,
+            adventurer?.id,
             "0",
             bidPrice,
           ],

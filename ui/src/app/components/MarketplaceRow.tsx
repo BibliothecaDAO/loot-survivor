@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Button } from "./Button";
 import { BidBox } from "./Bid";
 import { useContracts } from "../hooks/useContracts";
-import { NullAdventurer } from "../types";
 import { formatTime } from "../lib/utils";
 import { convertTime } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
@@ -28,9 +27,8 @@ const MarketplaceRow = ({
   setActiveMenu,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
-  const { lootMarketArcadeContract, adventurerContract } = useContracts();
+  const { lootMarketArcadeContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
   const [showBidBox, setShowBidBox] = useState(-1);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -52,7 +50,7 @@ const MarketplaceRow = ({
   };
 
   const checkBidBalance = () => {
-    if (formatAdventurer?.gold) {
+    if (adventurer?.gold) {
       const sum = calls
         .filter((call) => call.entrypoint == "bid_on_item")
         .reduce((accumulator, current) => {
@@ -60,7 +58,7 @@ const MarketplaceRow = ({
           const parsedValue = value ? parseInt(value.toString(), 10) : 0;
           return accumulator + (isNaN(parsedValue) ? 0 : parsedValue);
         }, 0);
-      return sum >= formatAdventurer.gold;
+      return sum >= adventurer.gold;
     }
     return true;
   };
@@ -179,7 +177,7 @@ const MarketplaceRow = ({
                 const claimItemTx = {
                   contractAddress: lootMarketArcadeContract?.address ?? "",
                   entrypoint: "claim_item",
-                  calldata: [item.marketId, "0", formatAdventurer?.id, "0"],
+                  calldata: [item.marketId, "0", adventurer?.id, "0"],
                   metadata: `Claiming ${item.item}`,
                 };
                 addToCalls(claimItemTx);
@@ -189,7 +187,7 @@ const MarketplaceRow = ({
                 claimExists(item.marketId) ||
                 !item.expiry ||
                 convertTime(item.expiry) > currentTime ||
-                formatAdventurer?.id != item.bidder
+                adventurer?.id != item.bidder
               }
               className={claimExists(item.marketId) ? "" : ""}
             >

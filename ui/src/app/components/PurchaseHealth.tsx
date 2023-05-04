@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import HealthSlider from "./HealthSlider";
 import { Button } from "./Button";
 import { useContracts } from "../hooks/useContracts";
-import { useTransactionManager } from "@starknet-react/core";
-import { NullAdventurer } from "../types";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
@@ -17,18 +15,16 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
   const { adventurerContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const { addTransaction } = useTransactionManager();
 
-  const formatAdventurer = adventurer ? adventurer.adventurer : NullAdventurer;
   const purchaseHealthTx = {
     contractAddress: adventurerContract?.address ?? "",
     entrypoint: "purchase_health",
-    calldata: [formatAdventurer?.id ?? "", "0", healthAmount],
+    calldata: [adventurer?.id ?? "", "0", healthAmount],
     metadata: `Purchasing ${healthAmount}`,
   };
   const purchaseGoldAmount = healthAmount * 5;
   const hasBalance =
-    formatAdventurer?.gold && formatAdventurer?.gold >= purchaseGoldAmount
+    adventurer?.gold && adventurer?.gold >= purchaseGoldAmount
       ? true
       : false;
 
@@ -68,7 +64,7 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
   }, [isActive, healthAmount]);
 
   return (
-    <div className="flex flex-col m-auto gap-5">
+    <div className="flex flex-col gap-5 m-auto">
       <HealthSlider
         purchaseAmount={healthAmount}
         setPurchaseAmount={setHealthAmount}

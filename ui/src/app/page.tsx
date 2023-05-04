@@ -32,25 +32,26 @@ import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { useMusic, musicSelector } from "./hooks/useMusic";
+import { testnet_addr } from "./lib/constants";
 
 export default function Home() {
+  const { disconnect } = useConnectors();
+  const { account } = useAccount();
+  const [isMuted, setIsMuted] = useState(false);
+
   const loading = useLoadingStore((state) => state.loading);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const data = useLoadingStore((state) => state.data);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
-  const { disconnect } = useConnectors();
-  const { account } = useAccount();
   const calls = useTransactionCartStore((state) => state.calls);
   const onboarded = useUIStore((state) => state.onboarded);
   const setOnboarded = useUIStore((state) => state.setOnboarded);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
-  const [isMuted, setIsMuted] = useState(false);
   const [showBattleScene, setShowBattleScene] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
 
-  const testnet_addr = "http://survivor-indexer.bibliothecadao.xyz:5050";
-
-  const upgrade = adventurer?.adventurer?.upgrading;
+  const upgrade = adventurer?.upgrading;
 
   const { play, stop } = useMusic(musicSelector.backgroundMusic, {
     volume: 0.5,
@@ -59,7 +60,7 @@ export default function Home() {
   });
 
   useEffect(() => {
-    play();
+    // play();
 
     return () => {
       stop();
@@ -79,7 +80,7 @@ export default function Home() {
   const hasBeast = !!adventurer?.adventurer?.beastId;
 
   useEffect(() => {
-    if (!adventurer || adventurer.adventurer?.health == 0) {
+    if (!adventurer || adventurer?.health == 0) {
       setSelected(menu[0].value);
     }
   }, [adventurer]);
@@ -109,7 +110,7 @@ export default function Home() {
       },
     ];
 
-    if (adventurer?.adventurer && adventurer?.adventurer.health > 0) {
+    if (adventurer && adventurer.health > 0) {
       newMenu = [
         ...newMenu,
         {
@@ -150,10 +151,7 @@ export default function Home() {
 
   const [getData, _] = useLazyQuery(getAdventurerById, {
     onCompleted: (data) => {
-      setAdventurer({
-        adventurer: data.adventurers[0],
-        image: undefined, // Set this to the image URL
-      });
+      setAdventurer(data.adventurers[0]);
     },
   });
 
@@ -161,7 +159,7 @@ export default function Home() {
     if (adventurer) {
       getData({
         variables: {
-          id: adventurer.adventurer?.id,
+          id: adventurer?.id,
         },
       });
     }
@@ -233,15 +231,6 @@ export default function Home() {
               ) : (
                 <Upgrade />
               )}
-              {/* {adventurer?.adventurer ? (
-                <div className="fixed flex items-center w-5/6 text-lg text-white transform -translate-x-1/2 border-2 bottom-1 left-1/2 flew-row bg-terminal-black border-terminal-green justify-evenly">
-                  {adventurerStats.adventurer?.name}
-                  <p>HEALTH: {adventurerStats.adventurer?.health}</p>
-                  <p>GOLD: {adventurerStats.adventurer?.gold}</p>
-                  <p>LEVEL: {adventurerStats.adventurer?.level}</p>
-                  <p>XP: {adventurerStats.adventurer?.xp}</p>
-                </div>
-              ) : null} */}
             </div>
           ) : null}
         </>
