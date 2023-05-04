@@ -36,10 +36,6 @@ export default function Actions() {
 
   const { data } = useQueriesStore();
 
-  useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
-    adventurerId: adventurer?.id,
-  });
-
   const latestDiscoveries = data.latestDiscoveriesQuery
     ? data.latestDiscoveriesQuery.discoveries
     : [];
