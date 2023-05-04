@@ -6,6 +6,7 @@ import {
   getLatestMarketItems,
   getAdventurersInList,
   getLatestMarketItemsNumber,
+  getUnclaimedItemsByAdventurer,
 } from "../hooks/graphql/queries";
 import { UTCClock, Countdown } from "./Clock";
 import MarketplaceRow from "./MarketplaceRow";
@@ -23,6 +24,23 @@ const Marketplace = () => {
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
   const [itemsCount, setItemsCount] = useState(0);
+
+  const {
+    loading: getUnclaimedItemsByAdventurerLoading,
+    error: getUnclaimedItemsByAdventurerError,
+    data: getUnclaimedItemsByAdventurerData,
+    refetch: getUnclaimedItemsByAdventurerRefetch,
+  } = useQuery(getUnclaimedItemsByAdventurer, {
+    variables: {
+      bidder: adventurer?.id,
+      status: "Open"
+    },
+    pollInterval: 5000,
+  });
+
+  const unclaimedItems = getUnclaimedItemsByAdventurerData ? getUnclaimedItemsByAdventurerData.items : [];
+
+  console.log(unclaimedItems)
 
   const {
     loading: latestMarketItemsNumberLoading,
@@ -50,7 +68,7 @@ const Marketplace = () => {
   });
 
   const marketLatestItems = marketLatestItemsData
-    ? marketLatestItemsData.items
+    ? unclaimedItems.concat(marketLatestItemsData.items)
     : [];
 
   const bidders: number[] = [];
