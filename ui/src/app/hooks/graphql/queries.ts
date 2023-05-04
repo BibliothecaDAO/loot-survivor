@@ -416,9 +416,40 @@ const getLatestMarketItems = gql`
   }
 `;
 
+
 const getItemsByAdventurer = gql`
   query get_items_by_adventurer($adventurer: FeltValue) {
     items( where: { ownerAdventurerId: { eq: $adventurer } } limit: 10000000) {
+      bag
+      bidder
+      claimedTime
+      createdBlock
+      equippedAdventurerId
+      expiry
+      greatness
+      id
+      item
+      lastUpdated
+      marketId
+      material
+      owner
+      ownerAdventurerId
+      prefix1
+      prefix2
+      price
+      rank
+      slot
+      status
+      suffix
+      type
+      xp
+    }
+  }
+`;
+
+const getUnclaimedItemsByAdventurer = gql`
+  query get_items_by_adventurer($bidder: FeltValue, $status: StatusValue) {
+    items( where: { bidder: { eq: $bidder }, status: {eq: $status} } limit: 10000000) {
       bag
       bidder
       claimedTime
@@ -505,4 +536,5 @@ export {
   getItemsByOwner,
   getItemsByAdventurer,
   getLatestMarketItemsNumber,
+  getUnclaimedItemsByAdventurer
 };
