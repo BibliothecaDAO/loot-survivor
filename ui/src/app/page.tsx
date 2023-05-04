@@ -200,8 +200,6 @@ export default function Home() {
   useEffect(() => {
     if (loading && loadingQuery && isDataUpdated[loadingQuery]) {
       if (type == "Attack" || type == "Flee") {
-        console.log("here");
-        refetch("battlesByTxHashQuery");
         if (data?.battlesByTxHashQuery) {
           stopLoading({
             data: data.battlesByTxHashQuery.battles,
@@ -209,7 +207,6 @@ export default function Home() {
           });
         }
       } else if (type == "Explore") {
-        refetch("discoveryByTxHashQuery");
         stopLoading(data.discoveryByTxHashQuery);
       } else {
         stopLoading(notificationData);

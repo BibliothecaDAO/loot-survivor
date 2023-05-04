@@ -107,7 +107,14 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
   refetchFunctions: initialRefetchFunctions,
   updateData: (queryKey, newData, loading, refetch) => {
     set((state) => {
-      if (JSON.stringify(state.data[queryKey]) !== JSON.stringify(newData)) {
+      const keys = Object.keys(newData);
+      const isDataNotEmpty = keys.some(
+        (key) => Array.isArray(newData[key]) && newData[key].length > 0
+      );
+      if (
+        JSON.stringify(state.data[queryKey]) !== JSON.stringify(newData) &&
+        isDataNotEmpty
+      ) {
         return {
           ...state,
           data: { ...state.data, [queryKey]: newData },
