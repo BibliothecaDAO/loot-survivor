@@ -28,6 +28,9 @@ import {
   getBattleByTxHash,
   getLastDiscovery,
   getDiscoveryByTxHash,
+  getAdventurersByOwner,
+  getLatestMarketItems,
+  getLatestMarketItemsNumber,
 } from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
@@ -38,6 +41,8 @@ import { NotificationDisplay } from "./components/NotificationDisplay";
 import { useMusic, musicSelector } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
 import { NullAdventurer } from "./types";
+import useCustomQuery from "./hooks/useCustomQuery";
+import { useQueriesStore } from "./hooks/useQueryStore";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -47,7 +52,7 @@ export default function Home() {
   const hash = useLoadingStore((state) => state.hash);
   const loading = useLoadingStore((state) => state.loading);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const loadingData = useLoadingStore((state) => state.loadingData);
+  const loadingQuery = useLoadingStore((state) => state.loadingQuery);
   const type = useLoadingStore((state) => state.type);
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
@@ -59,6 +64,34 @@ export default function Home() {
   const setIndexer = useIndexerStore((state) => state.setIndexer);
 
   const upgrade = adventurer?.upgrading;
+
+  const { data, isDataUpdated, refetch } = useQueriesStore();
+
+  useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
+    owner: padAddress(account?.address ?? ""),
+  });
+  useCustomQuery("adventurerByIdQuery", getAdventurerById, {
+    id: padAddress(account?.address ?? ""),
+  });
+  useCustomQuery("adventurersByGoldQuery", getAdventurerById);
+
+  useCustomQuery("latestMarketItemsNumberQuery", getLatestMarketItemsNumber);
+
+  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
+    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
+    : [];
+
+  useCustomQuery("latestMarketItemsQuery", getLatestMarketItems, {
+    itemsNumber: latestMarketItemsNumber,
+  });
+
+  useCustomQuery("battlesByTxHashQuery", getBattleByTxHash, {
+    txHash: padAddress(hash),
+  });
+
+  useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
+    txHash: padAddress(hash),
+  });
 
   const { play, stop } = useMusic(musicSelector.backgroundMusic, {
     volume: 0.5,
@@ -148,80 +181,41 @@ export default function Home() {
     setMenu(newMenu);
   }, [adventurer, account]);
 
-  // const { data: adventurerData } = useQuery(getAdventurerById, {
-  //   variables: {
-  //     id: adventurer?.id,
-  //   },
-  //   pollInterval: 5000,
-  // });
+  const updatedAdventurer = data.adventurerByIdQuery
+    ? data.adventurerByIdQuery.adventurers[0]
+    : NullAdventurer;
 
-  // const updatedAdventurer = adventurerData
-  //   ? adventurerData.adventurers[0]
-  //   : NullAdventurer;
-
-  // console.log(adventurer);
-
-  const [getData, _] = useLazyQuery(getAdventurerById, {
-    onCompleted: (data) => {
-      setAdventurer(data.adventurers[0]);
-    },
-  });
+  console.log(data);
+  console.log(loading);
 
   useEffect(() => {
-    if (adventurer) {
-      getData({
-        variables: {
-          id: adventurer?.id,
-        },
-      });
-    }
-  }, [loading, adventurer]);
+    setAdventurer(updatedAdventurer);
+  }, [updatedAdventurer]);
 
-  // useEffect(() => {
-  //   if (updatedAdventurer) {
-  //     setAdventurer(updatedAdventurer);
-  //   }
-  // }, [adventurerData]);
-
-  const prevData = usePrevious(loadingData);
-
-  const [getBattleData, {}] = useLazyQuery(getBattleByTxHash, {
-    onCompleted: (data) => {
-      stopLoading({
-        data: data.battles,
-        beastName: notificationData.beastName,
-      });
-      console.log(data.battles);
-    },
-  });
-
-  const [getDiscoveryData, {}] = useLazyQuery(getDiscoveryByTxHash, {
-    onCompleted: (data) => {
-      stopLoading(data.discoveries[0]);
-      console.log(hash);
-      console.log(data);
-    },
-  });
-
-  console.log(loadingData, prevData);
+  console.log(
+    loadingQuery && isDataUpdated[loadingQuery],
+    data.discoveryByTxHashQuery
+  );
 
   useEffect(() => {
-    if (
-      loading &&
-      loadingData &&
-      prevData &&
-      JSON.stringify(loadingData) !== JSON.stringify(prevData)
-    )
+    if (loading && loadingQuery && isDataUpdated[loadingQuery]) {
       if (type == "Attack" || type == "Flee") {
-        getBattleData({
-          variables: {
-            tx: padAddress(hash),
-          },
-        });
+        console.log("here");
+        refetch("battlesByTxHashQuery");
+        if (data?.battlesByTxHashQuery) {
+          stopLoading({
+            data: data.battlesByTxHashQuery.battles,
+            beastName: notificationData.beastName,
+          });
+        }
       } else if (type == "Explore") {
-        stopLoading(loadingData[0]);
+        refetch("discoveryByTxHashQuery");
+        stopLoading(data.discoveryByTxHashQuery);
+      } else {
+        stopLoading(notificationData);
       }
-  }, [loading, loadingData, prevData, stopLoading]);
+    }
+  }, [loading, loadingQuery, stopLoading, data]);
 
   return (
     <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
@@ -254,7 +248,7 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed flex flex-row border rounded-lg border-terminal-green w-1/4 bg-terminal-black p-2 top-3">
+            <div className="fixed flex flex-row border rounded-lg border-terminal-green w-1/4 bg-terminal-black p-2 top-5 gap-5">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}

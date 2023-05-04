@@ -13,39 +13,35 @@ const processAnimation = (type: string, notificationData: any) => {
   if (type == "Flee") {
     if (
       Array.isArray(notificationData.data) &&
-      notificationData.data.some((data: any) => {
-        data.fled;
-      })
+      notificationData.data.some((data: any) => data.fled)
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Flee"];
     } else if (
       Array.isArray(notificationData.data) &&
-      notificationData.some((data: any) => {
-        data.ambush == true && data.targetHealth == 0;
-      })
+      notificationData.data.some(
+        (data: any) => data.ambush && data.targetHealth == 0
+      )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
     } else if (
       Array.isArray(notificationData.data) &&
-      notificationData.some((data: any) => {
-        data.ambush == true;
-      })
+      notificationData.data.some((data: any) => data.ambush)
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Ambush"];
     }
   } else if (type == "Attack") {
     if (
       Array.isArray(notificationData.data) &&
-      notificationData.data.some((data: any) => {
-        data.attacker == "Beast" && data.targetHealth == 0;
-      })
+      notificationData.data.some(
+        (data: any) => data.attacker == "Beast" && data.targetHealth == 0
+      )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
     } else if (
       Array.isArray(notificationData.data) &&
-      notificationData.data.some((data: any) => {
-        data.attacker == "Beast" && data.targetHealth == 0;
-      })
+      notificationData.data.some(
+        (data: any) => data.attacker == "Beast" && data.targetHealth == 0
+      )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["attack2"];
     } else {

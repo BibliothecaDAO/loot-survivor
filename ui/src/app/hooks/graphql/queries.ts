@@ -369,7 +369,7 @@ const getLastBattleByAdventurer = gql`
 `;
 
 const getBattleByTxHash = gql`
-  query get_latest_battle_by_tx($txHash: He) {
+  query get_latest_battle_by_tx($txHash: HexValue) {
     battles(
       where: { txHash: { eq: $txHash } }
       orderBy: { timestamp: { desc: true } }
@@ -453,7 +453,6 @@ const getLatestMarketItems = gql`
   }
 `;
 
-
 const getItemsByAdventurer = gql`
   query get_items_by_adventurer($adventurer: FeltValue) {
     items(where: { ownerAdventurerId: { eq: $adventurer } }, limit: 10000000) {
@@ -486,7 +485,10 @@ const getItemsByAdventurer = gql`
 
 const getUnclaimedItemsByAdventurer = gql`
   query get_items_by_adventurer($bidder: FeltValue, $status: StatusValue) {
-    items( where: { bidder: { eq: $bidder }, status: {eq: $status} } limit: 10000000) {
+    items(
+      where: { bidder: { eq: $bidder }, status: { eq: $status } }
+      limit: 10000000
+    ) {
       bag
       bidder
       claimedTime
@@ -575,5 +577,5 @@ export {
   getItemsByOwner,
   getItemsByAdventurer,
   getLatestMarketItemsNumber,
-  getUnclaimedItemsByAdventurer
+  getUnclaimedItemsByAdventurer,
 };

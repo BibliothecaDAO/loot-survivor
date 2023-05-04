@@ -15,6 +15,8 @@ import { BeastDisplay } from "./BeastDisplay";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 export default function Beast() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -26,56 +28,36 @@ export default function Beast() {
   const { addTransaction } = useTransactionManager();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const { writeAsync } = useContractWrite({ calls });
-  const hash = useLoadingStore((state) => state.hash);
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const type = useLoadingStore((state) => state.type);
-  const updateData = useLoadingStore((state) => state.updateData);
 
-  const {
-    loading: lastBattleLoading,
-    error: lastBattleError,
-    data: lastBattleData,
-    refetch: lastBattleRefetch,
-  } = useQuery(getLastBattleByAdventurer, {
-    variables: {
-      adventurerId: adventurer?.id,
-    },
-    pollInterval: 5000,
+  const { data } = useQueriesStore();
+
+  useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
+    adventurerId: adventurer?.id,
   });
 
-  const {
-    loading: battlesByBeastLoading,
-    error: battlesByBeastError,
-    data: battlesByBeastData,
-    refetch: battlesByBeastRefetch,
-  } = useQuery(getBattlesByBeast, {
-    variables: {
-      adventurerId: adventurer?.id,
-      beastId: adventurer?.beastId
-        ? adventurer?.beastId
-        : lastBattleData?.battles[0]?.beastId,
-    },
-    pollInterval: 5000,
+  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
+    adventurerId: adventurer?.id,
+    beastId: adventurer?.beastId
+      ? adventurer?.beastId
+      : data.lastBattleQuery?.battles[0]?.beastId,
   });
 
-  const formatBattles = battlesByBeastData ? battlesByBeastData.battles : [];
+  const formatBattles = data.battlesByBeastQuery
+    ? data.battlesByBeastQuery.battles
+    : [];
 
-  const {
-    loading: beastByTokenIdLoading,
-    error: beastByTokenIdError,
-    data: beastByTokenIdData,
-    refetch: beastByTokenIdRefetch,
-  } = useQuery(getBeastById, {
-    variables: {
-      id: adventurer?.beastId
-        ? adventurer?.beastId
-        : lastBattleData?.battles[0]?.beastId,
-    },
-    pollInterval: 5000,
+  useCustomQuery("beastByIdQuery", getBeastById, {
+    id: adventurer?.beastId
+      ? adventurer?.beastId
+      : data.lastBattleQuery?.battles[0]?.beastId,
   });
 
-  let beastData = beastByTokenIdData ? beastByTokenIdData.beasts[0] : NullBeast;
+  let beastData = data.beastByIdQuery
+    ? data.beastByIdQuery.beasts[0]
+    : NullBeast;
 
   const attack = {
     contractAddress: beastContract?.address ?? "",
@@ -101,7 +83,7 @@ export default function Beast() {
               "Attack",
               tx.transaction_hash,
               "Attacking",
-              formatBattles,
+              "battlesByTxHashQuery",
               { beastName: beastData.beast }
             );
             addTransaction({
@@ -126,7 +108,7 @@ export default function Beast() {
               "Flee",
               tx.transaction_hash,
               "Fleeing",
-              formatBattles,
+              "battlesByTxHashQuery",
               { beastName: beastData.beast }
             );
             addTransaction({
@@ -144,12 +126,6 @@ export default function Beast() {
 
   const isBeastDead = beastData?.health == "0";
 
-  useEffect(() => {
-    if (loading && (type == "Attack" || type == "Flee")) {
-      updateData(formatBattles);
-    }
-  }, [loading, formatBattles]);
-
   return (
     <div className="flex flex-row space-x-6">
       <div className="w-1/3">
@@ -163,7 +139,7 @@ export default function Beast() {
           />
         )}
 
-        {(adventurer?.beastId || lastBattleData?.battles[0]) && (
+        {(adventurer?.beastId || data.lastBattleQuery?.battles[0]) && (
           <>
             <div className="flex flex-col items-center gap-5 p-2">
               <div className="text-xl uppercase">
@@ -184,7 +160,7 @@ export default function Beast() {
       </div>
 
       <div className="flex flex-row w-1/3 ">
-        {adventurer?.beastId || lastBattleData?.battles[0] ? (
+        {adventurer?.beastId || data.lastBattleQuery?.battles[0] ? (
           <>
             <BeastDisplay beastData={beastData} />
           </>

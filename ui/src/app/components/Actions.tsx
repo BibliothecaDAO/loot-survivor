@@ -14,6 +14,8 @@ import VerticalKeyboardControl from "./VerticalMenu";
 import PurchaseHealth from "./PurchaseHealth";
 import Info from "./Info";
 import Discovery from "./Discovery";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 export default function Actions() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -28,21 +30,18 @@ export default function Actions() {
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const type = useLoadingStore((state) => state.type);
-  const updateData = useLoadingStore((state) => state.updateData);
 
   const [selected, setSelected] = useState<string>("");
   const [activeMenu, setActiveMenu] = useState(0);
 
-  const { data: latestDiscoveriesData, loading: latestDiscoverieslLoading } =
-    useQuery(getLatestDiscoveries, {
-      variables: {
-        adventurerId: adventurer?.id,
-      },
-      pollInterval: 5000,
-    });
+  const { data } = useQueriesStore();
 
-  const latestDiscoveries = latestDiscoveriesData
-    ? latestDiscoveriesData.discoveries
+  useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
+    adventurerId: adventurer?.id,
+  });
+
+  const latestDiscoveries = data.latestDiscoveriesQuery
+    ? data.latestDiscoveriesQuery.discoveries
     : [];
 
   const exploreTx = {
@@ -65,7 +64,7 @@ export default function Actions() {
                 "Explore",
                 tx.transaction_hash,
                 "Exploring",
-                latestDiscoveries
+                "discoveryByTxHashQuery"
               );
               addTransaction({
                 hash: tx.transaction_hash,
@@ -89,11 +88,7 @@ export default function Actions() {
     },
   ];
 
-  useEffect(() => {
-    if (loading && type == "Explore") {
-      updateData(latestDiscoveries);
-    }
-  }, [loading, latestDiscoveries]);
+  console.log(adventurer);
 
   return (
     <div className="flex flex-row space-x-6 ">

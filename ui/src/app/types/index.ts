@@ -179,6 +179,20 @@ export const NullBeast = {
   xp: 0,
 };
 
+export const NullBattle = {
+  adventurerId: 0,
+  ambushed: undefined,
+  attacker: "",
+  beastId: 0,
+  damage: 0,
+  fled: undefined,
+  goldEarned: undefined,
+  targetHealth: undefined,
+  timestamp: undefined,
+  txHash: undefined,
+  xpEarned: undefined,
+};
+
 export const NullDiscovery = {
   adventurerId: 0,
   discoveryTime: 0,

@@ -11,6 +11,8 @@ import { ItemDisplay } from "./ItemDisplay";
 import { Button } from "./Button";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 const Inventory: React.FC = () => {
   const { account } = useAccount();
@@ -23,19 +25,15 @@ const Inventory: React.FC = () => {
 
   // const gameData = new GameData();
 
-  const {
-    loading: itemsByAdventurerLoading,
-    error: itemsByAdventurerError,
-    data: itemsByAdventurerData,
-    refetch: itemsByAdventurerRefetch,
-  } = useQuery(getItemsByAdventurer, {
-    variables: {
-      adventurer: adventurer?.id,
-    },
-    pollInterval: 5000,
+  const { data } = useQueriesStore();
+
+  useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
+    adventurer: adventurer?.id,
   });
 
-  const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
+  const items = data.itemsByAdventurerQuery
+    ? data.itemsByAdventurerQuery.items
+    : [];
 
   const handleAddEquipItem = (itemId: any) => {
     if (adventurerContract && formatAddress) {

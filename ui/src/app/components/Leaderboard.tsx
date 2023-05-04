@@ -3,6 +3,7 @@ import { useQuery } from "@apollo/client";
 import { getAdventurerByGold } from "../hooks/graphql/queries";
 import { Button } from "./Button";
 import Coin from "../../../public/coin.svg";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);

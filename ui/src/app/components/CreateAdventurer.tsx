@@ -107,7 +107,7 @@ export const CreateAdventurer = ({
           "Create",
           tx.transaction_hash,
           "Spawning Adventurer",
-          adventurers,
+          "adventurersByOwnerQuery",
           `You have spawned ${formData.name}!`
         );
         addTransaction({

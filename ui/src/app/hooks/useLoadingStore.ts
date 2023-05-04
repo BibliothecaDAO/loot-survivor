@@ -1,11 +1,12 @@
 import { create } from "zustand";
+import { QueryKey } from "./useQueryStore";
 
 type LoadingState = {
   loading: boolean;
   type: string;
   hash: string;
   pendingMessage: string;
-  loadingData: any;
+  loadingQuery: QueryKey | null;
   showNotification: boolean;
   notificationData: any;
   startLoading: (
@@ -16,7 +17,6 @@ type LoadingState = {
     notificationData?: any
   ) => void;
   stopLoading: (notificationData?: any) => void;
-  updateData: (data: any) => void;
 };
 
 const useLoadingStore = create<LoadingState>((set, get) => ({
@@ -24,34 +24,38 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   type: "",
   hash: "",
   pendingMessage: "",
-  loadingData: "",
+  loadingQuery: null,
   notification: "",
   showNotification: false,
   notificationData: undefined,
-  startLoading: (type, hash, pendingMessage, loadingData, notificationData) => {
+  startLoading: (
+    type,
+    hash,
+    pendingMessage,
+    loadingQuery,
+    notificationData
+  ) => {
     set({
       loading: true,
       type: type,
       hash,
       pendingMessage,
-      loadingData,
+      loadingQuery,
       notificationData,
     });
   },
   stopLoading: (notificationData) => {
     set({ showNotification: true, notificationData: notificationData });
     setTimeout(
-      () => set({ notificationData: "", showNotification: false }),
+      () =>
+        set({ type: "", notificationData: undefined, showNotification: false }),
       5000
     );
     set({
       loading: false,
       pendingMessage: undefined,
-      loadingData: "",
+      loadingQuery: null,
     });
-  },
-  updateData: (loadingData) => {
-    set({ loadingData });
   },
 }));
 

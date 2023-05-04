@@ -8,16 +8,13 @@ import { CreateAdventurer } from "./CreateAdventurer";
 import VerticalKeyboardControl from "./VerticalMenu";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 const Adventurer = () => {
   const { account } = useAccount();
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
-  const loading = useLoadingStore((state) => state.loading);
-  const updateData = useLoadingStore((state) => state.updateData);
-  const type = useLoadingStore((state) => state.type);
-
-  const accountAddress = account ? account.address : "0x0";
 
   const menu = [
     {
@@ -36,27 +33,13 @@ const Adventurer = () => {
     },
   ];
 
-  const {
-    loading: adventurersByOwnerLoading,
-    error: adventurersByOwnerError,
-    data: adventurersByOwnerData,
-    refetch: adventurersByOwnerRefetch,
-  } = useQuery(getAdventurersByOwner, {
-    variables: {
-      owner: padAddress(accountAddress),
-    },
-    pollInterval: 5000,
-  });
+  const { data } = useQueriesStore();
 
-  const adventurers = adventurersByOwnerData
-    ? adventurersByOwnerData.adventurers
+  console.log(data);
+
+  const adventurers = data.adventurersByOwnerQuery
+    ? data.adventurersByOwnerQuery.adventurers
     : [];
-
-  useEffect(() => {
-    if (loading && type == "Create") {
-      updateData(adventurers);
-    }
-  }, [loading, adventurers]);
 
   return (
     <div className="flex flex-row gap-2 p-4">

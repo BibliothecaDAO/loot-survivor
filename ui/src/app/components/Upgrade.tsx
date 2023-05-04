@@ -13,10 +13,7 @@ import useTransactionCartStore from "../hooks/useTransactionCartStore";
 const Upgrade = () => {
   const { adventurerContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
-  const type = useLoadingStore((state) => state.type);
-  const updateData = useLoadingStore((state) => state.updateData);
 
   const { addTransaction } = useTransactionManager();
   const calls = useTransactionCartStore((state) => state.calls);
@@ -91,7 +88,7 @@ const Upgrade = () => {
           "Upgrade",
           tx?.transaction_hash,
           `Upgrading ${selected}`,
-          adventurer,
+          "adventurerByIdQuery",
           `You upgraded ${selected}!`
         );
         addTransaction({

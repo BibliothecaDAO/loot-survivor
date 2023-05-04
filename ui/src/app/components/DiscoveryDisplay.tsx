@@ -13,8 +13,6 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     variables: { id: discoveryData?.entityId },
   });
 
-  const itemName = data ? data.items[0]?.item : "";
-
   return (
     <>
       {discoveryData.discoveryType == "Nothing" ? (
@@ -34,7 +32,11 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         discoveryData.subDiscoveryType == "Gold" ? (
           <p>You discovered {discoveryData.outputAmount} gold!</p>
         ) : discoveryData.subDiscoveryType == "Loot" ? (
-          <p>You discovered {itemName}!</p>
+          data ? (
+            <p>You discovered a loot item, {data.items[0]?.item}!</p>
+          ) : (
+            <></>
+          )
         ) : discoveryData.subDiscoveryType == "Health" ? (
           <p>You discovered {discoveryData.outputAmount} health!</p>
         ) : null
