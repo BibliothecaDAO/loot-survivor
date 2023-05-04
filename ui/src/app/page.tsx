@@ -7,7 +7,7 @@ import Actions from "./components/Actions";
 import Marketplace from "./components/Marketplace";
 import Adventurer from "./components/Adventurer";
 import Beast from "./components/Beast";
-import { displayAddress } from "./lib/utils";
+import { displayAddress, padAddress } from "./lib/utils";
 import Inventory from "./components/Inventory";
 import TransactionHistory from "./components/TransactionHistory";
 import TransactionCart from "./components/TransactionCart";
@@ -22,8 +22,13 @@ import { TxActivity } from "./components/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
 import useAdventurerStore from "./hooks/useAdventurerStore";
 import usePrevious from "use-previous";
-import { useLazyQuery } from "@apollo/client";
-import { getAdventurerById } from "./hooks/graphql/queries";
+import { useLazyQuery, useQuery } from "@apollo/client";
+import {
+  getAdventurerById,
+  getBattleByTxHash,
+  getLastDiscovery,
+  getDiscoveryByTxHash,
+} from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
@@ -32,12 +37,14 @@ import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/NotificationDisplay";
 import { useMusic, musicSelector } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
+import { NullAdventurer } from "./types";
 
 export default function Home() {
   const { disconnect } = useConnectors();
   const { account } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
 
+  const hash = useLoadingStore((state) => state.hash);
   const loading = useLoadingStore((state) => state.loading);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const loadingData = useLoadingStore((state) => state.loadingData);
@@ -141,6 +148,19 @@ export default function Home() {
     setMenu(newMenu);
   }, [adventurer, account]);
 
+  // const { data: adventurerData } = useQuery(getAdventurerById, {
+  //   variables: {
+  //     id: adventurer?.id,
+  //   },
+  //   pollInterval: 5000,
+  // });
+
+  // const updatedAdventurer = adventurerData
+  //   ? adventurerData.adventurers[0]
+  //   : NullAdventurer;
+
+  // console.log(adventurer);
+
   const [getData, _] = useLazyQuery(getAdventurerById, {
     onCompleted: (data) => {
       setAdventurer(data.adventurers[0]);
@@ -155,9 +175,35 @@ export default function Home() {
         },
       });
     }
-  }, [adventurer]);
+  }, [loading, adventurer]);
+
+  // useEffect(() => {
+  //   if (updatedAdventurer) {
+  //     setAdventurer(updatedAdventurer);
+  //   }
+  // }, [adventurerData]);
 
   const prevData = usePrevious(loadingData);
+
+  const [getBattleData, {}] = useLazyQuery(getBattleByTxHash, {
+    onCompleted: (data) => {
+      stopLoading({
+        data: data.battles,
+        beastName: notificationData.beastName,
+      });
+      console.log(data.battles);
+    },
+  });
+
+  const [getDiscoveryData, {}] = useLazyQuery(getDiscoveryByTxHash, {
+    onCompleted: (data) => {
+      stopLoading(data.discoveries[0]);
+      console.log(hash);
+      console.log(data);
+    },
+  });
+
+  console.log(loadingData, prevData);
 
   useEffect(() => {
     if (
@@ -165,9 +211,16 @@ export default function Home() {
       loadingData &&
       prevData &&
       JSON.stringify(loadingData) !== JSON.stringify(prevData)
-    ) {
-      stopLoading();
-    }
+    )
+      if (type == "Attack" || type == "Flee") {
+        getBattleData({
+          variables: {
+            tx: padAddress(hash),
+          },
+        });
+      } else if (type == "Explore") {
+        stopLoading(loadingData[0]);
+      }
   }, [loading, loadingData, prevData, stopLoading]);
 
   return (
@@ -201,7 +254,7 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed flex flex-row border rounded-lg border-terminal-green w-1/4 bg-terminal-black">
+            <div className="fixed flex flex-row border rounded-lg border-terminal-green w-1/4 bg-terminal-black p-2 top-3">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}

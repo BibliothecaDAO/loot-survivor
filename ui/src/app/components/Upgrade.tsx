@@ -3,10 +3,9 @@ import { useContracts } from "../hooks/useContracts";
 import { getKeyFromValue } from "../lib/utils";
 import { GameData } from "./GameData";
 import VerticalKeyboardControl from "./VerticalMenu";
-import {
-  useTransactionManager,
-  useContractWrite,
-} from "@starknet-react/core";
+import { useTransactionManager, useContractWrite } from "@starknet-react/core";
+import { useQuery } from "@apollo/client";
+import { getAdventurerById } from "../hooks/graphql/queries";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
@@ -133,17 +132,10 @@ const Upgrade = () => {
     </p>
   );
 
-  useEffect(() => {
-    if (loading && type == "Upgrade") {
-      updateData(adventurer);
-    }
-  }, [adventurer]);
-
   return (
     <div className="flex flex-col gap-10 w-full mt-[100px]">
       <p className="mx-auto items-center text-[60px] animate-pulse">
-        You are now level {adventurer?.level}, please select
-        upgrade!
+        You are now level {adventurer?.level}, please select upgrade!
       </p>
       <div className="flex flex-row">
         <div className="w-1/2">

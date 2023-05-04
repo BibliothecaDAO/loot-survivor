@@ -10,7 +10,7 @@ interface DiscoveryProps {
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const gameData = new GameData();
   const { data } = useQuery(getItemsByTokenId, {
-    variables: { id: discoveryData.entityId },
+    variables: { id: discoveryData?.entityId },
   });
 
   const itemName = data ? data.items[0]?.item : "";
@@ -32,7 +32,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         )
       ) : discoveryData.discoveryType == "Item" ? (
         discoveryData.subDiscoveryType == "Gold" ? (
-          <p>You discovered {discoveryData.amount} gold!</p>
+          <p>You discovered {discoveryData.outputAmount} gold!</p>
         ) : discoveryData.subDiscoveryType == "Loot" ? (
           <p>You discovered {itemName}!</p>
         ) : discoveryData.subDiscoveryType == "Health" ? (

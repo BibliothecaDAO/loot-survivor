@@ -45,7 +45,7 @@ export const BattleDisplay = ({
 };
 
 interface NotificationBattleDisplayProps {
-  battleData: any[];
+  battleData: any;
   beastName: string;
 }
 
@@ -63,39 +63,39 @@ export const NotificationBattleDisplay = ({
         data.ambushed;
       }) ? (
         <p>
-          You fled the {beastName}! But were ambushed before taking{" "}
-          {battleData[0].damage} damage!
+          You fled the {beastName ? beastName : ""}! But were ambushed before
+          taking {battleData[0].damage} damage!
         </p>
       ) : Array.isArray(battleData) &&
         battleData.some((data) => {
           data.ambushed;
         }) ? (
         <p>
-          You couldn't flee and were ambushed by the {beastName} taking{" "}
-          {battleData[0].damage} damage!
+          You couldn't flee and were ambushed by the{" "}
+          {beastName ? beastName : ""} taking {battleData[0].damage} damage!
         </p>
       ) : Array.isArray(battleData) &&
         battleData.some((data) => {
           data.fled;
         }) ? (
-        <p>You fled the {beastName}!</p>
-      ) : battleData[1].attacker == "Adventurer" ? (
-        battleData[1].targetHealth > 0 && battleData[0].targetHealth > 0 ? (
+        <p>You fled the {beastName ? beastName : ""}!</p>
+      ) : battleData[1]?.attacker == "Adventurer" ? (
+        battleData[1]?.targetHealth > 0 && battleData[0]?.targetHealth > 0 ? (
           <p>
-            You attacked the {beastName} with a mighty strike and dealt{" "}
-            {battleData[1].damage} damage! They counterattacked for{" "}
-            {battleData[0].damage} damage!
+            You attacked the {beastName ? beastName : ""} with a mighty strike
+            and dealt {battleData[1]?.damage} damage! They counterattacked for{" "}
+            {battleData[0]?.damage} damage!
           </p>
         ) : (
           <p>
-            You were killed by the {beastName} taking {battleData[0].damage}{" "}
-            damage!
+            You were killed by the {beastName ? beastName : ""} taking{" "}
+            {battleData[1]?.damage} damage!
           </p>
         )
       ) : (
         <p>
-          You slayed the {beastName} after inflicting {battleData[1].damage}{" "}
-          damage!
+          You slayed the {beastName ? beastName : ""} after inflicting{" "}
+          {battleData[0]?.damage} damage!
         </p>
       )}
     </div>

@@ -11,17 +11,22 @@ interface NotificationDisplayProps {
 const processAnimation = (type: string, notificationData: any) => {
   const gameData = new GameData();
   if (type == "Flee") {
-    if (notificationData.fled) {
+    if (
+      Array.isArray(notificationData.data) &&
+      notificationData.data.some((data: any) => {
+        data.fled;
+      })
+    ) {
       return gameData.ADVENTURER_ANIMATIONS["Flee"];
     } else if (
-      Array.isArray(notificationData) &&
+      Array.isArray(notificationData.data) &&
       notificationData.some((data: any) => {
         data.ambush == true && data.targetHealth == 0;
       })
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
     } else if (
-      Array.isArray(notificationData) &&
+      Array.isArray(notificationData.data) &&
       notificationData.some((data: any) => {
         data.ambush == true;
       })
@@ -30,15 +35,15 @@ const processAnimation = (type: string, notificationData: any) => {
     }
   } else if (type == "Attack") {
     if (
-      Array.isArray(notificationData) &&
-      notificationData.some((data: any) => {
+      Array.isArray(notificationData.data) &&
+      notificationData.data.some((data: any) => {
         data.attacker == "Beast" && data.targetHealth == 0;
       })
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
     } else if (
-      Array.isArray(notificationData) &&
-      notificationData.some((data: any) => {
+      Array.isArray(notificationData.data) &&
+      notificationData.data.some((data: any) => {
         data.attacker == "Beast" && data.targetHealth == 0;
       })
     ) {
@@ -49,13 +54,15 @@ const processAnimation = (type: string, notificationData: any) => {
   } else if (type == "Explore") {
     if (notificationData?.discoveryType == "Beast") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverBeast"];
-    } else if (notificationData.discoveryType == "Obstacle") {
+    } else if (notificationData?.discoveryType == "Obstacle") {
       if (notificationData?.outputAmount > 0) {
         return gameData.ADVENTURER_ANIMATIONS["HitByObstacle"];
       } else {
         return gameData.ADVENTURER_ANIMATIONS["AvoidObstacle"];
       }
     } else if (notificationData?.discoveryType == "Item") {
+      return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
+    } else if (notificationData?.discoveryType == "Nothing") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
     }
   } else {
@@ -66,7 +73,10 @@ const processAnimation = (type: string, notificationData: any) => {
 const proccessNotification = (type: string, notificationData: any) => {
   if (type == "Attack" || type == "Flee") {
     return (
-      <NotificationBattleDisplay battleData={notificationData} beastName="" />
+      <NotificationBattleDisplay
+        battleData={notificationData.data}
+        beastName={notificationData.beastName ? notificationData.beastName : ""}
+      />
     );
   } else if (type == "Explore") {
     return <DiscoveryDisplay discoveryData={notificationData} />;
@@ -79,9 +89,9 @@ export const NotificationDisplay = ({
   type,
   notificationData,
 }: NotificationDisplayProps) => {
-  const gameData = new GameData();
   const animation = processAnimation(type, notificationData);
   const notification = proccessNotification(type, notificationData);
+  console.log(notificationData);
   return (
     <>
       <SpriteAnimation

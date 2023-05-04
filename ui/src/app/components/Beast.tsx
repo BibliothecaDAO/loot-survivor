@@ -45,18 +45,6 @@ export default function Beast() {
   });
 
   const {
-    loading: battleLoading,
-    error: battleError,
-    data: battleData,
-    refetch: battleRefetch,
-  } = useQuery(getLastBattleByAdventurer, {
-    variables: {
-      txHash: hash,
-    },
-    pollInterval: 5000,
-  });
-
-  const {
     loading: battlesByBeastLoading,
     error: battlesByBeastError,
     data: battlesByBeastData,
@@ -114,7 +102,7 @@ export default function Beast() {
               tx.transaction_hash,
               "Attacking",
               formatBattles,
-              battleData
+              { beastName: beastData.beast }
             );
             addTransaction({
               hash: tx.transaction_hash,
@@ -139,7 +127,7 @@ export default function Beast() {
               tx.transaction_hash,
               "Fleeing",
               formatBattles,
-              battleData
+              { beastName: beastData.beast }
             );
             addTransaction({
               hash: tx.transaction_hash,
@@ -160,7 +148,7 @@ export default function Beast() {
     if (loading && (type == "Attack" || type == "Flee")) {
       updateData(formatBattles);
     }
-  }, [formatBattles]);
+  }, [loading, formatBattles]);
 
   return (
     <div className="flex flex-row space-x-6">

@@ -45,20 +45,6 @@ export default function Actions() {
     ? latestDiscoveriesData.discoveries
     : [];
 
-  const { data: lastDiscoveryData, loading: lastDiscoveryLoading } = useQuery(
-    getLastDiscovery,
-    {
-      variables: {
-        adventurerId: adventurer?.id,
-      },
-      pollInterval: 5000,
-    }
-  );
-
-  const lastDiscovery = lastDiscoveryData
-    ? lastDiscoveryData.discoveries[0]
-    : [];
-
   const exploreTx = {
     contractAddress: adventurerContract?.address ?? "",
     entrypoint: "explore",
@@ -72,19 +58,14 @@ export default function Actions() {
       value: "explore",
       action: async () => {
         {
-          addToCalls({
-            contractAddress: adventurerContract?.address ?? "",
-            entrypoint: "explore",
-            calldata: [adventurer?.id ?? "", "0"],
-          });
+          addToCalls(exploreTx);
           await handleSubmitCalls(writeAsync).then((tx: any) => {
             if (tx) {
               startLoading(
                 "Explore",
                 tx.transaction_hash,
                 "Exploring",
-                latestDiscoveries,
-                lastDiscovery
+                latestDiscoveries
               );
               addTransaction({
                 hash: tx.transaction_hash,
