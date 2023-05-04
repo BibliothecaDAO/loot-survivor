@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSpring, animated } from "react-spring";
+import { useSpring, animated, config } from "react-spring";
 import { useContracts } from "../hooks/useContracts";
 import { NullAdventurer, NullBeast } from "../types";
 import { useQuery } from "@apollo/client";
@@ -18,11 +18,14 @@ import BattleInfo from "./Info";
 import { BattleDisplay } from "./BattleDisplay";
 import { BeastDisplay } from "./BeastDisplay";
 import Battle from "../../../public/battle.png";
+import { Button } from "./Button";
+import { shortenHex } from "../lib/utils";
+import { TxActivity } from "./TxActivity";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 
-export default function Beast() {
+export default function BattleScene() {
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const handleSubmitCalls = useTransactionCartStore(
@@ -37,7 +40,30 @@ export default function Beast() {
   const type = useLoadingStore((state) => state.type);
   const updateData = useLoadingStore((state) => state.updateData);
 
+  const [finished, setFinished] = useState(false);
+
   const showBattleScene = true;
+
+  const entryAnimation = useSpring({
+    from: { opacity: 0, transform: "translateY(100%)" },
+    to: { opacity: 1, transform: "translateY(0%)" },
+    config: { tension: 20, friction: 5, mass: 1 },
+    onRest: () => setFinished(true),
+  });
+
+  const shakeAnimation = useSpring({
+    from: { transform: "translateX(0px)" },
+    to: async (next: any) => {
+      let loopCount = 0;
+      while (loopCount < 10) {
+        await next({ transform: "translateX(10px)" });
+        await next({ transform: "translateX(-10px)" });
+        loopCount++;
+      }
+      await next({ transform: "translateX(0px)" });
+    },
+    config: { duration: 100 },
+  });
 
   const formatAdventurer = adventurer ? adventurer?.adventurer : NullAdventurer;
 
@@ -155,12 +181,19 @@ export default function Beast() {
   return (
     <div
       className="flex flex-col items-center justify-center h-screen bg-cover bg-no-repeat bg-center border border-terminal-green"
-      style={{ backgroundImage: `url(./battle.png)` }}
+      style={{
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(./battle.png)`,
+      }}
     >
-      <div className="flex flex-row space-x-8">
-        <div className="w-1/3">
-          <BattleInfo adventurer={adventurer?.adventurer} />
-        </div>
+      <div className="flex flex-row space-x-8 w-full">
+        <animated.div
+          className="flex flex-row w-1/3 bg-black"
+          style={entryAnimation}
+        >
+          <animated.div style={finished ? shakeAnimation : {}}>
+            <BattleInfo adventurer={adventurer?.adventurer} />
+          </animated.div>
+        </animated.div>
         <div className="flex flex-col w-1/3 gap-10">
           {(formatAdventurer?.beastId || lastBattleData?.battles[0]) && (
             <>
@@ -188,18 +221,22 @@ export default function Beast() {
           )}
         </div>
 
-        <div className="flex flex-row w-1/3 bg-black">
-          {!isBeastDead &&
-          (formatAdventurer?.beastId || lastBattleData?.battles[0]) ? (
+        <animated.div
+          className="flex flex-row w-1/3 bg-black"
+          style={entryAnimation}
+        >
+          {formatAdventurer?.beastId || lastBattleData?.battles[0] ? (
             <>
-              <BeastDisplay beastData={beastData} />
+              <animated.div style={finished ? shakeAnimation : {}}>
+                <BeastDisplay beastData={beastData} />
+              </animated.div>
             </>
           ) : (
             <p className="text-5xl text-white text-center w-1/2 m-auto">
               You are not in a battle
             </p>
           )}
-        </div>
+        </animated.div>
       </div>
     </div>
   );

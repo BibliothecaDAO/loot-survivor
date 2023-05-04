@@ -12,7 +12,7 @@ export const useMusic = (
   options?: { volume?: number; loop?: boolean; isMuted: boolean }
 ) => {
   const [play, { stop }] = useSound(dir + selector, {
-    volume: options?.volume || 0.5,
+    volume: options?.volume || 0.1,
     loop: options?.loop || false,
   });
 

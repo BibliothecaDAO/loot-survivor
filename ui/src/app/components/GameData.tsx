@@ -19,6 +19,7 @@ export class GameData {
   STATUS: Dict<string>;
   SLOTS: Dict<string>;
   BEAST_IMAGES: DictString<string>;
+  BEAST_ATTACK_LOCATION: DictString<string>;
 
   constructor() {
     this.CONTRACTS = {
@@ -488,6 +489,29 @@ export class GameData {
       Werewolf: "/beasts/werewolf.png",
       Spider: "/beasts/spider.png",
       Rat: "/beasts/rat.png",
+    };
+
+    this.BEAST_ATTACK_LOCATION = {
+      Phoenix: "/icons/loot/head.svg",
+      Griffin: "/icons/loot/chest.svg",
+      Minotaur: "/icons/loot/hand.svg",
+      Basilisk: "/icons/loot/waist.svg",
+      Gnome: "/icons/loot/foot.svg",
+      Wraith: "/icons/loot/chest.svg",
+      Ghoul: "/icons/loot/hand.svg",
+      Goblin: "/icons/loot/waist.svg",
+      Skeleton: "/icons/loot/foot.svg",
+      Golem: "/icons/loot/head.svg",
+      Giant: "/icons/loot/hand.svg",
+      Yeti: "/icons/loot/waist.svg",
+      Orc: "/icons/loot/foot.svg",
+      Beserker: "/icons/loot/head.svg",
+      Ogre: "/icons/loot/chest.svg",
+      Dragon: "/icons/loot/waist.svg",
+      Vampire: "/icons/loot/foot.svg",
+      Werewolf: "/icons/loot/head.svg",
+      Spider: "/icons/loot/chest.svg",
+      Rat: "/icons/loot/hand.svg",
     };
   }
 }

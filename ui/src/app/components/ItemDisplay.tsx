@@ -6,20 +6,21 @@ export const ItemDisplay = (item: any) => {
 
   return (
     <div
-      className={`flex-shrink flex gap-2 p-2 border border-terminal-green  ${formatItem ? "bg-terminal-green text-terminal-black" : ""
-        }`}
+      className={`flex-shrink flex gap-2 p-2 mb-1  ${
+        formatItem ? "bg-terminal-green text-terminal-black" : ""
+      }`}
     >
       <LootIcon type={slot} />
       <div>
         <span className="font-semibold whitespace-nowrap">
           {formatItem ? formatItem.item : "Nothing Equipped"}
-        </span> <br />
+        </span>{" "}
+        <br />
         <span className="whitespace-nowrap">
           {formatItem &&
-            `[Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`}
+            `[Tier ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`}
         </span>
       </div>
-
     </div>
   );
 };

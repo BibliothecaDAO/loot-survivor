@@ -38,7 +38,7 @@ const Marketplace = () => {
 
   const latestMarketItemsNumber = latestMarketItemsNumberData
     ? latestMarketItemsNumberData.market[0]?.itemsNumber
-    : [];
+    : 0;
 
   const {
     loading: marketLatestItemsLoading,
@@ -138,7 +138,7 @@ const Marketplace = () => {
   const headings = [
     "Market Id",
     "Item",
-    "Rank",
+    "Tier",
     "Slot",
     "Type",
     "Material",
@@ -164,7 +164,7 @@ const Marketplace = () => {
 
   const nextMint = new Date(
     new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
-    (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+      (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
   return (
@@ -203,7 +203,6 @@ const Marketplace = () => {
               <div className="flex justify-center p-10 text-center">
                 <LootIconLoader />
               </div>
-
             )}
             {marketLatestItemsError && (
               <p className="text-xl">ERROR {marketLatestItemsError.message}</p>
