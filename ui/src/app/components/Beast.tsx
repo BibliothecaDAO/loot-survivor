@@ -35,7 +35,7 @@ export default function Beast() {
 
   const showBattleScene = true;
 
-  const formatAdventurer = adventurer ? adventurer?.adventurer : NullAdventurer;
+  const formatAdventurer = adventurer ? adventurer : null;
 
   const {
     loading: lastBattleLoading,
@@ -155,7 +155,7 @@ export default function Beast() {
     >
       <div className="flex flex-row space-x-8">
         <div className="w-1/3">
-          <BattleInfo adventurer={adventurer?.adventurer} />
+          <BattleInfo adventurer={adventurer} />
         </div>
         <div className="flex flex-col w-1/3 gap-10">
           {(formatAdventurer?.beastId || lastBattleData?.battles[0]) && (

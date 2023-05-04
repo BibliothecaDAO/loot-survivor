@@ -49,8 +49,6 @@ export default function Home() {
   const setOnboarded = useUIStore((state) => state.setOnboarded);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const [showBattleScene, setShowBattleScene] = useState(true);
-  const [isMuted, setIsMuted] = useState(false);
-
   const upgrade = adventurer?.upgrading;
 
   const { play, stop } = useMusic(musicSelector.backgroundMusic, {
@@ -77,7 +75,7 @@ export default function Home() {
   ]);
 
   const [selected, setSelected] = useState(menu[0].value);
-  const hasBeast = !!adventurer?.adventurer?.beastId;
+  const hasBeast = !!adventurer?.beastId;
 
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
@@ -221,11 +219,8 @@ export default function Home() {
                   {selected === "actions" && <Actions />}
                   {selected === "market" && <Marketplace />}
                   {selected === "inventory" && <Inventory />}
-                  {selected === "beast" && showBattleScene ? (
-                    <BattleScene />
-                  ) : (
-                    <Beast />
-                  )}
+                  {selected === "beast" &&
+                    (showBattleScene ? <BattleScene /> : <Beast />)}
                   {selected === "leaderboard" && <Leaderboard />}
                 </>
               ) : (

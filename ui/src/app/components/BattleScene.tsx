@@ -65,7 +65,7 @@ export default function BattleScene() {
     config: { duration: 100 },
   });
 
-  const formatAdventurer = adventurer ? adventurer?.adventurer : NullAdventurer;
+  const formatAdventurer = adventurer ? adventurer : NullAdventurer;
 
   const {
     loading: lastBattleLoading,
@@ -191,7 +191,7 @@ export default function BattleScene() {
           style={entryAnimation}
         >
           <animated.div style={finished ? shakeAnimation : {}}>
-            <BattleInfo adventurer={adventurer?.adventurer} />
+            <BattleInfo adventurer={adventurer} />
           </animated.div>
         </animated.div>
         <div className="flex flex-col w-1/3 gap-10">
