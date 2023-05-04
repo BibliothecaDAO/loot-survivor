@@ -32,7 +32,7 @@ const useCustomQuery = (
     if (data) {
       updateData(queryKey, data, loading, refetchWrapper);
     }
-  }, [data, updateData, loading, queryKey, refetchWrapper]);
+  }, [data, updateData, loading, queryKey, refetchWrapper, variables]);
 
   useEffect(() => {
     startPolling(5000);

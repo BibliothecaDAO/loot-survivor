@@ -27,6 +27,7 @@ import {
   getAdventurerById,
   getBattleByTxHash,
   getLastDiscovery,
+  getLatestDiscoveries,
   getLastBattleByAdventurer,
   getBattlesByBeast,
   getDiscoveryByTxHash,
@@ -66,8 +67,6 @@ export default function Home() {
   const setOnboarded = useUIStore((state) => state.setOnboarded);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
 
-  console.log(adventurer);
-
   const upgrade = adventurer?.upgrading;
 
   const { data, isDataUpdated, refetch } = useQueriesStore();
@@ -94,6 +93,10 @@ export default function Home() {
     txHash: padAddress(hash),
   });
 
+  useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
+    adventurerId: adventurer?.id,
+  });
+
   useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
     txHash: padAddress(hash),
   });
@@ -112,6 +115,14 @@ export default function Home() {
       ? adventurer?.beastId
       : data.lastBattleQuery?.battles[0]?.beastId,
   });
+
+  const updatedAdventurer = data.adventurerByIdQuery
+    ? data.adventurerByIdQuery.adventurers[0]
+    : NullAdventurer;
+
+  useEffect(() => {
+    setAdventurer(updatedAdventurer);
+  }, [updatedAdventurer]);
 
   const { play, stop } = useMusic(musicSelector.backgroundMusic, {
     volume: 0.5,
@@ -201,28 +212,16 @@ export default function Home() {
     setMenu(newMenu);
   }, [adventurer, account]);
 
-  const updatedAdventurer = data.adventurerByIdQuery
-    ? data.adventurerByIdQuery.adventurers[0]
-    : NullAdventurer;
-
-  useEffect(() => {
-    setAdventurer(updatedAdventurer);
-  }, [updatedAdventurer]);
-
-  console.log(data);
-
   useEffect(() => {
     if (loading && loadingQuery && isDataUpdated[loadingQuery]) {
       if (type == "Attack" || type == "Flee") {
         if (data?.battlesByTxHashQuery) {
-          refetch("battlesByTxHashQuery");
           stopLoading({
             data: data.battlesByTxHashQuery.battles,
             beastName: notificationData.beastName,
           });
         }
       } else if (type == "Explore") {
-        refetch("discoveryByTxHashQuery");
         stopLoading(data.discoveryByTxHashQuery.discoveries[0]);
       } else {
         stopLoading(notificationData);
