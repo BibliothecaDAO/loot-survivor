@@ -27,10 +27,13 @@ import {
   getAdventurerById,
   getBattleByTxHash,
   getLastDiscovery,
+  getLastBattleByAdventurer,
+  getBattlesByBeast,
   getDiscoveryByTxHash,
   getAdventurersByOwner,
   getLatestMarketItems,
   getLatestMarketItemsNumber,
+  getBeastById,
 } from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
@@ -63,6 +66,8 @@ export default function Home() {
   const setOnboarded = useUIStore((state) => state.setOnboarded);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
 
+  console.log(adventurer);
+
   const upgrade = adventurer?.upgrading;
 
   const { data, isDataUpdated, refetch } = useQueriesStore();
@@ -71,7 +76,7 @@ export default function Home() {
     owner: padAddress(account?.address ?? ""),
   });
   useCustomQuery("adventurerByIdQuery", getAdventurerById, {
-    id: padAddress(account?.address ?? ""),
+    id: adventurer?.id ?? 0,
   });
   useCustomQuery("adventurersByGoldQuery", getAdventurerById);
 
@@ -91,6 +96,21 @@ export default function Home() {
 
   useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
     txHash: padAddress(hash),
+  });
+
+  useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
+    adventurerId: adventurer?.id,
+  });
+
+  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
+    adventurerId: adventurer?.id,
+    beastId: adventurer?.beastId,
+  });
+
+  useCustomQuery("beastByIdQuery", getBeastById, {
+    id: adventurer?.beastId
+      ? adventurer?.beastId
+      : data.lastBattleQuery?.battles[0]?.beastId,
   });
 
   const { play, stop } = useMusic(musicSelector.backgroundMusic, {
@@ -185,29 +205,25 @@ export default function Home() {
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
 
-  console.log(data);
-  console.log(loading);
-
   useEffect(() => {
     setAdventurer(updatedAdventurer);
   }, [updatedAdventurer]);
 
-  console.log(
-    loadingQuery && isDataUpdated[loadingQuery],
-    data.discoveryByTxHashQuery
-  );
+  console.log(data);
 
   useEffect(() => {
     if (loading && loadingQuery && isDataUpdated[loadingQuery]) {
       if (type == "Attack" || type == "Flee") {
         if (data?.battlesByTxHashQuery) {
+          refetch("battlesByTxHashQuery");
           stopLoading({
             data: data.battlesByTxHashQuery.battles,
             beastName: notificationData.beastName,
           });
         }
       } else if (type == "Explore") {
-        stopLoading(data.discoveryByTxHashQuery);
+        refetch("discoveryByTxHashQuery");
+        stopLoading(data.discoveryByTxHashQuery.discoveries[0]);
       } else {
         stopLoading(notificationData);
       }

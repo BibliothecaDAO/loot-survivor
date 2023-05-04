@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { isEqual } from "lodash";
 
 export type QueryKey =
   | "lastBattleQuery"
@@ -107,14 +108,12 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
   refetchFunctions: initialRefetchFunctions,
   updateData: (queryKey, newData, loading, refetch) => {
     set((state) => {
+      const isDataChanged = !isEqual(state.data[queryKey], newData);
       const keys = Object.keys(newData);
       const isDataNotEmpty = keys.some(
         (key) => Array.isArray(newData[key]) && newData[key].length > 0
       );
-      if (
-        JSON.stringify(state.data[queryKey]) !== JSON.stringify(newData) &&
-        isDataNotEmpty
-      ) {
+      if (isDataChanged && isDataNotEmpty) {
         return {
           ...state,
           data: { ...state.data, [queryKey]: newData },

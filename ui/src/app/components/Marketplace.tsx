@@ -157,6 +157,8 @@ const Marketplace = () => {
       (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
+  console.log(marketLatestItems);
+
   return (
     <>
       {adventurer?.level != 1 ? (

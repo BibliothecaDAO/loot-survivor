@@ -45,17 +45,19 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
     });
   },
   stopLoading: (notificationData) => {
-    set({ showNotification: true, notificationData: notificationData });
+    set({
+      showNotification: true,
+      notificationData: notificationData,
+      loading: false,
+      pendingMessage: undefined,
+      loadingQuery: null,
+      hash: "",
+    });
     setTimeout(
       () =>
         set({ type: "", notificationData: undefined, showNotification: false }),
       5000
     );
-    set({
-      loading: false,
-      pendingMessage: undefined,
-      loadingQuery: null,
-    });
   },
 }));
 

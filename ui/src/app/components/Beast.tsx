@@ -34,26 +34,9 @@ export default function Beast() {
 
   const { data } = useQueriesStore();
 
-  useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
-    adventurerId: adventurer?.id,
-  });
-
-  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
-    adventurerId: adventurer?.id,
-    beastId: adventurer?.beastId
-      ? adventurer?.beastId
-      : data.lastBattleQuery?.battles[0]?.beastId,
-  });
-
   const formatBattles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
     : [];
-
-  useCustomQuery("beastByIdQuery", getBeastById, {
-    id: adventurer?.beastId
-      ? adventurer?.beastId
-      : data.lastBattleQuery?.battles[0]?.beastId,
-  });
 
   let beastData = data.beastByIdQuery
     ? data.beastByIdQuery.beasts[0]
@@ -139,7 +122,7 @@ export default function Beast() {
           />
         )}
 
-        {(adventurer?.beastId || data.lastBattleQuery?.battles[0]) && (
+        {adventurer?.beastId && (
           <>
             <div className="flex flex-col items-center gap-5 p-2">
               <div className="text-xl uppercase">

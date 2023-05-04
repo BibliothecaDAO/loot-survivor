@@ -2,7 +2,10 @@ import { useEffect } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "./useQueryStore";
 
-type Variables = Record<string, any>;
+type Variables = Record<
+  string,
+  string | number | number[] | boolean | null | undefined
+>;
 
 const useCustomQuery = (
   queryKey: QueryKey,
