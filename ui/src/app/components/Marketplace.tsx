@@ -48,7 +48,9 @@ const Marketplace = () => {
 
   const removeDuplicates = (arr: any) => {
     return arr.reduce((accumulator: any, currentItem: any) => {
-      if (!accumulator.some((item: any) => item.marketId === currentItem.marketId)) {
+      if (
+        !accumulator.some((item: any) => item.marketId === currentItem.marketId)
+      ) {
         accumulator.push(currentItem);
       }
       return accumulator;
@@ -81,13 +83,10 @@ const Marketplace = () => {
     metadata: `Minting Loot Items!`,
   };
 
-  console.log(data);
-
   useEffect(() => {
     if (marketLatestItems) {
       setItemsCount(marketLatestItems.length);
     }
-    console.log(marketLatestItems.length);
   }, [selectedIndex]);
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -162,10 +161,8 @@ const Marketplace = () => {
     new Date(
       data.latestMarketItemsNumberQuery?.market[0]?.timestamp
     ).getTime() +
-    (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+      (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
-
-  console.log(marketLatestItems);
 
   return (
     <>

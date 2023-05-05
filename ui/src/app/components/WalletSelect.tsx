@@ -15,7 +15,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
   const { connectors, connect } = useConnectors();
   const { account } = useAccount();
   const [addedDevnet, setAddedDevnet] = useState<boolean>(false);
-  const setOnboarded = useUIStore((state) => state.setOnboarded);
+  const setConnected = useUIStore((state) => state.setConnected);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   // const handleKeyDown = (event: KeyboardEvent) => {
@@ -50,11 +50,11 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     if (screen == 1) {
       if (
         (account as any)?.provider?.baseUrl ==
-        "http://survivor-indexer.bibliothecadao.xyz:5050" ||
+          "http://survivor-indexer.bibliothecadao.xyz:5050" ||
         (account as any)?.baseUrl ==
-        "http://survivor-indexer.bibliothecadao.xyz:5050"
+          "http://survivor-indexer.bibliothecadao.xyz:5050"
       ) {
-        setOnboarded(true);
+        setConnected(true);
       }
     }
 
@@ -63,7 +63,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
         (account as any)?.baseUrl == "https://alpha4.starknet.io" ||
         (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io"
       ) {
-        setOnboarded(true);
+        setConnected(true);
       }
     }
   }, [account, screen]);

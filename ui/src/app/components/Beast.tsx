@@ -61,9 +61,6 @@ export default function Beast() {
       action: async () => {
         addToCalls(attack);
         await handleSubmitCalls(writeAsync).then((tx: any) => {
-
-          console.log("tx", tx)
-
           if (tx) {
             startLoading(
               "Attack",
@@ -125,7 +122,7 @@ export default function Beast() {
           />
         )}
 
-        {(adventurer?.beastId || formatBattles[0]) && (
+        {adventurer?.beastId && (
           <>
             <div className="flex flex-col items-center gap-5 p-2">
               <div className="text-xl uppercase">

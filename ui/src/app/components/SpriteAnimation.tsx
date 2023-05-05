@@ -52,7 +52,7 @@ const SpriteAnimation: React.FC<SpriteAnimationProps> = ({
       style={{
         backgroundPositionX: `${bgPositionX}px`,
         backgroundPositionY: `${bgPositionY}px`,
-        backgroundSize: `${columns * frameWidth + 50}px ${
+        backgroundSize: `${columns * (frameWidth + 10)}px ${
           rows * frameHeight
         }px`,
         width: frameWidth,

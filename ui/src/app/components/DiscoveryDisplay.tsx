@@ -1,15 +1,18 @@
 import { useQuery } from "@apollo/client";
 import { getItemsByTokenId } from "../hooks/graphql/queries";
 import ItemDisplay from "./LootIcon";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 interface DiscoveryProps {
   discoveryData: any;
 }
 
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
+  const { adventurer } = useAdventurerStore();
   const { data } = useQuery(getItemsByTokenId, {
     variables: { id: discoveryData?.entityId },
   });
+  console.log(adventurer);
 
   const renderDiscoveryMessage = () => {
     if (discoveryData?.discoveryType === "Nothing") {
@@ -22,7 +25,16 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
 
     if (discoveryData?.discoveryType === "Obstacle") {
       if (discoveryData.outputAmount === 0) {
-        return <p>You avoided the {discoveryData.subDiscoveryType} obstacle!</p>;
+        return (
+          <p>You avoided the {discoveryData.subDiscoveryType} obstacle!</p>
+        );
+      } else if (adventurer?.health === 0) {
+        return (
+          <p>
+            You discovered the {discoveryData.subDiscoveryType} obstacle, it
+            killed you with {discoveryData.outputAmount} damage!
+          </p>
+        );
       } else {
         return (
           <p>
@@ -39,7 +51,14 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       }
 
       if (discoveryData.subDiscoveryType === "Loot") {
-        return data ? <div className="flex self-center"><ItemDisplay className="mr-4 " type={data.items[0]?.slot} /><p>You discovered a loot item, {data.items[0]?.item}!</p></div> : <></>;
+        return data ? (
+          <div className="flex self-center">
+            <ItemDisplay className="mr-4 " type={data.items[0]?.slot} />
+            <p>You discovered a loot item, {data.items[0]?.item}!</p>
+          </div>
+        ) : (
+          <></>
+        );
       }
 
       if (discoveryData.subDiscoveryType === "Health") {
@@ -50,9 +69,5 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     return null;
   };
 
-  return (
-    <div className="w-full p-2 text-left border border-terminal-green">
-      {renderDiscoveryMessage()}
-    </div>
-  );
+  return renderDiscoveryMessage();
 };

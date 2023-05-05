@@ -63,8 +63,8 @@ export default function Home() {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
-  const onboarded = useUIStore((state) => state.onboarded);
-  const setOnboarded = useUIStore((state) => state.setOnboarded);
+  const connected = useUIStore((state) => state.connected);
+  const setConnected = useUIStore((state) => state.setConnected);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
 
   const upgrade = adventurer?.upgrading;
@@ -107,8 +107,8 @@ export default function Home() {
   });
 
   useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
-    adventurerId: adventurer?.id,
-    beastId: adventurer?.beastId,
+    adventurerId: adventurer?.id ?? 0,
+    beastId: adventurer?.beastId ?? 0,
   });
 
   useCustomQuery("beastByIdQuery", getBeastById, {
@@ -120,6 +120,10 @@ export default function Home() {
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
+
+  console.log(data);
+  console.log(adventurer);
+  console.log(updatedAdventurer);
 
   useEffect(() => {
     setAdventurer(updatedAdventurer);
@@ -157,7 +161,7 @@ export default function Home() {
 
   useEffect(() => {
     if (!account?.address) {
-      setOnboarded(false);
+      setConnected(false);
     }
   }, [account]);
 
@@ -213,34 +217,23 @@ export default function Home() {
     setMenu(newMenu);
   }, [adventurer, account]);
 
-  // useEffect(() => {
-  //   // Check if loading, loadingQuery, and isDataUpdated are truthy
-  //   if (loading && loadingQuery && isDataUpdated[loadingQuery]) {
-  //     // Handle "Attack" or "Flee" types
-  //     if (type === "Attack" || type === "Flee") {
-  //       if (data?.battlesByTxHashQuery) {
-  //         stopLoading({
-  //           data: data.battlesByTxHashQuery.battles,
-  //           beastName: notificationData.beastName,
-  //         });
-  //       }
-  //     }
-
-  //     // Handle "Explore" type
-  //     else if (type === "Explore") {
-  //       stopLoading(data.discoveryByTxHashQuery.discoveries[0]);
-  //     }
-
-  //     // Handle other types
-  //     else {
-  //       stopLoading(notificationData);
-  //     }
-  //   }
-  // }, [loading]);
+  // const showNotification = true;
+  // const type = "Explore";
+  // const notificationData = {
+  //   adventurerId: 7,
+  //   attackLocation: "Foot",
+  //   discoveryTime: "2023-05-05T14:41:37",
+  //   discoveryType: "Obstacle",
+  //   entityId: null,
+  //   outputAmount: 9,
+  //   subDiscoveryType: "Dark Mist",
+  //   txHash: "0x02526e0eef880bfb5efaf3b3b64f4307bc09b8b30ad5f5e323",
+  // };
+  const battleNotifData = {};
 
   return (
     <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
-      {onboarded ? (
+      {connected ? (
         <>
           <div className="flex justify-between w-full ">
             <h1 className="glitch">M.O.R.T.A.L</h1>
@@ -263,19 +256,19 @@ export default function Home() {
             </div>
           </div>
           <div className="w-full h-6 my-2 bg-terminal-green" />
-          {/* <CSSTransition
+          <CSSTransition
             in={showNotification}
             timeout={500}
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed flex flex-row w-1/4 gap-5 p-2 border rounded-lg border-terminal-green bg-terminal-black top-5">
+            <div className="fixed top-0 left-0 mt-20 ml-20 w-1/4 border rounded-lg border-terminal-green bg-terminal-black">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}
               />
             </div>
-          </CSSTransition> */}
+          </CSSTransition>
 
           {account ? (
             <div className="flex-grow w-full">
