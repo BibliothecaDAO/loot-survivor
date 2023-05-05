@@ -169,16 +169,6 @@ const Inventory: React.FC = () => {
           equippedItemId={adventurer?.chestId}
         />
         <InventoryRow
-          title={"Feet Armour"}
-          items={groupedItems["Foot"]}
-          menuIndex={3}
-          isActive={activeMenu == 3}
-          setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 3}
-          setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.feetId}
-        />
-        <InventoryRow
           title={"Hands Armour"}
           items={groupedItems["Hand"]}
           menuIndex={4}
@@ -197,6 +187,16 @@ const Inventory: React.FC = () => {
           isSelected={selectedIndex == 5}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.waistId}
+        />
+        <InventoryRow
+          title={"Feet Armour"}
+          items={groupedItems["Foot"]}
+          menuIndex={3}
+          isActive={activeMenu == 3}
+          setActiveMenu={setActiveMenu}
+          isSelected={selectedIndex == 3}
+          setSelected={setSelectedIndex}
+          equippedItemId={adventurer?.feetId}
         />
         <InventoryRow
           title={"Neck Jewelry"}
