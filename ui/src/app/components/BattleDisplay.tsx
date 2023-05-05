@@ -56,8 +56,8 @@ export const NotificationBattleDisplay = ({
   return (
     <div>
       {Array.isArray(battleData) &&
-      battleData.some((data) => data.fled) &&
-      battleData.some((data) => data.ambushed) ? (
+        battleData.some((data) => data.fled) &&
+        battleData.some((data) => data.ambushed) ? (
         <p>
           You fled the {beastName ? beastName : ""}! But were ambushed before
           taking {battleData[0].damage} damage!
