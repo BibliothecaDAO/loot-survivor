@@ -1,7 +1,8 @@
 "use client";
-
+import { useEffect, useState } from "react";
 import { useWaitForTransaction } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../lib/utils";
+import { useQueriesStore } from "../hooks/useQueryStore";
 import useLoadingStore from "../hooks/useLoadingStore";
 import LootIconLoader from "./Loader";
 
@@ -17,13 +18,52 @@ export const TxActivity = () => {
   const hash = useLoadingStore((state) => state.hash);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const type = useLoadingStore((state) => state.type);
+  const {
+    data: queryData,
+    isDataUpdated,
+    refetch,
+    resetDataUpdated,
+  } = useQueriesStore();
+  const [accepted, setAccepted] = useState(false);
   const { data } = useWaitForTransaction({
     hash,
     watch: true,
     onAcceptedOnL2: () => {
-      stopLoading(notificationData);
+      setAccepted(true);
     },
   });
+
+  useEffect(() => {
+    // Check if loading, loadingQuery, and isDataUpdated are truthy
+    if (hash && loadingQuery && isDataUpdated[loadingQuery]) {
+      // Handle "Attack" or "Flee" types
+      if (type === "Attack" || type === "Flee") {
+        if (queryData?.battlesByTxHashQuery) {
+          stopLoading({
+            data: queryData.battlesByTxHashQuery.battles,
+            beastName: notificationData.beastName,
+          });
+        }
+        setAccepted(false);
+        resetDataUpdated(loadingQuery);
+      }
+
+      // Handle "Explore" type
+      else if (type === "Explore") {
+        console.log("here");
+        stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
+        setAccepted(false);
+        resetDataUpdated(loadingQuery);
+      }
+
+      // Handle other types
+      else {
+        stopLoading(notificationData);
+        setAccepted(false);
+        resetDataUpdated(loadingQuery);
+      }
+    }
+  }, [loadingQuery && isDataUpdated[loadingQuery], accepted, hash]);
 
   return (
     <>

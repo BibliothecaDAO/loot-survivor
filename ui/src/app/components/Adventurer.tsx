@@ -35,8 +35,6 @@ const Adventurer = () => {
 
   const { data } = useQueriesStore();
 
-  console.log(data);
-
   const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers
     : [];

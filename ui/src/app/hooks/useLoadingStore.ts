@@ -36,14 +36,6 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
     loadingQuery,
     notificationData
   ) => {
-    console.log("loading:", {
-      loading: true,
-      type: type,
-      hash,
-      pendingMessage,
-      loadingQuery,
-      notificationData,
-    })
     set({
       loading: true,
       type: type,
@@ -59,8 +51,8 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       notificationData: notificationData || undefined,
       loading: false,
       pendingMessage: undefined,
-      loadingQuery: null,
-      hash: "",
+      // loadingQuery: null,
+      // hash: "",
     });
     setTimeout(
       () =>

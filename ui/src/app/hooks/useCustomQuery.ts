@@ -1,6 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "./useQueryStore";
+import { isEqual } from "lodash";
 
 type Variables = Record<
   string,
@@ -13,10 +14,13 @@ const useCustomQuery = (
   variables?: Variables
 ) => {
   const { updateData } = useQueriesStore();
+
   const { data, startPolling, stopPolling, loading, refetch } = useQuery(
     query,
     {
-      variables,
+      variables: variables,
+      fetchPolicy: "network-only", // To ensure data is fetched from the network and not the cache,
+      pollInterval: 5000,
     }
   );
 

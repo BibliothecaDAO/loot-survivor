@@ -9,8 +9,6 @@ interface DiscoveryProps {
 const Discovery = ({ discoveries }: DiscoveryProps) => {
   const isLoading = useQueriesStore((state) => state.isLoading);
 
-  console.log("loading", isLoading)
-
   return (
     <div className="flex flex-col items-center gap-5 m-auto text-xl">
       {discoveries.length > 0 ? (
@@ -19,7 +17,12 @@ const Discovery = ({ discoveries }: DiscoveryProps) => {
           {isLoading.discoveryByTxHashQuery && <LootIconLoader />}
           <div className="flex flex-col items-center gap-2">
             {discoveries.map((discovery: any, index: number) => (
-              <DiscoveryDisplay key={index} discoveryData={discovery} />
+              <div
+                className="w-full p-2 text-left border border-terminal-green"
+                key={index}
+              >
+                <DiscoveryDisplay discoveryData={discovery} />
+              </div>
             ))}
           </div>
         </>

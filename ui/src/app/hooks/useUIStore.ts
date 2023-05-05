@@ -1,13 +1,13 @@
 import { create } from "zustand";
 
 type State = {
-  onboarded?: boolean;
-  setOnboarded: (value: boolean) => void;
+  connected?: boolean;
+  setConnected: (value: boolean) => void;
 };
 
 const useUIStore = create<State>((set) => ({
-  onboarded: undefined,
-  setOnboarded: (value) => set({ onboarded: value }),
+  connected: undefined,
+  setConnected: (value) => set({ connected: value }),
 }));
 
 export default useUIStore;

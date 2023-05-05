@@ -113,7 +113,6 @@ const MarketplaceRow = ({
       return "Bids";
     }
   };
-
   return (
     <tr
       ref={ref}
