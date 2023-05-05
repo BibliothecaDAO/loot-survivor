@@ -107,8 +107,8 @@ export default function Home() {
   });
 
   useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
-    adventurerId: adventurer?.id,
-    beastId: adventurer?.beastId,
+    adventurerId: adventurer?.id ?? 0,
+    beastId: adventurer?.beastId ?? 0,
   });
 
   useCustomQuery("beastByIdQuery", getBeastById, {
@@ -121,6 +121,8 @@ export default function Home() {
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
 
+  console.log(data);
+  console.log(adventurer);
   console.log(updatedAdventurer);
 
   useEffect(() => {
@@ -215,6 +217,20 @@ export default function Home() {
     setMenu(newMenu);
   }, [adventurer, account]);
 
+  // const showNotification = true;
+  // const type = "Explore";
+  // const notificationData = {
+  //   adventurerId: 7,
+  //   attackLocation: "Foot",
+  //   discoveryTime: "2023-05-05T14:41:37",
+  //   discoveryType: "Obstacle",
+  //   entityId: null,
+  //   outputAmount: 9,
+  //   subDiscoveryType: "Dark Mist",
+  //   txHash: "0x02526e0eef880bfb5efaf3b3b64f4307bc09b8b30ad5f5e323",
+  // };
+  const battleNotifData = {};
+
   return (
     <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
       {connected ? (
@@ -246,7 +262,7 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed top-0 left-0 mt-20 ml-20 flex flex-row w-1/4 gap-5 p-2 border rounded-lg border-terminal-green bg-terminal-black">
+            <div className="fixed top-0 left-0 mt-20 ml-20 w-1/4 border rounded-lg border-terminal-green bg-terminal-black">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}

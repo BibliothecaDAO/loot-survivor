@@ -30,16 +30,8 @@ export const TxActivity = () => {
     watch: true,
     onAcceptedOnL2: () => {
       setAccepted(true);
-      // stopLoading(notificationData);
     },
   });
-
-  console.log(
-    queryData,
-    loadingQuery && isDataUpdated[loadingQuery],
-    notificationData,
-    hash
-  );
 
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy

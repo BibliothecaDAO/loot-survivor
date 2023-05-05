@@ -70,24 +70,25 @@ export const NotificationBattleDisplay = ({
         </p>
       ) : Array.isArray(battleData) && battleData.some((data) => data.fled) ? (
         <p>You fled the {beastName ? beastName : ""}!</p>
-      ) : battleData[0]?.attacker == "Adventurer" ? (
-        battleData[0]?.targetHealth > 0 && battleData[1]?.targetHealth > 0 ? (
+      ) : (
+        battleData[0]?.attacker == "Adventurer" &&
+        (battleData[0]?.targetHealth > 0 && battleData[1]?.targetHealth > 0 ? (
           <p>
             You attacked the {beastName ? beastName : ""} with a mighty strike
-            and dealt {battleData[1]?.damage} damage! They counterattacked for{" "}
-            {battleData[0]?.damage} damage!
+            and dealt {battleData[0]?.damage} damage! They counterattacked for{" "}
+            {battleData[1]?.damage} damage!
           </p>
-        ) : (
+        ) : battleData[1]?.targetHealth == 0 ? (
           <p>
             You slayed the {beastName ? beastName : ""} after inflicting{" "}
             {battleData[0]?.damage} damage!
           </p>
-        )
-      ) : (
-        <p>
-          You were killed by the {beastName ? beastName : ""} taking{" "}
-          {battleData[1]?.damage} damage!
-        </p>
+        ) : (
+          <p>
+            You were killed by the {beastName ? beastName : ""} taking{" "}
+            {battleData[1]?.damage} damage!
+          </p>
+        ))
       )}
     </div>
   );

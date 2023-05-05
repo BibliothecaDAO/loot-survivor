@@ -122,7 +122,7 @@ export default function Beast() {
           />
         )}
 
-        {(adventurer?.beastId || formatBattles[0]) && (
+        {adventurer?.beastId && (
           <>
             <div className="flex flex-col items-center gap-5 p-2">
               <div className="text-xl uppercase">
