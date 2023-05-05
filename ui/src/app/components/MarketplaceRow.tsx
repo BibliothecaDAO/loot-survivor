@@ -114,6 +114,16 @@ const MarketplaceRow = ({
     }
   };
 
+  console.log(adventurer);
+
+  console.log(
+    item.claimedTime,
+    claimExists(item.marketId),
+    !item.expiry,
+    convertTime(item.expiry) > currentTime,
+    adventurer?.id != item.bidder
+  );
+
   return (
     <tr
       ref={ref}
@@ -136,10 +146,11 @@ const MarketplaceRow = ({
       <td className="text-center">{item.price}</td>
       <td className="text-center">
         {item.bidder
-          ? `${adventurers.find(
-            (adventurer: any) => adventurer.id == item.bidder
-          )?.name
-          } - ${item.bidder}`
+          ? `${
+              adventurers.find(
+                (adventurer: any) => adventurer.id == item.bidder
+              )?.name
+            } - ${item.bidder}`
           : ""}
       </td>
       <td className="text-center">

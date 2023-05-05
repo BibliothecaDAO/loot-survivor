@@ -59,7 +59,10 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     }
 
     if (screen == 2) {
-      if ((account as any)?.baseUrl == "https://alpha4.starknet.io" || (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io") {
+      if (
+        (account as any)?.baseUrl == "https://alpha4.starknet.io" ||
+        (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io"
+      ) {
         setOnboarded(true);
       }
     }
@@ -72,10 +75,10 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
         {screen == 2 ? (
           <div className="flex flex-col w-1/2 gap-5 m-auto">
             {connectors.length > 0 ? (
-              connectors.map((connector) => (
+              connectors.map((connector, index) => (
                 <Button
                   onClick={() => connect(connector)}
-                  key={connector.id()}
+                  key={index}
                   className="w-full"
                 >
                   Connect {connector.id()}
@@ -90,12 +93,12 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
             {connectors.some(
               (connector: any) => connector.id() == "argentX"
             ) ? (
-              connectors.map((connector) => (
+              connectors.map((connector, index) => (
                 <>
                   {connector.id() == "argentX" ? (
                     <Button
                       onClick={() => connect(connector)}
-                      key={connector.id()}
+                      key={index}
                       className="w-full"
                       disabled={account ? true : false}
                     >

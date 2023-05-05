@@ -2,7 +2,10 @@ import { useState, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { NullAdventurer } from "../types";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import { getLatestDiscoveries } from "../hooks/graphql/queries";
+import {
+  getLatestDiscoveries,
+  getLastDiscovery,
+} from "../hooks/graphql/queries";
 import { useQuery } from "@apollo/client";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
@@ -11,6 +14,8 @@ import VerticalKeyboardControl from "./VerticalMenu";
 import PurchaseHealth from "./PurchaseHealth";
 import Info from "./Info";
 import Discovery from "./Discovery";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 export default function Actions() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -25,43 +30,39 @@ export default function Actions() {
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const type = useLoadingStore((state) => state.type);
-  const updateData = useLoadingStore((state) => state.updateData);
+
+
 
   const [selected, setSelected] = useState<string>("");
   const [activeMenu, setActiveMenu] = useState(0);
 
-  const { data: latestDiscoveriesData, loading: latestDiscoverieslLoading } =
-    useQuery(getLatestDiscoveries, {
-      variables: {
-        adventurerId: adventurer?.id,
-      },
-      pollInterval: 5000,
-    });
+  const { data } = useQueriesStore();
 
-  const latestDiscoveries = latestDiscoveriesData
-    ? latestDiscoveriesData.discoveries
+  const latestDiscoveries = data.latestDiscoveriesQuery
+    ? data.latestDiscoveriesQuery.discoveries
     : [];
 
+  const exploreTx = {
+    contractAddress: adventurerContract?.address ?? "",
+    entrypoint: "explore",
+    calldata: [adventurer?.id ?? "", "0"],
+  };
 
   const buttonsData = [
     {
       id: 1,
-      label: "Into the mist",
+      label: adventurer?.isIdle ? "Into the mist" : "Beast found!!",
       value: "explore",
       action: async () => {
         {
-          addToCalls({
-            contractAddress: adventurerContract?.address ?? "",
-            entrypoint: "explore",
-            calldata: [adventurer?.id ?? "", "0"],
-          });
+          addToCalls(exploreTx);
           await handleSubmitCalls(writeAsync).then((tx: any) => {
             if (tx) {
               startLoading(
                 "Explore",
                 tx.transaction_hash,
                 "Exploring",
-                latestDiscoveries
+                "discoveryByTxHashQuery"
               );
               addTransaction({
                 hash: tx.transaction_hash,
@@ -74,22 +75,18 @@ export default function Actions() {
           });
         }
       },
-      disabled: adventurer?.status !== "Idle",
+      disabled: !adventurer?.isIdle || loading,
     },
     {
       id: 2,
       label: "Buy Health",
       value: "purchase health",
       action: () => setActiveMenu(1),
-      disabled: adventurer?.status !== "Idle",
+      disabled: !adventurer?.isIdle || loading,
     },
   ];
 
-  useEffect(() => {
-    if (loading && type == "Explore") {
-      updateData(latestDiscoveries);
-    }
-  }, [loading, latestDiscoveries]);
+  console.log(adventurer);
 
   return (
     <div className="flex flex-row space-x-4 overflow-hidden ">
@@ -107,7 +104,7 @@ export default function Actions() {
       <div className="flex flex-col w-1/3 bg-terminal-black">
         {selected == "explore" && <Discovery discoveries={latestDiscoveries} />}
         {selected == "purchase health" &&
-          (adventurer?.status == "Idle" ? (
+          (adventurer?.isIdle ? (
             <PurchaseHealth
               isActive={activeMenu == 1}
               onEscape={() => setActiveMenu(0)}

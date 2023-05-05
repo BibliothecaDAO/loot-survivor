@@ -54,7 +54,6 @@ export const CreateAdventurer = ({
     (state) => state.handleSubmitCalls
   );
   const startLoading = useLoadingStore((state) => state.startLoading);
-  const type = useLoadingStore((state) => state.type);
   const { writeAsync } = useContractWrite({ calls });
   const { adventurerContract, lordsContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -106,9 +105,10 @@ export const CreateAdventurer = ({
       if (tx) {
         startLoading(
           "Create",
-          tx?.transaction_hash,
+          tx.transaction_hash,
           "Spawning Adventurer",
-          adventurers
+          "adventurersByOwnerQuery",
+          `You have spawned ${formData.name}!`
         );
         addTransaction({
           hash: tx?.transaction_hash,

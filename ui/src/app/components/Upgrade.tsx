@@ -3,10 +3,9 @@ import { useContracts } from "../hooks/useContracts";
 import { getKeyFromValue } from "../lib/utils";
 import { GameData } from "./GameData";
 import VerticalKeyboardControl from "./VerticalMenu";
-import {
-  useTransactionManager,
-  useContractWrite,
-} from "@starknet-react/core";
+import { useTransactionManager, useContractWrite } from "@starknet-react/core";
+import { useQuery } from "@apollo/client";
+import { getAdventurerById } from "../hooks/graphql/queries";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
@@ -14,11 +13,8 @@ import useTransactionCartStore from "../hooks/useTransactionCartStore";
 const Upgrade = () => {
   const { adventurerContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
-  const type = useLoadingStore((state) => state.type);
-  const updateData = useLoadingStore((state) => state.updateData);
-
+  const loading = useLoadingStore((state) => state.loading);
   const { addTransaction } = useTransactionManager();
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -36,42 +32,42 @@ const Upgrade = () => {
       label: `Strength - ${adventurer?.strength}`,
       value: "Strength",
       action: async () => handleUpgradeTx("Strength"),
-      disabled: false,
+      disabled: loading,
     },
     {
       id: 2,
       label: `Dexterity - ${adventurer?.dexterity}`,
       value: "Dexterity",
       action: async () => handleUpgradeTx("Dexterity"),
-      disabled: false,
+      disabled: loading,
     },
     {
       id: 3,
       label: `Vitality - ${adventurer?.vitality}`,
       value: "Vitality",
       action: async () => handleUpgradeTx("Vitality"),
-      disabled: false,
+      disabled: loading,
     },
     {
       id: 4,
       label: `Intelligence - ${adventurer?.intelligence}`,
       value: "Intelligence",
       action: async () => handleUpgradeTx("Intelligence"),
-      disabled: false,
+      disabled: loading,
     },
     {
       id: 5,
       label: `Wisdom - ${adventurer?.wisdom}`,
       value: "Wisdom",
       action: async () => handleUpgradeTx("Wisdom"),
-      disabled: false,
+      disabled: loading,
     },
     {
       id: 6,
       label: `Charisma - ${adventurer?.charisma}`,
       value: "Charisma",
       action: async () => handleUpgradeTx("Charisma"),
-      disabled: false,
+      disabled: loading,
     },
   ];
 
@@ -92,7 +88,8 @@ const Upgrade = () => {
           "Upgrade",
           tx?.transaction_hash,
           `Upgrading ${selected}`,
-          adventurer
+          "adventurerByIdQuery",
+          `You upgraded ${selected}!`
         );
         addTransaction({
           hash: tx.transaction_hash,
@@ -132,17 +129,10 @@ const Upgrade = () => {
     </p>
   );
 
-  useEffect(() => {
-    if (loading && type == "Upgrade") {
-      updateData(adventurer);
-    }
-  }, [adventurer]);
-
   return (
     <div className="flex flex-col gap-10 w-full mt-[100px]">
       <p className="mx-auto items-center text-[60px] animate-pulse">
-        You are now level {adventurer?.level}, please select
-        upgrade!
+        You are now level {adventurer?.level}, please select upgrade!
       </p>
       <div className="flex flex-row">
         <div className="w-1/2">

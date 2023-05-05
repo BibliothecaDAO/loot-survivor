@@ -1,16 +1,18 @@
 import React, { useState } from "react";
 import { useQuery } from "@apollo/client";
-import { getAdventurerByGold } from "../hooks/graphql/queries";
+import { getAdventurerByXP } from "../hooks/graphql/queries";
 import { Button } from "./Button";
 import Coin from "../../../public/coin.svg";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import LootIconLoader from "./Loader";
 
 const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 20;
 
-  const { data, loading, error } = useQuery(getAdventurerByGold);
+  const { data, loading, error } = useQuery(getAdventurerByXP);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <div className="flex justify-center p-20 align-middle"><LootIconLoader /></div>;
   if (error) return <p>Error: {error.message}</p>;
 
   const adventurers = data?.adventurers;
@@ -32,13 +34,13 @@ const Leaderboard: React.FC = () => {
   let rankOffset = 0;
 
   const rankGold = (adventurer: any, index: number) => {
-    if (adventurer.gold !== previousGold) {
+    if (adventurer.xp !== previousGold) {
       currentRank = index + 1 + (currentPage - 1) * itemsPerPage;
       rankOffset = 0;
     } else {
       rankOffset++;
     }
-    previousGold = adventurer.gold;
+    previousGold = adventurer.xp;
     return currentRank;
   };
 
@@ -50,23 +52,37 @@ const Leaderboard: React.FC = () => {
             <th>Rank</th>
             <th>Adventurer</th>
             <th>Gold</th>
+            <th>XP</th>
+            <th>Health</th>
           </tr>
         </thead>
         <tbody>
           {displayAdventurers.map((adventurer: any, index: number) => {
+            const dead = adventurer.health <= 0;
             return (
               <tr
                 key={adventurer.id}
-                className="border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black text-center"
+                className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black"
               >
                 <td>{rankGold(adventurer, index)}</td>
                 <td>{`${adventurer.name} - ${adventurer.id}`}</td>
                 <td>
-                  <span className="flex text-terminal-yellow justify-center">
+                  <span className="flex justify-center text-terminal-yellow">
                     <Coin className="self-center w-6 h-6 fill-current" />
                     {adventurer.gold}
                   </span>
                 </td>
+                <td>
+                  <span className="flex justify-center text-terminal-yellow">
+                    {adventurer.xp}
+                  </span>
+                </td>
+                <td>
+                  <span className={`flex justify-center ${!dead ? " text-terminal-green" : "text-red-800"}`}>
+                    {adventurer.health}
+                  </span>
+                </td>
+
               </tr>
             );
           })}

@@ -14,6 +14,8 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import Coin from "../../../public/coin.svg";
 import LootIconLoader from "./Loader";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 const Marketplace = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -25,52 +27,39 @@ const Marketplace = () => {
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
   const [itemsCount, setItemsCount] = useState(0);
 
-  const {
-    loading: getUnclaimedItemsByAdventurerLoading,
-    error: getUnclaimedItemsByAdventurerError,
-    data: getUnclaimedItemsByAdventurerData,
-    refetch: getUnclaimedItemsByAdventurerRefetch,
-  } = useQuery(getUnclaimedItemsByAdventurer, {
-    variables: {
+  const { data, isLoading } = useQueriesStore();
+
+  useCustomQuery(
+    "unclaimedItemsByAdventurerQuery",
+    getUnclaimedItemsByAdventurer,
+    {
       bidder: adventurer?.id,
-      status: "Open"
-    },
-    pollInterval: 5000,
-  });
+      status: "Open",
+    }
+  );
 
-  const unclaimedItems = getUnclaimedItemsByAdventurerData ? getUnclaimedItemsByAdventurerData.items : [];
-
-  console.log(unclaimedItems)
-
-  const {
-    loading: latestMarketItemsNumberLoading,
-    error: latestMarketItemsNumberError,
-    data: latestMarketItemsNumberData,
-    refetch: latestMarketItemsNumberRefetch,
-  } = useQuery(getLatestMarketItemsNumber, {
-    pollInterval: 5000,
-  });
-
-  const latestMarketItemsNumber = latestMarketItemsNumberData
-    ? latestMarketItemsNumberData.market[0]?.itemsNumber
-    : 0;
-
-  const {
-    loading: marketLatestItemsLoading,
-    error: marketLatestItemsError,
-    data: marketLatestItemsData,
-    refetch: marketLatestItemsRefetch,
-  } = useQuery(getLatestMarketItems, {
-    variables: {
-      itemsNumber: latestMarketItemsNumber,
-    },
-    pollInterval: 5000,
-  });
-
-  const marketLatestItems = marketLatestItemsData
-    ? unclaimedItems.concat(marketLatestItemsData.items)
+  const unclaimedItems = data.unclaimedItemsByAdventurerQuery
+    ? data.unclaimedItemsByAdventurerQuery.items
     : [];
 
+  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
+    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
+    : [];
+
+  const removeDuplicates = (arr: any) => {
+    return arr.reduce((accumulator: any, currentItem: any) => {
+      if (
+        !accumulator.some((item: any) => item.marketId === currentItem.marketId)
+      ) {
+        accumulator.push(currentItem);
+      }
+      return accumulator;
+    }, []);
+  };
+
+  const marketLatestItems = data.latestMarketItemsQuery
+    ? removeDuplicates(unclaimedItems.concat(data.latestMarketItemsQuery.items))
+    : [];
   const bidders: number[] = [];
 
   for (const dict of marketLatestItems) {
@@ -79,20 +68,12 @@ const Marketplace = () => {
     }
   }
 
-  const {
-    loading: adventurersInListLoading,
-    error: adventurersInListError,
-    data: adventurersInListData,
-    refetch: adventurersInListRefetch,
-  } = useQuery(getAdventurersInList, {
-    variables: {
-      ids: bidders,
-    },
-    pollInterval: 5000,
+  useCustomQuery("adventurersInListQuery", getAdventurersInList, {
+    ids: bidders,
   });
 
-  const adventurers = adventurersInListData
-    ? adventurersInListData.adventurers
+  const adventurers = data.adventurersInListQuery
+    ? data.adventurersInListQuery.adventurers
     : [];
 
   const mintDailyItemsTx = {
@@ -101,6 +82,8 @@ const Marketplace = () => {
     calldata: [],
     metadata: `Minting Loot Items!`,
   };
+
+  console.log(data);
 
   useEffect(() => {
     if (marketLatestItems) {
@@ -178,9 +161,13 @@ const Marketplace = () => {
   const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
 
   const nextMint = new Date(
-    new Date(latestMarketItemsNumberData?.market[0]?.timestamp).getTime() +
+    new Date(
+      data.latestMarketItemsNumberQuery?.market[0]?.timestamp
+    ).getTime() +
       (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
+
+  console.log(marketLatestItems);
 
   return (
     <>
@@ -206,21 +193,20 @@ const Marketplace = () => {
             </div>
             <div>
               <span className="flex text-xl text-terminal-yellow">
-                Gold Balance:
-                <Coin className="self-center w-8 h-8 fill-current" />
+                <Coin className="self-center w-5 h-5 fill-current" />
+                {/* {adventurer?.name}s'
+                Gold Balance */}
+
                 {adventurer?.gold ? adventurer?.gold - sum : ""}
               </span>
             </div>
             <UTCClock />
           </div>
-          <div className="w-full overflow-y-auto border h-[650px] border-terminal-green">
-            {marketLatestItemsLoading && (
+          <div className="w-full overflow-y-auto border h-[650px] border-terminal-green table-scroll">
+            {isLoading.latestMarketItemsQuery && (
               <div className="flex justify-center p-10 text-center">
                 <LootIconLoader />
               </div>
-            )}
-            {marketLatestItemsError && (
-              <p className="text-xl">ERROR {marketLatestItemsError.message}</p>
             )}
             <table className="w-full border border-terminal-green ">
               <thead className="sticky top-0 border z-5 border-terminal-green bg-terminal-black">
@@ -231,8 +217,7 @@ const Marketplace = () => {
                 </tr>
               </thead>
               <tbody className="">
-                {!marketLatestItemsLoading &&
-                  !marketLatestItemsError &&
+                {!isLoading.latestMarketItemsQuery &&
                   marketLatestItems.map((item: any, index: number) => (
                     <MarketplaceRow
                       ref={(ref: any) => (rowRefs.current[index] = ref)}

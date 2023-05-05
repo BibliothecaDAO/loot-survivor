@@ -20,6 +20,7 @@ export class GameData {
   SLOTS: Dict<string>;
   BEAST_IMAGES: DictString<string>;
   BEAST_ATTACK_LOCATION: DictString<string>;
+  ADVENTURER_ANIMATIONS: DictString<string>;
 
   constructor() {
     this.CONTRACTS = {
@@ -513,7 +514,19 @@ export class GameData {
       Spider: "/icons/loot/chest.svg",
       Rat: "/icons/loot/hand.svg",
     };
+
+    this.ADVENTURER_ANIMATIONS = {
+      Create: "idle",
+      Flee: "run",
+      Ambush: "damage",
+      Attack: "attack1",
+      Die: "die",
+      Upgrade: "drawSword",
+      DiscoverItem: "discoverItem",
+      DiscoverBeast: "drawSword",
+      AvoidObstacle: "jump",
+      HitByObstacle: "damage",
+      Multicall: "discoverItem",
+    };
   }
 }
-
-const gameData = new GameData();

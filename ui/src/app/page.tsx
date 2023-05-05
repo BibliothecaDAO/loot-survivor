@@ -1,5 +1,4 @@
 "use client";
-import { StarknetConfig } from "@starknet-react/core";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect } from "react";
 import { Button } from "./components/Button";
@@ -11,7 +10,7 @@ import Marketplace from "./components/Marketplace";
 import Adventurer from "./components/Adventurer";
 import BattleScene from "./components/BattleScene";
 import Beast from "./components/Beast";
-import { displayAddress } from "./lib/utils";
+import { displayAddress, padAddress } from "./lib/utils";
 import Inventory from "./components/Inventory";
 import TransactionHistory from "./components/TransactionHistory";
 import TransactionCart from "./components/TransactionCart";
@@ -26,22 +25,44 @@ import { TxActivity } from "./components/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
 import useAdventurerStore from "./hooks/useAdventurerStore";
 import usePrevious from "use-previous";
-import { useLazyQuery } from "@apollo/client";
-import { getAdventurerById } from "./hooks/graphql/queries";
+import { useLazyQuery, useQuery } from "@apollo/client";
+import {
+  getAdventurerById,
+  getBattleByTxHash,
+  getLastDiscovery,
+  getLatestDiscoveries,
+  getLastBattleByAdventurer,
+  getBattlesByBeast,
+  getDiscoveryByTxHash,
+  getAdventurersByOwner,
+  getLatestMarketItems,
+  getLatestMarketItemsNumber,
+  getBeastById,
+} from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
+import SpriteAnimation from "./components/SpriteAnimation";
+import { CSSTransition } from "react-transition-group";
+import { NotificationDisplay } from "./components/NotificationDisplay";
 import { useMusic, musicSelector } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
+import { NullAdventurer } from "./types";
+import useCustomQuery from "./hooks/useCustomQuery";
+import { useQueriesStore } from "./hooks/useQueryStore";
 
 export default function Home() {
   const { disconnect } = useConnectors();
   const { account } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
 
+  const hash = useLoadingStore((state) => state.hash);
   const loading = useLoadingStore((state) => state.loading);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const data = useLoadingStore((state) => state.data);
+  const loadingQuery = useLoadingStore((state) => state.loadingQuery);
+  const type = useLoadingStore((state) => state.type);
+  const notificationData = useLoadingStore((state) => state.notificationData);
+  const showNotification = useLoadingStore((state) => state.showNotification);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
@@ -50,6 +71,62 @@ export default function Home() {
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const [showBattleScene, setShowBattleScene] = useState(true);
   const upgrade = adventurer?.upgrading;
+  const status = adventurer?.status;
+
+  const { data, isDataUpdated, refetch } = useQueriesStore();
+
+  useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
+    owner: padAddress(account?.address ?? ""),
+  });
+  useCustomQuery("adventurerByIdQuery", getAdventurerById, {
+    id: adventurer?.id ?? 0,
+  });
+  useCustomQuery("adventurersByGoldQuery", getAdventurerById);
+
+  useCustomQuery("latestMarketItemsNumberQuery", getLatestMarketItemsNumber);
+
+  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
+    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
+    : [];
+
+  useCustomQuery("latestMarketItemsQuery", getLatestMarketItems, {
+    itemsNumber: latestMarketItemsNumber,
+  });
+
+  useCustomQuery("battlesByTxHashQuery", getBattleByTxHash, {
+    txHash: padAddress(hash),
+  });
+
+  useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
+    adventurerId: adventurer?.id,
+  });
+
+  useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
+    txHash: padAddress(hash),
+  });
+
+  useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
+    adventurerId: adventurer?.id,
+  });
+
+  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
+    adventurerId: adventurer?.id,
+    beastId: adventurer?.beastId,
+  });
+
+  useCustomQuery("beastByIdQuery", getBeastById, {
+    id: adventurer?.beastId
+      ? adventurer?.beastId
+      : data.lastBattleQuery?.battles[0]?.beastId,
+  });
+
+  const updatedAdventurer = data.adventurerByIdQuery
+    ? data.adventurerByIdQuery.adventurers[0]
+    : NullAdventurer;
+
+  useEffect(() => {
+    setAdventurer(updatedAdventurer);
+  }, [updatedAdventurer]);
 
   const { play, stop } = useMusic(musicSelector.backgroundMusic, {
     volume: 0.5,
@@ -147,41 +224,37 @@ export default function Home() {
     setMenu(newMenu);
   }, [adventurer, account]);
 
-  const [getData, _] = useLazyQuery(getAdventurerById, {
-    onCompleted: (data) => {
-      setAdventurer(data.adventurers[0]);
-    },
-  });
+  // useEffect(() => {
+  //   // Check if loading, loadingQuery, and isDataUpdated are truthy
+  //   if (loading && loadingQuery && isDataUpdated[loadingQuery]) {
+  //     // Handle "Attack" or "Flee" types
+  //     if (type === "Attack" || type === "Flee") {
+  //       if (data?.battlesByTxHashQuery) {
+  //         stopLoading({
+  //           data: data.battlesByTxHashQuery.battles,
+  //           beastName: notificationData.beastName,
+  //         });
+  //       }
+  //     }
 
-  useEffect(() => {
-    if (adventurer) {
-      getData({
-        variables: {
-          id: adventurer?.id,
-        },
-      });
-    }
-  }, [adventurer]);
+  //     // Handle "Explore" type
+  //     else if (type === "Explore") {
+  //       stopLoading(data.discoveryByTxHashQuery.discoveries[0]);
+  //     }
 
-  const prevData = usePrevious(data);
-
-  useEffect(() => {
-    if (
-      loading &&
-      data &&
-      prevData &&
-      JSON.stringify(data) !== JSON.stringify(prevData)
-    ) {
-      stopLoading();
-    }
-  }, [loading, data, prevData, stopLoading]);
+  //     // Handle other types
+  //     else {
+  //       stopLoading(notificationData);
+  //     }
+  //   }
+  // }, [loading]);
 
   return (
     <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
       {onboarded ? (
         <>
           <div className="flex justify-between w-full ">
-            <h1 className="glitch">Loot Survivors</h1>
+            <h1 className="glitch">M.O.R.T.A.L</h1>
             <div className="flex flex-row self-end gap-2">
               <TxActivity />
               <Button onClick={() => setIsMuted(!isMuted)}>
@@ -201,6 +274,19 @@ export default function Home() {
             </div>
           </div>
           <div className="w-full h-6 my-2 bg-terminal-green" />
+          {/* <CSSTransition
+            in={showNotification}
+            timeout={500}
+            classNames="notification"
+            unmountOnExit
+          >
+            <div className="fixed flex flex-row w-1/4 gap-5 p-2 border rounded-lg border-terminal-green bg-terminal-black top-5">
+              <NotificationDisplay
+                type={type}
+                notificationData={notificationData}
+              />
+            </div>
+          </CSSTransition> */}
 
           {account ? (
             <div className="flex-grow w-full">

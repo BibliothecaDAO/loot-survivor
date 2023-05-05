@@ -47,6 +47,8 @@ export interface Adventurer {
   beastId: number;
   upgrading: boolean;
   gold: number;
+
+  isIdle: boolean | undefined;
 }
 
 export interface Item {
@@ -157,6 +159,7 @@ export const NullAdventurer: Adventurer = {
   beastId: 0,
   upgrading: false,
   gold: 0,
+  isIdle: false,
 };
 
 export const NullAdventurerProps: AdventurerProps = {
@@ -177,6 +180,20 @@ export const NullBeast = {
   rank: 0,
   slainOnDate: 0,
   xp: 0,
+};
+
+export const NullBattle = {
+  adventurerId: 0,
+  ambushed: undefined,
+  attacker: "",
+  beastId: 0,
+  damage: 0,
+  fled: undefined,
+  goldEarned: undefined,
+  targetHealth: undefined,
+  timestamp: undefined,
+  txHash: undefined,
+  xpEarned: undefined,
 };
 
 export const NullDiscovery = {

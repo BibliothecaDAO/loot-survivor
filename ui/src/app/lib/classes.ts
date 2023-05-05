@@ -92,5 +92,14 @@ export class AdventurerClass implements Adventurer {
         this.beastId = beastId;
         this.upgrading = upgrading;
         this.gold = gold;
+
+
+    }
+
+    get isIdle(): boolean | undefined {
+        if (typeof this.status === 'undefined') {
+            return undefined;
+        }
+        return this.status === "Idle";
     }
 }

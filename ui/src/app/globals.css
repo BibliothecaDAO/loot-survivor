@@ -8,24 +8,22 @@ body {
   font-family: "VT323", monospace;
   font-weight: 400;
   text-shadow: rgb(39, 168, 115, 0.9) 1px 0 10px;
-  animation: textShadow 0.3s infinite;
+  animation  : textShadow 0.3s infinite;
 }
 
 body::after {
   @apply pointer-events-none;
-  content: "";
+  content : "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.15),
-    rgba(0, 0, 0, 0.15) 1px,
-    transparent 1px,
-    transparent 2px
-  );
+  top     : 0;
+  left    : 0;
+  width   : 100vw;
+  height  : 100vh;
+  background: repeating-linear-gradient(0deg,
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0.15) 1px,
+      transparent 1px,
+      transparent 2px);
 }
 
 ::selection {
@@ -34,20 +32,20 @@ body::after {
 
 .crt-frame {
   pointer-events: none;
-  overflow: hidden;
-  z-index: 9000;
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  overflow      : hidden;
+  z-index       : 9000;
+  position      : fixed;
+  top           : 0;
+  right         : 0;
+  bottom        : 0;
+  left          : 0;
+  width         : 100%;
+  height        : 100%;
 }
 
 .ansi {
   text-shadow: none;
-  font-size: 6px;
+  font-size  : 6px;
 }
 
 h1 {
@@ -187,14 +185,39 @@ h6 {
   cursor       : pointer;
 }
 
-body::-webkit-scrollbar, table::-webkit-scrollbar {
+body::-webkit-scrollbar,
+.table-scroll::-webkit-scrollbar {
   width: 1em;
 }
- 
-body::-webkit-scrollbar-track, table::-webkit-scrollbar-track {
+
+body::-webkit-scrollbar-track,
+.table-scroll::-webkit-scrollbar-track {
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
 }
- 
-body::-webkit-scrollbar-thumb, table::-webkit-scrollbar-thumb {
+
+body::-webkit-scrollbar-thumb,
+.table-scroll::-webkit-scrollbar-thumb {
   @apply bg-terminal-green;
+}
+
+.notification-enter {
+  opacity  : 0;
+  transform: translateY(-1rem);
+}
+
+.notification-enter-active {
+  opacity   : 1;
+  transform : translateY(0);
+  transition: opacity 500ms, transform 500ms;
+}
+
+.notification-exit {
+  opacity  : 1;
+  transform: translateY(0);
+}
+
+.notification-exit-active {
+  opacity   : 0;
+  transform : translateY(-1rem);
+  transition: opacity 500ms, transform 500ms;
 }

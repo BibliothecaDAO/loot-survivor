@@ -74,6 +74,25 @@ const getLatestDiscoveries = gql`
   }
 `;
 
+const getLastDiscovery = gql`
+  query get_discoveries($adventurerId: FeltValue) {
+    discoveries(
+      where: { adventurerId: { eq: $adventurerId } }
+      limit: 1
+      orderBy: { discoveryTime: { desc: true } }
+    ) {
+      adventurerId
+      attackLocation
+      discoveryTime
+      discoveryType
+      entityId
+      outputAmount
+      subDiscoveryType
+      txHash
+    }
+  }
+`;
+
 const getDiscoveryByTxHash = gql`
   query get_discovery($txHash: HexValue) {
     discoveries(where: { txHash: { eq: $txHash } }) {
@@ -191,10 +210,7 @@ const getAdventurerById = gql`
 
 const getAdventurersInList = gql`
   query get_adventurer_by_id($ids: [FeltValue!]) {
-    adventurers(
-      where: { id: { In: $ids } }
-      limit: 10000000
-    ) {
+    adventurers(where: { id: { In: $ids } }, limit: 10000000) {
       beastId
       charisma
       chestId
@@ -267,6 +283,44 @@ const getAdventurerByGold = gql`
   }
 `;
 
+const getAdventurerByXP = gql`
+  query get_adventurer_by_gold {
+    adventurers(orderBy: { xp: { desc: true } }, limit: 10000000) {
+      id
+      name
+      gold
+      beastId
+      birthdate
+      charisma
+      chestId
+      dexterity
+      feetId
+      handsId
+      headId
+      health
+      homeRealm
+      imageHash1
+      imageHash2
+      intelligence
+      lastUpdated
+      level
+      luck
+      neckId
+      order
+      owner
+      race
+      ringId
+      status
+      strength
+      upgrading
+      vitality
+      waistId
+      weaponId
+      wisdom
+      xp
+    }
+  }
+`;
 const getBeastById = gql`
   query get_beast_by_id($id: FeltValue) {
     beasts(where: { id: { eq: $id } }) {
@@ -287,222 +341,159 @@ const getBeastById = gql`
   }
 `;
 
+
+const BATTLE_FIELDS = `
+  adventurerId
+  ambushed
+  attacker
+  beastId
+  damage
+  fled
+  goldEarned
+  targetHealth
+  timestamp
+  txHash
+  xpEarned
+`;
+
+const BATTLE_FRAGMENT = `
+  fragment BattleFields on Battle {
+    ${BATTLE_FIELDS}
+  }
+`;
+
 const getLatestBattlesByAdventurer = gql`
+${BATTLE_FRAGMENT}
   query get_latest_battles($adventurerId: FeltValue) {
     battles(
       limit: 10
       orderBy: { timestamp: { desc: true } }
       where: { adventurerId: { eq: $adventurerId } }
     ) {
-      adventurerId
-      ambushed
-      attacker
-      beastId
-      damage
-      fled
-      goldEarned
-      targetHealth
-      timestamp
-      txHash
-      xpEarned
+      ...BattleFields
     }
   }
 `;
 
 const getBattlesByBeast = gql`
+${BATTLE_FRAGMENT}
   query get_battles_by_beast($adventurerId: FeltValue, $beastId: FeltValue) {
     battles(
       where: { adventurerId: { eq: $adventurerId }, beastId: { eq: $beastId } }
       orderBy: { timestamp: { desc: true } }
     ) {
-      adventurerId
-      ambushed
-      attacker
-      beastId
-      damage
-      fled
-      goldEarned
-      targetHealth
-      timestamp
-      txHash
-      xpEarned
+      ...BattleFields
     }
   }
 `;
 
 const getLastBattleByAdventurer = gql`
+${BATTLE_FRAGMENT}
   query get_latest_battle_by_adventurer($adventurerId: FeltValue) {
     battles(
       limit: 1
       where: { adventurerId: { eq: $adventurerId } }
       orderBy: { timestamp: { desc: true } }
     ) {
-      adventurerId
-      ambushed
-      attacker
-      beastId
-      damage
-      fled
-      goldEarned
-      targetHealth
-      timestamp
-      txHash
-      xpEarned
+      ...BattleFields
     }
   }
 `;
+
+const getBattleByTxHash = gql`
+${BATTLE_FRAGMENT}
+  query get_latest_battle_by_tx($txHash: HexValue) {
+    battles(
+      where: { txHash: { eq: $txHash } }
+      orderBy: { timestamp: { desc: true } }
+    ) {
+      ...BattleFields
+    }
+  }
+`;
+
+const ITEM_FIELDS_VALUES = `
+  bag
+  bidder
+  claimedTime
+  createdBlock
+  equippedAdventurerId
+  expiry
+  greatness
+  id
+  item
+  lastUpdated
+  marketId
+  material
+  owner
+  ownerAdventurerId
+  prefix1
+  prefix2
+  price
+  rank
+  slot
+  status
+  suffix
+  type
+  xp
+`;
+
+const ITEM_FIELDS = `
+  fragment LatestMarketItemFields on Item {
+    ${ITEM_FIELDS_VALUES}
+  }
+`;
+
 
 const getItemsByTokenId = gql`
+${ITEM_FIELDS}
   query get_items($id: FeltValue) {
     items(where: { id: { eq: $id } }) {
-      bag
-      bidder
-      claimedTime
-      createdBlock
-      equippedAdventurerId
-      expiry
-      greatness
-      id
-      item
-      lastUpdated
-      marketId
-      material
-      owner
-      ownerAdventurerId
-      prefix1
-      prefix2
-      price
-      rank
-      slot
-      status
-      suffix
-      type
-      xp
+      ...LatestMarketItemFields
     }
   }
 `;
 
+
 const getLatestMarketItems = gql`
+ ${ITEM_FIELDS}
   query get_latest_market_items($itemsNumber: Int) {
     items(
       where: { marketId: { gt: 0 } }
       limit: $itemsNumber
       orderBy: { createdBlock: { desc: true } }
     ) {
-      bag
-      bidder
-      claimedTime
-      createdBlock
-      equippedAdventurerId
-      expiry
-      greatness
-      id
-      item
-      lastUpdated
-      marketId
-      material
-      owner
-      ownerAdventurerId
-      prefix1
-      prefix2
-      price
-      rank
-      slot
-      status
-      suffix
-      type
-      xp
+      ...LatestMarketItemFields
     }
   }
 `;
 
-
 const getItemsByAdventurer = gql`
+${ITEM_FIELDS}
   query get_items_by_adventurer($adventurer: FeltValue) {
-    items( where: { ownerAdventurerId: { eq: $adventurer } } limit: 10000000) {
-      bag
-      bidder
-      claimedTime
-      createdBlock
-      equippedAdventurerId
-      expiry
-      greatness
-      id
-      item
-      lastUpdated
-      marketId
-      material
-      owner
-      ownerAdventurerId
-      prefix1
-      prefix2
-      price
-      rank
-      slot
-      status
-      suffix
-      type
-      xp
+    items(where: { ownerAdventurerId: { eq: $adventurer } }, limit: 10000000) {
+      ...LatestMarketItemFields
     }
   }
 `;
 
 const getUnclaimedItemsByAdventurer = gql`
+${ITEM_FIELDS}
   query get_items_by_adventurer($bidder: FeltValue, $status: StatusValue) {
-    items( where: { bidder: { eq: $bidder }, status: {eq: $status} } limit: 10000000) {
-      bag
-      bidder
-      claimedTime
-      createdBlock
-      equippedAdventurerId
-      expiry
-      greatness
-      id
-      item
-      lastUpdated
-      marketId
-      material
-      owner
-      ownerAdventurerId
-      prefix1
-      prefix2
-      price
-      rank
-      slot
-      status
-      suffix
-      type
-      xp
+    items(
+      where: { bidder: { eq: $bidder }, status: { eq: $status } }
+      limit: 10000000
+    ) {
+      ...LatestMarketItemFields
     }
   }
 `;
 
 const getItemsByOwner = gql`
+${ITEM_FIELDS}
   query get_items_by_owner($owner: HexValue) {
-    items(where: { owner: { eq: $owner } } limit: 10000000) {
-      bag
-      bidder
-      claimedTime
-      createdBlock
-      equippedAdventurerId
-      expiry
-      greatness
-      id
-      item
-      lastUpdated
-      marketId
-      material
-      owner
-      ownerAdventurerId
-      prefix1
-      prefix2
-      price
-      rank
-      slot
-      status
-      suffix
-      type
-      xp
+    items(where: { owner: { eq: $owner } }, limit: 10000000) {
+      ...LatestMarketItemFields
     }
   }
 `;
@@ -520,6 +511,7 @@ const getLatestMarketItemsNumber = gql`
 export {
   getAdventurer,
   getLatestDiscoveries,
+  getLastDiscovery,
   getDiscoveryByTxHash,
   getAdventurersByOwner,
   getAdventurerById,
@@ -530,11 +522,13 @@ export {
   getLatestBattlesByAdventurer,
   getBattlesByBeast,
   getLastBattleByAdventurer,
+  getBattleByTxHash,
   getItems,
   getItemsByTokenId,
   getLatestMarketItems,
   getItemsByOwner,
   getItemsByAdventurer,
   getLatestMarketItemsNumber,
-  getUnclaimedItemsByAdventurer
+  getUnclaimedItemsByAdventurer,
+  getAdventurerByXP
 };

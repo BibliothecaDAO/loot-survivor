@@ -3,9 +3,10 @@ import ItemDisplay, { IconSize } from "./LootIcon";
 
 interface Loader {
   size?: IconSize;
+  className?: string;
 }
 
-const LootIconLoader = ({ size = "w-8" }: Loader) => {
+const LootIconLoader = ({ size = "w-5", className }: Loader) => {
   const [currentType, setCurrentType] = useState("chest");
   const types = [
     "chest",
@@ -28,7 +29,7 @@ const LootIconLoader = ({ size = "w-8" }: Loader) => {
     return () => clearInterval(interval);
   }, []);
 
-  return <ItemDisplay size={size} type={currentType} />;
+  return <ItemDisplay className={className} size={size} type={currentType} />;
 };
 
 export default LootIconLoader;
