@@ -47,6 +47,8 @@ export interface Adventurer {
   beastId: number;
   upgrading: boolean;
   gold: number;
+
+  isIdle: boolean | undefined;
 }
 
 export interface Item {
@@ -157,6 +159,7 @@ export const NullAdventurer: Adventurer = {
   beastId: 0,
   upgrading: false,
   gold: 0,
+  isIdle: false,
 };
 
 export const NullAdventurerProps: AdventurerProps = {

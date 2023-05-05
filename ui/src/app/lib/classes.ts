@@ -96,7 +96,10 @@ export class AdventurerClass implements Adventurer {
 
     }
 
-    get isIdle() {
-        return this.status ? this.status === "Idle" : false;
+    get isIdle(): boolean | undefined {
+        if (typeof this.status === 'undefined') {
+            return undefined;
+        }
+        return this.status === "Idle";
     }
 }
