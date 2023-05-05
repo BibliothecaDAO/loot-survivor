@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useWaitForTransaction } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../lib/utils";
@@ -22,10 +22,8 @@ export const TxActivity = () => {
     watch: true,
     onAcceptedOnL2: () => {
       stopLoading(notificationData);
-    }
+    },
   });
-
-  console.log(loading)
 
   return (
     <>
@@ -33,7 +31,10 @@ export const TxActivity = () => {
         loading && hash ? (
           <div className="flex flex-row items-center gap-5">
             {data?.status == "RECEIVED" || data?.status == "PENDING" ? (
-              <div className="flex w-48 loading-ellipsis "><LootIconLoader className="mr-3" />{pendingMessage}</div>
+              <div className="flex w-48 loading-ellipsis ">
+                <LootIconLoader className="mr-3" />
+                {pendingMessage}
+              </div>
             ) : (
               <div className="loading-ellipsis">Refreshing data</div>
             )}
@@ -55,7 +56,8 @@ export const TxActivity = () => {
           <div className="flex flex-row items-center gap-5">
             <div className="flex w-48 loading-ellipsis">
               <LootIconLoader className="self-center mr-3" />
-              {pendingMessage}</div>
+              {pendingMessage}
+            </div>
             <div className="flex flex-row gap-2">
               Hash:{" "}
               <a

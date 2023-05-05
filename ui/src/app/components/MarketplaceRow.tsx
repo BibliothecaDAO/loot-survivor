@@ -114,16 +114,6 @@ const MarketplaceRow = ({
     }
   };
 
-  console.log(adventurer);
-
-  console.log(
-    item.claimedTime,
-    claimExists(item.marketId),
-    !item.expiry,
-    convertTime(item.expiry) > currentTime,
-    adventurer?.id != item.bidder
-  );
-
   return (
     <tr
       ref={ref}

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useSpring, animated } from "react-spring";
 import { useContracts } from "../hooks/useContracts";
 import { NullBeast } from "../types";
 import { useQuery } from "@apollo/client";
@@ -10,7 +9,7 @@ import {
 } from "../hooks/graphql/queries";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import KeyboardControl, { ButtonData } from "./KeyboardControls";
-import BattleInfo from "./Info";
+import Info from "./Info";
 import { BattleDisplay } from "./BattleDisplay";
 import { BeastDisplay } from "./BeastDisplay";
 import Battle from "../../../public/battle.png";
@@ -33,9 +32,6 @@ export default function Beast() {
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const type = useLoadingStore((state) => state.type);
-  const updateData = useLoadingStore((state) => state.updateData);
-
-  const showBattleScene = true;
 
   const formatAdventurer = adventurer ? adventurer : null;
 
@@ -68,8 +64,6 @@ export default function Beast() {
       action: async () => {
         addToCalls(attack);
         await handleSubmitCalls(writeAsync).then((tx: any) => {
-          console.log("tx", tx);
-
           if (tx) {
             startLoading(
               "Attack",
@@ -119,7 +113,7 @@ export default function Beast() {
   const isBeastDead = beastData?.health == "0";
 
   return (
-    <div className="flex flex-row space-x-6">
+    <div className="flex flex-row space-x-4 overflow-hidden">
       <div className="w-1/3">
         <Info adventurer={adventurer} />
       </div>
@@ -151,7 +145,7 @@ export default function Beast() {
         )}
       </div>
 
-      <div className="flex flex-row w-1/3 ">
+      <div className="w-1/3">
         {adventurer?.beastId || data.lastBattleQuery?.battles[0] ? (
           <>
             <BeastDisplay beastData={beastData} />

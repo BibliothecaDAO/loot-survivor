@@ -15,23 +15,25 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
 
   const renderDiscoveryMessage = () => {
     if (discoveryData?.discoveryType === "Nothing") {
-      return <p>You discovered {discoveryData.outputAmount} xp!</p>;
+      return <p>NICE! You discovered {discoveryData.outputAmount} xp!</p>;
     }
 
     if (discoveryData?.discoveryType === "Beast") {
-      return <p>You discovered a beast!</p>;
+      return <p>OH NO! You discovered a beast!</p>;
     }
 
     if (discoveryData?.discoveryType === "Obstacle") {
       if (discoveryData.outputAmount === 0) {
         return (
-          <p>You avoided the {discoveryData.subDiscoveryType} obstacle!</p>
+          <p>
+            PHEW! You avoided the {discoveryData.subDiscoveryType} obstacle!
+          </p>
         );
       } else {
         return (
           <p>
-            You discovered the {discoveryData.subDiscoveryType} obstacle, it did{" "}
-            {discoveryData.outputAmount} damage!
+            OUCH! You discovered the {discoveryData.subDiscoveryType} obstacle,
+            it did {discoveryData.outputAmount} damage!
           </p>
         );
       }
@@ -39,14 +41,24 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
 
     if (discoveryData?.discoveryType === "Item") {
       if (discoveryData.subDiscoveryType === "Gold") {
-        return <p>You discovered {discoveryData.outputAmount} gold!</p>;
+        return (
+          <div className="flex self-center text-terminal-yellow">
+            <p className="text-terminal-green">
+              NICE! You discovered{" "}
+              <span className="text-terminal-yellow">
+                {discoveryData.outputAmount}
+              </span>{" "}
+            </p>
+            <Coin className="self-center w-5 h-5 fill-current" />
+          </div>
+        );
       }
 
       if (discoveryData.subDiscoveryType === "Loot") {
         return data ? (
           <div className="flex self-center">
             <ItemDisplay className="mr-4 " type={data.items[0]?.slot} />
-            <p>You discovered a loot item, {data.items[0]?.item}!</p>
+            <p>GREAT! You discovered a loot item, {data.items[0]?.item}!</p>
           </div>
         ) : (
           <></>
@@ -54,7 +66,12 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       }
 
       if (discoveryData.subDiscoveryType === "Health") {
-        return <p>You discovered {discoveryData.outputAmount} health!</p>;
+        return (
+          <div className="flex self-center">
+            <p>GREAT! You discovered {discoveryData.outputAmount} health! </p>
+            <Heart className="self-center w-5 h-5 fill-current" />
+          </div>
+        );
       }
     }
 

@@ -470,11 +470,11 @@ export class GameData {
     };
 
     this.BEAST_IMAGES = {
-      Phoenix: "/beasts/phoenix.png",
-      Griffin: "/beasts/griffin.png",
+      Phoenix: "/monsters/phoenix.png",
+      Griffin: "/monsters/griffin.png",
       Minotaur: "/beasts/minotaur.png",
       Basilisk: "/beasts/basilisk.png",
-      Gnome: "//beastsgnome.png",
+      Gnome: "/beasts/gnome.png",
       Wraith: "/beasts/wraith.png",
       Ghoul: "/beasts/ghoul.png",
       Goblin: "/beasts/goblin.png",
@@ -488,7 +488,7 @@ export class GameData {
       Dragon: "/beasts/dragon.png",
       Vampire: "/beasts/vampire.png",
       Werewolf: "/beasts/werewolf.png",
-      Spider: "/beasts/spider.png",
+      Spider: "/monsters/spider.png",
       Rat: "/beasts/rat.png",
     };
 

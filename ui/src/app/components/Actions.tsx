@@ -31,8 +31,6 @@ export default function Actions() {
   const startLoading = useLoadingStore((state) => state.startLoading);
   const type = useLoadingStore((state) => state.type);
 
-
-
   const [selected, setSelected] = useState<string>("");
   const [activeMenu, setActiveMenu] = useState(0);
 
@@ -85,8 +83,6 @@ export default function Actions() {
       disabled: !adventurer?.isIdle || loading,
     },
   ];
-
-  console.log(adventurer);
 
   return (
     <div className="flex flex-row space-x-4 overflow-hidden ">

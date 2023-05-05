@@ -20,15 +20,15 @@ const getAttackLocationIcon = (beastType: string) => {
   if (!iconPath) return null;
 
   if (iconPath == "/icons/loot/hand.svg")
-    return <Hand className="self-center w-8 h-8 fill-current mr-2" />;
+    return <Hand className="self-center w-10 h-10 fill-current mr-2" />;
   if (iconPath == "/icons/loot/chest.svg")
-    return <Chest className="self-center w-8 h-8 fill-current mr-2" />;
+    return <Chest className="self-center w-10 h-10 fill-current mr-2" />;
   if (iconPath == "/icons/loot/waist.svg")
-    return <Waist className="self-center w-8 h-8 fill-current mr-2" />;
+    return <Waist className="self-center w-10 h-10 fill-current mr-2" />;
   if (iconPath == "/icons/loot/foot.svg")
-    return <Foot className="self-center w-8 h-8 fill-current mr-2" />;
+    return <Foot className="self-center w-10 h-10 fill-current mr-2" />;
   if (iconPath == "/icons/loot/head.svg")
-    return <Head className="self-center w-8 h-8 fill-current mr-2" />;
+    return <Head className="self-center w-10 h-10 fill-current mr-2" />;
 };
 
 export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
@@ -40,50 +40,50 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
     newWidth: 20,
   });
   return (
-    <div className="flex flex-col h-full bg-black justify-center border-2 border-terminal-green transition-all duration-200 ease-in transform hover:-translate-y-1 hover:scale-105">
-      <div className="flex items-center justify-center w-full">
+    <div className="flex flex-col h-full items-center border-2 border-terminal-green">
+      <div className="relative flex h-full ">
         <ANSIArt
-          newWidth={250}
+          newWidth={280}
           src={
             getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
             "/beasts/phoenix.png"
           }
         />
       </div>
-      <div className="flex flex-col w-full p-2 uppercase">
-        <div className="flex justify-between w-full text-4xl border-b border-terminal-green">
+      <div className="flex flex-col p-2 uppercase">
+        <div className="flex justify-between text-5xl p-2 border-b border-terminal-green">
           {beastData?.beast}
 
           <span
-            className={`text-4xl flex ${
+            className={`text-5xl flex ${
               beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
             }`}
           >
             <Heart className="self-center w-8 h-8 fill-current" />{" "}
-            <p className="text-4xl">{beastData?.health}</p>
+            <p className="text-5xl">{beastData?.health}</p>
           </span>
         </div>
-        <div className="flex justify-between">
-          <p className="text-2xl text-terminal-yellow">
+        <div className="flex justify-between p-2">
+          <p className="text-3xl text-terminal-yellow">
             Level {beastData?.level}
           </p>
-          <p className="text-2xl text-terminal-yellow">XP {beastData?.xp}</p>
-          <p className="text-2xl text-terminal-yellow">
+          <p className="text-3xl text-terminal-yellow">XP {beastData?.xp}</p>
+          <p className="text-3xl text-terminal-yellow">
             Tier {beastData?.rank}
           </p>
         </div>
-        <div className="flex flex-row m-6">
-          <p className="flex items-center text-2xl text-red-600">
+        <div className="flex flex-row m-5">
+          <p className="flex items-center text-3xl">
             <Weapon className="self-center w-8 h-8 fill-current mr-2" />
             {beastData?.attackType}
           </p>
-          <p className="flex items-center text-2xl text-red-600 ">
+          <p className="flex items-center text-3xl m-1">
             {getAttackLocationIcon(beastData?.beast)}
             Attacks {beastData?.attackLocation}
           </p>
-          <p className="flex items-center text-2xl text-red-600 ">
+          <p className="flex items-center text-3xl">
             {" "}
-            <Head className="self-center w-8 h-8 fill-current text-red-600 mr-2" />
+            <Head className="self-center w-8 h-8 fill-current mr-2" />
             {beastData?.armorType}
           </p>
         </div>

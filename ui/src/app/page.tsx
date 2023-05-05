@@ -8,7 +8,6 @@ import HorizontalKeyboardControl, {
 import Actions from "./components/Actions";
 import Marketplace from "./components/Marketplace";
 import Adventurer from "./components/Adventurer";
-import BattleScene from "./components/BattleScene";
 import Beast from "./components/Beast";
 import { displayAddress, padAddress } from "./lib/utils";
 import Inventory from "./components/Inventory";
@@ -305,8 +304,7 @@ export default function Home() {
                   {selected === "actions" && <Actions />}
                   {selected === "market" && <Marketplace />}
                   {selected === "inventory" && <Inventory />}
-                  {selected === "beast" &&
-                    (showBattleScene ? <BattleScene /> : <Beast />)}
+                  {selected === "beast" && <Beast />}
                   {selected === "leaderboard" && <Leaderboard />}
                 </>
               ) : (
