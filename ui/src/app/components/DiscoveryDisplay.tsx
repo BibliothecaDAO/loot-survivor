@@ -14,7 +14,6 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const { data } = useQuery(getItemsByTokenId, {
     variables: { id: discoveryData?.entityId },
   });
-  console.log(adventurer);
 
   const renderDiscoveryMessage = () => {
     if (discoveryData?.discoveryType === "Nothing") {

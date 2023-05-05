@@ -123,10 +123,6 @@ export default function Home() {
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
 
-  console.log(data);
-  console.log(adventurer);
-  console.log(updatedAdventurer);
-
   useEffect(() => {
     setAdventurer(updatedAdventurer);
   }, [updatedAdventurer]);

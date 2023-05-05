@@ -40,10 +40,10 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
     newWidth: 20,
   });
   return (
-    <div className="flex flex-col h-full items-center border-2 border-terminal-green">
-      <div className="relative flex h-full ">
+    <div className="flex flex-col h-full items-center border-2 border-terminal-green overflow-hidden">
+      <div className="relative flex h-full">
         <ANSIArt
-          newWidth={280}
+          newWidth={250}
           src={
             getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
             "/beasts/phoenix.png"
@@ -51,19 +51,19 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
         />
       </div>
       <div className="flex flex-col p-2 uppercase">
-        <div className="flex justify-between text-5xl p-2 border-b border-terminal-green">
+        <div className="flex justify-between text-4xl px-4 py-2 border-b border-terminal-green">
           {beastData?.beast}
 
           <span
-            className={`text-5xl flex ${
+            className={`text-4xl flex ${
               beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
             }`}
           >
             <Heart className="self-center w-8 h-8 fill-current" />{" "}
-            <p className="text-5xl">{beastData?.health}</p>
+            <p className="text-4xl">{beastData?.health}</p>
           </span>
         </div>
-        <div className="flex justify-between p-2">
+        <div className="flex justify-between px-4 py-2">
           <p className="text-3xl text-terminal-yellow">
             Level {beastData?.level}
           </p>
