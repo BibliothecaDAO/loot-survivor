@@ -1,7 +1,8 @@
-"use client"
-
+"use client";
+import { useEffect, useState } from "react";
 import { useWaitForTransaction } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../lib/utils";
+import { useQueriesStore } from "../hooks/useQueryStore";
 import useLoadingStore from "../hooks/useLoadingStore";
 import LootIconLoader from "./Loader";
 
@@ -17,15 +18,60 @@ export const TxActivity = () => {
   const hash = useLoadingStore((state) => state.hash);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const type = useLoadingStore((state) => state.type);
+  const {
+    data: queryData,
+    isDataUpdated,
+    refetch,
+    resetDataUpdated,
+  } = useQueriesStore();
+  const [accepted, setAccepted] = useState(false);
   const { data } = useWaitForTransaction({
     hash,
     watch: true,
     onAcceptedOnL2: () => {
-      stopLoading(notificationData);
-    }
+      setAccepted(true);
+      // stopLoading(notificationData);
+    },
   });
 
-  console.log(loading)
+  console.log(
+    queryData,
+    loadingQuery && isDataUpdated[loadingQuery],
+    notificationData,
+    hash
+  );
+
+  useEffect(() => {
+    // Check if loading, loadingQuery, and isDataUpdated are truthy
+    if (hash && loadingQuery && isDataUpdated[loadingQuery]) {
+      // Handle "Attack" or "Flee" types
+      if (type === "Attack" || type === "Flee") {
+        if (queryData?.battlesByTxHashQuery) {
+          stopLoading({
+            data: queryData.battlesByTxHashQuery.battles,
+            beastName: notificationData.beastName,
+          });
+        }
+        setAccepted(false);
+        resetDataUpdated(loadingQuery);
+      }
+
+      // Handle "Explore" type
+      else if (type === "Explore") {
+        console.log("here");
+        stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
+        setAccepted(false);
+        resetDataUpdated(loadingQuery);
+      }
+
+      // Handle other types
+      else {
+        stopLoading(notificationData);
+        setAccepted(false);
+        resetDataUpdated(loadingQuery);
+      }
+    }
+  }, [loadingQuery && isDataUpdated[loadingQuery], accepted, hash]);
 
   return (
     <>
@@ -33,7 +79,10 @@ export const TxActivity = () => {
         loading && hash ? (
           <div className="flex flex-row items-center gap-5">
             {data?.status == "RECEIVED" || data?.status == "PENDING" ? (
-              <div className="flex w-48 loading-ellipsis "><LootIconLoader className="mr-3" />{pendingMessage}</div>
+              <div className="flex w-48 loading-ellipsis ">
+                <LootIconLoader className="mr-3" />
+                {pendingMessage}
+              </div>
             ) : (
               <div className="loading-ellipsis">Refreshing data</div>
             )}
@@ -55,7 +104,8 @@ export const TxActivity = () => {
           <div className="flex flex-row items-center gap-5">
             <div className="flex w-48 loading-ellipsis">
               <LootIconLoader className="self-center mr-3" />
-              {pendingMessage}</div>
+              {pendingMessage}
+            </div>
             <div className="flex flex-row gap-2">
               Hash:{" "}
               <a

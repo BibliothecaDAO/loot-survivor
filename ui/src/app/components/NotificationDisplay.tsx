@@ -27,6 +27,7 @@ const processAnimation = (type: string, notificationData: any) => {
       Array.isArray(notificationData.data) &&
       notificationData.data.some((data: any) => data.ambush)
     ) {
+      console.log("Ambush Animation");
       return gameData.ADVENTURER_ANIMATIONS["Ambush"];
     }
   } else if (type == "Attack") {
@@ -87,7 +88,6 @@ export const NotificationDisplay = ({
 }: NotificationDisplayProps) => {
   const animation = processAnimation(type, notificationData);
   const notification = proccessNotification(type, notificationData);
-  console.log(notificationData);
   return (
     <>
       <SpriteAnimation

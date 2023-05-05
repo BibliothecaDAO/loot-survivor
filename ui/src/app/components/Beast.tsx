@@ -61,9 +61,6 @@ export default function Beast() {
       action: async () => {
         addToCalls(attack);
         await handleSubmitCalls(writeAsync).then((tx: any) => {
-
-          console.log("tx", tx)
-
           if (tx) {
             startLoading(
               "Attack",

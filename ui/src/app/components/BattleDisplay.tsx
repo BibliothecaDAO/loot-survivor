@@ -56,8 +56,8 @@ export const NotificationBattleDisplay = ({
   return (
     <div>
       {Array.isArray(battleData) &&
-        battleData.some((data) => data.fled) &&
-        battleData.some((data) => data.ambushed) ? (
+      battleData.some((data) => data.fled) &&
+      battleData.some((data) => data.ambushed) ? (
         <p>
           You fled the {beastName ? beastName : ""}! But were ambushed before
           taking {battleData[0].damage} damage!
@@ -79,14 +79,14 @@ export const NotificationBattleDisplay = ({
           </p>
         ) : (
           <p>
-            You were killed by the {beastName ? beastName : ""} taking{" "}
-            {battleData[1]?.damage} damage!
+            You slayed the {beastName ? beastName : ""} after inflicting{" "}
+            {battleData[0]?.damage} damage!
           </p>
         )
       ) : (
         <p>
-          You slayed the {beastName ? beastName : ""} after inflicting{" "}
-          {battleData[0]?.damage} damage!
+          You were killed by the {beastName ? beastName : ""} taking{" "}
+          {battleData[1]?.damage} damage!
         </p>
       )}
     </div>
