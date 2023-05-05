@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { QueryKey } from "./useQueryStore";
 
+// TODO: Notification Data type
+
 type LoadingState = {
   loading: boolean;
   type: string;
@@ -25,7 +27,6 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   hash: "",
   pendingMessage: "",
   loadingQuery: null,
-  notification: "",
   showNotification: false,
   notificationData: undefined,
   startLoading: (
@@ -35,6 +36,14 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
     loadingQuery,
     notificationData
   ) => {
+    console.log("loading:", {
+      loading: true,
+      type: type,
+      hash,
+      pendingMessage,
+      loadingQuery,
+      notificationData,
+    })
     set({
       loading: true,
       type: type,
@@ -47,7 +56,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   stopLoading: (notificationData) => {
     set({
       showNotification: true,
-      notificationData: notificationData,
+      notificationData: notificationData || undefined,
       loading: false,
       pendingMessage: undefined,
       loadingQuery: null,

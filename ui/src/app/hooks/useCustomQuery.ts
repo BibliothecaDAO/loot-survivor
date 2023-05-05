@@ -35,7 +35,7 @@ const useCustomQuery = (
   }, [data, updateData, loading, queryKey, refetchWrapper, variables]);
 
   useEffect(() => {
-    startPolling(5000);
+    startPolling(3000);
     return () => {
       stopPolling();
     };

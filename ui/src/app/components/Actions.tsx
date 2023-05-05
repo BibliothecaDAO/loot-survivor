@@ -31,6 +31,8 @@ export default function Actions() {
   const startLoading = useLoadingStore((state) => state.startLoading);
   const type = useLoadingStore((state) => state.type);
 
+
+
   const [selected, setSelected] = useState<string>("");
   const [activeMenu, setActiveMenu] = useState(0);
 
@@ -49,7 +51,7 @@ export default function Actions() {
   const buttonsData = [
     {
       id: 1,
-      label: "Into the mist",
+      label: adventurer?.isIdle ? "Into the mist" : "Beast found!!",
       value: "explore",
       action: async () => {
         {
@@ -73,14 +75,14 @@ export default function Actions() {
           });
         }
       },
-      disabled: adventurer?.status !== "Idle",
+      disabled: !adventurer?.isIdle || loading,
     },
     {
       id: 2,
       label: "Buy Health",
       value: "purchase health",
       action: () => setActiveMenu(1),
-      disabled: adventurer?.status !== "Idle",
+      disabled: !adventurer?.isIdle || loading,
     },
   ];
 
@@ -102,7 +104,7 @@ export default function Actions() {
       <div className="flex flex-col w-1/3 bg-terminal-black">
         {selected == "explore" && <Discovery discoveries={latestDiscoveries} />}
         {selected == "purchase health" &&
-          (adventurer?.status == "Idle" ? (
+          (adventurer?.isIdle ? (
             <PurchaseHealth
               isActive={activeMenu == 1}
               onEscape={() => setActiveMenu(0)}

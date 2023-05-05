@@ -14,7 +14,7 @@ const Upgrade = () => {
   const { adventurerContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const startLoading = useLoadingStore((state) => state.startLoading);
-
+  const loading = useLoadingStore((state) => state.loading);
   const { addTransaction } = useTransactionManager();
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -32,42 +32,42 @@ const Upgrade = () => {
       label: `Strength - ${adventurer?.strength}`,
       value: "Strength",
       action: async () => handleUpgradeTx("Strength"),
-      disabled: false,
+      disabled: loading,
     },
     {
       id: 2,
       label: `Dexterity - ${adventurer?.dexterity}`,
       value: "Dexterity",
       action: async () => handleUpgradeTx("Dexterity"),
-      disabled: false,
+      disabled: loading,
     },
     {
       id: 3,
       label: `Vitality - ${adventurer?.vitality}`,
       value: "Vitality",
       action: async () => handleUpgradeTx("Vitality"),
-      disabled: false,
+      disabled: loading,
     },
     {
       id: 4,
       label: `Intelligence - ${adventurer?.intelligence}`,
       value: "Intelligence",
       action: async () => handleUpgradeTx("Intelligence"),
-      disabled: false,
+      disabled: loading,
     },
     {
       id: 5,
       label: `Wisdom - ${adventurer?.wisdom}`,
       value: "Wisdom",
       action: async () => handleUpgradeTx("Wisdom"),
-      disabled: false,
+      disabled: loading,
     },
     {
       id: 6,
       label: `Charisma - ${adventurer?.charisma}`,
       value: "Charisma",
       action: async () => handleUpgradeTx("Charisma"),
-      disabled: false,
+      disabled: loading,
     },
   ];
 

@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import {
   useTransactionManager,
-  useWaitForTransaction,
   useContractWrite,
 } from "@starknet-react/core";
 import { Metadata } from "../types";
@@ -41,7 +40,7 @@ const TransactionCart: React.FC = () => {
     <>
       <button
         onClick={toggleDropdown}
-        className="flex p-2 bg-black border border-terminal-green relative"
+        className="relative flex p-2 bg-black border border-terminal-green"
       >
         {isOpen ? "Hide Cart" : "Show Cart"}
       </button>

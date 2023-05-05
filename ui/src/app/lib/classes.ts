@@ -92,5 +92,11 @@ export class AdventurerClass implements Adventurer {
         this.beastId = beastId;
         this.upgrading = upgrading;
         this.gold = gold;
+
+
+    }
+
+    get isIdle() {
+        return this.status ? this.status === "Idle" : false;
     }
 }

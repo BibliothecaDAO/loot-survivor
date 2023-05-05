@@ -46,10 +46,18 @@ const Marketplace = () => {
     ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
     : [];
 
-  const marketLatestItems = data.latestMarketItemsQuery
-    ? unclaimedItems.concat(data.latestMarketItemsQuery.items)
-    : [];
+  const removeDuplicates = (arr: any) => {
+    return arr.reduce((accumulator: any, currentItem: any) => {
+      if (!accumulator.some((item: any) => item.marketId === currentItem.marketId)) {
+        accumulator.push(currentItem);
+      }
+      return accumulator;
+    }, []);
+  };
 
+  const marketLatestItems = data.latestMarketItemsQuery
+    ? removeDuplicates(unclaimedItems.concat(data.latestMarketItemsQuery.items))
+    : [];
   const bidders: number[] = [];
 
   for (const dict of marketLatestItems) {
@@ -154,7 +162,7 @@ const Marketplace = () => {
     new Date(
       data.latestMarketItemsNumberQuery?.market[0]?.timestamp
     ).getTime() +
-      (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+    (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
   console.log(marketLatestItems);
@@ -183,14 +191,16 @@ const Marketplace = () => {
             </div>
             <div>
               <span className="flex text-xl text-terminal-yellow">
-                Gold Balance:
-                <Coin className="self-center w-8 h-8 fill-current" />
+                <Coin className="self-center w-5 h-5 fill-current" />
+                {/* {adventurer?.name}s'
+                Gold Balance */}
+
                 {adventurer?.gold ? adventurer?.gold - sum : ""}
               </span>
             </div>
             <UTCClock />
           </div>
-          <div className="w-full overflow-y-auto border h-[650px] border-terminal-green">
+          <div className="w-full overflow-y-auto border h-[650px] border-terminal-green table-scroll">
             {isLoading.latestMarketItemsQuery && (
               <div className="flex justify-center p-10 text-center">
                 <LootIconLoader />

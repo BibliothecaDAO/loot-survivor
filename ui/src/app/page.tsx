@@ -68,6 +68,7 @@ export default function Home() {
   const setIndexer = useIndexerStore((state) => state.setIndexer);
 
   const upgrade = adventurer?.upgrading;
+  const status = adventurer?.status;
 
   const { data, isDataUpdated, refetch } = useQueriesStore();
 
@@ -212,29 +213,37 @@ export default function Home() {
     setMenu(newMenu);
   }, [adventurer, account]);
 
-  useEffect(() => {
-    if (loading && loadingQuery && isDataUpdated[loadingQuery]) {
-      if (type == "Attack" || type == "Flee") {
-        if (data?.battlesByTxHashQuery) {
-          stopLoading({
-            data: data.battlesByTxHashQuery.battles,
-            beastName: notificationData.beastName,
-          });
-        }
-      } else if (type == "Explore") {
-        stopLoading(data.discoveryByTxHashQuery.discoveries[0]);
-      } else {
-        stopLoading(notificationData);
-      }
-    }
-  }, [loading, loadingQuery, stopLoading, data]);
+  // useEffect(() => {
+  //   // Check if loading, loadingQuery, and isDataUpdated are truthy
+  //   if (loading && loadingQuery && isDataUpdated[loadingQuery]) {
+  //     // Handle "Attack" or "Flee" types
+  //     if (type === "Attack" || type === "Flee") {
+  //       if (data?.battlesByTxHashQuery) {
+  //         stopLoading({
+  //           data: data.battlesByTxHashQuery.battles,
+  //           beastName: notificationData.beastName,
+  //         });
+  //       }
+  //     }
+
+  //     // Handle "Explore" type
+  //     else if (type === "Explore") {
+  //       stopLoading(data.discoveryByTxHashQuery.discoveries[0]);
+  //     }
+
+  //     // Handle other types
+  //     else {
+  //       stopLoading(notificationData);
+  //     }
+  //   }
+  // }, [loading]);
 
   return (
     <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
       {onboarded ? (
         <>
           <div className="flex justify-between w-full ">
-            <h1 className="glitch">Loot Survivors</h1>
+            <h1 className="glitch">M.O.R.T.A.L</h1>
             <div className="flex flex-row self-end gap-2">
               <TxActivity />
               <Button onClick={() => setIsMuted(!isMuted)}>
@@ -254,19 +263,19 @@ export default function Home() {
             </div>
           </div>
           <div className="w-full h-6 my-2 bg-terminal-green" />
-          <CSSTransition
+          {/* <CSSTransition
             in={showNotification}
             timeout={500}
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed flex flex-row border rounded-lg border-terminal-green w-1/4 bg-terminal-black p-2 top-5 gap-5">
+            <div className="fixed flex flex-row w-1/4 gap-5 p-2 border rounded-lg border-terminal-green bg-terminal-black top-5">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}
               />
             </div>
-          </CSSTransition>
+          </CSSTransition> */}
 
           {account ? (
             <div className="flex-grow w-full">
