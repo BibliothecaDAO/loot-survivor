@@ -50,9 +50,9 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     if (screen == 1) {
       if (
         (account as any)?.provider?.baseUrl ==
-          "http://survivor-indexer.bibliothecadao.xyz:5050" ||
+        "http://survivor-indexer.bibliothecadao.xyz:5050" ||
         (account as any)?.baseUrl ==
-          "http://survivor-indexer.bibliothecadao.xyz:5050"
+        "http://survivor-indexer.bibliothecadao.xyz:5050"
       ) {
         setOnboarded(true);
       }

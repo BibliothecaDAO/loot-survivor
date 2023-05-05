@@ -65,7 +65,7 @@ export const NotificationBattleDisplay = ({
       ) : Array.isArray(battleData) &&
         battleData.some((data) => data.ambushed) ? (
         <p>
-          You couldn't flee and were ambushed by the{" "}
+          You couldn&apos;t flee and were ambushed by the{" "}
           {beastName ? beastName : ""} taking {battleData[0].damage} damage!
         </p>
       ) : Array.isArray(battleData) && battleData.some((data) => data.fled) ? (
