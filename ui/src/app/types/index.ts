@@ -1,4 +1,5 @@
 import { AdventurerProps } from "../hooks/useAdventurerStore";
+import { ScreenPage } from "../hooks/useUIStore";
 
 export interface Adventurer {
   // static stats
@@ -227,4 +228,10 @@ export const NullItem = {
   price: 0,
   owner: "",
   marketId: 0,
+};
+
+export type Menu = {
+  id: number;
+  label: string;
+  screen: ScreenPage;
 };

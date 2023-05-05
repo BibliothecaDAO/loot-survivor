@@ -10,6 +10,8 @@ import { getKeyFromValue } from "../lib/utils";
 import { GameData } from "./GameData";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useUIStore from "../hooks/useUIStore";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
@@ -47,6 +49,8 @@ export const CreateAdventurer = ({
     interfaceaddress:
       "0x12e0839c07c8fac67dd47a88e38317e0a56180faacf5e81f78d09a4c6338021",
   });
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
+  const setScreen = useUIStore((state) => state.setScreen);
 
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -119,6 +123,8 @@ export const CreateAdventurer = ({
         });
       }
     });
+    setAdventurer(adventurers[0]);
+    setScreen("actions");
   };
 
   // const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {

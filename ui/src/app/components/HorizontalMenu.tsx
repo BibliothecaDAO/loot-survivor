@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button } from "./Button";
 import { soundSelector, useUiSounds } from "../hooks/useUiSound";
+import { Menu } from "../types";
 
 interface ButtonData {
   id: number;
@@ -9,7 +10,7 @@ interface ButtonData {
 }
 
 interface HorizontalKeyboardControlProps {
-  buttonsData: ButtonData[];
+  buttonsData: Menu[];
   onButtonClick: (value: any) => void;
 }
 
@@ -17,25 +18,25 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
   buttonsData,
   onButtonClick,
 }) => {
-  const { play } = useUiSounds(soundSelector.click)
+  const { play } = useUiSounds(soundSelector.click);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
-    onButtonClick(buttonsData[selectedIndex].value);
+    onButtonClick(buttonsData[selectedIndex].screen);
   }, [selectedIndex]);
 
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
       case "ArrowLeft":
-        play()
+        play();
         setSelectedIndex((prev) => {
           const newIndex = Math.max(prev - 1, 0);
           return newIndex;
         });
         break;
       case "ArrowRight":
-        play()
+        play();
         setSelectedIndex((prev) => {
           const newIndex = Math.min(prev + 1, buttonsData.length - 1);
           return newIndex;
@@ -60,7 +61,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
           variant={selectedIndex === index ? "default" : "outline"}
           onClick={() => {
             setSelectedIndex(index);
-            onButtonClick(buttonData.value);
+            onButtonClick(buttonData.screen);
           }}
         >
           {buttonData.label}

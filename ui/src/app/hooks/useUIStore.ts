@@ -1,13 +1,31 @@
 import { create } from "zustand";
 
+export type ScreenPage =
+  | "start"
+  | "actions"
+  | "market"
+  | "inventory"
+  | "beast"
+  | "leaderboard";
+
 type State = {
-  connected?: boolean;
+  connected: boolean;
   setConnected: (value: boolean) => void;
+  onboarded: boolean;
+  handleOnboarded: () => void;
+  screen: ScreenPage;
+  setScreen: (value: ScreenPage) => void;
 };
 
 const useUIStore = create<State>((set) => ({
-  connected: undefined,
+  connected: false,
   setConnected: (value) => set({ connected: value }),
+  onboarded: false,
+  handleOnboarded: () => {
+    set({ onboarded: true });
+  },
+  screen: "start",
+  setScreen: (value) => set({ screen: value }),
 }));
 
 export default useUIStore;

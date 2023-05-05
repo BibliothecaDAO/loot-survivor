@@ -44,7 +44,7 @@ import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/NotificationDisplay";
 import { useMusic, musicSelector } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
-import { NullAdventurer } from "./types";
+import { Menu, NullAdventurer } from "./types";
 import useCustomQuery from "./hooks/useCustomQuery";
 import { useQueriesStore } from "./hooks/useQueryStore";
 
@@ -54,9 +54,6 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(false);
 
   const hash = useLoadingStore((state) => state.hash);
-  const loading = useLoadingStore((state) => state.loading);
-  const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const loadingQuery = useLoadingStore((state) => state.loadingQuery);
   const type = useLoadingStore((state) => state.type);
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
@@ -65,16 +62,24 @@ export default function Home() {
   const calls = useTransactionCartStore((state) => state.calls);
   const connected = useUIStore((state) => state.connected);
   const setConnected = useUIStore((state) => state.setConnected);
+  const onboarded = useUIStore((state) => state.onboarded);
+  const screen = useUIStore((state) => state.screen);
+  const setScreen = useUIStore((state) => state.setScreen);
+  const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
 
   const upgrade = adventurer?.upgrading;
-  const status = adventurer?.status;
 
-  const { data, isDataUpdated, refetch } = useQueriesStore();
+  const { data } = useQueriesStore();
 
   useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
     owner: padAddress(account?.address ?? ""),
   });
+
+  const adventurers = data.adventurersByGoldQuery
+    ? data.adventurersByOwnerQuery.adventurers
+    : [];
+
   useCustomQuery("adventurerByIdQuery", getAdventurerById, {
     id: adventurer?.id ?? 0,
   });
@@ -121,10 +126,6 @@ export default function Home() {
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
 
-  console.log(data);
-  console.log(adventurer);
-  console.log(updatedAdventurer);
-
   useEffect(() => {
     setAdventurer(updatedAdventurer);
   }, [updatedAdventurer]);
@@ -143,19 +144,17 @@ export default function Home() {
     };
   }, [play, stop]);
 
-  const [menu, setMenu] = useState([
+  const [menu, setMenu] = useState<Menu[]>([
     {
       id: 1,
       label: "Start",
-      value: "start",
+      screen: "start",
     },
   ]);
 
-  const [selected, setSelected] = useState(menu[0].value);
-
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
-      setSelected(menu[0].value);
+      setScreen(menu[0].screen);
     }
   }, [adventurer]);
 
@@ -175,11 +174,11 @@ export default function Home() {
   }, [account]);
 
   useEffect(() => {
-    let newMenu = [
+    let newMenu: Menu[] = [
       {
         id: 1,
         label: "Start",
-        value: "start",
+        screen: "start",
       },
     ];
 
@@ -189,27 +188,27 @@ export default function Home() {
         {
           id: 2,
           label: "Actions",
-          value: "actions",
+          screen: "actions",
         },
         {
           id: 3,
           label: "Market",
-          value: "market",
+          screen: "market",
         },
         {
           id: 4,
           label: "Inventory",
-          value: "inventory",
+          screen: "inventory",
         },
         {
           id: 5,
           label: "Beast",
-          value: "beast",
+          screen: "beast",
         },
         {
           id: 6,
           label: "Leaderboard",
-          value: "leaderboard",
+          screen: "leaderboard",
         },
       ];
     }
@@ -217,19 +216,25 @@ export default function Home() {
     setMenu(newMenu);
   }, [adventurer, account]);
 
-  // const showNotification = true;
-  // const type = "Explore";
-  // const notificationData = {
-  //   adventurerId: 7,
-  //   attackLocation: "Foot",
-  //   discoveryTime: "2023-05-05T14:41:37",
-  //   discoveryType: "Obstacle",
-  //   entityId: null,
-  //   outputAmount: 9,
-  //   subDiscoveryType: "Dark Mist",
-  //   txHash: "0x02526e0eef880bfb5efaf3b3b64f4307bc09b8b30ad5f5e323",
-  // };
-  const battleNotifData = {};
+  useEffect(() => {
+    if (adventurers.length == 0) {
+      setScreen(menu[0].screen);
+    } else if (
+      adventurers.length == 1 &&
+      adventurer?.xp == 0 &&
+      !adventurer.beastId
+    ) {
+      setScreen(menu[2].screen);
+    } else if (
+      adventurers.length == 1 &&
+      adventurer?.xp == 0 &&
+      adventurer.beastId
+    ) {
+      setScreen(menu[5].screen);
+    } else {
+      handleOnboarded();
+    }
+  }, [onboarded, adventurer]);
 
   return (
     <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
@@ -262,7 +267,7 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed top-0 left-0 mt-20 ml-20 w-1/4 border rounded-lg border-terminal-green bg-terminal-black">
+            <div className="fixed top-0 left-0 mt-32 ml-20 w-1/4 border rounded-lg border-terminal-green bg-terminal-black">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}
@@ -278,17 +283,17 @@ export default function Home() {
                     <HorizontalKeyboardControl
                       buttonsData={menu}
                       onButtonClick={(value) => {
-                        setSelected(value);
+                        setScreen(value);
                       }}
                     />
                   </div>
 
-                  {selected === "start" && <Adventurer />}
-                  {selected === "actions" && <Actions />}
-                  {selected === "market" && <Marketplace />}
-                  {selected === "inventory" && <Inventory />}
-                  {selected === "beast" && <Beast />}
-                  {selected === "leaderboard" && <Leaderboard />}
+                  {screen === "start" && <Adventurer />}
+                  {screen === "actions" && <Actions />}
+                  {screen === "market" && <Marketplace />}
+                  {screen === "inventory" && <Inventory />}
+                  {screen === "beast" && <Beast />}
+                  {screen === "leaderboard" && <Leaderboard />}
                 </>
               ) : (
                 <Upgrade />
