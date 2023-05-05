@@ -78,7 +78,7 @@ export const NotificationBattleDisplay = ({
             and dealt {battleData[0]?.damage} damage! They counterattacked for{" "}
             {battleData[1]?.damage} damage!
           </p>
-        ) : battleData[1]?.targetHealth == 0 ? (
+        ) : battleData[0]?.targetHealth == 0 ? (
           <p>
             You slayed the {beastName ? beastName : ""} after inflicting{" "}
             {battleData[0]?.damage} damage!
