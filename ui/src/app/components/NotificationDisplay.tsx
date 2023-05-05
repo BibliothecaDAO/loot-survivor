@@ -9,8 +9,11 @@ interface NotificationDisplayProps {
   notificationData: any;
 }
 
-const processAnimation = (type: string, notificationData: any) => {
-  const { adventurer } = useAdventurerStore();
+const processAnimation = (
+  type: string,
+  notificationData: any,
+  adventurer: any
+) => {
   const gameData = new GameData();
   if (type == "Flee") {
     if (
@@ -95,7 +98,8 @@ export const NotificationDisplay = ({
   type,
   notificationData,
 }: NotificationDisplayProps) => {
-  const animation = processAnimation(type, notificationData);
+  const { adventurer } = useAdventurerStore();
+  const animation = processAnimation(type, notificationData, adventurer);
   const notification = proccessNotification(type, notificationData);
   return (
     <div className="flex flex-row w-full gap-5 p-2">
