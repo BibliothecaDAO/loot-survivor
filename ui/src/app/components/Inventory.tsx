@@ -17,6 +17,7 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 const Inventory: React.FC = () => {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";
+  const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { adventurerContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -45,6 +46,12 @@ const Inventory: React.FC = () => {
       };
       addToCalls(equipItem);
     }
+  };
+
+  const singleEquipExists = (id: number) => {
+    return calls.some(
+      (call: any) => call.entrypoint == "equip_item" && call.calldata[2] == id
+    );
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -226,7 +233,10 @@ const Inventory: React.FC = () => {
             filteredItems.map((item: any, index: number) => (
               <div className="flex" key={index}>
                 <ItemDisplay item={item} />
-                <Button onClick={() => handleAddEquipItem(item.id)}>
+                <Button
+                  onClick={() => handleAddEquipItem(item.id)}
+                  disabled={singleEquipExists(item.id)}
+                >
                   equip
                 </Button>
               </div>

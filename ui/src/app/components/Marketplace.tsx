@@ -208,6 +208,8 @@ const Marketplace = () => {
       (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
+  const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
+
   return (
     <>
       {adventurer?.level != 1 ? (
@@ -241,10 +243,7 @@ const Marketplace = () => {
             <div>
               <span className="flex text-xl text-terminal-yellow">
                 <Coin className="self-center w-5 h-5 fill-current" />
-                {/* {adventurer?.name}s'
-                Gold Balance */}
-
-                {adventurer?.gold ? adventurer?.gold - sum : ""}
+                {calculatedNewGold}
               </span>
             </div>
             <UTCClock />
@@ -276,6 +275,7 @@ const Marketplace = () => {
                       adventurers={adventurers}
                       isActive={activeMenu == index + 1}
                       setActiveMenu={setActiveMenu}
+                      calculatedNewGold={calculatedNewGold}
                       key={index}
                     />
                   ))}

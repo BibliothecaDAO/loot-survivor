@@ -73,19 +73,20 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
           </p>
         </div>
         <div className="flex flex-row m-5">
-          <p className="flex items-center text-3xl">
-            <Weapon className="self-center w-8 h-8 fill-current mr-2" />
-            {beastData?.attackType}
-          </p>
-          <p className="flex items-center text-3xl m-1">
+          <div className="flex flex-row gap-2">
+            <Weapon className="self-center w-10 h-10 fill-current" />
+            <p className="flex items-center text-xl">{beastData?.attackType}</p>
+          </div>
+          <div className="flex flex-row gap-2">
             {getAttackLocationIcon(beastData?.beast)}
-            Attacks {beastData?.attackLocation}
-          </p>
-          <p className="flex items-center text-3xl">
-            {" "}
-            <Head className="self-center w-8 h-8 fill-current mr-2" />
-            {beastData?.armorType}
-          </p>
+            <p className="flex items-center text-xl">
+              Attacks {beastData?.attackLocation}
+            </p>
+          </div>
+          <div className="flex flex-row gap-2">
+            <Chest className="self-center w-10 h-10 fill-current" />
+            <p className="flex items-center text-xl">{beastData?.armorType}</p>
+          </div>
         </div>
       </div>
     </div>
