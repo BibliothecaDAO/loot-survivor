@@ -79,9 +79,6 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
               onButtonClick(buttonData.value);
             }
           }}
-          className={`${
-            buttonData.disabled ? "opacity-50 cursor-not-allowed" : ""
-          }`}
           disabled={buttonData.disabled}
         >
           {buttonData.label}
