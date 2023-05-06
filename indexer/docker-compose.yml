@@ -1,121 +1,130 @@
 version: "3"
 
 services:
-  devnet:
-    image: shardlabs/starknet-devnet:latest
-    command:
-    - "--host=0.0.0.0"
-    - "--port=5050"
-    - "--disable-rpc-request-validation"
-    ports:
-    - 5050:5050
+  # devnet:
+  #   image: shardlabs/starknet-devnet:latest
+  #   command:
+  #   - "--host=0.0.0.0"
+  #   - "--port=5050"
+  #   - "--disable-rpc-request-validation"
+  #   ports:
+  #   - 5050:5050
 
-  apibara:
-    image: quay.io/apibara/starknet:5e284618b2a1eea49aa04cb04d452ec48b3ffb99
-    ports:
-    - 7171:7171
-    depends_on:
-    - devnet
-    restart: always
-    command:
-    - "start"
-    - "--data=/data"
-    - "--rpc=http://devnet:5050/rpc"
-    environment:
-    - OTEL_SDK_DISABLED=true # disable tracing/metrics
-    volumes:
-    - apibara-data:/data
+  # apibara:
+  #   image: quay.io/apibara/starknet:5e284618b2a1eea49aa04cb04d452ec48b3ffb99
+  #   ports:
+  #   - 7171:7171
+  #   depends_on:
+  #   - devnet
+  #   restart: always
+  #   command:
+  #   - "start"
+  #   - "--data=/data"
+  #   - "--rpc=http://devnet:5050/rpc"
+  #   environment:
+  #   - OTEL_SDK_DISABLED=true # disable tracing/metrics
+  #   volumes:
+  #   - apibara-data:/data
 
   mongo-goerli:
     image: mongo:latest
     restart: always
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${GOERLI_DB_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${GOERLI_DB_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: apibara
+      MONGO_INITDB_ROOT_PASSWORD: apibara
     ports:
     - 27017:27017
     volumes:
     - mongo-data:/data/goerli/db
 
-  mongo-devnet:
-    image: mongo:latest
-    restart: always
-    command: mongod --port 27018
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: ${DEVNET_DB_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${DEVNET_DB_PASSWORD}
-    ports:
-    - 27018:27018
-    volumes:
-    - mongo-data:/data/devnet/db
+  # mongo-devnet:
+  #   image: mongo:latest
+  #   restart: always
+  #   command: mongod --port 27018
+  #   environment:
+  #     MONGO_INITDB_ROOT_USERNAME: ${DEVNET_DB_USERNAME}
+  #     MONGO_INITDB_ROOT_PASSWORD: ${DEVNET_DB_PASSWORD}
+  #   ports:
+  #   - 27018:27018
+  #   volumes:
+  #   - mongo-data:/data/devnet/db
 
-  indexer-goerli:
-    image: starknetdev/loot-survivor-indexer:latest
-    restart: always
-    command:
-    - start
-    - --mongo-url
-    - "mongodb://${GOERLI_DB_USERNAME}:${GOERLI_DB_PASSWORD}@mongo-goerli:27017"
-    - --network
-    - "goerli"
-    - --adventurer
-    - "0x035d755a23ec72df90819f584d9a1849bbc21fa77f96d25e03f1736883895248"
-    - --beast
-    - "0x000f4dbfe5d15792aa91025e42ee1d74c22bdeb1eef0b9bc19a37216377290c1"
-    - --loot
-    - "0x065669e15c8f1a7f17b7062e4eb1b709b922b931b93c59577f1848a85c30ab1f"
-    - --start_block
-    - "796600"
-    environment:
-      PYTHONUNBUFFERED: "1"
-    links:
-    - mongo-goerli
+  # indexer-goerli:
+  #   image: starknetdev/loot-survivor-indexer:latest
+  #   restart: always
+  #   command:
+  #   - start
+  #   - --mongo-url
+  #   - "mongodb://${GOERLI_DB_USERNAME}:${GOERLI_DB_PASSWORD}@mongo-goerli:27017"
+  #   - --network
+  #   - "goerli"
+  #   - --adventurer
+  #   - "0x035d755a23ec72df90819f584d9a1849bbc21fa77f96d25e03f1736883895248"
+  #   - --beast
+  #   - "0x000f4dbfe5d15792aa91025e42ee1d74c22bdeb1eef0b9bc19a37216377290c1"
+  #   - --loot
+  #   - "0x065669e15c8f1a7f17b7062e4eb1b709b922b931b93c59577f1848a85c30ab1f"
+  #   - --start_block
+  #   - "794796"
+  #   environment:
+  #     PYTHONUNBUFFERED: "1"
+  #   links:
+  #   - mongo-goerli
 
-  indexer-devnet:
-    image: starknetdev/loot-survivor-indexer:latest
-    restart: always
-    command:
-    - start
-    - --server-url
-    - "apibara:7171"
-    - --mongo-url
-    - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-devnet:27018"
-    - --network
-    - "devnet"
-    - --adventurer
-    - "0x009056f46cb33d53c479b1d7c063c196bcd4e3549d58c9c9555b8bd2fea5ff4d"
-    - --beast
-    - "0x028298b791b7d938a063be38799ca1e217afc9a18e2af085031920f50cd4e006"
-    - --loot
-    - "0x0216071afae3defb274a33c6de4b5480fe3a4dd40c4832f69363b65f1ccd4614"
-    environment:
-      PYTHONUNBUFFERED: "1"
-    links:
-    - mongo-devnet
+  # indexer-devnet:
+  #   image: starknetdev/loot-survivor-indexer:latest
+  #   restart: always
+  #   command:
+  #   - start
+  #   - --server-url
+  #   - "apibara:7171"
+  #   - --mongo-url
+  #   - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-devnet:27018"
+  #   - --network
+  #   - "devnet"
+  #   - --adventurer
+  #   - "0x00b34c2c5b7c35fb12a2999bfdd33d08132afca35e530804e8de8d6bf50ccfad"
+  #   - --beast
+  #   - "0x0695b5625d22e22b4e415807ce9d1bb5f6856a1e607c3cc2124b85d38886fbf6"
+  #   - --loot
+  #   - "0x00ce32116aaa06e2c8f531777fa0195b65971d8fe52abdd490bd35fdb4011de9"
+  #   - --start_block
+  #   - "0"
+  #   environment:
+  #     PYTHONUNBUFFERED: "1"
+  #   links:
+  #   - mongo-devnet
 
-  graphql:
-    image: starknetdev/loot-survivor-indexer:latest
-    restart: always
-    command:
-    - graphql
-    - --mongo_goerli
-    - "mongodb://${GOERLI_DB_USERNAME}:${GOERLI_DB_PASSWORD}@mongo-goerli:27017"
-    - --mongo_devnet
-    - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-devnet:27018"
-    - --port
-    - "8080"
-    environment:
-      PYTHONUNBUFFERED: "1"
-    ports:
-      - 8080:8080
-    links:
-    - mongo-goerli
-    - mongo-devnet
-    volumes:
-      - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/fullchain.pem:/app/fullchain.pem
-      - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/privkey.pem:/app/privkey.pem
+  # graphql-goerli:
+  #   image: starknetdev/loot-survivor-indexer:latest
+  #   restart: always
+  #   command:
+  #   - graphql
+  #   - --mongo-url
+  #   - "mongodb://${GOERLI_DB_USERNAME}:${GOERLI_DB_PASSWORD}@mongo-goerli:27017"
+  #   environment:
+  #     PYTHONUNBUFFERED: "1"
+  #   ports:
+  #     - 8080:8080
+  #   links:
+  #   - mongo-goerli
+
+  # graphql-devnet:
+  #   image: starknetdev/loot-survivor-indexer:latest
+  #   restart: always
+  #   command:
+  #   - graphql
+  #   - --mongo-url
+  #   - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-devnet:27018"
+  #   - --port
+  #   - "8081"
+  #   environment:
+  #     PYTHONUNBUFFERED: "1"
+  #   ports:
+  #     - 8081:8081
+  #   links:
+  #   - mongo-devnet
 
 volumes:
   mongo-data:
-  apibara-data:
-  certs:
+  # apibara-data:

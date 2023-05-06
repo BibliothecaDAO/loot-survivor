@@ -159,13 +159,6 @@ discovery_abi = {
     "type": "event",
 }
 
-update_thief_state_abi = {
-    "outputs": [{"name": "thief_state", "type": "ThiefState"}],
-    "keys": [],
-    "name": "UpdateThiefState",
-    "type": "event",
-}
-
 
 # BEAST EVENTS
 
@@ -377,13 +370,6 @@ discovery_decoder = FunctionCallSerializer(
     identifier_manager=identifier_manager_from_abi([discovery_abi, uint256_abi]),
 )
 
-update_thief_state_decoder = FunctionCallSerializer(
-    abi=update_thief_state_abi,
-    identifier_manager=identifier_manager_from_abi(
-        [update_thief_state_abi, thief_state_abi]
-    ),
-)
-
 
 def decode_mint_adventurer_event(data):
     return mint_adventurer_decoder.to_python([felt.to_int(d) for d in data])
@@ -399,10 +385,6 @@ def decode_adventurer_level_up_event(data):
 
 def decode_discovery_event(data):
     return discovery_decoder.to_python([felt.to_int(d) for d in data])
-
-
-def decode_update_thief_state_event(data):
-    return update_thief_state_decoder.to_python([felt.to_int(d) for d in data])
 
 
 ## BEAST DECODERS
@@ -483,7 +465,7 @@ def decode_fled_beast_event(data):
 
 
 def decode_adventurer_ambushed_event(data):
-    return adventurer_attacked_decoder.to_python([felt.to_int(d) for d in data])
+    return adventurer_ambushed_decoder.to_python([felt.to_int(d) for d in data])
 
 
 def decode_update_gold_event(data):
