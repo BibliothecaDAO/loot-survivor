@@ -18,7 +18,6 @@ from indexer.decoder import (
     decode_mint_adventurer_event,
     decode_update_adventurer_state_event,
     decode_discovery_event,
-    decode_update_thief_state_event,
     decode_create_beast_event,
     decode_beast_state_event,
     decode_beast_attacked_event,
@@ -84,7 +83,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "MintAdventurer",
             "UpdateAdventurerState",
             "Discovery",
-            "UpdatedThiefState",
         ]:
             add_filter(self.config.ADVENTURER_CONTRACT, adventurer_event)
 
@@ -132,13 +130,12 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "MintAdventurer": self.mint_adventurer,
                 "UpdateAdventurerState": self.update_adventurer_state,
                 "Discovery": self.discovery,
-                "UpdatedThiefState": self.update_thief,
                 "CreateBeast": self.create_beast,
                 "UpdateBeastState": self.update_beast_state,
                 "BeastAttacked": self.beast_attacked,
                 "AdventurerAttacked": self.adventurer_attacked,
                 "FledBeast": self.fled_beast,
-                "AvdenturerAmbushed": self.adventurer_ambushed,
+                "AdventurerAmbushed": self.adventurer_ambushed,
                 "UpdateGoldBalance": self.update_gold,
                 "MintItem": self.mint_item,
                 "UpdateItemState": self.update_item_state,
@@ -207,7 +204,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "handsId": check_exists_int(ua.adventurer_state["HandsId"]),
             "neckId": check_exists_int(ua.adventurer_state["NeckId"]),
             "ringId": check_exists_int(ua.adventurer_state["RingId"]),
-            "status": check_exists_int(ua.adventurer_state["Status"]),
+            "status": encode_int_as_bytes(ua.adventurer_state["Status"]),
             "beast": check_exists_int(ua.adventurer_state["Beast"]),
             "upgrading": encode_int_as_bytes(ua.adventurer_state["Upgrading"]),
             "lastUpdated": block_time,
@@ -252,44 +249,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         print("- [discovery]", d.adventurer_id, "->", d.discovery_type)
-
-    async def update_thief(
-        self,
-        info: Info,
-        block_time: datetime,
-        _: FieldElement,
-        tx_hash: FieldElement,
-        data: List[FieldElement],
-    ):
-        ut = decode_update_thief_state_event(data)
-        heist_doc = {
-            "thiefId": check_exists_int(ut.thief_state["AdventurerId"]),
-            "startTime": check_exists_int(ut.thief_state["StartTime"]),
-            "gold": check_exists_int(ut.thief_state["Gold"]),
-            "lastUpdated": block_time,
-        }
-        thief_state = await info.storage.find_one(
-            "heists",
-            {
-                "beastId": encode_int_as_bytes(ut.thief_state["AdventurerId"]),
-            },
-        )
-        if thief_state:
-            await info.storage.find_one_and_update(
-                "heists",
-                {
-                    "thiefId": encode_int_as_bytes(ut.thief_state["AdventurerId"]),
-                },
-                {
-                    "$set": heist_doc,
-                },
-            )
-        else:
-            await info.storage.insert_one(
-                "heists",
-                heist_doc,
-            )
-        print("- [update thief]", ut.thief_state["AdventurerId"], "->", ut.thief_state)
 
     async def create_beast(
         self,
