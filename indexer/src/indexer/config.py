@@ -197,6 +197,14 @@ class Config:
             15: "Hidden Arrow",
         }
 
+        self.ADVENTURER_STATUS = {
+            0: "Idle",
+            1: "Battle",
+            2: "Travel",
+            3: "Quest",
+            4: "Dead",
+        }
+
         self.DISCOVERY_TYPES = {
             0: "Nothing",
             1: "Beast",
@@ -445,7 +453,7 @@ class Config:
             16: "Of The Twins",
         }
 
-        self.STATUS = {0: "Closed", 1: "Open"}
+        self.ITEM_STATUS = {0: "Closed", 1: "Open"}
 
         self.SLOTS = {
             1: "Weapon",

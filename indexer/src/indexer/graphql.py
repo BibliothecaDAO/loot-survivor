@@ -74,6 +74,16 @@ def serialize_beast(value):
     return config.BEASTS.get(felt)
 
 
+def parse_adventurer_status(value):
+    felt = get_key_by_value(value, config.ADVENTURER_STATUS)
+    return felt.to_bytes(32, "big")
+
+
+def serialize_adventurer_status(value):
+    felt = int.from_bytes(value, "big")
+    return config.ADVENTURER_STATUS.get(felt)
+
+
 def parse_discovery(value):
     felt = get_key_by_value(value, config.DISCOVERY_TYPES)
     return felt.to_bytes(32, "big")
@@ -177,14 +187,14 @@ def serialize_suffixes(value):
     return config.ITEM_SUFFIXES.get(felt)
 
 
-def parse_status(value):
-    felt = get_key_by_value(value, config.STATUS)
+def parse_item_status(value):
+    felt = get_key_by_value(value, config.ITEM_STATUS)
     return felt.to_bytes(32, "big")
 
 
-def serialize_status(value):
+def serialize_item_status(value):
     felt = int.from_bytes(value, "big")
-    return config.STATUS.get(felt)
+    return config.ITEM_STATUS.get(felt)
 
 
 def parse_slot(value):
@@ -233,6 +243,12 @@ RaceValue = strawberry.scalar(
 
 BeastValue = strawberry.scalar(
     NewType("BeastValue", bytes), parse_value=parse_beast, serialize=serialize_beast
+)
+
+AdventurerStatusValue = strawberry.scalar(
+    NewType("AdventurerStatusValue", bytes),
+    parse_value=parse_adventurer_status,
+    serialize=serialize_adventurer_status,
 )
 
 DiscoveryValue = strawberry.scalar(
@@ -297,8 +313,8 @@ SuffixValue = strawberry.scalar(
 
 StatusValue = strawberry.scalar(
     NewType("StatusValue", bytes),
-    parse_value=parse_status,
-    serialize=serialize_status,
+    parse_value=parse_item_status,
+    serialize=serialize_item_status,
 )
 
 SlotValue = strawberry.scalar(
@@ -406,6 +422,20 @@ class BeastFilter:
     contains: Optional[BeastValue] = None
     startsWith: Optional[BeastValue] = None
     endsWith: Optional[BeastValue] = None
+
+
+@strawberry.input
+class AdventurerStatusFilter:
+    eq: Optional[AdventurerStatusValue] = None
+    _in: Optional[List[AdventurerStatusValue]] = None
+    notIn: Optional[AdventurerStatusValue] = None
+    lt: Optional[AdventurerStatusValue] = None
+    lte: Optional[AdventurerStatusValue] = None
+    gt: Optional[AdventurerStatusValue] = None
+    gte: Optional[AdventurerStatusValue] = None
+    contains: Optional[AdventurerStatusValue] = None
+    startsWith: Optional[AdventurerStatusValue] = None
+    endsWith: Optional[AdventurerStatusValue] = None
 
 
 @strawberry.input
@@ -602,7 +632,7 @@ class AdventurersFilter:
     handsId: Optional[FeltValueFilter] = None
     neckId: Optional[FeltValueFilter] = None
     ringId: Optional[FeltValueFilter] = None
-    status: Optional[StringFilter] = None
+    status: Optional[AdventurerStatusFilter] = None
     beast: Optional[FeltValueFilter] = None
     upgrading: Optional[BooleanFilter] = None
     gold: Optional[FeltValueFilter] = None
@@ -652,7 +682,7 @@ class BattlesFilter:
     targetHealth: Optional[FeltValueFilter] = None
     xpEarned: Optional[FeltValueFilter] = None
     goldEarned: Optional[FeltValueFilter] = None
-    txhash: Optional[HexValueFilter] = None
+    txHash: Optional[HexValueFilter] = None
 
 
 @strawberry.input
@@ -766,7 +796,7 @@ class BattlesOrderByInput:
     targetHealth: Optional[OrderByInput] = None
     xpEarned: Optional[OrderByInput] = None
     goldEarned: Optional[OrderByInput] = None
-    txhash: Optional[OrderByInput] = None
+    txHash: Optional[OrderByInput] = None
 
 
 @strawberry.input
@@ -832,7 +862,7 @@ class Adventurer:
     handsId: Optional[FeltValue]
     neckId: Optional[FeltValue]
     ringId: Optional[FeltValue]
-    status: Optional[FeltValue]
+    status: Optional[AdventurerStatusValue]
     beastId: Optional[FeltValue]
     upgrading: Optional[BooleanValue]
     gold: Optional[FeltValue]
@@ -899,13 +929,6 @@ class Discovery:
             discoveryTime=data["discoveryTime"],
             txHash=data["txHash"],
         )
-
-
-@strawberry.type
-class Heist:
-    thiefId: Optional[FeltValue]
-    heist_time: Optional[datetime]
-    gold: Optional[FeltValue]
 
 
 @strawberry.type
@@ -1166,6 +1189,7 @@ def get_adventurers(
                 isinstance(value, StringFilter)
                 | isinstance(value, OrderFilter)
                 | isinstance(value, RaceFilter)
+                | isinstance(value, AdventurerStatusFilter)
             ):
                 filter[key] = get_str_filters(value)
             elif isinstance(value, HexValueFilter):
