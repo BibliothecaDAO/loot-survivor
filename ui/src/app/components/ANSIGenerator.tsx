@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-export const ANSIArt = ({ src, newWidth = 60 }: any) => {
+export const ANSIArt = ({ src, newWidth = 100 }: any) => {
   const [ansiArt, setAnsiArt] = useState("");
 
   useEffect(() => {

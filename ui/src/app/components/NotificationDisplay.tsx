@@ -102,7 +102,7 @@ export const NotificationDisplay = ({
   const animation = processAnimation(type, notificationData, adventurer);
   const notification = proccessNotification(type, notificationData);
   return (
-    <div className="flex flex-row w-full gap-5 p-2">
+    <div className="flex flex-row w-full gap-5 p-2 z-10">
       <div className="w-1/4">
         <SpriteAnimation
           frameWidth={100}

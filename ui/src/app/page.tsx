@@ -2,7 +2,9 @@
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect } from "react";
 import { Button } from "./components/Button";
-import HorizontalKeyboardControl from "./components/HorizontalMenu";
+import HorizontalKeyboardControl, {
+  ButtonData,
+} from "./components/HorizontalMenu";
 import Actions from "./components/Actions";
 import Marketplace from "./components/Marketplace";
 import Adventurer from "./components/Adventurer";
@@ -66,7 +68,7 @@ export default function Home() {
   const connected = useUIStore((state) => state.connected);
   const setConnected = useUIStore((state) => state.setConnected);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
-
+  const [showBattleScene, setShowBattleScene] = useState(true);
   const upgrade = adventurer?.upgrading;
   const status = adventurer?.status;
 
@@ -121,10 +123,6 @@ export default function Home() {
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
 
-  console.log(data);
-  console.log(adventurer);
-  console.log(updatedAdventurer);
-
   useEffect(() => {
     setAdventurer(updatedAdventurer);
   }, [updatedAdventurer]);
@@ -143,15 +141,17 @@ export default function Home() {
     };
   }, [play, stop]);
 
-  const [menu, setMenu] = useState([
+  const [menu, setMenu] = useState<ButtonData[]>([
     {
       id: 1,
       label: "Start",
       value: "start",
+      disabled: false,
     },
   ]);
 
   const [selected, setSelected] = useState(menu[0].value);
+  const hasBeast = !!adventurer?.beastId;
 
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
@@ -180,6 +180,7 @@ export default function Home() {
         id: 1,
         label: "Start",
         value: "start",
+        disabled: false,
       },
     ];
 
@@ -190,26 +191,31 @@ export default function Home() {
           id: 2,
           label: "Actions",
           value: "actions",
+          disabled: hasBeast,
         },
         {
           id: 3,
           label: "Market",
           value: "market",
+          disabled: hasBeast,
         },
         {
           id: 4,
           label: "Inventory",
           value: "inventory",
+          disabled: false,
         },
         {
           id: 5,
           label: "Beast",
           value: "beast",
+          disabled: false,
         },
         {
           id: 6,
           label: "Leaderboard",
           value: "leaderboard",
+          disabled: hasBeast,
         },
       ];
     }

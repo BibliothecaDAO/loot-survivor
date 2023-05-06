@@ -9,6 +9,7 @@ import {
   getUnclaimedItemsByAdventurer,
 } from "../hooks/graphql/queries";
 import { UTCClock, Countdown } from "./Clock";
+import { convertTime } from "../lib/utils";
 import MarketplaceRow from "./MarketplaceRow";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
@@ -21,7 +22,7 @@ const Marketplace = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const { lootMarketArcadeContract } = useContracts();
+  const { lootMarketArcadeContract, adventurerContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
@@ -37,6 +38,19 @@ const Marketplace = () => {
       status: "Open",
     }
   );
+
+  const currentTime = new Date().getTime();
+
+  const claimExists = () => {
+    return calls.some((call: any) => call.entrypoint == "claim_item");
+  };
+
+  const singleClaimExists = (marketId: number) => {
+    return calls.some(
+      (call: any) =>
+        call.entrypoint == "claim_item" && call.calldata[0] == marketId
+    );
+  };
 
   const unclaimedItems = data.unclaimedItemsByAdventurerQuery
     ? data.unclaimedItemsByAdventurerQuery.items
@@ -81,6 +95,36 @@ const Marketplace = () => {
     entrypoint: "mint_daily_items",
     calldata: [],
     metadata: `Minting Loot Items!`,
+  };
+
+  const getClaimableItems = () => {
+    return marketLatestItems.filter(
+      (item: any) =>
+        !item.claimedTime &&
+        item.expiry &&
+        convertTime(item.expiry) <= currentTime &&
+        !singleClaimExists(item.marketId) &&
+        adventurer?.id === item.bidder
+    );
+  };
+
+  const handleClaimItem = (item: any) => {
+    if (adventurerContract) {
+      const claimItemTx = {
+        contractAddress: lootMarketArcadeContract?.address ?? "",
+        entrypoint: "claim_item",
+        calldata: [item.marketId, "0", adventurer?.id, "0"],
+        metadata: `Claiming ${item.item}`,
+      };
+      addToCalls(claimItemTx);
+    }
+  };
+
+  const claimAllItems = () => {
+    const claimableItems = getClaimableItems();
+    claimableItems.forEach((item: any) => {
+      handleClaimItem(item);
+    });
   };
 
   useEffect(() => {
@@ -133,7 +177,7 @@ const Marketplace = () => {
   const headings = [
     "Market Id",
     "Item",
-    "Rank",
+    "Tier",
     "Slot",
     "Type",
     "Material",
@@ -164,6 +208,8 @@ const Marketplace = () => {
       (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
+  const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
+
   return (
     <>
       {adventurer?.level != 1 ? (
@@ -177,6 +223,14 @@ const Marketplace = () => {
               >
                 Mint daily items
               </Button>
+              <Button
+                onClick={claimAllItems}
+                className={selectedIndex == 0 ? "animate-pulse" : ""}
+                disabled={claimExists() || getClaimableItems().length == 0}
+              >
+                Claim All
+              </Button>
+
               <div className="self-center">
                 <Countdown
                   countingMessage="Next mint in:"
@@ -189,10 +243,7 @@ const Marketplace = () => {
             <div>
               <span className="flex text-xl text-terminal-yellow">
                 <Coin className="self-center w-5 h-5 fill-current" />
-                {/* {adventurer?.name}s'
-                Gold Balance */}
-
-                {adventurer?.gold ? adventurer?.gold - sum : ""}
+                {calculatedNewGold}
               </span>
             </div>
             <UTCClock />
@@ -203,11 +254,13 @@ const Marketplace = () => {
                 <LootIconLoader />
               </div>
             )}
-            <table className="w-full border border-terminal-green ">
+            <table className="w-full border border-terminal-green">
               <thead className="sticky top-0 border z-5 border-terminal-green bg-terminal-black">
                 <tr className="">
                   {headings.map((heading, index) => (
-                    <th key={index}>{heading}</th>
+                    <th key={index} className="px-2">
+                      {heading}
+                    </th>
                   ))}
                 </tr>
               </thead>
@@ -222,6 +275,7 @@ const Marketplace = () => {
                       adventurers={adventurers}
                       isActive={activeMenu == index + 1}
                       setActiveMenu={setActiveMenu}
+                      calculatedNewGold={calculatedNewGold}
                       key={index}
                     />
                   ))}
