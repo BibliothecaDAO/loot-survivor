@@ -21,8 +21,8 @@ export const AddDevnetButton = ({
         id: "90013",
         chainName: "Loot Survivor Devnet",
         chainId: "LS_DEVNET",
-        baseUrl: "http://survivor-indexer.bibliothecadao.xyz:5050",
-        rpcUrls: ["http://survivor-indexer.bibliothecadao.xyz:5050/rpc"],
+        baseUrl: "https://survivor-indexer.bibliothecadao.xyz",
+        rpcUrls: ["https://survivor-indexer.bibliothecadao.xyz/rpc"],
         // accountImplementation:
         //   "0x3ebe39375ba9e0f8cc21d5ee38c48818e8ed6612fa2e4e04702a323d64b96ba",
       },

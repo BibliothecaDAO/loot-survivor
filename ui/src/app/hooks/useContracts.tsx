@@ -4,7 +4,7 @@ import LootMarketArcade from "../abi/LootMarketArcade.json";
 import Beast from "../abi/Beast.json";
 import Lords_ERC20_Mintable from "../abi/Lords_ERC20_Mintable.json";
 
-const testnet_addr = "http://survivor-indexer.bibliothecadao.xyz:5050";
+const testnet_addr = "https://survivor-indexer.bibliothecadao.xyz";
 
 export const contracts = {
   testnet: {
