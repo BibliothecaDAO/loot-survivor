@@ -93,9 +93,9 @@ const Inventory: React.FC = () => {
     Weapon = "Weapon",
     Head = "Head",
     Chest = "Chest",
-    Feet = "Foot",
     Hands = "Hand",
     Waist = "Waist",
+    Feet = "Foot",
     Neck = "Neck",
     Ring = "Ring",
   }
@@ -128,9 +128,9 @@ const Inventory: React.FC = () => {
     "weaponId",
     "headId",
     "chestId",
-    "feetId",
     "handsId",
     "waistId",
+    "feetId",
     "neckId",
     "ringId",
   ]);
@@ -178,30 +178,30 @@ const Inventory: React.FC = () => {
         <InventoryRow
           title={"Hands Armour"}
           items={groupedItems["Hand"]}
-          menuIndex={4}
-          isActive={activeMenu == 4}
+          menuIndex={3}
+          isActive={activeMenu == 3}
           setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 4}
+          isSelected={selectedIndex == 3}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.handsId}
         />
         <InventoryRow
           title={"Waist Armour"}
           items={groupedItems["Waist"]}
-          menuIndex={5}
-          isActive={activeMenu == 5}
+          menuIndex={4}
+          isActive={activeMenu == 4}
           setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 5}
+          isSelected={selectedIndex == 4}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.waistId}
         />
         <InventoryRow
           title={"Feet Armour"}
           items={groupedItems["Foot"]}
-          menuIndex={3}
-          isActive={activeMenu == 3}
+          menuIndex={5}
+          isActive={activeMenu == 5}
           setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 3}
+          isSelected={selectedIndex == 5}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.feetId}
         />

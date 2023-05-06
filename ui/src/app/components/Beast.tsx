@@ -151,9 +151,11 @@ export default function Beast() {
             <BeastDisplay beastData={beastData} />
           </>
         ) : (
-          <p className="m-auto text-lg uppercase text-terminal-green">
-            Beast not yet discovered.
-          </p>
+          <div className="flex flex-col h-full items-center border-2 border-terminal-green overflow-hidden">
+            <p className="m-auto text-lg uppercase text-terminal-green">
+              Beast not yet discovered.
+            </p>
+          </div>
         )}
       </div>
     </div>
