@@ -242,7 +242,7 @@ export default function Home() {
       {connected ? (
         <>
           <div className="flex justify-between w-full ">
-            <h1 className="glitch">M.O.R.T.A.L</h1>
+            <h1 className="glitch">Loot Survivor</h1>
             <div className="flex flex-row self-end gap-2">
               <TxActivity />
               <Button onClick={() => setIsMuted(!isMuted)}>
