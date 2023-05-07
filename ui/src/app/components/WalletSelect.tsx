@@ -50,9 +50,9 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     if (screen == 1) {
       if (
         (account as any)?.provider?.baseUrl ==
-          "http://survivor-indexer.bibliothecadao.xyz:5050" ||
+        "https://survivor-indexer.bibliothecadao.xyz" ||
         (account as any)?.baseUrl ==
-          "http://survivor-indexer.bibliothecadao.xyz:5050"
+        "https://survivor-indexer.bibliothecadao.xyz"
       ) {
         setConnected(true);
       }
