@@ -80,7 +80,7 @@ const Leaderboard: React.FC = () => {
                 <td>
                   <span className="flex justify-center text-terminal-yellow">
                     <Coin className="self-center w-6 h-6 fill-current" />
-                    {adventurer.gold}
+                    {adventurer.gold ? adventurer.gold : 0}
                   </span>
                 </td>
                 <td>
