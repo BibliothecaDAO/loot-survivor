@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import {
-  useTransactionManager,
-  useContractWrite,
-} from "@starknet-react/core";
+import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import { Metadata } from "../types";
 import { Button } from "./Button";
 import { MdClose } from "react-icons/md";
@@ -77,7 +74,7 @@ const TransactionCart: React.FC = () => {
                     startLoading(
                       "Multicall",
                       tx?.transaction_hash,
-                      "Muticalling",
+                      "Multicalling",
                       "",
                       `Multicall complete!`
                     );
