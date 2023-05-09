@@ -1,25 +1,35 @@
 import LootIcon from "./LootIcon";
 
 export const ItemDisplay = (item: any) => {
-  const formatItem = item.item;
-  const slot = formatItem ? formatItem.slot : "";
+  const processName = () => {
+    if (item.prefix1 && item.suffix && item.greatness) {
+      return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix} +1`;
+    } else if (item.prefix1 && item.suffix) {
+      return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix}`;
+    } else if (item.prefix1) {
+      return `${item.prefix1} ${item.prefix2} ${item.item}`;
+    }
+  };
+
+  const formatItem = processName();
+  const slot = item ? item.slot : "";
 
   return (
     <div
       className={`flex-shrink flex gap-2 p-2 mb-1  ${
-        formatItem ? "bg-terminal-green text-terminal-black" : ""
+        item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >
       <LootIcon type={slot} />
       <div>
         <span className="font-semibold whitespace-nowrap">
-          {formatItem ? formatItem.item : "Nothing Equipped"}
+          {item ? formatItem : "Nothing Equipped"}
           {slot == "Neck" || slot == "Ring" ? " +1 Luck" : ""}
         </span>{" "}
         <br />
         <span className="whitespace-nowrap">
-          {formatItem &&
-            `[Tier ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`}
+          {item &&
+            `[Tier ${item.rank}, Greatness ${item.greatness}, ${item.xp} XP]`}
         </span>
       </div>
     </div>
