@@ -41,11 +41,16 @@ const useTransactionCartStore = create<TransactionCartState>((set, get) => {
     }
   };
 
+  const resetCalls = () => {
+    set({ calls: [] });
+  };
+
   return {
     handleSubmitCalls,
     calls: [],
     addToCalls,
     removeFromCalls,
+    resetCalls,
   };
 });
 
