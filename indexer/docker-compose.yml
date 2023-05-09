@@ -3,15 +3,27 @@ version: "3"
 services:
   devnet:
     image: shardlabs/starknet-devnet:latest
+    container_name: devnet
+    restart: always
     command:
     - "--host=0.0.0.0"
     - "--port=5050"
     - "--disable-rpc-request-validation"
+    - "--timeout=5000"
+    - "--dump-path=/devnet-dumps/dump.pkl"
+    - "--load-path=/devnet-dumps/dump.pkl"
+    - "--dump-on=exit"
+    - "--lite-mode"
     ports:
     - 5050:5050
+    volumes:
+    - /home/ec2-user/devnet-dumps:/devnet-dumps
+    networks:
+    - devnet_network
 
   apibara:
     image: quay.io/apibara/starknet:5e284618b2a1eea49aa04cb04d452ec48b3ffb99
+    container_name: apibara
     ports:
     - 7171:7171
     depends_on:
@@ -24,10 +36,11 @@ services:
     environment:
     - OTEL_SDK_DISABLED=true # disable tracing/metrics
     volumes:
-    - apibara-data:/data
+    - /home/ec2-user/apibrara:/data
 
   mongo-goerli:
     image: mongo:latest
+    container_name: mongo-goerli
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${GOERLI_DB_USERNAME}
@@ -35,23 +48,29 @@ services:
     ports:
     - 27017:27017
     volumes:
-    - mongo-data:/data/goerli/db
+    - /home/ec2-user/mongo-data/goerli:/data/db
 
   mongo-devnet:
     image: mongo:latest
+    container_name: mongo-devnet
     restart: always
     command: mongod --port 27018
+    depends_on:
+      - devnet
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DEVNET_DB_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${DEVNET_DB_PASSWORD}
     ports:
     - 27018:27018
     volumes:
-    - mongo-data:/data/devnet/db
+    - /home/ec2-user/mongo-data/devnet:/data/db
 
   indexer-goerli:
     image: starknetdev/loot-survivor-indexer:latest
+    container_name: indexer-goerli
     restart: always
+    depends_on:
+      - mongo-goerli
     command:
     - start
     - --mongo-url
@@ -59,13 +78,13 @@ services:
     - --network
     - "goerli"
     - --adventurer
-    - "0x035d755a23ec72df90819f584d9a1849bbc21fa77f96d25e03f1736883895248"
+    - "0x045c00857eba10068c8cc54b438eb769735c679fd7af14815a7bf771f1d81ef6"
     - --beast
-    - "0x000f4dbfe5d15792aa91025e42ee1d74c22bdeb1eef0b9bc19a37216377290c1"
+    - "0x07c93d30731ebe1cd8d3dd2ee92917205f6c136b24f317b3de87e8c93da45ceb"
     - --loot
-    - "0x065669e15c8f1a7f17b7062e4eb1b709b922b931b93c59577f1848a85c30ab1f"
+    - "0x01db417426a5e190e328953e3bc36a2cfe4516743ff02c05c3a904107a1ad180"
     - --start_block
-    - "796600"
+    - "799200"
     environment:
       PYTHONUNBUFFERED: "1"
     links:
@@ -73,7 +92,11 @@ services:
 
   indexer-devnet:
     image: starknetdev/loot-survivor-indexer:latest
+    container_name: indexer-devnet
     restart: always
+    depends_on:
+      - apibara
+      - mongo-devnet
     command:
     - start
     - --server-url
@@ -83,11 +106,11 @@ services:
     - --network
     - "devnet"
     - --adventurer
-    - "0x009056f46cb33d53c479b1d7c063c196bcd4e3549d58c9c9555b8bd2fea5ff4d"
+    - "0x00dbc3c823544b5f28536acc912f850127d6b1565d83e22246af5aaf29183d20"
     - --beast
-    - "0x028298b791b7d938a063be38799ca1e217afc9a18e2af085031920f50cd4e006"
+    - "0x065a3696467017b1dc72fcec0374b19fef4cf8ca455f58fc01a3c3686a293339"
     - --loot
-    - "0x0216071afae3defb274a33c6de4b5480fe3a4dd40c4832f69363b65f1ccd4614"
+    - "0x06f1aca549769ced73c8021c7c1a163bed5f1b457a8c98b76d9bfc4c0a885fb2"
     environment:
       PYTHONUNBUFFERED: "1"
     links:
@@ -95,6 +118,7 @@ services:
 
   graphql:
     image: starknetdev/loot-survivor-indexer:latest
+    container_name: graphql
     restart: always
     command:
     - graphql
@@ -114,8 +138,9 @@ services:
     volumes:
       - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/fullchain.pem:/app/fullchain.pem
       - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/privkey.pem:/app/privkey.pem
-
+    
 volumes:
-  mongo-data:
-  apibara-data:
   certs:
+
+networks:
+  devnet_network:

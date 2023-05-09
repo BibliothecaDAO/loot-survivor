@@ -15,6 +15,7 @@ interface MarketplaceRowProps {
   adventurers: any[];
   isActive: boolean;
   setActiveMenu: (value: any) => void;
+  calculatedNewGold: number;
 }
 
 const MarketplaceRow = ({
@@ -25,6 +26,7 @@ const MarketplaceRow = ({
   adventurers,
   isActive,
   setActiveMenu,
+  calculatedNewGold,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
   const { lootMarketArcadeContract } = useContracts();
@@ -113,6 +115,7 @@ const MarketplaceRow = ({
       return "Bids";
     }
   };
+
   return (
     <tr
       ref={ref}
@@ -154,10 +157,10 @@ const MarketplaceRow = ({
       <td className="w-64 text-center">
         {showBidBox == index ? (
           <BidBox
-            showBidBox={showBidBox == index}
             close={() => setShowBidBox(-1)}
             marketId={item.marketId}
             item={item}
+            calculatedNewGold={calculatedNewGold}
           />
         ) : (
           <div>

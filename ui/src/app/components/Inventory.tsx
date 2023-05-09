@@ -17,6 +17,7 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 const Inventory: React.FC = () => {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";
+  const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { adventurerContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -45,6 +46,12 @@ const Inventory: React.FC = () => {
       };
       addToCalls(equipItem);
     }
+  };
+
+  const singleEquipExists = (id: number) => {
+    return calls.some(
+      (call: any) => call.entrypoint == "equip_item" && call.calldata[2] == id
+    );
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -86,9 +93,9 @@ const Inventory: React.FC = () => {
     Weapon = "Weapon",
     Head = "Head",
     Chest = "Chest",
-    Feet = "Foot",
     Hands = "Hand",
     Waist = "Waist",
+    Feet = "Foot",
     Neck = "Neck",
     Ring = "Ring",
   }
@@ -121,9 +128,9 @@ const Inventory: React.FC = () => {
     "weaponId",
     "headId",
     "chestId",
-    "feetId",
     "handsId",
     "waistId",
+    "feetId",
     "neckId",
     "ringId",
   ]);
@@ -169,34 +176,34 @@ const Inventory: React.FC = () => {
           equippedItemId={adventurer?.chestId}
         />
         <InventoryRow
-          title={"Feet Armour"}
-          items={groupedItems["Foot"]}
+          title={"Hands Armour"}
+          items={groupedItems["Hand"]}
           menuIndex={3}
           isActive={activeMenu == 3}
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 3}
-          setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.feetId}
-        />
-        <InventoryRow
-          title={"Hands Armour"}
-          items={groupedItems["Hand"]}
-          menuIndex={4}
-          isActive={activeMenu == 4}
-          setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 4}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.handsId}
         />
         <InventoryRow
           title={"Waist Armour"}
           items={groupedItems["Waist"]}
+          menuIndex={4}
+          isActive={activeMenu == 4}
+          setActiveMenu={setActiveMenu}
+          isSelected={selectedIndex == 4}
+          setSelected={setSelectedIndex}
+          equippedItemId={adventurer?.waistId}
+        />
+        <InventoryRow
+          title={"Feet Armour"}
+          items={groupedItems["Foot"]}
           menuIndex={5}
           isActive={activeMenu == 5}
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 5}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.waistId}
+          equippedItemId={adventurer?.feetId}
         />
         <InventoryRow
           title={"Neck Jewelry"}
@@ -226,7 +233,10 @@ const Inventory: React.FC = () => {
             filteredItems.map((item: any, index: number) => (
               <div className="flex" key={index}>
                 <ItemDisplay item={item} />
-                <Button onClick={() => handleAddEquipItem(item.id)}>
+                <Button
+                  onClick={() => handleAddEquipItem(item.id)}
+                  disabled={singleEquipExists(item.id)}
+                >
                   equip
                 </Button>
               </div>

@@ -85,7 +85,7 @@ export default function Actions() {
   ];
 
   return (
-    <div className="flex flex-row space-x-6 ">
+    <div className="flex flex-row space-x-4 overflow-hidden ">
       <div className="w-1/3">
         <Info adventurer={adventurer} />
       </div>

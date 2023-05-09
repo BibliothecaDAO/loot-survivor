@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { NullBeast } from "../types";
 import { useQuery } from "@apollo/client";
@@ -12,6 +12,7 @@ import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import Info from "./Info";
 import { BattleDisplay } from "./BattleDisplay";
 import { BeastDisplay } from "./BeastDisplay";
+import Battle from "../../../public/battle.png";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
@@ -31,6 +32,8 @@ export default function Beast() {
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const type = useLoadingStore((state) => state.type);
+
+  const formatAdventurer = adventurer ? adventurer : null;
 
   const { data } = useQueriesStore();
 
@@ -110,7 +113,7 @@ export default function Beast() {
   const isBeastDead = beastData?.health == "0";
 
   return (
-    <div className="flex flex-row space-x-6">
+    <div className="flex flex-row space-x-4 overflow-hidden">
       <div className="w-1/3">
         <Info adventurer={adventurer} />
       </div>
@@ -142,15 +145,17 @@ export default function Beast() {
         )}
       </div>
 
-      <div className="flex flex-row w-1/3 ">
+      <div className="w-1/3">
         {adventurer?.beastId || data.lastBattleQuery?.battles[0] ? (
           <>
             <BeastDisplay beastData={beastData} />
           </>
         ) : (
-          <p className="m-auto text-lg uppercase text-terminal-green">
-            Beast not yet discovered.
-          </p>
+          <div className="flex flex-col h-full items-center border-2 border-terminal-green overflow-hidden">
+            <p className="m-auto text-lg uppercase text-terminal-green">
+              Beast not yet discovered.
+            </p>
+          </div>
         )}
       </div>
     </div>

@@ -4,17 +4,17 @@ import LootMarketArcade from "../abi/LootMarketArcade.json";
 import Beast from "../abi/Beast.json";
 import Lords_ERC20_Mintable from "../abi/Lords_ERC20_Mintable.json";
 
-const testnet_addr = "http://survivor-indexer.bibliothecadao.xyz:5050";
+const testnet_addr = "https://survivor-indexer.bibliothecadao.xyz";
 
 export const contracts = {
   testnet: {
     adventurer:
-      "0x00473b70f183c27ab4dac4139c39f364244ae89680810ff7f1f8cb6d754b2067",
+      "0x06edcf9c92fb99b14bcf0a7f016b3f298548425df085483c1d1a68aecae4b4a9",
     lootMarketArcade:
-      "0x043d77e798f65a5284b4fde31051ee3b80f74a73817f607958e65d7504684ea0",
-    beast: "0x0128dc5af5038e745c83c57230a3203cce571f90320042e295744763953c0306",
+      "0x058899f75e139dd3db67fa6e875c79a12a48328215d93dd688721750389300f8",
+    beast: "0x029887bb51387e152aa861f8378e004fad6f99db836293855184540c08072731",
     lords_erc20_mintable:
-      "0x0171f44786f43f8c8ac26595385c3dedf1b9a5b2f10d39afacc40c2576084f0e",
+      "0x017441a8855b221aacb4b4ece57b0665b91ac41fd7d03e481fcd40767c17708d",
   },
   goerli: {
     adventurer:

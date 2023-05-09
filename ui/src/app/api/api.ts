@@ -13,7 +13,7 @@ export const mintEth = async ({ address }: MintEthProps) => {
     };
 
     const response = await fetch(
-      "http://survivor-indexer.bibliothecadao.xyz:5050/mint",
+      "https://survivor-indexer.bibliothecadao.xyz/mint",
       {
         method: "POST",
         headers: {

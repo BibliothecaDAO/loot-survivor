@@ -7,13 +7,18 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 interface BidBoxProps {
-  showBidBox: Boolean;
   close: () => void;
   marketId: number;
   item: any;
+  calculatedNewGold: number;
 }
 
-export function BidBox({ close, marketId, item }: BidBoxProps) {
+export function BidBox({
+  close,
+  marketId,
+  item,
+  calculatedNewGold,
+}: BidBoxProps) {
   const { account } = useAccount();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -28,13 +33,7 @@ export function BidBox({ close, marketId, item }: BidBoxProps) {
         const BidTx = {
           contractAddress: lootMarketArcadeContract?.address,
           entrypoint: "bid_on_item",
-          calldata: [
-            marketId,
-            "0",
-            adventurer?.id,
-            "0",
-            bidPrice,
-          ],
+          calldata: [marketId, "0", adventurer?.id, "0", bidPrice],
           metadata: `Bidding on ${marketId}`,
         };
         addToCalls(BidTx);
@@ -57,7 +56,11 @@ export function BidBox({ close, marketId, item }: BidBoxProps) {
       />
       <Button
         onClick={() => handleBid(marketId)}
-        disabled={typeof bidPrice === "undefined" || item.price >= bidPrice}
+        disabled={
+          typeof bidPrice === "undefined" ||
+          item.price >= bidPrice ||
+          bidPrice > calculatedNewGold
+        }
       >
         Place Bid
       </Button>

@@ -2,7 +2,9 @@
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect } from "react";
 import { Button } from "./components/Button";
-import HorizontalKeyboardControl from "./components/HorizontalMenu";
+import HorizontalKeyboardControl, {
+  ButtonData,
+} from "./components/HorizontalMenu";
 import Actions from "./components/Actions";
 import Marketplace from "./components/Marketplace";
 import Adventurer from "./components/Adventurer";
@@ -67,7 +69,7 @@ export default function Home() {
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
-
+  const [showBattleScene, setShowBattleScene] = useState(true);
   const upgrade = adventurer?.upgrading;
 
   const { data } = useQueriesStore();
@@ -263,7 +265,7 @@ export default function Home() {
       {connected ? (
         <>
           <div className="flex justify-between w-full ">
-            <h1 className="glitch">M.O.R.T.A.L</h1>
+            <h1 className="glitch">Loot Survivor</h1>
             <div className="flex flex-row self-end gap-2">
               <TxActivity />
               <Button onClick={() => setIsMuted(!isMuted)}>

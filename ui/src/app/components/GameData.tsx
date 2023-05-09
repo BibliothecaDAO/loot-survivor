@@ -19,6 +19,7 @@ export class GameData {
   STATUS: Dict<string>;
   SLOTS: Dict<string>;
   BEAST_IMAGES: DictString<string>;
+  BEAST_ATTACK_LOCATION: DictString<string>;
   ADVENTURER_ANIMATIONS: DictString<string>;
 
   constructor() {
@@ -469,11 +470,11 @@ export class GameData {
     };
 
     this.BEAST_IMAGES = {
-      Phoenix: "/beasts/phoenix.png",
-      Griffin: "/beasts/griffin.png",
+      Phoenix: "/monsters/phoenix.png",
+      Griffin: "/monsters/griffin.png",
       Minotaur: "/beasts/minotaur.png",
       Basilisk: "/beasts/basilisk.png",
-      Gnome: "//beastsgnome.png",
+      Gnome: "/beasts/gnome.png",
       Wraith: "/beasts/wraith.png",
       Ghoul: "/beasts/ghoul.png",
       Goblin: "/beasts/goblin.png",
@@ -487,8 +488,31 @@ export class GameData {
       Dragon: "/beasts/dragon.png",
       Vampire: "/beasts/vampire.png",
       Werewolf: "/beasts/werewolf.png",
-      Spider: "/beasts/spider.png",
+      Spider: "/monsters/spider.png",
       Rat: "/beasts/rat.png",
+    };
+
+    this.BEAST_ATTACK_LOCATION = {
+      Phoenix: "/icons/loot/head.svg",
+      Griffin: "/icons/loot/chest.svg",
+      Minotaur: "/icons/loot/hand.svg",
+      Basilisk: "/icons/loot/waist.svg",
+      Gnome: "/icons/loot/foot.svg",
+      Wraith: "/icons/loot/chest.svg",
+      Ghoul: "/icons/loot/hand.svg",
+      Goblin: "/icons/loot/waist.svg",
+      Skeleton: "/icons/loot/foot.svg",
+      Golem: "/icons/loot/head.svg",
+      Giant: "/icons/loot/hand.svg",
+      Yeti: "/icons/loot/waist.svg",
+      Orc: "/icons/loot/foot.svg",
+      Beserker: "/icons/loot/head.svg",
+      Ogre: "/icons/loot/chest.svg",
+      Dragon: "/icons/loot/waist.svg",
+      Vampire: "/icons/loot/foot.svg",
+      Werewolf: "/icons/loot/head.svg",
+      Spider: "/icons/loot/chest.svg",
+      Rat: "/icons/loot/hand.svg",
     };
 
     this.ADVENTURER_ANIMATIONS = {

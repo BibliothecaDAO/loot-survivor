@@ -47,7 +47,7 @@ export const CreateAdventurer = ({
     imageHash1: "1",
     imageHash2: "1",
     interfaceaddress:
-      "0x12e0839c07c8fac67dd47a88e38317e0a56180faacf5e81f78d09a4c6338021",
+      "0x026213C428D350Fa212Aa9B716D45b98b866548efDC867f94B6F775bE90fd86B",
   });
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const setScreen = useUIStore((state) => state.setScreen);

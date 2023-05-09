@@ -3,10 +3,11 @@ import { Button } from "./Button";
 import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 import { Menu } from "../types";
 
-interface ButtonData {
+export interface ButtonData {
   id: number;
   label: string;
   value: any;
+  disabled?: boolean;
 }
 
 interface HorizontalKeyboardControlProps {
@@ -27,19 +28,33 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
   }, [selectedIndex]);
 
   const handleKeyDown = (event: KeyboardEvent) => {
+    const getNextEnabledIndex = (currentIndex: number, direction: number) => {
+      let newIndex = currentIndex + direction;
+
+      while (
+        newIndex >= 0 &&
+        newIndex < buttonsData.length &&
+        buttonsData[newIndex].disabled
+      ) {
+        newIndex += direction;
+      }
+
+      return newIndex;
+    };
+
     switch (event.key) {
       case "ArrowLeft":
         play();
         setSelectedIndex((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
+          const newIndex = getNextEnabledIndex(prev, -1);
+          return newIndex < 0 ? prev : newIndex;
         });
         break;
       case "ArrowRight":
         play();
         setSelectedIndex((prev) => {
-          const newIndex = Math.min(prev + 1, buttonsData.length - 1);
-          return newIndex;
+          const newIndex = getNextEnabledIndex(prev, 1);
+          return newIndex >= buttonsData.length ? prev : newIndex;
         });
         break;
     }
@@ -63,6 +78,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
             setSelectedIndex(index);
             onButtonClick(buttonData.screen);
           }}
+          disabled={buttonData.disabled}
         >
           {buttonData.label}
         </Button>

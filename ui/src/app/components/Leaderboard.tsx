@@ -12,7 +12,12 @@ const Leaderboard: React.FC = () => {
 
   const { data, loading, error } = useQuery(getAdventurerByXP);
 
-  if (loading) return <div className="flex justify-center p-20 align-middle"><LootIconLoader /></div>;
+  if (loading)
+    return (
+      <div className="flex justify-center p-20 align-middle">
+        <LootIconLoader />
+      </div>
+    );
   if (error) return <p>Error: {error.message}</p>;
 
   const adventurers = data?.adventurers;
@@ -45,15 +50,15 @@ const Leaderboard: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center w-1/2 m-auto">
+    <div className="flex flex-col items-center w-3/4 m-auto">
       <table className="w-full mt-4 text-4xl border border-terminal-green">
-        <thead className="sticky top-0 border border-terminal-green">
+        <thead className="border border-terminal-green">
           <tr>
-            <th>Rank</th>
-            <th>Adventurer</th>
-            <th>Gold</th>
-            <th>XP</th>
-            <th>Health</th>
+            <th className="p-4">Rank</th>
+            <th className="p-4">Adventurer</th>
+            <th className="p-4">Gold</th>
+            <th className="p-4">XP</th>
+            <th className="p-4">Health</th>
           </tr>
         </thead>
         <tbody>
@@ -73,16 +78,17 @@ const Leaderboard: React.FC = () => {
                   </span>
                 </td>
                 <td>
-                  <span className="flex justify-center text-terminal-yellow">
-                    {adventurer.xp}
-                  </span>
+                  <span className="flex justify-center">{adventurer.xp}</span>
                 </td>
                 <td>
-                  <span className={`flex justify-center ${!dead ? " text-terminal-green" : "text-red-800"}`}>
+                  <span
+                    className={`flex justify-center ${
+                      !dead ? " text-terminal-green" : "text-red-800"
+                    }`}
+                  >
                     {adventurer.health}
                   </span>
                 </td>
-
               </tr>
             );
           })}
