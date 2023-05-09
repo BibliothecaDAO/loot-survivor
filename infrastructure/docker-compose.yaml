@@ -1,0 +1,156 @@
+version: "3"
+
+services:
+  devnet:
+    image: shardlabs/starknet-devnet:latest
+    container_name: devnet
+    restart: always
+    command:
+    - "--host=0.0.0.0"
+    - "--port=5050"
+    - "--disable-rpc-request-validation"
+    - "--timeout=5000"
+    - "--dump-path=/devnet-dumps/dump.pkl"
+    - "--load-path=/devnet-dumps/dump.pkl"
+    - "--dump-on=exit"
+    - "--lite-mode"
+    ports:
+    - 5050:5050
+    volumes:
+    - /home/ec2-user/devnet-dumps:/devnet-dumps
+    networks:
+    - devnet_network
+
+  apibara:
+    image: quay.io/apibara/starknet:5e284618b2a1eea49aa04cb04d452ec48b3ffb99
+    container_name: apibara
+    ports:
+    - 7171:7171
+    depends_on:
+    - devnet
+    restart: always
+    command:
+    - "start"
+    - "--data=/data"
+    - "--rpc=http://devnet:5050/rpc"
+    environment:
+    - OTEL_SDK_DISABLED=true # disable tracing/metrics
+    volumes:
+    - /home/ec2-user/apibrara:/data
+    networks:
+    - devnet_network
+    - goerli_network
+
+  mongo-goerli:
+    image: mongo:latest
+    container_name: mongo-goerli
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${GOERLI_DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${GOERLI_DB_PASSWORD}
+    ports:
+    - 27017:27017
+    volumes:
+    - /home/ec2-user/mongo-data/goerli:/data/db
+    networks:
+    - goerli_network
+
+  mongo-devnet:
+    image: mongo:latest
+    container_name: mongo-devnet
+    restart: always
+    command: mongod --port 27018
+    depends_on:
+      - devnet
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DEVNET_DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DEVNET_DB_PASSWORD}
+    ports:
+    - 27018:27018
+    volumes:
+    - /home/ec2-user/mongo-data/devnet:/data/db
+    networks:
+    - devnet_network
+
+  indexer-goerli:
+    image: starknetdev/loot-survivor-indexer:latest
+    container_name: indexer-goerli
+    restart: always
+    depends_on:
+      - mongo-goerli
+    command:
+    - start
+    - --mongo-url
+    - "mongodb://${GOERLI_DB_USERNAME}:${GOERLI_DB_PASSWORD}@mongo-goerli:27017"
+    - --network
+    - "goerli"
+    - --adventurer
+    - "0x045c00857eba10068c8cc54b438eb769735c679fd7af14815a7bf771f1d81ef6" // todo: move to env var
+    - --beast
+    - "0x07c93d30731ebe1cd8d3dd2ee92917205f6c136b24f317b3de87e8c93da45ceb" // todo: move to env var
+    - --loot
+    - "0x01db417426a5e190e328953e3bc36a2cfe4516743ff02c05c3a904107a1ad180" // todo: move to env var
+    - --start_block
+    - "799200"
+    environment:
+      PYTHONUNBUFFERED: "1"
+    links:
+    - mongo-goerli
+    networks:
+    - goerli_network
+
+  indexer-devnet:
+    image: starknetdev/loot-survivor-indexer:latest
+    container_name: indexer-devnet
+    restart: always
+    depends_on:
+      - apibara
+      - mongo-devnet
+    command:
+    - start
+    - --server-url
+    - "apibara:7171"
+    - --mongo-url
+    - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-devnet:27018"
+    - --network
+    - "devnet"
+    - --adventurer
+    - "0x06edcf9c92fb99b14bcf0a7f016b3f298548425df085483c1d1a68aecae4b4a9" // todo: move to env var
+    - --beast
+    - "0x029887bb51387e152aa861f8378e004fad6f99db836293855184540c08072731" // todo: move to env var
+    - --loot
+    - "0x058899f75e139dd3db67fa6e875c79a12a48328215d93dd688721750389300f8" // todo: move to env var
+    environment:
+      PYTHONUNBUFFERED: "1"
+    networks:
+    - devnet_network
+
+  graphql:
+    image: starknetdev/loot-survivor-indexer:latest
+    container_name: graphql
+    restart: always
+    command:
+    - graphql
+    - --mongo_goerli
+    - "mongodb://${GOERLI_DB_USERNAME}:${GOERLI_DB_PASSWORD}@mongo-goerli:27017"
+    - --mongo_devnet
+    - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-devnet:27018"
+    - --port
+    - "8080"
+    environment:
+      PYTHONUNBUFFERED: "1"
+    ports:
+      - 8080:8080
+    volumes:
+      - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/fullchain.pem:/app/fullchain.pem
+      - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/privkey.pem:/app/privkey.pem
+    networks:
+      - devnet_network
+      - goerli_network
+
+volumes:
+  certs:
+
+networks:
+  devnet_network:
+  goerli_network:
