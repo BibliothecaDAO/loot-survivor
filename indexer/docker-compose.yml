@@ -37,7 +37,9 @@ services:
     - OTEL_SDK_DISABLED=true # disable tracing/metrics
     volumes:
     - /home/ec2-user/apibrara:/data
-
+    networks:
+    - devnet_network
+    
   mongo-goerli:
     image: mongo:latest
     container_name: mongo-goerli
@@ -49,6 +51,8 @@ services:
     - 27017:27017
     volumes:
     - /home/ec2-user/mongo-data/goerli:/data/db
+    networks:
+    - goerli_network
 
   mongo-devnet:
     image: mongo:latest
@@ -64,6 +68,8 @@ services:
     - 27018:27018
     volumes:
     - /home/ec2-user/mongo-data/devnet:/data/db
+    networks:
+    - devnet_network
 
   indexer-goerli:
     image: starknetdev/loot-survivor-indexer:latest
@@ -78,17 +84,19 @@ services:
     - --network
     - "goerli"
     - --adventurer
-    - "0x045c00857eba10068c8cc54b438eb769735c679fd7af14815a7bf771f1d81ef6"
+    - ${GOERLI_ADVENTURER_CONTRACT}
     - --beast
-    - "0x07c93d30731ebe1cd8d3dd2ee92917205f6c136b24f317b3de87e8c93da45ceb"
+    - ${GOERLI_BEAST_CONTRACT}
     - --loot
-    - "0x01db417426a5e190e328953e3bc36a2cfe4516743ff02c05c3a904107a1ad180"
+    - ${GOERLI_LOOT_CONTRACT}
     - --start_block
     - "799200"
     environment:
       PYTHONUNBUFFERED: "1"
     links:
     - mongo-goerli
+    networks:
+    - goerli_network
 
   indexer-devnet:
     image: starknetdev/loot-survivor-indexer:latest
@@ -106,15 +114,15 @@ services:
     - --network
     - "devnet"
     - --adventurer
-    - "0x00dbc3c823544b5f28536acc912f850127d6b1565d83e22246af5aaf29183d20"
+    - ${DEVNET_ADVENTURER_CONTRACT}
     - --beast
-    - "0x065a3696467017b1dc72fcec0374b19fef4cf8ca455f58fc01a3c3686a293339"
+    - ${DEVNET_BEAST_CONTRACT}
     - --loot
-    - "0x06f1aca549769ced73c8021c7c1a163bed5f1b457a8c98b76d9bfc4c0a885fb2"
+    - ${DEVNET_LOOT_CONTRACT}
     environment:
       PYTHONUNBUFFERED: "1"
-    links:
-    - mongo-devnet
+    networks:
+    - devnet_network
 
   graphql:
     image: starknetdev/loot-survivor-indexer:latest
@@ -132,15 +140,16 @@ services:
       PYTHONUNBUFFERED: "1"
     ports:
       - 8080:8080
-    links:
-    - mongo-goerli
-    - mongo-devnet
     volumes:
       - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/fullchain.pem:/app/fullchain.pem
       - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/privkey.pem:/app/privkey.pem
-    
+    networks:
+      - devnet_network
+      - goerli_network
+
 volumes:
   certs:
 
 networks:
   devnet_network:
+  goerli_network:
