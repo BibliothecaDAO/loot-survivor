@@ -5,6 +5,7 @@ import { Button } from "./Button";
 import Coin from "../../../public/coin.svg";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import LootIconLoader from "./Loader";
+import Image from "next/image";
 
 const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -59,6 +60,11 @@ const Leaderboard: React.FC = () => {
             <th className="p-4">Gold</th>
             <th className="p-4">XP</th>
             <th className="p-4">Health</th>
+            {currentPage == 1 && (
+              <th className="p-4">
+                Prize <span className="text-sm">(per mint)</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -89,6 +95,33 @@ const Leaderboard: React.FC = () => {
                     {adventurer.health}
                   </span>
                 </td>
+                {currentPage == 1 && index < 3 && (
+                  <td>
+                    <div className="flex flex-row items-center justify-center gap-2">
+                      <span
+                        className={` ${
+                          index == 0
+                            ? "text-gold"
+                            : index == 1
+                            ? "text-silver"
+                            : index == 2
+                            ? "text-bronze"
+                            : ""
+                        }`}
+                      >
+                        {index == 0 ? 10 : index == 1 ? 3 : index == 2 ? 2 : ""}
+                      </span>
+                      <span className="h-[30px]">
+                        <Image
+                          alt="lords"
+                          src="/lords.png"
+                          width={30}
+                          height={30}
+                        />
+                      </span>
+                    </div>
+                  </td>
+                )}
               </tr>
             );
           })}
