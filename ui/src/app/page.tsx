@@ -78,7 +78,7 @@ export default function Home() {
     owner: padAddress(account?.address ?? ""),
   });
 
-  const adventurers = data.adventurersByGoldQuery
+  const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers
     : [];
 
