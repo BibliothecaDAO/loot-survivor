@@ -234,4 +234,5 @@ export type Menu = {
   id: number;
   label: string;
   screen: ScreenPage;
+  disabled?: boolean;
 };
