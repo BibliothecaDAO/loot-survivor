@@ -12,9 +12,10 @@ type TransactionCartState = {
   calls: Call[];
   addToCalls: (value: Call) => void;
   removeFromCalls: (value: Call) => void;
+  resetCalls: () => void;
 };
 
-const useTransactionCartStore = create<TransactionCartState>((set, get) => {
+const useTransactionCartStore = create<TransactionCartState>((set) => {
   const addToCalls = (tx: Call) => {
     set((state) => ({ calls: [...state.calls, tx] }));
   };
