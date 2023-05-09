@@ -14,6 +14,7 @@ const TransactionCart: React.FC = () => {
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
+  const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const {
     hashes,
@@ -66,7 +67,7 @@ const TransactionCart: React.FC = () => {
               </div>
             ))}
           </div>
-          <div className="m-2">
+          <div className="flex flex-row gap-2 absolute bottom-4">
             <Button
               onClick={async () =>
                 await handleSubmitCalls(writeAsync).then((tx: any) => {
@@ -100,10 +101,10 @@ const TransactionCart: React.FC = () => {
                   }
                 })
               }
-              className="absolute bottom-4"
             >
               Submit all Transactions
             </Button>
+            <Button onClick={() => resetCalls()}>Clear Cart</Button>
           </div>
         </div>
       ) : null}
