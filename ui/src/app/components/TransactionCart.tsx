@@ -75,7 +75,7 @@ const TransactionCart: React.FC = () => {
                     startLoading(
                       "Multicall",
                       tx?.transaction_hash,
-                      "Muticalling",
+                      "Multicalling",
                       "",
                       `Multicall complete!`
                     );
