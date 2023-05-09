@@ -1,18 +1,24 @@
 import LootIcon from "./LootIcon";
 
 export const ItemDisplay = (item: any) => {
-  const processName = () => {
-    if (item.prefix1 && item.suffix && item.greatness) {
-      return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix} +1`;
-    } else if (item.prefix1 && item.suffix) {
-      return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix}`;
-    } else if (item.prefix1) {
-      return `${item.prefix1} ${item.prefix2} ${item.item}`;
+  const processName = (item: any) => {
+    if (item) {
+      if (item.prefix1 && item.suffix && item.greatness >= 20) {
+        return `${item.prefix1} ${item.prefix2} ${item.item} of ${item.suffix} +1`;
+      } else if (item.prefix1 && item.suffix) {
+        return `${item.prefix1} ${item.prefix2} ${item.item} of ${item.suffix}`;
+      } else if (item.suffix) {
+        return `${item.item} of ${item.suffix}`;
+      } else {
+        return `${item.item}`;
+      }
     }
   };
 
-  const formatItem = processName();
-  const slot = item ? item.slot : "";
+  const formatItem = item?.item;
+
+  const itemName = processName(formatItem);
+  const slot = formatItem ? formatItem.slot : "";
 
   return (
     <div
@@ -20,16 +26,24 @@ export const ItemDisplay = (item: any) => {
         item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >
-      <LootIcon type={slot} />
+      <LootIcon
+        type={
+          item.type == "feet"
+            ? "foot"
+            : item.type == "hands"
+            ? "hand"
+            : item.type
+        }
+      />
       <div>
         <span className="font-semibold whitespace-nowrap">
-          {item ? formatItem : "Nothing Equipped"}
+          {formatItem ? itemName : "Nothing Equipped"}
           {slot == "Neck" || slot == "Ring" ? " +1 Luck" : ""}
         </span>{" "}
         <br />
         <span className="whitespace-nowrap">
-          {item &&
-            `[Tier ${item.rank}, Greatness ${item.greatness}, ${item.xp} XP]`}
+          {formatItem &&
+            `[Tier ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`}
         </span>
       </div>
     </div>

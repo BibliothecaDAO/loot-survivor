@@ -79,6 +79,8 @@ const Inventory: React.FC = () => {
 
   const groupedItems = groupBySlot(items);
 
+  console.log(groupedItems);
+
   // useEffect(() => {
   //   const button = buttonRefs.current[selectedIndex];
   //   if (button) {
@@ -138,6 +140,8 @@ const Inventory: React.FC = () => {
   const filteredItems = selectedItemType.filter(
     (item: any) => !equipedItemIds.includes(item.id)
   );
+
+  console.log(filteredItems);
 
   return (
     <div className="flex flex-row space-x-4 overflow-hidden ">

@@ -30,7 +30,7 @@ const ItemDisplay = ({ type, size = "w-5", className }: ItemDisplayProps) => {
     ring: <Ring className={classes} />,
   };
 
-  return Components[type.toLowerCase()];
+  return Components[type?.toLowerCase()];
 };
 
 export default ItemDisplay;
