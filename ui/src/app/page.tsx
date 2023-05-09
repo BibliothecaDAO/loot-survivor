@@ -174,63 +174,85 @@ export default function Home() {
   }, [account]);
 
   useEffect(() => {
-    let newMenu: Menu[] = [
-      {
-        id: 1,
-        label: "Start",
-        screen: "start",
-      },
-    ];
-
-    if (adventurer && adventurer.health > 0) {
-      newMenu = [
-        ...newMenu,
+    if (onboarded) {
+      let newMenu: Menu[] = [
         {
-          id: 2,
-          label: "Actions",
-          screen: "actions",
-        },
-        {
-          id: 3,
-          label: "Market",
-          screen: "market",
-        },
-        {
-          id: 4,
-          label: "Inventory",
-          screen: "inventory",
-        },
-        {
-          id: 5,
-          label: "Beast",
-          screen: "beast",
-        },
-        {
-          id: 6,
-          label: "Leaderboard",
-          screen: "leaderboard",
+          id: 1,
+          label: "Start",
+          screen: "start",
         },
       ];
-    }
 
-    setMenu(newMenu);
-  }, [adventurer, account]);
+      if (adventurer && adventurer.health > 0) {
+        newMenu = [
+          ...newMenu,
+          {
+            id: 2,
+            label: "Actions",
+            screen: "actions",
+          },
+          {
+            id: 3,
+            label: "Market",
+            screen: "market",
+          },
+          {
+            id: 4,
+            label: "Inventory",
+            screen: "inventory",
+          },
+          {
+            id: 5,
+            label: "Beast",
+            screen: "beast",
+          },
+          {
+            id: 6,
+            label: "Leaderboard",
+            screen: "leaderboard",
+          },
+        ];
+      }
+      setMenu(newMenu);
+    }
+  }, [adventurer, account, onboarded]);
 
   useEffect(() => {
     if (adventurers.length == 0) {
+      setMenu([
+        {
+          id: 1,
+          label: "Start",
+          screen: "start",
+        },
+      ]);
       setScreen(menu[0].screen);
     } else if (
       adventurers.length == 1 &&
       adventurer?.xp == 0 &&
       !adventurer.beastId
     ) {
-      setScreen(menu[2].screen);
+      setMenu([
+        {
+          id: 1,
+          label: "Actions",
+          screen: "actions",
+        },
+      ]);
+      setScreen(menu[0].screen);
     } else if (
       adventurers.length == 1 &&
       adventurer?.xp == 0 &&
       adventurer.beastId
     ) {
-      setScreen(menu[5].screen);
+      setMenu([
+        {
+          id: 1,
+          label: "Beast",
+          screen: "beast",
+        },
+      ]);
+      setScreen(menu[0].screen);
     } else {
       handleOnboarded();
     }
