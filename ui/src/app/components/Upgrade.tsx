@@ -110,7 +110,7 @@ const Upgrade = () => {
   );
   const Vitality = (): ReactElement => (
     <p className="text-[28px]">
-      Vitality increases health by 20hp, including max health
+      Vitality increases current and max health each by 20hp
     </p>
   );
   const Intelligence = (): ReactElement => (
