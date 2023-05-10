@@ -87,7 +87,8 @@ const TransactionCart: React.FC = () => {
                     for (const dict of calls) {
                       if (
                         dict.hasOwnProperty("entrypoint") &&
-                        dict["entrypoint"] === "bid_on_item"
+                        (dict["entrypoint"] === "bid_on_item" ||
+                          dict["entrypoint"] === "claim_item")
                       ) {
                         marketIds.push(dict.calldata[0]);
                       }
