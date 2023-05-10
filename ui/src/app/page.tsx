@@ -127,19 +127,21 @@ export default function Home() {
     setAdventurer(updatedAdventurer);
   }, [updatedAdventurer]);
 
+  const hasBeast = !!adventurer?.beastId;
+
   const { play, stop } = useMusic(musicSelector.backgroundMusic, {
     volume: 0.5,
     loop: true,
     isMuted: isMuted,
   });
 
-  useEffect(() => {
-    // play();
+  // useEffect(() => {
+  //   // play();
 
-    return () => {
-      stop();
-    };
-  }, [play, stop]);
+  //   return () => {
+  //     stop();
+  //   };
+  // }, [play, stop, hasBeast]);
 
   const [menu, setMenu] = useState<ButtonData[]>([
     {
@@ -151,7 +153,7 @@ export default function Home() {
   ]);
 
   const [selected, setSelected] = useState(menu[0].value);
-  const hasBeast = !!adventurer?.beastId;
+
 
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
@@ -165,12 +167,16 @@ export default function Home() {
     }
   }, [account]);
 
+  console.log(account)
+
+  const goerli_graphql = "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql";
+  const devnet_graphql = "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql";
+
   useEffect(() => {
     setIndexer(
-      (account as any)?.baseUrl == testnet_addr ||
-        (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io"
-        ? "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql"
-        : "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql"
+      (account as any)?.baseUrl == testnet_addr
+        ? devnet_graphql
+        : goerli_graphql
     );
   }, [account]);
 
@@ -270,7 +276,7 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed top-0 left-0 mt-20 ml-20 w-1/4 border rounded-lg border-terminal-green bg-terminal-black">
+            <div className="fixed top-0 left-0 w-1/4 mt-20 ml-20 border rounded-lg border-terminal-green bg-terminal-black">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}
