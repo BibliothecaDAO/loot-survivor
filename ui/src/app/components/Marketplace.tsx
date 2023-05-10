@@ -244,12 +244,14 @@ const Marketplace = () => {
 
   const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
 
-  const nextMint = new Date(
-    new Date(
-      data.latestMarketItemsNumberQuery?.market[0]?.timestamp
-    ).getTime() +
-      (3 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
-  );
+  const nextMint = data.latestMarketItemsNumberQuery?.market[0]?.timestamp
+    ? new Date(
+        new Date(
+          data.latestMarketItemsNumberQuery?.market[0]?.timestamp
+        ).getTime() +
+          (3 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+      )
+    : undefined;
 
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
 
@@ -263,6 +265,7 @@ const Marketplace = () => {
                 onClick={() => addToCalls(mintDailyItemsTx)}
                 className={selectedIndex == 0 ? "animate-pulse" : ""}
                 variant={selectedIndex == 0 ? "default" : "ghost"}
+                disabled={nextMint && currentTime < nextMint.getTime()}
               >
                 Mint daily items
               </Button>
@@ -276,8 +279,9 @@ const Marketplace = () => {
 
               <div className="self-center">
                 <Countdown
-                  countingMessage="Next mint in:"
-                  endTime={nextMint}
+                  countingMessage={
+                    nextMint ? "Next mint in:" : "No items minted yet!"
+                  }
                   finishedMessage="Items can be minted!"
                   nextMintTime={nextMint}
                 />
@@ -289,6 +293,11 @@ const Marketplace = () => {
                 {calculatedNewGold}
               </span>
             </div>
+            <span className="flex flex-row">
+              {`Charisma: ${adventurer?.charisma} (+ ${adventurer?.charisma}`}
+              <Coin className="w-5 h-5 fill-current text-terminal-yellow" />{" "}
+              {"to bids)"}
+            </span>
             <UTCClock />
           </div>
           <div className="w-full overflow-y-auto border h-[650px] border-terminal-green table-scroll">

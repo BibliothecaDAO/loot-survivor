@@ -21,14 +21,12 @@ export const UTCClock: React.FC = () => {
 };
 
 interface CountdownProps {
-  endTime: Date;
   countingMessage: string;
   finishedMessage: string;
   nextMintTime?: Date;
 }
 
 export const Countdown: React.FC<CountdownProps> = ({
-  endTime,
   countingMessage,
   finishedMessage,
   nextMintTime,
