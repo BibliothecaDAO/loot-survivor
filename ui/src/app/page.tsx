@@ -1,6 +1,6 @@
 "use client";
 import { useAccount, useConnectors } from "@starknet-react/core";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "./components/Button";
 import HorizontalKeyboardControl, {
   ButtonData,
@@ -129,19 +129,16 @@ export default function Home() {
 
   const hasBeast = !!adventurer?.beastId;
 
-  const { play, stop } = useMusic(musicSelector.backgroundMusic, {
+  const playState = useMemo(() => ({
+    isInBattle: hasBeast,
+    isDead: false, // set this to true when player is dead
+    isMuted: isMuted,
+  }), [hasBeast, isMuted]);
+
+  const { play, stop } = useMusic(playState, {
     volume: 0.5,
     loop: true,
-    isMuted: isMuted,
   });
-
-  // useEffect(() => {
-  //   // play();
-
-  //   return () => {
-  //     stop();
-  //   };
-  // }, [play, stop, hasBeast]);
 
   const [menu, setMenu] = useState<ButtonData[]>([
     {
