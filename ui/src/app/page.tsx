@@ -119,8 +119,6 @@ export default function Home() {
       : data.lastBattleQuery?.battles[0]?.beastId,
   });
 
-  console.log(data);
-
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
