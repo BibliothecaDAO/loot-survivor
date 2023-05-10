@@ -24,7 +24,7 @@ class Config:
             11: "Giant",
             12: "Yeti",
             13: "Orc",
-            14: "Beserker",
+            14: "Berserker",
             15: "Ogre",
             16: "Dragon",
             17: "Vampire",

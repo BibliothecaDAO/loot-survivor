@@ -205,7 +205,7 @@ const Marketplace = () => {
     new Date(
       data.latestMarketItemsNumberQuery?.market[0]?.timestamp
     ).getTime() +
-      (8 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+      (3 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
   );
 
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
@@ -220,6 +220,7 @@ const Marketplace = () => {
                 onClick={() => addToCalls(mintDailyItemsTx)}
                 className={selectedIndex == 0 ? "animate-pulse" : ""}
                 variant={selectedIndex == 0 ? "default" : "ghost"}
+                disabled={currentTime < nextMint.getTime()}
               >
                 Mint daily items
               </Button>

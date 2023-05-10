@@ -1,6 +1,6 @@
 "use client";
 import { useAccount, useConnectors } from "@starknet-react/core";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "./components/Button";
 import HorizontalKeyboardControl, {
   ButtonData,
@@ -132,10 +132,20 @@ export default function Home() {
     setAdventurer(updatedAdventurer);
   }, [updatedAdventurer]);
 
-  const { play, stop } = useMusic(musicSelector.backgroundMusic, {
+  const hasBeast = !!adventurer?.beastId;
+
+  const playState = useMemo(
+    () => ({
+      isInBattle: hasBeast,
+      isDead: false, // set this to true when player is dead
+      isMuted: isMuted,
+    }),
+    [hasBeast, isMuted]
+  );
+
+  const { play, stop } = useMusic(playState, {
     volume: 0.5,
     loop: true,
-    isMuted: isMuted,
   });
 
   useEffect(() => {
@@ -166,12 +176,18 @@ export default function Home() {
     }
   }, [account]);
 
+  console.log(account);
+
+  const goerli_graphql =
+    "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql";
+  const devnet_graphql =
+    "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql";
+
   useEffect(() => {
     setIndexer(
-      (account as any)?.baseUrl == testnet_addr ||
-        (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io"
-        ? "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql"
-        : "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql"
+      (account as any)?.baseUrl == testnet_addr
+        ? devnet_graphql
+        : goerli_graphql
     );
   }, [account]);
 
@@ -261,7 +277,9 @@ export default function Home() {
   }, [onboarded, adventurer]);
 
   return (
-    <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
+    <main
+      className={`min-h-screen container mx-auto flex flex-col p-10 overflow-hidden`}
+    >
       {connected ? (
         <>
           <div className="flex justify-between w-full ">
