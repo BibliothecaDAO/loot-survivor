@@ -117,7 +117,7 @@ export default function Beast() {
       <div className="w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      <div className="flex flex-col w-1/3 gap-10">
+      <div className="flex flex-col w-1/3 gap-10 p-4">
         {!isBeastDead && (
           <KeyboardControl
             buttonsData={buttonsData}
