@@ -119,6 +119,8 @@ export default function Home() {
       : data.lastBattleQuery?.battles[0]?.beastId,
   });
 
+  console.log(data);
+
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
@@ -129,11 +131,14 @@ export default function Home() {
 
   const hasBeast = !!adventurer?.beastId;
 
-  const playState = useMemo(() => ({
-    isInBattle: hasBeast,
-    isDead: false, // set this to true when player is dead
-    isMuted: isMuted,
-  }), [hasBeast, isMuted]);
+  const playState = useMemo(
+    () => ({
+      isInBattle: hasBeast,
+      isDead: false, // set this to true when player is dead
+      isMuted: isMuted,
+    }),
+    [hasBeast, isMuted]
+  );
 
   const { play, stop } = useMusic(playState, {
     volume: 0.5,
@@ -151,7 +156,6 @@ export default function Home() {
 
   const [selected, setSelected] = useState(menu[0].value);
 
-
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
       setSelected(menu[0].value);
@@ -164,10 +168,12 @@ export default function Home() {
     }
   }, [account]);
 
-  console.log(account)
+  console.log(account);
 
-  const goerli_graphql = "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql";
-  const devnet_graphql = "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql";
+  const goerli_graphql =
+    "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql";
+  const devnet_graphql =
+    "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql";
 
   useEffect(() => {
     setIndexer(

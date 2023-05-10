@@ -60,7 +60,8 @@ export default function Actions() {
                 "Explore",
                 tx.transaction_hash,
                 "Exploring",
-                "discoveryByTxHashQuery"
+                "discoveryByTxHashQuery",
+                adventurer?.id
               );
               addTransaction({
                 hash: tx.transaction_hash,

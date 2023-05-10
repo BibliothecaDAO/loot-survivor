@@ -89,6 +89,7 @@ const Upgrade = () => {
           tx?.transaction_hash,
           `Upgrading ${selected}`,
           "adventurerByIdQuery",
+          adventurer?.id,
           `You upgraded ${selected}!`
         );
         addTransaction({
