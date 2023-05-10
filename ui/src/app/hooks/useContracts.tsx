@@ -18,10 +18,10 @@ export const contracts = {
   },
   goerli: {
     adventurer:
-      "0x07d20e8948862aca077244ed749fe247e8c142e29bd6f74f34fdb60c6bee36e5",
+      "0x02d5088c014923bdf3b1bac23c7333275743b3733dc1f0693b84706a715b1bc6",
     lootMarketArcade:
-      "0x006b856e9b1f1cfd01cfae4766abb44923ccd8ff786369b3d8d8690ed1b10e33",
-    beast: "0x02bd56290459222c07a914bacf687cb7707325c8928eabe1a28ed8dd30a3158d",
+      "0x066a894dca52a03aa165050522d058ade9a1e100577aa90c22b11ad22627f0ad",
+    beast: "0x07db61dd565afb57c44d6d5fc55853aebfa28205a042b7e8be4872dceba87068",
     lords_erc20_mintable:
       "0x04981487ef559795bffcaa8de30aa8f031a49715ba8fd05f18708153e6a387ed",
   },
