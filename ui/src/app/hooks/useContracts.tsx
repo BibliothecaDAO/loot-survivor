@@ -9,12 +9,12 @@ const testnet_addr = "https://survivor-indexer.bibliothecadao.xyz";
 export const contracts = {
   testnet: {
     adventurer:
-      "0x06edcf9c92fb99b14bcf0a7f016b3f298548425df085483c1d1a68aecae4b4a9",
+      "0x0457395419b1aee6373d7058a8aca83dbf6ce6658c8a1fa2d996a8ddbcfe1378",
     lootMarketArcade:
-      "0x058899f75e139dd3db67fa6e875c79a12a48328215d93dd688721750389300f8",
-    beast: "0x029887bb51387e152aa861f8378e004fad6f99db836293855184540c08072731",
+      "0x01eaacc401583b025895766acf51422956e761d10dad4bcdee76ccc6946be90f",
+    beast: "0x064b38fedecf2afa53c6ee774cf9cad57b5b50ae568101cd8dfaeed510539e19",
     lords_erc20_mintable:
-      "0x017441a8855b221aacb4b4ece57b0665b91ac41fd7d03e481fcd40767c17708d",
+      "0x04d460ca5ae8059766c5df1c65633f492019e109a859b3437d3c3990ee31fe17",
   },
   goerli: {
     adventurer:
@@ -23,7 +23,7 @@ export const contracts = {
       "0x066a894dca52a03aa165050522d058ade9a1e100577aa90c22b11ad22627f0ad",
     beast: "0x07db61dd565afb57c44d6d5fc55853aebfa28205a042b7e8be4872dceba87068",
     lords_erc20_mintable:
-      "0x04981487ef559795bffcaa8de30aa8f031a49715ba8fd05f18708153e6a387ed",
+      "0x069a0a12241af46476f396784b123f3c7983364c568565c067b81f246ce6f34c",
   },
 };
 
