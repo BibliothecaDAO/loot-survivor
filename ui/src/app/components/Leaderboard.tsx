@@ -9,7 +9,7 @@ import Image from "next/image";
 
 const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const itemsPerPage = 20;
+  const itemsPerPage = 10;
 
   const { data, loading, error } = useQuery(getAdventurerByXP);
 
