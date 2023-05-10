@@ -1,29 +1,54 @@
+"use effect";
+
 import useSound from "use-sound";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const dir = "/music/ui/";
 
 export const musicSelector = {
-  backgroundMusic: "Intro.mp3",
-
+  backgroundMusic: "intro.mp3",
+  battle: "fight4.mp3",
+  death: "game_over.mp3",
 };
 
 export const useMusic = (
-  selector: string,
-  options?: { volume?: number; loop?: boolean; isMuted: boolean }
+  playState: { isInBattle: boolean; isDead: boolean; isMuted: boolean },
+  options?: { volume?: number; loop?: boolean }
 ) => {
-  const [play, { stop }] = useSound(dir + selector, {
+
+  const [music, setMusic] = useState<string>(musicSelector.backgroundMusic);
+
+  const [play, { stop }] = useSound(dir + music, {
     volume: options?.volume || 0.1,
     loop: options?.loop || false,
   });
 
+  const start = useCallback(() => {
+    play();
+  }, [])
+
   useEffect(() => {
-    if (options?.isMuted) {
+    stop();
+    if (playState.isInBattle) {
+      setMusic(musicSelector.battle);
+      console.log("sound", music)
+    } else if (playState.isDead) {
+      setMusic(musicSelector.death);
+      console.log("sound", music)
+    } else {
+      setMusic(musicSelector.backgroundMusic);
+      console.log("sound", music)
+    }
+    start();
+  }, [playState.isInBattle, playState.isDead]);
+
+  useEffect(() => {
+    if (playState.isMuted) {
       stop();
     } else {
       play();
     }
-  }, [options?.isMuted, play, stop]);
+  }, [play, stop, playState.isMuted]);
 
   return {
     play,
