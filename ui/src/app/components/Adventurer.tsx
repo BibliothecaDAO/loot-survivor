@@ -40,7 +40,7 @@ const Adventurer = () => {
     : [];
 
   return (
-    <div className="flex flex-row gap-2 p-4">
+    <div className="flex flex-row">
       <div className="w-2/12">
         <VerticalKeyboardControl
           buttonsData={menu}

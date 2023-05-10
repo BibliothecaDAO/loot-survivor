@@ -12,9 +12,9 @@ export const ItemDisplay = (item: any) => {
     >
       <LootIcon type={slot} />
       <div>
-        <span className="font-semibold whitespace-nowrap">
+        <span className="font-semibold whitespace-nowrap justify-between">
           {formatItem ? formatItem.item : "Nothing Equipped"}
-          {slot == "Neck" || slot == "Ring" ? " +1 Luck" : ""}
+          {slot == "Neck" || slot == "Ring" ? " [+1 Luck]" : ""}
         </span>{" "}
         <br />
         <span className="whitespace-nowrap">

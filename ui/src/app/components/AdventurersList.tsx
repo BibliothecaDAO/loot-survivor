@@ -20,14 +20,16 @@ export const AdventurersList = ({
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
+  const DeadIcon = (
+    <img className="w-5 h-5" src="/skull.png" alt="Dead Adventurer" />
+  );
 
   const buttonsData: ButtonData[] = [];
   for (let i = 0; i < adventurers.length; i++) {
     buttonsData.push({
       id: i + 1,
       label: `${adventurers[i].name} - ${adventurers[i].id}`,
-      action: () =>
-        setAdventurer(adventurers[i]),
+      action: () => setAdventurer(adventurers[i]),
     });
   }
 
@@ -79,7 +81,10 @@ export const AdventurersList = ({
                   setSelectedIndex(index);
                 }}
               >
-                {buttonData.label}
+                <span className="flex flex-row space-x-4">
+                  <p>{buttonData.label}</p>
+                  {adventurers[index].health === 0 && DeadIcon}
+                </span>
               </Button>
             ))}
           </div>
