@@ -4,7 +4,8 @@ import { useEffect } from "react";
 const dir = "/music/ui/";
 
 export const musicSelector = {
-  backgroundMusic: "8bit_NES.mp3",
+  backgroundMusic: "Intro.mp3",
+
 };
 
 export const useMusic = (

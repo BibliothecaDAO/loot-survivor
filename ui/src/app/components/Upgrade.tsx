@@ -125,7 +125,7 @@ const Upgrade = () => {
   );
   const Charisma = (): ReactElement => (
     <p className="text-[30px]">
-      Luck increases chance of hitting critical damage
+      Charisma provides discounts on the marketplace
     </p>
   );
 

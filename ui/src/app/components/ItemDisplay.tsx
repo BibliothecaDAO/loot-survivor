@@ -38,7 +38,7 @@ export const ItemDisplay = (item: any) => {
       <div>
         <span className="font-semibold whitespace-nowrap">
           {formatItem ? itemName : "Nothing Equipped"}
-          {slot == "Neck" || slot == "Ring" ? " +1 Luck" : ""}
+          {slot == "Neck" || slot == "Ring" ? " [+1 Luck]" : ""}
         </span>{" "}
         <br />
         <span className="whitespace-nowrap">

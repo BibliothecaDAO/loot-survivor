@@ -36,13 +36,13 @@ const Inventory: React.FC = () => {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  const handleAddEquipItem = (itemId: any) => {
+  const handleAddEquipItem = (item: any) => {
     if (adventurerContract && formatAddress) {
       const equipItem = {
         contractAddress: adventurerContract?.address,
         entrypoint: "equip_item",
-        calldata: [adventurer?.id, "0", itemId, "0"],
-        metadata: `Equipping ${itemId}!`,
+        calldata: [adventurer?.id, "0", item.id, "0"],
+        metadata: `Equipping ${item.item}!`,
       };
       addToCalls(equipItem);
     }
@@ -234,7 +234,7 @@ const Inventory: React.FC = () => {
               <div className="flex" key={index}>
                 <ItemDisplay item={item} />
                 <Button
-                  onClick={() => handleAddEquipItem(item.id)}
+                  onClick={() => handleAddEquipItem(item)}
                   disabled={singleEquipExists(item.id)}
                 >
                   equip
