@@ -228,9 +228,9 @@ const Marketplace = () => {
     "XP",
     "Price",
     "Bidder",
-    "Expiry",
+    "Expiry (UTC)",
     "Status",
-    "Claimed",
+    "Claimed (UTC)",
     "Actions",
   ];
 
