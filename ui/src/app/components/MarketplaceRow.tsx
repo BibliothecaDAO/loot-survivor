@@ -169,7 +169,8 @@ const MarketplaceRow = ({
               disabled={
                 checkBidBalance() ||
                 item.claimedTime ||
-                (item.expiry && checkExpired())
+                (item.expiry && checkExpired()) ||
+                bidExists(item.marketId)
               }
               className={bidExists(item.marketId) ? "bg-white" : ""}
             >
