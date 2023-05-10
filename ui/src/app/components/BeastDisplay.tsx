@@ -34,14 +34,21 @@ const getAttackLocationIcon = (beastType: string) => {
 export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
   if (beastData?.health === 0) {
     return (
-      <div className="flex relative h-full w-full items-center border-2 border-terminal-green overflow-hidden">
-        <p>You have killed the beast and made it out the Labyrinth!</p>
-        <Image
-          src={"/labyrinth.png"}
-          alt="labyrinth"
-          fill={true}
-          style={{ objectFit: "contain" }}
-        ></Image>
+      <div className="relative h-full w-full border-2 border-terminal-green overflow-hidden">
+        <div className="absolute inset-0">
+          <Image
+            src={"/labyrinth.png"}
+            alt="labyrinth"
+            fill={true}
+            style={{ objectFit: "cover" }}
+            quality={100}
+          />
+        </div>
+        <div className="relative z-10 flex flex-col items-center justify-center">
+          <p className="text-2xl text-center">
+            You have killed the beast and made it out the Labyrinth!
+          </p>
+        </div>
       </div>
     );
   }
