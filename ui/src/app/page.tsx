@@ -166,8 +166,6 @@ export default function Home() {
     }
   }, [account]);
 
-  console.log(account);
-
   const goerli_graphql =
     "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql";
   const devnet_graphql =
@@ -222,7 +220,7 @@ export default function Home() {
           id: 6,
           label: "Leaderboard",
           value: "leaderboard",
-          disabled: hasBeast,
+          disabled: false,
         },
       ];
     }
