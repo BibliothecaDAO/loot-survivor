@@ -250,6 +250,11 @@ const Marketplace = () => {
                 {calculatedNewGold}
               </span>
             </div>
+            <span className="flex flex-row">
+              {`Charisma: ${adventurer?.charisma} (+ ${adventurer?.charisma}`}
+              <Coin className="w-5 h-5 fill-current text-terminal-yellow" />{" "}
+              {"to bids)"}
+            </span>
             <UTCClock />
           </div>
           <div className="w-full overflow-y-auto border h-[650px] border-terminal-green table-scroll">
