@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { Button } from "./Button";
 import { useQuery } from "@apollo/client";
@@ -27,6 +27,8 @@ const Marketplace = () => {
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
   const [itemsCount, setItemsCount] = useState(0);
+  const [sortField, setSortField] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
   const { data, isLoading } = useQueriesStore();
 
@@ -127,11 +129,52 @@ const Marketplace = () => {
     });
   };
 
-  useEffect(() => {
-    if (marketLatestItems) {
-      setItemsCount(marketLatestItems.length);
+  const headingToKeyMapping: { [key: string]: string } = {
+    "Market Id": "marketId",
+    Item: "item",
+    Tier: "rank",
+    Slot: "slot",
+    Type: "type",
+    Material: "material",
+    Greatness: "greatness",
+    XP: "xp",
+    Price: "price",
+    Bidder: "bidder",
+    Expiry: "expiry",
+    Status: "status",
+    Claimed: "claimedTime",
+  };
+
+  const handleSort = (heading: string) => {
+    const mappedField = headingToKeyMapping[heading];
+    if (sortField === mappedField) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(mappedField);
+      setSortDirection("asc");
     }
-  }, [selectedIndex]);
+  };
+
+  const sortedMarketLatestItems = useMemo(() => {
+    if (!sortField) return marketLatestItems;
+    const sortedItems = [...marketLatestItems].sort((a, b) => {
+      let aValue = a[sortField];
+      let bValue = b[sortField];
+
+      if (aValue instanceof Date) {
+        aValue = aValue.getTime();
+        bValue = new Date(bValue).getTime();
+      } else if (typeof aValue === "string" && !isNaN(Number(aValue))) {
+        aValue = Number(aValue);
+        bValue = Number(bValue);
+      }
+
+      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+    return sortedItems;
+  }, [marketLatestItems, sortField, sortDirection]);
 
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
@@ -220,7 +263,6 @@ const Marketplace = () => {
                 onClick={() => addToCalls(mintDailyItemsTx)}
                 className={selectedIndex == 0 ? "animate-pulse" : ""}
                 variant={selectedIndex == 0 ? "default" : "ghost"}
-                disabled={currentTime < nextMint.getTime()}
               >
                 Mint daily items
               </Button>
@@ -259,7 +301,11 @@ const Marketplace = () => {
               <thead className="sticky top-0 border z-5 border-terminal-green bg-terminal-black">
                 <tr className="">
                   {headings.map((heading, index) => (
-                    <th key={index} className="px-2">
+                    <th
+                      key={index}
+                      className="px-2 cursor-pointer"
+                      onClick={() => handleSort(heading)}
+                    >
                       {heading}
                     </th>
                   ))}
@@ -267,7 +313,7 @@ const Marketplace = () => {
               </thead>
               <tbody className="">
                 {!isLoading.latestMarketItemsQuery &&
-                  marketLatestItems.map((item: any, index: number) => (
+                  sortedMarketLatestItems.map((item: any, index: number) => (
                     <MarketplaceRow
                       ref={(ref: any) => (rowRefs.current[index] = ref)}
                       item={item}
