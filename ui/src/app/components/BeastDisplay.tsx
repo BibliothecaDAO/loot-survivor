@@ -32,23 +32,45 @@ const getAttackLocationIcon = (beastType: string) => {
 };
 
 export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
+  if (beastData?.health === 0) {
+    return (
+      <div className="flex relative h-full w-full items-center border-2 border-terminal-green overflow-hidden">
+        <p>You have killed the beast and made it out the Labyrinth!</p>
+        <Image
+          src={"/labyrinth.png"}
+          alt="labyrinth"
+          fill={true}
+          style={{ objectFit: "contain" }}
+        ></Image>
+      </div>
+    );
+  }
   const gameData = new GameData();
   const ansiImage = ANSIArt({
     imageUrl:
       getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
-      "/beasts/phoenix.png",
+      "/monsters/phoenix.png",
     newWidth: 20,
   });
   return (
     <div className="flex flex-col h-full items-center border-2 border-terminal-green overflow-hidden">
-      <div className="relative flex h-full">
-        <ANSIArt
+      <div className="relative flex h-full w-full">
+        {/* <ANSIArt
           newWidth={250}
           src={
             getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
-            "/beasts/phoenix.png"
+            "/monsters/phoenix.png"
           }
-        />
+        /> */}
+        <Image
+          src={
+            getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
+            "/monsters/phoenix.png"
+          }
+          alt="monsters"
+          fill={true}
+          style={{ objectFit: "contain" }}
+        ></Image>
       </div>
       <div className="flex flex-col p-2 uppercase">
         <div className="flex justify-between text-4xl px-4 py-2 border-b border-terminal-green">
@@ -60,7 +82,11 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
             }`}
           >
             <Heart className="self-center w-8 h-8 fill-current" />{" "}
-            <p className="text-4xl">{beastData?.health}</p>
+            {beastData?.health === 0 ? (
+              <p className="text-sm">dead!</p>
+            ) : (
+              <p className="text-4xl">{beastData?.health}</p>
+            )}
           </span>
         </div>
         <div className="flex justify-between px-4 py-2">

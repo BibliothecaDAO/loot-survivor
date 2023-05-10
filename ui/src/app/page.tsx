@@ -238,7 +238,9 @@ export default function Home() {
   const battleNotifData = {};
 
   return (
-    <main className={`min-h-screen container mx-auto flex flex-col p-10`}>
+    <main
+      className={`min-h-screen container mx-auto flex flex-col p-10 overflow-hidden`}
+    >
       {connected ? (
         <>
           <div className="flex justify-between w-full ">

@@ -36,7 +36,7 @@ export function BidBox({
           contractAddress: lootMarketArcadeContract?.address,
           entrypoint: "bid_on_item",
           calldata: [marketId, "0", adventurer?.id, "0", bidPrice],
-          metadata: `Bidding on ${marketId}`,
+          metadata: `Bidding on ${item.item}`,
         };
         addToCalls(BidTx);
         // Place bid logic

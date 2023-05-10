@@ -113,11 +113,11 @@ export default function Beast() {
   const isBeastDead = beastData?.health == "0";
 
   return (
-    <div className="flex flex-row space-x-4 overflow-hidden">
+    <div className="flex flex-row overflow-hidden">
       <div className="w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      <div className="flex flex-col w-1/3 gap-10">
+      <div className="flex flex-col w-1/3 gap-10 p-4">
         {!isBeastDead && (
           <KeyboardControl
             buttonsData={buttonsData}
