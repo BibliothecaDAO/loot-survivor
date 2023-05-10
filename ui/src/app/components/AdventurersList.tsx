@@ -17,21 +17,29 @@ export const AdventurersList = ({
   adventurers,
 }: AdventurerListProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [showZeroHealth, setShowZeroHealth] = useState(true);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
+
+  const sortedAdventurers = [...adventurers].sort((a, b) => b.level - a.level);
+
+  const filteredAdventurers = showZeroHealth
+    ? sortedAdventurers
+    : sortedAdventurers.filter((adventurer) => adventurer.health !== 0);
+
+  const buttonsData: ButtonData[] = [];
+  for (let i = 0; i < sortedAdventurers.length; i++) {
+    buttonsData.push({
+      id: i + 1,
+      label: `${sortedAdventurers[i].name} - ${sortedAdventurers[i].id}`,
+      action: () => setAdventurer(sortedAdventurers[i]),
+    });
+  }
+
   const DeadIcon = (
     <img className="w-5 h-5" src="/skull.png" alt="Dead Adventurer" />
   );
-
-  const buttonsData: ButtonData[] = [];
-  for (let i = 0; i < adventurers.length; i++) {
-    buttonsData.push({
-      id: i + 1,
-      label: `${adventurers[i].name} - ${adventurers[i].id}`,
-      action: () => setAdventurer(adventurers[i]),
-    });
-  }
 
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
@@ -63,12 +71,12 @@ export const AdventurersList = ({
 
   return (
     <>
-      {adventurers.length > 0 ? (
+      {sortedAdventurers.length > 0 ? (
         <div className="flex basis-2/3">
           <div className="flex flex-col w-1/2 overflow-auto">
-            {buttonsData.map((buttonData, index) => (
+            {filteredAdventurers.map((adventurer, index) => (
               <Button
-                key={buttonData.id}
+                key={adventurer.id}
                 ref={(ref) => (buttonRefs.current[index] = ref)}
                 className={
                   selectedIndex === index && isActive ? "animate-pulse" : ""
@@ -77,19 +85,22 @@ export const AdventurersList = ({
                   selectedIndex === index && isActive ? "default" : "ghost"
                 }
                 onClick={() => {
-                  buttonData.action();
+                  setAdventurer(adventurer);
                   setSelectedIndex(index);
                 }}
               >
                 <span className="flex flex-row space-x-4">
-                  <p>{buttonData.label}</p>
                   {adventurers[index].health === 0 && DeadIcon}
                 </span>
+                {`${adventurer.name} - ${adventurer.id}`}
               </Button>
             ))}
           </div>
+          <Button onClick={() => setShowZeroHealth(!showZeroHealth)}>
+            {showZeroHealth ? "Hide" : "Show"} dead
+          </Button>
           <div className="w-1/2">
-            <Info adventurer={adventurers[selectedIndex]} />
+            <Info adventurer={sortedAdventurers[selectedIndex]} />
           </div>
         </div>
       ) : (
