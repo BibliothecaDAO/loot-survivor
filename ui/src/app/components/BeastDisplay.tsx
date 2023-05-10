@@ -44,9 +44,9 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
             quality={100}
           />
         </div>
-        <div className="relative flex flex-col items-center justify-center">
+        <div className="relative flex flex-col items-center justify-center border border-terminal-green bg-terminal-black p-1">
           <p className="text-2xl text-center">
-            You have killed the beast and made it out the Labyrinth!
+            You have killed the beast and made it out of the Labyrinth!
           </p>
         </div>
       </div>
