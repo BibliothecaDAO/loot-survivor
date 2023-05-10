@@ -5,8 +5,10 @@ import { Metadata } from "../types";
 import { Button } from "./Button";
 import { MdClose } from "react-icons/md";
 import useLoadingStore from "../hooks/useLoadingStore";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 const TransactionCart: React.FC = () => {
+  const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
   const removeFromCalls = useTransactionCartStore(
     (state) => state.removeFromCalls
@@ -77,6 +79,7 @@ const TransactionCart: React.FC = () => {
                       tx?.transaction_hash,
                       "Multicalling",
                       "",
+                      adventurer?.id,
                       `Multicall complete!`
                     );
                     const marketIds = [];

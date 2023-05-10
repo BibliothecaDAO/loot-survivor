@@ -70,6 +70,7 @@ export default function Beast() {
               tx.transaction_hash,
               "Attacking",
               "battlesByTxHashQuery",
+              adventurer?.id,
               { beastName: beastData.beast }
             );
             addTransaction({
@@ -95,6 +96,7 @@ export default function Beast() {
               tx.transaction_hash,
               "Fleeing",
               "battlesByTxHashQuery",
+              adventurer?.id,
               { beastName: beastData.beast }
             );
             addTransaction({
