@@ -220,6 +220,7 @@ const Marketplace = () => {
                 onClick={() => addToCalls(mintDailyItemsTx)}
                 className={selectedIndex == 0 ? "animate-pulse" : ""}
                 variant={selectedIndex == 0 ? "default" : "ghost"}
+                disabled={currentTime < nextMint.getTime()}
               >
                 Mint daily items
               </Button>
