@@ -20,15 +20,15 @@ const getAttackLocationIcon = (beastType: string) => {
   if (!iconPath) return null;
 
   if (iconPath == "/icons/loot/hand.svg")
-    return <Hand className="self-center w-10 h-10 fill-current mr-2" />;
+    return <Hand className="self-center w-10 h-10 fill-current" />;
   if (iconPath == "/icons/loot/chest.svg")
-    return <Chest className="self-center w-10 h-10 fill-current mr-2" />;
+    return <Chest className="self-center w-10 h-10 fill-current" />;
   if (iconPath == "/icons/loot/waist.svg")
-    return <Waist className="self-center w-10 h-10 fill-current mr-2" />;
+    return <Waist className="self-center w-10 h-10 fill-current" />;
   if (iconPath == "/icons/loot/foot.svg")
-    return <Foot className="self-center w-10 h-10 fill-current mr-2" />;
+    return <Foot className="self-center w-10 h-10 fill-current" />;
   if (iconPath == "/icons/loot/head.svg")
-    return <Head className="self-center w-10 h-10 fill-current mr-2" />;
+    return <Head className="self-center w-10 h-10 fill-current" />;
 };
 
 export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
@@ -98,7 +98,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
             Tier {beastData?.rank}
           </p>
         </div>
-        <div className="flex flex-row m-5">
+        <div className="flex flex-row">
           <div className="flex flex-row gap-2">
             <Weapon className="self-center w-10 h-10 fill-current" />
             <p className="flex items-center text-xl">{beastData?.attackType}</p>
