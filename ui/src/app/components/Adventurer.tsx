@@ -12,7 +12,6 @@ import useUIStore from "../hooks/useUIStore";
 const Adventurer = () => {
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
-  const setScreen = useUIStore((state) => state.setScreen);
 
   const { data } = useQueriesStore();
 

@@ -208,11 +208,13 @@ export default function Home() {
             id: 2,
             label: "Actions",
             screen: "actions",
+            disabled: hasBeast,
           },
           {
             id: 3,
             label: "Market",
             screen: "market",
+            disabled: hasBeast,
           },
           {
             id: 4,
