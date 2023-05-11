@@ -11,11 +11,9 @@ interface InfoProps {
 }
 
 export default function Info({ adventurer }: InfoProps) {
-
-
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
 
-  console.log(formatAdventurer)
+  console.log(formatAdventurer);
   const {
     loading: itemsByAdventurerLoading,
     error: itemsByAdventurerError,
@@ -28,8 +26,6 @@ export default function Info({ adventurer }: InfoProps) {
     pollInterval: 5000,
   });
 
-  console.log(itemsByAdventurerData)
-
   const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
 
   return (
@@ -39,7 +35,11 @@ export default function Info({ adventurer }: InfoProps) {
           <div className="flex flex-row gap-2 p-1">
             <div className="flex flex-col w-full p-2 uppercase">
               <div className="flex justify-between w-full">
-                {formatAdventurer.race} <span>{getRealmNameById(formatAdventurer.homeRealm)?.name}</span> <span>Order of {formatAdventurer.order}</span> 
+                {formatAdventurer.race}{" "}
+                <span>
+                  {getRealmNameById(formatAdventurer.homeRealm)?.name}
+                </span>{" "}
+                <span>Order of {formatAdventurer.order}</span>
               </div>
               <div className="flex justify-between w-full text-4xl font-medium border-b border-terminal-green">
                 {formatAdventurer.name}
@@ -49,7 +49,9 @@ export default function Info({ adventurer }: InfoProps) {
                 </span>
                 <span className="flex ">
                   <Heart className="self-center w-6 h-6 fill-current" />{" "}
-                  {formatAdventurer.health}
+                  {`${formatAdventurer.health}/${
+                    100 + formatAdventurer.vitality * 20
+                  }`}
                 </span>
               </div>
 
