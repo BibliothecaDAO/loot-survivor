@@ -32,6 +32,16 @@ export const AdventurersList = ({
     <img className="w-5 h-5" src="/skull.png" alt="Dead Adventurer" />
   );
 
+  const buttonsData: ButtonData[] = [];
+  for (let i = 0; i < adventurers.length; i++) {
+    buttonsData.push({
+      id: i + 1,
+      label: `${adventurers[i].name} - ${adventurers[i].id}`,
+      action: () => setAdventurer(adventurers[i]),
+      disabled: false,
+    });
+  }
+
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
       case "ArrowUp":

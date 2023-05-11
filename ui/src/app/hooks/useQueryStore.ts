@@ -108,12 +108,12 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
   refetchFunctions: initialRefetchFunctions,
   updateData: (queryKey, newData, loading, refetch) => {
     set((state) => {
-      const isDataChanged = !isEqual(state.data[queryKey], newData);
-      const keys = Object.keys(newData);
-      const isDataNotEmpty = keys.some(
-        (key) => Array.isArray(newData[key]) && newData[key].length > 0
-      );
-      if (isDataChanged && isDataNotEmpty && newData !== undefined) {
+      const oldData = state.data[queryKey];
+      const isDataChanged =
+        (oldData !== null ||
+          (newData && Object.values(newData).some((arr: any) => arr.length))) &&
+        !isEqual(oldData, newData);
+      if (isDataChanged && newData !== undefined) {
         console.log("Updated!", state.data[queryKey], newData);
         return {
           ...state,

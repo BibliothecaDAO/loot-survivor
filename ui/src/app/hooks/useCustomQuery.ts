@@ -19,7 +19,6 @@ const useCustomQuery = (
     query,
     {
       variables: variables,
-      fetchPolicy: "network-only", // To ensure data is fetched from the network and not the cache,
       pollInterval: 5000,
     }
   );

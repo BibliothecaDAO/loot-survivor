@@ -1,4 +1,5 @@
 import { AdventurerProps } from "../hooks/useAdventurerStore";
+import { ScreenPage } from "../hooks/useUIStore";
 
 export interface Adventurer {
   // static stats
@@ -48,20 +49,22 @@ export interface Adventurer {
   upgrading: boolean;
   gold: number;
 
+  homeRealm: number;
+
   isIdle: boolean | undefined;
 }
 
 export interface Item {
   id?: number; // item id 1 - 100
   item?: string; // name
-  slot?: number; // weapon, head, chest, etc
+  slot?: string; // weapon, head, chest, etc
   type?: number; // weapon.blade, armor.metal, jewelry.ring
   material?: number; // the material of the item
   rank?: number; // 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
-  prefix_1?: number; // First part of the name prefix (i.e Demon)
-  prefix_2?: number; // Second part of the name prefix (i.e Grasp)
+  prefix1?: number; // First part of the name prefix (i.e Demon)
+  prefix2?: number; // Second part of the name prefix (i.e Grasp)
   suffix?: number; // Stored value if item has a Suffix (i.e of Power)
-  greatness?: number; // Item greatness
+  greatness: number; // Item greatness
   createdBlock?: number; // Timestamp of when item was created
   xp?: number; // Experience of the item
   adventurerId?: number; // Adventurer ID IF equipped
@@ -73,17 +76,18 @@ export interface Item {
   price?: number;
   owner?: string;
   marketId?: number;
+  level?: number;
 }
 
 export interface MarketItem {
   id?: number; // item id 1 - 100
   item?: string; // name
-  slot?: number; // weapon, head, chest, etc
+  slot?: string; // weapon, head, chest, etc
   type?: number; // weapon.blade, armor.metal, jewelry.ring
   material?: number; // the material of the item
   rank?: number; // 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
-  prefix_1?: number; // First part of the name prefix (i.e Demon)
-  prefix_2?: number; // Second part of the name prefix (i.e Grasp)
+  prefix1?: number; // First part of the name prefix (i.e Demon)
+  prefix2?: number; // Second part of the name prefix (i.e Grasp)
   suffix?: number; // Stored value if item has a Suffix (i.e of Power)
   greatness?: number; // Item greatness
   createdBlock?: number; // Timestamp of when item was created
@@ -97,6 +101,7 @@ export interface MarketItem {
   price?: number;
   owner?: string;
   marketId?: number;
+  level?: number;
 }
 
 export interface Beast {
@@ -159,6 +164,7 @@ export const NullAdventurer: Adventurer = {
   beastId: 0,
   upgrading: false,
   gold: 0,
+  homeRealm:0,
   isIdle: false,
 };
 
@@ -212,8 +218,8 @@ export const NullItem = {
   type: 0, // weapon.blade, armor.metal, jewelry.ring
   material: 0, // the material of the item
   rank: 0, // 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
-  prefix_1: 0, // First part of the name prefix (i.e Demon)
-  prefix_2: 0, // Second part of the name prefix (i.e Grasp)
+  prefix1: 0, // First part of the name prefix (i.e Demon)
+  prefix2: 0, // Second part of the name prefix (i.e Grasp)
   suffix: 0, // Stored value if item has a Suffix (i.e of Power)
   greatness: 0, // Item greatness
   createdBlock: 0, // Timestamp of when item was created
@@ -227,4 +233,11 @@ export const NullItem = {
   price: 0,
   owner: "",
   marketId: 0,
+};
+
+export type Menu = {
+  id: number;
+  label: string;
+  screen: ScreenPage;
+  disabled?: boolean;
 };
