@@ -10,12 +10,15 @@ export type QueryKey =
   | "discoveryByTxHashQuery"
   | "adventurersByOwnerQuery"
   | "adventurerByIdQuery"
+  | "leaderboardByIdQuery"
   | "adventurersByGoldQuery"
+  | "adventurersByXPQuery"
   | "unclaimedItemsByAdventurerQuery"
   | "latestMarketItemsNumberQuery"
   | "latestMarketItemsQuery"
   | "adventurersInListQuery"
-  | "itemsByAdventurerQuery";
+  | "itemsByAdventurerQuery"
+  | "topScoresQuery";
 
 type QueriesState = {
   data: Record<QueryKey, any>;
@@ -41,12 +44,15 @@ const initialData: Record<QueryKey, any> = {
   discoveryByTxHashQuery: null,
   adventurersByOwnerQuery: null,
   adventurerByIdQuery: null,
+  leaderboardByIdQuery: null,
   adventurersByGoldQuery: null,
+  adventurersByXPQuery: null,
   unclaimedItemsByAdventurerQuery: null,
   latestMarketItemsNumberQuery: null,
   latestMarketItemsQuery: null,
   adventurersInListQuery: null,
   itemsByAdventurerQuery: null,
+  topScoresQuery: null,
 };
 
 const initialLoading: Record<QueryKey, boolean> = {
@@ -58,12 +64,15 @@ const initialLoading: Record<QueryKey, boolean> = {
   discoveryByTxHashQuery: false,
   adventurersByOwnerQuery: false,
   adventurerByIdQuery: false,
+  leaderboardByIdQuery: false,
   adventurersByGoldQuery: false,
+  adventurersByXPQuery: false,
   unclaimedItemsByAdventurerQuery: false,
   latestMarketItemsNumberQuery: false,
   latestMarketItemsQuery: false,
   adventurersInListQuery: false,
   itemsByAdventurerQuery: false,
+  topScoresQuery: false,
 };
 
 const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
@@ -75,12 +84,15 @@ const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
   discoveryByTxHashQuery: false,
   adventurersByOwnerQuery: false,
   adventurerByIdQuery: false,
+  leaderboardByIdQuery: false,
   adventurersByGoldQuery: false,
+  adventurersByXPQuery: false,
   unclaimedItemsByAdventurerQuery: false,
   latestMarketItemsNumberQuery: false,
   latestMarketItemsQuery: false,
   adventurersInListQuery: false,
   itemsByAdventurerQuery: false,
+  topScoresQuery: false,
   global: false,
 };
 
@@ -93,12 +105,15 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   discoveryByTxHashQuery: async () => {},
   adventurersByOwnerQuery: async () => {},
   adventurerByIdQuery: async () => {},
+  leaderboardByIdQuery: async () => {},
   adventurersByGoldQuery: async () => {},
+  adventurersByXPQuery: async () => {},
   unclaimedItemsByAdventurerQuery: async () => {},
   latestMarketItemsNumberQuery: async () => {},
   latestMarketItemsQuery: async () => {},
   adventurersInListQuery: async () => {},
   itemsByAdventurerQuery: async () => {},
+  topScoresQuery: async () => {},
 };
 
 export const useQueriesStore = create<QueriesState>((set, get) => ({

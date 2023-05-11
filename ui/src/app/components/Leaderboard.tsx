@@ -1,28 +1,41 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useQuery } from "@apollo/client";
 import { getAdventurerByXP } from "../hooks/graphql/queries";
 import { Button } from "./Button";
 import Coin from "../../../public/coin.svg";
 import Lords from "../../../public/lords.svg";
-import { useQueriesStore } from "../hooks/useQueryStore";
 import LootIconLoader from "./Loader";
-import Image from "next/image";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import useUIStore from "../hooks/useUIStore";
 
 const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
+  const ref = useRef<HTMLTableRowElement | null>(null);
 
-  const { data, loading, error } = useQuery(getAdventurerByXP);
+  const setScreen = useUIStore((state) => state.setScreen);
 
-  if (loading)
+  // useCustomQuery("leaderboardByIdQuery", getLatestDiscoveries, {
+  //   adventurerId: adventurer?.id ?? 0,
+  // });
+
+  const handleRowSelected = () => {
+    set;
+  };
+
+  const { data, isLoading } = useQueriesStore();
+
+  if (isLoading.adventurersByXPQuery)
     return (
       <div className="flex justify-center p-20 align-middle">
         <LootIconLoader />
       </div>
     );
-  if (error) return <p>Error: {error.message}</p>;
 
-  const adventurers = data?.adventurers;
+  const adventurers = data?.adventurersByXPQuery?.adventurers;
+  const scores = data?.topScoresQuery?.scores;
+
   const totalPages = Math.ceil(adventurers.length / itemsPerPage);
 
   const handleClick = (newPage: number): void => {
@@ -53,19 +66,59 @@ const Leaderboard: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center w-3/4 m-auto">
-      <table className="w-full mt-4 text-4xl border border-terminal-green">
+      <h1 className="text-2xl">Top 3 Submitted Scores</h1>
+      <table className="w-full mt-4 text-xl border border-terminal-green">
         <thead className="border border-terminal-green">
           <tr>
-            <th className="p-4">Rank</th>
-            <th className="p-4">Adventurer</th>
-            <th className="p-4">Gold</th>
-            <th className="p-4">XP</th>
-            <th className="p-4">Health</th>
-            {currentPage == 1 && (
-              <th className="p-4">
-                Prize <span className="text-sm">(per mint)</span>
-              </th>
-            )}
+            <th className="p-1">Rank</th>
+            <th className="p-1">Adventurer</th>
+            <th className="p-1">XP</th>
+            <th className="p-1">
+              Prize <span className="text-sm">(per mint)</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {scores.map((score: any, index: number) => (
+            <tr
+              key={index}
+              className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
+            >
+              <td>{index + 1}</td>
+              <td>{score.adventurerId}</td>
+              <td>{score.xp}</td>
+              <td>
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <span
+                    className={` ${
+                      index == 0
+                        ? "text-gold"
+                        : index == 1
+                        ? "text-silver"
+                        : index == 2
+                        ? "text-bronze"
+                        : ""
+                    }`}
+                  >
+                    {index == 0 ? 10 : index == 1 ? 3 : index == 2 ? 2 : ""}
+                  </span>
+
+                  <Lords className="self-center w-6 h-6 ml-4 fill-current" />
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <h1 className="text-2xl">Live Leaderboard</h1>
+      <table className="w-full mt-4 text-xl border border-terminal-green">
+        <thead className="border border-terminal-green">
+          <tr>
+            <th className="p-1">Rank</th>
+            <th className="p-1">Adventurer</th>
+            <th className="p-1">Gold</th>
+            <th className="p-1">XP</th>
+            <th className="p-1">Health</th>
           </tr>
         </thead>
         <tbody>
@@ -73,8 +126,9 @@ const Leaderboard: React.FC = () => {
             const dead = adventurer.health <= 0;
             return (
               <tr
+                ref={ref}
                 key={adventurer.id}
-                className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black"
+                className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
               >
                 <td>{rankGold(adventurer, index)}</td>
                 <td>{`${adventurer.name} - ${adventurer.id}`}</td>
@@ -89,33 +143,13 @@ const Leaderboard: React.FC = () => {
                 </td>
                 <td>
                   <span
-                    className={`flex justify-center ${!dead ? " text-terminal-green" : "text-red-800"
-                      }`}
+                    className={`flex justify-center ${
+                      !dead ? " text-terminal-green" : "text-red-800"
+                    }`}
                   >
                     {adventurer.health}
                   </span>
                 </td>
-                {currentPage == 1 && index < 3 && (
-                  <td>
-                    <div className="flex flex-row items-center justify-center gap-2">
-                      <span
-                        className={` ${index == 0
-                          ? "text-gold"
-                          : index == 1
-                            ? "text-silver"
-                            : index == 2
-                              ? "text-bronze"
-                              : ""
-                          }`}
-                      >
-                        {index == 0 ? 10 : index == 1 ? 3 : index == 2 ? 2 : ""}
-                      </span>
-
-                      <Lords className="self-center w-6 h-6 ml-4 fill-current" />
-
-                    </div>
-                  </td>
-                )}
               </tr>
             );
           })}

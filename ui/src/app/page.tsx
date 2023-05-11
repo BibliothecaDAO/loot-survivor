@@ -29,6 +29,7 @@ import {
   getAdventurerById,
   getBattleByTxHash,
   getLastDiscovery,
+  getAdventurerByXP,
   getLatestDiscoveries,
   getLastBattleByAdventurer,
   getBattlesByBeast,
@@ -37,6 +38,7 @@ import {
   getLatestMarketItems,
   getLatestMarketItemsNumber,
   getBeastById,
+  getTopScores,
 } from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
@@ -77,7 +79,8 @@ export default function Home() {
   useCustomQuery("adventurerByIdQuery", getAdventurerById, {
     id: adventurer?.id ?? 0,
   });
-  useCustomQuery("adventurersByGoldQuery", getAdventurerById);
+
+  useCustomQuery("adventurersByXPQuery", getAdventurerByXP);
 
   useCustomQuery("latestMarketItemsNumberQuery", getLatestMarketItemsNumber);
 
@@ -117,6 +120,8 @@ export default function Home() {
       ? adventurer?.beastId
       : data.lastBattleQuery?.battles[0]?.beastId,
   });
+
+  useCustomQuery("topScoresQuery", getTopScores);
 
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
