@@ -186,8 +186,6 @@ export default function Home() {
     }
   }, [account]);
 
-  console.log(account);
-
   const goerli_graphql =
     "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql";
   const devnet_graphql =
@@ -218,28 +216,36 @@ export default function Home() {
             id: 2,
             label: "Actions",
             screen: "actions",
-            disabled: hasBeast,
+            disabled: hasBeast || upgrade,
           },
           {
             id: 3,
             label: "Market",
             screen: "market",
-            disabled: hasBeast,
+            disabled: hasBeast || upgrade,
           },
           {
             id: 4,
             label: "Inventory",
             screen: "inventory",
+            disabled: upgrade,
           },
           {
             id: 5,
             label: "Beast",
             screen: "beast",
+            disabled: upgrade,
           },
           {
             id: 6,
             label: "Leaderboard",
             screen: "leaderboard",
+          },
+          {
+            id: 7,
+            label: "Upgrade",
+            screen: "upgrade",
+            disabled: !upgrade,
           },
         ];
       }
@@ -248,45 +254,56 @@ export default function Home() {
   }, [adventurer, account, onboarded]);
 
   useEffect(() => {
-    if (adventurers.length == 0) {
-      setMenu([
-        {
-          id: 1,
-          label: "Start",
-          screen: "start",
-        },
-      ]);
-      setScreen(menu[0].screen);
-    } else if (
-      adventurers.length == 1 &&
-      adventurer?.xp == 0 &&
-      !adventurer.beastId
-    ) {
-      setMenu([
-        {
-          id: 1,
-          label: "Actions",
-          screen: "actions",
-        },
-      ]);
-      setScreen(menu[0].screen);
-    } else if (
-      adventurers.length == 1 &&
-      adventurer?.xp == 0 &&
-      adventurer.beastId
-    ) {
-      setMenu([
-        {
-          id: 1,
-          label: "Beast",
-          screen: "beast",
-        },
-      ]);
-      setScreen(menu[0].screen);
-    } else {
-      handleOnboarded();
+    if (!onboarded) {
+      if (adventurers.length == 0) {
+        setMenu([
+          {
+            id: 1,
+            label: "Start",
+            screen: "start",
+          },
+        ]);
+        setScreen(menu[0].screen);
+      } else if (
+        adventurers.length == 1 &&
+        adventurer?.id &&
+        adventurer?.xp == 0 &&
+        !adventurer.beastId
+      ) {
+        setMenu([
+          {
+            id: 1,
+            label: "Actions",
+            screen: "actions",
+          },
+        ]);
+        setScreen("actions");
+      } else if (
+        adventurers.length == 1 &&
+        adventurer?.xp == 0 &&
+        adventurer.beastId
+      ) {
+        setMenu([
+          {
+            id: 1,
+            label: "Beast",
+            screen: "beast",
+          },
+        ]);
+        setScreen("beast");
+      } else {
+        handleOnboarded();
+      }
     }
-  }, [onboarded, adventurer]);
+  }, [onboarded, adventurer, account]);
+
+  console.log(adventurer);
+
+  useEffect(() => {
+    if (upgrade) {
+      setScreen("upgrade");
+    }
+  }, [upgrade]);
 
   return (
     <main
@@ -331,27 +348,24 @@ export default function Home() {
 
           {account ? (
             <div className="flex-grow w-full">
-              {!upgrade ? (
-                <>
-                  <div className="gap-10 pb-2">
-                    <HorizontalKeyboardControl
-                      buttonsData={menu}
-                      onButtonClick={(value) => {
-                        setScreen(value);
-                      }}
-                    />
-                  </div>
+              <>
+                <div className="gap-10 pb-2">
+                  <HorizontalKeyboardControl
+                    buttonsData={menu}
+                    onButtonClick={(value) => {
+                      setScreen(value);
+                    }}
+                  />
+                </div>
 
-                  {screen === "start" && <Adventurer />}
-                  {screen === "actions" && <Actions />}
-                  {screen === "market" && <Marketplace />}
-                  {screen === "inventory" && <Inventory />}
-                  {screen === "beast" && <Beast />}
-                  {screen === "leaderboard" && <Leaderboard />}
-                </>
-              ) : (
-                <Upgrade />
-              )}
+                {screen === "start" && <Adventurer />}
+                {screen === "actions" && <Actions />}
+                {screen === "market" && <Marketplace />}
+                {screen === "inventory" && <Inventory />}
+                {screen === "beast" && <Beast />}
+                {screen === "leaderboard" && <Leaderboard />}
+                {screen === "upgrade" && <Upgrade />}
+              </>
             </div>
           ) : null}
         </>

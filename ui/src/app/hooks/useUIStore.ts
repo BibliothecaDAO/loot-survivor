@@ -6,7 +6,8 @@ export type ScreenPage =
   | "market"
   | "inventory"
   | "beast"
-  | "leaderboard";
+  | "leaderboard"
+  | "upgrade";
 
 type State = {
   connected: boolean;

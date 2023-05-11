@@ -62,6 +62,7 @@ export const CreateAdventurer = ({
   const { adventurerContract, lordsContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const gameData = new GameData();
+  const [firstAdventurer, setFirstAdventurer] = useState(false);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -124,8 +125,9 @@ export const CreateAdventurer = ({
         });
       }
     });
-    setAdventurer(adventurers[0]);
-    setScreen("actions");
+    if (!adventurers[0]) {
+      setFirstAdventurer(true);
+    }
   };
 
   // const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -184,6 +186,15 @@ export const CreateAdventurer = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isActive, selectedIndex]);
+
+  console.log(adventurers[0] && firstAdventurer);
+
+  useEffect(() => {
+    if (adventurers[0] && firstAdventurer) {
+      setScreen("actions");
+      setAdventurer(adventurers[0]);
+    }
+  }, [adventurers, firstAdventurer]);
 
   return (
     <div className="flex flex-row w-full">
