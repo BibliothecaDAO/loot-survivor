@@ -70,7 +70,7 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
       <p>
         Health potions to purchase: <strong>{healthAmount}</strong>, This will
         cost you <strong>{purchaseGoldAmount}</strong> gold! You can only buy up
-        to Max Health!
+        to Max Health! 1 Potion = 10 Health
       </p>
       <Button
         disabled={!hasBalance}
