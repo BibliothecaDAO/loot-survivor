@@ -89,10 +89,12 @@ export const AdventurersList = ({
                   setSelectedIndex(index);
                 }}
               >
-                <span className="flex flex-row space-x-4">
+                <div className="flex-grow">
+                  {`${adventurer.name} - ${adventurer.id}`}
+                </div>
+                <span className="flex flex-row">
                   {adventurers[index].health === 0 && DeadIcon}
                 </span>
-                {`${adventurer.name} - ${adventurer.id}`}
               </Button>
             ))}
           </div>
