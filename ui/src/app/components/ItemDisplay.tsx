@@ -49,7 +49,7 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
           <br />
           <span className="whitespace-nowrap">
             {Item &&
-              `Tier ${Item?.rank}, Greatness ${Item?.greatness}, ${Item?.material}`}
+              `Tier ${Item?.rank}, Greatness ${Item?.greatness}`}
           </span>
         </div>
       ) : "Nothing Equipped"}

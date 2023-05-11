@@ -1,9 +1,7 @@
 "use client";
 
 import "./globals.css";
-import { InjectedConnector, StarknetConfig } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector";
-import { contracts } from "./hooks/useContracts";
+import { StarknetConfig } from "@starknet-react/core";
 import useIndexerStore from "./hooks/useIndexerStore";
 import { ApolloProvider } from "@apollo/client";
 import { connectors } from "./lib/connectors";
