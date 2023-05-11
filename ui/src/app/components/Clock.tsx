@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { formatTime } from "../lib/utils";
+import next from "next/types";
 
 export const UTCClock: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -24,23 +25,33 @@ interface CountdownProps {
   countingMessage: string;
   finishedMessage: string;
   nextMintTime?: Date;
+  expiryTime?: Date;
 }
 
 export const Countdown: React.FC<CountdownProps> = ({
   countingMessage,
   finishedMessage,
   nextMintTime,
+  expiryTime,
 }) => {
   const [seconds, setSeconds] = useState(0);
   const [displayTime, setDisplayTime] = useState("");
 
   useEffect(() => {
+    let targetTime: Date | undefined;
     if (nextMintTime) {
+      targetTime = nextMintTime;
+    } else if (expiryTime) {
+      targetTime = new Date(expiryTime);
+    }
+
+    if (targetTime) {
       const updateCountdown = () => {
         const currentTime = new Date().getTime();
-        const timeRemaining = nextMintTime.getTime() - currentTime;
-
-        setSeconds(Math.floor(timeRemaining / 1000));
+        if (targetTime) {
+          const timeRemaining = targetTime.getTime() - currentTime;
+          setSeconds(Math.floor(timeRemaining / 1000));
+        }
       };
 
       updateCountdown();
@@ -50,7 +61,7 @@ export const Countdown: React.FC<CountdownProps> = ({
         clearInterval(interval);
       };
     }
-  }, [nextMintTime]);
+  }, [nextMintTime, expiryTime]);
 
   useEffect(() => {
     if (seconds <= 0) {
@@ -71,7 +82,7 @@ export const Countdown: React.FC<CountdownProps> = ({
 
   return (
     <div>
-      {nextMintTime ? (
+      {nextMintTime || expiryTime ? (
         <p>{displayTime}</p>
       ) : (
         <p className="loading-ellipsis">Loading</p>

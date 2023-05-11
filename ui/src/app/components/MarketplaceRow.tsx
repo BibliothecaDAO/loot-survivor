@@ -4,6 +4,7 @@ import { BidBox } from "./Bid";
 import { useContracts } from "../hooks/useContracts";
 import { formatTime } from "../lib/utils";
 import { convertTime } from "../lib/utils";
+import { Countdown } from "./Clock";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import LootIcon from "./LootIcon";
@@ -133,7 +134,7 @@ const MarketplaceRow = ({
     } else if (item.expiry == null) {
       return "Open";
     } else if (checkExpired()) {
-      return "Expired";
+      return "Closed";
     } else {
       return "Bids";
     }
@@ -169,8 +170,17 @@ const MarketplaceRow = ({
           : ""}
       </td>
       <td className="text-center">
-        {item.expiry ? formatTime(new Date(convertTime(item.expiry))) : ""}
+        {item.expiry ? (
+          <Countdown
+            countingMessage=""
+            finishedMessage="Expired"
+            expiryTime={new Date(convertTime(item.expiry))}
+          />
+        ) : (
+          ""
+        )}
       </td>
+
       <td className="text-center">{status()}</td>
       <td className="text-center">
         {item.claimedTime

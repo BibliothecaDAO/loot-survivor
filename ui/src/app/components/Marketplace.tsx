@@ -140,9 +140,9 @@ const Marketplace = () => {
     XP: "xp",
     Price: "price",
     Bidder: "bidder",
-    Expiry: "expiry",
+    "Bidding Ends": "expiry",
     Status: "status",
-    Claimed: "claimedTime",
+    "Claimed (UTC)": "claimedTime",
   };
 
   const handleSort = (heading: string) => {
@@ -228,7 +228,7 @@ const Marketplace = () => {
     "XP",
     "Price",
     "Bidder",
-    "Expiry (UTC)",
+    "Bidding Ends",
     "Status",
     "Claimed (UTC)",
     "Actions",
