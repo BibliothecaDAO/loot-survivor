@@ -5,6 +5,8 @@ export interface ButtonData {
   id: number;
   label: string;
   action: () => void;
+  mouseEnter?: () => void;
+  mouseLeave?: () => void;
 }
 
 interface ButtonProps {
@@ -41,6 +43,8 @@ const KeyboardControl = ({ buttonsData, disabled }: ButtonProps) => {
     <div className="flex flex-col w-full">
       {buttonsData.map((buttonData, index) => (
         <Button
+          onMouseEnter={buttonData.mouseEnter}
+          onMouseLeave={buttonData.mouseLeave}
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
           className={selectedIndex === index ? "animate-pulse" : ""}

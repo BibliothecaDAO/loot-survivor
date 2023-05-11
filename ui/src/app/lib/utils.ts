@@ -2,6 +2,8 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 
+import Realms from "./realms.json";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -126,3 +128,7 @@ export function convertTime (time: string) {
   const TimeUTC = dateTime.getTime() + timezoneOffsetMilliseconds;
   return TimeUTC;
 };
+
+export function getRealmNameById(id: number){
+  return Realms.features.find((realm) => realm.id === id)
+}

@@ -40,6 +40,7 @@ const Intro = () => {
   }, [selectedIndex]);
 
   const [buttonText, setButtonText] = useState('do you dare?');
+
   const handleMouseEnter = () => {
     setButtonText('are you sure?');
   };

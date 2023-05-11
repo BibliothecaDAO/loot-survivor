@@ -3,6 +3,8 @@ import { DiscoveryDisplay } from "./DiscoveryDisplay";
 import SpriteAnimation from "./SpriteAnimation";
 import { GameData } from "./GameData";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import { soundSelector, useUiSounds } from "../hooks/useUiSound";
+import { useEffect } from "react";
 
 interface NotificationDisplayProps {
   type: string;
@@ -101,8 +103,15 @@ export const NotificationDisplay = ({
   const { adventurer } = useAdventurerStore();
   const animation = processAnimation(type, notificationData, adventurer);
   const notification = proccessNotification(type, notificationData);
+
+  const { play } = useUiSounds(soundSelector.click);
+
+  useEffect(() => {
+    play();
+  }, [])
+
   return (
-    <div className="flex flex-row w-full gap-5 p-2 z-10">
+    <div className="z-10 flex flex-row w-full gap-5 p-2">
       <div className="w-1/4">
         <SpriteAnimation
           frameWidth={100}
