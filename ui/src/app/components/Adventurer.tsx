@@ -6,38 +6,53 @@ import { padAddress } from "../lib/utils";
 import { AdventurersList } from "./AdventurersList";
 import { CreateAdventurer } from "./CreateAdventurer";
 import VerticalKeyboardControl from "./VerticalMenu";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import useUIStore from "../hooks/useUIStore";
 
 const Adventurer = () => {
-  const { account } = useAccount();
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
-
-  const menu = [
-    {
-      id: 1,
-      label: "Choose Adventurer",
-      value: "choose adventurer",
-      action: () => setSelected,
-      disabled: false,
-    },
-    {
-      id: 2,
-      label: "Create Adventurer",
-      value: "create adventurer",
-      action: () => setSelected,
-      disabled: false,
-    },
-  ];
 
   const { data } = useQueriesStore();
 
   const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers
     : [];
+
+  const handleMenu = () => {
+    if (adventurers == 0) {
+      const menu = [
+        {
+          id: 1,
+          label: "Create Adventurer",
+          value: "create adventurer",
+          action: () => setSelected,
+          disabled: false,
+        },
+      ];
+      return menu;
+    } else {
+      const menu = [
+        {
+          id: 1,
+          label: "Choose Adventurer",
+          value: "choose adventurer",
+          action: () => setSelected,
+          disabled: adventurers.length == 0,
+        },
+        {
+          id: 2,
+          label: "Create Adventurer",
+          value: "create adventurer",
+          action: () => setSelected,
+          disabled: false,
+        },
+      ];
+      return menu;
+    }
+  };
+
+  const menu = handleMenu();
 
   return (
     <div className="flex flex-row">

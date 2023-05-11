@@ -140,9 +140,9 @@ const Marketplace = () => {
     XP: "xp",
     Price: "price",
     Bidder: "bidder",
-    Expiry: "expiry",
+    "Bidding Ends": "expiry",
     Status: "status",
-    Claimed: "claimedTime",
+    "Claimed (UTC)": "claimedTime",
   };
 
   const handleSort = (heading: string) => {
@@ -228,7 +228,7 @@ const Marketplace = () => {
     "XP",
     "Price",
     "Bidder",
-    "Expiry (UTC)",
+    "Bidding Ends",
     "Status",
     "Claimed (UTC)",
     "Actions",
@@ -263,15 +263,12 @@ const Marketplace = () => {
             <div className="flex flex-row align-items">
               <Button
                 onClick={() => addToCalls(mintDailyItemsTx)}
-                className={selectedIndex == 0 ? "animate-pulse" : ""}
-                variant={selectedIndex == 0 ? "default" : "ghost"}
                 disabled={nextMint && currentTime < nextMint.getTime()}
               >
                 Mint daily items
               </Button>
               <Button
                 onClick={claimAllItems}
-                className={selectedIndex == 0 ? "animate-pulse" : ""}
                 disabled={claimExists() || getClaimableItems().length == 0}
               >
                 Claim All
@@ -283,7 +280,7 @@ const Marketplace = () => {
                     nextMint ? "Next mint in:" : "No items minted yet!"
                   }
                   finishedMessage="Items can be minted!"
-                  nextMintTime={nextMint}
+                  targetTime={nextMint}
                 />
               </div>
             </div>
