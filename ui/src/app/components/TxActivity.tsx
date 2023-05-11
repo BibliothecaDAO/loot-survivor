@@ -39,7 +39,8 @@ export const TxActivity = () => {
   console.log(
     loadingQuery,
     queryData.discoveryByTxHashQuery?.discoveries[0],
-    loadingQuery && isDataUpdated[loadingQuery]
+    loadingQuery && isDataUpdated[loadingQuery],
+    loading
   );
 
   useEffect(() => {

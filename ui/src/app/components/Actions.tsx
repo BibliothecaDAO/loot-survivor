@@ -85,6 +85,8 @@ export default function Actions() {
     },
   ];
 
+  console.log(!adventurer?.isIdle || loading);
+
   return (
     <div className="flex flex-row space-x-4 overflow-hidden ">
       <div className="w-1/3">
