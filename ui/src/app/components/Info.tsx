@@ -1,17 +1,21 @@
-import { NullAdventurer } from "../types";
+import { Adventurer, NullAdventurer } from "../types";
 import { useQuery } from "@apollo/client";
 import { getItemsByAdventurer } from "../hooks/graphql/queries";
-import { ANSIArt } from "./ANSIGenerator";
 import Heart from "../../../public/heart.svg";
 import Coin from "../../../public/coin.svg";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
+import { getRealmNameById } from "../lib/utils";
 interface InfoProps {
-  adventurer: any;
+  adventurer: Adventurer | undefined;
 }
 
 export default function Info({ adventurer }: InfoProps) {
+
+
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
+
+  console.log(formatAdventurer)
   const {
     loading: itemsByAdventurerLoading,
     error: itemsByAdventurerError,
@@ -24,6 +28,8 @@ export default function Info({ adventurer }: InfoProps) {
     pollInterval: 5000,
   });
 
+  console.log(itemsByAdventurerData)
+
   const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
 
   return (
@@ -32,6 +38,9 @@ export default function Info({ adventurer }: InfoProps) {
         <>
           <div className="flex flex-row gap-2 p-1">
             <div className="flex flex-col w-full p-2 uppercase">
+              <div className="flex justify-between w-full">
+                {formatAdventurer.race} <span>{getRealmNameById(formatAdventurer.homeRealm)?.name}</span> <span>Order of {formatAdventurer.order}</span> 
+              </div>
               <div className="flex justify-between w-full text-4xl font-medium border-b border-terminal-green">
                 {formatAdventurer.name}
                 <span className="flex text-terminal-yellow">
@@ -43,12 +52,14 @@ export default function Info({ adventurer }: InfoProps) {
                   {formatAdventurer.health}
                 </span>
               </div>
+
               <div className="flex justify-between w-full text-2xl">
                 <LevelBar
                   xp={formatAdventurer.xp}
                   level={formatAdventurer.level}
                 />
               </div>
+
               <div className="flex flex-row justify-between">
                 <div className="flex flex-col">
                   <div className="">
@@ -116,7 +127,7 @@ export default function Info({ adventurer }: InfoProps) {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col space-y-1 ml-1 text-xl">
+                <div className="flex flex-col ml-1 space-y-1 text-xl">
                   {/* <ANSIArt
                     newWidth={100}
                     src={

@@ -275,7 +275,7 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed top-0 left-0 w-1/4 mt-20 ml-20 border rounded-lg border-terminal-green bg-terminal-black">
+            <div className="fixed top-0 left-0 w-1/4 mt-20 ml-20 border border-terminal-green bg-terminal-black">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}

@@ -149,6 +149,7 @@ const getAdventurersByOwner = gql`
       health
       id
       imageHash1
+      homeRealm
       imageHash2
       intelligence
       level
@@ -185,6 +186,7 @@ const getAdventurerById = gql`
       health
       id
       imageHash1
+      homeRealm
       imageHash2
       intelligence
       level
@@ -220,6 +222,7 @@ const getAdventurersInList = gql`
       headId
       health
       id
+      homeRealm
       imageHash1
       imageHash2
       intelligence
