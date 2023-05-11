@@ -24,7 +24,7 @@ const LevelBar: React.FC<LevelBarProps> = ({ xp, level }) => {
       </div>
       <div className="w-full h-2 mt-1 border border-terminal-green bg-terminal-black ">
         <div
-          className="h-full bg-terminal-green animate-pulse"
+          className="h-full bg-terminal-green"
           style={{ width: `${progress}%` }}
         ></div>
       </div>
