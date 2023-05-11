@@ -263,15 +263,12 @@ const Marketplace = () => {
             <div className="flex flex-row align-items">
               <Button
                 onClick={() => addToCalls(mintDailyItemsTx)}
-                className={selectedIndex == 0 ? "animate-pulse" : ""}
-                variant={selectedIndex == 0 ? "default" : "ghost"}
                 disabled={nextMint && currentTime < nextMint.getTime()}
               >
                 Mint daily items
               </Button>
               <Button
                 onClick={claimAllItems}
-                className={selectedIndex == 0 ? "animate-pulse" : ""}
                 disabled={claimExists() || getClaimableItems().length == 0}
               >
                 Claim All
