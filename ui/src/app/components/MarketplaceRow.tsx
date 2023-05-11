@@ -174,7 +174,7 @@ const MarketplaceRow = ({
           <Countdown
             countingMessage=""
             finishedMessage="Expired"
-            expiryTime={new Date(convertTime(item.expiry))}
+            targetTime={new Date(convertTime(item.expiry))}
           />
         ) : (
           ""

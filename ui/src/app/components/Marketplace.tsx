@@ -283,7 +283,7 @@ const Marketplace = () => {
                     nextMint ? "Next mint in:" : "No items minted yet!"
                   }
                   finishedMessage="Items can be minted!"
-                  nextMintTime={nextMint}
+                  targetTime={nextMint}
                 />
               </div>
             </div>
