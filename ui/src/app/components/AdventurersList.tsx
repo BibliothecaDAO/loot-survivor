@@ -76,7 +76,7 @@ export const AdventurersList = ({
     <>
       {sortedAdventurers.length > 0 ? (
         <div className="flex basis-2/3">
-          <div className="flex flex-col w-1/2 overflow-auto">
+          <div className="flex flex-col w-1/2">
             {filteredAdventurers.map((adventurer, index) => (
               <Button
                 key={adventurer.id}
@@ -92,12 +92,10 @@ export const AdventurersList = ({
                   setSelectedIndex(index);
                 }}
               >
-                <div className="flex-grow">
-                  {`${adventurer.name} - ${adventurer.id}`}
+                <div className="flex-grow">{`${adventurer.name} - ${adventurer.id}`}</div>
+                <div className="w-5 text-right">
+                  {adventurer.health === 0 ? DeadIcon : null}
                 </div>
-                <span className="flex flex-row">
-                  {adventurer.health === 0 && DeadIcon}
-                </span>
               </Button>
             ))}
           </div>
