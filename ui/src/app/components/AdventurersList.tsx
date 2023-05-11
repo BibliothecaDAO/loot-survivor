@@ -32,6 +32,10 @@ export const AdventurersList = ({
     <img className="w-5 h-5" src="/skull.png" alt="Dead Adventurer" />
   );
 
+  const hasDeadAdventurers = sortedAdventurers.some(
+    (adventurer) => adventurer.health === 0
+  );
+
   const buttonsData: ButtonData[] = [];
   for (let i = 0; i < adventurers.length; i++) {
     buttonsData.push({
@@ -99,9 +103,11 @@ export const AdventurersList = ({
               </Button>
             ))}
           </div>
-          <Button onClick={() => setShowZeroHealth(!showZeroHealth)}>
-            {showZeroHealth ? "Hide" : "Show"} dead
-          </Button>
+          {hasDeadAdventurers && (
+            <Button onClick={() => setShowZeroHealth(!showZeroHealth)}>
+              {showZeroHealth ? "Hide" : "Show"} dead
+            </Button>
+          )}
           <div className="w-1/2">
             <Info adventurer={filteredAdventurers[selectedIndex]} />
           </div>
