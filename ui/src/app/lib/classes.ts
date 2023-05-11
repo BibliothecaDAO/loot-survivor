@@ -29,6 +29,7 @@ export class AdventurerClass implements Adventurer {
     status: string;
     beastId: number;
     upgrading: boolean;
+    homeRealm: number;
     gold: number;
     constructor(adventurer: Adventurer) {
         const {
@@ -60,6 +61,7 @@ export class AdventurerClass implements Adventurer {
             status,
             beastId,
             upgrading,
+            homeRealm,
             gold,
         } = adventurer;
 
@@ -91,6 +93,7 @@ export class AdventurerClass implements Adventurer {
         this.status = status;
         this.beastId = beastId;
         this.upgrading = upgrading;
+        this.homeRealm = homeRealm;
         this.gold = gold;
 
 

@@ -3,7 +3,7 @@ import LootIcon from "./LootIcon";
 
 interface ItemDisplayProps {
   item: Item;
-  type: string;
+  type?: string;
 }
 
 export const ItemDisplay = (item: ItemDisplayProps) => {
