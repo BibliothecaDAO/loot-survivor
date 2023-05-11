@@ -56,9 +56,6 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(false);
 
   const hash = useLoadingStore((state) => state.hash);
-  const loading = useLoadingStore((state) => state.loading);
-  const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const loadingQuery = useLoadingStore((state) => state.loadingQuery);
   const type = useLoadingStore((state) => state.type);
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
@@ -72,7 +69,7 @@ export default function Home() {
   const upgrade = adventurer?.upgrading;
   const status = adventurer?.status;
 
-  const { data, isDataUpdated, refetch } = useQueriesStore();
+  const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
 
   useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
     owner: padAddress(account?.address ?? ""),
@@ -97,7 +94,7 @@ export default function Home() {
   });
 
   useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
-    adventurerId: adventurer?.id,
+    adventurerId: adventurer?.id ?? 0,
   });
 
   useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
@@ -105,12 +102,14 @@ export default function Home() {
   });
 
   useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
-    adventurerId: adventurer?.id,
+    adventurerId: adventurer?.id ?? 0,
   });
 
   useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
     adventurerId: adventurer?.id ?? 0,
-    beastId: adventurer?.beastId ?? 0,
+    beastId: adventurer?.beastId
+      ? adventurer?.beastId
+      : data.lastBattleQuery?.battles[0]?.beastId,
   });
 
   useCustomQuery("beastByIdQuery", getBeastById, {
@@ -124,7 +123,9 @@ export default function Home() {
     : NullAdventurer;
 
   useEffect(() => {
-    setAdventurer(updatedAdventurer);
+    if (updatedAdventurer?.id > 0) {
+      setAdventurer(updatedAdventurer);
+    }
   }, [updatedAdventurer]);
 
   const hasBeast = !!adventurer?.beastId;
@@ -159,6 +160,12 @@ export default function Home() {
       setSelected(menu[0].value);
     }
   }, [adventurer]);
+
+  // useEffect(() => {
+  //   console.log("refetch");
+  //   refetch("latestDiscoveriesQuery");
+  //   console.log(data.latestDiscoveriesQuery);
+  // }, [adventurer]);
 
   useEffect(() => {
     if (!account?.address) {
@@ -228,19 +235,7 @@ export default function Home() {
     setMenu(newMenu);
   }, [adventurer, account]);
 
-  // const showNotification = true;
-  // const type = "Explore";
-  // const notificationData = {
-  //   adventurerId: 7,
-  //   attackLocation: "Foot",
-  //   discoveryTime: "2023-05-05T14:41:37",
-  //   discoveryType: "Obstacle",
-  //   entityId: null,
-  //   outputAmount: 9,
-  //   subDiscoveryType: "Dark Mist",
-  //   txHash: "0x02526e0eef880bfb5efaf3b3b64f4307bc09b8b30ad5f5e323",
-  // };
-  const battleNotifData = {};
+  console.log(notificationData, showNotification);
 
   return (
     <main
@@ -270,7 +265,7 @@ export default function Home() {
           </div>
           <div className="w-full h-6 my-2 bg-terminal-green" />
           <CSSTransition
-            in={showNotification}
+            in={showNotification && Boolean(notificationData)}
             timeout={500}
             classNames="notification"
             unmountOnExit

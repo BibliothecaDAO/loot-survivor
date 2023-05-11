@@ -55,7 +55,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
   const gameData = new GameData();
   const ansiImage = ANSIArt({
     imageUrl:
-      getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
+      getValueFromKey(gameData.BEAST_IMAGES, beastData?.beast) ||
       "/monsters/phoenix.png",
     newWidth: 20,
   });

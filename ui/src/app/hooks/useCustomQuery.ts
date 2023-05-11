@@ -19,7 +19,6 @@ const useCustomQuery = (
     query,
     {
       variables: variables,
-      fetchPolicy: "network-only", // To ensure data is fetched from the network and not the cache,
       pollInterval: 5000,
     }
   );
@@ -34,6 +33,7 @@ const useCustomQuery = (
 
   useEffect(() => {
     if (data) {
+      console.log(data);
       updateData(queryKey, data, loading, refetchWrapper);
     }
   }, [data, updateData, loading, queryKey, refetchWrapper, variables]);

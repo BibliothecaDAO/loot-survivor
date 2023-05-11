@@ -116,6 +116,8 @@ export default function Beast() {
 
   const isBeastDead = beastData?.health == "0";
 
+  console.log(formatBattles);
+
   return (
     <div className="flex flex-row overflow-hidden">
       <div className="w-1/3">
@@ -129,7 +131,7 @@ export default function Beast() {
           />
         )}
 
-        {adventurer?.beastId && (
+        {(adventurer?.beastId || formatBattles.length > 0) && (
           <>
             <div className="flex flex-col items-center gap-5 p-2">
               <div className="text-xl uppercase">
