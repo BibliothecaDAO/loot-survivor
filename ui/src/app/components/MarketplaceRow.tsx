@@ -7,6 +7,12 @@ import { convertTime } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import LootIcon from "./LootIcon";
+import {
+  useTransactionManager,
+  useWaitForTransaction,
+} from "@starknet-react/core";
+import { Metadata } from "../types";
+
 interface MarketplaceRowProps {
   ref: any;
   item: any;
@@ -34,6 +40,11 @@ const MarketplaceRow = ({
   const [showBidBox, setShowBidBox] = useState(-1);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const { hashes, transactions } = useTransactionManager();
+  const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
+
+  const transactingMarketIds = (transactions[0]?.metadata as Metadata)
+    ?.marketIds;
 
   const currentTime = new Date().getTime();
 
@@ -63,6 +74,18 @@ const MarketplaceRow = ({
       return sum >= adventurer.gold;
     }
     return true;
+  };
+
+  const checkTransacting = (marketId: number) => {
+    if (txData?.status == "RECEIVED" || txData?.status == "PENDING") {
+      return transactingMarketIds?.includes(marketId);
+    } else {
+      return false;
+    }
+  };
+
+  const checkBidder = (bidder: number) => {
+    return adventurer?.id === bidder;
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -170,7 +193,9 @@ const MarketplaceRow = ({
                 checkBidBalance() ||
                 item.claimedTime ||
                 (item.expiry && checkExpired()) ||
-                bidExists(item.marketId)
+                bidExists(item.marketId) ||
+                checkTransacting(item.marketId) ||
+                checkBidder(item.bidder)
               }
               className={bidExists(item.marketId) ? "bg-white" : ""}
             >
@@ -191,7 +216,8 @@ const MarketplaceRow = ({
                 claimExists(item.marketId) ||
                 !item.expiry ||
                 convertTime(item.expiry) > currentTime ||
-                adventurer?.id != item.bidder
+                adventurer?.id != item.bidder ||
+                checkTransacting(item.marketId)
               }
               className={claimExists(item.marketId) ? "" : ""}
             >

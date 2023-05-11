@@ -112,6 +112,7 @@ export const CreateAdventurer = ({
           tx.transaction_hash,
           "Spawning Adventurer",
           "adventurersByOwnerQuery",
+          undefined,
           `You have spawned ${formData.name}!`
         );
         addTransaction({
@@ -201,6 +202,7 @@ export const CreateAdventurer = ({
                 onChange={handleChange}
                 className="p-1 m-2 bg-terminal-black border border-slate-500"
                 onKeyDown={handleKeyDown}
+                maxLength={31}
               />
             </label>
             <label className="flex justify-between">

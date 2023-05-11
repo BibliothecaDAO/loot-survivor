@@ -3,6 +3,7 @@ import { useQuery } from "@apollo/client";
 import { getAdventurerByXP } from "../hooks/graphql/queries";
 import { Button } from "./Button";
 import Coin from "../../../public/coin.svg";
+import Lords from "../../../public/lords.svg";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import LootIconLoader from "./Loader";
 import Image from "next/image";
@@ -88,9 +89,8 @@ const Leaderboard: React.FC = () => {
                 </td>
                 <td>
                   <span
-                    className={`flex justify-center ${
-                      !dead ? " text-terminal-green" : "text-red-800"
-                    }`}
+                    className={`flex justify-center ${!dead ? " text-terminal-green" : "text-red-800"
+                      }`}
                   >
                     {adventurer.health}
                   </span>
@@ -99,26 +99,20 @@ const Leaderboard: React.FC = () => {
                   <td>
                     <div className="flex flex-row items-center justify-center gap-2">
                       <span
-                        className={` ${
-                          index == 0
-                            ? "text-gold"
-                            : index == 1
+                        className={` ${index == 0
+                          ? "text-gold"
+                          : index == 1
                             ? "text-silver"
                             : index == 2
-                            ? "text-bronze"
-                            : ""
-                        }`}
+                              ? "text-bronze"
+                              : ""
+                          }`}
                       >
                         {index == 0 ? 10 : index == 1 ? 3 : index == 2 ? 2 : ""}
                       </span>
-                      <span className="h-[30px]">
-                        <Image
-                          alt="lords"
-                          src="/lords.png"
-                          width={30}
-                          height={30}
-                        />
-                      </span>
+
+                      <Lords className="self-center w-6 h-6 ml-4 fill-current" />
+
                     </div>
                   </td>
                 )}

@@ -1,23 +1,15 @@
-import { useState, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { NullBeast } from "../types";
-import { useQuery } from "@apollo/client";
-import {
-  getBeastById,
-  getBattlesByBeast,
-  getLastBattleByAdventurer,
-} from "../hooks/graphql/queries";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import KeyboardControl, { ButtonData } from "./KeyboardControls";
 import Info from "./Info";
 import { BattleDisplay } from "./BattleDisplay";
 import { BeastDisplay } from "./BeastDisplay";
-import Battle from "../../../public/battle.png";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
-import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import { useState } from "react";
 
 export default function Beast() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -31,9 +23,6 @@ export default function Beast() {
   const { writeAsync } = useContractWrite({ calls });
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
-  const type = useLoadingStore((state) => state.type);
-
-  const formatAdventurer = adventurer ? adventurer : null;
 
   const { data } = useQueriesStore();
 
@@ -57,6 +46,17 @@ export default function Beast() {
     calldata: [adventurer?.beastId ?? "", "0"],
   };
 
+  const [buttonText, setButtonText] = useState('Flee!');
+
+  const handleMouseEnter = () => {
+    setButtonText('you coward!');
+  };
+
+  const handleMouseLeave = () => {
+    setButtonText('Flee!');
+  };
+
+
   const buttonsData: ButtonData[] = [
     {
       id: 1,
@@ -70,6 +70,7 @@ export default function Beast() {
               tx.transaction_hash,
               "Attacking",
               "battlesByTxHashQuery",
+              adventurer?.id,
               { beastName: beastData.beast }
             );
             addTransaction({
@@ -85,7 +86,9 @@ export default function Beast() {
     },
     {
       id: 2,
-      label: "FLEE BEAST",
+      label: buttonText,
+      mouseEnter: handleMouseEnter,
+      mouseLeave: handleMouseLeave,
       action: async () => {
         addToCalls(flee);
         await handleSubmitCalls(writeAsync).then((tx: any) => {
@@ -95,6 +98,7 @@ export default function Beast() {
               tx.transaction_hash,
               "Fleeing",
               "battlesByTxHashQuery",
+              adventurer?.id,
               { beastName: beastData.beast }
             );
             addTransaction({
@@ -112,6 +116,8 @@ export default function Beast() {
 
   const isBeastDead = beastData?.health == "0";
 
+  console.log(formatBattles);
+
   return (
     <div className="flex flex-row overflow-hidden">
       <div className="w-1/3">
@@ -125,7 +131,7 @@ export default function Beast() {
           />
         )}
 
-        {adventurer?.beastId && (
+        {(adventurer?.beastId || formatBattles.length > 0) && (
           <>
             <div className="flex flex-col items-center gap-5 p-2">
               <div className="text-xl uppercase">
@@ -151,7 +157,7 @@ export default function Beast() {
             <BeastDisplay beastData={beastData} />
           </>
         ) : (
-          <div className="flex flex-col h-full items-center border-2 border-terminal-green overflow-hidden">
+          <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
             <p className="m-auto text-lg uppercase text-terminal-green">
               Beast not yet discovered.
             </p>

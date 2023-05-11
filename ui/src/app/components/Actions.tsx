@@ -62,7 +62,8 @@ export default function Actions() {
                 "Explore",
                 tx.transaction_hash,
                 "Exploring",
-                "discoveryByTxHashQuery"
+                "discoveryByTxHashQuery",
+                adventurer?.id
               );
               addTransaction({
                 hash: tx.transaction_hash,
@@ -88,6 +89,8 @@ export default function Actions() {
       disabled: !adventurer?.isIdle || loading,
     });
   }
+
+  console.log(!adventurer?.isIdle || loading);
 
   return (
     <div className="flex flex-row space-x-4 overflow-hidden ">

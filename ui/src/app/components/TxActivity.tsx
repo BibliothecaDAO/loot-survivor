@@ -5,6 +5,7 @@ import { displayAddress, padAddress } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useLoadingStore from "../hooks/useLoadingStore";
 import LootIconLoader from "./Loader";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 export interface TxActivityProps {
   hash: string | undefined;
@@ -18,6 +19,8 @@ export const TxActivity = () => {
   const hash = useLoadingStore((state) => state.hash);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const type = useLoadingStore((state) => state.type);
+  const loadingAdventurer = useLoadingStore((state) => state.adventurer);
+  const adventurer = useAdventurerStore((state) => state.adventurer);
   const {
     data: queryData,
     isDataUpdated,
@@ -33,9 +36,16 @@ export const TxActivity = () => {
     },
   });
 
+  console.log(
+    loadingQuery,
+    queryData.discoveryByTxHashQuery?.discoveries[0],
+    loadingQuery && isDataUpdated[loadingQuery],
+    loading
+  );
+
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
-    if (hash && loadingQuery && isDataUpdated[loadingQuery]) {
+    if (accepted && hash && loadingQuery && isDataUpdated[loadingQuery]) {
       // Handle "Attack" or "Flee" types
       if (type === "Attack" || type === "Flee") {
         if (queryData?.battlesByTxHashQuery) {
@@ -50,7 +60,6 @@ export const TxActivity = () => {
 
       // Handle "Explore" type
       else if (type === "Explore") {
-        console.log("here");
         stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
         setAccepted(false);
         resetDataUpdated(loadingQuery);
@@ -67,8 +76,8 @@ export const TxActivity = () => {
 
   return (
     <>
-      {type != "Multicall" ? (
-        loading && hash ? (
+      {type != "Multicall" && type != "Create" ? (
+        loading && hash && loadingAdventurer === adventurer?.id ? (
           <div className="flex flex-row items-center gap-5">
             {data?.status == "RECEIVED" || data?.status == "PENDING" ? (
               <div className="flex w-48 loading-ellipsis ">

@@ -1,7 +1,15 @@
+import { Item } from "../types";
 import LootIcon from "./LootIcon";
 
-export const ItemDisplay = (item: any) => {
-  const processName = (item: any) => {
+interface ItemDisplayProps {
+  item: Item;
+  type?: string;
+}
+
+export const ItemDisplay = (item: ItemDisplayProps) => {
+  const Item = item?.item;
+
+  const processName = (item: Item) => {
     if (item) {
       if (item.prefix1 && item.suffix && item.greatness >= 20) {
         return `${item.prefix1} ${item.prefix2} ${item.item} of ${item.suffix} +1`;
@@ -15,37 +23,37 @@ export const ItemDisplay = (item: any) => {
     }
   };
 
-  const formatItem = item?.item;
-
-  const itemName = processName(formatItem);
-  const slot = formatItem ? formatItem.slot : "";
+  const itemName = processName(Item);
+  const slot = Item ? Item.slot : "";
 
   return (
     <div
-      className={`flex-shrink flex gap-2 p-2 mb-1  ${
-        item ? "bg-terminal-green text-terminal-black" : ""
-      }`}
+      className={`flex-shrink flex gap-2 p-2 mb-1  ${Item ? "bg-terminal-green text-terminal-black" : ""
+        }`}
     >
       <LootIcon
         type={
           item.type == "feet"
             ? "foot"
             : item.type == "hands"
-            ? "hand"
-            : item.type
+              ? "hand"
+              : item.type
         }
       />
-      <div>
-        <span className="font-semibold whitespace-nowrap">
-          {formatItem ? itemName : "Nothing Equipped"}
-          {slot == "Neck" || slot == "Ring" ? " [+1 Luck]" : ""}
-        </span>{" "}
-        <br />
-        <span className="whitespace-nowrap">
-          {formatItem &&
-            `[Tier ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`}
-        </span>
-      </div>
+      {Item ? (
+        <div>
+          <span className="font-semibold whitespace-nowrap">
+            {itemName} {Item?.level} {Item?.xp} XP
+            {slot == "Neck" || slot == "Ring" ? " [+1 Luck]" : ""}
+          </span>{" "}
+          <br />
+          <span className="whitespace-nowrap">
+            {Item &&
+              `Tier ${Item?.rank}, Greatness ${Item?.greatness}, ${Item?.material}`}
+          </span>
+        </div>
+      ) : "Nothing Equipped"}
+
     </div>
   );
 };

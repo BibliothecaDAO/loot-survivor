@@ -72,7 +72,7 @@ export default function Home() {
   const [showBattleScene, setShowBattleScene] = useState(true);
   const upgrade = adventurer?.upgrading;
 
-  const { data } = useQueriesStore();
+  const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
 
   useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
     owner: padAddress(account?.address ?? ""),
@@ -102,7 +102,7 @@ export default function Home() {
   });
 
   useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
-    adventurerId: adventurer?.id,
+    adventurerId: adventurer?.id ?? 0,
   });
 
   useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
@@ -110,12 +110,14 @@ export default function Home() {
   });
 
   useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
-    adventurerId: adventurer?.id,
+    adventurerId: adventurer?.id ?? 0,
   });
 
   useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
     adventurerId: adventurer?.id ?? 0,
-    beastId: adventurer?.beastId ?? 0,
+    beastId: adventurer?.beastId
+      ? adventurer?.beastId
+      : data.lastBattleQuery?.battles[0]?.beastId,
   });
 
   useCustomQuery("beastByIdQuery", getBeastById, {
@@ -129,7 +131,9 @@ export default function Home() {
     : NullAdventurer;
 
   useEffect(() => {
-    setAdventurer(updatedAdventurer);
+    if (updatedAdventurer?.id > 0) {
+      setAdventurer(updatedAdventurer);
+    }
   }, [updatedAdventurer]);
 
   const hasBeast = !!adventurer?.beastId;
@@ -169,6 +173,12 @@ export default function Home() {
       setScreen(menu[0].screen);
     }
   }, [adventurer]);
+
+  // useEffect(() => {
+  //   console.log("refetch");
+  //   refetch("latestDiscoveriesQuery");
+  //   console.log(data.latestDiscoveriesQuery);
+  // }, [adventurer]);
 
   useEffect(() => {
     if (!account?.address) {
@@ -306,7 +316,7 @@ export default function Home() {
           </div>
           <div className="w-full h-6 my-2 bg-terminal-green" />
           <CSSTransition
-            in={showNotification}
+            in={showNotification && Boolean(notificationData)}
             timeout={500}
             classNames="notification"
             unmountOnExit
