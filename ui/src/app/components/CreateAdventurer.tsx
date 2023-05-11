@@ -10,6 +10,8 @@ import { getKeyFromValue } from "../lib/utils";
 import { GameData } from "./GameData";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useUIStore from "../hooks/useUIStore";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
@@ -47,6 +49,8 @@ export const CreateAdventurer = ({
     interfaceaddress:
       "0x026213C428D350Fa212Aa9B716D45b98b866548efDC867f94B6F775bE90fd86B",
   });
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
+  const setScreen = useUIStore((state) => state.setScreen);
 
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -58,6 +62,7 @@ export const CreateAdventurer = ({
   const { adventurerContract, lordsContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const gameData = new GameData();
+  const [firstAdventurer, setFirstAdventurer] = useState(false);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -120,6 +125,9 @@ export const CreateAdventurer = ({
         });
       }
     });
+    if (!adventurers[0]) {
+      setFirstAdventurer(true);
+    }
   };
 
   // const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -178,6 +186,15 @@ export const CreateAdventurer = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isActive, selectedIndex]);
+
+  console.log(adventurers[0] && firstAdventurer);
+
+  useEffect(() => {
+    if (adventurers[0] && firstAdventurer) {
+      setScreen("actions");
+      setAdventurer(adventurers[0]);
+    }
+  }, [adventurers, firstAdventurer]);
 
   return (
     <div className="flex flex-row w-full">

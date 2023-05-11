@@ -15,6 +15,7 @@ import PurchaseHealth from "./PurchaseHealth";
 import Info from "./Info";
 import Discovery from "./Discovery";
 import useCustomQuery from "../hooks/useCustomQuery";
+import useUIStore from "../hooks/useUIStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 
 export default function Actions() {
@@ -30,6 +31,7 @@ export default function Actions() {
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const type = useLoadingStore((state) => state.type);
+  const onboarded = useUIStore((state) => state.onboarded);
 
   const [selected, setSelected] = useState<string>("");
   const [activeMenu, setActiveMenu] = useState(0);
@@ -76,16 +78,17 @@ export default function Actions() {
       },
       disabled: !adventurer?.isIdle || loading,
     },
-    {
+  ];
+
+  if (onboarded) {
+    buttonsData.push({
       id: 2,
       label: "Buy Health",
       value: "purchase health",
-      action: () => setActiveMenu(1),
+      action: async () => setActiveMenu(1),
       disabled: !adventurer?.isIdle || loading,
-    },
-  ];
-
-  console.log(!adventurer?.isIdle || loading);
+    });
+  }
 
   return (
     <div className="flex flex-row space-x-4 overflow-hidden ">
