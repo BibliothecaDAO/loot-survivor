@@ -28,15 +28,6 @@ export const AdventurersList = ({
     ? sortedAdventurers
     : sortedAdventurers.filter((adventurer) => adventurer.health !== 0);
 
-  const buttonsData: ButtonData[] = [];
-  for (let i = 0; i < sortedAdventurers.length; i++) {
-    buttonsData.push({
-      id: i + 1,
-      label: `${sortedAdventurers[i].name} - ${sortedAdventurers[i].id}`,
-      action: () => setAdventurer(sortedAdventurers[i]),
-    });
-  }
-
   const DeadIcon = (
     <img className="w-5 h-5" src="/skull.png" alt="Dead Adventurer" />
   );
@@ -47,10 +38,12 @@ export const AdventurersList = ({
         setSelectedIndex((prev) => Math.max(prev - 1, 0));
         break;
       case "ArrowDown":
-        setSelectedIndex((prev) => Math.min(prev + 1, buttonsData.length - 1));
+        setSelectedIndex((prev) =>
+          Math.min(prev + 1, filteredAdventurers.length - 1)
+        );
         break;
       case "Enter":
-        buttonsData[selectedIndex].action();
+        setAdventurer(filteredAdventurers[selectedIndex]);
         break;
       case "Escape":
         onEscape();
@@ -93,7 +86,7 @@ export const AdventurersList = ({
                   {`${adventurer.name} - ${adventurer.id}`}
                 </div>
                 <span className="flex flex-row">
-                  {adventurers[index].health === 0 && DeadIcon}
+                  {adventurer.health === 0 && DeadIcon}
                 </span>
               </Button>
             ))}
@@ -102,7 +95,7 @@ export const AdventurersList = ({
             {showZeroHealth ? "Hide" : "Show"} dead
           </Button>
           <div className="w-1/2">
-            <Info adventurer={sortedAdventurers[selectedIndex]} />
+            <Info adventurer={filteredAdventurers[selectedIndex]} />
           </div>
         </div>
       ) : (
