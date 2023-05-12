@@ -189,17 +189,17 @@ export default function Home() {
   }, [adventurer]);
 
   useEffect(() => {
-    if (notificationData) {
+    if (data.battlesByTxHashQuery) {
       if (
-        Array.isArray(notificationData.data) &&
-        notificationData.data.some(
+        Array.isArray(data.battlesByTxHashQuery.battles) &&
+        data.battlesByTxHashQuery.battles.some(
           (data: any) => data.attacker == "Beast" && data.targetHealth == 0
         )
       ) {
         showDialog(true);
       }
     }
-  }, [showNotification, notificationData]);
+  }, [showNotification, data.battlesByTxHashQuery]);
 
   // useEffect(() => {
   //   console.log("refetch");
@@ -330,6 +330,44 @@ export default function Home() {
     }
   }, [upgrade]);
 
+  const battlesBackup = [
+    {
+      adventurerId: 2,
+      ambushed: null,
+      attacker: "Adventurer",
+      beastId: 65,
+      damage: 7,
+      fled: null,
+      goldEarned: 0,
+      targetHealth: 26,
+      timestamp: "2023-05-12T18:40:52",
+      txHash:
+        "0x069ea00a618e9c241631c513609c8b07d3dab2c8cee56a7ffb0b3fd9fe9d6903",
+      xpEarned: 0,
+    },
+    {
+      adventurerId: 2,
+      ambushed: null,
+      attacker: "Beast",
+      beastId: 65,
+      damage: 7,
+      fled: null,
+      goldEarned: 0,
+      targetHealth: 0,
+      timestamp: "2023-05-12T18:40:52",
+      txHash:
+        "0x069ea00a618e9c241631c513609c8b07d3dab2c8cee56a7ffb0b3fd9fe9d6903",
+      xpEarned: 0,
+    },
+  ];
+
+  console.log(
+    data,
+    Array.isArray(battlesBackup) &&
+      battlesBackup.some(
+        (data: any) => data.attacker == "Beast" && data.targetHealth == 0
+      )
+  );
   return (
     <main
       className={`min-h-screen container mx-auto flex flex-col p-10 overflow-hidden`}
@@ -371,7 +409,7 @@ export default function Home() {
             </div>
           </CSSTransition>
 
-          {adventurer?.id && dialog && <DeathDialog />}
+          {dialog && <DeathDialog />}
 
           {account ? (
             <div className="flex-grow w-full">

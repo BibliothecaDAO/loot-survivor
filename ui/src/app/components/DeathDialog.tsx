@@ -33,7 +33,7 @@ export const DeathDialog = () => {
             </p>
           </div>
           <TwitterShareButton
-            text={`RIP ${adventurer?.name}, who died at ${adventurer?.level}th place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Loot`}
+            text={`RIP ${adventurer?.name}, who died at ${adventurer?.level}th place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Loot $Lords`}
           />
           <Button onClick={() => showDialog(false)}>Play Again</Button>
         </div>

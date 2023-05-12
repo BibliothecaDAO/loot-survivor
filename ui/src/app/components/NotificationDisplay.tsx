@@ -86,7 +86,7 @@ const proccessNotification = (type: string, notificationData: any) => {
     return (
       <NotificationBattleDisplay
         battleData={notificationData.data}
-        beastName={notificationData.beastName ? notificationData.beastName : ""}
+        beast={notificationData.beast ? notificationData.beast : ""}
       />
     );
   } else if (type == "Explore") {
@@ -108,7 +108,7 @@ export const NotificationDisplay = ({
 
   useEffect(() => {
     play();
-  }, [])
+  }, []);
 
   return (
     <div className="z-10 flex flex-row w-full gap-5 p-2">
