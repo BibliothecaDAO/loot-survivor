@@ -231,8 +231,10 @@ const Inventory: React.FC = () => {
         <div className="flex flex-col space-y-1">
           {filteredItems.length ? (
             filteredItems.map((item: any, index: number) => (
-              <div className="flex" key={index}>
-                <ItemDisplay item={item} />
+              <div className="flex items-center justify-between overflow-hidden">
+                <div className="w-full">
+                  <ItemDisplay item={item} />
+                </div>
                 <Button
                   onClick={() => handleAddEquipItem(item)}
                   disabled={singleEquipExists(item.id)}

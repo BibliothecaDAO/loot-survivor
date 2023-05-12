@@ -97,20 +97,18 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
             Tier {beastData?.rank}
           </p>
         </div>
-        <div className="flex flex-row w-full py-4 space-x-2">
-          <div className="flex flex-row gap-2">
+        <div className="flex flex-row justify-center items-center w-full py-4 space-x-2">
+          <div className="flex flex-row gap-2 items-center ml-5">
             <Weapon className="self-center w-6 h-6 fill-current" />
-            <p className="flex items-center text-xl">{beastData?.attackType}</p>
+            <p className="text-xl">{beastData?.attackType}</p>
           </div>
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-2 items-center">
             {getAttackLocationIcon(beastData?.beast)}
-            <p className="flex items-center text-xl">
-              Attacks {beastData?.attackLocation}
-            </p>
+            <p className="text-xl">Attacks {beastData?.attackLocation}</p>
           </div>
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-2 items-center">
             <Chest className="self-center w-6 h-6 fill-current" />
-            <p className="flex items-center text-xl">{beastData?.armorType}</p>
+            <p className="text-xl">{beastData?.armorType}</p>
           </div>
         </div>
       </div>
