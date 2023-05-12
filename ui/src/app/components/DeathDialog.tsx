@@ -3,11 +3,16 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import { Button } from "./Button";
 import useUIStore from "../hooks/useUIStore";
 import Image from "next/image";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
 
 export const DeathDialog = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const showDialog = useUIStore((state) => state.showDialog);
   const appUrl = "https://loot-survivor.vercel.app/";
+  const { data } = useQueriesStore();
+  const rank = getRankFromList(adventurer?.id ?? 0, data.adventurersByXPQuery);
+  const ordinalRank = getOrdinalSuffix(rank);
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
@@ -33,7 +38,7 @@ export const DeathDialog = () => {
             </p>
           </div>
           <TwitterShareButton
-            text={`RIP ${adventurer?.name}, who died at ${adventurer?.level}th place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Loot $Lords`}
+            text={`RIP ${adventurer?.name}, who died at ${ordinalRank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Loot $Lords`}
           />
           <Button onClick={() => showDialog(false)}>Play Again</Button>
         </div>

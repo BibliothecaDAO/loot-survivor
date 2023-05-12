@@ -1,5 +1,7 @@
 import TwitterShareButton from "./TwitterShareButtons";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
 
 interface BattleDisplayProps {
   battleData: any;
@@ -61,6 +63,9 @@ export const NotificationBattleDisplay = ({
   const beastName = beast?.beast;
   const beastLevel = beast?.level;
   const beastTier = beast?.rank;
+  const { data } = useQueriesStore();
+  const rank = getRankFromList(adventurer?.id ?? 0, data.adventurersByXPQuery);
+  const ordinalRank = getOrdinalSuffix(rank);
   return (
     <div>
       {Array.isArray(battleData) &&
@@ -93,7 +98,7 @@ export const NotificationBattleDisplay = ({
               {battleData[0]?.damage} damage!
             </p>
             <TwitterShareButton
-              text={`My adventurer just slayed a level ${beastLevel} ${beastName} (Tier ${beastTier}) on #LootSurvivor.\n\n${adventurer?.name} is currently 50th place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Loot $Lords`}
+              text={`My adventurer just slayed a level ${beastLevel} ${beastName} (Tier ${beastTier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Loot $Lords`}
             />
           </div>
         ) : (
