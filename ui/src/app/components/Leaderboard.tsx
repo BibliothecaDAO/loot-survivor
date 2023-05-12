@@ -31,8 +31,8 @@ const Leaderboard: React.FC = () => {
       </div>
     );
 
-  const adventurers = data?.adventurersByXPQuery?.adventurers;
-  const scores = data?.topScoresQuery?.scores;
+  const adventurers = data.adventurersByXPQuery?.adventurers;
+  const scores = data.topScoresQuery?.scores;
 
   const totalPages = Math.ceil(adventurers.length / itemsPerPage);
 
