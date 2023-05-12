@@ -33,7 +33,6 @@ const useCustomQuery = (
 
   useEffect(() => {
     if (data) {
-      console.log(data);
       updateData(queryKey, data, loading, refetchWrapper);
     }
   }, [data, updateData, loading, queryKey, refetchWrapper, variables]);

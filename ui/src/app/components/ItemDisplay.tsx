@@ -49,11 +49,13 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
           <br />
           <span className="whitespace-nowrap">
             {Item &&
-              `Tier ${Item?.rank}, Greatness ${Item?.greatness}`}
+              `Tier ${Item?.rank}, Greatness ${Item?.greatness}, ${Item?.material || "generic"
+              }`}
           </span>
         </div>
-      ) : "Nothing Equipped"}
-
+      ) : (
+        "Nothing Equipped"
+      )}
     </div>
   );
 };

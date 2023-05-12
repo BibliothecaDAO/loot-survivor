@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import { Metadata } from "../types";
@@ -25,6 +25,8 @@ const TransactionCart: React.FC = () => {
   } = useTransactionManager();
   const { writeAsync } = useContractWrite({ calls });
   const [isOpen, setIsOpen] = useState(false);
+  const [notification, setNotification] = useState("");
+  const [loadingQuery, setLoadingQuery] = useState("");
 
   const method = (queuedTransactions[0]?.metadata as Metadata)?.method;
 
@@ -35,6 +37,33 @@ const TransactionCart: React.FC = () => {
   // const reorderCards = useCallback((dragIndex: number, hoverIndex: number) => {
   //   txQueue.reorderQueue(dragIndex, hoverIndex);
   // }, []);
+
+  const handleLoadData = () => {
+    if (calls.some((call) => call.entrypoint === "mint_daily_items")) {
+      setNotification(notification + "New items minted! ");
+      setLoadingQuery("latestMarketItemsQuery");
+    }
+    if (calls.some((call) => call.entrypoint === "bid_on_item")) {
+      setNotification(notification + "Bids complete! ");
+      setLoadingQuery("latestMarketItemsQuery");
+    }
+    if (calls.some((call) => call.entrypoint === "claim_item")) {
+      setNotification(notification + "Claims complete! ");
+      setLoadingQuery("latestMarketItemsQuery");
+    }
+    if (calls.some((call) => call.entrypoint === "equip_item")) {
+      setNotification(notification + "Items swapped! ");
+      setLoadingQuery("adventurerByIdQuery");
+    }
+    if (calls.some((call) => call.entrypoint === "purchase_health")) {
+      setNotification(notification + "Health purchased! ");
+      setLoadingQuery("adventurerByIdQuery");
+    }
+  };
+
+  useEffect(() => {
+    handleLoadData();
+  }, [calls]);
 
   return (
     <>
@@ -71,28 +100,31 @@ const TransactionCart: React.FC = () => {
           </div>
           <div className="flex flex-row gap-2 absolute bottom-4">
             <Button
-              onClick={async () =>
+              onClick={async () => {
+                const marketIds: any[] = [];
+
+                for (const dict of calls) {
+                  if (
+                    dict.hasOwnProperty("entrypoint") &&
+                    (dict["entrypoint"] === "bid_on_item" ||
+                      dict["entrypoint"] === "claim_item")
+                  ) {
+                    marketIds.push(dict.calldata[0]);
+                  }
+                }
+
+                console.log(loadingQuery, notification);
+
                 await handleSubmitCalls(writeAsync).then((tx: any) => {
                   if (tx) {
                     startLoading(
                       "Multicall",
                       tx?.transaction_hash,
                       "Multicalling",
-                      "",
+                      loadingQuery,
                       adventurer?.id,
-                      `Multicall complete!`
+                      notification
                     );
-                    const marketIds = [];
-
-                    for (const dict of calls) {
-                      if (
-                        dict.hasOwnProperty("entrypoint") &&
-                        (dict["entrypoint"] === "bid_on_item" ||
-                          dict["entrypoint"] === "claim_item")
-                      ) {
-                        marketIds.push(dict.calldata[0]);
-                      }
-                    }
 
                     addTransaction({
                       hash: tx.transaction_hash,
@@ -103,8 +135,8 @@ const TransactionCart: React.FC = () => {
                       },
                     });
                   }
-                })
-              }
+                });
+              }}
             >
               Submit all Transactions
             </Button>

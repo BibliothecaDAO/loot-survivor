@@ -9,6 +9,7 @@ import { getAdventurerById } from "../hooks/graphql/queries";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useUIStore from "../hooks/useUIStore";
 
 const Upgrade = () => {
   const { adventurerContract } = useContracts();
@@ -22,7 +23,9 @@ const Upgrade = () => {
     (state) => state.handleSubmitCalls
   );
   const { writeAsync } = useContractWrite({ calls });
+  const setScreen = useUIStore((state) => state.setScreen);
   const [selected, setSelected] = useState("");
+  const upgrade = adventurer?.upgrading;
 
   const gameData = new GameData();
 
@@ -129,6 +132,12 @@ const Upgrade = () => {
       Charisma provides discounts on the marketplace
     </p>
   );
+
+  useEffect(() => {
+    if (!upgrade) {
+      setScreen("actions");
+    }
+  }, [upgrade]);
 
   return (
     <div className="flex flex-col gap-10 w-full mt-[100px]">

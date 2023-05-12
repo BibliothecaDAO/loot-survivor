@@ -10,6 +10,7 @@ import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { useState } from "react";
+import useUIStore from "../hooks/useUIStore";
 
 export default function Beast() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -23,6 +24,7 @@ export default function Beast() {
   const { writeAsync } = useContractWrite({ calls });
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
+  const onboarded = useUIStore((state) => state.onboarded);
 
   const { data } = useQueriesStore();
 
@@ -46,16 +48,15 @@ export default function Beast() {
     calldata: [adventurer?.beastId ?? "", "0"],
   };
 
-  const [buttonText, setButtonText] = useState('Flee!');
+  const [buttonText, setButtonText] = useState("Flee!");
 
   const handleMouseEnter = () => {
-    setButtonText('you coward!');
+    setButtonText("you coward!");
   };
 
   const handleMouseLeave = () => {
-    setButtonText('Flee!');
+    setButtonText("Flee!");
   };
-
 
   const buttonsData: ButtonData[] = [
     {
@@ -83,6 +84,7 @@ export default function Beast() {
           }
         });
       },
+      disabled: adventurer?.beastId == undefined || loading,
     },
     {
       id: 2,
@@ -111,12 +113,11 @@ export default function Beast() {
           }
         });
       },
+      disabled: adventurer?.beastId == undefined || loading || !onboarded,
     },
   ];
 
   const isBeastDead = beastData?.health == "0";
-
-  console.log(formatBattles);
 
   return (
     <div className="flex flex-row overflow-hidden">
@@ -124,12 +125,7 @@ export default function Beast() {
         <Info adventurer={adventurer} />
       </div>
       <div className="flex flex-col w-1/3 gap-10 p-4">
-        {!isBeastDead && (
-          <KeyboardControl
-            buttonsData={buttonsData}
-            disabled={adventurer?.beastId == undefined || loading}
-          />
-        )}
+        {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
 
         {(adventurer?.beastId || formatBattles.length > 0) && (
           <>
