@@ -29,6 +29,7 @@ import {
   getAdventurerById,
   getBattleByTxHash,
   getLastDiscovery,
+  getAdventurerByXP,
   getLatestDiscoveries,
   getLastBattleByAdventurer,
   getBattlesByBeast,
@@ -37,6 +38,7 @@ import {
   getLatestMarketItems,
   getLatestMarketItemsNumber,
   getBeastById,
+  getTopScores,
 } from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
@@ -49,6 +51,7 @@ import { testnet_addr } from "./lib/constants";
 import { Menu, NullAdventurer } from "./types";
 import useCustomQuery from "./hooks/useCustomQuery";
 import { useQueriesStore } from "./hooks/useQueryStore";
+import Profile from "./components/Profile";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -68,6 +71,7 @@ export default function Home() {
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
+  const profile = useUIStore((state) => state.profile);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const [showBattleScene, setShowBattleScene] = useState(true);
   const upgrade = adventurer?.upgrading;
@@ -85,7 +89,8 @@ export default function Home() {
   useCustomQuery("adventurerByIdQuery", getAdventurerById, {
     id: adventurer?.id ?? 0,
   });
-  useCustomQuery("adventurersByGoldQuery", getAdventurerById);
+
+  useCustomQuery("adventurersByXPQuery", getAdventurerByXP);
 
   useCustomQuery("latestMarketItemsNumberQuery", getLatestMarketItemsNumber);
 
@@ -124,6 +129,12 @@ export default function Home() {
     id: adventurer?.beastId
       ? adventurer?.beastId
       : data.lastBattleQuery?.battles[0]?.beastId,
+  });
+
+  useCustomQuery("topScoresQuery", getTopScores);
+
+  useCustomQuery("leaderboardByIdQuery", getAdventurerById, {
+    id: profile ?? 0,
   });
 
   const updatedAdventurer = data.adventurerByIdQuery
@@ -297,8 +308,6 @@ export default function Home() {
     }
   }, [onboarded, adventurer, account]);
 
-  console.log(adventurer);
-
   useEffect(() => {
     if (upgrade) {
       setScreen("upgrade");
@@ -365,6 +374,7 @@ export default function Home() {
                 {screen === "beast" && <Beast />}
                 {screen === "leaderboard" && <Leaderboard />}
                 {screen === "upgrade" && <Upgrade />}
+                {screen === "profile" && <Profile />}
               </>
             </div>
           ) : null}
