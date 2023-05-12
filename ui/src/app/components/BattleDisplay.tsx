@@ -30,10 +30,14 @@ export const BattleDisplay = ({
         )
       ) : battleData.targetHealth > 0 ? (
         battleData.ambushed ? (
-          <p>
-            You were ambushed by the {beastName} taking {battleData.damage}{" "}
-            damage!
-          </p>
+          battleData.damage == 0 ? (
+            <p>You were ambushed by the {beastName} but managed to avoid it!</p>
+          ) : (
+            <p>
+              You were ambushed by the {beastName} taking {battleData.damage}{" "}
+              damage!
+            </p>
+          )
         ) : (
           <p>
             You were counter attacked by the {beastName} taking{" "}
