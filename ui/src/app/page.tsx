@@ -52,6 +52,7 @@ import { Menu, NullAdventurer } from "./types";
 import useCustomQuery from "./hooks/useCustomQuery";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./components/Profile";
+import { DeathDialog } from "./components/DeathDialog";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -72,6 +73,8 @@ export default function Home() {
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const profile = useUIStore((state) => state.profile);
+  const dialog = useUIStore((state) => state.dialog);
+  const showDialog = useUIStore((state) => state.showDialog);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const [showBattleScene, setShowBattleScene] = useState(true);
   const upgrade = adventurer?.upgrading;
@@ -184,6 +187,19 @@ export default function Home() {
       setScreen(menu[0].screen);
     }
   }, [adventurer]);
+
+  useEffect(() => {
+    if (data.battlesByTxHashQuery) {
+      if (
+        Array.isArray(data.battlesByTxHashQuery.battles) &&
+        data.battlesByTxHashQuery.battles.some(
+          (data: any) => data.attacker == "Beast" && data.targetHealth == 0
+        )
+      ) {
+        showDialog(true);
+      }
+    }
+  }, [showNotification, data.battlesByTxHashQuery]);
 
   // useEffect(() => {
   //   console.log("refetch");
@@ -314,6 +330,44 @@ export default function Home() {
     }
   }, [upgrade]);
 
+  const battlesBackup = [
+    {
+      adventurerId: 2,
+      ambushed: null,
+      attacker: "Adventurer",
+      beastId: 65,
+      damage: 7,
+      fled: null,
+      goldEarned: 0,
+      targetHealth: 26,
+      timestamp: "2023-05-12T18:40:52",
+      txHash:
+        "0x069ea00a618e9c241631c513609c8b07d3dab2c8cee56a7ffb0b3fd9fe9d6903",
+      xpEarned: 0,
+    },
+    {
+      adventurerId: 2,
+      ambushed: null,
+      attacker: "Beast",
+      beastId: 65,
+      damage: 7,
+      fled: null,
+      goldEarned: 0,
+      targetHealth: 0,
+      timestamp: "2023-05-12T18:40:52",
+      txHash:
+        "0x069ea00a618e9c241631c513609c8b07d3dab2c8cee56a7ffb0b3fd9fe9d6903",
+      xpEarned: 0,
+    },
+  ];
+
+  console.log(
+    data,
+    Array.isArray(battlesBackup) &&
+      battlesBackup.some(
+        (data: any) => data.attacker == "Beast" && data.targetHealth == 0
+      )
+  );
   return (
     <main
       className={`min-h-screen container mx-auto flex flex-col p-10 overflow-hidden`}
@@ -354,6 +408,8 @@ export default function Home() {
               />
             </div>
           </CSSTransition>
+
+          {dialog && <DeathDialog />}
 
           {account ? (
             <div className="flex-grow w-full">
