@@ -64,8 +64,11 @@ export const NotificationBattleDisplay = ({
   const beastLevel = beast?.level;
   const beastTier = beast?.rank;
   const { data } = useQueriesStore();
-  const rank = getRankFromList(adventurer?.id ?? 0, data.adventurersByXPQuery);
-  const ordinalRank = getOrdinalSuffix(rank);
+  const rank = getRankFromList(
+    adventurer?.id ?? 0,
+    data.adventurersByXPQuery.adventurers ?? []
+  );
+  const ordinalRank = getOrdinalSuffix(rank ?? 0);
   return (
     <div>
       {Array.isArray(battleData) &&

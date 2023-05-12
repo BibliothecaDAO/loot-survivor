@@ -131,7 +131,7 @@ export function getRealmNameById(id: number) {
 }
 
 export function getRankFromList(id: number, data: any[]) {
-  return data.findIndex((data) => data.adventurerId === id);
+  return data.findIndex((data) => data.id === id);
 }
 
 export function getOrdinalSuffix(n: number): string {
