@@ -17,6 +17,8 @@ type State = {
   handleOnboarded: () => void;
   screen: ScreenPage;
   setScreen: (value: ScreenPage) => void;
+  profile: number;
+  setProfile: (value: number) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -28,6 +30,8 @@ const useUIStore = create<State>((set) => ({
   },
   screen: "start",
   setScreen: (value) => set({ screen: value }),
+  profile: 0,
+  setProfile: (value) => set({ profile: value }),
 }));
 
 export default useUIStore;
