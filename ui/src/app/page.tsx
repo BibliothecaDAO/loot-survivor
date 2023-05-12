@@ -74,6 +74,7 @@ export default function Home() {
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const profile = useUIStore((state) => state.profile);
   const dialog = useUIStore((state) => state.dialog);
+  const showDialog = useUIStore((state) => state.showDialog);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const [showBattleScene, setShowBattleScene] = useState(true);
   const upgrade = adventurer?.upgrading;
@@ -186,6 +187,17 @@ export default function Home() {
       setScreen(menu[0].screen);
     }
   }, [adventurer]);
+
+  useEffect(() => {
+    if (
+      Array.isArray(notificationData.data) &&
+      notificationData.data.some(
+        (data: any) => data.attacker == "Beast" && data.targetHealth == 0
+      )
+    ) {
+      showDialog("death");
+    }
+  }, [showNotification, notificationData]);
 
   // useEffect(() => {
   //   console.log("refetch");
@@ -357,7 +369,7 @@ export default function Home() {
             </div>
           </CSSTransition>
 
-          <DeathDialog />
+          {adventurer?.id && dialog === "death" && <DeathDialog />}
 
           {account ? (
             <div className="flex-grow w-full">

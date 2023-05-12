@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "./Button";
 
 interface Props {
   url: string;
@@ -21,9 +22,11 @@ const TwitterShareButton: React.FC<Props> = ({ url, text, via, hashtags }) => {
   }
 
   return (
-    <a href={tweetUrl} target="_blank" rel="noopener noreferrer">
-      Share to Twitter
-    </a>
+    <Button className="animate-pulse">
+      <a href={tweetUrl} target="_blank" rel="noopener noreferrer">
+        Share to Twitter
+      </a>
+    </Button>
   );
 };
 

@@ -22,7 +22,7 @@ type State = {
   profile: number;
   setProfile: (value: number) => void;
   dialog: Dialog | null;
-  showDialog: (value: Dialog) => void;
+  showDialog: (value: Dialog | null) => void;
 };
 
 const useUIStore = create<State>((set) => ({
