@@ -1,3 +1,8 @@
+import TwitterShareButton from "./TwitterShareButtons";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
+
 interface BattleDisplayProps {
   battleData: any;
   beastName: string;
@@ -46,13 +51,24 @@ export const BattleDisplay = ({
 
 interface NotificationBattleDisplayProps {
   battleData: any;
-  beastName: string;
+  beast: any;
 }
 
 export const NotificationBattleDisplay = ({
   battleData,
-  beastName,
+  beast,
 }: NotificationBattleDisplayProps) => {
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const appUrl = "https://loot-survivor.vercel.app/";
+  const beastName = beast?.beast;
+  const beastLevel = beast?.level;
+  const beastTier = beast?.rank;
+  const { data } = useQueriesStore();
+  const rank = getRankFromList(
+    adventurer?.id ?? 0,
+    data.adventurersByXPQuery.adventurers ?? []
+  );
+  const ordinalRank = getOrdinalSuffix(rank ?? 0);
   return (
     <div>
       {Array.isArray(battleData) &&
@@ -79,10 +95,15 @@ export const NotificationBattleDisplay = ({
             {battleData[1]?.damage} damage!
           </p>
         ) : battleData[0]?.targetHealth == 0 ? (
-          <p>
-            You slayed the {beastName ? beastName : ""} after inflicting{" "}
-            {battleData[0]?.damage} damage!
-          </p>
+          <div className="flex flex-col gap-2 items-center justify-center">
+            <p>
+              You slayed the {beastName ? beastName : ""} after inflicting{" "}
+              {battleData[0]?.damage} damage!
+            </p>
+            <TwitterShareButton
+              text={`My adventurer just slayed a level ${beastLevel} ${beastName} (Tier ${beastTier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Loot $Lords`}
+            />
+          </div>
         ) : (
           <p>
             You were killed by the {beastName ? beastName : ""} taking{" "}

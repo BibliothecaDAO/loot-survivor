@@ -19,6 +19,8 @@ type State = {
   setScreen: (value: ScreenPage) => void;
   profile: number;
   setProfile: (value: number) => void;
+  dialog: boolean;
+  showDialog: (value: boolean) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -32,6 +34,8 @@ const useUIStore = create<State>((set) => ({
   setScreen: (value) => set({ screen: value }),
   profile: 0,
   setProfile: (value) => set({ profile: value }),
+  dialog: false,
+  showDialog: (value) => set({ dialog: value }),
 }));
 
 export default useUIStore;
