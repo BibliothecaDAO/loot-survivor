@@ -46,6 +46,11 @@ module.exports = {
       fontFamily: {
         mono: ['var(--font-vt323)', ...fontFamily.mono],
       },
+      inset: {
+        '1/8': '12.5%',
+        '3/8': '37.5%',
+        '1/16': '6.25%',
+      },
     },
   },
   plugins: [],

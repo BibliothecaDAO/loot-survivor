@@ -46,7 +46,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
         </div>
         <div className="relative flex flex-col items-center justify-center p-1 border border-terminal-green bg-terminal-black">
           <p className="text-2xl text-center">
-            You have killed the beast and made it out of the Labyrinth!
+            You have killed the beast! <br /> You survive...for now!
           </p>
         </div>
       </div>
@@ -61,14 +61,14 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
   });
   return (
     <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
-
       <div className="flex flex-col w-full p-3 py-2 uppercase">
         <div className="flex justify-between py-2 text-4xl border-b border-terminal-green">
           {beastData?.beast}
 
           <span
-            className={`text-4xl flex ${beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
-              }`}
+            className={`text-4xl flex ${
+              beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
+            }`}
           >
             <Heart className="self-center w-6 h-6 fill-current" />{" "}
             {beastData?.health === 0 ? (

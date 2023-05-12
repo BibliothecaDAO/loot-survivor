@@ -74,7 +74,7 @@ const TransactionCart: React.FC = () => {
         {isOpen ? "Hide Cart" : "Show Cart"}
       </button>
       {isOpen ? (
-        <div className="absolute right-[280px] top-20 z-10 w-[400px] h-[400px] p-3 bg-terminal-black border border-terminal-green">
+        <div className="absolute right-[280px] top-32 z-10 w-[400px] h-[400px] p-3 bg-terminal-black border border-terminal-green">
           <p className="text-2xl">TRANSACTIONS</p>
           <div className="w-full border border-terminal-green "></div>
           <div className="flex flex-col h-[200px] overflow-auto">
