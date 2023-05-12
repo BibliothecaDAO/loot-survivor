@@ -1,4 +1,5 @@
 import Image from "next/image";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 import { getValueFromKey } from "../lib/utils";
 import { GameData } from "./GameData";
 import { ANSIArt } from "./ANSIGenerator";
@@ -32,6 +33,16 @@ const getAttackLocationIcon = (beastType: string) => {
 };
 
 export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+
+  let prefix1 = beastData?.prefix1 ?? "";
+  let prefix2 = beastData?.prefix2 ?? "";
+
+  if (adventurer?.xp === 0) {
+    prefix1 = "";
+    prefix2 = "";
+  }
+
   if (beastData?.health === 0) {
     return (
       <div className="relative w-full h-full overflow-hidden border-2 border-terminal-green">
@@ -46,7 +57,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
         </div>
         <div className="relative flex flex-col items-center justify-center p-1 border border-terminal-green bg-terminal-black">
           <p className="text-2xl text-center">
-            You have killed the beast and made it out of the Labyrinth!
+            You have killed the beast! You survive...for now!
           </p>
         </div>
       </div>
@@ -63,8 +74,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
     <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
       <div className="flex flex-col w-full p-3 uppercase">
         <div className="flex justify-between py-3 text-4xl border-b border-terminal-green">
-          {beastData?.beast}
-
+          {prefix1} {prefix2} {beastData?.beast}
           <span
             className={`text-4xl flex ${
               beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
