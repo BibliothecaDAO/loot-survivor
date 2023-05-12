@@ -7,7 +7,8 @@ export type ScreenPage =
   | "inventory"
   | "beast"
   | "leaderboard"
-  | "upgrade";
+  | "upgrade"
+  | "profile";
 
 type State = {
   connected: boolean;

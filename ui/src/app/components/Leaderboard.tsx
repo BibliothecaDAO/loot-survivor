@@ -1,6 +1,6 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useQuery } from "@apollo/client";
-import { getAdventurerByXP } from "../hooks/graphql/queries";
+import { getAdcv } from "../hooks/graphql/queries";
 import { Button } from "./Button";
 import Coin from "../../../public/coin.svg";
 import Lords from "../../../public/lords.svg";
@@ -13,15 +13,17 @@ const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
   const ref = useRef<HTMLTableRowElement | null>(null);
+  const [selectedPlayer, setSelectedPlayer] = useState<number | null>(null);
 
   const setScreen = useUIStore((state) => state.setScreen);
 
-  // useCustomQuery("leaderboardByIdQuery", getLatestDiscoveries, {
-  //   adventurerId: adventurer?.id ?? 0,
-  // });
+  useCustomQuery("leaderboardByIdQuery", getLatestDiscoveries, {
+    adventurerId: adventurer?.id ?? 0,
+  });
 
-  const handleRowSelected = () => {
-    set;
+  const handleRowSelected = (adventurerId: number) => {
+    setScreen("profile");
+    setSelectedPlayer(adventurerId);
   };
 
   const { data, isLoading } = useQueriesStore();
@@ -126,9 +128,9 @@ const Leaderboard: React.FC = () => {
             const dead = adventurer.health <= 0;
             return (
               <tr
-                ref={ref}
                 key={adventurer.id}
                 className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
+                onClick={handleRowSelected(adventurer.id)}
               >
                 <td>{rankGold(adventurer, index)}</td>
                 <td>{`${adventurer.name} - ${adventurer.id}`}</td>
