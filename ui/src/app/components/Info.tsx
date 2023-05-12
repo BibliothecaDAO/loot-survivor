@@ -13,7 +13,6 @@ interface InfoProps {
 export default function Info({ adventurer }: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
 
-  console.log(formatAdventurer);
   const {
     loading: itemsByAdventurerLoading,
     error: itemsByAdventurerError,
