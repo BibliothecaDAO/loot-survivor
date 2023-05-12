@@ -117,6 +117,8 @@ export const NotificationDisplay = ({
   useEffect(() => {
     if (animation) {
       const animationKey = Object.keys(gameData.ADVENTURER_ANIMATIONS).find(key => gameData.ADVENTURER_ANIMATIONS[key] === animation);
+
+      console.log(animationKey)
       if (animationKey && gameData.ADVENTURER_SOUNDS[animationKey]) {
         setSoundState(gameData.ADVENTURER_SOUNDS[animationKey]);
       }
