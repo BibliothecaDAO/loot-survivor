@@ -1,16 +1,20 @@
 import TwitterShareButton from "./TwitterShareButton";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 export const DeathDialog = () => {
+  const adventurer = useAdventurerStore((state) => state.adventurer);
   return (
     <>
       <div className="fixed top-0 left-0 right-0 bottom-0 opacity-80 bg-terminal-black z-2" />
-      <div className="w-1/2 h-3/4 m-auto rounded-lg border-terminal-green bg-terminal-black z-3">
-        <TwitterShareButton
-          url="https://example.com/my-page"
-          text="Check out My Page on Example.com!"
-          via="mytwitterhandle"
-          hashtags={["Example", "NextJs", "TypeScript"]}
-        />
+      <div className="fixed w-1/2 h-3/4 rounded-lg border border-terminal-green bg-terminal-black z-3">
+        <div className="flex flex-col p-5 align-center justify-center">
+          <TwitterShareButton
+            url="https://loot-survivor.vercel.app"
+            text={`I got a score of ${adventurer?.xp} xp on Loot Survivor. Come and dive into the labyrinth at`}
+            via="lootrealms"
+            hashtags={["loot", "realms"]}
+          />
+        </div>
       </div>
     </>
   );

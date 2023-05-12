@@ -10,6 +10,8 @@ export type ScreenPage =
   | "upgrade"
   | "profile";
 
+export type Dialog = "death" | "beast";
+
 type State = {
   connected: boolean;
   setConnected: (value: boolean) => void;
@@ -19,6 +21,8 @@ type State = {
   setScreen: (value: ScreenPage) => void;
   profile: number;
   setProfile: (value: number) => void;
+  dialog: Dialog | null;
+  showDialog: (value: Dialog) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -32,6 +36,8 @@ const useUIStore = create<State>((set) => ({
   setScreen: (value) => set({ screen: value }),
   profile: 0,
   setProfile: (value) => set({ profile: value }),
+  dialog: null,
+  showDialog: (value) => set({ dialog: value }),
 }));
 
 export default useUIStore;

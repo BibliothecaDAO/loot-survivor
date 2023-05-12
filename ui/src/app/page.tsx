@@ -52,6 +52,7 @@ import { Menu, NullAdventurer } from "./types";
 import useCustomQuery from "./hooks/useCustomQuery";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./components/Profile";
+import { DeathDialog } from "./components/DeathDialog";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -72,6 +73,7 @@ export default function Home() {
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const profile = useUIStore((state) => state.profile);
+  const dialog = useUIStore((state) => state.dialog);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const [showBattleScene, setShowBattleScene] = useState(true);
   const upgrade = adventurer?.upgrading;
@@ -354,6 +356,8 @@ export default function Home() {
               />
             </div>
           </CSSTransition>
+
+          <DeathDialog />
 
           {account ? (
             <div className="flex-grow w-full">
