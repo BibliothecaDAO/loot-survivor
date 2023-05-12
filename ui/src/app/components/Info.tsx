@@ -137,33 +137,32 @@ export default function Info({ adventurer }: InfoProps) {
                     }
                   /> */}
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    STRENGTH{" "}
+                    STR{" "}
                     <span className="pl-3">{formatAdventurer.strength}</span>
                   </div>
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    DEXTERITY{" "}
+                    DEX{" "}
                     <span className="pl-3">{formatAdventurer.dexterity}</span>
                   </div>
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    INTELLIGENCE{" "}
+                    INT{" "}
                     <span className="pl-3">
                       {formatAdventurer.intelligence}
                     </span>
                   </div>
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    VITALITY{" "}
+                    VIT{" "}
                     <span className="pl-3">{formatAdventurer.vitality}</span>
                   </div>
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    WISDOM{" "}
-                    <span className="pl-3">{formatAdventurer.wisdom}</span>
+                    WIS <span className="pl-3">{formatAdventurer.wisdom}</span>
                   </div>
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    CHARISMA
+                    CHA
                     <span className="pl-3">{formatAdventurer.charisma}</span>
                   </div>
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    LUCK <span className="pl-3">{formatAdventurer.luck}</span>
+                    LUC <span className="pl-3">{formatAdventurer.luck}</span>
                   </div>
                 </div>
               </div>
