@@ -5,7 +5,7 @@ import useUIStore from "../hooks/useUIStore";
 
 export default function Profile() {
   const { data } = useQueriesStore();
-  const adventurer = data.leaderboardByIdQuery.adventurers[0];
+  const adventurer = data.leaderboardByIdQuery?.adventurers[0];
   const setScreen = useUIStore((state) => state.setScreen);
   return (
     <div className="flex">
