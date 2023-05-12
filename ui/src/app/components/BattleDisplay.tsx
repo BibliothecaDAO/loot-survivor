@@ -1,3 +1,6 @@
+import TwitterShareButton from "./TwitterShareButtons";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+
 interface BattleDisplayProps {
   battleData: any;
   beastName: string;
@@ -53,6 +56,8 @@ export const NotificationBattleDisplay = ({
   battleData,
   beastName,
 }: NotificationBattleDisplayProps) => {
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const appUrl = "https://loot-survivor.vercel.app/";
   return (
     <div>
       {Array.isArray(battleData) &&
@@ -79,10 +84,15 @@ export const NotificationBattleDisplay = ({
             {battleData[1]?.damage} damage!
           </p>
         ) : battleData[0]?.targetHealth == 0 ? (
-          <p>
-            You slayed the {beastName ? beastName : ""} after inflicting{" "}
-            {battleData[0]?.damage} damage!
-          </p>
+          <div className="flex flex-col gap-2 items-center justify-center">
+            <p>
+              You slayed the {beastName ? beastName : ""} after inflicting{" "}
+              {battleData[0]?.damage} damage!
+            </p>
+            <TwitterShareButton
+              text={`I have slain a ${beastName} with the adventurer ${adventurer?.name}.\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Loot`}
+            />
+          </div>
         ) : (
           <p>
             You were killed by the {beastName ? beastName : ""} taking{" "}

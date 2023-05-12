@@ -189,13 +189,15 @@ export default function Home() {
   }, [adventurer]);
 
   useEffect(() => {
-    if (
-      Array.isArray(notificationData.data) &&
-      notificationData.data.some(
-        (data: any) => data.attacker == "Beast" && data.targetHealth == 0
-      )
-    ) {
-      showDialog(true);
+    if (notificationData) {
+      if (
+        Array.isArray(notificationData.data) &&
+        notificationData.data.some(
+          (data: any) => data.attacker == "Beast" && data.targetHealth == 0
+        )
+      ) {
+        showDialog(true);
+      }
     }
   }, [showNotification, notificationData]);
 

@@ -1,4 +1,4 @@
-import TwitterShareButton from "./TwitterShareButton";
+import TwitterShareButton from "./TwitterShareButtons";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { Button } from "./Button";
 import useUIStore from "../hooks/useUIStore";
@@ -7,6 +7,7 @@ import Image from "next/image";
 export const DeathDialog = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const showDialog = useUIStore((state) => state.showDialog);
+  const appUrl = "https://loot-survivor.vercel.app/";
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
@@ -32,10 +33,7 @@ export const DeathDialog = () => {
             </p>
           </div>
           <TwitterShareButton
-            url="https://loot-survivor.vercel.app"
-            text={`My adventurer ${adventurer?.name} got a score of ${adventurer?.xp} xp on Loot Survivor. Think you can go further? Dive into the labyrinth at`}
-            via="lootrealms"
-            hashtags={["loot", "realms"]}
+            text={`RIP ${adventurer?.name}, who died at ${adventurer?.level}th place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Loot`}
           />
           <Button onClick={() => showDialog(false)}>Play Again</Button>
         </div>
