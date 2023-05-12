@@ -54,7 +54,7 @@ export function BidBox({
         type="number"
         min={basePrice}
         onChange={(e) => setBidPrice(parseInt(e.target.value, 10))}
-        className="w-12 px-3 py-2 border rounded-md bg-terminal-black border-terminal-green text-terminal-green"
+        className="w-16 px-3 py-2 border rounded-md bg-terminal-black border-terminal-green text-terminal-green"
       />
       <Button
         onClick={() => handleBid(marketId)}

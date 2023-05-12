@@ -57,7 +57,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
         </div>
         <div className="relative flex flex-col items-center justify-center p-1 border border-terminal-green bg-terminal-black">
           <p className="text-2xl text-center">
-            You have killed the beast! You survive...for now!
+            You have killed the beast! <br /> You survive...for now!
           </p>
         </div>
       </div>
