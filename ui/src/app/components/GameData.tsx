@@ -532,18 +532,18 @@ export class GameData {
     };
 
     this.ADVENTURER_SOUNDS = {
-      Create: "beep.wav",
-      Flee: "beep.wav",
-      Ambush: "beep.wav",
-      Attack: "beep.wav",
-      Slayed: "beep.wav",
-      Dead: "beep.wav",
-      Upgrade: "beep.wav",
-      DiscoverItem: "beep.wav",
-      DiscoverBeast: "beep.wav",
-      AvoidObstacle: "beep.wav",
-      HitByObstacle: "beep.wav",
-      Multicall: "beep.wav",
+      Create: "fight_ui_sound.mp3",
+      Flee: "fight_ui_sound.mp3",
+      Ambush: "fight_ui_sound.mp3",
+      Attack: "fight_ui_sound.mp3",
+      Slayed: "fight_ui_sound.mp3",
+      Dead: "fight_ui_sound.mp3",
+      Upgrade: "fight_ui_sound.mp3",
+      DiscoverItem: "fight_ui_sound.mp3",
+      DiscoverBeast: "fight_ui_sound.mp3",
+      AvoidObstacle: "fight_ui_sound.mp3",
+      HitByObstacle: "fight_ui_sound.mp3",
+      Multicall: "fight_ui_sound.mp3",
     };
   }
 }

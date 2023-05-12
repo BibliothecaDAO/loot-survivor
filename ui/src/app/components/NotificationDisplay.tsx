@@ -111,6 +111,8 @@ export const NotificationDisplay = ({
   const { play } = useUiSounds(setSound);
 
   const playSound = useCallback(() => {
+
+    console.log(setSound)
     play();
   }, [])
 
@@ -118,8 +120,10 @@ export const NotificationDisplay = ({
     if (animation) {
       const animationKey = Object.keys(gameData.ADVENTURER_ANIMATIONS).find(key => gameData.ADVENTURER_ANIMATIONS[key] === animation);
 
-      console.log(animationKey)
+      console.log("animation", animationKey)
       if (animationKey && gameData.ADVENTURER_SOUNDS[animationKey]) {
+
+        console.log("animationKey", gameData.ADVENTURER_SOUNDS[animationKey])
         setSoundState(gameData.ADVENTURER_SOUNDS[animationKey]);
       }
       playSound();
