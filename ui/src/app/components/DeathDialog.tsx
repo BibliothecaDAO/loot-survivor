@@ -23,8 +23,8 @@ export const DeathDialog = () => {
           <div className="flex flex-col gap-2 items-center justify-center">
             <p className="text-4xl">GAME OVER!</p>
             <p className="text-2xl">
-              You have died level {adventurer?.level} with {adventurer?.xp} xp,
-              a valiant effort!
+              {adventurer?.name} has died level {adventurer?.level} with{" "}
+              {adventurer?.xp} xp, a valiant effort!
             </p>
             <p className="text-xl">
               Make sure to share your score. Continue the journey with another
@@ -37,7 +37,7 @@ export const DeathDialog = () => {
             via="lootrealms"
             hashtags={["loot", "realms"]}
           />
-          <Button onClick={() => showDialog(null)}>Play Again</Button>
+          <Button onClick={() => showDialog(false)}>Play Again</Button>
         </div>
       </div>
     </>

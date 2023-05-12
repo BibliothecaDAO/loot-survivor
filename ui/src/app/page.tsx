@@ -195,7 +195,7 @@ export default function Home() {
         (data: any) => data.attacker == "Beast" && data.targetHealth == 0
       )
     ) {
-      showDialog("death");
+      showDialog(true);
     }
   }, [showNotification, notificationData]);
 
@@ -369,7 +369,7 @@ export default function Home() {
             </div>
           </CSSTransition>
 
-          {adventurer?.id && dialog === "death" && <DeathDialog />}
+          {adventurer?.id && dialog && <DeathDialog />}
 
           {account ? (
             <div className="flex-grow w-full">
