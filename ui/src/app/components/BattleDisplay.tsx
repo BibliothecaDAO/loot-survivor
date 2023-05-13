@@ -82,37 +82,23 @@ export const NotificationBattleDisplay = ({
     <div>
       {Array.isArray(battleData) &&
       battleData.some((data) => data.fled) &&
-      battleData.some((data) => data.ambushed) ? (
-        battleData.some(
-          (data) => data.attacker == "Beast" && data.damage == 0
-        ) ? (
-          <p>
-            You fled the {beastName ? beastName : ""}! The beast tried to ambush
-            you before but you avoided it!
-          </p>
-        ) : (
-          <p>
-            You fled the {beastName ? beastName : ""}! But were ambushed before
-            taking {battleData[0].damage} damage!
-          </p>
-        )
-      ) : Array.isArray(battleData) &&
-        battleData.some((data) => data.ambushed) ? (
-        battleData.some(
-          (data) => data.attacker == "Beast" && data.damage == 0
-        ) ? (
-          <p>
-            You couldn&apos;t flee and the {beastName ? beastName : ""} tried to
-            ambush you but you avoided it!
-          </p>
-        ) : (
-          <p>
-            You couldn&apos;t flee and were ambushed by the{" "}
-            {beastName ? beastName : ""} taking {battleData[0].damage} damage!
-          </p>
-        )
-      ) : Array.isArray(battleData) && battleData.some((data) => data.fled) ? (
+      battleData.some((data) => data.attacker == "Beast") ? (
+        <p>
+          You failed to flee the {beastName ? beastName : ""} and were attacked
+          taking {battleData[0].damage}!
+        </p>
+      ) : battleData.fled ? (
         <p>You fled the {beastName ? beastName : ""}!</p>
+      ) : battleData.ambushed && battleData.targetHealth == 0 ? (
+        <p>
+          You were killed by the {beastName ? beastName : ""}, from an ambushed
+          taking {battleData.damage}!
+        </p>
+      ) : battleData.ambushed ? (
+        <p>
+          You were ambushed by the {beastName ? beastName : ""}, taking{" "}
+          {battleData.damage}!
+        </p>
       ) : (
         battleData[0]?.attacker == "Adventurer" &&
         (battleData[0]?.targetHealth > 0 && battleData[1]?.targetHealth > 0 ? (
