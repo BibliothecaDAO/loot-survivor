@@ -155,7 +155,7 @@ export default function Info({ adventurer }: InfoProps) {
                     <span className="pl-3">{formatAdventurer.charisma}</span>
                   </div>
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    LUC <span className="pl-3">{formatAdventurer.luck}</span>
+                    LUCK <span className="pl-3">{formatAdventurer.luck}</span>
                   </div>
                 </div>
               </div>
