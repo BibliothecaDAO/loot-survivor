@@ -1,5 +1,6 @@
 import { Item } from "../types";
 import LootIcon from "./LootIcon";
+import Efficacyicon from "./EfficacyIcon";
 
 interface ItemDisplayProps {
   item: Item;
@@ -43,11 +44,13 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
       />
       {Item ? (
         <div>
-          <span className="font-semibold whitespace-nowrap">
-            {itemName} {Item?.level} {Item?.xp} XP
-            {slot == "Neck" || slot == "Ring" ? " [+1 Luck]" : ""}
-          </span>{" "}
-          <br />
+          <span className="flex flex-row justify-between">
+            <span className="font-semibold whitespace-nowrap">
+              {itemName} {Item?.level} {Item?.xp} XP
+              {slot == "Neck" || slot == "Ring" ? " [+1 Luck]" : ""}
+            </span>
+            <Efficacyicon type={item.item?.type} />
+          </span>
           <span className="whitespace-nowrap">
             {Item &&
               `Tier ${Item?.rank}, Greatness ${Item?.greatness}, ${

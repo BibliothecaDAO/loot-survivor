@@ -58,7 +58,7 @@ export interface Item {
   id?: number; // item id 1 - 100
   item?: string; // name
   slot?: string; // weapon, head, chest, etc
-  type?: number; // weapon.blade, armor.metal, jewelry.ring
+  type?: string; // weapon.blade, armor.metal, jewelry.ring
   material?: number; // the material of the item
   rank?: number; // 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
   prefix1?: number; // First part of the name prefix (i.e Demon)
@@ -164,7 +164,7 @@ export const NullAdventurer: Adventurer = {
   beastId: 0,
   upgrading: false,
   gold: 0,
-  homeRealm:0,
+  homeRealm: 0,
   isIdle: false,
 };
 

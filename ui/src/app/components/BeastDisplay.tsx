@@ -10,6 +10,7 @@ import Hand from "../../../public/icons/loot/hand.svg";
 import Chest from "../../../public/icons/loot/chest.svg";
 import Waist from "../../../public/icons/loot/waist.svg";
 import Foot from "../../../public/icons/loot/foot.svg";
+import EfficacyIcon from "./EfficacyIcon";
 
 interface BeastDisplayProps {
   beastData: any;
@@ -101,7 +102,11 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
         </div>
         <div className="flex flex-row justify-center items-center w-full py-4 space-x-2">
           <div className="flex flex-row gap-2 items-center ml-5">
-            <Weapon className="self-center w-6 h-6 fill-current" />
+            <EfficacyIcon
+              type={beastData?.attackType}
+              size="w-6"
+              className="self-center w-6 h-6"
+            />
             <p className="text-xl">{beastData?.attackType}</p>
           </div>
           <div className="flex flex-row gap-2 items-center">
@@ -109,7 +114,11 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
             <p className="text-xl">Attacks {beastData?.attackLocation}</p>
           </div>
           <div className="flex flex-row gap-2 items-center">
-            <Chest className="self-center w-6 h-6 fill-current" />
+            <EfficacyIcon
+              type={beastData?.armorType}
+              size="w-6"
+              className="self-center w-6 h-6"
+            />
             <p className="text-xl">{beastData?.armorType}</p>
           </div>
         </div>
