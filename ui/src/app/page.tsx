@@ -409,7 +409,15 @@ export default function Home() {
           </div>
           <div className="w-full h-6 my-2 bg-terminal-green" />
           <CSSTransition
-            in={showNotification && Boolean(notificationData)}
+            in={
+              showNotification &&
+              Boolean(notificationData) &&
+              (typeof notificationData === "object"
+                ? "data" in notificationData
+                  ? notificationData.data.length > 0
+                  : true
+                : true)
+            }
             timeout={500}
             classNames="notification"
             unmountOnExit
