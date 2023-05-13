@@ -34,6 +34,13 @@ const getAttackLocationIcon = (beastType: string) => {
 
 export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const gameData = new GameData();
+  const ansiImage = ANSIArt({
+    imageUrl:
+      getValueFromKey(gameData.BEAST_IMAGES, beastData?.beast) ||
+      "/monsters/phoenix.png",
+    newWidth: 20,
+  });
 
   let prefix1 = beastData?.prefix1 ?? "";
   let prefix2 = beastData?.prefix2 ?? "";
@@ -63,13 +70,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
       </div>
     );
   }
-  const gameData = new GameData();
-  const ansiImage = ANSIArt({
-    imageUrl:
-      getValueFromKey(gameData.BEAST_IMAGES, beastData?.beast) ||
-      "/monsters/phoenix.png",
-    newWidth: 20,
-  });
+
   return (
     <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
       <div className="flex flex-col w-full p-3 uppercase">
