@@ -10,14 +10,19 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
+  profile?: boolean;
 }
 
-export default function Info({ adventurer }: InfoProps) {
+export default function Info({ adventurer, profile }: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
 
   const { data, isLoading } = useQueriesStore();
 
-  const items = data.itemsByAdventurerQuery
+  const items = profile
+    ? data.itemsByProfileQuery
+      ? data.itemsByProfileQuery.items
+      : []
+    : data.itemsByAdventurerQuery
     ? data.itemsByAdventurerQuery.items
     : [];
 

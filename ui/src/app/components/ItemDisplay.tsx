@@ -13,11 +13,11 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
   const processName = (item: Item) => {
     if (item) {
       if (item.prefix1 && item.suffix && item.greatness >= 20) {
-        return `${item.prefix1} ${item.prefix2} ${item.item} of ${item.suffix} +1`;
+        return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix} +1`;
       } else if (item.prefix1 && item.suffix) {
-        return `${item.prefix1} ${item.prefix2} ${item.item} of ${item.suffix}`;
+        return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix}`;
       } else if (item.suffix) {
-        return `${item.item} of ${item.suffix}`;
+        return `${item.item} ${item.suffix}`;
       } else {
         return `${item.item}`;
       }

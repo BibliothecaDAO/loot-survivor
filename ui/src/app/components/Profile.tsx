@@ -16,7 +16,7 @@ export default function Profile() {
         >
           Back
         </Button>
-        <Info adventurer={adventurer} />
+        <Info adventurer={adventurer} profile={true} />
       </div>
     </div>
   );

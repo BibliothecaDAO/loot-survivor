@@ -153,6 +153,10 @@ export default function Home() {
     adventurer: adventurer?.id ?? 0,
   });
 
+  useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
+    adventurer: profile ?? 0,
+  });
+
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
