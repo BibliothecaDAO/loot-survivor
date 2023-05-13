@@ -21,6 +21,7 @@ export class GameData {
   BEAST_IMAGES: DictString<string>;
   BEAST_ATTACK_LOCATION: DictString<string>;
   ADVENTURER_ANIMATIONS: DictString<string>;
+  ADVENTURER_SOUNDS: DictString<string>;
 
   constructor() {
     this.CONTRACTS = {
@@ -528,6 +529,21 @@ export class GameData {
       AvoidObstacle: "jump",
       HitByObstacle: "damage",
       Multicall: "discoverItem",
+    };
+
+    this.ADVENTURER_SOUNDS = {
+      Create: "fight_ui_sound.mp3",
+      Flee: "fight_ui_sound.mp3",
+      Ambush: "fight_ui_sound.mp3",
+      Attack: "fight_ui_sound.mp3",
+      Slayed: "fight_ui_sound.mp3",
+      Dead: "fight_ui_sound.mp3",
+      Upgrade: "fight_ui_sound.mp3",
+      DiscoverItem: "fight_ui_sound.mp3",
+      DiscoverBeast: "fight_ui_sound.mp3",
+      AvoidObstacle: "fight_ui_sound.mp3",
+      HitByObstacle: "fight_ui_sound.mp3",
+      Multicall: "fight_ui_sound.mp3",
     };
   }
 }

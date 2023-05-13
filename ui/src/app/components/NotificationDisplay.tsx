@@ -4,7 +4,7 @@ import SpriteAnimation from "./SpriteAnimation";
 import { GameData } from "./GameData";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { soundSelector, useUiSounds } from "../hooks/useUiSound";
-import { useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface NotificationDisplayProps {
   type: string;
@@ -100,15 +100,35 @@ export const NotificationDisplay = ({
   type,
   notificationData,
 }: NotificationDisplayProps) => {
+  const gameData = new GameData();
+
   const { adventurer } = useAdventurerStore();
   const animation = processAnimation(type, notificationData, adventurer);
   const notification = proccessNotification(type, notificationData);
 
-  const { play } = useUiSounds(soundSelector.click);
+  const [setSound, setSoundState] = useState(soundSelector.click);
 
-  useEffect(() => {
+  const { play } = useUiSounds(setSound);
+
+  const playSound = useCallback(() => {
+    console.log(setSound);
     play();
   }, []);
+
+  useEffect(() => {
+    if (animation) {
+      const animationKey = Object.keys(gameData.ADVENTURER_ANIMATIONS).find(
+        (key) => gameData.ADVENTURER_ANIMATIONS[key] === animation
+      );
+
+      console.log("animation", animationKey);
+      if (animationKey && gameData.ADVENTURER_SOUNDS[animationKey]) {
+        console.log("animationKey", gameData.ADVENTURER_SOUNDS[animationKey]);
+        setSoundState(gameData.ADVENTURER_SOUNDS[animationKey]);
+      }
+      playSound();
+    }
+  }, [animation]);
 
   return (
     <div className="z-10 flex flex-row w-full gap-5 p-2">

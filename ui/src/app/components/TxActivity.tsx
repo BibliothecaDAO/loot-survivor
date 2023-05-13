@@ -49,9 +49,12 @@ export const TxActivity = () => {
       // Handle "Attack" or "Flee" types
       if (type === "Attack" || type === "Flee") {
         if (queryData?.battlesByTxHashQuery) {
+          refetch("battlesByTxHashQuery");
+          refetch("battlesByBeastQuery");
+          refetch("adventurerByIdQuery");
           stopLoading({
             data: queryData.battlesByTxHashQuery.battles,
-            beastName: notificationData.beastName,
+            beast: notificationData.beast,
           });
         }
         setAccepted(false);
@@ -60,6 +63,9 @@ export const TxActivity = () => {
 
       // Handle "Explore" type
       else if (type === "Explore") {
+        refetch("discoveryByTxHashQuery");
+        refetch("latestDiscoveriesQuery");
+        refetch("adventurerByIdQuery");
         stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
         setAccepted(false);
         resetDataUpdated(loadingQuery);
