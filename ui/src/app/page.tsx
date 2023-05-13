@@ -374,13 +374,6 @@ export default function Home() {
     },
   ];
 
-  console.log(
-    data,
-    Array.isArray(battlesBackup) &&
-      battlesBackup.some(
-        (data: any) => data.attacker == "Beast" && data.targetHealth == 0
-      )
-  );
   return (
     <main
       className={`min-h-screen container mx-auto flex flex-col p-10 overflow-hidden`}
@@ -409,7 +402,11 @@ export default function Home() {
           </div>
           <div className="w-full h-6 my-2 bg-terminal-green" />
           <CSSTransition
-            in={showNotification && Boolean(notificationData)}
+            in={
+              showNotification &&
+              notificationData &&
+              ("data" in notificationData ? notificationData.data : true)
+            }
             timeout={500}
             classNames="notification"
             unmountOnExit
