@@ -6,6 +6,8 @@ import Coin from "../../../public/coin.svg";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
 import { getRealmNameById } from "../lib/utils";
+import { useQueriesStore } from "../hooks/useQueryStore";
+
 interface InfoProps {
   adventurer: Adventurer | undefined;
 }
@@ -13,23 +15,15 @@ interface InfoProps {
 export default function Info({ adventurer }: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
 
-  const {
-    loading: itemsByAdventurerLoading,
-    error: itemsByAdventurerError,
-    data: itemsByAdventurerData,
-    refetch: itemsByAdventurerRefetch,
-  } = useQuery(getItemsByAdventurer, {
-    variables: {
-      adventurer: formatAdventurer.id,
-    },
-    pollInterval: 5000,
-  });
+  const { data, isLoading } = useQueriesStore();
 
-  const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
+  const items = data.itemsByAdventurerQuery
+    ? data.itemsByAdventurerQuery.items
+    : [];
 
   return (
     <div className="h-full border border-terminal-green overflow-auto">
-      {!itemsByAdventurerLoading ? (
+      {!isLoading.itemsByAdventurerQuery ? (
         <>
           <div className="flex flex-row flex-wrap gap-2 p-1">
             <div className="flex flex-col w-full p-2 uppercase">

@@ -30,7 +30,7 @@ export const AdventurersList = ({
     : sortedAdventurers.filter((adventurer) => adventurer.health !== 0);
 
   const DeadIcon = (
-    <Image className="w-5 h-5" src="/skull.png" alt="Dead Adventurer" />
+    <img className="w-5 h-5" src="/skull.png" alt="Dead Adventurer" />
   );
 
   const hasDeadAdventurers = sortedAdventurers.some(
