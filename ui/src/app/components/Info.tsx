@@ -1,18 +1,20 @@
+import { useRef } from "react";
 import { Adventurer, NullAdventurer } from "../types";
-import { useQuery } from "@apollo/client";
-import { getItemsByAdventurer } from "../hooks/graphql/queries";
 import Heart from "../../../public/heart.svg";
 import Coin from "../../../public/coin.svg";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
 import { getRealmNameById } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import { shareCardToTwitter } from "./ShareCardToTwitter";
+import { Button } from "./Button";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
 }
 
 export default function Info({ adventurer }: InfoProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
 
   const { data, isLoading } = useQueriesStore();
@@ -21,8 +23,15 @@ export default function Info({ adventurer }: InfoProps) {
     ? data.itemsByAdventurerQuery.items
     : [];
 
+  const handleShareToTwitter = async () => {
+    await shareCardToTwitter(cardRef);
+  };
+
   return (
-    <div className="h-full border border-terminal-green overflow-auto">
+    <div
+      className="h-full border border-terminal-green overflow-auto"
+      ref={cardRef}
+    >
       {!isLoading.itemsByAdventurerQuery ? (
         <>
           <div className="flex flex-row flex-wrap gap-2 p-1">
@@ -122,41 +131,47 @@ export default function Info({ adventurer }: InfoProps) {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col ml-1 space-y-1 text-xl">
-                  {/* <ANSIArt
+                <div className="flex flex-col justify-between">
+                  <div className="flex flex-col ml-1 space-y-1 text-xl">
+                    {/* <ANSIArt
                     newWidth={100}
                     src={
                       formatAdventurer.health == 0 ? "/skull.png" : "/MIKE.png"
                     }
                   /> */}
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    STR{" "}
-                    <span className="pl-3">{formatAdventurer.strength}</span>
+                    <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
+                      STR{" "}
+                      <span className="pl-3">{formatAdventurer.strength}</span>
+                    </div>
+                    <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
+                      DEX{" "}
+                      <span className="pl-3">{formatAdventurer.dexterity}</span>
+                    </div>
+                    <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
+                      INT{" "}
+                      <span className="pl-3">
+                        {formatAdventurer.intelligence}
+                      </span>
+                    </div>
+                    <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
+                      VIT{" "}
+                      <span className="pl-3">{formatAdventurer.vitality}</span>
+                    </div>
+                    <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
+                      WIS{" "}
+                      <span className="pl-3">{formatAdventurer.wisdom}</span>
+                    </div>
+                    <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
+                      CHA
+                      <span className="pl-3">{formatAdventurer.charisma}</span>
+                    </div>
+                    <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
+                      LUCK <span className="pl-3">{formatAdventurer.luck}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    DEX{" "}
-                    <span className="pl-3">{formatAdventurer.dexterity}</span>
-                  </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    INT{" "}
-                    <span className="pl-3">
-                      {formatAdventurer.intelligence}
-                    </span>
-                  </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    VIT{" "}
-                    <span className="pl-3">{formatAdventurer.vitality}</span>
-                  </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    WIS <span className="pl-3">{formatAdventurer.wisdom}</span>
-                  </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    CHA
-                    <span className="pl-3">{formatAdventurer.charisma}</span>
-                  </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    LUCK <span className="pl-3">{formatAdventurer.luck}</span>
-                  </div>
+                  <Button onClick={() => handleShareToTwitter()}>
+                    Share to Twitter
+                  </Button>
                 </div>
               </div>
             </div>

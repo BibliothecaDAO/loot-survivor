@@ -1,5 +1,3 @@
-import { useAccount } from "@starknet-react/core";
-
 interface MintEthProps {
   address: string;
 }
