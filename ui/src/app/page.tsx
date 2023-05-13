@@ -216,7 +216,21 @@ export default function Home() {
         showDialog(true);
       }
     }
-  }, [showNotification, data.battlesByTxHashQuery]);
+    // handle dead by discovering obstacle
+    if (data.discoveryByTxHashQuery) {
+      if (
+        data.discoveryByTxHashQuery.discoveries[0].discoveryType ==
+          "Obstacle" &&
+        adventurer?.health == 0
+      ) {
+        showDialog(true);
+      }
+    }
+  }, [
+    showNotification,
+    data.battlesByTxHashQuery,
+    data.discoveryByTxHashQuery,
+  ]);
 
   // useEffect(() => {
   //   console.log("refetch");
