@@ -44,6 +44,11 @@ export const BattleDisplay = ({
             {battleData.damage} damage!
           </p>
         )
+      ) : battleData.ambushed ? (
+        <p>
+          You were killed by the {beastName} from an ambush taking{" "}
+          {battleData.damage} damage!
+        </p>
       ) : (
         <p>
           You were killed by the {beastName} taking {battleData.damage} damage!
