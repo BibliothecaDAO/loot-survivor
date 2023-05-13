@@ -28,16 +28,17 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
 
   return (
     <div
-      className={`flex-shrink flex gap-2 p-2 mb-1  ${Item ? "bg-terminal-green text-terminal-black" : ""
-        }`}
+      className={`flex-shrink flex gap-2 p-2 mb-1  ${
+        Item ? "bg-terminal-green text-terminal-black" : ""
+      }`}
     >
       <LootIcon
         type={
           item.type == "feet"
             ? "foot"
             : item.type == "hands"
-              ? "hand"
-              : item.type
+            ? "hand"
+            : item.type
         }
       />
       {Item ? (
@@ -49,7 +50,8 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
           <br />
           <span className="whitespace-nowrap">
             {Item &&
-              `Tier ${Item?.rank}, Greatness ${Item?.greatness}, ${Item?.material || "generic"
+              `Tier ${Item?.rank}, Greatness ${Item?.greatness}, ${
+                Item?.material || "Generic"
               }`}
           </span>
         </div>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 import { getValueFromKey } from "../lib/utils";
 import { GameData } from "./GameData";
 import { ANSIArt } from "./ANSIGenerator";
@@ -32,6 +33,23 @@ const getAttackLocationIcon = (beastType: string) => {
 };
 
 export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const gameData = new GameData();
+  const ansiImage = ANSIArt({
+    imageUrl:
+      getValueFromKey(gameData.BEAST_IMAGES, beastData?.beast) ||
+      "/monsters/phoenix.png",
+    newWidth: 20,
+  });
+
+  let prefix1 = beastData?.prefix1 ?? "";
+  let prefix2 = beastData?.prefix2 ?? "";
+
+  if (adventurer?.xp === 0) {
+    prefix1 = "";
+    prefix2 = "";
+  }
+
   if (beastData?.health === 0) {
     return (
       <div className="relative w-full h-full overflow-hidden border-2 border-terminal-green">
@@ -52,30 +70,19 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
       </div>
     );
   }
-  const gameData = new GameData();
-  const ansiImage = ANSIArt({
-    imageUrl:
-      getValueFromKey(gameData.BEAST_IMAGES, beastData?.beast) ||
-      "/monsters/phoenix.png",
-    newWidth: 20,
-  });
+
   return (
     <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
-      <div className="flex flex-col w-full p-3 py-2 uppercase">
-        <div className="flex justify-between py-2 text-4xl border-b border-terminal-green">
-          {beastData?.beast}
-
+      <div className="flex flex-col w-full p-3 uppercase">
+        <div className="flex justify-between py-3 text-4xl border-b border-terminal-green">
+          {`"${prefix1} ${prefix2}"`} {beastData?.beast}
           <span
             className={`text-4xl flex ${
               beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
             }`}
           >
             <Heart className="self-center w-6 h-6 fill-current" />{" "}
-            {beastData?.health === 0 ? (
-              <p className="text-sm">dead!</p>
-            ) : (
-              <p className="text-4xl">{beastData?.health}</p>
-            )}
+            <p className="text-4xl">{beastData?.health}</p>
           </span>
         </div>
         <div className="flex justify-between w-full py-2 ">
@@ -87,20 +94,18 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
             Tier {beastData?.rank}
           </p>
         </div>
-        <div className="flex flex-row w-full py-4 space-x-2">
-          <div className="flex flex-row gap-2">
+        <div className="flex flex-row justify-center items-center w-full py-4 space-x-2">
+          <div className="flex flex-row gap-2 items-center ml-5">
             <Weapon className="self-center w-6 h-6 fill-current" />
-            <p className="flex items-center text-xl">{beastData?.attackType}</p>
+            <p className="text-xl">{beastData?.attackType}</p>
           </div>
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-2 items-center">
             {getAttackLocationIcon(beastData?.beast)}
-            <p className="flex items-center text-xl">
-              Attacks {beastData?.attackLocation}
-            </p>
+            <p className="text-xl">Attacks {beastData?.attackLocation}</p>
           </div>
-          <div className="flex flex-row gap-2">
+          <div className="flex flex-row gap-2 items-center">
             <Chest className="self-center w-6 h-6 fill-current" />
-            <p className="flex items-center text-xl">{beastData?.armorType}</p>
+            <p className="text-xl">{beastData?.armorType}</p>
           </div>
         </div>
       </div>

@@ -6,6 +6,8 @@ import Coin from "../../../public/coin.svg";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
 import { getRealmNameById } from "../lib/utils";
+import { useQueriesStore } from "../hooks/useQueryStore";
+
 interface InfoProps {
   adventurer: Adventurer | undefined;
 }
@@ -13,25 +15,17 @@ interface InfoProps {
 export default function Info({ adventurer }: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
 
-  const {
-    loading: itemsByAdventurerLoading,
-    error: itemsByAdventurerError,
-    data: itemsByAdventurerData,
-    refetch: itemsByAdventurerRefetch,
-  } = useQuery(getItemsByAdventurer, {
-    variables: {
-      adventurer: formatAdventurer.id,
-    },
-    pollInterval: 5000,
-  });
+  const { data, isLoading } = useQueriesStore();
 
-  const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
+  const items = data.itemsByAdventurerQuery
+    ? data.itemsByAdventurerQuery.items
+    : [];
 
   return (
-    <div className="h-full border border-terminal-green">
-      {!itemsByAdventurerLoading ? (
+    <div className="h-full border border-terminal-green overflow-auto">
+      {!isLoading.itemsByAdventurerQuery ? (
         <>
-          <div className="flex flex-row gap-2 p-1">
+          <div className="flex flex-row flex-wrap gap-2 p-1">
             <div className="flex flex-col w-full p-2 uppercase">
               <div className="flex justify-between w-full">
                 {formatAdventurer.race}{" "}
@@ -48,8 +42,9 @@ export default function Info({ adventurer }: InfoProps) {
                 </span>
                 <span className="flex ">
                   <Heart className="self-center w-6 h-6 fill-current" />{" "}
-                  {`${formatAdventurer.health}/${100 + formatAdventurer.vitality * 20
-                    }`}
+                  {`${formatAdventurer.health}/${
+                    100 + formatAdventurer.vitality * 20
+                  }`}
                 </span>
               </div>
 
@@ -153,8 +148,7 @@ export default function Info({ adventurer }: InfoProps) {
                     <span className="pl-3">{formatAdventurer.vitality}</span>
                   </div>
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    WIS{" "}
-                    <span className="pl-3">{formatAdventurer.wisdom}</span>
+                    WIS <span className="pl-3">{formatAdventurer.wisdom}</span>
                   </div>
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
                     CHA

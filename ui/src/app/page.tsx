@@ -39,6 +39,7 @@ import {
   getLatestMarketItemsNumber,
   getBeastById,
   getTopScores,
+  getItemsByAdventurer,
 } from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
@@ -138,6 +139,10 @@ export default function Home() {
 
   useCustomQuery("leaderboardByIdQuery", getAdventurerById, {
     id: profile ?? 0,
+  });
+
+  useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
+    adventurer: adventurer?.id ?? 0,
   });
 
   const updatedAdventurer = data.adventurerByIdQuery

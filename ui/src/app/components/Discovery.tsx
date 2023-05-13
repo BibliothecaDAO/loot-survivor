@@ -15,7 +15,7 @@ const Discovery = ({ discoveries }: DiscoveryProps) => {
         <>
           <h3 className="text-center">Your travels</h3>
           {isLoading.discoveryByTxHashQuery && <LootIconLoader />}
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-2 overflow-auto">
             {discoveries.map((discovery: any, index: number) => (
               <div
                 className="w-full p-2 text-left border border-terminal-green"

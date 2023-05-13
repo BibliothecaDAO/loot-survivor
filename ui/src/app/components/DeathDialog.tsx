@@ -25,7 +25,7 @@ export const DeathDialog = () => {
         <div className="flex flex-col gap-10 h-full items-center justify-center	p-10">
           <div className="relative w-full h-1/4">
             <Image
-              src={"/skull.png"}
+              src={"/skull2.png"}
               alt="skull"
               fill={true}
               style={{ objectFit: "contain" }}

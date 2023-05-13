@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { useAccount } from "@starknet-react/core";
 import { useQuery } from "@apollo/client";
@@ -54,28 +54,34 @@ const Inventory: React.FC = () => {
     );
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowUp":
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-        break;
-      case "ArrowDown":
-        setSelectedIndex((prev) => Math.min(prev + 1, 8 - 1));
-        break;
-      case "Enter":
-        setActiveMenu(selectedIndex);
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowUp":
+          setSelectedIndex((prev) => Math.max(prev - 1, 0));
+          break;
+        case "ArrowDown":
+          setSelectedIndex((prev) => Math.min(prev + 1, 8 - 1));
+          break;
+        case "Enter":
+          setActiveMenu(selectedIndex);
+          break;
+      }
+    },
+    [setSelectedIndex, setActiveMenu, selectedIndex]
+  );
 
   useEffect(() => {
-    if (!activeMenu) {
+    if (activeMenu === undefined) {
       window.addEventListener("keydown", handleKeyDown);
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-      };
+    } else {
+      window.removeEventListener("keydown", handleKeyDown);
     }
-  }, [activeMenu]);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activeMenu, handleKeyDown]);
 
   const groupedItems = groupBySlot(items);
 
@@ -231,8 +237,13 @@ const Inventory: React.FC = () => {
         <div className="flex flex-col space-y-1">
           {filteredItems.length ? (
             filteredItems.map((item: any, index: number) => (
-              <div className="flex" key={index}>
-                <ItemDisplay item={item} />
+              <div
+                className="flex items-center justify-between overflow-hidden"
+                key={item.id}
+              >
+                <div className="w-full">
+                  <ItemDisplay item={item} />
+                </div>
                 <Button
                   onClick={() => handleAddEquipItem(item)}
                   disabled={singleEquipExists(item.id)}

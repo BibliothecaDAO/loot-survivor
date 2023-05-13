@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "./Button";
 import Info from "./Info";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { ButtonData } from "./KeyboardControls";
 import useLoadingStore from "../hooks/useLoadingStore";
+import Image from "next/image";
 
 export interface AdventurerListProps {
   isActive: boolean;
@@ -46,24 +47,27 @@ export const AdventurersList = ({
     });
   }
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowUp":
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-        break;
-      case "ArrowDown":
-        setSelectedIndex((prev) =>
-          Math.min(prev + 1, filteredAdventurers.length - 1)
-        );
-        break;
-      case "Enter":
-        setAdventurer(filteredAdventurers[selectedIndex]);
-        break;
-      case "Escape":
-        onEscape();
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowUp":
+          setSelectedIndex((prev) => Math.max(prev - 1, 0));
+          break;
+        case "ArrowDown":
+          setSelectedIndex((prev) =>
+            Math.min(prev + 1, filteredAdventurers.length - 1)
+          );
+          break;
+        case "Enter":
+          setAdventurer(filteredAdventurers[selectedIndex]);
+          break;
+        case "Escape":
+          onEscape();
+          break;
+      }
+    },
+    [setAdventurer, onEscape, selectedIndex, filteredAdventurers]
+  );
 
   useEffect(() => {
     if (isActive) {
@@ -74,7 +78,7 @@ export const AdventurersList = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isActive, selectedIndex]);
+  }, [isActive, handleKeyDown]);
 
   return (
     <>
