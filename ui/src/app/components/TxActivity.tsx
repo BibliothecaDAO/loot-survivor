@@ -34,6 +34,9 @@ export const TxActivity = () => {
     onAcceptedOnL2: () => {
       setAccepted(true);
     },
+    onRejected: () => {
+      stopLoading("Rejected");
+    },
   });
 
   console.log(

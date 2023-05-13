@@ -91,6 +91,13 @@ const proccessNotification = (type: string, notificationData: any) => {
     );
   } else if (type == "Explore") {
     return <DiscoveryDisplay discoveryData={notificationData} />;
+  } else if (notificationData == "Rejected") {
+    return (
+      <p className="text-lg">
+        OH NO! The transaction was rejected! Please refresh and try again incase
+        of wallet issues.
+      </p>
+    );
   } else {
     return <p className="text-lg">{notificationData}</p>;
   }
