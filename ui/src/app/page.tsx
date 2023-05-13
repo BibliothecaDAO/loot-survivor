@@ -404,8 +404,12 @@ export default function Home() {
           <CSSTransition
             in={
               showNotification &&
-              notificationData &&
-              ("data" in notificationData ? notificationData.data : true)
+              Boolean(notificationData) &&
+              (typeof notificationData === "object"
+                ? "data" in notificationData
+                  ? notificationData.data.length > 0
+                  : true
+                : true)
             }
             timeout={500}
             classNames="notification"
