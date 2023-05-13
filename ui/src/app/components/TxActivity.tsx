@@ -51,7 +51,7 @@ export const TxActivity = () => {
         if (queryData?.battlesByTxHashQuery) {
           stopLoading({
             data: queryData.battlesByTxHashQuery.battles,
-            beastName: notificationData.beastName,
+            beast: notificationData.beast,
           });
         }
         setAccepted(false);

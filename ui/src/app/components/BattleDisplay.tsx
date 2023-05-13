@@ -78,16 +78,34 @@ export const NotificationBattleDisplay = ({
       {Array.isArray(battleData) &&
       battleData.some((data) => data.fled) &&
       battleData.some((data) => data.ambushed) ? (
-        <p>
-          You fled the {beastName ? beastName : ""}! But were ambushed before
-          taking {battleData[0].damage} damage!
-        </p>
+        battleData.some(
+          (data) => data.attacker == "Beast" && data.damage == 0
+        ) ? (
+          <p>
+            You fled the {beastName ? beastName : ""}! The beast tried to ambush
+            you before but you avoided it!
+          </p>
+        ) : (
+          <p>
+            You fled the {beastName ? beastName : ""}! But were ambushed before
+            taking {battleData[0].damage} damage!
+          </p>
+        )
       ) : Array.isArray(battleData) &&
         battleData.some((data) => data.ambushed) ? (
-        <p>
-          You couldn&apos;t flee and were ambushed by the{" "}
-          {beastName ? beastName : ""} taking {battleData[0].damage} damage!
-        </p>
+        battleData.some(
+          (data) => data.attacker == "Beast" && data.damage == 0
+        ) ? (
+          <p>
+            You couldn&apos;t flee and the {beastName ? beastName : ""} tried to
+            ambush you but you avoided it!
+          </p>
+        ) : (
+          <p>
+            You couldn&apos;t flee and were ambushed by the{" "}
+            {beastName ? beastName : ""} taking {battleData[0].damage} damage!
+          </p>
+        )
       ) : Array.isArray(battleData) && battleData.some((data) => data.fled) ? (
         <p>You fled the {beastName ? beastName : ""}!</p>
       ) : (
