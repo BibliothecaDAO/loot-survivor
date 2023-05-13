@@ -75,7 +75,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
     <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
       <div className="flex flex-col w-full p-3 uppercase">
         <div className="flex justify-between py-3 text-4xl border-b border-terminal-green">
-          {prefix1} {prefix2} <br /> {beastData?.beast}
+          {prefix1} {prefix2} {beastData?.beast}
           <span
             className={`text-4xl flex ${
               beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
