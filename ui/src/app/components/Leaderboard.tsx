@@ -6,25 +6,33 @@ import Coin from "../../../public/coin.svg";
 import Lords from "../../../public/lords.svg";
 import LootIconLoader from "./Loader";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import useCustomQuery from "../hooks/useCustomQuery";
 import useUIStore from "../hooks/useUIStore";
 
 const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
-  const ref = useRef<HTMLTableRowElement | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
 
-  const handleRowSelected = (adventurerId: number) => {
-    setProfile(adventurerId);
-    setScreen("profile");
+  const handleRowSelected = async (adventurerId: number) => {
+    setLoading(true);
+    try {
+      setProfile(adventurerId);
+      await refetch("leaderboardByIdQuery");
+      await refetch("itemsByProfileQuery");
+      setScreen("profile");
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const { data, isLoading } = useQueriesStore();
+  const { data, isLoading, refetch } = useQueriesStore();
 
-  if (isLoading.adventurersByXPQuery)
+  if (isLoading.adventurersByXPQuery || loading)
     return (
       <div className="flex justify-center p-20 align-middle">
         <LootIconLoader />
