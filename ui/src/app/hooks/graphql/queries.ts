@@ -247,6 +247,47 @@ const getAdventurersInList = gql`
   }
 `;
 
+const getAdventurersInListByXp = gql`
+  query get_adventurer_by_id_order_xp($ids: [FeltValue!]) {
+    adventurers(
+      where: { id: { In: $ids } }
+      limit: 10000000
+      orderBy: { xp: { desc: true } }
+    ) {
+      beastId
+      charisma
+      chestId
+      dexterity
+      feetId
+      handsId
+      headId
+      health
+      id
+      homeRealm
+      imageHash1
+      imageHash2
+      intelligence
+      level
+      luck
+      name
+      neckId
+      order
+      owner
+      race
+      ringId
+      status
+      strength
+      upgrading
+      vitality
+      waistId
+      weaponId
+      wisdom
+      xp
+      gold
+    }
+  }
+`;
+
 const getAdventurerByGold = gql`
   query get_adventurer_by_gold {
     adventurers(orderBy: { gold: { desc: true } }, limit: 10000000) {
@@ -528,6 +569,7 @@ export {
   getAdventurersByOwner,
   getAdventurerById,
   getAdventurersInList,
+  getAdventurersInListByXp,
   getAdventurerByGold,
   getBeasts,
   getBeastById,

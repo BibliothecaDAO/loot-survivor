@@ -27,6 +27,8 @@ import usePrevious from "use-previous";
 import { useLazyQuery, useQuery } from "@apollo/client";
 import {
   getAdventurerById,
+  getAdventurersInList,
+  getAdventurersInListByXp,
   getBattleByTxHash,
   getLastDiscovery,
   getAdventurerByXP,
@@ -92,6 +94,12 @@ export default function Home() {
 
   useCustomQuery("adventurerByIdQuery", getAdventurerById, {
     id: adventurer?.id ?? 0,
+  });
+
+  useCustomQuery("adventurersInListByXpQuery", getAdventurersInListByXp, {
+    ids: data.topScoresQuery?.scores
+      ? data.topScoresQuery?.scores.map((score: any) => score.adventurerId)
+      : [0],
   });
 
   useCustomQuery("adventurersByXPQuery", getAdventurerByXP);

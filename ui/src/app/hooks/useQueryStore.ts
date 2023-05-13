@@ -17,6 +17,7 @@ export type QueryKey =
   | "latestMarketItemsNumberQuery"
   | "latestMarketItemsQuery"
   | "adventurersInListQuery"
+  | "adventurersInListByXpQuery"
   | "itemsByAdventurerQuery"
   | "topScoresQuery";
 
@@ -51,6 +52,7 @@ const initialData: Record<QueryKey, any> = {
   latestMarketItemsNumberQuery: null,
   latestMarketItemsQuery: null,
   adventurersInListQuery: null,
+  adventurersInListByXpQuery: null,
   itemsByAdventurerQuery: null,
   topScoresQuery: null,
 };
@@ -71,6 +73,7 @@ const initialLoading: Record<QueryKey, boolean> = {
   latestMarketItemsNumberQuery: false,
   latestMarketItemsQuery: false,
   adventurersInListQuery: false,
+  adventurersInListByXpQuery: false,
   itemsByAdventurerQuery: false,
   topScoresQuery: false,
 };
@@ -91,6 +94,7 @@ const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
   latestMarketItemsNumberQuery: false,
   latestMarketItemsQuery: false,
   adventurersInListQuery: false,
+  adventurersInListByXpQuery: false,
   itemsByAdventurerQuery: false,
   topScoresQuery: false,
   global: false,
@@ -112,6 +116,7 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   latestMarketItemsNumberQuery: async () => {},
   latestMarketItemsQuery: async () => {},
   adventurersInListQuery: async () => {},
+  adventurersInListByXpQuery: async () => {},
   itemsByAdventurerQuery: async () => {},
   topScoresQuery: async () => {},
 };

@@ -32,7 +32,6 @@ const Leaderboard: React.FC = () => {
     );
 
   const adventurers = data.adventurersByXPQuery?.adventurers;
-  const scores = data.topScoresQuery?.scores ?? [];
 
   const totalPages = Math.ceil(adventurers.length / itemsPerPage);
 
@@ -62,6 +61,12 @@ const Leaderboard: React.FC = () => {
     return currentRank;
   };
 
+  console.log(data.adventurersInListQuery?.adventurers);
+
+  const scores = data.adventurersInListByXpQuery?.adventurers
+    ? data.adventurersInListByXpQuery?.adventurers
+    : [];
+
   return (
     <div className="flex flex-col items-center w-3/4 m-auto">
       <h1 className="text-2xl">Top 3 Submitted Scores</h1>
@@ -77,15 +82,15 @@ const Leaderboard: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {scores.map((score: any, index: number) => (
+          {scores.map((adventurer: any, index: number) => (
             <tr
               key={index}
               className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
-              onClick={() => handleRowSelected(score.adventurerId)}
+              onClick={() => handleRowSelected(adventurer.id)}
             >
               <td>{index + 1}</td>
-              <td>{score.adventurerId}</td>
-              <td>{score.xp}</td>
+              <td>{`${adventurer.name} - ${adventurer.id}`}</td>
+              <td>{adventurer.xp}</td>
               <td>
                 <div className="flex flex-row items-center justify-center gap-2">
                   <span
