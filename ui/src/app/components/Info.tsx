@@ -28,10 +28,10 @@ export default function Info({ adventurer }: InfoProps) {
   const items = itemsByAdventurerData ? itemsByAdventurerData.items : [];
 
   return (
-    <div className="h-full border border-terminal-green">
+    <div className="h-full border border-terminal-green overflow-auto">
       {!itemsByAdventurerLoading ? (
         <>
-          <div className="flex flex-row gap-2 p-1">
+          <div className="flex flex-row flex-wrap gap-2 p-1">
             <div className="flex flex-col w-full p-2 uppercase">
               <div className="flex justify-between w-full">
                 {formatAdventurer.race}{" "}
