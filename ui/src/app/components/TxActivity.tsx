@@ -66,12 +66,14 @@ export const TxActivity = () => {
 
       // Handle "Explore" type
       else if (type === "Explore") {
-        refetch("discoveryByTxHashQuery");
-        refetch("latestDiscoveriesQuery");
-        refetch("adventurerByIdQuery");
-        stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
-        setAccepted(false);
-        resetDataUpdated(loadingQuery);
+        if (queryData?.discoveryByTxHashQuery) {
+          refetch("discoveryByTxHashQuery");
+          refetch("latestDiscoveriesQuery");
+          refetch("adventurerByIdQuery");
+          stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
+          setAccepted(false);
+          resetDataUpdated(loadingQuery);
+        }
       }
 
       // Handle other types
