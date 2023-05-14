@@ -40,30 +40,28 @@ const TransactionCart: React.FC = () => {
   // }, []);
 
   const handleLoadData = () => {
-    if (calls.some((call) => call.entrypoint === "mint_daily_items")) {
-      setNotification([...notification, "New items minted!"]);
-      setLoadingQuery("latestMarketItemsQuery");
-      setLoadingMessage([...loadingMessage, "Minting Items"]);
-    }
-    if (calls.some((call) => call.entrypoint === "bid_on_item")) {
-      setNotification([...notification, "Bids complete!"]);
-      setLoadingQuery("latestMarketItemsQuery");
-      setLoadingMessage([...loadingMessage, "Bidding"]);
-    }
-    if (calls.some((call) => call.entrypoint === "claim_item")) {
-      setNotification([...notification, "Claims complete!"]);
-      setLoadingQuery("latestMarketItemsQuery");
-      setLoadingMessage([...loadingMessage, "Claiming"]);
-    }
-    if (calls.some((call) => call.entrypoint === "equip_item")) {
-      setNotification([...notification, "Items swapped!"]);
-      setLoadingQuery("adventurerByIdQuery");
-      setLoadingMessage([...loadingMessage, "Equipping"]);
-    }
-    if (calls.some((call) => call.entrypoint === "purchase_health")) {
-      setNotification([...notification, "Health purchased!"]);
-      setLoadingQuery("adventurerByIdQuery");
-      setLoadingMessage([...loadingMessage, "Purchasing Health"]);
+    for (let call of calls) {
+      if (call.entrypoint === "mint_daily_items") {
+        setNotification([...notification, "New items minted!"]);
+        setLoadingQuery("latestMarketItemsQuery");
+        setLoadingMessage([...loadingMessage, "Minting Items"]);
+      } else if (call.entrypoint === "bid_on_item") {
+        setNotification([...notification, "Bids complete!"]);
+        setLoadingQuery("latestMarketItemsQuery");
+        setLoadingMessage([...loadingMessage, "Bidding"]);
+      } else if (call.entrypoint === "claim_item") {
+        setNotification([...notification, "Claims complete!"]);
+        setLoadingQuery("latestMarketItemsQuery");
+        setLoadingMessage([...loadingMessage, "Claiming"]);
+      } else if (call.entrypoint === "equip_item") {
+        setNotification([...notification, "Items swapped!"]);
+        setLoadingQuery("adventurerByIdQuery");
+        setLoadingMessage([...loadingMessage, "Equipping"]);
+      } else if (call.entrypoint === "purchase_health") {
+        setNotification([...notification, "Health purchased!"]);
+        setLoadingQuery("adventurerByIdQuery");
+        setLoadingMessage([...loadingMessage, "Purchasing Health"]);
+      }
     }
   };
 
