@@ -89,6 +89,8 @@ export const TxActivity = () => {
     }
   }, [pendingMessage]);
 
+  console.log(pendingMessage);
+
   return (
     <>
       {type != "Multicall" && type != "Create" ? (

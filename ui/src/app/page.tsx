@@ -232,12 +232,6 @@ export default function Home() {
     data.discoveryByTxHashQuery,
   ]);
 
-  // useEffect(() => {
-  //   console.log("refetch");
-  //   refetch("latestDiscoveriesQuery");
-  //   console.log(data.latestDiscoveriesQuery);
-  // }, [adventurer]);
-
   useEffect(() => {
     if (!account?.address) {
       setConnected(false);
