@@ -219,7 +219,7 @@ export default function Home() {
     // handle dead by discovering obstacle
     if (data.discoveryByTxHashQuery) {
       if (
-        data.discoveryByTxHashQuery.discoveries[0].discoveryType ==
+        data.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
           "Obstacle" &&
         adventurer?.health == 0
       ) {
