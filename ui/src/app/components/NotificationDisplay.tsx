@@ -98,6 +98,7 @@ const proccessNotification = (type: string, notificationData: any) => {
         of wallet issues.
       </p>
     );
+  } else if (type == "Multicall") {
   } else {
     return <p className="text-lg">{notificationData}</p>;
   }
