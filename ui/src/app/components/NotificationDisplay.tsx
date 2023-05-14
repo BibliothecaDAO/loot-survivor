@@ -99,6 +99,7 @@ const proccessNotification = (type: string, notificationData: any) => {
       </p>
     );
   } else if (type == "Multicall") {
+    notificationData.map((noti: any) => <p className="text-lg">{noti}</p>);
   } else {
     return <p className="text-lg">{notificationData}</p>;
   }

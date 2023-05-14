@@ -38,13 +38,8 @@ export const TxActivity = () => {
       stopLoading("Rejected");
     },
   });
-
-  console.log(
-    loadingQuery,
-    queryData.discoveryByTxHashQuery?.discoveries[0],
-    loadingQuery && isDataUpdated[loadingQuery],
-    loading
-  );
+  const pendingArray = Array.isArray(pendingMessage);
+  const [messageIndex, setMessageIndex] = useState(0);
 
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
@@ -83,6 +78,15 @@ export const TxActivity = () => {
     }
   }, [loadingQuery && isDataUpdated[loadingQuery], accepted, hash]);
 
+  useEffect(() => {
+    if (pendingArray) {
+      const interval = setInterval(() => {
+        setMessageIndex((prevIndex) => (prevIndex + 1) % pendingMessage.length);
+      }, 5000);
+      return () => clearInterval(interval); // This is important, it will clear the interval when the component is unmounted.
+    }
+  }, [pendingMessage]);
+
   return (
     <>
       {type != "Multicall" && type != "Create" ? (
@@ -91,7 +95,7 @@ export const TxActivity = () => {
             {data?.status == "RECEIVED" || data?.status == "PENDING" ? (
               <div className="flex w-48 loading-ellipsis ">
                 <LootIconLoader className="mr-3" />
-                {pendingMessage}
+                {pendingArray ? pendingMessage[messageIndex] : pendingMessage}
               </div>
             ) : (
               <div className="loading-ellipsis">Refreshing data</div>

@@ -7,7 +7,7 @@ type LoadingState = {
   loading: boolean;
   type: string;
   hash: string;
-  pendingMessage: string;
+  pendingMessage: string | string[];
   loadingQuery: QueryKey | null;
   showNotification: boolean;
   notificationData: any;
@@ -15,7 +15,7 @@ type LoadingState = {
   startLoading: (
     type: string,
     hash: string,
-    pendingMessage: string,
+    pendingMessage: string | string[],
     data: any,
     adventurer: number | undefined,
     notificationData?: any

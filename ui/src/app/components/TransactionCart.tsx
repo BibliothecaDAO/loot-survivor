@@ -25,7 +25,8 @@ const TransactionCart: React.FC = () => {
   } = useTransactionManager();
   const { writeAsync } = useContractWrite({ calls });
   const [isOpen, setIsOpen] = useState(false);
-  const [notification, setNotification] = useState("");
+  const [notification, setNotification] = useState<string[]>([]);
+  const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
   const [loadingQuery, setLoadingQuery] = useState("");
 
   const method = (queuedTransactions[0]?.metadata as Metadata)?.method;
@@ -40,24 +41,29 @@ const TransactionCart: React.FC = () => {
 
   const handleLoadData = () => {
     if (calls.some((call) => call.entrypoint === "mint_daily_items")) {
-      setNotification(notification + "New items minted! ");
+      setNotification([...notification, "New items minted!"]);
       setLoadingQuery("latestMarketItemsQuery");
+      setLoadingMessage([...loadingMessage, "Minting Items"]);
     }
     if (calls.some((call) => call.entrypoint === "bid_on_item")) {
-      setNotification(notification + "Bids complete! ");
+      setNotification([...notification, "Bids complete!"]);
       setLoadingQuery("latestMarketItemsQuery");
+      setLoadingMessage([...loadingMessage, "Bidding"]);
     }
     if (calls.some((call) => call.entrypoint === "claim_item")) {
-      setNotification(notification + "Claims complete! ");
+      setNotification([...notification, "Claims complete!"]);
       setLoadingQuery("latestMarketItemsQuery");
+      setLoadingMessage([...loadingMessage, "Claiming"]);
     }
     if (calls.some((call) => call.entrypoint === "equip_item")) {
-      setNotification(notification + "Items swapped! ");
+      setNotification([...notification, "Items swapped!"]);
       setLoadingQuery("adventurerByIdQuery");
+      setLoadingMessage([...loadingMessage, "Equipping"]);
     }
     if (calls.some((call) => call.entrypoint === "purchase_health")) {
-      setNotification(notification + "Health purchased! ");
+      setNotification([...notification, "Health purchased!"]);
       setLoadingQuery("adventurerByIdQuery");
+      setLoadingMessage([...loadingMessage, "Purchasing Health"]);
     }
   };
 
@@ -113,14 +119,12 @@ const TransactionCart: React.FC = () => {
                   }
                 }
 
-                console.log(loadingQuery, notification);
-
                 await handleSubmitCalls(writeAsync).then((tx: any) => {
                   if (tx) {
                     startLoading(
                       "Multicall",
                       tx?.transaction_hash,
-                      "Multicalling",
+                      loadingMessage,
                       loadingQuery,
                       adventurer?.id,
                       notification
