@@ -43,21 +43,21 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
         }
       />
       {Item ? (
-        <div>
-          <span className="flex flex-row justify-between">
-            <span className="font-semibold whitespace-nowrap">
+        <span className="flex flex-row justify-between w-full">
+          <div>
+            <span className="flex font-semibold whitespace-nowrap">
               {itemName} {Item?.level} {Item?.xp} XP
               {slot == "Neck" || slot == "Ring" ? " [+1 Luck]" : ""}
             </span>
-            <Efficacyicon type={item.item?.type} />
-          </span>
-          <span className="whitespace-nowrap">
-            {Item &&
-              `Tier ${Item?.rank}, Greatness ${Item?.greatness}, ${
-                Item?.material || "Generic"
-              }`}
-          </span>
-        </div>
+            <span className="whitespace-nowrap">
+              {Item &&
+                `Tier ${Item?.rank}, Greatness ${Item?.greatness}, ${
+                  Item?.material || "Generic"
+                }`}
+            </span>
+          </div>
+          <Efficacyicon type={item.item?.type} />
+        </span>
       ) : (
         "Nothing Equipped"
       )}

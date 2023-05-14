@@ -21,7 +21,7 @@ const EfficacyDisplay = ({
   size = "w-5",
   className,
 }: EfficacyDisplayProps) => {
-  const efficacy = type.split(" ")[0].toLowerCase();
+  const efficacy = type?.split(" ")[0].toLowerCase();
   const classes = `fill-current ${size} ${className}`;
   const Components: { [key in any]: ReactElement } = {
     blade: <BladeIcon className={classes} />,

@@ -156,7 +156,7 @@ const MarketplaceRow = ({
         <LootIcon className="self-center pt-3" type={item.slot} />{" "}
       </td>
       <td className="text-center">{item.type}</td>
-      <td className="text-center">{item.material}</td>
+      <td className="text-center">{item?.material || "Generic"}</td>
       <td className="text-center">{item.greatness}</td>
       <td className="text-center">{item.xp}</td>
       <td className="text-center">{item.price}</td>
