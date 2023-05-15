@@ -6,6 +6,7 @@ import { Button } from "./Button";
 import { MdClose } from "react-icons/md";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -28,12 +29,21 @@ const TransactionCart: React.FC = () => {
   const [notification, setNotification] = useState<string[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
   const [loadingQuery, setLoadingQuery] = useState("");
+  const { data } = useQueriesStore();
 
   const method = (queuedTransactions[0]?.metadata as Metadata)?.method;
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
+
+  const marketItems = data.latestMarketItemsQuery
+    ? data.latestMarketItemsQuery.items
+    : [];
+
+  const ownedItems = data.itemsByAdventurerQuery
+    ? data.itemsByAdventurerQuery.items
+    : [];
 
   // const reorderCards = useCallback((dragIndex: number, hoverIndex: number) => {
   //   txQueue.reorderQueue(dragIndex, hoverIndex);
@@ -46,19 +56,35 @@ const TransactionCart: React.FC = () => {
         setLoadingQuery("latestMarketItemsQuery");
         setLoadingMessage([...loadingMessage, "Minting Items"]);
       } else if (call.entrypoint === "bid_on_item") {
-        setNotification([...notification, "Bids complete!"]);
+        const item = marketItems.find(
+          (item: any) => item.marketId == call.calldata[0]
+        );
+        setNotification([
+          ...notification,
+          `You bid ${call.calldata[4]} gold on ${item?.item!}`,
+        ]);
         setLoadingQuery("latestMarketItemsQuery");
         setLoadingMessage([...loadingMessage, "Bidding"]);
       } else if (call.entrypoint === "claim_item") {
-        setNotification([...notification, "Claims complete!"]);
+        const item = marketItems.find(
+          (item: any) => item.marketId == call.calldata[0]
+        );
+        setNotification([...notification, `You claimed ${item?.item}!`]);
         setLoadingQuery("latestMarketItemsQuery");
         setLoadingMessage([...loadingMessage, "Claiming"]);
       } else if (call.entrypoint === "equip_item") {
-        setNotification([...notification, "Items swapped!"]);
+        const item = ownedItems.find(
+          (item: any) => item.id == call.calldata[2]
+        );
+        setNotification([...notification, `You equipped ${item?.item}!`]);
         setLoadingQuery("adventurerByIdQuery");
         setLoadingMessage([...loadingMessage, "Equipping"]);
       } else if (call.entrypoint === "purchase_health") {
-        setNotification([...notification, "Health purchased!"]);
+        setNotification([
+          ...notification,
+          `You purchased ${call.calldata[2]} health!`,
+          // `You purchased ${parseInt(call.calldata[2].toString()) * 10} health!`,
+        ]);
         setLoadingQuery("adventurerByIdQuery");
         setLoadingMessage([...loadingMessage, "Purchasing Health"]);
       }

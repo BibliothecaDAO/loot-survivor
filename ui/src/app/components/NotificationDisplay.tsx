@@ -99,12 +99,15 @@ const proccessNotification = (type: string, notificationData: any) => {
       </p>
     );
   } else if (type == "Multicall") {
-    <div className="flex flex-col">
-      {(notificationData as string[]).map((noti: any) => (
-        <p className="text-lg">{noti}</p>
-      ))}
-      ;
-    </div>;
+    return (
+      <div className="flex flex-col">
+        {(notificationData as string[]).map((noti: any, index: number) => (
+          <p key={index} className="text-lg">
+            {noti}
+          </p>
+        ))}
+      </div>
+    );
   } else {
     return <p className="text-lg">{notificationData}</p>;
   }
@@ -118,7 +121,6 @@ export const NotificationDisplay = ({
 
   const { adventurer } = useAdventurerStore();
   const animation = processAnimation(type, notificationData, adventurer);
-  console.log(notificationData);
   const notification = proccessNotification(type, notificationData);
 
   const [setSound, setSoundState] = useState(soundSelector.click);
