@@ -7,6 +7,7 @@ import { MdClose } from "react-icons/md";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import { processItemName } from "../lib/utils";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -59,9 +60,10 @@ const TransactionCart: React.FC = () => {
         const item = marketItems.find(
           (item: any) => item.marketId == call.calldata[0]
         );
+        const itemName = processItemName(item);
         setNotification([
           ...notification,
-          `You bid ${call.calldata[4]} gold on ${item?.item!}`,
+          `You bid ${call.calldata[4]} gold on ${item?.item && itemName}`,
         ]);
         setLoadingQuery("latestMarketItemsQuery");
         setLoadingMessage([...loadingMessage, "Bidding"]);
@@ -69,20 +71,30 @@ const TransactionCart: React.FC = () => {
         const item = marketItems.find(
           (item: any) => item.marketId == call.calldata[0]
         );
-        setNotification([...notification, `You claimed ${item?.item}!`]);
+        const itemName = processItemName(item);
+        setNotification([
+          ...notification,
+          `You claimed ${item?.item && itemName}!`,
+        ]);
         setLoadingQuery("latestMarketItemsQuery");
         setLoadingMessage([...loadingMessage, "Claiming"]);
       } else if (call.entrypoint === "equip_item") {
         const item = ownedItems.find(
           (item: any) => item.id == call.calldata[2]
         );
-        setNotification([...notification, `You equipped ${item?.item}!`]);
+        const itemName = processItemName(item);
+        setNotification([
+          ...notification,
+          `You equipped ${item?.item && itemName}!`,
+        ]);
         setLoadingQuery("adventurerByIdQuery");
         setLoadingMessage([...loadingMessage, "Equipping"]);
       } else if (call.entrypoint === "purchase_health") {
         setNotification([
           ...notification,
-          `You purchased ${call.calldata[2]} health!`,
+          `You purchased ${
+            call.calldata[2] && parseInt(call.calldata[2].toString()) * 10
+          } health!`,
           // `You purchased ${parseInt(call.calldata[2].toString()) * 10} health!`,
         ]);
         setLoadingQuery("adventurerByIdQuery");
@@ -157,8 +169,7 @@ const TransactionCart: React.FC = () => {
                     addTransaction({
                       hash: tx.transaction_hash,
                       metadata: {
-                        method: "Performing multicall",
-                        description: "Transactions have been batched and sent!",
+                        method: "Multicall",
                         marketIds: marketIds,
                       },
                     });

@@ -192,7 +192,7 @@ class Config:
             10: "Swinging Logs",
             11: "Pendulum Blades",
             12: "Flame Jet",
-            13: "Poision Dart",
+            13: "Poison Dart",
             14: "Spiked Pit",
             15: "Hidden Arrow",
         }

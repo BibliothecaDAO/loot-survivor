@@ -81,7 +81,11 @@ const processAnimation = (
   }
 };
 
-const proccessNotification = (type: string, notificationData: any) => {
+export const processNotification = (
+  type: string,
+  notificationData: any,
+  adventurer: any
+) => {
   if (type == "Attack" || type == "Flee") {
     return (
       <NotificationBattleDisplay
@@ -101,11 +105,20 @@ const proccessNotification = (type: string, notificationData: any) => {
   } else if (type == "Multicall") {
     return (
       <div className="flex flex-col">
-        {(notificationData as string[]).map((noti: any, index: number) => (
-          <p key={index} className="text-lg">
-            {noti}
-          </p>
-        ))}
+        {(notificationData as string[]).map((noti: any, index: number) => {
+          if (noti.startsWith("You equipped") && adventurer?.health == 0) {
+            return (
+              <p key={index} className="text-lg">
+                You were slaughtered by the beast after trying to equip an item!
+              </p>
+            );
+          }
+          return (
+            <p key={index} className="text-lg">
+              {noti}
+            </p>
+          );
+        })}
       </div>
     );
   } else {
@@ -121,7 +134,7 @@ export const NotificationDisplay = ({
 
   const { adventurer } = useAdventurerStore();
   const animation = processAnimation(type, notificationData, adventurer);
-  const notification = proccessNotification(type, notificationData);
+  const notification = processNotification(type, notificationData, adventurer);
 
   const [setSound, setSoundState] = useState(soundSelector.click);
 
