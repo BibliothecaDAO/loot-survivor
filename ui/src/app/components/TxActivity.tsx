@@ -38,13 +38,11 @@ export const TxActivity = () => {
       stopLoading("Rejected");
     },
   });
+  const pendingArray = Array.isArray(pendingMessage);
+  const [messageIndex, setMessageIndex] = useState(0);
 
-  console.log(
-    loadingQuery,
-    queryData.discoveryByTxHashQuery?.discoveries[0],
-    loadingQuery && isDataUpdated[loadingQuery],
-    loading
-  );
+  console.log(pendingArray);
+  console.log(pendingMessage);
 
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
@@ -85,6 +83,15 @@ export const TxActivity = () => {
     }
   }, [loadingQuery && isDataUpdated[loadingQuery], accepted, hash]);
 
+  useEffect(() => {
+    if (pendingArray) {
+      const interval = setInterval(() => {
+        setMessageIndex((prevIndex) => (prevIndex + 1) % pendingMessage.length);
+      }, 2000);
+      return () => clearInterval(interval); // This is important, it will clear the interval when the component is unmounted.
+    }
+  }, [pendingMessage, messageIndex]);
+
   return (
     <>
       {type != "Multicall" && type != "Create" ? (
@@ -116,7 +123,9 @@ export const TxActivity = () => {
           <div className="flex flex-row items-center gap-5">
             <div className="flex w-48 loading-ellipsis">
               <LootIconLoader className="self-center mr-3" />
-              {pendingMessage}
+              {pendingArray
+                ? (pendingMessage as string[])[messageIndex]
+                : pendingMessage}
             </div>
             <div className="flex flex-row gap-2">
               Hash:{" "}

@@ -6,6 +6,8 @@ import { Button } from "./Button";
 import { MdClose } from "react-icons/md";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import { processItemName } from "../lib/utils";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -25,8 +27,10 @@ const TransactionCart: React.FC = () => {
   } = useTransactionManager();
   const { writeAsync } = useContractWrite({ calls });
   const [isOpen, setIsOpen] = useState(false);
-  const [notification, setNotification] = useState("");
+  const [notification, setNotification] = useState<string[]>([]);
+  const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
   const [loadingQuery, setLoadingQuery] = useState("");
+  const { data } = useQueriesStore();
 
   const method = (queuedTransactions[0]?.metadata as Metadata)?.method;
 
@@ -34,30 +38,68 @@ const TransactionCart: React.FC = () => {
     setIsOpen(!isOpen);
   };
 
+  const marketItems = data.latestMarketItemsQuery
+    ? data.latestMarketItemsQuery.items
+    : [];
+
+  const ownedItems = data.itemsByAdventurerQuery
+    ? data.itemsByAdventurerQuery.items
+    : [];
+
   // const reorderCards = useCallback((dragIndex: number, hoverIndex: number) => {
   //   txQueue.reorderQueue(dragIndex, hoverIndex);
   // }, []);
 
   const handleLoadData = () => {
-    if (calls.some((call) => call.entrypoint === "mint_daily_items")) {
-      setNotification(notification + "New items minted! ");
-      setLoadingQuery("latestMarketItemsQuery");
-    }
-    if (calls.some((call) => call.entrypoint === "bid_on_item")) {
-      setNotification(notification + "Bids complete! ");
-      setLoadingQuery("latestMarketItemsQuery");
-    }
-    if (calls.some((call) => call.entrypoint === "claim_item")) {
-      setNotification(notification + "Claims complete! ");
-      setLoadingQuery("latestMarketItemsQuery");
-    }
-    if (calls.some((call) => call.entrypoint === "equip_item")) {
-      setNotification(notification + "Items swapped! ");
-      setLoadingQuery("adventurerByIdQuery");
-    }
-    if (calls.some((call) => call.entrypoint === "purchase_health")) {
-      setNotification(notification + "Health purchased! ");
-      setLoadingQuery("adventurerByIdQuery");
+    for (let call of calls) {
+      if (call.entrypoint === "mint_daily_items") {
+        setNotification([...notification, "New items minted!"]);
+        setLoadingQuery("latestMarketItemsQuery");
+        setLoadingMessage([...loadingMessage, "Minting Items"]);
+      } else if (call.entrypoint === "bid_on_item") {
+        const item = marketItems.find(
+          (item: any) => item.marketId == call.calldata[0]
+        );
+        const itemName = processItemName(item);
+        setNotification([
+          ...notification,
+          `You bid ${call.calldata[4]} gold on ${item?.item && itemName}`,
+        ]);
+        setLoadingQuery("latestMarketItemsQuery");
+        setLoadingMessage([...loadingMessage, "Bidding"]);
+      } else if (call.entrypoint === "claim_item") {
+        const item = marketItems.find(
+          (item: any) => item.marketId == call.calldata[0]
+        );
+        const itemName = processItemName(item);
+        setNotification([
+          ...notification,
+          `You claimed ${item?.item && itemName}!`,
+        ]);
+        setLoadingQuery("latestMarketItemsQuery");
+        setLoadingMessage([...loadingMessage, "Claiming"]);
+      } else if (call.entrypoint === "equip_item") {
+        const item = ownedItems.find(
+          (item: any) => item.id == call.calldata[2]
+        );
+        const itemName = processItemName(item);
+        setNotification([
+          ...notification,
+          `You equipped ${item?.item && itemName}!`,
+        ]);
+        setLoadingQuery("adventurerByIdQuery");
+        setLoadingMessage([...loadingMessage, "Equipping"]);
+      } else if (call.entrypoint === "purchase_health") {
+        setNotification([
+          ...notification,
+          `You purchased ${
+            call.calldata[2] && parseInt(call.calldata[2].toString()) * 10
+          } health!`,
+          // `You purchased ${parseInt(call.calldata[2].toString()) * 10} health!`,
+        ]);
+        setLoadingQuery("adventurerByIdQuery");
+        setLoadingMessage([...loadingMessage, "Purchasing Health"]);
+      }
     }
   };
 
@@ -113,14 +155,12 @@ const TransactionCart: React.FC = () => {
                   }
                 }
 
-                console.log(loadingQuery, notification);
-
                 await handleSubmitCalls(writeAsync).then((tx: any) => {
                   if (tx) {
                     startLoading(
                       "Multicall",
                       tx?.transaction_hash,
-                      "Multicalling",
+                      loadingMessage,
                       loadingQuery,
                       adventurer?.id,
                       notification
@@ -129,8 +169,7 @@ const TransactionCart: React.FC = () => {
                     addTransaction({
                       hash: tx.transaction_hash,
                       metadata: {
-                        method: "Performing multicall",
-                        description: "Transactions have been batched and sent!",
+                        method: "Multicall",
                         marketIds: marketIds,
                       },
                     });

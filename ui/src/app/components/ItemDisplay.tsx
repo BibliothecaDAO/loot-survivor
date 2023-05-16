@@ -1,6 +1,7 @@
 import { Item } from "../types";
 import LootIcon from "./LootIcon";
 import Efficacyicon from "./EfficacyIcon";
+import { processItemName } from "../lib/utils";
 
 interface ItemDisplayProps {
   item: Item;
@@ -10,21 +11,7 @@ interface ItemDisplayProps {
 export const ItemDisplay = (item: ItemDisplayProps) => {
   const Item = item?.item;
 
-  const processName = (item: Item) => {
-    if (item) {
-      if (item.prefix1 && item.suffix && item.greatness >= 20) {
-        return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix} +1`;
-      } else if (item.prefix1 && item.suffix) {
-        return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix}`;
-      } else if (item.suffix) {
-        return `${item.item} ${item.suffix}`;
-      } else {
-        return `${item.item}`;
-      }
-    }
-  };
-
-  const itemName = processName(Item);
+  const itemName = processItemName(Item);
   const slot = Item ? Item.slot : "";
 
   return (

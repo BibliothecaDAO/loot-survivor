@@ -8,10 +8,14 @@ import { Metadata } from "../types";
 import { Button } from "./Button";
 import { padAddress, shortenHex } from "../lib/utils";
 import useOnClickOutside from "../hooks/useOnClickOutside";
+import useLoadingStore from "../hooks/useLoadingStore";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import { processNotification } from "./NotificationDisplay";
 
 const TransactionHistory = () => {
   const wrapperRef = useRef<HTMLDivElement>(null); // Update the type here
   useOnClickOutside(wrapperRef, () => setIsOpen(false));
+  const { adventurer } = useAdventurerStore();
 
   const { hashes, transactions, addTransaction } = useTransactionManager();
   const [isOpen, setIsOpen] = useState(false);
@@ -27,12 +31,11 @@ const TransactionHistory = () => {
     setIsOpen(!isOpen);
   };
 
+  const history = useLoadingStore((state) => state.history);
+
   return (
     <div className="relative" ref={wrapperRef}>
-      <Button
-        onClick={toggleDropdown}
-
-      >
+      <Button onClick={toggleDropdown}>
         {isOpen ? "Hide Ledger" : "Show Ledger"}
       </Button>
       {isOpen ? (
@@ -44,22 +47,40 @@ const TransactionHistory = () => {
               {transactions
                 .slice()
                 .reverse()
-                .map((tx, i) => (
-                  <li key={i} className="p-1 m-1 border border-terminal-green">
-                    <div className="flex flex-row flex-wrap gap-1">
-                      <p className="text-xl text-terminal-yellow">
-                        {(tx?.metadata as Metadata)?.method}:{" "}
-                      </p>
-                      <p className="text-xl text-terminal-yellow">
-                        {(tx?.metadata as Metadata)?.description}
-                      </p>
-                    </div>
-                    <div className="flex flex-row">
-                      <div className="mr-4">Hash: {shortenHex(tx.hash)}</div>
-                      <TxStatus hash={tx.hash} />
-                    </div>
-                  </li>
-                ))}
+                .map((tx, i) => {
+                  const response = history.find(
+                    (response) => response.hash == tx.hash
+                  );
+                  let notification: React.ReactNode = null;
+                  if (response) {
+                    notification = processNotification(
+                      response.type,
+                      response.notificationData,
+                      adventurer
+                    );
+                  }
+                  return (
+                    <li
+                      key={i}
+                      className="p-1 m-1 border border-terminal-green"
+                    >
+                      <div className="flex flex-col">
+                        <div className="flex flex-row justify-between border-b border-terminal-green">
+                          {/* <div className="flex flex-wrap gap-1"> */}
+                          <p className="text-lg text-terminal-yellow">
+                            {(tx?.metadata as Metadata)?.method}
+                          </p>
+                          {/* </div> */}
+                          <div className="mr-4 text-lg">
+                            Hash: {shortenHex(tx.hash)}
+                          </div>
+                          <TxStatus hash={tx.hash} />
+                        </div>
+                        {response && notification}
+                      </div>
+                    </li>
+                  );
+                })}
             </ul>
           </div>
         ) : (

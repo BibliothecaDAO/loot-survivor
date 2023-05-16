@@ -77,8 +77,7 @@ export default function Beast() {
             addTransaction({
               hash: tx.transaction_hash,
               metadata: {
-                method: "Attack Beast",
-                description: `Attacking ${beastData.beast}`,
+                method: `Attack ${beastData.beast}`,
               },
             });
           }
@@ -106,8 +105,7 @@ export default function Beast() {
             addTransaction({
               hash: tx.transaction_hash,
               metadata: {
-                method: "Flee Beast",
-                description: `Fleeing from ${beastData.beast}`,
+                method: `Flee ${beastData.beast}`,
               },
             });
           }

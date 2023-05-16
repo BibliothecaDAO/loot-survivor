@@ -15,9 +15,7 @@ export const DeathDialog = () => {
     adventurer?.id ?? 0,
     data.adventurersByXPQuery.adventurers ?? []
   );
-  console.log(rank, data.adventurersByXPQuery.adventurers, adventurer?.id);
-  const ordinalRank = getOrdinalSuffix(rank ?? 0);
-  console.log(ordinalRank);
+  const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
