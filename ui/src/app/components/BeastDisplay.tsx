@@ -95,7 +95,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
           <p className="text-3xl text-terminal-yellow">
             Level {beastData?.level}
           </p>
-          <p className="text-3xl text-terminal-yellow">XP {beastData?.xp}</p>
+          {/* <p className="text-3xl text-terminal-yellow">XP {beastData?.xp}</p> */}
           <p className="text-3xl text-terminal-yellow">
             Tier {beastData?.rank}
           </p>
