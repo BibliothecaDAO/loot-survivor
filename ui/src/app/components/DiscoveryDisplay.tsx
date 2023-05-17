@@ -28,14 +28,21 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       if (discoveryData.outputAmount === 0) {
         return (
           <p>
-            PHEW! You avoided the {discoveryData?.subDiscoveryType} obstacle!
+            PHEW! You avoided the{" "}
+            {discoveryData?.subDiscoveryType == "Poision Dart"
+              ? "Poison Dart"
+              : discoveryData?.subDiscoveryType}{" "}
+            obstacle!
           </p>
         );
       } else if (adventurer?.health === 0) {
         return (
           <p>
-            You discovered the {discoveryData?.subDiscoveryType} obstacle, it
-            killed you with {discoveryData?.outputAmount} damage!
+            You discovered the{" "}
+            {discoveryData?.subDiscoveryType == "Poision Dart"
+              ? "Poison Dart"
+              : discoveryData?.subDiscoveryType}{" "}
+            obstacle, it killed you with {discoveryData?.outputAmount} damage!
           </p>
         );
       } else {
