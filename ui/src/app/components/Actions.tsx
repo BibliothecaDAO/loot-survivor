@@ -68,8 +68,7 @@ export default function Actions() {
               addTransaction({
                 hash: tx.transaction_hash,
                 metadata: {
-                  method: "Explore",
-                  description: `Exploring with ${adventurer?.name}`,
+                  method: `Explore with ${adventurer?.name}`,
                 },
               });
             }

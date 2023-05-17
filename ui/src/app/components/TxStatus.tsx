@@ -7,5 +7,5 @@ interface TxStatusProps {
 export const TxStatus = ({ hash }: TxStatusProps) => {
   const { data, status } = useWaitForTransaction({ hash });
 
-  return <p>Status: {data?.status}</p>;
+  return <p className="text-lg">Status: {data?.status}</p>;
 };

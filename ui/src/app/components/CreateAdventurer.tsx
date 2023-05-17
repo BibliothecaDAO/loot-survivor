@@ -119,8 +119,7 @@ export const CreateAdventurer = ({
         addTransaction({
           hash: tx?.transaction_hash,
           metadata: {
-            method: "Minting adventurer",
-            description: "Adventurer is being minted!",
+            method: `Spawn ${formData.name}`,
           },
         });
       }
