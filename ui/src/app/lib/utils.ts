@@ -3,6 +3,7 @@ import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 
 import Realms from "./realms.json";
+import { Item } from "../types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -151,4 +152,18 @@ export function getOrdinalSuffix(n: number): string {
   }
 
   return n + "th";
+}
+
+export function processItemName(item: Item) {
+  if (item) {
+    if (item.prefix1 && item.suffix && item.greatness >= 20) {
+      return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix} +1`;
+    } else if (item.prefix1 && item.suffix) {
+      return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix}`;
+    } else if (item.suffix) {
+      return `${item.item} ${item.suffix}`;
+    } else {
+      return `${item.item}`;
+    }
+  }
 }

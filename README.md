@@ -2,9 +2,9 @@
 
 This repository includes both the client and indexer that form the game Loot Survivor.
 
-## Setup
+App: https://loot-survivor.vercel.app/.
 
-Currently we are running the app locally until we fix an issue with running devnet over https. If you are only using goerli thhen simply go the app https://loot-survivor.vercel.app/.
+## Running Locally
 
 ### If you don't have yarn installed
 
@@ -36,7 +36,7 @@ yarn dev
 
 You will find the app at http://localhost:3000/.
 
-Setting up devnet:
+## Setting up devnet:
 
 - Select "Launch on Devnet"
 - Select "Connect ArgentX"

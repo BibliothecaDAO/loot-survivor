@@ -46,28 +46,35 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       if (discoveryData.outputAmount === 0) {
         return (
           <p>
-            PHEW! You avoided the {discoveryData.subDiscoveryType} obstacle!
+            PHEW! You avoided the{" "}
+            {discoveryData?.subDiscoveryType == "Poision Dart"
+              ? "Poison Dart"
+              : discoveryData?.subDiscoveryType}{" "}
+            obstacle!
           </p>
         );
       } else if (adventurer?.health === 0) {
         return (
           <p>
-            You discovered the {discoveryData.subDiscoveryType} obstacle, it
-            killed you with {discoveryData.outputAmount} damage!
+            You discovered the{" "}
+            {discoveryData?.subDiscoveryType == "Poision Dart"
+              ? "Poison Dart"
+              : discoveryData?.subDiscoveryType}{" "}
+            obstacle, it killed you with {discoveryData?.outputAmount} damage!
           </p>
         );
       } else {
         return (
           <p>
-            OUCH! You discovered the {discoveryData.subDiscoveryType} obstacle,
-            it did {discoveryData.outputAmount} damage!
+            OUCH! You discovered the {discoveryData?.subDiscoveryType} obstacle,
+            it did {discoveryData?.outputAmount} damage!
           </p>
         );
       }
     }
 
     if (discoveryData?.discoveryType === "Item") {
-      if (discoveryData.subDiscoveryType === "Gold") {
+      if (discoveryData?.subDiscoveryType === "Gold") {
         return (
           <div className="flex self-center text-terminal-yellow">
             <p className="text-terminal-green">
@@ -81,7 +88,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         );
       }
 
-      if (discoveryData.subDiscoveryType === "Loot") {
+      if (discoveryData?.subDiscoveryType === "Loot") {
         return data ? (
           <div className="flex self-center">
             <ItemDisplay className="mr-4 " type={data.items[0]?.slot} />
@@ -92,7 +99,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         );
       }
 
-      if (discoveryData.subDiscoveryType === "Health") {
+      if (discoveryData?.subDiscoveryType === "Health") {
         return (
           <div className="flex self-center">
             <p>GREAT! You discovered {discoveryData.outputAmount} health! </p>

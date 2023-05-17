@@ -64,6 +64,7 @@ export default function Home() {
 
   const hash = useLoadingStore((state) => state.hash);
   const type = useLoadingStore((state) => state.type);
+  const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -79,7 +80,6 @@ export default function Home() {
   const dialog = useUIStore((state) => state.dialog);
   const showDialog = useUIStore((state) => state.showDialog);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
-  const [showBattleScene, setShowBattleScene] = useState(true);
   const upgrade = adventurer?.upgrading;
 
   const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
@@ -216,13 +216,29 @@ export default function Home() {
         showDialog(true);
       }
     }
-  }, [showNotification, data.battlesByTxHashQuery]);
-
-  // useEffect(() => {
-  //   console.log("refetch");
-  //   refetch("latestDiscoveriesQuery");
-  //   console.log(data.latestDiscoveriesQuery);
-  // }, [adventurer]);
+    // handle dead by discovering obstacle
+    if (data.discoveryByTxHashQuery) {
+      if (
+        data.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
+          "Obstacle" &&
+        adventurer?.health == 0
+      ) {
+        showDialog(true);
+      }
+    }
+    if (pendingMessage) {
+      if (
+        (pendingMessage as string[]).includes("Equipping") &&
+        adventurer?.health == 0
+      ) {
+        showDialog(true);
+      }
+    }
+  }, [
+    showNotification,
+    data.battlesByTxHashQuery,
+    data.discoveryByTxHashQuery,
+  ]);
 
   useEffect(() => {
     if (!account?.address) {
