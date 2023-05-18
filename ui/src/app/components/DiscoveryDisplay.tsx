@@ -4,8 +4,10 @@ import Heart from "../../../public/heart.svg";
 import Coin from "../../../public/coin.svg";
 import ItemDisplay from "./LootIcon";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import { processBeastName } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { NullBattle, NullBeast } from "../types";
+import { getBattlesByBeast } from "../hooks/graphql/queries";
 
 interface DiscoveryProps {
   discoveryData: any;
@@ -13,21 +15,22 @@ interface DiscoveryProps {
 
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const { adventurer } = useAdventurerStore();
-  const { data } = useQuery(getItemsByTokenId, {
+  const { data } = useQueriesStore();
+  const { data: itemData } = useQuery(getItemsByTokenId, {
     variables: { id: discoveryData?.entityId },
   });
+  const beasts = data.beastsQuery ? data.beastsQuery.beasts : [];
 
-  const { data: queriesData } = useQueriesStore();
+  let beast = beasts.find(
+    (beasts: any) => discoveryData?.entityId === beasts?.id
+  );
+  const beastName = processBeastName(beast, adventurer);
 
-  let beastData = queriesData.beastByIdQuery
-    ? queriesData.beastByIdQuery.beasts[0]
-    : NullBeast;
+  const { data: discoveryBattleData } = useQuery(getBattlesByBeast, {
+    variables: { adventurerId: adventurer?.id ?? 0, beastId: beast?.id },
+  });
 
-  const beastName = beastData ? beastData.beast : "";
-
-  let battleData = queriesData.battlesByBeastQuery
-    ? queriesData.battlesByBeastQuery.battles[0]
-    : NullBattle;
+  let discoveryBattles = discoveryBattleData ? discoveryBattleData.battles : [];
 
   const renderDiscoveryMessage = () => {
     if (discoveryData?.discoveryType === "Nothing") {
@@ -35,8 +38,11 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     }
 
     if (discoveryData?.discoveryType === "Beast") {
-      if (battleData && battleData.ambush) {
-        <p>YIKES! You were ambushed by a {beastName}</p>;
+      if (
+        discoveryBattles &&
+        discoveryBattles.some((battle: any) => battle.ambush === true)
+      ) {
+        return <p>YIKES! You were ambushed by a {beastName}</p>;
       } else {
         return <p>OH NO! You discovered a {beastName}!</p>;
       }
@@ -66,8 +72,8 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       } else {
         return (
           <p>
-            OUCH! You discovered the {discoveryData?.subDiscoveryType} obstacle,
-            it did {discoveryData?.outputAmount} damage!
+            OUCH! You were hit by the {discoveryData?.subDiscoveryType}{" "}
+            obstacle, it did {discoveryData?.outputAmount} damage!
           </p>
         );
       }
@@ -89,10 +95,10 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       }
 
       if (discoveryData?.subDiscoveryType === "Loot") {
-        return data ? (
+        return itemData ? (
           <div className="flex self-center">
-            <ItemDisplay className="mr-4 " type={data.items[0]?.slot} />
-            <p>GREAT! You discovered a loot item, {data.items[0]?.item}!</p>
+            <ItemDisplay className="mr-4 " type={itemData.items[0]?.slot} />
+            <p>GREAT! You discovered a loot item, {itemData.items[0]?.item}!</p>
           </div>
         ) : (
           <></>

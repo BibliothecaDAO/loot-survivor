@@ -8,7 +8,8 @@ export type ScreenPage =
   | "beast"
   | "leaderboard"
   | "upgrade"
-  | "profile";
+  | "profile"
+  | "encounters";
 
 type State = {
   connected: boolean;

@@ -11,6 +11,7 @@ import Chest from "../../../public/icons/loot/chest.svg";
 import Waist from "../../../public/icons/loot/waist.svg";
 import Foot from "../../../public/icons/loot/foot.svg";
 import EfficacyIcon from "./EfficacyIcon";
+import { processBeastName } from "../lib/utils";
 
 interface BeastDisplayProps {
   beastData: any;
@@ -43,18 +44,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
     newWidth: 20,
   });
 
-  let prefix1 = beastData?.prefix1 ?? "";
-  let prefix2 = beastData?.prefix2 ?? "";
-
-  const processPrefixes = () => {
-    if (adventurer?.xp && adventurer?.xp > 0) {
-      return `"${prefix1} ${prefix2}"`;
-    } else {
-      return "";
-    }
-  };
-
-  const prefixes = processPrefixes();
+  const beastName = processBeastName(beastData, adventurer);
 
   if (beastData?.health === 0) {
     return (
@@ -81,7 +71,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
     <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
       <div className="flex flex-col w-full p-3 uppercase">
         <div className="flex justify-between py-3 text-4xl border-b border-terminal-green">
-          {prefixes} {beastData?.beast}
+          {beastName}
           <span
             className={`text-4xl flex ${
               beastData?.health === 0 ? "text-red-600" : "text-terminal-green"

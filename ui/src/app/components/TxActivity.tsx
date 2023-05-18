@@ -41,9 +41,6 @@ export const TxActivity = () => {
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
 
-  console.log(pendingArray);
-  console.log(pendingMessage);
-
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
     if (accepted && hash && loadingQuery && isDataUpdated[loadingQuery]) {
@@ -51,8 +48,8 @@ export const TxActivity = () => {
       if (type === "Attack" || type === "Flee") {
         if (queryData?.battlesByTxHashQuery) {
           refetch("battlesByTxHashQuery");
-          refetch("battlesByBeastQuery");
           refetch("adventurerByIdQuery");
+          refetch("battlesByBeastQuery");
           stopLoading({
             data: queryData.battlesByTxHashQuery.battles,
             beast: notificationData.beast,
@@ -72,6 +69,11 @@ export const TxActivity = () => {
           setAccepted(false);
           resetDataUpdated(loadingQuery);
         }
+      } else if (type == "Upgrade") {
+        refetch("adventurerByIdQuery");
+        stopLoading(notificationData);
+        setAccepted(false);
+        resetDataUpdated(loadingQuery);
       }
 
       // Handle other types

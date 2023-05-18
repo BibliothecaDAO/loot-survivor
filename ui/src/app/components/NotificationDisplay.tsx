@@ -5,6 +5,7 @@ import { GameData } from "./GameData";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 import { useCallback, useEffect, useState } from "react";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 interface NotificationDisplayProps {
   type: string;
@@ -14,7 +15,8 @@ interface NotificationDisplayProps {
 const processAnimation = (
   type: string,
   notificationData: any,
-  adventurer: any
+  adventurer: any,
+  battles: any[]
 ) => {
   const gameData = new GameData();
   if (type == "Flee") {
@@ -26,19 +28,17 @@ const processAnimation = (
     } else if (
       Array.isArray(notificationData.data) &&
       notificationData.data.some(
-        (data: any) => data.ambush && data.targetHealth == 0
+        (data: any) => data.attacker == "Beast" && data.targetHealth > 0
+      )
+    ) {
+      return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
+    } else if (
+      Array.isArray(notificationData.data) &&
+      notificationData.data.some(
+        (data: any) => data.attacker == "Beast" && data.targetHealth == 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
-    } else if (
-      Array.isArray(notificationData.data) &&
-      notificationData.data.some((data: any) => data.ambush)
-    ) {
-      if (adventurer?.health === 0) {
-        return gameData.ADVENTURER_ANIMATIONS["Dead"];
-      } else {
-        return gameData.ADVENTURER_ANIMATIONS["Ambush"];
-      }
     }
   } else if (type == "Attack") {
     if (
@@ -60,7 +60,19 @@ const processAnimation = (
     }
   } else if (type == "Explore") {
     if (notificationData?.discoveryType == "Beast") {
-      return gameData.ADVENTURER_ANIMATIONS["DiscoverBeast"];
+      if (
+        Array.isArray(battles) &&
+        battles.some((battle) => battle.ambush && battle.targetHealth > 0)
+      ) {
+        return gameData.ADVENTURER_ANIMATIONS["Ambush"];
+      } else if (
+        Array.isArray(battles) &&
+        battles.some((battle) => battle.ambush && battle.targetHealth == 0)
+      ) {
+        return gameData.ADVENTURER_ANIMATIONS["Dead"];
+      } else {
+        return gameData.ADVENTURER_ANIMATIONS["DiscoverBeast"];
+      }
     } else if (notificationData?.discoveryType == "Obstacle") {
       if (notificationData?.outputAmount > 0) {
         if (adventurer?.health === 0) {
@@ -122,7 +134,7 @@ export const processNotification = (
       </div>
     );
   } else {
-    return <p className="text-lg">{notificationData}</p>;
+    return <p className="text-lg">{notificationData.toString()}</p>;
   }
 };
 
@@ -133,7 +145,16 @@ export const NotificationDisplay = ({
   const gameData = new GameData();
 
   const { adventurer } = useAdventurerStore();
-  const animation = processAnimation(type, notificationData, adventurer);
+  const { data } = useQueriesStore();
+  const battles = data.battlesByBeastQuery
+    ? data.battlesByBeastQuery.battles
+    : [];
+  const animation = processAnimation(
+    type,
+    notificationData,
+    adventurer,
+    battles
+  );
   const notification = processNotification(type, notificationData, adventurer);
 
   const [setSound, setSoundState] = useState(soundSelector.click);
@@ -141,7 +162,6 @@ export const NotificationDisplay = ({
   const { play } = useUiSounds(setSound);
 
   const playSound = useCallback(() => {
-    console.log(setSound);
     play();
   }, []);
 
@@ -150,10 +170,7 @@ export const NotificationDisplay = ({
       const animationKey = Object.keys(gameData.ADVENTURER_ANIMATIONS).find(
         (key) => gameData.ADVENTURER_ANIMATIONS[key] === animation
       );
-
-      console.log("animation", animationKey);
       if (animationKey && gameData.ADVENTURER_SOUNDS[animationKey]) {
-        console.log("animationKey", gameData.ADVENTURER_SOUNDS[animationKey]);
         setSoundState(gameData.ADVENTURER_SOUNDS[animationKey]);
       }
       playSound();

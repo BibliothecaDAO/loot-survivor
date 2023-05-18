@@ -30,10 +30,13 @@ import {
   getAdventurersInList,
   getAdventurersInListByXp,
   getBattleByTxHash,
+  getBeasts,
   getLastDiscovery,
   getAdventurerByXP,
+  getDiscoveries,
   getLatestDiscoveries,
   getLastBattleByAdventurer,
+  getBattlesByAdventurer,
   getBattlesByBeast,
   getDiscoveryByTxHash,
   getAdventurersByOwner,
@@ -42,20 +45,21 @@ import {
   getBeastById,
   getTopScores,
   getItemsByAdventurer,
+  getUnclaimedItemsByAdventurer,
 } from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
-import SpriteAnimation from "./components/SpriteAnimation";
 import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/NotificationDisplay";
-import { useMusic, musicSelector } from "./hooks/useMusic";
+import { useMusic } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
 import { Menu, NullAdventurer } from "./types";
 import useCustomQuery from "./hooks/useCustomQuery";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./components/Profile";
 import { DeathDialog } from "./components/DeathDialog";
+import { Encounters } from "./components/Encounters";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -92,6 +96,8 @@ export default function Home() {
     ? data.adventurersByOwnerQuery.adventurers
     : [];
 
+  useCustomQuery("beastsQuery", getBeasts);
+
   useCustomQuery("adventurerByIdQuery", getAdventurerById, {
     id: adventurer?.id ?? 0,
   });
@@ -118,6 +124,10 @@ export default function Home() {
     txHash: padAddress(hash),
   });
 
+  useCustomQuery("discoveriesQuery", getDiscoveries, {
+    adventurerId: adventurer?.id ?? 0,
+  });
+
   useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
     adventurerId: adventurer?.id ?? 0,
   });
@@ -127,6 +137,10 @@ export default function Home() {
   });
 
   useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
+    adventurerId: adventurer?.id ?? 0,
+  });
+
+  useCustomQuery("battlesByAdventurerQuery", getBattlesByAdventurer, {
     adventurerId: adventurer?.id ?? 0,
   });
 
@@ -156,6 +170,15 @@ export default function Home() {
   useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
     adventurer: profile ?? 0,
   });
+
+  useCustomQuery(
+    "unclaimedItemsByAdventurerQuery",
+    getUnclaimedItemsByAdventurer,
+    {
+      bidder: adventurer?.id,
+      status: "Open",
+    }
+  );
 
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
@@ -307,6 +330,11 @@ export default function Home() {
             screen: "upgrade",
             disabled: !upgrade,
           },
+          {
+            id: 8,
+            label: "Encounters",
+            screen: "encounters",
+          },
         ];
       }
       setMenu(newMenu);
@@ -363,36 +391,7 @@ export default function Home() {
     }
   }, [upgrade]);
 
-  const battlesBackup = [
-    {
-      adventurerId: 2,
-      ambushed: null,
-      attacker: "Adventurer",
-      beastId: 65,
-      damage: 7,
-      fled: null,
-      goldEarned: 0,
-      targetHealth: 26,
-      timestamp: "2023-05-12T18:40:52",
-      txHash:
-        "0x069ea00a618e9c241631c513609c8b07d3dab2c8cee56a7ffb0b3fd9fe9d6903",
-      xpEarned: 0,
-    },
-    {
-      adventurerId: 2,
-      ambushed: null,
-      attacker: "Beast",
-      beastId: 65,
-      damage: 7,
-      fled: null,
-      goldEarned: 0,
-      targetHealth: 0,
-      timestamp: "2023-05-12T18:40:52",
-      txHash:
-        "0x069ea00a618e9c241631c513609c8b07d3dab2c8cee56a7ffb0b3fd9fe9d6903",
-      xpEarned: 0,
-    },
-  ];
+  console.log(data);
 
   return (
     <main
@@ -465,6 +464,7 @@ export default function Home() {
                 {screen === "leaderboard" && <Leaderboard />}
                 {screen === "upgrade" && <Upgrade />}
                 {screen === "profile" && <Profile />}
+                {screen === "encounters" && <Encounters />}
               </>
             </div>
           ) : null}

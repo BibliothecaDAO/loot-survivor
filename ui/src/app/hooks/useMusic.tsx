@@ -15,7 +15,6 @@ export const useMusic = (
   playState: { isInBattle: boolean; isDead: boolean; isMuted: boolean },
   options?: { volume?: number; loop?: boolean }
 ) => {
-
   const [music, setMusic] = useState<string>(musicSelector.backgroundMusic);
 
   const [play, { stop }] = useSound(dir + music, {
@@ -25,19 +24,16 @@ export const useMusic = (
 
   const start = useCallback(() => {
     play();
-  }, [])
+  }, []);
 
   useEffect(() => {
     stop();
     if (playState.isInBattle) {
       setMusic(musicSelector.battle);
-      console.log("sound", music)
     } else if (playState.isDead) {
       setMusic(musicSelector.death);
-      console.log("sound", music)
     } else {
       setMusic(musicSelector.backgroundMusic);
-      console.log("sound", music)
     }
     start();
   }, [playState.isInBattle, playState.isDead]);

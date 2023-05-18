@@ -2,6 +2,7 @@ import TwitterShareButton from "./TwitterShareButtons";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
+import { processBeastName } from "../lib/utils";
 
 interface BattleDisplayProps {
   battleData: any;
@@ -38,6 +39,11 @@ export const BattleDisplay = ({
               damage!
             </p>
           )
+        ) : battleData.damage == 0 ? (
+          <p>
+            You were counter attacked by the {beastName} but defended the
+            attack!
+          </p>
         ) : (
           <p>
             You were counter attacked by the {beastName} taking{" "}
@@ -69,7 +75,7 @@ export const NotificationBattleDisplay = ({
 }: NotificationBattleDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const appUrl = "https://loot-survivor.vercel.app/";
-  const beastName = beast?.beast;
+  const beastName = processBeastName(beast, adventurer);
   const beastLevel = beast?.level;
   const beastTier = beast?.rank;
   const { data } = useQueriesStore();
@@ -78,26 +84,36 @@ export const NotificationBattleDisplay = ({
     data.adventurersByXPQuery.adventurers ?? []
   );
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
+  const isArray = Array.isArray(battleData);
   return (
     <div>
-      {Array.isArray(battleData) &&
-      battleData.some((data) => data.fled) &&
-      battleData.some((data) => data.attacker == "Beast") ? (
-        <p>
-          You failed to flee the {beastName ? beastName : ""} and were attacked
-          taking {battleData[0].damage}!
-        </p>
-      ) : battleData.fled ? (
+      {isArray && battleData.some((data) => data.fled) ? (
         <p>You fled the {beastName ? beastName : ""}!</p>
       ) : battleData.ambushed && battleData.targetHealth == 0 ? (
         <p>
-          You were killed by the {beastName ? beastName : ""}, from an ambushed
+          You were killed by the {beastName ? beastName : ""}, from an ambush
           taking {battleData.damage}!
         </p>
-      ) : battleData.ambushed ? (
+      ) : isArray && battleData.length == 1 && battleData[0].ambushed ? (
         <p>
           You were ambushed by the {beastName ? beastName : ""}, taking{" "}
-          {battleData.damage}!
+          {battleData[0].damage}!
+        </p>
+      ) : isArray &&
+        battleData.length == 1 &&
+        battleData[0].attacker == "Beast" &&
+        battleData[0].targetHealth > 0 ? (
+        <p>
+          You failed to flee the {beastName ? beastName : ""} and were attacked
+          taking {battleData[0].damage} damage!{" "}
+        </p>
+      ) : isArray &&
+        battleData.length == 1 &&
+        battleData[0].attacker == "Beast" &&
+        battleData[0].targetHealth == 0 ? (
+        <p>
+          You were killed trying to flee the {beastName ? beastName : ""}
+          taking {battleData[0].damage} damage!{" "}
         </p>
       ) : (
         battleData[0]?.attacker == "Adventurer" &&
@@ -107,7 +123,8 @@ export const NotificationBattleDisplay = ({
             and dealt {battleData[0]?.damage} damage! They counterattacked for{" "}
             {battleData[1]?.damage} damage!
           </p>
-        ) : battleData[0]?.targetHealth == 0 ? (
+        ) : battleData[0]?.attacker == "Adventurer" &&
+          battleData[0]?.targetHealth == 0 ? (
           <div className="flex flex-col gap-2 items-center justify-center">
             <p>
               You slayed the {beastName ? beastName : ""} after inflicting{" "}
