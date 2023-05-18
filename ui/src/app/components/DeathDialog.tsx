@@ -37,7 +37,7 @@ export const DeathDialog = () => {
           </div>
           <div className="flex flex-col gap-2 items-center justify-center">
             <p className="text-4xl text-red-500">GAME OVER!</p>
-            {notification}
+            {/* {notification} */}
             <p className="text-2xl">
               {adventurer?.name} has died level {adventurer?.level} with{" "}
               {adventurer?.xp} xp, a valiant effort!
