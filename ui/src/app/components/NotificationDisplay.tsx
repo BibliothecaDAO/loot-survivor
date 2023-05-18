@@ -134,7 +134,7 @@ export const processNotification = (
       </div>
     );
   } else {
-    return <p className="text-lg">{notificationData ?? ""}</p>;
+    return <p className="text-lg">{notificationData?.toString()}</p>;
   }
 };
 
