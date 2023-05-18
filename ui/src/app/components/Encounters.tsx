@@ -4,14 +4,24 @@ import { DiscoveryDisplay } from "./DiscoveryDisplay";
 import { BattleDisplay } from "./BattleDisplay";
 import LootIconLoader from "./Loader";
 import { Button } from "./Button";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { getBeasts } from "../hooks/graphql/queries";
+import { NullBeast } from "../types";
+import { processBeastName } from "../lib/utils";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 export const Encounters = () => {
+  const { adventurer } = useAdventurerStore();
   const { data, isLoading } = useQueriesStore();
   const encountersPerPage = 10;
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const [loadingData, setLoadingData] = useState(true);
   const [sortedCombined, setSortedCombined] = useState<any[]>([]);
+
+  useCustomQuery("beastsQuery", getBeasts);
+
+  const beasts = data.beastsQuery ? data.beastsQuery.beasts : [];
 
   useEffect(() => {
     if (data) {
@@ -30,7 +40,15 @@ export const Encounters = () => {
         timestamp: discovery.discoveryTime,
       }));
 
-      const combined = [...formattedDiscoveries, ...battles];
+      const formattedBattles = battles.map((battle: any) => {
+        let beast = beasts.find((beasts: any) => beasts.id === battle.beastId);
+        return {
+          ...battle,
+          beast: beast ? beast : NullBeast,
+        };
+      });
+
+      const combined = [...formattedDiscoveries, ...formattedBattles];
       const sorted = combined.sort((a: any, b: any) => {
         const dateA = new Date(a.timestamp);
         const dateB = new Date(b.timestamp);
@@ -64,18 +82,24 @@ export const Encounters = () => {
             isLoading.battlesByBeastQuery ||
             loadingData) && <LootIconLoader />}
           <div className="flex flex-col items-center gap-2 overflow-auto">
-            {displayEncounters.map((encounter: any, index: number) => (
-              <div
-                className="w-full p-2 text-left border border-terminal-green"
-                key={index}
-              >
-                {encounter.hasOwnProperty("discoveryType") ? (
-                  <DiscoveryDisplay discoveryData={encounter} />
-                ) : (
-                  <BattleDisplay battleData={encounter} beastName="" />
-                )}
-              </div>
-            ))}
+            {displayEncounters.map((encounter: any, index: number) => {
+              const beastName = processBeastName(encounter.beast, adventurer);
+              return (
+                <div
+                  className="w-full p-2 text-left border border-terminal-green"
+                  key={index}
+                >
+                  {encounter.hasOwnProperty("discoveryType") ? (
+                    <DiscoveryDisplay discoveryData={encounter} />
+                  ) : (
+                    <BattleDisplay
+                      battleData={encounter}
+                      beastName={beastName}
+                    />
+                  )}
+                </div>
+              );
+            })}
           </div>
         </>
       ) : (

@@ -38,7 +38,7 @@ const getAdventurer = gql`
 
 const getBeasts = gql`
   query get_beasts {
-    beasts {
+    beasts(limit: 1000000) {
       adventurerId
       armorType
       attackType

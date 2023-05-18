@@ -11,6 +11,7 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { useState } from "react";
 import useUIStore from "../hooks/useUIStore";
+import { processBeastName } from "../lib/utils";
 
 export default function Beast() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -117,6 +118,8 @@ export default function Beast() {
 
   const isBeastDead = beastData?.health == "0";
 
+  const beastName = processBeastName(beastData, adventurer);
+
   return (
     <div className="flex flex-row overflow-hidden">
       <div className="w-1/3">
@@ -136,7 +139,7 @@ export default function Beast() {
                   <BattleDisplay
                     key={index}
                     battleData={battle}
-                    beastName={beastData.beast}
+                    beastName={beastName}
                   />
                 ))}
               </div>
