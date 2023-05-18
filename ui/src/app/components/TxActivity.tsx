@@ -94,12 +94,6 @@ export const TxActivity = () => {
     }
   }, [pendingMessage, messageIndex]);
 
-  console.log(
-    loading,
-    loadingQuery && isDataUpdated[loadingQuery],
-    queryData.discoveryByTxHashQuery
-  );
-
   return (
     <>
       {type != "Multicall" && type != "Create" ? (

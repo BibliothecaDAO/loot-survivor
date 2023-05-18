@@ -39,6 +39,11 @@ export const BattleDisplay = ({
               damage!
             </p>
           )
+        ) : battleData.damage == 0 ? (
+          <p>
+            You were counter attacked by the {beastName} but defended the
+            attack!
+          </p>
         ) : (
           <p>
             You were counter attacked by the {beastName} taking{" "}
@@ -70,7 +75,7 @@ export const NotificationBattleDisplay = ({
 }: NotificationBattleDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const appUrl = "https://loot-survivor.vercel.app/";
-  const beastName = processBeastName(battleData, adventurer);
+  const beastName = processBeastName(beast, adventurer);
   const beastLevel = beast?.level;
   const beastTier = beast?.rank;
   const { data } = useQueriesStore();
