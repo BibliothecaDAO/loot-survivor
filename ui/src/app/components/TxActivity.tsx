@@ -48,8 +48,8 @@ export const TxActivity = () => {
       if (type === "Attack" || type === "Flee") {
         if (queryData?.battlesByTxHashQuery) {
           refetch("battlesByTxHashQuery");
-          refetch("battlesByBeastQuery");
           refetch("adventurerByIdQuery");
+          refetch("battlesByBeastQuery");
           stopLoading({
             data: queryData.battlesByTxHashQuery.battles,
             beast: notificationData.beast,

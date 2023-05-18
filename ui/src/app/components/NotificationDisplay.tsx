@@ -5,6 +5,7 @@ import { GameData } from "./GameData";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 import { useCallback, useEffect, useState } from "react";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 interface NotificationDisplayProps {
   type: string;
@@ -17,6 +18,10 @@ const processAnimation = (
   adventurer: any
 ) => {
   const gameData = new GameData();
+  const { data } = useQueriesStore();
+  const battles = data.battlesByBeastQuery
+    ? data.battlesByBeastQuery.battles
+    : [];
   if (type == "Flee") {
     if (
       Array.isArray(notificationData.data) &&
@@ -26,19 +31,17 @@ const processAnimation = (
     } else if (
       Array.isArray(notificationData.data) &&
       notificationData.data.some(
-        (data: any) => data.ambush && data.targetHealth == 0
+        (data: any) => data.attacker == "Beast" && data.targetHealth > 0
+      )
+    ) {
+      return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
+    } else if (
+      Array.isArray(notificationData.data) &&
+      notificationData.data.some(
+        (data: any) => data.attacker == "Beast" && data.targetHealth == 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
-    } else if (
-      Array.isArray(notificationData.data) &&
-      notificationData.data.some((data: any) => data.ambush)
-    ) {
-      if (adventurer?.health === 0) {
-        return gameData.ADVENTURER_ANIMATIONS["Dead"];
-      } else {
-        return gameData.ADVENTURER_ANIMATIONS["Ambush"];
-      }
     }
   } else if (type == "Attack") {
     if (
@@ -60,7 +63,19 @@ const processAnimation = (
     }
   } else if (type == "Explore") {
     if (notificationData?.discoveryType == "Beast") {
-      return gameData.ADVENTURER_ANIMATIONS["DiscoverBeast"];
+      if (
+        Array.isArray(battles) &&
+        battles.some((battle) => battle.ambush && battle.targetHealth > 0)
+      ) {
+        return gameData.ADVENTURER_ANIMATIONS["Ambush"];
+      } else if (
+        Array.isArray(battles) &&
+        battles.some((battle) => battle.ambush && battle.targetHealth == 0)
+      ) {
+        return gameData.ADVENTURER_ANIMATIONS["Dead"];
+      } else {
+        return gameData.ADVENTURER_ANIMATIONS["DiscoverBeast"];
+      }
     } else if (notificationData?.discoveryType == "Obstacle") {
       if (notificationData?.outputAmount > 0) {
         if (adventurer?.health === 0) {

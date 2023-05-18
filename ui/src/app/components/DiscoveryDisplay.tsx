@@ -22,7 +22,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const beasts = data.beastsQuery ? data.beastsQuery.beasts : [];
 
   let beast = beasts.find(
-    (beasts: any) => discoveryData.entityId === beasts.id
+    (beasts: any) => discoveryData?.entityId === beasts?.id
   );
   const beastName = processBeastName(beast, adventurer);
 
@@ -72,8 +72,8 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       } else {
         return (
           <p>
-            OUCH! You discovered the {discoveryData?.subDiscoveryType} obstacle,
-            it did {discoveryData?.outputAmount} damage!
+            OUCH! You were hit by the {discoveryData?.subDiscoveryType}{" "}
+            obstacle, it did {discoveryData?.outputAmount} damage!
           </p>
         );
       }

@@ -84,26 +84,36 @@ export const NotificationBattleDisplay = ({
     data.adventurersByXPQuery.adventurers ?? []
   );
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
+  const isArray = Array.isArray(battleData);
   return (
     <div>
-      {Array.isArray(battleData) &&
-      battleData.some((data) => data.fled) &&
-      battleData.some((data) => data.attacker == "Beast") ? (
-        <p>
-          You failed to flee the {beastName ? beastName : ""} and were attacked
-          taking {battleData[0].damage}!
-        </p>
-      ) : Array.isArray(battleData) && battleData.some((data) => data.fled) ? (
+      {isArray && battleData.some((data) => data.fled) ? (
         <p>You fled the {beastName ? beastName : ""}!</p>
       ) : battleData.ambushed && battleData.targetHealth == 0 ? (
         <p>
-          You were killed by the {beastName ? beastName : ""}, from an ambushed
+          You were killed by the {beastName ? beastName : ""}, from an ambush
           taking {battleData.damage}!
         </p>
-      ) : battleData.ambushed ? (
+      ) : isArray && battleData.length == 1 && battleData[0].ambushed ? (
         <p>
           You were ambushed by the {beastName ? beastName : ""}, taking{" "}
-          {battleData.damage}!
+          {battleData[0].damage}!
+        </p>
+      ) : isArray &&
+        battleData.length == 1 &&
+        battleData[0].attacker == "Beast" &&
+        battleData[0].targetHealth > 0 ? (
+        <p>
+          You failed to flee the {beastName ? beastName : ""} and were attacked
+          taking {battleData[0].damage} damage!{" "}
+        </p>
+      ) : isArray &&
+        battleData.length == 1 &&
+        battleData[0].attacker == "Beast" &&
+        battleData[0].targetHealth == 0 ? (
+        <p>
+          You were killed trying to flee the {beastName ? beastName : ""}
+          taking {battleData[0].damage} damage!{" "}
         </p>
       ) : (
         battleData[0]?.attacker == "Adventurer" &&
