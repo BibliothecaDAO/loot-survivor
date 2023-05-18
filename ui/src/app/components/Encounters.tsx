@@ -4,8 +4,6 @@ import { DiscoveryDisplay } from "./DiscoveryDisplay";
 import { BattleDisplay } from "./BattleDisplay";
 import LootIconLoader from "./Loader";
 import { Button } from "./Button";
-import useCustomQuery from "../hooks/useCustomQuery";
-import { getBeasts } from "../hooks/graphql/queries";
 import { NullBeast } from "../types";
 import { processBeastName } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
@@ -18,8 +16,6 @@ export const Encounters = () => {
 
   const [loadingData, setLoadingData] = useState(true);
   const [sortedCombined, setSortedCombined] = useState<any[]>([]);
-
-  useCustomQuery("beastsQuery", getBeasts);
 
   const beasts = data.beastsQuery ? data.beastsQuery.beasts : [];
 

@@ -30,6 +30,7 @@ import {
   getAdventurersInList,
   getAdventurersInListByXp,
   getBattleByTxHash,
+  getBeasts,
   getLastDiscovery,
   getAdventurerByXP,
   getDiscoveries,
@@ -94,6 +95,8 @@ export default function Home() {
   const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers
     : [];
+
+  useCustomQuery("beastsQuery", getBeasts);
 
   useCustomQuery("adventurerByIdQuery", getAdventurerById, {
     id: adventurer?.id ?? 0,
