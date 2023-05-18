@@ -101,32 +101,34 @@ export const Encounters = () => {
       ) : (
         <p>You have not yet made any encounters!</p>
       )}
-      <div className="flex justify-center mt-8">
-        <Button
-          variant={"outline"}
-          onClick={() => handleClick(currentPage - 1)}
-        >
-          back
-        </Button>
-        {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-          (pageNum: number) => (
-            <Button
-              variant={"outline"}
-              key={pageNum}
-              onClick={() => handleClick(pageNum)}
-              className={currentPage === pageNum ? "animate-pulse" : ""}
-            >
-              {pageNum}
-            </Button>
-          )
-        )}
-        <Button
-          variant={"outline"}
-          onClick={() => handleClick(currentPage + 1)}
-        >
-          next
-        </Button>
-      </div>
+      {sortedCombined.length > 10 && (
+        <div className="flex justify-center mt-8">
+          <Button
+            variant={"outline"}
+            onClick={() => handleClick(currentPage - 1)}
+          >
+            back
+          </Button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+            (pageNum: number) => (
+              <Button
+                variant={"outline"}
+                key={pageNum}
+                onClick={() => handleClick(pageNum)}
+                className={currentPage === pageNum ? "animate-pulse" : ""}
+              >
+                {pageNum}
+              </Button>
+            )
+          )}
+          <Button
+            variant={"outline"}
+            onClick={() => handleClick(currentPage + 1)}
+          >
+            next
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

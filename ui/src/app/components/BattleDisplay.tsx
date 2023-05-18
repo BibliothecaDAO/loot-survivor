@@ -2,6 +2,7 @@ import TwitterShareButton from "./TwitterShareButtons";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
+import { processBeastName } from "../lib/utils";
 
 interface BattleDisplayProps {
   battleData: any;
@@ -69,7 +70,7 @@ export const NotificationBattleDisplay = ({
 }: NotificationBattleDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const appUrl = "https://loot-survivor.vercel.app/";
-  const beastName = beast?.beast;
+  const beastName = processBeastName(battleData, adventurer);
   const beastLevel = beast?.level;
   const beastTier = beast?.rank;
   const { data } = useQueriesStore();
@@ -87,7 +88,7 @@ export const NotificationBattleDisplay = ({
           You failed to flee the {beastName ? beastName : ""} and were attacked
           taking {battleData[0].damage}!
         </p>
-      ) : battleData.fled ? (
+      ) : Array.isArray(battleData) && battleData.some((data) => data.fled) ? (
         <p>You fled the {beastName ? beastName : ""}!</p>
       ) : battleData.ambushed && battleData.targetHealth == 0 ? (
         <p>

@@ -69,6 +69,11 @@ export const TxActivity = () => {
           setAccepted(false);
           resetDataUpdated(loadingQuery);
         }
+      } else if (type == "Upgrade") {
+        refetch("adventurerByIdQuery");
+        stopLoading(notificationData);
+        setAccepted(false);
+        resetDataUpdated(loadingQuery);
       }
 
       // Handle other types
@@ -88,6 +93,12 @@ export const TxActivity = () => {
       return () => clearInterval(interval); // This is important, it will clear the interval when the component is unmounted.
     }
   }, [pendingMessage, messageIndex]);
+
+  console.log(
+    loading,
+    loadingQuery && isDataUpdated[loadingQuery],
+    queryData.discoveryByTxHashQuery
+  );
 
   return (
     <>

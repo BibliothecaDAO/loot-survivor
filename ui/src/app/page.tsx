@@ -49,10 +49,9 @@ import {
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
-import SpriteAnimation from "./components/SpriteAnimation";
 import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/NotificationDisplay";
-import { useMusic, musicSelector } from "./hooks/useMusic";
+import { useMusic } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
 import { Menu, NullAdventurer } from "./types";
 import useCustomQuery from "./hooks/useCustomQuery";

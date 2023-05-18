@@ -149,7 +149,20 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
   updateData: (queryKey, newData, loading, refetch) => {
     set((state) => {
       const oldData = state.data[queryKey];
+      const queryKeysToIgnore = [
+        "battlesByTxHashQuery",
+        "discoveryByTxHashQuery",
+      ];
+      const hasEmptyArray =
+        newData && typeof newData === "object"
+          ? Object.values(newData).some(
+              (arr) => Array.isArray(arr) && arr.length === 0
+            )
+          : false;
+      const ignoreDataChange =
+        queryKeysToIgnore.includes(queryKey) && hasEmptyArray;
       const isDataChanged =
+        !ignoreDataChange &&
         (oldData !== null ||
           (newData && Object.values(newData).some((arr: any) => arr.length))) &&
         !isEqual(oldData, newData);

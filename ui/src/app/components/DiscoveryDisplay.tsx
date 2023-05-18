@@ -27,12 +27,10 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const beastName = processBeastName(beast, adventurer);
 
   const { data: discoveryBattleData } = useQuery(getBattlesByBeast, {
-    variables: { adventurerId: adventurer?.id ?? 0, beastId: beast.id },
+    variables: { adventurerId: adventurer?.id ?? 0, beastId: beast?.id },
   });
 
-  let discoveryBattles = discoveryBattleData
-    ? discoveryBattleData.battles[0]
-    : [];
+  let discoveryBattles = discoveryBattleData ? discoveryBattleData.battles : [];
 
   const renderDiscoveryMessage = () => {
     if (discoveryData?.discoveryType === "Nothing") {
