@@ -55,8 +55,27 @@ const getBeasts = gql`
   }
 `;
 
-const getLatestDiscoveries = gql`
+const getDiscoveries = gql`
   query get_discoveries($adventurerId: FeltValue) {
+    discoveries(
+      where: { adventurerId: { eq: $adventurerId } }
+      limit: 1000000
+      orderBy: { discoveryTime: { desc: true } }
+    ) {
+      adventurerId
+      attackLocation
+      discoveryTime
+      discoveryType
+      entityId
+      outputAmount
+      subDiscoveryType
+      txHash
+    }
+  }
+`;
+
+const getLatestDiscoveries = gql`
+  query get_latest_discoveries($adventurerId: FeltValue) {
     discoveries(
       where: { adventurerId: { eq: $adventurerId } }
       limit: 10
@@ -418,6 +437,19 @@ const getLatestBattlesByAdventurer = gql`
   }
 `;
 
+const getBattlesByAdventurer = gql`
+  ${BATTLE_FRAGMENT}
+  query get_battles($adventurerId: FeltValue) {
+    battles(
+      limit: 1000000
+      orderBy: { timestamp: { desc: true } }
+      where: { adventurerId: { eq: $adventurerId } }
+    ) {
+      ...BattleFields
+    }
+  }
+`;
+
 const getBattlesByBeast = gql`
   ${BATTLE_FRAGMENT}
   query get_battles_by_beast($adventurerId: FeltValue, $beastId: FeltValue) {
@@ -563,6 +595,7 @@ const getTopScores = gql`
 
 export {
   getAdventurer,
+  getDiscoveries,
   getLatestDiscoveries,
   getLastDiscovery,
   getDiscoveryByTxHash,
@@ -576,6 +609,7 @@ export {
   getLatestBattlesByAdventurer,
   getBattlesByBeast,
   getLastBattleByAdventurer,
+  getBattlesByAdventurer,
   getBattleByTxHash,
   getItems,
   getItemsByTokenId,

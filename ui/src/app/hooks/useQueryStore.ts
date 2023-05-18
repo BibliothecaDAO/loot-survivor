@@ -3,9 +3,11 @@ import { isEqual } from "lodash";
 
 export type QueryKey =
   | "lastBattleQuery"
+  | "battlesByAdventurerQuery"
   | "battlesByBeastQuery"
   | "battlesByTxHashQuery"
   | "beastByIdQuery"
+  | "discoveriesQuery"
   | "latestDiscoveriesQuery"
   | "discoveryByTxHashQuery"
   | "adventurersByOwnerQuery"
@@ -39,9 +41,11 @@ type QueriesState = {
 
 const initialData: Record<QueryKey, any> = {
   lastBattleQuery: null,
+  battlesByAdventurerQuery: null,
   battlesByBeastQuery: null,
   battlesByTxHashQuery: null,
   beastByIdQuery: null,
+  discoveriesQuery: null,
   latestDiscoveriesQuery: null,
   discoveryByTxHashQuery: null,
   adventurersByOwnerQuery: null,
@@ -61,9 +65,11 @@ const initialData: Record<QueryKey, any> = {
 
 const initialLoading: Record<QueryKey, boolean> = {
   lastBattleQuery: false,
+  battlesByAdventurerQuery: false,
   battlesByBeastQuery: false,
   battlesByTxHashQuery: false,
   beastByIdQuery: false,
+  discoveriesQuery: false,
   latestDiscoveriesQuery: false,
   discoveryByTxHashQuery: false,
   adventurersByOwnerQuery: false,
@@ -83,9 +89,11 @@ const initialLoading: Record<QueryKey, boolean> = {
 
 const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
   lastBattleQuery: false,
+  battlesByAdventurerQuery: false,
   battlesByBeastQuery: false,
   battlesByTxHashQuery: false,
   beastByIdQuery: false,
+  discoveriesQuery: false,
   latestDiscoveriesQuery: false,
   discoveryByTxHashQuery: false,
   adventurersByOwnerQuery: false,
@@ -106,9 +114,11 @@ const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
 
 const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   lastBattleQuery: async () => {},
+  battlesByAdventurerQuery: async () => {},
   battlesByBeastQuery: async () => {},
   battlesByTxHashQuery: async () => {},
   beastByIdQuery: async () => {},
+  discoveriesQuery: async () => {},
   latestDiscoveriesQuery: async () => {},
   discoveryByTxHashQuery: async () => {},
   adventurersByOwnerQuery: async () => {},
