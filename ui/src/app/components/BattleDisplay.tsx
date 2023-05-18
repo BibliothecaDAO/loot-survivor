@@ -123,7 +123,8 @@ export const NotificationBattleDisplay = ({
             and dealt {battleData[0]?.damage} damage! They counterattacked for{" "}
             {battleData[1]?.damage} damage!
           </p>
-        ) : battleData[0]?.targetHealth == 0 ? (
+        ) : battleData[0]?.attacker == "Adventurer" &&
+          battleData[0]?.targetHealth == 0 ? (
           <div className="flex flex-col gap-2 items-center justify-center">
             <p>
               You slayed the {beastName ? beastName : ""} after inflicting{" "}
