@@ -32,15 +32,6 @@ const Marketplace = () => {
 
   const { data, isLoading } = useQueriesStore();
 
-  useCustomQuery(
-    "unclaimedItemsByAdventurerQuery",
-    getUnclaimedItemsByAdventurer,
-    {
-      bidder: adventurer?.id,
-      status: "Open",
-    }
-  );
-
   const currentTime = new Date().getTime();
 
   const claimExists = () => {

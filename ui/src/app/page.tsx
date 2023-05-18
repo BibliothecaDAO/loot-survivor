@@ -45,6 +45,7 @@ import {
   getBeastById,
   getTopScores,
   getItemsByAdventurer,
+  getUnclaimedItemsByAdventurer,
 } from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
@@ -169,6 +170,15 @@ export default function Home() {
   useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
     adventurer: profile ?? 0,
   });
+
+  useCustomQuery(
+    "unclaimedItemsByAdventurerQuery",
+    getUnclaimedItemsByAdventurer,
+    {
+      bidder: adventurer?.id,
+      status: "Open",
+    }
+  );
 
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]

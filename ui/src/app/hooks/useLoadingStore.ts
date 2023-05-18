@@ -71,7 +71,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       () =>
         set({
           type: "",
-          notificationData: undefined,
+          // notificationData: undefined,
           showNotification: false,
           adventurer: undefined,
         }),
