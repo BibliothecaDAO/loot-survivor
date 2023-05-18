@@ -15,13 +15,10 @@ interface NotificationDisplayProps {
 const processAnimation = (
   type: string,
   notificationData: any,
-  adventurer: any
+  adventurer: any,
+  battles: any[]
 ) => {
   const gameData = new GameData();
-  const { data } = useQueriesStore();
-  const battles = data.battlesByBeastQuery
-    ? data.battlesByBeastQuery.battles
-    : [];
   if (type == "Flee") {
     if (
       Array.isArray(notificationData.data) &&
@@ -148,7 +145,16 @@ export const NotificationDisplay = ({
   const gameData = new GameData();
 
   const { adventurer } = useAdventurerStore();
-  const animation = processAnimation(type, notificationData, adventurer);
+  const { data } = useQueriesStore();
+  const battles = data.battlesByBeastQuery
+    ? data.battlesByBeastQuery.battles
+    : [];
+  const animation = processAnimation(
+    type,
+    notificationData,
+    adventurer,
+    battles
+  );
   const notification = processNotification(type, notificationData, adventurer);
 
   const [setSound, setSoundState] = useState(soundSelector.click);
