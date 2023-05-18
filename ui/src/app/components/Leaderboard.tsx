@@ -69,11 +69,11 @@ const Leaderboard: React.FC = () => {
     return currentRank;
   };
 
-  console.log(data.adventurersInListQuery?.adventurers);
-
   const scores = data.adventurersInListByXpQuery?.adventurers
     ? data.adventurersInListByXpQuery?.adventurers
     : [];
+
+  console.log(scores);
 
   return (
     <div className="flex flex-col items-center w-3/4 m-auto">

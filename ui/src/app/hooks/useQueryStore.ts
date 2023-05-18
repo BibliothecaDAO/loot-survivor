@@ -154,7 +154,6 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
           (newData && Object.values(newData).some((arr: any) => arr.length))) &&
         !isEqual(oldData, newData);
       if (isDataChanged && newData !== undefined) {
-        console.log("Updated!", state.data[queryKey], newData);
         return {
           ...state,
           data: { ...state.data, [queryKey]: newData },

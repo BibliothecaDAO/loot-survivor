@@ -6,6 +6,8 @@ import ItemDisplay from "./LootIcon";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { processBeastName } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import { NullBattle, NullBeast } from "../types";
+import { getBattlesByBeast } from "../hooks/graphql/queries";
 
 interface DiscoveryProps {
   discoveryData: any;
@@ -19,29 +21,18 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   });
   const beasts = data.beastsQuery ? data.beastsQuery.beasts : [];
 
-  const { data: queriesData } = useQueriesStore();
+  let beast = beasts.find(
+    (beasts: any) => discoveryData.entityId === beasts.id
+  );
+  const beastName = processBeastName(beast, adventurer);
 
-  let beastData = queriesData.beastByIdQuery
-    ? queriesData.beastByIdQuery.beasts[0]
-    : NullBeast;
+  const { data: discoveryBattleData } = useQuery(getBattlesByBeast, {
+    variables: { adventurerId: adventurer?.id ?? 0, beastId: beast.id },
+  });
 
-  const beastName = beastData ? beastData.beast : "";
-
-  let battleData = queriesData.battlesByBeastQuery
-    ? queriesData.battlesByBeastQuery.battles[0]
-    : NullBattle;
-
-  const { data: queriesData } = useQueriesStore();
-
-  let beastData = queriesData.beastByIdQuery
-    ? queriesData.beastByIdQuery.beasts[0]
-    : NullBeast;
-
-  const beastName = beastData ? beastData.beast : "";
-
-  let battleData = queriesData.battlesByBeastQuery
-    ? queriesData.battlesByBeastQuery.battles[0]
-    : NullBattle;
+  let discoveryBattles = discoveryBattleData
+    ? discoveryBattleData.battles[0]
+    : [];
 
   const renderDiscoveryMessage = () => {
     if (discoveryData?.discoveryType === "Nothing") {
@@ -49,13 +40,11 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     }
 
     if (discoveryData?.discoveryType === "Beast") {
-      let beast = beasts.find(
-        (beasts: any) => discoveryData.entityId === beasts.id
-      );
-      const beastName = processBeastName(beast, adventurer);
-      return <p>OH NO! You discovered {beastName}!</p>;
-      if (battleData && battleData.ambush) {
-        <p>YIKES! You were ambushed by a {beastName}</p>;
+      if (
+        discoveryBattles &&
+        discoveryBattles.some((battle: any) => battle.ambush === true)
+      ) {
+        return <p>YIKES! You were ambushed by a {beastName}</p>;
       } else {
         return <p>OH NO! You discovered a {beastName}!</p>;
       }

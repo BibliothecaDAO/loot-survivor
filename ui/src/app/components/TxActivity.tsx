@@ -41,9 +41,6 @@ export const TxActivity = () => {
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
 
-  console.log(pendingArray);
-  console.log(pendingMessage);
-
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
     if (accepted && hash && loadingQuery && isDataUpdated[loadingQuery]) {

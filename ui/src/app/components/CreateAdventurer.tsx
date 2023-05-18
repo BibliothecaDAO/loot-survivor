@@ -186,8 +186,6 @@ export const CreateAdventurer = ({
     };
   }, [isActive, selectedIndex]);
 
-  console.log(adventurers[0] && firstAdventurer);
-
   useEffect(() => {
     if (adventurers[0] && firstAdventurer) {
       setScreen("actions");

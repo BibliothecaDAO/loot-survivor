@@ -102,6 +102,8 @@ export default function Home() {
     id: adventurer?.id ?? 0,
   });
 
+  console.log(data.topScoresQuery?.scores);
+
   useCustomQuery("adventurersInListByXpQuery", getAdventurersInListByXp, {
     ids: data.topScoresQuery?.scores
       ? data.topScoresQuery?.scores.map((score: any) => score.adventurerId)
