@@ -1,12 +1,16 @@
 import TwitterShareButton from "./TwitterShareButtons";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import useLoadingStore from "../hooks/useLoadingStore";
 import { Button } from "./Button";
 import useUIStore from "../hooks/useUIStore";
 import Image from "next/image";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
+import { processNotification } from "./NotificationDisplay";
 
 export const DeathDialog = () => {
+  const type = useLoadingStore((state) => state.type);
+  const notificationData = useLoadingStore((state) => state.notificationData);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const showDialog = useUIStore((state) => state.showDialog);
   const appUrl = "https://loot-survivor.vercel.app/";
@@ -16,6 +20,7 @@ export const DeathDialog = () => {
     data.adventurersByXPQuery.adventurers ?? []
   );
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
+  const notification = processNotification(type, notificationData, adventurer);
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
@@ -31,6 +36,7 @@ export const DeathDialog = () => {
           </div>
           <div className="flex flex-col gap-2 items-center justify-center">
             <p className="text-4xl">GAME OVER!</p>
+            {notification}
             <p className="text-2xl">
               {adventurer?.name} has died level {adventurer?.level} with{" "}
               {adventurer?.xp} xp, a valiant effort!
