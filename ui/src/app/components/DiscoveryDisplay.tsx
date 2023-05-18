@@ -19,6 +19,30 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   });
   const beasts = data.beastsQuery ? data.beastsQuery.beasts : [];
 
+  const { data: queriesData } = useQueriesStore();
+
+  let beastData = queriesData.beastByIdQuery
+    ? queriesData.beastByIdQuery.beasts[0]
+    : NullBeast;
+
+  const beastName = beastData ? beastData.beast : "";
+
+  let battleData = queriesData.battlesByBeastQuery
+    ? queriesData.battlesByBeastQuery.battles[0]
+    : NullBattle;
+
+  const { data: queriesData } = useQueriesStore();
+
+  let beastData = queriesData.beastByIdQuery
+    ? queriesData.beastByIdQuery.beasts[0]
+    : NullBeast;
+
+  const beastName = beastData ? beastData.beast : "";
+
+  let battleData = queriesData.battlesByBeastQuery
+    ? queriesData.battlesByBeastQuery.battles[0]
+    : NullBattle;
+
   const renderDiscoveryMessage = () => {
     if (discoveryData?.discoveryType === "Nothing") {
       return <p>NICE! You discovered {discoveryData.outputAmount} xp!</p>;
@@ -30,6 +54,11 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       );
       const beastName = processBeastName(beast, adventurer);
       return <p>OH NO! You discovered {beastName}!</p>;
+      if (battleData && battleData.ambush) {
+        <p>YIKES! You were ambushed by a {beastName}</p>;
+      } else {
+        return <p>OH NO! You discovered a {beastName}!</p>;
+      }
     }
 
     if (discoveryData?.discoveryType === "Obstacle") {
