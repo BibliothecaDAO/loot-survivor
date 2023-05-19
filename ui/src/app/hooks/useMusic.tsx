@@ -1,7 +1,7 @@
 "use effect";
 
 import useSound from "use-sound";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 const dir = "/music/ui/";
 
@@ -16,6 +16,7 @@ export const useMusic = (
   options?: { volume?: number; loop?: boolean }
 ) => {
   const [music, setMusic] = useState<string>(musicSelector.backgroundMusic);
+  const stopRef = useRef<() => void>();
 
   const [play, { stop }] = useSound(dir + music, {
     volume: options?.volume || 0.1,
@@ -27,7 +28,11 @@ export const useMusic = (
   }, []);
 
   useEffect(() => {
-    stop();
+    if (stopRef.current) {
+      stopRef.current();
+    }
+    stopRef.current = stop;
+
     if (playState.isInBattle) {
       setMusic(musicSelector.battle);
     } else if (playState.isDead) {
