@@ -11,6 +11,7 @@ import useOnClickOutside from "../hooks/useOnClickOutside";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { processNotification } from "./NotificationDisplay";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 const TransactionHistory = () => {
   const wrapperRef = useRef<HTMLDivElement>(null); // Update the type here
@@ -24,6 +25,7 @@ const TransactionHistory = () => {
     hash,
     watch: true,
   });
+  const { data: queryData } = useQueriesStore();
 
   const method = (transactions[0]?.metadata as Metadata)?.method;
 
@@ -52,11 +54,20 @@ const TransactionHistory = () => {
                     (response) => response.hash == tx.hash
                   );
                   let notification: React.ReactNode = null;
+                  const battles = queryData.battlesByBeastQuery
+                    ? queryData.battlesByBeastQuery.battles
+                    : [];
+                  const beast = queryData.beastByIdQuery
+                    ? queryData.beastByIdQuery.beasts[0]
+                    : [];
                   if (response) {
                     notification = processNotification(
                       response.type,
                       response.notificationData,
-                      adventurer
+                      adventurer,
+                      battles,
+                      !!adventurer?.beastId,
+                      beast
                     );
                   }
                   return (
