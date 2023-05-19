@@ -20,7 +20,7 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
     contractAddress: adventurerContract?.address ?? "",
     entrypoint: "purchase_health",
     calldata: [adventurer?.id ?? "", "0", healthAmount],
-    metadata: `Purchasing ${healthAmount}`,
+    metadata: `Purchasing ${healthAmount * 10} health`,
   };
   const purchaseGoldAmount = healthAmount * 5;
   const hasBalance =
