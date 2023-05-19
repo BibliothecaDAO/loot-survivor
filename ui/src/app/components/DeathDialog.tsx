@@ -19,8 +19,19 @@ export const DeathDialog = () => {
     adventurer?.id ?? 0,
     data.adventurersByXPQuery.adventurers ?? []
   );
+  const battles = data.battlesByBeastQuery
+    ? data.battlesByBeastQuery.battles
+    : [];
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
-  const notification = processNotification(type, notificationData, adventurer);
+  const beast = data.beastByIdQuery ? data.beastByIdQuery.beasts[0] : [];
+  const notification = processNotification(
+    type,
+    notificationData,
+    adventurer,
+    battles,
+    !!adventurer?.beastId,
+    beast
+  );
   console.log(notificationData);
   return (
     <>

@@ -67,11 +67,13 @@ export const BattleDisplay = ({
 interface NotificationBattleDisplayProps {
   battleData: any;
   beast: any;
+  type: string;
 }
 
 export const NotificationBattleDisplay = ({
   battleData,
   beast,
+  type,
 }: NotificationBattleDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const appUrl = "https://loot-survivor.vercel.app/";
@@ -89,10 +91,12 @@ export const NotificationBattleDisplay = ({
     <div>
       {isArray && battleData.some((data) => data.fled) ? (
         <p>You fled the {beastName ? beastName : ""}!</p>
-      ) : battleData.ambushed && battleData.targetHealth == 0 ? (
+      ) : isArray &&
+        battleData[0].ambushed &&
+        battleData[0].targetHealth == 0 ? (
         <p>
           You were killed by the {beastName ? beastName : ""}, from an ambush
-          taking {battleData.damage}!
+          taking {battleData[0].damage}!
         </p>
       ) : isArray && battleData.length == 1 && battleData[0].ambushed ? (
         <p>
@@ -100,6 +104,7 @@ export const NotificationBattleDisplay = ({
           {battleData[0].damage}!
         </p>
       ) : isArray &&
+        type == "Flee" &&
         battleData.length == 1 &&
         battleData[0].attacker == "Beast" &&
         battleData[0].targetHealth > 0 ? (
@@ -108,6 +113,7 @@ export const NotificationBattleDisplay = ({
           taking {battleData[0].damage} damage!{" "}
         </p>
       ) : isArray &&
+        type == "Flee" &&
         battleData.length == 1 &&
         battleData[0].attacker == "Beast" &&
         battleData[0].targetHealth == 0 ? (

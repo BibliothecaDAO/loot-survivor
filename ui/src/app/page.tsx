@@ -438,6 +438,7 @@ export default function Home() {
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}
+                hasBeast={hasBeast}
               />
             </div>
           </CSSTransition>

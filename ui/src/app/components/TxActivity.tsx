@@ -74,6 +74,15 @@ export const TxActivity = () => {
         stopLoading(notificationData);
         setAccepted(false);
         resetDataUpdated(loadingQuery);
+      } else if (
+        type == "Multicall" &&
+        notificationData.some((noti: string) => noti.startsWith("You equipped"))
+      ) {
+        refetch("adventurerByIdQuery");
+        refetch("battlesByBeastQuery");
+        stopLoading(notificationData);
+        setAccepted(false);
+        resetDataUpdated(loadingQuery);
       }
 
       // Handle other types

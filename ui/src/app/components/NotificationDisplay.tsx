@@ -6,17 +6,20 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 import { useCallback, useEffect, useState } from "react";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import { processBeastName } from "../lib/utils";
 
 interface NotificationDisplayProps {
   type: string;
   notificationData: any;
+  hasBeast: boolean;
 }
 
 const processAnimation = (
   type: string,
   notificationData: any,
   adventurer: any,
-  battles: any[]
+  battles: any[],
+  hasBeast: boolean
 ) => {
   const gameData = new GameData();
   if (type == "Flee") {
@@ -88,6 +91,12 @@ const processAnimation = (
     } else if (notificationData?.discoveryType == "Nothing") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
     }
+  } else if (type == "Multicall") {
+    if (hasBeast) {
+      return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
+    } else {
+      return gameData.ADVENTURER_ANIMATIONS[type];
+    }
   } else {
     return gameData.ADVENTURER_ANIMATIONS[type];
   }
@@ -96,13 +105,17 @@ const processAnimation = (
 export const processNotification = (
   type: string,
   notificationData: any,
-  adventurer: any
+  adventurer: any,
+  battles: any[],
+  hasBeast: boolean,
+  beast: any
 ) => {
   if (type == "Attack" || type == "Flee") {
     return (
       <NotificationBattleDisplay
         battleData={notificationData.data}
         beast={notificationData.beast ? notificationData.beast : ""}
+        type={type}
       />
     );
   } else if (type == "Explore") {
@@ -118,12 +131,43 @@ export const processNotification = (
     return (
       <div className="flex flex-col">
         {(notificationData as string[]).map((noti: any, index: number) => {
-          if (noti.startsWith("You equipped") && adventurer?.health == 0) {
-            return (
-              <p key={index} className="text-lg">
-                You were slaughtered by the beast after trying to equip an item!
-              </p>
-            );
+          if (hasBeast) {
+            if (
+              noti.startsWith("You equipped") &&
+              battles[0].attacker == "Beast" &&
+              battles[0].targetHealth == 0
+            ) {
+              return (
+                <p key={index} className="text-lg">
+                  You were slaughtered by the beast after trying to equip an
+                  item!
+                </p>
+              );
+            } else if (
+              noti.startsWith("You equipped") &&
+              battles[0].attacker == "Beast" &&
+              battles[0].targetHealth > 0 &&
+              battles[0].damage > 0
+            ) {
+              return (
+                <p key={index} className="text-lg">
+                  You were attacked by the {processBeastName(beast, adventurer)}{" "}
+                  after equipping an item taking {battles[0].damage}!
+                </p>
+              );
+            } else if (
+              noti.startsWith("You equipped") &&
+              battles[0].attacker == "Beast" &&
+              battles[0].targetHealth > 0 &&
+              battles[0].damage == 0
+            ) {
+              return (
+                <p key={index} className="text-lg">
+                  You were attacked by the {processBeastName(beast, adventurer)}{" "}
+                  after equipping an item but defended it!
+                </p>
+              );
+            }
           }
           return (
             <p key={index} className="text-lg">
@@ -141,6 +185,7 @@ export const processNotification = (
 export const NotificationDisplay = ({
   type,
   notificationData,
+  hasBeast,
 }: NotificationDisplayProps) => {
   const gameData = new GameData();
 
@@ -149,13 +194,22 @@ export const NotificationDisplay = ({
   const battles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
     : [];
+  const beast = data.beastByIdQuery ? data.beastByIdQuery.beasts[0] : [];
   const animation = processAnimation(
     type,
     notificationData,
     adventurer,
-    battles
+    battles,
+    hasBeast
   );
-  const notification = processNotification(type, notificationData, adventurer);
+  const notification = processNotification(
+    type,
+    notificationData,
+    adventurer,
+    battles,
+    hasBeast,
+    beast
+  );
 
   const [setSound, setSoundState] = useState(soundSelector.click);
 
