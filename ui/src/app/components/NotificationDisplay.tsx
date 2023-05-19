@@ -134,8 +134,8 @@ export const processNotification = (
           if (hasBeast) {
             if (
               noti.startsWith("You equipped") &&
-              battles[0].attacker == "Beast" &&
-              battles[0].targetHealth == 0
+              battles[0]?.attacker == "Beast" &&
+              battles[0]?.targetHealth == 0
             ) {
               return (
                 <p key={index} className="text-lg">
@@ -145,9 +145,9 @@ export const processNotification = (
               );
             } else if (
               noti.startsWith("You equipped") &&
-              battles[0].attacker == "Beast" &&
-              battles[0].targetHealth > 0 &&
-              battles[0].damage > 0
+              battles[0]?.attacker == "Beast" &&
+              battles[0]?.targetHealth > 0 &&
+              battles[0]?.damage > 0
             ) {
               return (
                 <p key={index} className="text-lg">
@@ -157,9 +157,9 @@ export const processNotification = (
               );
             } else if (
               noti.startsWith("You equipped") &&
-              battles[0].attacker == "Beast" &&
-              battles[0].targetHealth > 0 &&
-              battles[0].damage == 0
+              battles[0]?.attacker == "Beast" &&
+              battles[0]?.targetHealth > 0 &&
+              battles[0]?.damage == 0
             ) {
               return (
                 <p key={index} className="text-lg">
