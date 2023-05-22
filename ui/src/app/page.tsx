@@ -292,32 +292,32 @@ export default function Home() {
         },
       ];
 
-      if (adventurer && adventurer.health > 0) {
+      if (adventurer) {
         newMenu = [
           ...newMenu,
           {
             id: 2,
             label: "Actions",
             screen: "actions",
-            disabled: hasBeast || upgrade,
+            disabled: hasBeast || upgrade || adventurer.health == 0,
           },
           {
             id: 3,
             label: "Market",
             screen: "market",
-            disabled: hasBeast || upgrade,
+            disabled: hasBeast || upgrade || adventurer.health == 0,
           },
           {
             id: 4,
             label: "Inventory",
             screen: "inventory",
-            disabled: upgrade,
+            disabled: upgrade || adventurer.health == 0,
           },
           {
             id: 5,
             label: "Beast",
             screen: "beast",
-            disabled: upgrade,
+            disabled: upgrade || adventurer.health == 0,
           },
           {
             id: 6,
