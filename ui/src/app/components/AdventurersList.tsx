@@ -3,8 +3,8 @@ import { Button } from "./Button";
 import Info from "./Info";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { ButtonData } from "./KeyboardControls";
-import useLoadingStore from "../hooks/useLoadingStore";
-import Image from "next/image";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import LootIconLoader from "./Loader";
 
 export interface AdventurerListProps {
   isActive: boolean;
@@ -22,6 +22,8 @@ export const AdventurersList = ({
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
+
+  const { data, refetch, isLoading, isDataUpdated } = useQueriesStore();
 
   const sortedAdventurers = [...adventurers].sort((a, b) => b.level - a.level);
 
@@ -80,6 +82,13 @@ export const AdventurersList = ({
     };
   }, [isActive, handleKeyDown]);
 
+  console.log(
+    isLoading["itemsByAdventurerQuery"],
+    isDataUpdated["itemsByAdventurerQuery"],
+    isLoading["adventurerByIdQuery"],
+    isDataUpdated["adventurerByIdQuery"]
+  );
+
   return (
     <>
       {sortedAdventurers.length > 0 ? (
@@ -112,9 +121,15 @@ export const AdventurersList = ({
               {showZeroHealth ? "Hide" : "Show"} dead
             </Button>
           )}
-          <div className="w-1/2">
-            <Info adventurer={filteredAdventurers[selectedIndex]} />
-          </div>
+          {!isDataUpdated["itemsByAdventurerQuery"] ? (
+            <div className="flex justify-center p-20 align-middle">
+              <LootIconLoader />
+            </div>
+          ) : (
+            <div className="w-1/2">
+              <Info adventurer={filteredAdventurers[selectedIndex]} />
+            </div>
+          )}
         </div>
       ) : (
         <p className="text-lg">You do not have any adventurers!</p>

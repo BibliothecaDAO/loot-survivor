@@ -40,7 +40,9 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     if (discoveryData?.discoveryType === "Beast") {
       if (
         discoveryBattles &&
-        discoveryBattles.some((battle: any) => battle.ambush === true)
+        discoveryBattles.some(
+          (battle: any) => battle.ambush === true && battle.damage > 0
+        )
       ) {
         return <p>YIKES! You were ambushed by a {beastName}</p>;
       } else {

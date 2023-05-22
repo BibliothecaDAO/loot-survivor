@@ -98,10 +98,20 @@ export const NotificationBattleDisplay = ({
           You were killed by the {beastName ? beastName : ""}, from an ambush
           taking {battleData[0].damage}!
         </p>
-      ) : isArray && battleData.length == 1 && battleData[0].ambushed ? (
+      ) : isArray &&
+        battleData.length == 1 &&
+        battleData[0].ambushed &&
+        battleData[0].damage > 0 ? (
         <p>
           You were ambushed by the {beastName ? beastName : ""}, taking{" "}
           {battleData[0].damage}!
+        </p>
+      ) : isArray &&
+        battleData.length == 1 &&
+        battleData[0].ambushed &&
+        battleData[0].damage == 0 ? (
+        <p>
+          You were ambushed by the {beastName ? beastName : ""}, but avoided it!
         </p>
       ) : isArray &&
         type == "Flee" &&

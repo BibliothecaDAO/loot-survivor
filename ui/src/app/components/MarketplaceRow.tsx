@@ -204,8 +204,8 @@ const MarketplaceRow = ({
                 item.claimedTime ||
                 (item.expiry && checkExpired()) ||
                 bidExists(item.marketId) ||
-                checkTransacting(item.marketId) ||
-                checkBidder(item.bidder)
+                checkTransacting(item.marketId)
+                // checkBidder(item.bidder)
               }
               className={bidExists(item.marketId) ? "bg-white" : ""}
             >

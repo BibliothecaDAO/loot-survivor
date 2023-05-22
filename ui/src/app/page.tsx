@@ -381,6 +381,7 @@ export default function Home() {
         setScreen("beast");
       } else {
         handleOnboarded();
+        refetch("adventurersByOwnerQuery");
       }
     }
   }, [onboarded, adventurer, account]);
