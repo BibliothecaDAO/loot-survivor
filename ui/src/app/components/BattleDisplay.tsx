@@ -83,7 +83,7 @@ export const NotificationBattleDisplay = ({
   const { data } = useQueriesStore();
   const rank = getRankFromList(
     adventurer?.id ?? 0,
-    data.adventurersByXPQuery.adventurers ?? []
+    data.adventurersByXPQuery?.adventurers ?? []
   );
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
   const isArray = Array.isArray(battleData);

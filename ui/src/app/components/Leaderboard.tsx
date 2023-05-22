@@ -41,7 +41,7 @@ const Leaderboard: React.FC = () => {
 
   const adventurers = data.adventurersByXPQuery?.adventurers;
 
-  const totalPages = Math.ceil(adventurers.length / itemsPerPage);
+  const totalPages = Math.ceil(adventurers?.length / itemsPerPage);
 
   const handleClick = (newPage: number): void => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -49,7 +49,7 @@ const Leaderboard: React.FC = () => {
     }
   };
 
-  const displayAdventurers = adventurers.slice(
+  const displayAdventurers = adventurers?.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -134,7 +134,7 @@ const Leaderboard: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {displayAdventurers.map((adventurer: any, index: number) => {
+          {displayAdventurers?.map((adventurer: any, index: number) => {
             const dead = adventurer.health <= 0;
             return (
               <tr
@@ -167,7 +167,7 @@ const Leaderboard: React.FC = () => {
           })}
         </tbody>
       </table>
-      {adventurers.length > 10 && (
+      {adventurers?.length > 10 && (
         <div className="flex justify-center mt-8">
           <Button
             variant={"outline"}
