@@ -43,6 +43,9 @@ export const TxActivity = () => {
 
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
+    console.log(
+      accepted && hash && loadingQuery && isDataUpdated[loadingQuery]
+    );
     if (accepted && hash && loadingQuery && isDataUpdated[loadingQuery]) {
       // Handle "Attack" or "Flee" types
       if (type === "Attack" || type === "Flee") {

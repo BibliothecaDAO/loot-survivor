@@ -78,7 +78,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
             }`}
           >
             <Heart className="self-center w-6 h-6 fill-current" />{" "}
-            <p className="text-4xl">{beastData?.health}</p>
+            <p className="self-center text-4xl">{beastData?.health}</p>
           </span>
         </div>
         <div className="flex justify-between w-full py-2 ">

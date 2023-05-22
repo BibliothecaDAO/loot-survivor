@@ -34,7 +34,9 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
           <div>
             <span className="flex font-semibold whitespace-nowrap">
               {itemName} {Item?.level} {Item?.xp} XP
-              {slot == "Neck" || slot == "Ring" ? " [+1 Luck]" : ""}
+              {slot == "Neck" || slot == "Ring"
+                ? ` [+${Item?.greatness} Luck]`
+                : ""}
             </span>
             <span className="whitespace-nowrap">
               {Item &&

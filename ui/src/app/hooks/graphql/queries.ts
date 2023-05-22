@@ -347,27 +347,27 @@ const getAdventurerByGold = gql`
 `;
 
 const getAdventurerByXP = gql`
-  query get_adventurer_by_gold {
+  query get_adventurer_by_xp {
     adventurers(orderBy: { xp: { desc: true } }, limit: 10000000) {
-      id
-      name
-      gold
       beastId
       birthdate
       charisma
       chestId
       dexterity
       feetId
+      gold
       handsId
       headId
       health
       homeRealm
+      id
       imageHash1
       imageHash2
       intelligence
       lastUpdated
       level
       luck
+      name
       neckId
       order
       owner

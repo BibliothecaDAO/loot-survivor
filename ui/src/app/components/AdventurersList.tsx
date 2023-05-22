@@ -82,13 +82,6 @@ export const AdventurersList = ({
     };
   }, [isActive, handleKeyDown]);
 
-  console.log(
-    isLoading["itemsByAdventurerQuery"],
-    isDataUpdated["itemsByAdventurerQuery"],
-    isLoading["adventurerByIdQuery"],
-    isDataUpdated["adventurerByIdQuery"]
-  );
-
   return (
     <>
       {sortedAdventurers.length > 0 ? (

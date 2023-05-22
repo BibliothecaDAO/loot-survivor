@@ -73,8 +73,6 @@ const Leaderboard: React.FC = () => {
     ? data.adventurersInListByXpQuery?.adventurers
     : [];
 
-  console.log(scores);
-
   return (
     <div className="flex flex-col items-center w-3/4 m-auto">
       <h1 className="text-2xl">Top 3 Submitted Scores</h1>
