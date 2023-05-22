@@ -229,7 +229,7 @@ export default function Home() {
   }, [adventurer]);
 
   useEffect(() => {
-    if (data.battlesByTxHashQuery) {
+    if (data.battlesByTxHashQuery && isDataUpdated["battlesByTxHashQuery"]) {
       if (
         Array.isArray(data.battlesByTxHashQuery.battles) &&
         data.battlesByTxHashQuery.battles.some(
@@ -240,7 +240,10 @@ export default function Home() {
       }
     }
     // handle dead by discovering obstacle
-    if (data.discoveryByTxHashQuery) {
+    if (
+      data.discoveryByTxHashQuery &&
+      isDataUpdated["discoveryByTxHashQuery"]
+    ) {
       if (
         data.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
           "Obstacle" &&
@@ -249,7 +252,7 @@ export default function Home() {
         showDialog(true);
       }
     }
-    if (pendingMessage) {
+    if (pendingMessage && isDataUpdated["adventurerByIdQuery"]) {
       if (
         (pendingMessage as string[]).includes("Equipping") &&
         adventurer?.health == 0
