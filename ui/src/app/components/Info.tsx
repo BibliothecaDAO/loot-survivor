@@ -127,7 +127,7 @@ export default function Info({ adventurer, profile }: InfoProps) {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col ml-1 space-y-1 text-xl">
+                <div className="flex flex-col mx-1 space-y-1 text-xl sm:text-lg">
                   {/* <ANSIArt
                     newWidth={100}
                     src={
