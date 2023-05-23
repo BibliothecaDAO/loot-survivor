@@ -76,50 +76,54 @@ const Leaderboard: React.FC = () => {
   return (
     <div className="flex flex-col items-center w-3/4 m-auto">
       <h1 className="text-2xl">Top 3 Submitted Scores</h1>
-      <table className="w-full mt-4 text-xl border border-terminal-green">
-        <thead className="border border-terminal-green">
-          <tr>
-            <th className="p-1">Rank</th>
-            <th className="p-1">Adventurer</th>
-            <th className="p-1">XP</th>
-            <th className="p-1">
-              Prize <span className="text-sm">(per mint)</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {scores.map((adventurer: any, index: number) => (
-            <tr
-              key={index}
-              className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
-              onClick={() => handleRowSelected(adventurer.id)}
-            >
-              <td>{index + 1}</td>
-              <td>{`${adventurer.name} - ${adventurer.id}`}</td>
-              <td>{adventurer.xp}</td>
-              <td>
-                <div className="flex flex-row items-center justify-center gap-2">
-                  <span
-                    className={` ${
-                      index == 0
-                        ? "text-gold"
-                        : index == 1
-                        ? "text-silver"
-                        : index == 2
-                        ? "text-bronze"
-                        : ""
-                    }`}
-                  >
-                    {index == 0 ? 10 : index == 1 ? 3 : index == 2 ? 2 : ""}
-                  </span>
-
-                  <Lords className="self-center w-6 h-6 ml-4 fill-current" />
-                </div>
-              </td>
+      {scores.length > 0 ? (
+        <table className="w-full mt-4 text-xl border border-terminal-green">
+          <thead className="border border-terminal-green">
+            <tr>
+              <th className="p-1">Rank</th>
+              <th className="p-1">Adventurer</th>
+              <th className="p-1">XP</th>
+              <th className="p-1">
+                Prize <span className="text-sm">(per mint)</span>
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {scores.map((adventurer: any, index: number) => (
+              <tr
+                key={index}
+                className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
+                onClick={() => handleRowSelected(adventurer.id)}
+              >
+                <td>{index + 1}</td>
+                <td>{`${adventurer.name} - ${adventurer.id}`}</td>
+                <td>{adventurer.xp}</td>
+                <td>
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    <span
+                      className={` ${
+                        index == 0
+                          ? "text-gold"
+                          : index == 1
+                          ? "text-silver"
+                          : index == 2
+                          ? "text-bronze"
+                          : ""
+                      }`}
+                    >
+                      {index == 0 ? 10 : index == 1 ? 3 : index == 2 ? 2 : ""}
+                    </span>
+
+                    <Lords className="self-center w-6 h-6 ml-4 fill-current" />
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <h3>No scores submitted yet. Be the first!</h3>
+      )}
       <h1 className="text-2xl">Live Leaderboard</h1>
       <table className="w-full mt-4 text-xl border border-terminal-green">
         <thead className="border border-terminal-green">
