@@ -1,4 +1,4 @@
-version: "3"
+version: "4"
 
 services:
   devnet:
@@ -39,7 +39,7 @@ services:
     - /home/ec2-user/apibrara:/data
     networks:
     - devnet_network
-    
+
   mongo-goerli:
     image: mongo:latest
     container_name: mongo-goerli
@@ -90,7 +90,7 @@ services:
     - --loot
     - ${GOERLI_LOOT_CONTRACT}
     - --start_block
-    - "799200"
+    - "808000"
     environment:
       PYTHONUNBUFFERED: "1"
     links:
@@ -146,6 +146,21 @@ services:
     networks:
       - devnet_network
       - goerli_network
+
+  nginx:
+    image: nginx
+    restart: always
+    container_name: nginx
+    depends_on:
+      - devnet
+    networks:
+      - devnet_network
+    ports:
+      - 443:443
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/fullchain.pem:/etc/nginx/ssl/fullchain.pem
+      - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/privkey.pem:/etc/nginx/ssl/privkey.pem
 
 volumes:
   certs:
