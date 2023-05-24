@@ -395,6 +395,11 @@ export default function Home() {
     }
   }, [upgrade]);
 
+  // fetch adventurers on app start and account switch
+  useEffect(() => {
+    refetch("adventurersByOwnerQuery");
+  }, [account]);
+
   console.log(data);
 
   return (
