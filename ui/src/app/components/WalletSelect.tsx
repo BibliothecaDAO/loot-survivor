@@ -49,10 +49,10 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
   useEffect(() => {
     if (screen == 1) {
       if (
-        (account as any)?.provider?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz" ||
         (account as any)?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz"
+          "https://survivor-indexer.bibliothecadao.xyz" ||
+        (account as any)?.provider?.baseUrl ==
+          "https://survivor-indexer.bibliothecadao.xyz"
       ) {
         setConnected(true);
       }

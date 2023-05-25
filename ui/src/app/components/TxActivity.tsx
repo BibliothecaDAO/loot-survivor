@@ -72,7 +72,6 @@ export const TxActivity = () => {
           resetDataUpdated(loadingQuery);
         }
       } else if (type == "Upgrade") {
-        refetch("adventurerByIdQuery");
         stopLoading(notificationData);
         setAccepted(false);
         resetDataUpdated(loadingQuery);

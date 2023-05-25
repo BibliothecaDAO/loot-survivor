@@ -9,12 +9,12 @@ const testnet_addr = "https://survivor-indexer.bibliothecadao.xyz";
 export const contracts = {
   testnet: {
     adventurer:
-      "0x013cfe04c070fdc37379084ef560b76ef72ebbfd5d9d199e0ac1e2b2184a13c5",
+      "0x024144ef19ad4c5767e5056fbdca9b6867e8b82d8d45768bbff0498fdedc6ac4",
     lootMarketArcade:
-      "0x031288084d9f15dc446f82db2c2eb32196aafea8d74244210750400035a49406",
-    beast: "0x05bc7c27a0bf8a8cfe3f0316752082225a9dbce24f9bfe7f5c91db9d9eef6ab4",
+      "0x00c664109403c47238859a4e0c8d34424c06c41636fa2167a2528abc95c860f0",
+    beast: "0x02badcca85581480702a9dded0c9fb004743e25246e9fd96fa970027575a339e",
     lords_erc20_mintable:
-      "0x04e46fcf274b18db304bd16ae8c33af5876eb2b8a2fab35c3b7c8e7822cbd0fd",
+      "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
   },
   goerli: {
     adventurer:
@@ -29,9 +29,11 @@ export const contracts = {
 
 export const useContracts = () => {
   const { account } = useAccount();
+  console.log(account);
 
   const { contract: adventurerContract } = useContract({
     address:
+      (account as any)?.provider?.baseUrl == testnet_addr ||
       (account as any)?.baseUrl == testnet_addr
         ? contracts.testnet.adventurer
         : contracts.goerli.adventurer,
@@ -40,6 +42,7 @@ export const useContracts = () => {
 
   const { contract: lootMarketArcadeContract } = useContract({
     address:
+      (account as any)?.provider?.baseUrl == testnet_addr ||
       (account as any)?.baseUrl == testnet_addr
         ? contracts.testnet.lootMarketArcade
         : contracts.goerli.lootMarketArcade,
@@ -48,6 +51,7 @@ export const useContracts = () => {
 
   const { contract: beastContract } = useContract({
     address:
+      (account as any)?.provider?.baseUrl == testnet_addr ||
       (account as any)?.baseUrl == testnet_addr
         ? contracts.testnet.beast
         : contracts.goerli.beast,
@@ -56,6 +60,7 @@ export const useContracts = () => {
 
   const { contract: lordsContract } = useContract({
     address:
+      (account as any)?.provider?.baseUrl == testnet_addr ||
       (account as any)?.baseUrl == testnet_addr
         ? contracts.testnet.lords_erc20_mintable
         : contracts.goerli.lords_erc20_mintable,

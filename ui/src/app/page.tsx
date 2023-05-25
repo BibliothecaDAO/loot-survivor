@@ -279,7 +279,8 @@ export default function Home() {
 
   useEffect(() => {
     setIndexer(
-      (account as any)?.baseUrl == testnet_addr
+      (account as any)?.provider?.baseUrl == testnet_addr ||
+        (account as any)?.baseUrl == testnet_addr
         ? devnet_graphql
         : goerli_graphql
     );
@@ -417,10 +418,12 @@ export default function Home() {
               </Button>
               {account && calls.length > 0 && <TransactionCart />}
               {account && <TransactionHistory />}
-              {(account as any)?.baseUrl == testnet_addr && (
+              {((account as any)?.provider?.baseUrl == testnet_addr ||
+                (account as any)?.baseUrl == testnet_addr) && (
                 <AddDevnetEthButton />
               )}
-              {(account as any)?.baseUrl == testnet_addr && <MintEthButton />}
+              {((account as any)?.provider?.baseUrl == testnet_addr ||
+                (account as any)?.baseUrl == testnet_addr) && <MintEthButton />}
               {account && (
                 <Button onClick={() => disconnect()}>
                   {displayAddress(account.address)}
