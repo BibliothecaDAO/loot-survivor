@@ -11,14 +11,24 @@ type Variables = Record<
 const useCustomQuery = (
   queryKey: QueryKey,
   query: any,
-  variables?: Variables
+  variables?: Variables,
+  condition?: boolean
 ) => {
   const { updateData } = useQueriesStore();
+
+  const skipQuery = useMemo(() => {
+    // If condition is undefined, proceed with the query
+    if (!condition) return false;
+
+    // If condition exists, use it to determine whether to skip
+    return condition;
+  }, [variables, condition]);
 
   const { data, startPolling, stopPolling, loading, refetch } = useQuery(
     query,
     {
       variables: variables,
+      skip: skipQuery,
       pollInterval: 5000,
     }
   );

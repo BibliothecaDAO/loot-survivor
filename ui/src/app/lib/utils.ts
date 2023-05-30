@@ -16,14 +16,18 @@ export function indexAddress(address: string) {
 }
 
 export function padAddress(address: string) {
-  const length = address.length;
-  const neededLength = 66 - length;
-  let zeros = "";
-  for (var i = 0; i < neededLength; i++) {
-    zeros += "0";
+  if (address !== "") {
+    const length = address.length;
+    const neededLength = 66 - length;
+    let zeros = "";
+    for (var i = 0; i < neededLength; i++) {
+      zeros += "0";
+    }
+    const newHex = address.substring(0, 2) + zeros + address.substring(2);
+    return newHex;
+  } else {
+    return "";
   }
-  const newHex = address.substring(0, 2) + zeros + address.substring(2);
-  return newHex;
 }
 
 export function displayAddress(string: string) {

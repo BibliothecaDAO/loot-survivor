@@ -88,9 +88,14 @@ export default function Home() {
 
   const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
 
-  useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
-    owner: padAddress(account?.address ?? ""),
-  });
+  useCustomQuery(
+    "adventurersByOwnerQuery",
+    getAdventurersByOwner,
+    {
+      owner: padAddress(account?.address ?? ""),
+    },
+    !account || account.address === undefined
+  );
 
   const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers
@@ -120,9 +125,14 @@ export default function Home() {
     itemsNumber: latestMarketItemsNumber,
   });
 
-  useCustomQuery("battlesByTxHashQuery", getBattleByTxHash, {
-    txHash: padAddress(hash),
-  });
+  useCustomQuery(
+    "battlesByTxHashQuery",
+    getBattleByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    hash === ""
+  );
 
   useCustomQuery("discoveriesQuery", getDiscoveries, {
     adventurerId: adventurer?.id ?? 0,
@@ -132,9 +142,14 @@ export default function Home() {
     adventurerId: adventurer?.id ?? 0,
   });
 
-  useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
-    txHash: padAddress(hash),
-  });
+  useCustomQuery(
+    "discoveryByTxHashQuery",
+    getDiscoveryByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    hash === ""
+  );
 
   useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
     adventurerId: adventurer?.id ?? 0,
