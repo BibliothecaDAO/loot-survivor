@@ -1,4 +1,4 @@
-import { InjectedConnector, StarknetConfig } from "@starknet-react/core";
+import { InjectedConnector } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector";
 import { contracts } from "../hooks/useContracts";
 
@@ -23,4 +23,11 @@ export const argentConnector = new InjectedConnector({
     },
 });
 
-export const connectors = [controllerConnector as any, argentConnector];
+export const braavosConnector = new InjectedConnector({
+    options: {
+        id: "braavos",
+    },
+});
+
+
+export const connectors = [controllerConnector as any, argentConnector, braavosConnector];

@@ -94,7 +94,7 @@ const Intro = () => {
 
               {introComplete && (
                 <div className="flex flex-row gap-10 m-auto">
-                  <Button
+                  {/* <Button
                     onClick={() => setScreen(1)}
                     className={
                       "m-auto w-40" + (selectedIndex == 0 ? "animate-pulse" : "")
@@ -102,7 +102,7 @@ const Intro = () => {
                     variant={selectedIndex == 0 ? "default" : "ghost"}
                   >
                     <p className="text-base whitespace-nowrap">LAUNCH ON DEVNET</p>
-                  </Button>
+                  </Button> */}
                   <Button
                     onClick={() => setScreen(2)}
                     className={
