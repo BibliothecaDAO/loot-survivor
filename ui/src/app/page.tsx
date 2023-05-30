@@ -403,6 +403,8 @@ export default function Home() {
 
   console.log(data);
 
+  // const notificationData = { data: "test" };
+
   return (
     <main
       className={`min-h-screen container mx-auto flex flex-col p-10 overflow-hidden`}

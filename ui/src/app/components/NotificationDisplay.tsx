@@ -7,6 +7,7 @@ import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 import { useCallback, useEffect, useState } from "react";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { processBeastName } from "../lib/utils";
+import { getRandomElement } from "../lib/utils";
 
 interface NotificationDisplayProps {
   type: string;
@@ -51,15 +52,12 @@ const processAnimation = (
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
-    } else if (
-      Array.isArray(notificationData.data) &&
-      notificationData.data.some(
-        (data: any) => data.attacker == "Adventurer" && data.targetHealth == 0
-      )
-    ) {
-      return gameData.ADVENTURER_ANIMATIONS["Slayed"];
     } else {
-      return gameData.ADVENTURER_ANIMATIONS[type];
+      return getRandomElement([
+        gameData.ADVENTURER_ANIMATIONS["Attack1"],
+        gameData.ADVENTURER_ANIMATIONS["Attack2"],
+        gameData.ADVENTURER_ANIMATIONS["Attack3"],
+      ]);
     }
   } else if (type == "Explore") {
     if (notificationData?.discoveryType == "Beast") {
@@ -202,6 +200,7 @@ export const NotificationDisplay = ({
     battles,
     hasBeast
   );
+  // const animation = "attack2";
   const notification = processNotification(
     type,
     notificationData,
@@ -245,12 +244,13 @@ export const NotificationDisplay = ({
             { name: "run", startFrame: 9, frameCount: 5 },
             { name: "jump", startFrame: 11, frameCount: 7 },
             { name: "attack1", startFrame: 42, frameCount: 5 },
-            { name: "attack2", startFrame: 47, frameCount: 4 },
-            { name: "attack3", startFrame: 55, frameCount: 6 },
+            { name: "attack2", startFrame: 47, frameCount: 6 },
+            { name: "attack3", startFrame: 53, frameCount: 8 },
             { name: "damage", startFrame: 59, frameCount: 4 },
             { name: "die", startFrame: 64, frameCount: 9 },
             { name: "drawSword", startFrame: 70, frameCount: 5 },
             { name: "discoverItem", startFrame: 85, frameCount: 6 },
+            { name: "slide", startFrame: 24, frameCount: 5 },
           ]}
           currentAnimation={animation ?? ""}
         />

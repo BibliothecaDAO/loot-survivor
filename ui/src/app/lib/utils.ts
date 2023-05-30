@@ -178,3 +178,11 @@ export function processBeastName(beastData: any, adventurer: any) {
     return `${beastData?.beast}`;
   }
 }
+
+export function getRandomElement(arr: string[]): string {
+  if (arr.length === 0) {
+    throw new Error("Array must not be empty.");
+  }
+  const randomIndex = Math.floor(Math.random() * arr.length);
+  return arr[randomIndex];
+}
