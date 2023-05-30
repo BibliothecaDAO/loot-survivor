@@ -90,11 +90,11 @@ export default function Actions() {
   }
 
   return (
-    <div className="flex flex-row space-x-4 overflow-hidden ">
-      <div className="w-1/3">
+    <div className="flex flex-row space-x-4 overflow-hidden flex-wrap">
+      <div className="sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      <div className="flex flex-col w-1/3 m-auto">
+      <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full">
         <VerticalKeyboardControl
           buttonsData={buttonsData}
           onSelected={(value) => setSelected(value)}
@@ -102,7 +102,7 @@ export default function Actions() {
         />
       </div>
 
-      <div className="flex flex-col w-1/3 bg-terminal-black">
+      <div className="flex flex-col sm:w-1/3 bg-terminal-black">
         {selected == "explore" && <Discovery discoveries={latestDiscoveries} />}
         {selected == "purchase health" &&
           (adventurer?.isIdle ? (

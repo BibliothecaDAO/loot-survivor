@@ -74,7 +74,7 @@ const Leaderboard: React.FC = () => {
     : [];
 
   return (
-    <div className="flex flex-col items-center w-3/4 m-auto">
+    <div className="flex flex-col items-center sm:w-3/4 m-auto">
       <h1 className="text-2xl">Top 3 Submitted Scores</h1>
       {scores.length > 0 ? (
         <table className="w-full mt-4 text-xl border border-terminal-green">
@@ -101,15 +101,14 @@ const Leaderboard: React.FC = () => {
                 <td>
                   <div className="flex flex-row items-center justify-center gap-2">
                     <span
-                      className={` ${
-                        index == 0
+                      className={` ${index == 0
                           ? "text-gold"
                           : index == 1
-                          ? "text-silver"
-                          : index == 2
-                          ? "text-bronze"
-                          : ""
-                      }`}
+                            ? "text-silver"
+                            : index == 2
+                              ? "text-bronze"
+                              : ""
+                        }`}
                     >
                       {index == 0 ? 10 : index == 1 ? 3 : index == 2 ? 2 : ""}
                     </span>
@@ -157,9 +156,8 @@ const Leaderboard: React.FC = () => {
                 </td>
                 <td>
                   <span
-                    className={`flex justify-center ${
-                      !dead ? " text-terminal-green" : "text-red-800"
-                    }`}
+                    className={`flex justify-center ${!dead ? " text-terminal-green" : "text-red-800"
+                      }`}
                   >
                     {adventurer.health}
                   </span>

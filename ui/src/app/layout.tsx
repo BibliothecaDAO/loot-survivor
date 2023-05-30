@@ -23,7 +23,7 @@ export default function RootLayout({
       >
         <img
           src="/crt_green_mask.png"
-          className="absolute w-full pointer-events-none crt-frame"
+          className="absolute w-full pointer-events-none crt-frame hidden sm:block"
         />
         <StarknetConfig connectors={connectors} autoConnect>
           <ApolloProvider client={client}>{children}</ApolloProvider>

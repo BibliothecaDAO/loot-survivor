@@ -42,7 +42,7 @@ const TransactionHistory = () => {
       </Button>
       {isOpen ? (
         transactions ? (
-          <div className="absolute right-0 top-12 z-10 w-[650px] h-[250px] p-4 bg-terminal-black border border-terminal-green overflow-x-auto table-scroll">
+          <div className="absolute sm:right-0 top-12 z-10 w-[650px] h-[250px] p-4 bg-terminal-black border border-terminal-green overflow-x-auto table-scroll">
             <p className="text-2xl">Ledger</p>
             <div className="w-full border border-terminal-green" />
             <ul>

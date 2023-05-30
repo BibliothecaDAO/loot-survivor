@@ -246,7 +246,7 @@ export default function Home() {
     ) {
       if (
         data.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
-          "Obstacle" &&
+        "Obstacle" &&
         adventurer?.health == 0
       ) {
         showDialog(true);
@@ -405,13 +405,13 @@ export default function Home() {
 
   return (
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-10 overflow-hidden`}
+      className={`min-h-screen container mx-auto flex flex-col p-4 sm:p-10 overflow-hidden`}
     >
       {connected ? (
         <>
-          <div className="flex justify-between w-full ">
+          <div className="flex flex-col sm:flex-row justify-between w-full">
             <h1 className="glitch">Loot Survivor</h1>
-            <div className="flex flex-row self-end gap-2">
+            <div className="flex flex-row self-end gap-2 flex-wrap">
               <TxActivity />
               <Button onClick={() => setIsMuted(!isMuted)}>
                 {isMuted ? "Unmute" : "Mute"}
@@ -420,8 +420,8 @@ export default function Home() {
               {account && <TransactionHistory />}
               {((account as any)?.provider?.baseUrl == testnet_addr ||
                 (account as any)?.baseUrl == testnet_addr) && (
-                <AddDevnetEthButton />
-              )}
+                  <AddDevnetEthButton />
+                )}
               {((account as any)?.provider?.baseUrl == testnet_addr ||
                 (account as any)?.baseUrl == testnet_addr) && <MintEthButton />}
               {account && (
@@ -446,7 +446,7 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed top-1/16 left-3/8 w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
+            <div className="fixed top-1/16 left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}

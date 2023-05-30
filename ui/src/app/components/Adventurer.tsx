@@ -55,8 +55,8 @@ const Adventurer = () => {
   const menu = handleMenu();
 
   return (
-    <div className="flex flex-row">
-      <div className="w-2/12">
+    <div className="flex flex-row flex-wrap">
+      <div className="w-full sm:w-2/12">
         <VerticalKeyboardControl
           buttonsData={menu}
           onSelected={(value) => setSelected(value)}
@@ -66,7 +66,7 @@ const Adventurer = () => {
       </div>
 
       {selected === "choose adventurer" && (
-        <div className="w-2/3">
+        <div className="sm:w-8/12">
           <AdventurersList
             isActive={activeMenu == 1}
             onEscape={() => setActiveMenu(0)}
@@ -75,7 +75,7 @@ const Adventurer = () => {
         </div>
       )}
       {selected === "create adventurer" && (
-        <div className="w-full">
+        <div className="sm:w-8/12">
           <CreateAdventurer
             isActive={activeMenu == 2}
             onEscape={() => setActiveMenu(0)}

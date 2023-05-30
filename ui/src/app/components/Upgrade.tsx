@@ -107,28 +107,28 @@ const Upgrade = () => {
   };
 
   const Strength = (): ReactElement => (
-    <p className="text-[28px]">Strength increases attack damage by 10%</p>
+    <p className="sm:text-[28px]">Strength increases attack damage by 10%</p>
   );
   const Dexterity = (): ReactElement => (
-    <p className="text-[28px]">Dexterity increases chance of fleeing</p>
+    <p className="sm:text-[28px]">Dexterity increases chance of fleeing</p>
   );
   const Vitality = (): ReactElement => (
-    <p className="text-[28px]">
+    <p className="sm:text-[28px]">
       Vitality increases current and max health each by 20hp
     </p>
   );
   const Intelligence = (): ReactElement => (
-    <p className="text-[28px]">
+    <p className="sm:text-[28px]">
       Intelligence increases chance of avoiding Obstacles
     </p>
   );
   const Wisdom = (): ReactElement => (
-    <p className="text-[28px]">
+    <p className="sm:text-[28px]">
       Wisdom increases chance of avoiding a Beast ambush
     </p>
   );
   const Charisma = (): ReactElement => (
-    <p className="text-[30px]">
+    <p className="sm:text-[30px]">
       Charisma provides discounts on the marketplace
     </p>
   );
@@ -141,7 +141,7 @@ const Upgrade = () => {
 
   return (
     <div className="flex flex-col gap-10 w-full mt-[100px]">
-      <p className="mx-auto items-center text-[60px] animate-pulse">
+      <p className="mx-auto items-center sm:text-[60px] animate-pulse">
         You are now level {adventurer?.level}, please select upgrade!
       </p>
       <div className="flex flex-row">
