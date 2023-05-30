@@ -96,9 +96,7 @@ There are three categories of weapons and armor materials:
 
 | Weapon Type | Metal | Hide | Cloth |
 |-------------|-------|------|-------|
-|
-
- Blade       | Weak  | Fair | Strong|
+| Blade       | Weak  | Fair | Strong|
 | Bludgeon    | Fair  | Strong| Weak|
 | Magic       | Strong | Weak | Fair |
 
