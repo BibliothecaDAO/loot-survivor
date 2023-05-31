@@ -121,11 +121,11 @@ export default function Beast() {
   const beastName = processBeastName(beastData, adventurer);
 
   return (
-    <div className="flex flex-row overflow-hidden">
-      <div className="w-1/3">
+    <div className="flex flex-row overflow-hidden flex-wrap">
+      <div className="sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      <div className="flex flex-col w-1/3 gap-10 p-4">
+      <div className="flex flex-col sm:w-1/3 gap-10 p-4">
         {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
 
         {(adventurer?.beastId || formatBattles.length > 0) && (
@@ -148,7 +148,7 @@ export default function Beast() {
         )}
       </div>
 
-      <div className="w-1/3">
+      <div className="sm:w-1/3">
         {adventurer?.beastId || data.lastBattleQuery?.battles[0] ? (
           <>
             <BeastDisplay beastData={beastData} />

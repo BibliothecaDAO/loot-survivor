@@ -317,7 +317,7 @@ export const TxActivity = () => {
     <>
       {type != "Multicall" && type != "Create" ? (
         loading && hash && loadingAdventurer === adventurer?.id ? (
-          <div className="flex flex-row items-center gap-5">
+          <div className="flex flex-row items-center gap-5 flex-wrap">
             {data?.status == "RECEIVED" || data?.status == "PENDING" ? (
               <div className="flex w-48 loading-ellipsis ">
                 <LootIconLoader className="mr-3" />

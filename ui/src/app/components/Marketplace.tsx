@@ -237,11 +237,11 @@ const Marketplace = () => {
 
   const nextMint = data.latestMarketItemsNumberQuery?.market[0]?.timestamp
     ? new Date(
-        new Date(
-          data.latestMarketItemsNumberQuery?.market[0]?.timestamp
-        ).getTime() +
-          (3 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
-      )
+      new Date(
+        data.latestMarketItemsNumberQuery?.market[0]?.timestamp
+      ).getTime() +
+      (3 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+    )
     : undefined;
 
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
@@ -250,8 +250,8 @@ const Marketplace = () => {
     <>
       {adventurer?.level != 1 ? (
         <div className="w-full">
-          <div className="flex flex-row justify-between m-1">
-            <div className="flex flex-row align-items">
+          <div className="flex flex-row justify-between m-1 flex-wrap">
+            <div className="flex flex-row align-items flex-wrap">
               <Button
                 onClick={() => addToCalls(mintDailyItemsTx)}
                 disabled={nextMint && currentTime < nextMint.getTime()}

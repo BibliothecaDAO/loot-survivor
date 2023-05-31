@@ -8,7 +8,7 @@ import Link from "next/link";
 import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 
 const buttonVariants = cva(
-  "active:scale-95 inline-flex items-center justify-center text-sm font-medium transition-colors focus:outline-none focus:ring-offset-2 dark:hover:bg-slate-800 dark:hover:text-slate-100 disabled:bg-terminal-black disabled:text-terminal-green dark:focus:ring-slate-400 disabled:pointer-events-none dark:focus:ring-offset-slate-900 data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800 uppercase font-sans-serif mx-1 border border-transparent disabled:text-slate-600",
+  "active:scale-95 inline-flex items-center justify-center text-sm font-medium transition-colors focus:outline-none focus:ring-offset-2 dark:hover:bg-slate-800 dark:hover:text-slate-100 disabled:bg-terminal-black disabled:text-terminal-green dark:focus:ring-slate-400 disabled:pointer-events-none dark:focus:ring-offset-slate-900 data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800 uppercase font-sans-serif border border-transparent disabled:text-slate-600",
   {
     variants: {
       variant: {
@@ -24,7 +24,7 @@ const buttonVariants = cva(
         link: "bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-slate-900 dark:text-slate-100 hover:bg-transparent dark:hover:bg-transparent",
       },
       size: {
-        default: "h-10 py-2 px-4",
+        default: "sm:h-10 px-2 py-1 sm:py-2 sm:px-4",
         xs: "h-6 px-3 text-xs",
         sm: "h-9 px-3 ",
         lg: "h-11 px-8",
@@ -39,7 +39,7 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   children: React.ReactNode;
   href?: string;
 }

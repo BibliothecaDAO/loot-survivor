@@ -23,15 +23,15 @@ export default function Info({ adventurer, profile }: InfoProps) {
       ? data.itemsByProfileQuery.items
       : []
     : data.itemsByAdventurerQuery
-    ? data.itemsByAdventurerQuery.items
-    : [];
+      ? data.itemsByAdventurerQuery.items
+      : [];
 
   return (
     <div className="h-full border border-terminal-green overflow-auto">
       {!isLoading.itemsByAdventurerQuery ? (
         <>
           <div className="flex flex-row flex-wrap gap-2 p-1">
-            <div className="flex flex-col w-full p-2 uppercase">
+            <div className="flex flex-col w-full sm:p-2 uppercase">
               <div className="flex justify-between w-full">
                 {formatAdventurer.race}{" "}
                 <span>
@@ -39,7 +39,7 @@ export default function Info({ adventurer, profile }: InfoProps) {
                 </span>{" "}
                 <span>Order of {formatAdventurer.order}</span>
               </div>
-              <div className="flex justify-between w-full text-4xl font-medium border-b border-terminal-green">
+              <div className="flex justify-between w-full text-2xl sm:text-4xl font-medium border-b border-terminal-green">
                 {formatAdventurer.name}
                 <span className="flex text-terminal-yellow">
                   <Coin className="self-center w-6 h-6 fill-current" />{" "}
@@ -47,9 +47,8 @@ export default function Info({ adventurer, profile }: InfoProps) {
                 </span>
                 <span className="flex ">
                   <Heart className="self-center w-6 h-6 fill-current" />{" "}
-                  {`${formatAdventurer.health}/${
-                    100 + formatAdventurer.vitality * 20
-                  }`}
+                  {`${formatAdventurer.health}/${100 + formatAdventurer.vitality * 20
+                    }`}
                 </span>
               </div>
 
@@ -128,12 +127,6 @@ export default function Info({ adventurer, profile }: InfoProps) {
                   </div>
                 </div>
                 <div className="flex flex-col mx-1 space-y-1 text-xl sm:text-lg">
-                  {/* <ANSIArt
-                    newWidth={100}
-                    src={
-                      formatAdventurer.health == 0 ? "/skull.png" : "/MIKE.png"
-                    }
-                  /> */}
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
                     STR{" "}
                     <span className="pl-3">{formatAdventurer.strength}</span>

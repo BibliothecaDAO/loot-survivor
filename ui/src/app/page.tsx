@@ -60,6 +60,7 @@ import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./components/Profile";
 import { DeathDialog } from "./components/DeathDialog";
 import { Encounters } from "./components/Encounters";
+import { Maintenance } from "./components/Maintenance";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -157,7 +158,7 @@ export default function Home() {
     ) {
       if (
         data.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
-          "Obstacle" &&
+        "Obstacle" &&
         adventurer?.health == 0
       ) {
         showDialog(true);
@@ -315,87 +316,89 @@ export default function Home() {
   console.log(data);
 
   return (
-    <main
-      className={`min-h-screen container mx-auto flex flex-col p-10 overflow-hidden`}
-    >
-      {connected ? (
-        <>
-          <div className="flex justify-between w-full ">
-            <h1 className="glitch">Loot Survivor</h1>
-            <div className="flex flex-row self-end gap-2">
-              <TxActivity />
-              <Button onClick={() => setIsMuted(!isMuted)}>
-                {isMuted ? "Unmute" : "Mute"}
-              </Button>
-              {account && calls.length > 0 && <TransactionCart />}
-              {account && <TransactionHistory />}
-              {((account as any)?.provider?.baseUrl == testnet_addr ||
-                (account as any)?.baseUrl == testnet_addr) && (
-                <AddDevnetEthButton />
-              )}
-              {((account as any)?.provider?.baseUrl == testnet_addr ||
-                (account as any)?.baseUrl == testnet_addr) && <MintEthButton />}
-              {account && (
-                <Button onClick={() => disconnect()}>
-                  {displayAddress(account.address)}
-                </Button>
-              )}
-            </div>
-          </div>
-          <div className="w-full h-6 my-2 bg-terminal-green" />
-          <CSSTransition
-            in={
-              showNotification &&
-              Boolean(notificationData) &&
-              (typeof notificationData === "object"
-                ? "data" in notificationData
-                  ? notificationData.data.length > 0
-                  : true
-                : true)
-            }
-            timeout={500}
-            classNames="notification"
-            unmountOnExit
-          >
-            <div className="fixed top-1/16 left-3/8 w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
-              <NotificationDisplay
-                type={type}
-                notificationData={notificationData}
-                hasBeast={hasBeast}
-              />
-            </div>
-          </CSSTransition>
+    <Maintenance />
+    // <main
+    //   className={`min-h-screen container mx-auto flex flex-col p-4 sm:p-10 overflow-hidden`}
+    // >
 
-          {dialog && <DeathDialog />}
+    //   {connected ? (
+    //     <>
+    //       <div className="flex flex-col sm:flex-row justify-between w-full">
+    //         <h1 className="glitch">Loot Survivor</h1>
+    //         <div className="flex flex-row self-end gap-2 flex-wrap">
+    //           <TxActivity />
+    //           <Button onClick={() => setIsMuted(!isMuted)}>
+    //             {isMuted ? "Unmute" : "Mute"}
+    //           </Button>
+    //           {account && calls.length > 0 && <TransactionCart />}
+    //           {account && <TransactionHistory />}
+    //           {((account as any)?.provider?.baseUrl == testnet_addr ||
+    //             (account as any)?.baseUrl == testnet_addr) && (
+    //               <AddDevnetEthButton />
+    //             )}
+    //           {((account as any)?.provider?.baseUrl == testnet_addr ||
+    //             (account as any)?.baseUrl == testnet_addr) && <MintEthButton />}
+    //           {account && (
+    //             <Button onClick={() => disconnect()}>
+    //               {displayAddress(account.address)}
+    //             </Button>
+    //           )}
+    //         </div>
+    //       </div>
+    //       <div className="w-full h-6 my-2 bg-terminal-green" />
+    //       <CSSTransition
+    //         in={
+    //           showNotification &&
+    //           Boolean(notificationData) &&
+    //           (typeof notificationData === "object"
+    //             ? "data" in notificationData
+    //               ? notificationData.data.length > 0
+    //               : true
+    //             : true)
+    //         }
+    //         timeout={500}
+    //         classNames="notification"
+    //         unmountOnExit
+    //       >
+    //         <div className="fixed top-1/16 left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
+    //           <NotificationDisplay
+    //             type={type}
+    //             notificationData={notificationData}
+    //             hasBeast={hasBeast}
+    //           />
+    //         </div>
+    //       </CSSTransition>
 
-          {account ? (
-            <div className="flex-grow w-full">
-              <>
-                <div className="gap-10 pb-2">
-                  <HorizontalKeyboardControl
-                    buttonsData={menu}
-                    onButtonClick={(value) => {
-                      setScreen(value);
-                    }}
-                  />
-                </div>
+    //       {dialog && <DeathDialog />}
 
-                {screen === "start" && <Adventurer />}
-                {screen === "actions" && <Actions />}
-                {screen === "market" && <Marketplace />}
-                {screen === "inventory" && <Inventory />}
-                {screen === "beast" && <Beast />}
-                {screen === "leaderboard" && <Leaderboard />}
-                {screen === "upgrade" && <Upgrade />}
-                {screen === "profile" && <Profile />}
-                {screen === "encounters" && <Encounters />}
-              </>
-            </div>
-          ) : null}
-        </>
-      ) : (
-        <Intro />
-      )}
-    </main>
+    //       {account ? (
+    //         <div className="flex-grow w-full">
+    //           <>
+    //             <div className="gap-10 pb-2">
+    //               <HorizontalKeyboardControl
+    //                 buttonsData={menu}
+    //                 onButtonClick={(value) => {
+    //                   setScreen(value);
+    //                 }}
+    //               />
+    //             </div>
+
+    //             {screen === "start" && <Adventurer />}
+    //             {screen === "actions" && <Actions />}
+    //             {screen === "market" && <Marketplace />}
+    //             {screen === "inventory" && <Inventory />}
+    //             {screen === "beast" && <Beast />}
+    //             {screen === "leaderboard" && <Leaderboard />}
+    //             {screen === "upgrade" && <Upgrade />}
+    //             {screen === "profile" && <Profile />}
+    //             {screen === "encounters" && <Encounters />}
+    //           </>
+    //         </div>
+    //       ) : null}
+    //     </>
+    //   ) : (
+    //     <Intro />
+    //   )}
+    // </main>
   );
 }
