@@ -12,24 +12,15 @@ const useCustomQuery = (
   queryKey: QueryKey,
   query: any,
   variables?: Variables,
-  condition?: boolean
+  shouldPoll?: boolean
 ) => {
   const { updateData } = useQueriesStore();
-
-  const skipQuery = useMemo(() => {
-    // If condition is undefined, proceed with the query
-    if (!condition) return false;
-
-    // If condition exists, use it to determine whether to skip
-    return condition;
-  }, [variables, condition]);
 
   const { data, startPolling, stopPolling, loading, refetch } = useQuery(
     query,
     {
       variables: variables,
-      skip: skipQuery,
-      pollInterval: 5000,
+      skip: !shouldPoll,
     }
   );
 
@@ -48,11 +39,12 @@ const useCustomQuery = (
   }, [data, updateData, loading, queryKey, refetchWrapper, variables]);
 
   useEffect(() => {
-    startPolling(3000);
-    return () => {
+    if (shouldPoll) {
+      startPolling(5000);
+    } else {
       stopPolling();
-    };
-  }, [startPolling, stopPolling]);
+    }
+  }, [shouldPoll, startPolling, stopPolling]);
 };
 
 export default useCustomQuery;
