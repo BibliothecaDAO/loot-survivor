@@ -80,120 +80,12 @@ export default function Home() {
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
-  const profile = useUIStore((state) => state.profile);
   const dialog = useUIStore((state) => state.dialog);
   const showDialog = useUIStore((state) => state.showDialog);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const upgrade = adventurer?.upgrading;
 
   const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
-
-  useCustomQuery(
-    "adventurersByOwnerQuery",
-    getAdventurersByOwner,
-    {
-      owner: padAddress(account?.address ?? ""),
-    },
-    !account || account.address === undefined
-  );
-
-  const adventurers = data.adventurersByOwnerQuery
-    ? data.adventurersByOwnerQuery.adventurers
-    : [];
-
-  useCustomQuery("beastsQuery", getBeasts);
-
-  useCustomQuery("adventurerByIdQuery", getAdventurerById, {
-    id: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery("adventurersInListByXpQuery", getAdventurersInListByXp, {
-    ids: data.topScoresQuery?.scores
-      ? data.topScoresQuery?.scores.map((score: any) => score.adventurerId)
-      : [0],
-  });
-
-  useCustomQuery("adventurersByXPQuery", getAdventurerByXP);
-
-  useCustomQuery("latestMarketItemsNumberQuery", getLatestMarketItemsNumber);
-
-  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
-    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
-    : [];
-
-  useCustomQuery("latestMarketItemsQuery", getLatestMarketItems, {
-    itemsNumber: latestMarketItemsNumber,
-  });
-
-  useCustomQuery(
-    "battlesByTxHashQuery",
-    getBattleByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    hash === ""
-  );
-
-  useCustomQuery("discoveriesQuery", getDiscoveries, {
-    adventurerId: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
-    adventurerId: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery(
-    "discoveryByTxHashQuery",
-    getDiscoveryByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    hash === ""
-  );
-
-  useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
-    adventurerId: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery("battlesByAdventurerQuery", getBattlesByAdventurer, {
-    adventurerId: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
-    adventurerId: adventurer?.id ?? 0,
-    beastId: adventurer?.beastId
-      ? adventurer?.beastId
-      : data.lastBattleQuery?.battles[0]?.beastId,
-  });
-
-  useCustomQuery("beastByIdQuery", getBeastById, {
-    id: adventurer?.beastId
-      ? adventurer?.beastId
-      : data.lastBattleQuery?.battles[0]?.beastId,
-  });
-
-  useCustomQuery("topScoresQuery", getTopScores);
-
-  useCustomQuery("leaderboardByIdQuery", getAdventurerById, {
-    id: profile ?? 0,
-  });
-
-  useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
-    adventurer: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
-    adventurer: profile ?? 0,
-  });
-
-  useCustomQuery(
-    "unclaimedItemsByAdventurerQuery",
-    getUnclaimedItemsByAdventurer,
-    {
-      bidder: adventurer?.id,
-      status: "Open",
-    }
-  );
 
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
@@ -236,6 +128,10 @@ export default function Home() {
       screen: "start",
     },
   ]);
+
+  const adventurers = data.adventurersByOwnerQuery
+    ? data.adventurersByOwnerQuery.adventurers
+    : [];
 
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
