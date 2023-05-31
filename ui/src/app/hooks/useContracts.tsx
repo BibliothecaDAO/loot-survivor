@@ -29,7 +29,6 @@ export const contracts = {
 
 export const useContracts = () => {
   const { account } = useAccount();
-  console.log(account);
 
   const { contract: adventurerContract } = useContract({
     address:

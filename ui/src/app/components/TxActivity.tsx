@@ -1,11 +1,35 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useWaitForTransaction } from "@starknet-react/core";
+import { useWaitForTransaction, useAccount } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useLoadingStore from "../hooks/useLoadingStore";
 import LootIconLoader from "./Loader";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import {
+  getAdventurerById,
+  getAdventurersInList,
+  getAdventurersInListByXp,
+  getBattleByTxHash,
+  getBeasts,
+  getLastDiscovery,
+  getAdventurerByXP,
+  getDiscoveries,
+  getLatestDiscoveries,
+  getLastBattleByAdventurer,
+  getBattlesByAdventurer,
+  getBattlesByBeast,
+  getDiscoveryByTxHash,
+  getAdventurersByOwner,
+  getLatestMarketItems,
+  getLatestMarketItemsNumber,
+  getBeastById,
+  getTopScores,
+  getItemsByAdventurer,
+  getUnclaimedItemsByAdventurer,
+} from "../hooks/graphql/queries";
+import useCustomQuery from "../hooks/useCustomQuery";
+import useUIStore from "../hooks/useUIStore";
 
 export interface TxActivityProps {
   hash: string | undefined;
@@ -21,6 +45,7 @@ export const TxActivity = () => {
   const type = useLoadingStore((state) => state.type);
   const loadingAdventurer = useLoadingStore((state) => state.adventurer);
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const profile = useUIStore((state) => state.profile);
   const {
     data: queryData,
     isDataUpdated,
@@ -40,6 +65,190 @@ export const TxActivity = () => {
   });
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
+
+  const { account } = useAccount();
+
+  useCustomQuery(
+    "adventurersByOwnerQuery",
+    getAdventurersByOwner,
+    {
+      owner: padAddress(account?.address ?? ""),
+    },
+    accepted && (!account || account.address === undefined)
+  );
+
+  const adventurers = queryData.adventurersByOwnerQuery
+    ? queryData.adventurersByOwnerQuery.adventurers
+    : [];
+
+  useCustomQuery("beastsQuery", getBeasts, undefined, accepted);
+
+  useCustomQuery(
+    "adventurerByIdQuery",
+    getAdventurerById,
+    {
+      id: adventurer?.id ?? 0,
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "adventurersInListByXpQuery",
+    getAdventurersInListByXp,
+    {
+      ids: queryData.topScoresQuery?.scores
+        ? queryData.topScoresQuery?.scores.map(
+            (score: any) => score.adventurerId
+          )
+        : [0],
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "adventurersByXPQuery",
+    getAdventurerByXP,
+    undefined,
+    accepted
+  );
+
+  useCustomQuery(
+    "latestMarketItemsNumberQuery",
+    getLatestMarketItemsNumber,
+    undefined,
+    accepted
+  );
+
+  const latestMarketItemsNumber = queryData.latestMarketItemsNumberQuery
+    ? queryData.latestMarketItemsNumberQuery.market[0]?.itemsNumber
+    : [];
+
+  useCustomQuery(
+    "latestMarketItemsQuery",
+    getLatestMarketItems,
+    {
+      itemsNumber: latestMarketItemsNumber,
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "battlesByTxHashQuery",
+    getBattleByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "discoveriesQuery",
+    getDiscoveries,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "latestDiscoveriesQuery",
+    getLatestDiscoveries,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    accepted
+  );
+
+  console.log(padAddress(hash));
+
+  useCustomQuery(
+    "discoveryByTxHashQuery",
+    getDiscoveryByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "lastBattleQuery",
+    getLastBattleByAdventurer,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "battlesByAdventurerQuery",
+    getBattlesByAdventurer,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "battlesByBeastQuery",
+    getBattlesByBeast,
+    {
+      adventurerId: adventurer?.id ?? 0,
+      beastId: adventurer?.beastId
+        ? adventurer?.beastId
+        : queryData.lastBattleQuery?.battles[0]?.beastId,
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "beastByIdQuery",
+    getBeastById,
+    {
+      id: adventurer?.beastId
+        ? adventurer?.beastId
+        : queryData.lastBattleQuery?.battles[0]?.beastId,
+    },
+    accepted
+  );
+
+  useCustomQuery("topScoresQuery", getTopScores);
+
+  useCustomQuery(
+    "leaderboardByIdQuery",
+    getAdventurerById,
+    {
+      id: profile ?? 0,
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "itemsByAdventurerQuery",
+    getItemsByAdventurer,
+    {
+      adventurer: adventurer?.id ?? 0,
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "itemsByProfileQuery",
+    getItemsByAdventurer,
+    {
+      adventurer: profile ?? 0,
+    },
+    accepted
+  );
+
+  useCustomQuery(
+    "unclaimedItemsByAdventurerQuery",
+    getUnclaimedItemsByAdventurer,
+    {
+      bidder: adventurer?.id,
+      status: "Open",
+    },
+    accepted
+  );
 
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy

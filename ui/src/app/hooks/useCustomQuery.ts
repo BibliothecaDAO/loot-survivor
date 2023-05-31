@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "./useQueryStore";
-import { isEqual } from "lodash";
+import { cond, isEqual } from "lodash";
 
 type Variables = Record<
   string,
@@ -12,26 +12,32 @@ const useCustomQuery = (
   queryKey: QueryKey,
   query: any,
   variables?: Variables,
-  condition?: boolean
+  shouldPoll?: boolean
 ) => {
   const { updateData } = useQueriesStore();
 
   const skipQuery = useMemo(() => {
     // If condition is undefined, proceed with the query
-    if (!condition) return false;
+    if (!shouldPoll) return false;
 
     // If condition exists, use it to determine whether to skip
-    return condition;
-  }, [variables, condition]);
+    return shouldPoll;
+  }, [variables, shouldPoll]);
 
-  const { data, startPolling, stopPolling, loading, refetch } = useQuery(
+  const { data, startPolling, stopPolling, loading, refetch, error } = useQuery(
     query,
     {
       variables: variables,
       skip: skipQuery,
-      pollInterval: 5000,
     }
   );
+
+  console.log(shouldPoll);
+  console.log(variables);
+
+  console.log(data);
+
+  console.log(`Error: ${error}`);
 
   const refetchWrapper = async () => {
     try {
@@ -48,11 +54,12 @@ const useCustomQuery = (
   }, [data, updateData, loading, queryKey, refetchWrapper, variables]);
 
   useEffect(() => {
-    startPolling(3000);
-    return () => {
+    if (shouldPoll) {
+      startPolling(5000);
+    } else {
       stopPolling();
-    };
-  }, [startPolling, stopPolling]);
+    }
+  }, [shouldPoll, startPolling, stopPolling]);
 };
 
 export default useCustomQuery;
