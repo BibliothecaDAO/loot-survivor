@@ -79,13 +79,13 @@ export const Guide = ({ isActive, onEscape, adventurers }: GuideProps) => {
       <p className="mb-2">
         There are three categories of weapons and armor materials. Items have
         prefixes and suffixes assigned to them when they reach certain
-        Greatness. The suffix ...e.g "of power" and prefix.....e.g "agony bane"
-        is assigned when an item reaches 15 greatness and adventurer gets a +3
-        stat boost of what is associated with the suffix e.g “of dectection" =
-        3+ WIS. The suffix is randomly generated from 1 of 16 orders. Items are
-        also granted a coveted +1 modifier when they hit 20 greatness...e.g
-        "agony bane club of power + 1". If you meet a beast with the same suffix
-        and prefix of your item, special hits can be achieved!
+        Greatness. The suffix ...e.g of power and prefix.....e.g agony bane is
+        assigned when an item reaches 15 greatness and adventurer gets a +3 stat
+        boost of what is associated with the suffix e.g of dectection = 3+ WIS.
+        The suffix is randomly generated from 1 of 16 orders. Items are also
+        granted a coveted +1 modifier when they hit 20 greatness...e.g agony
+        bane club of power + 1. If you meet a beast with the same suffix and
+        prefix of your item, special hits can be achieved!
       </p>
       <p className="text-xl">Weapons: Blade, Bludgeon, Magic</p>
       <h3 className="mb-2">Weapon Item Rankings</h3>
