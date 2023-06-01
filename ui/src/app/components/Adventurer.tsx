@@ -5,6 +5,7 @@ import { getAdventurersByOwner } from "../hooks/graphql/queries";
 import { padAddress } from "../lib/utils";
 import { AdventurersList } from "./AdventurersList";
 import { CreateAdventurer } from "./CreateAdventurer";
+import Guide from "./Guide";
 import VerticalKeyboardControl from "./VerticalMenu";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
@@ -44,6 +45,13 @@ const Adventurer = () => {
           id: 2,
           label: "Create Adventurer",
           value: "create adventurer",
+          action: () => setSelected,
+          disabled: false,
+        },
+        {
+          id: 2,
+          label: "Guide",
+          value: "guide",
           action: () => setSelected,
           disabled: false,
         },
