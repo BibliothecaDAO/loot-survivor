@@ -48,13 +48,13 @@ const Adventurer = () => {
           action: () => setSelected,
           disabled: false,
         },
-        {
-          id: 2,
-          label: "Guide",
-          value: "guide",
-          action: () => setSelected,
-          disabled: false,
-        },
+        // {
+        //   id: 2,
+        //   label: "Guide",
+        //   value: "guide",
+        //   action: () => setSelected,
+        //   disabled: false,
+        // },
       ];
       return menu;
     }
