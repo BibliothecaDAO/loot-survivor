@@ -30,9 +30,19 @@ const Marketplace = () => {
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  const { data, isLoading } = useQueriesStore();
+  const { data, isLoading, refetch } = useQueriesStore();
 
   const currentTime = new Date().getTime();
+
+  useCustomQuery(
+    "unclaimedItemsByAdventurerQuery",
+    getUnclaimedItemsByAdventurer,
+    {
+      bidder: adventurer?.id,
+      status: "Open",
+    },
+    undefined
+  );
 
   const claimExists = () => {
     return calls.some((call: any) => call.entrypoint == "claim_item");
@@ -47,10 +57,6 @@ const Marketplace = () => {
 
   const unclaimedItems = data.unclaimedItemsByAdventurerQuery
     ? data.unclaimedItemsByAdventurerQuery.items
-    : [];
-
-  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
-    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
     : [];
 
   const removeDuplicates = (arr: any) => {

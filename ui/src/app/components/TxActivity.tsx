@@ -45,7 +45,6 @@ export const TxActivity = () => {
   const type = useLoadingStore((state) => state.type);
   const loadingAdventurer = useLoadingStore((state) => state.adventurer);
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const profile = useUIStore((state) => state.profile);
   const {
     data: queryData,
     isDataUpdated,
@@ -74,49 +73,59 @@ export const TxActivity = () => {
     {
       owner: padAddress(account?.address ?? ""),
     },
-    accepted && (!account || account.address === undefined)
+    undefined
   );
 
   const adventurers = queryData.adventurersByOwnerQuery
     ? queryData.adventurersByOwnerQuery.adventurers
     : [];
 
-  useCustomQuery("beastsQuery", getBeasts, undefined, accepted);
+  useCustomQuery("beastsQuery", getBeasts, undefined, undefined);
+
+  useCustomQuery("adventurerByIdQuery", getAdventurerById, {
+    id: adventurer?.id ?? 0,
+  });
 
   useCustomQuery(
-    "adventurerByIdQuery",
-    getAdventurerById,
+    "battlesByTxHashQuery",
+    getBattleByTxHash,
     {
-      id: adventurer?.id ?? 0,
+      txHash: padAddress(hash),
     },
-    accepted
+    undefined
   );
 
   useCustomQuery(
-    "adventurersInListByXpQuery",
-    getAdventurersInListByXp,
+    "discoveryByTxHashQuery",
+    getDiscoveryByTxHash,
     {
-      ids: queryData.topScoresQuery?.scores
-        ? queryData.topScoresQuery?.scores.map(
-            (score: any) => score.adventurerId
-          )
-        : [0],
+      txHash: padAddress(hash),
     },
-    accepted
+    undefined
   );
 
-  useCustomQuery(
-    "adventurersByXPQuery",
-    getAdventurerByXP,
-    undefined,
-    accepted
-  );
+  useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
+    adventurerId: adventurer?.id ?? 0,
+  });
+
+  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
+    adventurerId: adventurer?.id ?? 0,
+    beastId: adventurer?.beastId
+      ? adventurer?.beastId
+      : queryData.lastBattleQuery?.battles[0]?.beastId,
+  });
+
+  useCustomQuery("beastByIdQuery", getBeastById, {
+    id: adventurer?.beastId
+      ? adventurer?.beastId
+      : queryData.lastBattleQuery?.battles[0]?.beastId,
+  });
 
   useCustomQuery(
     "latestMarketItemsNumberQuery",
     getLatestMarketItemsNumber,
     undefined,
-    accepted
+    undefined
   );
 
   const latestMarketItemsNumber = queryData.latestMarketItemsNumberQuery
@@ -129,125 +138,7 @@ export const TxActivity = () => {
     {
       itemsNumber: latestMarketItemsNumber,
     },
-    accepted
-  );
-
-  useCustomQuery(
-    "battlesByTxHashQuery",
-    getBattleByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    accepted
-  );
-
-  useCustomQuery(
-    "discoveriesQuery",
-    getDiscoveries,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    accepted
-  );
-
-  useCustomQuery(
-    "latestDiscoveriesQuery",
-    getLatestDiscoveries,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    accepted
-  );
-
-  console.log(padAddress(hash));
-
-  useCustomQuery(
-    "discoveryByTxHashQuery",
-    getDiscoveryByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    accepted
-  );
-
-  useCustomQuery(
-    "lastBattleQuery",
-    getLastBattleByAdventurer,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    accepted
-  );
-
-  useCustomQuery(
-    "battlesByAdventurerQuery",
-    getBattlesByAdventurer,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    accepted
-  );
-
-  useCustomQuery(
-    "battlesByBeastQuery",
-    getBattlesByBeast,
-    {
-      adventurerId: adventurer?.id ?? 0,
-      beastId: adventurer?.beastId
-        ? adventurer?.beastId
-        : queryData.lastBattleQuery?.battles[0]?.beastId,
-    },
-    accepted
-  );
-
-  useCustomQuery(
-    "beastByIdQuery",
-    getBeastById,
-    {
-      id: adventurer?.beastId
-        ? adventurer?.beastId
-        : queryData.lastBattleQuery?.battles[0]?.beastId,
-    },
-    accepted
-  );
-
-  useCustomQuery("topScoresQuery", getTopScores);
-
-  useCustomQuery(
-    "leaderboardByIdQuery",
-    getAdventurerById,
-    {
-      id: profile ?? 0,
-    },
-    accepted
-  );
-
-  useCustomQuery(
-    "itemsByAdventurerQuery",
-    getItemsByAdventurer,
-    {
-      adventurer: adventurer?.id ?? 0,
-    },
-    accepted
-  );
-
-  useCustomQuery(
-    "itemsByProfileQuery",
-    getItemsByAdventurer,
-    {
-      adventurer: profile ?? 0,
-    },
-    accepted
-  );
-
-  useCustomQuery(
-    "unclaimedItemsByAdventurerQuery",
-    getUnclaimedItemsByAdventurer,
-    {
-      bidder: adventurer?.id,
-      status: "Open",
-    },
-    accepted
+    undefined
   );
 
   useEffect(() => {

@@ -10,7 +10,7 @@ type State = {
 const useIndexerStore = create<State>((set, get) => ({
   indexer: undefined,
   client: new ApolloClient({
-    uri: "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql",
+    uri: "https://survivor-indexer.bibliothecadao.xyz:8081/goerli-graphql",
     cache: new InMemoryCache(),
   }),
   setIndexer: (value) => {

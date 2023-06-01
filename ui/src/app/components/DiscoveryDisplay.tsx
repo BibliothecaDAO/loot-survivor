@@ -25,8 +25,8 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     (beasts: any) => discoveryData?.entityId === beasts?.id
   );
   const beastName =
-    discoveryData.entityId === beasts[0].id
-      ? beasts[0].beast
+    discoveryData.entityId === beasts[0]?.id
+      ? beasts[0]?.beast
       : processBeastName(beast, adventurer);
 
   const { data: discoveryBattleData } = useQuery(getBattlesByBeast, {

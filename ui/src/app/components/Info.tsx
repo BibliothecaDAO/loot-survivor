@@ -7,18 +7,28 @@ import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
 import { getRealmNameById } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import useUIStore from "../hooks/useUIStore";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
-  profile?: boolean;
+  profileExists?: boolean;
 }
 
-export default function Info({ adventurer, profile }: InfoProps) {
+export default function Info({ adventurer, profileExists }: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
-
+  const profile = useUIStore((state) => state.profile);
   const { data, isLoading } = useQueriesStore();
 
-  const items = profile
+  useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
+    adventurer: adventurer?.id ?? 0,
+  });
+
+  useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
+    adventurer: profile ?? 0,
+  });
+  console.log(data.itemsByProfileQuery, data.itemsByAdventurerQuery);
+  const items = profileExists
     ? data.itemsByProfileQuery
       ? data.itemsByProfileQuery.items
       : []

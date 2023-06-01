@@ -1,12 +1,16 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useQuery } from "@apollo/client";
-import { getAdventurerById } from "../hooks/graphql/queries";
+import React, { useState } from "react";
+import {
+  getAdventurerByXP,
+  getAdventurersInListByXp,
+  getTopScores,
+} from "../hooks/graphql/queries";
 import { Button } from "./Button";
 import Coin from "../../../public/coin.svg";
 import Lords from "../../../public/lords.svg";
 import LootIconLoader from "./Loader";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
+import useCustomQuery from "../hooks/useCustomQuery";
 
 const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -31,6 +35,30 @@ const Leaderboard: React.FC = () => {
   };
 
   const { data, isLoading, refetch } = useQueriesStore();
+
+  useCustomQuery(
+    "adventurersInListByXpQuery",
+    getAdventurersInListByXp,
+    {
+      ids: data.topScoresQuery?.scores
+        ? data.topScoresQuery?.scores.map((score: any) => score.adventurerId)
+        : [0],
+    },
+    undefined
+  );
+
+  const scores = data.adventurersInListByXpQuery?.adventurers
+    ? data.adventurersInListByXpQuery?.adventurers
+    : [];
+
+  useCustomQuery(
+    "adventurersByXPQuery",
+    getAdventurerByXP,
+    undefined,
+    undefined
+  );
+
+  useCustomQuery("topScoresQuery", getTopScores);
 
   if (isLoading.adventurersByXPQuery || loading)
     return (
@@ -68,10 +96,6 @@ const Leaderboard: React.FC = () => {
     previousGold = adventurer.xp;
     return currentRank;
   };
-
-  const scores = data.adventurersInListByXpQuery?.adventurers
-    ? data.adventurersInListByXpQuery?.adventurers
-    : [];
 
   return (
     <div className="flex flex-col items-center sm:w-3/4 m-auto">
