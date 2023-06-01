@@ -11,6 +11,7 @@ import LootIconLoader from "./Loader";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
 import useCustomQuery from "../hooks/useCustomQuery";
+import { dedupeByValue } from "../lib/utils";
 
 const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -113,35 +114,48 @@ const Leaderboard: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {scores.map((adventurer: any, index: number) => (
-              <tr
-                key={index}
-                className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
-                onClick={() => handleRowSelected(adventurer.id)}
-              >
-                <td>{index + 1}</td>
-                <td>{`${adventurer.name} - ${adventurer.id}`}</td>
-                <td>{adventurer.xp}</td>
-                <td>
-                  <div className="flex flex-row items-center justify-center gap-2">
-                    <span
-                      className={` ${index == 0
-                          ? "text-gold"
-                          : index == 1
-                            ? "text-silver"
-                            : index == 2
+            {scores.map((adventurer: any, index: number) => {
+              if (index > 2) {
+                return <></>;
+              } else {
+                return (
+                  <tr
+                    key={index}
+                    className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
+                    onClick={() => handleRowSelected(adventurer.id)}
+                  >
+                    <td>{index + 1}</td>
+                    <td>{`${adventurer.name} - ${adventurer.id}`}</td>
+                    <td>{adventurer.xp}</td>
+                    <td>
+                      <div className="flex flex-row items-center justify-center gap-2">
+                        <span
+                          className={` ${
+                            index == 0
+                              ? "text-gold"
+                              : index == 1
+                              ? "text-silver"
+                              : index == 2
                               ? "text-bronze"
                               : ""
-                        }`}
-                    >
-                      {index == 0 ? 10 : index == 1 ? 3 : index == 2 ? 2 : ""}
-                    </span>
+                          }`}
+                        >
+                          {index == 0
+                            ? 10
+                            : index == 1
+                            ? 3
+                            : index == 2
+                            ? 2
+                            : ""}
+                        </span>
 
-                    <Lords className="self-center w-6 h-6 ml-4 fill-current" />
-                  </div>
-                </td>
-              </tr>
-            ))}
+                        <Lords className="self-center w-6 h-6 ml-4 fill-current" />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              }
+            })}
           </tbody>
         </table>
       ) : (
@@ -180,8 +194,9 @@ const Leaderboard: React.FC = () => {
                 </td>
                 <td>
                   <span
-                    className={`flex justify-center ${!dead ? " text-terminal-green" : "text-red-800"
-                      }`}
+                    className={`flex justify-center ${
+                      !dead ? " text-terminal-green" : "text-red-800"
+                    }`}
                   >
                     {adventurer.health}
                   </span>

@@ -623,7 +623,7 @@ const getLatestMarketItemsNumber = gql`
 
 const getTopScores = gql`
   query get_top_scores {
-    scores(orderBy: { xp: { desc: true } }, limit: 3) {
+    scores(orderBy: { xp: { desc: true } }, limit: 10) {
       address
       adventurerId
       scoreTime

@@ -182,3 +182,17 @@ export function processBeastName(beastData: any, adventurer: any) {
     return `${beastData?.beast}`;
   }
 }
+
+type MyDict = { [key: string]: any }; // Or replace 'any' with the actual type if you know it
+
+export function dedupeByValue(arr: MyDict[], key: string): MyDict[] {
+  const seen = new Set();
+  return arr.filter((item) => {
+    const val = item[key];
+    if (seen.has(val)) {
+      return false;
+    }
+    seen.add(val);
+    return true;
+  });
+}
