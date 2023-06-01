@@ -35,13 +35,11 @@ def serialize_felt(value):
 
 
 def parse_string(value):
-    felt = str_to_felt(value)
-    return felt.to_bytes(32, "big")
+    return value.encode("utf-8")
 
 
 def serialize_string(value):
-    felt = int.from_bytes(value, "big")
-    return felt_to_str(felt).replace("\u0000", "")
+    return value.decode("utf-8").replace("\u0000", "")
 
 
 def parse_order(value):
@@ -640,6 +638,15 @@ class AdventurersFilter:
 
 
 @strawberry.input
+class ScoresFilter:
+    adventurerId: Optional[FeltValueFilter] = None
+    address: Optional[HexValueFilter] = None
+    xp: Optional[FeltValueFilter] = None
+    txHash: Optional[HexValueFilter] = None
+    scoreTime: Optional[DateTimeFilter] = None
+
+
+@strawberry.input
 class DiscoveriesFilter:
     adventurerId: Optional[FeltValueFilter] = None
     disoveryType: Optional[StringFilter] = None
@@ -753,6 +760,15 @@ class AdventurersOrderByInput:
     upgrading: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
     lastUpdated: Optional[OrderByInput] = None
+
+
+@strawberry.input
+class ScoresOrderByInput:
+    adventurerId: Optional[OrderByInput] = None
+    address: Optional[OrderByInput] = None
+    xp: Optional[OrderByInput] = None
+    txHash: Optional[OrderByInput] = None
+    scoreTime: Optional[OrderByInput] = None
 
 
 @strawberry.input
@@ -903,6 +919,25 @@ class Adventurer:
             upgrading=data["upgrading"],
             gold=data["gold"],
             lastUpdated=data["lastUpdated"],
+        )
+
+
+@strawberry.type
+class Score:
+    adventurerId: Optional[FeltValue]
+    address: Optional[HexValue]
+    xp: Optional[FeltValue]
+    txHash: Optional[HexValue]
+    scoreTime: Optional[datetime]
+
+    @classmethod
+    def from_mongo(cls, data):
+        return cls(
+            adventurerId=data["adventurerId"],
+            address=data["address"],
+            xp=data["xp"],
+            txHash=data["txHash"],
+            scoreTime=data["scoreTime"],
         )
 
 
@@ -1223,6 +1258,49 @@ def get_adventurers(
     return [Adventurer.from_mongo(t) for t in query]
 
 
+def get_scores(
+    info,
+    where: Optional[ScoresFilter] = {},
+    limit: Optional[int] = 10,
+    skip: Optional[int] = 0,
+    orderBy: Optional[ScoresOrderByInput] = {},
+) -> List[Score]:
+    db = info.context["db"]
+
+    filter = {"_chain.valid_to": None}
+
+    if where:
+        processed_filters = process_filters(where)
+        for key, value in processed_filters.items():
+            if isinstance(value, StringFilter):
+                filter[key] = get_str_filters(value)
+            elif isinstance(value, HexValueFilter):
+                filter[key] = get_hex_filters(value)
+            elif isinstance(value, DateTimeFilter):
+                filter[key] = get_date_filters(value)
+            elif isinstance(value, FeltValueFilter):
+                filter[key] = get_felt_filters(value)
+
+    sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
+
+    sort_var = "updated_at"
+    sort_dir = -1
+
+    for key, value in sort_options.items():
+        if value.asc:
+            sort_var = key
+            sort_dir = 1
+            break
+        if value.desc:
+            sort_var = key
+            sort_dir = -1
+            break
+
+    query = db["scores"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
+
+    return [Score.from_mongo(t) for t in query]
+
+
 def get_discoveries(
     info,
     where: Optional[DiscoveriesFilter] = {},
@@ -1464,6 +1542,7 @@ def get_market(
 @strawberry.type
 class Query:
     adventurers: List[Adventurer] = strawberry.field(resolver=get_adventurers)
+    scores: List[Score] = strawberry.field(resolver=get_scores)
     discoveries: List[Discovery] = strawberry.field(resolver=get_discoveries)
     beasts: List[Beast] = strawberry.field(resolver=get_beasts)
     battles: List[Battle] = strawberry.field(resolver=get_battles)

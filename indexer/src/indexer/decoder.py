@@ -115,6 +115,17 @@ bid_abi = {
     "type": "struct",
 }
 
+top_score_abi = {
+    "members": [
+        {"name": "address", "offset": 0, "type": "felt"},
+        {"name": "xp", "offset": 1, "type": "felt"},
+        {"name": "adventurer_id", "offset": 2, "type": "Uint256"},
+    ],
+    "name": "TopScore",
+    "size": 4,
+    "type": "struct",
+}
+
 # ADVENTURER EVENTS
 mint_adventurer_abi = {
     "outputs": [
@@ -156,6 +167,13 @@ discovery_abi = {
     ],
     "keys": [],
     "name": "Discovery",
+    "type": "event",
+}
+
+high_score_abi = {
+    "outputs": [{"name": "top_score_holders", "type": "TopScore"}],
+    "keys": [],
+    "name": "HighScoreReward",
     "type": "event",
 }
 
@@ -370,6 +388,13 @@ discovery_decoder = FunctionCallSerializer(
     identifier_manager=identifier_manager_from_abi([discovery_abi, uint256_abi]),
 )
 
+high_score_decoder = FunctionCallSerializer(
+    abi=high_score_abi,
+    identifier_manager=identifier_manager_from_abi(
+        [high_score_abi, top_score_abi, uint256_abi]
+    ),
+)
+
 
 def decode_mint_adventurer_event(data):
     return mint_adventurer_decoder.to_python([felt.to_int(d) for d in data])
@@ -385,6 +410,10 @@ def decode_adventurer_level_up_event(data):
 
 def decode_discovery_event(data):
     return discovery_decoder.to_python([felt.to_int(d) for d in data])
+
+
+def decode_high_score_event(data):
+    return high_score_decoder.to_python([felt.to_int(d) for d in data])
 
 
 ## BEAST DECODERS
