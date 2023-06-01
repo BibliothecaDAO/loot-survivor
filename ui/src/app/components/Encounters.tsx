@@ -7,6 +7,11 @@ import { Button } from "./Button";
 import { NullBeast } from "../types";
 import { processBeastName } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import {
+  getBattlesByAdventurer,
+  getDiscoveries,
+} from "../hooks/graphql/queries";
 
 export const Encounters = () => {
   const { adventurer } = useAdventurerStore();
@@ -18,6 +23,14 @@ export const Encounters = () => {
   const [sortedCombined, setSortedCombined] = useState<any[]>([]);
 
   const beasts = data.beastsQuery ? data.beastsQuery.beasts : [];
+
+  useCustomQuery("discoveriesQuery", getDiscoveries, {
+    adventurerId: adventurer?.id ?? 0,
+  });
+
+  useCustomQuery("battlesByAdventurerQuery", getBattlesByAdventurer, {
+    adventurerId: adventurer?.id ?? 0,
+  });
 
   useEffect(() => {
     if (data) {

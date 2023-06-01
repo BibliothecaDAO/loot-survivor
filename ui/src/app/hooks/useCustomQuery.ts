@@ -13,24 +13,16 @@ const useCustomQuery = (
   query: any,
   variables?: Variables,
   shouldPoll?: boolean
-  shouldPoll?: boolean
 ) => {
-  const { updateData } = useQueriesStore();
+  const { data: queryData, updateData, isDataUpdated } = useQueriesStore();
 
   const { data, startPolling, stopPolling, loading, refetch, error } = useQuery(
     query,
     {
       variables: variables,
-      skip: !shouldPoll,
+      skip: !shouldPoll && shouldPoll !== undefined,
     }
   );
-
-  console.log(shouldPoll);
-  console.log(variables);
-
-  console.log(data);
-
-  console.log(`Error: ${error}`);
 
   const refetchWrapper = async () => {
     try {
@@ -46,16 +38,23 @@ const useCustomQuery = (
     }
   }, [data, updateData, loading, queryKey, refetchWrapper, variables]);
 
+  console.log("FIRE");
+
   useEffect(() => {
-    if (shouldPoll) {
-      startPolling(5000);
-    } else {
-    if (shouldPoll) {
+    if (shouldPoll || shouldPoll === undefined) {
       startPolling(5000);
     } else {
       stopPolling();
     }
-  }, [shouldPoll, startPolling, stopPolling]);
+  }, [startPolling, stopPolling]);
 };
+
+//   useEffect(() => {
+//     startPolling(5000);
+//     return () => {
+//       stopPolling();
+//     };
+//   }, [startPolling, stopPolling]);
+// };
 
 export default useCustomQuery;
