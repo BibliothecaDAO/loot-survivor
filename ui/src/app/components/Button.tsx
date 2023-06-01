@@ -42,10 +42,11 @@ export interface ButtonProps
   VariantProps<typeof buttonVariants> {
   children: React.ReactNode;
   href?: string;
+  loading?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, className, variant, size, href, onClick, ...props }, ref) => {
+  ({ children, className, variant, size, href, onClick, loading, ...props }, ref) => {
     const { play } = useUiSounds(soundSelector.click);
 
     if (href) {
@@ -68,7 +69,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
       >
-        {children}
+        {loading ? 'loading' : children}
       </button>
     );
   }
