@@ -76,6 +76,7 @@ export default function Actions() {
         }
       },
       disabled: !adventurer?.isIdle || loading,
+      loading: loading
     },
   ];
 
@@ -86,6 +87,7 @@ export default function Actions() {
       value: "purchase health",
       action: async () => setActiveMenu(1),
       disabled: !adventurer?.isIdle || loading,
+      loading: loading
     });
   }
 

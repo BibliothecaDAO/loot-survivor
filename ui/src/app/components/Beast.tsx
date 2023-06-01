@@ -85,6 +85,7 @@ export default function Beast() {
         });
       },
       disabled: adventurer?.beastId == undefined || loading,
+      loading: loading,
     },
     {
       id: 2,
@@ -113,6 +114,7 @@ export default function Beast() {
         });
       },
       disabled: adventurer?.beastId == undefined || loading || !onboarded,
+      loading: loading,
     },
   ];
 
