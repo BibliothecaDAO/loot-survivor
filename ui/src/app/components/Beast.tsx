@@ -120,7 +120,7 @@ export default function Beast() {
 
   const isBeastDead = beastData?.health == "0";
 
-  const beastName = processBeastName(beastData, adventurer);
+  const beastName = processBeastName(beastData);
 
   return (
     <div className="flex flex-row overflow-hidden flex-wrap">

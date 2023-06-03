@@ -44,7 +44,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
     newWidth: 20,
   });
 
-  const beastName = processBeastName(beastData, adventurer);
+  const beastName = processBeastName(beastData);
 
   if (beastData?.health === 0) {
     return (

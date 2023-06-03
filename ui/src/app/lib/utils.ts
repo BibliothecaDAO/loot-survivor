@@ -172,15 +172,11 @@ export function processItemName(item: Item) {
   }
 }
 
-export function processBeastName(beastData: any, adventurer: any) {
+export function processBeastName(beastData: any) {
   let prefix1 = beastData?.prefix1 ?? "";
   let prefix2 = beastData?.prefix2 ?? "";
 
-  if (adventurer?.xp && adventurer?.xp > 0) {
-    return `"${prefix1} ${prefix2}" ${beastData?.beast}`;
-  } else {
-    return `${beastData?.beast}`;
-  }
+  return `"${prefix1} ${prefix2}" ${beastData?.beast}`;
 }
 
 type MyDict = { [key: string]: any }; // Or replace 'any' with the actual type if you know it
