@@ -29,7 +29,7 @@ export function BidBox({
 
   const basePrice = adventurer?.charisma && adventurer?.charisma > 0 ? 2 : 3;
 
-  const price = basePrice * (6 - item.rank)
+  const price = basePrice * (6 - item.rank);
 
   const handleBid = (marketId: number) => {
     if (bidPrice != undefined && bidPrice >= basePrice) {
@@ -63,7 +63,8 @@ export function BidBox({
         disabled={
           typeof bidPrice === "undefined" ||
           item.price >= bidPrice ||
-          bidPrice > calculatedNewGold
+          bidPrice > calculatedNewGold ||
+          bidPrice < price
         }
       >
         Place Bid
