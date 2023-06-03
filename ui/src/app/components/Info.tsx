@@ -136,7 +136,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col mx-1 space-y-1 text-xl sm:text-lg">
+                <div className="flex flex-col space-y-1 text-xl sm:text-lg">
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
                     STR{" "}
                     <span className="pl-3">{formatAdventurer.strength}</span>
