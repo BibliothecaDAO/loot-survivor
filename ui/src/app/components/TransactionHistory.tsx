@@ -89,7 +89,6 @@ const TransactionHistory = () => {
                                 tx.hash
                               )}`}
                               target="_blank"
-                              className="animate-pulse"
                             >
                               {shortenHex(tx.hash)}
                             </a>
