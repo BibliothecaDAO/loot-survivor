@@ -174,7 +174,7 @@ export function processItemName(item: Item) {
 
 export function processBeastName(beastData: any) {
   if (beastData?.prefix1 && beastData?.prefix2) {
-    return `"${beastData?.prefix1} ${beastData?.prefix1}" ${beastData?.beast}`;
+    return `"${beastData?.prefix1} ${beastData?.prefix2}" ${beastData?.beast}`;
   } else {
     return `${beastData?.beast}`;
   }
