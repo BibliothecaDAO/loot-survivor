@@ -29,6 +29,8 @@ export function BidBox({
 
   const basePrice = adventurer?.charisma && adventurer?.charisma > 0 ? 2 : 3;
 
+  const price = basePrice * (6 - item.rank)
+
   const handleBid = (marketId: number) => {
     if (bidPrice != undefined && bidPrice >= basePrice) {
       if (lootMarketArcadeContract && formatAddress) {
@@ -52,7 +54,7 @@ export function BidBox({
       <input
         id="bid"
         type="number"
-        min={basePrice}
+        min={price}
         onChange={(e) => setBidPrice(parseInt(e.target.value, 10))}
         className="w-16 px-3 py-2 border rounded-md bg-terminal-black border-terminal-green text-terminal-green"
       />
