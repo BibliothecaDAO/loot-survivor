@@ -11,6 +11,7 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useUIStore from "../hooks/useUIStore";
 import Info from "./Info";
+import { Button } from "./Button";
 
 const Upgrade = () => {
   const { adventurerContract } = useContracts();
@@ -36,42 +37,42 @@ const Upgrade = () => {
       id: 1,
       label: `Strength - ${adventurer?.strength}`,
       value: "Strength",
-      action: async () => handleUpgradeTx("Strength"),
+      action: async () => setSelected("Strength"),
       disabled: loading,
     },
     {
       id: 2,
       label: `Dexterity - ${adventurer?.dexterity}`,
       value: "Dexterity",
-      action: async () => handleUpgradeTx("Dexterity"),
+      action: async () => setSelected("Dexterity"),
       disabled: loading,
     },
     {
       id: 3,
       label: `Vitality - ${adventurer?.vitality}`,
       value: "Vitality",
-      action: async () => handleUpgradeTx("Vitality"),
+      action: async () => setSelected("Vitality"),
       disabled: loading,
     },
     {
       id: 4,
       label: `Intelligence - ${adventurer?.intelligence}`,
       value: "Intelligence",
-      action: async () => handleUpgradeTx("Intelligence"),
+      action: async () => setSelected("Intelligence"),
       disabled: loading,
     },
     {
       id: 5,
       label: `Wisdom - ${adventurer?.wisdom}`,
       value: "Wisdom",
-      action: async () => handleUpgradeTx("Wisdom"),
+      action: async () => setSelected("Wisdom"),
       disabled: loading,
     },
     {
       id: 6,
       label: `Charisma - ${adventurer?.charisma}`,
       value: "Charisma",
-      action: async () => handleUpgradeTx("Charisma"),
+      action: async () => setSelected("Charisma"),
       disabled: loading,
     },
   ];
@@ -109,34 +110,62 @@ const Upgrade = () => {
   };
 
   const Strength = (): ReactElement => (
-    <p className="sm:text-[28px] text-center">
-      Strength increases attack damage by 10%
-    </p>
+    <div className="flex flex-col items-center">
+      <p className="sm:text-[28px] text-center">
+        Strength increases attack damage by 10%
+      </p>
+      <Button onClick={() => handleUpgradeTx("Strength")}>
+        Upgrade Strength
+      </Button>
+    </div>
   );
   const Dexterity = (): ReactElement => (
-    <p className="sm:text-[28px] text-center">
-      Dexterity increases chance of fleeing Beasts
-    </p>
+    <div className="flex flex-col items-center">
+      <p className="sm:text-[28px] text-center">
+        Dexterity increases chance of fleeing Beasts
+      </p>
+      <Button onClick={() => handleUpgradeTx("Dexterity")}>
+        Upgrade Dexterity
+      </Button>
+    </div>
   );
   const Vitality = (): ReactElement => (
-    <p className="sm:text-[28px] text-center">
-      Vitality increases current and max health each by 20hp
-    </p>
+    <div className="flex flex-col items-center">
+      <p className="sm:text-[28px] text-center">
+        Vitality increases current and max health each by 20hp
+      </p>
+      <Button onClick={() => handleUpgradeTx("Vitality")}>
+        Upgrade Vitality
+      </Button>
+    </div>
   );
   const Intelligence = (): ReactElement => (
-    <p className="sm:text-[28px] text-center">
-      Intelligence increases chance of avoiding Obstacles
-    </p>
+    <div className="flex flex-col items-center">
+      <p className="sm:text-[28px] text-center">
+        Intelligence increases chance of avoiding Obstacles
+      </p>
+      <Button onClick={() => handleUpgradeTx("Intelligence")}>
+        Upgrade Intelligence
+      </Button>
+    </div>
   );
   const Wisdom = (): ReactElement => (
-    <p className="sm:text-[28px] text-center">
-      Wisdom increases chance of avoiding a Beast ambush
-    </p>
+    <div className="flex flex-col items-center">
+      <p className="sm:text-[28px] text-center">
+        Wisdom increases chance of avoiding a Beast ambush
+      </p>
+      <Button onClick={() => handleUpgradeTx("Wisdom")}>Upgrade Wisdom</Button>
+    </div>
   );
   const Charisma = (): ReactElement => (
-    <p className="sm:text-[30px] text-center">
-      Charisma provides discounts on the marketplace
-    </p>
+    <div className="flex flex-col items-center">
+      <p className="sm:text-[30px] text-center">
+        Charisma provides discounts on the marketplace
+      </p>
+      <Button onClick={() => handleUpgradeTx("Charisma")}>
+        Upgrade Charisma
+      </Button>
+    </div>
   );
 
   useEffect(() => {

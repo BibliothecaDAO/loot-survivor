@@ -113,7 +113,7 @@ export const processNotification = (
   if (type == "Attack" || type == "Flee") {
     return (
       <NotificationBattleDisplay
-        battleData={notificationData.data}
+        battleData={notificationData?.data}
         beast={notificationData.beast ? notificationData.beast : ""}
         type={type}
       />

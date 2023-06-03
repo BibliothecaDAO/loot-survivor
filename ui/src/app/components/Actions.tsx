@@ -31,8 +31,6 @@ export default function Actions() {
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const type = useLoadingStore((state) => state.type);
   const onboarded = useUIStore((state) => state.onboarded);
 
   const [selected, setSelected] = useState<string>("");
