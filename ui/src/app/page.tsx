@@ -62,6 +62,7 @@ import { DeathDialog } from "./components/DeathDialog";
 import { Encounters } from "./components/Encounters";
 import { Maintenance } from "./components/Maintenance";
 import Guide from "./components/Guide";
+import { processNotification } from "./components/NotificationDisplay";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -72,6 +73,7 @@ export default function Home() {
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
+  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
@@ -148,6 +150,16 @@ export default function Home() {
           (data: any) => data.attacker == "Beast" && data.targetHealth == 0
         )
       ) {
+        const beast = data.beastByIdQuery ? data.beastByIdQuery.beasts[0] : [];
+        const message = processNotification(
+          type,
+          notificationData,
+          adventurer,
+          data.battlesByTxHashQuery.battles,
+          !!adventurer?.beastId,
+          beast
+        );
+        setDeathMessage(message);
         showDialog(true);
       }
     }
