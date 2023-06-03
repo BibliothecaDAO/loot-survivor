@@ -27,9 +27,9 @@ export function BidBox({
 
   const formatAddress = account ? account.address : "0x0";
 
-  const basePrice = adventurer?.charisma && adventurer?.charisma > 0 ? 2 : 3;
+  const basePrice = 3
 
-  const price = basePrice * (6 - item.rank)
+  const price = adventurer ? basePrice * (6 - item.rank) - adventurer?.charisma : basePrice
 
   const handleBid = (marketId: number) => {
     if (bidPrice != undefined && bidPrice >= basePrice) {
@@ -55,6 +55,7 @@ export function BidBox({
         id="bid"
         type="number"
         min={price}
+        placeholder={price.toString()}
         onChange={(e) => setBidPrice(parseInt(e.target.value, 10))}
         className="w-16 px-3 py-2 border rounded-md bg-terminal-black border-terminal-green text-terminal-green"
       />
