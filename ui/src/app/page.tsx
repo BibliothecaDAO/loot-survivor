@@ -222,13 +222,13 @@ export default function Home() {
             id: 3,
             label: "Market",
             screen: "market",
-            disabled: hasBeast || upgrade || adventurer.health == 0,
+            disabled: hasBeast || adventurer.health == 0,
           },
           {
             id: 4,
             label: "Inventory",
             screen: "inventory",
-            disabled: upgrade || adventurer.health == 0,
+            disabled: adventurer.health == 0,
           },
           {
             id: 5,

@@ -15,12 +15,12 @@ type LoadingState = {
   history: any[];
   startLoading: (
     type: string,
-    hash: string,
     pendingMessage: string | string[],
     data: any,
     adventurer: number | undefined,
     notificationData?: any
   ) => void;
+  setTxHash: (hash: string) => void;
   stopLoading: (notificationData?: any) => void;
 };
 
@@ -36,7 +36,6 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   history: [],
   startLoading: (
     type,
-    hash,
     pendingMessage,
     loadingQuery,
     adventurer,
@@ -45,16 +44,16 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
     set({
       loading: true,
       type: type,
-      hash,
       pendingMessage,
       loadingQuery,
       adventurer,
       notificationData,
     });
   },
+  setTxHash: (hash) => set({ hash }),
   stopLoading: (notificationData) => {
     set({
-      showNotification: true,
+      showNotification: notificationData ? true : false,
       notificationData: notificationData || undefined,
       loading: false,
       pendingMessage: undefined,
@@ -67,16 +66,19 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
         },
       ],
     });
-    setTimeout(
-      () =>
-        set({
-          type: "",
-          notificationData: undefined,
-          showNotification: false,
-          adventurer: undefined,
-        }),
-      5000
-    );
+    if (notificationData) {
+      setTimeout(
+        () =>
+          set({
+            type: "",
+            hash: "",
+            notificationData: undefined,
+            showNotification: false,
+            adventurer: undefined,
+          }),
+        5000
+      );
+    }
   },
 }));
 

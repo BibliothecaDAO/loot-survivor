@@ -20,6 +20,7 @@ const TransactionCart: React.FC = () => {
   );
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const startLoading = useLoadingStore((state) => state.startLoading);
+  const setTxHash = useLoadingStore((state) => state.setTxHash);
   const {
     hashes,
     transactions: queuedTransactions,
@@ -154,18 +155,17 @@ const TransactionCart: React.FC = () => {
                     marketIds.push(dict.calldata[0]);
                   }
                 }
+                startLoading(
+                  "Multicall",
+                  loadingMessage,
+                  loadingQuery,
+                  adventurer?.id,
+                  notification
+                );
 
                 await handleSubmitCalls(writeAsync).then((tx: any) => {
                   if (tx) {
-                    startLoading(
-                      "Multicall",
-                      tx?.transaction_hash,
-                      loadingMessage,
-                      loadingQuery,
-                      adventurer?.id,
-                      notification
-                    );
-
+                    setTxHash(tx?.transaction_hash);
                     addTransaction({
                       hash: tx.transaction_hash,
                       metadata: {
