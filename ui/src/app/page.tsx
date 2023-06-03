@@ -61,6 +61,7 @@ import Profile from "./components/Profile";
 import { DeathDialog } from "./components/DeathDialog";
 import { Encounters } from "./components/Encounters";
 import { Maintenance } from "./components/Maintenance";
+import Guide from "./components/Guide";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -251,6 +252,11 @@ export default function Home() {
             label: "Encounters",
             screen: "encounters",
           },
+          {
+            id: 9,
+            label: "Guide",
+            screen: "guide",
+          },
         ];
       }
       setMenu(newMenu);
@@ -391,6 +397,7 @@ export default function Home() {
                 {screen === "upgrade" && <Upgrade />}
                 {screen === "profile" && <Profile />}
                 {screen === "encounters" && <Encounters />}
+                {screen === "guide" && <Guide />}
               </>
             </div>
           ) : null}
