@@ -37,7 +37,7 @@ export const Guide = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <button className="py-2 px-4">Join the Discord</button>
+          <Button className="py-2 px-4">Join the Discord</Button>
         </a>
       </div>
       <h1 className="mb-4">Loot Survivor: A Saga of Bravery and Fortitude</h1>
