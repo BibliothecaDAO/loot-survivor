@@ -38,8 +38,6 @@ const useCustomQuery = (
     }
   }, [data, updateData, loading, queryKey, refetchWrapper, variables]);
 
-  console.log("FIRE");
-
   useEffect(() => {
     if (shouldPoll || shouldPoll === undefined) {
       startPolling(5000);

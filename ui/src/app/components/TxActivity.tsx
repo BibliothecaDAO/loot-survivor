@@ -145,7 +145,6 @@ export const TxActivity = () => {
 
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
-    console.log(accepted, hash, loadingQuery && isDataUpdated[loadingQuery]);
     if (accepted && hash && loadingQuery && isDataUpdated[loadingQuery]) {
       // Handle "Attack" or "Flee" types
       if (type === "Attack" || type === "Flee") {
@@ -205,7 +204,6 @@ export const TxActivity = () => {
     }
   }, [error, setError, stopLoading]);
 
-  console.log(loading);
   useEffect(() => {
     if (pendingArray) {
       const interval = setInterval(() => {
@@ -214,8 +212,6 @@ export const TxActivity = () => {
       return () => clearInterval(interval); // This is important, it will clear the interval when the component is unmounted.
     }
   }, [pendingMessage, messageIndex]);
-
-  console.log(hash);
 
   return (
     <>

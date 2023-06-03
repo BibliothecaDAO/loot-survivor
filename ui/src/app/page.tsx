@@ -318,8 +318,6 @@ export default function Home() {
     refetch("adventurersByOwnerQuery");
   }, [account]);
 
-  console.log(data);
-
   return (
     // <Maintenance />
     <main

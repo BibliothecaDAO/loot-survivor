@@ -27,14 +27,13 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
   useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
     adventurer: profile ?? 0,
   });
-  console.log(data.itemsByProfileQuery, data.itemsByAdventurerQuery);
   const items = profileExists
     ? data.itemsByProfileQuery
       ? data.itemsByProfileQuery.items
       : []
     : data.itemsByAdventurerQuery
-      ? data.itemsByAdventurerQuery.items
-      : [];
+    ? data.itemsByAdventurerQuery.items
+    : [];
 
   return (
     <div className="h-full border border-terminal-green overflow-auto">
@@ -57,8 +56,9 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                 </span>
                 <span className="flex ">
                   <Heart className="self-center w-6 h-6 fill-current" />{" "}
-                  {`${formatAdventurer.health}/${100 + formatAdventurer.vitality * 20
-                    }`}
+                  {`${formatAdventurer.health}/${
+                    100 + formatAdventurer.vitality * 20
+                  }`}
                 </span>
               </div>
 

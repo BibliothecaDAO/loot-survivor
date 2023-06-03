@@ -15,44 +15,11 @@ const Adventurer = () => {
   const [selected, setSelected] = useState<String>("");
   const [loading, setLoading] = useState(false);
 
-  const { data, refetch, isDataUpdated } = useQueriesStore();
+  const { data } = useQueriesStore();
 
   const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers
     : [];
-
-  // const handleMenu = () => {
-  //   if (adventurers.length == 0) {
-  //     const menu = [
-  //       {
-  //         id: 1,
-  //         label: "Create Adventurer",
-  //         value: "create adventurer",
-  //         action: () => setSelected,
-  //         disabled: false,
-  //       },
-  //     ];
-  //     return menu;
-  //   } else {
-  //     const menu = [
-  //       {
-  //         id: 1,
-  //         label: "Choose Adventurer",
-  //         value: "choose adventurer",
-  //         action: () => setSelected,
-  //         disabled: adventurers.length == 0,
-  //       },
-  //       {
-  //         id: 2,
-  //         label: "Create Adventurer",
-  //         value: "create adventurer",
-  //         action: () => setSelected,
-  //         disabled: false,
-  //       },
-  //     ];
-  //     return menu;
-  //   }
-  // };
 
   const menu = [
     {

@@ -17,7 +17,6 @@ export default function Profile() {
     undefined
   );
   const adventurer = data.leaderboardByIdQuery?.adventurers[0];
-  console.log(adventurer);
   const setScreen = useUIStore((state) => state.setScreen);
   return (
     <div className="w-1/2 m-auto">
