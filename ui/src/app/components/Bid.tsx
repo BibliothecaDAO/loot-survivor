@@ -34,7 +34,7 @@ export function BidBox({
     : basePrice;
 
   const handleBid = (marketId: number) => {
-    if (bidPrice != undefined && bidPrice >= price) {
+    if (bidPrice != undefined && bidPrice >= basePrice) {
       if (lootMarketArcadeContract && formatAddress) {
         const BidTx = {
           contractAddress: lootMarketArcadeContract?.address,
