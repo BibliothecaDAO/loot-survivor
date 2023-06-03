@@ -10,6 +10,7 @@ import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useUIStore from "../hooks/useUIStore";
+import Info from "./Info";
 
 const Upgrade = () => {
   const { adventurerContract } = useContracts();
@@ -108,28 +109,32 @@ const Upgrade = () => {
   };
 
   const Strength = (): ReactElement => (
-    <p className="sm:text-[28px]">Strength increases attack damage by 10%</p>
+    <p className="sm:text-[28px] text-center">
+      Strength increases attack damage by 10%
+    </p>
   );
   const Dexterity = (): ReactElement => (
-    <p className="sm:text-[28px]">Dexterity increases chance of fleeing</p>
+    <p className="sm:text-[28px] text-center">
+      Dexterity increases chance of fleeing Beasts
+    </p>
   );
   const Vitality = (): ReactElement => (
-    <p className="sm:text-[28px]">
+    <p className="sm:text-[28px] text-center">
       Vitality increases current and max health each by 20hp
     </p>
   );
   const Intelligence = (): ReactElement => (
-    <p className="sm:text-[28px]">
+    <p className="sm:text-[28px] text-center">
       Intelligence increases chance of avoiding Obstacles
     </p>
   );
   const Wisdom = (): ReactElement => (
-    <p className="sm:text-[28px]">
+    <p className="sm:text-[28px] text-center">
       Wisdom increases chance of avoiding a Beast ambush
     </p>
   );
   const Charisma = (): ReactElement => (
-    <p className="sm:text-[30px]">
+    <p className="sm:text-[30px] text-center">
       Charisma provides discounts on the marketplace
     </p>
   );
@@ -141,25 +146,32 @@ const Upgrade = () => {
   }, [upgrade]);
 
   return (
-    <div className="flex flex-col gap-10 w-full mt-[100px]">
-      <p className="mx-auto items-center sm:text-[60px] animate-pulse">
-        You are now level {adventurer?.level}, please select upgrade!
-      </p>
-      <div className="flex flex-row">
-        <div className="w-1/2">
-          <VerticalKeyboardControl
-            buttonsData={upgradeMenu}
-            onSelected={setSelected}
-            onEnterAction={true}
-          />
-        </div>
-        <div className="flex items-center justify-center w-1/2">
-          {selected == "Strength" && <Strength />}
-          {selected == "Dexterity" && <Dexterity />}
-          {selected == "Vitality" && <Vitality />}
-          {selected == "Intelligence" && <Intelligence />}
-          {selected == "Wisdom" && <Wisdom />}
-          {selected == "Charisma" && <Charisma />}
+    <div className="flex flex-row">
+      <div className="w-1/3 mr-5">
+        <Info adventurer={adventurer} />
+      </div>
+      <div className="w-2/3 m-auto">
+        <div className="flex flex-col">
+          <p className="mx-auto items-center sm:text-[45px] animate-pulse mb-10">
+            You are now level {adventurer?.level}, please select upgrade!
+          </p>
+          <div className="flex flex-row w-full">
+            <div className="w-1/3">
+              <VerticalKeyboardControl
+                buttonsData={upgradeMenu}
+                onSelected={setSelected}
+                onEnterAction={true}
+              />
+            </div>
+            <div className="flex w-2/3 items-center justify-center">
+              {selected == "Strength" && <Strength />}
+              {selected == "Dexterity" && <Dexterity />}
+              {selected == "Vitality" && <Vitality />}
+              {selected == "Intelligence" && <Intelligence />}
+              {selected == "Wisdom" && <Wisdom />}
+              {selected == "Charisma" && <Charisma />}
+            </div>
+          </div>
         </div>
       </div>
     </div>

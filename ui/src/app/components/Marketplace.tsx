@@ -243,11 +243,11 @@ const Marketplace = () => {
 
   const nextMint = data.latestMarketItemsNumberQuery?.market[0]?.timestamp
     ? new Date(
-      new Date(
-        data.latestMarketItemsNumberQuery?.market[0]?.timestamp
-      ).getTime() +
-      (3 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
-    )
+        new Date(
+          data.latestMarketItemsNumberQuery?.market[0]?.timestamp
+        ).getTime() +
+          (3 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+      )
     : undefined;
 
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
@@ -271,7 +271,7 @@ const Marketplace = () => {
                 Claim All
               </Button>
 
-              <div className="self-center">
+              <div className="self-center ml-1">
                 <Countdown
                   countingMessage={
                     nextMint ? "Next mint in:" : "No items minted yet!"
