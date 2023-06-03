@@ -31,7 +31,8 @@ export const Guide = () => {
 
   return (
     <div className="overflow-y-auto h-screen p-2 table-scroll">
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-between items-center mb-4">
+        <h1>Loot Survivor: A Saga of Fortitude and Death</h1>
         <a
           href="https://discord.gg/bibliothecadao"
           target="_blank"
@@ -40,8 +41,7 @@ export const Guide = () => {
           <Button className="py-2 px-4 animate-pulse">Join the Discord</Button>
         </a>
       </div>
-      <h1 className="mb-4">Loot Survivor: A Saga of Fortitude and Death</h1>
-      <p className="">
+      <p>
         Your journey in Loot Survivor will take you through perilous trials, as
         part of the renowned Adventurers series. This tale unfolds in the Loot
         realm, a world where brave heroes strive to defeat monstrous creatures,
