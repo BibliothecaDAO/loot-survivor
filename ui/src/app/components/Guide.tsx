@@ -37,10 +37,7 @@ export const Guide = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Button className="py-2 px-4">
-            Join the Discord
-            {/* </a> */}
-          </Button>
+          <button className="py-2 px-4">Join the Discord</button>
         </a>
       </div>
       <h1 className="mb-4">Loot Survivor: A Saga of Bravery and Fortitude</h1>
@@ -54,30 +51,30 @@ export const Guide = () => {
 
       <h3 className="mb-2">Embarking on Your Quest</h3>
       <p>
-        Select your adventurer's persona. Remember, there's no limit to the
-        number of adventurers you can control!
+        Select your adventurer&apos;s persona. Remember, there is no limit to
+        the number of adventurers you can control!
       </p>
 
       <h3 className="mb-2">The Trials</h3>
       <p>
         During your exploration, you may stumble upon a Beast, an Obstacle, a
-        valuable Item such as Gold, Health Potion & Loot, or perhaps you'll gain
-        XP.
+        valuable Item such as Gold, Health Potion & Loot, or perhaps you will
+        gain XP.
       </p>
 
       <h3 className="mb-2">Beasts</h3>
       <p>
         If you encounter a beast, ready yourself for a potential onslaught!
-        Assess the beast's armor, its method and area of attack. Prepare your
-        offense, or choose to flee if you're not prepared for battle! Beware,
-        adventurer this is not for feint hearted!
+        Assess the beast&apos;s armor, its method and area of attack. Prepare
+        your offense, or choose to flee if you are not prepared for battle!
+        Beware, adventurer this is not for feint hearted!
       </p>
       <h3 className="mb-2">Weapon and Armor</h3>
       <p className="mb-2">
         There are three kinds of weapons: Blade, Bludgeon, Magic and armor
         materials: Cloth, Hide and Metal. Tier 1 is the highest.
       </p>
-      <h3 className="mb-2">The Armory's Ranking</h3>
+      <h3 className="mb-2">The Armory Ranking</h3>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -86,10 +83,10 @@ export const Guide = () => {
                 Weapon Class
               </th>
               <th className="py-2 px-3 text-center border border-terminal-green">
-                Weapon's Moniker
+                Weapon Moniker
               </th>
               <th className="py-2 px-3 text-center border border-terminal-green">
-                Weapon's Prestige
+                Weapon Prestige
               </th>
             </tr>
           </thead>
@@ -148,9 +145,9 @@ export const Guide = () => {
         certain Greatness. The suffix is randomly generated from 1 of 16 orders.
         Once an item reaches greatness 15 it receives a name suffix which grants
         the adventurer +3 stat boost while it is equipped. Items are also
-        granted a coveted +1 modifier when they hit 20 Greatness and an addition
-        +1 stat boost. If you meet a beast with the same suffix and prefix of
-        your item, special hits can be achieved!
+        granted a coveted +1 modifier when they hit 20 Greatness and an
+        additional +1 stat boost. If you meet a beast with the same suffix and
+        prefix of your item, special hits can be achieved!
       </p>
 
       <h3 className="mb-2">Market</h3>
@@ -167,24 +164,24 @@ export const Guide = () => {
       <h3 className="mb-2">Swap Items</h3>
       <p>
         You can switch weapons and armor to aid in your adventure. However, if
-        you make a switch during a battle, you'll be open to an attack!
+        you make a switch during a battle, you will be open to an attack!
       </p>
 
       <h3 className="mb-2">Upgrading Stats</h3>
       <p>
         Each level up grants adventurers a +1 stat boost to help them survive
-        their explorations. While you can't directly upgrade Luck, you can
+        their explorations. While you cannot directly upgrade Luck, you can
         increase it by equipping jewelry items.
       </p>
-      <ul className="text-l">
-        <li> - Strength: Boosts attack damage by 10%.</li>
-        <li> - Vitality: Increases health by +20hp and max health.</li>
-        <li> - Dexterity: Improves chances of successfully fleeing.</li>
-        <li> - Wisdom: Helps evade Beast ambushes.</li>
-        <li> - Intelligence: Aids in avoiding Obstacles.</li>
+      <ul className="text-l ml-1">
+        <li> Strength: Boosts attack damage by 10%.</li>
+        <li> Vitality: Increases health by +20hp and max health.</li>
+        <li> Dexterity: Improves chances of successfully fleeing.</li>
+        <li> Wisdom: Helps evade Beast ambushes.</li>
+        <li> Intelligence: Aids in avoiding Obstacles.</li>
         <li>
-          - Luck: Raises chances of critical damage (cannot be upgraded
-          directly).
+          Luck: Raises chances of critical damage and cannot be upgraded
+          directly.
         </li>
       </ul>
 
@@ -194,7 +191,7 @@ export const Guide = () => {
         potions cannot be bought if you are in battle or if your character has
         died. Maximum health is fixed at 100HP unless you upgrade your Vitality
         which adds +20 to your maximum health. The cost of Health Potions
-        increases with your adventurer's level and grants 10HP.
+        increases with your adventurer level and grants 10HP.
       </p>
     </div>
   );
