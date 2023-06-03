@@ -186,9 +186,9 @@ export default function Home() {
   }, [account]);
 
   const goerli_graphql =
-    "https://survivor-indexer.bibliothecadao.xyz:8081/goerli-graphql";
+    "https://survivor-indexer.bibliothecadao.xyz:8082/goerli-graphql";
   const devnet_graphql =
-    "https://survivor-indexer.bibliothecadao.xyz:8081/devnet-graphql";
+    "https://survivor-indexer.bibliothecadao.xyz:8082/devnet-graphql";
 
   useEffect(() => {
     setIndexer(

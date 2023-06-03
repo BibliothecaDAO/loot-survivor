@@ -136,11 +136,11 @@ services:
     - --mongo_devnet
     - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-devnet:27018"
     - --port
-    - "8081"
+    - "8082"
     environment:
       PYTHONUNBUFFERED: "1"
     ports:
-      - 8081:8081
+      - 8082:8082
     volumes:
       - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/fullchain.pem:/app/fullchain.pem
       - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/privkey.pem:/app/privkey.pem
