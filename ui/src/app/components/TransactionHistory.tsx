@@ -83,7 +83,16 @@ const TransactionHistory = () => {
                           </p>
                           {/* </div> */}
                           <div className="mr-4 text-lg">
-                            Hash: {shortenHex(tx.hash)}
+                            Hash:{" "}
+                            <a
+                              href={`https://testnet.starkscan.co/tx/${padAddress(
+                                tx.hash
+                              )}`}
+                              target="_blank"
+                              className="animate-pulse"
+                            >
+                              {shortenHex(tx.hash)}
+                            </a>
                           </div>
                           <TxStatus hash={tx.hash} />
                         </div>
