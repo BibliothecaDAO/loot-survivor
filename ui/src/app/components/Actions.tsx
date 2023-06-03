@@ -30,6 +30,8 @@ export default function Actions() {
   const { writeAsync } = useContractWrite({ calls });
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
+  const setTxHash = useLoadingStore((state) => state.setTxHash);
+  const stopLoading = useLoadingStore((state) => state.stopLoading);
   const type = useLoadingStore((state) => state.type);
   const onboarded = useUIStore((state) => state.onboarded);
 
@@ -56,15 +58,15 @@ export default function Actions() {
       action: async () => {
         {
           addToCalls(exploreTx);
+          startLoading(
+            "Explore",
+            "Exploring",
+            "discoveryByTxHashQuery",
+            adventurer?.id
+          );
           await handleSubmitCalls(writeAsync).then((tx: any) => {
             if (tx) {
-              startLoading(
-                "Explore",
-                tx.transaction_hash,
-                "Exploring",
-                "discoveryByTxHashQuery",
-                adventurer?.id
-              );
+              setTxHash(tx.transaction_hash);
               addTransaction({
                 hash: tx.transaction_hash,
                 metadata: {
@@ -76,7 +78,7 @@ export default function Actions() {
         }
       },
       disabled: !adventurer?.isIdle || loading,
-      loading: loading
+      loading: loading,
     },
   ];
 
@@ -87,7 +89,7 @@ export default function Actions() {
       value: "purchase health",
       action: async () => setActiveMenu(1),
       disabled: !adventurer?.isIdle || loading,
-      loading: loading
+      loading: loading,
     });
   }
 

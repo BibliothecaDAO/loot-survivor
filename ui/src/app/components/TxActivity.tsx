@@ -29,7 +29,7 @@ import {
   getUnclaimedItemsByAdventurer,
 } from "../hooks/graphql/queries";
 import useCustomQuery from "../hooks/useCustomQuery";
-import useUIStore from "../hooks/useUIStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 export interface TxActivityProps {
   hash: string | undefined;
@@ -45,6 +45,8 @@ export const TxActivity = () => {
   const type = useLoadingStore((state) => state.type);
   const loadingAdventurer = useLoadingStore((state) => state.adventurer);
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const error = useTransactionCartStore((state) => state.error);
+  const setError = useTransactionCartStore((state) => state.setError);
   const {
     data: queryData,
     isDataUpdated,
@@ -195,6 +197,15 @@ export const TxActivity = () => {
     }
   }, [loadingQuery && isDataUpdated[loadingQuery], accepted, hash]);
 
+  // stop loading when an error is caught
+  useEffect(() => {
+    if (error === true) {
+      stopLoading(undefined);
+      setError(false); // reset the error state
+    }
+  }, [error, setError, stopLoading]);
+
+  console.log(loading);
   useEffect(() => {
     if (pendingArray) {
       const interval = setInterval(() => {
@@ -204,41 +215,21 @@ export const TxActivity = () => {
     }
   }, [pendingMessage, messageIndex]);
 
+  console.log(hash);
+
   return (
     <>
-      {type != "Multicall" && type != "Create" ? (
-        loading && hash && loadingAdventurer === adventurer?.id ? (
-          <div className="flex flex-row items-center gap-5 flex-wrap">
-            {data?.status == "RECEIVED" || data?.status == "PENDING" ? (
-              <div className="flex w-48 loading-ellipsis ">
-                <LootIconLoader className="mr-3" />
-                {pendingMessage}
-              </div>
-            ) : (
-              <div className="loading-ellipsis">Refreshing data</div>
-            )}
-            <div className="flex flex-row gap-2">
-              Hash:{" "}
-              <a
-                href={`https://testnet.starkscan.co/tx/${padAddress(hash)}`}
-                target="_blank"
-                className="animate-pulse"
-              >
-                {displayAddress(hash)}
-              </a>
-            </div>
-            {data && <div>Status: {data.status}</div>}
-          </div>
-        ) : null
-      ) : (
-        (data?.status == "RECEIVED" || data?.status == "PENDING") && (
-          <div className="flex flex-row items-center gap-5">
-            <div className="flex w-48 loading-ellipsis">
-              <LootIconLoader className="self-center mr-3" />
-              {pendingArray
+      {loading ? (
+        <div className="flex flex-row items-center gap-5">
+          <div className="flex w-48 loading-ellipsis">
+            <LootIconLoader className="self-center mr-3" />
+            {hash
+              ? pendingArray
                 ? (pendingMessage as string[])[messageIndex]
-                : pendingMessage}
-            </div>
+                : pendingMessage
+              : "Confirming Tx"}
+          </div>
+          {hash && (
             <div className="flex flex-row gap-2">
               Hash:{" "}
               <a
@@ -249,10 +240,10 @@ export const TxActivity = () => {
                 {displayAddress(hash)}
               </a>
             </div>
-            {data && <div>Status: {data.status}</div>}
-          </div>
-        )
-      )}
+          )}
+          {data && hash && <div>Status: {data.status}</div>}
+        </div>
+      ) : null}
     </>
   );
 };

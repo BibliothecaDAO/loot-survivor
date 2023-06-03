@@ -58,6 +58,7 @@ export const CreateAdventurer = ({
     (state) => state.handleSubmitCalls
   );
   const startLoading = useLoadingStore((state) => state.startLoading);
+  const setTxHash = useLoadingStore((state) => state.setTxHash);
   const { writeAsync } = useContractWrite({ calls });
   const { adventurerContract, lordsContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -106,16 +107,16 @@ export const CreateAdventurer = ({
       ],
     };
     addToCalls(mintAdventurer);
+    startLoading(
+      "Create",
+      "Spawning Adventurer",
+      "adventurersByOwnerQuery",
+      undefined,
+      `You have spawned ${formData.name}!`
+    );
     await handleSubmitCalls(writeAsync).then((tx: any) => {
       if (tx) {
-        startLoading(
-          "Create",
-          tx.transaction_hash,
-          "Spawning Adventurer",
-          "adventurersByOwnerQuery",
-          undefined,
-          `You have spawned ${formData.name}!`
-        );
+        setTxHash(tx.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
           metadata: {
