@@ -39,14 +39,17 @@ const buttonVariants = cva(
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-  VariantProps<typeof buttonVariants> {
+    VariantProps<typeof buttonVariants> {
   children: React.ReactNode;
   href?: string;
   loading?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, className, variant, size, href, onClick, loading, ...props }, ref) => {
+  (
+    { children, className, variant, size, href, onClick, loading, ...props },
+    ref
+  ) => {
     const { play } = useUiSounds(soundSelector.click);
 
     if (href) {
@@ -69,7 +72,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         {...props}
       >
-        {loading ? 'loading' : children}
+        {children}
       </button>
     );
   }
