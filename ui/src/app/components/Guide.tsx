@@ -219,7 +219,7 @@ export const Guide = () => {
         potions cannot be bought if you are in battle or if your character has
         died. Maximum health is fixed at 100HP unless you upgrade your Vitality
         which adds +20 to your maximum health. The cost of Health Potions
-        increases with your adventurer level and grants 10HP.
+        increase with your adventurer level and grants 10HP.
       </p>
     </div>
   );
