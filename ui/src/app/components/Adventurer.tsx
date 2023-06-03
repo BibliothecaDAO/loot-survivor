@@ -8,51 +8,72 @@ import { CreateAdventurer } from "./CreateAdventurer";
 import VerticalKeyboardControl from "./VerticalMenu";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
+import LootIconLoader from "./Loader";
 
 const Adventurer = () => {
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
+  const [loading, setLoading] = useState(false);
 
-  const { data } = useQueriesStore();
+  const { data, refetch, isDataUpdated } = useQueriesStore();
 
   const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers
     : [];
 
-  const handleMenu = () => {
-    if (adventurers == 0) {
-      const menu = [
-        {
-          id: 1,
-          label: "Create Adventurer",
-          value: "create adventurer",
-          action: () => setSelected,
-          disabled: false,
-        },
-      ];
-      return menu;
-    } else {
-      const menu = [
-        {
-          id: 1,
-          label: "Choose Adventurer",
-          value: "choose adventurer",
-          action: () => setSelected,
-          disabled: adventurers.length == 0,
-        },
-        {
-          id: 2,
-          label: "Create Adventurer",
-          value: "create adventurer",
-          action: () => setSelected,
-          disabled: false,
-        },
-      ];
-      return menu;
-    }
-  };
+  // const handleMenu = () => {
+  //   if (adventurers.length == 0) {
+  //     const menu = [
+  //       {
+  //         id: 1,
+  //         label: "Create Adventurer",
+  //         value: "create adventurer",
+  //         action: () => setSelected,
+  //         disabled: false,
+  //       },
+  //     ];
+  //     return menu;
+  //   } else {
+  //     const menu = [
+  //       {
+  //         id: 1,
+  //         label: "Choose Adventurer",
+  //         value: "choose adventurer",
+  //         action: () => setSelected,
+  //         disabled: adventurers.length == 0,
+  //       },
+  //       {
+  //         id: 2,
+  //         label: "Create Adventurer",
+  //         value: "create adventurer",
+  //         action: () => setSelected,
+  //         disabled: false,
+  //       },
+  //     ];
+  //     return menu;
+  //   }
+  // };
 
-  const menu = handleMenu();
+  const menu = [
+    {
+      id: 1,
+      label: "Choose Adventurer",
+      value: "choose adventurer",
+      action: () => setSelected,
+      disabled: adventurers.length == 0,
+    },
+    {
+      id: 2,
+      label: "Create Adventurer",
+      value: "create adventurer",
+      action: () => setSelected,
+      disabled: false,
+    },
+  ];
+
+  if (loading) {
+    return <LootIconLoader />;
+  }
 
   return (
     <div className="flex flex-row flex-wrap">

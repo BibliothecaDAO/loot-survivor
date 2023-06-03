@@ -68,7 +68,6 @@ export default function Home() {
   const { account } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
 
-  const hash = useLoadingStore((state) => state.hash);
   const type = useLoadingStore((state) => state.type);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const notificationData = useLoadingStore((state) => state.notificationData);
