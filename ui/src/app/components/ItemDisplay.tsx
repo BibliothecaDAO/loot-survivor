@@ -16,21 +16,24 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
 
   return (
     <div
-      className={`flex-shrink flex gap-2 p-1 sm:p-2 mb-1  ${Item ? "bg-terminal-green text-terminal-black" : ""
-        }`}
+      className={`flex-shrink flex gap-2 p-1 sm:p-2 mb-1  ${
+        Item ? "bg-terminal-green text-terminal-black" : ""
+      }`}
     >
       <LootIcon
         type={
           item.type == "feet"
             ? "foot"
             : item.type == "hands"
-              ? "hand"
-              : item.type
+            ? "hand"
+            : item.type
         }
       />
       {Item ? (
         <span className="flex flex-row justify-between w-full">
-          <div>
+          <div className="w-full overflow-auto whitespace-normal">
+            {" "}
+            {/* Added the CSS classes here */}
             <span className="flex font-semibold whitespace-nowrap">
               {itemName} {Item?.level} {Item?.xp} XP
               {slot == "Neck" || slot == "Ring"
@@ -39,7 +42,8 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
             </span>
             <span className="whitespace-nowrap">
               {Item &&
-                `Tier ${Item?.rank}, Greatness ${Item?.greatness}, ${Item?.material || "Generic"
+                `Tier ${Item?.rank}, Greatness ${Item?.greatness}, ${
+                  Item?.material || "Generic"
                 }`}
             </span>
           </div>
