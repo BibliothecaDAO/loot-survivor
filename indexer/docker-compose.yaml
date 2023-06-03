@@ -93,6 +93,7 @@ services:
     - "808000"
     environment:
       PYTHONUNBUFFERED: "1"
+      AUTH_TOKEN: ${AUTH_TOKEN}
     links:
     - mongo-goerli
     networks:

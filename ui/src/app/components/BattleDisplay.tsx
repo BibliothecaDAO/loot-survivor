@@ -77,7 +77,7 @@ export const NotificationBattleDisplay = ({
 }: NotificationBattleDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const appUrl = "https://loot-survivor.vercel.app/";
-  const beastName = processBeastName(beast, adventurer);
+  const beastName = processBeastName(beast);
   const beastLevel = beast?.level;
   const beastTier = beast?.rank;
   const { data } = useQueriesStore();

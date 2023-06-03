@@ -92,12 +92,7 @@ export const Encounters = () => {
             loadingData) && <LootIconLoader />}
           <div className="flex flex-col items-center gap-2 overflow-auto">
             {displayEncounters.map((encounter: any, index: number) => {
-              // const beastName = processBeastName(encounter.beast, adventurer);
-              let beastName =
-                encounter.beast?.id === beasts[0].id ||
-                encounter.entityId === beasts[0].id
-                  ? encounter.beast?.beast
-                  : processBeastName(encounter.beast, adventurer);
+              let beastName = processBeastName(encounter.beast);
               return (
                 <div
                   className="w-full p-2 text-left border border-terminal-green"
