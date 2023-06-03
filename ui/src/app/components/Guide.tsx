@@ -37,10 +37,10 @@ export const Guide = () => {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Button className="py-2 px-4">Join the Discord</Button>
+          <Button className="py-2 px-4 animate-pulse">Join the Discord</Button>
         </a>
       </div>
-      <h1 className="mb-4">Loot Survivor: A Saga of Bravery and Fortitude</h1>
+      <h1 className="mb-4">Loot Survivor: A Saga of Fortitude and Death</h1>
       <p className="">
         Your journey in Loot Survivor will take you through perilous trials, as
         part of the renowned Adventurers series. This tale unfolds in the Loot
@@ -52,7 +52,7 @@ export const Guide = () => {
       <h3 className="mb-2">Embarking on Your Quest</h3>
       <p>
         Select your adventurer&apos;s persona. Remember, there is no limit to
-        the number of adventurers you can control!
+        the number of adventurers you can spawn!
       </p>
 
       <h3 className="mb-2">The Trials</h3>
@@ -65,18 +65,18 @@ export const Guide = () => {
       <h3 className="mb-2">Beasts</h3>
       <p>
         If you encounter a beast, ready yourself for a potential onslaught!
-        Assess the beast&apos;s armor, its method and area of attack. Prepare
-        your offense, or choose to flee if you are not prepared for battle!
-        Beware, adventurer this is not for feint hearted!
+        Assess the beast&apos;s armor, method and area of attack. Prepare your
+        offense, or choose to flee if you are not prepared for battle! Beware,
+        adventurer this is not for feint hearted!
       </p>
-      <h3 className="mb-2">Weapon and Armor</h3>
+      <h3 className="mb-2">Weapons and Armor</h3>
       <p className="mb-2">
-        There are three kinds of weapons: Blade, Bludgeon, Magic and armor
-        materials: Cloth, Hide and Metal. Tier 1 is the highest.
+        There are three types of weapons: Blade, Bludgeon, Magic and three types
+        of armor materials: Cloth, Hide and Metal. Tier 1 is the highest.
       </p>
-      <h3 className="mb-2">The Armory Ranking</h3>
+      <h3 className="mb-2 text-center">The Armory Ranking</h3>
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-1/2 m-auto uppercase">
           <thead>
             <tr>
               <th className="py-2 px-3 text-center border border-terminal-green">
@@ -86,7 +86,7 @@ export const Guide = () => {
                 Weapon Moniker
               </th>
               <th className="py-2 px-3 text-center border border-terminal-green">
-                Weapon Prestige
+                Weapon Tier
               </th>
             </tr>
           </thead>
@@ -107,12 +107,13 @@ export const Guide = () => {
           </tbody>
         </table>
       </div>
-      <h4>Armor materials: Cloth, Hide, Metal</h4>
       <div className="overflow-x-auto">
-        <p>Efficacy Chart of Weapon and Armor Interactions</p>
-        <table className="w-full uppercase whitespace-nowrap border border-terminal-green">
+        <h4 className="text-center text-l mb-2">
+          Efficacy Chart of Weapon and Armor Interactions
+        </h4>
+        <table className="w-1/2 m-auto uppercase whitespace-nowrap border border-terminal-green">
           <thead>
-            <tr className="text-l tracking-wide text-left border-b border-terminal-green">
+            <tr className="text-l tracking-wide text-center border-b border-terminal-green ">
               <th className="px-4 py-3 border border-terminal-green">Weapon</th>
               <th className="px-4 py-3 border border-terminal-green">Metal</th>
               <th className="px-4 py-3 border border-terminal-green">Hide</th>
@@ -121,7 +122,7 @@ export const Guide = () => {
           </thead>
           <tbody className="border-terminal-green">
             {efficacyData.map((row, i) => (
-              <tr key={i} className="text-terminal-green">
+              <tr key={i} className="text-terminal-green text-center">
                 <td className="px-4 py-3 border border-terminal-green">
                   {row.weapon}
                 </td>
@@ -168,22 +169,49 @@ export const Guide = () => {
       </p>
 
       <h3 className="mb-2">Upgrading Stats</h3>
-      <p>
+      <p className="mb-2">
         Each level up grants adventurers a +1 stat boost to help them survive
         their explorations. While you cannot directly upgrade Luck, you can
         increase it by equipping jewelry items.
       </p>
-      <ul className="text-l ml-1">
-        <li> Strength: Boosts attack damage by 10%.</li>
-        <li> Vitality: Increases health by +20hp and max health.</li>
-        <li> Dexterity: Improves chances of successfully fleeing.</li>
-        <li> Wisdom: Helps evade Beast ambushes.</li>
-        <li> Intelligence: Aids in avoiding Obstacles.</li>
-        <li>
-          Luck: Raises chances of critical damage and cannot be upgraded
-          directly.
-        </li>
-      </ul>
+      <table className="w-1/2 m-auto uppercase text-center whitespace-nowrap border border-terminal-green">
+        <tbody>
+          <tr className="border border-terminal-green">
+            <td className="px-4 py-3 border-r border-terminal-green">
+              Strength
+            </td>
+            <td>Boosts attack damage by 10%</td>
+          </tr>
+          <tr className="border border-terminal-green">
+            <td className="px-4 py-3 border-r border-terminal-green">
+              Vitality
+            </td>
+            <td>Increases health by +20hp and max health</td>
+          </tr>
+          <tr className="py-4 border border-terminal-green">
+            <td className="px-4 py-3 border-r border-terminal-green">
+              Dexterity
+            </td>
+            <td>Improves chances of successfully fleeing</td>
+          </tr>
+          <tr className="py-4 border border-terminal-green">
+            <td className="px-4 py-3 border-r border-terminal-green">Wisdom</td>
+            <td>Helps evade Beast ambushes</td>
+          </tr>
+          <tr className="py-4 border border-terminal-green">
+            <td className="px-4 py-3 border-r border-terminal-green">
+              Intelligence
+            </td>
+            <td>Aids in avoiding Obstacles</td>
+          </tr>
+          <tr className="py-4 border border-terminal-green">
+            <td className="px-4 py-3 border-r border-terminal-green">Luck</td>
+            <td>
+              Raises chances of critical damage and cannot be upgraded directly
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
       <h3 className="mb-2">Health Potions</h3>
       <p>
