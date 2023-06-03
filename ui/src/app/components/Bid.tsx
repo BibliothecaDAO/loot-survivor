@@ -27,9 +27,11 @@ export function BidBox({
 
   const formatAddress = account ? account.address : "0x0";
 
-  const basePrice = 3
+  const basePrice = 3;
 
-  const price = adventurer ? basePrice * (6 - item.rank) - adventurer?.charisma : basePrice
+  const price = adventurer
+    ? basePrice * (6 - item.rank) - adventurer?.charisma
+    : basePrice;
 
   const handleBid = (marketId: number) => {
     if (bidPrice != undefined && bidPrice >= price) {
@@ -45,7 +47,7 @@ export function BidBox({
         close();
       }
     } else {
-      alert("Bid price must be at least 3 gold");
+      alert(`Bid price must be at least ${price} gold`);
     }
   };
 
