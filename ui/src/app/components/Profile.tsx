@@ -20,15 +20,17 @@ export default function Profile() {
   console.log(adventurer);
   const setScreen = useUIStore((state) => state.setScreen);
   return (
-    <div className="flex">
-      <div className="sm:w-1/3 m-auto flex flex-row">
+    <div className="w-1/2 m-auto">
+      <div className="flex items-start">
         <Button
           className="animate-pulse"
           onClick={() => setScreen("leaderboard")}
         >
           Back
         </Button>
-        <Info adventurer={adventurer} profileExists={true} />
+        <div className="w-full ml-4">
+          <Info adventurer={adventurer} profileExists={true} />
+        </div>
       </div>
     </div>
   );
