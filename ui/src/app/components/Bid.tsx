@@ -32,7 +32,7 @@ export function BidBox({
   const price = adventurer ? basePrice * (6 - item.rank) - adventurer?.charisma : basePrice
 
   const handleBid = (marketId: number) => {
-    if (bidPrice != undefined && bidPrice >= basePrice) {
+    if (bidPrice != undefined && bidPrice >= price) {
       if (lootMarketArcadeContract && formatAddress) {
         const BidTx = {
           contractAddress: lootMarketArcadeContract?.address,
