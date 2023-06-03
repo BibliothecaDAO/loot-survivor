@@ -15,6 +15,7 @@ const Upgrade = () => {
   const { adventurerContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const startLoading = useLoadingStore((state) => state.startLoading);
+  const setTxHash = useLoadingStore((state) => state.setTxHash);
   const loading = useLoadingStore((state) => state.loading);
   const { addTransaction } = useTransactionManager();
   const calls = useTransactionCartStore((state) => state.calls);
@@ -85,16 +86,16 @@ const Upgrade = () => {
       ],
     };
     addToCalls(upgradeTx);
+    startLoading(
+      "Upgrade",
+      `Upgrading ${selected}`,
+      "adventurerByIdQuery",
+      adventurer?.id,
+      `You upgraded ${selected}!`
+    );
     handleSubmitCalls(writeAsync).then((tx: any) => {
       if (tx) {
-        startLoading(
-          "Upgrade",
-          tx?.transaction_hash,
-          `Upgrading ${selected}`,
-          "adventurerByIdQuery",
-          adventurer?.id,
-          `You upgraded ${selected}!`
-        );
+        setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx.transaction_hash,
           metadata: {
