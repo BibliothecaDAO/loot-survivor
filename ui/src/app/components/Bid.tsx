@@ -24,15 +24,16 @@ export function BidBox({
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { lootMarketArcadeContract } = useContracts();
   const [bidPrice, setBidPrice] = useState<number | undefined>(undefined);
+  const adventurerCharisma = adventurer?.charisma ?? 0;
 
   const formatAddress = account ? account.address : "0x0";
 
-  const basePrice = 3
+  const basePrice = 3 * (6 - item.rank);
 
-  const price = adventurer ? basePrice * (6 - item.rank) - adventurer?.charisma : basePrice
+  const price = Math.min(basePrice - adventurerCharisma * 3, basePrice);
 
   const handleBid = (marketId: number) => {
-    if (bidPrice != undefined && bidPrice >= basePrice) {
+    if (bidPrice != undefined && bidPrice >= price) {
       if (lootMarketArcadeContract && formatAddress) {
         const BidTx = {
           contractAddress: lootMarketArcadeContract?.address,
@@ -45,7 +46,7 @@ export function BidBox({
         close();
       }
     } else {
-      alert("Bid price must be at least 3 gold");
+      alert(`Bid price must be at least ${price} gold`);
     }
   };
 
