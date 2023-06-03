@@ -64,7 +64,8 @@ export function BidBox({
         disabled={
           typeof bidPrice === "undefined" ||
           item.price >= bidPrice ||
-          bidPrice > calculatedNewGold
+          bidPrice > calculatedNewGold ||
+          bidPrice < price
         }
       >
         Place Bid
