@@ -30,15 +30,21 @@ export function BidBox({
 
   const basePrice = 3 * (6 - item.rank);
 
-  const price = Math.min(basePrice - adventurerCharisma * 3, basePrice);
+  const discount = adventurerCharisma * 3;
+  const actualBid = bidPrice ? bidPrice + discount : 0;
+  const neededBid = item.price
+    ? item.price + 1
+    : basePrice > 3
+    ? basePrice - discount
+    : 3;
 
   const handleBid = (marketId: number) => {
-    if (bidPrice != undefined && bidPrice >= price) {
+    if (bidPrice != undefined && actualBid >= basePrice) {
       if (lootMarketArcadeContract && formatAddress) {
         const BidTx = {
           contractAddress: lootMarketArcadeContract?.address,
           entrypoint: "bid_on_item",
-          calldata: [marketId, "0", adventurer?.id, "0", bidPrice],
+          calldata: [marketId, "0", adventurer?.id, "0", actualBid],
           metadata: `Bidding on ${item.item}`,
         };
         addToCalls(BidTx);
@@ -46,7 +52,7 @@ export function BidBox({
         close();
       }
     } else {
-      alert(`Bid price must be at least ${price} gold`);
+      alert(`Bid price must be at least ${neededBid} gold`);
     }
   };
 
@@ -55,8 +61,8 @@ export function BidBox({
       <input
         id="bid"
         type="number"
-        min={price}
-        placeholder={price.toString()}
+        min={neededBid}
+        placeholder={neededBid.toString()}
         onChange={(e) => setBidPrice(parseInt(e.target.value, 10))}
         className="w-16 px-3 py-2 border rounded-md bg-terminal-black border-terminal-green text-terminal-green"
       />
@@ -64,9 +70,9 @@ export function BidBox({
         onClick={() => handleBid(marketId)}
         disabled={
           typeof bidPrice === "undefined" ||
-          item.price >= bidPrice ||
+          item.price >= actualBid ||
           bidPrice > calculatedNewGold ||
-          bidPrice < price
+          actualBid < basePrice
         }
       >
         Place Bid
