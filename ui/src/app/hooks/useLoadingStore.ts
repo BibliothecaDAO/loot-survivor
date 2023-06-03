@@ -66,17 +66,19 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
         },
       ],
     });
-    setTimeout(
-      () =>
-        set({
-          type: "",
-          hash: "",
-          notificationData: undefined,
-          showNotification: false,
-          adventurer: undefined,
-        }),
-      5000
-    );
+    if (notificationData) {
+      setTimeout(
+        () =>
+          set({
+            type: "",
+            hash: "",
+            notificationData: undefined,
+            showNotification: false,
+            adventurer: undefined,
+          }),
+        5000
+      );
+    }
   },
 }));
 
