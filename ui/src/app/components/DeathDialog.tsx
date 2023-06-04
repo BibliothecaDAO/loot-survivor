@@ -9,8 +9,6 @@ import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
 import { processNotification } from "./NotificationDisplay";
 
 export const DeathDialog = () => {
-  const type = useLoadingStore((state) => state.type);
-  const notificationData = useLoadingStore((state) => state.notificationData);
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const showDialog = useUIStore((state) => state.showDialog);

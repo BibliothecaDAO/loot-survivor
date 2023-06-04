@@ -151,15 +151,19 @@ export default function Home() {
         )
       ) {
         const beast = data.beastByIdQuery ? data.beastByIdQuery.beasts[0] : [];
-        const message = processNotification(
+        const battles = data.battlesByBeastQuery
+          ? data.battlesByBeastQuery.battles
+          : [];
+        const notification = processNotification(
           type,
           notificationData,
           adventurer,
-          data.battlesByTxHashQuery.battles,
-          !!adventurer?.beastId,
+          battles,
+          hasBeast,
           beast
         );
-        setDeathMessage(message);
+
+        setDeathMessage(notification);
         showDialog(true);
       }
     }
