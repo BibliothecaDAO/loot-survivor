@@ -8,6 +8,7 @@ const dir = "/music/ui/";
 export const musicSelector = {
   backgroundMusic: "intro.mp3",
   battle: "fight4.mp3",
+  battle2: "fight5.mp3",
   death: "game_over.mp3",
 };
 
@@ -27,6 +28,8 @@ export const useMusic = (
     play();
   }, []);
 
+  const trackArray = [musicSelector.battle, musicSelector.battle2]
+
   useEffect(() => {
     if (stopRef.current) {
       stopRef.current();
@@ -34,7 +37,7 @@ export const useMusic = (
     stopRef.current = stop;
 
     if (playState.isInBattle) {
-      setMusic(musicSelector.battle);
+      setMusic(trackArray[Math.floor(Math.random() * trackArray.length)]);
     } else if (playState.isDead) {
       setMusic(musicSelector.death);
     } else {

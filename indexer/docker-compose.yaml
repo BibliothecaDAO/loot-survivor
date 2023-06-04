@@ -39,7 +39,7 @@ services:
     - /home/ec2-user/apibrara:/data
     networks:
     - devnet_network
-
+    
   mongo-goerli:
     image: mongo:latest
     container_name: mongo-goerli
@@ -93,6 +93,7 @@ services:
     - "808000"
     environment:
       PYTHONUNBUFFERED: "1"
+      AUTH_TOKEN: ${AUTH_TOKEN}
     links:
     - mongo-goerli
     networks:
@@ -135,11 +136,11 @@ services:
     - --mongo_devnet
     - "mongodb://${DEVNET_DB_USERNAME}:${DEVNET_DB_PASSWORD}@mongo-devnet:27018"
     - --port
-    - "8080"
+    - "8081"
     environment:
       PYTHONUNBUFFERED: "1"
     ports:
-      - 8080:8080
+      - 8081:8081
     volumes:
       - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/fullchain.pem:/app/fullchain.pem
       - /etc/letsencrypt/live/survivor-indexer.bibliothecadao.xyz/privkey.pem:/app/privkey.pem

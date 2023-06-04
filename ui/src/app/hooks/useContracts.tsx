@@ -18,18 +18,17 @@ export const contracts = {
   },
   goerli: {
     adventurer:
-      "0x04abf49f8e1706388049ee3bda370c8b9dcad9f90c2e9a740a3e28ca20ddac72",
+      "0x059daa60c4fbbb2866bbaf55b32916bd55d39243a2f97d78938fdfba79f1a4f2",
     lootMarketArcade:
-      "0x0020c2aaa6398d604b6d773e27551779578cdc825b61aec631c2bdd0570869b3",
-    beast: "0x04b68a5f16f2ab3684db80fd61adebb44890874303367cdf9a9b5117ac0e2327",
+      "0x051f4d360d69a19ff9cc00ebf733d0485e52e2880f0e1e506b041a4770418181",
+    beast: "0x00d4941e7c42c06437cff11b2f50933d38b19ffd6c9a317bbddcc836ca83f113",
     lords_erc20_mintable:
-      "0x071d4f1882b8db3429c59181ae829cd180196c5a4e0d1c56d1e49f120ce12925",
+      "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
   },
 };
 
 export const useContracts = () => {
   const { account } = useAccount();
-  console.log(account);
 
   const { contract: adventurerContract } = useContract({
     address:

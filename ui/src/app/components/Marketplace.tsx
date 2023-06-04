@@ -30,9 +30,19 @@ const Marketplace = () => {
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
 
-  const { data, isLoading } = useQueriesStore();
+  const { data, isLoading, refetch } = useQueriesStore();
 
   const currentTime = new Date().getTime();
+
+  useCustomQuery(
+    "unclaimedItemsByAdventurerQuery",
+    getUnclaimedItemsByAdventurer,
+    {
+      bidder: adventurer?.id,
+      status: "Open",
+    },
+    undefined
+  );
 
   const claimExists = () => {
     return calls.some((call: any) => call.entrypoint == "claim_item");
@@ -47,10 +57,6 @@ const Marketplace = () => {
 
   const unclaimedItems = data.unclaimedItemsByAdventurerQuery
     ? data.unclaimedItemsByAdventurerQuery.items
-    : [];
-
-  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
-    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
     : [];
 
   const removeDuplicates = (arr: any) => {
@@ -250,8 +256,8 @@ const Marketplace = () => {
     <>
       {adventurer?.level != 1 ? (
         <div className="w-full">
-          <div className="flex flex-row justify-between m-1">
-            <div className="flex flex-row align-items">
+          <div className="flex flex-row justify-between m-1 flex-wrap">
+            <div className="flex flex-row align-items flex-wrap">
               <Button
                 onClick={() => addToCalls(mintDailyItemsTx)}
                 disabled={nextMint && currentTime < nextMint.getTime()}
@@ -265,7 +271,7 @@ const Marketplace = () => {
                 Claim All
               </Button>
 
-              <div className="self-center">
+              <div className="self-center ml-1">
                 <Countdown
                   countingMessage={
                     nextMint ? "Next mint in:" : "No items minted yet!"

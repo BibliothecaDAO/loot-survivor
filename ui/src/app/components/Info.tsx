@@ -7,18 +7,27 @@ import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
 import { getRealmNameById } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import useUIStore from "../hooks/useUIStore";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
-  profile?: boolean;
+  profileExists?: boolean;
 }
 
-export default function Info({ adventurer, profile }: InfoProps) {
+export default function Info({ adventurer, profileExists }: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
-
+  const profile = useUIStore((state) => state.profile);
   const { data, isLoading } = useQueriesStore();
 
-  const items = profile
+  useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
+    adventurer: adventurer?.id ?? 0,
+  });
+
+  useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
+    adventurer: profile ?? 0,
+  });
+  const items = profileExists
     ? data.itemsByProfileQuery
       ? data.itemsByProfileQuery.items
       : []
@@ -31,7 +40,7 @@ export default function Info({ adventurer, profile }: InfoProps) {
       {!isLoading.itemsByAdventurerQuery ? (
         <>
           <div className="flex flex-row flex-wrap gap-2 p-1">
-            <div className="flex flex-col w-full p-2 uppercase">
+            <div className="flex flex-col w-full sm:p-2 uppercase">
               <div className="flex justify-between w-full">
                 {formatAdventurer.race}{" "}
                 <span>
@@ -39,7 +48,7 @@ export default function Info({ adventurer, profile }: InfoProps) {
                 </span>{" "}
                 <span>Order of {formatAdventurer.order}</span>
               </div>
-              <div className="flex justify-between w-full text-4xl font-medium border-b border-terminal-green">
+              <div className="flex justify-between w-full text-2xl sm:text-4xl font-medium border-b border-terminal-green">
                 {formatAdventurer.name}
                 <span className="flex text-terminal-yellow">
                   <Coin className="self-center w-6 h-6 fill-current" />{" "}
@@ -127,13 +136,7 @@ export default function Info({ adventurer, profile }: InfoProps) {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col mx-1 space-y-1 text-xl sm:text-lg">
-                  {/* <ANSIArt
-                    newWidth={100}
-                    src={
-                      formatAdventurer.health == 0 ? "/skull.png" : "/MIKE.png"
-                    }
-                  /> */}
+                <div className="flex flex-col space-y-1 text-xl sm:text-lg">
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
                     STR{" "}
                     <span className="pl-3">{formatAdventurer.strength}</span>

@@ -77,7 +77,7 @@ export const NotificationBattleDisplay = ({
 }: NotificationBattleDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const appUrl = "https://loot-survivor.vercel.app/";
-  const beastName = processBeastName(beast, adventurer);
+  const beastName = processBeastName(beast);
   const beastLevel = beast?.level;
   const beastTier = beast?.rank;
   const { data } = useQueriesStore();
@@ -147,7 +147,7 @@ export const NotificationBattleDisplay = ({
               {battleData[0]?.damage} damage!
             </p>
             <TwitterShareButton
-              text={`My adventurer just slew a level ${beastLevel} ${beastName} (Tier ${beastTier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Loot $Lords`}
+              text={`My adventurer just slew a level ${beastLevel} ${beastName} (Tier ${beastTier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
             />
           </div>
         ) : (

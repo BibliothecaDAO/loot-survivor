@@ -30,7 +30,7 @@ export default function Actions() {
   const { writeAsync } = useContractWrite({ calls });
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
-  const type = useLoadingStore((state) => state.type);
+  const setTxHash = useLoadingStore((state) => state.setTxHash);
   const onboarded = useUIStore((state) => state.onboarded);
 
   const [selected, setSelected] = useState<string>("");
@@ -56,15 +56,15 @@ export default function Actions() {
       action: async () => {
         {
           addToCalls(exploreTx);
+          startLoading(
+            "Explore",
+            "Exploring",
+            "discoveryByTxHashQuery",
+            adventurer?.id
+          );
           await handleSubmitCalls(writeAsync).then((tx: any) => {
             if (tx) {
-              startLoading(
-                "Explore",
-                tx.transaction_hash,
-                "Exploring",
-                "discoveryByTxHashQuery",
-                adventurer?.id
-              );
+              setTxHash(tx.transaction_hash);
               addTransaction({
                 hash: tx.transaction_hash,
                 metadata: {
@@ -76,6 +76,7 @@ export default function Actions() {
         }
       },
       disabled: !adventurer?.isIdle || loading,
+      loading: loading,
     },
   ];
 
@@ -86,15 +87,16 @@ export default function Actions() {
       value: "purchase health",
       action: async () => setActiveMenu(1),
       disabled: !adventurer?.isIdle || loading,
+      loading: loading,
     });
   }
 
   return (
-    <div className="flex flex-row space-x-4 overflow-hidden ">
-      <div className="w-1/3">
+    <div className="flex flex-row overflow-hidden flex-wrap">
+      <div className="sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      <div className="flex flex-col w-1/3 m-auto">
+      <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8">
         <VerticalKeyboardControl
           buttonsData={buttonsData}
           onSelected={(value) => setSelected(value)}
@@ -102,7 +104,7 @@ export default function Actions() {
         />
       </div>
 
-      <div className="flex flex-col w-1/3 bg-terminal-black">
+      <div className="flex flex-col sm:w-1/3 bg-terminal-black">
         {selected == "explore" && <Discovery discoveries={latestDiscoveries} />}
         {selected == "purchase health" &&
           (adventurer?.isIdle ? (

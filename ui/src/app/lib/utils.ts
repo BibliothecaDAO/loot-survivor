@@ -16,14 +16,18 @@ export function indexAddress(address: string) {
 }
 
 export function padAddress(address: string) {
-  const length = address.length;
-  const neededLength = 66 - length;
-  let zeros = "";
-  for (var i = 0; i < neededLength; i++) {
-    zeros += "0";
+  if (address !== "") {
+    const length = address.length;
+    const neededLength = 66 - length;
+    let zeros = "";
+    for (var i = 0; i < neededLength; i++) {
+      zeros += "0";
+    }
+    const newHex = address.substring(0, 2) + zeros + address.substring(2);
+    return newHex;
+  } else {
+    return "";
   }
-  const newHex = address.substring(0, 2) + zeros + address.substring(2);
-  return newHex;
 }
 
 export function displayAddress(string: string) {
@@ -168,12 +172,9 @@ export function processItemName(item: Item) {
   }
 }
 
-export function processBeastName(beastData: any, adventurer: any) {
-  let prefix1 = beastData?.prefix1 ?? "";
-  let prefix2 = beastData?.prefix2 ?? "";
-
-  if (adventurer?.xp && adventurer?.xp > 0) {
-    return `"${prefix1} ${prefix2}" ${beastData?.beast}`;
+export function processBeastName(beastData: any) {
+  if (beastData?.prefix1 && beastData?.prefix2) {
+    return `"${beastData?.prefix1} ${beastData?.prefix2}" ${beastData?.beast}`;
   } else {
     return `${beastData?.beast}`;
   }
@@ -185,4 +186,18 @@ export function getRandomElement(arr: string[]): string {
   }
   const randomIndex = Math.floor(Math.random() * arr.length);
   return arr[randomIndex];
+}
+
+type MyDict = { [key: string]: any }; // Or replace 'any' with the actual type if you know it
+
+export function dedupeByValue(arr: MyDict[], key: string): MyDict[] {
+  const seen = new Set();
+  return arr.filter((item) => {
+    const val = item[key];
+    if (seen.has(val)) {
+      return false;
+    }
+    seen.add(val);
+    return true;
+  });
 }

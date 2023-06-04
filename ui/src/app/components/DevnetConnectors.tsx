@@ -13,7 +13,6 @@ export const AddDevnetButton = ({
 }: AddDevnetButtonProps) => {
   const { connector } = useAccount();
   const wallet = (connector as any)?._wallet;
-  console.log(wallet);
 
   const handleAddDevnet = async () => {
     await wallet?.request({

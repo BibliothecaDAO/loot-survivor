@@ -63,9 +63,9 @@ const Intro = () => {
       ) : (
         <>
           {screen == 0 ? (
-            <div className="flex flex-col w-full h-full p-8">
+            <div className="flex flex-col w-full h-full p-4 sm:p-8">
               <div className="flex">
-                <p className="p-4 text-xl leading-tight">
+                <p className="sm:p-4 text-xs sm:text-xl leading-tight">
                   <TypeAnimation
                     sequence={[
                       prologue,

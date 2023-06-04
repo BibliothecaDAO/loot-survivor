@@ -60,13 +60,14 @@ import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./components/Profile";
 import { DeathDialog } from "./components/DeathDialog";
 import { Encounters } from "./components/Encounters";
+import { Maintenance } from "./components/Maintenance";
+import Guide from "./components/Guide";
 
 export default function Home() {
   const { disconnect } = useConnectors();
   const { account } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
 
-  const hash = useLoadingStore((state) => state.hash);
   const type = useLoadingStore((state) => state.type);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const notificationData = useLoadingStore((state) => state.notificationData);
@@ -80,105 +81,12 @@ export default function Home() {
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
-  const profile = useUIStore((state) => state.profile);
   const dialog = useUIStore((state) => state.dialog);
   const showDialog = useUIStore((state) => state.showDialog);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const upgrade = adventurer?.upgrading;
 
   const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
-
-  useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
-    owner: padAddress(account?.address ?? ""),
-  });
-
-  const adventurers = data.adventurersByOwnerQuery
-    ? data.adventurersByOwnerQuery.adventurers
-    : [];
-
-  useCustomQuery("beastsQuery", getBeasts);
-
-  useCustomQuery("adventurerByIdQuery", getAdventurerById, {
-    id: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery("adventurersInListByXpQuery", getAdventurersInListByXp, {
-    ids: data.topScoresQuery?.scores
-      ? data.topScoresQuery?.scores.map((score: any) => score.adventurerId)
-      : [0],
-  });
-
-  useCustomQuery("adventurersByXPQuery", getAdventurerByXP);
-
-  useCustomQuery("latestMarketItemsNumberQuery", getLatestMarketItemsNumber);
-
-  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
-    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
-    : [];
-
-  useCustomQuery("latestMarketItemsQuery", getLatestMarketItems, {
-    itemsNumber: latestMarketItemsNumber,
-  });
-
-  useCustomQuery("battlesByTxHashQuery", getBattleByTxHash, {
-    txHash: padAddress(hash),
-  });
-
-  useCustomQuery("discoveriesQuery", getDiscoveries, {
-    adventurerId: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
-    adventurerId: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
-    txHash: padAddress(hash),
-  });
-
-  useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
-    adventurerId: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery("battlesByAdventurerQuery", getBattlesByAdventurer, {
-    adventurerId: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
-    adventurerId: adventurer?.id ?? 0,
-    beastId: adventurer?.beastId
-      ? adventurer?.beastId
-      : data.lastBattleQuery?.battles[0]?.beastId,
-  });
-
-  useCustomQuery("beastByIdQuery", getBeastById, {
-    id: adventurer?.beastId
-      ? adventurer?.beastId
-      : data.lastBattleQuery?.battles[0]?.beastId,
-  });
-
-  useCustomQuery("topScoresQuery", getTopScores);
-
-  useCustomQuery("leaderboardByIdQuery", getAdventurerById, {
-    id: profile ?? 0,
-  });
-
-  useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
-    adventurer: adventurer?.id ?? 0,
-  });
-
-  useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
-    adventurer: profile ?? 0,
-  });
-
-  useCustomQuery(
-    "unclaimedItemsByAdventurerQuery",
-    getUnclaimedItemsByAdventurer,
-    {
-      bidder: adventurer?.id,
-      status: "Open",
-    }
-  );
 
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
@@ -221,6 +129,10 @@ export default function Home() {
       screen: "start",
     },
   ]);
+
+  const adventurers = data.adventurersByOwnerQuery
+    ? data.adventurersByOwnerQuery.adventurers
+    : [];
 
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
@@ -273,9 +185,9 @@ export default function Home() {
   }, [account]);
 
   const goerli_graphql =
-    "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql";
+    "https://survivor-indexer.bibliothecadao.xyz:8081/goerli-graphql";
   const devnet_graphql =
-    "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql";
+    "https://survivor-indexer.bibliothecadao.xyz:8081/devnet-graphql";
 
   useEffect(() => {
     setIndexer(
@@ -309,13 +221,13 @@ export default function Home() {
             id: 3,
             label: "Market",
             screen: "market",
-            disabled: hasBeast || upgrade || adventurer.health == 0,
+            disabled: hasBeast || adventurer.health == 0,
           },
           {
             id: 4,
             label: "Inventory",
             screen: "inventory",
-            disabled: upgrade || adventurer.health == 0,
+            disabled: adventurer.health == 0,
           },
           {
             id: 5,
@@ -338,6 +250,11 @@ export default function Home() {
             id: 8,
             label: "Encounters",
             screen: "encounters",
+          },
+          {
+            id: 9,
+            label: "Guide",
+            screen: "guide",
           },
         ];
       }
@@ -401,19 +318,16 @@ export default function Home() {
     refetch("adventurersByOwnerQuery");
   }, [account]);
 
-  console.log(data);
-
-  // const notificationData = { data: "test" };
-
   return (
+    // <Maintenance />
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-10 overflow-hidden`}
+      className={`min-h-screen container mx-auto flex flex-col p-4 sm:p-10 overflow-hidden`}
     >
       {connected ? (
         <>
-          <div className="flex justify-between w-full ">
+          <div className="flex flex-col sm:flex-row justify-between w-full">
             <h1 className="glitch">Loot Survivor</h1>
-            <div className="flex flex-row self-end gap-2">
+            <div className="flex flex-row self-end gap-2 flex-wrap">
               <TxActivity />
               <Button onClick={() => setIsMuted(!isMuted)}>
                 {isMuted ? "Unmute" : "Mute"}
@@ -448,7 +362,7 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed top-1/16 left-3/8 w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
+            <div className="fixed top-1/16 left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}
@@ -480,6 +394,7 @@ export default function Home() {
                 {screen === "upgrade" && <Upgrade />}
                 {screen === "profile" && <Profile />}
                 {screen === "encounters" && <Encounters />}
+                {screen === "guide" && <Guide />}
               </>
             </div>
           ) : null}

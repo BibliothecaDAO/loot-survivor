@@ -25,6 +25,7 @@ export default function Beast() {
   const { writeAsync } = useContractWrite({ calls });
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
+  const setTxHash = useLoadingStore((state) => state.setTxHash);
   const onboarded = useUIStore((state) => state.onboarded);
 
   const { data } = useQueriesStore();
@@ -65,16 +66,16 @@ export default function Beast() {
       label: "ATTACK BEAST!",
       action: async () => {
         addToCalls(attack);
+        startLoading(
+          "Attack",
+          "Attacking",
+          "battlesByTxHashQuery",
+          adventurer?.id,
+          { beast: beastData }
+        );
         await handleSubmitCalls(writeAsync).then((tx: any) => {
           if (tx) {
-            startLoading(
-              "Attack",
-              tx.transaction_hash,
-              "Attacking",
-              "battlesByTxHashQuery",
-              adventurer?.id,
-              { beast: beastData }
-            );
+            setTxHash(tx.transaction_hash);
             addTransaction({
               hash: tx.transaction_hash,
               metadata: {
@@ -85,6 +86,7 @@ export default function Beast() {
         });
       },
       disabled: adventurer?.beastId == undefined || loading,
+      loading: loading,
     },
     {
       id: 2,
@@ -93,16 +95,16 @@ export default function Beast() {
       mouseLeave: handleMouseLeave,
       action: async () => {
         addToCalls(flee);
+        startLoading(
+          "Flee",
+          "Fleeing",
+          "battlesByTxHashQuery",
+          adventurer?.id,
+          { beast: beastData }
+        );
         await handleSubmitCalls(writeAsync).then((tx: any) => {
           if (tx) {
-            startLoading(
-              "Flee",
-              tx.transaction_hash,
-              "Fleeing",
-              "battlesByTxHashQuery",
-              adventurer?.id,
-              { beast: beastData }
-            );
+            setTxHash(tx.transaction_hash);
             addTransaction({
               hash: tx.transaction_hash,
               metadata: {
@@ -113,19 +115,20 @@ export default function Beast() {
         });
       },
       disabled: adventurer?.beastId == undefined || loading || !onboarded,
+      loading: loading,
     },
   ];
 
   const isBeastDead = beastData?.health == "0";
 
-  const beastName = processBeastName(beastData, adventurer);
+  const beastName = processBeastName(beastData);
 
   return (
-    <div className="flex flex-row overflow-hidden">
-      <div className="w-1/3">
+    <div className="flex flex-row overflow-hidden flex-wrap">
+      <div className="sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      <div className="flex flex-col w-1/3 gap-10 p-4">
+      <div className="flex flex-col sm:w-1/3 gap-10 p-4">
         {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
 
         {(adventurer?.beastId || formatBattles.length > 0) && (
@@ -148,7 +151,7 @@ export default function Beast() {
         )}
       </div>
 
-      <div className="w-1/3">
+      <div className="sm:w-1/3">
         {adventurer?.beastId || data.lastBattleQuery?.battles[0] ? (
           <>
             <BeastDisplay beastData={beastData} />

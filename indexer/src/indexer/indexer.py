@@ -18,6 +18,7 @@ from indexer.decoder import (
     decode_mint_adventurer_event,
     decode_update_adventurer_state_event,
     decode_discovery_event,
+    decode_high_score_event,
     decode_create_beast_event,
     decode_beast_state_event,
     decode_beast_attacked_event,
@@ -83,6 +84,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "MintAdventurer",
             "UpdateAdventurerState",
             "Discovery",
+            "HighScoreReward",
         ]:
             add_filter(self.config.ADVENTURER_CONTRACT, adventurer_event)
 
@@ -121,34 +123,40 @@ class LootSurvivorIndexer(StarkNetIndexer):
 
     async def handle_data(self, info: Info, data: Block):
         block_time = data.header.timestamp.ToDatetime()
-        print(f"Indexing block {data.header.block_number}")
+        print(f"Indexing block {data.header.block_number} at {block_time}")
         # Handle one block of data
-        for event_with_tx in data.events:
-            event = event_with_tx.event
-            event_name = self.event_map[felt.to_int(event.keys[0])]
-            await {
-                "MintAdventurer": self.mint_adventurer,
-                "UpdateAdventurerState": self.update_adventurer_state,
-                "Discovery": self.discovery,
-                "CreateBeast": self.create_beast,
-                "UpdateBeastState": self.update_beast_state,
-                "BeastAttacked": self.beast_attacked,
-                "AdventurerAttacked": self.adventurer_attacked,
-                "FledBeast": self.fled_beast,
-                "AdventurerAmbushed": self.adventurer_ambushed,
-                "UpdateGoldBalance": self.update_gold,
-                "MintItem": self.mint_item,
-                "UpdateItemState": self.update_item_state,
-                "MintDailyItems": self.mint_daily_items,
-                "ClaimItem": self.claim_item,
-                "ItemMerchantUpdate": self.update_merchant_item,
-            }[event_name](
-                info,
-                block_time,
-                event.from_address,
-                felt.to_hex(event_with_tx.transaction.meta.hash),
-                event.data,
-            )
+        # Define the batch size
+        batch_size = 100  # adjust this number as necessary
+
+        for i in range(0, len(data.events), batch_size):
+            batch = data.events[i : i + batch_size]
+            for event_with_tx in batch:
+                event = event_with_tx.event
+                event_name = self.event_map[felt.to_int(event.keys[0])]
+                await {
+                    "MintAdventurer": self.mint_adventurer,
+                    "UpdateAdventurerState": self.update_adventurer_state,
+                    "Discovery": self.discovery,
+                    "HighScoreReward": self.high_score,
+                    "CreateBeast": self.create_beast,
+                    "UpdateBeastState": self.update_beast_state,
+                    "BeastAttacked": self.beast_attacked,
+                    "AdventurerAttacked": self.adventurer_attacked,
+                    "FledBeast": self.fled_beast,
+                    "AdventurerAmbushed": self.adventurer_ambushed,
+                    "UpdateGoldBalance": self.update_gold,
+                    "MintItem": self.mint_item,
+                    "UpdateItemState": self.update_item_state,
+                    "MintDailyItems": self.mint_daily_items,
+                    "ClaimItem": self.claim_item,
+                    "ItemMerchantUpdate": self.update_merchant_item,
+                }[event_name](
+                    info,
+                    block_time,
+                    event.from_address,
+                    felt.to_hex(event_with_tx.transaction.meta.hash),
+                    event.data,
+                )
 
     async def mint_adventurer(
         self,
@@ -249,6 +257,25 @@ class LootSurvivorIndexer(StarkNetIndexer):
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         print("- [discovery]", d.adventurer_id, "->", d.discovery_type)
+
+    async def high_score(
+        self,
+        info: Info,
+        block_time: datetime,
+        _: FieldElement,
+        tx_hash: str,
+        data: List[FieldElement],
+    ):
+        hs = decode_high_score_event(data)
+        discovery_doc = {
+            "txHash": encode_hex_as_bytes(tx_hash),
+            "address": check_exists_int(hs.top_score_holders["address"]),
+            "xp": encode_int_as_bytes(hs.top_score_holders["xp"]),
+            "adventurerId": encode_int_as_bytes(hs.top_score_holders["adventurer_id"]),
+            "scoreTime": block_time,
+        }
+        await info.storage.insert_one("scores", discovery_doc)
+        print("- [score]", hs.top_score_holders)
 
     async def create_beast(
         self,
@@ -788,6 +815,9 @@ async def run_indexer(
             token=AUTH_TOKEN,
         ),
         reset_state=restart,
+        client_options=[
+            ("grpc.max_receive_message_length", 256 * 1_000_000),  # ~256 MB
+        ],
     )
 
     config = Config(network, adventurer, beast, loot, start_block)

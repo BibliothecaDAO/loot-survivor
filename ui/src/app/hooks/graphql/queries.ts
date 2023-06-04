@@ -384,6 +384,46 @@ const getAdventurerByXP = gql`
     }
   }
 `;
+
+const getAdventurersByXPPaginated = gql`
+  query get_adventurer_by_xp_paginated($skip: Int) {
+    adventurers(limit: 10, skip: $skip, orderBy: { xp: { desc: true } }) {
+      beastId
+      birthdate
+      charisma
+      chestId
+      dexterity
+      feetId
+      gold
+      handsId
+      headId
+      health
+      homeRealm
+      id
+      imageHash1
+      imageHash2
+      intelligence
+      lastUpdated
+      level
+      luck
+      name
+      neckId
+      order
+      owner
+      race
+      ringId
+      status
+      strength
+      upgrading
+      vitality
+      waistId
+      weaponId
+      wisdom
+      xp
+    }
+  }
+`;
+
 const getBeastById = gql`
   query get_beast_by_id($id: FeltValue) {
     beasts(where: { id: { eq: $id } }) {
@@ -583,7 +623,7 @@ const getLatestMarketItemsNumber = gql`
 
 const getTopScores = gql`
   query get_top_scores {
-    scores(orderBy: { xp: { desc: true } }, limit: 3) {
+    scores(orderBy: { xp: { desc: true } }, limit: 10) {
       address
       adventurerId
       scoreTime
@@ -619,5 +659,6 @@ export {
   getLatestMarketItemsNumber,
   getUnclaimedItemsByAdventurer,
   getAdventurerByXP,
+  getAdventurersByXPPaginated,
   getTopScores,
 };

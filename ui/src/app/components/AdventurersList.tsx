@@ -85,8 +85,8 @@ export const AdventurersList = ({
   return (
     <>
       {sortedAdventurers.length > 0 ? (
-        <div className="flex basis-2/3">
-          <div className="flex flex-col w-1/2">
+        <div className="flex flex-wrap w-full">
+          <div className="flex flex-col sm:w-1/2">
             {filteredAdventurers.map((adventurer, index) => (
               <Button
                 key={adventurer.id}
@@ -114,12 +114,8 @@ export const AdventurersList = ({
               {showZeroHealth ? "Hide" : "Show"} dead
             </Button>
           )}
-          {!isDataUpdated["itemsByAdventurerQuery"] ? (
-            <div className="flex justify-center p-20 align-middle">
-              <LootIconLoader />
-            </div>
-          ) : (
-            <div className="w-1/2">
+          {filteredAdventurers.length > 0 && (
+            <div className="sm:w-1/2">
               <Info adventurer={filteredAdventurers[selectedIndex]} />
             </div>
           )}

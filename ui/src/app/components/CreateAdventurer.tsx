@@ -47,7 +47,7 @@ export const CreateAdventurer = ({
     imageHash1: "1",
     imageHash2: "1",
     interfaceaddress:
-      "0x026213C428D350Fa212Aa9B716D45b98b866548efDC867f94B6F775bE90fd86B",
+      "0x07642A1c8D575B0c0f9a7AD7cCEb5517c02f36E5F3B36B25429Cc7C99383ed0a",
   });
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const setScreen = useUIStore((state) => state.setScreen);
@@ -58,6 +58,7 @@ export const CreateAdventurer = ({
     (state) => state.handleSubmitCalls
   );
   const startLoading = useLoadingStore((state) => state.startLoading);
+  const setTxHash = useLoadingStore((state) => state.setTxHash);
   const { writeAsync } = useContractWrite({ calls });
   const { adventurerContract, lordsContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -106,16 +107,16 @@ export const CreateAdventurer = ({
       ],
     };
     addToCalls(mintAdventurer);
+    startLoading(
+      "Create",
+      "Spawning Adventurer",
+      "adventurersByOwnerQuery",
+      undefined,
+      `You have spawned ${formData.name}!`
+    );
     await handleSubmitCalls(writeAsync).then((tx: any) => {
       if (tx) {
-        startLoading(
-          "Create",
-          tx.transaction_hash,
-          "Spawning Adventurer",
-          "adventurersByOwnerQuery",
-          undefined,
-          `You have spawned ${formData.name}!`
-        );
+        setTxHash(tx.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
           metadata: {
@@ -195,7 +196,7 @@ export const CreateAdventurer = ({
 
   return (
     <div className="flex flex-row w-full">
-      <div className="flex items-center w-1/2 mx-2 text-lg border border-terminal-green">
+      <div className="flex items-center sm:w-1/2 mx-2 sm:text-lg border border-terminal-green">
         <div className="flex flex-row w-full gap-2 p-1">
           <form
             onSubmit={handleSubmit}

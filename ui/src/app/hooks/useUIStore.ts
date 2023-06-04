@@ -9,7 +9,8 @@ export type ScreenPage =
   | "leaderboard"
   | "upgrade"
   | "profile"
-  | "encounters";
+  | "encounters"
+  | "guide";
 
 type State = {
   connected: boolean;

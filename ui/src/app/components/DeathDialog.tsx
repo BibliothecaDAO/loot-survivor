@@ -32,7 +32,6 @@ export const DeathDialog = () => {
     !!adventurer?.beastId,
     beast
   );
-  console.log(notificationData);
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
@@ -59,7 +58,7 @@ export const DeathDialog = () => {
             </p>
           </div>
           <TwitterShareButton
-            text={`RIP ${adventurer?.name}, who died at ${ordinalRank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Loot $Lords`}
+            text={`RIP ${adventurer?.name}, who died at ${ordinalRank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
           />
           <Button onClick={() => showDialog(false)}>Play Again</Button>
         </div>

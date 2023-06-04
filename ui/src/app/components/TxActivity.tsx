@@ -1,11 +1,35 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useWaitForTransaction } from "@starknet-react/core";
+import { useWaitForTransaction, useAccount } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useLoadingStore from "../hooks/useLoadingStore";
 import LootIconLoader from "./Loader";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import {
+  getAdventurerById,
+  getAdventurersInList,
+  getAdventurersInListByXp,
+  getBattleByTxHash,
+  getBeasts,
+  getLastDiscovery,
+  getAdventurerByXP,
+  getDiscoveries,
+  getLatestDiscoveries,
+  getLastBattleByAdventurer,
+  getBattlesByAdventurer,
+  getBattlesByBeast,
+  getDiscoveryByTxHash,
+  getAdventurersByOwner,
+  getLatestMarketItems,
+  getLatestMarketItemsNumber,
+  getBeastById,
+  getTopScores,
+  getItemsByAdventurer,
+  getUnclaimedItemsByAdventurer,
+} from "../hooks/graphql/queries";
+import useCustomQuery from "../hooks/useCustomQuery";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 export interface TxActivityProps {
   hash: string | undefined;
@@ -21,6 +45,8 @@ export const TxActivity = () => {
   const type = useLoadingStore((state) => state.type);
   const loadingAdventurer = useLoadingStore((state) => state.adventurer);
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const error = useTransactionCartStore((state) => state.error);
+  const setError = useTransactionCartStore((state) => state.setError);
   const {
     data: queryData,
     isDataUpdated,
@@ -41,9 +67,84 @@ export const TxActivity = () => {
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
 
+  const { account } = useAccount();
+
+  useCustomQuery(
+    "adventurersByOwnerQuery",
+    getAdventurersByOwner,
+    {
+      owner: padAddress(account?.address ?? ""),
+    },
+    undefined
+  );
+
+  const adventurers = queryData.adventurersByOwnerQuery
+    ? queryData.adventurersByOwnerQuery.adventurers
+    : [];
+
+  useCustomQuery("beastsQuery", getBeasts, undefined, undefined);
+
+  useCustomQuery("adventurerByIdQuery", getAdventurerById, {
+    id: adventurer?.id ?? 0,
+  });
+
+  useCustomQuery(
+    "battlesByTxHashQuery",
+    getBattleByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    undefined
+  );
+
+  useCustomQuery(
+    "discoveryByTxHashQuery",
+    getDiscoveryByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    undefined
+  );
+
+  useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
+    adventurerId: adventurer?.id ?? 0,
+  });
+
+  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
+    adventurerId: adventurer?.id ?? 0,
+    beastId: adventurer?.beastId
+      ? adventurer?.beastId
+      : queryData.lastBattleQuery?.battles[0]?.beastId,
+  });
+
+  useCustomQuery("beastByIdQuery", getBeastById, {
+    id: adventurer?.beastId
+      ? adventurer?.beastId
+      : queryData.lastBattleQuery?.battles[0]?.beastId,
+  });
+
+  useCustomQuery(
+    "latestMarketItemsNumberQuery",
+    getLatestMarketItemsNumber,
+    undefined,
+    undefined
+  );
+
+  const latestMarketItemsNumber = queryData.latestMarketItemsNumberQuery
+    ? queryData.latestMarketItemsNumberQuery.market[0]?.itemsNumber
+    : [];
+
+  useCustomQuery(
+    "latestMarketItemsQuery",
+    getLatestMarketItems,
+    {
+      itemsNumber: latestMarketItemsNumber,
+    },
+    undefined
+  );
+
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
-    console.log(accepted, hash, loadingQuery && isDataUpdated[loadingQuery]);
     if (accepted && hash && loadingQuery && isDataUpdated[loadingQuery]) {
       // Handle "Attack" or "Flee" types
       if (type === "Attack" || type === "Flee") {
@@ -95,6 +196,14 @@ export const TxActivity = () => {
     }
   }, [loadingQuery && isDataUpdated[loadingQuery], accepted, hash]);
 
+  // stop loading when an error is caught
+  useEffect(() => {
+    if (error === true) {
+      stopLoading(undefined);
+      setError(false); // reset the error state
+    }
+  }, [error, setError, stopLoading]);
+
   useEffect(() => {
     if (pendingArray) {
       const interval = setInterval(() => {
@@ -106,39 +215,17 @@ export const TxActivity = () => {
 
   return (
     <>
-      {type != "Multicall" && type != "Create" ? (
-        loading && hash && loadingAdventurer === adventurer?.id ? (
-          <div className="flex flex-row items-center gap-5">
-            {data?.status == "RECEIVED" || data?.status == "PENDING" ? (
-              <div className="flex w-48 loading-ellipsis ">
-                <LootIconLoader className="mr-3" />
-                {pendingMessage}
-              </div>
-            ) : (
-              <div className="loading-ellipsis">Refreshing data</div>
-            )}
-            <div className="flex flex-row gap-2">
-              Hash:{" "}
-              <a
-                href={`https://testnet.starkscan.co/tx/${padAddress(hash)}`}
-                target="_blank"
-                className="animate-pulse"
-              >
-                {displayAddress(hash)}
-              </a>
-            </div>
-            {data && <div>Status: {data.status}</div>}
-          </div>
-        ) : null
-      ) : (
-        (data?.status == "RECEIVED" || data?.status == "PENDING") && (
-          <div className="flex flex-row items-center gap-5">
-            <div className="flex w-48 loading-ellipsis">
-              <LootIconLoader className="self-center mr-3" />
-              {pendingArray
+      {loading ? (
+        <div className="flex flex-row items-center gap-5">
+          <div className="flex w-48 loading-ellipsis">
+            <LootIconLoader className="self-center mr-3" />
+            {hash
+              ? pendingArray
                 ? (pendingMessage as string[])[messageIndex]
-                : pendingMessage}
-            </div>
+                : pendingMessage
+              : "Confirming Tx"}
+          </div>
+          {hash && (
             <div className="flex flex-row gap-2">
               Hash:{" "}
               <a
@@ -149,10 +236,10 @@ export const TxActivity = () => {
                 {displayAddress(hash)}
               </a>
             </div>
-            {data && <div>Status: {data.status}</div>}
-          </div>
-        )
-      )}
+          )}
+          {data && hash && <div>Status: {data.status}</div>}
+        </div>
+      ) : null}
     </>
   );
 };

@@ -16,7 +16,7 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
 
   return (
     <div
-      className={`flex-shrink flex gap-2 p-2 mb-1  ${
+      className={`flex-shrink flex gap-2 p-1 sm:p-2 mb-1  ${
         Item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >
@@ -31,7 +31,9 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
       />
       {Item ? (
         <span className="flex flex-row justify-between w-full">
-          <div>
+          <div className="w-full overflow-auto whitespace-normal">
+            {" "}
+            {/* Added the CSS classes here */}
             <span className="flex font-semibold whitespace-nowrap">
               {itemName} {Item?.level} {Item?.xp} XP
               {slot == "Neck" || slot == "Ring"

@@ -1,12 +1,17 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useQuery } from "@apollo/client";
-import { getAdventurerById } from "../hooks/graphql/queries";
+import React, { useState } from "react";
+import {
+  getAdventurerByXP,
+  getAdventurersInListByXp,
+  getTopScores,
+} from "../hooks/graphql/queries";
 import { Button } from "./Button";
 import Coin from "../../../public/coin.svg";
 import Lords from "../../../public/lords.svg";
 import LootIconLoader from "./Loader";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { dedupeByValue } from "../lib/utils";
 
 const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -31,6 +36,30 @@ const Leaderboard: React.FC = () => {
   };
 
   const { data, isLoading, refetch } = useQueriesStore();
+
+  useCustomQuery(
+    "adventurersInListByXpQuery",
+    getAdventurersInListByXp,
+    {
+      ids: data.topScoresQuery?.scores
+        ? data.topScoresQuery?.scores.map((score: any) => score.adventurerId)
+        : [0],
+    },
+    undefined
+  );
+
+  const scores = data.adventurersInListByXpQuery?.adventurers
+    ? data.adventurersInListByXpQuery?.adventurers
+    : [];
+
+  useCustomQuery(
+    "adventurersByXPQuery",
+    getAdventurerByXP,
+    undefined,
+    undefined
+  );
+
+  useCustomQuery("topScoresQuery", getTopScores);
 
   if (isLoading.adventurersByXPQuery || loading)
     return (
@@ -69,12 +98,8 @@ const Leaderboard: React.FC = () => {
     return currentRank;
   };
 
-  const scores = data.adventurersInListByXpQuery?.adventurers
-    ? data.adventurersInListByXpQuery?.adventurers
-    : [];
-
   return (
-    <div className="flex flex-col items-center w-3/4 m-auto">
+    <div className="flex flex-col items-center sm:w-3/4 m-auto">
       <h1 className="text-2xl">Top 3 Submitted Scores</h1>
       {scores.length > 0 ? (
         <table className="w-full mt-4 text-xl border border-terminal-green">
@@ -89,36 +114,48 @@ const Leaderboard: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {scores.map((adventurer: any, index: number) => (
-              <tr
-                key={index}
-                className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
-                onClick={() => handleRowSelected(adventurer.id)}
-              >
-                <td>{index + 1}</td>
-                <td>{`${adventurer.name} - ${adventurer.id}`}</td>
-                <td>{adventurer.xp}</td>
-                <td>
-                  <div className="flex flex-row items-center justify-center gap-2">
-                    <span
-                      className={` ${
-                        index == 0
-                          ? "text-gold"
-                          : index == 1
-                          ? "text-silver"
-                          : index == 2
-                          ? "text-bronze"
-                          : ""
-                      }`}
-                    >
-                      {index == 0 ? 10 : index == 1 ? 3 : index == 2 ? 2 : ""}
-                    </span>
+            {scores.map((adventurer: any, index: number) => {
+              if (index > 2) {
+                return <></>;
+              } else {
+                return (
+                  <tr
+                    key={index}
+                    className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
+                    onClick={() => handleRowSelected(adventurer.id)}
+                  >
+                    <td>{index + 1}</td>
+                    <td>{`${adventurer.name} - ${adventurer.id}`}</td>
+                    <td>{adventurer.xp}</td>
+                    <td>
+                      <div className="flex flex-row items-center justify-center gap-2">
+                        <span
+                          className={` ${
+                            index == 0
+                              ? "text-gold"
+                              : index == 1
+                              ? "text-silver"
+                              : index == 2
+                              ? "text-bronze"
+                              : ""
+                          }`}
+                        >
+                          {index == 0
+                            ? 10
+                            : index == 1
+                            ? 3
+                            : index == 2
+                            ? 2
+                            : ""}
+                        </span>
 
-                    <Lords className="self-center w-6 h-6 ml-4 fill-current" />
-                  </div>
-                </td>
-              </tr>
-            ))}
+                        <Lords className="self-center w-6 h-6 ml-4 fill-current" />
+                      </div>
+                    </td>
+                  </tr>
+                );
+              }
+            })}
           </tbody>
         </table>
       ) : (

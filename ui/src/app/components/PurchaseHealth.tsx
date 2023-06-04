@@ -22,7 +22,17 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
     calldata: [adventurer?.id ?? "", "0", healthAmount],
     metadata: `Purchasing ${healthAmount * 10} health`,
   };
-  const purchaseGoldAmount = healthAmount * 5;
+
+  let purchaseGoldAmount;
+
+  if (adventurer && adventurer?.level - adventurer?.charisma <= 3) {
+    purchaseGoldAmount = healthAmount * 3;
+  } else {
+    let discount =
+      (adventurer && adventurer?.level - adventurer?.charisma) || 0;
+    purchaseGoldAmount = healthAmount * (3 * discount);
+  }
+
   const hasBalance =
     adventurer?.gold && adventurer?.gold >= purchaseGoldAmount ? true : false;
 

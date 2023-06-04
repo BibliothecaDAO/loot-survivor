@@ -8,6 +8,7 @@ export interface ButtonData {
   mouseEnter?: () => void;
   mouseLeave?: () => void;
   disabled: boolean;
+  loading?: boolean;
 }
 
 interface ButtonProps {
@@ -54,6 +55,7 @@ const KeyboardControl = ({ buttonsData }: ButtonProps) => {
             setSelectedIndex(index);
           }}
           disabled={buttonData.disabled}
+          loading={buttonData.loading}
         >
           {buttonData.label}
         </Button>

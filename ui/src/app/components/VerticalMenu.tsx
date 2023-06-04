@@ -74,8 +74,9 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
         <Button
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
-          className={selectedIndex === index && isActive ? "animate-pulse" : ""}
+          className={selectedIndex === index && isActive ? "animate-pulse w-full" : "w-full"}
           variant={selectedIndex === index ? "default" : "outline"}
+          size={'lg'}
           onClick={() => {
             setSelectedIndex(index);
             buttonData.action();

@@ -1,9 +1,7 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { useAccount } from "@starknet-react/core";
-import { useQuery } from "@apollo/client";
 import { getItemsByAdventurer } from "../hooks/graphql/queries";
-import { NullAdventurerProps } from "../types";
 import { groupBySlot } from "../lib/utils";
 import { InventoryRow } from "./InventoryRow";
 import Info from "./Info";
@@ -13,6 +11,7 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import useLoadingStore from "../hooks/useLoadingStore";
 
 const Inventory: React.FC = () => {
   const { account } = useAccount();
@@ -23,8 +22,7 @@ const Inventory: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
-
-  // const gameData = new GameData();
+  const loading = useLoadingStore((state) => state.loading);
 
   const { data } = useQueriesStore();
 
@@ -146,8 +144,8 @@ const Inventory: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-row space-x-4 overflow-hidden ">
-      <div className="w-1/3">
+    <div className="flex flex-row space-x-4 overflow-hidden flex-wrap">
+      <div className="sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
       <div className="flex flex-col">
@@ -247,6 +245,7 @@ const Inventory: React.FC = () => {
                 <Button
                   onClick={() => handleAddEquipItem(item)}
                   disabled={singleEquipExists(item.id)}
+                  loading={loading}
                 >
                   equip
                 </Button>

@@ -7,6 +7,11 @@ import { Button } from "./Button";
 import { NullBeast } from "../types";
 import { processBeastName } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import {
+  getBattlesByAdventurer,
+  getDiscoveries,
+} from "../hooks/graphql/queries";
 
 export const Encounters = () => {
   const { adventurer } = useAdventurerStore();
@@ -18,6 +23,14 @@ export const Encounters = () => {
   const [sortedCombined, setSortedCombined] = useState<any[]>([]);
 
   const beasts = data.beastsQuery ? data.beastsQuery.beasts : [];
+
+  useCustomQuery("discoveriesQuery", getDiscoveries, {
+    adventurerId: adventurer?.id ?? 0,
+  });
+
+  useCustomQuery("battlesByAdventurerQuery", getBattlesByAdventurer, {
+    adventurerId: adventurer?.id ?? 0,
+  });
 
   useEffect(() => {
     if (data) {
@@ -79,12 +92,7 @@ export const Encounters = () => {
             loadingData) && <LootIconLoader />}
           <div className="flex flex-col items-center gap-2 overflow-auto">
             {displayEncounters.map((encounter: any, index: number) => {
-              // const beastName = processBeastName(encounter.beast, adventurer);
-              let beastName =
-                encounter.beast?.id === beasts[0].id ||
-                encounter.entityId === beasts[0].id
-                  ? encounter.beast?.beast
-                  : processBeastName(encounter.beast, adventurer);
+              let beastName = processBeastName(encounter.beast);
               return (
                 <div
                   className="w-full p-2 text-left border border-terminal-green"

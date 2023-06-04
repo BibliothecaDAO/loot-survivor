@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "./useQueryStore";
-import { isEqual } from "lodash";
+import { cond, isEqual } from "lodash";
 
 type Variables = Record<
   string,
@@ -11,15 +11,16 @@ type Variables = Record<
 const useCustomQuery = (
   queryKey: QueryKey,
   query: any,
-  variables?: Variables
+  variables?: Variables,
+  shouldPoll?: boolean
 ) => {
-  const { updateData } = useQueriesStore();
+  const { data: queryData, updateData, isDataUpdated } = useQueriesStore();
 
-  const { data, startPolling, stopPolling, loading, refetch } = useQuery(
+  const { data, startPolling, stopPolling, loading, refetch, error } = useQuery(
     query,
     {
       variables: variables,
-      pollInterval: 5000,
+      skip: !shouldPoll && shouldPoll !== undefined,
     }
   );
 
@@ -38,11 +39,20 @@ const useCustomQuery = (
   }, [data, updateData, loading, queryKey, refetchWrapper, variables]);
 
   useEffect(() => {
-    startPolling(3000);
-    return () => {
+    if (shouldPoll || shouldPoll === undefined) {
+      startPolling(5000);
+    } else {
       stopPolling();
-    };
+    }
   }, [startPolling, stopPolling]);
 };
+
+//   useEffect(() => {
+//     startPolling(5000);
+//     return () => {
+//       stopPolling();
+//     };
+//   }, [startPolling, stopPolling]);
+// };
 
 export default useCustomQuery;

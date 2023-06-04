@@ -111,7 +111,7 @@ export const processNotification = (
   if (type == "Attack" || type == "Flee") {
     return (
       <NotificationBattleDisplay
-        battleData={notificationData.data}
+        battleData={notificationData?.data}
         beast={notificationData.beast ? notificationData.beast : ""}
         type={type}
       />
@@ -149,8 +149,8 @@ export const processNotification = (
             ) {
               return (
                 <p key={index} className="text-lg">
-                  You were attacked by the {processBeastName(beast, adventurer)}{" "}
-                  after equipping an item taking {battles[0].damage}!
+                  You were attacked by the {processBeastName(beast)} after
+                  equipping an item taking {battles[0].damage}!
                 </p>
               );
             } else if (
@@ -161,8 +161,8 @@ export const processNotification = (
             ) {
               return (
                 <p key={index} className="text-lg">
-                  You were attacked by the {processBeastName(beast, adventurer)}{" "}
-                  after equipping an item but defended it!
+                  You were attacked by the {processBeastName(beast)} after
+                  equipping an item but defended it!
                 </p>
               );
             }
