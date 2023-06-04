@@ -58,7 +58,11 @@ const processAnimation = (
         (data: any) => data.attacker == "Adventurer" && data.targetHealth == 0
       )
     ) {
-      return gameData.ADVENTURER_ANIMATIONS["Slayed"];
+      return getRandomElement([
+        gameData.ADVENTURER_ANIMATIONS["Attack1"],
+        gameData.ADVENTURER_ANIMATIONS["Attack2"],
+        gameData.ADVENTURER_ANIMATIONS["Attack3"],
+      ]);
     } else {
       return getRandomElement([
         gameData.ADVENTURER_ANIMATIONS["Attack1"],

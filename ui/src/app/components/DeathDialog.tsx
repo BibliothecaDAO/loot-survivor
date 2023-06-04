@@ -13,6 +13,7 @@ export const DeathDialog = () => {
   const showDialog = useUIStore((state) => state.showDialog);
   const appUrl = "https://loot-survivor.vercel.app/";
   const { data } = useQueriesStore();
+
   const rank = getRankFromList(
     adventurer?.id ?? 0,
     data.adventurersByXPQuery?.adventurers ?? []
