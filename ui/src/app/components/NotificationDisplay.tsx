@@ -82,7 +82,10 @@ const processAnimation = (
           return gameData.ADVENTURER_ANIMATIONS["HitByObstacle"];
         }
       } else {
-        return gameData.ADVENTURER_ANIMATIONS["AvoidObstacle"];
+        return getRandomElement([
+          gameData.ADVENTURER_ANIMATIONS["AvoidObstacle1"],
+          gameData.ADVENTURER_ANIMATIONS["AvoidObstacle2"],
+        ]);
       }
     } else if (notificationData?.discoveryType == "Item") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
