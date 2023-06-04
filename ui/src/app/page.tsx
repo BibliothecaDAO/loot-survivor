@@ -63,6 +63,7 @@ import { Encounters } from "./components/Encounters";
 import { Maintenance } from "./components/Maintenance";
 import Guide from "./components/Guide";
 import { processNotification } from "./components/NotificationDisplay";
+import { DiscoveryDisplay } from "./components/DiscoveryDisplay";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -177,6 +178,7 @@ export default function Home() {
           "Obstacle" &&
         adventurer?.health == 0
       ) {
+        setDeathMessage(<DiscoveryDisplay discoveryData={notificationData} />);
         showDialog(true);
       }
     }
