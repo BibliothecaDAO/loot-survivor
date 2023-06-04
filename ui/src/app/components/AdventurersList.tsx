@@ -114,11 +114,7 @@ export const AdventurersList = ({
               {showZeroHealth ? "Hide" : "Show"} dead
             </Button>
           )}
-          {!isDataUpdated["itemsByAdventurerQuery"] ? (
-            <div className="flex justify-center p-20 align-middle">
-              <LootIconLoader />
-            </div>
-          ) : (
+          {filteredAdventurers.length > 0 && (
             <div className="sm:w-1/2">
               <Info adventurer={filteredAdventurers[selectedIndex]} />
             </div>
