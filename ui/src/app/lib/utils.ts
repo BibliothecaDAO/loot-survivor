@@ -180,6 +180,14 @@ export function processBeastName(beastData: any) {
   }
 }
 
+export function getRandomElement(arr: string[]): string {
+  if (arr.length === 0) {
+    throw new Error("Array must not be empty.");
+  }
+  const randomIndex = Math.floor(Math.random() * arr.length);
+  return arr[randomIndex];
+}
+
 type MyDict = { [key: string]: any }; // Or replace 'any' with the actual type if you know it
 
 export function dedupeByValue(arr: MyDict[], key: string): MyDict[] {
