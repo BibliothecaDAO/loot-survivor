@@ -155,17 +155,21 @@ export const Guide = () => {
       <p>
         You can purchase items in the Marketplace auction and equip them in each
         item slot. Available slots include: Weapon, Head, Chest, Hands, Waist,
-        Feet, Neck and Ring. Every 3 hours new items will be available. Once you
-        bid on items, a 15 minute window will start where you can be outbid,
-        after 15 minutes the auction closes and the highest bidder can claim
-        their items. Claimed items appear in your Inventory. Expect to pay more
-        for higher tier items, even when not bidding against other adventurers.
+        Feet, Neck and Ring. Once you bid on items, a 15 minute auction
+        countdown will start where you can be outbid by other players, after 15
+        minutes the auction closes the highest bidder can claim their items.
+        Claimed items appear in your Inventory and can be equipped. Expect to
+        pay more for higher tier items, even when not bidding against other
+        adventurers. Every 3 hours new items will be available to mint, anyone
+        can mint items to refresh the marketplace. You can still claim items
+        even if new items have been minted.
       </p>
 
       <h3 className="mb-2">Swap Items</h3>
       <p>
-        You can switch weapons and armor to aid in your adventure. However, if
-        you make a switch during a battle, you will be open to an attack!
+        You can switch weapons and armor to aid in your adventure. BE WARNED! If
+        you make a switch during a battle, you will be open to an attack! You
+        will be hit for each item swap.
       </p>
 
       <h3 className="mb-2">Upgrading Stats</h3>
@@ -177,6 +181,12 @@ export const Guide = () => {
       <table className="w-1/2 m-auto uppercase text-center whitespace-nowrap border border-terminal-green">
         <tbody>
           <tr className="border border-terminal-green">
+            <td
+              rowSpan={3}
+              className="px-4 py-3 border-r border-terminal-green"
+            >
+              3D Physical
+            </td>
             <td className="px-4 py-3 border-r border-terminal-green">
               Strength
             </td>
@@ -186,7 +196,7 @@ export const Guide = () => {
             <td className="px-4 py-3 border-r border-terminal-green">
               Vitality
             </td>
-            <td>Increases health by +20hp and max health</td>
+            <td>Increases health by +20hp and max health by +20hp</td>
           </tr>
           <tr className="py-4 border border-terminal-green">
             <td className="px-4 py-3 border-r border-terminal-green">
@@ -195,18 +205,36 @@ export const Guide = () => {
             <td>Improves chances of successfully fleeing</td>
           </tr>
           <tr className="py-4 border border-terminal-green">
-            <td className="px-4 py-3 border-r border-terminal-green">Wisdom</td>
-            <td>Helps evade Beast ambushes</td>
-          </tr>
-          <tr className="py-4 border border-terminal-green">
+            <td
+              rowSpan={3}
+              className="px-4 py-3 border-r border-terminal-green"
+            >
+              3D Mental
+            </td>
             <td className="px-4 py-3 border-r border-terminal-green">
               Intelligence
             </td>
             <td>Aids in avoiding Obstacles</td>
           </tr>
           <tr className="py-4 border border-terminal-green">
+            <td className="px-4 py-3 border-r border-terminal-green">Wisdom</td>
+            <td>Helps evade Beast ambushes</td>
+          </tr>
+          <tr className="py-4 border border-terminal-green">
+            <td className="px-4 py-3 border-r border-terminal-green">
+              Charisma
+            </td>
+            <td>Gives 3 Gold Discount on items and health potions</td>
+          </tr>
+          <tr className="py-4 border border-terminal-green">
+            <td
+              rowSpan={1}
+              className="px-4 py-3 border-r border-terminal-green"
+            >
+              1D Metaphysical
+            </td>
             <td className="px-4 py-3 border-r border-terminal-green">Luck</td>
-            <td>
+            <td className="px-4 py-3 border-r border-terminal-green">
               Raises chances of critical damage and cannot be upgraded directly
             </td>
           </tr>
