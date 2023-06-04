@@ -320,7 +320,7 @@ export default function Home() {
   }, [onboarded, adventurer, account]);
 
   useEffect(() => {
-    if (upgrade) {
+    if (upgrade && adventurer?.health !== 0) {
       setScreen("upgrade");
     }
   }, [upgrade]);
