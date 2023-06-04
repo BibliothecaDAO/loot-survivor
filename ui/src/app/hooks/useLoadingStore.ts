@@ -22,6 +22,8 @@ type LoadingState = {
   ) => void;
   setTxHash: (hash: string) => void;
   stopLoading: (notificationData?: any) => void;
+  deathMessage: any;
+  setDeathMessage: (deathMessage: any) => void;
 };
 
 const useLoadingStore = create<LoadingState>((set, get) => ({
@@ -79,6 +81,10 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
         5000
       );
     }
+  },
+  deathMessage: null,
+  setDeathMessage: (deathMessage) => {
+    set({ deathMessage });
   },
 }));
 

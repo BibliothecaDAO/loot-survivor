@@ -143,6 +143,13 @@ export const TxActivity = () => {
     undefined
   );
 
+  useCustomQuery(
+    "adventurersByXPQuery",
+    getAdventurerByXP,
+    undefined,
+    undefined
+  );
+
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
     if (accepted && hash && loadingQuery && isDataUpdated[loadingQuery]) {

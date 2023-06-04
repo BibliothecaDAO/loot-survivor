@@ -25,19 +25,19 @@ const processAnimation = (
   const gameData = new GameData();
   if (type == "Flee") {
     if (
-      Array.isArray(notificationData.data) &&
+      Array.isArray(notificationData?.data) &&
       notificationData.data.some((data: any) => data.fled)
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Flee"];
     } else if (
-      Array.isArray(notificationData.data) &&
+      Array.isArray(notificationData?.data) &&
       notificationData.data.some(
         (data: any) => data.attacker == "Beast" && data.targetHealth > 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
     } else if (
-      Array.isArray(notificationData.data) &&
+      Array.isArray(notificationData?.data) &&
       notificationData.data.some(
         (data: any) => data.attacker == "Beast" && data.targetHealth == 0
       )
@@ -46,12 +46,23 @@ const processAnimation = (
     }
   } else if (type == "Attack") {
     if (
-      Array.isArray(notificationData.data) &&
+      Array.isArray(notificationData?.data) &&
       notificationData.data.some(
         (data: any) => data.attacker == "Beast" && data.targetHealth == 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
+    } else if (
+      Array.isArray(notificationData?.data) &&
+      notificationData.data.some(
+        (data: any) => data.attacker == "Adventurer" && data.targetHealth == 0
+      )
+    ) {
+      return getRandomElement([
+        gameData.ADVENTURER_ANIMATIONS["Attack1"],
+        gameData.ADVENTURER_ANIMATIONS["Attack2"],
+        gameData.ADVENTURER_ANIMATIONS["Attack3"],
+      ]);
     } else {
       return getRandomElement([
         gameData.ADVENTURER_ANIMATIONS["Attack1"],

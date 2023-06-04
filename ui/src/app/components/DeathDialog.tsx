@@ -6,32 +6,20 @@ import useUIStore from "../hooks/useUIStore";
 import Image from "next/image";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
-import { processNotification } from "./NotificationDisplay";
 
 export const DeathDialog = () => {
-  const type = useLoadingStore((state) => state.type);
-  const notificationData = useLoadingStore((state) => state.notificationData);
+  const deathMessage = useLoadingStore((state) => state.deathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const showDialog = useUIStore((state) => state.showDialog);
   const appUrl = "https://loot-survivor.vercel.app/";
   const { data } = useQueriesStore();
+
   const rank = getRankFromList(
     adventurer?.id ?? 0,
-    data.adventurersByXPQuery.adventurers ?? []
+    data.adventurersByXPQuery?.adventurers ?? []
   );
-  const battles = data.battlesByBeastQuery
-    ? data.battlesByBeastQuery.battles
-    : [];
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
-  const beast = data.beastByIdQuery ? data.beastByIdQuery.beasts[0] : [];
-  const notification = processNotification(
-    type,
-    notificationData,
-    adventurer,
-    battles,
-    !!adventurer?.beastId,
-    beast
-  );
+  console.log(deathMessage);
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
@@ -47,7 +35,7 @@ export const DeathDialog = () => {
           </div>
           <div className="flex flex-col gap-2 items-center justify-center">
             <p className="text-4xl text-red-500">GAME OVER!</p>
-            {/* {notification} */}
+            {deathMessage}
             <p className="text-2xl">
               {adventurer?.name} has died level {adventurer?.level} with{" "}
               {adventurer?.xp} xp, a valiant effort!

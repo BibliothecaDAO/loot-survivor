@@ -52,7 +52,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                 {formatAdventurer.name}
                 <span className="flex text-terminal-yellow">
                   <Coin className="self-center w-6 h-6 fill-current" />{" "}
-                  {formatAdventurer.gold}
+                  {formatAdventurer.gold ? formatAdventurer.gold : 0}
                 </span>
                 <span className="flex ">
                   <Heart className="self-center w-6 h-6 fill-current" />{" "}
