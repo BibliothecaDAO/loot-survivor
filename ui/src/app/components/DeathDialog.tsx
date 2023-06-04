@@ -6,7 +6,6 @@ import useUIStore from "../hooks/useUIStore";
 import Image from "next/image";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
-import { processNotification } from "./NotificationDisplay";
 
 export const DeathDialog = () => {
   const deathMessage = useLoadingStore((state) => state.deathMessage);
@@ -19,6 +18,7 @@ export const DeathDialog = () => {
     data.adventurersByXPQuery?.adventurers ?? []
   );
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
+  console.log(deathMessage);
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
