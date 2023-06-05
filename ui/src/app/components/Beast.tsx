@@ -135,7 +135,7 @@ export default function Beast() {
           <>
             <div className="flex flex-col items-center gap-5 p-2">
               <div className="text-xl uppercase">
-                Battle log with {beastData.beast}
+                Battle log with {beastData?.beast}
               </div>
               <div className="flex flex-col gap-2">
                 {formatBattles.map((battle: any, index: number) => (
