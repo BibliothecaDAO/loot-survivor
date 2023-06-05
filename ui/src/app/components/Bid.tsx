@@ -34,9 +34,10 @@ export function BidBox({
   const actualBid = bidPrice ? bidPrice + discount : 0;
   const neededBid = item.price
     ? item.price + 1
-    : basePrice > 3
+    : basePrice - discount > 3
     ? basePrice - discount
     : 3;
+  console.log(neededBid);
 
   const handleBid = (marketId: number) => {
     if (bidPrice != undefined && actualBid >= basePrice) {
