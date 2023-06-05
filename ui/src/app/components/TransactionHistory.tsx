@@ -35,6 +35,8 @@ const TransactionHistory = () => {
 
   const history = useLoadingStore((state) => state.history);
 
+  console.log(history);
+
   return (
     <div className="relative" ref={wrapperRef}>
       <Button onClick={toggleDropdown}>

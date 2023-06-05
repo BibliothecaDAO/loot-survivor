@@ -142,7 +142,7 @@ export const processNotification = (
   } else if (type == "Multicall") {
     return (
       <div className="flex flex-col">
-        {(notificationData as string[]).map((noti: any, index: number) => {
+        {(notificationData as string[])?.map((noti: any, index: number) => {
           if (hasBeast) {
             if (
               noti.startsWith("You equipped") &&
