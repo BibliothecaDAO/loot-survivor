@@ -92,44 +92,44 @@ export const NotificationBattleDisplay = ({
       {isArray && battleData.some((data) => data.fled) ? (
         <p>You fled the {beastName ? beastName : ""}!</p>
       ) : isArray &&
-        battleData[0].ambushed &&
-        battleData[0].targetHealth == 0 ? (
+        battleData[0]?.ambushed &&
+        battleData[0]?.targetHealth == 0 ? (
         <p>
           You were killed by the {beastName ? beastName : ""}, from an ambush
           taking {battleData[0].damage}!
         </p>
       ) : isArray &&
         battleData.length == 1 &&
-        battleData[0].ambushed &&
-        battleData[0].damage > 0 ? (
+        battleData[0]?.ambushed &&
+        battleData[0]?.damage > 0 ? (
         <p>
           You were ambushed by the {beastName ? beastName : ""}, taking{" "}
-          {battleData[0].damage}!
+          {battleData[0]?.damage}!
         </p>
       ) : isArray &&
         battleData.length == 1 &&
-        battleData[0].ambushed &&
-        battleData[0].damage == 0 ? (
+        battleData[0]?.ambushed &&
+        battleData[0]?.damage == 0 ? (
         <p>
           You were ambushed by the {beastName ? beastName : ""}, but avoided it!
         </p>
       ) : isArray &&
         type == "Flee" &&
         battleData.length == 1 &&
-        battleData[0].attacker == "Beast" &&
-        battleData[0].targetHealth > 0 ? (
+        battleData[0]?.attacker == "Beast" &&
+        battleData[0]?.targetHealth > 0 ? (
         <p>
           You failed to flee the {beastName ? beastName : ""} and were attacked
-          taking {battleData[0].damage} damage!{" "}
+          taking {battleData[0]?.damage} damage!{" "}
         </p>
       ) : isArray &&
         type == "Flee" &&
         battleData.length == 1 &&
-        battleData[0].attacker == "Beast" &&
-        battleData[0].targetHealth == 0 ? (
+        battleData[0]?.attacker == "Beast" &&
+        battleData[0]?.targetHealth == 0 ? (
         <p>
           You were killed trying to flee the {beastName ? beastName : ""}
-          taking {battleData[0].damage} damage!{" "}
+          taking {battleData[0]?.damage} damage!{" "}
         </p>
       ) : (
         battleData[0]?.attacker == "Adventurer" &&
