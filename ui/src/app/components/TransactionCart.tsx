@@ -44,19 +44,19 @@ const TransactionCart: React.FC = () => {
     setIsOpen(!isOpen);
   };
 
-  useCustomQuery(
-    "latestMarketItemsQuery",
-    getLatestMarketItems,
-    undefined,
-    false
-  );
+  // useCustomQuery(
+  //   "latestMarketItemsQuery",
+  //   getLatestMarketItems,
+  //   undefined,
+  //   false
+  // );
 
-  useCustomQuery(
-    "itemsByAdventurerQuery",
-    getItemsByAdventurer,
-    undefined,
-    false
-  );
+  // useCustomQuery(
+  //   "itemsByAdventurerQuery",
+  //   getItemsByAdventurer,
+  //   undefined,
+  //   false
+  // );
 
   const marketItems = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
