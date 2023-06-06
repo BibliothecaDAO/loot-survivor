@@ -8,6 +8,11 @@ import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { processItemName } from "../lib/utils";
+import {
+  getLatestMarketItems,
+  getItemsByAdventurer,
+} from "../hooks/graphql/queries";
+import useCustomQuery from "../hooks/useCustomQuery";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -38,6 +43,20 @@ const TransactionCart: React.FC = () => {
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
   };
+
+  useCustomQuery(
+    "latestMarketItemsQuery",
+    getLatestMarketItems,
+    undefined,
+    false
+  );
+
+  useCustomQuery(
+    "itemsByAdventurerQuery",
+    getItemsByAdventurer,
+    undefined,
+    false
+  );
 
   const marketItems = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items

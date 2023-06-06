@@ -4,7 +4,7 @@ import { getKeyFromValue } from "../lib/utils";
 import { GameData } from "./GameData";
 import VerticalKeyboardControl from "./VerticalMenu";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import { useQuery } from "@apollo/client";
+import useCustomQuery from "../hooks/useCustomQuery";
 import { getAdventurerById } from "../hooks/graphql/queries";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
@@ -19,6 +19,7 @@ const Upgrade = () => {
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const loading = useLoadingStore((state) => state.loading);
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
   const { addTransaction } = useTransactionManager();
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -29,6 +30,15 @@ const Upgrade = () => {
   const setScreen = useUIStore((state) => state.setScreen);
   const [selected, setSelected] = useState("");
   const upgrade = adventurer?.upgrading;
+
+  useCustomQuery(
+    "adventurerByIdQuery",
+    getAdventurerById,
+    {
+      id: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
 
   const gameData = new GameData();
 

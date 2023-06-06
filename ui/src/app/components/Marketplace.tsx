@@ -87,7 +87,7 @@ const Marketplace = () => {
     {
       ids: bidders,
     },
-    true
+    false
   );
 
   useCustomQuery(
