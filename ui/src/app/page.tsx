@@ -56,6 +56,7 @@ export default function Home() {
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
+  const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const hash = useLoadingStore((state) => state.hash);
@@ -216,7 +217,9 @@ export default function Home() {
           beast,
           beasts
         );
-        setDeathMessage(notification);
+        if (!deathMessage) {
+          setDeathMessage(notification);
+        }
         showDialog(true);
       }
     }
@@ -230,9 +233,14 @@ export default function Home() {
           "Obstacle" &&
         adventurer?.health == 0
       ) {
-        setDeathMessage(
-          <DiscoveryDisplay discoveryData={notificationData} beasts={beasts} />
-        );
+        if (!deathMessage) {
+          setDeathMessage(
+            <DiscoveryDisplay
+              discoveryData={notificationData}
+              beasts={beasts}
+            />
+          );
+        }
         showDialog(true);
       }
     }
@@ -255,7 +263,9 @@ export default function Home() {
           beasts
         );
         console.log(notification);
-        setDeathMessage(notification);
+        if (!deathMessage) {
+          setDeathMessage(notification);
+        }
         showDialog(true);
       }
     }

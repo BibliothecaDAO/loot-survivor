@@ -9,6 +9,7 @@ import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
 
 export const DeathDialog = () => {
   const deathMessage = useLoadingStore((state) => state.deathMessage);
+  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const showDialog = useUIStore((state) => state.showDialog);
   const appUrl = "https://loot-survivor.vercel.app/";
@@ -48,7 +49,14 @@ export const DeathDialog = () => {
           <TwitterShareButton
             text={`RIP ${adventurer?.name}, who died at ${ordinalRank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
           />
-          <Button onClick={() => showDialog(false)}>Play Again</Button>
+          <Button
+            onClick={() => {
+              showDialog(false);
+              setDeathMessage(null);
+            }}
+          >
+            Play Again
+          </Button>
         </div>
       </div>
     </>

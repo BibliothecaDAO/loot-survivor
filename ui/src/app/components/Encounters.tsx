@@ -48,33 +48,7 @@ export const Encounters = ({ profile }: EncountersProps) => {
     },
   });
 
-  // useCustomQuery(
-  //   "beastsByAdventurerQuery",
-  //   getBeastsByAdventurer,
-  // {
-  //   adventurerId: profile ? profile : adventurer?.id ?? 0,
-  // },
-  //   txAccepted
-  // );
   const beasts = beastsByAdventurerData ? beastsByAdventurerData.beasts : [];
-
-  // useCustomQuery(
-  //   "discoveriesQuery",
-  //   getDiscoveries,
-  //   {
-  //     adventurerId: profile ? profile : adventurer?.id ?? 0,
-  //   },
-  //   txAccepted
-  // );
-
-  // useCustomQuery(
-  //   "battlesByAdventurerQuery",
-  //   getBattlesByAdventurer,
-  //   {
-  //     adventurerId: profile ? profile : adventurer?.id ?? 0,
-  //   },
-  //   txAccepted
-  // );
 
   useEffect(() => {
     if (data) {
