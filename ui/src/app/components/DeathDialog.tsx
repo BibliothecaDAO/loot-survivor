@@ -24,10 +24,10 @@ export const DeathDialog = () => {
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
       <div className="fixed top-1/8 left-1/4 w-1/2 h-3/4 rounded-lg border border-red-500 bg-terminal-black z-50">
-        <div className="flex flex-col gap-10 h-full items-center justify-center	p-10">
-          <div className="relative w-full h-1/4">
+        <div className="flex flex-col gap-10 h-full items-center justify-center	p-5">
+          <div className="relative w-full h-1/2">
             <Image
-              src={"/skull2.png"}
+              src={"/crying-skull.png"}
               alt="skull"
               fill={true}
               style={{ objectFit: "contain" }}

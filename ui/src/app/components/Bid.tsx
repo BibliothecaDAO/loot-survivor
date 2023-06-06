@@ -37,7 +37,6 @@ export function BidBox({
     : basePrice - discount > 3
     ? basePrice - discount
     : 3;
-  console.log(neededBid);
 
   const handleBid = (marketId: number) => {
     if (bidPrice != undefined && actualBid >= basePrice) {
