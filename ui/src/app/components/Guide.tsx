@@ -29,6 +29,25 @@ export const Guide = () => {
     { weapon: "Magic", item: "Book", rank: 5 },
   ];
 
+  const suffixData = [
+    { suffix: "of Power", attribute: "Strength" },
+    { suffix: "of Giant", attribute: "Vitality" },
+    { suffix: "of Titans", attribute: "Dexterity" },
+    { suffix: "of Skill", attribute: "Intelligence" },
+    { suffix: "of Perfection", attribute: "Intelligence" },
+    { suffix: "of Brilliance", attribute: "Intelligence" },
+    { suffix: "of Enlightenment", attribute: "Wisdom" },
+    { suffix: "of Protection", attribute: "Vitality" },
+    { suffix: "of Anger", attribute: "Strength" },
+    { suffix: "of Rage", attribute: "Wisdom" },
+    { suffix: "of Fury", attribute: "Dexterity" },
+    { suffix: "of Vitriol", attribute: "Charisma" },
+    { suffix: "of the Fox", attribute: "Intelligence" },
+    { suffix: "of Detection", attribute: "Wisdom" },
+    { suffix: "of Reflection", attribute: "Wisdom" },
+    { suffix: "of the Twins", attribute: "Dexterity" },
+  ];
+
   return (
     <div className="overflow-y-auto h-screen p-2 table-scroll">
       <div className="flex justify-between items-center mb-4">
@@ -150,6 +169,33 @@ export const Guide = () => {
         additional +1 stat boost. If you meet a beast with the same suffix and
         prefix of your item, special hits can be achieved!
       </p>
+      <h4 className="mb-2 text-center">Item Suffixes and Their Attributes</h4>
+      <div className="overflow-x-auto">
+        <table className="w-1/2 m-auto uppercase">
+          <thead>
+            <tr>
+              <th className="py-2 px-3 text-center border border-terminal-green">
+                Item Suffix
+              </th>
+              <th className="py-2 px-3 text-center border border-terminal-green">
+                Adventurer Attribute
+              </th>
+            </tr>
+          </thead>
+          <tbody className="border-terminal-green">
+            {suffixData.map((row, i) => (
+              <tr key={i}>
+                <td className="py-2 px-4 text-center border border-terminal-green">
+                  {row.suffix}
+                </td>
+                <td className="py-2 px-4 text-center border border-terminal-green">
+                  {row.attribute}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
       <h3 className="mb-2">Market</h3>
       <p>
