@@ -120,7 +120,8 @@ export const processNotification = (
   adventurer: any,
   battles: any[],
   hasBeast: boolean,
-  beast: any
+  beast: any,
+  beasts: any[]
 ) => {
   if (type == "Attack" || type == "Flee") {
     return (
@@ -131,7 +132,9 @@ export const processNotification = (
       />
     );
   } else if (type == "Explore") {
-    return <DiscoveryDisplay discoveryData={notificationData} />;
+    return (
+      <DiscoveryDisplay discoveryData={notificationData} beasts={beasts} />
+    );
   } else if (notificationData == "Rejected") {
     return (
       <p className="text-lg">
@@ -206,6 +209,9 @@ export const NotificationDisplay = ({
   const battles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
     : [];
+  const beasts = data.beastsByAdventurerQuery
+    ? data.beastsByAdventurerQuery.beasts
+    : [];
   const beast = data.beastByIdQuery ? data.beastByIdQuery.beasts[0] : [];
   const animation = processAnimation(
     type,
@@ -221,7 +227,8 @@ export const NotificationDisplay = ({
     adventurer,
     battles,
     hasBeast,
-    beast
+    beast,
+    beasts
   );
 
   const [setSound, setSoundState] = useState(soundSelector.click);

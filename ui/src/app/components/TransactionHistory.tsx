@@ -12,6 +12,7 @@ import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { processNotification } from "./NotificationDisplay";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import useCustomQuery from "../hooks/useCustomQuery";
 
 const TransactionHistory = () => {
   const wrapperRef = useRef<HTMLDivElement>(null); // Update the type here
@@ -26,6 +27,10 @@ const TransactionHistory = () => {
     watch: true,
   });
   const { data: queryData } = useQueriesStore();
+
+  const beasts = queryData.beastsByAdventurerQuery
+    ? queryData.beastsByAdventurerQuery.beasts
+    : [];
 
   const method = (transactions[0]?.metadata as Metadata)?.method;
 
@@ -69,7 +74,8 @@ const TransactionHistory = () => {
                       adventurer,
                       battles,
                       !!adventurer?.beastId,
-                      beast
+                      beast,
+                      beasts
                     );
                   }
                   return (

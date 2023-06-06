@@ -150,7 +150,8 @@ export default function Home() {
           adventurer,
           battles,
           hasBeast,
-          beast
+          beast,
+          beasts
         );
         setDeathMessage(notification);
         showDialog(true);
@@ -187,7 +188,8 @@ export default function Home() {
           adventurer,
           battles,
           hasBeast,
-          beast
+          beast,
+          beasts
         );
         console.log(notification);
         setDeathMessage(notification);
