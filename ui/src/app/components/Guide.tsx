@@ -30,22 +30,22 @@ export const Guide = () => {
   ];
 
   const suffixData = [
-    { suffix: "of_Power", attribute: "Strength" },
-    { suffix: "of_Giant", attribute: "Vitality" },
-    { suffix: "of_Titans", attribute: "Dexterity" },
-    { suffix: "of_Skill", attribute: "Intelligence" },
-    { suffix: "of_Perfection", attribute: "Intelligence" },
-    { suffix: "of_Brilliance", attribute: "Intelligence" },
-    { suffix: "of_Enlightenment", attribute: "Wisdom" },
-    { suffix: "of_Protection", attribute: "Vitality" },
-    { suffix: "of_Anger", attribute: "Strength" },
-    { suffix: "of_Rage", attribute: "Wisdom" },
-    { suffix: "of_Fury", attribute: "Dexterity" },
-    { suffix: "of_Vitriol", attribute: "Charisma" },
-    { suffix: "of_the_Fox", attribute: "Intelligence" },
-    { suffix: "of_Detection", attribute: "Wisdom" },
-    { suffix: "of_Reflection", attribute: "Wisdom" },
-    { suffix: "of_the_Twins", attribute: "Dexterity" },
+    { suffix: "of Power", attribute: "Strength" },
+    { suffix: "of Giant", attribute: "Vitality" },
+    { suffix: "of Titans", attribute: "Dexterity" },
+    { suffix: "of Skill", attribute: "Intelligence" },
+    { suffix: "of Perfection", attribute: "Intelligence" },
+    { suffix: "of Brilliance", attribute: "Intelligence" },
+    { suffix: "of Enlightenment", attribute: "Wisdom" },
+    { suffix: "of Protection", attribute: "Vitality" },
+    { suffix: "of Anger", attribute: "Strength" },
+    { suffix: "of Rage", attribute: "Wisdom" },
+    { suffix: "of Fury", attribute: "Dexterity" },
+    { suffix: "of Vitriol", attribute: "Charisma" },
+    { suffix: "of the Fox", attribute: "Intelligence" },
+    { suffix: "of Detection", attribute: "Wisdom" },
+    { suffix: "of Reflection", attribute: "Wisdom" },
+    { suffix: "of the Twins", attribute: "Dexterity" },
   ];
 
   return (
@@ -169,7 +169,7 @@ export const Guide = () => {
         additional +1 stat boost. If you meet a beast with the same suffix and
         prefix of your item, special hits can be achieved!
       </p>
-      <h3 className="mb-2">Item Suffixes and Their Attributes</h3>
+      <h4 className="mb-2 text-center">Item Suffixes and Their Attributes</h4>
       <div className="overflow-x-auto">
         <table className="w-1/2 m-auto uppercase">
           <thead>
