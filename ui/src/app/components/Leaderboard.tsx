@@ -45,21 +45,14 @@ const Leaderboard: React.FC = () => {
         ? data.topScoresQuery?.scores.map((score: any) => score.adventurerId)
         : [0],
     },
-    undefined
+    false
   );
 
   const scores = data.adventurersInListByXpQuery?.adventurers
     ? data.adventurersInListByXpQuery?.adventurers
     : [];
 
-  useCustomQuery(
-    "adventurersByXPQuery",
-    getAdventurerByXP,
-    undefined,
-    undefined
-  );
-
-  useCustomQuery("topScoresQuery", getTopScores);
+  useCustomQuery("topScoresQuery", getTopScores, undefined, false);
 
   if (isLoading.adventurersByXPQuery || loading)
     return (

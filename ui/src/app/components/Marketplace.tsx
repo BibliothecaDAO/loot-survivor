@@ -41,7 +41,7 @@ const Marketplace = () => {
       bidder: adventurer?.id,
       status: "Open",
     },
-    undefined
+    true
   );
 
   const claimExists = () => {
@@ -81,9 +81,34 @@ const Marketplace = () => {
     }
   }
 
-  useCustomQuery("adventurersInListQuery", getAdventurersInList, {
-    ids: bidders,
-  });
+  useCustomQuery(
+    "adventurersInListQuery",
+    getAdventurersInList,
+    {
+      ids: bidders,
+    },
+    true
+  );
+
+  useCustomQuery(
+    "latestMarketItemsNumberQuery",
+    getLatestMarketItemsNumber,
+    undefined,
+    true
+  );
+
+  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
+    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
+    : [];
+
+  useCustomQuery(
+    "latestMarketItemsQuery",
+    getLatestMarketItems,
+    {
+      itemsNumber: latestMarketItemsNumber,
+    },
+    true
+  );
 
   const adventurers = data.adventurersInListQuery
     ? data.adventurersInListQuery.adventurers

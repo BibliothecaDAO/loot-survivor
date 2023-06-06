@@ -9,6 +9,7 @@ import { getRealmNameById } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useCustomQuery from "../hooks/useCustomQuery";
 import useUIStore from "../hooks/useUIStore";
+import useLoadingStore from "../hooks/useLoadingStore";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
@@ -19,14 +20,25 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
   const profile = useUIStore((state) => state.profile);
   const { data, isLoading } = useQueriesStore();
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
 
-  useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
-    adventurer: adventurer?.id ?? 0,
-  });
+  useCustomQuery(
+    "itemsByAdventurerQuery",
+    getItemsByAdventurer,
+    {
+      adventurer: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
 
-  useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
-    adventurer: profile ?? 0,
-  });
+  useCustomQuery(
+    "itemsByProfileQuery",
+    getItemsByAdventurer,
+    {
+      adventurer: profile ?? 0,
+    },
+    txAccepted
+  );
   const items = profileExists
     ? data.itemsByProfileQuery
       ? data.itemsByProfileQuery.items

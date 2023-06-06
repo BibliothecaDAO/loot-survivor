@@ -2,9 +2,7 @@
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "./components/Button";
-import HorizontalKeyboardControl, {
-  ButtonData,
-} from "./components/HorizontalMenu";
+import HorizontalKeyboardControl from "./components/HorizontalMenu";
 import Actions from "./components/Actions";
 import Marketplace from "./components/Marketplace";
 import Adventurer from "./components/Adventurer";
@@ -23,30 +21,6 @@ import Leaderboard from "./components/Leaderboard";
 import { TxActivity } from "./components/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
 import useAdventurerStore from "./hooks/useAdventurerStore";
-import usePrevious from "use-previous";
-import { useLazyQuery, useQuery } from "@apollo/client";
-import {
-  getAdventurerById,
-  getAdventurersInList,
-  getAdventurersInListByXp,
-  getBattleByTxHash,
-  getBeasts,
-  getLastDiscovery,
-  getAdventurerByXP,
-  getDiscoveries,
-  getLatestDiscoveries,
-  getLastBattleByAdventurer,
-  getBattlesByAdventurer,
-  getBattlesByBeast,
-  getDiscoveryByTxHash,
-  getAdventurersByOwner,
-  getLatestMarketItems,
-  getLatestMarketItemsNumber,
-  getBeastById,
-  getTopScores,
-  getItemsByAdventurer,
-  getUnclaimedItemsByAdventurer,
-} from "./hooks/graphql/queries";
 import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
@@ -55,12 +29,10 @@ import { NotificationDisplay } from "./components/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
 import { Menu, NullAdventurer } from "./types";
-import useCustomQuery from "./hooks/useCustomQuery";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./components/Profile";
 import { DeathDialog } from "./components/DeathDialog";
 import { Encounters } from "./components/Encounters";
-import { Maintenance } from "./components/Maintenance";
 import Guide from "./components/Guide";
 import { processNotification } from "./components/NotificationDisplay";
 import { DiscoveryDisplay } from "./components/DiscoveryDisplay";
@@ -94,6 +66,8 @@ export default function Home() {
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
+
+  console.log(updatedAdventurer);
 
   useEffect(() => {
     if (updatedAdventurer?.id > 0) {
@@ -220,7 +194,7 @@ export default function Home() {
   const devnet_graphql =
     "https://survivor-indexer.bibliothecadao.xyz:8081/devnet-graphql";
 
-  useEffect(() => {
+  useMemo(() => {
     setIndexer(
       (account as any)?.provider?.baseUrl == testnet_addr ||
         (account as any)?.baseUrl == testnet_addr
