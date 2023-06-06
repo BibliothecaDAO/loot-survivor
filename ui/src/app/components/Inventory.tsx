@@ -28,7 +28,7 @@ const Inventory: React.FC = () => {
 
   useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
     adventurer: adventurer?.id,
-  });
+  }, true);
 
   const items = data.itemsByAdventurerQuery
     ? data.itemsByAdventurerQuery.items

@@ -1,12 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { NullAdventurer } from "../types";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import {
-  getLatestDiscoveries,
-  getLastDiscovery,
-} from "../hooks/graphql/queries";
-import { useQuery } from "@apollo/client";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
@@ -14,9 +8,10 @@ import VerticalKeyboardControl from "./VerticalMenu";
 import PurchaseHealth from "./PurchaseHealth";
 import Info from "./Info";
 import Discovery from "./Discovery";
-import useCustomQuery from "../hooks/useCustomQuery";
 import useUIStore from "../hooks/useUIStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { getBeasts } from "../hooks/graphql/queries";
 
 export default function Actions() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -47,6 +42,8 @@ export default function Actions() {
     entrypoint: "explore",
     calldata: [adventurer?.id ?? "", "0"],
   };
+
+  useCustomQuery("beastsQuery", getBeasts, undefined, false);
 
   const buttonsData = [
     {

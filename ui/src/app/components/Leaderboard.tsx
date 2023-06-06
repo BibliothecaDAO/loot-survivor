@@ -45,7 +45,7 @@ const Leaderboard: React.FC = () => {
         ? data.topScoresQuery?.scores.map((score: any) => score.adventurerId)
         : [0],
     },
-    undefined
+    false
   );
 
   const scores = data.adventurersInListByXpQuery?.adventurers
@@ -56,10 +56,10 @@ const Leaderboard: React.FC = () => {
     "adventurersByXPQuery",
     getAdventurerByXP,
     undefined,
-    undefined
+    false
   );
 
-  useCustomQuery("topScoresQuery", getTopScores);
+  useCustomQuery("topScoresQuery", getTopScores, undefined, false);
 
   if (isLoading.adventurersByXPQuery || loading)
     return (
@@ -130,23 +130,22 @@ const Leaderboard: React.FC = () => {
                     <td>
                       <div className="flex flex-row items-center justify-center gap-2">
                         <span
-                          className={` ${
-                            index == 0
-                              ? "text-gold"
-                              : index == 1
+                          className={` ${index == 0
+                            ? "text-gold"
+                            : index == 1
                               ? "text-silver"
                               : index == 2
-                              ? "text-bronze"
-                              : ""
-                          }`}
+                                ? "text-bronze"
+                                : ""
+                            }`}
                         >
                           {index == 0
                             ? 10
                             : index == 1
-                            ? 3
-                            : index == 2
-                            ? 2
-                            : ""}
+                              ? 3
+                              : index == 2
+                                ? 2
+                                : ""}
                         </span>
 
                         <Lords className="self-center w-6 h-6 ml-4 fill-current" />
@@ -194,9 +193,8 @@ const Leaderboard: React.FC = () => {
                 </td>
                 <td>
                   <span
-                    className={`flex justify-center ${
-                      !dead ? " text-terminal-green" : "text-red-800"
-                    }`}
+                    className={`flex justify-center ${!dead ? " text-terminal-green" : "text-red-800"
+                      }`}
                   >
                     {adventurer.health}
                   </span>

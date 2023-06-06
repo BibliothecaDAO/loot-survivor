@@ -9,13 +9,23 @@ import VerticalKeyboardControl from "./VerticalMenu";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
 import LootIconLoader from "./Loader";
+import useCustomQuery from "../hooks/useCustomQuery";
 
 const Adventurer = () => {
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
   const [loading, setLoading] = useState(false);
-
+  const { account } = useAccount();
   const { data } = useQueriesStore();
+
+  useCustomQuery(
+    "adventurersByOwnerQuery",
+    getAdventurersByOwner,
+    {
+      owner: padAddress(account?.address ?? ""),
+    },
+    false
+  );
 
   const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers

@@ -41,7 +41,7 @@ const Marketplace = () => {
       bidder: adventurer?.id,
       status: "Open",
     },
-    undefined
+    true
   );
 
   const claimExists = () => {
@@ -83,7 +83,27 @@ const Marketplace = () => {
 
   useCustomQuery("adventurersInListQuery", getAdventurersInList, {
     ids: bidders,
-  });
+  }, true);
+
+  useCustomQuery(
+    "latestMarketItemsNumberQuery",
+    getLatestMarketItemsNumber,
+    undefined,
+    false
+  );
+
+  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
+    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
+    : [];
+
+  useCustomQuery(
+    "latestMarketItemsQuery",
+    getLatestMarketItems,
+    {
+      itemsNumber: latestMarketItemsNumber,
+    },
+    false
+  );
 
   const adventurers = data.adventurersInListQuery
     ? data.adventurersInListQuery.adventurers
@@ -243,11 +263,11 @@ const Marketplace = () => {
 
   const nextMint = data.latestMarketItemsNumberQuery?.market[0]?.timestamp
     ? new Date(
-        new Date(
-          data.latestMarketItemsNumberQuery?.market[0]?.timestamp
-        ).getTime() +
-          (3 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
-      )
+      new Date(
+        data.latestMarketItemsNumberQuery?.market[0]?.timestamp
+      ).getTime() +
+      (3 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
+    )
     : undefined;
 
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
@@ -288,9 +308,8 @@ const Marketplace = () => {
               </span>
             </div>
             <span className="flex flex-row">
-              {`Charisma: ${adventurer?.charisma} (+ ${
-                adventurer?.charisma && adventurer?.charisma * 3
-              }`}
+              {`Charisma: ${adventurer?.charisma} (+ ${adventurer?.charisma && adventurer?.charisma * 3
+                }`}
               <Coin className="w-5 h-5 fill-current text-terminal-yellow" />{" "}
               {"to bids)"}
             </span>

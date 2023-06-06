@@ -444,6 +444,27 @@ const getBeastById = gql`
   }
 `;
 
+const getBeastByAdventurerId = gql`
+  query get_beast_by_id($id: FeltValue) {
+    beasts(where: { adventurerId: { eq: $id } }) {
+      adventurerId
+      armorType
+      attackType
+      attackLocation
+      beast
+      health
+      id
+      level
+      prefix1
+      prefix2
+      rank
+      slainOnDate
+      xp
+    }
+  }
+`;
+
+
 const BATTLE_FIELDS = `
   adventurerId
   ambushed

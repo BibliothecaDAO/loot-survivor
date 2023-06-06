@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useWaitForTransaction, useAccount } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
@@ -67,26 +67,9 @@ export const TxActivity = () => {
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
 
-  const { account } = useAccount();
-
-  useCustomQuery(
-    "adventurersByOwnerQuery",
-    getAdventurersByOwner,
-    {
-      owner: padAddress(account?.address ?? ""),
-    },
-    undefined
-  );
-
-  const adventurers = queryData.adventurersByOwnerQuery
-    ? queryData.adventurersByOwnerQuery.adventurers
-    : [];
-
-  useCustomQuery("beastsQuery", getBeasts, undefined, undefined);
-
   useCustomQuery("adventurerByIdQuery", getAdventurerById, {
     id: adventurer?.id ?? 0,
-  });
+  }, true);
 
   useCustomQuery(
     "battlesByTxHashQuery",
@@ -94,7 +77,7 @@ export const TxActivity = () => {
     {
       txHash: padAddress(hash),
     },
-    undefined
+    true
   );
 
   useCustomQuery(
@@ -103,52 +86,28 @@ export const TxActivity = () => {
     {
       txHash: padAddress(hash),
     },
-    undefined
+    true
   );
 
-  useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
-    adventurerId: adventurer?.id ?? 0,
-  });
+  // useCustomQuery(
+  //   "latestMarketItemsNumberQuery",
+  //   getLatestMarketItemsNumber,
+  //   undefined,
+  //   false
+  // );
 
-  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
-    adventurerId: adventurer?.id ?? 0,
-    beastId: adventurer?.beastId
-      ? adventurer?.beastId
-      : queryData.lastBattleQuery?.battles[0]?.beastId,
-  });
+  // const latestMarketItemsNumber = queryData.latestMarketItemsNumberQuery
+  //   ? queryData.latestMarketItemsNumberQuery.market[0]?.itemsNumber
+  //   : [];
 
-  useCustomQuery("beastByIdQuery", getBeastById, {
-    id: adventurer?.beastId
-      ? adventurer?.beastId
-      : queryData.lastBattleQuery?.battles[0]?.beastId,
-  });
-
-  useCustomQuery(
-    "latestMarketItemsNumberQuery",
-    getLatestMarketItemsNumber,
-    undefined,
-    undefined
-  );
-
-  const latestMarketItemsNumber = queryData.latestMarketItemsNumberQuery
-    ? queryData.latestMarketItemsNumberQuery.market[0]?.itemsNumber
-    : [];
-
-  useCustomQuery(
-    "latestMarketItemsQuery",
-    getLatestMarketItems,
-    {
-      itemsNumber: latestMarketItemsNumber,
-    },
-    undefined
-  );
-
-  useCustomQuery(
-    "adventurersByXPQuery",
-    getAdventurerByXP,
-    undefined,
-    undefined
-  );
+  // useCustomQuery(
+  //   "latestMarketItemsQuery",
+  //   getLatestMarketItems,
+  //   {
+  //     itemsNumber: latestMarketItemsNumber,
+  //   },
+  //   false
+  // );
 
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy

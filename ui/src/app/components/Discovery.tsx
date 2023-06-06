@@ -18,7 +18,7 @@ const Discovery = ({ discoveries }: DiscoveryProps) => {
     {
       adventurerId: adventurer?.id ?? 0,
     },
-    undefined
+    true
   );
 
   return (

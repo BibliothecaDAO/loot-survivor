@@ -12,6 +12,8 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import { useState } from "react";
 import useUIStore from "../hooks/useUIStore";
 import { processBeastName } from "../lib/utils";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { getBattlesByBeast, getBeastById, getLastBattleByAdventurer } from "../hooks/graphql/queries";
 
 export default function Beast() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -29,6 +31,23 @@ export default function Beast() {
   const onboarded = useUIStore((state) => state.onboarded);
 
   const { data } = useQueriesStore();
+
+  useCustomQuery("beastByIdQuery", getBeastById, {
+    id: adventurer?.beastId
+      ? adventurer?.beastId
+      : data.lastBattleQuery?.battles[0]?.beastId,
+  }, true);
+
+  useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
+    adventurerId: adventurer?.id ?? 0,
+  }, false);
+
+  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
+    adventurerId: adventurer?.id ?? 0,
+    beastId: adventurer?.beastId
+      ? adventurer?.beastId
+      : data.lastBattleQuery?.battles[0]?.beastId,
+  }, false);
 
   const formatBattles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
