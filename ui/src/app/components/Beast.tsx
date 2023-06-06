@@ -13,7 +13,11 @@ import { useState } from "react";
 import useUIStore from "../hooks/useUIStore";
 import { processBeastName } from "../lib/utils";
 import useCustomQuery from "../hooks/useCustomQuery";
-import { getBattlesByBeast, getBeastById, getLastBattleByAdventurer } from "../hooks/graphql/queries";
+import {
+  getBattlesByBeast,
+  getBeastById,
+  getLastBattleByAdventurer,
+} from "../hooks/graphql/queries";
 
 export default function Beast() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -28,26 +32,50 @@ export default function Beast() {
   const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
   const onboarded = useUIStore((state) => state.onboarded);
 
   const { data } = useQueriesStore();
 
-  useCustomQuery("beastByIdQuery", getBeastById, {
-    id: adventurer?.beastId
-      ? adventurer?.beastId
-      : data.lastBattleQuery?.battles[0]?.beastId,
-  }, true);
+  useCustomQuery(
+    "beastByIdQuery",
+    getBeastById,
+    {
+      id: adventurer?.beastId
+        ? adventurer?.beastId
+        : data.lastBattleQuery?.battles[0]?.beastId,
+    },
+    txAccepted
+  );
 
-  useCustomQuery("lastBattleQuery", getLastBattleByAdventurer, {
-    adventurerId: adventurer?.id ?? 0,
-  }, false);
+  useCustomQuery(
+    "lastBattleQuery",
+    getLastBattleByAdventurer,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
 
-  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
-    adventurerId: adventurer?.id ?? 0,
-    beastId: adventurer?.beastId
-      ? adventurer?.beastId
-      : data.lastBattleQuery?.battles[0]?.beastId,
-  }, false);
+  useCustomQuery(
+    "battlesByBeastQuery",
+    getBattlesByBeast,
+    {
+      adventurerId: adventurer?.id ?? 0,
+      beastId: adventurer?.beastId
+        ? adventurer?.beastId
+        : data.lastBattleQuery?.battles[0]?.beastId,
+    },
+    txAccepted
+  );
+
+  console.log(txAccepted);
+
+  console.log(
+    data.battlesByBeastQuery,
+    data.lastBattleQuery,
+    data.beastByIdQuery
+  );
 
   const formatBattles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles

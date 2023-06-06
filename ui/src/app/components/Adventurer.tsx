@@ -10,6 +10,7 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
 import LootIconLoader from "./Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
+import useLoadingStore from "../hooks/useLoadingStore";
 
 const Adventurer = () => {
   const [activeMenu, setActiveMenu] = useState(0);
@@ -18,13 +19,15 @@ const Adventurer = () => {
   const { account } = useAccount();
   const { data } = useQueriesStore();
 
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
+
   useCustomQuery(
     "adventurersByOwnerQuery",
     getAdventurersByOwner,
     {
       owner: padAddress(account?.address ?? ""),
     },
-    false
+    txAccepted
   );
 
   const adventurers = data.adventurersByOwnerQuery

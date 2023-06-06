@@ -43,7 +43,12 @@ const useCustomQuery = (
     } else {
       stopPolling();
     }
-  }, [startPolling, stopPolling]);
+  }, [shouldPoll, startPolling, stopPolling]);
+
+  useEffect(() => {
+    refetch();
+    console.log("fetching!");
+  }, []);
 };
 
 export default useCustomQuery;

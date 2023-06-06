@@ -24,6 +24,7 @@ export default function Actions() {
   const { addTransaction } = useTransactionManager();
   const { writeAsync } = useContractWrite({ calls });
   const loading = useLoadingStore((state) => state.loading);
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const onboarded = useUIStore((state) => state.onboarded);

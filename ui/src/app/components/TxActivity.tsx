@@ -42,8 +42,9 @@ export const TxActivity = () => {
   const loading = useLoadingStore((state) => state.loading);
   const hash = useLoadingStore((state) => state.hash);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
+  const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
   const type = useLoadingStore((state) => state.type);
-  const loadingAdventurer = useLoadingStore((state) => state.adventurer);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const error = useTransactionCartStore((state) => state.error);
   const setError = useTransactionCartStore((state) => state.setError);
@@ -53,12 +54,11 @@ export const TxActivity = () => {
     refetch,
     resetDataUpdated,
   } = useQueriesStore();
-  const [accepted, setAccepted] = useState(false);
   const { data } = useWaitForTransaction({
     hash,
     watch: true,
     onAcceptedOnL2: () => {
-      setAccepted(true);
+      setTxAccepted(true);
     },
     onRejected: () => {
       stopLoading("Rejected");
@@ -67,9 +67,14 @@ export const TxActivity = () => {
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
 
-  useCustomQuery("adventurerByIdQuery", getAdventurerById, {
-    id: adventurer?.id ?? 0,
-  }, true);
+  useCustomQuery(
+    "adventurerByIdQuery",
+    getAdventurerById,
+    {
+      id: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
 
   useCustomQuery(
     "battlesByTxHashQuery",
@@ -77,7 +82,7 @@ export const TxActivity = () => {
     {
       txHash: padAddress(hash),
     },
-    true
+    txAccepted
   );
 
   useCustomQuery(
@@ -86,32 +91,39 @@ export const TxActivity = () => {
     {
       txHash: padAddress(hash),
     },
-    true
+    txAccepted
   );
 
-  // useCustomQuery(
-  //   "latestMarketItemsNumberQuery",
-  //   getLatestMarketItemsNumber,
-  //   undefined,
-  //   false
-  // );
+  useCustomQuery(
+    "latestMarketItemsNumberQuery",
+    getLatestMarketItemsNumber,
+    undefined,
+    txAccepted
+  );
 
-  // const latestMarketItemsNumber = queryData.latestMarketItemsNumberQuery
-  //   ? queryData.latestMarketItemsNumberQuery.market[0]?.itemsNumber
-  //   : [];
+  const latestMarketItemsNumber = queryData.latestMarketItemsNumberQuery
+    ? queryData.latestMarketItemsNumberQuery.market[0]?.itemsNumber
+    : [];
 
-  // useCustomQuery(
-  //   "latestMarketItemsQuery",
-  //   getLatestMarketItems,
-  //   {
-  //     itemsNumber: latestMarketItemsNumber,
-  //   },
-  //   false
-  // );
+  useCustomQuery(
+    "latestMarketItemsQuery",
+    getLatestMarketItems,
+    {
+      itemsNumber: latestMarketItemsNumber,
+    },
+    txAccepted
+  );
+
+  useCustomQuery(
+    "adventurersByXPQuery",
+    getAdventurerByXP,
+    undefined,
+    txAccepted
+  );
 
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
-    if (accepted && hash && loadingQuery && isDataUpdated[loadingQuery]) {
+    if (txAccepted && hash && loadingQuery && isDataUpdated[loadingQuery]) {
       // Handle "Attack" or "Flee" types
       if (type === "Attack" || type === "Flee") {
         if (queryData?.battlesByTxHashQuery) {
@@ -123,7 +135,7 @@ export const TxActivity = () => {
             beast: notificationData.beast,
           });
         }
-        setAccepted(false);
+        setTxAccepted(false);
         resetDataUpdated(loadingQuery);
       }
 
@@ -135,12 +147,12 @@ export const TxActivity = () => {
           refetch("adventurerByIdQuery");
           refetch("beastByIdQuery");
           stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
-          setAccepted(false);
+          setTxAccepted(false);
           resetDataUpdated(loadingQuery);
         }
       } else if (type == "Upgrade") {
         stopLoading(notificationData);
-        setAccepted(false);
+        setTxAccepted(false);
         resetDataUpdated(loadingQuery);
       } else if (
         type == "Multicall" &&
@@ -149,18 +161,18 @@ export const TxActivity = () => {
         refetch("adventurerByIdQuery");
         refetch("battlesByBeastQuery");
         stopLoading(notificationData);
-        setAccepted(false);
+        setTxAccepted(false);
         resetDataUpdated(loadingQuery);
       }
 
       // Handle other types
       else {
         stopLoading(notificationData);
-        setAccepted(false);
+        setTxAccepted(false);
         resetDataUpdated(loadingQuery);
       }
     }
-  }, [loadingQuery && isDataUpdated[loadingQuery], accepted, hash]);
+  }, [loadingQuery && isDataUpdated[loadingQuery], txAccepted, hash]);
 
   // stop loading when an error is caught
   useEffect(() => {

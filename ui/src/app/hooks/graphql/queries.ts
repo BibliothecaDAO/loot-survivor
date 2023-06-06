@@ -55,6 +55,25 @@ const getBeasts = gql`
   }
 `;
 
+const getBeastsByAdventurer = gql`
+  query get_beasts_by_adventurer($adventurerId: FeltValue) {
+    beasts(where: { adventurerId: { eq: $adventurerId } }, limit: 1000000) {
+      adventurerId
+      armorType
+      attackType
+      attackLocation
+      beast
+      health
+      id
+      level
+      prefix1
+      prefix2
+      rank
+      xp
+    }
+  }
+`;
+
 const getDiscoveries = gql`
   query get_discoveries($adventurerId: FeltValue) {
     discoveries(
@@ -464,7 +483,6 @@ const getBeastByAdventurerId = gql`
   }
 `;
 
-
 const BATTLE_FIELDS = `
   adventurerId
   ambushed
@@ -666,6 +684,7 @@ export {
   getAdventurersInListByXp,
   getAdventurerByGold,
   getBeasts,
+  getBeastsByAdventurer,
   getBeastById,
   getLatestBattlesByAdventurer,
   getBattlesByBeast,

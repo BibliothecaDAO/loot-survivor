@@ -2,8 +2,7 @@
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "./components/Button";
-import HorizontalKeyboardControl, {
-} from "./components/HorizontalMenu";
+import HorizontalKeyboardControl from "./components/HorizontalMenu";
 import Actions from "./components/Actions";
 import Marketplace from "./components/Marketplace";
 import Adventurer from "./components/Adventurer";
@@ -67,6 +66,8 @@ export default function Home() {
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
+
+  console.log(updatedAdventurer);
 
   useEffect(() => {
     if (updatedAdventurer?.id > 0) {
@@ -147,7 +148,7 @@ export default function Home() {
     ) {
       if (
         data.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
-        "Obstacle" &&
+          "Obstacle" &&
         adventurer?.health == 0
       ) {
         setDeathMessage(<DiscoveryDisplay discoveryData={notificationData} />);
@@ -388,8 +389,8 @@ export default function Home() {
               {account && <TransactionHistory />}
               {((account as any)?.provider?.baseUrl == testnet_addr ||
                 (account as any)?.baseUrl == testnet_addr) && (
-                  <AddDevnetEthButton />
-                )}
+                <AddDevnetEthButton />
+              )}
               {((account as any)?.provider?.baseUrl == testnet_addr ||
                 (account as any)?.baseUrl == testnet_addr) && <MintEthButton />}
               {account && (
