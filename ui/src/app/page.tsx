@@ -106,8 +106,8 @@ export default function Home() {
     {
       txHash: padAddress(hash),
     },
-    txAccepted,
-    hash !== ""
+    txAccepted
+    // hash !== ""
   );
 
   useCustomQuery(
@@ -116,8 +116,8 @@ export default function Home() {
     {
       txHash: padAddress(hash),
     },
-    txAccepted,
-    hash !== ""
+    txAccepted
+    // hash !== ""
   );
 
   useCustomQuery(
