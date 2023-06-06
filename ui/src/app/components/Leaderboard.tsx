@@ -25,8 +25,6 @@ const Leaderboard: React.FC = () => {
     setLoading(true);
     try {
       setProfile(adventurerId);
-      await refetch("leaderboardByIdQuery");
-      await refetch("itemsByProfileQuery");
       setScreen("profile");
     } catch (error) {
       console.error(error);

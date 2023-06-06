@@ -14,8 +14,13 @@ import {
   getDiscoveries,
   getBeastsByAdventurer,
 } from "../hooks/graphql/queries";
+import { useQuery } from "@apollo/client";
 
-export const Encounters = () => {
+export interface EncountersProps {
+  profile?: any;
+}
+
+export const Encounters = ({ profile }: EncountersProps) => {
   const { adventurer } = useAdventurerStore();
   const { data, isLoading } = useQueriesStore();
   const encountersPerPage = 10;
@@ -25,49 +30,63 @@ export const Encounters = () => {
   const [sortedCombined, setSortedCombined] = useState<any[]>([]);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
 
-  useCustomQuery(
-    "beastsByAdventurerQuery",
-    getBeastsByAdventurer,
-    {
-      adventurerId: adventurer?.id ?? 0,
+  const { data: beastsByAdventurerData } = useQuery(getBeastsByAdventurer, {
+    variables: {
+      adventurerId: profile ? profile : adventurer?.id ?? 0,
     },
-    txAccepted
-  );
-  const beasts = data.beastsByAdventurerQuery
-    ? data.beastsByAdventurerQuery.beasts
-    : [];
+  });
 
-  useCustomQuery(
-    "discoveriesQuery",
-    getDiscoveries,
-    {
-      adventurerId: adventurer?.id ?? 0,
+  const { data: discoveriesByAdventurerData } = useQuery(getDiscoveries, {
+    variables: {
+      adventurerId: profile ? profile : adventurer?.id ?? 0,
     },
-    txAccepted
-  );
+  });
 
-  useCustomQuery(
-    "battlesByAdventurerQuery",
-    getBattlesByAdventurer,
-    {
-      adventurerId: adventurer?.id ?? 0,
+  const { data: battlesByAdventurerData } = useQuery(getBattlesByAdventurer, {
+    variables: {
+      adventurerId: profile ? profile : adventurer?.id ?? 0,
     },
-    txAccepted
-  );
+  });
+
+  // useCustomQuery(
+  //   "beastsByAdventurerQuery",
+  //   getBeastsByAdventurer,
+  // {
+  //   adventurerId: profile ? profile : adventurer?.id ?? 0,
+  // },
+  //   txAccepted
+  // );
+  const beasts = beastsByAdventurerData ? beastsByAdventurerData.beasts : [];
+
+  // useCustomQuery(
+  //   "discoveriesQuery",
+  //   getDiscoveries,
+  //   {
+  //     adventurerId: profile ? profile : adventurer?.id ?? 0,
+  //   },
+  //   txAccepted
+  // );
+
+  // useCustomQuery(
+  //   "battlesByAdventurerQuery",
+  //   getBattlesByAdventurer,
+  //   {
+  //     adventurerId: profile ? profile : adventurer?.id ?? 0,
+  //   },
+  //   txAccepted
+  // );
 
   useEffect(() => {
     if (data) {
       setLoadingData(true);
 
-      const discoveries = data.discoveriesQuery
-        ? data.discoveriesQuery.discoveries
+      const discoveries = discoveriesByAdventurerData
+        ? discoveriesByAdventurerData.discoveries
         : [];
 
-      const battles = data.battlesByAdventurerQuery
-        ? data.battlesByAdventurerQuery.battles
+      const battles = battlesByAdventurerData
+        ? battlesByAdventurerData.battles
         : [];
-
-      console.log(data.battlesByAdventurerQuery);
 
       const formattedDiscoveries = discoveries.map((discovery: any) => ({
         ...discovery,
@@ -92,7 +111,11 @@ export const Encounters = () => {
       setSortedCombined(sorted);
       setLoadingData(false);
     }
-  }, [data]); // Runs whenever 'data' changes
+  }, [
+    beastsByAdventurerData,
+    discoveriesByAdventurerData,
+    battlesByAdventurerData,
+  ]); // Runs whenever 'data' changes
 
   const totalPages = Math.ceil(sortedCombined.length / encountersPerPage);
 
@@ -107,11 +130,25 @@ export const Encounters = () => {
     currentPage * encountersPerPage
   );
 
+  if (
+    !beastsByAdventurerData ||
+    !discoveriesByAdventurerData ||
+    !battlesByAdventurerData
+  ) {
+    return (
+      <div className="flex flex-col items-center m-auto">
+        <LootIconLoader />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col items-center m-auto text-xl">
       {displayEncounters.length > 0 ? (
         <>
-          <h3 className="text-center">Your encounters</h3>
+          <h3 className="text-center">
+            {profile ? "Encounters" : "Your Encounters"}
+          </h3>
           {(isLoading.latestDiscoveriesQuery ||
             isLoading.battlesByBeastQuery ||
             loadingData) && <LootIconLoader />}
