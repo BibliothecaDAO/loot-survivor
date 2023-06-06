@@ -37,7 +37,15 @@ import Guide from "./components/Guide";
 import { processNotification } from "./components/NotificationDisplay";
 import { DiscoveryDisplay } from "./components/DiscoveryDisplay";
 import useCustomQuery from "./hooks/useCustomQuery";
-import { getBeastsByAdventurer } from "./hooks/graphql/queries";
+import {
+  getBeastsByAdventurer,
+  getAdventurerById,
+  getBattleByTxHash,
+  getDiscoveryByTxHash,
+  getLatestMarketItems,
+  getLatestMarketItemsNumber,
+  getAdventurerByXP,
+} from "./hooks/graphql/queries";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -50,6 +58,7 @@ export default function Home() {
   const showNotification = useLoadingStore((state) => state.showNotification);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
+  const hash = useLoadingStore((state) => state.hash);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
@@ -70,8 +79,6 @@ export default function Home() {
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
 
-  console.log(updatedAdventurer);
-
   useCustomQuery(
     "beastsByAdventurerQuery",
     getBeastsByAdventurer,
@@ -83,6 +90,62 @@ export default function Home() {
   const beasts = data.beastsByAdventurerQuery
     ? data.beastsByAdventurerQuery.beasts
     : [];
+
+  useCustomQuery(
+    "adventurerByIdQuery",
+    getAdventurerById,
+    {
+      id: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+
+  useCustomQuery(
+    "battlesByTxHashQuery",
+    getBattleByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    txAccepted,
+    hash !== ""
+  );
+
+  useCustomQuery(
+    "discoveryByTxHashQuery",
+    getDiscoveryByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    txAccepted,
+    hash !== ""
+  );
+
+  useCustomQuery(
+    "latestMarketItemsNumberQuery",
+    getLatestMarketItemsNumber,
+    undefined,
+    txAccepted
+  );
+
+  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
+    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
+    : [];
+
+  useCustomQuery(
+    "latestMarketItemsQuery",
+    getLatestMarketItems,
+    {
+      itemsNumber: latestMarketItemsNumber,
+    },
+    txAccepted
+  );
+
+  useCustomQuery(
+    "adventurersByXPQuery",
+    getAdventurerByXP,
+    undefined,
+    txAccepted
+  );
 
   useEffect(() => {
     if (updatedAdventurer?.id > 0) {

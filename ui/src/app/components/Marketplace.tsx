@@ -345,7 +345,6 @@ const Marketplace = () => {
                 {!isLoading.latestMarketItemsQuery &&
                   sortedMarketLatestItems.map((item: any, index: number) => (
                     <MarketplaceRow
-                      ref={(ref: any) => (rowRefs.current[index] = ref)}
                       item={item}
                       index={index}
                       selectedIndex={selectedIndex}

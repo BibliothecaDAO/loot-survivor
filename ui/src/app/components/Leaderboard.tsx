@@ -109,7 +109,7 @@ const Leaderboard: React.FC = () => {
           <tbody>
             {scores.map((adventurer: any, index: number) => {
               if (index > 2) {
-                return <></>;
+                return null;
               } else {
                 return (
                   <tr
@@ -170,7 +170,7 @@ const Leaderboard: React.FC = () => {
             const dead = adventurer.health <= 0;
             return (
               <tr
-                key={adventurer.id}
+                key={index}
                 className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
                 onClick={() => handleRowSelected(adventurer.id)}
               >

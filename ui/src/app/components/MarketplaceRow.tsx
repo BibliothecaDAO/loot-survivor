@@ -15,7 +15,6 @@ import {
 import { Metadata } from "../types";
 
 interface MarketplaceRowProps {
-  ref: any;
   item: any;
   index: number;
   selectedIndex: number;
@@ -26,7 +25,6 @@ interface MarketplaceRowProps {
 }
 
 const MarketplaceRow = ({
-  ref,
   item,
   index,
   selectedIndex,
@@ -142,7 +140,6 @@ const MarketplaceRow = ({
 
   return (
     <tr
-      ref={ref}
       className={
         "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black" +
         (selectedIndex === index + 1 ? " bg-terminal-black" : "")

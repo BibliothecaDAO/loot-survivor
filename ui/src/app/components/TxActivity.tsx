@@ -67,60 +67,6 @@ export const TxActivity = () => {
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
 
-  useCustomQuery(
-    "adventurerByIdQuery",
-    getAdventurerById,
-    {
-      id: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
-
-  useCustomQuery(
-    "battlesByTxHashQuery",
-    getBattleByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted
-  );
-
-  useCustomQuery(
-    "discoveryByTxHashQuery",
-    getDiscoveryByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted
-  );
-
-  useCustomQuery(
-    "latestMarketItemsNumberQuery",
-    getLatestMarketItemsNumber,
-    undefined,
-    txAccepted
-  );
-
-  const latestMarketItemsNumber = queryData.latestMarketItemsNumberQuery
-    ? queryData.latestMarketItemsNumberQuery.market[0]?.itemsNumber
-    : [];
-
-  useCustomQuery(
-    "latestMarketItemsQuery",
-    getLatestMarketItems,
-    {
-      itemsNumber: latestMarketItemsNumber,
-    },
-    txAccepted
-  );
-
-  useCustomQuery(
-    "adventurersByXPQuery",
-    getAdventurerByXP,
-    undefined,
-    txAccepted
-  );
-
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
     if (txAccepted && hash && loadingQuery && isDataUpdated[loadingQuery]) {
