@@ -4,6 +4,7 @@ import LootIconLoader from "./Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { getLatestDiscoveries } from "../hooks/graphql/queries";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import useLoadingStore from "../hooks/useLoadingStore";
 
 interface DiscoveryProps {
   discoveries: any[];
@@ -12,13 +13,14 @@ interface DiscoveryProps {
 const Discovery = ({ discoveries }: DiscoveryProps) => {
   const isLoading = useQueriesStore((state) => state.isLoading);
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
   useCustomQuery(
     "latestDiscoveriesQuery",
     getLatestDiscoveries,
     {
       adventurerId: adventurer?.id ?? 0,
     },
-    undefined
+    txAccepted
   );
 
   return (

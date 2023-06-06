@@ -1,5 +1,8 @@
 import { useQuery } from "@apollo/client";
-import { getItemsByTokenId } from "../hooks/graphql/queries";
+import {
+  getItemsByTokenId,
+  getBeastsByAdventurer,
+} from "../hooks/graphql/queries";
 import Heart from "../../../public/heart.svg";
 import Coin from "../../../public/coin.svg";
 import ItemDisplay from "./LootIcon";
@@ -8,6 +11,8 @@ import { processBeastName } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { NullBattle, NullBeast } from "../types";
 import { getBattlesByBeast } from "../hooks/graphql/queries";
+import useCustomQuery from "../hooks/useCustomQuery";
+import useLoadingStore from "../hooks/useLoadingStore";
 
 interface DiscoveryProps {
   discoveryData: any;
@@ -19,7 +24,18 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const { data: itemData } = useQuery(getItemsByTokenId, {
     variables: { id: discoveryData?.entityId },
   });
-  const beasts = data.beastsQuery ? data.beastsQuery.beasts : [];
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
+  useCustomQuery(
+    "beastsByAdventurerQuery",
+    getBeastsByAdventurer,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+  const beasts = data.beastsByAdventurerQuery
+    ? data.beastsByAdventurerQuery.beasts
+    : [];
 
   let beast = beasts.find(
     (beasts: any) => discoveryData?.entityId === beasts?.id

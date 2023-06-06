@@ -11,6 +11,7 @@ import useCustomQuery from "../hooks/useCustomQuery";
 import {
   getBattlesByAdventurer,
   getDiscoveries,
+  getBeastsByAdventurer,
 } from "../hooks/graphql/queries";
 
 export const Encounters = () => {
@@ -22,15 +23,35 @@ export const Encounters = () => {
   const [loadingData, setLoadingData] = useState(true);
   const [sortedCombined, setSortedCombined] = useState<any[]>([]);
 
-  const beasts = data.beastsQuery ? data.beastsQuery.beasts : [];
+  useCustomQuery(
+    "beastsByAdventurerQuery",
+    getBeastsByAdventurer,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    true
+  );
+  const beasts = data.beastsByAdventurerQuery
+    ? data.beastsByAdventurerQuery.beasts
+    : [];
 
-  useCustomQuery("discoveriesQuery", getDiscoveries, {
-    adventurerId: adventurer?.id ?? 0,
-  });
+  useCustomQuery(
+    "discoveriesQuery",
+    getDiscoveries,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    true
+  );
 
-  useCustomQuery("battlesByAdventurerQuery", getBattlesByAdventurer, {
-    adventurerId: adventurer?.id ?? 0,
-  });
+  useCustomQuery(
+    "battlesByAdventurerQuery",
+    getBattlesByAdventurer,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    true
+  );
 
   useEffect(() => {
     if (data) {
@@ -43,6 +64,8 @@ export const Encounters = () => {
       const battles = data.battlesByAdventurerQuery
         ? data.battlesByAdventurerQuery.battles
         : [];
+
+      console.log(data.battlesByAdventurerQuery);
 
       const formattedDiscoveries = discoveries.map((discovery: any) => ({
         ...discovery,

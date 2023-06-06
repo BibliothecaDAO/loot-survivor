@@ -23,7 +23,7 @@ export default function Profile() {
     {
       id: profile ?? 0,
     },
-    undefined
+    false
   );
   const adventurer = data.leaderboardByIdQuery?.adventurers[0];
   useCustomQuery("discoveriesQuery", getDiscoveries, {

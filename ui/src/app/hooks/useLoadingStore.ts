@@ -7,6 +7,7 @@ type LoadingState = {
   loading: boolean;
   type: string;
   hash: string;
+  txAccepted: boolean;
   pendingMessage: string | string[];
   loadingQuery: QueryKey | null;
   showNotification: boolean;
@@ -21,6 +22,7 @@ type LoadingState = {
     notificationData?: any
   ) => void;
   setTxHash: (hash: string) => void;
+  setTxAccepted: (txAccepted: boolean) => void;
   stopLoading: (notificationData?: any) => void;
   deathMessage: any;
   setDeathMessage: (deathMessage: any) => void;
@@ -30,6 +32,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   loading: false,
   type: "",
   hash: "",
+  txAccepted: false,
   pendingMessage: "",
   loadingQuery: null,
   showNotification: false,
@@ -53,6 +56,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
     });
   },
   setTxHash: (hash) => set({ hash }),
+  setTxAccepted: (txAccepted) => set({ txAccepted }),
   stopLoading: (notificationData) => {
     set({
       showNotification: notificationData ? true : false,

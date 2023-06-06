@@ -23,12 +23,18 @@ const Inventory: React.FC = () => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const loading = useLoadingStore((state) => state.loading);
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
 
   const { data } = useQueriesStore();
 
-  useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
-    adventurer: adventurer?.id,
-  });
+  useCustomQuery(
+    "itemsByAdventurerQuery",
+    getItemsByAdventurer,
+    {
+      adventurer: adventurer?.id,
+    },
+    txAccepted
+  );
 
   const items = data.itemsByAdventurerQuery
     ? data.itemsByAdventurerQuery.items
