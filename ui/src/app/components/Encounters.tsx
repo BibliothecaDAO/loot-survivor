@@ -172,7 +172,7 @@ export const Encounters = ({ profile }: EncountersProps) => {
             {1}
           </Button>
 
-          {currentPage > 3 && "..."}
+          {/* {currentPage > 3 && "..."}
 
           {(
             Array.from({ length: Math.min(5, totalPages - 2) }, (_, i) => {
@@ -192,7 +192,7 @@ export const Encounters = ({ profile }: EncountersProps) => {
             </Button>
           ))}
 
-          {currentPage < totalPages - 2 && "..."}
+          {currentPage < totalPages - 2 && "..."} */}
 
           <Button
             variant={"outline"}
