@@ -7,6 +7,7 @@ import {
   getAdventurerById,
   getDiscoveries,
   getBattlesByAdventurer,
+  getBeastsByAdventurer,
 } from "../hooks/graphql/queries";
 import { useEffect, useState } from "react";
 import { DiscoveryDisplay } from "./DiscoveryDisplay";
@@ -26,67 +27,87 @@ export default function Profile() {
     false
   );
   const adventurer = data.leaderboardByIdQuery?.adventurers[0];
-  useCustomQuery("discoveriesQuery", getDiscoveries, {
-    adventurerId: adventurer?.id ?? 0,
-  });
+  // useCustomQuery(
+  //   "discoveriesQuery",
+  //   getDiscoveries,
+  //   {
+  //     adventurerId: adventurer?.id ?? 0,
+  //   },
+  //   false
+  // );
 
-  useCustomQuery("battlesByAdventurerQuery", getBattlesByAdventurer, {
-    adventurerId: adventurer?.id ?? 0,
-  });
+  // useCustomQuery(
+  //   "battlesByAdventurerQuery",
+  //   getBattlesByAdventurer,
+  //   {
+  //     adventurerId: adventurer?.id ?? 0,
+  //   },
+  //   false
+  // );
   const setScreen = useUIStore((state) => state.setScreen);
-  const encountersPerPage = 10;
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [sortedCombined, setSortedCombined] = useState<any[]>([]);
+  // const encountersPerPage = 10;
+  // const [currentPage, setCurrentPage] = useState<number>(1);
+  // const [sortedCombined, setSortedCombined] = useState<any[]>([]);
 
-  const beasts = data.beastsQuery ? data.beastsQuery.beasts : [];
+  // useCustomQuery(
+  //   "beastsByAdventurerQuery",
+  //   getBeastsByAdventurer,
+  //   {
+  //     adventurerId: adventurer?.id ?? 0,
+  //   },
+  //   false
+  // );
+  // const beasts = data.beastsByAdventurerQuery
+  //   ? data.beastsByAdventurerQuery.beasts
+  //   : [];
 
-  useEffect(() => {
-    if (data) {
-      const discoveries = data.discoveriesQuery
-        ? data.discoveriesQuery.discoveries
-        : [];
-      console.log(discoveries);
+  // useEffect(() => {
+  //   if (data) {
+  //     const discoveries = data.discoveriesQuery
+  //       ? data.discoveriesQuery.discoveries
+  //       : [];
+  //     console.log(discoveries);
 
-      const battles = data.battlesByAdventurerQuery
-        ? data.battlesByAdventurerQuery.battles
-        : [];
+  //     const battles = data.battlesByAdventurerQuery
+  //       ? data.battlesByAdventurerQuery.battles
+  //       : [];
 
-      const formattedDiscoveries = discoveries.map((discovery: any) => ({
-        ...discovery,
-        timestamp: discovery.discoveryTime,
-      }));
+  //     const formattedDiscoveries = discoveries.map((discovery: any) => ({
+  //       ...discovery,
+  //       timestamp: discovery.discoveryTime,
+  //     }));
 
-      const formattedBattles = battles.map((battle: any) => {
-        let beast = beasts.find((beasts: any) => beasts.id === battle.beastId);
-        return {
-          ...battle,
-          beast: beast ? beast : NullBeast,
-        };
-      });
+  //     const formattedBattles = battles.map((battle: any) => {
+  //       let beast = beasts.find((beasts: any) => beasts.id === battle.beastId);
+  //       return {
+  //         ...battle,
+  //         beast: beast ? beast : NullBeast,
+  //       };
+  //     });
 
-      const combined = [...formattedDiscoveries, ...formattedBattles];
-      const sorted = combined.sort((a: any, b: any) => {
-        const dateA = new Date(a.timestamp);
-        const dateB = new Date(b.timestamp);
-        return dateB.getTime() - dateA.getTime();
-      });
+  //     const combined = [...formattedDiscoveries, ...formattedBattles];
+  //     const sorted = combined.sort((a: any, b: any) => {
+  //       const dateA = new Date(a.timestamp);
+  //       const dateB = new Date(b.timestamp);
+  //       return dateB.getTime() - dateA.getTime();
+  //     });
 
-      setSortedCombined(sorted);
-    }
-  }, [data]); // Runs whenever 'data' changes
+  //     setSortedCombined(sorted);
+  //   }
+  // }, [data]); // Runs whenever 'data' changes
 
-  const totalPages = Math.ceil(sortedCombined.length / encountersPerPage);
+  // const totalPages = Math.ceil(sortedCombined.length / encountersPerPage);
 
-  const handleClick = (newPage: number): void => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      setCurrentPage(newPage);
-    }
-  };
+  // const handleClick = (newPage: number): void => {
+  //   if (newPage >= 1 && newPage <= totalPages) {
+  //     setCurrentPage(newPage);
+  //   }
+  // };
 
-  const displayEncounters = sortedCombined.slice(
-    (currentPage - 1) * encountersPerPage,
-    currentPage * encountersPerPage
-  );
+  // const displayEncounters = sortedCombined.slice(
+  //   (currentPage - 1) * encountersPerPage,
+  //   currentPage * encountersPerPage
+  // );
 
   return (
     <div className="w-full m-auto">
@@ -100,7 +121,7 @@ export default function Profile() {
         <div className="w-1/3 ml-4">
           <Info adventurer={adventurer} profileExists={true} />
         </div>
-        <div className="flex flex-col gap-5 justify-center">
+        {/* <div className="flex flex-col gap-5 justify-center">
           <h3 className="text-center">Encounters</h3>
           <div className="flex flex-col items-center gap-2 overflow-auto">
             {displayEncounters.map((encounter: any, index: number) => {
@@ -111,7 +132,10 @@ export default function Profile() {
                   key={index}
                 >
                   {encounter.hasOwnProperty("discoveryType") ? (
-                    <DiscoveryDisplay discoveryData={encounter} />
+                    <DiscoveryDisplay
+                      discoveryData={encounter}
+                      beasts={beasts}
+                    />
                   ) : (
                     <BattleDisplay
                       battleData={encounter}
@@ -183,7 +207,7 @@ export default function Profile() {
               </Button>
             </div>
           )}
-        </div>
+        </div> */}
       </div>
     </div>
   );

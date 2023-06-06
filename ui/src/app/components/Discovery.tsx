@@ -1,27 +1,14 @@
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { DiscoveryDisplay } from "./DiscoveryDisplay";
 import LootIconLoader from "./Loader";
-import useCustomQuery from "../hooks/useCustomQuery";
-import { getLatestDiscoveries } from "../hooks/graphql/queries";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useLoadingStore from "../hooks/useLoadingStore";
 
 interface DiscoveryProps {
   discoveries: any[];
+  beasts: any[];
 }
 
-const Discovery = ({ discoveries }: DiscoveryProps) => {
+const Discovery = ({ discoveries, beasts }: DiscoveryProps) => {
   const isLoading = useQueriesStore((state) => state.isLoading);
-  const adventurer = useAdventurerStore((state) => state.adventurer);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
-  useCustomQuery(
-    "latestDiscoveriesQuery",
-    getLatestDiscoveries,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
 
   return (
     <div className="flex flex-col items-center gap-5 m-auto text-xl">
@@ -35,7 +22,7 @@ const Discovery = ({ discoveries }: DiscoveryProps) => {
                 className="w-full p-2 text-left border border-terminal-green"
                 key={index}
               >
-                <DiscoveryDisplay discoveryData={discovery} />
+                <DiscoveryDisplay discoveryData={discovery} beasts={beasts} />
               </div>
             ))}
           </div>

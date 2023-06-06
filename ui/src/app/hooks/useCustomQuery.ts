@@ -47,7 +47,6 @@ const useCustomQuery = (
 
   useEffect(() => {
     refetch();
-    console.log("fetching!");
   }, []);
 };
 

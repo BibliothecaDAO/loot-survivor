@@ -36,6 +36,8 @@ import { Encounters } from "./components/Encounters";
 import Guide from "./components/Guide";
 import { processNotification } from "./components/NotificationDisplay";
 import { DiscoveryDisplay } from "./components/DiscoveryDisplay";
+import useCustomQuery from "./hooks/useCustomQuery";
+import { getBeastsByAdventurer } from "./hooks/graphql/queries";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -47,6 +49,7 @@ export default function Home() {
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
@@ -68,6 +71,18 @@ export default function Home() {
     : NullAdventurer;
 
   console.log(updatedAdventurer);
+
+  useCustomQuery(
+    "beastsByAdventurerQuery",
+    getBeastsByAdventurer,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+  const beasts = data.beastsByAdventurerQuery
+    ? data.beastsByAdventurerQuery.beasts
+    : [];
 
   useEffect(() => {
     if (updatedAdventurer?.id > 0) {
@@ -151,7 +166,9 @@ export default function Home() {
           "Obstacle" &&
         adventurer?.health == 0
       ) {
-        setDeathMessage(<DiscoveryDisplay discoveryData={notificationData} />);
+        setDeathMessage(
+          <DiscoveryDisplay discoveryData={notificationData} beasts={beasts} />
+        );
         showDialog(true);
       }
     }

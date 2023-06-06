@@ -11,31 +11,18 @@ import { processBeastName } from "../lib/utils";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { NullBattle, NullBeast } from "../types";
 import { getBattlesByBeast } from "../hooks/graphql/queries";
-import useCustomQuery from "../hooks/useCustomQuery";
-import useLoadingStore from "../hooks/useLoadingStore";
 
 interface DiscoveryProps {
   discoveryData: any;
+  beasts: any[];
 }
 
-export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
+export const DiscoveryDisplay = ({ discoveryData, beasts }: DiscoveryProps) => {
   const { adventurer } = useAdventurerStore();
   const { data } = useQueriesStore();
   const { data: itemData } = useQuery(getItemsByTokenId, {
     variables: { id: discoveryData?.entityId },
   });
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
-  useCustomQuery(
-    "beastsByAdventurerQuery",
-    getBeastsByAdventurer,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
-  const beasts = data.beastsByAdventurerQuery
-    ? data.beastsByAdventurerQuery.beasts
-    : [];
 
   let beast = beasts.find(
     (beasts: any) => discoveryData?.entityId === beasts?.id

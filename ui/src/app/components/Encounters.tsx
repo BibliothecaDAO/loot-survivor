@@ -8,6 +8,7 @@ import { NullBeast } from "../types";
 import { processBeastName } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useCustomQuery from "../hooks/useCustomQuery";
+import useLoadingStore from "../hooks/useLoadingStore";
 import {
   getBattlesByAdventurer,
   getDiscoveries,
@@ -22,6 +23,7 @@ export const Encounters = () => {
 
   const [loadingData, setLoadingData] = useState(true);
   const [sortedCombined, setSortedCombined] = useState<any[]>([]);
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
 
   useCustomQuery(
     "beastsByAdventurerQuery",
@@ -29,7 +31,7 @@ export const Encounters = () => {
     {
       adventurerId: adventurer?.id ?? 0,
     },
-    true
+    txAccepted
   );
   const beasts = data.beastsByAdventurerQuery
     ? data.beastsByAdventurerQuery.beasts
@@ -41,7 +43,7 @@ export const Encounters = () => {
     {
       adventurerId: adventurer?.id ?? 0,
     },
-    true
+    txAccepted
   );
 
   useCustomQuery(
@@ -50,7 +52,7 @@ export const Encounters = () => {
     {
       adventurerId: adventurer?.id ?? 0,
     },
-    true
+    txAccepted
   );
 
   useEffect(() => {
@@ -122,7 +124,10 @@ export const Encounters = () => {
                   key={index}
                 >
                   {encounter.hasOwnProperty("discoveryType") ? (
-                    <DiscoveryDisplay discoveryData={encounter} />
+                    <DiscoveryDisplay
+                      discoveryData={encounter}
+                      beasts={beasts}
+                    />
                   ) : (
                     <BattleDisplay
                       battleData={encounter}

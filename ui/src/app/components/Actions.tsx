@@ -11,7 +11,10 @@ import Discovery from "./Discovery";
 import useUIStore from "../hooks/useUIStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useCustomQuery from "../hooks/useCustomQuery";
-import { getBeasts } from "../hooks/graphql/queries";
+import {
+  getLatestDiscoveries,
+  getBeastsByAdventurer,
+} from "../hooks/graphql/queries";
 
 export default function Actions() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -34,6 +37,15 @@ export default function Actions() {
 
   const { data } = useQueriesStore();
 
+  useCustomQuery(
+    "latestDiscoveriesQuery",
+    getLatestDiscoveries,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+
   const latestDiscoveries = data.latestDiscoveriesQuery
     ? data.latestDiscoveriesQuery.discoveries
     : [];
@@ -44,7 +56,18 @@ export default function Actions() {
     calldata: [adventurer?.id ?? "", "0"],
   };
 
-  useCustomQuery("beastsQuery", getBeasts, undefined, false);
+  useCustomQuery(
+    "beastsByAdventurerQuery",
+    getBeastsByAdventurer,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+
+  const beasts = data.beastsByAdventurerQuery
+    ? data.beastsByAdventurerQuery.beasts
+    : [];
 
   const buttonsData = [
     {
@@ -103,7 +126,9 @@ export default function Actions() {
       </div>
 
       <div className="flex flex-col sm:w-1/3 bg-terminal-black">
-        {selected == "explore" && <Discovery discoveries={latestDiscoveries} />}
+        {selected == "explore" && (
+          <Discovery discoveries={latestDiscoveries} beasts={beasts} />
+        )}
         {selected == "purchase health" &&
           (adventurer?.isIdle ? (
             <PurchaseHealth
