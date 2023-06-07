@@ -67,7 +67,7 @@ const Adventurer = () => {
       </div>
 
       {selected === "choose adventurer" && (
-        <div className="sm:w-8/12">
+        <div className="sm:w-5/6">
           <AdventurersList
             isActive={activeMenu == 1}
             onEscape={() => setActiveMenu(0)}

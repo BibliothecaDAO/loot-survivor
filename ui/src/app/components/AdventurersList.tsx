@@ -83,42 +83,41 @@ export const AdventurersList = ({
   }, [isActive, handleKeyDown]);
 
   return (
-    <>
+    <div className="flex flex-col h-screen overflow-hidden ">
       {sortedAdventurers.length > 0 ? (
-        <div className="flex w-full">
-          <div className="flex flex-col w-1/2 sm:w-1/2">
-            <div className="flex flex-col">
-              {" "}
-              {filteredAdventurers.map((adventurer, index) => (
-                <Button
-                  key={adventurer.id}
-                  ref={(ref) => (buttonRefs.current[index] = ref)}
-                  className={
-                    selectedIndex === index && isActive ? "animate-pulse" : ""
-                  }
-                  variant={
-                    selectedIndex === index && isActive ? "default" : "ghost"
-                  }
-                  onClick={() => {
-                    setAdventurer(adventurer);
-                    setSelectedIndex(index);
-                  }}
-                >
-                  <div className="flex-grow">{`${adventurer.name} - ${adventurer.id}`}</div>
-                  <div className="w-5 text-right">
-                    {adventurer.health === 0 ? DeadIcon : null}
-                  </div>
-                </Button>
-              ))}
-              {hasDeadAdventurers && (
-                <Button onClick={() => setShowZeroHealth(!showZeroHealth)}>
-                  {showZeroHealth ? "Hide" : "Show"} dead
-                </Button>
-              )}
-            </div>
+        <div className="flex w-full h-full">
+          <div className="flex flex-col sm:w-1/3 h-full overflow-y-auto mx-2">
+            {filteredAdventurers.map((adventurer, index) => (
+              <Button
+                key={adventurer.id}
+                ref={(ref) => (buttonRefs.current[index] = ref)}
+                className={
+                  selectedIndex === index && isActive ? "animate-pulse" : ""
+                }
+                variant={
+                  selectedIndex === index && isActive ? "default" : "ghost"
+                }
+                onClick={() => {
+                  setAdventurer(adventurer);
+                  setSelectedIndex(index);
+                }}
+              >
+                <div className="flex-grow">{`${adventurer.name} - ${adventurer.id}`}</div>
+                <div className="w-5 text-right">
+                  {adventurer.health === 0 ? DeadIcon : null}
+                </div>
+              </Button>
+            ))}
+          </div>
+          <div>
+            {hasDeadAdventurers && (
+              <Button onClick={() => setShowZeroHealth(!showZeroHealth)}>
+                {showZeroHealth ? "Hide" : "Show"} dead
+              </Button>
+            )}
           </div>
           {filteredAdventurers.length > 0 && (
-            <div className="w-1/2 sm:w-1/2 flex-grow ml-2">
+            <div className="sm:w-2/12 md:w-6/12 lg:w-2/3 w-2/3 ml-2">
               <Info adventurer={filteredAdventurers[selectedIndex]} />
             </div>
           )}
@@ -126,6 +125,6 @@ export const AdventurersList = ({
       ) : (
         <p className="text-lg">You do not have any adventurers!</p>
       )}
-    </>
+    </div>
   );
 };
