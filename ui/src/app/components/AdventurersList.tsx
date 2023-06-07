@@ -83,11 +83,11 @@ export const AdventurersList = ({
   }, [isActive, handleKeyDown]);
 
   return (
-    <div className="h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       {sortedAdventurers.length > 0 ? (
-        <div className="flex w-full h-3/4">
-          <div className="flex flex-col gap-2 w-1/2 sm:w-1/2">
-            <div className="flex flex-col overflow-y-auto">
+        <div className="flex w-full h-full">
+          <div className="flex flex-col w-1/2 sm:w-1/2">
+            <div className="flex flex-col overflow-y-auto h-full">
               {filteredAdventurers.map((adventurer, index) => (
                 <Button
                   key={adventurer.id}
@@ -117,7 +117,7 @@ export const AdventurersList = ({
             )}
           </div>
           {filteredAdventurers.length > 0 && (
-            <div className="w-1/2 sm:w-1/2 flex-grow ml-2">
+            <div className="w-full sm:w-1/2 flex-grow ml-2 h-full overflow-y-auto">
               <Info adventurer={filteredAdventurers[selectedIndex]} />
             </div>
           )}
