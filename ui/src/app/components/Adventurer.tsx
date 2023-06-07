@@ -25,7 +25,7 @@ const Adventurer = () => {
     "adventurersByOwnerQuery",
     getAdventurersByOwner,
     {
-      owner: padAddress(account?.address ?? ""),
+      owner: padAddress("account?.address" ?? ""),
     },
     txAccepted
   );

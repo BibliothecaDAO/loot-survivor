@@ -87,7 +87,7 @@ export const AdventurersList = ({
       {sortedAdventurers.length > 0 ? (
         <div className="flex w-full">
           <div className="flex flex-col w-1/2 sm:w-1/2">
-            <div className="flex flex-col">
+            <div className="flex flex-col overflow-y-auto max-h-screen">
               {" "}
               {filteredAdventurers.map((adventurer, index) => (
                 <Button

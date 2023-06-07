@@ -176,7 +176,9 @@ const getItems = gql`
 
 const getAdventurersByOwner = gql`
   query get_adventurers_by_owner($owner: HexValue) {
-    adventurers(where: { owner: { eq: $owner } }) {
+    adventurers(
+      where: { owner: { eq: $owner } }, limit: 10000000
+      ) {
       beastId
       charisma
       chestId
@@ -213,7 +215,8 @@ const getAdventurersByOwner = gql`
 
 const getAdventurerById = gql`
   query get_adventurer_by_id($id: FeltValue) {
-    adventurers(where: { id: { eq: $id } }) {
+    adventurers(
+      where: { id: { eq: $id } }) {
       beastId
       charisma
       chestId
