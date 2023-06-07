@@ -83,12 +83,11 @@ export const AdventurersList = ({
   }, [isActive, handleKeyDown]);
 
   return (
-    <>
+    <div className="h-screen">
       {sortedAdventurers.length > 0 ? (
-        <div className="flex w-full">
-          <div className="flex flex-col w-1/2 sm:w-1/2">
-            <div className="flex flex-col overflow-y-auto max-h-screen">
-              {" "}
+        <div className="flex w-full h-3/4">
+          <div className="flex flex-col gap-2 w-1/2 sm:w-1/2">
+            <div className="flex flex-col overflow-y-auto">
               {filteredAdventurers.map((adventurer, index) => (
                 <Button
                   key={adventurer.id}
@@ -110,12 +109,12 @@ export const AdventurersList = ({
                   </div>
                 </Button>
               ))}
-              {hasDeadAdventurers && (
-                <Button onClick={() => setShowZeroHealth(!showZeroHealth)}>
-                  {showZeroHealth ? "Hide" : "Show"} dead
-                </Button>
-              )}
             </div>
+            {hasDeadAdventurers && (
+              <Button onClick={() => setShowZeroHealth(!showZeroHealth)}>
+                {showZeroHealth ? "Hide" : "Show"} dead
+              </Button>
+            )}
           </div>
           {filteredAdventurers.length > 0 && (
             <div className="w-1/2 sm:w-1/2 flex-grow ml-2">
@@ -126,6 +125,6 @@ export const AdventurersList = ({
       ) : (
         <p className="text-lg">You do not have any adventurers!</p>
       )}
-    </>
+    </div>
   );
 };
