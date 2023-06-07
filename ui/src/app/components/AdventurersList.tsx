@@ -117,7 +117,7 @@ export const AdventurersList = ({
             )}
           </div>
           {filteredAdventurers.length > 0 && (
-            <div className="sm:w-2/12 md:w-6/12 w-2/3 ml-2">
+            <div className="sm:w-2/12 md:w-6/12 lg:w-2/3 w-2/3 ml-2">
               <Info adventurer={filteredAdventurers[selectedIndex]} />
             </div>
           )}
