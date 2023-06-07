@@ -170,7 +170,7 @@ const Upgrade = () => {
   const Charisma = (): ReactElement => (
     <div className="flex flex-col items-center">
       <p className="sm:text-[30px] text-center">
-        Charisma provides discounts on the marketplace
+        Charisma provides discounts on the marketplace and potions
       </p>
       <Button onClick={() => handleUpgradeTx("Charisma")}>
         Upgrade Charisma
