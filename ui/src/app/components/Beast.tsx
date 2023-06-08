@@ -201,10 +201,7 @@ export default function Beast() {
       <div className="sm:w-1/3">
         {adventurer?.beastId || data.lastBattleQuery?.battles[0] ? (
           <>
-            <BeastDisplay
-              beastData={beastData}
-              lastBattle={data.lastBattleQuery?.battles[0]}
-            />
+            <BeastDisplay beastData={beastData} lastBattle={formatBattles[0]} />
           </>
         ) : (
           <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">

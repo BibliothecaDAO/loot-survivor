@@ -139,7 +139,7 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
           <p className="text-6xl font-bold text-red-600 uppercase">DEFEATED</p>
         </div>
       )}
-      {/* {lastBattle?.fled && (
+      {lastBattle?.fled && (
         <div
           className="absolute inset-0 flex items-center justify-center"
           style={{ backdropFilter: "blur(1px)" }}
@@ -148,7 +148,7 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
             FLED
           </p>
         </div>
-      )} */}
+      )}
     </div>
   );
 };
