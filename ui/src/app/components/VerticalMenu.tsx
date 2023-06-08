@@ -5,6 +5,7 @@ import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 interface ButtonData {
   id: number;
   label: string;
+  icon?: any;
   value: any;
   action: () => void;
   disabled: boolean;
@@ -74,15 +75,20 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
         <Button
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
-          className={selectedIndex === index && isActive ? "animate-pulse w-full" : "w-full"}
+          className={
+            selectedIndex === index && isActive
+              ? "flex flex-row gap-5 animate-pulse w-full"
+              : "flex flex-row gap-5 w-full"
+          }
           variant={selectedIndex === index ? "default" : "outline"}
-          size={'lg'}
+          size={"lg"}
           onClick={() => {
             setSelectedIndex(index);
             buttonData.action();
           }}
           disabled={buttonData.disabled}
         >
+          {buttonData.icon && <div>{buttonData.icon}</div>}
           {buttonData.label}
         </Button>
       ))}

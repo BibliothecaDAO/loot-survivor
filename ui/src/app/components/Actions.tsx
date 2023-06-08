@@ -15,6 +15,7 @@ import {
   getLatestDiscoveries,
   getBeastsByAdventurer,
 } from "../hooks/graphql/queries";
+import { MistIcon, HealthPotionsIcon } from "./Icons";
 
 export default function Actions() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -73,6 +74,7 @@ export default function Actions() {
     {
       id: 1,
       label: adventurer?.isIdle ? "Into the mist" : "Beast found!!",
+      icon: <MistIcon />,
       value: "explore",
       action: async () => {
         {
@@ -105,6 +107,7 @@ export default function Actions() {
     buttonsData.push({
       id: 2,
       label: "Buy Health",
+      icon: <HealthPotionsIcon />,
       value: "purchase health",
       action: async () => setActiveMenu(1),
       disabled: !adventurer?.isIdle || loading,
