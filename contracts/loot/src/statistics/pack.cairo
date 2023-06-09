@@ -1,7 +1,3 @@
-use starknet::{
-    StorageAccess, SyscallResult, StorageBaseAddress, storage_read_syscall, storage_write_syscall,
-    storage_address_from_base_and_offset
-};
 use integer::{
     U128IntoFelt252, Felt252IntoU256, Felt252TryIntoU64, U256TryIntoFelt252, u256_from_felt252
 };
@@ -9,59 +5,52 @@ use traits::{TryInto, Into};
 use option::OptionTrait;
 use debug::PrintTrait;
 
-impl U256TryIntoU64 of TryInto<u256, u64> {
-    fn try_into(self: u256) -> Option<u64> {
-        let intermediate: Option<felt252> = self.try_into();
-        match intermediate {
-            Option::Some(felt) => felt.try_into(),
-            Option::None(()) => Option::None(())
-        }
-    }
+use pack::pack::{pack_value, unpack_value, U256TryIntoU32};
+use pack::constants::{TWO_POW_63, TWO_POW_126, TWO_POW_189, MASK_63};
+
+#[derive(Copy, Drop)]
+struct Loot {
+    rank: u32,
+    material: u32,
+    item_type: u32,
+    slot: u32,
 }
 
-const MASK_64: u256 = 0xFFFFFFFFFFFFFFFF;
-const MASK_160: u256 = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
-
-const TWO_POW_160: u256 = 10000000000000000000000000000000000000000;
-
-#[derive(Copy, Drop, Serde)]
-struct Proposal {
-    proposer: felt252,
-    last_updated_at: u64,
-}
-
-/// Pack the proposal fields into a single felt252.
-/// * `proposer` - The proposer of the proposal.
-/// * `last_updated_at` - The last time the proposal was updated.
-fn pack_proposal_fields(proposer: felt252, last_updated_at: u64) -> felt252 {
+fn pack_loot(loot: Loot) -> felt252 {
     let mut packed = 0;
-    packed = packed | proposer.into();
-    packed = packed | (u256_from_felt252(last_updated_at.into()) * TWO_POW_160);
+
+    packed = packed | pack_value(loot.rank.into(), TWO_POW_189);
+    packed = packed | pack_value(loot.material.into(), TWO_POW_126);
+    packed = packed | pack_value(loot.item_type.into(), TWO_POW_63);
+    packed = packed | pack_value(loot.slot.into(), 1);
 
     packed.try_into().unwrap()
 }
 
-/// Unpack the proposal fields from a single felt252.
-/// * `packed` - The packed proposal.
-fn unpack_proposal_fields(packed: felt252) -> (felt252, u64) {
+
+fn unpack_loot(packed: felt252) -> Loot {
     let packed = packed.into();
 
-    let proposer = (packed & MASK_160).try_into().unwrap();
-    let last_updated_at: u64 = U256TryIntoU64::try_into(((packed / TWO_POW_160) & MASK_64))
-        .unwrap();
-
-    (proposer, last_updated_at)
+    Loot {
+        rank: U256TryIntoU32::try_into(unpack_value(packed, TWO_POW_189, MASK_63)).unwrap(),
+        material: U256TryIntoU32::try_into(unpack_value(packed, TWO_POW_126, MASK_63)).unwrap(),
+        item_type: U256TryIntoU32::try_into(unpack_value(packed, TWO_POW_63, MASK_63)).unwrap(),
+        slot: U256TryIntoU32::try_into(unpack_value(packed, 1, MASK_63)).unwrap(),
+    }
 }
 
 
 #[test]
 #[available_gas(1000000)]
 fn test() {
-    let packed = pack_proposal_fields(123123123120, 18982);
+    let lootItem = Loot { rank: 1213123, material: 21231231, item_type: 3123123, slot: 412312 };
 
-    let (proposer, last_updated_at) = unpack_proposal_fields(packed);
+    let packed = pack_loot(lootItem);
+    let unpacked = unpack_loot(packed);
 
-    proposer.print();
-    assert(last_updated_at == 18982, 'tes');
-// assert(proposer.into() == 123123123120, 'tes');
+    assert(lootItem.rank == unpacked.rank, 'rank');
+    assert(lootItem.material == unpacked.material, 'material');
+    assert(lootItem.item_type == unpacked.item_type, 'item_type');
+    assert(lootItem.slot == unpacked.slot, 'slot');
 }
+
