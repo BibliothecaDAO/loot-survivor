@@ -18,6 +18,11 @@ struct Beast {
     suffix: u8,
 }
 
+// @loaf notes
+// Adventurer ID is needed to determine everything
+// Random seed value should be set when Adventurer upgrades so the market can be deterministic off the seed
+
+// need to set the owner address at some point
 #[derive(Drop, Copy)]
 struct Adventurer {
     Name: u64, // name
