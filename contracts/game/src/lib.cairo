@@ -4,40 +4,54 @@ mod Adventurer {
     use starknet::get_caller_address;
     use starknet::ContractAddress;
 
-    use lootitems::loot::Loot;
+    use lootitems::loot::{Loot, ItemStats};
     use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8};
+
+    use survivor::adventurer::{Adventurer, AdventurerActions};
     // events
 
     // adventurer_update
     // adventurer_items
     // leaderboard_update
 
+    #[event]
+    fn AdventurerUpdate(owner: ContractAddress, id: u256, adventurer: Adventurer) {}
+
     #[storage]
     struct Storage {
-        adventurer: LegacyMap::<u256, u256>,
-        loot: LegacyMap::<u256, u256>,
+        _adventurer: LegacyMap::<(ContractAddress, u256), felt252>,
+        _loot: LegacyMap::<u256, felt252>,
+        _counter: u256,
     // lords_address
     // dao_address
     // leaders
     }
 
     #[constructor]
-    fn constructor(
-        _name: felt252, _address: ContractAddress
-    ) { // let item = ItemStats::pack(ItemStats::get(1));
-    // loot::write(1, item);
-    // set items in constructor with loop
+    fn constructor() { // set items in constructor with loop
     // set beasts in constructor with loop
     // set lords _address
     // set DAO address
     }
 
     // @loothero
-    fn start(starting_weapon: u256) { //
-    // get item_type
-    // generate starting beast
-    // create and set Adventurer with beast and item
-    // mint fees etc
+    fn start(starting_weapon: u8) {
+        // TODO: check item is starting weapon
+        // TODO: set adventurer metadata
+        // TODO: set mint fees
+
+        // generate new adventurer with starting weapon and beast health
+        let new_adventurer: Adventurer = AdventurerActions::new(starting_weapon);
+
+        let current_adventurer_id = _counter::read();
+        let owner = get_caller_address();
+
+        _adventurer::write((owner, current_adventurer_id), AdventurerActions::pack(new_adventurer));
+
+        // emit update
+        AdventurerUpdate(owner, current_adventurer_id, new_adventurer);
+
+        _counter::write(current_adventurer_id + 1);
     }
 
     // @loothero
@@ -103,8 +117,8 @@ mod Adventurer {
     // 
     }
 }
+// #[test]
+// #[available_gas(2000000)]
+// fn test_component() {}
 
 
-#[test]
-#[available_gas(2000000)]
-fn test_component() {}

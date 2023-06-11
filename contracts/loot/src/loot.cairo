@@ -25,7 +25,7 @@ trait ItemTrait {
     fn tier(id: u8) -> u8;
     fn item_type(id: u8) -> u8;
     fn slot(id: u8) -> u8;
-    fn pack(loot: Loot) -> felt252;
+    fn pack(self: Loot) -> felt252;
     fn unpack(packed: felt252) -> Loot;
 }
 
@@ -46,12 +46,12 @@ impl ItemStats of ItemTrait {
     fn slot(id: u8) -> u8 {
         return item_slot::get(id);
     }
-    fn pack(loot: Loot) -> felt252 {
+    fn pack(self: Loot) -> felt252 {
         let mut packed = 0;
 
-        packed = packed | pack_value(loot.tier.into(), pow::TWO_POW_180);
-        packed = packed | pack_value(loot.item_type.into(), pow::TWO_POW_63);
-        packed = packed | pack_value(loot.slot.into(), 1);
+        packed = packed | pack_value(self.tier.into(), pow::TWO_POW_180);
+        packed = packed | pack_value(self.item_type.into(), pow::TWO_POW_63);
+        packed = packed | pack_value(self.slot.into(), 1);
 
         packed.try_into().unwrap()
     }

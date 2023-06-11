@@ -7,3 +7,4 @@ version = "0.1.0"
 [dependencies]
 starknet = ">=1.0.0"
 lootitems = { path = "../loot" }
+survivor = { path = "../adventurer" }
