@@ -15,6 +15,25 @@ impl U256TryIntoU32 of TryInto<u256, u32> {
     }
 }
 
+impl U256TryIntoU16 of TryInto<u256, u16> {
+    fn try_into(self: u256) -> Option<u16> {
+        let intermediate: Option<felt252> = self.try_into();
+        match intermediate {
+            Option::Some(felt) => felt.try_into(),
+            Option::None(()) => Option::None(())
+        }
+    }
+}
+
+impl U256TryIntoU8 of TryInto<u256, u8> {
+    fn try_into(self: u256) -> Option<u8> {
+        let intermediate: Option<felt252> = self.try_into();
+        match intermediate {
+            Option::Some(felt) => felt.try_into(),
+            Option::None(()) => Option::None(())
+        }
+    }
+}
 fn pack_value(value: felt252, pow: u256) -> u256 {
     u256_from_felt252(value) * pow
 }
