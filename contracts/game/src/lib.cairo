@@ -7,7 +7,7 @@ mod Adventurer {
     use lootitems::loot::{Loot, ItemStats};
     use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8};
 
-    use survivor::adventurer::{Adventurer, AdventurerActions};
+    use survivor::adventurer::{Adventurer, AdventurerActions, Actions};
     // events
 
     // adventurer_update
@@ -44,12 +44,11 @@ mod Adventurer {
         let new_adventurer: Adventurer = AdventurerActions::new(starting_weapon);
 
         let current_adventurer_id = _counter::read();
-        let owner = get_caller_address();
+        let caller = get_caller_address();
 
-        _adventurer::write((owner, current_adventurer_id), AdventurerActions::pack(new_adventurer));
+        _adventurer::write((caller, current_adventurer_id), new_adventurer.pack());
 
-        // emit update
-        AdventurerUpdate(owner, current_adventurer_id, new_adventurer);
+        AdventurerUpdate(caller, current_adventurer_id, new_adventurer);
 
         _counter::write(current_adventurer_id + 1);
     }
