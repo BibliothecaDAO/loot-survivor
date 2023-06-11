@@ -18,6 +18,14 @@ struct Item {
 }
 
 #[derive(Drop, Copy)]
+struct AdventurerMeta {
+    name: u32,
+    home_realm: u8,
+    race: u8,
+    seed: u8,
+}
+
+#[derive(Drop, Copy)]
 struct Adventurer {
     health: u16, // health
     xp: u16, // xp 
@@ -157,7 +165,7 @@ fn unpack_adventurer(packed: felt252) -> Adventurer {
 
 
 #[test]
-#[available_gas(1000000000000)]
+#[available_gas(5000000)]
 fn test_adventurer() {
     let adventurer = Adventurer {
         health: 100,
