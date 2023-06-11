@@ -1,3 +1,29 @@
+mod mask {
+    const MASK_1: u256 = 0x1;
+    const MASK_2: u256 = 0x3;
+    const MASK_3: u256 = 0x7;
+    const MASK_4: u256 = 0xF;
+    const MASK_5: u256 = 0x1F;
+    const MASK_6: u256 = 0x3F;
+    const MASK_7: u256 = 0x7F;
+    const MASK_8: u256 = 0xFF;
+    const MASK_9: u256 = 0x1FF;
+    const MASK_10: u256 = 0x3FF;
+    const MASK_11: u256 = 0x7FF;
+    const MASK_12: u256 = 0xFFF;
+    const MASK_13: u256 = 0x1FFF;
+    const MASK_14: u256 = 0x3FFF;
+    const MASK_15: u256 = 0x7FFF;
+    const MASK_16: u256 = 0xFFFF;
+    const MASK_17: u256 = 0x1FFFF;
+    const MASK_18: u256 = 0x3FFFF;
+    const MASK_19: u256 = 0x7FFFF;
+    const MASK_20: u256 = 0xFFFFF;
+    const MASK_21: u256 = 0x1FFFFF;
+    const MASK_22: u256 = 0x3FFFFF;
+    const MASK_23: u256 = 0x7FFFFF;
+}
+
 const MASK_63: u256 = 0x7FFFFFFFFFFFFFFF;
 const MASK_6: u256 = 0x3F;
 const MASK_8: u256 = 0xFF; // Mask for 8-bit values: id, prefix1, prefix2, suffix
