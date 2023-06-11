@@ -6,7 +6,7 @@ use option::OptionTrait;
 use debug::PrintTrait;
 
 use pack::pack::{pack_value, unpack_value, U256TryIntoU32};
-use pack::constants::{TWO_POW_63, TWO_POW_126, TWO_POW_189, MASK_63};
+use pack::constants::{MASK_63, pow};
 
 #[derive(Copy, Drop)]
 struct Loot {
@@ -19,9 +19,9 @@ struct Loot {
 fn pack_loot(loot: Loot) -> felt252 {
     let mut packed = 0;
 
-    packed = packed | pack_value(loot.rank.into(), TWO_POW_189);
-    packed = packed | pack_value(loot.material.into(), TWO_POW_126);
-    packed = packed | pack_value(loot.item_type.into(), TWO_POW_63);
+    packed = packed | pack_value(loot.rank.into(), pow::TWO_POW_189);
+    packed = packed | pack_value(loot.material.into(), pow::TWO_POW_126);
+    packed = packed | pack_value(loot.item_type.into(), pow::TWO_POW_63);
     packed = packed | pack_value(loot.slot.into(), 1);
 
     packed.try_into().unwrap()
@@ -32,9 +32,11 @@ fn unpack_loot(packed: felt252) -> Loot {
     let packed = packed.into();
 
     Loot {
-        rank: U256TryIntoU32::try_into(unpack_value(packed, TWO_POW_189, MASK_63)).unwrap(),
-        material: U256TryIntoU32::try_into(unpack_value(packed, TWO_POW_126, MASK_63)).unwrap(),
-        item_type: U256TryIntoU32::try_into(unpack_value(packed, TWO_POW_63, MASK_63)).unwrap(),
+        rank: U256TryIntoU32::try_into(unpack_value(packed, pow::TWO_POW_189, MASK_63)).unwrap(),
+        material: U256TryIntoU32::try_into(unpack_value(packed, pow::TWO_POW_126, MASK_63))
+            .unwrap(),
+        item_type: U256TryIntoU32::try_into(unpack_value(packed, pow::TWO_POW_63, MASK_63))
+            .unwrap(),
         slot: U256TryIntoU32::try_into(unpack_value(packed, 1, MASK_63)).unwrap(),
     }
 }
