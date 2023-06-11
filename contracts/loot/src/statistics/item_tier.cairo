@@ -1,7 +1,7 @@
 use array::ArrayTrait;
-use loot::statistics::item_tier;
-use loot::statistics::constants::ItemId;
-use loot::statistics::constants::ItemTier;
+use lootitems::statistics::item_tier;
+use lootitems::statistics::constants::ItemId;
+use lootitems::statistics::constants::ItemTier;
 
 fn get(id: u8) -> u8 {
     if id == ItemId::Pendant {

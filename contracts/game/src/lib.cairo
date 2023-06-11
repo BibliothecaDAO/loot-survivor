@@ -4,8 +4,8 @@ mod Adventurer {
     use starknet::get_caller_address;
     use starknet::ContractAddress;
 
-    use loot::loot::{Loot, ItemTrait};
-
+    use lootitems::loot::Loot;
+    use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8};
     // events
 
     // adventurer_update
@@ -14,14 +14,18 @@ mod Adventurer {
 
     #[storage]
     struct Storage {
-        adventurer: LegacyMap::<u256, u256>, 
+        adventurer: LegacyMap::<u256, u256>,
+        loot: LegacyMap::<u256, u256>,
     // lords_address
     // dao_address
     // leaders
     }
 
     #[constructor]
-    fn constructor(_name: felt252, _address: ContractAddress) { //
+    fn constructor(
+        _name: felt252, _address: ContractAddress
+    ) { // let item = ItemStats::pack(ItemStats::get(1));
+    // loot::write(1, item);
     // set items in constructor with loop
     // set beasts in constructor with loop
     // set lords _address

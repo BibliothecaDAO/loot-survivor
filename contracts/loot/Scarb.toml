@@ -1,9 +1,8 @@
 [package]
-name = "loot"
+name = "lootitems"
 version = "0.1.0"
 
 # See more keys and their definitions at https://docs.swmansion.com/scarb/docs/reference/manifest
 
 [dependencies]
-starknet = ">=1.0.0"
 pack = {path = "../pack"}
