@@ -54,7 +54,13 @@ mod Adventurer {
     }
 
     // @loothero
-    fn explore(adventurer_id: u256) { // get random explore
+    fn explore(adventurer_id: u256) {
+        let mut adventurer = _adventurer::read((get_caller_address(), adventurer_id)).unpack();
+
+        adventurer.add_beast(100);
+
+        _adventurer::write((get_caller_address(), adventurer_id), adventurer.pack());
+    // get random explore
     // calculate discovery (beast, obstacle, item)
     // if beast -> create beast -> check ambush -> attack adventurer
     // if obstacle -> calculate obstacle dmg
@@ -120,4 +126,9 @@ mod Adventurer {
 // #[available_gas(2000000)]
 // fn test_component() {}
 
+// on mint -> get random number
+
+// on explore ->
+
+// global seed
 
