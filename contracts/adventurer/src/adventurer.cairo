@@ -384,7 +384,7 @@ impl AdventurerActions of Actions {
             charisma: 0,
             gold: 0,
             weapon: Item {
-                id: starting_item, xp: 0, metadata: 0, 
+                id: starting_item, xp: 0, metadata: 1, 
                 }, chest: Item {
                 id: 0, xp: 0, metadata: 0, 
                 }, head: Item {

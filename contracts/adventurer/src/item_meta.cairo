@@ -14,15 +14,16 @@ use super::adventurer::{Adventurer, AdventurerActions, Actions};
 use super::bag::{Bag, BagActions, Item};
 
 mod item_meta_index {
-    const INDEX_1: u8 = 0;
-    const INDEX_2: u8 = 1;
-    const INDEX_3: u8 = 2;
-    const INDEX_4: u8 = 3;
-    const INDEX_5: u8 = 4;
-    const INDEX_6: u8 = 5;
-    const INDEX_7: u8 = 6;
-    const INDEX_8: u8 = 7;
-    const INDEX_9: u8 = 8;
+    const INDEX_1: u8 = 1;
+    const INDEX_2: u8 = 2;
+    const INDEX_3: u8 = 3;
+    const INDEX_4: u8 = 4;
+    const INDEX_5: u8 = 5;
+    const INDEX_6: u8 = 6;
+    const INDEX_7: u8 = 7;
+    const INDEX_8: u8 = 8;
+    const INDEX_9: u8 = 9;
+    const INDEX_10: u8 = 10;
 }
 
 #[derive(Drop, Copy)]
@@ -350,8 +351,8 @@ impl ImplItemMetaActions of ItemMetaActions {
         }
 
         // if no slots -> return first index which is 0
-        if slot == 0 {
-            Item { id: item.id, xp: item.xp, metadata: 0 }
+        if slot == 1 {
+            Item { id: item.id, xp: item.xp, metadata: 1 }
         } else {
             Item { id: item.id, xp: item.xp, metadata: slot + 1 }
         }
@@ -484,10 +485,10 @@ fn test_get_item_metadata_slot() {
     let mut adventurer = AdventurerActions::new(1, 1);
 
     // add test items
-    let item_pendant = Item { id: 1, xp: 1, metadata: 0 };
-    let item_silver_ring = Item { id: 4, xp: 1, metadata: 1 };
-    let item_ghost_wand = Item { id: 9, xp: 1, metadata: 2 };
-    let item_silk_robe = Item { id: 18, xp: 1, metadata: 3 };
+    let item_pendant = Item { id: 1, xp: 1, metadata: 3 };
+    let item_silver_ring = Item { id: 4, xp: 1, metadata: 4 };
+    let item_ghost_wand = Item { id: 9, xp: 1, metadata: 5 };
+    let item_silk_robe = Item { id: 18, xp: 1, metadata: 6 };
 
     adventurer.add_item(item_pendant);
     adventurer.add_item(item_silver_ring);
@@ -555,7 +556,7 @@ fn test_set_item_metadata_slot() {
             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
         }
     };
-    let item = Item { id: 1, xp: 1, metadata: 0 };
+    let item = Item { id: 1, xp: 1, metadata: 1 };
 
     let item_meta = ItemMeta { id: 1, name_prefix: 12, name_suffix: 11, item_suffix: 13 };
 
