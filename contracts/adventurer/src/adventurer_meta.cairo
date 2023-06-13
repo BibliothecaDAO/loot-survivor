@@ -9,7 +9,7 @@ use debug::PrintTrait;
 use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8};
 use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
-use lootitems::loot::{Loot, ItemStats, ItemTrait};
+use lootitems::loot::{Loot, ItemUtils, ItemTrait};
 
 
 #[derive(Drop, Copy, Serde)]
