@@ -13,7 +13,7 @@ use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
 use lootitems::loot::{Loot, ItemTrait, ItemUtils};
 
-use super::exploration;
+use super::exploration::ExploreUtils;
 use super::beasts::BeastUtils;
 use super::obstacles::ObstacleUtils;
 use super::constants::{discovery_constants, beast_constants};
@@ -114,7 +114,7 @@ impl AdventurerActions of Actions {
 
     fn explore(ref self: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> Adventurer {
         // get the exploration outcome
-        let explore_outcome = exploration::get_random_explore(
+        let explore_outcome = ExploreUtils::get_random_explore(
             self, adventurer_entropy, game_entropy
         );
 
@@ -128,42 +128,55 @@ impl AdventurerActions of Actions {
             return self.add_beast(beast_health);
         // if the adventurer encounters an obstacle
         } else if (explore_outcome == discovery_constants::DiscoveryType::Obstacle) {
-            // get the damage the obstacle does
-            let obstacle_damage = ObstacleUtils::get_damage(self, adventurer_entropy, game_entropy);
-            // deduct the damage from the beast health
-            return self.deduct_health(obstacle_damage);
-        // if the adventurer encounters a discovery
-        } else if (explore_outcome == discovery_constants::DiscoveryType::Item) {
-            // get the discovery type
-            let item_type = exploration::get_discovery_type(self, adventurer_entropy, game_entropy);
+            // get a random obstacle
+            let obstacle = ObstacleUtils::get_random_obstacle(
+                self, adventurer_entropy, game_entropy
+            );
 
+            // get the xp reward for the obstacle
+            let xp_reward = ObstacleUtils::get_xp_reward(obstacle);
+
+            // grant adventurer and items xp gets xp for encountering an obstacle
+            self.increase_adventurer_xp(xp_reward);
+            self.increase_item_xp(xp_reward);
+
+            // get damage from the obstacle, returning boolean for dodged and damage
+            let (dodged, obstacle_damage) = ObstacleUtils::get_damage(self, obstacle);
+
+            // if the adventurer did not dodge the obstacle
+            if (dodged == false) {
+                // deduct the damage from the adventurer health
+                self.deduct_health(obstacle_damage);
+                return self;
+            // if the adventurer dodged the obstacle    
+            } else {
+                // simply return the adventurer
+                return self;
+            }
+        } // if the adventurer encounters a discovery
+        else if (explore_outcome == discovery_constants::DiscoveryType::Item) { // get the discovery type
+            let item_type = ExploreUtils::get_discovery_type(
+                self, adventurer_entropy, game_entropy
+            );
             // if the discovery is gold
-            if (item_type == discovery_constants::ItemDiscoveryType::Gold) {
-                // get the gold amount
-                let gold_disovery_amount = exploration::get_gold_discovery(
+            if (item_type == discovery_constants::ItemDiscoveryType::Gold) { // get the gold amount
+                let gold_disovery_amount = ExploreUtils::get_gold_discovery(
                     self, adventurer_entropy, game_entropy
-                );
-                // add the gold to the adventurer
-                return self.increase_gold(gold_disovery_amount);
-            // if the discovery is xp
-            } else if (item_type == discovery_constants::ItemDiscoveryType::XP) {
-                // get the xp amount
-                let xp_discovery_amount = exploration::get_xp_discovery(
+                ); // add the gold to the adventurer
+                return self.increase_gold(gold_disovery_amount); // if the discovery is xp
+            } else if (item_type == discovery_constants::ItemDiscoveryType::XP) { // get the xp amount
+                let xp_discovery_amount = ExploreUtils::get_xp_discovery(
                     self, adventurer_entropy, game_entropy
-                );
-                // add the xp to the adventurer
-                return self.increase_adventurer_xp(xp_discovery_amount);
-            // if the discovery is an item
-            } else if (item_type == discovery_constants::ItemDiscoveryType::Health) {
-                // get the health amount
-                let health_discovery_amount = exploration::get_health_discovery(
+                ); // add the xp to the adventurer
+                return self
+                    .increase_adventurer_xp(xp_discovery_amount); // if the discovery is an item
+            } else if (item_type == discovery_constants::ItemDiscoveryType::Health) { // get the health amount
+                let health_discovery_amount = ExploreUtils::get_health_discovery(
                     self, adventurer_entropy, game_entropy
-                );
-                // add the health to the adventurer
+                ); // add the health to the adventurer
                 return self.add_health(health_discovery_amount);
             }
         }
-
         return self;
     }
 
@@ -177,6 +190,7 @@ impl AdventurerActions of Actions {
         return self;
     }
 
+    // TODO: implement this function
     fn flee(ref self: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> Adventurer {
         // combat::attempt_flee(adventurer, adventurer_entropy, game_entropy;
         // if successful, return adventurer with adventurer.beast_health = 0;
@@ -185,8 +199,9 @@ impl AdventurerActions of Actions {
     }
 
 
+    // TODO: implement this function
     fn luck(self: Adventurer) -> u8 {
-        // TODO: Calculate Luck from ring and neck
+        // calculate Luck from ring and neck greatness
         0
     }
 

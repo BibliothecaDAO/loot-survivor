@@ -25,6 +25,7 @@ trait ItemTrait {
     fn get_tier(id: u8) -> u8;
     fn get_type(id: u8) -> u8;
     fn get_slot(id: u8) -> u8;
+    fn is_starting_weapon(id: u8) -> bool;
     fn pack(self: Loot) -> felt252;
     fn unpack(packed: felt252) -> Loot;
 }
@@ -46,6 +47,25 @@ impl ItemUtils of ItemTrait {
     fn get_slot(id: u8) -> u8 {
         return item_slot::get(id);
     }
+
+    // is_starting_weapon returns true if the item is a starting weapon.
+    // Starting weapons are: {Wand, Book, Club, ShortSword}
+    // @param id The item id.
+    // @return True if the item is a starting weapon.
+    fn is_starting_weapon(id: u8) -> bool {
+        if (id == constants::ItemId::Wand) {
+            return true;
+        } else if (id == constants::ItemId::Book) {
+            return true;
+        } else if (id == constants::ItemId::Club) {
+            return true;
+        } else if (id == constants::ItemId::ShortSword) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     fn pack(self: Loot) -> felt252 {
         let mut packed = 0;
 

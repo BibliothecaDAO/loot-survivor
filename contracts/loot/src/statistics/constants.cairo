@@ -35,8 +35,6 @@ mod ItemId {
     const WoolShoes: u8 = 34;
     const LinenShoes: u8 = 35;
     const Shoes: u8 = 36;
-
-    
     const DivineGloves: u8 = 37;
     const SilkGloves: u8 = 38;
     const WoolGloves: u8 = 39;

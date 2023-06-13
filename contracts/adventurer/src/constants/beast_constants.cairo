@@ -24,7 +24,9 @@ mod BeastId {
     const Rat: u8 = 20;
 
     // If you add beasts, make sure to update MAX_ID below
-    const MAX_ID: u8 = 20;
+    // making this u64 as it's commonly used to select a random beast based
+    // on entropy variables which are u64 based
+    const MAX_ID: u64 = 20;
 }
 
 mod BeastTier {
