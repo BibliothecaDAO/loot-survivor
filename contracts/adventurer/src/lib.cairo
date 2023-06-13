@@ -1,4 +1,6 @@
 mod adventurer;
+mod adventurer_meta;
+mod item_meta;
 // #[derive(Drop, Copy)]
 // struct Item {
 //     id: u8,
