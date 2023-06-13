@@ -82,16 +82,16 @@ struct Bag {
 
 trait BagActions {
     fn pack(self: Bag) -> felt252;
-    fn unpack(self: felt252) -> Bag;
+    fn unpack(packed: felt252) -> Bag;
 
     // swap item
     // take bag and item to swap and item to equip
     // return bag with swapped items and item that was swapped for
     // we then store the item on the Adventurer
-    fn swap_items(self: Bag, swapping: Item, equipping: Item) -> (Bag, Item);
+    // fn swap_items(self: Bag, incoming: u8, outgoing: u8) -> (Bag, Item);
 
     // set item in first available slot
-    fn set_item(self: Bag, item: Item) -> Bag;
+    fn set_item(ref self: Bag, item: Item) -> Bag;
 
     // finds open slot
     fn find_slot(self: Bag) -> u8;
@@ -103,6 +103,147 @@ trait BagActions {
     fn get_item(self: Bag, item_id: u8) -> Item;
 }
 
+impl ImplBagActions of BagActions {
+    fn pack(self: Bag) -> felt252 {
+        0
+    }
+    fn unpack(packed: felt252) -> Bag {
+        Bag {
+            item_1: Item {
+                id: 0, xp: 0, metadata: 0, 
+                }, item_2: Item {
+                id: 0, xp: 0, metadata: 0, 
+                }, item_3: Item {
+                id: 0, xp: 0, metadata: 0, 
+                }, item_4: Item {
+                id: 0, xp: 0, metadata: 0, 
+                }, item_5: Item {
+                id: 0, xp: 0, metadata: 0, 
+                }, item_6: Item {
+                id: 0, xp: 0, metadata: 0, 
+                }, item_7: Item {
+                id: 0, xp: 0, metadata: 0, 
+                }, item_8: Item {
+                id: 0, xp: 0, metadata: 0, 
+                }, item_9: Item {
+                id: 0, xp: 0, metadata: 0, 
+                }, item_10: Item {
+                id: 0, xp: 0, metadata: 0, 
+                }, item_11: Item {
+                id: 0, xp: 0, metadata: 0, 
+                }, item_12: Item {
+                id: 0, xp: 0, metadata: 0, 
+            },
+        }
+    }
+    fn set_item(ref self: Bag, item: Item) -> Bag {
+        let slot = self.find_slot();
+
+        if slot == 0 {
+            self.item_1 = item;
+            return self;
+        } else if slot == 1 {
+            self.item_2 = item;
+            return self;
+        } else if slot == 2 {
+            self.item_3 = item;
+            return self;
+        } else if slot == 3 {
+            self.item_4 = item;
+            return self;
+        } else if slot == 4 {
+            self.item_5 = item;
+            return self;
+        } else if slot == 5 {
+            self.item_6 = item;
+            return self;
+        } else if slot == 6 {
+            self.item_7 = item;
+            return self;
+        } else if slot == 7 {
+            self.item_8 = item;
+            return self;
+        } else if slot == 8 {
+            self.item_9 = item;
+            return self;
+        } else if slot == 9 {
+            self.item_10 = item;
+            return self;
+        } else if slot == 10 {
+            self.item_11 = item;
+            return self;
+        } else if slot == 11 {
+            self.item_12 = item;
+            return self;
+        } else {
+            return self;
+        }
+    }
+    fn find_slot(self: Bag) -> u8 {
+        if self.item_1.id == 0 {
+            return 0;
+        } else if self.item_2.id == 0 {
+            return 1;
+        } else if self.item_3.id == 0 {
+            return 2;
+        } else if self.item_4.id == 0 {
+            return 3;
+        } else if self.item_5.id == 0 {
+            return 4;
+        } else if self.item_6.id == 0 {
+            return 5;
+        } else if self.item_7.id == 0 {
+            return 6;
+        } else if self.item_8.id == 0 {
+            return 7;
+        } else if self.item_9.id == 0 {
+            return 8;
+        } else if self.item_10.id == 0 {
+            return 9;
+        } else if self.item_11.id == 0 {
+            return 10;
+        } else if self.item_12.id == 0 {
+            return 11;
+        } else {
+            return 12;
+        }
+    }
+    fn is_full(self: Bag) -> bool {
+        if self.item_12.id == 0 {
+            return false;
+        } else {
+            return true;
+        }
+    }
+    fn get_item(self: Bag, item_id: u8) -> Item {
+        if self.item_1.id == item_id {
+            return self.item_1;
+        } else if self.item_2.id == item_id {
+            return self.item_2;
+        } else if self.item_3.id == item_id {
+            return self.item_3;
+        } else if self.item_4.id == item_id {
+            return self.item_4;
+        } else if self.item_5.id == item_id {
+            return self.item_5;
+        } else if self.item_6.id == item_id {
+            return self.item_6;
+        } else if self.item_7.id == item_id {
+            return self.item_7;
+        } else if self.item_8.id == item_id {
+            return self.item_8;
+        } else if self.item_9.id == item_id {
+            return self.item_9;
+        } else if self.item_10.id == item_id {
+            return self.item_10;
+        } else if self.item_11.id == item_id {
+            return self.item_11;
+        } else {
+            return self.item_12;
+        }
+    }
+}
+
 
 // Item meta only is set once and is filled up as items are found
 // There is no swapping of positions
@@ -110,7 +251,7 @@ trait BagActions {
 // We only set the metadata when an item is upgraded
 trait ItemMetaActions {
     fn pack(self: ItemMetaStorage) -> felt252;
-    fn unpack(self: felt252) -> ItemMetaStorage;
+    fn unpack(packed: felt252) -> ItemMetaStorage;
 
     // takes Item and sets the metadata slot for that item
     // 1. Find highest slot from equipped and unequipped items
@@ -120,6 +261,8 @@ trait ItemMetaActions {
     // this needs to be run when an item is found/purchased
     fn get_item_metadata_slot(adventurer: Adventurer, bag: Bag, item: Item) -> Item;
 
+
+    // on contract side we check if item.metadata > 9 if it is pass in second metadata storage
     fn set_item_metadata(
         ref item_meta_storage: ItemMetaStorage, item: Item, item_meta: ItemMeta
     ) -> ItemMetaStorage;
@@ -130,7 +273,7 @@ impl ImplItemMetaActions of ItemMetaActions {
     fn pack(self: ItemMetaStorage) -> felt252 {
         0
     }
-    fn unpack(self: felt252) -> ItemMetaStorage {
+    fn unpack(packed: felt252) -> ItemMetaStorage {
         ItemMetaStorage {
             item_1: ItemMeta {
                 id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
@@ -229,52 +372,40 @@ impl ImplItemMetaActions of ItemMetaActions {
             Item { id: item.id, xp: item.xp, metadata: slot + 1 }
         }
     }
-
     fn set_item_metadata(
         ref item_meta_storage: ItemMetaStorage, item: Item, item_meta: ItemMeta
     ) -> ItemMetaStorage {
         if item.metadata == item_meta_index::INDEX_1 {
             item_meta_storage.item_1 = item_meta;
             return item_meta_storage;
-        }
-        if item.metadata == item_meta_index::INDEX_2 {
+        } else if item.metadata == item_meta_index::INDEX_2 {
             item_meta_storage.item_2 = item_meta;
             return item_meta_storage;
-        }
-        if item.metadata == item_meta_index::INDEX_3 {
+        } else if item.metadata == item_meta_index::INDEX_3 {
             item_meta_storage.item_3 = item_meta;
             return item_meta_storage;
-        }
-        if item.metadata == item_meta_index::INDEX_4 {
+        } else if item.metadata == item_meta_index::INDEX_4 {
             item_meta_storage.item_4 = item_meta;
             return item_meta_storage;
-        }
-        if item.metadata == item_meta_index::INDEX_5 {
+        } else if item.metadata == item_meta_index::INDEX_5 {
             item_meta_storage.item_5 = item_meta;
             return item_meta_storage;
-        }
-        if item.metadata == item_meta_index::INDEX_6 {
+        } else if item.metadata == item_meta_index::INDEX_6 {
             item_meta_storage.item_6 = item_meta;
             return item_meta_storage;
-        }
-        if item.metadata == item_meta_index::INDEX_7 {
+        } else if item.metadata == item_meta_index::INDEX_7 {
             item_meta_storage.item_7 = item_meta;
             return item_meta_storage;
-        }
-        if item.metadata == item_meta_index::INDEX_8 {
+        } else if item.metadata == item_meta_index::INDEX_8 {
             item_meta_storage.item_8 = item_meta;
             return item_meta_storage;
-        }
-        if item.metadata == item_meta_index::INDEX_9 {
+        } else if item.metadata == item_meta_index::INDEX_9 {
             item_meta_storage.item_9 = item_meta;
             return item_meta_storage;
-        }
-        if item.metadata == item_meta_index::INDEX_10 {
+        } else {
             item_meta_storage.item_10 = item_meta;
             return item_meta_storage;
         }
-
-        item_meta_storage
     }
 }
 
