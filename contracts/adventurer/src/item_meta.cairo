@@ -11,6 +11,8 @@ use pack::constants::{pow, mask};
 
 use super::adventurer::{Adventurer, AdventurerActions, Actions};
 
+use super::bag::{Bag, BagActions, Item};
+
 mod item_meta_index {
     const INDEX_1: u8 = 0;
     const INDEX_2: u8 = 1;
@@ -21,25 +23,6 @@ mod item_meta_index {
     const INDEX_7: u8 = 6;
     const INDEX_8: u8 = 7;
     const INDEX_9: u8 = 8;
-    const INDEX_10: u8 = 9;
-    const INDEX_11: u8 = 10;
-    const INDEX_12: u8 = 11;
-    const INDEX_13: u8 = 12;
-    const INDEX_14: u8 = 13;
-    const INDEX_15: u8 = 14;
-    const INDEX_16: u8 = 15;
-    const INDEX_17: u8 = 16;
-    const INDEX_18: u8 = 17;
-    const INDEX_19: u8 = 18;
-    const INDEX_20: u8 = 19;
-}
-
-#[derive(Drop, Copy, Serde)] // 24 bits
-struct Item {
-    id: u8, // 7 bits
-    xp: u16, // 12 bits
-    // this is set as the items are found/purchased
-    metadata: u8, // 5 bits 
 }
 
 #[derive(Drop, Copy)]
@@ -64,187 +47,6 @@ struct ItemMetaStorage {
     item_10: ItemMeta,
 }
 
-#[derive(Drop, Copy, Serde)]
-struct Bag {
-    item_1: Item, // club
-    item_2: Item, // club
-    item_3: Item, // club
-    item_4: Item, // club
-    item_5: Item, // club
-    item_6: Item, // club
-    item_7: Item, // club
-    item_8: Item, // club
-    item_9: Item, // club
-    item_10: Item, // club
-    item_11: Item, // club
-    item_12: Item, // club
-}
-
-trait BagActions {
-    fn pack(self: Bag) -> felt252;
-    fn unpack(packed: felt252) -> Bag;
-
-    // swap item
-    // take bag and item to swap and item to equip
-    // return bag with swapped items and item that was swapped for
-    // we then store the item on the Adventurer
-    // fn swap_items(self: Bag, incoming: u8, outgoing: u8) -> (Bag, Item);
-
-    // set item in first available slot
-    fn set_item(ref self: Bag, item: Item) -> Bag;
-
-    // finds open slot
-    fn find_slot(self: Bag) -> u8;
-
-    // check if bag full
-    fn is_full(self: Bag) -> bool;
-
-    // get item by id
-    fn get_item(self: Bag, item_id: u8) -> Item;
-}
-
-impl ImplBagActions of BagActions {
-    fn pack(self: Bag) -> felt252 {
-        0
-    }
-    fn unpack(packed: felt252) -> Bag {
-        Bag {
-            item_1: Item {
-                id: 0, xp: 0, metadata: 0, 
-                }, item_2: Item {
-                id: 0, xp: 0, metadata: 0, 
-                }, item_3: Item {
-                id: 0, xp: 0, metadata: 0, 
-                }, item_4: Item {
-                id: 0, xp: 0, metadata: 0, 
-                }, item_5: Item {
-                id: 0, xp: 0, metadata: 0, 
-                }, item_6: Item {
-                id: 0, xp: 0, metadata: 0, 
-                }, item_7: Item {
-                id: 0, xp: 0, metadata: 0, 
-                }, item_8: Item {
-                id: 0, xp: 0, metadata: 0, 
-                }, item_9: Item {
-                id: 0, xp: 0, metadata: 0, 
-                }, item_10: Item {
-                id: 0, xp: 0, metadata: 0, 
-                }, item_11: Item {
-                id: 0, xp: 0, metadata: 0, 
-                }, item_12: Item {
-                id: 0, xp: 0, metadata: 0, 
-            },
-        }
-    }
-    fn set_item(ref self: Bag, item: Item) -> Bag {
-        let slot = self.find_slot();
-
-        if slot == 0 {
-            self.item_1 = item;
-            return self;
-        } else if slot == 1 {
-            self.item_2 = item;
-            return self;
-        } else if slot == 2 {
-            self.item_3 = item;
-            return self;
-        } else if slot == 3 {
-            self.item_4 = item;
-            return self;
-        } else if slot == 4 {
-            self.item_5 = item;
-            return self;
-        } else if slot == 5 {
-            self.item_6 = item;
-            return self;
-        } else if slot == 6 {
-            self.item_7 = item;
-            return self;
-        } else if slot == 7 {
-            self.item_8 = item;
-            return self;
-        } else if slot == 8 {
-            self.item_9 = item;
-            return self;
-        } else if slot == 9 {
-            self.item_10 = item;
-            return self;
-        } else if slot == 10 {
-            self.item_11 = item;
-            return self;
-        } else if slot == 11 {
-            self.item_12 = item;
-            return self;
-        } else {
-            return self;
-        }
-    }
-    fn find_slot(self: Bag) -> u8 {
-        if self.item_1.id == 0 {
-            return 0;
-        } else if self.item_2.id == 0 {
-            return 1;
-        } else if self.item_3.id == 0 {
-            return 2;
-        } else if self.item_4.id == 0 {
-            return 3;
-        } else if self.item_5.id == 0 {
-            return 4;
-        } else if self.item_6.id == 0 {
-            return 5;
-        } else if self.item_7.id == 0 {
-            return 6;
-        } else if self.item_8.id == 0 {
-            return 7;
-        } else if self.item_9.id == 0 {
-            return 8;
-        } else if self.item_10.id == 0 {
-            return 9;
-        } else if self.item_11.id == 0 {
-            return 10;
-        } else if self.item_12.id == 0 {
-            return 11;
-        } else {
-            return 12;
-        }
-    }
-    fn is_full(self: Bag) -> bool {
-        if self.item_12.id == 0 {
-            return false;
-        } else {
-            return true;
-        }
-    }
-    fn get_item(self: Bag, item_id: u8) -> Item {
-        if self.item_1.id == item_id {
-            return self.item_1;
-        } else if self.item_2.id == item_id {
-            return self.item_2;
-        } else if self.item_3.id == item_id {
-            return self.item_3;
-        } else if self.item_4.id == item_id {
-            return self.item_4;
-        } else if self.item_5.id == item_id {
-            return self.item_5;
-        } else if self.item_6.id == item_id {
-            return self.item_6;
-        } else if self.item_7.id == item_id {
-            return self.item_7;
-        } else if self.item_8.id == item_id {
-            return self.item_8;
-        } else if self.item_9.id == item_id {
-            return self.item_9;
-        } else if self.item_10.id == item_id {
-            return self.item_10;
-        } else if self.item_11.id == item_id {
-            return self.item_11;
-        } else {
-            return self.item_12;
-        }
-    }
-}
-
-
 // Item meta only is set once and is filled up as items are found
 // There is no swapping of positions
 // When an item is found we find the next available slot and set it on the Item NOT in the metadata -> this saves gas
@@ -264,7 +66,7 @@ trait ItemMetaActions {
 
     // on contract side we check if item.metadata > 9 if it is pass in second metadata storage
     fn set_item_metadata(
-        ref item_meta_storage: ItemMetaStorage, item: Item, item_meta: ItemMeta
+        ref self: ItemMetaStorage, item: Item, item_meta: ItemMeta
     ) -> ItemMetaStorage;
 }
 
@@ -373,38 +175,40 @@ impl ImplItemMetaActions of ItemMetaActions {
         }
     }
     fn set_item_metadata(
-        ref item_meta_storage: ItemMetaStorage, item: Item, item_meta: ItemMeta
+        ref self: ItemMetaStorage, item: Item, item_meta: ItemMeta
     ) -> ItemMetaStorage {
+        // TODO:
+        // @loothere: should we generate the prefix here or up in the contract?
         if item.metadata == item_meta_index::INDEX_1 {
-            item_meta_storage.item_1 = item_meta;
-            return item_meta_storage;
+            self.item_1 = item_meta;
+            return self;
         } else if item.metadata == item_meta_index::INDEX_2 {
-            item_meta_storage.item_2 = item_meta;
-            return item_meta_storage;
+            self.item_2 = item_meta;
+            return self;
         } else if item.metadata == item_meta_index::INDEX_3 {
-            item_meta_storage.item_3 = item_meta;
-            return item_meta_storage;
+            self.item_3 = item_meta;
+            return self;
         } else if item.metadata == item_meta_index::INDEX_4 {
-            item_meta_storage.item_4 = item_meta;
-            return item_meta_storage;
+            self.item_4 = item_meta;
+            return self;
         } else if item.metadata == item_meta_index::INDEX_5 {
-            item_meta_storage.item_5 = item_meta;
-            return item_meta_storage;
+            self.item_5 = item_meta;
+            return self;
         } else if item.metadata == item_meta_index::INDEX_6 {
-            item_meta_storage.item_6 = item_meta;
-            return item_meta_storage;
+            self.item_6 = item_meta;
+            return self;
         } else if item.metadata == item_meta_index::INDEX_7 {
-            item_meta_storage.item_7 = item_meta;
-            return item_meta_storage;
+            self.item_7 = item_meta;
+            return self;
         } else if item.metadata == item_meta_index::INDEX_8 {
-            item_meta_storage.item_8 = item_meta;
-            return item_meta_storage;
+            self.item_8 = item_meta;
+            return self;
         } else if item.metadata == item_meta_index::INDEX_9 {
-            item_meta_storage.item_9 = item_meta;
-            return item_meta_storage;
+            self.item_9 = item_meta;
+            return self;
         } else {
-            item_meta_storage.item_10 = item_meta;
-            return item_meta_storage;
+            self.item_10 = item_meta;
+            return self;
         }
     }
 }
@@ -459,4 +263,41 @@ fn test_get_item_metadata_slot() {
     let item = ItemMetaActions::get_item_metadata_slot(adventurer, bag, new_item);
 
     assert(item.metadata == 19, 'Item metadata should be 5');
+}
+
+#[test]
+#[available_gas(5000000)]
+fn test_set_item_metadata_slot() {
+    let mut item_meta_storage = ItemMetaStorage {
+        item_1: ItemMeta {
+            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            }, item_2: ItemMeta {
+            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            }, item_3: ItemMeta {
+            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            }, item_4: ItemMeta {
+            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            }, item_5: ItemMeta {
+            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            }, item_6: ItemMeta {
+            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            }, item_7: ItemMeta {
+            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            }, item_8: ItemMeta {
+            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            }, item_9: ItemMeta {
+            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            }, item_10: ItemMeta {
+            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+        }
+    };
+    let item = Item { id: 1, xp: 1, metadata: 0 };
+
+    let item_meta = ItemMeta { id: 1, name_prefix: 12, name_suffix: 11, item_suffix: 13 };
+
+    item_meta_storage.set_item_metadata(item, item_meta);
+
+    assert(item_meta_storage.item_1.name_prefix == 12, 'Item id should be 1');
+    assert(item_meta_storage.item_1.name_suffix == 11, 'Item id should be 1');
+    assert(item_meta_storage.item_1.item_suffix == 13, 'Item id should be 1');
 }

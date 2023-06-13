@@ -4,3 +4,4 @@ mod item_meta;
 mod utils;
 mod beasts;
 mod obstacles;
+mod bag;
