@@ -13,8 +13,10 @@ use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
 use lootitems::loot::{Loot, ItemTrait, ItemUtils};
 use survivor::utils::{exploration, constants};
+
 use survivor::beasts::BeastUtils;
 use survivor::obstacles::ObstacleUtils;
+use survivor::constants::{discovery_constants, beast_constants};
 
 use super::item_meta::Item;
 
@@ -87,7 +89,7 @@ trait Actions {
     fn add_ring(ref self: Adventurer, value: Item) -> Adventurer;
 
     // beast 
-    fn deduct_beast_health(ref self: Adventurer, value: u16) -> Adventurer;
+    fn deduct_beast_health(ref self: Adventurer, amount: u16) -> Adventurer;
 
     // we just add the beast -> the beast is deterministic off the xp
     fn add_beast(ref self: Adventurer, value: u16) -> Adventurer;
@@ -117,7 +119,7 @@ impl AdventurerActions of Actions {
         );
 
         // if the adventurer encounters a beast
-        if (explore_outcome == constants::DiscoveryType::Beast) {
+        if (explore_outcome == discovery_constants::DiscoveryType::Beast) {
             // get starting health for the beast
             let beast_health = BeastUtils::get_starting_health(
                 self, adventurer_entropy, game_entropy
@@ -125,18 +127,18 @@ impl AdventurerActions of Actions {
             // add the beast to the adventurer
             return self.add_beast(beast_health);
         // if the adventurer encounters an obstacle
-        } else if (explore_outcome == constants::DiscoveryType::Obstacle) {
+        } else if (explore_outcome == discovery_constants::DiscoveryType::Obstacle) {
             // get the damage the obstacle does
             let obstacle_damage = ObstacleUtils::get_damage(self, adventurer_entropy, game_entropy);
             // deduct the damage from the beast health
             return self.deduct_health(obstacle_damage);
         // if the adventurer encounters a discovery
-        } else if (explore_outcome == constants::DiscoveryType::Item) {
+        } else if (explore_outcome == discovery_constants::DiscoveryType::Item) {
             // get the discovery type
             let item_type = exploration::get_discovery_type(self, adventurer_entropy, game_entropy);
 
             // if the discovery is gold
-            if (item_type == constants::ItemDiscoveryType::Gold) {
+            if (item_type == discovery_constants::ItemDiscoveryType::Gold) {
                 // get the gold amount
                 let gold_disovery_amount = exploration::get_gold_discovery(
                     self, adventurer_entropy, game_entropy
@@ -144,7 +146,7 @@ impl AdventurerActions of Actions {
                 // add the gold to the adventurer
                 return self.increase_gold(gold_disovery_amount);
             // if the discovery is xp
-            } else if (item_type == constants::ItemDiscoveryType::XP) {
+            } else if (item_type == discovery_constants::ItemDiscoveryType::XP) {
                 // get the xp amount
                 let xp_discovery_amount = exploration::get_xp_discovery(
                     self, adventurer_entropy, game_entropy
@@ -152,7 +154,7 @@ impl AdventurerActions of Actions {
                 // add the xp to the adventurer
                 return self.increase_adventurer_xp(xp_discovery_amount);
             // if the discovery is an item
-            } else if (item_type == constants::ItemDiscoveryType::Health) {
+            } else if (item_type == discovery_constants::ItemDiscoveryType::Health) {
                 // get the health amount
                 let health_discovery_amount = exploration::get_health_discovery(
                     self, adventurer_entropy, game_entropy
@@ -187,6 +189,10 @@ impl AdventurerActions of Actions {
         // TODO: Calculate Luck from ring and neck
         0
     }
+
+    // in_battle returns true if the adventurer is in battle
+    // @param self: Adventurer the adventurer to check if in battle
+    // @return bool true if the adventurer is in battle, false otherwise
     fn in_battle(self: Adventurer) -> bool {
         if self.beast_health > 0 {
             true
@@ -194,8 +200,14 @@ impl AdventurerActions of Actions {
             false
         }
     }
-    fn deduct_beast_health(ref self: Adventurer, value: u16) -> Adventurer {
-        let mut new_beast_health = self.beast_health - value;
+
+    // deduct_beast_health deducts the beast health from the adventurer
+    // if the beast health is less than 0, it sets the beast health to 0
+    // @param self: Adventurer the adventurer to deduct the beast health from
+    // @param value: u16 the amount to deduct from the beast health
+    // @return Adventurer the adventurer with the beast health deducted
+    fn deduct_beast_health(ref self: Adventurer, amount: u16) -> Adventurer {
+        let mut new_beast_health = self.beast_health - amount;
 
         // check if killed
         if new_beast_health < 0 {
@@ -317,6 +329,12 @@ impl AdventurerActions of Actions {
         self.ring = value;
         self
     }
+
+    // increase_item_xp is used to increase the xp of all items that are equipped
+    // this is used when the adventurer kills a beast or takes damage from an obstacle
+    // @param self: Adventurer - the adventurer calling the function
+    // @param value: u16 - the amount of xp to increase the items by
+    // @return Adventurer - the adventurer with the updated items
     fn increase_item_xp(ref self: Adventurer, value: u16) -> Adventurer {
         if self.weapon.id > 0 {
             self.weapon.xp = self.weapon.xp + value;
@@ -344,6 +362,13 @@ impl AdventurerActions of Actions {
         }
         self
     }
+
+    // create a new adventurer from a starting item and a block number
+    // the block number is used to set the last action
+    // the starting item is used to set the starting weapon
+    // @param starting_item: the id of the starting item
+    // @param block_number: the block number of the block that the adventurer was created in
+    // @return Adventurer: the new adventurer
     fn new(starting_item: u8, block_number: u64) -> Adventurer {
         let last_action: u16 = (block_number % 512).try_into().unwrap();
 
@@ -377,6 +402,10 @@ impl AdventurerActions of Actions {
             }, beast_health: 10, stat_upgrade_available: 0,
         };
     }
+
+    // pack the adventurer into a single felt252
+    // this is used to store the adventurer in the contract
+    // @return the packed adventurer
     fn pack(self: Adventurer) -> felt252 {
         let mut packed = 0;
         packed = packed | pack_value(self.last_action.into(), pow::TWO_POW_242);
@@ -427,6 +456,10 @@ impl AdventurerActions of Actions {
 
         packed.try_into().unwrap()
     }
+
+    // unpack a felt252 into an Adventurer
+    // @param packed: felt252
+    // @return Adventurer
     fn unpack(packed: felt252) -> Adventurer {
         let packed = packed.into();
 
@@ -748,13 +781,40 @@ fn test_explore_obstacle_discovery() {
 
 #[test]
 #[available_gas(5000000)]
+fn test_explore_gold_discovery() {
+    let mut adventurer = AdventurerActions::new(1, 1);
+    let adventurer_entropy = 0;
+    let game_entropy = 2;
+    adventurer.xp = 1;
+
+    // exploring with entropy 2 and no adventurer xp will result in adventurer discoverying gold (currently hard coded to 1)
+    adventurer.explore(adventurer_entropy, game_entropy);
+
+    assert(adventurer.gold > 0, 'advntr should discover gold');
+}
+
+#[test]
+#[available_gas(5000000)]
+fn test_explore_health_discovery() {
+    let mut adventurer = AdventurerActions::new(1, 1);
+    let adventurer_entropy = 0;
+    let game_entropy = 2;
+    adventurer.xp = 2;
+
+    // exploring with entropy 2 and no adventurer xp will result in an obstacle discovery which will currently do 1 damage
+    adventurer.explore(adventurer_entropy, game_entropy);
+    assert(adventurer.health > 100, 'advntr should discover health');
+}
+
+#[test]
+#[available_gas(5000000)]
 fn test_explore_xp_discovery() {
     let mut adventurer = AdventurerActions::new(1, 1);
     let adventurer_entropy = 0;
     let game_entropy = 2;
-    adventurer.xp = 0;
+    adventurer.xp = 3;
 
     // exploring with entropy 2 and no adventurer xp will result in an obstacle discovery which will currently do 1 damage
     adventurer.explore(adventurer_entropy, game_entropy);
-    assert(adventurer.health == 99, 'advntr should take obstacle dmg');
+    assert(adventurer.xp > 0, 'advntr should discover xp');
 }

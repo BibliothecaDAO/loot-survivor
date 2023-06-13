@@ -1,15 +1,15 @@
 use core::traits::Into;
 use survivor::adventurer::{Adventurer, AdventurerActions};
-use survivor::utils::constants::DiscoveryType;
+use survivor::constants::discovery_constants::DiscoveryType;
 
 fn get_random_explore(adventurer: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> u64 {
     // return a random number between 0 and 3 based on provided entropy
 
-    return (adventurer_entropy + game_entropy + adventurer.xp.into()) % 4;
+    return (adventurer_entropy + game_entropy) % 3;
 }
 
 fn get_discovery_type(adventurer: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> u64 {
-    return (adventurer_entropy + game_entropy + adventurer.xp.into()) % 4;
+    return (adventurer_entropy + game_entropy + adventurer.xp.into()) % 3;
 }
 
 fn get_gold_discovery(adventurer: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> u16 {
