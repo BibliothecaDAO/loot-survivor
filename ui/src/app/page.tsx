@@ -70,6 +70,7 @@ export default function Home() {
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const dialog = useUIStore((state) => state.dialog);
+  // const dialog = true;
   const showDialog = useUIStore((state) => state.showDialog);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const upgrade = adventurer?.upgrading;

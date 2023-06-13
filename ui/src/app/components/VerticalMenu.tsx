@@ -88,7 +88,9 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
           }}
           disabled={buttonData.disabled}
         >
-          {buttonData.icon && <div>{buttonData.icon}</div>}
+          {buttonData.icon && (
+            <div className="w-10 h-10">{buttonData.icon}</div>
+          )}
           {buttonData.label}
         </Button>
       ))}
