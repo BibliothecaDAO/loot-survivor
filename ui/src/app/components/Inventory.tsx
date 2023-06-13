@@ -236,8 +236,12 @@ const Inventory: React.FC = () => {
           equippedItemId={adventurer?.ringId}
         />
       </div>
-      <div>
+      <div className="w-1/3">
         <h4>Loot</h4>
+        <p className="pb-1">
+          Items of Tier 1 carry the highest prestige and quality, whereas items
+          of Tier 5 offer the most basic value.
+        </p>
         <div className="flex flex-col space-y-1">
           {filteredItems.length ? (
             filteredItems.map((item: any, index: number) => (

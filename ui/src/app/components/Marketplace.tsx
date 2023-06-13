@@ -333,7 +333,7 @@ const Marketplace = () => {
                   {headings.map((heading, index) => (
                     <th
                       key={index}
-                      className="px-2 cursor-pointer"
+                      className="px-3 cursor-pointer"
                       onClick={() => handleSort(heading)}
                     >
                       {heading}

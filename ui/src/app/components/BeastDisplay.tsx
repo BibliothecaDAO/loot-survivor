@@ -15,6 +15,7 @@ import { processBeastName } from "../lib/utils";
 
 interface BeastDisplayProps {
   beastData: any;
+  lastBattle: any;
 }
 
 const getAttackLocationIcon = (beastType: string) => {
@@ -34,41 +35,42 @@ const getAttackLocationIcon = (beastType: string) => {
     return <Head className="self-center w-6 h-6 fill-current" />;
 };
 
-export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
+export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const gameData = new GameData();
-  const ansiImage = ANSIArt({
-    imageUrl:
-      getValueFromKey(gameData.BEAST_IMAGES, beastData?.beast) ||
-      "/monsters/phoenix.png",
-    newWidth: 20,
-  });
+  console.log(lastBattle);
+  // const ansiImage = ANSIArt({
+  //   imageUrl:
+  //     getValueFromKey(gameData.BEAST_IMAGES, beastData?.beast) ||
+  //     "/monsters/phoenix.png",
+  //   newWidth: 20,
+  // });
 
   const beastName = processBeastName(beastData);
 
-  if (beastData?.health === 0) {
-    return (
-      <div className="relative w-full h-full overflow-hidden border-2 border-terminal-green">
-        <div className="absolute inset-0">
-          <Image
-            src={"/labyrinth.png"}
-            alt="labyrinth"
-            fill={true}
-            style={{ objectFit: "cover" }}
-            quality={100}
-          />
-        </div>
-        <div className="relative flex flex-col items-center justify-center p-1 border border-terminal-green bg-terminal-black">
-          <p className="text-2xl text-center">
-            You have killed the beast! <br /> You survive...for now!
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // if (beastData?.health === 0) {
+  //   return (
+  //     <div className="relative w-full h-full overflow-hidden border-2 border-terminal-green">
+  //       <div className="absolute inset-0">
+  //         <Image
+  //           src={"/labyrinth.png"}
+  //           alt="labyrinth"
+  //           fill={true}
+  //           style={{ objectFit: "cover" }}
+  //           quality={100}
+  //         />
+  //       </div>
+  //       <div className="relative flex flex-col items-center justify-center p-1 border border-terminal-green bg-terminal-black">
+  //         <p className="text-2xl text-center">
+  //           You have killed the beast! <br /> You survive...for now!
+  //         </p>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
-    <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
+    <div className="relative flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
       <div className="flex flex-col w-full p-3 uppercase">
         <div className="flex justify-between py-3 text-4xl border-b border-terminal-green">
           {beastName}
@@ -113,17 +115,40 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
           </div>
         </div>
       </div>
-      <div className="relative flex w-full h-full">
+      <div className="relative flex-grow w-full h-0 pb-full">
         <Image
           src={
-            getValueFromKey(gameData.BEAST_IMAGES, beastData.beast) ||
+            getValueFromKey(gameData.BEAST_IMAGES, beastData?.beast) ||
             "/monsters/phoenix.png"
           }
           alt="monsters"
           fill={true}
-          style={{ objectFit: "contain" }}
-        ></Image>
+          style={{
+            objectFit: "contain",
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+          }}
+        />
       </div>
+      {beastData?.health === 0 && (
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ backdropFilter: "blur(1px)" }}
+        >
+          <p className="text-6xl font-bold text-red-600 uppercase">DEFEATED</p>
+        </div>
+      )}
+      {lastBattle?.fled && (
+        <div
+          className="absolute inset-0 flex items-center justify-center"
+          style={{ backdropFilter: "blur(1px)" }}
+        >
+          <p className="text-6xl font-bold text-terminal-yellow uppercase">
+            FLED
+          </p>
+        </div>
+      )}
     </div>
   );
 };
