@@ -7,7 +7,7 @@ mod Adventurer {
     use lootitems::loot::{Loot, ItemUtils};
     use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8};
     use survivor::adventurer::{Adventurer, AdventurerActions, Actions};
-    
+
     // events
 
     // adventurer_update
@@ -37,36 +37,50 @@ mod Adventurer {
     // @loothero
     fn start(starting_weapon: u8) {
         // TODO: check item is starting weapon
-        // TODO: set adventurer metadata
+        // TODO: set adventurer metadata including adventurer entropy seed
         // TODO: set mint fees
 
-        // generate new adventurer with starting weapon and beast health
+        // get the current block info
         let block_info = starknet::get_block_info().unbox();
 
+        // create a new adventurer with the selected starting weapon
+        // and the current block number as start time
         let new_adventurer: Adventurer = AdventurerActions::new(
             starting_weapon, block_info.block_number
         );
 
+        // get the current adventurer id
         let current_adventurer_id = _counter::read();
+
+        // get the caller address
         let caller = get_caller_address();
 
-        _adventurer::write((caller, current_adventurer_id), new_adventurer.pack());
-
+        // emit the AdventurerUpdate event
         AdventurerUpdate(caller, current_adventurer_id, new_adventurer);
 
+        // write the new adventurer to storage
+        _adventurer::write((caller, current_adventurer_id), new_adventurer.pack());
         _counter::write(current_adventurer_id + 1);
     }
 
     // @loothero
     fn explore(adventurer_id: u256) {
+        // get adventurer from storage and unpack
         let mut adventurer = AdventurerActions::unpack(
             _adventurer::read((get_caller_address(), adventurer_id))
         );
+
         // TODO: get adventurer entropy from AdventurerMeta
         let adventurer_entropy = 1;
-        // TODO: get game_entropy from storage var
+
+        // TODO: get game_entropy from storage
         let game_entropy = 1;
+
+        // send adventurer out to explore
+        // result of the explore will mutate adventurer
         adventurer.explore(adventurer_entropy, game_entropy);
+
+        // write the updated adventurer to storage
         _adventurer::write((get_caller_address(), adventurer_id), adventurer.pack());
     }
 
