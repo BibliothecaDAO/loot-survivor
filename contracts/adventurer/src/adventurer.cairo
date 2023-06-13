@@ -12,11 +12,11 @@ use pack::pack::{
 use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
 use lootitems::loot::{Loot, ItemTrait, ItemUtils};
-use survivor::utils::{exploration, constants};
 
-use survivor::beasts::BeastUtils;
-use survivor::obstacles::ObstacleUtils;
-use survivor::constants::{discovery_constants, beast_constants};
+use super::exploration;
+use super::beasts::BeastUtils;
+use super::obstacles::ObstacleUtils;
+use super::constants::{discovery_constants, beast_constants};
 
 use super::item_meta::Item;
 
