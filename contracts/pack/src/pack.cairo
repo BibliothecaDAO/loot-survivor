@@ -5,6 +5,16 @@ use traits::{TryInto, Into};
 use option::OptionTrait;
 use debug::PrintTrait;
 
+impl U256TryIntoU64 of TryInto<u256, u64> {
+    fn try_into(self: u256) -> Option<u64> {
+        let intermediate: Option<felt252> = self.try_into();
+        match intermediate {
+            Option::Some(felt) => felt.try_into(),
+            Option::None(()) => Option::None(())
+        }
+    }
+}
+
 impl U256TryIntoU32 of TryInto<u256, u32> {
     fn try_into(self: u256) -> Option<u32> {
         let intermediate: Option<felt252> = self.try_into();

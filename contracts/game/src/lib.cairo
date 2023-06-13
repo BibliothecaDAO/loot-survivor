@@ -1,13 +1,13 @@
 #[contract]
 mod Adventurer {
     use option::OptionTrait;
+    use box::BoxTrait;
     use starknet::get_caller_address;
     use starknet::ContractAddress;
-
-    use lootitems::loot::{Loot, ItemStats};
+    use lootitems::loot::{Loot, ItemUtils};
     use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8};
-
     use survivor::adventurer::{Adventurer, AdventurerActions, Actions};
+    
     // events
 
     // adventurer_update
@@ -41,7 +41,11 @@ mod Adventurer {
         // TODO: set mint fees
 
         // generate new adventurer with starting weapon and beast health
-        let new_adventurer: Adventurer = AdventurerActions::new(starting_weapon);
+        let block_info = starknet::get_block_info().unbox();
+
+        let new_adventurer: Adventurer = AdventurerActions::new(
+            starting_weapon, block_info.block_number
+        );
 
         let current_adventurer_id = _counter::read();
         let caller = get_caller_address();
@@ -55,17 +59,15 @@ mod Adventurer {
 
     // @loothero
     fn explore(adventurer_id: u256) {
-        let mut adventurer = _adventurer::read((get_caller_address(), adventurer_id)).unpack();
-
-        adventurer.add_beast(100);
-
+        let mut adventurer = AdventurerActions::unpack(
+            _adventurer::read((get_caller_address(), adventurer_id))
+        );
+        // TODO: get adventurer entropy from AdventurerMeta
+        let adventurer_entropy = 1;
+        // TODO: get game_entropy from storage var
+        let game_entropy = 1;
+        adventurer.explore(adventurer_entropy, game_entropy);
         _adventurer::write((get_caller_address(), adventurer_id), adventurer.pack());
-    // get random explore
-    // calculate discovery (beast, obstacle, item)
-    // if beast -> create beast -> check ambush -> attack adventurer
-    // if obstacle -> calculate obstacle dmg
-    // if item -> generate random discovery (gold,xp,health)
-    // if adventurer dies -> set leaderboard, kill adventurer
     }
 
     // @loothero
@@ -131,4 +133,5 @@ mod Adventurer {
 // on explore ->
 
 // global seed
+
 
