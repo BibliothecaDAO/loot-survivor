@@ -63,7 +63,6 @@ trait ItemMetaActions {
     // this needs to be run when an item is found/purchased
     fn get_item_metadata_slot(adventurer: Adventurer, bag: Bag, item: Item) -> Item;
 
-
     // on contract side we check if item.metadata > 9 if it is pass in second metadata storage
     fn set_item_metadata(
         ref self: ItemMetaStorage, item: Item, item_meta: ItemMeta
@@ -73,30 +72,213 @@ trait ItemMetaActions {
 
 impl ImplItemMetaActions of ItemMetaActions {
     fn pack(self: ItemMetaStorage) -> felt252 {
-        0
+        let mut packed = 0;
+        packed = packed | pack_value(self.item_1.id.into(), pow::TWO_POW_244);
+        packed = packed | pack_value(self.item_1.name_prefix.into(), pow::TWO_POW_238);
+        packed = packed | pack_value(self.item_1.name_suffix.into(), pow::TWO_POW_233);
+        packed = packed | pack_value(self.item_1.item_suffix.into(), pow::TWO_POW_229);
+
+        packed = packed | pack_value(self.item_2.id.into(), pow::TWO_POW_222);
+        packed = packed | pack_value(self.item_2.name_prefix.into(), pow::TWO_POW_215);
+        packed = packed | pack_value(self.item_2.name_suffix.into(), pow::TWO_POW_210);
+        packed = packed | pack_value(self.item_2.item_suffix.into(), pow::TWO_POW_206);
+
+        packed = packed | pack_value(self.item_3.id.into(), pow::TWO_POW_199);
+        packed = packed | pack_value(self.item_3.name_prefix.into(), pow::TWO_POW_192);
+        packed = packed | pack_value(self.item_3.name_suffix.into(), pow::TWO_POW_187);
+        packed = packed | pack_value(self.item_3.item_suffix.into(), pow::TWO_POW_183);
+
+        packed = packed | pack_value(self.item_4.id.into(), pow::TWO_POW_176);
+        packed = packed | pack_value(self.item_4.name_prefix.into(), pow::TWO_POW_169);
+        packed = packed | pack_value(self.item_4.name_suffix.into(), pow::TWO_POW_164);
+        packed = packed | pack_value(self.item_4.item_suffix.into(), pow::TWO_POW_160);
+
+        packed = packed | pack_value(self.item_5.id.into(), pow::TWO_POW_153);
+        packed = packed | pack_value(self.item_5.name_prefix.into(), pow::TWO_POW_146);
+        packed = packed | pack_value(self.item_5.name_suffix.into(), pow::TWO_POW_141);
+        packed = packed | pack_value(self.item_5.item_suffix.into(), pow::TWO_POW_137);
+
+        packed = packed | pack_value(self.item_6.id.into(), pow::TWO_POW_130);
+        packed = packed | pack_value(self.item_6.name_prefix.into(), pow::TWO_POW_123);
+        packed = packed | pack_value(self.item_6.name_suffix.into(), pow::TWO_POW_118);
+        packed = packed | pack_value(self.item_6.item_suffix.into(), pow::TWO_POW_114);
+
+        packed = packed | pack_value(self.item_7.id.into(), pow::TWO_POW_107);
+        packed = packed | pack_value(self.item_7.name_prefix.into(), pow::TWO_POW_100);
+        packed = packed | pack_value(self.item_7.name_suffix.into(), pow::TWO_POW_95);
+        packed = packed | pack_value(self.item_7.item_suffix.into(), pow::TWO_POW_91);
+
+        packed = packed | pack_value(self.item_8.id.into(), pow::TWO_POW_84);
+        packed = packed | pack_value(self.item_8.name_prefix.into(), pow::TWO_POW_77);
+        packed = packed | pack_value(self.item_8.name_suffix.into(), pow::TWO_POW_72);
+        packed = packed | pack_value(self.item_8.item_suffix.into(), pow::TWO_POW_68);
+
+        packed = packed | pack_value(self.item_9.id.into(), pow::TWO_POW_61);
+        packed = packed | pack_value(self.item_9.name_prefix.into(), pow::TWO_POW_54);
+        packed = packed | pack_value(self.item_9.name_suffix.into(), pow::TWO_POW_49);
+        packed = packed | pack_value(self.item_9.item_suffix.into(), pow::TWO_POW_45);
+
+        packed = packed | pack_value(self.item_10.id.into(), pow::TWO_POW_38);
+        packed = packed | pack_value(self.item_10.name_prefix.into(), pow::TWO_POW_31);
+        packed = packed | pack_value(self.item_10.name_suffix.into(), pow::TWO_POW_26);
+        packed = packed | pack_value(self.item_10.item_suffix.into(), pow::TWO_POW_22);
+
+        packed.try_into().unwrap()
     }
     fn unpack(packed: felt252) -> ItemMetaStorage {
+        let packed = packed.into();
+
         ItemMetaStorage {
             item_1: ItemMeta {
-                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_244, mask::MASK_7))
+                    .unwrap(),
+                name_prefix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_238, mask::MASK_7)
+                )
+                    .unwrap(),
+                name_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_233, mask::MASK_5)
+                )
+                    .unwrap(),
+                item_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_229, mask::MASK_4)
+                )
+                    .unwrap(),
                 }, item_2: ItemMeta {
-                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_222, mask::MASK_7))
+                    .unwrap(),
+                name_prefix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_215, mask::MASK_7)
+                )
+                    .unwrap(),
+                name_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_210, mask::MASK_5)
+                )
+                    .unwrap(),
+                item_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_206, mask::MASK_4)
+                )
+                    .unwrap(),
                 }, item_3: ItemMeta {
-                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_199, mask::MASK_7))
+                    .unwrap(),
+                name_prefix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_192, mask::MASK_7)
+                )
+                    .unwrap(),
+                name_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_187, mask::MASK_5)
+                )
+                    .unwrap(),
+                item_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_183, mask::MASK_4)
+                )
+                    .unwrap(),
                 }, item_4: ItemMeta {
-                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_176, mask::MASK_7))
+                    .unwrap(),
+                name_prefix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_169, mask::MASK_7)
+                )
+                    .unwrap(),
+                name_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_164, mask::MASK_5)
+                )
+                    .unwrap(),
+                item_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_160, mask::MASK_4)
+                )
+                    .unwrap(),
                 }, item_5: ItemMeta {
-                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_153, mask::MASK_7))
+                    .unwrap(),
+                name_prefix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_146, mask::MASK_7)
+                )
+                    .unwrap(),
+                name_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_141, mask::MASK_5)
+                )
+                    .unwrap(),
+                item_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_137, mask::MASK_4)
+                )
+                    .unwrap(),
                 }, item_6: ItemMeta {
-                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_130, mask::MASK_7))
+                    .unwrap(),
+                name_prefix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_123, mask::MASK_7)
+                )
+                    .unwrap(),
+                name_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_118, mask::MASK_5)
+                )
+                    .unwrap(),
+                item_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_114, mask::MASK_4)
+                )
+                    .unwrap(),
                 }, item_7: ItemMeta {
-                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_107, mask::MASK_7))
+                    .unwrap(),
+                name_prefix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_100, mask::MASK_7)
+                )
+                    .unwrap(),
+                name_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_95, mask::MASK_5)
+                )
+                    .unwrap(),
+                item_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_91, mask::MASK_4)
+                )
+                    .unwrap(),
                 }, item_8: ItemMeta {
-                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_84, mask::MASK_7))
+                    .unwrap(),
+                name_prefix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_77, mask::MASK_7)
+                )
+                    .unwrap(),
+                name_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_72, mask::MASK_5)
+                )
+                    .unwrap(),
+                item_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_68, mask::MASK_4)
+                )
+                    .unwrap(),
                 }, item_9: ItemMeta {
-                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_61, mask::MASK_7))
+                    .unwrap(),
+                name_prefix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_54, mask::MASK_7)
+                )
+                    .unwrap(),
+                name_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_49, mask::MASK_5)
+                )
+                    .unwrap(),
+                item_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_45, mask::MASK_4)
+                )
+                    .unwrap(),
                 }, item_10: ItemMeta {
-                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_38, mask::MASK_7))
+                    .unwrap(),
+                name_prefix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_31, mask::MASK_7)
+                )
+                    .unwrap(),
+                name_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_26, mask::MASK_5)
+                )
+                    .unwrap(),
+                item_suffix: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_22, mask::MASK_4)
+                )
+                    .unwrap(),
             }
         }
     }
@@ -211,6 +393,88 @@ impl ImplItemMetaActions of ItemMetaActions {
             return self;
         }
     }
+}
+
+#[test]
+#[available_gas(5000000)]
+fn test_item_meta_packing() {
+    let mut item_meta_storage = ItemMetaStorage {
+        item_1: ItemMeta {
+            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            }, item_2: ItemMeta {
+            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            }, item_3: ItemMeta {
+            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            }, item_4: ItemMeta {
+            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            }, item_5: ItemMeta {
+            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            }, item_6: ItemMeta {
+            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            }, item_7: ItemMeta {
+            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            }, item_8: ItemMeta {
+            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            }, item_9: ItemMeta {
+            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            }, item_10: ItemMeta {
+            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+        }
+    };
+
+    let unpacked = ImplItemMetaActions::unpack(item_meta_storage.pack());
+
+    unpacked.item_1.id.print();
+
+    assert(unpacked.item_1.id == 127, 'item_1 id 127');
+    assert(unpacked.item_1.name_prefix == 127, 'item_1 name_prefix  127');
+    assert(unpacked.item_1.name_suffix == 31, 'item_1 name_suffix  31');
+    assert(unpacked.item_1.item_suffix == 15, 'item_1 item_suffix 15');
+
+    assert(unpacked.item_2.id == 127, 'item_2 id 127');
+    assert(unpacked.item_2.name_prefix == 127, 'item_2 name_prefix  127');
+    assert(unpacked.item_2.name_suffix == 31, 'item_2 name_suffix  31');
+    assert(unpacked.item_2.item_suffix == 15, 'item_2 item_suffix 15');
+
+    assert(unpacked.item_3.id == 127, 'item_3 id 127');
+    assert(unpacked.item_3.name_prefix == 127, 'item_3 name_prefix  127');
+    assert(unpacked.item_3.name_suffix == 31, 'item_3 name_suffix  31');
+    assert(unpacked.item_3.item_suffix == 15, 'item_3 item_suffix 15');
+
+    assert(unpacked.item_4.id == 127, 'item_4 id 127');
+    assert(unpacked.item_4.name_prefix == 127, 'item_4 name_prefix  127');
+    assert(unpacked.item_4.name_suffix == 31, 'item_4 name_suffix  31');
+    assert(unpacked.item_4.item_suffix == 15, 'item_4 item_suffix 15');
+
+    assert(unpacked.item_5.id == 127, 'item_5 id 127');
+    assert(unpacked.item_5.name_prefix == 127, 'item_5 name_prefix  127');
+    assert(unpacked.item_5.name_suffix == 31, 'item_5 name_suffix  31');
+    assert(unpacked.item_5.item_suffix == 15, 'item_5 item_suffix 15');
+
+    assert(unpacked.item_6.id == 127, 'item_6 id 127');
+    assert(unpacked.item_6.name_prefix == 127, 'item_6 name_prefix  127');
+    assert(unpacked.item_6.name_suffix == 31, 'item_6 name_suffix  31');
+    assert(unpacked.item_6.item_suffix == 15, 'item_6 item_suffix 15');
+
+    assert(unpacked.item_7.id == 127, 'item_7 id 127');
+    assert(unpacked.item_7.name_prefix == 127, 'item_7 name_prefix  127');
+    assert(unpacked.item_7.name_suffix == 31, 'item_7 name_suffix  31');
+    assert(unpacked.item_7.item_suffix == 15, 'item_7 item_suffix 15');
+
+    assert(unpacked.item_8.id == 127, 'item_8 id 127');
+    assert(unpacked.item_8.name_prefix == 127, 'item_8 name_prefix  127');
+    assert(unpacked.item_8.name_suffix == 31, 'item_8 name_suffix  31');
+    assert(unpacked.item_8.item_suffix == 15, 'item_8 item_suffix 15');
+
+    assert(unpacked.item_9.id == 127, 'item_9 id 127');
+    assert(unpacked.item_9.name_prefix == 127, 'item_9 name_prefix  127');
+    assert(unpacked.item_9.name_suffix == 31, 'item_9 name_suffix  31');
+    assert(unpacked.item_9.item_suffix == 15, 'item_9 item_suffix 15');
+
+    assert(unpacked.item_10.id == 127, 'item_10 id 127');
+    assert(unpacked.item_10.name_prefix == 127, 'item_10 name_prefix  127');
+    assert(unpacked.item_10.name_suffix == 31, 'item_10 name_suffix  31');
+    assert(unpacked.item_10.item_suffix == 15, 'item_10 item_suffix 15');
 }
 
 

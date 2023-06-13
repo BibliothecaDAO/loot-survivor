@@ -60,34 +60,165 @@ trait BagActions {
 
 impl ImplBagActions of BagActions {
     fn pack(self: Bag) -> felt252 {
-        0
+        let mut packed = 0;
+        packed = packed | pack_value(self.item_1.id.into(), pow::TWO_POW_244);
+        packed = packed | pack_value(self.item_1.xp.into(), pow::TWO_POW_236);
+        packed = packed | pack_value(self.item_1.metadata.into(), pow::TWO_POW_231);
+
+        packed = packed | pack_value(self.item_2.id.into(), pow::TWO_POW_224);
+        packed = packed | pack_value(self.item_2.xp.into(), pow::TWO_POW_215);
+        packed = packed | pack_value(self.item_2.metadata.into(), pow::TWO_POW_210);
+
+        packed = packed | pack_value(self.item_3.id.into(), pow::TWO_POW_203);
+        packed = packed | pack_value(self.item_3.xp.into(), pow::TWO_POW_194);
+        packed = packed | pack_value(self.item_3.metadata.into(), pow::TWO_POW_189);
+
+        packed = packed | pack_value(self.item_4.id.into(), pow::TWO_POW_182);
+        packed = packed | pack_value(self.item_4.xp.into(), pow::TWO_POW_173);
+        packed = packed | pack_value(self.item_4.metadata.into(), pow::TWO_POW_168);
+
+        packed = packed | pack_value(self.item_5.id.into(), pow::TWO_POW_161);
+        packed = packed | pack_value(self.item_5.xp.into(), pow::TWO_POW_152);
+        packed = packed | pack_value(self.item_5.metadata.into(), pow::TWO_POW_147);
+
+        packed = packed | pack_value(self.item_6.id.into(), pow::TWO_POW_140);
+        packed = packed | pack_value(self.item_6.xp.into(), pow::TWO_POW_131);
+        packed = packed | pack_value(self.item_6.metadata.into(), pow::TWO_POW_126);
+
+        packed = packed | pack_value(self.item_7.id.into(), pow::TWO_POW_119);
+        packed = packed | pack_value(self.item_7.xp.into(), pow::TWO_POW_110);
+        packed = packed | pack_value(self.item_7.metadata.into(), pow::TWO_POW_105);
+
+        packed = packed | pack_value(self.item_8.id.into(), pow::TWO_POW_98);
+        packed = packed | pack_value(self.item_8.xp.into(), pow::TWO_POW_89);
+        packed = packed | pack_value(self.item_8.metadata.into(), pow::TWO_POW_84);
+
+        packed = packed | pack_value(self.item_9.id.into(), pow::TWO_POW_77);
+        packed = packed | pack_value(self.item_9.xp.into(), pow::TWO_POW_68);
+        packed = packed | pack_value(self.item_9.metadata.into(), pow::TWO_POW_63);
+
+        packed = packed | pack_value(self.item_10.id.into(), pow::TWO_POW_56);
+        packed = packed | pack_value(self.item_10.xp.into(), pow::TWO_POW_47);
+        packed = packed | pack_value(self.item_10.metadata.into(), pow::TWO_POW_42);
+
+        packed = packed | pack_value(self.item_11.id.into(), pow::TWO_POW_35);
+        packed = packed | pack_value(self.item_11.xp.into(), pow::TWO_POW_26);
+        packed = packed | pack_value(self.item_11.metadata.into(), pow::TWO_POW_21);
+
+        packed = packed | pack_value(self.item_12.id.into(), pow::TWO_POW_14);
+        packed = packed | pack_value(self.item_12.xp.into(), pow::TWO_POW_5);
+        packed = packed | pack_value(self.item_12.metadata.into(), 1);
+
+        packed.try_into().unwrap()
     }
     fn unpack(packed: felt252) -> Bag {
+        let packed = packed.into();
         Bag {
             item_1: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_244, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_236, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_231, mask::MASK_5)
+                )
+                    .unwrap(),
                 }, item_2: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_224, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_215, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_210, mask::MASK_5)
+                )
+                    .unwrap(),
                 }, item_3: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_203, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_194, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_189, mask::MASK_5)
+                )
+                    .unwrap(),
                 }, item_4: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_182, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_173, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_168, mask::MASK_5)
+                )
+                    .unwrap(),
                 }, item_5: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_161, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_152, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_147, mask::MASK_5)
+                )
+                    .unwrap(),
                 }, item_6: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_140, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_131, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_126, mask::MASK_5)
+                )
+                    .unwrap(),
                 }, item_7: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_119, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_110, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_105, mask::MASK_5)
+                )
+                    .unwrap(),
                 }, item_8: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_98, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_89, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_84, mask::MASK_5)
+                )
+                    .unwrap(),
                 }, item_9: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_77, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_68, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_63, mask::MASK_5)
+                )
+                    .unwrap(),
                 }, item_10: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_56, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_47, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_42, mask::MASK_5)
+                )
+                    .unwrap(),
                 }, item_11: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_35, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_26, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(
+                    unpack_value(packed, pow::TWO_POW_21, mask::MASK_5)
+                )
+                    .unwrap(),
                 }, item_12: Item {
-                id: 0, xp: 0, metadata: 0, 
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_14, mask::MASK_7))
+                    .unwrap(),
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_5, mask::MASK_9))
+                    .unwrap(),
+                metadata: U256TryIntoU8::try_into(unpack_value(packed, 1, mask::MASK_5)).unwrap(),
             },
         }
     }
@@ -199,6 +330,88 @@ impl ImplBagActions of BagActions {
             return self.item_12;
         }
     }
+}
+
+#[test]
+#[available_gas(5000000)]
+fn test_pack_bag() {
+    let mut bag = Bag {
+        item_1: Item {
+            id: 127, xp: 511, metadata: 31
+            }, item_2: Item {
+            id: 127, xp: 511, metadata: 31
+            }, item_3: Item {
+            id: 127, xp: 511, metadata: 31
+            }, item_4: Item {
+            id: 127, xp: 511, metadata: 31
+            }, item_5: Item {
+            id: 127, xp: 511, metadata: 31
+            }, item_6: Item {
+            id: 127, xp: 511, metadata: 31
+            }, item_7: Item {
+            id: 127, xp: 511, metadata: 31
+            }, item_8: Item {
+            id: 127, xp: 511, metadata: 31
+            }, item_9: Item {
+            id: 127, xp: 511, metadata: 31
+            }, item_10: Item {
+            id: 127, xp: 511, metadata: 31
+            }, item_11: Item {
+            id: 127, xp: 511, metadata: 31
+            }, item_12: Item {
+            id: 127, xp: 511, metadata: 31
+        },
+    };
+
+    let packed_bag = ImplBagActions::unpack(bag.pack());
+
+    assert(packed_bag.item_1.id == 127, 'Item 1 ID is not 127');
+    assert(packed_bag.item_1.xp == 511, 'Item 1 XP is not 511');
+    assert(packed_bag.item_1.metadata == 31, 'Item 1 metadata is not 31');
+
+    assert(packed_bag.item_2.id == 127, 'Item 2 ID is not 127');
+    assert(packed_bag.item_2.xp == 511, 'Item 2 XP is not 511');
+    assert(packed_bag.item_2.metadata == 31, 'Item 2 metadata is not 31');
+
+    assert(packed_bag.item_3.id == 127, 'Item 3 ID is not 127');
+    assert(packed_bag.item_3.xp == 511, 'Item 3 XP is not 511');
+    assert(packed_bag.item_3.metadata == 31, 'Item 3 metadata is not 31');
+
+    assert(packed_bag.item_4.id == 127, 'Item 4 ID is not 127');
+    assert(packed_bag.item_4.xp == 511, 'Item 4 XP is not 511');
+    assert(packed_bag.item_4.metadata == 31, 'Item 4 metadata is not 31');
+
+    assert(packed_bag.item_5.id == 127, 'Item 5 ID is not 127');
+    assert(packed_bag.item_5.xp == 511, 'Item 5 XP is not 511');
+    assert(packed_bag.item_5.metadata == 31, 'Item 5 metadata is not 31');
+
+    assert(packed_bag.item_6.id == 127, 'Item 6 ID is not 127');
+    assert(packed_bag.item_6.xp == 511, 'Item 6 XP is not 511');
+    assert(packed_bag.item_6.metadata == 31, 'Item 6 metadata is not 31');
+
+    assert(packed_bag.item_7.id == 127, 'Item 7 ID is not 127');
+    assert(packed_bag.item_7.xp == 511, 'Item 7 XP is not 511');
+    assert(packed_bag.item_7.metadata == 31, 'Item 7 metadata is not 31');
+
+    assert(packed_bag.item_8.id == 127, 'Item 8 ID is not 127');
+    assert(packed_bag.item_8.xp == 511, 'Item 8 XP is not 511');
+    assert(packed_bag.item_8.metadata == 31, 'Item 8 metadata is not 31');
+
+    assert(packed_bag.item_9.id == 127, 'Item 9 ID is not 127');
+    assert(packed_bag.item_9.xp == 511, 'Item 9 XP is not 511');
+    assert(packed_bag.item_9.metadata == 31, 'Item 9 metadata is not 31');
+
+    assert(packed_bag.item_10.id == 127, 'Item 10 ID is not 127');
+    assert(packed_bag.item_10.xp == 511, 'Item 10 XP is not 511');
+    assert(packed_bag.item_10.metadata == 31, 'Item 10 metadata is not 31');
+
+    assert(packed_bag.item_11.id == 127, 'Item 11 ID is not 127');
+    assert(packed_bag.item_11.xp == 511, 'Item 11 XP is not 511');
+    assert(packed_bag.item_11.metadata == 31, 'Item 11 metadata is not 31');
+
+    assert(packed_bag.item_12.id == 127, 'Item 12 ID is not 127');
+    assert(packed_bag.item_12.xp == 511, 'Item 12 XP is not 511');
+    assert(packed_bag.item_12.metadata == 31, 'Item 12 metadata is not 31');
 }
 
 
