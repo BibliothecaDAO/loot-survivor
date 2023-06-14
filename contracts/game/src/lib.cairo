@@ -5,12 +5,14 @@ mod Adventurer {
     use starknet::get_caller_address;
     use starknet::{ContractAddress, ContractAddressIntoFelt252};
     use integer::U64IntoFelt252;
-    use core::traits::Into;
+    use core::traits::{TryInto, Into};
     use lootitems::loot::{Loot, ItemUtils};
     use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64};
     use survivor::adventurer::{Adventurer, AdventurerActions, Actions};
 
     use survivor::bag::{Bag, BagActions, ImplBagActions};
+
+    use market::{ImplMarket};
 
     // events
 
@@ -160,11 +162,28 @@ mod Adventurer {
     }
 
     // @loaf
-    fn buy_item(adventurer_id: u256, item_id: u8) { // 
-    // check item exists on Market
-    // check gold balance
+    fn buy_item(adventurer_id: u256, item_id: u8, equip: bool) {
+        let mut adventurer = AdventurerActions::unpack(
+            _adventurer::read((get_caller_address(), adventurer_id))
+        );
+
+        // update to real entropy
+        let entropy: u32 = 123;
+
+        // check item exists on Market
+        assert(ImplMarket::check_ownership(entropy, item_id) == true, 'Item does not exist');
+
+        // get item price based on tier
+        let item_price = 15;
+
+        // check gold balance is greater than item price
+        if adventurer.check_gold(item_price) == false {
+            assert(false, 'Not enough gold');
+        }
+
+        adventurer.deduct_gold(item_price);
+    // check item type exists on Adventurer -> if some exists put add to bag
     // set item on Adventurer in first free slot
-    // update gold balance - item price
     }
 
     // @loothero

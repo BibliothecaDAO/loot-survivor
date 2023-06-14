@@ -64,6 +64,10 @@ trait Actions {
     // gold
     fn increase_gold(ref self: Adventurer, value: u16) -> Adventurer;
 
+    // TODO: tests
+    fn deduct_gold(ref self: Adventurer, value: u16) -> Adventurer;
+    fn check_gold(self: Adventurer, value: u16) -> bool;
+
     // xp
     fn increase_adventurer_xp(ref self: Adventurer, value: u16) -> Adventurer;
     fn increase_item_xp(ref self: Adventurer, value: u16) -> Adventurer;
@@ -108,6 +112,19 @@ trait Actions {
 }
 
 impl AdventurerActions of Actions {
+    fn deduct_gold(ref self: Adventurer, value: u16) -> Adventurer {
+        self.gold -= value;
+
+        if (self.gold < 0) {
+            self.gold = 0;
+        }
+
+        self
+    }
+    fn check_gold(self: Adventurer, value: u16) -> bool {
+        self.gold >= value
+    }
+
     fn get_item_at_slot(self: Adventurer, item: Item) -> Item {
         let item_slot = ItemUtils::get_slot(item.id);
 

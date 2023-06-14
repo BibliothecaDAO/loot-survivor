@@ -18,7 +18,7 @@ trait MarketTrait {
     fn check_ownership(seed: u32, item_id: u8) -> bool;
 }
 
-impl Market of MarketTrait {
+impl ImplMarket of MarketTrait {
     fn get_all_items(seed: u32) -> Array<Loot> {
         let mut all_items = ArrayTrait::<Loot>::new();
 
@@ -29,7 +29,7 @@ impl Market of MarketTrait {
             }
 
             // TODO: We need to move this to fetch from state - it's too gassy...
-            all_items.append(ItemUtils::get_item(Market::get_id(seed + i)));
+            all_items.append(ItemUtils::get_item(ImplMarket::get_id(seed + i)));
             i += OFFSET;
         };
 
@@ -47,7 +47,7 @@ impl Market of MarketTrait {
                 break ();
             }
 
-            let id = Market::get_id(seed + i);
+            let id = ImplMarket::get_id(seed + i);
 
             if item_id == id {
                 break ();
@@ -66,7 +66,7 @@ impl Market of MarketTrait {
 #[test]
 #[available_gas(10000000)]
 fn test_get_all_items() {
-    let items = Market::get_all_items(1);
+    let items = ImplMarket::get_all_items(1);
 
     assert(items.len() > NUMBER_OF_ITEMS_PER_LEVEL, 'too many items');
 }
@@ -82,9 +82,9 @@ fn test_check_ownership() {
             break ();
         }
 
-        let id = Market::get_id(seed + i);
+        let id = ImplMarket::get_id(seed + i);
 
-        let result = Market::check_ownership(seed + i, id);
+        let result = ImplMarket::check_ownership(seed + i, id);
 
         assert(result == true, 'item');
 
@@ -104,9 +104,9 @@ fn test_fake_check_ownership() {
             break ();
         }
 
-        let id = Market::get_id(seed + i + 2);
+        let id = ImplMarket::get_id(seed + i + 2);
 
-        let result = Market::check_ownership(seed + i, id);
+        let result = ImplMarket::check_ownership(seed + i, id);
 
         assert(result == false, 'item');
 
@@ -120,7 +120,7 @@ fn test_fake_check_ownership() {
 fn test_get_all_items_ownership() {
     let mut seed = 123456;
 
-    let items = Market::get_all_items(seed);
+    let items = ImplMarket::get_all_items(seed);
 
     let mut i: usize = 0;
     let mut item_index: usize = 0;
@@ -130,7 +130,7 @@ fn test_get_all_items_ownership() {
             break ();
         }
 
-        let result = Market::check_ownership(seed + i, *items[item_index].id);
+        let result = ImplMarket::check_ownership(seed + i, *items[item_index].id);
 
         assert(result == true, 'item');
 

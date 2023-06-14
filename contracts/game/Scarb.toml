@@ -8,3 +8,4 @@ version = "0.1.0"
 starknet = ">=1.0.0"
 lootitems = { path = "../loot" }
 survivor = { path = "../adventurer" }
+market = { path = "../market" }
