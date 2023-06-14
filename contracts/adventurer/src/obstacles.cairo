@@ -244,7 +244,7 @@ impl ObstacleUtils of ObstacleTrait {
     // get_damage returns the damage of the obstacle based on the provided obstacle id
     fn get_damage(adventurer: Adventurer, obstacle: Obstacle) -> (bool, u16) {
         // get deterministic obstacle based on adventurer
-        return (true, 0);
+        return (false, 10);
     }
 
     // get_xp_reward returns the xp reward from encountering the obstacle
