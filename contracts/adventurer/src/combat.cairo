@@ -1,4 +1,6 @@
-use integer::{U8IntoU16, U16IntoU64, U8IntoU64};
+use core::option::OptionTrait;
+use integer::{U8IntoU16, U16IntoU64, U8IntoU64, U64TryIntoU16};
+use core::traits::DivEq;
 use survivor::adventurer::{Adventurer, AdventurerActions};
 use lootitems::statistics::constants::{Type};
 use survivor::constants::combat_constants::{WeaponEffectiveness, CombatSettings};
@@ -195,46 +197,47 @@ impl CombatUtils of Combat {
         return WeaponEffectiveness::Weak(());
     }
 
+    // is_critical_hit determines if an attack is a critical hit
+    // @param adventurer_luck: the luck of the adventurer
+    // @param adventurer_health: the health of the adventurer
+    // @param adventurer_entropy: the adventurer entropy
+    // @param game_entropy: the game entropy
+    // @return bool: true if the attack is a critical hit, false otherwise
     fn is_critical_hit(
         adventurer_luck: u8, adventurer_health: u16, adventurer_entropy: u64, game_entropy: u64
     ) -> bool {
+        // TODO: move this to combat settings;
+        let MAX_CRITICAL_HIT_CHANCE: u16 = 4;
+
         // critical hit chance is whole number of luck / 10
-        let critical_hit_chance = adventurer_luck / 10;
+        // so the chance of getting a critical hit increases every 10 luck
+        let mut critical_hit_chance: u16 = U8IntoU16::into(adventurer_luck) / 10;
 
         // critical hit random number is adventurer entropy + game entropy + adventurer health
-        // this is intended to remain fixed between game entropy changes to prevent bots from simulating critical hits
-        let critical_hit_rnd = adventurer_entropy
+        // using health in this calculation is essential to have this change each attack
+        let mut critical_hit_rnd = adventurer_entropy
             + game_entropy
             + U16IntoU64::into(adventurer_health);
 
-        // if critical hit random number is less than critical hit chance
-        if (critical_hit_rnd < U8IntoU64::into(critical_hit_chance)) {
+        // critical hit chance is capped at 4 which will result in 50% chance of critical hit
+        if (critical_hit_chance >= MAX_CRITICAL_HIT_CHANCE) {
+            critical_hit_chance = MAX_CRITICAL_HIT_CHANCE;
+        }
+
+        // critical hit random number is modulo the max critical hit chance
+        // this will result in a number between 0 and 5
+        critical_hit_rnd %= U16IntoU64::into((6 - critical_hit_chance));
+
+        // if the critical hit random number is 0 (no remainder)
+        if (critical_hit_rnd == 0) {
             // return true
             return true;
         } else {
             // otherwise return false
             return false;
         }
-    // let (critical_hit_chance, _) = unsigned_div_rem(luck, 10);
-    // // there is no implied cap on item greatness so luck is unbound
-    // // but for purposes of critical damage calculation, the max critical hit chance is 5
-    // let critical_hit_chance_within_range = is_le(critical_hit_chance, MAX_CRITICAL_HIT_CHANCE);
-    // // if the critical hit chance is 5 or less
-    // if (critical_hit_chance_within_range == TRUE) {
-    //     // use the unalterted critical hit chance
-    //     tempvar
-    //     temp_critical_hit_chance = critical_hit_chance;
-    // } else {
-    //     // if it is above 5, then set it to 5
-    //     tempvar
-    //     temp_critical_hit_chance = MAX_CRITICAL_HIT_CHANCE;
-    // }
-    // let critical_hit_chance = temp_critical_hit_chance;
-    // 
-    // let (_, critical_rand) = unsigned_div_rem(rnd, (6 - critical_hit_chance));
-    // let critical_hit = is_le(critical_rand, 0);
-    // return (critical_hit, );
     }
+
     // get_critical_hit_damage_bonus returns the bonus damage done by a critical hit
     // @param base_damage: the base damage done by the attacker
     // @param adventurer_luck: the luck of the adventurer
@@ -253,11 +256,27 @@ impl CombatUtils of Combat {
         adventurer_entropy: u64,
         game_entropy: u64
     ) -> u16 {
+        // check if the attack is a critical hit
         let is_critical_hit = CombatUtils::is_critical_hit(
             adventurer_luck, adventurer_health, adventurer_entropy, game_entropy
         );
 
-        return 0;
+        // if the attack is a critical hit
+        if (is_critical_hit == true) {
+            // divide base damage by 4 to get 25% of original damage
+            let damage_boost_base = base_damage / 4;
+
+            // critical hit random number is adventurer entropy + game entropy + base_damage
+            let rnd = adventurer_entropy + game_entropy + U16IntoU64::into(adventurer_health);
+
+            // damage multplier is 1-4 which will equate to a 25-100% damage boost
+            let damage_multplier = U64TryIntoU16::try_into(rnd % 4).unwrap();
+
+            // multiply base damage boost (25% of original damage) by damage multiplier (1-4)
+            return damage_boost_base * (damage_multplier + 1);
+        }
+        // otherwise return 0
+        0
     }
 
     // get_special_name_damage_bonus returns the bonus damage for special item
@@ -284,6 +303,89 @@ impl CombatUtils of Combat {
     fn get_adventurer_strength_bonus(adventurer: Adventurer, original_damage: u16) -> u16 {
         return 0;
     }
+}
+
+#[test]
+#[available_gas(200000)]
+fn test_get_critical_hit_damage_bonus() {
+    // no critical hit
+    let mut adventurer_luck = 40;
+    let mut adventurer_health = 0;
+    let mut adventurer_entropy = 3;
+    let mut game_entropy = 0;
+    let mut base_damage = 100;
+    let critical_hit_damage_bonus = CombatUtils::get_critical_hit_damage_bonus(
+        base_damage, adventurer_luck, adventurer_health, adventurer_entropy, game_entropy
+    );
+    assert(critical_hit_damage_bonus == 0, 'should be 0 crit hit bonus');
+
+    // critical hit low damage
+    adventurer_luck = 0;
+    adventurer_health = 0;
+    adventurer_entropy = 0;
+    game_entropy = 0;
+    base_damage = 100;
+    let critical_hit_damage_bonus = CombatUtils::get_critical_hit_damage_bonus(
+        base_damage, adventurer_luck, adventurer_health, adventurer_entropy, game_entropy
+    );
+    assert(critical_hit_damage_bonus == 25, 'should be 25 crit hit bonus');
+
+    // Medium high damage
+    adventurer_luck = 40;
+    adventurer_health = 0;
+    adventurer_entropy = 2;
+    game_entropy = 0;
+    base_damage = 100;
+    let critical_hit_damage_bonus = CombatUtils::get_critical_hit_damage_bonus(
+        base_damage, adventurer_luck, adventurer_health, adventurer_entropy, game_entropy
+    );
+    assert(critical_hit_damage_bonus == 75, 'should be 75 crit hit bonus');
+}
+
+
+#[test]
+#[available_gas(80000)]
+fn test_is_critical_hit() {
+    // in order to produce a critical hit, we need the remainder of 
+    // the summation of entropy and (6 - critical_hit_chance) to be 0
+    // where critical_hit_chance is adventurer_luck / 10
+
+    // an easy way to simulate this outcome is to use
+    // all zero for entropy, adventurer_luck, and adventurer_health
+    let mut adventurer_luck = 0;
+    let mut adventurer_health = 0;
+    let adventurer_entropy = 0;
+    let game_entropy = 0;
+    let is_critical_hit = CombatUtils::is_critical_hit(
+        adventurer_luck, adventurer_health, adventurer_entropy, game_entropy
+    );
+    assert(is_critical_hit, 'should be critical hit');
+
+    // by reducing adventurer health to 3, we should no longer get a critical hit
+    // because we'll be doing 3 % 8 which is 2 and not 0
+    adventurer_health = 3;
+    let is_critical_hit = CombatUtils::is_critical_hit(
+        adventurer_luck, adventurer_health, adventurer_entropy, game_entropy
+    );
+    assert(!is_critical_hit, 'should not be critical hit');
+
+    // next we increase adventurer luck to max of 40 which will result
+    // in critical hit being the remainder of entropy / 2 which is a 50% chance
+    adventurer_luck = 40;
+
+    // entropy is currently still 3 however (just health) so we should not get a critical hit
+    let is_critical_hit = CombatUtils::is_critical_hit(
+        adventurer_luck, adventurer_health, adventurer_entropy, game_entropy
+    );
+    assert(!is_critical_hit, 'should not be critical hit');
+
+    // by increasing adventurer health to 4 we increase total entropy to 4
+    // which will result in a 0 remainder and a critical hit
+    adventurer_health = 4;
+    let is_critical_hit = CombatUtils::is_critical_hit(
+        adventurer_luck, adventurer_health, adventurer_entropy, game_entropy
+    );
+    assert(is_critical_hit, 'should be critical hit');
 }
 
 #[test]
