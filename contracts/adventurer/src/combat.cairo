@@ -1,4 +1,4 @@
-use integer::{U8IntoU16, U16IntoU64};
+use integer::{U8IntoU16, U16IntoU64, U8IntoU64};
 use survivor::adventurer::{Adventurer, AdventurerActions};
 use lootitems::statistics::constants::{Type};
 use survivor::constants::combat_constants::{WeaponEffectiveness, CombatSettings};
@@ -207,7 +207,6 @@ impl CombatUtils of Combat {
             + game_entropy
             + U16IntoU64::into(adventurer_health);
 
-
         // if critical hit random number is less than critical hit chance
         if (critical_hit_rnd < U8IntoU64::into(critical_hit_chance)) {
             // return true
@@ -216,7 +215,6 @@ impl CombatUtils of Combat {
             // otherwise return false
             return false;
         }
-        
     // let (critical_hit_chance, _) = unsigned_div_rem(luck, 10);
     // // there is no implied cap on item greatness so luck is unbound
     // // but for purposes of critical damage calculation, the max critical hit chance is 5
@@ -255,7 +253,9 @@ impl CombatUtils of Combat {
         adventurer_entropy: u64,
         game_entropy: u64
     ) -> u16 {
-        let (is_critical_hit_) = is_critical_hit(luck, rnd);
+        let is_critical_hit = CombatUtils::is_critical_hit(
+            adventurer_luck, adventurer_health, adventurer_entropy, game_entropy
+        );
 
         return 0;
     }
