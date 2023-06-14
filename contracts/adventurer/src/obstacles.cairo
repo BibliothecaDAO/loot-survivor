@@ -1,6 +1,6 @@
 use option::OptionTrait;
 use integer::{U64TryIntoU8, U16IntoU64, U8IntoU64, U8IntoU16};
-use survivor::bag::Item;
+use survivor::bag::LootStatistics;
 use survivor::adventurer::{Adventurer, AdventurerActions};
 use lootitems::statistics::constants::{Type, Slot};
 use survivor::constants::obstacle_constants::{
@@ -465,21 +465,21 @@ fn test_get_obstacle_level() {
         wisdom: 0,
         charisma: 0,
         gold: 0,
-        weapon: Item {
+        weapon: LootStatistics {
             id: 12, xp: 0, metadata: 1, 
-            }, chest: Item {
+            }, chest: LootStatistics {
             id: 0, xp: 0, metadata: 0, 
-            }, head: Item {
+            }, head: LootStatistics {
             id: 0, xp: 0, metadata: 0, 
-            }, waist: Item {
+            }, waist: LootStatistics {
             id: 0, xp: 0, metadata: 0, 
-            }, foot: Item {
+            }, foot: LootStatistics {
             id: 0, xp: 0, metadata: 0, 
-            }, hand: Item {
+            }, hand: LootStatistics {
             id: 0, xp: 0, metadata: 0, 
-            }, neck: Item {
+            }, neck: LootStatistics {
             id: 0, xp: 0, metadata: 0, 
-            }, ring: Item {
+            }, ring: LootStatistics {
             id: 0, xp: 0, metadata: 0, 
         }, beast_health: 10, stat_upgrade_available: 0,
     };

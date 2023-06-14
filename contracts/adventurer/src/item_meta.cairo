@@ -11,7 +11,7 @@ use pack::constants::{pow, mask};
 
 use super::adventurer::{Adventurer, AdventurerActions, Actions};
 
-use super::bag::{Bag, BagActions, Item};
+use super::bag::{Bag, BagActions, LootStatistics};
 
 mod ITEM_META_INDEX {
     const INDEX_1: u8 = 1;
@@ -27,7 +27,7 @@ mod ITEM_META_INDEX {
 }
 
 #[derive(Drop, Copy)]
-struct ItemMeta {
+struct LootDescription {
     id: u8, // 7 bits
     name_prefix: u8, // 7 bits
     name_suffix: u8, // 5 bits
@@ -35,44 +35,46 @@ struct ItemMeta {
 }
 
 #[derive(Drop, Copy)]
-struct ItemMetaStorage {
-    item_1: ItemMeta,
-    item_2: ItemMeta,
-    item_3: ItemMeta,
-    item_4: ItemMeta,
-    item_5: ItemMeta,
-    item_6: ItemMeta,
-    item_7: ItemMeta,
-    item_8: ItemMeta,
-    item_9: ItemMeta,
-    item_10: ItemMeta,
+struct LootDescriptionStorage {
+    item_1: LootDescription,
+    item_2: LootDescription,
+    item_3: LootDescription,
+    item_4: LootDescription,
+    item_5: LootDescription,
+    item_6: LootDescription,
+    item_7: LootDescription,
+    item_8: LootDescription,
+    item_9: LootDescription,
+    item_10: LootDescription,
 }
 
-// Item meta only is set once and is filled up as items are found
+// LootStatistics meta only is set once and is filled up as items are found
 // There is no swapping of positions
-// When an item is found we find the next available slot and set it on the Item NOT in the metadata -> this saves gas
+// When an item is found we find the next available slot and set it on the LootStatistics NOT in the metadata -> this saves gas
 // We only set the metadata when an item is upgraded
-trait ItemMetaActions {
-    fn pack(self: ItemMetaStorage) -> felt252;
-    fn unpack(packed: felt252) -> ItemMetaStorage;
+trait LootDescriptionActions {
+    fn pack(self: LootDescriptionStorage) -> felt252;
+    fn unpack(packed: felt252) -> LootDescriptionStorage;
 
-    // takes Item and sets the metadata slot for that item
+    // takes LootStatistics and sets the metadata slot for that item
     // 1. Find highest slot from equipped and unequipped items
-    // 2. Return Item with slot which is then saved on the Adventurer/Bag
+    // 2. Return LootStatistics with slot which is then saved on the Adventurer/Bag
 
     // this could be somewhere else
     // this needs to be run when an item is found/purchased
-    fn get_item_metadata_slot(adventurer: Adventurer, bag: Bag, item: Item) -> Item;
+    fn get_item_metadata_slot(
+        adventurer: Adventurer, bag: Bag, item: LootStatistics
+    ) -> LootStatistics;
 
     // on contract side we check if item.metadata > 9 if it is pass in second metadata storage
     fn set_item_metadata(
-        ref self: ItemMetaStorage, item: Item, item_meta: ItemMeta
-    ) -> ItemMetaStorage;
+        ref self: LootDescriptionStorage, item: LootStatistics, item_meta: LootDescription
+    ) -> LootDescriptionStorage;
 }
 
 
-impl ImplItemMetaActions of ItemMetaActions {
-    fn pack(self: ItemMetaStorage) -> felt252 {
+impl ImplLootDescriptionActions of LootDescriptionActions {
+    fn pack(self: LootDescriptionStorage) -> felt252 {
         let mut packed = 0;
         packed = packed | pack_value(self.item_1.id.into(), pow::TWO_POW_244);
         packed = packed | pack_value(self.item_1.name_prefix.into(), pow::TWO_POW_238);
@@ -126,11 +128,11 @@ impl ImplItemMetaActions of ItemMetaActions {
 
         packed.try_into().unwrap()
     }
-    fn unpack(packed: felt252) -> ItemMetaStorage {
+    fn unpack(packed: felt252) -> LootDescriptionStorage {
         let packed = packed.into();
 
-        ItemMetaStorage {
-            item_1: ItemMeta {
+        LootDescriptionStorage {
+            item_1: LootDescription {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_244, mask::MASK_7))
                     .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
@@ -145,7 +147,7 @@ impl ImplItemMetaActions of ItemMetaActions {
                     unpack_value(packed, pow::TWO_POW_229, mask::MASK_4)
                 )
                     .unwrap(),
-                }, item_2: ItemMeta {
+                }, item_2: LootDescription {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_222, mask::MASK_7))
                     .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
@@ -160,7 +162,7 @@ impl ImplItemMetaActions of ItemMetaActions {
                     unpack_value(packed, pow::TWO_POW_206, mask::MASK_4)
                 )
                     .unwrap(),
-                }, item_3: ItemMeta {
+                }, item_3: LootDescription {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_199, mask::MASK_7))
                     .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
@@ -175,7 +177,7 @@ impl ImplItemMetaActions of ItemMetaActions {
                     unpack_value(packed, pow::TWO_POW_183, mask::MASK_4)
                 )
                     .unwrap(),
-                }, item_4: ItemMeta {
+                }, item_4: LootDescription {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_176, mask::MASK_7))
                     .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
@@ -190,7 +192,7 @@ impl ImplItemMetaActions of ItemMetaActions {
                     unpack_value(packed, pow::TWO_POW_160, mask::MASK_4)
                 )
                     .unwrap(),
-                }, item_5: ItemMeta {
+                }, item_5: LootDescription {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_153, mask::MASK_7))
                     .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
@@ -205,7 +207,7 @@ impl ImplItemMetaActions of ItemMetaActions {
                     unpack_value(packed, pow::TWO_POW_137, mask::MASK_4)
                 )
                     .unwrap(),
-                }, item_6: ItemMeta {
+                }, item_6: LootDescription {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_130, mask::MASK_7))
                     .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
@@ -220,7 +222,7 @@ impl ImplItemMetaActions of ItemMetaActions {
                     unpack_value(packed, pow::TWO_POW_114, mask::MASK_4)
                 )
                     .unwrap(),
-                }, item_7: ItemMeta {
+                }, item_7: LootDescription {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_107, mask::MASK_7))
                     .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
@@ -235,7 +237,7 @@ impl ImplItemMetaActions of ItemMetaActions {
                     unpack_value(packed, pow::TWO_POW_91, mask::MASK_4)
                 )
                     .unwrap(),
-                }, item_8: ItemMeta {
+                }, item_8: LootDescription {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_84, mask::MASK_7))
                     .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
@@ -250,7 +252,7 @@ impl ImplItemMetaActions of ItemMetaActions {
                     unpack_value(packed, pow::TWO_POW_68, mask::MASK_4)
                 )
                     .unwrap(),
-                }, item_9: ItemMeta {
+                }, item_9: LootDescription {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_61, mask::MASK_7))
                     .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
@@ -265,7 +267,7 @@ impl ImplItemMetaActions of ItemMetaActions {
                     unpack_value(packed, pow::TWO_POW_45, mask::MASK_4)
                 )
                     .unwrap(),
-                }, item_10: ItemMeta {
+                }, item_10: LootDescription {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_38, mask::MASK_7))
                     .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
@@ -283,7 +285,9 @@ impl ImplItemMetaActions of ItemMetaActions {
             }
         }
     }
-    fn get_item_metadata_slot(adventurer: Adventurer, bag: Bag, item: Item) -> Item {
+    fn get_item_metadata_slot(
+        adventurer: Adventurer, bag: Bag, item: LootStatistics
+    ) -> LootStatistics {
         // check slots
 
         let mut slot = 0;
@@ -352,14 +356,14 @@ impl ImplItemMetaActions of ItemMetaActions {
 
         // if no slots -> return first index which is 0
         if slot == 1 {
-            Item { id: item.id, xp: item.xp, metadata: 1 }
+            LootStatistics { id: item.id, xp: item.xp, metadata: 1 }
         } else {
-            Item { id: item.id, xp: item.xp, metadata: slot + 1 }
+            LootStatistics { id: item.id, xp: item.xp, metadata: slot + 1 }
         }
     }
     fn set_item_metadata(
-        ref self: ItemMetaStorage, item: Item, item_meta: ItemMeta
-    ) -> ItemMetaStorage {
+        ref self: LootDescriptionStorage, item: LootStatistics, item_meta: LootDescription
+    ) -> LootDescriptionStorage {
         // TODO:
         // @loothere: should we generate the prefix here or up in the contract?
         if item.metadata == 1 {
@@ -398,31 +402,31 @@ impl ImplItemMetaActions of ItemMetaActions {
 // #[test]
 // #[available_gas(5000000)]
 // fn test_item_meta_packing() {
-//     let mut item_meta_storage = ItemMetaStorage {
-//         item_1: ItemMeta {
+//     let mut item_meta_storage = LootDescriptionStorage {
+//         item_1: LootDescription {
 //             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-//             }, item_2: ItemMeta {
+//             }, item_2: LootDescription {
 //             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-//             }, item_3: ItemMeta {
+//             }, item_3: LootDescription {
 //             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-//             }, item_4: ItemMeta {
+//             }, item_4: LootDescription {
 //             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-//             }, item_5: ItemMeta {
+//             }, item_5: LootDescription {
 //             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-//             }, item_6: ItemMeta {
+//             }, item_6: LootDescription {
 //             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-//             }, item_7: ItemMeta {
+//             }, item_7: LootDescription {
 //             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-//             }, item_8: ItemMeta {
+//             }, item_8: LootDescription {
 //             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-//             }, item_9: ItemMeta {
+//             }, item_9: LootDescription {
 //             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-//             }, item_10: ItemMeta {
+//             }, item_10: LootDescription {
 //             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
 //         }
 //     };
 
-//     let unpacked = ImplItemMetaActions::unpack(item_meta_storage.pack());
+//     let unpacked = ImplLootDescriptionActions::unpack(item_meta_storage.pack());
 
 //     unpacked.item_1.id.print();
 
@@ -483,10 +487,10 @@ impl ImplItemMetaActions of ItemMetaActions {
 //     let mut adventurer = AdventurerActions::new(1, 1);
 
 //     // add test items
-//     let item_pendant = Item { id: 1, xp: 1, metadata: 3 };
-//     let item_silver_ring = Item { id: 4, xp: 1, metadata: 4 };
-//     let item_ghost_wand = Item { id: 9, xp: 1, metadata: 5 };
-//     let item_silk_robe = Item { id: 18, xp: 1, metadata: 6 };
+//     let item_pendant = LootStatistics { id: 1, xp: 1, metadata: 3 };
+//     let item_silver_ring = LootStatistics { id: 4, xp: 1, metadata: 4 };
+//     let item_ghost_wand = LootStatistics { id: 9, xp: 1, metadata: 5 };
+//     let item_silk_robe = LootStatistics { id: 18, xp: 1, metadata: 6 };
 
 //     adventurer.add_item(item_pendant);
 //     adventurer.add_item(item_silver_ring);
@@ -494,73 +498,74 @@ impl ImplItemMetaActions of ItemMetaActions {
 //     adventurer.add_item(item_silk_robe);
 
 //     let bag = Bag {
-//         item_1: Item {
+//         item_1: LootStatistics {
 //             id: 1, xp: 0, metadata: 4, 
-//             }, item_2: Item {
+//             }, item_2: LootStatistics {
 //             id: 2, xp: 0, metadata: 5, 
-//             }, item_3: Item {
+//             }, item_3: LootStatistics {
 //             id: 3, xp: 0, metadata: 6, 
-//             }, item_4: Item {
+//             }, item_4: LootStatistics {
 //             id: 4, xp: 0, metadata: 7, 
-//             }, item_5: Item {
+//             }, item_5: LootStatistics {
 //             id: 5, xp: 0, metadata: 8, 
-//             }, item_6: Item {
+//             }, item_6: LootStatistics {
 //             id: 6, xp: 0, metadata: 11, 
-//             }, item_7: Item {
+//             }, item_7: LootStatistics {
 //             id: 7, xp: 0, metadata: 0, 
-//             }, item_8: Item {
+//             }, item_8: LootStatistics {
 //             id: 8, xp: 0, metadata: 12, 
-//             }, item_9: Item {
+//             }, item_9: LootStatistics {
 //             id: 9, xp: 0, metadata: 0, 
-//             }, item_10: Item {
+//             }, item_10: LootStatistics {
 //             id: 10, xp: 0, metadata: 0, 
-//             }, item_11: Item {
+//             }, item_11: LootStatistics {
 //             id: 11, xp: 0, metadata: 18, 
-//             }, item_12: Item {
+//             }, item_12: LootStatistics {
 //             id: 12, xp: 0, metadata: 0, 
 //         },
 //     };
 
-//     let new_item = Item { id: 1, xp: 1, metadata: 0 };
+//     let new_item = LootStatistics { id: 1, xp: 1, metadata: 0 };
 
-//     let item = ItemMetaActions::get_item_metadata_slot(adventurer, bag, new_item);
+//     let item = LootDescriptionActions::get_item_metadata_slot(adventurer, bag, new_item);
 
-//     assert(item.metadata == 19, 'Item metadata should be 5');
+//     assert(item.metadata == 19, 'LootStatistics metadata should be 5');
 // }
 
 // #[test]
 // #[available_gas(5000000)]
 // fn test_set_item_metadata_slot() {
-//     let mut item_meta_storage = ItemMetaStorage {
-//         item_1: ItemMeta {
+//     let mut item_meta_storage = LootDescriptionStorage {
+//         item_1: LootDescription {
 //             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-//             }, item_2: ItemMeta {
+//             }, item_2: LootDescription {
 //             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-//             }, item_3: ItemMeta {
+//             }, item_3: LootDescription {
 //             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-//             }, item_4: ItemMeta {
+//             }, item_4: LootDescription {
 //             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-//             }, item_5: ItemMeta {
+//             }, item_5: LootDescription {
 //             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-//             }, item_6: ItemMeta {
+//             }, item_6: LootDescription {
 //             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-//             }, item_7: ItemMeta {
+//             }, item_7: LootDescription {
 //             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-//             }, item_8: ItemMeta {
+//             }, item_8: LootDescription {
 //             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-//             }, item_9: ItemMeta {
+//             }, item_9: LootDescription {
 //             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-//             }, item_10: ItemMeta {
+//             }, item_10: LootDescription {
 //             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
 //         }
 //     };
-//     let item = Item { id: 1, xp: 1, metadata: 1 };
+//     let item = LootStatistics { id: 1, xp: 1, metadata: 1 };
 
-//     let item_meta = ItemMeta { id: 1, name_prefix: 12, name_suffix: 11, item_suffix: 13 };
+//     let item_meta = LootDescription { id: 1, name_prefix: 12, name_suffix: 11, item_suffix: 13 };
 
 //     item_meta_storage.set_item_metadata(item, item_meta);
-//     assert(item_meta_storage.item_1.name_prefix == 12, 'Item id should be 1');
-//     assert(item_meta_storage.item_1.name_suffix == 11, 'Item id should be 1');
-//     assert(item_meta_storage.item_1.item_suffix == 13, 'Item id should be 1');
+//     assert(item_meta_storage.item_1.name_prefix == 12, 'LootStatistics id should be 1');
+//     assert(item_meta_storage.item_1.name_suffix == 11, 'LootStatistics id should be 1');
+//     assert(item_meta_storage.item_1.item_suffix == 13, 'LootStatistics id should be 1');
 // }
+
 

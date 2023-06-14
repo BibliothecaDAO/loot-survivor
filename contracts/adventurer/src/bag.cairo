@@ -12,7 +12,7 @@ use pack::constants::{pow, mask};
 use super::adventurer::{Adventurer, AdventurerActions, Actions};
 
 #[derive(Drop, Copy, Serde)] // 24 bits
-struct Item {
+struct LootStatistics {
     id: u8, // 7 bits
     xp: u16, // 12 bits
     // this is set as the items are found/purchased
@@ -21,18 +21,18 @@ struct Item {
 
 #[derive(Drop, Copy, Serde)]
 struct Bag {
-    item_1: Item, // club
-    item_2: Item, // club
-    item_3: Item, // club
-    item_4: Item, // club
-    item_5: Item, // club
-    item_6: Item, // club
-    item_7: Item, // club
-    item_8: Item, // club
-    item_9: Item, // club
-    item_10: Item, // club
-    item_11: Item, // club
-    item_12: Item, // club
+    item_1: LootStatistics, // club
+    item_2: LootStatistics, // club
+    item_3: LootStatistics, // club
+    item_4: LootStatistics, // club
+    item_5: LootStatistics, // club
+    item_6: LootStatistics, // club
+    item_7: LootStatistics, // club
+    item_8: LootStatistics, // club
+    item_9: LootStatistics, // club
+    item_10: LootStatistics, // club
+    item_11: LootStatistics, // club
+    item_12: LootStatistics, // club
 }
 
 trait BagActions {
@@ -42,10 +42,10 @@ trait BagActions {
     // take bag and item to swap and item to equip
     // return bag with swapped items and item that was swapped for
     // we then store the item on the Adventurer
-    // fn swap_items(self: Bag, incoming: u8, outgoing: u8) -> (Bag, Item);
+    // fn swap_items(self: Bag, incoming: u8, outgoing: u8) -> (Bag, LootStatistics);
 
     // set item in first available slot
-    fn add_item(ref self: Bag, item: Item) -> Bag;
+    fn add_item(ref self: Bag, item: LootStatistics) -> Bag;
 
     // // finds open slot
     fn find_slot(self: Bag) -> u8;
@@ -53,8 +53,11 @@ trait BagActions {
     // check if bag full
     fn is_full(self: Bag) -> bool;
     // get item by id
-    fn get_item(self: Bag, item_id: u8) -> Item;
+    fn get_item(self: Bag, item_id: u8) -> LootStatistics;
     fn remove_item(ref self: Bag, item_id: u8) -> Bag;
+
+    // creates new item
+    fn new_item(item_id: u8) -> LootStatistics;
 }
 
 impl ImplBagActions of BagActions {
@@ -113,7 +116,7 @@ impl ImplBagActions of BagActions {
     fn unpack(packed: felt252) -> Bag {
         let packed = packed.into();
         Bag {
-            item_1: Item {
+            item_1: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_244, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_236, mask::MASK_9))
@@ -122,7 +125,7 @@ impl ImplBagActions of BagActions {
                     unpack_value(packed, pow::TWO_POW_231, mask::MASK_5)
                 )
                     .unwrap(),
-                }, item_2: Item {
+                }, item_2: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_224, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_215, mask::MASK_9))
@@ -131,7 +134,7 @@ impl ImplBagActions of BagActions {
                     unpack_value(packed, pow::TWO_POW_210, mask::MASK_5)
                 )
                     .unwrap(),
-                }, item_3: Item {
+                }, item_3: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_203, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_194, mask::MASK_9))
@@ -140,7 +143,7 @@ impl ImplBagActions of BagActions {
                     unpack_value(packed, pow::TWO_POW_189, mask::MASK_5)
                 )
                     .unwrap(),
-                }, item_4: Item {
+                }, item_4: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_182, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_173, mask::MASK_9))
@@ -149,7 +152,7 @@ impl ImplBagActions of BagActions {
                     unpack_value(packed, pow::TWO_POW_168, mask::MASK_5)
                 )
                     .unwrap(),
-                }, item_5: Item {
+                }, item_5: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_161, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_152, mask::MASK_9))
@@ -158,7 +161,7 @@ impl ImplBagActions of BagActions {
                     unpack_value(packed, pow::TWO_POW_147, mask::MASK_5)
                 )
                     .unwrap(),
-                }, item_6: Item {
+                }, item_6: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_140, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_131, mask::MASK_9))
@@ -167,7 +170,7 @@ impl ImplBagActions of BagActions {
                     unpack_value(packed, pow::TWO_POW_126, mask::MASK_5)
                 )
                     .unwrap(),
-                }, item_7: Item {
+                }, item_7: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_119, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_110, mask::MASK_9))
@@ -176,7 +179,7 @@ impl ImplBagActions of BagActions {
                     unpack_value(packed, pow::TWO_POW_105, mask::MASK_5)
                 )
                     .unwrap(),
-                }, item_8: Item {
+                }, item_8: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_98, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_89, mask::MASK_9))
@@ -185,7 +188,7 @@ impl ImplBagActions of BagActions {
                     unpack_value(packed, pow::TWO_POW_84, mask::MASK_5)
                 )
                     .unwrap(),
-                }, item_9: Item {
+                }, item_9: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_77, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_68, mask::MASK_9))
@@ -194,7 +197,7 @@ impl ImplBagActions of BagActions {
                     unpack_value(packed, pow::TWO_POW_63, mask::MASK_5)
                 )
                     .unwrap(),
-                }, item_10: Item {
+                }, item_10: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_56, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_47, mask::MASK_9))
@@ -203,7 +206,7 @@ impl ImplBagActions of BagActions {
                     unpack_value(packed, pow::TWO_POW_42, mask::MASK_5)
                 )
                     .unwrap(),
-                }, item_11: Item {
+                }, item_11: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_35, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_26, mask::MASK_9))
@@ -212,7 +215,7 @@ impl ImplBagActions of BagActions {
                     unpack_value(packed, pow::TWO_POW_21, mask::MASK_5)
                 )
                     .unwrap(),
-                }, item_12: Item {
+                }, item_12: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_14, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_5, mask::MASK_9))
@@ -221,7 +224,7 @@ impl ImplBagActions of BagActions {
             },
         }
     }
-    fn add_item(ref self: Bag, item: Item) -> Bag {
+    fn add_item(ref self: Bag, item: LootStatistics) -> Bag {
         assert(self.is_full() == false, 'Bag is full');
 
         let slot = self.find_slot();
@@ -300,7 +303,7 @@ impl ImplBagActions of BagActions {
             return true;
         }
     }
-    fn get_item(self: Bag, item_id: u8) -> Item {
+    fn get_item(self: Bag, item_id: u8) -> LootStatistics {
         if self.item_1.id == item_id {
             return self.item_1;
         } else if self.item_2.id == item_id {
@@ -330,188 +333,191 @@ impl ImplBagActions of BagActions {
     fn remove_item(ref self: Bag, item_id: u8) -> Bag {
         // this doesn't check if item is in the bag... It just removes by id...
         if self.item_1.id == item_id {
-            self.item_1 = Item { id: 0, xp: 0, metadata: 0 };
+            self.item_1 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_2.id == item_id {
-            self.item_2 = Item { id: 0, xp: 0, metadata: 0 };
+            self.item_2 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_3.id == item_id {
-            self.item_3 = Item { id: 0, xp: 0, metadata: 0 };
+            self.item_3 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_4.id == item_id {
-            self.item_4 = Item { id: 0, xp: 0, metadata: 0 };
+            self.item_4 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_5.id == item_id {
-            self.item_5 = Item { id: 0, xp: 0, metadata: 0 };
+            self.item_5 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_6.id == item_id {
-            self.item_6 = Item { id: 0, xp: 0, metadata: 0 };
+            self.item_6 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_7.id == item_id {
-            self.item_7 = Item { id: 0, xp: 0, metadata: 0 };
+            self.item_7 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_8.id == item_id {
-            self.item_8 = Item { id: 0, xp: 0, metadata: 0 };
+            self.item_8 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_9.id == item_id {
-            self.item_9 = Item { id: 0, xp: 0, metadata: 0 };
+            self.item_9 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_10.id == item_id {
-            self.item_10 = Item { id: 0, xp: 0, metadata: 0 };
+            self.item_10 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         } else {
-            self.item_11 = Item { id: 0, xp: 0, metadata: 0 };
+            self.item_11 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         }
+    }
+    fn new_item(item_id: u8) -> LootStatistics {
+        LootStatistics { id: item_id, xp: 0, metadata: 0 }
     }
 }
 #[test]
 #[available_gas(5000000)]
 fn test_pack_bag() {
     let mut bag = Bag {
-        item_1: Item {
+        item_1: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_2: Item {
+            }, item_2: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_3: Item {
+            }, item_3: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_4: Item {
+            }, item_4: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_5: Item {
+            }, item_5: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_6: Item {
+            }, item_6: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_7: Item {
+            }, item_7: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_8: Item {
+            }, item_8: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_9: Item {
+            }, item_9: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_10: Item {
+            }, item_10: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_11: Item {
+            }, item_11: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_12: Item {
+            }, item_12: LootStatistics {
             id: 127, xp: 511, metadata: 31
         },
     };
 
     let packed_bag = ImplBagActions::unpack(bag.pack());
 
-    assert(packed_bag.item_1.id == 127, 'Item 1 ID is not 127');
-    assert(packed_bag.item_1.xp == 511, 'Item 1 XP is not 511');
-    assert(packed_bag.item_1.metadata == 31, 'Item 1 metadata is not 31');
+    assert(packed_bag.item_1.id == 127, 'Loot 1 ID is not 127');
+    assert(packed_bag.item_1.xp == 511, 'Loot 1 XP is not 511');
+    assert(packed_bag.item_1.metadata == 31, ' metadata is not 31');
 
-    assert(packed_bag.item_2.id == 127, 'Item 2 ID is not 127');
-    assert(packed_bag.item_2.xp == 511, 'Item 2 XP is not 511');
-    assert(packed_bag.item_2.metadata == 31, 'Item 2 metadata is not 31');
+    assert(packed_bag.item_2.id == 127, 'Loot 2 ID is not 127');
+    assert(packed_bag.item_2.xp == 511, 'Loot 2 XP is not 511');
+    assert(packed_bag.item_2.metadata == 31, ' 2 metadata is not 31');
 
-    assert(packed_bag.item_3.id == 127, 'Item 3 ID is not 127');
-    assert(packed_bag.item_3.xp == 511, 'Item 3 XP is not 511');
-    assert(packed_bag.item_3.metadata == 31, 'Item 3 metadata is not 31');
+    assert(packed_bag.item_3.id == 127, 'Loot 3 ID is not 127');
+    assert(packed_bag.item_3.xp == 511, 'Loot 3 XP is not 511');
+    assert(packed_bag.item_3.metadata == 31, ' 3 metadata is not 31');
 
-    assert(packed_bag.item_4.id == 127, 'Item 4 ID is not 127');
-    assert(packed_bag.item_4.xp == 511, 'Item 4 XP is not 511');
-    assert(packed_bag.item_4.metadata == 31, 'Item 4 metadata is not 31');
+    assert(packed_bag.item_4.id == 127, 'Loot 4 ID is not 127');
+    assert(packed_bag.item_4.xp == 511, 'Loot 4 XP is not 511');
+    assert(packed_bag.item_4.metadata == 31, ' 4 metadata is not 31');
 
-    assert(packed_bag.item_5.id == 127, 'Item 5 ID is not 127');
-    assert(packed_bag.item_5.xp == 511, 'Item 5 XP is not 511');
-    assert(packed_bag.item_5.metadata == 31, 'Item 5 metadata is not 31');
+    assert(packed_bag.item_5.id == 127, 'Loot 5 ID is not 127');
+    assert(packed_bag.item_5.xp == 511, 'Loot 5 XP is not 511');
+    assert(packed_bag.item_5.metadata == 31, ' 5 metadata is not 31');
 
-    assert(packed_bag.item_6.id == 127, 'Item 6 ID is not 127');
-    assert(packed_bag.item_6.xp == 511, 'Item 6 XP is not 511');
-    assert(packed_bag.item_6.metadata == 31, 'Item 6 metadata is not 31');
+    assert(packed_bag.item_6.id == 127, 'Loot 6 ID is not 127');
+    assert(packed_bag.item_6.xp == 511, 'Loot 6 XP is not 511');
+    assert(packed_bag.item_6.metadata == 31, ' 6 metadata is not 31');
 
-    assert(packed_bag.item_7.id == 127, 'Item 7 ID is not 127');
-    assert(packed_bag.item_7.xp == 511, 'Item 7 XP is not 511');
-    assert(packed_bag.item_7.metadata == 31, 'Item 7 metadata is not 31');
+    assert(packed_bag.item_7.id == 127, 'Loot 7 ID is not 127');
+    assert(packed_bag.item_7.xp == 511, 'Loot 7 XP is not 511');
+    assert(packed_bag.item_7.metadata == 31, ' 7 metadata is not 31');
 
-    assert(packed_bag.item_8.id == 127, 'Item 8 ID is not 127');
-    assert(packed_bag.item_8.xp == 511, 'Item 8 XP is not 511');
-    assert(packed_bag.item_8.metadata == 31, 'Item 8 metadata is not 31');
+    assert(packed_bag.item_8.id == 127, 'Loot 8 ID is not 127');
+    assert(packed_bag.item_8.xp == 511, 'Loot 8 XP is not 511');
+    assert(packed_bag.item_8.metadata == 31, ' 8 metadata is not 31');
 
-    assert(packed_bag.item_9.id == 127, 'Item 9 ID is not 127');
-    assert(packed_bag.item_9.xp == 511, 'Item 9 XP is not 511');
-    assert(packed_bag.item_9.metadata == 31, 'Item 9 metadata is not 31');
+    assert(packed_bag.item_9.id == 127, 'Loot 9 ID is not 127');
+    assert(packed_bag.item_9.xp == 511, 'Loot 9 XP is not 511');
+    assert(packed_bag.item_9.metadata == 31, ' 9 metadata is not 31');
 
-    assert(packed_bag.item_10.id == 127, 'Item 10 ID is not 127');
-    assert(packed_bag.item_10.xp == 511, 'Item 10 XP is not 511');
-    assert(packed_bag.item_10.metadata == 31, 'Item 10 metadata is not 31');
+    assert(packed_bag.item_10.id == 127, 'Loot 10 ID is not 127');
+    assert(packed_bag.item_10.xp == 511, 'Loot 10 XP is not 511');
+    assert(packed_bag.item_10.metadata == 31, ' 10 metadata is not 31');
 
-    assert(packed_bag.item_11.id == 127, 'Item 11 ID is not 127');
-    assert(packed_bag.item_11.xp == 511, 'Item 11 XP is not 511');
-    assert(packed_bag.item_11.metadata == 31, 'Item 11 metadata is not 31');
+    assert(packed_bag.item_11.id == 127, 'Loot 11 ID is not 127');
+    assert(packed_bag.item_11.xp == 511, 'Loot 11 XP is not 511');
+    assert(packed_bag.item_11.metadata == 31, ' 11 metadata is not 31');
 
-    assert(packed_bag.item_12.id == 127, 'Item 12 ID is not 127');
-    assert(packed_bag.item_12.xp == 511, 'Item 12 XP is not 511');
-    assert(packed_bag.item_12.metadata == 31, 'Item 12 metadata is not 31');
+    assert(packed_bag.item_12.id == 127, 'Loot 12 ID is not 127');
+    assert(packed_bag.item_12.xp == 511, 'Loot 12 XP is not 511');
+    assert(packed_bag.item_12.metadata == 31, ' 12 metadata is not 31');
 }
 
 #[test]
 #[available_gas(5000000)]
 fn test_add_item() {
     let mut bag = Bag {
-        item_1: Item {
+        item_1: LootStatistics {
             id: 1, xp: 0, metadata: 0
-            }, item_2: Item {
+            }, item_2: LootStatistics {
             id: 2, xp: 0, metadata: 0
-            }, item_3: Item {
+            }, item_3: LootStatistics {
             id: 3, xp: 0, metadata: 0
-            }, item_4: Item {
+            }, item_4: LootStatistics {
             id: 4, xp: 0, metadata: 0
-            }, item_5: Item {
+            }, item_5: LootStatistics {
             id: 5, xp: 0, metadata: 0
-            }, item_6: Item {
+            }, item_6: LootStatistics {
             id: 0, xp: 0, metadata: 0
-            }, item_7: Item {
+            }, item_7: LootStatistics {
             id: 0, xp: 0, metadata: 0
-            }, item_8: Item {
+            }, item_8: LootStatistics {
             id: 0, xp: 0, metadata: 0
-            }, item_9: Item {
+            }, item_9: LootStatistics {
             id: 0, xp: 0, metadata: 0
-            }, item_10: Item {
+            }, item_10: LootStatistics {
             id: 0, xp: 0, metadata: 0
-            }, item_11: Item {
+            }, item_11: LootStatistics {
             id: 0, xp: 0, metadata: 0
-            }, item_12: Item {
+            }, item_12: LootStatistics {
             id: 0, xp: 0, metadata: 0
         },
     };
 
-    let item = Item { id: 23, xp: 1, metadata: 5 };
+    let item = LootStatistics { id: 23, xp: 1, metadata: 5 };
 
     bag.add_item(item);
 
-    assert(bag.item_6.id == 23, 'Item id should be 23');
+    assert(bag.item_6.id == 23, 'Loot id should be 23');
 }
 
 #[test]
 #[available_gas(5000000)]
 fn test_is_full() {
     let mut bag = Bag {
-        item_1: Item {
+        item_1: LootStatistics {
             id: 1, xp: 0, metadata: 0
-            }, item_2: Item {
+            }, item_2: LootStatistics {
             id: 2, xp: 0, metadata: 0
-            }, item_3: Item {
+            }, item_3: LootStatistics {
             id: 3, xp: 0, metadata: 0
-            }, item_4: Item {
+            }, item_4: LootStatistics {
             id: 4, xp: 0, metadata: 0
-            }, item_5: Item {
+            }, item_5: LootStatistics {
             id: 5, xp: 0, metadata: 0
-            }, item_6: Item {
+            }, item_6: LootStatistics {
             id: 8, xp: 0, metadata: 0
-            }, item_7: Item {
+            }, item_7: LootStatistics {
             id: 9, xp: 0, metadata: 0
-            }, item_8: Item {
+            }, item_8: LootStatistics {
             id: 11, xp: 0, metadata: 0
-            }, item_9: Item {
+            }, item_9: LootStatistics {
             id: 12, xp: 0, metadata: 0
-            }, item_10: Item {
+            }, item_10: LootStatistics {
             id: 13, xp: 0, metadata: 0
-            }, item_11: Item {
+            }, item_11: LootStatistics {
             id: 14, xp: 0, metadata: 0
-            }, item_12: Item {
+            }, item_12: LootStatistics {
             id: 15, xp: 0, metadata: 0
         },
     };
@@ -522,35 +528,35 @@ fn test_is_full() {
 #[available_gas(5000000)]
 fn remove_item() {
     let mut bag = Bag {
-        item_1: Item {
+        item_1: LootStatistics {
             id: 1, xp: 0, metadata: 0
-            }, item_2: Item {
+            }, item_2: LootStatistics {
             id: 2, xp: 0, metadata: 0
-            }, item_3: Item {
+            }, item_3: LootStatistics {
             id: 3, xp: 0, metadata: 0
-            }, item_4: Item {
+            }, item_4: LootStatistics {
             id: 4, xp: 0, metadata: 0
-            }, item_5: Item {
+            }, item_5: LootStatistics {
             id: 5, xp: 0, metadata: 0
-            }, item_6: Item {
+            }, item_6: LootStatistics {
             id: 8, xp: 0, metadata: 0
-            }, item_7: Item {
+            }, item_7: LootStatistics {
             id: 9, xp: 0, metadata: 0
-            }, item_8: Item {
+            }, item_8: LootStatistics {
             id: 11, xp: 0, metadata: 0
-            }, item_9: Item {
+            }, item_9: LootStatistics {
             id: 12, xp: 0, metadata: 0
-            }, item_10: Item {
+            }, item_10: LootStatistics {
             id: 13, xp: 0, metadata: 0
-            }, item_11: Item {
+            }, item_11: LootStatistics {
             id: 14, xp: 0, metadata: 0
-            }, item_12: Item {
+            }, item_12: LootStatistics {
             id: 15, xp: 0, metadata: 0
         },
     };
 
     bag.remove_item(8);
 
-    assert(bag.item_6.id == 0, 'Item id should be 0');
+    assert(bag.item_6.id == 0, 'Loot id should be 0');
 }
 

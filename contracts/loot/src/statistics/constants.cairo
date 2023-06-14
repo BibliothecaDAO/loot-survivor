@@ -114,7 +114,7 @@ mod Slot {
     const Ring: u8 = 8;
 }
 
-// Item Slot lookups
+// LootStatistics Slot lookups
 // TODO: Make this use the Slot enum (Slot.Weapon)
 // @loaf
 mod ItemSlot {
@@ -235,7 +235,7 @@ mod ItemSlot {
     const TitaniumRing: u8 = 8;
 }
 
-// Item Slot Length
+// LootStatistics Slot Length
 mod ItemSlotLength {
     const SlotItemsLengthWeapon: u8 = 18;
     const SlotItemsLengthChest: u8 = 15;
@@ -386,7 +386,7 @@ mod Type {
     }
 }
 
-// Item Type
+// LootStatistics Type
 // TODO: @loaf use the above module instead of literals
 // i.e we want Warhammer = Type.Weapon.Bludgeon
 mod ItemType {

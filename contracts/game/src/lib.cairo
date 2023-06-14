@@ -45,7 +45,7 @@ mod Adventurer {
     fn start(starting_weapon: u8) {
         // assert item is a starting weapon
         assert(
-            ItemUtils::is_starting_weapon(starting_weapon) == true, 'Item is not a starter weapon'
+            ItemUtils::is_starting_weapon(starting_weapon) == true, 'Loot is not a starter weapon'
         );
 
         // generate adventurer entropy seed based on current block timestamp and caller address
@@ -84,7 +84,7 @@ mod Adventurer {
         AdventurerUpdate(caller, current_adventurer_id, new_adventurer);
 
         // write the new adventurer to storage
-        _adventurer::write((caller, current_adventurer_id), new_adventurer.pack());
+        _pack_adventurer(current_adventurer_id, new_adventurer);
 
         // TODO: write adventurer meta data to storage
 
@@ -95,9 +95,7 @@ mod Adventurer {
     // @loothero
     fn explore(adventurer_id: u256) {
         // get adventurer from storage and unpack
-        let mut adventurer = AdventurerActions::unpack(
-            _adventurer::read((get_caller_address(), adventurer_id))
-        );
+        let mut adventurer = _adventuer_unpacked(adventurer_id);
 
         // TODO: get adventurer entropy from AdventurerMeta
         let adventurer_entropy = 1;
@@ -110,7 +108,7 @@ mod Adventurer {
         adventurer.explore(adventurer_entropy, game_entropy);
 
         // write the updated adventurer to storage
-        _adventurer::write((get_caller_address(), adventurer_id), adventurer.pack());
+        _pack_adventurer(adventurer_id, adventurer);
     }
 
     // @loothero
@@ -136,15 +134,13 @@ mod Adventurer {
     // @loaf
     fn equip(adventurer_id: u256, item_id: u8) {
         // TODO: check ownership
-        let mut adventurer = AdventurerActions::unpack(
-            _adventurer::read((get_caller_address(), adventurer_id))
-        );
+        let mut adventurer = _adventuer_unpacked(adventurer_id);
 
         let mut bag = ImplBagActions::unpack(_bag::read(adventurer_id));
 
         let equipping_item = bag.get_item(item_id);
         // TODO: could be moved to lib
-        assert(equipping_item.id > 0, 'Item does not exist in bag');
+        assert(equipping_item.id > 0, 'Loot does not exist in bag');
 
         // check what item type exists on adventurer
         // if some exists pluck from adventurer and add to bag
@@ -157,34 +153,57 @@ mod Adventurer {
         adventurer.add_item(equipping_item);
 
         // pack and save
-        _adventurer::write((get_caller_address(), adventurer_id), adventurer.pack());
-        _bag::write(adventurer_id, bag.pack());
+        _pack_adventurer(adventurer_id, adventurer);
+        _pack_bag(adventurer_id, bag);
     }
 
     // @loaf
     fn buy_item(adventurer_id: u256, item_id: u8, equip: bool) {
-        let mut adventurer = AdventurerActions::unpack(
-            _adventurer::read((get_caller_address(), adventurer_id))
-        );
+        let mut adventurer = _adventuer_unpacked(adventurer_id);
 
-        // update to real entropy
+        // TODO: update to real entropy
         let entropy: u32 = 123;
 
         // check item exists on Market
-        assert(ImplMarket::check_ownership(entropy, item_id) == true, 'Item does not exist');
+        assert(ImplMarket::check_ownership(entropy, item_id) == true, 'Market item does not exist');
 
-        // get item price based on tier
+        // creates new item struct
+        let item = ImplBagActions::new_item(item_id);
+
+        // TODO: get item price based on tier 
         let item_price = 15;
 
-        // check gold balance is greater than item price
-        if adventurer.check_gold(item_price) == false {
-            assert(false, 'Not enough gold');
-        }
+        // check adventurer has enough gold
+        assert(adventurer.check_gold(item_price) == true, 'Not enough gold');
 
+        // deduct gold
         adventurer.deduct_gold(item_price);
-    // check item type exists on Adventurer -> if some exists put add to bag
-    // set item on Adventurer in first free slot
+
+        if equip == true {
+            let unequipping_item = adventurer.get_item_at_slot(item);
+
+            adventurer.add_item(item);
+
+            // check if item exists
+            if unequipping_item.id > 0 {
+                let mut bag = ImplBagActions::unpack(_bag::read(adventurer_id));
+                bag.add_item(unequipping_item);
+
+                // pack bag
+                _pack_bag(adventurer_id, bag);
+            }
+            _pack_adventurer(adventurer_id, adventurer);
+        } else {
+            // add and pack bag
+            let mut bag = ImplBagActions::unpack(_bag::read(adventurer_id));
+            bag.add_item(item);
+            _pack_bag(adventurer_id, bag);
+
+            // pack adventurer
+            _pack_adventurer(adventurer_id, adventurer);
+        }
     }
+
 
     // @loothero
     fn upgrade_stat(adventurer_id: u256, stat_id: u8) { //
@@ -205,15 +224,25 @@ mod Adventurer {
     // check item exists on Adventurer
     // 
     }
+
+    // ------------------------------------------ //
+    // ------------ Helper Functions ------------ //
+    // ------------------------------------------ //
+
+    fn _adventuer_unpacked(adventurer_id: u256) -> Adventurer {
+        AdventurerActions::unpack(_adventurer::read((get_caller_address(), adventurer_id)))
+    }
+
+    fn _pack_adventurer(adventurer_id: u256, adventurer: Adventurer) {
+        _adventurer::write((get_caller_address(), adventurer_id), adventurer.pack());
+    }
+
+    fn _bag_unpacked(adventurer_id: u256) -> Bag {
+        ImplBagActions::unpack(_bag::read(adventurer_id))
+    }
+
+    fn _pack_bag(adventurer_id: u256, bag: Bag) {
+        _bag::write(adventurer_id, bag.pack());
+    }
 }
-// #[test]
-// #[available_gas(2000000)]
-// fn test_component() {}
-
-// on mint -> get random number
-
-// on explore ->
-
-// global seed
-
 

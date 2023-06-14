@@ -149,5 +149,5 @@ fn test_explore_item_discovery() {
     let discover_item = ExploreUtils::get_random_explore(
         adventurer, adventurer_entropy, game_entropy
     );
-    assert(discover_item == DiscoveryType::Item, 'should have found item');
+    assert(discover_item == DiscoveryType::LootStatistics, 'should have found item');
 }

@@ -19,7 +19,7 @@ use super::beasts::BeastUtils;
 use super::obstacles::ObstacleUtils;
 use super::constants::{discovery_constants, beast_constants};
 
-use super::item_meta::Item;
+use super::item_meta::LootStatistics;
 
 #[derive(Drop, Copy, Serde)]
 struct Adventurer {
@@ -36,14 +36,14 @@ struct Adventurer {
     charisma: u8, //  5 bits
     // equipped
     gold: u16, // 9 bits
-    weapon: Item, // 24 bits
-    chest: Item, // 24 bits
-    head: Item, // 24 bits
-    waist: Item, // 24 bits
-    foot: Item, // 24 bits
-    hand: Item, // 24 bits
-    neck: Item, // 24 bits
-    ring: Item, // 24 bits
+    weapon: LootStatistics, // 24 bits
+    chest: LootStatistics, // 24 bits
+    head: LootStatistics, // 24 bits
+    waist: LootStatistics, // 24 bits
+    foot: LootStatistics, // 24 bits
+    hand: LootStatistics, // 24 bits
+    neck: LootStatistics, // 24 bits
+    ring: LootStatistics, // 24 bits
     // Beast health
     beast_health: u16,
     stat_upgrade_available: u8,
@@ -81,17 +81,17 @@ trait Actions {
     fn add_charisma(ref self: Adventurer, value: u8) -> Adventurer;
 
     // This is generic and can be used for all items
-    fn add_item(ref self: Adventurer, value: Item) -> Adventurer;
+    fn add_item(ref self: Adventurer, value: LootStatistics) -> Adventurer;
 
     // TODO: Do we keep these as helpers? We use in add_items
-    fn add_weapon(ref self: Adventurer, value: Item) -> Adventurer;
-    fn add_chest(ref self: Adventurer, value: Item) -> Adventurer;
-    fn add_head(ref self: Adventurer, value: Item) -> Adventurer;
-    fn add_waist(ref self: Adventurer, value: Item) -> Adventurer;
-    fn add_foot(ref self: Adventurer, value: Item) -> Adventurer;
-    fn add_hand(ref self: Adventurer, value: Item) -> Adventurer;
-    fn add_neck(ref self: Adventurer, value: Item) -> Adventurer;
-    fn add_ring(ref self: Adventurer, value: Item) -> Adventurer;
+    fn add_weapon(ref self: Adventurer, value: LootStatistics) -> Adventurer;
+    fn add_chest(ref self: Adventurer, value: LootStatistics) -> Adventurer;
+    fn add_head(ref self: Adventurer, value: LootStatistics) -> Adventurer;
+    fn add_waist(ref self: Adventurer, value: LootStatistics) -> Adventurer;
+    fn add_foot(ref self: Adventurer, value: LootStatistics) -> Adventurer;
+    fn add_hand(ref self: Adventurer, value: LootStatistics) -> Adventurer;
+    fn add_neck(ref self: Adventurer, value: LootStatistics) -> Adventurer;
+    fn add_ring(ref self: Adventurer, value: LootStatistics) -> Adventurer;
 
     // beast 
     fn deduct_beast_health(ref self: Adventurer, amount: u16) -> Adventurer;
@@ -106,9 +106,9 @@ trait Actions {
 
     fn get_level(self: Adventurer) -> u8;
 
-    fn is_slot_free(self: Adventurer, item: Item) -> bool;
+    fn is_slot_free(self: Adventurer, item: LootStatistics) -> bool;
 
-    fn get_item_at_slot(self: Adventurer, item: Item) -> Item;
+    fn get_item_at_slot(self: Adventurer, item: LootStatistics) -> LootStatistics;
 }
 
 impl AdventurerActions of Actions {
@@ -125,7 +125,7 @@ impl AdventurerActions of Actions {
         self.gold >= value
     }
 
-    fn get_item_at_slot(self: Adventurer, item: Item) -> Item {
+    fn get_item_at_slot(self: Adventurer, item: LootStatistics) -> LootStatistics {
         let item_slot = ItemUtils::get_slot(item.id);
 
         if (item_slot == constants::Slot::Weapon) {
@@ -146,7 +146,7 @@ impl AdventurerActions of Actions {
             return self.ring;
         }
     }
-    fn is_slot_free(self: Adventurer, item: Item) -> bool {
+    fn is_slot_free(self: Adventurer, item: LootStatistics) -> bool {
         let item_slot = ItemUtils::get_slot(item.id);
 
         if (item_slot == constants::Slot::Weapon) {
@@ -220,7 +220,7 @@ impl AdventurerActions of Actions {
                 return self;
             }
         } // if the adventurer encounters a discovery
-        else if (explore_outcome == discovery_constants::DiscoveryType::Item) { // get the discovery type
+        else if (explore_outcome == discovery_constants::DiscoveryType::LootStatistics) { // get the discovery type
             let item_type = ExploreUtils::get_discovery_type(
                 self, adventurer_entropy, game_entropy
             );
@@ -349,7 +349,7 @@ impl AdventurerActions of Actions {
         self.charisma = self.charisma + value;
         self
     }
-    fn add_item(ref self: Adventurer, value: Item) -> Adventurer {
+    fn add_item(ref self: Adventurer, value: LootStatistics) -> Adventurer {
         let slot = ItemUtils::get_slot(value.id);
 
         if slot == 1 {
@@ -378,35 +378,35 @@ impl AdventurerActions of Actions {
         }
         self
     }
-    fn add_weapon(ref self: Adventurer, value: Item) -> Adventurer {
+    fn add_weapon(ref self: Adventurer, value: LootStatistics) -> Adventurer {
         self.weapon = value;
         self
     }
-    fn add_chest(ref self: Adventurer, value: Item) -> Adventurer {
+    fn add_chest(ref self: Adventurer, value: LootStatistics) -> Adventurer {
         self.chest = value;
         self
     }
-    fn add_head(ref self: Adventurer, value: Item) -> Adventurer {
+    fn add_head(ref self: Adventurer, value: LootStatistics) -> Adventurer {
         self.head = value;
         self
     }
-    fn add_waist(ref self: Adventurer, value: Item) -> Adventurer {
+    fn add_waist(ref self: Adventurer, value: LootStatistics) -> Adventurer {
         self.waist = value;
         self
     }
-    fn add_foot(ref self: Adventurer, value: Item) -> Adventurer {
+    fn add_foot(ref self: Adventurer, value: LootStatistics) -> Adventurer {
         self.foot = value;
         self
     }
-    fn add_hand(ref self: Adventurer, value: Item) -> Adventurer {
+    fn add_hand(ref self: Adventurer, value: LootStatistics) -> Adventurer {
         self.hand = value;
         self
     }
-    fn add_neck(ref self: Adventurer, value: Item) -> Adventurer {
+    fn add_neck(ref self: Adventurer, value: LootStatistics) -> Adventurer {
         self.neck = value;
         self
     }
-    fn add_ring(ref self: Adventurer, value: Item) -> Adventurer {
+    fn add_ring(ref self: Adventurer, value: LootStatistics) -> Adventurer {
         self.ring = value;
         self
     }
@@ -464,21 +464,21 @@ impl AdventurerActions of Actions {
             wisdom: 0,
             charisma: 0,
             gold: 0,
-            weapon: Item {
+            weapon: LootStatistics {
                 id: starting_item, xp: 0, metadata: 1, 
-                }, chest: Item {
+                }, chest: LootStatistics {
                 id: 0, xp: 0, metadata: 0, 
-                }, head: Item {
+                }, head: LootStatistics {
                 id: 0, xp: 0, metadata: 0, 
-                }, waist: Item {
+                }, waist: LootStatistics {
                 id: 0, xp: 0, metadata: 0, 
-                }, foot: Item {
+                }, foot: LootStatistics {
                 id: 0, xp: 0, metadata: 0, 
-                }, hand: Item {
+                }, hand: LootStatistics {
                 id: 0, xp: 0, metadata: 0, 
-                }, neck: Item {
+                }, neck: LootStatistics {
                 id: 0, xp: 0, metadata: 0, 
-                }, ring: Item {
+                }, ring: LootStatistics {
                 id: 0, xp: 0, metadata: 0, 
             }, beast_health: 10, stat_upgrade_available: 0,
         };
@@ -569,7 +569,7 @@ impl AdventurerActions of Actions {
                 .unwrap(),
             gold: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_179, mask::MASK_9))
                 .unwrap(),
-            weapon: Item {
+            weapon: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_172, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_163, mask::MASK_9))
@@ -578,7 +578,7 @@ impl AdventurerActions of Actions {
                     unpack_value(packed, pow::TWO_POW_158, mask::MASK_5)
                 )
                     .unwrap(),
-                }, chest: Item {
+                }, chest: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_151, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_142, mask::MASK_9))
@@ -587,7 +587,7 @@ impl AdventurerActions of Actions {
                     unpack_value(packed, pow::TWO_POW_137, mask::MASK_5)
                 )
                     .unwrap(),
-                }, head: Item {
+                }, head: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_130, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_121, mask::MASK_9))
@@ -596,7 +596,7 @@ impl AdventurerActions of Actions {
                     unpack_value(packed, pow::TWO_POW_116, mask::MASK_5)
                 )
                     .unwrap(),
-                }, waist: Item {
+                }, waist: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_109, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_100, mask::MASK_9))
@@ -605,7 +605,7 @@ impl AdventurerActions of Actions {
                     unpack_value(packed, pow::TWO_POW_95, mask::MASK_5)
                 )
                     .unwrap(),
-                }, foot: Item {
+                }, foot: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_88, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_79, mask::MASK_9))
@@ -614,7 +614,7 @@ impl AdventurerActions of Actions {
                     unpack_value(packed, pow::TWO_POW_74, mask::MASK_5)
                 )
                     .unwrap(),
-                }, hand: Item {
+                }, hand: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_67, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_58, mask::MASK_9))
@@ -623,7 +623,7 @@ impl AdventurerActions of Actions {
                     unpack_value(packed, pow::TWO_POW_53, mask::MASK_5)
                 )
                     .unwrap(),
-                }, neck: Item {
+                }, neck: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_46, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_37, mask::MASK_9))
@@ -632,7 +632,7 @@ impl AdventurerActions of Actions {
                     unpack_value(packed, pow::TWO_POW_32, mask::MASK_5)
                 )
                     .unwrap(),
-                }, ring: Item {
+                }, ring: LootStatistics {
                 id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_25, mask::MASK_7))
                     .unwrap(),
                 xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_16, mask::MASK_9))
@@ -665,21 +665,21 @@ fn test_adventurer() {
         wisdom: 31,
         charisma: 31,
         gold: 511,
-        weapon: Item {
+        weapon: LootStatistics {
             id: 100, xp: 511, metadata: 1, 
-            }, chest: Item {
+            }, chest: LootStatistics {
             id: 99, xp: 511, metadata: 2, 
-            }, head: Item {
+            }, head: LootStatistics {
             id: 98, xp: 511, metadata: 3, 
-            }, waist: Item {
+            }, waist: LootStatistics {
             id: 87, xp: 511, metadata: 4, 
-            }, foot: Item {
+            }, foot: LootStatistics {
             id: 78, xp: 511, metadata: 5, 
-            }, hand: Item {
+            }, hand: LootStatistics {
             id: 34, xp: 511, metadata: 6, 
-            }, neck: Item {
+            }, neck: LootStatistics {
             id: 32, xp: 511, metadata: 7, 
-            }, ring: Item {
+            }, ring: LootStatistics {
             id: 1, xp: 511, metadata: 8, 
         }, beast_health: 1023, stat_upgrade_available: 1,
     };
@@ -786,7 +786,7 @@ fn test_add_weapon() {
     let mut adventurer = AdventurerActions::new(1, 1);
     let mut adventurer = AdventurerActions::new(1, 1);
 
-    let item = Item { id: 1, xp: 1, metadata: 0 };
+    let item = LootStatistics { id: 1, xp: 1, metadata: 0 };
 
     adventurer.add_weapon(item);
 
@@ -802,10 +802,10 @@ fn test_increase_item_xp() {
     let mut adventurer = AdventurerActions::new(1, 1);
     let mut adventurer = AdventurerActions::new(1, 1);
 
-    let item_pendant = Item { id: 1, xp: 1, metadata: 0 };
-    let item_silver_ring = Item { id: 4, xp: 1, metadata: 0 };
-    let item_ghost_wand = Item { id: 9, xp: 1, metadata: 0 };
-    let item_silk_robe = Item { id: 18, xp: 1, metadata: 0 };
+    let item_pendant = LootStatistics { id: 1, xp: 1, metadata: 0 };
+    let item_silver_ring = LootStatistics { id: 4, xp: 1, metadata: 0 };
+    let item_ghost_wand = LootStatistics { id: 9, xp: 1, metadata: 0 };
+    let item_silk_robe = LootStatistics { id: 18, xp: 1, metadata: 0 };
 
     adventurer.add_item(item_pendant);
     adventurer.add_item(item_silver_ring);

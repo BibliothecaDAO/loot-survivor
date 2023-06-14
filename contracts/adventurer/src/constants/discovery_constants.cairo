@@ -1,7 +1,7 @@
 mod DiscoveryType {
     const Beast: u64 = 0;
     const Obstacle: u64 = 1;
-    const Item: u64 = 2;
+    const LootStatistics: u64 = 2;
 }
 
 mod ItemDiscoveryType {
