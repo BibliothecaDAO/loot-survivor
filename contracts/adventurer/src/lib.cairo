@@ -6,3 +6,4 @@ mod beasts;
 mod obstacles;
 mod bag;
 mod constants;
+mod combat;

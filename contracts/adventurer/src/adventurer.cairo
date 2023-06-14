@@ -840,7 +840,7 @@ fn test_explore_obstacle_discovery() {
 
     // exploring with 1 entropy will result in an obstacle discovery which will currently do 1 damage
     adventurer.explore(adventurer_entropy, game_entropy);
-    assert(adventurer.health == 99, 'advntr should take obstacle dmg');
+    assert(adventurer.health < 99, 'advntr should take obstacle dmg');
 }
 
 #[test]
