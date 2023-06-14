@@ -42,6 +42,23 @@ trait Combat {
         adventurer_entropy: u64,
         game_entropy: u64
     ) -> u16;
+
+    fn get_name_prefix_damage_bonus(
+        base_damage: u16,
+        weapon_name: CombatItemName,
+        armor_name: CombatItemName,
+        adventurer_entropy: u64,
+        game_entropy: u64
+    ) -> u16;
+
+    fn get_name_suffix_damage_bonus(
+        base_damage: u16,
+        weapon_name: CombatItemName,
+        armor_name: CombatItemName,
+        adventurer_entropy: u64,
+        game_entropy: u64
+    ) -> u16;
+
     fn get_special_name_damage_bonus(
         base_damage: u16,
         weapon_name: CombatItemName,
@@ -279,6 +296,58 @@ impl CombatUtils of Combat {
         0
     }
 
+    fn get_name_prefix_damage_bonus(
+        base_damage: u16,
+        weapon_name: CombatItemName,
+        armor_name: CombatItemName,
+        adventurer_entropy: u64,
+        game_entropy: u64
+    ) -> u16 {
+        // is the weapon does not have a prefix
+        if (weapon_name.prefix == 0) {
+            // return zero
+            return 0;
+        // if the weapon prefix is the same as the armor prefix
+        } else if (weapon_name.prefix == armor_name.prefix) {
+            let damage_multplier = U64TryIntoU16::try_into((adventurer_entropy + game_entropy) % 4)
+                .unwrap();
+
+            // result will be base damage * (4-7) which will equate to a 4-7x damage bonus
+            return base_damage * (damage_multplier + 4);
+        }
+
+        // fall through return zero
+        0
+    }
+
+    fn get_name_suffix_damage_bonus(
+        base_damage: u16,
+        weapon_name: CombatItemName,
+        armor_name: CombatItemName,
+        adventurer_entropy: u64,
+        game_entropy: u64
+    ) -> u16 {
+        // is the weapon does not have a prefix
+        if (weapon_name.suffix == 0) {
+            // return zero
+            return 0;
+        // if the weapon prefix is the same as the armor prefix
+        } else if (weapon_name.suffix == armor_name.suffix) {
+            // divide base damage by 4 to get 25% of original damage
+            let damage_boost_base = base_damage / 4;
+
+            // damage multplier is 1-4 which will equate to a 25-100% damage boost
+            let damage_multplier = U64TryIntoU16::try_into((adventurer_entropy + game_entropy) % 4)
+                .unwrap();
+
+            // multiply base damage boost (25% of original damage) by damage multiplier (1-4)
+            return damage_boost_base * (damage_multplier + 1);
+        }
+
+        // fall through return zero
+        0
+    }
+
     // get_special_name_damage_bonus returns the bonus damage for special item
     // @param base_damage: the base damage done by the attacker
     // @param weapon_name: the name of the weapon used by the attacker
@@ -293,7 +362,16 @@ impl CombatUtils of Combat {
         adventurer_entropy: u64,
         game_entropy: u64
     ) -> u16 {
-        return 0;
+        let name_prefix_bonus = CombatUtils::get_name_prefix_damage_bonus(
+            base_damage, weapon_name, armor_name, adventurer_entropy, game_entropy
+        );
+
+        let name_suffix_bonus = CombatUtils::get_name_suffix_damage_bonus(
+            base_damage, weapon_name, armor_name, adventurer_entropy, game_entropy
+        );
+
+        // return the sum of the name prefix and name suffix bonuses
+        return name_prefix_bonus + name_suffix_bonus;
     }
 
     // get_adventurer_strength_bonus returns the bonus damage for adventurer strength
@@ -301,7 +379,10 @@ impl CombatUtils of Combat {
     // @param original_damage: the original damage done by the attacker
     // @return u16: the bonus damage done by adventurer strength
     fn get_adventurer_strength_bonus(adventurer: Adventurer, original_damage: u16) -> u16 {
-        return 0;
+        // each strength stat point is worth 10% of the original damage
+        let strength_boost = original_damage * (90 + (U8IntoU16::into(adventurer.strength) * 10));
+        let strength_bonus_damage = strength_boost / 100;
+        return strength_bonus_damage;
     }
 }
 
