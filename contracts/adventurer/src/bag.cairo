@@ -38,7 +38,6 @@ struct Bag {
 trait BagActions {
     fn pack(self: Bag) -> felt252;
     fn unpack(packed: felt252) -> Bag;
-
     // swap item
     // take bag and item to swap and item to equip
     // return bag with swapped items and item that was swapped for
@@ -46,16 +45,16 @@ trait BagActions {
     // fn swap_items(self: Bag, incoming: u8, outgoing: u8) -> (Bag, Item);
 
     // set item in first available slot
-    fn set_item(ref self: Bag, item: Item) -> Bag;
+    fn add_item(ref self: Bag, item: Item) -> Bag;
 
-    // finds open slot
+    // // finds open slot
     fn find_slot(self: Bag) -> u8;
 
     // check if bag full
     fn is_full(self: Bag) -> bool;
-
     // get item by id
     fn get_item(self: Bag, item_id: u8) -> Item;
+    fn remove_item(ref self: Bag, item_id: u8) -> Bag;
 }
 
 impl ImplBagActions of BagActions {
@@ -222,7 +221,7 @@ impl ImplBagActions of BagActions {
             },
         }
     }
-    fn set_item(ref self: Bag, item: Item) -> Bag {
+    fn add_item(ref self: Bag, item: Item) -> Bag {
         assert(self.is_full() == false, 'Bag is full');
 
         let slot = self.find_slot();
@@ -290,10 +289,8 @@ impl ImplBagActions of BagActions {
             return 9;
         } else if self.item_11.id == 0 {
             return 10;
-        } else if self.item_12.id == 0 {
-            return 11;
         } else {
-            return 12;
+            return 11;
         }
     }
     fn is_full(self: Bag) -> bool {
@@ -330,8 +327,44 @@ impl ImplBagActions of BagActions {
             return self.item_12;
         }
     }
+    fn remove_item(ref self: Bag, item_id: u8) -> Bag {
+        // this doesn't check if item is in the bag... It just removes by id...
+        if self.item_1.id == item_id {
+            self.item_1 = Item { id: 0, xp: 0, metadata: 0 };
+            return self;
+        } else if self.item_2.id == item_id {
+            self.item_2 = Item { id: 0, xp: 0, metadata: 0 };
+            return self;
+        } else if self.item_3.id == item_id {
+            self.item_3 = Item { id: 0, xp: 0, metadata: 0 };
+            return self;
+        } else if self.item_4.id == item_id {
+            self.item_4 = Item { id: 0, xp: 0, metadata: 0 };
+            return self;
+        } else if self.item_5.id == item_id {
+            self.item_5 = Item { id: 0, xp: 0, metadata: 0 };
+            return self;
+        } else if self.item_6.id == item_id {
+            self.item_6 = Item { id: 0, xp: 0, metadata: 0 };
+            return self;
+        } else if self.item_7.id == item_id {
+            self.item_7 = Item { id: 0, xp: 0, metadata: 0 };
+            return self;
+        } else if self.item_8.id == item_id {
+            self.item_8 = Item { id: 0, xp: 0, metadata: 0 };
+            return self;
+        } else if self.item_9.id == item_id {
+            self.item_9 = Item { id: 0, xp: 0, metadata: 0 };
+            return self;
+        } else if self.item_10.id == item_id {
+            self.item_10 = Item { id: 0, xp: 0, metadata: 0 };
+            return self;
+        } else {
+            self.item_11 = Item { id: 0, xp: 0, metadata: 0 };
+            return self;
+        }
+    }
 }
-
 #[test]
 #[available_gas(5000000)]
 fn test_pack_bag() {
@@ -414,10 +447,9 @@ fn test_pack_bag() {
     assert(packed_bag.item_12.metadata == 31, 'Item 12 metadata is not 31');
 }
 
-
 #[test]
 #[available_gas(5000000)]
-fn test_set_item() {
+fn test_add_item() {
     let mut bag = Bag {
         item_1: Item {
             id: 1, xp: 0, metadata: 0
@@ -448,7 +480,7 @@ fn test_set_item() {
 
     let item = Item { id: 23, xp: 1, metadata: 5 };
 
-    bag.set_item(item);
+    bag.add_item(item);
 
     assert(bag.item_6.id == 23, 'Item id should be 23');
 }
@@ -486,3 +518,39 @@ fn test_is_full() {
 
     assert(bag.is_full() == true, 'Bag should be full');
 }
+#[test]
+#[available_gas(5000000)]
+fn remove_item() {
+    let mut bag = Bag {
+        item_1: Item {
+            id: 1, xp: 0, metadata: 0
+            }, item_2: Item {
+            id: 2, xp: 0, metadata: 0
+            }, item_3: Item {
+            id: 3, xp: 0, metadata: 0
+            }, item_4: Item {
+            id: 4, xp: 0, metadata: 0
+            }, item_5: Item {
+            id: 5, xp: 0, metadata: 0
+            }, item_6: Item {
+            id: 8, xp: 0, metadata: 0
+            }, item_7: Item {
+            id: 9, xp: 0, metadata: 0
+            }, item_8: Item {
+            id: 11, xp: 0, metadata: 0
+            }, item_9: Item {
+            id: 12, xp: 0, metadata: 0
+            }, item_10: Item {
+            id: 13, xp: 0, metadata: 0
+            }, item_11: Item {
+            id: 14, xp: 0, metadata: 0
+            }, item_12: Item {
+            id: 15, xp: 0, metadata: 0
+        },
+    };
+
+    bag.remove_item(8);
+
+    assert(bag.item_6.id == 0, 'Item id should be 0');
+}
+

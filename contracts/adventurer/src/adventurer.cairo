@@ -12,6 +12,7 @@ use pack::pack::{
 use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
 use lootitems::loot::{Loot, ItemTrait, ItemUtils};
+use lootitems::statistics::constants;
 
 use super::exploration::ExploreUtils;
 use super::beasts::BeastUtils;
@@ -100,9 +101,57 @@ trait Actions {
     fn get_beast(self: Adventurer) -> u8;
 
     fn get_level(self: Adventurer) -> u8;
+
+    fn is_slot_free(self: Adventurer, item: Item) -> bool;
+
+    fn get_item_at_slot(self: Adventurer, item: Item) -> Item;
 }
 
 impl AdventurerActions of Actions {
+    fn get_item_at_slot(self: Adventurer, item: Item) -> Item {
+        let item_slot = ItemUtils::get_slot(item.id);
+
+        if (item_slot == constants::Slot::Weapon) {
+            return self.weapon;
+        } else if (item_slot == constants::Slot::Chest) {
+            return self.chest;
+        } else if (item_slot == constants::Slot::Head) {
+            return self.head;
+        } else if (item_slot == constants::Slot::Waist) {
+            return self.waist;
+        } else if (item_slot == constants::Slot::Foot) {
+            return self.foot;
+        } else if (item_slot == constants::Slot::Hand) {
+            return self.hand;
+        } else if (item_slot == constants::Slot::Neck) {
+            return self.neck;
+        } else {
+            return self.ring;
+        }
+    }
+    fn is_slot_free(self: Adventurer, item: Item) -> bool {
+        let item_slot = ItemUtils::get_slot(item.id);
+
+        if (item_slot == constants::Slot::Weapon) {
+            return self.weapon.id == 0;
+        } else if (item_slot == constants::Slot::Chest) {
+            return self.chest.id == 0;
+        } else if (item_slot == constants::Slot::Head) {
+            return self.head.id == 0;
+        } else if (item_slot == constants::Slot::Waist) {
+            return self.waist.id == 0;
+        } else if (item_slot == constants::Slot::Foot) {
+            return self.foot.id == 0;
+        } else if (item_slot == constants::Slot::Hand) {
+            return self.hand.id == 0;
+        } else if (item_slot == constants::Slot::Neck) {
+            return self.neck.id == 0;
+        } else if (item_slot == constants::Slot::Ring) {
+            return self.ring.id == 0;
+        } else {
+            return false;
+        }
+    }
     fn get_beast(self: Adventurer) -> u8 {
         // TODO: return Beast struct generated from xp
         return 1;

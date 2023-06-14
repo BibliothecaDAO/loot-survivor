@@ -8,6 +8,8 @@ mod Adventurer {
     use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8};
     use survivor::adventurer::{Adventurer, AdventurerActions, Actions};
 
+    use survivor::bag::{Bag, BagActions, ImplBagActions};
+
     // events
 
     // adventurer_update
@@ -22,6 +24,7 @@ mod Adventurer {
         _adventurer: LegacyMap::<(ContractAddress, u256), felt252>,
         _loot: LegacyMap::<u256, felt252>,
         _counter: u256,
+        _bag: LegacyMap::<u256, felt252>,
     // lords_address
     // dao_address
     // leaders
@@ -105,9 +108,31 @@ mod Adventurer {
     }
 
     // @loaf
-    fn equip(adventurer_id: u256, item_id: u8) { // 
-    // check item exists on Adventurer
-    // swap with current slot if exists or just set
+    fn equip(adventurer_id: u256, item_id: u8) {
+        // TODO: check ownership
+        let mut adventurer = AdventurerActions::unpack(
+            _adventurer::read((get_caller_address(), adventurer_id))
+        );
+
+        let mut bag = ImplBagActions::unpack(_bag::read(adventurer_id));
+
+        let equipping_item = bag.get_item(item_id);
+        // TODO: could be moved to lib
+        assert(equipping_item.id > 0, 'Item does not exist in bag');
+
+        // check what item type exists on adventurer
+        // if some exists pluck from adventurer and add to bag
+        if adventurer.is_slot_free(equipping_item) == false {
+            let unequipping_item = adventurer.get_item_at_slot(equipping_item);
+            bag.add_item(unequipping_item);
+        }
+
+        // equip item
+        adventurer.add_item(equipping_item);
+
+        // pack and save
+        _adventurer::write((get_caller_address(), adventurer_id), adventurer.pack());
+        _bag::write(adventurer_id, bag.pack());
     }
 
     // @loaf

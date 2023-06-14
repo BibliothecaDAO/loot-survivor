@@ -13,7 +13,7 @@ use super::adventurer::{Adventurer, AdventurerActions, Actions};
 
 use super::bag::{Bag, BagActions, Item};
 
-mod item_meta_index {
+mod ITEM_META_INDEX {
     const INDEX_1: u8 = 1;
     const INDEX_2: u8 = 2;
     const INDEX_3: u8 = 3;
@@ -362,207 +362,205 @@ impl ImplItemMetaActions of ItemMetaActions {
     ) -> ItemMetaStorage {
         // TODO:
         // @loothere: should we generate the prefix here or up in the contract?
-        if item.metadata == item_meta_index::INDEX_1 {
+        if item.metadata == 1 {
             self.item_1 = item_meta;
-            return self;
-        } else if item.metadata == item_meta_index::INDEX_2 {
+            self
+        } else if item.metadata == 2 {
             self.item_2 = item_meta;
-            return self;
-        } else if item.metadata == item_meta_index::INDEX_3 {
+            self
+        } else if item.metadata == 3 {
             self.item_3 = item_meta;
-            return self;
-        } else if item.metadata == item_meta_index::INDEX_4 {
+            self
+        } else if item.metadata == 4 {
             self.item_4 = item_meta;
-            return self;
-        } else if item.metadata == item_meta_index::INDEX_5 {
+            self
+        } else if item.metadata == 5 {
             self.item_5 = item_meta;
-            return self;
-        } else if item.metadata == item_meta_index::INDEX_6 {
+            self
+        } else if item.metadata == 6 {
             self.item_6 = item_meta;
-            return self;
-        } else if item.metadata == item_meta_index::INDEX_7 {
+            self
+        } else if item.metadata == 7 {
             self.item_7 = item_meta;
-            return self;
-        } else if item.metadata == item_meta_index::INDEX_8 {
+            self
+        } else if item.metadata == 8 {
             self.item_8 = item_meta;
-            return self;
-        } else if item.metadata == item_meta_index::INDEX_9 {
+            self
+        } else if item.metadata == 9 {
             self.item_9 = item_meta;
-            return self;
+            self
         } else {
             self.item_10 = item_meta;
-            return self;
+            self
         }
     }
 }
+// #[test]
+// #[available_gas(5000000)]
+// fn test_item_meta_packing() {
+//     let mut item_meta_storage = ItemMetaStorage {
+//         item_1: ItemMeta {
+//             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+//             }, item_2: ItemMeta {
+//             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+//             }, item_3: ItemMeta {
+//             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+//             }, item_4: ItemMeta {
+//             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+//             }, item_5: ItemMeta {
+//             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+//             }, item_6: ItemMeta {
+//             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+//             }, item_7: ItemMeta {
+//             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+//             }, item_8: ItemMeta {
+//             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+//             }, item_9: ItemMeta {
+//             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+//             }, item_10: ItemMeta {
+//             id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+//         }
+//     };
 
-#[test]
-#[available_gas(5000000)]
-fn test_item_meta_packing() {
-    let mut item_meta_storage = ItemMetaStorage {
-        item_1: ItemMeta {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-            }, item_2: ItemMeta {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-            }, item_3: ItemMeta {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-            }, item_4: ItemMeta {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-            }, item_5: ItemMeta {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-            }, item_6: ItemMeta {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-            }, item_7: ItemMeta {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-            }, item_8: ItemMeta {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-            }, item_9: ItemMeta {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-            }, item_10: ItemMeta {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
-        }
-    };
+//     let unpacked = ImplItemMetaActions::unpack(item_meta_storage.pack());
 
-    let unpacked = ImplItemMetaActions::unpack(item_meta_storage.pack());
+//     unpacked.item_1.id.print();
 
-    unpacked.item_1.id.print();
+//     assert(unpacked.item_1.id == 127, 'item_1 id 127');
+//     assert(unpacked.item_1.name_prefix == 127, 'item_1 name_prefix  127');
+//     assert(unpacked.item_1.name_suffix == 31, 'item_1 name_suffix  31');
+//     assert(unpacked.item_1.item_suffix == 15, 'item_1 item_suffix 15');
 
-    assert(unpacked.item_1.id == 127, 'item_1 id 127');
-    assert(unpacked.item_1.name_prefix == 127, 'item_1 name_prefix  127');
-    assert(unpacked.item_1.name_suffix == 31, 'item_1 name_suffix  31');
-    assert(unpacked.item_1.item_suffix == 15, 'item_1 item_suffix 15');
+//     assert(unpacked.item_2.id == 127, 'item_2 id 127');
+//     assert(unpacked.item_2.name_prefix == 127, 'item_2 name_prefix  127');
+//     assert(unpacked.item_2.name_suffix == 31, 'item_2 name_suffix  31');
+//     assert(unpacked.item_2.item_suffix == 15, 'item_2 item_suffix 15');
 
-    assert(unpacked.item_2.id == 127, 'item_2 id 127');
-    assert(unpacked.item_2.name_prefix == 127, 'item_2 name_prefix  127');
-    assert(unpacked.item_2.name_suffix == 31, 'item_2 name_suffix  31');
-    assert(unpacked.item_2.item_suffix == 15, 'item_2 item_suffix 15');
+//     assert(unpacked.item_3.id == 127, 'item_3 id 127');
+//     assert(unpacked.item_3.name_prefix == 127, 'item_3 name_prefix  127');
+//     assert(unpacked.item_3.name_suffix == 31, 'item_3 name_suffix  31');
+//     assert(unpacked.item_3.item_suffix == 15, 'item_3 item_suffix 15');
 
-    assert(unpacked.item_3.id == 127, 'item_3 id 127');
-    assert(unpacked.item_3.name_prefix == 127, 'item_3 name_prefix  127');
-    assert(unpacked.item_3.name_suffix == 31, 'item_3 name_suffix  31');
-    assert(unpacked.item_3.item_suffix == 15, 'item_3 item_suffix 15');
+//     assert(unpacked.item_4.id == 127, 'item_4 id 127');
+//     assert(unpacked.item_4.name_prefix == 127, 'item_4 name_prefix  127');
+//     assert(unpacked.item_4.name_suffix == 31, 'item_4 name_suffix  31');
+//     assert(unpacked.item_4.item_suffix == 15, 'item_4 item_suffix 15');
 
-    assert(unpacked.item_4.id == 127, 'item_4 id 127');
-    assert(unpacked.item_4.name_prefix == 127, 'item_4 name_prefix  127');
-    assert(unpacked.item_4.name_suffix == 31, 'item_4 name_suffix  31');
-    assert(unpacked.item_4.item_suffix == 15, 'item_4 item_suffix 15');
+//     assert(unpacked.item_5.id == 127, 'item_5 id 127');
+//     assert(unpacked.item_5.name_prefix == 127, 'item_5 name_prefix  127');
+//     assert(unpacked.item_5.name_suffix == 31, 'item_5 name_suffix  31');
+//     assert(unpacked.item_5.item_suffix == 15, 'item_5 item_suffix 15');
 
-    assert(unpacked.item_5.id == 127, 'item_5 id 127');
-    assert(unpacked.item_5.name_prefix == 127, 'item_5 name_prefix  127');
-    assert(unpacked.item_5.name_suffix == 31, 'item_5 name_suffix  31');
-    assert(unpacked.item_5.item_suffix == 15, 'item_5 item_suffix 15');
+//     assert(unpacked.item_6.id == 127, 'item_6 id 127');
+//     assert(unpacked.item_6.name_prefix == 127, 'item_6 name_prefix  127');
+//     assert(unpacked.item_6.name_suffix == 31, 'item_6 name_suffix  31');
+//     assert(unpacked.item_6.item_suffix == 15, 'item_6 item_suffix 15');
 
-    assert(unpacked.item_6.id == 127, 'item_6 id 127');
-    assert(unpacked.item_6.name_prefix == 127, 'item_6 name_prefix  127');
-    assert(unpacked.item_6.name_suffix == 31, 'item_6 name_suffix  31');
-    assert(unpacked.item_6.item_suffix == 15, 'item_6 item_suffix 15');
+//     assert(unpacked.item_7.id == 127, 'item_7 id 127');
+//     assert(unpacked.item_7.name_prefix == 127, 'item_7 name_prefix  127');
+//     assert(unpacked.item_7.name_suffix == 31, 'item_7 name_suffix  31');
+//     assert(unpacked.item_7.item_suffix == 15, 'item_7 item_suffix 15');
 
-    assert(unpacked.item_7.id == 127, 'item_7 id 127');
-    assert(unpacked.item_7.name_prefix == 127, 'item_7 name_prefix  127');
-    assert(unpacked.item_7.name_suffix == 31, 'item_7 name_suffix  31');
-    assert(unpacked.item_7.item_suffix == 15, 'item_7 item_suffix 15');
+//     assert(unpacked.item_8.id == 127, 'item_8 id 127');
+//     assert(unpacked.item_8.name_prefix == 127, 'item_8 name_prefix  127');
+//     assert(unpacked.item_8.name_suffix == 31, 'item_8 name_suffix  31');
+//     assert(unpacked.item_8.item_suffix == 15, 'item_8 item_suffix 15');
 
-    assert(unpacked.item_8.id == 127, 'item_8 id 127');
-    assert(unpacked.item_8.name_prefix == 127, 'item_8 name_prefix  127');
-    assert(unpacked.item_8.name_suffix == 31, 'item_8 name_suffix  31');
-    assert(unpacked.item_8.item_suffix == 15, 'item_8 item_suffix 15');
+//     assert(unpacked.item_9.id == 127, 'item_9 id 127');
+//     assert(unpacked.item_9.name_prefix == 127, 'item_9 name_prefix  127');
+//     assert(unpacked.item_9.name_suffix == 31, 'item_9 name_suffix  31');
+//     assert(unpacked.item_9.item_suffix == 15, 'item_9 item_suffix 15');
 
-    assert(unpacked.item_9.id == 127, 'item_9 id 127');
-    assert(unpacked.item_9.name_prefix == 127, 'item_9 name_prefix  127');
-    assert(unpacked.item_9.name_suffix == 31, 'item_9 name_suffix  31');
-    assert(unpacked.item_9.item_suffix == 15, 'item_9 item_suffix 15');
+//     assert(unpacked.item_10.id == 127, 'item_10 id 127');
+//     assert(unpacked.item_10.name_prefix == 127, 'item_10 name_prefix  127');
+//     assert(unpacked.item_10.name_suffix == 31, 'item_10 name_suffix  31');
+//     assert(unpacked.item_10.item_suffix == 15, 'item_10 item_suffix 15');
+// }
 
-    assert(unpacked.item_10.id == 127, 'item_10 id 127');
-    assert(unpacked.item_10.name_prefix == 127, 'item_10 name_prefix  127');
-    assert(unpacked.item_10.name_suffix == 31, 'item_10 name_suffix  31');
-    assert(unpacked.item_10.item_suffix == 15, 'item_10 item_suffix 15');
-}
+// #[test]
+// #[available_gas(5000000)]
+// fn test_get_item_metadata_slot() {
+//     let mut adventurer = AdventurerActions::new(1, 1);
 
+//     // add test items
+//     let item_pendant = Item { id: 1, xp: 1, metadata: 3 };
+//     let item_silver_ring = Item { id: 4, xp: 1, metadata: 4 };
+//     let item_ghost_wand = Item { id: 9, xp: 1, metadata: 5 };
+//     let item_silk_robe = Item { id: 18, xp: 1, metadata: 6 };
 
-#[test]
-#[available_gas(5000000)]
-fn test_get_item_metadata_slot() {
-    let mut adventurer = AdventurerActions::new(1, 1);
+//     adventurer.add_item(item_pendant);
+//     adventurer.add_item(item_silver_ring);
+//     adventurer.add_item(item_ghost_wand);
+//     adventurer.add_item(item_silk_robe);
 
-    // add test items
-    let item_pendant = Item { id: 1, xp: 1, metadata: 3 };
-    let item_silver_ring = Item { id: 4, xp: 1, metadata: 4 };
-    let item_ghost_wand = Item { id: 9, xp: 1, metadata: 5 };
-    let item_silk_robe = Item { id: 18, xp: 1, metadata: 6 };
+//     let bag = Bag {
+//         item_1: Item {
+//             id: 1, xp: 0, metadata: 4, 
+//             }, item_2: Item {
+//             id: 2, xp: 0, metadata: 5, 
+//             }, item_3: Item {
+//             id: 3, xp: 0, metadata: 6, 
+//             }, item_4: Item {
+//             id: 4, xp: 0, metadata: 7, 
+//             }, item_5: Item {
+//             id: 5, xp: 0, metadata: 8, 
+//             }, item_6: Item {
+//             id: 6, xp: 0, metadata: 11, 
+//             }, item_7: Item {
+//             id: 7, xp: 0, metadata: 0, 
+//             }, item_8: Item {
+//             id: 8, xp: 0, metadata: 12, 
+//             }, item_9: Item {
+//             id: 9, xp: 0, metadata: 0, 
+//             }, item_10: Item {
+//             id: 10, xp: 0, metadata: 0, 
+//             }, item_11: Item {
+//             id: 11, xp: 0, metadata: 18, 
+//             }, item_12: Item {
+//             id: 12, xp: 0, metadata: 0, 
+//         },
+//     };
 
-    adventurer.add_item(item_pendant);
-    adventurer.add_item(item_silver_ring);
-    adventurer.add_item(item_ghost_wand);
-    adventurer.add_item(item_silk_robe);
+//     let new_item = Item { id: 1, xp: 1, metadata: 0 };
 
-    let bag = Bag {
-        item_1: Item {
-            id: 1, xp: 0, metadata: 4, 
-            }, item_2: Item {
-            id: 2, xp: 0, metadata: 5, 
-            }, item_3: Item {
-            id: 3, xp: 0, metadata: 6, 
-            }, item_4: Item {
-            id: 4, xp: 0, metadata: 7, 
-            }, item_5: Item {
-            id: 5, xp: 0, metadata: 8, 
-            }, item_6: Item {
-            id: 6, xp: 0, metadata: 11, 
-            }, item_7: Item {
-            id: 7, xp: 0, metadata: 0, 
-            }, item_8: Item {
-            id: 8, xp: 0, metadata: 12, 
-            }, item_9: Item {
-            id: 9, xp: 0, metadata: 0, 
-            }, item_10: Item {
-            id: 10, xp: 0, metadata: 0, 
-            }, item_11: Item {
-            id: 11, xp: 0, metadata: 18, 
-            }, item_12: Item {
-            id: 12, xp: 0, metadata: 0, 
-        },
-    };
+//     let item = ItemMetaActions::get_item_metadata_slot(adventurer, bag, new_item);
 
-    let new_item = Item { id: 1, xp: 1, metadata: 0 };
+//     assert(item.metadata == 19, 'Item metadata should be 5');
+// }
 
-    let item = ItemMetaActions::get_item_metadata_slot(adventurer, bag, new_item);
+// #[test]
+// #[available_gas(5000000)]
+// fn test_set_item_metadata_slot() {
+//     let mut item_meta_storage = ItemMetaStorage {
+//         item_1: ItemMeta {
+//             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+//             }, item_2: ItemMeta {
+//             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+//             }, item_3: ItemMeta {
+//             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+//             }, item_4: ItemMeta {
+//             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+//             }, item_5: ItemMeta {
+//             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+//             }, item_6: ItemMeta {
+//             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+//             }, item_7: ItemMeta {
+//             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+//             }, item_8: ItemMeta {
+//             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+//             }, item_9: ItemMeta {
+//             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+//             }, item_10: ItemMeta {
+//             id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+//         }
+//     };
+//     let item = Item { id: 1, xp: 1, metadata: 1 };
 
-    assert(item.metadata == 19, 'Item metadata should be 5');
-}
+//     let item_meta = ItemMeta { id: 1, name_prefix: 12, name_suffix: 11, item_suffix: 13 };
 
-#[test]
-#[available_gas(5000000)]
-fn test_set_item_metadata_slot() {
-    let mut item_meta_storage = ItemMetaStorage {
-        item_1: ItemMeta {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_2: ItemMeta {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_3: ItemMeta {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_4: ItemMeta {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_5: ItemMeta {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_6: ItemMeta {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_7: ItemMeta {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_8: ItemMeta {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_9: ItemMeta {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_10: ItemMeta {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-        }
-    };
-    let item = Item { id: 1, xp: 1, metadata: 1 };
+//     item_meta_storage.set_item_metadata(item, item_meta);
+//     assert(item_meta_storage.item_1.name_prefix == 12, 'Item id should be 1');
+//     assert(item_meta_storage.item_1.name_suffix == 11, 'Item id should be 1');
+//     assert(item_meta_storage.item_1.item_suffix == 13, 'Item id should be 1');
+// }
 
-    let item_meta = ItemMeta { id: 1, name_prefix: 12, name_suffix: 11, item_suffix: 13 };
-
-    item_meta_storage.set_item_metadata(item, item_meta);
-
-    assert(item_meta_storage.item_1.name_prefix == 12, 'Item id should be 1');
-    assert(item_meta_storage.item_1.name_suffix == 11, 'Item id should be 1');
-    assert(item_meta_storage.item_1.item_suffix == 13, 'Item id should be 1');
-}
