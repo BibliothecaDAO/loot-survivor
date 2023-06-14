@@ -15,6 +15,7 @@ use pack::constants::{pow, mask};
 
 #[derive(Copy, Drop, Clone)]
 struct Loot {
+    id: u8,
     tier: u8,
     item_type: u8,
     slot: u8,
@@ -33,6 +34,7 @@ trait ItemTrait {
 impl ItemUtils of ItemTrait {
     fn get_item(id: u8) -> Loot {
         Loot {
+            id: id,
             tier: ItemUtils::get_tier(id),
             item_type: ItemUtils::get_type(id),
             slot: ItemUtils::get_slot(id),
@@ -69,9 +71,10 @@ impl ItemUtils of ItemTrait {
     fn pack(self: Loot) -> felt252 {
         let mut packed = 0;
 
-        packed = packed | pack_value(self.tier.into(), pow::TWO_POW_180);
-        packed = packed | pack_value(self.item_type.into(), pow::TWO_POW_63);
-        packed = packed | pack_value(self.slot.into(), 1);
+        packed = packed | pack_value(self.id.into(), pow::TWO_POW_236);
+        packed = packed | pack_value(self.tier.into(), pow::TWO_POW_220);
+        packed = packed | pack_value(self.item_type.into(), pow::TWO_POW_204);
+        packed = packed | pack_value(self.slot.into(), pow::TWO_POW_118);
 
         packed.try_into().unwrap()
     }
@@ -79,11 +82,16 @@ impl ItemUtils of ItemTrait {
         let packed = packed.into();
 
         Loot {
-            tier: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_180, mask::MASK_16))
+            id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_236, mask::MASK_16))
                 .unwrap(),
-            item_type: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_63, mask::MASK_16))
+            tier: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_220, mask::MASK_16))
                 .unwrap(),
-            slot: U256TryIntoU8::try_into(unpack_value(packed, 1, mask::MASK_16)).unwrap(),
+            item_type: U256TryIntoU8::try_into(
+                unpack_value(packed, pow::TWO_POW_204, mask::MASK_16)
+            )
+                .unwrap(),
+            slot: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_118, mask::MASK_16))
+                .unwrap(),
         }
     }
 }
@@ -91,14 +99,14 @@ impl ItemUtils of ItemTrait {
 #[test]
 #[available_gas(100000000)]
 fn test() {
-    let lootItem = Loot { tier: 1, item_type: 3, slot: 4 };
+    let loot = Loot { id: 1, tier: 1, item_type: 3, slot: 4 };
 
-    let packed = ItemUtils::pack(lootItem);
-    let unpacked = ItemUtils::unpack(packed);
+    let unpacked = ItemUtils::unpack(loot.pack());
 
-    assert(lootItem.tier == unpacked.tier, 'tier');
-    assert(lootItem.item_type == unpacked.item_type, 'item_type');
-    assert(lootItem.slot == unpacked.slot, 'slot');
+    assert(loot.id == unpacked.id, 'id');
+    assert(loot.tier == unpacked.tier, 'tier');
+    assert(loot.item_type == unpacked.item_type, 'item_type');
+    assert(loot.slot == unpacked.slot, 'slot');
 }
 // #[test]
 // #[available_gas(30000000)]
