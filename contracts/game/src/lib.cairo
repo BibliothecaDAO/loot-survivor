@@ -3,9 +3,11 @@ mod Adventurer {
     use option::OptionTrait;
     use box::BoxTrait;
     use starknet::get_caller_address;
-    use starknet::ContractAddress;
+    use starknet::{ContractAddress, ContractAddressIntoFelt252};
+    use integer::U64IntoFelt252;
+    use core::traits::Into;
     use lootitems::loot::{Loot, ItemUtils};
-    use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8};
+    use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64};
     use survivor::adventurer::{Adventurer, AdventurerActions, Actions};
 
     use survivor::bag::{Bag, BagActions, ImplBagActions};
@@ -39,12 +41,30 @@ mod Adventurer {
 
     // @loothero
     fn start(starting_weapon: u8) {
-        // TODO: check item is starting weapon
-        // TODO: set adventurer metadata including adventurer entropy seed
-        // TODO: set mint fees
+        // assert item is a starting weapon
+        assert(
+            ItemUtils::is_starting_weapon(starting_weapon) == true, 'Item is not a starter weapon'
+        );
 
-        // get the current block info
+        // generate adventurer entropy seed based on current block timestamp and caller address
+        // TODO: Make this stronger by perhaps using the current block hash instead of timestamp
+
+        // get current block timestamp and convert to felt252
         let block_info = starknet::get_block_info().unbox();
+        let block_timestamp = U64IntoFelt252::into(block_info.block_timestamp);
+
+        // get caller address and convert to felt252
+        let caller_address_felt = ContractAddressIntoFelt252::into(get_caller_address());
+
+        // combine caller address and block timestamp to create adventurer entropy seed as a u64
+        let adventurer_entropy_seed = Felt252TryIntoU64::try_into(
+            caller_address_felt + block_timestamp
+        )
+            .unwrap();
+
+        // TODO: initialize adventurer metadata using the adventurer entropy seed
+
+        // TODO: distribute mint fees
 
         // create a new adventurer with the selected starting weapon
         // and the current block number as start time
@@ -63,6 +83,10 @@ mod Adventurer {
 
         // write the new adventurer to storage
         _adventurer::write((caller, current_adventurer_id), new_adventurer.pack());
+
+        // TODO: write adventurer meta data to storage
+
+        // increment the adventurer counter
         _counter::write(current_adventurer_id + 1);
     }
 
