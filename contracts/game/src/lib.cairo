@@ -95,7 +95,7 @@ mod Adventurer {
     // @loothero
     fn explore(adventurer_id: u256) {
         // get adventurer from storage and unpack
-        let mut adventurer = _adventuer_unpacked(adventurer_id);
+        let mut adventurer = _adventurer_unpacked(adventurer_id);
 
         // TODO: get adventurer entropy from AdventurerMeta
         let adventurer_entropy = 1;
@@ -134,11 +134,12 @@ mod Adventurer {
     // @loaf
     fn equip(adventurer_id: u256, item_id: u8) {
         // TODO: check ownership
-        let mut adventurer = _adventuer_unpacked(adventurer_id);
+        let mut adventurer = _adventurer_unpacked(adventurer_id);
 
         let mut bag = ImplBagActions::unpack(_bag::read(adventurer_id));
 
         let equipping_item = bag.get_item(item_id);
+
         // TODO: could be moved to lib
         assert(equipping_item.id > 0, 'Loot does not exist in bag');
 
@@ -158,8 +159,12 @@ mod Adventurer {
     }
 
     // @loaf
+    // checks item exists on market according to the adventurers entropy
+    // checks adventurer has enough gold
+    // equips item if equip is true
+    // stashes item in bag if equip is false
     fn buy_item(adventurer_id: u256, item_id: u8, equip: bool) {
-        let mut adventurer = _adventuer_unpacked(adventurer_id);
+        let mut adventurer = _adventurer_unpacked(adventurer_id);
 
         // TODO: update to real entropy
         let entropy: u32 = 123;
@@ -229,7 +234,7 @@ mod Adventurer {
     // ------------ Helper Functions ------------ //
     // ------------------------------------------ //
 
-    fn _adventuer_unpacked(adventurer_id: u256) -> Adventurer {
+    fn _adventurer_unpacked(adventurer_id: u256) -> Adventurer {
         AdventurerActions::unpack(_adventurer::read((get_caller_address(), adventurer_id)))
     }
 
