@@ -13,16 +13,13 @@ const OFFSET: u32 = 9636;
 const LOOT_ITEMS: u32 = 101;
 
 trait MarketTrait {
-    fn get_all_items(adventurer: felt252) -> Array<Loot>;
-    fn seed(seed: felt252) -> u32;
+    fn get_all_items(seed: u32) -> Array<Loot>;
     fn get_id(seed: u32) -> u8;
     fn check_ownership(seed: u32, item_id: u8) -> bool;
 }
 
 impl Market of MarketTrait {
-    fn get_all_items(adventurer: felt252) -> Array<Loot> {
-        let seed = Market::seed(adventurer);
-
+    fn get_all_items(seed: u32) -> Array<Loot> {
         let mut all_items = ArrayTrait::<Loot>::new();
 
         let mut i: usize = 0;
@@ -37,12 +34,6 @@ impl Market of MarketTrait {
         };
 
         all_items
-    }
-
-    // this could be redudant -> we could just pass the seed directly into fns
-    fn seed(seed: felt252) -> u32 {
-        // TOOD: get the seed from the adventurer
-        1234512
     }
     fn get_id(seed: u32) -> u8 {
         let id: u8 = (seed % LOOT_ITEMS).try_into().unwrap();
@@ -83,7 +74,7 @@ fn test_get_all_items() {
 #[test]
 #[available_gas(9000000)]
 fn test_check_ownership() {
-    let mut seed = Market::seed(1);
+    let mut seed = 123456;
 
     let mut i: usize = 0;
     loop {
@@ -105,7 +96,7 @@ fn test_check_ownership() {
 #[available_gas(9000000)]
 #[should_panic(expected: ('item does not exist', ))]
 fn test_fake_check_ownership() {
-    let mut seed = Market::seed(1);
+    let mut seed = 123456;
 
     let mut i: usize = 0;
     loop {
@@ -127,9 +118,9 @@ fn test_fake_check_ownership() {
 #[test]
 #[available_gas(9000000)]
 fn test_get_all_items_ownership() {
-    let mut seed = Market::seed(1);
+    let mut seed = 123456;
 
-    let items = Market::get_all_items(1);
+    let items = Market::get_all_items(seed);
 
     let mut i: usize = 0;
     let mut item_index: usize = 0;
