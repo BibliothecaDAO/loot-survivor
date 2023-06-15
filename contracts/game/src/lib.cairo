@@ -12,7 +12,7 @@ mod Adventurer {
 
     use survivor::bag::{Bag, BagActions, ImplBagActions};
 
-    use market::{ImplMarket};
+    use market::market::{ImplMarket};
 
     // events
 
