@@ -255,8 +255,9 @@ mod Game {
     fn lords_address() -> ContractAddress {
         _lords::read()
     }
-// #[view]
-// fn dao_address() -> ContractAddress {
-//     _dao::read()
-// }
+
+    #[view]
+    fn dao_address() -> ContractAddress {
+        _dao::read()
+    }
 }

@@ -19,15 +19,16 @@ fn setup() {
 
 #[test]
 #[available_gas(20000000)]
-fn test_constructor() { // setup();
-// assert(Game::lords_address() == LORDS_ADDRESS(), 'LORDS_ADDRESS');
-// assert(Game::dao_address() == DAO_ADDRESS(), 'DAO_ADDRESS');
+fn test_constructor() {
+    setup();
+    assert(Game::lords_address() == LORDS_ADDRESS(), 'LORDS_ADDRESS');
+    assert(Game::dao_address() == DAO_ADDRESS(), 'DAO_ADDRESS');
 }
 
 
 #[test]
 #[available_gas(20000000)]
-fn test_new_adventurer() {// setup();
+fn test_new_adventurer() { // setup();
 // Game::start(1);
 // assert(Game::lords_address() == LORDS_ADDRESS(), 'LORDS_ADDRESS');
 }
