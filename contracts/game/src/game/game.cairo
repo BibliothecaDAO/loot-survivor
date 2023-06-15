@@ -1,4 +1,8 @@
-#[contract]
+#[starknet::interface]
+trait IGame<T> {// fn constructor(ref self: ContractState, lords: ContractAddress, dao: ContractAddress);
+}
+
+#[starknet::contract]
 mod Game {
     use option::OptionTrait;
     use box::BoxTrait;
@@ -35,15 +39,15 @@ mod Game {
     }
 
     #[constructor]
-    fn constructor(lords: ContractAddress, dao: ContractAddress) {
+    fn constructor(ref self: ContractState, lords: ContractAddress, dao: ContractAddress) {
         // set the contract addresses
-        _lords::write(lords);
-        _dao::write(dao);
+        self._lords.write(lords);
+        self._dao.write(dao);
     }
 
     // @loothero
     #[external]
-    fn start(starting_weapon: u8) {
+    fn start(ref self: ContractState, starting_weapon: u8) {
         // assert item is a starting weapon
         assert(
             ItemUtils::is_starting_weapon(starting_weapon) == true, 'Loot is not a starter weapon'
@@ -76,7 +80,7 @@ mod Game {
         );
 
         // get the current adventurer id
-        let current_adventurer_id = _counter::read();
+        let current_adventurer_id = self._counter.read();
 
         // get the caller address
         let caller = get_caller_address();
@@ -85,18 +89,18 @@ mod Game {
         AdventurerUpdate(caller, current_adventurer_id, new_adventurer);
 
         // write the new adventurer to storage
-        _pack_adventurer(current_adventurer_id, new_adventurer);
+        _pack_adventurer(ref self, current_adventurer_id, new_adventurer);
 
         // TODO: write adventurer meta data to storage
 
         // increment the adventurer counter
-        _counter::write(current_adventurer_id + 1);
+        self._counter.write(current_adventurer_id + 1);
     }
 
     // @loothero
-    fn explore(adventurer_id: u256) {
+    fn explore(ref self: ContractState, adventurer_id: u256) {
         // get adventurer from storage and unpack
-        let mut adventurer = _adventurer_unpacked(adventurer_id);
+        let mut adventurer = _adventurer_unpacked(ref self, adventurer_id);
 
         // TODO: get adventurer entropy from AdventurerMeta
         let adventurer_entropy = 1;
@@ -109,7 +113,7 @@ mod Game {
         adventurer.explore(adventurer_entropy, game_entropy);
 
         // write the updated adventurer to storage
-        _pack_adventurer(adventurer_id, adventurer);
+        _pack_adventurer(ref self, adventurer_id, adventurer);
     }
 
     // @loothero
@@ -133,11 +137,11 @@ mod Game {
     }
 
     // @loaf
-    fn equip(adventurer_id: u256, item_id: u8) {
+    fn equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
         // TODO: check ownership
-        let mut adventurer = _adventurer_unpacked(adventurer_id);
+        let mut adventurer = _adventurer_unpacked(ref self, adventurer_id);
 
-        let mut bag = ImplBagActions::unpack(_bag::read(adventurer_id));
+        let mut bag = _bag_unpacked(ref self, adventurer_id);
 
         let equipping_item = bag.get_item(item_id);
 
@@ -155,8 +159,8 @@ mod Game {
         adventurer.add_item(equipping_item);
 
         // pack and save
-        _pack_adventurer(adventurer_id, adventurer);
-        _pack_bag(adventurer_id, bag);
+        _pack_adventurer(ref self, adventurer_id, adventurer);
+        _pack_bag(ref self, adventurer_id, bag);
     }
 
     // @loaf
@@ -164,8 +168,8 @@ mod Game {
     // checks adventurer has enough gold
     // equips item if equip is true
     // stashes item in bag if equip is false
-    fn buy_item(adventurer_id: u256, item_id: u8, equip: bool) {
-        let mut adventurer = _adventurer_unpacked(adventurer_id);
+    fn buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
+        let mut adventurer = _adventurer_unpacked(ref self, adventurer_id);
 
         // TODO: update to real entropy
         let entropy: u32 = 123;
@@ -192,21 +196,21 @@ mod Game {
 
             // check if item exists
             if unequipping_item.id > 0 {
-                let mut bag = ImplBagActions::unpack(_bag::read(adventurer_id));
+                let mut bag = _bag_unpacked(ref self, adventurer_id);
                 bag.add_item(unequipping_item);
 
                 // pack bag
-                _pack_bag(adventurer_id, bag);
+                _pack_bag(ref self, adventurer_id, bag);
             }
-            _pack_adventurer(adventurer_id, adventurer);
+            _pack_adventurer(ref self, adventurer_id, adventurer);
         } else {
             // add and pack bag
-            let mut bag = ImplBagActions::unpack(_bag::read(adventurer_id));
+            let mut bag = _bag_unpacked(ref self, adventurer_id);
             bag.add_item(item);
-            _pack_bag(adventurer_id, bag);
+            _pack_bag(ref self, adventurer_id, bag);
 
             // pack adventurer
-            _pack_adventurer(adventurer_id, adventurer);
+            _pack_adventurer(ref self, adventurer_id, adventurer);
         }
     }
 
@@ -235,29 +239,29 @@ mod Game {
     // ------------ Helper Functions ------------ //
     // ------------------------------------------ //
 
-    fn _adventurer_unpacked(adventurer_id: u256) -> Adventurer {
-        AdventurerActions::unpack(_adventurer::read((get_caller_address(), adventurer_id)))
+    fn _adventurer_unpacked(ref self: ContractState, adventurer_id: u256) -> Adventurer {
+        AdventurerActions::unpack(self._adventurer.read((get_caller_address(), adventurer_id)))
     }
 
-    fn _pack_adventurer(adventurer_id: u256, adventurer: Adventurer) {
-        _adventurer::write((get_caller_address(), adventurer_id), adventurer.pack());
+    fn _pack_adventurer(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {
+        self._adventurer.write((get_caller_address(), adventurer_id), adventurer.pack());
     }
 
-    fn _bag_unpacked(adventurer_id: u256) -> Bag {
-        ImplBagActions::unpack(_bag::read(adventurer_id))
+    fn _bag_unpacked(ref self: ContractState, adventurer_id: u256) -> Bag {
+        ImplBagActions::unpack(self._bag.read(adventurer_id))
     }
 
-    fn _pack_bag(adventurer_id: u256, bag: Bag) {
-        _bag::write(adventurer_id, bag.pack());
-    }
-
-    #[view]
-    fn lords_address() -> ContractAddress {
-        _lords::read()
+    fn _pack_bag(ref self: ContractState, adventurer_id: u256, bag: Bag) {
+        self._bag.write(adventurer_id, bag.pack());
     }
 
     #[view]
-    fn dao_address() -> ContractAddress {
-        _dao::read()
+    fn lords_address(ref self: ContractState) -> ContractAddress {
+        self._lords.read()
+    }
+
+    #[view]
+    fn dao_address(ref self: ContractState) -> ContractAddress {
+        self._dao.read()
     }
 }
