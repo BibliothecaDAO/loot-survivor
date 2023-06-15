@@ -1,21 +1,80 @@
 name: Build Scarb project
- 
+
 on:
   push:
     branches:
       - main
- 
+
 env:
   SCARB_VERSION: 0.4.0
- 
+
 jobs:
-  build:
-    name: build
+  build-contracts:
+    name: Build Contracts
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
- 
+
       - name: Setup Scarb
         run: |
           curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
-      - run: scarb build
+
+      - name: Scarb build
+        run: |
+          cd contracts/adventurer && scarb build
+
+  build-game:
+    name: Build Game
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Scarb
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+
+      - name: Scarb build
+        run: |
+          cd contracts/game && scarb build
+
+  build-loot:
+    name: Build Loot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Scarb
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+
+      - name: Scarb build
+        run: |
+          cd contracts/loot && scarb build
+
+  build-market:
+    name: Build Market
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Scarb
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+
+      - name: Scarb build
+        run: |
+          cd contracts/market && scarb build
+
+  build-pack:
+    name: Build Market
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Scarb
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+
+      - name: Scarb build
+        run: |
+          cd contracts/pack && scarb build          
