@@ -1,80 +1,40 @@
-# Loot Survivor Game
+<a href="https://twitter.com/lootrealms">
+<img src="https://img.shields.io/twitter/follow/lootrealms?style=social"/>
+</a>
+<a href="https://twitter.com/BibliothecaDAO">
+<img src="https://img.shields.io/twitter/follow/BibliothecaDAO?style=social"/>
+</a>
 
-Welcome to the Loot Survivor game repository, where you'll find both the client and indexer that make up this immersive gaming experience. 
 
-Access the app here: [Loot Survivor](https://loot-survivor.vercel.app/)
+[![discord](https://img.shields.io/badge/join-bibliothecadao-black?logo=discord&logoColor=white)](https://discord.gg/bibliothecadao)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-## Running the Game Locally
+![background](./bg.png)
 
-### Prerequisites
 
-If you do not have Yarn installed:
+## 🪦 Loot Survivor
 
-1. Install Node.js from [here](https://nodejs.org/en/download/).
+> Go and die with glory
 
-2. Install Yarn globally by running this command in your terminal:
+Play [Loot Survivor](https://loot-survivor.vercel.app/)
 
-   ```
-   npm install --global yarn
-   ```
+Table of contents
 
-   If you encounter a permissions error, you may need to use sudo:
+- [Game Design](#🕹️-game-design)
+- [Technology](#⛓️-technology)
+- [Contributing](#🏗️-contributing)
 
-   ```
-   sudo npm install --global yarn
-   ```
+---
 
-### Starting the App
+## 🕹️ Game Design
 
-To run the app locally, follow these steps:
+Loot Survivor is a onchain Arcade machine game. You add some tokens, try get the highscore and live for eternity onchain.
 
-1. Clone the repository:
+Each play through will be different and there is no end to the game. Every level just gets progressively harder.
 
-   ```
-   git clone https://github.com/BibliothecaDAO/loot-survivor.git
-   ```
+<details>
 
-2. Set up the server:
-
-   ```
-   cd loot-survivor/ui
-   yarn
-   yarn dev
-   ```
-
-You should now be able to access the app at [http://localhost:3000/](http://localhost:3000/).
-
-## Setting up Devnet:
-
-To set up a development network (devnet):
-
-1. Select "Launch on Devnet".
-2. Connect ArgentX.
-3. Add Devnet (confirm this action in Argent).
-4. Switch to Devnet (again, confirm in Argent).
-5. Open Argent and create an account. You will receive 1 ETH as a starting balance. This might take a few seconds.
-
-To check your ETH balance, add the token address: `0x49D36570D4E46F48E99674BD3FCC84644DDD6B96F7C741B1562B82F9E004DC7`
-
-If you encounter an error that reads `Class with hash 0x3343...`, follow these steps to resolve it:
-
-1. Go to your ArgentX wallet.
-2. Select the Settings cog icon.
-3. Open Developer settings.
-4. Manage networks.
-5. Choose Loot Survivor Devnet.
-6. Open Advanced settings.
-7. Add this address to the Account class hash field: `0x3ebe39375ba9e0f8cc21d5ee38c48818e8ed6612fa2e4e04702a323d64b96ba`
-8. Save your changes and refresh the page.
-
-If you still receive an error, try creating a new account in Loot Survivor Devnet (1 ETH should be loaded) to resolve it.
-
-# Game Description
-
-Loot Survivor is a part of the Adventurers series and builds upon the Loot ecosystem to create an environment where adventurers must battle beasts, overcome terrifying obstacles, boost their stats, and acquire items to advance in the game.
-
-## Stats
-
+<summary>Game Statistics</summary>
 Each level up grants adventurers 1+ upgrade to help them survive their explorations. Although Luck cannot be upgraded directly, it can be increased by equipping jewelry items:
 
 - Strength: Boosts attack damage by 10%.
@@ -83,8 +43,11 @@ Each level up grants adventurers 1+ upgrade to help them survive their explorati
 - Wisdom: Helps evade Beast ambushes.
 - Intelligence: Aids in avoiding Obstacles.
 - Luck: Raises chances of critical damage (cannot be upgraded directly).
+</details>
 
-## Efficacies
+<details>
+
+<summary>Combat Logic</summary>
 
 There are three categories of weapons and armor materials:
 
@@ -100,9 +63,15 @@ There are three categories of weapons and armor materials:
 | Bludgeon    | Fair  | Strong| Weak|
 | Magic       | Strong | Weak | Fair |
 
-## Items
 
-Items can be purchased in the Marketplace auction and can be equipped in each item slot. Available slots include:
+</details>
+
+<details>
+<summary>Weapons and Materials</summary>
+
+## Weapons
+
+The items are based off the OG loot contract
 
 - Weapon
 - Head
@@ -141,6 +110,22 @@ Items can be purchased in the Marketplace auction and can be equipped in each it
 - Beasts 
 - Obstacles 
 
-## Progression
+</details>
 
-- Levels
+---
+
+## 🏗️ Contributing
+
+The game is a work in progress and contributions are greatly appreciated.
+
+---
+
+## ⛓️ Technology
+
+
+Loot Survivor is a onchain game, designed to be immutable and permanently hosted on Starknet. We use advanced gas optimization to reduce costs on Starknet. A players gamestate exists primarily in a single felt252, every action the player takes only updates a single storage slot.
+
+
+- Client: Nextjs
+- Indexer: Apibara
+- Contracts: Cairo 1.0
