@@ -425,7 +425,7 @@ fn test_get_critical_hit_damage_bonus() {
 
 
 #[test]
-#[available_gas(80000)]
+#[available_gas(90000)]
 fn test_is_critical_hit() {
     // in order to produce a critical hit, we need the remainder of 
     // the summation of entropy and (6 - critical_hit_chance) to be 0
@@ -519,7 +519,7 @@ fn test_get_weapon_effectiveness() {
 }
 
 #[test]
-#[available_gas(120000)]
+#[available_gas(130000)]
 fn test_adjust_damage_for_elemental() {
     // init weapons
     let magic_weapon = Type::Weapon::Magic;
