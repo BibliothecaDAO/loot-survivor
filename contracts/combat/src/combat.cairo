@@ -58,16 +58,10 @@ trait Combat {
     fn critical_hit_bonus(damage: u16, entropy: u64) -> u16;
 
     fn get_name_prefix1_bonus(
-        damage: u16,
-        weapon_name: CombatItemSpecialNames,
-        armor_name: CombatItemSpecialNames,
-        entropy: u64,
+        damage: u16, weapon_prefix1: u8, armor_prefix1: u8, entropy: u64, 
     ) -> u16;
     fn get_name_prefix2_bonus(
-        base_damage: u16,
-        weapon_name: CombatItemSpecialNames,
-        armor_name: CombatItemSpecialNames,
-        entropy: u64,
+        base_damage: u16, weapon_prefix2: u8, armor_prefix2: u8, entropy: u64, 
     ) -> u16;
     fn get_name_damage_bonus(
         base_damage: u16,
@@ -285,17 +279,14 @@ impl CombatUtils of Combat {
     // @param entropy: entropy for randomizing name prefix damage bonus
     // @return u16: the bonus damage done by a name prefix
     fn get_name_prefix1_bonus(
-        damage: u16,
-        weapon_name: CombatItemSpecialNames,
-        armor_name: CombatItemSpecialNames,
-        entropy: u64,
+        damage: u16, weapon_prefix1: u8, armor_prefix1: u8, entropy: u64, 
     ) -> u16 {
         // is the weapon does not have a prefix
-        if (weapon_name.prefix1 == 0) {
+        if (weapon_prefix1 == 0) {
             // return zero
             return 0;
         // if the weapon prefix is the same as the armor prefix
-        } else if (weapon_name.prefix1 == armor_name.prefix1) {
+        } else if (weapon_prefix1 == armor_prefix1) {
             let damage_multplier = U64TryIntoU16::try_into(entropy % 4).unwrap();
 
             // result will be base damage * (4-7) which will equate to a 4-7x damage bonus
@@ -313,17 +304,14 @@ impl CombatUtils of Combat {
     // @param entropy: entropy for randomizing name prefix 2 damage bonus
     // @return u16: the bonus damage done by a weapon as a result of the second part of its name
     fn get_name_prefix2_bonus(
-        base_damage: u16,
-        weapon_name: CombatItemSpecialNames,
-        armor_name: CombatItemSpecialNames,
-        entropy: u64,
+        base_damage: u16, weapon_prefix2: u8, armor_prefix2: u8, entropy: u64, 
     ) -> u16 {
         // is the weapon does not have a prefix
-        if (weapon_name.prefix2 == 0) {
+        if (weapon_prefix2 == 0) {
             // return zero
             return 0;
         // if the weapon prefix is the same as the armor prefix
-        } else if (weapon_name.prefix2 == armor_name.prefix2) {
+        } else if (weapon_prefix2 == armor_prefix2) {
             // divide base damage by 4 to get 25% of original damage
             let damage_boost_base = base_damage / 4;
 
@@ -351,11 +339,11 @@ impl CombatUtils of Combat {
         entropy: u64
     ) -> u16 {
         let name_prefix1_bonus = CombatUtils::get_name_prefix1_bonus(
-            base_damage, weapon_name, armor_name, entropy
+            base_damage, weapon_name.prefix1, armor_name.prefix1, entropy
         );
 
         let name_prefix2_bonus = CombatUtils::get_name_prefix2_bonus(
-            base_damage, weapon_name, armor_name, entropy
+            base_damage, weapon_name.prefix2, armor_name.prefix2, entropy
         );
 
         // return the sum of the name prefix and name suffix bonuses
@@ -781,14 +769,14 @@ fn test_get_name_prefix1_bonus() {
 
     // weapon without special name should have no bonus
     let name_prefix1_bonus = CombatUtils::get_name_prefix1_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
     );
     assert(name_prefix1_bonus == 0, 'should be no bonus');
 
     // assign armor a prefix1 name and ensure lack of weapon special name still results in no bonus
     armor_special_names.prefix1 = 1;
     let name_prefix1_bonus = CombatUtils::get_name_prefix1_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
     );
     assert(name_prefix1_bonus == 0, 'should be no bonus');
 
@@ -797,28 +785,28 @@ fn test_get_name_prefix1_bonus() {
     // entropy 0: 4x
     weapon_special_names.prefix1 = 1;
     let name_prefix1_bonus = CombatUtils::get_name_prefix1_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
     );
     assert(name_prefix1_bonus == 400, 'should be +400hp bonus');
 
     // entropy 1: 5x
     entropy = 1;
     let name_prefix1_bonus = CombatUtils::get_name_prefix1_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
     );
     assert(name_prefix1_bonus == 500, 'should be +500hp bonus');
 
     // entropy 2: 6x
     entropy = 2;
     let name_prefix1_bonus = CombatUtils::get_name_prefix1_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
     );
     assert(name_prefix1_bonus == 600, 'should be +600hp bonus');
 
     // entropy 3: 7x
     entropy = 3;
     let name_prefix1_bonus = CombatUtils::get_name_prefix1_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
     );
     assert(name_prefix1_bonus == 700, 'should be +700hp bonus');
 }
@@ -834,14 +822,14 @@ fn test_get_name_prefix2_bonus() {
 
     // weapon without special name should have no bonus
     let name_prefix2_bonus = CombatUtils::get_name_prefix2_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
     );
     assert(name_prefix2_bonus == 0, 'no prefix2 == no bonus');
 
     // assign armor a prefix2 name and ensure lack of weapon special name still results in no bonus
     armor_special_names.prefix2 = 1;
     let name_prefix2_bonus = CombatUtils::get_name_prefix2_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
     );
     assert(name_prefix2_bonus == 0, 'no prefix2 == no bonus');
 
@@ -850,28 +838,28 @@ fn test_get_name_prefix2_bonus() {
     // entropy 0: 25%
     weapon_special_names.prefix2 = 1;
     let name_prefix2_bonus = CombatUtils::get_name_prefix2_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
     );
     assert(name_prefix2_bonus == 25, 'should be +25hp bonus');
 
     // entropy 1: 50%
     entropy = 1;
     let name_prefix2_bonus = CombatUtils::get_name_prefix2_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
     );
     assert(name_prefix2_bonus == 50, 'should be +50hp bonus');
 
     // entropy 2: 75%
     entropy = 2;
     let name_prefix2_bonus = CombatUtils::get_name_prefix2_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
     );
     assert(name_prefix2_bonus == 75, 'should be +75hp bonus');
 
     // entropy 3: 100%
     entropy = 3;
     let name_prefix2_bonus = CombatUtils::get_name_prefix2_bonus(
-        base_damage, weapon_special_names, armor_special_names, entropy
+        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
     );
     assert(name_prefix2_bonus == 100, 'should be +100hp bonus');
 }
