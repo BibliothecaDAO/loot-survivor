@@ -39,7 +39,7 @@ const Discovery = ({ discoveries, beasts }: DiscoveryProps) => {
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-5 items-center">
       <div className="flex flex-col items-center gap-5 m-auto text-xl">
         {discoveries.length > 0 ? (
           <>
@@ -62,7 +62,7 @@ const Discovery = ({ discoveries, beasts }: DiscoveryProps) => {
       </div>
       {isMobileDevice && (
         <Button
-          className="w-full"
+          className="w-1/2 text-lg"
           onClick={async () => {
             addToCalls(exploreTx);
             startLoading(

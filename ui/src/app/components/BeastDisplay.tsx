@@ -101,11 +101,13 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
               size="w-6"
               className="self-center w-6 h-6"
             />
-            <p className="text-sm  sm:text-xl">{beastData?.attackType}</p>
+            <p className="text-sm text-center sm:text-xl">
+              {beastData?.attackType}
+            </p>
           </div>
           <div className="flex flex-row gap-2 items-center">
             {getAttackLocationIcon(beastData?.beast)}
-            <p className="text-lg sm:text-xl">
+            <p className="text-sm text-center sm:text-xl">
               Attacks {beastData?.attackLocation}
             </p>
           </div>
@@ -115,7 +117,9 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
               size="w-6"
               className="self-center w-6 h-6"
             />
-            <p className="text-lg sm:text-xl">{beastData?.armorType}</p>
+            <p className="text-sm text-center sm:text-xl">
+              {beastData?.armorType}
+            </p>
           </div>
         </div>
       </div>
