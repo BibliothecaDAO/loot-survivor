@@ -74,7 +74,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                 </span>
               </div>
 
-              <div className="flex justify-between w-full text-2xl">
+              <div className="flex justify-between w-full text-lg sm:text-2xl">
                 <LevelBar
                   xp={formatAdventurer.xp}
                   level={formatAdventurer.level}
@@ -148,7 +148,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col space-y-1 text-xl sm:text-lg">
+                <div className="flex flex-col space-y-1 text-sm sm:text-xl">
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
                     STR{" "}
                     <span className="pl-3">{formatAdventurer.strength}</span>

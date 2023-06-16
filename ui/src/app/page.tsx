@@ -393,7 +393,7 @@ export default function Home() {
             id: 3,
             label: "Market",
             screen: "market",
-            disabled: hasBeast || adventurer.health == 0,
+            disabled: hasBeast || adventurer.health == 0 || !upgrade,
           },
           {
             id: 4,
@@ -596,11 +596,13 @@ export default function Home() {
                 ) : (
                   <>
                     {!isMobileDevice && account && (
-                      <Button
-                        onClick={() => setDisplayHistory(!displayHistory)}
-                      >
-                        {displayHistory ? "Hide Ledger" : "Show Ledger"}
-                      </Button>
+                      <>
+                        <Button
+                          onClick={() => setDisplayHistory(!displayHistory)}
+                        >
+                          {displayHistory ? "Hide Ledger" : "Show Ledger"}
+                        </Button>
+                      </>
                     )}
                     {((account as any)?.provider?.baseUrl == testnet_addr ||
                       (account as any)?.baseUrl == testnet_addr) && (
@@ -612,6 +614,7 @@ export default function Home() {
                     )}
                   </>
                 )}
+                {account && displayHistory && <TransactionHistory />}
                 {account && (
                   <Button onClick={() => disconnect()}>
                     {displayAddress(account.address)}

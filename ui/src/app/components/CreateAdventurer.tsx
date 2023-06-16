@@ -196,11 +196,11 @@ export const CreateAdventurer = ({
 
   return (
     <div className="flex flex-row w-full">
-      <div className="flex items-center sm:w-1/2 mx-2 sm:text-lg border border-terminal-green">
+      <div className="flex items-center sm:w-1/2 mx-2 border border-terminal-green">
         <div className="flex flex-row w-full gap-2 p-1">
           <form
             onSubmit={handleSubmit}
-            className="flex flex-col w-full gap-2 p-1 text-2xl"
+            className="flex flex-col w-full gap-2 p-1 text-lg sm:text-2xl"
           >
             <label className="flex justify-between">
               <span className="self-center">Name:</span>

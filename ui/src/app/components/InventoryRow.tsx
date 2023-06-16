@@ -88,7 +88,7 @@ export const InventoryRow = ({
 
   return (
     <>
-      <div className="flex flex-row w-full gap-3 align-center">
+      <div className="flex flex-row w-full gap-3 sm:gap-1 align-center">
         <Button
           className={isSelected && !isActive ? "animate-pulse" : ""}
           variant={isSelected ? "default" : "ghost"}
@@ -98,14 +98,20 @@ export const InventoryRow = ({
             setActiveMenu(menuIndex);
           }}
         >
-          {icon && (
+          {isMobileDevice ? (
             <div className="flex items-center justify-center w-10 h-10 sm:hidden">
               {icon}
             </div>
+          ) : (
+            <>
+              <div className="flex items-center justify-center w-10 h-10">
+                {icon}
+              </div>
+              <p className="w-40 text-xl whitespace-nowrap hidden sm:block">
+                {title}
+              </p>
+            </>
           )}
-          <p className="w-40 text-xl whitespace-nowrap hidden sm:block">
-            {title}
-          </p>
         </Button>
       </div>
     </>

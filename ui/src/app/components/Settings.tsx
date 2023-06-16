@@ -28,6 +28,12 @@ export default function Settings() {
       icon: <GuideIcon />,
       action: () => setScreen("guide"),
     },
+    {
+      id: 4,
+      label: "Discord",
+      icon: <ChatIcon />,
+      action: () => window.open("https://discord.gg/bibliothecadao", "_blank"),
+    },
   ];
   return (
     <div className="flex flex-row overflow-hidden flex-wrap">
@@ -37,13 +43,13 @@ export default function Settings() {
           onSelected={(value) => null}
           onEnterAction={true}
         />
-        <a
+        {/* <a
           href="https://discord.gg/bibliothecadao"
           target="_blank"
           rel="noopener noreferrer"
         >
           <Button>Discord</Button>
-        </a>
+        </a> */}
       </div>
     </div>
   );

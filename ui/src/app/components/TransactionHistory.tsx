@@ -14,6 +14,8 @@ import { processNotification } from "./NotificationDisplay";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { useMediaQuery } from "react-responsive";
+import useUIStore from "../hooks/useUIStore";
+import { MdClose } from "react-icons/md";
 
 const TransactionHistory = () => {
   const wrapperRef = useRef<HTMLDivElement>(null); // Update the type here
@@ -28,6 +30,8 @@ const TransactionHistory = () => {
     watch: true,
   });
   const { data: queryData } = useQueriesStore();
+  const displayHistory = useUIStore((state) => state.displayHistory);
+  const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
 
   const beasts = queryData.beastsByAdventurerQuery
     ? queryData.beastsByAdventurerQuery.beasts
@@ -41,19 +45,23 @@ const TransactionHistory = () => {
 
   const history = useLoadingStore((state) => state.history);
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   return (
-    <div className="relative" ref={wrapperRef}>
-      <Button onClick={toggleDropdown}>
-        {isOpen ? "Hide Ledger" : "Show Ledger"}
-      </Button>
-      {isOpen ? (
+    <>
+      {displayHistory ? (
         transactions ? (
-          <div className="absolute sm:right-0 top-12 z-10 w-[650px] h-[250px] p-4 bg-terminal-black border border-terminal-green overflow-x-auto table-scroll">
-            <p className="text-2xl">Ledger</p>
+          <div
+            ref={wrapperRef}
+            className="absolute m-auto right-8 sm:right-16 top-20 sm:top-32 z-10 w-[300px] sm:w-[650px] h-[250px] p-4 bg-terminal-black border border-terminal-green overflow-x-auto table-scroll"
+          >
+            <div className="flex flex-row justify-between">
+              <p className="text-2xl">Ledger</p>
+              <button
+                onClick={() => setDisplayHistory(false)}
+                className="text-red-500 hover:text-red-700"
+              >
+                <MdClose size={40} />
+              </button>
+            </div>
             <div className="w-full border border-terminal-green" />
             <ul>
               {transactions
@@ -119,7 +127,7 @@ const TransactionHistory = () => {
           </div>
         )
       ) : null}
-    </div>
+    </>
   );
 };
 

@@ -93,12 +93,7 @@ export const AdventurersList = ({
         <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row w-full h-full items-center sm:items-start">
           {isMobileDevice ? (
             <>
-              {filteredAdventurers.length > 0 && (
-                <div className="sm:w-2/12 md:w-6/12 lg:w-2/3 w-full sm:ml-2">
-                  <Info adventurer={filteredAdventurers[selectedIndex]} />
-                </div>
-              )}
-              <div className="flex flex-col sm:w-1/3 h-full overflow-y-auto mx-2">
+              <div className="flex flex-col w-full sm:w-1/3 sm:h-full overflow-y-auto mx-2">
                 {filteredAdventurers.map((adventurer, index) => (
                   <Button
                     key={adventurer.id}
@@ -128,6 +123,11 @@ export const AdventurersList = ({
                   </Button>
                 )}
               </div>
+              {filteredAdventurers.length > 0 && (
+                <div className="sm:w-2/12 md:w-6/12 lg:w-2/3 w-full sm:ml-2">
+                  <Info adventurer={filteredAdventurers[selectedIndex]} />
+                </div>
+              )}
             </>
           ) : (
             <>
