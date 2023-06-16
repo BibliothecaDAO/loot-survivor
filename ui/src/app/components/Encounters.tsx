@@ -117,7 +117,7 @@ export const Encounters = ({ profile }: EncountersProps) => {
   }
 
   return (
-    <div className="flex flex-col items-center m-auto text-xl">
+    <div className="flex flex-col items-center m-auto text-sm sm:text-xl">
       {displayEncounters.length > 0 ? (
         <>
           <h3 className="text-center">

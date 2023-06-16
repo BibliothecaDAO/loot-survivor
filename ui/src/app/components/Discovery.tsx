@@ -47,7 +47,7 @@ const Discovery = ({ discoveries, beasts }: DiscoveryProps) => {
           <div className="flex flex-col items-center gap-2 overflow-auto">
             {discoveries.map((discovery: any, index: number) => (
               <div
-                className="w-full p-2 text-left border border-terminal-green"
+                className="w-full p-2 text-left border border-terminal-green text-sm sm:text-base"
                 key={index}
               >
                 <DiscoveryDisplay discoveryData={discovery} beasts={beasts} />

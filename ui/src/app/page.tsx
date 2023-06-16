@@ -79,6 +79,8 @@ export default function Home() {
   const showDialog = useUIStore((state) => state.showDialog);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
+  const displayCart = useUIStore((state) => state.displayCart);
+  const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const upgrade = adventurer?.upgrading;
 
@@ -554,53 +556,68 @@ export default function Home() {
     >
       {connected ? (
         <>
-          <div className="flex flex-row sm:flex-row justify-between w-full">
-            <h1 className="glitch">Loot Survivor</h1>
-            <div className="flex flex-row self-end gap-2 flex-wrap">
-              <TxActivity />
-              <button onClick={() => setIsMuted(!isMuted)}>
-                {isMuted ? (
-                  <div className="flex items-center w-6 h-6">
-                    <MuteIcon />
-                  </div>
-                ) : (
-                  <div className="flex items-center w-6 h-6">
-                    <VolumeIcon />
-                  </div>
+          <div className="flex flex-col w-full">
+            {isMobileDevice && <TxActivity />}
+            <div className="flex flex-row justify-between">
+              <h1 className="glitch">Loot Survivor</h1>
+              <div className="flex flex-row items-center self-end gap-2 flex-wrap">
+                {!isMobileDevice && <TxActivity />}
+                <button onClick={() => setIsMuted(!isMuted)}>
+                  {isMuted ? (
+                    <div className="flex items-center w-6 h-6">
+                      <MuteIcon />
+                    </div>
+                  ) : (
+                    <div className="flex items-center w-6 h-6">
+                      <VolumeIcon />
+                    </div>
+                  )}
+                </button>
+                {account && calls.length > 0 && (
+                  <>
+                    <button
+                      onClick={() => setDisplayCart(!displayCart)}
+                      className="relative flex px-1 sm:p-2 bg-black border border-terminal-green text-xs"
+                    >
+                      {displayCart ? "Hide Cart" : "Show Cart"}
+                    </button>
+                    {displayCart && <TransactionCart />}
+                  </>
                 )}
-              </button>
-              {account && calls.length > 0 && <TransactionCart />}
-              {isMobileDevice ? (
-                <>
-                  <button
-                    className="w-6 h-6"
-                    onClick={() => setScreen("settings")}
-                  >
-                    <CogIcon />
-                  </button>
-                </>
-              ) : (
-                <>
-                  {!isMobileDevice && account && (
-                    <Button onClick={() => setDisplayHistory(!displayHistory)}>
-                      {displayHistory ? "Hide Ledger" : "Show Ledger"}
-                    </Button>
-                  )}
-                  {((account as any)?.provider?.baseUrl == testnet_addr ||
-                    (account as any)?.baseUrl == testnet_addr) && (
-                    <AddDevnetEthButton />
-                  )}
-                  {((account as any)?.provider?.baseUrl == testnet_addr ||
-                    (account as any)?.baseUrl == testnet_addr) && (
-                    <MintEthButton />
-                  )}
-                </>
-              )}
-              {account && (
-                <Button onClick={() => disconnect()}>
-                  {displayAddress(account.address)}
-                </Button>
-              )}
+                {isMobileDevice ? (
+                  <>
+                    <button
+                      className="w-6 h-6"
+                      onClick={() => setScreen("settings")}
+                    >
+                      <CogIcon />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {!isMobileDevice && account && (
+                      <Button
+                        onClick={() => setDisplayHistory(!displayHistory)}
+                      >
+                        {displayHistory ? "Hide Ledger" : "Show Ledger"}
+                      </Button>
+                    )}
+                    {((account as any)?.provider?.baseUrl == testnet_addr ||
+                      (account as any)?.baseUrl == testnet_addr) && (
+                      <AddDevnetEthButton />
+                    )}
+                    {((account as any)?.provider?.baseUrl == testnet_addr ||
+                      (account as any)?.baseUrl == testnet_addr) && (
+                      <MintEthButton />
+                    )}
+                  </>
+                )}
+                {account && (
+                  <Button onClick={() => disconnect()}>
+                    {displayAddress(account.address)}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
           <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green" />
@@ -618,7 +635,7 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed top-1/16 left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
+            <div className="fixed top-1/16 left-2/8  sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}

@@ -27,6 +27,8 @@ type State = {
   showDialog: (value: boolean) => void;
   displayHistory: boolean;
   setDisplayHistory: (value: boolean) => void;
+  displayCart: boolean;
+  setDisplayCart: (value: boolean) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -44,6 +46,8 @@ const useUIStore = create<State>((set) => ({
   showDialog: (value) => set({ dialog: value }),
   displayHistory: false,
   setDisplayHistory: (value) => set({ displayHistory: value }),
+  displayCart: false,
+  setDisplayCart: (value) => set({ displayCart: value }),
 }));
 
 export default useUIStore;

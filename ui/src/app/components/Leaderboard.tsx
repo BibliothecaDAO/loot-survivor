@@ -91,9 +91,9 @@ const Leaderboard: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center sm:w-3/4 m-auto">
-      <h1 className="text-2xl">Top 3 Submitted Scores</h1>
+      <h1 className="text-lg sm:text-2xl">Top 3 Submitted Scores</h1>
       {scores.length > 0 ? (
-        <table className="w-full mt-4 text-xl border border-terminal-green">
+        <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
           <thead className="border border-terminal-green">
             <tr>
               <th className="p-1">Rank</th>
@@ -152,8 +152,8 @@ const Leaderboard: React.FC = () => {
       ) : (
         <h3>No scores submitted yet. Be the first!</h3>
       )}
-      <h1 className="text-2xl">Live Leaderboard</h1>
-      <table className="w-full mt-4 text-xl border border-terminal-green">
+      <h1 className="text-lg sm:text-2xl">Live Leaderboard</h1>
+      <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
         <thead className="border border-terminal-green">
           <tr>
             <th className="p-1">Rank</th>

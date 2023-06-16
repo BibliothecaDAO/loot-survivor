@@ -255,7 +255,7 @@ const Inventory: React.FC = () => {
           {filteredItems.length ? (
             filteredItems.map((item: any, index: number) => (
               <div
-                className="flex items-center justify-between overflow-hidden"
+                className="flex flex-row gap-2 w-full items-center justify-between"
                 key={item.id}
               >
                 <div className="w-full">

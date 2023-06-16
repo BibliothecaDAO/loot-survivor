@@ -140,8 +140,8 @@ export const TxActivity = () => {
   return (
     <>
       {loading ? (
-        <div className="flex flex-row items-center gap-5">
-          <div className="flex w-48 loading-ellipsis">
+        <div className="flex flex-row fixed top-0 sm:relative items-center gap-5 justify-between text-xs sm:text-base">
+          <div className="flex w-32 sm:w-48 loading-ellipsis">
             <LootIconLoader className="self-center mr-3" />
             {hash
               ? pendingArray

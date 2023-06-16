@@ -72,7 +72,7 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
   return (
     <div className="relative flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
       <div className="flex flex-col w-full h-full p-3 uppercase">
-        <div className="flex justify-between py-3 text-3xl sm:text-4xl border-b border-terminal-green">
+        <div className="flex justify-between py-3 text-2xl sm:text-4xl border-b border-terminal-green">
           {beastName}
           <span
             className={`text-4xl flex ${
@@ -80,15 +80,17 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
             }`}
           >
             <Heart className="self-center w-6 h-6 fill-current" />{" "}
-            <p className="self-center text-4xl">{beastData?.health}</p>
+            <p className="self-center text-2xl sm:text-4xl">
+              {beastData?.health}
+            </p>
           </span>
         </div>
         <div className="flex justify-between w-full py-2 ">
-          <p className="text-3xl text-terminal-yellow">
+          <p className="text-xl sm:text-3xl text-terminal-yellow">
             Level {beastData?.level}
           </p>
           {/* <p className="text-3xl text-terminal-yellow">XP {beastData?.xp}</p> */}
-          <p className="text-3xl text-terminal-yellow">
+          <p className="text-xl sm:text-3xl text-terminal-yellow">
             Tier {beastData?.rank}
           </p>
         </div>
@@ -99,11 +101,13 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
               size="w-6"
               className="self-center w-6 h-6"
             />
-            <p className="text-xl">{beastData?.attackType}</p>
+            <p className="text-sm  sm:text-xl">{beastData?.attackType}</p>
           </div>
           <div className="flex flex-row gap-2 items-center">
             {getAttackLocationIcon(beastData?.beast)}
-            <p className="text-xl">Attacks {beastData?.attackLocation}</p>
+            <p className="text-lg sm:text-xl">
+              Attacks {beastData?.attackLocation}
+            </p>
           </div>
           <div className="flex flex-row gap-2 items-center">
             <EfficacyIcon
@@ -111,11 +115,11 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
               size="w-6"
               className="self-center w-6 h-6"
             />
-            <p className="text-xl">{beastData?.armorType}</p>
+            <p className="text-lg sm:text-xl">{beastData?.armorType}</p>
           </div>
         </div>
       </div>
-      <div className="relative flex-grow w-full h-64 sm:h-full pb-full">
+      <div className="relative flex-grow w-full h-40 sm:h-full pb-full">
         <Image
           src={
             getValueFromKey(gameData.BEAST_IMAGES, beastData?.beast) ||

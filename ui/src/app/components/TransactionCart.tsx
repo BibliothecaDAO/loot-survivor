@@ -13,6 +13,7 @@ import {
   getItemsByAdventurer,
 } from "../hooks/graphql/queries";
 import useCustomQuery from "../hooks/useCustomQuery";
+import useUIStore from "../hooks/useUIStore";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -37,12 +38,10 @@ const TransactionCart: React.FC = () => {
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
   const [loadingQuery, setLoadingQuery] = useState("");
   const { data } = useQueriesStore();
+  const displayCart = useUIStore((state) => state.displayCart);
+  const setDisplayCart = useUIStore((state) => state.setDisplayCart);
 
   const method = (queuedTransactions[0]?.metadata as Metadata)?.method;
-
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
 
   // useCustomQuery(
   //   "latestMarketItemsQuery",
@@ -129,14 +128,8 @@ const TransactionCart: React.FC = () => {
 
   return (
     <>
-      <button
-        onClick={toggleDropdown}
-        className="relative flex p-2 bg-black border border-terminal-green"
-      >
-        {isOpen ? "Hide Cart" : "Show Cart"}
-      </button>
-      {isOpen ? (
-        <div className="absolute right-[280px] top-32 z-10 w-[400px] h-[400px] p-3 bg-terminal-black border border-terminal-green">
+      {displayCart ? (
+        <div className="absolute right-[50px] w-[300px] h-[400px] sm:right-[280px] top-20 sm:top-32 z-10 sm:w-[400px] sm:h-[400px] p-3 bg-terminal-black border border-terminal-green">
           <p className="text-2xl">TRANSACTIONS</p>
           <div className="w-full border border-terminal-green "></div>
           <div className="flex flex-col h-[200px] overflow-auto">
