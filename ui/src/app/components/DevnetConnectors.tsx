@@ -1,5 +1,5 @@
 import { useAccount } from "@starknet-react/core";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 import { mintEth } from "../api/api";
 
 interface AddDevnetButtonProps {

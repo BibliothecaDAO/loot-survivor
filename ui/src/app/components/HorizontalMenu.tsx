@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 import { Menu } from "../types";
 
@@ -71,6 +71,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
     <div>
       {buttonsData.map((buttonData, index) => (
         <Button
+          className="px-3"
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
           variant={selectedIndex === index ? "default" : "outline"}

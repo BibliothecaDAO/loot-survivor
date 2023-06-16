@@ -1,7 +1,7 @@
-import TwitterShareButton from "./TwitterShareButtons";
+import TwitterShareButton from "./buttons/TwitterShareButtons";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useLoadingStore from "../hooks/useLoadingStore";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 import useUIStore from "../hooks/useUIStore";
 import Image from "next/image";
 import { useQueriesStore } from "../hooks/useQueryStore";

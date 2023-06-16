@@ -1,24 +1,24 @@
 "use client";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect, useMemo } from "react";
-import { Button } from "./components/Button";
+import { Button } from "./components/buttons/Button";
 import HorizontalKeyboardControl from "./components/HorizontalMenu";
-import Actions from "./components/Actions";
-import Marketplace from "./components/Marketplace";
-import Adventurer from "./components/Adventurer";
-import Beast from "./components/Beast";
+import Actions from "./components/actions/Actions";
+import Marketplace from "./components/marketplace/Marketplace";
+import Adventurer from "./components/start/Adventurer";
+import Beast from "./components/beast/Beast";
 import { displayAddress, padAddress } from "./lib/utils";
-import Inventory from "./components/Inventory";
-import TransactionHistory from "./components/TransactionHistory";
-import TransactionCart from "./components/TransactionCart";
+import Inventory from "./components/inventory/Inventory";
+import TransactionHistory from "./components/navigation/TransactionHistory";
+import TransactionCart from "./components/navigation/TransactionCart";
 import Upgrade from "./components/Upgrade";
-import Intro from "./components/Intro";
+import Intro from "./components/intro/Intro";
 import {
   AddDevnetEthButton,
   MintEthButton,
 } from "./components/DevnetConnectors";
-import Leaderboard from "./components/Leaderboard";
-import { TxActivity } from "./components/TxActivity";
+import Leaderboard from "./components/leaderboard/Leaderboard";
+import { TxActivity } from "./components/navigation/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
 import useAdventurerStore from "./hooks/useAdventurerStore";
 import useUIStore from "./hooks/useUIStore";
@@ -30,12 +30,12 @@ import { useMusic } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
 import { Menu, NullAdventurer } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
-import Profile from "./components/Profile";
+import Profile from "./components/leaderboard/Profile";
 import { DeathDialog } from "./components/DeathDialog";
 import { Encounters } from "./components/Encounters";
 import Guide from "./components/Guide";
 import { processNotification } from "./components/NotificationDisplay";
-import { DiscoveryDisplay } from "./components/DiscoveryDisplay";
+import { DiscoveryDisplay } from "./components/actions/DiscoveryDisplay";
 import useCustomQuery from "./hooks/useCustomQuery";
 import {
   getBeastsByAdventurer,
@@ -46,6 +46,13 @@ import {
   getLatestMarketItemsNumber,
   getAdventurerByXP,
 } from "./hooks/graphql/queries";
+import { useMediaQuery } from "react-responsive";
+import { CogIcon, MuteIcon, VolumeIcon } from "./components/Icons";
+import Settings from "./components/Settings";
+import MobileHeader from "./components/MobileHeader";
+import Player from "./components/Player";
+import { useUiSounds } from "./hooks/useUiSound";
+import { soundSelector } from "./hooks/useUiSound";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -70,7 +77,13 @@ export default function Home() {
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const dialog = useUIStore((state) => state.dialog);
+  // const dialog = true;
   const showDialog = useUIStore((state) => state.showDialog);
+  const displayHistory = useUIStore((state) => state.displayHistory);
+  const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
+  const displayCart = useUIStore((state) => state.displayCart);
+  const setDisplayCart = useUIStore((state) => state.setDisplayCart);
+  const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const upgrade = adventurer?.upgrading;
 
@@ -179,6 +192,14 @@ export default function Home() {
   }, [play, stop]);
 
   const [menu, setMenu] = useState<Menu[]>([
+    {
+      id: 1,
+      label: "Start",
+      screen: "start",
+    },
+  ]);
+
+  const [mobileMenu, setMobileMenu] = useState<Menu[]>([
     {
       id: 1,
       label: "Start",
@@ -305,6 +326,14 @@ export default function Home() {
         },
       ];
 
+      let newMobileMenu: Menu[] = [
+        {
+          id: 1,
+          label: "Start",
+          screen: "start",
+        },
+      ];
+
       if (adventurer) {
         newMenu = [
           ...newMenu,
@@ -354,8 +383,43 @@ export default function Home() {
             screen: "guide",
           },
         ];
+
+        newMobileMenu = [
+          ...newMobileMenu,
+          {
+            id: 2,
+            label: "Actions",
+            screen: "actions",
+            disabled: hasBeast || upgrade || adventurer.health == 0,
+          },
+          {
+            id: 3,
+            label: "Market",
+            screen: "market",
+            disabled: hasBeast || adventurer.health == 0,
+          },
+          {
+            id: 4,
+            label: "Inventory",
+            screen: "inventory",
+            disabled: adventurer.health == 0,
+          },
+          {
+            id: 5,
+            label: "Beast",
+            screen: "beast",
+            disabled: upgrade || adventurer.health == 0,
+          },
+          {
+            id: 6,
+            label: "Upgrade",
+            screen: "upgrade",
+            disabled: !upgrade,
+          },
+        ];
       }
       setMenu(newMenu);
+      setMobileMenu(newMobileMenu);
     }
   }, [adventurer, account, onboarded]);
 
@@ -363,6 +427,13 @@ export default function Home() {
     if (!onboarded) {
       if (adventurers.length == 0) {
         setMenu([
+          {
+            id: 1,
+            label: "Start",
+            screen: "start",
+          },
+        ]);
+        setMobileMenu([
           {
             id: 1,
             label: "Start",
@@ -383,6 +454,13 @@ export default function Home() {
             screen: "actions",
           },
         ]);
+        setMobileMenu([
+          {
+            id: 1,
+            label: "Actions",
+            screen: "actions",
+          },
+        ]);
         setScreen("actions");
       } else if (
         adventurers.length == 1 &&
@@ -394,6 +472,13 @@ export default function Home() {
             id: 1,
             label: "Beast",
             screen: "beast",
+          },
+        ]);
+        setMobileMenu([
+          {
+            id: 1,
+            label: "Actions",
+            screen: "actions",
           },
         ]);
         setScreen("beast");
@@ -463,6 +548,10 @@ export default function Home() {
     refetch("adventurersByOwnerQuery");
   }, [account]);
 
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
+
   return (
     // <Maintenance />
     <main
@@ -470,29 +559,85 @@ export default function Home() {
     >
       {connected ? (
         <>
-          <div className="flex flex-col sm:flex-row justify-between w-full">
-            <h1 className="glitch">Loot Survivor</h1>
-            <div className="flex flex-row self-end gap-2 flex-wrap">
-              <TxActivity />
-              <Button onClick={() => setIsMuted(!isMuted)}>
-                {isMuted ? "Unmute" : "Mute"}
-              </Button>
-              {account && calls.length > 0 && <TransactionCart />}
-              {account && <TransactionHistory />}
-              {((account as any)?.provider?.baseUrl == testnet_addr ||
-                (account as any)?.baseUrl == testnet_addr) && (
-                <AddDevnetEthButton />
-              )}
-              {((account as any)?.provider?.baseUrl == testnet_addr ||
-                (account as any)?.baseUrl == testnet_addr) && <MintEthButton />}
-              {account && (
-                <Button onClick={() => disconnect()}>
-                  {displayAddress(account.address)}
-                </Button>
-              )}
+          <div className="flex flex-col w-full">
+            {isMobileDevice && <TxActivity />}
+            <div className="flex flex-row justify-between">
+              <h1 className="glitch">Loot Survivor</h1>
+              <div className="flex flex-row items-center self-end gap-2 flex-wrap">
+                {!isMobileDevice && <TxActivity />}
+                <button
+                  onClick={() => {
+                    setIsMuted(!isMuted);
+                    clickPlay();
+                  }}
+                >
+                  {isMuted ? (
+                    <div className="flex items-center w-6 h-6">
+                      <MuteIcon />
+                    </div>
+                  ) : (
+                    <div className="flex items-center w-6 h-6">
+                      <VolumeIcon />
+                    </div>
+                  )}
+                </button>
+                {account && calls.length > 0 && (
+                  <>
+                    <button
+                      onClick={() => {
+                        setDisplayCart(!displayCart);
+                        clickPlay();
+                      }}
+                      className="relative flex px-1 sm:p-2 bg-black border border-terminal-green text-xs"
+                    >
+                      {displayCart ? "Hide Cart" : "Show Cart"}
+                    </button>
+                    {displayCart && <TransactionCart />}
+                  </>
+                )}
+                {isMobileDevice ? (
+                  <>
+                    <button
+                      className="w-6 h-6"
+                      onClick={() => {
+                        setScreen("settings");
+                        clickPlay();
+                      }}
+                    >
+                      <CogIcon />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {!isMobileDevice && account && (
+                      <>
+                        <Button
+                          onClick={() => setDisplayHistory(!displayHistory)}
+                        >
+                          {displayHistory ? "Hide Ledger" : "Show Ledger"}
+                        </Button>
+                      </>
+                    )}
+                    {((account as any)?.provider?.baseUrl == testnet_addr ||
+                      (account as any)?.baseUrl == testnet_addr) && (
+                      <AddDevnetEthButton />
+                    )}
+                    {((account as any)?.provider?.baseUrl == testnet_addr ||
+                      (account as any)?.baseUrl == testnet_addr) && (
+                      <MintEthButton />
+                    )}
+                  </>
+                )}
+                {account && displayHistory && <TransactionHistory />}
+                {account && (
+                  <Button onClick={() => disconnect()}>
+                    {displayAddress(account.address)}
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-          <div className="w-full h-6 my-2 bg-terminal-green" />
+          <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green" />
           <CSSTransition
             in={
               showNotification &&
@@ -507,7 +652,7 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed top-1/16 left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
+            <div className="fixed top-1/16 left-2/8  sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}
@@ -519,16 +664,18 @@ export default function Home() {
           {dialog && <DeathDialog />}
 
           {account ? (
-            <div className="flex-grow w-full">
+            <div className="flex flex-col flex-grow w-full">
               <>
                 <div className="gap-10 pb-2">
                   <HorizontalKeyboardControl
-                    buttonsData={menu}
+                    buttonsData={isMobileDevice ? mobileMenu : menu}
                     onButtonClick={(value) => {
                       setScreen(value);
                     }}
                   />
                 </div>
+
+                {isMobileDevice && <MobileHeader />}
 
                 {screen === "start" && <Adventurer />}
                 {screen === "actions" && <Actions />}
@@ -540,6 +687,8 @@ export default function Home() {
                 {screen === "profile" && <Profile />}
                 {screen === "encounters" && <Encounters />}
                 {screen === "guide" && <Guide />}
+                {screen === "settings" && <Settings />}
+                {screen === "player" && <Player />}
               </>
             </div>
           ) : null}
