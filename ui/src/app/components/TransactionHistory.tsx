@@ -16,6 +16,8 @@ import useCustomQuery from "../hooks/useCustomQuery";
 import { useMediaQuery } from "react-responsive";
 import useUIStore from "../hooks/useUIStore";
 import { MdClose } from "react-icons/md";
+import { useUiSounds } from "../hooks/useUiSound";
+import { soundSelector } from "../hooks/useUiSound";
 
 const TransactionHistory = () => {
   const wrapperRef = useRef<HTMLDivElement>(null); // Update the type here
@@ -32,6 +34,7 @@ const TransactionHistory = () => {
   const { data: queryData } = useQueriesStore();
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
+  const { play } = useUiSounds(soundSelector.click);
 
   const beasts = queryData.beastsByAdventurerQuery
     ? queryData.beastsByAdventurerQuery.beasts
@@ -56,7 +59,10 @@ const TransactionHistory = () => {
             <div className="flex flex-row justify-between">
               <p className="text-2xl">Ledger</p>
               <button
-                onClick={() => setDisplayHistory(false)}
+                onClick={() => {
+                  setDisplayHistory(false);
+                  play();
+                }}
                 className="text-red-500 hover:text-red-700"
               >
                 <MdClose size={40} />

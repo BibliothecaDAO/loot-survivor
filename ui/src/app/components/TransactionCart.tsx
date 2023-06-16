@@ -14,6 +14,8 @@ import {
 } from "../hooks/graphql/queries";
 import useCustomQuery from "../hooks/useCustomQuery";
 import useUIStore from "../hooks/useUIStore";
+import { useUiSounds } from "../hooks/useUiSound";
+import { soundSelector } from "../hooks/useUiSound";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -40,6 +42,7 @@ const TransactionCart: React.FC = () => {
   const { data } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
+  const { play: clickPlay } = useUiSounds(soundSelector.click);
 
   const method = (queuedTransactions[0]?.metadata as Metadata)?.method;
 
@@ -142,7 +145,10 @@ const TransactionCart: React.FC = () => {
                       {/* <p>{call.calldata}</p> */}
                       <p>{call.metadata}</p>
                       <button
-                        onClick={() => removeFromCalls(call)}
+                        onClick={() => {
+                          removeFromCalls(call);
+                          clickPlay();
+                        }}
                         className="text-red-500 hover:text-red-700"
                       >
                         <MdClose size={20} />

@@ -51,6 +51,8 @@ import { CogIcon, MuteIcon, VolumeIcon } from "./components/Icons";
 import Settings from "./components/Settings";
 import MobileHeader from "./components/MobileHeader";
 import Player from "./components/Player";
+import { useUiSounds } from "./hooks/useUiSound";
+import { soundSelector } from "./hooks/useUiSound";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -81,6 +83,7 @@ export default function Home() {
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
+  const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const upgrade = adventurer?.upgrading;
 
@@ -562,7 +565,12 @@ export default function Home() {
               <h1 className="glitch">Loot Survivor</h1>
               <div className="flex flex-row items-center self-end gap-2 flex-wrap">
                 {!isMobileDevice && <TxActivity />}
-                <button onClick={() => setIsMuted(!isMuted)}>
+                <button
+                  onClick={() => {
+                    setIsMuted(!isMuted);
+                    clickPlay();
+                  }}
+                >
                   {isMuted ? (
                     <div className="flex items-center w-6 h-6">
                       <MuteIcon />
@@ -576,7 +584,10 @@ export default function Home() {
                 {account && calls.length > 0 && (
                   <>
                     <button
-                      onClick={() => setDisplayCart(!displayCart)}
+                      onClick={() => {
+                        setDisplayCart(!displayCart);
+                        clickPlay();
+                      }}
                       className="relative flex px-1 sm:p-2 bg-black border border-terminal-green text-xs"
                     >
                       {displayCart ? "Hide Cart" : "Show Cart"}
@@ -588,7 +599,10 @@ export default function Home() {
                   <>
                     <button
                       className="w-6 h-6"
-                      onClick={() => setScreen("settings")}
+                      onClick={() => {
+                        setScreen("settings");
+                        clickPlay();
+                      }}
                     >
                       <CogIcon />
                     </button>
