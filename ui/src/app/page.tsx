@@ -396,7 +396,7 @@ export default function Home() {
             id: 3,
             label: "Market",
             screen: "market",
-            disabled: hasBeast || adventurer.health == 0 || !upgrade,
+            disabled: hasBeast || adventurer.health == 0,
           },
           {
             id: 4,

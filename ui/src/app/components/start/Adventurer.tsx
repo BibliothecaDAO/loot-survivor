@@ -9,6 +9,7 @@ import { useQueriesStore } from "../../hooks/useQueryStore";
 import LootIconLoader from "../Loader";
 import useCustomQuery from "../../hooks/useCustomQuery";
 import useLoadingStore from "../../hooks/useLoadingStore";
+import { useMediaQuery } from "react-responsive";
 
 const Adventurer = () => {
   const [activeMenu, setActiveMenu] = useState(0);
@@ -53,6 +54,10 @@ const Adventurer = () => {
     return <LootIconLoader />;
   }
 
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
+
   return (
     <>
       <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap">
@@ -67,6 +72,7 @@ const Adventurer = () => {
 
         {selected === "choose adventurer" && (
           <div className="sm:w-5/6">
+            {isMobileDevice && <p className="text-center">Adventurers</p>}
             <AdventurersList
               isActive={activeMenu == 1}
               onEscape={() => setActiveMenu(0)}
@@ -84,7 +90,6 @@ const Adventurer = () => {
           </div>
         )}
       </div>
-      {/* )} */}
     </>
   );
 };

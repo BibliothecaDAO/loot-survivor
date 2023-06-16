@@ -88,7 +88,7 @@ const Leaderboard: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col items-center sm:w-3/4 m-auto">
+    <div className="flex flex-col items-center sm:w-3/4 mx-auto">
       <h1 className="text-lg sm:text-2xl">Top 3 Submitted Scores</h1>
       {scores.length > 0 ? (
         <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">

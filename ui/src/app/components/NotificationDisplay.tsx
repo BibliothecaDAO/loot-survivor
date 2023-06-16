@@ -252,7 +252,7 @@ export const NotificationDisplay = ({
   }, [animation]);
 
   return (
-    <div className="z-10 flex flex-row w-full gap-5 p-2">
+    <div className="z-10 flex flex-row w-full gap-5 sm:p-2">
       <div className="w-1/6 sm:w-1/4">
         <SpriteAnimation
           frameWidth={100}

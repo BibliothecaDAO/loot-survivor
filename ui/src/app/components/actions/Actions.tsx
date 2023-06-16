@@ -117,15 +117,15 @@ export default function Actions() {
       disabled: !adventurer?.isIdle || loading,
       loading: loading,
     });
-    buttonsData.push({
-      id: 3,
-      label: "Kill Adventurer",
-      icon: <TargetIcon />,
-      value: "kill adventurer",
-      action: async () => setActiveMenu(2),
-      disabled: !adventurer?.isIdle || loading,
-      loading: loading,
-    });
+    // buttonsData.push({
+    //   id: 3,
+    //   label: "Kill Adventurer",
+    //   icon: <TargetIcon />,
+    //   value: "kill adventurer",
+    //   action: async () => setActiveMenu(2),
+    //   disabled: !adventurer?.isIdle || loading,
+    //   loading: loading,
+    // });
   }
 
   const isMobileDevice = useMediaQuery({
