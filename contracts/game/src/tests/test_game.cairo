@@ -9,6 +9,8 @@ mod tests {
 
     use test::test_utils::assert_eq;
 
+    use lootitems::loot::constants::{ItemId};
+
     use game::game::game::{IGame, Game, IGameDispatcher, IGameDispatcherTrait};
 
     fn setup() -> IGameDispatcher {
@@ -27,15 +29,23 @@ mod tests {
         IGameDispatcher { contract_address: address0 }
     }
 
-    #[test]
-    #[available_gas(30000000)]
-    fn test_start() {
+    fn new_adventurer() -> IGameDispatcher {
         let mut deployed_game = setup();
 
-        deployed_game.start(12);
+        deployed_game.start(ItemId::Wand);
 
         let adventurer_1 = @deployed_game.get_adventurer(0);
 
-        assert_eq(adventurer_1.weapon.id, @12, 'weapon');
+        deployed_game
+    }
+
+    #[test]
+    #[available_gas(30000000)]
+    fn test_start() {
+        let mut deployed_game = new_adventurer();
+
+        let adventurer_1 = @deployed_game.get_adventurer(0);
+
+        assert_eq(adventurer_1.weapon.id, @ItemId::Wand, 'weapon');
     }
 }
