@@ -139,7 +139,7 @@ export default function Actions() {
       </div>
       {isMobileDevice ? (
         <>
-          <div className="flex sm:w-1/3 bg-terminal-black">
+          <div className="flex flex-col items-center sm:w-1/3 bg-terminal-black">
             {selected == "explore" && (
               <Discovery discoveries={latestDiscoveries} beasts={beasts} />
             )}

@@ -199,7 +199,7 @@ export default function Beast() {
             )}
           </div>
 
-          <div className="flex flex-col sm:w-1/3 gap-10 p-4">
+          <div className="flex flex-col sm:w-1/3 gap-5 p-4">
             {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
 
             {(adventurer?.beastId || formatBattles.length > 0) && (
