@@ -1,5 +1,19 @@
+use survivor::adventurer::{Adventurer, AdventurerActions, Actions};
+
 #[starknet::interface]
-trait IGame<T> {// fn constructor(ref self: ContractState, lords: ContractAddress, dao: ContractAddress);
+trait IGame<T> {
+    fn start(ref self: T, starting_weapon: u8);
+    fn explore(ref self: T, adventurer_id: u256);
+
+    fn attack(ref self: T, adventurer_id: u256);
+    fn flee(ref self: T, adventurer_id: u256);
+    fn equip(ref self: T, adventurer_id: u256, item_id: u8);
+    fn buy_item(ref self: T, adventurer_id: u256, item_id: u8, equip: bool);
+    fn upgrade_stat(ref self: T, adventurer_id: u256, stat: u8);
+    fn purchase_health(ref self: T, adventurer_id: u256);
+
+    // view functions
+    fn get_adventurer(self: @T, adventurer_id: u256) -> Adventurer;
 }
 
 #[starknet::contract]
@@ -12,8 +26,8 @@ mod Game {
     use core::traits::{TryInto, Into};
     use lootitems::loot::{Loot, ItemUtils};
     use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64};
-    use survivor::adventurer::{Adventurer, AdventurerActions, Actions};
 
+    use survivor::adventurer::{Adventurer, AdventurerActions, Actions};
     use survivor::bag::{Bag, BagActions, ImplBagActions};
 
     use market::market::{ImplMarket};
@@ -45,9 +59,48 @@ mod Game {
         self._dao.write(dao);
     }
 
-    // @loothero
-    #[external]
-    fn start(ref self: ContractState, starting_weapon: u8) {
+    // ------------------------------------------ //
+    // ------------ Impl ------------------------ //
+    // ------------------------------------------ //
+
+    #[external(v0)]
+    impl Game of super::IGame<ContractState> {
+        fn start(ref self: ContractState, starting_weapon: u8) {
+            _start(ref self, starting_weapon);
+        }
+        fn explore(ref self: ContractState, adventurer_id: u256) {
+            _explore(ref self, adventurer_id);
+        }
+        fn attack(ref self: ContractState, adventurer_id: u256) {
+            _attack(ref self, adventurer_id);
+        }
+        fn flee(ref self: ContractState, adventurer_id: u256) {
+            _flee(ref self, adventurer_id);
+        }
+        fn equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
+            _equip(ref self, adventurer_id, item_id);
+        }
+        fn buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
+            _buy_item(ref self, adventurer_id, item_id, equip);
+        }
+        fn upgrade_stat(ref self: ContractState, adventurer_id: u256, stat: u8) {
+            _upgrade_stat(ref self, adventurer_id, stat);
+        }
+        fn purchase_health(ref self: ContractState, adventurer_id: u256) {
+            _purchase_health(ref self, adventurer_id);
+        }
+
+        // view functions
+        fn get_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
+            _adventurer_unpacked(self, adventurer_id)
+        }
+    }
+
+    // ------------------------------------------ //
+    // ------------ Internal Functions ---------- //
+    // ------------------------------------------ //
+
+    fn _start(ref self: ContractState, starting_weapon: u8) {
         // assert item is a starting weapon
         assert(
             ItemUtils::is_starting_weapon(starting_weapon) == true, 'Loot is not a starter weapon'
@@ -98,9 +151,9 @@ mod Game {
     }
 
     // @loothero
-    fn explore(ref self: ContractState, adventurer_id: u256) {
+    fn _explore(ref self: ContractState, adventurer_id: u256) {
         // get adventurer from storage and unpack
-        let mut adventurer = _adventurer_unpacked(ref self, adventurer_id);
+        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
         // TODO: get adventurer entropy from AdventurerMeta
         let adventurer_entropy = 1;
@@ -117,7 +170,7 @@ mod Game {
     }
 
     // @loothero
-    fn attack(adventurer_id: u256) { //
+    fn _attack(ref self: ContractState, adventurer_id: u256) { //
     // check beast exists on Adventurer
     // calculate attack dmg
     // check if beast is dead
@@ -128,7 +181,7 @@ mod Game {
     }
 
     // @loothero
-    fn flee(adventurer_id: u256) { // 
+    fn _flee(ref self: ContractState, adventurer_id: u256) { // 
     // check beast exists on Adventurer
     // calculate if can flee
     // if can flee -> set beast to null
@@ -137,9 +190,9 @@ mod Game {
     }
 
     // @loaf
-    fn equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
+    fn _equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
         // TODO: check ownership
-        let mut adventurer = _adventurer_unpacked(ref self, adventurer_id);
+        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
         let mut bag = _bag_unpacked(ref self, adventurer_id);
 
@@ -168,8 +221,8 @@ mod Game {
     // checks adventurer has enough gold
     // equips item if equip is true
     // stashes item in bag if equip is false
-    fn buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
-        let mut adventurer = _adventurer_unpacked(ref self, adventurer_id);
+    fn _buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
+        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
         // TODO: update to real entropy
         let entropy: u32 = 123;
@@ -216,30 +269,25 @@ mod Game {
 
 
     // @loothero
-    fn upgrade_stat(adventurer_id: u256, stat_id: u8) { //
+    fn _upgrade_stat(ref self: ContractState, adventurer_id: u256, stat_id: u8) { //
     // check can upgradable
     // upgrade stat
     // set upgrade to false
     }
 
     // @loothero
-    fn purchase_health(adventurer_id: u256) { // 
+    fn _purchase_health(ref self: ContractState, adventurer_id: u256) { // 
     // check gold balance
     // update health
     // update gold - health price
-    }
-
-    // maybe deprecate??
-    fn unequip(adventurer_id: u256, item_id: u8) { //
-    // check item exists on Adventurer
-    // 
     }
 
     // ------------------------------------------ //
     // ------------ Helper Functions ------------ //
     // ------------------------------------------ //
 
-    fn _adventurer_unpacked(ref self: ContractState, adventurer_id: u256) -> Adventurer {
+    #[view]
+    fn _adventurer_unpacked(self: @ContractState, adventurer_id: u256) -> Adventurer {
         AdventurerActions::unpack(self._adventurer.read((get_caller_address(), adventurer_id)))
     }
 

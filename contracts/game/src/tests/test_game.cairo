@@ -11,29 +11,31 @@ mod tests {
 
     use game::game::game::{IGame, Game, IGameDispatcher, IGameDispatcherTrait};
 
-    #[test]
-    #[available_gas(30000000)]
-    fn test_flow() {
+    fn setup() -> IGameDispatcher {
         let mut calldata = Default::default();
+
+        // lords
         calldata.append(100);
+
+        // dao
         calldata.append(200);
+
         let (address0, _) = deploy_syscall(
             Game::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
         )
             .unwrap();
-        let mut contract0 = IGameDispatcher { contract_address: address0 };
-    // let mut calldata = Default::default();
-    // calldata.append(200);
-    // let (address1, _) = deploy_syscall(
-    //     Balance::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
-    // )
-    //     .unwrap();
-    // let mut contract1 = IBalanceDispatcher { contract_address: address1 };
+        IGameDispatcher { contract_address: address0 }
+    }
 
-    // assert_eq(@contract0.get(), @100, 'contract0.get() == 100');
-    // assert_eq(@contract1.get(), @200, 'contract1.get() == 200');
-    // @contract1.increase(200);
-    // assert_eq(@contract0.get(), @100, 'contract0.get() == 100');
-    // assert_eq(@contract1.get(), @400, 'contract1.get() == 400');
+    #[test]
+    #[available_gas(30000000)]
+    fn test_start() {
+        let mut deployed_game = setup();
+
+        deployed_game.start(12);
+
+        let adventurer_1 = @deployed_game.get_adventurer(0);
+
+        assert_eq(adventurer_1.weapon.id, @12, 'weapon');
     }
 }
