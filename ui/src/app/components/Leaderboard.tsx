@@ -176,7 +176,7 @@ const Leaderboard: React.FC = () => {
                 <td>{`${adventurer.name} - ${adventurer.id}`}</td>
                 <td>
                   <span className="flex justify-center text-terminal-yellow">
-                    <Coin className="self-center w-6 h-6 fill-current" />
+                    <Coin className="self-center w-4 h-4 sm:w-6 sm:h-6 fill-current" />
                     {adventurer.gold ? adventurer.gold : 0}
                   </span>
                 </td>

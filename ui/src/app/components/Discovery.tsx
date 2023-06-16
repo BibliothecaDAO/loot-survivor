@@ -39,51 +39,53 @@ const Discovery = ({ discoveries, beasts }: DiscoveryProps) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-5 m-auto text-xl">
-      {discoveries.length > 0 ? (
-        <>
-          <h3 className="text-center">Your travels</h3>
-          {isLoading.discoveryByTxHashQuery && <LootIconLoader />}
-          <div className="flex flex-col items-center gap-2 overflow-auto">
-            {discoveries.map((discovery: any, index: number) => (
-              <div
-                className="w-full p-2 text-left border border-terminal-green text-sm sm:text-base"
-                key={index}
-              >
-                <DiscoveryDisplay discoveryData={discovery} beasts={beasts} />
-              </div>
-            ))}
-          </div>
-          {isMobileDevice && (
-            <Button
-              className="w-full"
-              onClick={async () => {
-                addToCalls(exploreTx);
-                startLoading(
-                  "Explore",
-                  "Exploring",
-                  "discoveryByTxHashQuery",
-                  adventurer?.id
-                );
-                await handleSubmitCalls(writeAsync).then((tx: any) => {
-                  if (tx) {
-                    setTxHash(tx.transaction_hash);
-                    addTransaction({
-                      hash: tx.transaction_hash,
-                      metadata: {
-                        method: `Explore with ${adventurer?.name}`,
-                      },
-                    });
-                  }
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col items-center gap-5 m-auto text-xl">
+        {discoveries.length > 0 ? (
+          <>
+            <h3 className="text-center">Your travels</h3>
+            {isLoading.discoveryByTxHashQuery && <LootIconLoader />}
+            <div className="flex flex-col items-center gap-2 overflow-auto">
+              {discoveries.map((discovery: any, index: number) => (
+                <div
+                  className="w-full p-2 text-left border border-terminal-green text-sm sm:text-base"
+                  key={index}
+                >
+                  <DiscoveryDisplay discoveryData={discovery} beasts={beasts} />
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <p>You have not yet made any discoveries!</p>
+        )}
+      </div>
+      {isMobileDevice && (
+        <Button
+          className="w-full"
+          onClick={async () => {
+            addToCalls(exploreTx);
+            startLoading(
+              "Explore",
+              "Exploring",
+              "discoveryByTxHashQuery",
+              adventurer?.id
+            );
+            await handleSubmitCalls(writeAsync).then((tx: any) => {
+              if (tx) {
+                setTxHash(tx.transaction_hash);
+                addTransaction({
+                  hash: tx.transaction_hash,
+                  metadata: {
+                    method: `Explore with ${adventurer?.name}`,
+                  },
                 });
-              }}
-            >
-              Explore
-            </Button>
-          )}
-        </>
-      ) : (
-        <p>You have not yet made any discoveries!</p>
+              }
+            });
+          }}
+        >
+          Explore
+        </Button>
       )}
     </div>
   );
