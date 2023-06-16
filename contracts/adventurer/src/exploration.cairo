@@ -1,6 +1,6 @@
 use core::option::OptionTrait;
 use core::traits::Into;
-use survivor::adventurer::{Adventurer, AdventurerActions};
+use survivor::adventurer::{Adventurer, ImplAdventurer};
 use survivor::constants::discovery_constants::DiscoveryType;
 use integer::{U8IntoU64, U64TryIntoU16};
 
@@ -53,7 +53,7 @@ impl ExploreUtils of Explore {
         adventurer: Adventurer, adventurer_entropy: u64, game_entropy: u64
     ) -> u16 {
         // get adventurer's level
-        let adventurer_level = AdventurerActions::get_level(adventurer);
+        let adventurer_level = ImplAdventurer::get_level(adventurer);
 
         // divide adventurer level by 5 and store the whole number
         let discovery_multiplier = adventurer_level / 5;
@@ -119,7 +119,7 @@ impl ExploreUtils of Explore {
 #[test]
 #[available_gas(4000000)]
 fn test_explore_beast_discovery() {
-    let adventurer = AdventurerActions::new(1, 1);
+    let adventurer = ImplAdventurer::new(1, 1);
     let adventurer_entropy = 0;
     let game_entropy = 0;
     let discover_beast = ExploreUtils::get_random_explore(
@@ -131,7 +131,7 @@ fn test_explore_beast_discovery() {
 #[test]
 #[available_gas(4000000)]
 fn test_explore_obstacle_discovery() {
-    let adventurer = AdventurerActions::new(1, 1);
+    let adventurer = ImplAdventurer::new(1, 1);
     let adventurer_entropy = 0;
     let game_entropy = 1;
     let discover_obstacle = ExploreUtils::get_random_explore(
@@ -143,7 +143,7 @@ fn test_explore_obstacle_discovery() {
 #[test]
 #[available_gas(4000000)]
 fn test_explore_item_discovery() {
-    let adventurer = AdventurerActions::new(1, 1);
+    let adventurer = ImplAdventurer::new(1, 1);
     let adventurer_entropy = 0;
     let game_entropy = 2;
     let discover_item = ExploreUtils::get_random_explore(

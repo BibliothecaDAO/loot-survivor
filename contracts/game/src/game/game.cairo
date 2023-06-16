@@ -1,4 +1,4 @@
-use survivor::adventurer::{Adventurer, AdventurerActions, Actions};
+use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
 #[starknet::interface]
 trait IGame<T> {
@@ -27,7 +27,7 @@ mod Game {
     use lootitems::loot::{Loot, ItemUtils};
     use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64};
 
-    use survivor::adventurer::{Adventurer, AdventurerActions, Actions};
+    use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
     use survivor::bag::{Bag, BagActions, ImplBagActions};
 
     use market::market::{ImplMarket};
@@ -128,7 +128,7 @@ mod Game {
 
         // create a new adventurer with the selected starting weapon
         // and the current block number as start time
-        let new_adventurer: Adventurer = AdventurerActions::new(
+        let new_adventurer: Adventurer = ImplAdventurer::new(
             starting_weapon, block_info.block_number
         );
 
@@ -288,7 +288,7 @@ mod Game {
 
     #[view]
     fn _adventurer_unpacked(self: @ContractState, adventurer_id: u256) -> Adventurer {
-        AdventurerActions::unpack(self._adventurer.read((get_caller_address(), adventurer_id)))
+        ImplAdventurer::unpack(self._adventurer.read((get_caller_address(), adventurer_id)))
     }
 
     fn _pack_adventurer(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {

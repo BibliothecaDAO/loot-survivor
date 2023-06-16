@@ -1,7 +1,7 @@
 use option::OptionTrait;
 use integer::{U64TryIntoU8, U16IntoU64, U8IntoU64, U8IntoU16};
 use survivor::bag::LootStatistics;
-use survivor::adventurer::{Adventurer, AdventurerActions};
+use survivor::adventurer::{Adventurer, ImplAdventurer};
 use lootitems::statistics::constants::{Type, Slot};
 use survivor::constants::obstacle_constants::{
     ObstacleId, ObstacleTier, ObstacleType, ObstacleAttackLocation, ObstacleSettings
@@ -90,7 +90,7 @@ impl ObstacleUtils of ObstacleTrait {
     // @return u8 - the obstacle level
     fn get_level(adventurer: Adventurer, adventurer_entropy_seed: u64, game_entropy: u64) -> u8 {
         // get adventurer level
-        let adventurer_level = AdventurerActions::get_level(adventurer);
+        let adventurer_level = ImplAdventurer::get_level(adventurer);
 
         // if adventurer level is less than or equal to the obstacle base level
         if (adventurer_level <= ObstacleSettings::DifficultyCliff) {
@@ -101,7 +101,7 @@ impl ObstacleUtils of ObstacleTrait {
         // if the adventurere level is higher than the obstacle base level
 
         // divide adventurer level by 5 and store whole number which will be used as a level multiplier
-        let obstacle_level_multplier = AdventurerActions::get_level(adventurer)
+        let obstacle_level_multplier = ImplAdventurer::get_level(adventurer)
             / ObstacleSettings::DifficultyCliff;
 
         // maximum range of the obstacle level will be the above multplier * the obstacle difficulty
@@ -487,12 +487,12 @@ fn test_get_obstacle_level() {
     // obstacle level and adventurer level will be equivalent up to the difficulty cliff
     let obstacle_level = ObstacleUtils::get_level(adventurer, 0, 0);
     assert(
-        AdventurerActions::get_level(adventurer) == obstacle_level, 'obstcl lvl should eql advr lvl'
+        ImplAdventurer::get_level(adventurer) == obstacle_level, 'obstcl lvl should eql advr lvl'
     );
 
     // continue to test at difficult cliff and beyond
     // currently we need to implement adventurer.get_level() for this to work
     adventurer.xp = 10;
     let obstacle_level = ObstacleUtils::get_level(adventurer, 0, 0);
-    assert(AdventurerActions::get_level(adventurer) == 1, 'fail is expected - tdd');
+    assert(ImplAdventurer::get_level(adventurer) == 1, 'fail is expected - tdd');
 }

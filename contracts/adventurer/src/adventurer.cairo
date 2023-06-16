@@ -49,7 +49,7 @@ struct Adventurer {
     stat_upgrade_available: u8,
 }
 
-trait Actions {
+trait IAdventurer {
     fn new(starting_item: u8, block_number: u64) -> Adventurer;
     fn pack(self: Adventurer) -> felt252;
     fn unpack(packed: felt252) -> Adventurer;
@@ -111,7 +111,7 @@ trait Actions {
     fn get_item_at_slot(self: Adventurer, item: LootStatistics) -> LootStatistics;
 }
 
-impl AdventurerActions of Actions {
+impl ImplAdventurer of IAdventurer {
     fn deduct_gold(ref self: Adventurer, value: u16) -> Adventurer {
         self.gold -= value;
 
@@ -684,7 +684,7 @@ fn test_adventurer() {
         }, beast_health: 1023, stat_upgrade_available: 1,
     };
     let packed = adventurer.pack();
-    let unpacked = AdventurerActions::unpack(packed);
+    let unpacked = ImplAdventurer::unpack(packed);
     assert(adventurer.last_action == unpacked.last_action, 'last_action');
     assert(adventurer.health == unpacked.health, 'health');
     assert(adventurer.xp == unpacked.xp, 'xp');
@@ -729,7 +729,7 @@ fn test_adventurer() {
 #[test]
 #[available_gas(5000000)]
 fn test_new_adventurer() {
-    let new_adventurer = AdventurerActions::new(1, 1);
+    let new_adventurer = ImplAdventurer::new(1, 1);
 
     new_adventurer.pack();
 
@@ -739,8 +739,8 @@ fn test_new_adventurer() {
 #[test]
 #[available_gas(5000000)]
 fn test_health() {
-    let mut adventurer = AdventurerActions::new(1, 1);
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
 
     adventurer.add_health(5);
 
@@ -750,8 +750,8 @@ fn test_health() {
 #[test]
 #[available_gas(5000000)]
 fn test_deduct_health() {
-    let mut adventurer = AdventurerActions::new(1, 1);
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
 
     adventurer.deduct_health(5);
 
@@ -761,8 +761,8 @@ fn test_deduct_health() {
 #[test]
 #[available_gas(5000000)]
 fn test_xp() {
-    let mut adventurer = AdventurerActions::new(1, 1);
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
 
     adventurer.increase_adventurer_xp(5);
 
@@ -772,8 +772,8 @@ fn test_xp() {
 #[test]
 #[available_gas(5000000)]
 fn test_strength() {
-    let mut adventurer = AdventurerActions::new(1, 1);
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
 
     adventurer.add_strength(1);
 
@@ -783,8 +783,8 @@ fn test_strength() {
 #[test]
 #[available_gas(5000000)]
 fn test_add_weapon() {
-    let mut adventurer = AdventurerActions::new(1, 1);
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
 
     let item = LootStatistics { id: 1, xp: 1, metadata: 0 };
 
@@ -799,8 +799,8 @@ fn test_add_weapon() {
 #[test]
 #[available_gas(5000000)]
 fn test_increase_item_xp() {
-    let mut adventurer = AdventurerActions::new(1, 1);
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
 
     let item_pendant = LootStatistics { id: 1, xp: 1, metadata: 0 };
     let item_silver_ring = LootStatistics { id: 4, xp: 1, metadata: 0 };
@@ -823,8 +823,8 @@ fn test_increase_item_xp() {
 #[test]
 #[available_gas(5000000)]
 fn test_deduct_beast_health() {
-    let mut adventurer = AdventurerActions::new(1, 1);
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
 
     adventurer.add_beast(100);
     assert(adventurer.beast_health == 100, 'beast_health');
@@ -836,7 +836,7 @@ fn test_deduct_beast_health() {
 #[test]
 #[available_gas(5000000)]
 fn test_explore_beast_discovery() {
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
     let adventurer_entropy = 0;
     let game_entropy = 0;
 
@@ -851,7 +851,7 @@ fn test_explore_beast_discovery() {
 #[test]
 #[available_gas(5000000)]
 fn test_explore_obstacle_discovery() {
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
     let adventurer_entropy = 0;
     let game_entropy = 1;
 
@@ -863,7 +863,7 @@ fn test_explore_obstacle_discovery() {
 #[test]
 #[available_gas(5000000)]
 fn test_explore_gold_discovery() {
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
     let adventurer_entropy = 0;
     let game_entropy = 2;
     adventurer.xp = 1;
@@ -877,7 +877,7 @@ fn test_explore_gold_discovery() {
 #[test]
 #[available_gas(5000000)]
 fn test_explore_health_discovery() {
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
     let adventurer_entropy = 0;
     let game_entropy = 2;
     adventurer.xp = 2;
@@ -890,7 +890,7 @@ fn test_explore_health_discovery() {
 #[test]
 #[available_gas(5000000)]
 fn test_explore_xp_discovery() {
-    let mut adventurer = AdventurerActions::new(1, 1);
+    let mut adventurer = ImplAdventurer::new(1, 1);
     let adventurer_entropy = 0;
     let game_entropy = 2;
     adventurer.xp = 3;
