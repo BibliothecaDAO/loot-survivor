@@ -9,7 +9,7 @@
 [![discord](https://img.shields.io/badge/join-bibliothecadao-black?logo=discord&logoColor=white)](https://discord.gg/bibliothecadao)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-![background](./bg.png)
+![background](.github/bg.png)
 
 
 ## 🪦 Loot Survivor
