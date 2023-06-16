@@ -110,31 +110,30 @@ fn test_fake_check_ownership() {
         i += OFFSET;
     };
 }
-// TODO: Fix
-// #[test]
-// #[available_gas(9000000)]
-// fn test_get_all_items_ownership() {
-//     let mut seed = 123456;
 
-//     let items = @ImplMarket::get_all_items(seed);
+#[test]
+#[available_gas(9000000)]
+fn test_get_all_items_ownership() {
+    let mut seed = 123456;
 
-//     let mut i: usize = 0;
-//     let mut item_index: usize = 0;
+    let items = @ImplMarket::get_all_items(seed);
 
-//     loop {
-//         if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
-//             break ();
-//         }
+    let mut i: usize = 0;
+    let mut item_index: usize = 0;
 
-//         let snap = @items[item_index];
+    loop {
+        if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+            break ();
+        }
 
-//         let result = ImplMarket::check_ownership(seed + i, snap.id);
+        let snap = items.at(item_index);
 
-//         assert(result == true, 'item');
+        let result = ImplMarket::check_ownership(seed + i, *snap.id);
 
-//         i += OFFSET;
-//         item_index += 1;
-//     };
-// }
+        assert(result == true, 'item');
 
+        i += OFFSET;
+        item_index += 1;
+    };
+}
 
