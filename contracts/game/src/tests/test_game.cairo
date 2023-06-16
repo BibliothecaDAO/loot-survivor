@@ -46,6 +46,20 @@ mod tests {
 
         let adventurer_1 = @deployed_game.get_adventurer(0);
 
+        // check adventurer
         assert_eq(adventurer_1.weapon.id, @ItemId::Wand, 'weapon');
+
+        // check beast has been assigned
+        assert(*adventurer_1.beast_health > 0, 'beast_health');
+    // TODO:
+    // Check beast is correct
+    }
+
+    #[test]
+    #[available_gas(30000000)]
+    fn test_explore() {
+        let mut deployed_game = new_adventurer();
+
+        deployed_game.explore(0);
     }
 }
