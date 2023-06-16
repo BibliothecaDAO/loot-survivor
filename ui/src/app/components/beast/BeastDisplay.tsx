@@ -1,17 +1,15 @@
 import Image from "next/image";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { getValueFromKey } from "../lib/utils";
-import { GameData } from "./GameData";
-import { ANSIArt } from "./ANSIGenerator";
-import Heart from "../../../public/heart.svg";
-import Weapon from "../../../public/icons/loot/weapon.svg";
-import Head from "../../../public/icons/loot/head.svg";
-import Hand from "../../../public/icons/loot/hand.svg";
-import Chest from "../../../public/icons/loot/chest.svg";
-import Waist from "../../../public/icons/loot/waist.svg";
-import Foot from "../../../public/icons/loot/foot.svg";
-import EfficacyIcon from "./EfficacyIcon";
-import { processBeastName } from "../lib/utils";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { getValueFromKey } from "../../lib/utils";
+import { GameData } from "../GameData";
+import Heart from "../../../../public/heart.svg";
+import Head from "../../../../public/icons/loot/head.svg";
+import Hand from "../../../../public/icons/loot/hand.svg";
+import Chest from "../../../../public/icons/loot/chest.svg";
+import Waist from "../../../../public/icons/loot/waist.svg";
+import Foot from "../../../../public/icons/loot/foot.svg";
+import EfficacyIcon from "../EfficacyIcon";
+import { processBeastName } from "../../lib/utils";
 
 interface BeastDisplayProps {
   beastData: any;

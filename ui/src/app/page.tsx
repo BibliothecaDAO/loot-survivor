@@ -1,24 +1,24 @@
 "use client";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect, useMemo } from "react";
-import { Button } from "./components/Button";
+import { Button } from "./components/buttons/Button";
 import HorizontalKeyboardControl from "./components/HorizontalMenu";
-import Actions from "./components/Actions";
-import Marketplace from "./components/Marketplace";
-import Adventurer from "./components/Adventurer";
-import Beast from "./components/Beast";
+import Actions from "./components/actions/Actions";
+import Marketplace from "./components/marketplace/Marketplace";
+import Adventurer from "./components/start/Adventurer";
+import Beast from "./components/beast/Beast";
 import { displayAddress, padAddress } from "./lib/utils";
-import Inventory from "./components/Inventory";
-import TransactionHistory from "./components/TransactionHistory";
-import TransactionCart from "./components/TransactionCart";
+import Inventory from "./components/inventory/Inventory";
+import TransactionHistory from "./components/navigation/TransactionHistory";
+import TransactionCart from "./components/navigation/TransactionCart";
 import Upgrade from "./components/Upgrade";
-import Intro from "./components/Intro";
+import Intro from "./components/intro/Intro";
 import {
   AddDevnetEthButton,
   MintEthButton,
 } from "./components/DevnetConnectors";
-import Leaderboard from "./components/Leaderboard";
-import { TxActivity } from "./components/TxActivity";
+import Leaderboard from "./components/leaderboard/Leaderboard";
+import { TxActivity } from "./components/navigation/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
 import useAdventurerStore from "./hooks/useAdventurerStore";
 import useUIStore from "./hooks/useUIStore";
@@ -30,12 +30,12 @@ import { useMusic } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
 import { Menu, NullAdventurer } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
-import Profile from "./components/Profile";
+import Profile from "./components/leaderboard/Profile";
 import { DeathDialog } from "./components/DeathDialog";
 import { Encounters } from "./components/Encounters";
 import Guide from "./components/Guide";
 import { processNotification } from "./components/NotificationDisplay";
-import { DiscoveryDisplay } from "./components/DiscoveryDisplay";
+import { DiscoveryDisplay } from "./components/actions/DiscoveryDisplay";
 import useCustomQuery from "./hooks/useCustomQuery";
 import {
   getBeastsByAdventurer,

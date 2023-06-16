@@ -1,35 +1,11 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useWaitForTransaction, useAccount } from "@starknet-react/core";
-import { displayAddress, padAddress } from "../lib/utils";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import useLoadingStore from "../hooks/useLoadingStore";
-import LootIconLoader from "./Loader";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import {
-  getAdventurerById,
-  getAdventurersInList,
-  getAdventurersInListByXp,
-  getBattleByTxHash,
-  getBeasts,
-  getLastDiscovery,
-  getAdventurerByXP,
-  getDiscoveries,
-  getLatestDiscoveries,
-  getLastBattleByAdventurer,
-  getBattlesByAdventurer,
-  getBattlesByBeast,
-  getDiscoveryByTxHash,
-  getAdventurersByOwner,
-  getLatestMarketItems,
-  getLatestMarketItemsNumber,
-  getBeastById,
-  getTopScores,
-  getItemsByAdventurer,
-  getUnclaimedItemsByAdventurer,
-} from "../hooks/graphql/queries";
-import useCustomQuery from "../hooks/useCustomQuery";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import { displayAddress, padAddress } from "../../lib/utils";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import useLoadingStore from "../../hooks/useLoadingStore";
+import LootIconLoader from "../Loader";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 
 export interface TxActivityProps {
   hash: string | undefined;
@@ -45,7 +21,6 @@ export const TxActivity = () => {
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
   const type = useLoadingStore((state) => state.type);
-  const adventurer = useAdventurerStore((state) => state.adventurer);
   const error = useTransactionCartStore((state) => state.error);
   const setError = useTransactionCartStore((state) => state.setError);
   const {

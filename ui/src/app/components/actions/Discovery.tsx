@@ -1,12 +1,12 @@
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { Button } from "./Button";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import { Button } from "../buttons/Button";
 import { DiscoveryDisplay } from "./DiscoveryDisplay";
-import LootIconLoader from "./Loader";
+import LootIconLoader from "../Loader";
 import { useMediaQuery } from "react-responsive";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import useLoadingStore from "../hooks/useLoadingStore";
-import { useContracts } from "../hooks/useContracts";
-import useAdventurerStore from "../hooks/useAdventurerStore";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import useLoadingStore from "../../hooks/useLoadingStore";
+import { useContracts } from "../../hooks/useContracts";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 
 interface DiscoveryProps {

@@ -1,20 +1,11 @@
-import Info from "./Info";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { Button } from "./Button";
-import useUIStore from "../hooks/useUIStore";
-import useCustomQuery from "../hooks/useCustomQuery";
-import {
-  getAdventurerById,
-  getDiscoveries,
-  getBattlesByAdventurer,
-  getBeastsByAdventurer,
-} from "../hooks/graphql/queries";
-import { useEffect, useState } from "react";
-import { DiscoveryDisplay } from "./DiscoveryDisplay";
-import { BattleDisplay } from "./BattleDisplay";
-import { NullBeast } from "../types";
-import { processBeastName } from "../lib/utils";
-import { Encounters } from "./Encounters";
+import Info from "../Info";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import { Button } from "../buttons/Button";
+import useUIStore from "../../hooks/useUIStore";
+import useCustomQuery from "../../hooks/useCustomQuery";
+import { getAdventurerById } from "../../hooks/graphql/queries";
+import { useState } from "react";
+import { Encounters } from "../Encounters";
 import { useMediaQuery } from "react-responsive";
 
 export default function Profile() {

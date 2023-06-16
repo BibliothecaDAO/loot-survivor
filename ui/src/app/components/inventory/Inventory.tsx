@@ -1,18 +1,18 @@
 import { useState, useEffect, useCallback } from "react";
-import { useContracts } from "../hooks/useContracts";
+import { useContracts } from "../../hooks/useContracts";
 import { useAccount } from "@starknet-react/core";
-import { getItemsByAdventurer } from "../hooks/graphql/queries";
-import { groupBySlot } from "../lib/utils";
+import { getItemsByAdventurer } from "../../hooks/graphql/queries";
+import { groupBySlot } from "../../lib/utils";
 import { InventoryRow } from "./InventoryRow";
-import Info from "./Info";
-import { ItemDisplay } from "./ItemDisplay";
-import { Button } from "./Button";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import useCustomQuery from "../hooks/useCustomQuery";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import useLoadingStore from "../hooks/useLoadingStore";
-import LootIcon from "./LootIcon";
+import Info from "../Info";
+import { ItemDisplay } from "../ItemDisplay";
+import { Button } from "../buttons/Button";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import useCustomQuery from "../../hooks/useCustomQuery";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import useLoadingStore from "../../hooks/useLoadingStore";
+import LootIcon from "../LootIcon";
 
 const Inventory: React.FC = () => {
   const { account } = useAccount();

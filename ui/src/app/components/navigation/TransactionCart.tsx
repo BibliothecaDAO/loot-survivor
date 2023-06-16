@@ -1,21 +1,16 @@
 import React, { useEffect, useState } from "react";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import { Metadata } from "../types";
-import { Button } from "./Button";
+import { Metadata } from "../../types";
+import { Button } from "../buttons/Button";
 import { MdClose } from "react-icons/md";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { processItemName } from "../lib/utils";
-import {
-  getLatestMarketItems,
-  getItemsByAdventurer,
-} from "../hooks/graphql/queries";
-import useCustomQuery from "../hooks/useCustomQuery";
-import useUIStore from "../hooks/useUIStore";
-import { useUiSounds } from "../hooks/useUiSound";
-import { soundSelector } from "../hooks/useUiSound";
+import useLoadingStore from "../../hooks/useLoadingStore";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import { processItemName } from "../../lib/utils";
+import useUIStore from "../../hooks/useUIStore";
+import { useUiSounds } from "../../hooks/useUiSound";
+import { soundSelector } from "../../hooks/useUiSound";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -35,7 +30,6 @@ const TransactionCart: React.FC = () => {
     addTransaction,
   } = useTransactionManager();
   const { writeAsync } = useContractWrite({ calls });
-  const [isOpen, setIsOpen] = useState(false);
   const [notification, setNotification] = useState<string[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
   const [loadingQuery, setLoadingQuery] = useState("");
@@ -43,22 +37,6 @@ const TransactionCart: React.FC = () => {
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
-
-  const method = (queuedTransactions[0]?.metadata as Metadata)?.method;
-
-  // useCustomQuery(
-  //   "latestMarketItemsQuery",
-  //   getLatestMarketItems,
-  //   undefined,
-  //   false
-  // );
-
-  // useCustomQuery(
-  //   "itemsByAdventurerQuery",
-  //   getItemsByAdventurer,
-  //   undefined,
-  //   false
-  // );
 
   const marketItems = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
@@ -140,7 +118,7 @@ const TransactionCart: React.FC = () => {
               <div key={i}>
                 <div className="flex flex-col gap-2">
                   {call && (
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between text-xs sm:text-base">
                       <p>{call.entrypoint}</p>
                       {/* <p>{call.calldata}</p> */}
                       <p>{call.metadata}</p>

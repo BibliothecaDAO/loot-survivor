@@ -11,7 +11,7 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useUIStore from "../hooks/useUIStore";
 import Info from "./Info";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 import { useMediaQuery } from "react-responsive";
 
 const Upgrade = () => {

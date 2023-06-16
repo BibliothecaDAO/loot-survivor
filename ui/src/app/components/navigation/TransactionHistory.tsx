@@ -1,39 +1,27 @@
 import React, { useState, useRef } from "react";
-import {
-  useTransactionManager,
-  useWaitForTransaction,
-} from "@starknet-react/core";
+import { useTransactionManager } from "@starknet-react/core";
 import { TxStatus } from "./TxStatus";
-import { Metadata } from "../types";
-import { Button } from "./Button";
-import { padAddress, shortenHex } from "../lib/utils";
-import useOnClickOutside from "../hooks/useOnClickOutside";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { processNotification } from "./NotificationDisplay";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import useCustomQuery from "../hooks/useCustomQuery";
-import { useMediaQuery } from "react-responsive";
-import useUIStore from "../hooks/useUIStore";
+import { Metadata } from "../../types";
+import { padAddress, shortenHex } from "../../lib/utils";
+import useOnClickOutside from "../../hooks/useOnClickOutside";
+import useLoadingStore from "../../hooks/useLoadingStore";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { processNotification } from "../NotificationDisplay";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import useUIStore from "../../hooks/useUIStore";
 import { MdClose } from "react-icons/md";
-import { useUiSounds } from "../hooks/useUiSound";
-import { soundSelector } from "../hooks/useUiSound";
+import { useUiSounds } from "../../hooks/useUiSound";
+import { soundSelector } from "../../hooks/useUiSound";
 
 const TransactionHistory = () => {
   const wrapperRef = useRef<HTMLDivElement>(null); // Update the type here
-  useOnClickOutside(wrapperRef, () => setIsOpen(false));
+  const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
+  useOnClickOutside(wrapperRef, () => setDisplayHistory(false));
   const { adventurer } = useAdventurerStore();
 
-  const { hashes, transactions, addTransaction } = useTransactionManager();
-  const [isOpen, setIsOpen] = useState(false);
-  const [hash, setHash] = useState<string | undefined>(undefined);
-  const { data, isLoading, error } = useWaitForTransaction({
-    hash,
-    watch: true,
-  });
+  const { transactions } = useTransactionManager();
   const { data: queryData } = useQueriesStore();
   const displayHistory = useUIStore((state) => state.displayHistory);
-  const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const { play } = useUiSounds(soundSelector.click);
 
   const beasts = queryData.beastsByAdventurerQuery
@@ -41,10 +29,6 @@ const TransactionHistory = () => {
     : [];
 
   const method = (transactions[0]?.metadata as Metadata)?.method;
-
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
-  };
 
   const history = useLoadingStore((state) => state.history);
 
@@ -103,11 +87,11 @@ const TransactionHistory = () => {
                       <div className="flex flex-col">
                         <div className="flex flex-row justify-between border-b border-terminal-green">
                           {/* <div className="flex flex-wrap gap-1"> */}
-                          <p className="text-lg text-terminal-yellow">
-                            {(tx?.metadata as Metadata)?.method}
+                          <p className="text-xs sm:text-lg text-terminal-yellow">
+                            {method}
                           </p>
                           {/* </div> */}
-                          <div className="mr-4 text-lg">
+                          <div className="mr-4 text-xs sm:text-lg">
                             Hash:{" "}
                             <a
                               href={`https://testnet.starkscan.co/tx/${padAddress(

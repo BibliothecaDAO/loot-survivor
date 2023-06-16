@@ -3,7 +3,7 @@ import { EncountersIcon, LedgerIcon } from "./Icons";
 import { GuideIcon } from "./Icons";
 import { ChatIcon } from "./Icons";
 import useUIStore from "../hooks/useUIStore";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 
 export default function Settings() {
   const setScreen = useUIStore((state) => state.setScreen);

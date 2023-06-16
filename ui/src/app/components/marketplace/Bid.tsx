@@ -1,10 +1,9 @@
 import { useState } from "react";
-import { Button } from "./Button";
-import { useContracts } from "../hooks/useContracts";
+import { Button } from "../buttons/Button";
+import { useContracts } from "../../hooks/useContracts";
 import { useAccount } from "@starknet-react/core";
-import { NullAdventurerProps } from "../types";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 
 interface BidBoxProps {
   close: () => void;

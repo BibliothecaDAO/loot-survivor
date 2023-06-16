@@ -1,21 +1,21 @@
 import { useState } from "react";
-import { useContracts } from "../hooks/useContracts";
+import { useContracts } from "../../hooks/useContracts";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import VerticalKeyboardControl from "./VerticalMenu";
+import useLoadingStore from "../../hooks/useLoadingStore";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import VerticalKeyboardControl from "../VerticalMenu";
 import PurchaseHealth from "./PurchaseHealth";
-import Info from "./Info";
+import Info from "../Info";
 import Discovery from "./Discovery";
-import useUIStore from "../hooks/useUIStore";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import useCustomQuery from "../hooks/useCustomQuery";
+import useUIStore from "../../hooks/useUIStore";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import useCustomQuery from "../../hooks/useCustomQuery";
 import {
   getLatestDiscoveries,
   getBeastsByAdventurer,
-} from "../hooks/graphql/queries";
-import { MistIcon, HealthPotionsIcon, TargetIcon } from "./Icons";
+} from "../../hooks/graphql/queries";
+import { MistIcon, HealthPotionsIcon, TargetIcon } from "../Icons";
 import { useMediaQuery } from "react-responsive";
 import KillAdventurer from "./KillAdventurer";
 

@@ -1,17 +1,14 @@
-import { useMemo, useState, useEffect } from "react";
-import { useQuery } from "@apollo/client";
+import { useState } from "react";
 import { useAccount } from "@starknet-react/core";
-import { getAdventurersByOwner } from "../hooks/graphql/queries";
-import { padAddress } from "../lib/utils";
+import { getAdventurersByOwner } from "../../hooks/graphql/queries";
+import { padAddress } from "../../lib/utils";
 import { AdventurersList } from "./AdventurersList";
 import { CreateAdventurer } from "./CreateAdventurer";
-import VerticalKeyboardControl from "./VerticalMenu";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import useUIStore from "../hooks/useUIStore";
-import LootIconLoader from "./Loader";
-import useCustomQuery from "../hooks/useCustomQuery";
-import useLoadingStore from "../hooks/useLoadingStore";
-import { useMediaQuery } from "react-responsive";
+import VerticalKeyboardControl from "../VerticalMenu";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import LootIconLoader from "../Loader";
+import useCustomQuery from "../../hooks/useCustomQuery";
+import useLoadingStore from "../../hooks/useLoadingStore";
 
 const Adventurer = () => {
   const [activeMenu, setActiveMenu] = useState(0);
@@ -58,36 +55,6 @@ const Adventurer = () => {
 
   return (
     <>
-      {/* {isMobileDevice ? (
-        <div className="flex flex-col flex-wrap">
-          {selected === "choose adventurer" && (
-            <div className="w-full sm:w-5/6">
-              <AdventurersList
-                isActive={activeMenu == 1}
-                onEscape={() => setActiveMenu(0)}
-                adventurers={adventurers}
-              />
-            </div>
-          )}
-          {selected === "create adventurer" && (
-            <div className="w-full sm:w-8/12">
-              <CreateAdventurer
-                isActive={activeMenu == 2}
-                onEscape={() => setActiveMenu(0)}
-                adventurers={adventurers}
-              />
-            </div>
-          )}
-          <div className="w-full sm:w-2/12">
-            <VerticalKeyboardControl
-              buttonsData={menu}
-              onSelected={(value) => setSelected(value)}
-              isActive={activeMenu == 0}
-              setActiveMenu={setActiveMenu}
-            />
-          </div>
-        </div>
-      ) : ( */}
       <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap">
         <div className="w-full sm:w-2/12">
           <VerticalKeyboardControl

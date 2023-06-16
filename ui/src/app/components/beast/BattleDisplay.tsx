@@ -1,8 +1,8 @@
-import TwitterShareButton from "./TwitterShareButtons";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
-import { processBeastName } from "../lib/utils";
+import TwitterShareButton from "../buttons/TwitterShareButtons";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
+import { processBeastName } from "../../lib/utils";
 
 interface BattleDisplayProps {
   battleData: any;

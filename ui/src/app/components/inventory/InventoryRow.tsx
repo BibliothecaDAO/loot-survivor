@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef } from "react";
-import { useContracts } from "../hooks/useContracts";
-import { NullAdventurer } from "../types";
-import { Button } from "./Button";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import { useContracts } from "../../hooks/useContracts";
+import { Button } from "../buttons/Button";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useMediaQuery } from "react-responsive";
 
 interface InventoryRowProps {

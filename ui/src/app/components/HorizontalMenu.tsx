@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 import { Menu } from "../types";
 

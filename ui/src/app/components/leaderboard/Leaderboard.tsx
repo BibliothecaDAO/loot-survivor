@@ -1,17 +1,15 @@
 import React, { useState } from "react";
 import {
-  getAdventurerByXP,
   getAdventurersInListByXp,
   getTopScores,
-} from "../hooks/graphql/queries";
-import { Button } from "./Button";
-import Coin from "../../../public/coin.svg";
-import Lords from "../../../public/lords.svg";
-import LootIconLoader from "./Loader";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import useUIStore from "../hooks/useUIStore";
-import useCustomQuery from "../hooks/useCustomQuery";
-import { dedupeByValue } from "../lib/utils";
+} from "../../hooks/graphql/queries";
+import { Button } from "../buttons/Button";
+import Coin from "../../../../public/coin.svg";
+import Lords from "../../../../public/lords.svg";
+import LootIconLoader from "../Loader";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import useUIStore from "../../hooks/useUIStore";
+import useCustomQuery from "../../hooks/useCustomQuery";
 
 const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);

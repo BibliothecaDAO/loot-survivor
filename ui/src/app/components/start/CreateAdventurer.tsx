@@ -1,17 +1,17 @@
 import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
-import { useContracts } from "../hooks/useContracts";
-import { stringToFelt } from "../lib/utils";
+import { useContracts } from "../../hooks/useContracts";
+import { stringToFelt } from "../../lib/utils";
 import {
   useAccount,
   useTransactionManager,
   useContractWrite,
 } from "@starknet-react/core";
-import { getKeyFromValue } from "../lib/utils";
-import { GameData } from "./GameData";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import useUIStore from "../hooks/useUIStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
+import { getKeyFromValue } from "../../lib/utils";
+import { GameData } from "../GameData";
+import useLoadingStore from "../../hooks/useLoadingStore";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import useUIStore from "../../hooks/useUIStore";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
@@ -130,22 +130,6 @@ export const CreateAdventurer = ({
     }
   };
 
-  // const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-  //   if (event.key === "ArrowDown" || event.key === "ArrowUp") {
-  //     const form = event.currentTarget.form;
-  //     if (!form) return;
-
-  //     const inputs = Array.from(form.querySelectorAll("input, select"));
-  //     const currentIndex = inputs.indexOf(event.currentTarget);
-  //     const newIndex =
-  //       event.key === "ArrowDown"
-  //         ? Math.min(currentIndex + 1, inputs.length - 1)
-  //         : Math.max(currentIndex - 1, 0);
-  //     (inputs[newIndex] as HTMLElement).focus();
-  //     event.preventDefault();
-  //   }
-  // };
-
   const handleKeyDown = (
     event: React.KeyboardEvent<HTMLInputElement> | KeyboardEvent
   ) => {
@@ -165,10 +149,6 @@ export const CreateAdventurer = ({
           const newIndex = Math.max(prev - 1, 0);
           return newIndex;
         });
-        break;
-      // case "Enter":
-      //   onEnterAction && buttonsData[selectedIndex].action();
-      //   break;
       case "Escape":
         onEscape();
         break;

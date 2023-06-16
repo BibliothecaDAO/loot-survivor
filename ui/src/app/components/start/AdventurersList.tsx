@@ -1,10 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Button } from "./Button";
-import Info from "./Info";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { ButtonData } from "./KeyboardControls";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import LootIconLoader from "./Loader";
+import { Button } from "../buttons/Button";
+import Info from "../Info";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { ButtonData } from "../KeyboardControls";
+import { useQueriesStore } from "../../hooks/useQueryStore";
 import { useMediaQuery } from "react-responsive";
 
 export interface AdventurerListProps {
@@ -23,8 +22,6 @@ export const AdventurersList = ({
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
-
-  const { data, refetch, isLoading, isDataUpdated } = useQueriesStore();
 
   const sortedAdventurers = [...adventurers].sort((a, b) => b.level - a.level);
 

@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import { Button } from "./Button";
+import { Button } from "../buttons/Button";
 import WalletSelect from "./WalletSelect";
 import { TypeAnimation } from "react-type-animation";
-import { prologue } from "../lib/constants";
-import LootIconLoader from "./Loader";
+import { prologue } from "../../lib/constants";
+import LootIconLoader from "../Loader";
 
 const Intro = () => {
   const [screen, setScreen] = useState(0);
@@ -39,14 +39,14 @@ const Intro = () => {
     };
   }, [selectedIndex]);
 
-  const [buttonText, setButtonText] = useState('do you dare?');
+  const [buttonText, setButtonText] = useState("do you dare?");
 
   const handleMouseEnter = () => {
-    setButtonText('are you sure?');
+    setButtonText("are you sure?");
   };
 
   const handleMouseLeave = () => {
-    setButtonText('do you dare?');
+    setButtonText("do you dare?");
   };
 
   return (
@@ -55,10 +55,15 @@ const Intro = () => {
         <div className="flex flex-wrap justify-center p-20 w-fill">
           <LootIconLoader size="w-8" />
           <div className="flex justify-center w-full mt-10">
-            <Button className="animate-pulse" onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave} onClick={() => setInitiated(true)}>{buttonText} </Button>
+            <Button
+              className="animate-pulse"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onClick={() => setInitiated(true)}
+            >
+              {buttonText}{" "}
+            </Button>
           </div>
-
         </div>
       ) : (
         <>
@@ -106,11 +111,14 @@ const Intro = () => {
                   <Button
                     onClick={() => setScreen(2)}
                     className={
-                      "m-auto w-40" + (selectedIndex == 1 ? "animate-pulse" : "")
+                      "m-auto w-40" +
+                      (selectedIndex == 1 ? "animate-pulse" : "")
                     }
                     variant={selectedIndex == 1 ? "default" : "ghost"}
                   >
-                    <p className="text-base whitespace-nowrap">LAUNCH ON GOERLI</p>
+                    <p className="text-base whitespace-nowrap">
+                      LAUNCH ON GOERLI
+                    </p>
                   </Button>
                 </div>
               )}
@@ -120,8 +128,6 @@ const Intro = () => {
           )}
         </>
       )}
-
-
     </>
   );
 };

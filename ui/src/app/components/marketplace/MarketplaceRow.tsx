@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
-import { Button } from "./Button";
+import { Button } from "../buttons/Button";
 import { BidBox } from "./Bid";
-import { useContracts } from "../hooks/useContracts";
-import { formatTime } from "../lib/utils";
-import { convertTime } from "../lib/utils";
-import { Countdown } from "./Clock";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import LootIcon from "./LootIcon";
+import { useContracts } from "../../hooks/useContracts";
+import { formatTime } from "../../lib/utils";
+import { convertTime } from "../../lib/utils";
+import { Countdown } from "../Clock";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import LootIcon from "../LootIcon";
 import {
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
-import { Metadata } from "../types";
+import { Metadata } from "../../types";
 
 interface MarketplaceRowProps {
   item: any;

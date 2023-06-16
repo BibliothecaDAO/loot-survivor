@@ -1,5 +1,5 @@
-import { NotificationBattleDisplay } from "./BattleDisplay";
-import { DiscoveryDisplay } from "./DiscoveryDisplay";
+import { NotificationBattleDisplay } from "./beast/BattleDisplay";
+import { DiscoveryDisplay } from "./actions/DiscoveryDisplay";
 import SpriteAnimation from "./SpriteAnimation";
 import { GameData } from "./GameData";
 import useAdventurerStore from "../hooks/useAdventurerStore";

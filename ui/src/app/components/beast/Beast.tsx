@@ -1,23 +1,23 @@
-import { useContracts } from "../hooks/useContracts";
-import { NullBeast } from "../types";
+import { useContracts } from "../../hooks/useContracts";
+import { NullBeast } from "../../types";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import KeyboardControl, { ButtonData } from "./KeyboardControls";
-import Info from "./Info";
+import KeyboardControl, { ButtonData } from "../KeyboardControls";
+import Info from "../Info";
 import { BattleDisplay } from "./BattleDisplay";
 import { BeastDisplay } from "./BeastDisplay";
-import useLoadingStore from "../hooks/useLoadingStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { useQueriesStore } from "../hooks/useQueryStore";
+import useLoadingStore from "../../hooks/useLoadingStore";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { useQueriesStore } from "../../hooks/useQueryStore";
 import { useState } from "react";
-import useUIStore from "../hooks/useUIStore";
-import { processBeastName } from "../lib/utils";
-import useCustomQuery from "../hooks/useCustomQuery";
+import useUIStore from "../../hooks/useUIStore";
+import { processBeastName } from "../../lib/utils";
+import useCustomQuery from "../../hooks/useCustomQuery";
 import {
   getBattlesByBeast,
   getBeastById,
   getLastBattleByAdventurer,
-} from "../hooks/graphql/queries";
+} from "../../hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
 
 export default function Beast() {

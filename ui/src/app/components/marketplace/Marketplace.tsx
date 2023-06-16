@@ -1,22 +1,21 @@
 import { useState, useEffect, useRef, useMemo } from "react";
-import { useContracts } from "../hooks/useContracts";
-import { Button } from "./Button";
-import { useQuery } from "@apollo/client";
+import { useContracts } from "../../hooks/useContracts";
+import { Button } from "../buttons/Button";
 import {
   getLatestMarketItems,
   getAdventurersInList,
   getLatestMarketItemsNumber,
   getUnclaimedItemsByAdventurer,
-} from "../hooks/graphql/queries";
-import { UTCClock, Countdown } from "./Clock";
-import { convertTime } from "../lib/utils";
+} from "../../hooks/graphql/queries";
+import { UTCClock, Countdown } from "../Clock";
+import { convertTime } from "../../lib/utils";
 import MarketplaceRow from "./MarketplaceRow";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import Coin from "../../../public/coin.svg";
-import LootIconLoader from "./Loader";
-import useCustomQuery from "../hooks/useCustomQuery";
-import { useQueriesStore } from "../hooks/useQueryStore";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import Coin from "../../../../public/coin.svg";
+import LootIconLoader from "../Loader";
+import useCustomQuery from "../../hooks/useCustomQuery";
+import { useQueriesStore } from "../../hooks/useQueryStore";
 
 const Marketplace = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);

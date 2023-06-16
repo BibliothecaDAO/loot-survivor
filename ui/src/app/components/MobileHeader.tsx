@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 import { ControllerIcon, TrophyIcon } from "./Icons";
 import useUIStore from "../hooks/useUIStore";
 import { capitalizeFirstLetter } from "../lib/utils";

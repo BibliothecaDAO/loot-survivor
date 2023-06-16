@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "./Button";
+import { Button } from "../buttons/Button";
 
 export default function KillAdventurer() {
   const [adventurerTarget, setAdventurerTarget] = useState("");

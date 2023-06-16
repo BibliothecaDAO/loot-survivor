@@ -1,16 +1,12 @@
 import { useQuery } from "@apollo/client";
-import {
-  getItemsByTokenId,
-  getBeastsByAdventurer,
-} from "../hooks/graphql/queries";
-import Heart from "../../../public/heart.svg";
-import Coin from "../../../public/coin.svg";
-import ItemDisplay from "./LootIcon";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { processBeastName } from "../lib/utils";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { NullBattle, NullBeast } from "../types";
-import { getBattlesByBeast } from "../hooks/graphql/queries";
+import { getItemsByTokenId } from "../../hooks/graphql/queries";
+import Heart from "../../../../public/heart.svg";
+import Coin from "../../../../public/coin.svg";
+import ItemDisplay from "../LootIcon";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { processBeastName } from "../../lib/utils";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import { getBattlesByBeast } from "../../hooks/graphql/queries";
 
 interface DiscoveryProps {
   discoveryData: any;
