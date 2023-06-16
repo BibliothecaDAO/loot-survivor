@@ -4,6 +4,7 @@ import { NullAdventurer } from "../types";
 import { Button } from "./Button";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import { useMediaQuery } from "react-responsive";
 
 interface InventoryRowProps {
   title: string;
@@ -14,6 +15,7 @@ interface InventoryRowProps {
   isSelected: boolean;
   setSelected: (value: any) => void;
   equippedItemId: number | undefined;
+  icon?: any;
 }
 
 export const InventoryRow = ({
@@ -25,6 +27,7 @@ export const InventoryRow = ({
   isSelected,
   setSelected,
   equippedItemId,
+  icon,
 }: InventoryRowProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { adventurerContract } = useContracts();
@@ -79,19 +82,30 @@ export const InventoryRow = ({
     };
   }, [isActive, selectedIndex]);
 
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
+
   return (
     <>
       <div className="flex flex-row w-full gap-3 align-center">
         <Button
           className={isSelected && !isActive ? "animate-pulse" : ""}
           variant={isSelected ? "default" : "ghost"}
-          size={"lg"}
+          size={isMobileDevice ? "sm" : "lg"}
           onClick={() => {
             setSelected(menuIndex);
             setActiveMenu(menuIndex);
           }}
         >
-          <p className="w-40 text-xl whitespace-nowrap">{title}</p>
+          {icon && (
+            <div className="flex items-center justify-center w-10 h-10 sm:hidden">
+              {icon}
+            </div>
+          )}
+          <p className="w-40 text-xl whitespace-nowrap hidden sm:block">
+            {title}
+          </p>
         </Button>
       </div>
     </>

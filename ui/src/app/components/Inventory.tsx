@@ -12,6 +12,7 @@ import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useLoadingStore from "../hooks/useLoadingStore";
+import LootIcon from "./LootIcon";
 
 const Inventory: React.FC = () => {
   const { account } = useAccount();
@@ -150,11 +151,11 @@ const Inventory: React.FC = () => {
   );
 
   return (
-    <div className="flex flex-row space-x-4 overflow-hidden flex-wrap">
-      <div className="sm:w-1/3">
+    <div className="flex flex-row gap-5 sm:gap-0 sm:space-x-4 overflow-hidden flex-wrap">
+      <div className="hidden sm:block sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-5 sm:gap-0">
         <InventoryRow
           title={"Weapon"}
           items={groupedItems["Weapon"]}
@@ -164,6 +165,7 @@ const Inventory: React.FC = () => {
           isSelected={selectedIndex == 0}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.weaponId}
+          icon={<LootIcon type="weapon" />}
         />
         <InventoryRow
           title={"Head Armour"}
@@ -174,6 +176,7 @@ const Inventory: React.FC = () => {
           isSelected={selectedIndex == 1}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.headId}
+          icon={<LootIcon type="head" />}
         />
         <InventoryRow
           title={"Chest Armour"}
@@ -184,6 +187,7 @@ const Inventory: React.FC = () => {
           isSelected={selectedIndex == 2}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.chestId}
+          icon={<LootIcon type="chest" />}
         />
         <InventoryRow
           title={"Hands Armour"}
@@ -194,6 +198,7 @@ const Inventory: React.FC = () => {
           isSelected={selectedIndex == 3}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.handsId}
+          icon={<LootIcon type="hand" />}
         />
         <InventoryRow
           title={"Waist Armour"}
@@ -204,6 +209,7 @@ const Inventory: React.FC = () => {
           isSelected={selectedIndex == 4}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.waistId}
+          icon={<LootIcon type="waist" />}
         />
         <InventoryRow
           title={"Feet Armour"}
@@ -214,6 +220,7 @@ const Inventory: React.FC = () => {
           isSelected={selectedIndex == 5}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.feetId}
+          icon={<LootIcon type="foot" />}
         />
         <InventoryRow
           title={"Neck Jewelry"}
@@ -224,6 +231,7 @@ const Inventory: React.FC = () => {
           isSelected={selectedIndex == 6}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.neckId}
+          icon={<LootIcon type="neck" />}
         />
         <InventoryRow
           title={"Ring Jewelry"}
@@ -234,11 +242,12 @@ const Inventory: React.FC = () => {
           isSelected={selectedIndex == 7}
           setSelected={setSelectedIndex}
           equippedItemId={adventurer?.ringId}
+          icon={<LootIcon type="ring" />}
         />
       </div>
-      <div className="w-1/3">
+      <div className="w-2/3 sm:w-1/3">
         <h4>Loot</h4>
-        <p className="pb-1">
+        <p className="pb-1 hidden sm:block">
           Items of Tier 1 carry the highest prestige and quality, whereas items
           of Tier 5 offer the most basic value.
         </p>

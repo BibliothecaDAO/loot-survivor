@@ -18,6 +18,7 @@ import Ledger from "../../../public/icons/ledger.svg";
 import Guide from "../../../public/icons/guide.svg";
 import Chat from "../../../public/icons/chat.svg";
 import Encounters from "../../../public/icons/encounters.svg";
+import Target from "../../../public/icons/target.svg";
 
 const ClothIcon = GiRolledCloth;
 const HideIcon = GiAnimalHide;
@@ -39,6 +40,7 @@ const LedgerIcon = Ledger;
 const GuideIcon = Guide;
 const ChatIcon = Chat;
 const EncountersIcon = Encounters;
+const TargetIcon = Target;
 
 export {
   ClothIcon,
@@ -61,4 +63,5 @@ export {
   GuideIcon,
   ChatIcon,
   EncountersIcon,
+  TargetIcon,
 };

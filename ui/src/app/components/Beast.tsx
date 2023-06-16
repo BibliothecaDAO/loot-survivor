@@ -18,6 +18,7 @@ import {
   getBeastById,
   getLastBattleByAdventurer,
 } from "../hooks/graphql/queries";
+import { useMediaQuery } from "react-responsive";
 
 export default function Beast() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -170,47 +171,100 @@ export default function Beast() {
 
   const beastName = processBeastName(beastData);
 
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
+
   return (
-    <div className="flex flex-row overflow-hidden flex-wrap">
-      <div className="sm:w-1/3">
+    <div className="flex flex-col sm:flex-row overflow-hidden flex-wrap">
+      <div className="hidden sm:block sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      <div className="flex flex-col sm:w-1/3 gap-10 p-4">
-        {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
-
-        {(adventurer?.beastId || formatBattles.length > 0) && (
-          <>
-            <div className="flex flex-col items-center gap-5 p-2">
-              <div className="text-xl uppercase">
-                Battle log with {beastData?.beast}
+      {isMobileDevice ? (
+        <>
+          <div className="sm:w-1/3">
+            {adventurer?.beastId || data.lastBattleQuery?.battles[0] ? (
+              <>
+                <BeastDisplay
+                  beastData={beastData}
+                  lastBattle={formatBattles[0]}
+                />
+              </>
+            ) : (
+              <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
+                <p className="m-auto text-lg uppercase text-terminal-green">
+                  Beast not yet discovered.
+                </p>
               </div>
-              <div className="flex flex-col gap-2">
-                {formatBattles.map((battle: any, index: number) => (
-                  <BattleDisplay
-                    key={index}
-                    battleData={battle}
-                    beastName={beastName}
-                  />
-                ))}
-              </div>
-            </div>
-          </>
-        )}
-      </div>
-
-      <div className="sm:w-1/3">
-        {adventurer?.beastId || data.lastBattleQuery?.battles[0] ? (
-          <>
-            <BeastDisplay beastData={beastData} lastBattle={formatBattles[0]} />
-          </>
-        ) : (
-          <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
-            <p className="m-auto text-lg uppercase text-terminal-green">
-              Beast not yet discovered.
-            </p>
+            )}
           </div>
-        )}
-      </div>
+
+          <div className="flex flex-col sm:w-1/3 gap-10 p-4">
+            {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
+
+            {(adventurer?.beastId || formatBattles.length > 0) && (
+              <>
+                <div className="flex flex-col items-center gap-5 p-2">
+                  <div className="text-xl uppercase">
+                    Battle log with {beastData?.beast}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {formatBattles.map((battle: any, index: number) => (
+                      <BattleDisplay
+                        key={index}
+                        battleData={battle}
+                        beastName={beastName}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex flex-col sm:w-1/3 gap-10 p-4">
+            {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
+
+            {(adventurer?.beastId || formatBattles.length > 0) && (
+              <>
+                <div className="flex flex-col items-center gap-5 p-2">
+                  <div className="text-xl uppercase">
+                    Battle log with {beastData?.beast}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {formatBattles.map((battle: any, index: number) => (
+                      <BattleDisplay
+                        key={index}
+                        battleData={battle}
+                        beastName={beastName}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="sm:w-1/3">
+            {adventurer?.beastId || data.lastBattleQuery?.battles[0] ? (
+              <>
+                <BeastDisplay
+                  beastData={beastData}
+                  lastBattle={formatBattles[0]}
+                />
+              </>
+            ) : (
+              <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
+                <p className="m-auto text-lg uppercase text-terminal-green">
+                  Beast not yet discovered.
+                </p>
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

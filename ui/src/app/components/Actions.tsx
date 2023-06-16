@@ -15,7 +15,9 @@ import {
   getLatestDiscoveries,
   getBeastsByAdventurer,
 } from "../hooks/graphql/queries";
-import { MistIcon, HealthPotionsIcon } from "./Icons";
+import { MistIcon, HealthPotionsIcon, TargetIcon } from "./Icons";
+import { useMediaQuery } from "react-responsive";
+import KillAdventurer from "./KillAdventurer";
 
 export default function Actions() {
   const calls = useTransactionCartStore((state) => state.calls);
@@ -77,25 +79,27 @@ export default function Actions() {
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
-        {
-          addToCalls(exploreTx);
-          startLoading(
-            "Explore",
-            "Exploring",
-            "discoveryByTxHashQuery",
-            adventurer?.id
-          );
-          await handleSubmitCalls(writeAsync).then((tx: any) => {
-            if (tx) {
-              setTxHash(tx.transaction_hash);
-              addTransaction({
-                hash: tx.transaction_hash,
-                metadata: {
-                  method: `Explore with ${adventurer?.name}`,
-                },
-              });
-            }
-          });
+        if (!isMobileDevice) {
+          {
+            addToCalls(exploreTx);
+            startLoading(
+              "Explore",
+              "Exploring",
+              "discoveryByTxHashQuery",
+              adventurer?.id
+            );
+            await handleSubmitCalls(writeAsync).then((tx: any) => {
+              if (tx) {
+                setTxHash(tx.transaction_hash);
+                addTransaction({
+                  hash: tx.transaction_hash,
+                  metadata: {
+                    method: `Explore with ${adventurer?.name}`,
+                  },
+                });
+              }
+            });
+          }
         }
       },
       disabled: !adventurer?.isIdle || loading,
@@ -113,35 +117,82 @@ export default function Actions() {
       disabled: !adventurer?.isIdle || loading,
       loading: loading,
     });
+    buttonsData.push({
+      id: 3,
+      label: "Kill Adventurer",
+      icon: <TargetIcon />,
+      value: "kill adventurer",
+      action: async () => setActiveMenu(2),
+      disabled: !adventurer?.isIdle || loading,
+      loading: loading,
+    });
   }
 
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
+
   return (
-    <div className="flex flex-row overflow-hidden flex-wrap">
-      <div className="sm:w-1/3">
+    <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 overflow-hidden flex-wrap">
+      <div className="hidden sm:block sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8">
-        <VerticalKeyboardControl
-          buttonsData={buttonsData}
-          onSelected={(value) => setSelected(value)}
-          onEnterAction={true}
-        />
-      </div>
-
-      <div className="flex flex-col sm:w-1/3 bg-terminal-black">
-        {selected == "explore" && (
-          <Discovery discoveries={latestDiscoveries} beasts={beasts} />
-        )}
-        {selected == "purchase health" &&
-          (adventurer?.isIdle ? (
-            <PurchaseHealth
-              isActive={activeMenu == 1}
-              onEscape={() => setActiveMenu(0)}
+      {isMobileDevice ? (
+        <>
+          <div className="flex sm:w-1/3 bg-terminal-black">
+            {selected == "explore" && (
+              <Discovery discoveries={latestDiscoveries} beasts={beasts} />
+            )}
+            {selected == "purchase health" &&
+              (adventurer?.isIdle ? (
+                <PurchaseHealth
+                  isActive={activeMenu == 1}
+                  onEscape={() => setActiveMenu(0)}
+                />
+              ) : (
+                <p>You are in a battle!</p>
+              ))}
+          </div>
+          <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8">
+            <VerticalKeyboardControl
+              buttonsData={buttonsData}
+              onSelected={(value) => setSelected(value)}
+              onEnterAction={true}
             />
-          ) : (
-            <p>You are in a battle!</p>
-          ))}
-      </div>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8">
+            <VerticalKeyboardControl
+              buttonsData={buttonsData}
+              onSelected={(value) => setSelected(value)}
+              onEnterAction={true}
+            />
+          </div>
+
+          <div className="flex flex-col sm:w-1/3 bg-terminal-black">
+            {selected == "explore" && (
+              <Discovery discoveries={latestDiscoveries} beasts={beasts} />
+            )}
+            {selected == "purchase health" &&
+              (adventurer?.isIdle ? (
+                <PurchaseHealth
+                  isActive={activeMenu == 1}
+                  onEscape={() => setActiveMenu(0)}
+                />
+              ) : (
+                <p>You are in a battle!</p>
+              ))}
+            {selected == "kill adventurer" &&
+              (adventurer?.isIdle ? (
+                <KillAdventurer />
+              ) : (
+                <p>You are in a battle!</p>
+              ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

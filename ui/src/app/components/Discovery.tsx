@@ -1,6 +1,13 @@
 import { useQueriesStore } from "../hooks/useQueryStore";
+import { Button } from "./Button";
 import { DiscoveryDisplay } from "./DiscoveryDisplay";
 import LootIconLoader from "./Loader";
+import { useMediaQuery } from "react-responsive";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useLoadingStore from "../hooks/useLoadingStore";
+import { useContracts } from "../hooks/useContracts";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 
 interface DiscoveryProps {
   discoveries: any[];
@@ -8,7 +15,28 @@ interface DiscoveryProps {
 }
 
 const Discovery = ({ discoveries, beasts }: DiscoveryProps) => {
+  const calls = useTransactionCartStore((state) => state.calls);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const handleSubmitCalls = useTransactionCartStore(
+    (state) => state.handleSubmitCalls
+  );
+  const { adventurerContract } = useContracts();
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const { addTransaction } = useTransactionManager();
+  const { writeAsync } = useContractWrite({ calls });
+  const startLoading = useLoadingStore((state) => state.startLoading);
+  const setTxHash = useLoadingStore((state) => state.setTxHash);
+
   const isLoading = useQueriesStore((state) => state.isLoading);
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
+
+  const exploreTx = {
+    contractAddress: adventurerContract?.address ?? "",
+    entrypoint: "explore",
+    calldata: [adventurer?.id ?? "", "0"],
+  };
 
   return (
     <div className="flex flex-col items-center gap-5 m-auto text-xl">
@@ -26,6 +54,33 @@ const Discovery = ({ discoveries, beasts }: DiscoveryProps) => {
               </div>
             ))}
           </div>
+          {isMobileDevice && (
+            <Button
+              className="w-full"
+              onClick={async () => {
+                addToCalls(exploreTx);
+                startLoading(
+                  "Explore",
+                  "Exploring",
+                  "discoveryByTxHashQuery",
+                  adventurer?.id
+                );
+                await handleSubmitCalls(writeAsync).then((tx: any) => {
+                  if (tx) {
+                    setTxHash(tx.transaction_hash);
+                    addTransaction({
+                      hash: tx.transaction_hash,
+                      metadata: {
+                        method: `Explore with ${adventurer?.name}`,
+                      },
+                    });
+                  }
+                });
+              }}
+            >
+              Explore
+            </Button>
+          )}
         </>
       ) : (
         <p>You have not yet made any discoveries!</p>

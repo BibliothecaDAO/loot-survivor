@@ -71,8 +71,8 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
 
   return (
     <div className="relative flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
-      <div className="flex flex-col w-full p-3 uppercase">
-        <div className="flex justify-between py-3 text-4xl border-b border-terminal-green">
+      <div className="flex flex-col w-full h-full p-3 uppercase">
+        <div className="flex justify-between py-3 text-3xl sm:text-4xl border-b border-terminal-green">
           {beastName}
           <span
             className={`text-4xl flex ${
@@ -115,7 +115,7 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
           </div>
         </div>
       </div>
-      <div className="relative flex-grow w-full h-0 pb-full">
+      <div className="relative flex-grow w-full h-64 sm:h-full pb-full">
         <Image
           src={
             getValueFromKey(gameData.BEAST_IMAGES, beastData?.beast) ||
