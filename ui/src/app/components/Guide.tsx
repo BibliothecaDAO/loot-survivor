@@ -1,5 +1,5 @@
 import React from "react";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 
 export const Guide = () => {
   const efficacyData = [
@@ -49,15 +49,17 @@ export const Guide = () => {
   ];
 
   return (
-    <div className="overflow-y-auto h-screen p-2 table-scroll">
-      <div className="flex justify-between items-center mb-4">
+    <div className="overflow-y-auto h-screen p-2 table-scroll text-xs sm:text-base text-center sm:text-left">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
         <h1>Loot Survivor: A Saga of Fortitude and Death</h1>
         <a
           href="https://discord.gg/bibliothecadao"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Button className="py-2 px-4 animate-pulse">Join the Discord</Button>
+          <Button className="py-2 px-4 animate-pulse hidden sm:block">
+            Join the Discord
+          </Button>
         </a>
       </div>
       <p>

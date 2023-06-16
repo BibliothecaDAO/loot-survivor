@@ -1,13 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 import { soundSelector, useUiSounds } from "../hooks/useUiSound";
 
 interface ButtonData {
   id: number;
   label: string;
-  value: any;
+  icon?: any;
+  value?: any;
   action: () => void;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 interface VerticalKeyboardControlProps {
@@ -74,15 +75,20 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
         <Button
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
-          className={selectedIndex === index && isActive ? "animate-pulse w-full" : "w-full"}
+          className={
+            selectedIndex === index && isActive
+              ? "flex flex-row gap-5 animate-pulse w-full"
+              : "flex flex-row gap-5 w-full"
+          }
           variant={selectedIndex === index ? "default" : "outline"}
-          size={'lg'}
+          size={"lg"}
           onClick={() => {
             setSelectedIndex(index);
             buttonData.action();
           }}
           disabled={buttonData.disabled}
         >
+          {buttonData.icon && <div className="w-6 h-6">{buttonData.icon}</div>}
           {buttonData.label}
         </Button>
       ))}
