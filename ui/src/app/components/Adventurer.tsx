@@ -56,10 +56,6 @@ const Adventurer = () => {
     return <LootIconLoader />;
   }
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   return (
     <>
       {/* {isMobileDevice ? (
