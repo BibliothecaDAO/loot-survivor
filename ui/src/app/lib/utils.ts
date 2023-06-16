@@ -201,3 +201,7 @@ export function dedupeByValue(arr: MyDict[], key: string): MyDict[] {
     return true;
   });
 }
+
+export function capitalizeFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}

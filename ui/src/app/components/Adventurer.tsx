@@ -11,6 +11,7 @@ import useUIStore from "../hooks/useUIStore";
 import LootIconLoader from "./Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import useLoadingStore from "../hooks/useLoadingStore";
+import { useMediaQuery } from "react-responsive";
 
 const Adventurer = () => {
   const [activeMenu, setActiveMenu] = useState(0);
@@ -55,36 +56,73 @@ const Adventurer = () => {
     return <LootIconLoader />;
   }
 
-  return (
-    <div className="flex flex-row flex-wrap">
-      <div className="w-full sm:w-2/12">
-        <VerticalKeyboardControl
-          buttonsData={menu}
-          onSelected={(value) => setSelected(value)}
-          isActive={activeMenu == 0}
-          setActiveMenu={setActiveMenu}
-        />
-      </div>
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
 
-      {selected === "choose adventurer" && (
-        <div className="sm:w-5/6">
-          <AdventurersList
-            isActive={activeMenu == 1}
-            onEscape={() => setActiveMenu(0)}
-            adventurers={adventurers}
+  return (
+    <>
+      {/* {isMobileDevice ? (
+        <div className="flex flex-col flex-wrap">
+          {selected === "choose adventurer" && (
+            <div className="w-full sm:w-5/6">
+              <AdventurersList
+                isActive={activeMenu == 1}
+                onEscape={() => setActiveMenu(0)}
+                adventurers={adventurers}
+              />
+            </div>
+          )}
+          {selected === "create adventurer" && (
+            <div className="w-full sm:w-8/12">
+              <CreateAdventurer
+                isActive={activeMenu == 2}
+                onEscape={() => setActiveMenu(0)}
+                adventurers={adventurers}
+              />
+            </div>
+          )}
+          <div className="w-full sm:w-2/12">
+            <VerticalKeyboardControl
+              buttonsData={menu}
+              onSelected={(value) => setSelected(value)}
+              isActive={activeMenu == 0}
+              setActiveMenu={setActiveMenu}
+            />
+          </div>
+        </div>
+      ) : ( */}
+      <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap">
+        <div className="w-full sm:w-2/12">
+          <VerticalKeyboardControl
+            buttonsData={menu}
+            onSelected={(value) => setSelected(value)}
+            isActive={activeMenu == 0}
+            setActiveMenu={setActiveMenu}
           />
         </div>
-      )}
-      {selected === "create adventurer" && (
-        <div className="sm:w-8/12">
-          <CreateAdventurer
-            isActive={activeMenu == 2}
-            onEscape={() => setActiveMenu(0)}
-            adventurers={adventurers}
-          />
-        </div>
-      )}
-    </div>
+
+        {selected === "choose adventurer" && (
+          <div className="sm:w-5/6">
+            <AdventurersList
+              isActive={activeMenu == 1}
+              onEscape={() => setActiveMenu(0)}
+              adventurers={adventurers}
+            />
+          </div>
+        )}
+        {selected === "create adventurer" && (
+          <div className="sm:w-8/12">
+            <CreateAdventurer
+              isActive={activeMenu == 2}
+              onEscape={() => setActiveMenu(0)}
+              adventurers={adventurers}
+            />
+          </div>
+        )}
+      </div>
+      {/* )} */}
+    </>
   );
 };
 

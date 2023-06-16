@@ -10,7 +10,9 @@ export type ScreenPage =
   | "upgrade"
   | "profile"
   | "encounters"
-  | "guide";
+  | "guide"
+  | "settings"
+  | "player";
 
 type State = {
   connected: boolean;
@@ -23,6 +25,8 @@ type State = {
   setProfile: (value: number) => void;
   dialog: boolean;
   showDialog: (value: boolean) => void;
+  displayHistory: boolean;
+  setDisplayHistory: (value: boolean) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -38,6 +42,8 @@ const useUIStore = create<State>((set) => ({
   setProfile: (value) => set({ profile: value }),
   dialog: false,
   showDialog: (value) => set({ dialog: value }),
+  displayHistory: false,
+  setDisplayHistory: (value) => set({ displayHistory: value }),
 }));
 
 export default useUIStore;

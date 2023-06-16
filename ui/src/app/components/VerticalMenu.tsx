@@ -6,9 +6,9 @@ interface ButtonData {
   id: number;
   label: string;
   icon?: any;
-  value: any;
+  value?: any;
   action: () => void;
-  disabled: boolean;
+  disabled?: boolean;
 }
 
 interface VerticalKeyboardControlProps {
@@ -88,9 +88,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
           }}
           disabled={buttonData.disabled}
         >
-          {buttonData.icon && (
-            <div className="w-10 h-10">{buttonData.icon}</div>
-          )}
+          {buttonData.icon && <div className="w-6 h-6">{buttonData.icon}</div>}
           {buttonData.label}
         </Button>
       ))}

@@ -13,6 +13,7 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import { processNotification } from "./NotificationDisplay";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useCustomQuery from "../hooks/useCustomQuery";
+import { useMediaQuery } from "react-responsive";
 
 const TransactionHistory = () => {
   const wrapperRef = useRef<HTMLDivElement>(null); // Update the type here
@@ -40,7 +41,9 @@ const TransactionHistory = () => {
 
   const history = useLoadingStore((state) => state.history);
 
-  console.log(history);
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
 
   return (
     <div className="relative" ref={wrapperRef}>

@@ -16,7 +16,7 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
 
   return (
     <div
-      className={`flex-shrink flex gap-2 p-1 sm:p-2 mb-1  ${
+      className={`flex-shrink flex gap-2 p-1 sm:p-2 mb-1 text-sm sm:text-base ${
         Item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >

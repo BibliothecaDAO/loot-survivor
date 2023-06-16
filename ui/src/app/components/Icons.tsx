@@ -10,6 +10,14 @@ import Volume from "../../../public/icons/volume.svg";
 import Mute from "../../../public/icons/mute.svg";
 import Trophy from "../../../public/icons/trophy.svg";
 import Mist from "../../../public/icons/mist.svg";
+import Cog from "../../../public/icons/cog.svg";
+import Controller from "../../../public/icons/controller.svg";
+import Attack from "../../../public/icons/attack.svg";
+import Flag from "../../../public/icons/flag.svg";
+import Ledger from "../../../public/icons/ledger.svg";
+import Guide from "../../../public/icons/guide.svg";
+import Chat from "../../../public/icons/chat.svg";
+import Encounters from "../../../public/icons/encounters.svg";
 
 const ClothIcon = GiRolledCloth;
 const HideIcon = GiAnimalHide;
@@ -23,6 +31,14 @@ const VolumeIcon = Volume;
 const MuteIcon = Mute;
 const TrophyIcon = Trophy;
 const MistIcon = Mist;
+const CogIcon = Cog;
+const ControllerIcon = Controller;
+const AttackIcon = Attack;
+const FlagIcon = Flag;
+const LedgerIcon = Ledger;
+const GuideIcon = Guide;
+const ChatIcon = Chat;
+const EncountersIcon = Encounters;
 
 export {
   ClothIcon,
@@ -37,4 +53,12 @@ export {
   MuteIcon,
   TrophyIcon,
   MistIcon,
+  CogIcon,
+  ControllerIcon,
+  AttackIcon,
+  FlagIcon,
+  LedgerIcon,
+  GuideIcon,
+  ChatIcon,
+  EncountersIcon,
 };
