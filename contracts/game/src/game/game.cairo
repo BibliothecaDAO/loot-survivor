@@ -1,8 +1,10 @@
 use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
+use survivor::adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata};
+use starknet::{ContractAddress};
 
 #[starknet::interface]
 trait IGame<T> {
-    fn start(ref self: T, starting_weapon: u8);
+    fn start(ref self: T, starting_weapon: u8, adventurer_meta: AdventurerMetadata);
     fn explore(ref self: T, adventurer_id: u256);
 
     fn attack(ref self: T, adventurer_id: u256);
@@ -14,6 +16,9 @@ trait IGame<T> {
 
     // view functions
     fn get_adventurer(self: @T, adventurer_id: u256) -> Adventurer;
+    fn get_adventurer_meta(self: @T, adventurer_id: u256) -> AdventurerMetadata;
+
+    fn owner_of(self: @T, adventurer_id: u256) -> ContractAddress;
 }
 
 #[starknet::contract]
@@ -29,7 +34,9 @@ mod Game {
 
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
     use survivor::bag::{Bag, BagActions, ImplBagActions};
-    use survivor::adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata};
+    use survivor::adventurer_meta::{
+        AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata
+    };
 
     use market::market::{ImplMarket};
 
@@ -44,8 +51,11 @@ mod Game {
 
     #[storage]
     struct Storage {
-        _adventurer: LegacyMap::<(ContractAddress, u256), felt252>,
+        _adventurer: LegacyMap::<u256, felt252>,
+        _owner: LegacyMap::<u256, ContractAddress>,
+        _adventurer_meta: LegacyMap::<u256, felt252>,
         _loot: LegacyMap::<u256, felt252>,
+        _loot_meta: LegacyMap::<u256, felt252>,
         _bag: LegacyMap::<u256, felt252>,
         _counter: u256,
         _lords: ContractAddress,
@@ -65,8 +75,10 @@ mod Game {
 
     #[external(v0)]
     impl Game of super::IGame<ContractState> {
-        fn start(ref self: ContractState, starting_weapon: u8) {
-            _start(ref self, starting_weapon);
+        fn start(
+            ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata
+        ) {
+            _start(ref self, starting_weapon, adventurer_meta);
         }
         fn explore(ref self: ContractState, adventurer_id: u256) {
             _explore(ref self, adventurer_id);
@@ -94,69 +106,78 @@ mod Game {
         fn get_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
             _adventurer_unpacked(self, adventurer_id)
         }
+
+        fn get_adventurer_meta(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
+            _adventurer_meta_unpacked(self, adventurer_id)
+        }
+
+        fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
+            _owner_of(self, adventurer_id)
+        }
     }
 
     // ------------------------------------------ //
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
 
-    fn _start(ref self: ContractState, starting_weapon: u8) {
-        // assert item is a starting weapon
+    fn _start(ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata) {
+        let caller = get_caller_address();
+
         assert(
             ItemUtils::is_starting_weapon(starting_weapon) == true, 'Loot is not a starter weapon'
         );
 
-        // generate adventurer entropy seed based on current block timestamp and caller address
-        // TODO: Make this stronger by perhaps using the current block hash instead of timestamp
-
         // get current block timestamp and convert to felt252
         let block_info = starknet::get_block_info().unbox();
-        let block_timestamp = U64IntoFelt252::into(block_info.block_timestamp);
 
-        // get caller address and convert to felt252
-        let caller_address_felt = ContractAddressIntoFelt252::into(get_caller_address());
-
-        // combine caller address and block timestamp to create adventurer entropy seed as a u64
-        let adventurer_entropy_seed = Felt252TryIntoU64::try_into(
-            caller_address_felt + block_timestamp
-        )
-            .unwrap();
-
-        // TODO: initialize adventurer metadata using the adventurer entropy seed
-
-        // TODO: distribute mint fees
-
-        // create a new adventurer with the selected starting weapon
         // and the current block number as start time
         let new_adventurer: Adventurer = ImplAdventurer::new(
             starting_weapon, block_info.block_number
         );
 
         // get the current adventurer id
-        let current_adventurer_id = self._counter.read();
-
-        // get the caller address
-        let caller = get_caller_address();
+        let adventurer_id = self._counter.read();
 
         // emit the AdventurerUpdate event
-        AdventurerUpdate(caller, current_adventurer_id, new_adventurer);
+        AdventurerUpdate(caller, adventurer_id, new_adventurer);
 
         // write the new adventurer to storage
-        _pack_adventurer(ref self, current_adventurer_id, new_adventurer);
+        _pack_adventurer(ref self, adventurer_id, new_adventurer);
 
-        // TODO: write adventurer meta data to storage
+        // pack metadata with entropy seed
+        _pack_adventurer_meta(
+            ref self,
+            adventurer_id,
+            AdventurerMetadata {
+                name: adventurer_meta.name,
+                home_realm: adventurer_meta.home_realm,
+                race: adventurer_meta.race,
+                order: adventurer_meta.order,
+                entropy: Felt252TryIntoU64::try_into(
+                    ContractAddressIntoFelt252::into(caller)
+                        + U64IntoFelt252::into(block_info.block_timestamp)
+                )
+                    .unwrap()
+            }
+        );
 
         // increment the adventurer counter
-        self._counter.write(current_adventurer_id + 1);
+        self._counter.write(adventurer_id + 1);
+
+        // set caller as owner
+        self._owner.write(adventurer_id, caller);
+    // TODO: distribute mint fees
     }
 
     // @loothero
     fn _explore(ref self: ContractState, adventurer_id: u256) {
+        _assert_ownership(@self, adventurer_id);
+
         // get adventurer from storage and unpack
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
-        // TODO: get adventurer entropy from AdventurerMeta
-        let adventurer_entropy = 1;
+        // get adventurer entropy from storage  
+        let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
         // TODO: get game_entropy from storage
         let game_entropy = 1;
@@ -286,13 +307,12 @@ mod Game {
     // ------------ Helper Functions ------------ //
     // ------------------------------------------ //
 
-    #[view]
     fn _adventurer_unpacked(self: @ContractState, adventurer_id: u256) -> Adventurer {
-        ImplAdventurer::unpack(self._adventurer.read((get_caller_address(), adventurer_id)))
+        ImplAdventurer::unpack(self._adventurer.read(adventurer_id))
     }
 
     fn _pack_adventurer(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {
-        self._adventurer.write((get_caller_address(), adventurer_id), adventurer.pack());
+        self._adventurer.write(adventurer_id, adventurer.pack());
     }
 
     fn _bag_unpacked(ref self: ContractState, adventurer_id: u256) -> Bag {
@@ -303,12 +323,28 @@ mod Game {
         self._bag.write(adventurer_id, bag.pack());
     }
 
-    #[view]
+    fn _adventurer_meta_unpacked(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
+        ImplAdventurerMetadata::unpack(self._adventurer_meta.read(adventurer_id))
+    }
+
+    fn _pack_adventurer_meta(
+        ref self: ContractState, adventurer_id: u256, adventurer_meta: AdventurerMetadata
+    ) {
+        self._adventurer_meta.write(adventurer_id, adventurer_meta.pack());
+    }
+
+    fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
+        self._owner.read(adventurer_id)
+    }
+
+    fn _assert_ownership(self: @ContractState, adventurer_id: u256) {
+        assert(self._owner.read(adventurer_id) == get_caller_address(), 'Not owner');
+    }
+
     fn lords_address(ref self: ContractState) -> ContractAddress {
         self._lords.read()
     }
 
-    #[view]
     fn dao_address(ref self: ContractState) -> ContractAddress {
         self._dao.read()
     }

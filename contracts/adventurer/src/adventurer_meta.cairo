@@ -1,7 +1,7 @@
 use core::serde::Serde;
 use integer::{
     U128IntoFelt252, Felt252IntoU256, Felt252TryIntoU64, U256TryIntoFelt252, u256_from_felt252,
-    U256TryIntoU32, U256TryIntoU128, U256TryIntoU16, U256TryIntoU8
+    U256TryIntoU32, U256TryIntoU128, U256TryIntoU16, U256TryIntoU8, U256TryIntoU64
 };
 use traits::{TryInto, Into};
 use option::OptionTrait;
@@ -17,23 +17,23 @@ struct AdventurerMetadata {
     home_realm: u8,
     race: u8,
     order: u8,
-    entropy: u32,
+    entropy: u64,
 }
 
 trait IAdventurerMetadata {
-    fn pack(ref self: AdventurerMetadata) -> felt252;
+    fn pack(self: AdventurerMetadata) -> felt252;
     fn unpack(packed: felt252) -> AdventurerMetadata;
 }
 
 impl ImplAdventurerMetadata of IAdventurerMetadata {
-    fn pack(ref self: AdventurerMetadata) -> felt252 {
+    fn pack(self: AdventurerMetadata) -> felt252 {
         let mut packed = 0;
         packed = packed | pack_value(self.name.into(), pow::TWO_POW_219);
         packed = packed | pack_value(self.home_realm.into(), pow::TWO_POW_212);
         packed = packed | pack_value(self.race.into(), pow::TWO_POW_204);
         packed = packed | pack_value(self.order.into(), pow::TWO_POW_196);
 
-        packed = packed | pack_value(self.entropy.into(), pow::TWO_POW_164);
+        packed = packed | pack_value(self.entropy.into(), pow::TWO_POW_132);
 
         packed.try_into().unwrap()
     }
@@ -50,7 +50,7 @@ impl ImplAdventurerMetadata of IAdventurerMetadata {
                 .unwrap(),
             order: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_196, mask::MASK_8))
                 .unwrap(),
-            entropy: U256TryIntoU32::try_into(unpack_value(packed, pow::TWO_POW_164, mask::MASK_32))
+            entropy: U256TryIntoU64::try_into(unpack_value(packed, pow::TWO_POW_132, mask::MASK_64))
                 .unwrap()
         }
     }
