@@ -11,7 +11,7 @@ use pack::pack::{
 };
 use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
-use lootitems::loot::{Loot, ItemTrait, ItemUtils};
+use lootitems::loot::{Loot, ILoot, ImplLoot};
 use lootitems::statistics::constants;
 
 use super::exploration::ExploreUtils;
@@ -126,7 +126,7 @@ impl ImplAdventurer of IAdventurer {
     }
 
     fn get_item_at_slot(self: Adventurer, item: LootStatistics) -> LootStatistics {
-        let item_slot = ItemUtils::get_slot(item.id);
+        let item_slot = ImplLoot::get_slot(item.id);
 
         if (item_slot == constants::Slot::Weapon) {
             return self.weapon;
@@ -147,7 +147,7 @@ impl ImplAdventurer of IAdventurer {
         }
     }
     fn is_slot_free(self: Adventurer, item: LootStatistics) -> bool {
-        let item_slot = ItemUtils::get_slot(item.id);
+        let item_slot = ImplLoot::get_slot(item.id);
 
         if (item_slot == constants::Slot::Weapon) {
             return self.weapon.id == 0;
@@ -350,7 +350,7 @@ impl ImplAdventurer of IAdventurer {
         self
     }
     fn add_item(ref self: Adventurer, value: LootStatistics) -> Adventurer {
-        let slot = ItemUtils::get_slot(value.id);
+        let slot = ImplLoot::get_slot(value.id);
 
         if slot == 1 {
             self.add_weapon(value);

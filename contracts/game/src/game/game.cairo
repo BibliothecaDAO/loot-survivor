@@ -6,7 +6,6 @@ use starknet::{ContractAddress};
 trait IGame<T> {
     fn start(ref self: T, starting_weapon: u8, adventurer_meta: AdventurerMetadata);
     fn explore(ref self: T, adventurer_id: u256);
-
     fn attack(ref self: T, adventurer_id: u256);
     fn flee(ref self: T, adventurer_id: u256);
     fn equip(ref self: T, adventurer_id: u256, item_id: u8);
@@ -27,10 +26,11 @@ mod Game {
     use box::BoxTrait;
     use starknet::get_caller_address;
     use starknet::{ContractAddress, ContractAddressIntoFelt252};
+    use integer::{U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64};
     use integer::U64IntoFelt252;
     use core::traits::{TryInto, Into};
-    use lootitems::loot::{Loot, ItemUtils};
-    use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64};
+    use lootitems::loot::{Loot, ImplLoot};
+    use pack::pack::{pack_value, unpack_value};
 
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
     use survivor::bag::{Bag, BagActions, ImplBagActions};
@@ -124,7 +124,7 @@ mod Game {
         let caller = get_caller_address();
 
         assert(
-            ItemUtils::is_starting_weapon(starting_weapon) == true, 'Loot is not a starter weapon'
+            ImplLoot::is_starting_weapon(starting_weapon) == true, 'Loot is not a starter weapon'
         );
 
         // get current block timestamp and convert to felt252

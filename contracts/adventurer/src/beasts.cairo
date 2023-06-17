@@ -6,7 +6,7 @@ use traits::{TryInto, Into};
 use option::OptionTrait;
 use debug::PrintTrait;
 use survivor::adventurer::Adventurer;
-use lootitems::loot::{Loot, ItemUtils, ItemTrait};
+use lootitems::loot::{Loot, ImplLoot, ILoot};
 
 #[derive(Drop, Copy, Serde)] // 24 bits
 struct Beast {
