@@ -1,214 +1,214 @@
 use array::ArrayTrait;
 use lootitems::statistics::item_type;
 use lootitems::statistics::constants::ItemId;
-use lootitems::statistics::constants::ItemType;
+use combat::constants::CombatEnums::Type;
 
-fn get(id: u8) -> u8 {
+fn get(id: u8) -> Type {
     if id == ItemId::Pendant {
-        return ItemType::Pendant;
+        return Type::Necklace(());
     } else if id == ItemId::Necklace {
-        return ItemType::Necklace;
+        return Type::Necklace(());
     } else if id == ItemId::Amulet {
-        return ItemType::Amulet;
+        return Type::Necklace(());
     } else if id == ItemId::SilverRing {
-        return ItemType::SilverRing;
+        return Type::Ring(());
     } else if id == ItemId::BronzeRing {
-        return ItemType::BronzeRing;
+        return Type::Ring(());
     } else if id == ItemId::PlatinumRing {
-        return ItemType::PlatinumRing;
+        return Type::Ring(());
     } else if id == ItemId::TitaniumRing {
-        return ItemType::TitaniumRing;
+        return Type::Ring(());
     } else if id == ItemId::GoldRing {
-        return ItemType::GoldRing;
+        return Type::Ring(());
     } else if id == ItemId::GhostWand {
-        return ItemType::GhostWand;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::GraveWand {
-        return ItemType::GraveWand;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::BoneWand {
-        return ItemType::BoneWand;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Wand {
-        return ItemType::Wand;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Grimoire {
-        return ItemType::Grimoire;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Chronicle {
-        return ItemType::Chronicle;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Tome {
-        return ItemType::Tome;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Book {
-        return ItemType::Book;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::DivineRobe {
-        return ItemType::DivineRobe;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::SilkRobe {
-        return ItemType::SilkRobe;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::LinenRobe {
-        return ItemType::LinenRobe;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Robe {
-        return ItemType::Robe;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Shirt {
-        return ItemType::Shirt;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Crown {
-        return ItemType::Crown;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::DivineHood {
-        return ItemType::DivineHood;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::SilkHood {
-        return ItemType::SilkHood;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::LinenHood {
-        return ItemType::LinenHood;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Hood {
-        return ItemType::Hood;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::BrightsilkSash {
-        return ItemType::BrightsilkSash;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::SilkSash {
-        return ItemType::SilkSash;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::WoolSash {
-        return ItemType::WoolSash;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::LinenSash {
-        return ItemType::LinenSash;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Sash {
-        return ItemType::Sash;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::DivineSlippers {
-        return ItemType::DivineSlippers;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::SilkSlippers {
-        return ItemType::SilkSlippers;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::WoolShoes {
-        return ItemType::WoolShoes;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::LinenShoes {
-        return ItemType::LinenShoes;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Shoes {
-        return ItemType::Shoes;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::DivineGloves {
-        return ItemType::DivineGloves;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::SilkGloves {
-        return ItemType::SilkGloves;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::WoolGloves {
-        return ItemType::WoolGloves;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::LinenGloves {
-        return ItemType::LinenGloves;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Gloves {
-        return ItemType::Gloves;
+        return Type::Magic_or_Cloth(());
     } else if id == ItemId::Katana {
-        return ItemType::Katana;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::Falchion {
-        return ItemType::Falchion;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::Scimitar {
-        return ItemType::Scimitar;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::LongSword {
-        return ItemType::LongSword;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::ShortSword {
-        return ItemType::ShortSword;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::DemonHusk {
-        return ItemType::DemonHusk;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::DragonskinArmor {
-        return ItemType::DragonskinArmor;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::StuddedLeatherArmor {
-        return ItemType::StuddedLeatherArmor;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::HardLeatherArmor {
-        return ItemType::HardLeatherArmor;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::LeatherArmor {
-        return ItemType::LeatherArmor;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::DemonCrown {
-        return ItemType::DemonCrown;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::DragonsCrown {
-        return ItemType::DragonsCrown;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::WarCap {
-        return ItemType::WarCap;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::LeatherCap {
-        return ItemType::LeatherCap;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::Cap {
-        return ItemType::Cap;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::DemonhideBelt {
-        return ItemType::DemonhideBelt;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::DragonskinBelt {
-        return ItemType::DragonskinBelt;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::StuddedLeatherBelt {
-        return ItemType::StuddedLeatherBelt;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::HardLeatherBelt {
-        return ItemType::HardLeatherBelt;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::LeatherBelt {
-        return ItemType::LeatherBelt;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::DemonhideBoots {
-        return ItemType::DemonhideBoots;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::DragonskinBoots {
-        return ItemType::DragonskinBoots;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::StuddedLeatherBoots {
-        return ItemType::StuddedLeatherBoots;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::HardLeatherBoots {
-        return ItemType::HardLeatherBoots;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::LeatherBoots {
-        return ItemType::LeatherBoots;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::DemonsHands {
-        return ItemType::DemonsHands;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::DragonskinGloves {
-        return ItemType::DragonskinGloves;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::StuddedLeatherGloves {
-        return ItemType::StuddedLeatherGloves;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::HardLeatherGloves {
-        return ItemType::HardLeatherGloves;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::LeatherGloves {
-        return ItemType::LeatherGloves;
+        return Type::Blade_or_Hide(());
     } else if id == ItemId::Warhammer {
-        return ItemType::Warhammer;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::Quarterstaff {
-        return ItemType::Quarterstaff;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::Maul {
-        return ItemType::Maul;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::Mace {
-        return ItemType::Mace;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::Club {
-        return ItemType::Club;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::HolyChestplate {
-        return ItemType::HolyChestplate;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::OrnateChestplate {
-        return ItemType::OrnateChestplate;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::PlateMail {
-        return ItemType::PlateMail;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::ChainMail {
-        return ItemType::ChainMail;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::RingMail {
-        return ItemType::RingMail;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::AncientHelm {
-        return ItemType::AncientHelm;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::OrnateHelm {
-        return ItemType::OrnateHelm;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::GreatHelm {
-        return ItemType::GreatHelm;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::FullHelm {
-        return ItemType::FullHelm;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::Helm {
-        return ItemType::Helm;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::OrnateBelt {
-        return ItemType::OrnateBelt;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::WarBelt {
-        return ItemType::WarBelt;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::PlatedBelt {
-        return ItemType::PlatedBelt;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::MeshBelt {
-        return ItemType::MeshBelt;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::HeavyBelt {
-        return ItemType::HeavyBelt;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::HolyGreaves {
-        return ItemType::HolyGreaves;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::OrnateGreaves {
-        return ItemType::OrnateGreaves;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::Greaves {
-        return ItemType::Greaves;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::ChainBoots {
-        return ItemType::ChainBoots;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::HeavyBoots {
-        return ItemType::HeavyBoots;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::HolyGauntlets {
-        return ItemType::HolyGauntlets;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::OrnateGauntlets {
-        return ItemType::OrnateGauntlets;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::Gauntlets {
-        return ItemType::Gauntlets;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::ChainGloves {
-        return ItemType::ChainGloves;
+        return Type::Bludgeon_or_Metal(());
     } else if id == ItemId::HeavyGloves {
-        return ItemType::HeavyGloves;
+        return Type::Bludgeon_or_Metal(());
     } else {
-        // invalid id passed in
-        return 0;
+        // unknown id, return bludgeon
+        return Type::Bludgeon_or_Metal(());
     }
 }
 
@@ -217,385 +217,387 @@ fn get(id: u8) -> u8 {
 fn test_get_item_type() {
     let warhammer = ItemId::Warhammer;
     let warhammer_type = get(warhammer);
-    assert(warhammer_type == 3, 'warhammer is blunt');
+    assert(warhammer_type == Type::Bludgeon_or_Metal(()), 'warhammer is blunt');
 
     let quarterstaff = ItemId::Quarterstaff;
     let quarterstaff_type = get(quarterstaff);
-    assert(quarterstaff_type == 3, 'quarterstaff is blunt');
+    assert(quarterstaff_type == Type::Bludgeon_or_Metal(()), 'quarterstaff is blunt');
 
     let maul = ItemId::Maul;
     let maul_type = get(maul);
-    assert(maul_type == 3, 'maul is blunt');
+    assert(maul_type == Type::Bludgeon_or_Metal(()), 'maul is blunt');
 
     let mace = ItemId::Mace;
     let mace_type = get(mace);
-    assert(mace_type == 3, 'mace is blunt');
+    assert(mace_type == Type::Bludgeon_or_Metal(()), 'mace is blunt');
 
     let club = ItemId::Club;
     let club_type = get(club);
-    assert(club_type == 3, 'club is blunt');
+    assert(club_type == Type::Bludgeon_or_Metal(()), 'club is blunt');
 
     let katana = ItemId::Katana;
     let katana_type = get(katana);
-    assert(katana_type == 2, 'katana is blade');
+    assert(katana_type == Type::Blade_or_Hide(()), 'katana is blade');
 
     let falchion = ItemId::Falchion;
     let falchion_type = get(falchion);
-    assert(falchion_type == 2, 'falchion is blade');
+    assert(falchion_type == Type::Blade_or_Hide(()), 'falchion is blade');
 
     let scimitar = ItemId::Scimitar;
     let scimitar_type = get(scimitar);
-    assert(scimitar_type == 2, 'scimitar is blade');
+    assert(scimitar_type == Type::Blade_or_Hide(()), 'scimitar is blade');
 
     let long_sword = ItemId::LongSword;
     let long_sword_type = get(long_sword);
-    assert(long_sword_type == 2, 'long sword is blade');
+    assert(long_sword_type == Type::Blade_or_Hide(()), 'long sword is blade');
 
     let short_sword = ItemId::ShortSword;
     let short_sword_type = get(short_sword);
-    assert(short_sword_type == 2, 'short sword is blade');
+    assert(short_sword_type == Type::Blade_or_Hide(()), 'short sword is blade');
 
     let ghost_wand = ItemId::GhostWand;
     let ghost_wand_type = get(ghost_wand);
-    assert(ghost_wand_type == 1, 'ghost wand is magic');
+    assert(ghost_wand_type == Type::Magic_or_Cloth(()), 'ghost wand is magic');
 
     let grave_wand = ItemId::GraveWand;
     let grave_wand_type = get(grave_wand);
-    assert(grave_wand_type == 1, 'grave wand is magic');
+    assert(grave_wand_type == Type::Magic_or_Cloth(()), 'grave wand is magic');
 
     let bone_wand = ItemId::BoneWand;
     let bone_wand_type = get(bone_wand);
-    assert(bone_wand_type == 1, 'bone wand is magic');
+    assert(bone_wand_type == Type::Magic_or_Cloth(()), 'bone wand is magic');
 
     let wand = ItemId::Wand;
     let wand_type = get(wand);
-    assert(wand_type == 1, 'wand is magic');
+    assert(wand_type == Type::Magic_or_Cloth(()), 'wand is magic');
 
     let grimoire = ItemId::Grimoire;
     let grimoire_type = get(grimoire);
-    assert(grimoire_type == 1, 'grimoire is magic');
+    assert(grimoire_type == Type::Magic_or_Cloth(()), 'grimoire is magic');
 
     let chronicle = ItemId::Chronicle;
     let chronicle_type = get(chronicle);
-    assert(chronicle_type == 1, 'chronicle is magic');
+    assert(chronicle_type == Type::Magic_or_Cloth(()), 'chronicle is magic');
 
     let tome = ItemId::Tome;
     let tome_type = get(tome);
-    assert(tome_type == 1, 'tome is magic');
+    assert(tome_type == Type::Magic_or_Cloth(()), 'tome is magic');
 
     let book = ItemId::Book;
     let book_type = get(book);
-    assert(book_type == 1, 'book is magic');
+    assert(book_type == Type::Magic_or_Cloth(()), 'book is magic');
 
     let divine_robe = ItemId::DivineRobe;
     let divine_robe_type = get(divine_robe);
-    assert(divine_robe_type == 1, 'divine robe is cloth');
+    assert(divine_robe_type == Type::Magic_or_Cloth(()), 'divine robe is cloth');
 
     let silk_robe = ItemId::SilkRobe;
     let silk_robe_type = get(silk_robe);
-    assert(silk_robe_type == 1, 'silk robe is cloth');
+    assert(silk_robe_type == Type::Magic_or_Cloth(()), 'silk robe is cloth');
 
     let linen_robe = ItemId::LinenRobe;
     let linen_robe_type = get(linen_robe);
-    assert(linen_robe_type == 1, 'linen robe is cloth');
+    assert(linen_robe_type == Type::Magic_or_Cloth(()), 'linen robe is cloth');
 
     let robe = ItemId::Robe;
     let robe_type = get(robe);
-    assert(robe_type == 1, 'robe is cloth');
+    assert(robe_type == Type::Magic_or_Cloth(()), 'robe is cloth');
 
     let shirt = ItemId::Shirt;
     let shirt_type = get(shirt);
-    assert(shirt_type == 1, 'shirt is cloth');
+    assert(shirt_type == Type::Magic_or_Cloth(()), 'shirt is cloth');
 
     let demon_husk = ItemId::DemonHusk;
     let demon_husk_type = get(demon_husk);
-    assert(demon_husk_type == 2, 'demon husk is hide');
+    assert(demon_husk_type == Type::Blade_or_Hide(()), 'demon husk is hide');
 
     let dragonskin_armor = ItemId::DragonskinArmor;
     let dragonskin_armor_type = get(dragonskin_armor);
-    assert(dragonskin_armor_type == 2, 'dragonskin armor is hide');
+    assert(dragonskin_armor_type == Type::Blade_or_Hide(()), 'dragonskin armor is hide');
 
     let studded_leather_armor = ItemId::StuddedLeatherArmor;
     let studded_leather_armor_type = get(studded_leather_armor);
-    assert(studded_leather_armor_type == 2, 'studded leather armor is hide');
+    assert(studded_leather_armor_type == Type::Blade_or_Hide(()), 'studded leather armor is hide');
 
     let hard_leather_armor = ItemId::HardLeatherArmor;
     let hard_leather_armor_type = get(hard_leather_armor);
-    assert(hard_leather_armor_type == 2, 'hard leather armor is hide');
+    assert(hard_leather_armor_type == Type::Blade_or_Hide(()), 'hard leather armor is hide');
 
     let leather_armor = ItemId::LeatherArmor;
     let leather_armor_type = get(leather_armor);
-    assert(leather_armor_type == 2, 'leather armor is hide');
+    assert(leather_armor_type == Type::Blade_or_Hide(()), 'leather armor is hide');
 
     let holy_chestplate = ItemId::HolyChestplate;
     let holy_chestplate_type = get(holy_chestplate);
-    assert(holy_chestplate_type == 3, 'holy chestplate is metal');
+    assert(holy_chestplate_type == Type::Bludgeon_or_Metal(()), 'holy chestplate is metal');
 
     let ornate_chestplate = ItemId::OrnateChestplate;
     let ornate_chestplate_type = get(ornate_chestplate);
-    assert(ornate_chestplate_type == 3, 'ornate chestplate is metal');
+    assert(ornate_chestplate_type == Type::Bludgeon_or_Metal(()), 'ornate chestplate is metal');
 
     let plate_mail = ItemId::PlateMail;
     let plate_mail_type = get(plate_mail);
-    assert(plate_mail_type == 3, 'plate mail is metal');
+    assert(plate_mail_type == Type::Bludgeon_or_Metal(()), 'plate mail is metal');
 
     let chain_mail = ItemId::ChainMail;
     let chain_mail_type = get(chain_mail);
-    assert(chain_mail_type == 3, 'chain mail is metal');
+    assert(chain_mail_type == Type::Bludgeon_or_Metal(()), 'chain mail is metal');
 
     let ring_mail = ItemId::RingMail;
     let ring_mail_type = get(ring_mail);
-    assert(ring_mail_type == 3, 'ring mail is metal');
+    assert(ring_mail_type == Type::Bludgeon_or_Metal(()), 'ring mail is metal');
 
     let ancient_helm = ItemId::AncientHelm;
     let ancient_helm_type = get(ancient_helm);
-    assert(ancient_helm_type == 3, 'ancient helm is metal');
+    assert(ancient_helm_type == Type::Bludgeon_or_Metal(()), 'ancient helm is metal');
 
     let ornate_helm = ItemId::OrnateHelm;
     let ornate_helm_type = get(ornate_helm);
-    assert(ornate_helm_type == 3, 'ornate helm is metal');
+    assert(ornate_helm_type == Type::Bludgeon_or_Metal(()), 'ornate helm is metal');
 
     let great_helm = ItemId::GreatHelm;
     let great_helm_type = get(great_helm);
-    assert(great_helm_type == 3, 'great helm is metal');
+    assert(great_helm_type == Type::Bludgeon_or_Metal(()), 'great helm is metal');
 
     let full_helm = ItemId::FullHelm;
     let full_helm_type = get(full_helm);
-    assert(full_helm_type == 3, 'full helm is metal');
+    assert(full_helm_type == Type::Bludgeon_or_Metal(()), 'full helm is metal');
 
     let helm = ItemId::Helm;
     let helm_type = get(helm);
-    assert(helm_type == 3, 'helm is metal');
+    assert(helm_type == Type::Bludgeon_or_Metal(()), 'helm is metal');
 
     let demon_crown = ItemId::DemonCrown;
     let demon_crown_type = get(demon_crown);
-    assert(demon_crown_type == 2, 'demon crown is hide');
+    assert(demon_crown_type == Type::Blade_or_Hide(()), 'demon crown is hide');
 
     let dragons_crown = ItemId::DragonsCrown;
     let dragons_crown_type = get(dragons_crown);
-    assert(dragons_crown_type == 2, 'dragons crown is hide');
+    assert(dragons_crown_type == Type::Blade_or_Hide(()), 'dragons crown is hide');
 
     let war_cap = ItemId::WarCap;
     let war_cap_type = get(war_cap);
-    assert(war_cap_type == 2, 'war cap is hide');
+    assert(war_cap_type == Type::Blade_or_Hide(()), 'war cap is hide');
 
     let leather_cap = ItemId::LeatherCap;
     let leather_cap_type = get(leather_cap);
-    assert(leather_cap_type == 2, 'leather cap is hide');
+    assert(leather_cap_type == Type::Blade_or_Hide(()), 'leather cap is hide');
 
     let cap = ItemId::Cap;
     let cap_type = get(cap);
-    assert(cap_type == 2, 'cap is hide');
+    assert(cap_type == Type::Blade_or_Hide(()), 'cap is hide');
 
     let crown = ItemId::Crown;
     let crown_type = get(crown);
-    assert(crown_type == 1, 'crown is cloth');
+    assert(crown_type == Type::Magic_or_Cloth(()), 'crown is cloth');
 
     let divine_hood = ItemId::DivineHood;
     let divine_hood_type = get(divine_hood);
-    assert(divine_hood_type == 1, 'divine hood is cloth');
+    assert(divine_hood_type == Type::Magic_or_Cloth(()), 'divine hood is cloth');
 
     let silk_hood = ItemId::SilkHood;
     let silk_hood_type = get(silk_hood);
-    assert(silk_hood_type == 1, 'silk hood is cloth');
+    assert(silk_hood_type == Type::Magic_or_Cloth(()), 'silk hood is cloth');
 
     let linen_hood = ItemId::LinenHood;
     let linen_hood_type = get(linen_hood);
-    assert(linen_hood_type == 1, 'linen hood is cloth');
+    assert(linen_hood_type == Type::Magic_or_Cloth(()), 'linen hood is cloth');
 
     let hood = ItemId::Hood;
     let hood_type = get(hood);
-    assert(hood_type == 1, 'hood is cloth');
+    assert(hood_type == Type::Magic_or_Cloth(()), 'hood is cloth');
 
     let ornate_belt = ItemId::OrnateBelt;
     let ornate_belt_type = get(ornate_belt);
-    assert(ornate_belt_type == 3, 'ornate belt is metal');
+    assert(ornate_belt_type == Type::Bludgeon_or_Metal(()), 'ornate belt is metal');
 
     let war_belt = ItemId::WarBelt;
     let war_belt_type = get(war_belt);
-    assert(war_belt_type == 3, 'war belt is metal');
+    assert(war_belt_type == Type::Bludgeon_or_Metal(()), 'war belt is metal');
 
     let plated_belt = ItemId::PlatedBelt;
     let plated_belt_type = get(plated_belt);
-    assert(plated_belt_type == 3, 'plated belt is metal');
+    assert(plated_belt_type == Type::Bludgeon_or_Metal(()), 'plated belt is metal');
 
     let mesh_belt = ItemId::MeshBelt;
     let mesh_belt_type = get(mesh_belt);
-    assert(mesh_belt_type == 3, 'mesh belt is metal');
+    assert(mesh_belt_type == Type::Bludgeon_or_Metal(()), 'mesh belt is metal');
 
     let heavy_belt = ItemId::HeavyBelt;
     let heavy_belt_type = get(heavy_belt);
-    assert(heavy_belt_type == 3, 'heavy belt is metal');
+    assert(heavy_belt_type == Type::Bludgeon_or_Metal(()), 'heavy belt is metal');
 
     let demonhide_belt = ItemId::DemonhideBelt;
     let demonhide_belt_type = get(demonhide_belt);
-    assert(demonhide_belt_type == 2, 'demonhide belt is hide');
+    assert(demonhide_belt_type == Type::Blade_or_Hide(()), 'demonhide belt is hide');
 
     let dragonskin_belt = ItemId::DragonskinBelt;
     let dragonskin_belt_type = get(dragonskin_belt);
-    assert(dragonskin_belt_type == 2, 'dragonskin belt is hide');
+    assert(dragonskin_belt_type == Type::Blade_or_Hide(()), 'dragonskin belt is hide');
 
     let studded_leather_belt = ItemId::StuddedLeatherBelt;
     let studded_leather_belt_type = get(studded_leather_belt);
-    assert(studded_leather_belt_type == 2, 'studded leather belt is hide');
+    assert(studded_leather_belt_type == Type::Blade_or_Hide(()), 'studded leather belt is hide');
 
     let hard_leather_belt = ItemId::HardLeatherBelt;
     let hard_leather_belt_type = get(hard_leather_belt);
-    assert(hard_leather_belt_type == 2, 'hard leather belt is hide');
+    assert(hard_leather_belt_type == Type::Blade_or_Hide(()), 'hard leather belt is hide');
 
     let leather_belt = ItemId::LeatherBelt;
     let leather_belt_type = get(leather_belt);
-    assert(leather_belt_type == 2, 'leather belt is hide');
+    assert(leather_belt_type == Type::Blade_or_Hide(()), 'leather belt is hide');
 
     let brightsilk_sash = ItemId::BrightsilkSash;
     let brightsilk_sash_type = get(brightsilk_sash);
-    assert(brightsilk_sash_type == 1, 'brightsilk sash is cloth');
+    assert(brightsilk_sash_type == Type::Magic_or_Cloth(()), 'brightsilk sash is cloth');
 
     let silk_sash = ItemId::SilkSash;
     let silk_sash_type = get(silk_sash);
-    assert(silk_sash_type == 1, 'silk sash is cloth');
+    assert(silk_sash_type == Type::Magic_or_Cloth(()), 'silk sash is cloth');
 
     let wool_sash = ItemId::WoolSash;
     let wool_sash_type = get(wool_sash);
-    assert(wool_sash_type == 1, 'wool sash is cloth');
+    assert(wool_sash_type == Type::Magic_or_Cloth(()), 'wool sash is cloth');
 
     let linen_sash = ItemId::LinenSash;
     let linen_sash_type = get(linen_sash);
-    assert(linen_sash_type == 1, 'linen sash is cloth');
+    assert(linen_sash_type == Type::Magic_or_Cloth(()), 'linen sash is cloth');
 
     let sash = ItemId::Sash;
     let sash_type = get(sash);
-    assert(sash_type == 1, 'sash is cloth');
+    assert(sash_type == Type::Magic_or_Cloth(()), 'sash is cloth');
 
     let holy_greaves = ItemId::HolyGreaves;
     let holy_greaves_type = get(holy_greaves);
-    assert(holy_greaves_type == 3, 'holy greaves is metal');
+    assert(holy_greaves_type == Type::Bludgeon_or_Metal(()), 'holy greaves is metal');
 
     let ornate_greaves = ItemId::OrnateGreaves;
     let ornate_greaves_type = get(ornate_greaves);
-    assert(ornate_greaves_type == 3, 'ornate greaves is metal');
+    assert(ornate_greaves_type == Type::Bludgeon_or_Metal(()), 'ornate greaves is metal');
 
     let greaves = ItemId::Greaves;
     let greaves_type = get(greaves);
-    assert(greaves_type == 3, 'greaves is metal');
+    assert(greaves_type == Type::Bludgeon_or_Metal(()), 'greaves is metal');
 
     let chain_boots = ItemId::ChainBoots;
     let chain_boots_type = get(chain_boots);
-    assert(chain_boots_type == 3, 'chain boots is metal');
+    assert(chain_boots_type == Type::Bludgeon_or_Metal(()), 'chain boots is metal');
 
     let heavy_boots = ItemId::HeavyBoots;
     let heavy_boots_type = get(heavy_boots);
-    assert(heavy_boots_type == 3, 'heavy boots is metal');
+    assert(heavy_boots_type == Type::Bludgeon_or_Metal(()), 'heavy boots is metal');
 
     let demonhide_boots = ItemId::DemonhideBoots;
     let demonhide_boots_type = get(demonhide_boots);
-    assert(demonhide_boots_type == 2, 'demonhide boots is hide');
+    assert(demonhide_boots_type == Type::Blade_or_Hide(()), 'demonhide boots is hide');
 
     let dragonskin_boots = ItemId::DragonskinBoots;
     let dragonskin_boots_type = get(dragonskin_boots);
-    assert(dragonskin_boots_type == 2, 'dragonskin boots is hide');
+    assert(dragonskin_boots_type == Type::Blade_or_Hide(()), 'dragonskin boots is hide');
 
     let studded_leather_boots = ItemId::StuddedLeatherBoots;
     let studded_leather_boots_type = get(studded_leather_boots);
-    assert(studded_leather_boots_type == 2, 'studded leather boots is hide');
+    assert(studded_leather_boots_type == Type::Blade_or_Hide(()), 'studded leather boots is hide');
 
     let hard_leather_boots = ItemId::HardLeatherBoots;
     let hard_leather_boots_type = get(hard_leather_boots);
-    assert(hard_leather_boots_type == 2, 'hard leather boots is hide');
+    assert(hard_leather_boots_type == Type::Blade_or_Hide(()), 'hard leather boots is hide');
 
     let leather_boots = ItemId::LeatherBoots;
     let leather_boots_type = get(leather_boots);
-    assert(leather_boots_type == 2, 'leather boots is hide');
+    assert(leather_boots_type == Type::Blade_or_Hide(()), 'leather boots is hide');
 
     let divine_slippers = ItemId::DivineSlippers;
     let divine_slippers_type = get(divine_slippers);
-    assert(divine_slippers_type == 1, 'divine slippers is cloth');
+    assert(divine_slippers_type == Type::Magic_or_Cloth(()), 'divine slippers is cloth');
 
     let silk_slippers = ItemId::SilkSlippers;
     let silk_slippers_type = get(silk_slippers);
-    assert(silk_slippers_type == 1, 'silk slippers is cloth');
+    assert(silk_slippers_type == Type::Magic_or_Cloth(()), 'silk slippers is cloth');
 
     let wool_shoes = ItemId::WoolShoes;
     let wool_shoes_type = get(wool_shoes);
-    assert(wool_shoes_type == 1, 'wool shoes is cloth');
+    assert(wool_shoes_type == Type::Magic_or_Cloth(()), 'wool shoes is cloth');
 
     let linen_shoes = ItemId::LinenShoes;
     let linen_shoes_type = get(linen_shoes);
-    assert(linen_shoes_type == 1, 'linen shoes is cloth');
+    assert(linen_shoes_type == Type::Magic_or_Cloth(()), 'linen shoes is cloth');
 
     let shoes = ItemId::Shoes;
     let shoes_type = get(shoes);
-    assert(shoes_type == 1, 'shoes is cloth');
+    assert(shoes_type == Type::Magic_or_Cloth(()), 'shoes is cloth');
 
     let holy_gauntlets = ItemId::HolyGauntlets;
     let holy_gauntlets_type = get(holy_gauntlets);
-    assert(holy_gauntlets_type == 3, 'holy gauntlets is metal');
+    assert(holy_gauntlets_type == Type::Bludgeon_or_Metal(()), 'holy gauntlets is metal');
 
     let ornate_gauntlets = ItemId::OrnateGauntlets;
     let ornate_gauntlets_type = get(ornate_gauntlets);
-    assert(ornate_gauntlets_type == 3, 'ornate gauntlets is metal');
+    assert(ornate_gauntlets_type == Type::Bludgeon_or_Metal(()), 'ornate gauntlets is metal');
 
     let gauntlets = ItemId::Gauntlets;
     let gauntlets_type = get(gauntlets);
-    assert(gauntlets_type == 3, 'gauntlets is metal');
+    assert(gauntlets_type == Type::Bludgeon_or_Metal(()), 'gauntlets is metal');
 
     let chain_gloves = ItemId::ChainGloves;
     let chain_gloves_type = get(chain_gloves);
-    assert(chain_gloves_type == 3, 'chain gloves is metal');
+    assert(chain_gloves_type == Type::Bludgeon_or_Metal(()), 'chain gloves is metal');
 
     let heavy_gloves = ItemId::HeavyGloves;
     let heavy_gloves_type = get(heavy_gloves);
-    assert(heavy_gloves_type == 3, 'heavy gloves is metal');
+    assert(heavy_gloves_type == Type::Bludgeon_or_Metal(()), 'heavy gloves is metal');
 
     let demons_hands = ItemId::DemonsHands;
     let demons_hands_type = get(demons_hands);
-    assert(demons_hands_type == 2, 'demons hands is hide');
+    assert(demons_hands_type == Type::Blade_or_Hide(()), 'demons hands is hide');
 
     let dragonskin_gloves = ItemId::DragonskinGloves;
     let dragonskin_gloves_type = get(dragonskin_gloves);
-    assert(dragonskin_gloves_type == 2, 'dragonskin gloves is hide');
+    assert(dragonskin_gloves_type == Type::Blade_or_Hide(()), 'dragonskin gloves is hide');
 
     let studded_leather_gloves = ItemId::StuddedLeatherGloves;
     let studded_leather_gloves_type = get(studded_leather_gloves);
-    assert(studded_leather_gloves_type == 2, 'studded leather gloves is hide');
+    assert(
+        studded_leather_gloves_type == Type::Blade_or_Hide(()), 'studded leather gloves is hide'
+    );
 
     let hard_leather_gloves = ItemId::HardLeatherGloves;
     let hard_leather_gloves_type = get(hard_leather_gloves);
-    assert(hard_leather_gloves_type == 2, 'hard leather gloves is hide');
+    assert(hard_leather_gloves_type == Type::Blade_or_Hide(()), 'hard leather gloves is hide');
 
     let leather_gloves = ItemId::LeatherGloves;
     let leather_gloves_type = get(leather_gloves);
-    assert(leather_gloves_type == 2, 'leather gloves is hide');
+    assert(leather_gloves_type == Type::Blade_or_Hide(()), 'leather gloves is hide');
 
     let necklace = ItemId::Necklace;
     let necklace_type = get(necklace);
-    assert(necklace_type == 4, 'necklace is necklace');
+    assert(necklace_type == Type::Necklace(()), 'necklace is necklace');
 
     let amulet = ItemId::Amulet;
     let amulet_type = get(amulet);
-    assert(amulet_type == 4, 'amulet is necklace');
+    assert(amulet_type == Type::Necklace(()), 'amulet is necklace');
 
     let pendant = ItemId::Pendant;
     let pendant_type = get(pendant);
-    assert(pendant_type == 4, 'pendant is necklace');
+    assert(pendant_type == Type::Necklace(()), 'pendant is necklace');
 
     let gold_ring = ItemId::GoldRing;
     let gold_ring_type = get(gold_ring);
-    assert(gold_ring_type == 5, 'gold ring is ring');
+    assert(gold_ring_type == Type::Ring(()), 'gold ring is ring');
 
     let silver_ring = ItemId::SilverRing;
     let silver_ring_type = get(silver_ring);
-    assert(silver_ring_type == 5, 'silver ring is ring');
+    assert(silver_ring_type == Type::Ring(()), 'silver ring is ring');
 
     let bronze_ring = ItemId::BronzeRing;
     let bronze_ring_type = get(bronze_ring);
-    assert(bronze_ring_type == 5, 'bronze ring is ring');
+    assert(bronze_ring_type == Type::Ring(()), 'bronze ring is ring');
 
     let platinum_ring = ItemId::PlatinumRing;
     let platinum_ring_type = get(platinum_ring);
-    assert(platinum_ring_type == 5, 'platinum ring is ring');
+    assert(platinum_ring_type == Type::Ring(()), 'platinum ring is ring');
 
     let titanium_ring = ItemId::TitaniumRing;
     let titanium_ring_type = get(titanium_ring);
-    assert(titanium_ring_type == 5, 'titanium ring is ring');
+    assert(titanium_ring_type == Type::Ring(()), 'titanium ring is ring');
 }

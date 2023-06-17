@@ -225,7 +225,8 @@ mod Game {
         // check what item type exists on adventurer
         // if some exists pluck from adventurer and add to bag
         if adventurer.is_slot_free(equipping_item) == false {
-            let unequipping_item = adventurer.get_item_at_slot(equipping_item);
+            let unequipping_item = adventurer
+                .get_item_at_slot(ImplLoot::get_slot(equipping_item.id));
             bag.add_item(unequipping_item);
         }
 
@@ -264,7 +265,7 @@ mod Game {
         adventurer.deduct_gold(item_price);
 
         if equip == true {
-            let unequipping_item = adventurer.get_item_at_slot(item);
+            let unequipping_item = adventurer.get_item_at_slot(ImplLoot::get_slot(item.id));
 
             adventurer.add_item(item);
 

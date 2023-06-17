@@ -10,7 +10,6 @@ use debug::PrintTrait;
 use pack::pack::{pack_value, unpack_value};
 use pack::constants::{pow, mask};
 
-
 #[derive(Drop, Copy, Serde)]
 struct AdventurerMetadata {
     name: u32,

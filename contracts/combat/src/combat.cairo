@@ -1,57 +1,42 @@
 use core::option::OptionTrait;
-use integer::{U8IntoU16, U16IntoU64, U8IntoU64, U64TryIntoU16};
+use integer::{U8IntoU16, U16IntoU64, U8IntoU64, U64TryIntoU16, U64TryIntoU8};
 use core::traits::DivEq;
-use super::constants::{WeaponEffectiveness, CombatSettings, WeaponType, ArmorType};
+use super::constants::CombatEnums::{Tier, Type, Slot, WeaponEffectiveness};
+use super::constants::CombatSettings;
 use core::debug::PrintTrait;
 
-// CombatItemSpecialNames contains special names for combat items
+// SpecialPowers contains special names for combat items
 #[derive(Drop, Copy)]
-struct CombatItemSpecialNames {
+struct SpecialPowers {
     prefix1: u8,
     prefix2: u8,
     suffix: u8,
 }
 
-// CombatItem used for both CombatWeapons and CombatArmor
+// CombatSpec is used for combat calculations 
 #[derive(Drop, Copy)]
-struct CombatItem {
-    tier: u16, // using u16 because this is commonly used for combat calculations where u8 is too small
-    level: u16, // using u16 because this is commonly used for combat calculations where u8 is too small
-    special_names: CombatItemSpecialNames,
-}
-
-// CombatWeapon is used for combat calculations
-#[derive(Drop, Copy)]
-struct CombatWeapon {
-    item_type: WeaponType,
-    details: CombatItem
-}
-
-// CombatArmor is used for combat calculations
-#[derive(Drop, Copy)]
-struct CombatArmor {
-    item_type: ArmorType,
-    details: CombatItem,
+struct CombatSpec {
+    tier: Tier,
+    item_type: Type,
+    level: u16,
+    special_powers: SpecialPowers,
 }
 
 // Combat is a trait that provides functions for calculating damage during on-chain combat
 trait Combat {
     fn calculate_damage(
-        weapon: CombatWeapon,
-        armor: CombatArmor,
+        weapon: CombatSpec,
+        armor: CombatSpec,
         minimum_damage: u16,
         strength_boost: u16,
         is_critical_hit: bool,
-        weapon_effectiveness: WeaponEffectiveness,
         entropy: u64,
     ) -> u16;
 
-    fn get_attack_hp(weapon: CombatWeapon) -> u16;
-    fn get_armor_hp(armor: CombatArmor) -> u16;
+    fn get_attack_hp(weapon: CombatSpec) -> u16;
+    fn get_armor_hp(armor: CombatSpec) -> u16;
 
-    fn get_weapon_effectiveness(
-        weapon_type: WeaponType, armor_type: ArmorType
-    ) -> WeaponEffectiveness;
+    fn get_weapon_effectiveness(weapon_type: Type, armor_type: Type) -> WeaponEffectiveness;
     fn get_elemental_bonus(damage: u16, weapon_effectiveness: WeaponEffectiveness) -> u16;
 
     fn is_critical_hit(luck: u8, entropy: u64) -> bool;
@@ -64,13 +49,24 @@ trait Combat {
         base_damage: u16, weapon_prefix2: u8, armor_prefix2: u8, entropy: u64, 
     ) -> u16;
     fn get_name_damage_bonus(
-        base_damage: u16,
-        weapon_name: CombatItemSpecialNames,
-        armor_name: CombatItemSpecialNames,
-        entropy: u64
+        base_damage: u16, weapon_name: SpecialPowers, armor_name: SpecialPowers, entropy: u64
     ) -> u16;
 
     fn get_strength_bonus(damage: u16, strength: u16) -> u16;
+    fn get_random_level(
+        adventurer_level: u8, entropy: u64, range_increase_interval: u8, level_multiplier: u8
+    ) -> u8;
+    fn get_random_damage_location(entropy: u64, ) -> Slot;
+    fn get_xp_reward(defeated_entity: CombatSpec) -> u16;
+
+    fn tier_to_u8(tier: Tier) -> u8;
+    fn u8_to_tier(item_type: u8) -> Tier;
+
+    fn type_to_u8(item_type: Type) -> u8;
+    fn u8_to_type(item_type: u8) -> Type;
+
+    fn slot_to_u8(slot: Slot) -> u8;
+    fn u8_to_slot(item_type: u8) -> Slot;
 }
 
 // CombatUtils is an implementation of the Combat trait
@@ -86,17 +82,20 @@ impl CombatUtils of Combat {
     // @param entropy: the entropy used to calculate critical hit bonus and name prefix bonus
     // @return u16: the damage done by the attacker
     fn calculate_damage(
-        weapon: CombatWeapon,
-        armor: CombatArmor,
+        weapon: CombatSpec,
+        armor: CombatSpec,
         minimum_damage: u16,
         strength_boost: u16,
         is_critical_hit: bool,
-        weapon_effectiveness: WeaponEffectiveness,
         entropy: u64,
     ) -> u16 {
         // get base damage
         let base_attack_hp = CombatUtils::get_attack_hp(weapon);
         let armor_hp = CombatUtils::get_armor_hp(armor);
+
+        let weapon_effectiveness = CombatUtils::get_weapon_effectiveness(
+            weapon.item_type, armor.item_type
+        );
 
         // get elemental adjusted attack
         let elemental_adjusted_attack = CombatUtils::get_elemental_bonus(
@@ -112,7 +111,7 @@ impl CombatUtils of Combat {
 
         // get special name damage bonus
         let name_prefix_bonus = CombatUtils::get_name_damage_bonus(
-            base_attack_hp, weapon.details.special_names, armor.details.special_names, entropy
+            base_attack_hp, weapon.special_powers, armor.special_powers, entropy
         );
 
         // get adventurer strength bonus
@@ -139,15 +138,47 @@ impl CombatUtils of Combat {
     // get_attack_hp calculates the attack HP of a weapon
     // @param weapon: the weapon used to attack
     // @return u16: the attack HP of the weapon
-    fn get_attack_hp(weapon: CombatWeapon) -> u16 {
-        return (CombatSettings::LowestItemTierPlusOne - weapon.details.tier) * weapon.details.level;
+    fn get_attack_hp(weapon: CombatSpec) -> u16 {
+        match weapon.tier {
+            Tier::T1(()) => {
+                return weapon.level * CombatSettings::WEAPON_TIER_DAMAGE_MULTIPLIER::T1;
+            },
+            Tier::T2(()) => {
+                return weapon.level * CombatSettings::WEAPON_TIER_DAMAGE_MULTIPLIER::T2;
+            },
+            Tier::T3(()) => {
+                return weapon.level * CombatSettings::WEAPON_TIER_DAMAGE_MULTIPLIER::T3;
+            },
+            Tier::T4(()) => {
+                return weapon.level * CombatSettings::WEAPON_TIER_DAMAGE_MULTIPLIER::T4;
+            },
+            Tier::T5(()) => {
+                return weapon.level * CombatSettings::WEAPON_TIER_DAMAGE_MULTIPLIER::T5;
+            }
+        }
     }
 
     // get_armor_hp calculates the armor HP of a piece of armor
     // @param armor: the armor worn by the defender
     // @return u16: the armor HP of the armor
-    fn get_armor_hp(armor: CombatArmor) -> u16 {
-        return (CombatSettings::LowestItemTierPlusOne - armor.details.tier) * armor.details.level;
+    fn get_armor_hp(armor: CombatSpec) -> u16 {
+        match armor.tier {
+            Tier::T1(()) => {
+                return armor.level * CombatSettings::ARMOR_TIER_DAMAGE_MULTIPLIER::T1;
+            },
+            Tier::T2(()) => {
+                return armor.level * CombatSettings::ARMOR_TIER_DAMAGE_MULTIPLIER::T2;
+            },
+            Tier::T3(()) => {
+                return armor.level * CombatSettings::ARMOR_TIER_DAMAGE_MULTIPLIER::T3;
+            },
+            Tier::T4(()) => {
+                return armor.level * CombatSettings::ARMOR_TIER_DAMAGE_MULTIPLIER::T4;
+            },
+            Tier::T5(()) => {
+                return armor.level * CombatSettings::ARMOR_TIER_DAMAGE_MULTIPLIER::T5;
+            }
+        }
     }
 
     // adjust_damage_for_elemental adjusts the base damage for elemental effects
@@ -155,9 +186,9 @@ impl CombatUtils of Combat {
     // @param weapon_effectiveness: the effectiveness of the weapon against the armor
     // @return u16: the base damage done by the attacker adjusted for elemental effects
     fn get_elemental_bonus(damage: u16, weapon_effectiveness: WeaponEffectiveness) -> u16 {
-        // CombatSettings::ElementalDamageBonus determines impact of elemental damage
+        // CombatSettings::ELEMENTAL_DAMAGE_BONUS determines impact of elemental damage
         // default setting is 2 which results in -50%, 0%, or 50% damage bonus for elemental
-        let elemental_damage_effect = damage / CombatSettings::ElementalDamageBonus;
+        let elemental_damage_effect = damage / CombatSettings::ELEMENTAL_DAMAGE_BONUS;
 
         // adjust base damage based on weapon effectiveness
         match weapon_effectiveness {
@@ -178,52 +209,80 @@ impl CombatUtils of Combat {
     // @param weapon_type: the type of weapon used to attack
     // @param armor_type: the type of armor worn by the defender
     // @return WeaponEffectiveness: the effectiveness of the weapon against the armor
-    fn get_weapon_effectiveness(
-        weapon_type: WeaponType, armor_type: ArmorType
-    ) -> WeaponEffectiveness {
+    fn get_weapon_effectiveness(weapon_type: Type, armor_type: Type) -> WeaponEffectiveness {
         match weapon_type {
             // Magic is strong against metal, fair against cloth, and weak against hide
-            WeaponType::Magic(()) => {
+            Type::Magic_or_Cloth(()) => {
                 match armor_type {
-                    ArmorType::Cloth(()) => {
+                    Type::Magic_or_Cloth(()) => {
                         return WeaponEffectiveness::Fair(());
                     },
-                    ArmorType::Hide(()) => {
+                    Type::Blade_or_Hide(()) => {
                         return WeaponEffectiveness::Weak(());
                     },
-                    ArmorType::Metal(()) => {
+                    Type::Bludgeon_or_Metal(()) => {
                         return WeaponEffectiveness::Strong(());
+                    },
+                    // should not happen but compiler requires exhaustive match
+                    Type::Necklace(()) => {
+                        return WeaponEffectiveness::Fair(());
+                    },
+                    // should not happen but compiler requires exhaustive match
+                    Type::Ring(()) => {
+                        return WeaponEffectiveness::Fair(());
                     }
                 }
             },
             // Blade is strong against cloth, fair against hide, and weak against metal
-            WeaponType::Blade(()) => {
+            Type::Blade_or_Hide(()) => {
                 match armor_type {
-                    ArmorType::Cloth(()) => {
+                    Type::Magic_or_Cloth(()) => {
                         return WeaponEffectiveness::Strong(());
                     },
-                    ArmorType::Hide(()) => {
+                    Type::Blade_or_Hide(()) => {
                         return WeaponEffectiveness::Fair(());
                     },
-                    ArmorType::Metal(()) => {
+                    Type::Bludgeon_or_Metal(()) => {
                         return WeaponEffectiveness::Weak(());
+                    },
+                    // should not happen but compiler requires exhaustive match
+                    Type::Necklace(()) => {
+                        return WeaponEffectiveness::Fair(());
+                    },
+                    // should not happen but compiler requires exhaustive match
+                    Type::Ring(()) => {
+                        return WeaponEffectiveness::Fair(());
                     }
                 }
             },
             // Bludgeon is strong against hide, fair against metal, and weak against cloth
-            WeaponType::Bludgeon(()) => {
+            Type::Bludgeon_or_Metal(()) => {
                 match armor_type {
-                    ArmorType::Cloth(()) => {
+                    Type::Magic_or_Cloth(()) => {
                         return WeaponEffectiveness::Weak(());
                     },
-                    ArmorType::Hide(()) => {
+                    Type::Blade_or_Hide(()) => {
                         return WeaponEffectiveness::Strong(());
                     },
-                    ArmorType::Metal(()) => {
+                    Type::Bludgeon_or_Metal(()) => {
+                        return WeaponEffectiveness::Fair(());
+                    },
+                    // should not happen but compiler requires exhaustive match
+                    Type::Necklace(()) => {
+                        return WeaponEffectiveness::Fair(());
+                    },
+                    // should not happen but compiler requires exhaustive match
+                    Type::Ring(()) => {
                         return WeaponEffectiveness::Fair(());
                     }
                 }
-            }
+            },
+            Type::Necklace(()) => {
+                return WeaponEffectiveness::Fair(());
+            },
+            Type::Ring(()) => {
+                return WeaponEffectiveness::Fair(());
+            },
         }
     }
 
@@ -232,11 +291,11 @@ impl CombatUtils of Combat {
     // @param entropy: the entropy used to create random outcome
     // @return bool: true if the attack is a critical hit, false otherwise
     fn is_critical_hit(luck: u8, entropy: u64) -> bool {
-        // maximum luck is governed by CombatSettings::MaxLuckForCriticalHit
+        // maximum luck is governed by CombatSettings::MAX_CRITICAL_HIT_LUCK
         // current setting is 50. With Luck at 50, player has 50% chance of critical hit
         let mut effective_luck = luck;
-        if (luck > CombatSettings::MaxLuckForCriticalHit) {
-            effective_luck = CombatSettings::MaxLuckForCriticalHit;
+        if (luck > CombatSettings::MAX_CRITICAL_HIT_LUCK) {
+            effective_luck = CombatSettings::MAX_CRITICAL_HIT_LUCK;
         }
 
         // critical hit chance is whole number of luck / 10
@@ -333,10 +392,7 @@ impl CombatUtils of Combat {
     // @param entropy: entropy for randomizing special item damage bonus
     // @return u16: the bonus damage done by a special item
     fn get_name_damage_bonus(
-        base_damage: u16,
-        weapon_name: CombatItemSpecialNames,
-        armor_name: CombatItemSpecialNames,
-        entropy: u64
+        base_damage: u16, weapon_name: SpecialPowers, armor_name: SpecialPowers, entropy: u64
     ) -> u16 {
         let name_prefix1_bonus = CombatUtils::get_name_prefix1_bonus(
             base_damage, weapon_name.prefix1, armor_name.prefix1, entropy
@@ -363,6 +419,146 @@ impl CombatUtils of Combat {
             return (damage * strength * 20) / 100;
         }
     }
+
+    // get_random_level returns a random level scoped for the adventurere Level
+    // @param adventurer_level: the level of the adventurer
+    // @param entropy: entropy for randomizing obstacle level
+    // @param range_increase_interval: the interval at which the max level of obstacles will increase
+    // @param level_multiplier: the multiplier for the obstacle level
+    // @return u8: the random level scoped for the adventurer level
+    fn get_random_level(
+        adventurer_level: u8, entropy: u64, range_increase_interval: u8, level_multiplier: u8
+    ) -> u8 {
+        // If adventurer has not exceeded the difficult cliff level
+        if (adventurer_level <= range_increase_interval) {
+            // return the adventurer level
+            return adventurer_level;
+        }
+
+        // If adventurer has exceeded the difficult cliff level
+        // the obstacle level will be randomnly scoped around the adventurer level
+        // the max level of obstacles will increase every N levels based on 
+        // the DIFFICULTY_CLIFF setting. The higher this setting, the less frequently the max level will increase
+        let entity_level_multplier = 1 + (adventurer_level / range_increase_interval);
+
+        // maximum range of the obstacle level will be the above multplier * the obstacle difficulty
+        let entity_level_range = U8IntoU64::into(entity_level_multplier * level_multiplier);
+
+        // calculate the obstacle level 
+        let entity_level_boost = entropy % entity_level_range;
+
+        // add the obstacle level boost to the adventurer level - difficulty cliff
+        // this will produce a level between (adventurer level - difficulty cliff) and entity_level_multplier * obstacle_constants::Settings::OBSTACLE_LEVEL_RANGE
+        let entity_level = entity_level_boost
+            + U8IntoU64::into((adventurer_level - entity_level_multplier));
+
+        // return the obstacle level as a u16
+        return U64TryIntoU8::try_into(entity_level).unwrap();
+    }
+
+    // get_xp_reward returns the xp reward for defeating an entity
+    // @param defeated_entity: the entity that was defeated
+    // @return u16: the xp reward for defeating the entity
+    fn get_xp_reward(defeated_entity: CombatSpec) -> u16 {
+        match defeated_entity.tier {
+            Tier::T1(()) => {
+                return CombatSettings::XP_MULTIPLIER::T1 * defeated_entity.level;
+            },
+            Tier::T2(()) => {
+                return CombatSettings::XP_MULTIPLIER::T2 * defeated_entity.level;
+            },
+            Tier::T3(()) => {
+                return CombatSettings::XP_MULTIPLIER::T3 * defeated_entity.level;
+            },
+            Tier::T4(()) => {
+                return CombatSettings::XP_MULTIPLIER::T4 * defeated_entity.level;
+            },
+            Tier::T5(()) => {
+                return CombatSettings::XP_MULTIPLIER::T5 * defeated_entity.level;
+            }
+        }
+    }
+
+    fn get_random_damage_location(entropy: u64, ) -> Slot {
+        // generate random damage location based on Item Slot which has
+        // armor in slots 2-6 inclusive
+        let damage_location = 2 + (entropy % 6);
+        return CombatUtils::u8_to_slot(U64TryIntoU8::try_into(damage_location).unwrap());
+    }
+
+    fn tier_to_u8(tier: Tier) -> u8 {
+        match tier {
+            Tier::T1(()) => 1,
+            Tier::T2(()) => 2,
+            Tier::T3(()) => 3,
+            Tier::T4(()) => 4,
+            Tier::T5(()) => 5,
+        }
+    }
+    fn type_to_u8(item_type: Type) -> u8 {
+        match item_type {
+            Type::Magic_or_Cloth(()) => 1,
+            Type::Blade_or_Hide(()) => 2,
+            Type::Bludgeon_or_Metal(()) => 3,
+            Type::Necklace(()) => 4,
+            Type::Ring(()) => 5,
+        }
+    }
+    fn u8_to_type(item_type: u8) -> Type {
+        if (item_type == 1) {
+            return Type::Magic_or_Cloth(());
+        } else if (item_type == 2) {
+            return Type::Blade_or_Hide(());
+        } else if (item_type == 3) {
+            return Type::Bludgeon_or_Metal(());
+        } else if (item_type == 4) {
+            return Type::Necklace(());
+        }
+        return Type::Ring(());
+    }
+    fn u8_to_tier(item_type: u8) -> Tier {
+        if (item_type == 1) {
+            return Tier::T1(());
+        } else if (item_type == 2) {
+            return Tier::T2(());
+        } else if (item_type == 3) {
+            return Tier::T3(());
+        } else if (item_type == 4) {
+            return Tier::T4(());
+        }
+        return Tier::T5(());
+    }
+    fn slot_to_u8(slot: Slot) -> u8 {
+        match slot {
+            Slot::Weapon(()) => 1,
+            Slot::Chest(()) => 2,
+            Slot::Head(()) => 3,
+            Slot::Waist(()) => 4,
+            Slot::Foot(()) => 5,
+            Slot::Hand(()) => 6,
+            Slot::Neck(()) => 7,
+            Slot::Ring(()) => 8,
+        }
+    }
+    fn u8_to_slot(item_type: u8) -> Slot {
+        if (item_type == 1) {
+            return Slot::Weapon(());
+        } else if (item_type == 2) {
+            return Slot::Chest(());
+        } else if (item_type == 3) {
+            return Slot::Head(());
+        } else if (item_type == 4) {
+            return Slot::Waist(());
+        } else if (item_type == 5) {
+            return Slot::Foot(());
+        } else if (item_type == 6) {
+            return Slot::Hand(());
+        } else if (item_type == 7) {
+            return Slot::Neck(());
+        } else {
+            return Slot::Ring(());
+        }
+    }
 }
 
 #[test]
@@ -370,127 +566,131 @@ impl CombatUtils of Combat {
 fn test_get_attack_hp() {
     // Initialize weapon struct
     // for this test we just need item tier and level so we can ignore other properties
-    let weapon_special_names = CombatItemSpecialNames { prefix1: 0, prefix2: 0, suffix: 0,  };
-    let weapon_definition = CombatItem { tier: 5, level: 0, special_names: weapon_special_names };
-    let mut weapon = CombatWeapon { item_type: WeaponType::Blade(()), details: weapon_definition };
+    let weapon_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let mut weapon = CombatSpec {
+        item_type: Type::Blade_or_Hide(()),
+        tier: Tier::T5(()),
+        level: 0,
+        special_powers: weapon_special_names
+    };
 
     // T5 Level 0 Weapon Deals 0HP of Damage
-    weapon.details.tier = 5;
-    weapon.details.level = 0;
+    weapon.tier = Tier::T5(());
+    weapon.level = 0;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 0, 'T5 LVL0 should deal 0HP');
 
     // T5 Level 1 Weapon Deals 1HP of Damage
-    weapon.details.tier = 5;
-    weapon.details.level = 1;
+    weapon.tier = Tier::T5(());
+    weapon.level = 1;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 1, 'T5 LVL1 should deal 1HP');
 
     // T5 Level 2 Weapon Deals 1HP of Damage
-    weapon.details.tier = 5;
-    weapon.details.level = 2;
+    weapon.tier = Tier::T5(());
+    weapon.level = 2;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 2, 'T5 LVL2 should deal 2HP');
 
     // T5 Level 20 Weapon Deals 20HP of Damage
-    weapon.details.tier = 5;
-    weapon.details.level = 20;
+    weapon.tier = Tier::T5(());
+    weapon.level = 20;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 20, 'T5 LVL20 should deal 20HP');
 
     // T4 Level 0 Weapon Deals 0HP of Damage
-    weapon.details.tier = 4;
-    weapon.details.level = 0;
+    weapon.tier = Tier::T4(());
+    weapon.level = 0;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 0, 'T4 LVL0 should deal 0HP');
 
     // T4 Level 1 Weapon Deals 2HP of Damage
-    weapon.details.tier = 4;
-    weapon.details.level = 1;
+    weapon.tier = Tier::T4(());
+    weapon.level = 1;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 2, 'T4 LVL1 should deal 2HP');
 
     // T4 Level 2 Weapon Deals 4HP of Damage
-    weapon.details.tier = 4;
-    weapon.details.level = 2;
+    weapon.tier = Tier::T4(());
+    weapon.level = 2;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 4, 'T4 LVL2 should deal 4HP');
 
     // T4 Level 20 Weapon Deals 40HP of Damage
-    weapon.details.tier = 4;
-    weapon.details.level = 20;
+    weapon.tier = Tier::T4(());
+    weapon.level = 20;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 40, 'T4 LVL20 should deal 40HP');
 
     // T3 Level 0 Weapon Deals 0HP of Damage
-    weapon.details.tier = 3;
-    weapon.details.level = 0;
+    weapon.tier = Tier::T3(());
+    weapon.level = 0;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 0, 'T3 LVL0 should deal 0HP');
 
     // T3 Level 1 Weapon Deals 3HP of Damage
-    weapon.details.tier = 3;
-    weapon.details.level = 1;
+    weapon.tier = Tier::T3(());
+    weapon.level = 1;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 3, 'T3 LVL1 should deal 3HP');
 
     // T3 Level 2 Weapon Deals 6HP of Damage
-    weapon.details.tier = 3;
-    weapon.details.level = 2;
+    weapon.tier = Tier::T3(());
+    weapon.level = 2;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 6, 'T3 LVL2 should deal 6HP');
 
     // T3 Level 20 Weapon Deals 60HP of Damage
-    weapon.details.tier = 3;
-    weapon.details.level = 20;
+    weapon.tier = Tier::T3(());
+    weapon.level = 20;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 60, 'T3 LVL20 should deal 60HP');
 
     // T2 Level 0 Weapon Deals 0HP of Damage
-    weapon.details.tier = 2;
-    weapon.details.level = 0;
+    weapon.tier = Tier::T2(());
+    weapon.level = 0;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 0, 'T2 LVL0 should deal 0HP');
 
     // T2 Level 1 Weapon Deals 4HP of Damage
-    weapon.details.tier = 2;
-    weapon.details.level = 1;
+    weapon.tier = Tier::T2(());
+    weapon.level = 1;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 4, 'T2 LVL1 should deal 4HP');
 
     // T2 Level 2 Weapon Deals 8HP of Damage
-    weapon.details.tier = 2;
-    weapon.details.level = 2;
+    weapon.tier = Tier::T2(());
+    weapon.level = 2;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 8, 'T2 LVL2 should deal 8HP');
 
     // T2 Level 20 Weapon Deals 80HP of Damage
-    weapon.details.tier = 2;
-    weapon.details.level = 20;
+    weapon.tier = Tier::T2(());
+    weapon.level = 20;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 80, 'T2 LVL20 should deal 80HP');
 
     // T1 Level 0 Weapon Deals 0HP of Damage
-    weapon.details.tier = 1;
-    weapon.details.level = 0;
+    weapon.tier = Tier::T1(());
+    weapon.level = 0;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 0, 'T1 LVL0 should deal 0HP');
 
     // T1 Level 1 Weapon Deals 5HP of Damage
-    weapon.details.tier = 1;
-    weapon.details.level = 1;
+    weapon.tier = Tier::T1(());
+    weapon.level = 1;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 5, 'T1 LVL1 should deal 5HP');
 
     // T1 Level 2 Weapon Deals 10HP of Damage
-    weapon.details.tier = 1;
-    weapon.details.level = 2;
+    weapon.tier = Tier::T1(());
+    weapon.level = 2;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 10, 'T1 LVL2 should deal 10HP');
 
     // T1 Level 20 Weapon Deals 100HP of Damage
-    weapon.details.tier = 1;
-    weapon.details.level = 20;
+    weapon.tier = Tier::T1(());
+    weapon.level = 20;
     let attack_hp = CombatUtils::get_attack_hp(weapon);
     assert(attack_hp == 100, 'T1 LVL20 should deal 100HP');
 }
@@ -499,127 +699,131 @@ fn test_get_attack_hp() {
 #[available_gas(170000)]
 fn test_get_armor_hp() {
     // T1 Level 20 Armor
-    let armor_special_names = CombatItemSpecialNames { prefix1: 0, prefix2: 0, suffix: 0,  };
-    let armor_details = CombatItem { tier: 1, level: 20, special_names: armor_special_names };
-    let mut armor = CombatArmor { item_type: ArmorType::Hide(()), details: armor_details };
+    let armor_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let mut armor = CombatSpec {
+        item_type: Type::Blade_or_Hide(()),
+        tier: Tier::T1(()),
+        level: 20,
+        special_powers: armor_special_names
+    };
 
     // T5 Level 0 Weapon Deals 0HP of Damage
-    armor.details.tier = 5;
-    armor.details.level = 0;
+    armor.tier = Tier::T5(());
+    armor.level = 0;
     let attack_hp = CombatUtils::get_armor_hp(armor);
     assert(attack_hp == 0, 'T5 LVL0 should deal 0HP');
 
     // T5 Level 1 Weapon Deals 1HP of Damage
-    armor.details.tier = 5;
-    armor.details.level = 1;
+    armor.tier = Tier::T5(());
+    armor.level = 1;
     let attack_hp = CombatUtils::get_armor_hp(armor);
     assert(attack_hp == 1, 'T5 LVL1 should deal 1HP');
 
     // T5 Level 2 Weapon Deals 1HP of Damage
-    armor.details.tier = 5;
-    armor.details.level = 2;
+    armor.tier = Tier::T5(());
+    armor.level = 2;
     let attack_hp = CombatUtils::get_armor_hp(armor);
     assert(attack_hp == 2, 'T5 LVL2 should deal 2HP');
 
     // T5 Level 20 Weapon Deals 20HP of Damage
-    armor.details.tier = 5;
-    armor.details.level = 20;
+    armor.tier = Tier::T5(());
+    armor.level = 20;
     let attack_hp = CombatUtils::get_armor_hp(armor);
     assert(attack_hp == 20, 'T5 LVL20 should deal 20HP');
 
     // T4 Level 0 Armor Provides 0HP
-    armor.details.tier = 4;
-    armor.details.level = 0;
+    armor.tier = Tier::T4(());
+    armor.level = 0;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 0, 'T4 LVL0 should provide 0HP');
 
     // T4 Level 1 Armor Provides 2HP
-    armor.details.tier = 4;
-    armor.details.level = 1;
+    armor.tier = Tier::T4(());
+    armor.level = 1;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 2, 'T4 LVL1 should provide 2HP');
 
     // T4 Level 2 Armor Provides 4HP
-    armor.details.tier = 4;
-    armor.details.level = 2;
+    armor.tier = Tier::T4(());
+    armor.level = 2;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 4, 'T4 LVL2 should provide 4HP');
 
     // T4 Level 20 Armor Provides 40HP
-    armor.details.tier = 4;
-    armor.details.level = 20;
+    armor.tier = Tier::T4(());
+    armor.level = 20;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 40, 'T4 LVL20 should provide 40HP');
 
     // T3 Level 0 Armor Provides 0HP
-    armor.details.tier = 3;
-    armor.details.level = 0;
+    armor.tier = Tier::T3(());
+    armor.level = 0;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 0, 'T3 LVL0 should provide 0HP');
 
     // T3 Level 1 Armor Provides 3HP
-    armor.details.tier = 3;
-    armor.details.level = 1;
+    armor.tier = Tier::T3(());
+    armor.level = 1;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 3, 'T3 LVL1 should provide 3HP');
 
     // T3 Level 2 Armor Provides 6HP
-    armor.details.tier = 3;
-    armor.details.level = 2;
+    armor.tier = Tier::T3(());
+    armor.level = 2;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 6, 'T3 LVL2 should provide 6HP');
 
     // T3 Level 20 Armor Provides 60HP
-    armor.details.tier = 3;
-    armor.details.level = 20;
+    armor.tier = Tier::T3(());
+    armor.level = 20;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 60, 'T3 LVL20 should provide 60HP');
 
     // T2 Level 0 Armor Provides 0HP
-    armor.details.tier = 2;
-    armor.details.level = 0;
+    armor.tier = Tier::T2(());
+    armor.level = 0;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 0, 'T2 LVL0 should provide 0HP');
 
     // T2 Level 1 Armor Provides 4HP
-    armor.details.tier = 2;
-    armor.details.level = 1;
+    armor.tier = Tier::T2(());
+    armor.level = 1;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 4, 'T2 LVL1 should provide 4HP');
 
     // T2 Level 2 Armor Provides 8HP
-    armor.details.tier = 2;
-    armor.details.level = 2;
+    armor.tier = Tier::T2(());
+    armor.level = 2;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 8, 'T2 LVL2 should provide 8HP');
 
     // T2 Level 20 Armor Provides 80HP
-    armor.details.tier = 2;
-    armor.details.level = 20;
+    armor.tier = Tier::T2(());
+    armor.level = 20;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 80, 'T2 LVL20 should provide 80HP');
 
     // T1 Level 0 Armor Provides 0HP
-    armor.details.tier = 1;
-    armor.details.level = 0;
+    armor.tier = Tier::T1(());
+    armor.level = 0;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 0, 'T1 LVL0 should provide 0HP');
 
     // T1 Level 1 Armor Provides 5HP
-    armor.details.tier = 1;
-    armor.details.level = 1;
+    armor.tier = Tier::T1(());
+    armor.level = 1;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 5, 'T1 LVL1 should provide 5HP');
 
     // T1 Level 2 Armor Provides 10HP
-    armor.details.tier = 1;
-    armor.details.level = 2;
+    armor.tier = Tier::T1(());
+    armor.level = 2;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 10, 'T1 LVL2 should provide 10HP');
 
     // T1 Level 20 Armor Provides 100HP
-    armor.details.tier = 1;
-    armor.details.level = 20;
+    armor.tier = Tier::T1(());
+    armor.level = 20;
     let armor_hp = CombatUtils::get_armor_hp(armor);
     assert(armor_hp == 100, 'T1 LVL20 should provide 100HP');
 }
@@ -687,48 +891,48 @@ fn test_is_critical_hit() {
 #[test]
 #[available_gas(40000)]
 fn test_get_weapon_effectiveness() {
-    let weapon_type = WeaponType::Magic(());
-    let armor_type = ArmorType::Metal(());
+    let weapon_type = Type::Magic_or_Cloth(());
+    let armor_type = Type::Bludgeon_or_Metal(());
     let effectiveness = CombatUtils::get_weapon_effectiveness(weapon_type, armor_type);
     assert(effectiveness == WeaponEffectiveness::Strong(()), 'magic is strong against metal');
 
-    let weapon_type = WeaponType::Magic(());
-    let armor_type = ArmorType::Cloth(());
+    let weapon_type = Type::Magic_or_Cloth(());
+    let armor_type = Type::Magic_or_Cloth(());
     let effectiveness = CombatUtils::get_weapon_effectiveness(weapon_type, armor_type);
     assert(effectiveness == WeaponEffectiveness::Fair(()), 'magic is fair against cloth');
 
-    let weapon_type = WeaponType::Magic(());
-    let armor_type = ArmorType::Hide(());
+    let weapon_type = Type::Magic_or_Cloth(());
+    let armor_type = Type::Blade_or_Hide(());
     let effectiveness = CombatUtils::get_weapon_effectiveness(weapon_type, armor_type);
     assert(effectiveness == WeaponEffectiveness::Weak(()), 'magic is weak against cloth');
 
-    let weapon_type = WeaponType::Blade(());
-    let armor_type = ArmorType::Cloth(());
+    let weapon_type = Type::Blade_or_Hide(());
+    let armor_type = Type::Magic_or_Cloth(());
     let effectiveness = CombatUtils::get_weapon_effectiveness(weapon_type, armor_type);
     assert(effectiveness == WeaponEffectiveness::Strong(()), 'blade is strong against cloth');
 
-    let weapon_type = WeaponType::Blade(());
-    let armor_type = ArmorType::Hide(());
+    let weapon_type = Type::Blade_or_Hide(());
+    let armor_type = Type::Blade_or_Hide(());
     let effectiveness = CombatUtils::get_weapon_effectiveness(weapon_type, armor_type);
     assert(effectiveness == WeaponEffectiveness::Fair(()), 'blade is fair against hide');
 
-    let weapon_type = WeaponType::Blade(());
-    let armor_type = ArmorType::Metal(());
+    let weapon_type = Type::Blade_or_Hide(());
+    let armor_type = Type::Bludgeon_or_Metal(());
     let effectiveness = CombatUtils::get_weapon_effectiveness(weapon_type, armor_type);
     assert(effectiveness == WeaponEffectiveness::Weak(()), 'blade is weak against metal');
 
-    let weapon_type = WeaponType::Bludgeon(());
-    let armor_type = ArmorType::Hide(());
+    let weapon_type = Type::Bludgeon_or_Metal(());
+    let armor_type = Type::Blade_or_Hide(());
     let effectiveness = CombatUtils::get_weapon_effectiveness(weapon_type, armor_type);
     assert(effectiveness == WeaponEffectiveness::Strong(()), 'bludgeon is strong against hide');
 
-    let weapon_type = WeaponType::Bludgeon(());
-    let armor_type = ArmorType::Metal(());
+    let weapon_type = Type::Bludgeon_or_Metal(());
+    let armor_type = Type::Bludgeon_or_Metal(());
     let effectiveness = CombatUtils::get_weapon_effectiveness(weapon_type, armor_type);
     assert(effectiveness == WeaponEffectiveness::Fair(()), 'bludgeon is fair against metal');
 
-    let weapon_type = WeaponType::Bludgeon(());
-    let armor_type = ArmorType::Cloth(());
+    let weapon_type = Type::Bludgeon_or_Metal(());
+    let armor_type = Type::Magic_or_Cloth(());
     let effectiveness = CombatUtils::get_weapon_effectiveness(weapon_type, armor_type);
     assert(effectiveness == WeaponEffectiveness::Weak(()), 'bludgeon is weak against cloth');
 }
@@ -764,8 +968,8 @@ fn test_get_name_prefix1_bonus() {
     let base_damage = 100;
     let mut entropy = 0;
 
-    let mut weapon_special_names = CombatItemSpecialNames { prefix1: 0, prefix2: 0, suffix: 0,  };
-    let mut armor_special_names = CombatItemSpecialNames { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let mut weapon_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let mut armor_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
 
     // weapon without special name should have no bonus
     let name_prefix1_bonus = CombatUtils::get_name_prefix1_bonus(
@@ -817,8 +1021,8 @@ fn test_get_name_prefix2_bonus() {
     let base_damage = 100;
     let mut entropy = 0;
 
-    let mut weapon_special_names = CombatItemSpecialNames { prefix1: 0, prefix2: 0, suffix: 0,  };
-    let mut armor_special_names = CombatItemSpecialNames { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let mut weapon_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let mut armor_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
 
     // weapon without special name should have no bonus
     let name_prefix2_bonus = CombatUtils::get_name_prefix2_bonus(
@@ -895,40 +1099,41 @@ fn test_get_strength_bonus() {
 #[available_gas(1100000)]
 fn test_calculate_damage() {
     // initialize weapon
-    let weapon_special_names = CombatItemSpecialNames { prefix1: 0, prefix2: 0, suffix: 0,  };
-    let weapon_definition = CombatItem { tier: 5, level: 1, special_names: weapon_special_names };
-    let mut weapon = CombatWeapon { item_type: WeaponType::Blade(()), details: weapon_definition };
+    let weapon_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let mut weapon = CombatSpec {
+        item_type: Type::Blade_or_Hide(()),
+        tier: Tier::T5(()),
+        level: 1,
+        special_powers: weapon_special_names
+    };
 
     // initialize armor
-    let armor_special_names = CombatItemSpecialNames { prefix1: 0, prefix2: 0, suffix: 0,  };
-    let armor_details = CombatItem { tier: 5, level: 1, special_names: armor_special_names };
-    let mut armor = CombatArmor { item_type: ArmorType::Cloth(()), details: armor_details };
+    let armor_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let mut armor = CombatSpec {
+        item_type: Type::Magic_or_Cloth(()),
+        tier: Tier::T5(()),
+        level: 1,
+        special_powers: armor_special_names
+    };
 
     // initialize other combat parameters
     // start with simplest values to reduce number of variables to track
     let mut minimum_damage = 0;
     let mut strength_boost = 0;
     let mut is_critical_hit = false;
-    let mut weapon_effectiveness = WeaponEffectiveness::Strong(());
     let mut entropy = 0;
 
     // We'll start by simulating the starter beast battle
     // adventurer selects a T5 Blade (Short Sword) and it'll be greatness/level 1
-    weapon.details.tier = 5;
-    weapon.details.level = 1;
+    weapon.tier = Tier::T5(());
+    weapon.level = 1;
 
     // beast is going to be a T5 wearing cloth and it'll be greatness/level 1
-    armor.details.tier = 5;
-    armor.details.level = 1;
+    armor.tier = Tier::T5(());
+    armor.level = 1;
 
     let damage = CombatUtils::calculate_damage(
-        weapon,
-        armor,
-        minimum_damage,
-        strength_boost,
-        is_critical_hit,
-        weapon_effectiveness,
-        entropy
+        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
 
     // adventurer isn't able to deal any damage to the beast (not good)
@@ -937,43 +1142,25 @@ fn test_calculate_damage() {
     // client can use minimum damage setting to ensure adventurer always does at least some damage
     minimum_damage = 2;
     let damage = CombatUtils::calculate_damage(
-        weapon,
-        armor,
-        minimum_damage,
-        strength_boost,
-        is_critical_hit,
-        weapon_effectiveness,
-        entropy
+        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
     assert(damage == 2, 'minimum damage: 2hp');
 
     // adventurer levels up their weapon to level 3
     // and encounters another T5 beast wearing cloth
-    weapon.details.level = 3;
+    weapon.level = 3;
     let damage = CombatUtils::calculate_damage(
-        weapon,
-        armor,
-        minimum_damage,
-        strength_boost,
-        is_critical_hit,
-        weapon_effectiveness,
-        entropy
+        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
 
     // they can now deal more than the minimum damage
     assert(damage == 3, 'upgrade to lvl3: 3HP');
 
     // they then go to the store and upgrade to a Katana (will be level 1)
-    weapon.details.tier = 1;
-    weapon.details.level = 1;
+    weapon.tier = Tier::T1(());
+    weapon.level = 1;
     let damage = CombatUtils::calculate_damage(
-        weapon,
-        armor,
-        minimum_damage,
-        strength_boost,
-        is_critical_hit,
-        weapon_effectiveness,
-        entropy
+        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
     // even on level 1, it can deal a lot more damage than the short sword
     assert(damage == 6, 'upgrade to katana: 6HP');
@@ -981,13 +1168,7 @@ fn test_calculate_damage() {
     // enable critical hit for that last attack
     is_critical_hit = true;
     let damage = CombatUtils::calculate_damage(
-        weapon,
-        armor,
-        minimum_damage,
-        strength_boost,
-        is_critical_hit,
-        weapon_effectiveness,
-        entropy
+        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
     // user picks up a critical hit but gets minimum bonus of 1
     assert(damage == 7, 'critical hit min bonus: 7HP');
@@ -996,78 +1177,137 @@ fn test_calculate_damage() {
     // entropy 3 will produce max bonus of 100% of the base damage (5)
     entropy = 3;
     let damage = CombatUtils::calculate_damage(
-        weapon,
-        armor,
-        minimum_damage,
-        strength_boost,
-        is_critical_hit,
-        weapon_effectiveness,
-        entropy
+        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
     assert(damage == 10, 'good critical hit: 10HP');
 
     // switch to weak elemental
-    weapon_effectiveness = WeaponEffectiveness::Weak(());
+    weapon.item_type = Type::Blade_or_Hide(());
+    armor.item_type = Type::Bludgeon_or_Metal(());
     let damage = CombatUtils::calculate_damage(
-        weapon,
-        armor,
-        minimum_damage,
-        strength_boost,
-        is_critical_hit,
-        weapon_effectiveness,
-        entropy
+        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
     // verify damage drops by ~50%
     assert(damage == 6, 'weak elemental penalty: 6HP');
 
     // adventurer invests in two strength stat points to get a 40% bonus on base damage (5)
     strength_boost = 2;
-    // switch to weak elemental
-    weapon_effectiveness = WeaponEffectiveness::Weak(());
     let damage = CombatUtils::calculate_damage(
-        weapon,
-        armor,
-        minimum_damage,
-        strength_boost,
-        is_critical_hit,
-        weapon_effectiveness,
-        entropy
+        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
     // verify damage drops by ~50%
     assert(damage == 8, 'attack should be 9HP');
 
     // fast forward to late game (G20 Katana)
-    weapon.details.level = 20;
-    weapon.details.tier = 1;
-
+    weapon.level = 20;
+    weapon.tier = Tier::T1(());
     // against a Level 30 T3 beast wearing Metal (strong against blade)
-    armor.details.level = 40;
-    armor.details.tier = 2;
-    weapon_effectiveness = WeaponEffectiveness::Weak(());
-
+    armor.level = 40;
+    armor.tier = Tier::T2(());
     let damage = CombatUtils::calculate_damage(
-        weapon,
-        armor,
-        minimum_damage,
-        strength_boost,
-        is_critical_hit,
-        weapon_effectiveness,
-        entropy
+        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
     assert(damage == 30, 'T1 G20 vs T3 G30: 30hp');
 
     // Same battle against a magical beast (cloth)
-    weapon_effectiveness = WeaponEffectiveness::Strong(());
+    weapon.item_type = Type::Blade_or_Hide(());
+    armor.item_type = Type::Magic_or_Cloth(());
     let damage = CombatUtils::calculate_damage(
-        weapon,
-        armor,
-        minimum_damage,
-        strength_boost,
-        is_critical_hit,
-        weapon_effectiveness,
-        entropy
+        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
     // deals significantly more damage because elemental is applied
     // to raw attack damage
     assert(damage == 130, 'T1 G20 vs T3 G30: 130hp');
+}
+
+#[test]
+#[available_gas(550000)]
+fn test_get_random_level() {
+    let mut adventurer_level = 1;
+
+    let range_level_increase = CombatSettings::DIFFICULTY_CLIFF::NORMAL;
+    let level_multiplier = CombatSettings::LEVEL_MULTIPLIER::NORMAL;
+
+    // obstacle level and adventurer level will be equivalent up to the difficulty cliff
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 0, range_level_increase, level_multiplier
+    );
+    assert(entity_level == adventurer_level, 'lvl should eql advr lvl');
+
+    // test at just before the difficult level cliff
+    adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL - 1;
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 0, range_level_increase, level_multiplier
+    );
+    // entity level should still be the same as adventurer level
+    assert(entity_level == adventurer_level, 'lvl should eql advr lvl');
+
+    // test above difficult cliff (we should start to see a range of levels now based on entropy)
+    // using defualts, adventurer will now be level 5
+    // entropy 0 will generate the minimum obstacle level which will be:
+    // 1 + (adventurer level - difficulty cliff)
+    // min_level: 1 + (5 - 3) = 3
+    // the max level will be: adventurer_level + (1 + (LEVEL_MULTIPLIER * number of level increases))
+    // for current settings that will be: 5 + (1 + (4*1) = 10
+    adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL + 1;
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 0, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 3, 'obstacle lvl should be 3');
+
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 1, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 4, 'obstacle lvl should be 4');
+
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 2, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 5, 'obstacle lvl should be 5');
+
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 3, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 6, 'obstacle lvl should be 6');
+
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 4, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 7, 'obstacle lvl should be 7');
+
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 5, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 8, 'obstacle lvl should be 8');
+
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 6, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 9, 'obstacle lvl should be 9');
+
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 7, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 10, 'obstacle lvl should be 10');
+
+    // verify we roll over back to obstacle level 1
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 8, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 3, 'obstacle lvl should be 3');
+
+    // test 6 * the difficulty cliff for mid-late game
+    // difficulty cliff default is 4 so adventurer_level here would be 24
+    adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL * 6;
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 0, range_level_increase, level_multiplier
+    );
+    // at this stage, the minimum obstacle level is 17
+    assert(entity_level == 17, 'obstacle lvl should be 17');
+
+    // but we'll have 27 levels of range so top end should be 52
+    let entity_level = CombatUtils::get_random_level(
+        adventurer_level, 27, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 44, 'obstacle lvl should be 44');
 }

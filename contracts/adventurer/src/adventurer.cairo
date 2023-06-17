@@ -1,6 +1,7 @@
 use core::serde::Serde;
 use integer::{
     U128IntoFelt252, Felt252IntoU256, Felt252TryIntoU64, U256TryIntoFelt252, u256_from_felt252,
+    U16IntoU64
 };
 use traits::{TryInto, Into};
 use option::OptionTrait;
@@ -12,14 +13,16 @@ use pack::pack::{
 use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
 use lootitems::loot::{Loot, ILoot, ImplLoot};
-use lootitems::statistics::constants;
+use lootitems::statistics::{constants, item_tier, item_type};
 
 use super::exploration::ExploreUtils;
 use super::beasts::BeastUtils;
-use super::obstacles::ObstacleUtils;
+use obstacles::obstacle::ObstacleUtils;
 use super::constants::{discovery_constants, beast_constants};
+use super::item_meta::{LootStatistics, LootDescription};
 
-use super::item_meta::LootStatistics;
+use combat::combat::{CombatSpec, SpecialPowers};
+use combat::constants::CombatEnums::{Type, Tier, Slot};
 
 #[derive(Drop, Copy, Serde)]
 struct Adventurer {
@@ -108,7 +111,7 @@ trait IAdventurer {
 
     fn is_slot_free(self: Adventurer, item: LootStatistics) -> bool;
 
-    fn get_item_at_slot(self: Adventurer, item: LootStatistics) -> LootStatistics;
+    fn get_item_at_slot(self: Adventurer, slot: Slot) -> LootStatistics;
 }
 
 impl ImplAdventurer of IAdventurer {
@@ -125,48 +128,38 @@ impl ImplAdventurer of IAdventurer {
         self.gold >= value
     }
 
-    fn get_item_at_slot(self: Adventurer, item: LootStatistics) -> LootStatistics {
-        let item_slot = ImplLoot::get_slot(item.id);
-
-        if (item_slot == constants::Slot::Weapon) {
-            return self.weapon;
-        } else if (item_slot == constants::Slot::Chest) {
-            return self.chest;
-        } else if (item_slot == constants::Slot::Head) {
-            return self.head;
-        } else if (item_slot == constants::Slot::Waist) {
-            return self.waist;
-        } else if (item_slot == constants::Slot::Foot) {
-            return self.foot;
-        } else if (item_slot == constants::Slot::Hand) {
-            return self.hand;
-        } else if (item_slot == constants::Slot::Neck) {
-            return self.neck;
-        } else {
-            return self.ring;
+    // get_item_at_slot returns the item at a given item slot
+    // @param self: Adventurer to check
+    // @param slot: Slot to check
+    // @return LootStatistics: Item at slot
+    fn get_item_at_slot(self: Adventurer, slot: Slot) -> LootStatistics {
+        match slot {
+            Slot::Weapon(()) => self.weapon,
+            Slot::Chest(()) => self.chest,
+            Slot::Head(()) => self.head,
+            Slot::Waist(()) => self.waist,
+            Slot::Foot(()) => self.foot,
+            Slot::Hand(()) => self.hand,
+            Slot::Neck(()) => self.neck,
+            Slot::Ring(()) => self.ring,
         }
     }
-    fn is_slot_free(self: Adventurer, item: LootStatistics) -> bool {
-        let item_slot = ImplLoot::get_slot(item.id);
 
-        if (item_slot == constants::Slot::Weapon) {
-            return self.weapon.id == 0;
-        } else if (item_slot == constants::Slot::Chest) {
-            return self.chest.id == 0;
-        } else if (item_slot == constants::Slot::Head) {
-            return self.head.id == 0;
-        } else if (item_slot == constants::Slot::Waist) {
-            return self.waist.id == 0;
-        } else if (item_slot == constants::Slot::Foot) {
-            return self.foot.id == 0;
-        } else if (item_slot == constants::Slot::Hand) {
-            return self.hand.id == 0;
-        } else if (item_slot == constants::Slot::Neck) {
-            return self.neck.id == 0;
-        } else if (item_slot == constants::Slot::Ring) {
-            return self.ring.id == 0;
-        } else {
-            return false;
+    // is_slot_free checks if an item slot is free for an adventurer
+    // @param self: Adventurer to check
+    // @param item: Item to check
+    // @return bool: True if slot is free, false if not
+    fn is_slot_free(self: Adventurer, item: LootStatistics) -> bool {
+        let slot = ImplLoot::get_slot(item.id);
+        match slot {
+            Slot::Weapon(()) => self.weapon.id == 0,
+            Slot::Chest(()) => self.chest.id == 0,
+            Slot::Head(()) => self.head.id == 0,
+            Slot::Waist(()) => self.waist.id == 0,
+            Slot::Foot(()) => self.foot.id == 0,
+            Slot::Hand(()) => self.hand.id == 0,
+            Slot::Neck(()) => self.neck.id == 0,
+            Slot::Ring(()) => self.ring.id == 0,
         }
     }
     fn get_beast(self: Adventurer) -> u8 {
@@ -194,24 +187,44 @@ impl ImplAdventurer of IAdventurer {
             return self.add_beast(beast_health);
         // if the adventurer encounters an obstacle
         } else if (explore_outcome == discovery_constants::DiscoveryType::Obstacle) {
-            // get a random obstacle
-            let obstacle = ObstacleUtils::get_random_obstacle(
-                self, adventurer_entropy, game_entropy
-            );
+            // generate obstacle entropy
+            let obstacle_entropy = adventurer_entropy + game_entropy + U16IntoU64::into(self.xp);
+            // generate a random obstacle using the obstacle entropy
+            let adventurer_level = ImplAdventurer::get_level(self);
+            let obstacle = ObstacleUtils::get_random_obstacle(adventurer_level, obstacle_entropy);
 
-            // get the xp reward for the obstacle
+            // regardless of the outcome, adventurer will earn xp
+            // so calculate it
             let xp_reward = ObstacleUtils::get_xp_reward(obstacle);
 
-            // grant adventurer and items xp gets xp for encountering an obstacle
+            // and grant it to adventurer and items
             self.increase_adventurer_xp(xp_reward);
             self.increase_item_xp(xp_reward);
 
-            // get damage from the obstacle, returning boolean for dodged and damage
-            let (dodged, obstacle_damage) = ObstacleUtils::get_damage(self, obstacle);
+            let dodged_obstacle = ObstacleUtils::dodged(
+                adventurer_level, self.intelligence, obstacle_entropy
+            );
 
             // if the adventurer did not dodge the obstacle
-            if (dodged == false) {
-                // deduct the damage from the adventurer health
+            if (dodged_obstacle == false) {
+                // calculate the damage
+
+                // start by getting the adventurer's armor at the damage location
+                let armor = ImplAdventurer::get_item_at_slot(self, obstacle.damage_location);
+                // TODO: fetch actual meta data ImplLootDescription::get_item_description(self, armor.id);
+                let armor_combat_spec = CombatSpec {
+                    tier: Tier::T1(()),
+                    item_type: Type::Magic_or_Cloth(()),
+                    level: 1,
+                    special_powers: SpecialPowers {
+                        prefix1: 1, prefix2: 2, suffix: 1
+                    }
+                };
+
+                let obstacle_damage = ObstacleUtils::get_damage(
+                    obstacle, armor_combat_spec, obstacle_entropy
+                );
+
                 self.deduct_health(obstacle_damage);
                 return self;
             // if the adventurer dodged the obstacle    
@@ -351,30 +364,15 @@ impl ImplAdventurer of IAdventurer {
     }
     fn add_item(ref self: Adventurer, value: LootStatistics) -> Adventurer {
         let slot = ImplLoot::get_slot(value.id);
-
-        if slot == 1 {
-            self.add_weapon(value);
-        }
-        if slot == 2 {
-            self.add_chest(value);
-        }
-        if slot == 3 {
-            self.add_head(value);
-        }
-        if slot == 4 {
-            self.add_waist(value);
-        }
-        if slot == 5 {
-            self.add_foot(value);
-        }
-        if slot == 6 {
-            self.add_hand(value);
-        }
-        if slot == 7 {
-            self.add_neck(value);
-        }
-        if slot == 8 {
-            self.add_ring(value);
+        match slot {
+            Slot::Weapon(()) => self.add_weapon(value),
+            Slot::Chest(()) => self.add_chest(value),
+            Slot::Head(()) => self.add_head(value),
+            Slot::Waist(()) => self.add_waist(value),
+            Slot::Foot(()) => self.add_foot(value),
+            Slot::Hand(()) => self.add_hand(value),
+            Slot::Neck(()) => self.add_neck(value),
+            Slot::Ring(()) => self.add_ring(value),
         }
         self
     }
@@ -855,9 +853,10 @@ fn test_explore_obstacle_discovery() {
     let adventurer_entropy = 0;
     let game_entropy = 1;
 
-    // exploring with 1 entropy will result in an obstacle discovery which will currently do 1 damage
+    // exploring with 1 entropy will result in an obstacle discovery
+    // adventurer should dodge obstacle and not take damage
     adventurer.explore(adventurer_entropy, game_entropy);
-    assert(adventurer.health < 99, 'advntr should take obstacle dmg');
+    assert(adventurer.health == 100, 'advntr dodged obstacle');
 }
 
 #[test]
