@@ -9,3 +9,6 @@ starknet = ">=2.0.0-rc0"
 lootitems = { path = "../loot" }
 survivor = { path = "../adventurer" }
 market = { path = "../market" }
+
+[[target.starknet-contract]]
+allowed-libfuncs-list = { name = "experimental" }

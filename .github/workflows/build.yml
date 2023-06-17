@@ -4,13 +4,14 @@ on:
   push:
     branches:
       - main
+  pull_request:    
 
 env:
-  SCARB_VERSION: 0.4.0
+  SCARB_VERSION: 0.5.0-alpha.0
 
 jobs:
   build-contracts:
-    name: Build Contracts
+    name: Build Adventurer
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -21,7 +22,7 @@ jobs:
 
       - name: Scarb build
         run: |
-          cd contracts/adventurer && scarb build
+          cd contracts/adventurer && scarb build && scarb cairo-test
 
   build-game:
     name: Build Game
@@ -35,7 +36,7 @@ jobs:
 
       - name: Scarb build
         run: |
-          cd contracts/game && scarb build
+          cd contracts/game && scarb build && scarb cairo-test
 
   build-loot:
     name: Build Loot
@@ -49,7 +50,7 @@ jobs:
 
       - name: Scarb build
         run: |
-          cd contracts/loot && scarb build
+          cd contracts/loot && scarb build && scarb cairo-test
 
   build-market:
     name: Build Market
@@ -63,10 +64,10 @@ jobs:
 
       - name: Scarb build
         run: |
-          cd contracts/market && scarb build
+          cd contracts/market && scarb build && scarb cairo-test
 
   build-pack:
-    name: Build Market
+    name: Build Pack
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -77,4 +78,4 @@ jobs:
 
       - name: Scarb build
         run: |
-          cd contracts/pack && scarb build          
+          cd contracts/pack && scarb build && scarb cairo-test         

@@ -7,8 +7,6 @@ mod tests {
     use starknet::syscalls::deploy_syscall;
     use traits::TryInto;
 
-    use test::test_utils::assert_eq;
-
     use lootitems::loot::constants::{ItemId};
 
     use game::game::game::{IGame, Game, IGameDispatcher, IGameDispatcherTrait};
@@ -47,7 +45,7 @@ mod tests {
         let adventurer_1 = @deployed_game.get_adventurer(0);
 
         // check adventurer
-        assert_eq(adventurer_1.weapon.id, @ItemId::Wand, 'weapon');
+        assert(adventurer_1.weapon.id == @ItemId::Wand, 'weapon');
 
         // check beast has been assigned
         assert(*adventurer_1.beast_health > 0, 'beast_health');
