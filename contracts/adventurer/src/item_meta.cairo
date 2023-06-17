@@ -66,16 +66,46 @@ trait ILootDescription {
         adventurer: Adventurer, bag: Bag, loot_statistics: LootStatistics
     ) -> LootStatistics;
 
-    // on contract side we check if item.metadata > 9 if it is pass in second metadata storage
+    // on contract side we check if item.metadata > 10 if it is pass in second metadata storage
     fn set_item_metadata(
         ref self: LootDescriptionStorage,
         loot_statistics: LootStatistics,
         loot_description: LootDescription
     ) -> LootDescriptionStorage;
+
+    fn get_item_metadata(
+        self: LootDescriptionStorage, loot_statistics: LootStatistics
+    ) -> LootDescription;
 }
 
 
 impl ImplLootDescription of ILootDescription {
+    fn get_item_metadata(
+        self: LootDescriptionStorage, loot_statistics: LootStatistics
+    ) -> LootDescription {
+        if loot_statistics.metadata == STORAGE::INDEX_1 {
+            return self.item_1;
+        } else if loot_statistics.metadata == STORAGE::INDEX_2 {
+            return self.item_2;
+        } else if loot_statistics.metadata == STORAGE::INDEX_3 {
+            return self.item_3;
+        } else if loot_statistics.metadata == STORAGE::INDEX_4 {
+            return self.item_4;
+        } else if loot_statistics.metadata == STORAGE::INDEX_5 {
+            return self.item_5;
+        } else if loot_statistics.metadata == STORAGE::INDEX_6 {
+            return self.item_6;
+        } else if loot_statistics.metadata == STORAGE::INDEX_7 {
+            return self.item_7;
+        } else if loot_statistics.metadata == STORAGE::INDEX_8 {
+            return self.item_8;
+        } else if loot_statistics.metadata == STORAGE::INDEX_9 {
+            return self.item_9;
+        } else {
+            return self.item_10;
+        }
+    }
+
     fn pack(self: LootDescriptionStorage) -> felt252 {
         let mut packed = 0;
         packed = packed | pack_value(self.item_1.id.into(), pow::TWO_POW_244);
@@ -573,9 +603,9 @@ fn test_set_item_metadata_slot() {
 
     item_meta_storage.set_item_metadata(loot_statistics_1, loot_description_2);
 
-    assert(item_meta_storage.item_1.name_prefix == 12, 'should be 1');
-    assert(item_meta_storage.item_1.name_suffix == 11, 'should be 1');
-    assert(item_meta_storage.item_1.item_suffix == 13, 'should be 1');
+    assert(item_meta_storage.item_1.name_prefix == 12, 'should be 12');
+    assert(item_meta_storage.item_1.name_suffix == 11, 'should be 11');
+    assert(item_meta_storage.item_1.item_suffix == 13, 'should be 13');
 
     let loot_statistics_2 = LootStatistics { id: 102, xp: 0, metadata: 2 };
 
@@ -584,8 +614,105 @@ fn test_set_item_metadata_slot() {
     };
 
     item_meta_storage.set_item_metadata(loot_statistics_2, loot_description_2);
-    assert(item_meta_storage.item_2.name_prefix == 12, 'should be 2');
-    assert(item_meta_storage.item_2.name_suffix == 11, 'should be 2');
-    assert(item_meta_storage.item_2.item_suffix == 13, 'should be 2');
+    assert(item_meta_storage.item_2.name_prefix == 12, 'should be 12');
+    assert(item_meta_storage.item_2.name_suffix == 11, 'should be 11');
+    assert(item_meta_storage.item_2.item_suffix == 13, 'should be 13');
 }
 
+#[test]
+#[available_gas(5000000)]
+fn test_get_item_metadata() {
+    let item_pendant = LootStatistics { id: 1, xp: 1, metadata: 1 };
+    let item_silver_ring = LootStatistics { id: 2, xp: 1, metadata: 2 };
+    let item_silk_robe = LootStatistics { id: 3, xp: 1, metadata: 3 };
+    let item_iron_sword = LootStatistics { id: 4, xp: 1, metadata: 4 };
+    let item_katana = LootStatistics { id: 5, xp: 1, metadata: 5 };
+    let item_falchion = LootStatistics { id: 6, xp: 1, metadata: 6 };
+    let item_leather_gloves = LootStatistics { id: 7, xp: 1, metadata: 7 };
+    let item_silk_gloves = LootStatistics { id: 8, xp: 1, metadata: 8 };
+    let item_linen_gloves = LootStatistics { id: 9, xp: 1, metadata: 9 };
+    let item_crown = LootStatistics { id: 10, xp: 1, metadata: 10 };
+
+    let mut item_meta_storage = LootDescriptionStorage {
+        item_1: LootDescription {
+            id: 1, name_prefix: 2, name_suffix: 2, item_suffix: 10, 
+            }, item_2: LootDescription {
+            id: 2, name_prefix: 4, name_suffix: 3, item_suffix: 11, 
+            }, item_3: LootDescription {
+            id: 3, name_prefix: 5, name_suffix: 4, item_suffix: 11, 
+            }, item_4: LootDescription {
+            id: 4, name_prefix: 6, name_suffix: 5, item_suffix: 3, 
+            }, item_5: LootDescription {
+            id: 5, name_prefix: 8, name_suffix: 6, item_suffix: 2, 
+            }, item_6: LootDescription {
+            id: 6, name_prefix: 9, name_suffix: 7, item_suffix: 1, 
+            }, item_7: LootDescription {
+            id: 7, name_prefix: 11, name_suffix: 8, item_suffix: 5, 
+            }, item_8: LootDescription {
+            id: 8, name_prefix: 2, name_suffix: 9, item_suffix: 6, 
+            }, item_9: LootDescription {
+            id: 9, name_prefix: 3, name_suffix: 0, item_suffix: 7, 
+            }, item_10: LootDescription {
+            id: 10, name_prefix: 11, name_suffix: 8, item_suffix: 5, 
+        }
+    };
+
+    let meta_data = item_meta_storage.get_item_metadata(item_pendant);
+
+    assert(meta_data.name_prefix == 2, 'item_pendant.name_prefix');
+    assert(meta_data.name_suffix == 2, 'item_pendant.name_suffix');
+    assert(meta_data.item_suffix == 10, 'item_pendant.item_suffix');
+    let meta_data = item_meta_storage.get_item_metadata(item_silver_ring);
+
+    assert(meta_data.name_prefix == 4, 'item_silver_ring.name_prefix');
+    assert(meta_data.name_suffix == 3, 'item_silver_ring.name_suffix');
+    assert(meta_data.item_suffix == 11, 'item_silver_ring.item_suffix');
+
+    let meta_data = item_meta_storage.get_item_metadata(item_silk_robe);
+
+    assert(meta_data.name_prefix == 5, 'item_silk_robe.name_prefix');
+    assert(meta_data.name_suffix == 4, 'item_silk_robe.name_suffix');
+    assert(meta_data.item_suffix == 11, 'item_silk_robe.item_suffix');
+
+    let meta_data = item_meta_storage.get_item_metadata(item_iron_sword);
+
+    assert(meta_data.name_prefix == 6, 'item_iron_sword.name_prefix');
+    assert(meta_data.name_suffix == 5, 'item_iron_sword.name_suffix');
+    assert(meta_data.item_suffix == 3, 'item_iron_sword.item_suffix');
+
+    let meta_data = item_meta_storage.get_item_metadata(item_katana);
+
+    assert(meta_data.name_prefix == 8, 'item_katana');
+    assert(meta_data.name_suffix == 6, 'item_katana');
+    assert(meta_data.item_suffix == 2, 'item_katana');
+
+    let meta_data = item_meta_storage.get_item_metadata(item_falchion);
+
+    assert(meta_data.name_prefix == 9, 'item_falchion');
+    assert(meta_data.name_suffix == 7, 'item_falchion');
+    assert(meta_data.item_suffix == 1, 'item_falchion');
+
+    let meta_data = item_meta_storage.get_item_metadata(item_leather_gloves);
+
+    assert(meta_data.name_prefix == 11, 'item_leather_gloves');
+    assert(meta_data.name_suffix == 8, 'item_leather_gloves');
+    assert(meta_data.item_suffix == 5, 'item_leather_gloves');
+
+    let meta_data = item_meta_storage.get_item_metadata(item_silk_gloves);
+
+    assert(meta_data.name_prefix == 2, 'item_silk_gloves');
+    assert(meta_data.name_suffix == 9, 'item_silk_gloves');
+    assert(meta_data.item_suffix == 6, 'item_silk_gloves');
+
+    let meta_data = item_meta_storage.get_item_metadata(item_linen_gloves);
+
+    assert(meta_data.name_prefix == 3, 'item_linen_gloves');
+    assert(meta_data.name_suffix == 0, 'item_linen_gloves');
+    assert(meta_data.item_suffix == 7, 'item_linen_gloves');
+
+    let meta_data = item_meta_storage.get_item_metadata(item_crown);
+
+    assert(meta_data.name_prefix == 11, 'item_crown');
+    assert(meta_data.name_suffix == 8, 'item_crown');
+    assert(meta_data.item_suffix == 5, 'item_crown');
+}
