@@ -9,13 +9,13 @@ use lootitems::loot::{Loot, ItemTrait, ItemUtils};
 
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET};
 
-trait MarketTrait {
+trait IMarket {
     fn get_all_items(seed: u32) -> Array<Loot>;
     fn get_id(seed: u32) -> u8;
     fn check_ownership(seed: u32, item_id: u8) -> bool;
 }
 
-impl ImplMarket of MarketTrait {
+impl ImplMarket of IMarket {
     fn get_all_items(seed: u32) -> Array<Loot> {
         let mut all_items = ArrayTrait::<Loot>::new();
 
