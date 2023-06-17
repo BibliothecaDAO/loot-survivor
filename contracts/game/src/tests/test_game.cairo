@@ -6,10 +6,14 @@ mod tests {
     use option::OptionTrait;
     use starknet::syscalls::deploy_syscall;
     use traits::TryInto;
+    use debug::PrintTrait;
 
     use lootitems::loot::constants::{ItemId};
 
     use game::game::game::{IGame, Game, IGameDispatcher, IGameDispatcherTrait};
+    use survivor::adventurer_meta::{
+        AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata
+    };
 
     fn setup() -> IGameDispatcher {
         let mut calldata = Default::default();
@@ -30,9 +34,11 @@ mod tests {
     fn new_adventurer() -> IGameDispatcher {
         let mut deployed_game = setup();
 
-        deployed_game.start(ItemId::Wand);
+        let adventurer_meta = AdventurerMetadata {
+            name: 'Loaf'.try_into().unwrap(), home_realm: 1, race: 1, order: 2, entropy: 0
+        };
 
-        let adventurer_1 = @deployed_game.get_adventurer(0);
+        deployed_game.start(ItemId::Wand, adventurer_meta);
 
         deployed_game
     }
@@ -42,15 +48,20 @@ mod tests {
     fn test_start() {
         let mut deployed_game = new_adventurer();
 
-        let adventurer_1 = @deployed_game.get_adventurer(0);
+        let adventurer_1 = deployed_game.get_adventurer(0);
+        let adventurer_meta_1 = deployed_game.get_adventurer_meta(0);
 
         // check adventurer
-        assert(adventurer_1.weapon.id == @ItemId::Wand, 'weapon');
+        assert(adventurer_1.weapon.id == ItemId::Wand, 'weapon');
+        assert(adventurer_1.beast_health > 0, 'beast_health');
 
-        // check beast has been assigned
-        assert(*adventurer_1.beast_health > 0, 'beast_health');
-    // TODO:
-    // Check beast is correct
+        // check meta
+        assert(adventurer_meta_1.name == 'Loaf', 'name');
+        assert(adventurer_meta_1.home_realm == 1, 'home_realm');
+        assert(adventurer_meta_1.race == 1, 'race');
+        assert(adventurer_meta_1.order == 2, 'order');
+
+        adventurer_meta_1.entropy.print();
     }
 
     #[test]

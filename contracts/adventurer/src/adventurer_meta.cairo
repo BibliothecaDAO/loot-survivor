@@ -21,12 +21,12 @@ struct AdventurerMetadata {
 }
 
 trait IAdventurerMetadata {
-    fn pack(ref self: AdventurerMetadata) -> felt252;
+    fn pack(self: AdventurerMetadata) -> felt252;
     fn unpack(packed: felt252) -> AdventurerMetadata;
 }
 
 impl ImplAdventurerMetadata of IAdventurerMetadata {
-    fn pack(ref self: AdventurerMetadata) -> felt252 {
+    fn pack(self: AdventurerMetadata) -> felt252 {
         let mut packed = 0;
         packed = packed | pack_value(self.name.into(), pow::TWO_POW_219);
         packed = packed | pack_value(self.home_realm.into(), pow::TWO_POW_212);
