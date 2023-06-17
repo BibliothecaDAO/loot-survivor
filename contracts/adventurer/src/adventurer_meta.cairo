@@ -10,7 +10,6 @@ use debug::PrintTrait;
 use pack::pack::{pack_value, unpack_value};
 use pack::constants::{pow, mask};
 
-use test::test_utils::assert_eq;
 
 #[derive(Drop, Copy, Serde)]
 struct AdventurerMetadata {
@@ -66,10 +65,10 @@ fn test_meta() {
 
     let packed = meta.pack();
     let unpacked = ImplAdventurerMetadata::unpack(packed);
-    assert_eq(@meta.name, @unpacked.name, 'name');
-    assert_eq(@meta.home_realm, @unpacked.home_realm, 'home_realm');
-    assert_eq(@meta.race, @unpacked.race, 'race');
-    assert_eq(@meta.order, @unpacked.order, 'order');
-    assert_eq(@meta.entropy, @unpacked.entropy, 'entropy');
+    assert(@meta.name == @unpacked.name, 'name');
+    assert(@meta.home_realm == @unpacked.home_realm, 'home_realm');
+    assert(@meta.race == @unpacked.race, 'race');
+    assert(@meta.order == @unpacked.order, 'order');
+    assert(@meta.entropy == @unpacked.entropy, 'entropy');
 }
 
