@@ -29,6 +29,7 @@ mod Game {
 
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
     use survivor::bag::{Bag, BagActions, ImplBagActions};
+    use survivor::adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata};
 
     use market::market::{ImplMarket};
 
@@ -45,9 +46,8 @@ mod Game {
     struct Storage {
         _adventurer: LegacyMap::<(ContractAddress, u256), felt252>,
         _loot: LegacyMap::<u256, felt252>,
-        _counter: u256,
         _bag: LegacyMap::<u256, felt252>,
-        // contract
+        _counter: u256,
         _lords: ContractAddress,
         _dao: ContractAddress
     }
