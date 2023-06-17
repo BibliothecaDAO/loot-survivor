@@ -5,17 +5,28 @@ use array::ArrayTrait;
 use debug::PrintTrait;
 use option::OptionTrait;
 
+use lootitems::statistics::constants::ItemId;
 use lootitems::loot::{Loot, ILoot, ImplLoot};
+use lootitems::statistics::item_tier;
 
-use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET};
+use combat::constants::CombatEnums::{Tier};
+use combat::combat::{CombatUtils};
+
+use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET, TIER_PRICE};
 
 trait IMarket {
     fn get_all_items(seed: u32) -> Array<Loot>;
     fn get_id(seed: u32) -> u8;
     fn check_ownership(seed: u32, item_id: u8) -> bool;
+    fn get_price(item_id: u8) -> u8;
 }
 
 impl ImplMarket of IMarket {
+    fn get_price(item_id: u8) -> u8 {
+        let item_tier = ImplLoot::get_tier(item_id);
+        let item_tier_u8 = CombatUtils::tier_to_u8(item_tier);
+        (6 - item_tier_u8) * TIER_PRICE
+    }
     fn get_all_items(seed: u32) -> Array<Loot> {
         let mut all_items = ArrayTrait::<Loot>::new();
 
@@ -58,6 +69,24 @@ impl ImplMarket of IMarket {
     }
 }
 
+#[test]
+#[available_gas(9000000)]
+fn test_get_price() {
+    let t1_price = ImplMarket::get_price(ItemId::Pendant);
+    assert(t1_price == (6 - 1) * TIER_PRICE, 't1 price');
+
+    let t2_price = ImplMarket::get_price(ItemId::SilverRing);
+    assert(t2_price == (6 - 2) * TIER_PRICE, 't2 price');
+
+    let t3_price = ImplMarket::get_price(ItemId::BronzeRing);
+    assert(t3_price == (6 - 3) * TIER_PRICE, 't3 price');
+
+    let t4_price = ImplMarket::get_price(ItemId::Robe);
+    assert(t4_price == (6 - 4) * TIER_PRICE, 't4 price');
+
+    let t5_price = ImplMarket::get_price(ItemId::Wand);
+    assert(t5_price == (6 - 5) * TIER_PRICE, 't5 price');
+}
 
 // TODO: This needs to be optimised - it's too gassy....
 #[test]
