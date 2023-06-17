@@ -5,7 +5,7 @@ use array::ArrayTrait;
 use debug::PrintTrait;
 use option::OptionTrait;
 
-use lootitems::loot::{Loot, ItemTrait, ItemUtils};
+use lootitems::loot::{Loot, ILoot, ImplLoot};
 
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET};
 
@@ -26,7 +26,7 @@ impl ImplMarket of IMarket {
             }
 
             // TODO: We need to move this to fetch from state - it's too gassy...
-            all_items.append(ItemUtils::get_item(ImplMarket::get_id(seed + i)));
+            all_items.append(ImplLoot::get_item(ImplMarket::get_id(seed + i)));
             i += OFFSET;
         };
 
