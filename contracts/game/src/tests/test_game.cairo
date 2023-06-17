@@ -71,4 +71,12 @@ mod tests {
 
         deployed_game.explore(0);
     }
+
+    #[test]
+    #[available_gas(30000000)]
+    fn test_attack() {
+        let mut deployed_game = new_adventurer();
+
+        deployed_game.explore(0);
+    }
 }

@@ -1,5 +1,6 @@
 use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 use survivor::adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata};
+use starknet::{ContractAddress};
 
 #[starknet::interface]
 trait IGame<T> {
@@ -16,6 +17,8 @@ trait IGame<T> {
     // view functions
     fn get_adventurer(self: @T, adventurer_id: u256) -> Adventurer;
     fn get_adventurer_meta(self: @T, adventurer_id: u256) -> AdventurerMetadata;
+
+    fn owner_of(self: @T, adventurer_id: u256) -> ContractAddress;
 }
 
 #[starknet::contract]
@@ -48,7 +51,8 @@ mod Game {
 
     #[storage]
     struct Storage {
-        _adventurer: LegacyMap::<(ContractAddress, u256), felt252>,
+        _adventurer: LegacyMap::<u256, felt252>,
+        _owner: LegacyMap::<u256, ContractAddress>,
         _adventurer_meta: LegacyMap::<u256, felt252>,
         _loot: LegacyMap::<u256, felt252>,
         _loot_meta: LegacyMap::<u256, felt252>,
@@ -106,6 +110,10 @@ mod Game {
         fn get_adventurer_meta(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
             _adventurer_meta_unpacked(self, adventurer_id)
         }
+
+        fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
+            _owner_of(self, adventurer_id)
+        }
     }
 
     // ------------------------------------------ //
@@ -145,7 +153,7 @@ mod Game {
                 home_realm: adventurer_meta.home_realm,
                 race: adventurer_meta.race,
                 order: adventurer_meta.order,
-                entropy: Felt252TryIntoU32::try_into(
+                entropy: Felt252TryIntoU64::try_into(
                     ContractAddressIntoFelt252::into(caller)
                         + U64IntoFelt252::into(block_info.block_timestamp)
                 )
@@ -155,16 +163,21 @@ mod Game {
 
         // increment the adventurer counter
         self._counter.write(adventurer_id + 1);
+
+        // set caller as owner
+        self._owner.write(adventurer_id, caller);
     // TODO: distribute mint fees
     }
 
     // @loothero
     fn _explore(ref self: ContractState, adventurer_id: u256) {
+        _assert_ownership(@self, adventurer_id);
+
         // get adventurer from storage and unpack
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
-        // TODO: get adventurer entropy from AdventurerMeta
-        let adventurer_entropy = 1;
+        // get adventurer entropy from storage  
+        let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
         // TODO: get game_entropy from storage
         let game_entropy = 1;
@@ -294,13 +307,12 @@ mod Game {
     // ------------ Helper Functions ------------ //
     // ------------------------------------------ //
 
-    #[view]
     fn _adventurer_unpacked(self: @ContractState, adventurer_id: u256) -> Adventurer {
-        ImplAdventurer::unpack(self._adventurer.read((get_caller_address(), adventurer_id)))
+        ImplAdventurer::unpack(self._adventurer.read(adventurer_id))
     }
 
     fn _pack_adventurer(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {
-        self._adventurer.write((get_caller_address(), adventurer_id), adventurer.pack());
+        self._adventurer.write(adventurer_id, adventurer.pack());
     }
 
     fn _bag_unpacked(ref self: ContractState, adventurer_id: u256) -> Bag {
@@ -321,12 +333,18 @@ mod Game {
         self._adventurer_meta.write(adventurer_id, adventurer_meta.pack());
     }
 
-    #[view]
+    fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
+        self._owner.read(adventurer_id)
+    }
+
+    fn _assert_ownership(self: @ContractState, adventurer_id: u256) {
+        assert(self._owner.read(adventurer_id) == get_caller_address(), 'Not owner');
+    }
+
     fn lords_address(ref self: ContractState) -> ContractAddress {
         self._lords.read()
     }
 
-    #[view]
     fn dao_address(ref self: ContractState) -> ContractAddress {
         self._dao.read()
     }
