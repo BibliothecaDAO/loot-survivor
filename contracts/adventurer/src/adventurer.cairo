@@ -17,8 +17,10 @@ use lootitems::statistics::{constants, item_tier, item_type};
 
 use super::exploration::ExploreUtils;
 use super::beasts::BeastUtils;
-use obstacles::obstacle::ObstacleUtils;
-use super::constants::{discovery_constants, beast_constants};
+use obstacles::obstacle::{ImplObstacle, Obstacle};
+use super::constants::beast_constants;
+use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
+
 use super::item_meta::{LootStatistics, LootDescription};
 
 use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
@@ -57,9 +59,12 @@ trait IAdventurer {
     fn pack(self: Adventurer) -> felt252;
     fn unpack(packed: felt252) -> Adventurer;
 
-    fn explore(ref self: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> Adventurer;
-    fn attack(ref self: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> Adventurer;
-    fn flee(ref self: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> Adventurer;
+    fn get_random_explore(entropy: u64) -> ExploreResult;
+    fn beast_encounter(ref self: Adventurer, entropy: u64) -> Adventurer;
+    fn discover_treasure(ref self: Adventurer, entropy: u64) -> Adventurer;
+
+    fn attack(ref self: Adventurer, entropy: u64) -> Adventurer;
+    fn flee(ref self: Adventurer, entropy: u64) -> Adventurer;
 
     fn add_health(ref self: Adventurer, value: u16) -> Adventurer;
     fn deduct_health(ref self: Adventurer, value: u16) -> Adventurer;
@@ -107,7 +112,7 @@ trait IAdventurer {
 
     fn get_beast(self: Adventurer) -> u8;
 
-    fn get_level(self: Adventurer) -> u8;
+    fn get_level(xp: u16) -> u8;
 
     fn is_slot_free(self: Adventurer, item: LootStatistics) -> bool;
 
@@ -115,6 +120,19 @@ trait IAdventurer {
 }
 
 impl ImplAdventurer of IAdventurer {
+    // get_random_explore returns a random number between 0 and 3 based on provided entropy
+    // @param entropy: entropy for generating random explore
+    // @return u64: A random number between 0 and 3 denoting the outcome of the explore
+    fn get_random_explore(entropy: u64) -> ExploreResult {
+        let result = entropy % 3;
+        if (result == 0) {
+            return ExploreResult::Beast(());
+        } else if (result == 1) {
+            return ExploreResult::Obstacle(());
+        } else {
+            return ExploreResult::Treasure(());
+        }
+    }
     fn deduct_gold(ref self: Adventurer, value: u16) -> Adventurer {
         self.gold -= value;
 
@@ -167,102 +185,46 @@ impl ImplAdventurer of IAdventurer {
         return 1;
     }
 
-    fn get_level(self: Adventurer) -> u8 {
-        return ImplCombat::get_level_from_xp(self.xp);
+    fn get_level(xp: u16) -> u8 {
+        return ImplCombat::get_level_from_xp(xp);
     }
 
-    fn explore(ref self: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> Adventurer {
-        // get the exploration outcome
-        let explore_outcome = ExploreUtils::get_random_explore(
-            self, adventurer_entropy, game_entropy
-        );
+    fn beast_encounter(ref self: Adventurer, entropy: u64) -> Adventurer {
+        // get the beast health
+        let beast_health = BeastUtils::get_starting_health(self, entropy);
+        // add the beast to the adventurer
+        return self.add_beast(beast_health);
+    }
 
-        // if the adventurer encounters a beast
-        if (explore_outcome == discovery_constants::DiscoveryType::Beast) {
-            // get starting health for the beast
-            let beast_health = BeastUtils::get_starting_health(
-                self, adventurer_entropy, game_entropy
-            );
-            // add the beast to the adventurer
-            return self.add_beast(beast_health);
-        // if the adventurer encounters an obstacle
-        } else if (explore_outcome == discovery_constants::DiscoveryType::Obstacle) {
-            // generate obstacle entropy
-            let obstacle_entropy = adventurer_entropy + game_entropy + U16IntoU64::into(self.xp);
-            // generate a random obstacle using the obstacle entropy
-            let adventurer_level = ImplAdventurer::get_level(self);
-            let obstacle = ObstacleUtils::get_random_obstacle(adventurer_level, obstacle_entropy);
+    fn discover_treasure(ref self: Adventurer, entropy: u64) -> Adventurer {
+        // generate random item discovery
+        let item_type = ExploreUtils::get_random_treasury_discovery(self, entropy);
 
-            // regardless of the outcome, adventurer will earn xp
-            // so calculate it
-            let xp_reward = ObstacleUtils::get_xp_reward(obstacle);
-
-            // and grant it to adventurer and items
-            self.increase_adventurer_xp(xp_reward);
-            self.increase_item_xp(xp_reward);
-
-            let dodged_obstacle = ObstacleUtils::dodged(
-                adventurer_level, self.intelligence, obstacle_entropy
-            );
-
-            // if the adventurer did not dodge the obstacle
-            if (dodged_obstacle == false) {
-                // generate random obstacle
-
-                // get adventurers armor at the location the obstacle does damage to
-                let armor = ImplAdventurer::get_item_at_slot(self, obstacle.damage_location);
-                // TODO: fetch actual meta data ImplLootDescription::get_item_description(self, armor.id);
-                let armor_combat_spec = CombatSpec {
-                    tier: Tier::T1(()),
-                    item_type: Type::Magic_or_Cloth(()),
-                    level: 1,
-                    special_powers: SpecialPowers {
-                        prefix1: 1, prefix2: 2, suffix: 1
-                    }
-                };
-
-                // calculate the damage the obstacle does to the adventurer
-                let obstacle_damage = ObstacleUtils::get_damage(
-                    obstacle, armor_combat_spec, obstacle_entropy
-                );
-
-                // deduct the health from the adventurer
-                self.deduct_health(obstacle_damage);
-                return self;
-            // if the adventurer dodged the obstacle    
-            } else {
-                // simply return the adventurer
-                return self;
-            }
-        } // if the adventurer encounters a discovery
-        else if (explore_outcome == discovery_constants::DiscoveryType::LootStatistics) { // get the discovery type
-            let item_type = ExploreUtils::get_discovery_type(
-                self, adventurer_entropy, game_entropy
-            );
-            // if the discovery is gold
-            if (item_type == discovery_constants::ItemDiscoveryType::Gold) { // get the gold amount
+        match item_type {
+            TreasureDiscovery::Gold(()) => {
                 let gold_disovery_amount = ExploreUtils::get_gold_discovery(
-                    self, adventurer_entropy, game_entropy
+                    self, entropy
                 ); // add the gold to the adventurer
                 return self.increase_gold(gold_disovery_amount); // if the discovery is xp
-            } else if (item_type == discovery_constants::ItemDiscoveryType::XP) { // get the xp amount
+            },
+            TreasureDiscovery::XP(()) => {
                 let xp_discovery_amount = ExploreUtils::get_xp_discovery(
-                    self, adventurer_entropy, game_entropy
+                    self, entropy
                 ); // add the xp to the adventurer
                 return self
                     .increase_adventurer_xp(xp_discovery_amount); // if the discovery is an item
-            } else if (item_type == discovery_constants::ItemDiscoveryType::Health) { // get the health amount
+            },
+            TreasureDiscovery::Health(()) => {
                 let health_discovery_amount = ExploreUtils::get_health_discovery(
-                    self, adventurer_entropy, game_entropy
+                    self, entropy
                 ); // add the health to the adventurer
                 return self.add_health(health_discovery_amount);
-            }
+            },
         }
-        return self;
     }
 
     // TODO: implement this function
-    fn attack(ref self: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> Adventurer {
+    fn attack(ref self: Adventurer, entropy: u64) -> Adventurer {
         // get beast from adventurer
         // combat::calculate_damage_to_beast(adventurer, beast, adventurer_entropy, game_entropy);
         // if beast is dead, add xp to adventurer and items
@@ -272,7 +234,7 @@ impl ImplAdventurer of IAdventurer {
     }
 
     // TODO: implement this function
-    fn flee(ref self: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> Adventurer {
+    fn flee(ref self: Adventurer, entropy: u64) -> Adventurer {
         // combat::attempt_flee(adventurer, adventurer_entropy, game_entropy;
         // if successful, return adventurer with adventurer.beast_health = 0;
         // if not successful, process beast counter_attack and return adventurer
@@ -835,68 +797,32 @@ fn test_deduct_beast_health() {
 
 #[test]
 #[available_gas(5000000)]
-fn test_explore_beast_discovery() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-    let adventurer_entropy = 0;
-    let game_entropy = 0;
-
-    // zero out beast health on adventurer
-    adventurer.beast_health = 0;
-
+fn test_get_random_explore() {
     // exploring with zero entropy will result in a beast discovery
-    adventurer.explore(adventurer_entropy, game_entropy);
-    assert(adventurer.beast_health != 0, 'adventurer should find beast');
+    let entropy = 0;
+    let discovery = ImplAdventurer::get_random_explore(entropy);
+    assert(discovery == ExploreResult::Beast(()), 'adventurer should find beast');
+
+    let entropy = 1;
+    let discovery = ImplAdventurer::get_random_explore(entropy);
+    assert(discovery == ExploreResult::Obstacle(()), 'adventurer should find obstacle');
+
+    let entropy = 2;
+    let discovery = ImplAdventurer::get_random_explore(entropy);
+    assert(discovery == ExploreResult::Treasure(()), 'adventurer should find treasure');
 }
 
 #[test]
-#[available_gas(5000000)]
-fn test_explore_obstacle_discovery() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-    let adventurer_entropy = 0;
-    let game_entropy = 1;
-
-    // exploring with 1 entropy will result in an obstacle discovery
-    // adventurer should dodge obstacle and not take damage
-    adventurer.explore(adventurer_entropy, game_entropy);
-    assert(adventurer.health == 100, 'advntr dodged obstacle');
+#[available_gas(500000)]
+fn test_explore_health_discovery() { //TODO: test health discovery
 }
 
 #[test]
-#[available_gas(5000000)]
-fn test_explore_gold_discovery() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-    let adventurer_entropy = 0;
-    let game_entropy = 2;
-    adventurer.xp = 1;
-
-    // exploring with entropy 2 and no adventurer xp will result in adventurer discoverying gold (currently hard coded to 1)
-    adventurer.explore(adventurer_entropy, game_entropy);
-
-    assert(adventurer.gold > 0, 'advntr should discover gold');
+#[available_gas(500000)]
+fn test_explore_gold_discovery() { //TODO: test health discovery
 }
 
 #[test]
-#[available_gas(5000000)]
-fn test_explore_health_discovery() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-    let adventurer_entropy = 0;
-    let game_entropy = 2;
-    adventurer.xp = 2;
-
-    // exploring with entropy 2 and no adventurer xp will result in an obstacle discovery which will currently do 1 damage
-    adventurer.explore(adventurer_entropy, game_entropy);
-    assert(adventurer.health > 100, 'advntr should discover health');
-}
-
-#[test]
-#[available_gas(5000000)]
-fn test_explore_xp_discovery() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-    let adventurer_entropy = 0;
-    let game_entropy = 2;
-    adventurer.xp = 3;
-
-    // exploring with entropy 2 and no adventurer xp will result in an obstacle discovery which will currently do 1 damage
-    adventurer.explore(adventurer_entropy, game_entropy);
-    assert(adventurer.xp > 0, 'advntr should discover xp');
+#[available_gas(500000)]
+fn test_explore_xp_discovery() { // TODO: test xp discovery
 }

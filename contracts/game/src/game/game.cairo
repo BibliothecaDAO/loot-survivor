@@ -17,7 +17,6 @@ trait IGame<T> {
     // view functions
     fn get_adventurer(self: @T, adventurer_id: u256) -> Adventurer;
     fn get_adventurer_meta(self: @T, adventurer_id: u256) -> AdventurerMetadata;
-
     fn owner_of(self: @T, adventurer_id: u256) -> ContractAddress;
 }
 
@@ -30,7 +29,7 @@ mod Game {
     use box::BoxTrait;
     use starknet::get_caller_address;
     use starknet::{ContractAddress, ContractAddressIntoFelt252};
-    use integer::{U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64};
+    use integer::{U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64, U8IntoU16};
     use integer::U64IntoFelt252;
     use core::traits::{TryInto, Into};
     use lootitems::loot::{Loot, ImplLoot};
@@ -41,12 +40,18 @@ mod Game {
     use survivor::adventurer_meta::{
         AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata
     };
-
+    use survivor::exploration::ExploreUtils;
+    use survivor::constants::discovery_constants::DiscoveryEnums::{
+        ExploreResult, TreasureDiscovery
+    };
     use survivor::item_meta::{
         ImplLootDescription, LootDescription, ILootDescription, LootDescriptionStorage
     };
 
     use market::market::{ImplMarket};
+    use obstacles::obstacle::{ImplObstacle};
+    use combat::combat::{CombatSpec, SpecialPowers, ImplCombat};
+    use combat::constants::CombatEnums;
 
     // events
 
@@ -207,14 +212,79 @@ mod Game {
                 example_item_to_replace
             );
         }
-
-        // send adventurer out to explore
-        // result of the explore will mutate adventurer
-        adventurer.explore(adventurer_entropy, game_entropy);
+        let explore_result = ImplAdventurer::get_random_explore(game_entropy);
+        match explore_result {
+            ExploreResult::Beast(()) => {
+                adventurer.beast_encounter(game_entropy);
+            },
+            ExploreResult::Obstacle(()) => {
+                _obstacle_encounter(ref self, ref adventurer, adventurer_id, game_entropy);
+            },
+            ExploreResult::Treasure(()) => {
+                adventurer.discover_treasure(game_entropy);
+            },
+        }
 
         // write the updated adventurer to storage
         _pack_adventurer(ref self, adventurer_id, adventurer);
     }
+
+    fn _beast_discovery(ref self: ContractState, adventurer_id: u256) {}
+
+    fn _obstacle_encounter(
+        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, entropy: u64
+    ) -> Adventurer {
+        // get adventurer level from xp
+        let adventurer_level = ImplAdventurer::get_level(adventurer.xp);
+
+        // process obstacle encounter
+        let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
+            adventurer_level, adventurer.intelligence, entropy
+        );
+
+        // grant equipped items and adventurer xp for the encounter
+        let xp_reward = ImplObstacle::get_xp_reward(obstacle);
+        adventurer.increase_adventurer_xp(xp_reward);
+        adventurer.increase_item_xp(xp_reward);
+
+        // if the obstacle was dodged, return the adventurer
+        if (dodged) {
+            // TODO: Generate ObstacleDodged event with obstacle details
+            return adventurer;
+        // if the obstacle was not dodged
+        } else {
+            // get item at the location the obstacle is dealing damage to
+            // TODO: Clean this up
+            let armor = ImplAdventurer::get_item_at_slot(adventurer, obstacle.damage_location);
+            let armor_tier = ImplLoot::get_tier(armor.id);
+            let armor_type = ImplLoot::get_type(armor.id);
+            let item = ImplLootDescription::get_loot_description(
+                _loot_description_storage_unpacked(@self, adventurer_id, LOOT_DESCRIPTION_INDEX_1),
+                armor
+            );
+            let armor_level = ImplLoot::get_greatness_level(armor.xp);
+            let armor_combat_spec = CombatSpec {
+                tier: armor_tier,
+                item_type: armor_type,
+                level: U8IntoU16::into(armor_level),
+                special_powers: SpecialPowers {
+                    prefix1: item.name_prefix, prefix2: item.name_suffix, suffix: item.item_suffix
+                }
+            };
+
+            // calculate damage from the obstacle
+            let obstacle_damage = ImplObstacle::get_damage(obstacle, armor_combat_spec, entropy);
+
+            // deduct the health from the adventurer
+            adventurer.deduct_health(obstacle_damage);
+
+            // TODO: Generate HitByObstacle event with obstacle details
+            return adventurer;
+        }
+    }
+
+    fn _treasure_discovery(ref self: ContractState, adventurer_id: u256) {}
+
 
     // @loothero
     fn _attack(ref self: ContractState, adventurer_id: u256) { //

@@ -15,36 +15,42 @@ struct Obstacle {
 trait ObstacleTrait {
     fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, entropy: u64) -> u16;
     fn dodged(adventurer_level: u8, adventurer_intelligence: u8, entropy: u64) -> bool;
-    fn get_random_obstacle(adventurer_level: u8, entropy: u64) -> Obstacle;
+    fn obstacle_encounter(
+        adventurer_level: u8, adventurer_intelligence: u8, entropy: u64
+    ) -> (Obstacle, bool);
     fn get_obstacle(id: u8, level: u8, damage_location: Slot) -> Obstacle;
     fn get_random_level(adventurer_level: u8, entropy: u64) -> u8;
     fn get_random_damage_location(entropy: u64) -> Slot;
-    fn get_random_obstacle_id(entropy: u64) -> u8;
+    fn obstacle_encounter_id(entropy: u64) -> u8;
     fn get_xp_reward(obstacle: Obstacle) -> u16;
     fn get_tier(id: u8) -> Tier;
     fn get_type(id: u8) -> Type;
 }
 
-impl ObstacleUtils of ObstacleTrait {
-    // get_random_obstacle returns a random obstacle based on the adventurer level and entropy
+impl ImplObstacle of ObstacleTrait {
+    // obstacle_encounter returns a random obstacle based on the adventurer level and entropy
     // @param adventurer_level: u8 - the adventurer level
     // @param entropy: u64 - entropy for level generation
-    fn get_random_obstacle(adventurer_level: u8, entropy: u64) -> Obstacle {
+    fn obstacle_encounter(
+        adventurer_level: u8, adventurer_intelligence: u8, entropy: u64
+    ) -> (Obstacle, bool) {
         // get random obstacle id
-        let obstacle_id = ObstacleUtils::get_random_obstacle_id(entropy);
+        let obstacle_id = ImplObstacle::obstacle_encounter_id(entropy);
         // get random obstacle level
-        let obstacle_level = ObstacleUtils::get_random_level(adventurer_level, entropy);
+        let obstacle_level = ImplObstacle::get_random_level(adventurer_level, entropy);
         // get random damage location
-        let damage_location = ObstacleUtils::get_random_damage_location(entropy);
+        let damage_location = ImplObstacle::get_random_damage_location(entropy);
         // return obstacle
-        return ObstacleUtils::get_obstacle(obstacle_id, obstacle_level, damage_location);
+        let obstacle = ImplObstacle::get_obstacle(obstacle_id, obstacle_level, damage_location);
+        let dodged = ImplObstacle::dodged(adventurer_level, adventurer_intelligence, entropy);
+        return (obstacle, dodged);
     }
 
-    // get_random_obstacle_id returns a random obstacle id based on adventurer, adventurer entropy, and game entropy
+    // obstacle_encounter_id returns a random obstacle id based on adventurer, adventurer entropy, and game entropy
     // the obstacle id will be between 1 and the max obstacle id (inclusive)
     // @param entropy: u64 - entropy from random id generation
     // @return u8 - the obstacle id
-    fn get_random_obstacle_id(entropy: u64) -> u8 {
+    fn obstacle_encounter_id(entropy: u64) -> u8 {
         // select an obstacle between 1 and max obstacle id (inclusive)
         let obstacle_id = (entropy % ObstacleId::MAX_ID) + 1;
 
@@ -57,8 +63,8 @@ impl ObstacleUtils of ObstacleTrait {
     // @return Obstacle - the obstacle
     fn get_obstacle(id: u8, level: u8, damage_location: Slot) -> Obstacle {
         let combat_specs = CombatSpec {
-            tier: ObstacleUtils::get_tier(id),
-            item_type: ObstacleUtils::get_type(id),
+            tier: ImplObstacle::get_tier(id),
+            item_type: ImplObstacle::get_type(id),
             level: U8IntoU16::into(level),
             special_powers: SpecialPowers {
                 prefix1: 0, prefix2: 0, suffix: 0, 
@@ -207,63 +213,63 @@ impl ObstacleUtils of ObstacleTrait {
 #[available_gas(100000)]
 fn test_get_obstacle_tier() {
     let demonic_alter = ObstacleId::DemonicAlter;
-    let demonic_alter_tier = ObstacleUtils::get_tier(demonic_alter);
+    let demonic_alter_tier = ImplObstacle::get_tier(demonic_alter);
     assert(demonic_alter_tier == Tier::T1(()), 'demonic_alter should be T1');
 
     let curse = ObstacleId::Curse;
-    let curse_tier = ObstacleUtils::get_tier(curse);
+    let curse_tier = ImplObstacle::get_tier(curse);
     assert(curse_tier == Tier::T2(()), 'curse should be T2');
 
     let hex = ObstacleId::Hex;
-    let hex_tier = ObstacleUtils::get_tier(hex);
+    let hex_tier = ImplObstacle::get_tier(hex);
     assert(hex_tier == Tier::T3(()), 'hex should be T3');
 
     let magic_lock = ObstacleId::MagicLock;
-    let magic_lock_tier = ObstacleUtils::get_tier(magic_lock);
+    let magic_lock_tier = ImplObstacle::get_tier(magic_lock);
     assert(magic_lock_tier == Tier::T4(()), 'magic_lock should be T4');
 
     let dark_mist = ObstacleId::DarkMist;
-    let dark_mist_tier = ObstacleUtils::get_tier(dark_mist);
+    let dark_mist_tier = ImplObstacle::get_tier(dark_mist);
     assert(dark_mist_tier == Tier::T5(()), 'dark_mist should be T5');
 
     let collapsing_ceiling = ObstacleId::CollapsingCeiling;
-    let collapsing_ceiling_tier = ObstacleUtils::get_tier(collapsing_ceiling);
+    let collapsing_ceiling_tier = ImplObstacle::get_tier(collapsing_ceiling);
     assert(collapsing_ceiling_tier == Tier::T1(()), 'collapsing_ceiling should be T1');
 
     let crushing_walls = ObstacleId::CrushingWalls;
-    let crushing_walls_tier = ObstacleUtils::get_tier(crushing_walls);
+    let crushing_walls_tier = ImplObstacle::get_tier(crushing_walls);
     assert(crushing_walls_tier == Tier::T2(()), 'crushing_walls should be T2');
 
     let rockslide = ObstacleId::Rockslide;
-    let rockslide_tier = ObstacleUtils::get_tier(rockslide);
+    let rockslide_tier = ImplObstacle::get_tier(rockslide);
     assert(rockslide_tier == Tier::T3(()), 'rockslide should be T3');
 
     let tumbling_boulders = ObstacleId::TumblingBoulders;
-    let tumbling_boulders_tier = ObstacleUtils::get_tier(tumbling_boulders);
+    let tumbling_boulders_tier = ImplObstacle::get_tier(tumbling_boulders);
     assert(tumbling_boulders_tier == Tier::T4(()), 'tumbling_boulders should be T4');
 
     let swinging_logs = ObstacleId::SwingingLogs;
-    let swinging_logs_tier = ObstacleUtils::get_tier(swinging_logs);
+    let swinging_logs_tier = ImplObstacle::get_tier(swinging_logs);
     assert(swinging_logs_tier == Tier::T5(()), 'swinging_logs should be T5');
 
     let pendulum_blades = ObstacleId::PendulumBlades;
-    let pendulum_blades_tier = ObstacleUtils::get_tier(pendulum_blades);
+    let pendulum_blades_tier = ImplObstacle::get_tier(pendulum_blades);
     assert(pendulum_blades_tier == Tier::T1(()), 'pendulum_blades should be T1');
 
     let flame_jet = ObstacleId::FlameJet;
-    let flame_jet_tier = ObstacleUtils::get_tier(flame_jet);
+    let flame_jet_tier = ImplObstacle::get_tier(flame_jet);
     assert(flame_jet_tier == Tier::T2(()), 'flame_jet should be T2');
 
     let poison_dart = ObstacleId::PoisonDart;
-    let poison_dart_tier = ObstacleUtils::get_tier(poison_dart);
+    let poison_dart_tier = ImplObstacle::get_tier(poison_dart);
     assert(poison_dart_tier == Tier::T3(()), 'poison_dart should be T3');
 
     let spiked_pit = ObstacleId::SpikedPit;
-    let spiked_pit_tier = ObstacleUtils::get_tier(spiked_pit);
+    let spiked_pit_tier = ImplObstacle::get_tier(spiked_pit);
     assert(spiked_pit_tier == Tier::T4(()), 'spiked_pit should be T4');
 
     let hidden_arrow = ObstacleId::HiddenArrow;
-    let hidden_arrow_tier = ObstacleUtils::get_tier(hidden_arrow);
+    let hidden_arrow_tier = ImplObstacle::get_tier(hidden_arrow);
     assert(hidden_arrow_tier == Tier::T5(()), 'hidden_arrow should be T5');
 }
 
@@ -271,65 +277,65 @@ fn test_get_obstacle_tier() {
 #[available_gas(100000)]
 fn test_get_obstacle_type() {
     let demonic_alter = ObstacleId::DemonicAlter;
-    let demonic_alter_type = ObstacleUtils::get_type(demonic_alter);
+    let demonic_alter_type = ImplObstacle::get_type(demonic_alter);
     assert(demonic_alter_type == Type::Magic_or_Cloth(()), 'demonic_alter should be magic');
 
     let curse = ObstacleId::Curse;
-    let curse_type = ObstacleUtils::get_type(curse);
+    let curse_type = ImplObstacle::get_type(curse);
     assert(curse_type == Type::Magic_or_Cloth(()), 'curse should be magic');
 
     let hex = ObstacleId::Hex;
-    let hex_type = ObstacleUtils::get_type(hex);
+    let hex_type = ImplObstacle::get_type(hex);
     assert(hex_type == Type::Magic_or_Cloth(()), 'hex should be magic');
 
     let magic_lock = ObstacleId::MagicLock;
-    let magic_lock_type = ObstacleUtils::get_type(magic_lock);
+    let magic_lock_type = ImplObstacle::get_type(magic_lock);
     assert(magic_lock_type == Type::Magic_or_Cloth(()), 'magic_lock should be magic');
 
     let dark_mist = ObstacleId::DarkMist;
-    let dark_mist_type = ObstacleUtils::get_type(dark_mist);
+    let dark_mist_type = ImplObstacle::get_type(dark_mist);
     assert(dark_mist_type == Type::Magic_or_Cloth(()), 'dark_mist should be magic');
 
     let collapsing_ceiling = ObstacleId::CollapsingCeiling;
-    let collapsing_ceiling_type = ObstacleUtils::get_type(collapsing_ceiling);
+    let collapsing_ceiling_type = ImplObstacle::get_type(collapsing_ceiling);
     assert(
         collapsing_ceiling_type == Type::Bludgeon_or_Metal(()), 'collapsing_ceiling is bludgeon'
     );
 
     let crushing_walls = ObstacleId::CrushingWalls;
-    let crushing_walls_type = ObstacleUtils::get_type(crushing_walls);
+    let crushing_walls_type = ImplObstacle::get_type(crushing_walls);
     assert(crushing_walls_type == Type::Bludgeon_or_Metal(()), 'crushing_walls is bludgeon');
 
     let rockslide = ObstacleId::Rockslide;
-    let rockslide_type = ObstacleUtils::get_type(rockslide);
+    let rockslide_type = ImplObstacle::get_type(rockslide);
     assert(rockslide_type == Type::Bludgeon_or_Metal(()), 'rockslide should be bludgeon');
 
     let tumbling_boulders = ObstacleId::TumblingBoulders;
-    let tumbling_boulders_type = ObstacleUtils::get_type(tumbling_boulders);
+    let tumbling_boulders_type = ImplObstacle::get_type(tumbling_boulders);
     assert(tumbling_boulders_type == Type::Bludgeon_or_Metal(()), 'tumbling_boulders type ');
 
     let swinging_logs = ObstacleId::SwingingLogs;
-    let swinging_logs_type = ObstacleUtils::get_type(swinging_logs);
+    let swinging_logs_type = ImplObstacle::get_type(swinging_logs);
     assert(swinging_logs_type == Type::Bludgeon_or_Metal(()), 'swinging_logs is bludgeon');
 
     let pendulum_blades = ObstacleId::PendulumBlades;
-    let pendulum_blades_type = ObstacleUtils::get_type(pendulum_blades);
+    let pendulum_blades_type = ImplObstacle::get_type(pendulum_blades);
     assert(pendulum_blades_type == Type::Blade_or_Hide(()), 'pendulum_blades should be blade');
 
     let flame_jet = ObstacleId::FlameJet;
-    let flame_jet_type = ObstacleUtils::get_type(flame_jet);
+    let flame_jet_type = ImplObstacle::get_type(flame_jet);
     assert(flame_jet_type == Type::Blade_or_Hide(()), 'flame_jet should be blade');
 
     let poison_dart = ObstacleId::PoisonDart;
-    let poison_dart_type = ObstacleUtils::get_type(poison_dart);
+    let poison_dart_type = ImplObstacle::get_type(poison_dart);
     assert(poison_dart_type == Type::Blade_or_Hide(()), 'poison_dart should be blade');
 
     let spiked_pit = ObstacleId::SpikedPit;
-    let spiked_pit_type = ObstacleUtils::get_type(spiked_pit);
+    let spiked_pit_type = ImplObstacle::get_type(spiked_pit);
     assert(spiked_pit_type == Type::Blade_or_Hide(()), 'spiked_pit should be blade');
 
     let hidden_arrow = ObstacleId::HiddenArrow;
-    let hidden_arrow_type = ObstacleUtils::get_type(hidden_arrow);
+    let hidden_arrow_type = ImplObstacle::get_type(hidden_arrow);
     assert(hidden_arrow_type == Type::Blade_or_Hide(()), 'hidden_arrow should be blade');
 }
 

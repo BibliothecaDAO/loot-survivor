@@ -1,11 +1,15 @@
-mod DiscoveryType {
-    const Beast: u64 = 0;
-    const Obstacle: u64 = 1;
-    const LootStatistics: u64 = 2;
-}
+mod DiscoveryEnums {
+    #[derive(Copy, Drop, PartialEq)]
+    enum ExploreResult {
+        Beast: (),
+        Obstacle: (),
+        Treasure: (),
+    }
 
-mod ItemDiscoveryType {
-    const Gold: u64 = 0;
-    const Health: u64 = 1;
-    const XP: u64 = 2;
+    #[derive(Copy, Drop, PartialEq)]
+    enum TreasureDiscovery {
+        Gold: (),
+        XP: (),
+        Health: (),
+    }
 }
