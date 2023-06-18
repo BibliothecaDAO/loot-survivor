@@ -10,7 +10,6 @@ use lootitems::loot::{Loot, ILoot, ImplLoot};
 use lootitems::statistics::item_tier;
 
 use combat::constants::CombatEnums::{Tier};
-use combat::combat::{CombatUtils};
 
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET, TIER_PRICE};
 
