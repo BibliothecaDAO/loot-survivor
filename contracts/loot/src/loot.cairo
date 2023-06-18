@@ -7,16 +7,14 @@ use integer::{U256TryIntoU32, U256TryIntoU8};
 use core::clone::Clone;
 use array::ArrayTrait;
 
-use lootitems::statistics::item_tier;
-use lootitems::statistics::item_slot;
-use lootitems::statistics::item_type;
-use lootitems::statistics::constants;
+use super::statistics::{item_tier, item_slot, item_type};
+use super::statistics::constants;
 
 use pack::pack::{pack_value, unpack_value};
 use pack::constants::{pow, mask};
 
 use combat::constants::CombatEnums::{Type, Tier, Slot};
-use combat::combat::CombatUtils;
+use combat::combat::ImplCombat;
 
 #[derive(Copy, Drop, Clone)]
 struct Loot {
@@ -32,6 +30,7 @@ trait ILoot {
     fn get_type(id: u8) -> Type;
     fn get_slot(id: u8) -> Slot;
     fn is_starting_weapon(id: u8) -> bool;
+    fn get_greatness_level(xp: u16) -> u8;
     fn pack(self: Loot) -> felt252;
     fn unpack(packed: felt252) -> Loot;
 }
@@ -73,11 +72,22 @@ impl ImplLoot of ILoot {
         }
     }
 
+    // get_greatness_level returns the greatness level of an item based on xp
+    // @param xp The xp of the item.
+    // @return The greatness level of the item.
+    fn get_greatness_level(xp: u16) -> u8 {
+        // use combat lib to determine the level but give items a bonus based
+        // on the item level multiplier setting (currently 4) which means
+        // items will level up 4x faster than entities without a multplier
+        // such as adventurers
+        return ImplCombat::get_level_from_xp(xp * constants::Settings::ITEM_LEVEL_MULTIPLIER);
+    }
+
     fn pack(self: Loot) -> felt252 {
         let mut packed = 0;
-        let item_tier = CombatUtils::tier_to_u8(self.tier);
-        let item_type = CombatUtils::type_to_u8(self.item_type);
-        let item_slot = CombatUtils::slot_to_u8(self.slot);
+        let item_tier = ImplCombat::tier_to_u8(self.tier);
+        let item_type = ImplCombat::type_to_u8(self.item_type);
+        let item_slot = ImplCombat::slot_to_u8(self.slot);
 
         packed = packed | pack_value(self.id.into(), pow::TWO_POW_236);
         packed = packed | pack_value(item_tier.into(), pow::TWO_POW_220);
@@ -104,9 +114,9 @@ impl ImplLoot of ILoot {
 
         let item_id = U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_236, mask::MASK_16))
             .unwrap();
-        let item_tier = CombatUtils::u8_to_tier(item_tier_u8);
-        let item_type = CombatUtils::u8_to_type(item_type_u8);
-        let item_slot = CombatUtils::u8_to_slot(item_slot_u8);
+        let item_tier = ImplCombat::u8_to_tier(item_tier_u8);
+        let item_type = ImplCombat::u8_to_type(item_type_u8);
+        let item_slot = ImplCombat::u8_to_slot(item_slot_u8);
 
         Loot { id: item_id, tier: item_tier, item_type: item_type, slot: item_slot }
     }
