@@ -62,25 +62,25 @@ trait ILootDescription {
 
     // this could be somewhere else
     // this needs to be run when an item is found/purchased
-    fn get_item_metadata_slot(
+    fn get_loot_description_slot(
         adventurer: Adventurer, bag: Bag, loot_statistics: LootStatistics
     ) -> LootStatistics;
 
     // on contract side we check if item.metadata > 10 if it is pass in second metadata storage
-    fn set_item_metadata(
+    fn set_loot_description(
         ref self: LootDescriptionStorage,
         loot_statistics: LootStatistics,
         loot_description: LootDescription
     ) -> LootDescriptionStorage;
 
-    fn get_item_metadata(
+    fn get_loot_description(
         self: LootDescriptionStorage, loot_statistics: LootStatistics
     ) -> LootDescription;
 }
 
 
 impl ImplLootDescription of ILootDescription {
-    fn get_item_metadata(
+    fn get_loot_description(
         self: LootDescriptionStorage, loot_statistics: LootStatistics
     ) -> LootDescription {
         if loot_statistics.metadata == STORAGE::INDEX_1 {
@@ -317,7 +317,7 @@ impl ImplLootDescription of ILootDescription {
             }
         }
     }
-    fn get_item_metadata_slot(
+    fn get_loot_description_slot(
         adventurer: Adventurer, bag: Bag, loot_statistics: LootStatistics
     ) -> LootStatistics {
         // check slots
@@ -393,7 +393,7 @@ impl ImplLootDescription of ILootDescription {
             LootStatistics { id: loot_statistics.id, xp: loot_statistics.xp, metadata: slot + 1 }
         }
     }
-    fn set_item_metadata(
+    fn set_loot_description(
         ref self: LootDescriptionStorage,
         loot_statistics: LootStatistics,
         loot_description: LootDescription
@@ -563,7 +563,7 @@ fn test_get_item_metadata_slot() {
 
     let new_item = LootStatistics { id: 1, xp: 1, metadata: 0 };
 
-    let item = ILootDescription::get_item_metadata_slot(adventurer, bag, new_item);
+    let item = ILootDescription::get_loot_description_slot(adventurer, bag, new_item);
 
     assert(item.metadata == 19, 'LootStatistics');
 }
@@ -601,7 +601,7 @@ fn test_set_item_metadata_slot() {
         id: 1, name_prefix: 12, name_suffix: 11, item_suffix: 13
     };
 
-    item_meta_storage.set_item_metadata(loot_statistics_1, loot_description_2);
+    item_meta_storage.set_loot_description(loot_statistics_1, loot_description_2);
 
     assert(item_meta_storage.item_1.name_prefix == 12, 'should be 12');
     assert(item_meta_storage.item_1.name_suffix == 11, 'should be 11');
@@ -613,7 +613,7 @@ fn test_set_item_metadata_slot() {
         id: 3, name_prefix: 12, name_suffix: 11, item_suffix: 13
     };
 
-    item_meta_storage.set_item_metadata(loot_statistics_2, loot_description_2);
+    item_meta_storage.set_loot_description(loot_statistics_2, loot_description_2);
     assert(item_meta_storage.item_2.name_prefix == 12, 'should be 12');
     assert(item_meta_storage.item_2.name_suffix == 11, 'should be 11');
     assert(item_meta_storage.item_2.item_suffix == 13, 'should be 13');
@@ -657,60 +657,60 @@ fn test_get_item_metadata() {
         }
     };
 
-    let meta_data = item_meta_storage.get_item_metadata(item_pendant);
+    let meta_data = item_meta_storage.get_loot_description(item_pendant);
 
     assert(meta_data.name_prefix == 2, 'item_pendant.name_prefix');
     assert(meta_data.name_suffix == 2, 'item_pendant.name_suffix');
     assert(meta_data.item_suffix == 10, 'item_pendant.item_suffix');
-    let meta_data = item_meta_storage.get_item_metadata(item_silver_ring);
+    let meta_data = item_meta_storage.get_loot_description(item_silver_ring);
 
     assert(meta_data.name_prefix == 4, 'item_silver_ring.name_prefix');
     assert(meta_data.name_suffix == 3, 'item_silver_ring.name_suffix');
     assert(meta_data.item_suffix == 11, 'item_silver_ring.item_suffix');
 
-    let meta_data = item_meta_storage.get_item_metadata(item_silk_robe);
+    let meta_data = item_meta_storage.get_loot_description(item_silk_robe);
 
     assert(meta_data.name_prefix == 5, 'item_silk_robe.name_prefix');
     assert(meta_data.name_suffix == 4, 'item_silk_robe.name_suffix');
     assert(meta_data.item_suffix == 11, 'item_silk_robe.item_suffix');
 
-    let meta_data = item_meta_storage.get_item_metadata(item_iron_sword);
+    let meta_data = item_meta_storage.get_loot_description(item_iron_sword);
 
     assert(meta_data.name_prefix == 6, 'item_iron_sword.name_prefix');
     assert(meta_data.name_suffix == 5, 'item_iron_sword.name_suffix');
     assert(meta_data.item_suffix == 3, 'item_iron_sword.item_suffix');
 
-    let meta_data = item_meta_storage.get_item_metadata(item_katana);
+    let meta_data = item_meta_storage.get_loot_description(item_katana);
 
     assert(meta_data.name_prefix == 8, 'item_katana');
     assert(meta_data.name_suffix == 6, 'item_katana');
     assert(meta_data.item_suffix == 2, 'item_katana');
 
-    let meta_data = item_meta_storage.get_item_metadata(item_falchion);
+    let meta_data = item_meta_storage.get_loot_description(item_falchion);
 
     assert(meta_data.name_prefix == 9, 'item_falchion');
     assert(meta_data.name_suffix == 7, 'item_falchion');
     assert(meta_data.item_suffix == 1, 'item_falchion');
 
-    let meta_data = item_meta_storage.get_item_metadata(item_leather_gloves);
+    let meta_data = item_meta_storage.get_loot_description(item_leather_gloves);
 
     assert(meta_data.name_prefix == 11, 'item_leather_gloves');
     assert(meta_data.name_suffix == 8, 'item_leather_gloves');
     assert(meta_data.item_suffix == 5, 'item_leather_gloves');
 
-    let meta_data = item_meta_storage.get_item_metadata(item_silk_gloves);
+    let meta_data = item_meta_storage.get_loot_description(item_silk_gloves);
 
     assert(meta_data.name_prefix == 2, 'item_silk_gloves');
     assert(meta_data.name_suffix == 9, 'item_silk_gloves');
     assert(meta_data.item_suffix == 6, 'item_silk_gloves');
 
-    let meta_data = item_meta_storage.get_item_metadata(item_linen_gloves);
+    let meta_data = item_meta_storage.get_loot_description(item_linen_gloves);
 
     assert(meta_data.name_prefix == 3, 'item_linen_gloves');
     assert(meta_data.name_suffix == 0, 'item_linen_gloves');
     assert(meta_data.item_suffix == 7, 'item_linen_gloves');
 
-    let meta_data = item_meta_storage.get_item_metadata(item_crown);
+    let meta_data = item_meta_storage.get_loot_description(item_crown);
 
     assert(meta_data.name_prefix == 11, 'item_crown');
     assert(meta_data.name_suffix == 8, 'item_crown');

@@ -2,6 +2,7 @@ use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 use survivor::adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata};
 use starknet::{ContractAddress};
 
+
 #[starknet::interface]
 trait IGame<T> {
     fn start(ref self: T, starting_weapon: u8, adventurer_meta: AdventurerMetadata);
@@ -22,6 +23,9 @@ trait IGame<T> {
 
 #[starknet::contract]
 mod Game {
+    const LOOT_DESCRIPTION_INDEX_1: u256 = 0;
+    const LOOT_DESCRIPTION_INDEX_2: u256 = 1;
+
     use option::OptionTrait;
     use box::BoxTrait;
     use starknet::get_caller_address;
@@ -33,12 +37,14 @@ mod Game {
     use pack::pack::{pack_value, unpack_value};
 
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
-    use survivor::bag::{Bag, BagActions, ImplBagActions};
+    use survivor::bag::{Bag, BagActions, ImplBagActions, LootStatistics};
     use survivor::adventurer_meta::{
         AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata
     };
 
-    use survivor::item_meta::{ImplLootDescription, LootDescription, ILootDescription};
+    use survivor::item_meta::{
+        ImplLootDescription, LootDescription, ILootDescription, LootDescriptionStorage
+    };
 
     use market::market::{ImplMarket};
 
@@ -57,7 +63,7 @@ mod Game {
         _owner: LegacyMap::<u256, ContractAddress>,
         _adventurer_meta: LegacyMap::<u256, felt252>,
         _loot: LegacyMap::<u256, felt252>,
-        _loot_meta: LegacyMap::<u256, felt252>,
+        _loot_description: LegacyMap::<(u256, u256), felt252>,
         _bag: LegacyMap::<u256, felt252>,
         _counter: u256,
         _lords: ContractAddress,
@@ -184,6 +190,24 @@ mod Game {
         // TODO: get game_entropy from storage
         let game_entropy = 1;
 
+        // get armour based storage
+        // fetch item according to obstacle location on Adventurer
+        let example_item_to_replace = LootStatistics { id: 1, xp: 1, metadata: 1 };
+
+        // withdraw from storage
+        // TODO: check item even has any metadata
+        if (example_item_to_replace.xp <= 10) {
+            let item = ImplLootDescription::get_loot_description(
+                _loot_description_storage_unpacked(@self, adventurer_id, LOOT_DESCRIPTION_INDEX_1),
+                example_item_to_replace
+            );
+        } else {
+            let item = ImplLootDescription::get_loot_description(
+                _loot_description_storage_unpacked(@self, adventurer_id, LOOT_DESCRIPTION_INDEX_2),
+                example_item_to_replace
+            );
+        }
+
         // send adventurer out to explore
         // result of the explore will mutate adventurer
         adventurer.explore(adventurer_entropy, game_entropy);
@@ -246,6 +270,7 @@ mod Game {
     // equips item if equip is true
     // stashes item in bag if equip is false
     fn _buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
+        // TODO: check stat available -> 
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
         let mut bag = _bag_unpacked(ref self, adventurer_id);
 
@@ -256,7 +281,7 @@ mod Game {
         assert(ImplMarket::check_ownership(entropy, item_id) == true, 'Market item does not exist');
 
         // get item and determine metadata slot
-        let item = ImplLootDescription::get_item_metadata_slot(
+        let item = ImplLootDescription::get_loot_description_slot(
             adventurer, bag, ImplBagActions::new_item(item_id)
         );
 
@@ -334,6 +359,24 @@ mod Game {
         ref self: ContractState, adventurer_id: u256, adventurer_meta: AdventurerMetadata
     ) {
         self._adventurer_meta.write(adventurer_id, adventurer_meta.pack());
+    }
+
+    // we pack according to a storage index
+    fn _pack_loot_description_storage(
+        ref self: ContractState,
+        adventurer_id: u256,
+        storage_index: u256,
+        loot_description_storage: LootDescriptionStorage,
+    ) {
+        self
+            ._loot_description
+            .write((adventurer_id, storage_index), loot_description_storage.pack());
+    }
+
+    fn _loot_description_storage_unpacked(
+        self: @ContractState, adventurer_id: u256, storage_index: u256
+    ) -> LootDescriptionStorage {
+        ImplLootDescription::unpack(self._loot_description.read((adventurer_id, storage_index)))
     }
 
     fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
