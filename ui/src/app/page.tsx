@@ -316,32 +316,32 @@ export default function Home() {
           },
           {
             id: 3,
-            label: "Market",
-            screen: "market",
-            disabled: hasBeast || adventurer.health == 0,
-          },
-          {
-            id: 4,
             label: "Inventory",
             screen: "inventory",
             disabled: adventurer.health == 0,
           },
           {
-            id: 5,
+            id: 4,
             label: "Beast",
             screen: "beast",
             disabled: upgrade || adventurer.health == 0,
           },
           {
-            id: 6,
+            id: 5,
             label: "Leaderboard",
             screen: "leaderboard",
           },
           {
-            id: 7,
+            id: 6,
             label: "Upgrade",
             screen: "upgrade",
             disabled: !upgrade,
+          },
+          {
+            id: 7,
+            label: "Market",
+            screen: "market",
+            disabled: hasBeast || adventurer.health == 0 || !upgrade,
           },
           {
             id: 8,
