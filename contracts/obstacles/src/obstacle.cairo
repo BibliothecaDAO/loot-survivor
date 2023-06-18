@@ -1,7 +1,7 @@
 use option::OptionTrait;
 use integer::{U64TryIntoU8, U8IntoU16, U8IntoU64};
 use super::constants::{ObstacleId, ObstacleSettings};
-use combat::combat::{CombatUtils, CombatSpec, SpecialPowers};
+use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
 use combat::constants::CombatSettings;
 use combat::constants::CombatEnums::{Type, Tier, Slot};
 
@@ -73,7 +73,7 @@ impl ObstacleUtils of ObstacleTrait {
     // @param entropy: entropy for random level generation
     // @return u8 - the obstacle level
     fn get_random_level(adventurer_level: u8, entropy: u64) -> u8 {
-        CombatUtils::get_random_level(
+        ImplCombat::get_random_level(
             adventurer_level,
             entropy,
             CombatSettings::DIFFICULTY_CLIFF::NORMAL,
@@ -165,7 +165,7 @@ impl ObstacleUtils of ObstacleTrait {
     // @param id: u8 - the obstacle id
     // @return u8 - the obstacle attack location
     fn get_random_damage_location(entropy: u64) -> Slot {
-        return CombatUtils::get_random_damage_location(entropy);
+        return ImplCombat::get_random_damage_location(entropy);
     }
 
     // get_damage returns the damage of the obstacle based on the provided obstacle id
@@ -173,7 +173,7 @@ impl ObstacleUtils of ObstacleTrait {
         // no critical hits for obstacles
         let is_critical_hit = false;
 
-        return CombatUtils::calculate_damage(
+        return ImplCombat::calculate_damage(
             obstacle.combat_specs,
             armor_combat_spec,
             ObstacleSettings::MINIMUM_DAMAGE,
@@ -187,7 +187,7 @@ impl ObstacleUtils of ObstacleTrait {
     // @param obstacle: Obstacle - the obstacle
     // @return u16 - the xp reward
     fn get_xp_reward(obstacle: Obstacle) -> u16 {
-        CombatUtils::get_xp_reward(obstacle.combat_specs)
+        ImplCombat::get_xp_reward(obstacle.combat_specs)
     }
 
     fn dodged(adventurer_level: u8, adventurer_intelligence: u8, entropy: u64) -> bool {

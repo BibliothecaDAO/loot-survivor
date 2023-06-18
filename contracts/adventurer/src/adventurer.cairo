@@ -21,7 +21,7 @@ use obstacles::obstacle::ObstacleUtils;
 use super::constants::{discovery_constants, beast_constants};
 use super::item_meta::{LootStatistics, LootDescription};
 
-use combat::combat::{CombatSpec, SpecialPowers};
+use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
 use combat::constants::CombatEnums::{Type, Tier, Slot};
 
 #[derive(Drop, Copy, Serde)]
@@ -168,7 +168,7 @@ impl ImplAdventurer of IAdventurer {
     }
 
     fn get_level(self: Adventurer) -> u8 {
-        return 1;
+        return ImplCombat::get_level_from_xp(self.xp);
     }
 
     fn explore(ref self: Adventurer, adventurer_entropy: u64, game_entropy: u64) -> Adventurer {
@@ -207,9 +207,9 @@ impl ImplAdventurer of IAdventurer {
 
             // if the adventurer did not dodge the obstacle
             if (dodged_obstacle == false) {
-                // calculate the damage
+                // generate random obstacle
 
-                // start by getting the adventurer's armor at the damage location
+                // get adventurers armor at the location the obstacle does damage to
                 let armor = ImplAdventurer::get_item_at_slot(self, obstacle.damage_location);
                 // TODO: fetch actual meta data ImplLootDescription::get_item_description(self, armor.id);
                 let armor_combat_spec = CombatSpec {
@@ -221,10 +221,12 @@ impl ImplAdventurer of IAdventurer {
                     }
                 };
 
+                // calculate the damage the obstacle does to the adventurer
                 let obstacle_damage = ObstacleUtils::get_damage(
                     obstacle, armor_combat_spec, obstacle_entropy
                 );
 
+                // deduct the health from the adventurer
                 self.deduct_health(obstacle_damage);
                 return self;
             // if the adventurer dodged the obstacle    

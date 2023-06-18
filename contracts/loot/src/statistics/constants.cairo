@@ -1,3 +1,7 @@
+mod Settings {
+    const ITEM_LEVEL_MULTIPLIER: u16 = 4;
+}
+
 mod ItemId {
     const Pendant: u8 = 1;
     const Necklace: u8 = 2;
