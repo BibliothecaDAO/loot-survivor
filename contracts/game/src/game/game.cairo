@@ -38,6 +38,8 @@ mod Game {
         AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata
     };
 
+    use survivor::item_meta::{ImplLootDescription, LootDescription, ILootDescription};
+
     use market::market::{ImplMarket};
 
     // events
@@ -245,6 +247,7 @@ mod Game {
     // stashes item in bag if equip is false
     fn _buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+        let mut bag = _bag_unpacked(ref self, adventurer_id);
 
         // TODO: update to real entropy
         let entropy: u32 = 123;
@@ -252,8 +255,10 @@ mod Game {
         // check item exists on Market
         assert(ImplMarket::check_ownership(entropy, item_id) == true, 'Market item does not exist');
 
-        // creates new item struct
-        let item = ImplBagActions::new_item(item_id);
+        // get item and determine metadata slot
+        let item = ImplLootDescription::get_item_metadata_slot(
+            adventurer, bag, ImplBagActions::new_item(item_id)
+        );
 
         // TODO: get item price based on tier 
         let item_price = 15;
@@ -271,7 +276,6 @@ mod Game {
 
             // check if item exists
             if unequipping_item.id > 0 {
-                let mut bag = _bag_unpacked(ref self, adventurer_id);
                 bag.add_item(unequipping_item);
 
                 // pack bag
@@ -279,12 +283,10 @@ mod Game {
             }
             _pack_adventurer(ref self, adventurer_id, adventurer);
         } else {
-            // add and pack bag
-            let mut bag = _bag_unpacked(ref self, adventurer_id);
             bag.add_item(item);
-            _pack_bag(ref self, adventurer_id, bag);
 
-            // pack adventurer
+            // pack
+            _pack_bag(ref self, adventurer_id, bag);
             _pack_adventurer(ref self, adventurer_id, adventurer);
         }
     }
