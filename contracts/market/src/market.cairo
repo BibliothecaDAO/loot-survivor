@@ -18,14 +18,12 @@ trait IMarket {
     fn get_all_items(seed: u32) -> Array<Loot>;
     fn get_id(seed: u32) -> u8;
     fn check_ownership(seed: u32, item_id: u8) -> bool;
-    fn get_price(item_id: u8) -> u8;
+    fn get_price(item_tier: u8) -> u8;
 }
 
 impl ImplMarket of IMarket {
-    fn get_price(item_id: u8) -> u8 {
-        let item_tier = ImplLoot::get_tier(item_id);
-        let item_tier_u8 = CombatUtils::tier_to_u8(item_tier);
-        (6 - item_tier_u8) * TIER_PRICE
+    fn get_price(item_tier: u8) -> u8 {
+        (6 - item_tier) * TIER_PRICE
     }
     fn get_all_items(seed: u32) -> Array<Loot> {
         let mut all_items = ArrayTrait::<Loot>::new();
@@ -72,19 +70,19 @@ impl ImplMarket of IMarket {
 #[test]
 #[available_gas(9000000)]
 fn test_get_price() {
-    let t1_price = ImplMarket::get_price(ItemId::Pendant);
+    let t1_price = ImplMarket::get_price(1);
     assert(t1_price == (6 - 1) * TIER_PRICE, 't1 price');
 
-    let t2_price = ImplMarket::get_price(ItemId::SilverRing);
+    let t2_price = ImplMarket::get_price(2);
     assert(t2_price == (6 - 2) * TIER_PRICE, 't2 price');
 
-    let t3_price = ImplMarket::get_price(ItemId::BronzeRing);
+    let t3_price = ImplMarket::get_price(3);
     assert(t3_price == (6 - 3) * TIER_PRICE, 't3 price');
 
-    let t4_price = ImplMarket::get_price(ItemId::Robe);
+    let t4_price = ImplMarket::get_price(4);
     assert(t4_price == (6 - 4) * TIER_PRICE, 't4 price');
 
-    let t5_price = ImplMarket::get_price(ItemId::Wand);
+    let t5_price = ImplMarket::get_price(5);
     assert(t5_price == (6 - 5) * TIER_PRICE, 't5 price');
 }
 
