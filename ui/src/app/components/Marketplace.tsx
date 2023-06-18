@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { Button } from "./Button";
-import { useQuery } from "@apollo/client";
 import {
   getLatestMarketItems,
   getAdventurersInList,
@@ -282,30 +281,6 @@ const Marketplace = () => {
       {adventurer?.level != 1 ? (
         <div className="w-full">
           <div className="flex flex-row justify-between m-1 flex-wrap">
-            <div className="flex flex-row align-items flex-wrap">
-              <Button
-                onClick={() => addToCalls(mintDailyItemsTx)}
-                disabled={nextMint && currentTime < nextMint.getTime()}
-              >
-                Mint daily items
-              </Button>
-              <Button
-                onClick={claimAllItems}
-                disabled={claimExists() || getClaimableItems().length == 0}
-              >
-                Claim All
-              </Button>
-
-              <div className="self-center ml-1">
-                <Countdown
-                  countingMessage={
-                    nextMint ? "Next mint in:" : "No items minted yet!"
-                  }
-                  finishedMessage="Items can be minted!"
-                  targetTime={nextMint}
-                />
-              </div>
-            </div>
             <div>
               <span className="flex text-xl text-terminal-yellow">
                 <Coin className="self-center w-5 h-5 fill-current" />
@@ -319,7 +294,6 @@ const Marketplace = () => {
               <Coin className="w-5 h-5 fill-current text-terminal-yellow" />{" "}
               {"to bids)"}
             </span>
-            <UTCClock />
           </div>
           <div className="w-full overflow-y-auto border h-[650px] border-terminal-green table-scroll">
             {isLoading.latestMarketItemsQuery && (
