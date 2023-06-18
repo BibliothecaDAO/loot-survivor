@@ -9,7 +9,7 @@ use debug::PrintTrait;
 use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8};
 use pack::constants::{pow, mask};
 
-use super::adventurer::{Adventurer, AdventurerActions, Actions};
+use super::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
 #[derive(Drop, Copy, Serde)] // 24 bits
 struct LootStatistics {

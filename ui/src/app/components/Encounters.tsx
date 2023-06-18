@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import { DiscoveryDisplay } from "./DiscoveryDisplay";
-import { BattleDisplay } from "./BattleDisplay";
+import { DiscoveryDisplay } from "./actions/DiscoveryDisplay";
+import { BattleDisplay } from "./beast/BattleDisplay";
 import LootIconLoader from "./Loader";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 import { NullBeast } from "../types";
 import { processBeastName } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
@@ -117,7 +117,7 @@ export const Encounters = ({ profile }: EncountersProps) => {
   }
 
   return (
-    <div className="flex flex-col items-center m-auto text-xl">
+    <div className="flex flex-col items-center m-auto text-sm sm:text-xl">
       {displayEncounters.length > 0 ? (
         <>
           <h3 className="text-center">

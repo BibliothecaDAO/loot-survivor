@@ -1,5 +1,5 @@
-import { NotificationBattleDisplay } from "./BattleDisplay";
-import { DiscoveryDisplay } from "./DiscoveryDisplay";
+import { NotificationBattleDisplay } from "./beast/BattleDisplay";
+import { DiscoveryDisplay } from "./actions/DiscoveryDisplay";
 import SpriteAnimation from "./SpriteAnimation";
 import { GameData } from "./GameData";
 import useAdventurerStore from "../hooks/useAdventurerStore";
@@ -252,8 +252,8 @@ export const NotificationDisplay = ({
   }, [animation]);
 
   return (
-    <div className="z-10 flex flex-row w-full gap-5 p-2">
-      <div className="w-1/4">
+    <div className="z-10 flex flex-row w-full gap-5 sm:p-2">
+      <div className="w-1/6 sm:w-1/4">
         <SpriteAnimation
           frameWidth={100}
           frameHeight={100}
@@ -276,7 +276,7 @@ export const NotificationDisplay = ({
           currentAnimation={animation ?? ""}
         />
       </div>
-      <div className="w-3/4 m-auto">{notification}</div>
+      <div className="w-5/6 sm:w-3/4 m-auto">{notification}</div>
     </div>
   );
 };

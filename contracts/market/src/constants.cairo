@@ -6,3 +6,6 @@ const OFFSET: u32 = 9636;
 
 // number of loot items
 const NUM_LOOT_ITEMS: u32 = 101;
+
+
+const TIER_PRICE: u8 = 3;

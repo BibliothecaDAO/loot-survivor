@@ -11,7 +11,8 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useUIStore from "../hooks/useUIStore";
 import Info from "./Info";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
+import { useMediaQuery } from "react-responsive";
 
 const Upgrade = () => {
   const { adventurerContract } = useContracts();
@@ -184,32 +185,58 @@ const Upgrade = () => {
     }
   }, [upgrade]);
 
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
+
   return (
-    <div className="flex flex-row">
-      <div className="w-1/3 mr-5">
+    <div className="flex flex-col sm:flex-row">
+      <div className="w-1/3 mr-5 hidden sm:block">
         <Info adventurer={adventurer} />
       </div>
       <div className="w-2/3 m-auto">
         <div className="flex flex-col">
-          <p className="mx-auto items-center sm:text-[45px] animate-pulse mb-10">
+          <p className="mx-auto items-center justify-center text-center text-lg animate-pulse mb-10">
             You are now level {adventurer?.level}, please select upgrade!
           </p>
-          <div className="flex flex-row w-full">
-            <div className="w-1/3">
-              <VerticalKeyboardControl
-                buttonsData={upgradeMenu}
-                onSelected={setSelected}
-                onEnterAction={true}
-              />
-            </div>
-            <div className="flex w-2/3 items-center justify-center">
-              {selected == "Strength" && <Strength />}
-              {selected == "Dexterity" && <Dexterity />}
-              {selected == "Vitality" && <Vitality />}
-              {selected == "Intelligence" && <Intelligence />}
-              {selected == "Wisdom" && <Wisdom />}
-              {selected == "Charisma" && <Charisma />}
-            </div>
+          <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full">
+            {isMobileDevice ? (
+              <>
+                <div className="flex sm:w-2/3 items-center justify-center">
+                  {selected == "Strength" && <Strength />}
+                  {selected == "Dexterity" && <Dexterity />}
+                  {selected == "Vitality" && <Vitality />}
+                  {selected == "Intelligence" && <Intelligence />}
+                  {selected == "Wisdom" && <Wisdom />}
+                  {selected == "Charisma" && <Charisma />}
+                </div>
+                <div className="sm:w-1/3">
+                  <VerticalKeyboardControl
+                    buttonsData={upgradeMenu}
+                    onSelected={setSelected}
+                    onEnterAction={true}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="sm:w-1/3">
+                  <VerticalKeyboardControl
+                    buttonsData={upgradeMenu}
+                    onSelected={setSelected}
+                    onEnterAction={true}
+                  />
+                </div>
+                <div className="flex sm:w-2/3 items-center justify-center">
+                  {selected == "Strength" && <Strength />}
+                  {selected == "Dexterity" && <Dexterity />}
+                  {selected == "Vitality" && <Vitality />}
+                  {selected == "Intelligence" && <Intelligence />}
+                  {selected == "Wisdom" && <Wisdom />}
+                  {selected == "Charisma" && <Charisma />}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

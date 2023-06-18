@@ -6,7 +6,7 @@ use traits::{TryInto, Into};
 use option::OptionTrait;
 use debug::PrintTrait;
 use survivor::adventurer::Adventurer;
-use lootitems::loot::{Loot, ItemUtils, ItemTrait};
+use lootitems::loot::{Loot, ImplLoot, ILoot};
 
 #[derive(Drop, Copy, Serde)] // 24 bits
 struct Beast {
@@ -23,9 +23,7 @@ struct Beast {
 trait BeastTrait {
     fn get_beast(adventurer: Adventurer) -> Beast;
     fn get_level(id: u8) -> u16;
-    fn get_starting_health(
-        adventurer: Adventurer, adventurer_entropy: u64, game_entropy: u64
-    ) -> u16;
+    fn get_starting_health(adventurer: Adventurer, entropy: u64) -> u16;
     fn get_health(adventurer: Adventurer) -> u16;
     fn get_attack_type(id: u8) -> u8;
     fn get_armor_type(id: u8) -> u8;
@@ -48,9 +46,7 @@ impl BeastUtils of BeastTrait {
             Prefix_2: 1,
         }
     }
-    fn get_starting_health(
-        adventurer: Adventurer, adventurer_entropy: u64, game_entropy: u64
-    ) -> u16 {
+    fn get_starting_health(adventurer: Adventurer, entropy: u64) -> u16 {
         return 1;
     }
     fn get_level(id: u8) -> u16 {

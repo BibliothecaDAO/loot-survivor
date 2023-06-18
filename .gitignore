@@ -1,1 +1,7 @@
 /target
+contracts/adventurer/target/CACHEDIR.TAG
+contracts/adventurer/target/dev/survivor.sierra
+contracts/combat/target/CACHEDIR.TAG
+contracts/combat/target/dev/combat.sierra
+contracts/item/target/CACHEDIR.TAG
+contracts/item/target/dev/item.sierra
