@@ -400,31 +400,31 @@ impl ImplLootDescription of ILootDescription {
     ) -> LootDescriptionStorage {
         // TODO:
         // @loothere: should we generate the prefix here or up in the contract?
-        if loot_statistics.metadata == 1 {
+        if loot_statistics.metadata == STORAGE::INDEX_1 {
             self.item_1 = loot_description;
             self
-        } else if loot_statistics.metadata == 2 {
+        } else if loot_statistics.metadata == STORAGE::INDEX_2 {
             self.item_2 = loot_description;
             self
-        } else if loot_statistics.metadata == 3 {
+        } else if loot_statistics.metadata == STORAGE::INDEX_3 {
             self.item_3 = loot_description;
             self
-        } else if loot_statistics.metadata == 4 {
+        } else if loot_statistics.metadata == STORAGE::INDEX_4 {
             self.item_4 = loot_description;
             self
-        } else if loot_statistics.metadata == 5 {
+        } else if loot_statistics.metadata == STORAGE::INDEX_5 {
             self.item_5 = loot_description;
             self
-        } else if loot_statistics.metadata == 6 {
+        } else if loot_statistics.metadata == STORAGE::INDEX_6 {
             self.item_6 = loot_description;
             self
-        } else if loot_statistics.metadata == 7 {
+        } else if loot_statistics.metadata == STORAGE::INDEX_7 {
             self.item_7 = loot_description;
             self
-        } else if loot_statistics.metadata == 8 {
+        } else if loot_statistics.metadata == STORAGE::INDEX_8 {
             self.item_8 = loot_description;
             self
-        } else if loot_statistics.metadata == 9 {
+        } else if loot_statistics.metadata == STORAGE::INDEX_9 {
             self.item_9 = loot_description;
             self
         } else {

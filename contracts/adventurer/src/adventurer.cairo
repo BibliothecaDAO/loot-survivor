@@ -17,14 +17,15 @@ use lootitems::statistics::{constants, item_tier, item_type};
 
 use super::exploration::ExploreUtils;
 use super::beasts::BeastUtils;
-use obstacles::obstacle::{ImplObstacle, Obstacle};
 use super::constants::beast_constants;
+use super::constants::adventurer_constants::{STARTING_GOLD};
 use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
-
 use super::item_meta::{LootStatistics, LootDescription};
 
 use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
 use combat::constants::CombatEnums::{Type, Tier, Slot};
+
+use obstacles::obstacle::{ImplObstacle, Obstacle};
 
 #[derive(Drop, Copy, Serde)]
 struct Adventurer {
@@ -425,7 +426,7 @@ impl ImplAdventurer of IAdventurer {
             intelligence: 0,
             wisdom: 0,
             charisma: 0,
-            gold: 0,
+            gold: STARTING_GOLD,
             weapon: LootStatistics {
                 id: starting_item, xp: 0, metadata: 1, 
                 }, chest: LootStatistics {

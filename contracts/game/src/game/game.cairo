@@ -212,6 +212,7 @@ mod Game {
                 example_item_to_replace
             );
         }
+
         let explore_result = ImplAdventurer::get_random_explore(game_entropy);
         match explore_result {
             ExploreResult::Beast(()) => {
@@ -234,6 +235,7 @@ mod Game {
     fn _obstacle_encounter(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, entropy: u64
     ) -> Adventurer {
+        _assert_ownership(@self, adventurer_id);
         // get adventurer level from xp
         let adventurer_level = ImplAdventurer::get_level(adventurer.xp);
 
@@ -308,6 +310,7 @@ mod Game {
 
     // @loaf
     fn _equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
+        _assert_ownership(@self, adventurer_id);
         // TODO: check ownership
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
@@ -340,12 +343,17 @@ mod Game {
     // equips item if equip is true
     // stashes item in bag if equip is false
     fn _buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
-        // TODO: check stat available -> 
+        _assert_ownership(@self, adventurer_id);
+
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+        // TODO: Remove after testing
+        // assert(adventurer.stat_upgrade_available == 1, 'Not available');
+
         let mut bag = _bag_unpacked(ref self, adventurer_id);
 
         // TODO: update to real entropy
-        let entropy: u32 = 123;
+        let entropy: u32 = 12303548;
 
         // check item exists on Market
         assert(ImplMarket::check_ownership(entropy, item_id) == true, 'Market item does not exist');
@@ -355,8 +363,9 @@ mod Game {
             adventurer, bag, ImplBagActions::new_item(item_id)
         );
 
-        // TODO: get item price based on tier 
-        let item_price = 15;
+        // TODO: Replace with read from state
+        let item_tier = ImplLoot::get_tier(item_id);
+        let item_price = ImplMarket::get_price(item_tier);
 
         // check adventurer has enough gold
         assert(adventurer.check_gold(item_price) == true, 'Not enough gold');

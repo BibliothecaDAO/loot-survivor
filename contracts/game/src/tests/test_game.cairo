@@ -8,12 +8,17 @@ mod tests {
     use traits::TryInto;
     use debug::PrintTrait;
 
+    use market::market::{ImplMarket};
+
+    use lootitems::loot::{Loot, ImplLoot, ILoot};
     use lootitems::loot::constants::{ItemId};
 
     use game::game::game::{IGame, Game, IGameDispatcher, IGameDispatcherTrait};
     use survivor::adventurer_meta::{
         AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata
     };
+
+    use survivor::constants::adventurer_constants::{STARTING_GOLD};
 
     fn setup() -> IGameDispatcher {
         let mut calldata = Default::default();
@@ -68,15 +73,32 @@ mod tests {
     #[available_gas(30000000)]
     fn test_explore() {
         let mut deployed_game = new_adventurer();
-
-        deployed_game.explore(0);
     }
 
     #[test]
     #[available_gas(30000000)]
     fn test_attack() {
         let mut deployed_game = new_adventurer();
+    }
 
-        deployed_game.explore(0);
+    #[test]
+    #[available_gas(30000000)]
+    fn test_equip() {
+        let mut deployed_game = new_adventurer();
+
+        // this is the first item based off the hardcoded entropy in the contract
+        // this will change when we have a real entropy source
+        // Sash
+        let item_id = 31;
+        let item = ImplLoot::get_item(item_id);
+        let item_price = ImplMarket::get_price(item.tier);
+
+        deployed_game.buy_item(0, item_id, true);
+
+        let adventurer = deployed_game.get_adventurer(0);
+
+        assert(adventurer.gold == STARTING_GOLD - item_price, 'gold');
+
+        assert(adventurer.waist.id == item_id, 'sash is equiped');
     }
 }

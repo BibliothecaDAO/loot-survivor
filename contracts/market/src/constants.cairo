@@ -8,4 +8,4 @@ const OFFSET: u32 = 9636;
 const NUM_LOOT_ITEMS: u32 = 101;
 
 
-const TIER_PRICE: u8 = 3;
+const TIER_PRICE: u16 = 3;
