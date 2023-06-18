@@ -196,7 +196,7 @@ mod Game {
 
         // withdraw from storage
         // TODO: check item even has any metadata
-        if (example_item_to_replace.xp <= 10) {
+        if (example_item_to_replace.metadata <= 10) {
             let item = ImplLootDescription::get_loot_description(
                 _loot_description_storage_unpacked(@self, adventurer_id, LOOT_DESCRIPTION_INDEX_1),
                 example_item_to_replace
