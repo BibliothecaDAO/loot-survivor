@@ -196,7 +196,10 @@ const Upgrade = () => {
       </div>
       <div className="w-2/3 m-auto">
         <div className="flex flex-col">
-          <p className="mx-auto items-center justify-center text-center text-lg animate-pulse mb-10">
+          <p className="mx-auto items-center justify-center text-center text-lg animate-pulse">
+            Market is open
+          </p>
+          <p className="mx-auto items-center justify-center text-center text-lg">
             You are now level {adventurer?.level}, please select upgrade!
           </p>
           <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full">
