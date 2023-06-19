@@ -31,6 +31,7 @@ mod Game {
     use survivor::constants::discovery_constants::DiscoveryEnums::{
         ExploreResult, TreasureDiscovery
     };
+    use survivor::constants::adventurer_constants::{POTION_HEALTH_AMOUNT};
     use survivor::item_meta::{
         ImplLootDescription, LootDescription, ILootDescription, LootDescriptionStorage
     };
@@ -51,6 +52,7 @@ mod Game {
 
     #[storage]
     struct Storage {
+        _game_entropy: felt252,
         _adventurer: LegacyMap::<u256, felt252>,
         _owner: LegacyMap::<u256, ContractAddress>,
         _adventurer_meta: LegacyMap::<u256, felt252>,
@@ -67,6 +69,8 @@ mod Game {
         // set the contract addresses
         self._lords.write(lords);
         self._dao.write(dao);
+
+        _set_entropy(ref self);
     }
 
     // ------------------------------------------ //
@@ -117,6 +121,18 @@ mod Game {
 
         fn get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<Loot> {
             _get_items_on_market(self, adventurer_id)
+        }
+
+        fn get_dao_address(self: @ContractState) -> ContractAddress {
+            _dao_address(self)
+        }
+
+        fn get_lords_address(self: @ContractState) -> ContractAddress {
+            _lords_address(self)
+        }
+
+        fn get_entropy(self: @ContractState) -> u256 {
+            _get_entropy(self)
         }
 
         fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
@@ -188,7 +204,7 @@ mod Game {
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
         // TODO: get game_entropy from storage
-        let game_entropy = 1;
+        let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
 
         let explore_result = ImplAdventurer::get_random_explore(game_entropy);
         match explore_result {
@@ -275,7 +291,7 @@ mod Game {
     // @loaf
     fn _equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
         _assert_ownership(@self, adventurer_id);
-        // TODO: check ownership
+
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
         let mut bag = _bag_unpacked(@self, adventurer_id);
@@ -364,18 +380,37 @@ mod Game {
     }
 
 
-    // @loothero
-    fn _upgrade_stat(ref self: ContractState, adventurer_id: u256, stat_id: u8) { //
-    // check can upgradable
-    // upgrade stat
-    // set upgrade to false
+    fn _upgrade_stat(ref self: ContractState, adventurer_id: u256, stat_id: u8) {
+        _assert_ownership(@self, adventurer_id);
+
+        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+        assert(adventurer.stat_upgrade_available == 1, messages::STAT_POINT_NOT_AVAILABLE);
+
+        adventurer.add_statistic(stat_id);
+        adventurer.stat_upgrade_available == 0;
+
+        _pack_adventurer(ref self, adventurer_id, adventurer);
     }
 
     // @loothero
-    fn _purchase_health(ref self: ContractState, adventurer_id: u256) { // 
-    // check gold balance
-    // update health
-    // update gold - health price
+    fn _purchase_health(ref self: ContractState, adventurer_id: u256) {
+        _assert_ownership(@self, adventurer_id);
+
+        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+        // check gold balance
+        assert(
+            adventurer.check_gold(adventurer.get_potion_cost()) == true, messages::NOT_ENOUGH_GOLD
+        );
+
+        // calculate cost of potion based on the Adventurers level
+        adventurer.deduct_gold(adventurer.get_potion_cost());
+
+        // TODO: We could remove the value from here altogether and have it within the function
+        adventurer.add_health(POTION_HEALTH_AMOUNT);
+
+        _pack_adventurer(ref self, adventurer_id, adventurer);
     }
 
     // ------------------------------------------ //
@@ -434,11 +469,11 @@ mod Game {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
     }
 
-    fn lords_address(ref self: ContractState) -> ContractAddress {
+    fn _lords_address(self: @ContractState) -> ContractAddress {
         self._lords.read()
     }
 
-    fn dao_address(ref self: ContractState) -> ContractAddress {
+    fn _dao_address(self: @ContractState) -> ContractAddress {
         self._dao.read()
     }
 
@@ -479,5 +514,15 @@ mod Game {
                 suffix: item_details.item_suffix
             }
         };
+    }
+
+    fn _set_entropy(ref self: ContractState) {
+        // TODO: Replace with actual seed
+        //starknet::get_tx_info().unbox().transaction_hash.into()
+        self._game_entropy.write(1);
+    }
+
+    fn _get_entropy(self: @ContractState) -> u256 {
+        self._game_entropy.read().into()
     }
 }

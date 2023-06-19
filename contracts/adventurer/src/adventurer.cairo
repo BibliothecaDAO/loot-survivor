@@ -18,7 +18,9 @@ use lootitems::statistics::{constants, item_tier, item_type};
 use super::exploration::ExploreUtils;
 use super::beasts::BeastUtils;
 use super::constants::beast_constants;
-use super::constants::adventurer_constants::{STARTING_GOLD};
+use super::constants::adventurer_constants::{
+    STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH
+};
 use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
 use super::item_meta::{LootStatistics, LootDescription};
 
@@ -70,6 +72,8 @@ trait IAdventurer {
     fn add_health(ref self: Adventurer, value: u16) -> Adventurer;
     fn deduct_health(ref self: Adventurer, value: u16) -> Adventurer;
 
+    fn get_potion_cost(ref self: Adventurer) -> u16;
+
     // gold
     fn increase_gold(ref self: Adventurer, value: u16) -> Adventurer;
 
@@ -82,6 +86,7 @@ trait IAdventurer {
     fn increase_item_xp(ref self: Adventurer, value: u16) -> Adventurer;
 
     // stats
+    fn add_statistic(ref self: Adventurer, value: u8) -> Adventurer;
     fn add_strength(ref self: Adventurer, value: u8) -> Adventurer;
     fn add_dexterity(ref self: Adventurer, value: u8) -> Adventurer;
     fn add_vitality(ref self: Adventurer, value: u8) -> Adventurer;
@@ -121,6 +126,26 @@ trait IAdventurer {
 }
 
 impl ImplAdventurer of IAdventurer {
+    fn get_potion_cost(ref self: Adventurer) -> u16 {
+        // TODO: Loothero
+        POTION_PRICE
+    }
+    fn add_statistic(ref self: Adventurer, value: u8) -> Adventurer {
+        assert(value < 6, 'Index out of bounds');
+        if (value == StatisticIndex::STRENGTH) {
+            self.add_strength(1)
+        } else if (value == StatisticIndex::DEXTERITY) {
+            self.add_dexterity(1)
+        } else if (value == StatisticIndex::VITALITY) {
+            self.add_vitality(1)
+        } else if (value == StatisticIndex::INTELLIGENCE) {
+            self.add_intelligence(1)
+        } else if (value == StatisticIndex::WISDOM) {
+            self.add_wisdom(1)
+        } else {
+            self.add_charisma(1)
+        }
+    }
     // get_random_explore returns a random number between 0 and 3 based on provided entropy
     // @param entropy: entropy for generating random explore
     // @return u64: A random number between 0 and 3 denoting the outcome of the explore
@@ -418,7 +443,7 @@ impl ImplAdventurer of IAdventurer {
 
         return Adventurer {
             last_action: last_action,
-            health: 100,
+            health: STARTING_HEALTH,
             xp: 0,
             strength: 0,
             dexterity: 0,
@@ -826,4 +851,25 @@ fn test_explore_gold_discovery() { //TODO: test health discovery
 #[test]
 #[available_gas(500000)]
 fn test_explore_xp_discovery() { // TODO: test xp discovery
+}
+
+#[test]
+#[available_gas(500000)]
+fn test_add_statistic() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+
+    adventurer.add_statistic(StatisticIndex::STRENGTH);
+    assert(adventurer.strength == 1, 'strength');
+
+    adventurer.add_statistic(StatisticIndex::DEXTERITY);
+    assert(adventurer.dexterity == 1, 'dexterity');
+
+    adventurer.add_statistic(StatisticIndex::INTELLIGENCE);
+    assert(adventurer.intelligence == 1, 'intelligence');
+
+    adventurer.add_statistic(StatisticIndex::VITALITY);
+    assert(adventurer.vitality == 1, 'vitality');
+
+    adventurer.add_statistic(StatisticIndex::WISDOM);
+    assert(adventurer.wisdom == 1, 'wisdom');
 }

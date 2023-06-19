@@ -4,5 +4,6 @@ mod messages {
     const NOT_OWNER: felt252 = 'Not authorized to act';
     const ITEM_NOT_IN_BAG: felt252 = 'Item not in bag';
     const INVALID_STARTING_WEAPON: felt252 = 'Invalid starting weapon';
+    const STAT_POINT_NOT_AVAILABLE: felt252 = 'Stat point not available';
 }
 

@@ -20,7 +20,11 @@ mod tests {
         AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata
     };
 
-    use survivor::constants::adventurer_constants::{STARTING_GOLD};
+    use survivor::constants::adventurer_constants::{
+        STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH
+    };
+
+    use game::game::messages::messages;
 
     fn setup() -> IGameDispatcher {
         let mut calldata = Default::default();
@@ -74,7 +78,7 @@ mod tests {
         assert(adventurer_meta_1.race == 1, 'race');
         assert(adventurer_meta_1.order == 2, 'order');
 
-        adventurer_meta_1.entropy.print();
+        adventurer_meta_1.entropy;
     }
 
     #[test]
@@ -162,8 +166,29 @@ mod tests {
         // refetch bag to make sure it's empty
         let bag = deployed_game.get_bag(0);
 
-        bag.item_1.id.print();
+        bag.item_1.id;
 
         assert(bag.item_1.id == 0, 'sash is still in bag');
+    }
+
+    #[test]
+    #[available_gas(30000000)]
+    fn test_buy_health() {
+        let mut deployed_game = new_adventurer();
+
+        deployed_game.purchase_health(0);
+
+        let adventurer = deployed_game.get_adventurer(0);
+
+        assert(adventurer.health == POTION_HEALTH_AMOUNT + STARTING_HEALTH, 'health');
+        assert(adventurer.gold == STARTING_GOLD - POTION_PRICE, 'gold');
+    }
+
+    #[test]
+    #[available_gas(300000000)]
+    fn test_entropy() {
+        let mut deployed_game = new_adventurer();
+
+        deployed_game.get_entropy();
     }
 }
