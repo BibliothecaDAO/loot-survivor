@@ -7,13 +7,20 @@ mod tests {
     use starknet::syscalls::deploy_syscall;
     use traits::TryInto;
     use debug::PrintTrait;
+    use core::serde::Serde;
 
+    use market::market::{ImplMarket};
+
+    use lootitems::loot::{Loot, ImplLoot, ILoot};
     use lootitems::loot::constants::{ItemId};
 
-    use game::game::game::{IGame, Game, IGameDispatcher, IGameDispatcherTrait};
+    use game::game::interfaces::{IGameDispatcherTrait, IGameDispatcher};
+    use game::game::game::{Game};
     use survivor::adventurer_meta::{
         AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata
     };
+
+    use survivor::constants::adventurer_constants::{STARTING_GOLD};
 
     fn setup() -> IGameDispatcher {
         let mut calldata = Default::default();
@@ -43,6 +50,12 @@ mod tests {
         deployed_game
     }
 
+    fn adventurer_market_items() -> Array<Loot> {
+        let mut deployed_game = new_adventurer();
+
+        deployed_game.get_items_on_market(0)
+    }
+
     #[test]
     #[available_gas(30000000)]
     fn test_start() {
@@ -68,15 +81,77 @@ mod tests {
     #[available_gas(30000000)]
     fn test_explore() {
         let mut deployed_game = new_adventurer();
-
-        deployed_game.explore(0);
     }
 
     #[test]
     #[available_gas(30000000)]
     fn test_attack() {
         let mut deployed_game = new_adventurer();
+    }
 
-        deployed_game.explore(0);
+    #[test]
+    #[available_gas(30000000)]
+    fn test_buy_equip() {
+        let mut deployed_game = new_adventurer();
+        let market_items = @adventurer_market_items();
+
+        let item = ImplLoot::get_item(*market_items.at(0).id);
+        let item_price = ImplMarket::get_price(item.tier);
+
+        deployed_game.buy_item(0, *market_items.at(0).id, true);
+
+        let adventurer = deployed_game.get_adventurer(0);
+
+        assert(adventurer.gold == STARTING_GOLD - item_price, 'gold');
+        assert(adventurer.waist.id == *market_items.at(0).id, 'sash is equiped');
+    }
+
+    #[test]
+    #[available_gas(30000000)]
+    fn test_get_market_items() {
+        let mut deployed_game = new_adventurer();
+
+        let market_items = @adventurer_market_items();
+
+        assert(market_items.len() == 20, 'market items');
+
+        assert(*market_items.at(0).id == 31, 'sash');
+    }
+
+    #[test]
+    #[available_gas(30000000)]
+    fn test_buy_and_bag_item() {
+        let mut deployed_game = new_adventurer();
+        let market_items = @adventurer_market_items();
+
+        deployed_game.buy_item(0, *market_items.at(0).id, false);
+
+        let bag = deployed_game.get_bag(0);
+
+        assert(bag.item_1.id == *market_items.at(0).id, 'sash in bag');
+    }
+
+    #[test]
+    #[available_gas(30000000)]
+    fn test_equip_item_from_bag() {
+        let mut deployed_game = new_adventurer();
+        let market_items = @adventurer_market_items();
+
+        deployed_game.buy_item(0, *market_items.at(0).id, false);
+
+        let bag = deployed_game.get_bag(0);
+        assert(bag.item_1.id == *market_items.at(0).id, 'sash in bag');
+
+        deployed_game.equip(0, *market_items.at(0).id);
+
+        let adventurer = deployed_game.get_adventurer(0);
+        assert(adventurer.waist.id == *market_items.at(0).id, 'sash is equiped');
+
+        // refetch bag to make sure it's empty
+        let bag = deployed_game.get_bag(0);
+
+        bag.item_1.id.print();
+
+        assert(bag.item_1.id == 0, 'sash is still in bag');
     }
 }

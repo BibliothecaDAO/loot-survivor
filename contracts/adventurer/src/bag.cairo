@@ -362,8 +362,11 @@ impl ImplBagActions of BagActions {
         } else if self.item_10.id == item_id {
             self.item_10 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
-        } else {
+        } else if self.item_11.id == item_id {
             self.item_11 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            return self;
+        } else {
+            self.item_12 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         }
     }

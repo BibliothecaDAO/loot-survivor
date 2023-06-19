@@ -1,0 +1,1 @@
+const STARTING_GOLD: u16 = 40;
