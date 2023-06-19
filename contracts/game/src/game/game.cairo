@@ -198,24 +198,6 @@ mod Game {
         // TODO: get game_entropy from storage
         let game_entropy = 1;
 
-        // get armour based storage
-        // fetch item according to obstacle location on Adventurer
-        let example_item_to_replace = LootStatistics { id: 1, xp: 1, metadata: 1 };
-
-        // withdraw from storage
-        // TODO: check item even has any metadata
-        if (example_item_to_replace.metadata <= 10) {
-            let item = ImplLootDescription::get_loot_description(
-                _loot_description_storage_unpacked(@self, adventurer_id, LOOT_DESCRIPTION_INDEX_1),
-                example_item_to_replace
-            );
-        } else {
-            let item = ImplLootDescription::get_loot_description(
-                _loot_description_storage_unpacked(@self, adventurer_id, LOOT_DESCRIPTION_INDEX_2),
-                example_item_to_replace
-            );
-        }
-
         let explore_result = ImplAdventurer::get_random_explore(game_entropy);
         match explore_result {
             ExploreResult::Beast(()) => {
@@ -259,23 +241,10 @@ mod Game {
         // if the obstacle was not dodged
         } else {
             // get item at the location the obstacle is dealing damage to
-            // TODO: Clean this up
             let armor = ImplAdventurer::get_item_at_slot(adventurer, obstacle.damage_location);
-            let armor_tier = ImplLoot::get_tier(armor.id);
-            let armor_type = ImplLoot::get_type(armor.id);
-            let item = ImplLootDescription::get_loot_description(
-                _loot_description_storage_unpacked(@self, adventurer_id, LOOT_DESCRIPTION_INDEX_1),
-                armor
-            );
-            let armor_level = ImplLoot::get_greatness_level(armor.xp);
-            let armor_combat_spec = CombatSpec {
-                tier: armor_tier,
-                item_type: armor_type,
-                level: U8IntoU16::into(armor_level),
-                special_powers: SpecialPowers {
-                    prefix1: item.name_prefix, prefix2: item.name_suffix, suffix: item.item_suffix
-                }
-            };
+
+            // get combat spec for that item
+            let armor_combat_spec = _get_combat_spec(@self, adventurer_id, armor);
 
             // calculate damage from the obstacle
             let obstacle_damage = ImplObstacle::get_damage(obstacle, armor_combat_spec, entropy);
@@ -488,5 +457,39 @@ mod Game {
     fn _get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<Loot> {
         // TODO: Replace with actual seed
         ImplMarket::get_all_items(TEST_ENTROPY)
+    }
+
+    fn _get_description_index(self: @ContractState, meta_data_id: u8) -> u256 {
+        if (meta_data_id <= 10) {
+            return LOOT_DESCRIPTION_INDEX_1;
+        } else {
+            return LOOT_DESCRIPTION_INDEX_2;
+        }
+    }
+
+    // _get_combat_spec returns the combat spec of an item
+    // as part of this we get the item details from the loot description
+    fn _get_combat_spec(
+        self: @ContractState, adventurer_id: u256, item: LootStatistics
+    ) -> CombatSpec {
+        // get item details
+        let item_details = ImplLootDescription::get_loot_description(
+            _loot_description_storage_unpacked(
+                self, adventurer_id, _get_description_index(self, item.metadata)
+            ),
+            item
+        );
+
+        // return combat spec of item
+        return CombatSpec {
+            tier: ImplLoot::get_tier(item.id),
+            item_type: ImplLoot::get_type(item.id),
+            level: U8IntoU16::into(ImplLoot::get_greatness_level(item.xp)),
+            special_powers: SpecialPowers {
+                prefix1: item_details.name_prefix,
+                prefix2: item_details.name_suffix,
+                suffix: item_details.item_suffix
+            }
+        };
     }
 }
