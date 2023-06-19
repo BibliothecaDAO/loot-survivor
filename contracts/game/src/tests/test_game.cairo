@@ -81,6 +81,18 @@ mod tests {
     #[available_gas(30000000)]
     fn test_explore() {
         let mut deployed_game = new_adventurer();
+        let original_adventurer = deployed_game.get_adventurer(0);
+        assert(original_adventurer.xp == 0, 'should start with 0 xp');
+        assert(original_adventurer.health == 100, 'should start with 100hp');
+        assert(original_adventurer.weapon.id == ItemId::Wand, 'adventurer should have a wand');
+
+        // Go exploring an encounter an obstacle (explore is currently hard coded for an obstacle)
+        deployed_game.explore(0);
+        let updated_adventurer = deployed_game.get_adventurer(0);
+        assert(updated_adventurer.health == 100, 'should have dodged obstacle');
+        assert(updated_adventurer.xp > 0, 'advntr should have gained xp');
+        assert(updated_adventurer.weapon.xp > 0, 'weapon should have gained xp');
+        assert(updated_adventurer.head.xp == 0, 'head should not have gained xp');
     }
 
     #[test]
