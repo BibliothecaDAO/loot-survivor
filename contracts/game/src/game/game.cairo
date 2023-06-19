@@ -188,7 +188,7 @@ mod Game {
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
         // TODO: get game_entropy from storage
-        let game_entropy = 2;
+        let game_entropy = 1;
 
         let explore_result = ImplAdventurer::get_random_explore(game_entropy);
         match explore_result {
