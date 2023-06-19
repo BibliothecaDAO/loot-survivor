@@ -23,6 +23,8 @@ trait IGame<T> {
 
     fn get_bag(self: @T, adventurer_id: u256) -> Bag;
     fn get_items_on_market(self: @T, adventurer_id: u256) -> Array<Loot>;
+    fn get_dao_address(self: @T) -> ContractAddress;
+    fn get_lords_address(self: @T) -> ContractAddress;
 
     fn owner_of(self: @T, adventurer_id: u256) -> ContractAddress;
 }

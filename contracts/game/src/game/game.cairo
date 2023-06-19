@@ -119,6 +119,14 @@ mod Game {
             _get_items_on_market(self, adventurer_id)
         }
 
+        fn get_dao_address(self: @ContractState) -> ContractAddress {
+            _dao_address(self)
+        }
+
+        fn get_lords_address(self: @ContractState) -> ContractAddress {
+            _lords_address(self)
+        }
+
         fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
             _owner_of(self, adventurer_id)
         }
@@ -306,7 +314,7 @@ mod Game {
     // @loaf
     fn _equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
         _assert_ownership(@self, adventurer_id);
-        // TODO: check ownership
+
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
         let mut bag = _bag_unpacked(@self, adventurer_id);
@@ -396,8 +404,12 @@ mod Game {
 
 
     // @loothero
-    fn _upgrade_stat(ref self: ContractState, adventurer_id: u256, stat_id: u8) { //
-    // check can upgradable
+    fn _upgrade_stat(ref self: ContractState, adventurer_id: u256, stat_id: u8) {
+        _assert_ownership(@self, adventurer_id);
+
+        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+        assert(adventurer.stat_upgrade_available == 1, messages::STAT_POINT_NOT_AVAILABLE);
     // upgrade stat
     // set upgrade to false
     }
@@ -465,11 +477,11 @@ mod Game {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
     }
 
-    fn lords_address(ref self: ContractState) -> ContractAddress {
+    fn _lords_address(self: @ContractState) -> ContractAddress {
         self._lords.read()
     }
 
-    fn dao_address(ref self: ContractState) -> ContractAddress {
+    fn _dao_address(self: @ContractState) -> ContractAddress {
         self._dao.read()
     }
 
