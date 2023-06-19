@@ -32,6 +32,7 @@ impl ImplMarket of IMarket {
             Tier::T5(()) => 1 * TIER_PRICE,
         }
     }
+
     fn get_all_items(seed: u64) -> Array<Loot> {
         let mut all_items = ArrayTrait::<Loot>::new();
 
@@ -48,11 +49,11 @@ impl ImplMarket of IMarket {
 
         all_items
     }
-    fn get_id(seed: u64) -> u8 {
-        let id: u8 = (seed % NUM_LOOT_ITEMS).try_into().unwrap();
 
-        id
+    fn get_id(seed: u64) -> u8 {
+        (seed % NUM_LOOT_ITEMS).try_into().unwrap()
     }
+
     fn check_ownership(seed: u64, item_id: u8) -> bool {
         let mut i: u64 = 0;
         let result = loop {
