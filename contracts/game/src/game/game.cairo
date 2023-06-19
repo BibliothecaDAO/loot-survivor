@@ -31,6 +31,7 @@ mod Game {
     use survivor::constants::discovery_constants::DiscoveryEnums::{
         ExploreResult, TreasureDiscovery
     };
+    use survivor::constants::adventurer_constants::{POTION_HEALTH_AMOUNT};
     use survivor::item_meta::{
         ImplLootDescription, LootDescription, ILootDescription, LootDescriptionStorage
     };
@@ -372,22 +373,37 @@ mod Game {
     }
 
 
-    // @loothero
     fn _upgrade_stat(ref self: ContractState, adventurer_id: u256, stat_id: u8) {
         _assert_ownership(@self, adventurer_id);
 
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
         assert(adventurer.stat_upgrade_available == 1, messages::STAT_POINT_NOT_AVAILABLE);
-    // upgrade stat
-    // set upgrade to false
+
+        adventurer.add_statistic(stat_id);
+        adventurer.stat_upgrade_available == 0;
+
+        _pack_adventurer(ref self, adventurer_id, adventurer);
     }
 
     // @loothero
-    fn _purchase_health(ref self: ContractState, adventurer_id: u256) { // 
-    // check gold balance
-    // update health
-    // update gold - health price
+    fn _purchase_health(ref self: ContractState, adventurer_id: u256) {
+        _assert_ownership(@self, adventurer_id);
+
+        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+        // check gold balance
+        assert(
+            adventurer.check_gold(adventurer.get_potion_cost()) == true, messages::NOT_ENOUGH_GOLD
+        );
+
+        // calculate cost of potion based on the Adventurers level
+        adventurer.deduct_gold(adventurer.get_potion_cost());
+
+        // TODO: We could remove the value from here altogether and have it within the function
+        adventurer.add_health(POTION_HEALTH_AMOUNT);
+
+        _pack_adventurer(ref self, adventurer_id, adventurer);
     }
 
     // ------------------------------------------ //

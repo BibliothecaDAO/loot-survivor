@@ -18,7 +18,9 @@ use lootitems::statistics::{constants, item_tier, item_type};
 use super::exploration::ExploreUtils;
 use super::beasts::BeastUtils;
 use super::constants::beast_constants;
-use super::constants::adventurer_constants::{STARTING_GOLD, StatisticIndex};
+use super::constants::adventurer_constants::{
+    STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH
+};
 use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
 use super::item_meta::{LootStatistics, LootDescription};
 
@@ -69,6 +71,8 @@ trait IAdventurer {
 
     fn add_health(ref self: Adventurer, value: u16) -> Adventurer;
     fn deduct_health(ref self: Adventurer, value: u16) -> Adventurer;
+
+    fn get_potion_cost(ref self: Adventurer) -> u16;
 
     // gold
     fn increase_gold(ref self: Adventurer, value: u16) -> Adventurer;
@@ -122,6 +126,10 @@ trait IAdventurer {
 }
 
 impl ImplAdventurer of IAdventurer {
+    fn get_potion_cost(ref self: Adventurer) -> u16 {
+        // TODO: Loothero
+        POTION_PRICE
+    }
     fn add_statistic(ref self: Adventurer, value: u8) -> Adventurer {
         assert(value < 6, 'Index out of bounds');
         if (value == StatisticIndex::STRENGTH) {
@@ -435,7 +443,7 @@ impl ImplAdventurer of IAdventurer {
 
         return Adventurer {
             last_action: last_action,
-            health: 100,
+            health: STARTING_HEALTH,
             xp: 0,
             strength: 0,
             dexterity: 0,

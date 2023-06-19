@@ -20,7 +20,11 @@ mod tests {
         AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata
     };
 
-    use survivor::constants::adventurer_constants::{STARTING_GOLD};
+    use survivor::constants::adventurer_constants::{
+        STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH
+    };
+
+    use game::game::messages::messages;
 
     fn setup() -> IGameDispatcher {
         let mut calldata = Default::default();
@@ -165,5 +169,34 @@ mod tests {
         bag.item_1.id.print();
 
         assert(bag.item_1.id == 0, 'sash is still in bag');
+    }
+
+    #[test]
+    #[available_gas(30000000)]
+    fn test_buy_health() {
+        let mut deployed_game = new_adventurer();
+
+        deployed_game.purchase_health(0);
+
+        let adventurer = deployed_game.get_adventurer(0);
+
+        assert(adventurer.health == POTION_HEALTH_AMOUNT + STARTING_HEALTH, 'health');
+        assert(adventurer.gold == STARTING_GOLD - POTION_PRICE, 'gold');
+    }
+
+    #[test]
+    #[available_gas(300000000)]
+    #[should_panic(expected: ('Not enough gold', ))]
+    fn test_buy_too_much_health() {
+        let mut deployed_game = new_adventurer();
+
+        let mut i = 0;
+        loop {
+            if i == 21 {
+                break;
+            }
+            deployed_game.purchase_health(0);
+            i += 1;
+        };
     }
 }
