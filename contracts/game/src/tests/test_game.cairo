@@ -1,4 +1,3 @@
-use core::serde::Serde;
 #[cfg(test)]
 mod tests {
     use array::ArrayTrait;
@@ -8,6 +7,7 @@ mod tests {
     use starknet::syscalls::deploy_syscall;
     use traits::TryInto;
     use debug::PrintTrait;
+    use core::serde::Serde;
 
     use market::market::{ImplMarket};
 
