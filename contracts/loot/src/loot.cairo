@@ -1,7 +1,7 @@
 use traits::{TryInto, Into};
 use option::OptionTrait;
 use debug::PrintTrait;
-
+use core::serde::Serde;
 use integer::{U256TryIntoU32, U256TryIntoU8};
 
 use core::clone::Clone;
@@ -16,7 +16,7 @@ use pack::constants::{pow, mask};
 use combat::constants::CombatEnums::{Type, Tier, Slot};
 use combat::combat::ImplCombat;
 
-#[derive(Copy, Drop, Clone)]
+#[derive(Copy, Drop, Clone, Serde)]
 struct Loot {
     id: u8,
     tier: Tier,

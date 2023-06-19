@@ -14,9 +14,9 @@ use combat::constants::CombatEnums::{Tier};
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET, TIER_PRICE};
 
 trait IMarket {
-    fn get_all_items(seed: u32) -> Array<Loot>;
-    fn get_id(seed: u32) -> u8;
-    fn check_ownership(seed: u32, item_id: u8) -> bool;
+    fn get_all_items(seed: u64) -> Array<Loot>;
+    fn get_id(seed: u64) -> u8;
+    fn check_ownership(seed: u64, item_id: u8) -> bool;
     fn get_price(tier: Tier) -> u16;
 }
 
@@ -30,12 +30,12 @@ impl ImplMarket of IMarket {
             Tier::T5(()) => 1 * TIER_PRICE,
         }
     }
-    fn get_all_items(seed: u32) -> Array<Loot> {
+    fn get_all_items(seed: u64) -> Array<Loot> {
         let mut all_items = ArrayTrait::<Loot>::new();
 
-        let mut i: usize = 0;
+        let mut i: u64 = 0;
         loop {
-            if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
                 break ();
             }
 
@@ -46,13 +46,13 @@ impl ImplMarket of IMarket {
 
         all_items
     }
-    fn get_id(seed: u32) -> u8 {
+    fn get_id(seed: u64) -> u8 {
         let id: u8 = (seed % NUM_LOOT_ITEMS).try_into().unwrap();
 
         id
     }
-    fn check_ownership(seed: u32, item_id: u8) -> bool {
-        let mut i: usize = 0;
+    fn check_ownership(seed: u64, item_id: u8) -> bool {
+        let mut i: u64 = 0;
         let result = loop {
             if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
                 break ();
@@ -97,7 +97,9 @@ fn test_get_price() {
 fn test_get_all_items() {
     let items = ImplMarket::get_all_items(1);
 
-    assert(items.len() > NUMBER_OF_ITEMS_PER_LEVEL, 'too many items');
+    let len: u64 = items.len().into();
+
+    assert(len == NUMBER_OF_ITEMS_PER_LEVEL, 'too many items');
 }
 
 #[test]
@@ -105,7 +107,7 @@ fn test_get_all_items() {
 fn test_check_ownership() {
     let mut seed = 123456;
 
-    let mut i: usize = 0;
+    let mut i: u64 = 0;
     loop {
         if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
             break ();
@@ -127,7 +129,7 @@ fn test_check_ownership() {
 fn test_fake_check_ownership() {
     let mut seed = 123456;
 
-    let mut i: usize = 0;
+    let mut i: u64 = 0;
     loop {
         if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
             break ();
@@ -150,7 +152,7 @@ fn test_get_all_items_ownership() {
 
     let items = @ImplMarket::get_all_items(seed);
 
-    let mut i: usize = 0;
+    let mut i: u64 = 0;
     let mut item_index: usize = 0;
 
     loop {

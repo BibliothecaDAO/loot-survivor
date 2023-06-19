@@ -1,12 +1,12 @@
 mod CombatEnums {
-    #[derive(Drop, Copy, PartialEq)]
+    #[derive(Drop, Copy, PartialEq, Serde)]
     enum WeaponEffectiveness {
         Weak: (),
         Fair: (),
         Strong: (),
     }
 
-    #[derive(Copy, Drop, PartialEq)]
+    #[derive(Copy, Drop, PartialEq, Serde)]
     enum Type {
         Magic_or_Cloth: (),
         Blade_or_Hide: (),
@@ -15,7 +15,7 @@ mod CombatEnums {
         Ring: (),
     }
 
-    #[derive(Copy, Drop, PartialEq)]
+    #[derive(Copy, Drop, PartialEq, Serde)]
     enum Tier {
         T1: (),
         T2: (),
@@ -24,7 +24,7 @@ mod CombatEnums {
         T5: (),
     }
 
-    #[derive(Copy, Drop, PartialEq)]
+    #[derive(Copy, Drop, PartialEq, Serde)]
     enum Slot {
         Weapon: (),
         Chest: (),

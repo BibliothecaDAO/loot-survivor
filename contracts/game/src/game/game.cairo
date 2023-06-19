@@ -1,27 +1,11 @@
-use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
-use survivor::adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata};
-use starknet::{ContractAddress};
-
-
-#[starknet::interface]
-trait IGame<T> {
-    fn start(ref self: T, starting_weapon: u8, adventurer_meta: AdventurerMetadata);
-    fn explore(ref self: T, adventurer_id: u256);
-    fn attack(ref self: T, adventurer_id: u256);
-    fn flee(ref self: T, adventurer_id: u256);
-    fn equip(ref self: T, adventurer_id: u256, item_id: u8);
-    fn buy_item(ref self: T, adventurer_id: u256, item_id: u8, equip: bool);
-    fn upgrade_stat(ref self: T, adventurer_id: u256, stat: u8);
-    fn purchase_health(ref self: T, adventurer_id: u256);
-
-    // view functions
-    fn get_adventurer(self: @T, adventurer_id: u256) -> Adventurer;
-    fn get_adventurer_meta(self: @T, adventurer_id: u256) -> AdventurerMetadata;
-    fn owner_of(self: @T, adventurer_id: u256) -> ContractAddress;
-}
-
 #[starknet::contract]
 mod Game {
+    // TESTING CONSTS REMOVE 
+
+    const TEST_ENTROPY: u64 = 12303548;
+
+    use game::game::interfaces::IGame;
+
     const LOOT_DESCRIPTION_INDEX_1: u256 = 0;
     const LOOT_DESCRIPTION_INDEX_2: u256 = 1;
 
@@ -32,6 +16,9 @@ mod Game {
     use integer::{U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64, U8IntoU16};
     use integer::U64IntoFelt252;
     use core::traits::{TryInto, Into};
+
+    use game::game::messages::messages;
+
     use lootitems::loot::{Loot, ImplLoot};
     use pack::pack::{pack_value, unpack_value};
 
@@ -87,7 +74,7 @@ mod Game {
     // ------------------------------------------ //
 
     #[external(v0)]
-    impl Game of super::IGame<ContractState> {
+    impl Game of IGame<ContractState> {
         fn start(
             ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata
         ) {
@@ -124,6 +111,14 @@ mod Game {
             _adventurer_meta_unpacked(self, adventurer_id)
         }
 
+        fn get_bag(self: @ContractState, adventurer_id: u256) -> Bag {
+            _bag_unpacked(self, adventurer_id)
+        }
+
+        fn get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<Loot> {
+            _get_items_on_market(self, adventurer_id)
+        }
+
         fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
             _owner_of(self, adventurer_id)
         }
@@ -137,7 +132,7 @@ mod Game {
         let caller = get_caller_address();
 
         assert(
-            ImplLoot::is_starting_weapon(starting_weapon) == true, 'Loot is not a starter weapon'
+            ImplLoot::is_starting_weapon(starting_weapon) == true, messages::INVALID_STARTING_WEAPON
         );
 
         // get current block timestamp and convert to felt252
@@ -314,12 +309,15 @@ mod Game {
         // TODO: check ownership
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
-        let mut bag = _bag_unpacked(ref self, adventurer_id);
+        let mut bag = _bag_unpacked(@self, adventurer_id);
 
         let equipping_item = bag.get_item(item_id);
 
+        // remove item from bag
+        bag.remove_item(equipping_item.id);
+
         // TODO: could be moved to lib
-        assert(equipping_item.id > 0, 'Loot does not exist in bag');
+        assert(equipping_item.id > 0, messages::ITEM_NOT_IN_BAG);
 
         // check what item type exists on adventurer
         // if some exists pluck from adventurer and add to bag
@@ -350,13 +348,14 @@ mod Game {
         // TODO: Remove after testing
         // assert(adventurer.stat_upgrade_available == 1, 'Not available');
 
-        let mut bag = _bag_unpacked(ref self, adventurer_id);
-
-        // TODO: update to real entropy
-        let entropy: u32 = 12303548;
+        let mut bag = _bag_unpacked(@self, adventurer_id);
 
         // check item exists on Market
-        assert(ImplMarket::check_ownership(entropy, item_id) == true, 'Market item does not exist');
+        // TODO: replace entropy
+        assert(
+            ImplMarket::check_ownership(TEST_ENTROPY, item_id) == true,
+            messages::ITEM_DOES_NOT_EXIST
+        );
 
         // get item and determine metadata slot
         let item = ImplLootDescription::get_loot_description_slot(
@@ -368,7 +367,7 @@ mod Game {
         let item_price = ImplMarket::get_price(item_tier);
 
         // check adventurer has enough gold
-        assert(adventurer.check_gold(item_price) == true, 'Not enough gold');
+        assert(adventurer.check_gold(item_price) == true, messages::NOT_ENOUGH_GOLD);
 
         // deduct gold
         adventurer.deduct_gold(item_price);
@@ -422,7 +421,7 @@ mod Game {
         self._adventurer.write(adventurer_id, adventurer.pack());
     }
 
-    fn _bag_unpacked(ref self: ContractState, adventurer_id: u256) -> Bag {
+    fn _bag_unpacked(self: @ContractState, adventurer_id: u256) -> Bag {
         ImplBagActions::unpack(self._bag.read(adventurer_id))
     }
 
@@ -463,7 +462,7 @@ mod Game {
     }
 
     fn _assert_ownership(self: @ContractState, adventurer_id: u256) {
-        assert(self._owner.read(adventurer_id) == get_caller_address(), 'Not owner');
+        assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
     }
 
     fn lords_address(ref self: ContractState) -> ContractAddress {
@@ -472,5 +471,10 @@ mod Game {
 
     fn dao_address(ref self: ContractState) -> ContractAddress {
         self._dao.read()
+    }
+
+    fn _get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<Loot> {
+        // TODO: Replace with actual seed
+        ImplMarket::get_all_items(TEST_ENTROPY)
     }
 }
