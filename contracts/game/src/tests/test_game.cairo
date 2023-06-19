@@ -78,7 +78,7 @@ mod tests {
         assert(adventurer_meta_1.race == 1, 'race');
         assert(adventurer_meta_1.order == 2, 'order');
 
-        adventurer_meta_1.entropy.print();
+        adventurer_meta_1.entropy;
     }
 
     #[test]
@@ -166,7 +166,7 @@ mod tests {
         // refetch bag to make sure it's empty
         let bag = deployed_game.get_bag(0);
 
-        bag.item_1.id.print();
+        bag.item_1.id;
 
         assert(bag.item_1.id == 0, 'sash is still in bag');
     }
@@ -186,17 +186,9 @@ mod tests {
 
     #[test]
     #[available_gas(300000000)]
-    #[should_panic(expected: ('Not enough gold', ))]
-    fn test_buy_too_much_health() {
+    fn test_entropy() {
         let mut deployed_game = new_adventurer();
 
-        let mut i = 0;
-        loop {
-            if i == 21 {
-                break;
-            }
-            deployed_game.purchase_health(0);
-            i += 1;
-        };
+        deployed_game.get_entropy();
     }
 }

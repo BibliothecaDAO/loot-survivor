@@ -52,6 +52,7 @@ mod Game {
 
     #[storage]
     struct Storage {
+        _game_entropy: felt252,
         _adventurer: LegacyMap::<u256, felt252>,
         _owner: LegacyMap::<u256, ContractAddress>,
         _adventurer_meta: LegacyMap::<u256, felt252>,
@@ -68,6 +69,8 @@ mod Game {
         // set the contract addresses
         self._lords.write(lords);
         self._dao.write(dao);
+
+        _set_entropy(ref self);
     }
 
     // ------------------------------------------ //
@@ -126,6 +129,10 @@ mod Game {
 
         fn get_lords_address(self: @ContractState) -> ContractAddress {
             _lords_address(self)
+        }
+
+        fn get_entropy(self: @ContractState) -> u256 {
+            _get_entropy(self)
         }
 
         fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
@@ -197,7 +204,7 @@ mod Game {
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
         // TODO: get game_entropy from storage
-        let game_entropy = 1;
+        let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
 
         let explore_result = ImplAdventurer::get_random_explore(game_entropy);
         match explore_result {
@@ -507,5 +514,15 @@ mod Game {
                 suffix: item_details.item_suffix
             }
         };
+    }
+
+    fn _set_entropy(ref self: ContractState) {
+        // TODO: Replace with actual seed
+        //starknet::get_tx_info().unbox().transaction_hash.into()
+        self._game_entropy.write(1);
+    }
+
+    fn _get_entropy(self: @ContractState) -> u256 {
+        self._game_entropy.read().into()
     }
 }
