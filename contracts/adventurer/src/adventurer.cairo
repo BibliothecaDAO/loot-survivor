@@ -118,17 +118,25 @@ trait IAdventurer {
 
     fn get_beast(self: Adventurer) -> u8;
 
-    fn get_level(xp: u16) -> u8;
+    fn get_level(self: Adventurer) -> u8;
 
     fn is_slot_free(self: Adventurer, item: LootStatistics) -> bool;
 
     fn get_item_at_slot(self: Adventurer, slot: Slot) -> LootStatistics;
+
+    fn charisma_potion_discount(self: Adventurer) -> u16;
+    fn charisma_item_discount(self: Adventurer) -> u16;
 }
 
 impl ImplAdventurer of IAdventurer {
+    fn charisma_potion_discount(self: Adventurer) -> u16 {
+        0
+    }
+    fn charisma_item_discount(self: Adventurer) -> u16 {
+        0
+    }
     fn get_potion_cost(ref self: Adventurer) -> u16 {
-        // TODO: Loothero
-        POTION_PRICE
+        POTION_PRICE * self.get_level().into()
     }
     fn add_statistic(ref self: Adventurer, value: u8) -> Adventurer {
         assert(value < 6, 'Index out of bounds');
@@ -211,8 +219,8 @@ impl ImplAdventurer of IAdventurer {
         return 1;
     }
 
-    fn get_level(xp: u16) -> u8 {
-        return ImplCombat::get_level_from_xp(xp);
+    fn get_level(self: Adventurer) -> u8 {
+        return ImplCombat::get_level_from_xp(self.xp);
     }
 
     fn beast_encounter(ref self: Adventurer, entropy: u64) -> Adventurer {
@@ -479,48 +487,49 @@ impl ImplAdventurer of IAdventurer {
         let mut packed = 0;
         packed = packed | pack_value(self.last_action.into(), pow::TWO_POW_242);
         packed = packed | pack_value(self.health.into(), pow::TWO_POW_233);
-        packed = packed | pack_value(self.xp.into(), pow::TWO_POW_218);
-        packed = packed | pack_value(self.strength.into(), pow::TWO_POW_213);
-        packed = packed | pack_value(self.dexterity.into(), pow::TWO_POW_208);
-        packed = packed | pack_value(self.vitality.into(), pow::TWO_POW_203);
-        packed = packed | pack_value(self.intelligence.into(), pow::TWO_POW_198);
-        packed = packed | pack_value(self.wisdom.into(), pow::TWO_POW_193);
-        packed = packed | pack_value(self.charisma.into(), pow::TWO_POW_188);
-        packed = packed | pack_value(self.gold.into(), pow::TWO_POW_179);
+        packed = packed | pack_value(self.xp.into(), pow::TWO_POW_220);
+        packed = packed | pack_value(self.strength.into(), pow::TWO_POW_215);
+        packed = packed | pack_value(self.dexterity.into(), pow::TWO_POW_210);
+        packed = packed | pack_value(self.vitality.into(), pow::TWO_POW_205);
+        packed = packed | pack_value(self.intelligence.into(), pow::TWO_POW_200);
+        packed = packed | pack_value(self.wisdom.into(), pow::TWO_POW_195);
+        packed = packed | pack_value(self.charisma.into(), pow::TWO_POW_190);
+        packed = packed | pack_value(self.gold.into(), pow::TWO_POW_181);
 
-        packed = packed | pack_value(self.weapon.id.into(), pow::TWO_POW_172);
-        packed = packed | pack_value(self.weapon.xp.into(), pow::TWO_POW_163);
-        packed = packed | pack_value(self.weapon.metadata.into(), pow::TWO_POW_158);
+        packed = packed | pack_value(self.weapon.id.into(), pow::TWO_POW_174);
+        packed = packed | pack_value(self.weapon.xp.into(), pow::TWO_POW_165);
+        packed = packed | pack_value(self.weapon.metadata.into(), pow::TWO_POW_160);
 
-        packed = packed | pack_value(self.chest.id.into(), pow::TWO_POW_151);
-        packed = packed | pack_value(self.chest.xp.into(), pow::TWO_POW_142);
-        packed = packed | pack_value(self.chest.metadata.into(), pow::TWO_POW_137);
+        packed = packed | pack_value(self.chest.id.into(), pow::TWO_POW_153);
+        packed = packed | pack_value(self.chest.xp.into(), pow::TWO_POW_144);
+        packed = packed | pack_value(self.chest.metadata.into(), pow::TWO_POW_139);
 
-        packed = packed | pack_value(self.head.id.into(), pow::TWO_POW_130);
-        packed = packed | pack_value(self.head.xp.into(), pow::TWO_POW_121);
-        packed = packed | pack_value(self.head.metadata.into(), pow::TWO_POW_116);
+        packed = packed | pack_value(self.head.id.into(), pow::TWO_POW_132);
+        packed = packed | pack_value(self.head.xp.into(), pow::TWO_POW_123);
+        packed = packed | pack_value(self.head.metadata.into(), pow::TWO_POW_118);
 
-        packed = packed | pack_value(self.waist.id.into(), pow::TWO_POW_109);
-        packed = packed | pack_value(self.waist.xp.into(), pow::TWO_POW_100);
-        packed = packed | pack_value(self.waist.metadata.into(), pow::TWO_POW_95);
+        packed = packed | pack_value(self.waist.id.into(), pow::TWO_POW_111);
+        packed = packed | pack_value(self.waist.xp.into(), pow::TWO_POW_102);
+        packed = packed | pack_value(self.waist.metadata.into(), pow::TWO_POW_97);
 
-        packed = packed | pack_value(self.foot.id.into(), pow::TWO_POW_88);
-        packed = packed | pack_value(self.foot.xp.into(), pow::TWO_POW_79);
-        packed = packed | pack_value(self.foot.metadata.into(), pow::TWO_POW_74);
+        packed = packed | pack_value(self.foot.id.into(), pow::TWO_POW_90);
+        packed = packed | pack_value(self.foot.xp.into(), pow::TWO_POW_81);
+        packed = packed | pack_value(self.foot.metadata.into(), pow::TWO_POW_76);
 
-        packed = packed | pack_value(self.hand.id.into(), pow::TWO_POW_67);
-        packed = packed | pack_value(self.hand.xp.into(), pow::TWO_POW_58);
-        packed = packed | pack_value(self.hand.metadata.into(), pow::TWO_POW_53);
+        packed = packed | pack_value(self.hand.id.into(), pow::TWO_POW_69);
+        packed = packed | pack_value(self.hand.xp.into(), pow::TWO_POW_60);
+        packed = packed | pack_value(self.hand.metadata.into(), pow::TWO_POW_55);
 
-        packed = packed | pack_value(self.neck.id.into(), pow::TWO_POW_46);
-        packed = packed | pack_value(self.neck.xp.into(), pow::TWO_POW_37);
-        packed = packed | pack_value(self.neck.metadata.into(), pow::TWO_POW_32);
+        packed = packed | pack_value(self.neck.id.into(), pow::TWO_POW_48);
+        packed = packed | pack_value(self.neck.xp.into(), pow::TWO_POW_39);
+        packed = packed | pack_value(self.neck.metadata.into(), pow::TWO_POW_34);
 
-        packed = packed | pack_value(self.ring.id.into(), pow::TWO_POW_25);
-        packed = packed | pack_value(self.ring.xp.into(), pow::TWO_POW_16);
-        packed = packed | pack_value(self.ring.metadata.into(), pow::TWO_POW_11);
+        packed = packed | pack_value(self.ring.id.into(), pow::TWO_POW_27);
+        packed = packed | pack_value(self.ring.xp.into(), pow::TWO_POW_18);
+        packed = packed | pack_value(self.ring.metadata.into(), pow::TWO_POW_13);
 
-        packed = packed | pack_value(self.beast_health.into(), pow::TWO_POW_1);
+        packed = packed | pack_value(self.beast_health.into(), pow::TWO_POW_3);
+
         packed = packed | pack_value(self.stat_upgrade_available.into(), 1);
 
         packed.try_into().unwrap()
@@ -539,102 +548,102 @@ impl ImplAdventurer of IAdventurer {
                 .unwrap(),
             health: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_233, mask::MASK_10))
                 .unwrap(),
-            xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_218, mask::MASK_15))
+            xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_220, mask::MASK_13))
                 .unwrap(),
-            strength: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_213, mask::MASK_5))
+            strength: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_215, mask::MASK_5))
                 .unwrap(),
-            dexterity: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_208, mask::MASK_5))
+            dexterity: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_210, mask::MASK_5))
                 .unwrap(),
-            vitality: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_203, mask::MASK_5))
+            vitality: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_205, mask::MASK_5))
                 .unwrap(),
             intelligence: U256TryIntoU8::try_into(
-                unpack_value(packed, pow::TWO_POW_198, mask::MASK_5)
+                unpack_value(packed, pow::TWO_POW_200, mask::MASK_5)
             )
                 .unwrap(),
-            wisdom: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_193, mask::MASK_5))
+            wisdom: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_195, mask::MASK_5))
                 .unwrap(),
-            charisma: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_188, mask::MASK_5))
+            charisma: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_190, mask::MASK_5))
                 .unwrap(),
-            gold: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_179, mask::MASK_9))
+            gold: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_181, mask::MASK_9))
                 .unwrap(),
             weapon: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_172, mask::MASK_7))
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_174, mask::MASK_7))
                     .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_163, mask::MASK_9))
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_165, mask::MASK_9))
                     .unwrap(),
                 metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_158, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_160, mask::MASK_5)
                 )
                     .unwrap(),
                 }, chest: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_151, mask::MASK_7))
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_153, mask::MASK_7))
                     .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_142, mask::MASK_9))
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_144, mask::MASK_9))
                     .unwrap(),
                 metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_137, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_139, mask::MASK_5)
                 )
                     .unwrap(),
                 }, head: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_130, mask::MASK_7))
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_132, mask::MASK_7))
                     .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_121, mask::MASK_9))
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_123, mask::MASK_9))
                     .unwrap(),
                 metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_116, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_118, mask::MASK_5)
                 )
                     .unwrap(),
                 }, waist: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_109, mask::MASK_7))
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_111, mask::MASK_7))
                     .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_100, mask::MASK_9))
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_102, mask::MASK_9))
                     .unwrap(),
                 metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_95, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_97, mask::MASK_5)
                 )
                     .unwrap(),
                 }, foot: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_88, mask::MASK_7))
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_90, mask::MASK_7))
                     .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_79, mask::MASK_9))
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_81, mask::MASK_9))
                     .unwrap(),
                 metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_74, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_76, mask::MASK_5)
                 )
                     .unwrap(),
                 }, hand: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_67, mask::MASK_7))
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_69, mask::MASK_7))
                     .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_58, mask::MASK_9))
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_60, mask::MASK_9))
                     .unwrap(),
                 metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_53, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_55, mask::MASK_5)
                 )
                     .unwrap(),
                 }, neck: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_46, mask::MASK_7))
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_48, mask::MASK_7))
                     .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_37, mask::MASK_9))
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_39, mask::MASK_9))
                     .unwrap(),
                 metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_32, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_34, mask::MASK_5)
                 )
                     .unwrap(),
                 }, ring: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_25, mask::MASK_7))
+                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_27, mask::MASK_7))
                     .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_16, mask::MASK_9))
+                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_18, mask::MASK_9))
                     .unwrap(),
                 metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_11, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_13, mask::MASK_5)
                 )
                     .unwrap(),
             },
             beast_health: U256TryIntoU16::try_into(
-                unpack_value(packed, pow::TWO_POW_1, mask::MASK_10)
+                unpack_value(packed, pow::TWO_POW_3, mask::MASK_10)
             )
                 .unwrap(),
-            stat_upgrade_available: U256TryIntoU8::try_into(unpack_value(packed, 1, MASK_BOOL))
+            stat_upgrade_available: U256TryIntoU8::try_into(unpack_value(packed, 1, mask::MASK_3))
                 .unwrap(),
         }
     }
@@ -645,7 +654,7 @@ fn test_adventurer() {
     let adventurer = Adventurer {
         last_action: 511,
         health: 1023,
-        xp: 32767,
+        xp: 8191,
         strength: 31,
         dexterity: 31,
         vitality: 31,
@@ -708,6 +717,8 @@ fn test_adventurer() {
     assert(adventurer.ring.xp == unpacked.ring.xp, 'ring.xp');
     assert(adventurer.ring.metadata == unpacked.ring.metadata, 'ring.metadata');
     assert(adventurer.beast_health == unpacked.beast_health, 'beast_health');
+
+    unpacked.stat_upgrade_available.print();
     assert(
         adventurer.stat_upgrade_available == unpacked.stat_upgrade_available,
         'stat_upgrade_available'

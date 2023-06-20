@@ -38,7 +38,7 @@ impl ExploreUtils of Explore {
     // @return u16: the amount of gold discovered
     fn get_level_adjusted_discovery_amount(adventurer: Adventurer, entropy: u64) -> u16 {
         // get adventurer's level
-        let adventurer_level = ImplAdventurer::get_level(adventurer.xp);
+        let adventurer_level = ImplAdventurer::get_level(adventurer);
 
         // divide adventurer level by 5 and store the whole number
         let discovery_multiplier = adventurer_level / 5;

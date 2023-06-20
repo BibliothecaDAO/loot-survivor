@@ -252,7 +252,7 @@ mod Game {
     ) -> Adventurer {
         _assert_ownership(@self, adventurer_id);
         // get adventurer level from xp
-        let adventurer_level = ImplAdventurer::get_level(adventurer.xp);
+        let adventurer_level = ImplAdventurer::get_level(adventurer);
 
         // process obstacle encounter
         let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
