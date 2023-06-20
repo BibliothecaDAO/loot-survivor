@@ -17,8 +17,6 @@ use lootitems::loot::{Loot, ILoot, ImplLoot};
 use lootitems::statistics::{constants, item_tier, item_type};
 
 use super::exploration::ExploreUtils;
-use super::beasts::BeastUtils;
-use super::constants::beast_constants;
 use super::constants::adventurer_constants::{
     STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_DISCOUNT,
     MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE
@@ -30,6 +28,8 @@ use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
 use combat::constants::CombatEnums::{Type, Tier, Slot};
 
 use obstacles::obstacle::{ImplObstacle, Obstacle};
+use beasts::beast::{ImplBeast, Beast};
+
 
 #[derive(Drop, Copy, Serde)]
 struct Adventurer {
@@ -260,7 +260,8 @@ impl ImplAdventurer of IAdventurer {
 
     fn beast_encounter(ref self: Adventurer, entropy: u64) -> Adventurer {
         // get the beast health
-        let beast_health = BeastUtils::get_starting_health(self, entropy);
+        let adventurer_level = ImplAdventurer::get_level(self.xp);
+        let beast_health = ImplBeast::get_starting_health(adventurer_level, entropy);
         // add the beast to the adventurer
         return self.add_beast(beast_health);
     }
