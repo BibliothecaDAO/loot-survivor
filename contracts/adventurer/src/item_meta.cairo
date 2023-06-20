@@ -25,7 +25,7 @@ mod STORAGE {
     const INDEX_10: u8 = 10;
 }
 
-#[derive(Drop, Copy)]
+#[derive(Drop, Copy, Serde)]
 struct LootDescription {
     id: u8, // 7 bits
     name_prefix: u8, // 7 bits
@@ -34,7 +34,7 @@ struct LootDescription {
 }
 
 // Player can have a total of 20 items. We map the items index to a slot in the metadata
-#[derive(Drop, Copy)]
+#[derive(Drop, Copy, Serde)]
 struct LootDescriptionStorage {
     item_1: LootDescription,
     item_2: LootDescription,
