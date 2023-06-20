@@ -345,12 +345,21 @@ mod Game {
         // to accomplish this
         let attack_entropy = game_entropy + adventurer_entropy + U16IntoU64::into(adventurer.health + adventurer.beast_health);
         let damage_dealt = ImplBeast::attack(adventurer.get_luck(), adventurer.strength, weapon_combat_spec, beast, attack_entropy);
-
         // if the amount of damage dealt to beast exceeds its health
         if (damage_dealt > adventurer.beast_health) {
             // TODO: Generate Event
             // the beast is dead so set health to zero
-            adventurer.beast_health = 0;
+            // get xp earned for adventurer and items
+            // get gold earned
+            // emit __event__SlayedBeast()
+)
+        } else {
+            // the beast is still alive and proceeds to counter attack
+            let damage_taken = ImplBeast::counter_attack(adventurer.get_luck(), adventurer.strength, weapon_combat_spec, beast, attack_entropy);
+            //counter_attack(beast: Beast, armor: CombatSpec, entropy: u64) -> u16;
+
+
+        }
 
         }
 
