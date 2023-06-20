@@ -26,6 +26,9 @@ trait IGame<T> {
     fn get_lords_address(self: @T) -> ContractAddress;
     fn get_entropy(self: @T) -> u256;
 
+    // setters ---------------------------------------------------
+    fn set_entropy(ref self: T, entropy: felt252);
+
     // checks
     fn owner_of(self: @T, adventurer_id: u256) -> ContractAddress;
 }

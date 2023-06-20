@@ -6,6 +6,7 @@ mod Game {
 
     use game::game::interfaces::IGame;
 
+
     const LOOT_DESCRIPTION_INDEX_1: u256 = 0;
     const LOOT_DESCRIPTION_INDEX_2: u256 = 1;
 
@@ -41,15 +42,6 @@ mod Game {
     use combat::combat::{CombatSpec, SpecialPowers, ImplCombat};
     use combat::constants::CombatEnums;
 
-    // events
-
-    // adventurer_update
-    // adventurer_items
-    // leaderboard_update
-
-    #[event]
-    fn AdventurerUpdate(owner: ContractAddress, id: u256, adventurer: Adventurer) {}
-
     #[storage]
     struct Storage {
         _game_entropy: felt252,
@@ -64,13 +56,36 @@ mod Game {
         _dao: ContractAddress
     }
 
+    #[event]
+    #[derive(Drop, starknet::Event)]
+    enum Event {
+        StartGame: StartGame,
+        StatUpgraded: StatUpgraded,
+        DiscoverHealth: DiscoverHealth,
+        DiscoverGold: DiscoverGold,
+        DiscoverXP: DiscoverXP,
+        DiscoverObstacle: DiscoverObstacle,
+        DiscoverBeast: DiscoverBeast,
+        AttackBeast: AttackBeast,
+        SlayedBeast: SlayedBeast,
+        FleeAttempt: FleeAttempt,
+        PurchasedItem: PurchasedItem,
+        EquipItem: EquipItem,
+        GreatnessIncreased: GreatnessIncreased,
+        ItemPrefixDiscovered: ItemPrefixDiscovered,
+        ItemSuffixDiscovered: ItemSuffixDiscovered,
+        PurchasedPotion: PurchasedPotion,
+        NewHighScore: NewHighScore,
+        AdventurerDied: AdventurerDied
+    }
+
     #[constructor]
     fn constructor(ref self: ContractState, lords: ContractAddress, dao: ContractAddress) {
         // set the contract addresses
         self._lords.write(lords);
         self._dao.write(dao);
 
-        _set_entropy(ref self);
+        _set_entropy(ref self, 1);
     }
 
     // ------------------------------------------ //
@@ -135,6 +150,10 @@ mod Game {
             _get_entropy(self)
         }
 
+        fn set_entropy(ref self: ContractState, entropy: felt252) {
+            _set_entropy(ref self, entropy)
+        }
+
         fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
             _owner_of(self, adventurer_id)
         }
@@ -163,7 +182,7 @@ mod Game {
         let adventurer_id = self._counter.read();
 
         // emit the AdventurerUpdate event
-        AdventurerUpdate(caller, adventurer_id, new_adventurer);
+        // __EVENT_update_adventurer__(ref self, adventurer_id, new_adventurer);
 
         // write the new adventurer to storage
         _pack_adventurer(ref self, adventurer_id, new_adventurer);
@@ -516,13 +535,182 @@ mod Game {
         };
     }
 
-    fn _set_entropy(ref self: ContractState) {
+    fn _set_entropy(ref self: ContractState, entropy: felt252) {
         // TODO: Replace with actual seed
         //starknet::get_tx_info().unbox().transaction_hash.into()
-        self._game_entropy.write(1);
+        self._game_entropy.write(entropy);
     }
 
     fn _get_entropy(self: @ContractState) -> u256 {
         self._game_entropy.read().into()
     }
+
+    // EVENTS ------------------------------------ //
+
+    #[derive(Drop, Serde, starknet::Event)]
+    struct AdventurerState {
+        owner: ContractAddress,
+        adventurer_id: u256,
+        adventurer: Adventurer
+    }
+
+    #[derive(Drop, Serde, starknet::Event)]
+    struct AdventurerStateWithBag {
+        adventurer_state: AdventurerState,
+        bag: Bag
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct StartGame {
+        adventurer_state: AdventurerState,
+        adventurer_meta: AdventurerMetadata
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct StatUpgraded {
+        adventurer_state: AdventurerState,
+        stat_id: u8
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct DiscoverHealth {
+        adventurer_state: AdventurerState,
+        health_amount: u8
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct DiscoverGold {
+        adventurer_state: AdventurerState,
+        gold_amount: u8
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct DiscoverXP {
+        adventurer_state: AdventurerState,
+        xp_amount: u8
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct DiscoverObstacle {
+        adventurer_state: AdventurerState,
+        obstacle_id: u8,
+        obstacle_level: u8,
+        dodged: bool,
+        damage_taken: u8,
+        xp_earned_adventurer: u8,
+        xp_earned_items: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct DiscoverBeast {
+        adventurer_state: AdventurerState,
+        beast_id: u8,
+        prefix_1: u8,
+        prefix_2: u8,
+        beast_level: u8,
+        beast_health: u8,
+        ambushed: bool,
+        damage_taken: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct AttackBeast {
+        adventurer_state: AdventurerState,
+        beast_id: u8,
+        prefix_1: u8,
+        prefix_2: u8,
+        beast_level: u8,
+        beast_health: u8,
+        damage_dealt: u8,
+        damage_taken: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct SlayedBeast {
+        adventurer_state: AdventurerState,
+        beast_id: u8,
+        prefix_1: u8,
+        prefix_2: u8,
+        beast_level: u8,
+        beast_health: u8,
+        damage_dealt: u8,
+        damage_taken: u8,
+        xp_earned_adventurer: u8,
+        xp_earned_items: u8,
+        gold_earned: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct FleeAttempt {
+        adventurer_state: AdventurerState,
+        beast_id: u8,
+        prefix_1: u8,
+        prefix_2: u8,
+        beast_level: u8,
+        beast_health: u8,
+        damage_taken: u8,
+        fled: bool,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct PurchasedItem {
+        adventurer_state: AdventurerStateWithBag,
+        item_id: u8,
+        cost: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct EquipItem {
+        adventurer_state: AdventurerStateWithBag,
+        equiped_item_id: u8,
+        unequiped_item_id: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct GreatnessIncreased {
+        adventurer_state: AdventurerState,
+        item_id: u8
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct ItemPrefixDiscovered {
+        adventurer_state: AdventurerState,
+        item_description: LootDescription
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct ItemSuffixDiscovered {
+        adventurer_state: AdventurerState,
+        item_description: LootDescription
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct PurchasedPotion {
+        adventurer_state: AdventurerState,
+        health_amount: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct NewHighScore {
+        adventurer_state: AdventurerState,
+        rank: u8, // 1-3
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct AdventurerDied {
+        adventurer_state: AdventurerState,
+        killed_by_beast: bool,
+        killed_by_obstacle: bool,
+        killer_id: u8,
+    }
+// fn __event_update_adventurer__(
+//     ref self: ContractState, adventurer_id: u256, adventurer: Adventurer
+// ) {
+//     self
+//         .emit(
+//             Event::AdventurerState(
+//                 AdventurerState { owner: get_caller_address(), adventurer_id, adventurer }
+//             )
+//         );
+// }
 }
