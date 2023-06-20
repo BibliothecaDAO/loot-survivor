@@ -260,7 +260,7 @@ impl ImplAdventurer of IAdventurer {
 
     fn beast_encounter(ref self: Adventurer, entropy: u64) -> Adventurer {
         // get the beast health
-        let adventurer_level = ImplAdventurer::get_level(self.xp);
+        let adventurer_level = ImplAdventurer::get_level(self);
         let beast_health = ImplBeast::get_starting_health(adventurer_level, entropy);
         // add the beast to the adventurer
         return self.add_beast(beast_health);
