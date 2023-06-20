@@ -369,15 +369,17 @@ mod Game {
             adventurer, bag, ImplBagActions::new_item(item_id)
         );
 
-        // TODO: Replace with read from state
+        // TODO: Replace with read from state. We could also move all to lib
         let item_tier = ImplLoot::get_tier(item_id);
         let item_price = ImplMarket::get_price(item_tier);
 
+        let charisma_discount_price = adventurer.get_item_cost(item_price);
+
         // check adventurer has enough gold
-        assert(adventurer.check_gold(item_price) == true, messages::NOT_ENOUGH_GOLD);
+        assert(adventurer.check_gold(charisma_discount_price) == true, messages::NOT_ENOUGH_GOLD);
 
         // deduct gold
-        adventurer.deduct_gold(item_price);
+        adventurer.deduct_gold(charisma_discount_price);
 
         if equip == true {
             let unequipping_item = adventurer.get_item_at_slot(ImplLoot::get_slot(item.id));

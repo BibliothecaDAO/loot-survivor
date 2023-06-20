@@ -1,7 +1,8 @@
+use core::result::ResultTrait;
 use core::serde::Serde;
 use integer::{
     U128IntoFelt252, Felt252IntoU256, Felt252TryIntoU64, U256TryIntoFelt252, u256_from_felt252,
-    U16IntoU64
+    U16IntoU64, u16_overflowing_sub, u16_is_zero
 };
 use traits::{TryInto, Into};
 use option::OptionTrait;
@@ -19,7 +20,8 @@ use super::exploration::ExploreUtils;
 use super::beasts::BeastUtils;
 use super::constants::beast_constants;
 use super::constants::adventurer_constants::{
-    STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH
+    STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_DISCOUNT,
+    MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE
 };
 use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
 use super::item_meta::{LootStatistics, LootDescription};
@@ -126,17 +128,50 @@ trait IAdventurer {
 
     fn charisma_potion_discount(self: Adventurer) -> u16;
     fn charisma_item_discount(self: Adventurer) -> u16;
+
+    fn get_item_cost(self: Adventurer, item_cost: u16) -> u16;
 }
 
 impl ImplAdventurer of IAdventurer {
     fn charisma_potion_discount(self: Adventurer) -> u16 {
-        0
+        CHARISMA_DISCOUNT * self.charisma.into()
     }
+
     fn charisma_item_discount(self: Adventurer) -> u16 {
-        0
+        CHARISMA_DISCOUNT * self.charisma.into()
     }
+
+    fn get_item_cost(self: Adventurer, item_cost: u16) -> u16 {
+        if (u16_overflowing_sub(item_cost, self.charisma_item_discount()).is_ok()) {
+            let cost = item_cost - self.charisma_item_discount();
+
+            if (cost < MINIMUM_ITEM_PRICE) {
+                MINIMUM_ITEM_PRICE
+            } else {
+                cost
+            }
+        } else {
+            MINIMUM_ITEM_PRICE
+        }
+    }
+
     fn get_potion_cost(ref self: Adventurer) -> u16 {
-        POTION_PRICE * self.get_level().into()
+        // check if we overflow
+        if (u16_overflowing_sub(
+            POTION_PRICE * self.get_level().into(), self.charisma_potion_discount()
+        )
+            .is_ok()) {
+            let price = POTION_PRICE * self.get_level().into() - self.charisma_potion_discount();
+
+            // check if less than the base price - this can only happen rarely
+            if (price < MINIMUM_POTION_PRICE) {
+                MINIMUM_POTION_PRICE
+            } else {
+                price
+            }
+        } else {
+            MINIMUM_POTION_PRICE
+        }
     }
     fn add_statistic(ref self: Adventurer, value: u8) -> Adventurer {
         assert(value < 6, 'Index out of bounds');
@@ -883,4 +918,96 @@ fn test_add_statistic() {
 
     adventurer.add_statistic(StatisticIndex::WISDOM);
     assert(adventurer.wisdom == 1, 'wisdom');
+}
+
+
+#[test]
+#[available_gas(500000)]
+fn test_charisma_health_discount_overflow() {
+    let mut adventurer = Adventurer {
+        last_action: 511,
+        health: 1023,
+        xp: 0,
+        strength: 31,
+        dexterity: 31,
+        vitality: 31,
+        intelligence: 31,
+        wisdom: 31,
+        charisma: 100,
+        gold: 1,
+        weapon: LootStatistics {
+            id: 100, xp: 511, metadata: 1, 
+            }, chest: LootStatistics {
+            id: 99, xp: 511, metadata: 2, 
+            }, head: LootStatistics {
+            id: 98, xp: 511, metadata: 3, 
+            }, waist: LootStatistics {
+            id: 87, xp: 511, metadata: 4, 
+            }, foot: LootStatistics {
+            id: 78, xp: 511, metadata: 5, 
+            }, hand: LootStatistics {
+            id: 34, xp: 511, metadata: 6, 
+            }, neck: LootStatistics {
+            id: 32, xp: 511, metadata: 7, 
+            }, ring: LootStatistics {
+            id: 1, xp: 511, metadata: 8, 
+        }, beast_health: 1023, stat_upgrade_available: 1,
+    };
+
+    let discount = adventurer.get_potion_cost();
+
+    assert(discount == MINIMUM_POTION_PRICE, 'discount');
+
+    // set to 0
+    adventurer.charisma = 0;
+
+    let discount = adventurer.get_potion_cost();
+
+    assert(discount == MINIMUM_POTION_PRICE * adventurer.get_level().into(), 'no charisma potion');
+}
+
+#[test]
+#[available_gas(500000)]
+fn test_charisma_item_discount_overflow() {
+    let mut adventurer = Adventurer {
+        last_action: 511,
+        health: 1023,
+        xp: 100,
+        strength: 31,
+        dexterity: 31,
+        vitality: 31,
+        intelligence: 31,
+        wisdom: 31,
+        charisma: 10,
+        gold: 40,
+        weapon: LootStatistics {
+            id: 100, xp: 511, metadata: 1, 
+            }, chest: LootStatistics {
+            id: 99, xp: 511, metadata: 2, 
+            }, head: LootStatistics {
+            id: 98, xp: 511, metadata: 3, 
+            }, waist: LootStatistics {
+            id: 87, xp: 511, metadata: 4, 
+            }, foot: LootStatistics {
+            id: 78, xp: 511, metadata: 5, 
+            }, hand: LootStatistics {
+            id: 34, xp: 511, metadata: 6, 
+            }, neck: LootStatistics {
+            id: 32, xp: 511, metadata: 7, 
+            }, ring: LootStatistics {
+            id: 1, xp: 511, metadata: 8, 
+        }, beast_health: 1023, stat_upgrade_available: 1,
+    };
+
+    let max_item_price = 15;
+
+    let item_price = adventurer.get_item_cost(max_item_price);
+
+    assert(item_price == MINIMUM_ITEM_PRICE, 'min_item_price');
+
+    adventurer.charisma = 0;
+
+    let item_price = adventurer.get_item_cost(max_item_price);
+
+    assert(item_price == max_item_price, 'max_item_price');
 }
