@@ -10,4 +10,5 @@ pack = { path = "../pack" }
 lootitems = { path = "../loot" }
 obstacles = { path = "../obstacles" }
 combat = { path = "../combat" }
+market = { path = "../market" }
 beasts = { path = "../beasts" }

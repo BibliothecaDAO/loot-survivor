@@ -181,28 +181,31 @@ mod Game {
         // get the current adventurer id
         let adventurer_id = self._counter.read();
 
-        // emit the AdventurerUpdate event
-        // __EVENT_update_adventurer__(ref self, adventurer_id, new_adventurer);
+        // build meta
+        let adventurer_meta = AdventurerMetadata {
+            name: adventurer_meta.name,
+            home_realm: adventurer_meta.home_realm,
+            race: adventurer_meta.race,
+            order: adventurer_meta.order,
+            entropy: Felt252TryIntoU64::try_into(
+                ContractAddressIntoFelt252::into(caller)
+                    + U64IntoFelt252::into(block_info.block_timestamp)
+            )
+                .unwrap()
+        };
+
+        // emit the StartGame
+        __event__StartGame(
+            ref self,
+            AdventurerState { owner: caller, adventurer_id, adventurer: new_adventurer },
+            adventurer_meta
+        );
 
         // write the new adventurer to storage
         _pack_adventurer(ref self, adventurer_id, new_adventurer);
 
         // pack metadata with entropy seed
-        _pack_adventurer_meta(
-            ref self,
-            adventurer_id,
-            AdventurerMetadata {
-                name: adventurer_meta.name,
-                home_realm: adventurer_meta.home_realm,
-                race: adventurer_meta.race,
-                order: adventurer_meta.order,
-                entropy: Felt252TryIntoU64::try_into(
-                    ContractAddressIntoFelt252::into(caller)
-                        + U64IntoFelt252::into(block_info.block_timestamp)
-                )
-                    .unwrap()
-            }
-        );
+        _pack_adventurer_meta(ref self, adventurer_id, adventurer_meta);
 
         // increment the adventurer counter
         self._counter.write(adventurer_id + 1);
@@ -249,7 +252,7 @@ mod Game {
     ) -> Adventurer {
         _assert_ownership(@self, adventurer_id);
         // get adventurer level from xp
-        let adventurer_level = ImplAdventurer::get_level(adventurer.xp);
+        let adventurer_level = ImplAdventurer::get_level(adventurer);
 
         // process obstacle encounter
         let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
@@ -366,15 +369,17 @@ mod Game {
             adventurer, bag, ImplBagActions::new_item(item_id)
         );
 
-        // TODO: Replace with read from state
+        // TODO: Replace with read from state. We could also move all to lib
         let item_tier = ImplLoot::get_tier(item_id);
         let item_price = ImplMarket::get_price(item_tier);
 
+        let charisma_discount_price = adventurer.get_item_cost(item_price);
+
         // check adventurer has enough gold
-        assert(adventurer.check_gold(item_price) == true, messages::NOT_ENOUGH_GOLD);
+        assert(adventurer.check_gold(charisma_discount_price) == true, messages::NOT_ENOUGH_GOLD);
 
         // deduct gold
-        adventurer.deduct_gold(item_price);
+        adventurer.deduct_gold(charisma_discount_price);
 
         if equip == true {
             let unequipping_item = adventurer.get_item_at_slot(ImplLoot::get_slot(item.id));
@@ -654,14 +659,14 @@ mod Game {
 
     #[derive(Drop, starknet::Event)]
     struct PurchasedItem {
-        adventurer_state: AdventurerStateWithBag,
+        adventurer_state_with_bag: AdventurerStateWithBag,
         item_id: u8,
         cost: u8,
     }
 
     #[derive(Drop, starknet::Event)]
     struct EquipItem {
-        adventurer_state: AdventurerStateWithBag,
+        adventurer_state_with_bag: AdventurerStateWithBag,
         equiped_item_id: u8,
         unequiped_item_id: u8,
     }
@@ -703,14 +708,263 @@ mod Game {
         killed_by_obstacle: bool,
         killer_id: u8,
     }
-// fn __event_update_adventurer__(
-//     ref self: ContractState, adventurer_id: u256, adventurer: Adventurer
-// ) {
-//     self
-//         .emit(
-//             Event::AdventurerState(
-//                 AdventurerState { owner: get_caller_address(), adventurer_id, adventurer }
-//             )
-//         );
-// }
+
+    fn __event__StartGame(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        adventurer_meta: AdventurerMetadata
+    ) {
+        self.emit(Event::StartGame(StartGame { adventurer_state, adventurer_meta }));
+    }
+
+    fn __event__StatUpgraded(
+        ref self: ContractState, adventurer_state: AdventurerState, stat_id: u8
+    ) {
+        self.emit(Event::StatUpgraded(StatUpgraded { adventurer_state, stat_id }));
+    }
+
+    fn __event__DiscoverHealth(
+        ref self: ContractState, adventurer_state: AdventurerState, health_amount: u8
+    ) {
+        self.emit(Event::DiscoverHealth(DiscoverHealth { adventurer_state, health_amount }));
+    }
+
+    fn __event__DiscoverGold(
+        ref self: ContractState, adventurer_state: AdventurerState, gold_amount: u8
+    ) {
+        self.emit(Event::DiscoverGold(DiscoverGold { adventurer_state, gold_amount }));
+    }
+
+    fn __event__DiscoverXP(
+        ref self: ContractState, adventurer_state: AdventurerState, xp_amount: u8
+    ) {
+        self.emit(Event::DiscoverXP(DiscoverXP { adventurer_state, xp_amount }));
+    }
+
+    fn __event__DiscoverObstacle(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        obstacle_id: u8,
+        obstacle_level: u8,
+        dodged: bool,
+        damage_taken: u8,
+        xp_earned_adventurer: u8,
+        xp_earned_items: u8,
+    ) {
+        self
+            .emit(
+                Event::DiscoverObstacle(
+                    DiscoverObstacle {
+                        adventurer_state,
+                        obstacle_id,
+                        obstacle_level,
+                        dodged,
+                        damage_taken,
+                        xp_earned_adventurer,
+                        xp_earned_items,
+                    }
+                )
+            );
+    }
+
+    fn __event__DiscoverBeast(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        beast_id: u8,
+        prefix_1: u8,
+        prefix_2: u8,
+        beast_level: u8,
+        beast_health: u8,
+        ambushed: bool,
+        damage_taken: u8,
+    ) {
+        self
+            .emit(
+                Event::DiscoverBeast(
+                    DiscoverBeast {
+                        adventurer_state,
+                        beast_id,
+                        prefix_1,
+                        prefix_2,
+                        beast_level,
+                        beast_health,
+                        ambushed,
+                        damage_taken,
+                    }
+                )
+            );
+    }
+
+    fn __event__AttackBeast(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        beast_id: u8,
+        prefix_1: u8,
+        prefix_2: u8,
+        beast_level: u8,
+        beast_health: u8,
+        damage_dealt: u8,
+        damage_taken: u8,
+    ) {
+        self
+            .emit(
+                Event::AttackBeast(
+                    AttackBeast {
+                        adventurer_state,
+                        beast_id,
+                        prefix_1,
+                        prefix_2,
+                        beast_level,
+                        beast_health,
+                        damage_dealt,
+                        damage_taken,
+                    }
+                )
+            );
+    }
+
+    fn __event__SlayedBeast(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        beast_id: u8,
+        prefix_1: u8,
+        prefix_2: u8,
+        beast_level: u8,
+        beast_health: u8,
+        damage_dealt: u8,
+        damage_taken: u8,
+        xp_earned_adventurer: u8,
+        xp_earned_items: u8,
+        gold_earned: u8,
+    ) {
+        self
+            .emit(
+                Event::SlayedBeast(
+                    SlayedBeast {
+                        adventurer_state,
+                        beast_id,
+                        prefix_1,
+                        prefix_2,
+                        beast_level,
+                        beast_health,
+                        damage_dealt,
+                        damage_taken,
+                        xp_earned_adventurer,
+                        xp_earned_items,
+                        gold_earned,
+                    }
+                )
+            );
+    }
+
+    fn __event__FleeAttempt(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        beast_id: u8,
+        prefix_1: u8,
+        prefix_2: u8,
+        beast_level: u8,
+        beast_health: u8,
+        damage_taken: u8,
+        fled: bool,
+    ) {
+        self
+            .emit(
+                Event::FleeAttempt(
+                    FleeAttempt {
+                        adventurer_state,
+                        beast_id,
+                        prefix_1,
+                        prefix_2,
+                        beast_level,
+                        beast_health,
+                        damage_taken,
+                        fled
+                    }
+                )
+            );
+    }
+
+    fn __event_PurchasedItem(
+        ref self: ContractState,
+        adventurer_state_with_bag: AdventurerStateWithBag,
+        item_id: u8,
+        cost: u8
+    ) {
+        self.emit(Event::PurchasedItem(PurchasedItem { adventurer_state_with_bag, item_id, cost }));
+    }
+
+    fn __event_EquipItem(
+        ref self: ContractState,
+        adventurer_state_with_bag: AdventurerStateWithBag,
+        equiped_item_id: u8,
+        unequiped_item_id: u8,
+    ) {
+        self
+            .emit(
+                Event::EquipItem(
+                    EquipItem { adventurer_state_with_bag, equiped_item_id, unequiped_item_id }
+                )
+            );
+    }
+
+
+    fn __event_GreatnessIncreased(
+        ref self: ContractState, adventurer_state: AdventurerState, item_id: u8
+    ) {
+        self.emit(Event::GreatnessIncreased(GreatnessIncreased { adventurer_state, item_id }));
+    }
+
+    fn __event_ItemPrefixDiscovered(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        item_description: LootDescription
+    ) {
+        self
+            .emit(
+                Event::ItemPrefixDiscovered(
+                    ItemPrefixDiscovered { adventurer_state, item_description }
+                )
+            );
+    }
+
+    fn __event_ItemSuffixDiscovered(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        item_description: LootDescription
+    ) {
+        self
+            .emit(
+                Event::ItemSuffixDiscovered(
+                    ItemSuffixDiscovered { adventurer_state, item_description }
+                )
+            );
+    }
+
+    fn __event_PurchasedPotion(
+        ref self: ContractState, adventurer_state: AdventurerState, health_amount: u8
+    ) {
+        self.emit(Event::PurchasedPotion(PurchasedPotion { adventurer_state, health_amount }));
+    }
+
+    fn __event_NewHighScore(ref self: ContractState, adventurer_state: AdventurerState, rank: u8) {
+        self.emit(Event::NewHighScore(NewHighScore { adventurer_state, rank }));
+    }
+
+    fn __event_AdventurerDied(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        killed_by_beast: bool,
+        killed_by_obstacle: bool,
+        killer_id: u8
+    ) {
+        self
+            .emit(
+                Event::AdventurerDied(
+                    AdventurerDied {
+                        adventurer_state, killed_by_beast, killed_by_obstacle, killer_id
+                    }
+                )
+            );
+    }
 }
