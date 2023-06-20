@@ -5,3 +5,5 @@ contracts/combat/target/CACHEDIR.TAG
 contracts/combat/target/dev/combat.sierra
 contracts/item/target/CACHEDIR.TAG
 contracts/item/target/dev/item.sierra
+contracts/obstacles/target/CACHEDIR.TAG
+contracts/obstacles/target/dev/obstacles.sierra
