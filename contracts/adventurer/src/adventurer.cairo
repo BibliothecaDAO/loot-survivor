@@ -33,7 +33,7 @@ use obstacles::obstacle::{ImplObstacle, Obstacle};
 struct Adventurer {
     last_action: u16, // 3 bits
     health: u16, // 9 bits     
-    xp: u16, // 15 bits
+    xp: u16, // 13 bits
     // Physical
     strength: u8, // 5 bits
     dexterity: u8, //  5 bits
@@ -54,7 +54,7 @@ struct Adventurer {
     ring: LootStatistics, // 24 bits
     // Beast health
     beast_health: u16,
-    stat_upgrade_available: u8,
+    stat_upgrade_available: u8, // 3 bits
 }
 
 trait IAdventurer {
