@@ -68,6 +68,13 @@ mod CombatSettings {
         const HARD: u8 = 8; // increase level range by 8x each range increase
     }
 
+    // Controls how fast max health increases for entities
+    mod HEALTH_MULTIPLIER {
+        const EASY: u8 = 10; // increase max health by 10x each range increase
+        const NORMAL: u8 = 15; // increase max health by 15x each range increase
+        const HARD: u8 = 20; // increase max health by 20x each range increase
+    }
+
     // Determines xp multiplier for each tier
     mod XP_MULTIPLIER {
         const T1: u16 = 5; // 5 * level

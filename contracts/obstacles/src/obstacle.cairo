@@ -196,16 +196,15 @@ impl ImplObstacle of ObstacleTrait {
         ImplCombat::get_xp_reward(obstacle.combat_specs)
     }
 
+    // dodged returns true if the adventurer dodged the obstacle
+    // @param adventurer_level: u8 - the adventurer level
+    // @param adventurer_intelligence: u8 - the adventurer intelligence
+    // @param entropy: u64 - the entropy
+    // @return bool - true if the adventurer dodged the obstacle
     fn dodged(adventurer_level: u8, adventurer_intelligence: u8, entropy: u64) -> bool {
-        // number of sides of the die will be 1 - adventurer_level
-        let dodge_dice_roll = entropy % U8IntoU64::into(adventurer_level);
-
-        // adventurer dodges obstacle if they roll a number less than or equal to
-        // their intelligence + difficulty cliff
-        // This means that prior to the difficulty cliff, adventurers will have 100% chance of dodging
-        return (dodge_dice_roll <= U8IntoU64::into(
-            adventurer_intelligence + CombatSettings::DIFFICULTY_CLIFF::NORMAL
-        ));
+        // Delegate ambushed calculation to combat system
+        // avoiding beast ambush requires wisdom
+        return ImplCombat::ability_based_avoid_threat(adventurer_level, adventurer_intelligence, entropy);
     }
 }
 

@@ -17,7 +17,6 @@ use lootitems::statistics::{constants, item_tier, item_type};
 
 use super::exploration::ExploreUtils;
 use super::beasts::BeastUtils;
-use super::constants::beast_constants;
 use super::constants::adventurer_constants::{
     STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH
 };
