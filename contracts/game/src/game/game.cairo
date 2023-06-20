@@ -14,13 +14,17 @@ mod Game {
     use box::BoxTrait;
     use starknet::get_caller_address;
     use starknet::{ContractAddress, ContractAddressIntoFelt252};
-    use integer::{U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64, U8IntoU16};
+    use integer::{
+        U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64, U8IntoU16, U16IntoU64, U8IntoU64,
+        U64TryIntoU8
+    };
     use integer::U64IntoFelt252;
     use core::traits::{TryInto, Into};
 
     use game::game::messages::messages;
 
     use lootitems::loot::{Loot, ImplLoot};
+    use lootitems::loot::constants::{NamePrefixLength, NameSuffixLength};
     use pack::pack::{pack_value, unpack_value};
 
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
@@ -41,6 +45,7 @@ mod Game {
     use obstacles::obstacle::{ImplObstacle};
     use combat::combat::{CombatSpec, SpecialPowers, ImplCombat};
     use combat::constants::CombatEnums;
+    use beasts::beast::{ImplBeast};
 
     #[storage]
     struct Storage {
@@ -292,7 +297,63 @@ mod Game {
 
     // @loothero
     fn _attack(ref self: ContractState, adventurer_id: u256) { //
-    // check beast exists on Adventurer
+        // check beast exists on Adventurer
+        _assert_ownership(@self, adventurer_id);
+
+        // get adventurer from storage and unpack
+        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+        // assert adventurer has a beast to attack
+        _assert_in_battle(@self, adventurer);
+
+        // get adventurer entropy from storage  
+        let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
+
+        // generate a battle fixed source of randomness. If we used exclusively adventurer entropy
+        // the adventurer would get the same beast everytime. We can't use game_entropy because that
+        // could potentially change during battle and we need to be able to generate the same beast
+        // for combat calculations during the course of a battle.
+        let battle_fixed_entropy = adventurer_entropy
+            * U16IntoU64::into(adventurer.get_battle_fixed_entropy());
+
+        // generate special names for beast using Loot name schema. We use Loot names because
+        // combat system will deal bonus damage for matching names. We do this here instead of in beast
+        // to prevent beast from depending on Loot
+        let beast_prefix1 = U64TryIntoU8::try_into(battle_fixed_entropy)
+            .unwrap() % NamePrefixLength;
+        let beast_prefix2 = U64TryIntoU8::try_into(battle_fixed_entropy)
+            .unwrap() % NameSuffixLength;
+        let beast_name_prefix = SpecialPowers {
+            prefix1: beast_prefix1, prefix2: beast_prefix2, suffix: 0
+        };
+
+        // get battle fixed beast. The key to this is using battle fixed entropy
+        let beast = ImplBeast::get_beast(
+            adventurer.get_level(), beast_name_prefix, battle_fixed_entropy
+        );
+
+        // if the items greatness is below 15, it won't have any special names so no need
+        // to waste a read fetching them
+        let weapon = ImplAdventurer::get_item_at_slot(adventurer, CombatEnums::Slot::Weapon(()));
+        let weapon_combat_spec = _get_combat_spec(@self, adventurer_id, weapon);
+
+        // TODO: get game_entropy from storage
+        let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
+
+        // When generating the beast, we need to ensure entropy remains fixed for the battle
+        // for attacking however, we should change the entropy during battle so we use adventurer and beast health
+        // to accomplish this
+        let attack_entropy = game_entropy + adventurer_entropy + U16IntoU64::into(adventurer.health + adventurer.beast_health);
+        let damage_dealt = ImplBeast::attack(adventurer.get_luck(), adventurer.strength, weapon_combat_spec, beast, attack_entropy);
+
+        // if the amount of damage dealt to beast exceeds its health
+        if (damage_dealt > adventurer.beast_health) {
+            // TODO: Generate Event
+            // the beast is dead so set health to zero
+            adventurer.beast_health = 0;
+
+        }
+
     // calculate attack dmg
     // check if beast is dead
     // if dead -> calculate xp & gold
@@ -492,6 +553,9 @@ mod Game {
     fn _assert_ownership(self: @ContractState, adventurer_id: u256) {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
     }
+    fn _assert_in_battle(self: @ContractState, adventurer: Adventurer) {
+        assert(adventurer.beast_health > 0, messages::ATTACK_CALLED_OUTSIDE_BATTLE);
+    }
 
     fn _lords_address(self: @ContractState) -> ContractAddress {
         self._lords.read()
@@ -519,25 +583,39 @@ mod Game {
     fn _get_combat_spec(
         self: @ContractState, adventurer_id: u256, item: LootStatistics
     ) -> CombatSpec {
-        // get item details
-        let item_details = ImplLootDescription::get_loot_description(
-            _loot_description_storage_unpacked(
-                self, adventurer_id, _get_description_index(self, item.metadata)
-            ),
-            item
-        );
+        // get the greatness of the item
+        let item_greatness = ImplLoot::get_greatness_level(item.xp);
 
-        // return combat spec of item
-        return CombatSpec {
-            tier: ImplLoot::get_tier(item.id),
-            item_type: ImplLoot::get_type(item.id),
-            level: U8IntoU16::into(ImplLoot::get_greatness_level(item.xp)),
-            special_powers: SpecialPowers {
-                prefix1: item_details.name_prefix,
-                prefix2: item_details.name_suffix,
-                suffix: item_details.item_suffix
-            }
-        };
+        // if it's less than 15, no need to fetch the special names it doesn't have them
+        if (item_greatness < 15) {
+            return CombatSpec {
+                tier: ImplLoot::get_tier(item.id),
+                item_type: ImplLoot::get_type(item.id),
+                level: U8IntoU16::into(ImplLoot::get_greatness_level(item.xp)),
+                special_powers: SpecialPowers {
+                    prefix1: 0, prefix2: 0, suffix: 0
+                }
+            };
+        } else {
+            // if it's above 15, fetch the special names
+            let item_details = ImplLootDescription::get_loot_description(
+                _loot_description_storage_unpacked(
+                    self, adventurer_id, _get_description_index(self, item.metadata)
+                ),
+                item
+            );
+            // return combat spec of item
+            return CombatSpec {
+                tier: ImplLoot::get_tier(item.id),
+                item_type: ImplLoot::get_type(item.id),
+                level: U8IntoU16::into(ImplLoot::get_greatness_level(item.xp)),
+                special_powers: SpecialPowers {
+                    prefix1: item_details.name_prefix,
+                    prefix2: item_details.name_suffix,
+                    suffix: item_details.item_suffix
+                }
+            };
+        }
     }
 
     fn _set_entropy(ref self: ContractState, entropy: felt252) {

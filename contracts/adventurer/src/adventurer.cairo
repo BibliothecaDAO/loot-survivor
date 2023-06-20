@@ -2,7 +2,7 @@ use core::result::ResultTrait;
 use core::serde::Serde;
 use integer::{
     U128IntoFelt252, Felt252IntoU256, Felt252TryIntoU64, U256TryIntoFelt252, u256_from_felt252,
-    U16IntoU64, u16_overflowing_sub, u16_is_zero
+    U16IntoU64, U8IntoU16, u16_overflowing_sub, u16_is_zero
 };
 use traits::{TryInto, Into};
 use option::OptionTrait;
@@ -116,7 +116,7 @@ trait IAdventurer {
     fn add_beast(ref self: Adventurer, value: u16) -> Adventurer;
     fn in_battle(self: Adventurer) -> bool;
 
-    fn luck(self: Adventurer) -> u8;
+    fn get_luck(self: Adventurer) -> u8;
 
     fn get_beast(self: Adventurer) -> u8;
 
@@ -125,6 +125,8 @@ trait IAdventurer {
     fn is_slot_free(self: Adventurer, item: LootStatistics) -> bool;
 
     fn get_item_at_slot(self: Adventurer, slot: Slot) -> LootStatistics;
+
+    fn get_battle_fixed_entropy(self: Adventurer) -> u16;
 
     fn charisma_potion_discount(self: Adventurer) -> u16;
     fn charisma_item_discount(self: Adventurer) -> u16;
@@ -312,10 +314,16 @@ impl ImplAdventurer of IAdventurer {
     }
 
 
-    // TODO: implement this function
-    fn luck(self: Adventurer) -> u8 {
-        // calculate Luck from ring and neck greatness
-        0
+    // luck 
+    fn get_luck(self: Adventurer) -> u8 {
+        // get greatness of aventurers equipped necklace
+        let necklace_greatness = ImplLoot::get_greatness_level(self.neck.xp);
+        // get greatness of aventurers equipped ring
+        let ring_greatness = ImplLoot::get_greatness_level(self.neck.xp);
+
+        // luck is combined greatness of equipped jewlery
+        return necklace_greatness + ring_greatness;
+
     }
 
     // in_battle returns true if the adventurer is in battle
@@ -514,6 +522,16 @@ impl ImplAdventurer of IAdventurer {
                 id: 0, xp: 0, metadata: 0, 
             }, beast_health: 10, stat_upgrade_available: 0,
         };
+    }
+
+    // get_battle_fixed_entropy provides a source of entropy
+    // that is fixed when the adventurer is in combat
+    fn get_battle_fixed_entropy(self: Adventurer) -> u16 {
+        // while it's simple, using just XP is advantgeous because players can't easily maninpulate it. 
+        // if for example we include adventurer stats, it could be possible for an advanced bot to
+        // select specific stats to increase chance of beneficial outcome. The same applies to 
+        // gold and item xp. 
+        return self.xp;
     }
 
     // pack the adventurer into a single felt252
