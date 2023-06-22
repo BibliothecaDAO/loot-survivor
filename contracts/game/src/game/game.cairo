@@ -105,10 +105,21 @@ mod Game {
             _start(ref self, starting_weapon, adventurer_meta);
         }
         fn explore(ref self: ContractState, adventurer_id: u256) {
-            _explore(ref self, adventurer_id);
+
+            // assert caller owns adventurer id
+            _assert_ownership(@self, adventurer_id);
+
+            // get adventurer from storage and unpack
+            let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+            // assert adventurer does not have stat upgrades available
+            _assert_no_stat_upgrades_available(@self, adventurer);  
+
+            // pass adventurer ref into internal function
+            _explore(ref self, ref adventurer, adventurer_id);
         }
         fn attack(ref self: ContractState, adventurer_id: u256) {
-            // check caller owns adventurer id
+            // assert caller owns adventurer id
             _assert_ownership(@self, adventurer_id);
 
             // get adventurer from storage and unpack
@@ -250,12 +261,7 @@ mod Game {
     }
 
     // @loothero
-    fn _explore(ref self: ContractState, adventurer_id: u256) {
-        _assert_ownership(@self, adventurer_id);
-
-        // get adventurer from storage and unpack
-        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
-
+    fn _explore(ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256) {
         // get adventurer entropy from storage  
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
@@ -596,10 +602,11 @@ mod Game {
 
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
-        assert(adventurer.stat_upgrade_available == 1, messages::STAT_POINT_NOT_AVAILABLE);
+        assert(adventurer.stat_upgrade_available > 0, messages::STAT_POINT_NOT_AVAILABLE);
 
         adventurer.add_statistic(stat_id);
-        adventurer.stat_upgrade_available == 0;
+
+        adventurer.stat_upgrade_available -= 1;
 
         _pack_adventurer(ref self, adventurer_id, adventurer);
     }
@@ -702,6 +709,9 @@ mod Game {
     }
     fn _assert_not_starter_beast(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.get_level() > 1, messages::CANT_FLEE_STARTER_BEAST);
+    }
+    fn _assert_no_stat_upgrades_available(self: @ContractState, adventurer: Adventurer) {
+        assert(adventurer.stat_upgrade_available == 0, messages::STAT_UPGRADES_AVAILABLE);
     }
 
     fn _lords_address(self: @ContractState) -> ContractAddress {

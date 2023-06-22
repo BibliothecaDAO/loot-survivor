@@ -17,12 +17,14 @@ mod tests {
     use game::game::interfaces::{IGameDispatcherTrait, IGameDispatcher};
     use game::game::game::{Game};
     use survivor::adventurer_meta::{
-        AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata
+        AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata,
     };
 
     use survivor::constants::adventurer_constants::{
         STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH
     };
+
+    use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
     use game::game::messages::messages;
     use beasts::constants::BeastSettings;
@@ -176,7 +178,7 @@ mod tests {
         // double tap the first beast
         // TODO: Need to determine why starter beast
         // takes 5 attacks to take down on this test
-        // in the test_attack above it only takes two which is
+        // in test_attack  it only takes two which is
         // expected. For now my goal is to test flee so going to just
         // send the 5x attack so I can discover a non-starter beast
         game.attack(0);
@@ -188,6 +190,9 @@ mod tests {
         let updated_adventurer = game.get_adventurer(0);
         assert(updated_adventurer.beast_health == 0, 'beast should be dead');
 
+        // use stat upgrade
+        game.upgrade_stat(0,0);
+
         // manipulate game entrop so we discover another beast
         game.set_entropy(1);
         game.explore(0);
@@ -198,8 +203,35 @@ mod tests {
         game.flee(0);
         let updated_adventurer = game.get_adventurer(0);
         assert(updated_adventurer.beast_health == 0, 'should have fled beast');
-
     }
+
+    #[test]
+    #[should_panic]
+    #[available_gas(80000000)]
+    fn test_explore_not_allowed_with_stat() {
+        let mut game = new_adventurer();
+        let adventurer_start = game.get_adventurer(0);
+
+        // TODO: Need to determine why starter beast
+        // takes 5 attacks to take down on this test
+        // in the test_attack above it only takes two which is
+        // expected. For now my goal is to test flee so going to just
+        // send the 5x attack so I can discover a non-starter beast
+        game.attack(0);
+        game.attack(0);
+        game.attack(0);
+        game.attack(0);
+        game.attack(0);
+
+        let updated_adventurer = game.get_adventurer(0);
+        assert(updated_adventurer.get_level() == 2, 'advntr should be lvl 2');
+        assert(updated_adventurer.stat_upgrade_available == 1, 'advntr should have 1 stat avl');
+
+        // adventurer trying to explore should cause panic because they have stat upgrade available
+        // using #[should_panic] to verify this
+        game.explore(0);
+    }
+
 
     #[test]
     #[available_gas(30000000)]

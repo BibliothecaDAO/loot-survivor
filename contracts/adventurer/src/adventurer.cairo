@@ -381,7 +381,11 @@ impl ImplAdventurer of IAdventurer {
         self
     }
     fn increase_adventurer_xp(ref self: Adventurer, value: u16) -> Adventurer {
+        let previous_level = self.get_level();
         self.xp = self.xp + value;
+        let new_level = self.get_level();
+        // add the difference between previous level and new level to stat upgrades
+        self.stat_upgrade_available += (new_level - previous_level);
         self
     }
     fn add_strength(ref self: Adventurer, value: u8) -> Adventurer {
@@ -796,8 +800,6 @@ fn test_adventurer() {
     assert(adventurer.ring.xp == unpacked.ring.xp, 'ring.xp');
     assert(adventurer.ring.metadata == unpacked.ring.metadata, 'ring.metadata');
     assert(adventurer.beast_health == unpacked.beast_health, 'beast_health');
-
-    unpacked.stat_upgrade_available.print();
     assert(
         adventurer.stat_upgrade_available == unpacked.stat_upgrade_available,
         'stat_upgrade_available'
@@ -1054,4 +1056,50 @@ fn test_charisma_item_discount_overflow() {
     let item_price = adventurer.get_item_cost(max_item_price);
 
     assert(item_price == max_item_price, 'max_item_price');
+}
+
+#[test]
+#[available_gas(90000)]
+fn test_increase_xp() {
+
+    // initialize lvl 1 adventurer with no stat points available
+    let mut adventurer = Adventurer {
+        last_action: 511,
+        health: 1023,
+        xp: 1,
+        strength: 31,
+        dexterity: 31,
+        vitality: 31,
+        intelligence: 31,
+        wisdom: 31,
+        charisma: 10,
+        gold: 40,
+        weapon: LootStatistics {
+            id: 100, xp: 511, metadata: 1, 
+            }, chest: LootStatistics {
+            id: 99, xp: 511, metadata: 2, 
+            }, head: LootStatistics {
+            id: 98, xp: 511, metadata: 3, 
+            }, waist: LootStatistics {
+            id: 87, xp: 511, metadata: 4, 
+            }, foot: LootStatistics {
+            id: 78, xp: 511, metadata: 5, 
+            }, hand: LootStatistics {
+            id: 34, xp: 511, metadata: 6, 
+            }, neck: LootStatistics {
+            id: 32, xp: 511, metadata: 7, 
+            }, ring: LootStatistics {
+            id: 1, xp: 511, metadata: 8, 
+        }, beast_health: 1023, stat_upgrade_available: 0,
+    };
+
+    // increase adventurer xp by 3 which should level up the adventurer
+    adventurer.increase_adventurer_xp(3);
+    assert(adventurer.get_level() == 2, 'advtr should be lvl 2');
+    assert(adventurer.stat_upgrade_available == 1, 'advtr should have 1 stat avlbl');
+
+    // double level up without spending previous stat point
+    adventurer.increase_adventurer_xp(12);
+    assert(adventurer.get_level() == 4, 'advtr should be lvl 4');
+    assert(adventurer.stat_upgrade_available == 3, 'advtr should have 3 stat avlbl');
 }
