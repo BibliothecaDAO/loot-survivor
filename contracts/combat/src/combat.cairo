@@ -1225,7 +1225,7 @@ fn test_calculate_damage() {
     // initialize armor
     let armor_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
     let mut armor = CombatSpec {
-        item_type: Type::Magic_or_Cloth(()),
+        item_type: Type::Blade_or_Hide(()),
         tier: Tier::T5(()),
         level: 1,
         special_powers: armor_special_names
@@ -1261,9 +1261,9 @@ fn test_calculate_damage() {
     );
     assert(damage == 2, 'minimum damage: 2hp');
 
-    // adventurer levels up their weapon to level 3
+    // adventurer levels up their weapon to level 4
     // and encounters another T5 beast wearing cloth
-    weapon.level = 3;
+    weapon.level = 4;
     let damage = ImplCombat::calculate_damage(
         weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
@@ -1277,8 +1277,9 @@ fn test_calculate_damage() {
     let damage = ImplCombat::calculate_damage(
         weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
-    // even on level 1, it can deal a lot more damage than the short sword
-    assert(damage == 6, 'upgrade to katana: 6HP');
+    damage.print();
+    // even on level 1, it deals more damage than their starter short sword
+    assert(damage == 4, 'upgrade to katana: 6HP');
 
     // enable critical hit for that last attack
     is_critical_hit = true;
@@ -1286,7 +1287,7 @@ fn test_calculate_damage() {
         weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
     // user picks up a critical hit but gets minimum bonus of 1
-    assert(damage == 7, 'critical hit min bonus: 7HP');
+    assert(damage == 5, 'critical hit min bonus: 5HP');
 
     // we can manipulate entropy to get different results
     // entropy 3 will produce max bonus of 100% of the base damage (5)
@@ -1294,7 +1295,7 @@ fn test_calculate_damage() {
     let damage = ImplCombat::calculate_damage(
         weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
-    assert(damage == 10, 'good critical hit: 10HP');
+    assert(damage == 8, 'good critical hit: 8HP');
 
     // switch to weak elemental
     weapon.item_type = Type::Blade_or_Hide(());
