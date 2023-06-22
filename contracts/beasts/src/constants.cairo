@@ -1,11 +1,45 @@
 mod BeastSettings {
-    // Determines the minimum damage from a beast
+
+    // Controls the health of the first beast in the game
+    const STARTER_BEAST_HEALTH: u16 = 5;
+
+    // Controls the level of the first beast in the game
+    const STARTER_BEAST_LEVEL: u16 = 1;
+
+    // Controls the minimum damage from beasts
     const MINIMUM_DAMAGE: u16 = 1;
 
-    // Determines the strength boost for a beast
+    // Controls the strength boost for beasts
     const STRENGTH_BONUS: u16 = 0;
 
+    // Controls minimum health for beasts
     const MINIMUM_HEALTH: u8 = 5;
+
+    // Controls the amount of gold received for slaying a beast
+    // relative to XP. The current setting of 2 will result
+    // in adventurers receiving a base gold reward of 1/2 XP when
+    // slaying beasts. Set this value to 1 to increase gold reward
+    // increase it to lower gold reward. Note, unlike XP, the amount
+    // of gold received after slaying a beast includes a random bonus
+    // between 0%-100%
+    const GOLD_REWARD_DIVISOR: u16 = 2;
+
+    // controls the size of the base gold reward bonus. The higher
+    // this number, the smaller the base gold bonus will be. With the
+    // setting at 5, the gold reward bonus base is 20% of the earned
+    // xp
+    const GOLD_REWARD_BONUS_DIVISOR: u16 = 4;
+
+    // controls the range of the gold bonus when slaying beasts
+    // the higher this number the wider the range of the gold bonus
+    const GOLD_REWARD_BONUS_MAX_MULTPLIER: u128 = 4;
+
+    // control the minimum base gold reward. Note the bonus
+    // will be applied to this so even when the minimun is used
+    // the actual amount may be slightly higher based on bonus
+    const GOLD_REWARD_BASE_MINIMUM: u16 = 4;
+
+    const XP_REWARD_MINIMUM: u16 = 4;
 }
 
 mod BeastId {
@@ -132,7 +166,7 @@ mod BeastId {
     const Golem: u8 = 52; // An animated anthropomorphic being in Jewish folklore
     const Titan: u8 = 53; // A race of deities from Greek mythology
     const Yeti: u8 = 54; // The Abominable Snowman from Himalayan folklore
-    const Troll: u8 = 55; // A creature from Norse mythology and Scandinavian folklore
+    const NemeanLion: u8 = 55; // A vicious monster in Greek mythology that lived at Nemea
 
     // Brute T2s
     const Oni: u8 = 56; // A kind of yōkai, demon, or troll in Japanese folklore
@@ -152,8 +186,8 @@ mod BeastId {
     const Leviathan: u8 = 65; // A sea monster referenced in the Hebrew Bible
 
     // Brute T4s
-    const Skeleton: u8 =
-        66; // A mythical creature portrayed in Classical times with the head and tail of a bull and the body of a man
+    const Colossus: u8 =
+        66; // An exceptionally large and powerful entity from various mythologies and popular culture
     const Nephilim: u8 =
         67; // The offspring of the "sons of God" and the "daughters of men" in the Bible
     const Tarrasque: u8 = 68; // A legendary mythical beast from French folklore
@@ -166,12 +200,13 @@ mod BeastId {
     const Jotunn: u8 =
         72; // A type of entity contrasted with gods and other figures, such as dwarfs and elves, in Norse mythology
     const Hydra: u8 = 73; // A serpentine water monster with many heads in Greek and Roman mythology
-    const NemeanLion: u8 = 74; // A vicious monster in Greek mythology that lived at Nemea
-    const Colossus: u8 =
-        75; // An exceptionally large and powerful entity from various mythologies and popular culture
+    const Skeleton: u8 =
+        74; // A mythical creature portrayed in Classical times with the head and tail of a bull and the body of a man
+    const Troll: u8 = 75; // A creature from Norse mythology and Scandinavian folklore
+
 
     // If you add beasts, make sure to update MAX_ID below
-    // making this u64 as it's commonly used to select a random beast based
-    // on entropy variables which are u64 based
-    const MAX_ID: u64 = 75;
+    // making this u128 as it's commonly used to select a random beast based
+    // on entropy variables which are u128 based
+    const MAX_ID: u128 = 75;
 }
