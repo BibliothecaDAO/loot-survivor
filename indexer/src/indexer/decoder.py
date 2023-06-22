@@ -15,10 +15,39 @@ uint256_abi = {
     ],
 }
 
+adventurer_abi = {
+    {"name": "Birthdate", "offset": 2, "type": "felt"},
+    {"name": "Name", "offset": 3, "type": "felt"},
+    {"name": "Order", "offset": 4, "type": "felt"},
+    {"name": "ImageHash1", "offset": 5, "type": "felt"},
+    {"name": "ImageHash2", "offset": 6, "type": "felt"},
+    {"name": "Health", "offset": 7, "type": "felt"},
+    {"name": "Level", "offset": 8, "type": "felt"},
+    {"name": "Strength", "offset": 9, "type": "felt"},
+    {"name": "Dexterity", "offset": 10, "type": "felt"},
+    {"name": "Vitality", "offset": 11, "type": "felt"},
+    {"name": "Intelligence", "offset": 12, "type": "felt"},
+    {"name": "Wisdom", "offset": 13, "type": "felt"},
+    {"name": "Charisma", "offset": 14, "type": "felt"},
+    {"name": "Luck", "offset": 15, "type": "felt"},
+    {"name": "XP", "offset": 16, "type": "felt"},
+    {"name": "WeaponId", "offset": 17, "type": "felt"},
+    {"name": "ChestId", "offset": 18, "type": "felt"},
+    {"name": "HeadId", "offset": 19, "type": "felt"},
+    {"name": "WaistId", "offset": 20, "type": "felt"},
+    {"name": "FeetId", "offset": 21, "type": "felt"},
+    {"name": "HandsId", "offset": 22, "type": "felt"},
+    {"name": "NeckId", "offset": 23, "type": "felt"},
+    {"name": "RingId", "offset": 24, "type": "felt"},
+    {"name": "Status", "offset": 25, "type": "felt"},
+    {"name": "Beast", "offset": 26, "type": "felt"},
+}
+
 adventurer_state_abi = {
     "members": [
-        {"name": "Race", "offset": 0, "type": "felt"},
-        {"name": "HomeRealm", "offset": 1, "type": "felt"},
+        {"name": "owner", "offset": 0, "type": "ContractAddress"},
+        {"name": "adventurer_id", "offset": 1, "type": "u256"},
+        {"name": "adventurer", "offset": 2, "type": "Adventurer"},
         {"name": "Birthdate", "offset": 2, "type": "felt"},
         {"name": "Name", "offset": 3, "type": "felt"},
         {"name": "Order", "offset": 4, "type": "felt"},
@@ -44,7 +73,6 @@ adventurer_state_abi = {
         {"name": "RingId", "offset": 24, "type": "felt"},
         {"name": "Status", "offset": 25, "type": "felt"},
         {"name": "Beast", "offset": 26, "type": "felt"},
-        {"name": "Upgrading", "offset": 27, "type": "felt"},
     ],
     "name": "AdventurerState",
     "size": 28,
@@ -127,10 +155,10 @@ top_score_abi = {
 }
 
 # ADVENTURER EVENTS
-mint_adventurer_abi = {
+start_game_abi = {
     "outputs": [
-        {"name": "adventurer_id", "type": "Uint256"},
-        {"name": "owner", "type": "felt"},
+        {"name": "adventurer_state", "type": "AdventurerState"},
+        {"name": "adventurer_meta", "type": "AdventurerMetadata"},
     ],
     "keys": [],
     "name": "MintAdventurer",
@@ -364,9 +392,9 @@ item_merchant_update_abi = {
 
 ## ADVENTURER DECODERS
 
-mint_adventurer_decoder = FunctionCallSerializer(
-    abi=mint_adventurer_abi,
-    identifier_manager=identifier_manager_from_abi([mint_adventurer_abi, uint256_abi]),
+start_game_decoder = FunctionCallSerializer(
+    abi=start_game_abi,
+    identifier_manager=identifier_manager_from_abi([start_game_abi, uint256_abi]),
 )
 
 adventurer_update_state_decoder = FunctionCallSerializer(
@@ -396,8 +424,8 @@ high_score_decoder = FunctionCallSerializer(
 )
 
 
-def decode_mint_adventurer_event(data):
-    return mint_adventurer_decoder.to_python([felt.to_int(d) for d in data])
+def decode_start_game_event(data):
+    return start_game_decoder.to_python([felt.to_int(d) for d in data])
 
 
 def decode_update_adventurer_state_event(data):

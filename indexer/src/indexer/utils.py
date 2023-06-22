@@ -22,6 +22,10 @@ def encode_int_as_bytes(n):
     return n.to_bytes(32, "big")
 
 
+def decode_bytes_as_int(n):
+    return int.from_bytes(n, "big")
+
+
 def check_exists_int(val):
     if val == 0:
         return None
