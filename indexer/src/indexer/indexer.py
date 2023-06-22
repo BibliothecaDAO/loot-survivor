@@ -85,7 +85,7 @@ async def update_adventurer_helper(info: Info, adventurer_state):
         "neck": check_exists_int(adventurer_state["adventurer"]["neck"]),
         "ring": check_exists_int(adventurer_state["adventurer"]["ring"]),
         "beastHealth": check_exists_int(adventurer_state["adventurer"]["beast_health"]),
-        "statUpgradeAvailable": check_exists_int(
+        "statUpgrades": check_exists_int(
             adventurer_state["adventurer"]["stat_upgrade_available"]
         ),
     }
@@ -96,6 +96,7 @@ async def update_adventurer_helper(info: Info, adventurer_state):
         },
         {"$set": update_adventurer_doc},
     )
+
 
 async def update_adventurer_bag(info: Info, adventurer_id, bag):
     update_bag_doc = {
@@ -123,27 +124,30 @@ async def update_adventurer_bag(info: Info, adventurer_id, bag):
         },
     )
 
+
 async def get_item(info, item_id, adventurer_id):
     item = await info.storage.find_one(
         "items",
         {
             "item": check_exists_int(item_id),
-            "adventurerId": check_exists_int(adventurer_id)
+            "adventurerId": check_exists_int(adventurer_id),
         },
     )
     return item
+
 
 async def update_item_xp(info, item, adventurer_id, xp):
     await info.storage.find_one_and_update(
         "items",
         {
             "item": check_exists_int(item),
-            "adventurerId": check_exists_int(adventurer_id)
+            "adventurerId": check_exists_int(adventurer_id),
         },
         {
             "$set": {"xp", encode_int_as_bytes(xp)},
         },
     )
+
 
 async def update_items_xp(info, adventurer_id, xp_increase):
     adventurer = await info.storage.find_one(
@@ -152,38 +156,103 @@ async def update_items_xp(info, adventurer_id, xp_increase):
             "id": check_exists_int(adventurer_id),
         },
     )
-    weapon_item = await info.sroage.find_one("items", {
-        "item": check_exists_int(adventurer.weapon),
-    })
-    chest_item = await info.sroage.find_one("items", {
-        "item": check_exists_int(adventurer.chest),
-    })
-    head_item = await info.sroage.find_one("items", {
-        "item": check_exists_int(adventurer.head),
-    })
-    waist_item = await info.sroage.find_one("items", {
-        "item": check_exists_int(adventurer.waist),
-    })
-    foot_item = await info.sroage.find_one("items", {
-        "item": check_exists_int(adventurer.foot),
-    })
-    hand_item = await info.sroage.find_one("items", {
-        "item": check_exists_int(adventurer.hand),
-    })
-    neck_item = await info.sroage.find_one("items", {
-        "item": check_exists_int(adventurer.neck),
-    })
-    ring_item = await info.sroage.find_one("items", {
-        "item": check_exists_int(adventurer.ring),
-    })
-    update_item_xp(info, decode_bytes_as_int(weapon_item.item), adventurer_id, decode_bytes_as_int(weapon_item.xp) + xp_increase)
-    update_item_xp(info, decode_bytes_as_int(chest_item.item), adventurer_id, decode_bytes_as_int(chest_item.xp) + xp_increase)
-    update_item_xp(info, decode_bytes_as_int(head_item.item), adventurer_id, decode_bytes_as_int(head_item.xp) + xp_increase)
-    update_item_xp(info, decode_bytes_as_int(waist_item.item), adventurer_id, decode_bytes_as_int(waist_item.xp) + xp_increase)
-    update_item_xp(info, decode_bytes_as_int(foot_item.item), adventurer_id, decode_bytes_as_int(foot_item.xp) + xp_increase)
-    update_item_xp(info, decode_bytes_as_int(hand_item.item), adventurer_id, decode_bytes_as_int(hand_item.xp) + xp_increase)
-    update_item_xp(info, decode_bytes_as_int(neck_item.item), adventurer_id, decode_bytes_as_int(neck_item.xp) + xp_increase)
-    update_item_xp(info, decode_bytes_as_int(ring_item.item), adventurer_id, decode_bytes_as_int(ring_item.xp) + xp_increase)
+    weapon_item = await info.sroage.find_one(
+        "items",
+        {
+            "item": check_exists_int(adventurer.weapon),
+        },
+    )
+    chest_item = await info.sroage.find_one(
+        "items",
+        {
+            "item": check_exists_int(adventurer.chest),
+        },
+    )
+    head_item = await info.sroage.find_one(
+        "items",
+        {
+            "item": check_exists_int(adventurer.head),
+        },
+    )
+    waist_item = await info.sroage.find_one(
+        "items",
+        {
+            "item": check_exists_int(adventurer.waist),
+        },
+    )
+    foot_item = await info.sroage.find_one(
+        "items",
+        {
+            "item": check_exists_int(adventurer.foot),
+        },
+    )
+    hand_item = await info.sroage.find_one(
+        "items",
+        {
+            "item": check_exists_int(adventurer.hand),
+        },
+    )
+    neck_item = await info.sroage.find_one(
+        "items",
+        {
+            "item": check_exists_int(adventurer.neck),
+        },
+    )
+    ring_item = await info.sroage.find_one(
+        "items",
+        {
+            "item": check_exists_int(adventurer.ring),
+        },
+    )
+    update_item_xp(
+        info,
+        decode_bytes_as_int(weapon_item.item),
+        adventurer_id,
+        decode_bytes_as_int(weapon_item.xp) + xp_increase,
+    )
+    update_item_xp(
+        info,
+        decode_bytes_as_int(chest_item.item),
+        adventurer_id,
+        decode_bytes_as_int(chest_item.xp) + xp_increase,
+    )
+    update_item_xp(
+        info,
+        decode_bytes_as_int(head_item.item),
+        adventurer_id,
+        decode_bytes_as_int(head_item.xp) + xp_increase,
+    )
+    update_item_xp(
+        info,
+        decode_bytes_as_int(waist_item.item),
+        adventurer_id,
+        decode_bytes_as_int(waist_item.xp) + xp_increase,
+    )
+    update_item_xp(
+        info,
+        decode_bytes_as_int(foot_item.item),
+        adventurer_id,
+        decode_bytes_as_int(foot_item.xp) + xp_increase,
+    )
+    update_item_xp(
+        info,
+        decode_bytes_as_int(hand_item.item),
+        adventurer_id,
+        decode_bytes_as_int(hand_item.xp) + xp_increase,
+    )
+    update_item_xp(
+        info,
+        decode_bytes_as_int(neck_item.item),
+        adventurer_id,
+        decode_bytes_as_int(neck_item.xp) + xp_increase,
+    )
+    update_item_xp(
+        info,
+        decode_bytes_as_int(ring_item.item),
+        adventurer_id,
+        decode_bytes_as_int(ring_item.xp) + xp_increase,
+    )
+
 
 class LootSurvivorIndexer(StarkNetIndexer):
     def __init__(self, config):
@@ -266,11 +335,11 @@ class LootSurvivorIndexer(StarkNetIndexer):
                     "PurchasedItem": self.purchased_item,
                     "EquipItem": self.equip_item,
                     "GreatnessIncreased": self.greatness_increased,
-                    "ItemPrefixDiscovered": ,
-                    "ItemSuffixDiscovered",
-                    "PurchasedPotion",
-                    "NewHighScore",
-                    "AdventurerDied",
+                    "ItemPrefixDiscovered": self.item_prefix_discovered,
+                    "ItemSuffixDiscovered": self.item_suffix_discovered,
+                    "PurchasedPotion": self.purchased_potion,
+                    "NewHighScore": self.new_high_score,
+                    "AdventurerDied": self.adventurer_died,
                 }[event_name](
                     info,
                     block_time,
@@ -324,7 +393,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "beastHealth": check_exists_int(
                 sg.adventurer_state["adventurer"]["beast_health"]
             ),
-            "statUpgradeAvailable": check_exists_int(
+            "statUpgrades": check_exists_int(
                 sg.adventurer_state["adventurer"]["stat_upgrade_available"]
             ),
             "name": check_exists_int(sg.adventurer["name"]),
@@ -377,8 +446,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "outputAmount": encode_int_as_bytes(dh.health_amount),
             "obstacle": check_exists_int(0),
             "obstacleLevel": check_exists_int(0),
-            "dodgedObstacle":encode_int_as_bytes(0),
-            "damageTaken":encode_int_as_bytes(0),
+            "dodgedObstacle": encode_int_as_bytes(0),
+            "damageTaken": encode_int_as_bytes(0),
             "xp_earned_adventurer": check_exists_int(0),
             "xp_earned_items": check_exists_int(0),
             "entityId": check_exists_int(0),
@@ -389,7 +458,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         print(
-            "- [discovered health]", dh.adventurer_state["adventurer_id"], "->", dh.health_amount
+            "- [discovered health]",
+            dh.adventurer_state["adventurer_id"],
+            "->",
+            dh.health_amount,
         )
 
     async def discover_gold(
@@ -411,8 +483,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "outputAmount": encode_int_as_bytes(dg.gold_amount),
             "obstacle": check_exists_int(0),
             "obstacleLevel": check_exists_int(0),
-            "dodgedObstacle":encode_int_as_bytes(0),
-            "damageTaken":encode_int_as_bytes(0),
+            "dodgedObstacle": encode_int_as_bytes(0),
+            "damageTaken": encode_int_as_bytes(0),
             "xp_earned_adventurer": check_exists_int(0),
             "xp_earned_items": check_exists_int(0),
             "entityId": check_exists_int(0),
@@ -423,7 +495,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         print(
-            "- [discovered gold]", dg.adventurer_state["adventurer_id"], "->", dg.gold_amount
+            "- [discovered gold]",
+            dg.adventurer_state["adventurer_id"],
+            "->",
+            dg.gold_amount,
         )
 
     async def discover_xp(
@@ -445,8 +520,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "outputAmount": encode_int_as_bytes(dx.xp_amount),
             "obstacle": check_exists_int(0),
             "obstacleLevel": check_exists_int(0),
-            "dodgedObstacle":encode_int_as_bytes(0),
-            "damageTaken":encode_int_as_bytes(0),
+            "dodgedObstacle": encode_int_as_bytes(0),
+            "damageTaken": encode_int_as_bytes(0),
             "xp_earned_adventurer": check_exists_int(0),
             "xp_earned_items": check_exists_int(0),
             "entityId": check_exists_int(0),
@@ -457,7 +532,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         print(
-            "- [discovered xp]", dx.adventurer_state["adventurer_id"], "->", dx.xp_amount
+            "- [discovered xp]",
+            dx.adventurer_state["adventurer_id"],
+            "->",
+            dx.xp_amount,
         )
 
     async def discover_obstacle(
@@ -491,9 +569,14 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "discoveryTime": block_time,
         }
         await info.storage.insert_one("discoveries", discovery_doc)
-        await update_items_xp(info, do.adventurer_state["adventurer_id"], do.xp_earned_items)
+        await update_items_xp(
+            info, do.adventurer_state["adventurer_id"], do.xp_earned_items
+        )
         print(
-            "- [discovered obstacle]", do.adventurer_state["adventurer_id"], "->", do.obstacle_id
+            "- [discovered obstacle]",
+            do.adventurer_state["adventurer_id"],
+            "->",
+            do.obstacle_id,
         )
 
     async def discover_beast(
@@ -514,8 +597,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "outputAmount": encode_int_as_bytes(0),
             "obstacle": check_exists_int(0),
             "obstacleLevel": check_exists_int(0),
-            "dodgedObstacle":encode_int_as_bytes(0),
-            "damageTaken":encode_int_as_bytes(db.damage_taken),
+            "dodgedObstacle": encode_int_as_bytes(0),
+            "damageTaken": encode_int_as_bytes(db.damage_taken),
             "damageLocation": check_exists_int(0),
             "xp_earned_adventurer": check_exists_int(0),
             "xp_earned_items": check_exists_int(0),
@@ -527,7 +610,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         print(
-            "- [discovered beast]", db.adventurer_state["adventurer_id"], "->", db.beast_id
+            "- [discovered beast]",
+            db.adventurer_state["adventurer_id"],
+            "->",
+            db.beast_id,
         )
 
     async def attack_beast(
@@ -591,7 +677,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "timestamp": block_time,
         }
         await info.storage.insert_one("battles", slayed_beast_doc)
-        await update_items_xp(info, sb.adventurer_state["adventurer_id"], sb.xp_earned_items)
+        await update_items_xp(
+            info, sb.adventurer_state["adventurer_id"], sb.xp_earned_items
+        )
         print(
             "- [attack beast]",
             sb.beast_id,
@@ -647,19 +735,25 @@ class LootSurvivorIndexer(StarkNetIndexer):
         purchased_item_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "item": check_exists_int(pi.item_id),
-            "ownerAdventurerId": check_exists_int(pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"]),
-            "owner": check_exists_int(pi.adventurer_state_with_bag["adventurer_state"]["owner"]),
+            "ownerAdventurerId": check_exists_int(
+                pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"]
+            ),
+            "owner": check_exists_int(
+                pi.adventurer_state_with_bag["adventurer_state"]["owner"]
+            ),
             "cost": encode_int_as_bytes(pi.cost),
             "timestamp": block_time,
         }
         await info.storage.insert_one("purchases", purchased_item_doc)
         item_doc = {
             "item": check_exists_int(pi.item_id),
-            "adventurerId": check_exists_int(pi.pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"]),
+            "adventurerId": check_exists_int(
+                pi.pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"]
+            ),
             "xp": encode_int_as_bytes(0),
             "namePrefix": check_exists_int(0),
             "nameSuffix": check_exists_int(0),
-            "itemSuffix": check_exists_int(0)
+            "itemSuffix": check_exists_int(0),
         }
         await info.storage.insert_one("items", item_doc)
         print("- [purchased item]", pi.item_id, "->", pi.cost)
@@ -677,13 +771,21 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "txHash": encode_hex_as_bytes(tx_hash),
             "equipedItemId": check_exists_int(ei.equip_item_id),
             "unequipedItemId": check_exists_int(ei.unequiped_item_id),
-            "ownerAdventurerId": check_exists_int(ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"]),
-            "owner": check_exists_int(ei.adventurer_state_with_bag["adventurer_state"]["owner"]),
+            "ownerAdventurerId": check_exists_int(
+                ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"]
+            ),
+            "owner": check_exists_int(
+                ei.adventurer_state_with_bag["adventurer_state"]["owner"]
+            ),
             "timestamp": block_time,
         }
         await info.storage.insert_one("swaps", equip_item_doc)
         update_adventurer_helper(info, ei.adventurer_state_with_bag["adventurer_state"])
-        update_adventurer_bag(info, ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"], ei.adventurer_state_with_bag["bag"])
+        update_adventurer_bag(
+            info,
+            ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+            ei.adventurer_state_with_bag["bag"],
+        )
         print("- [equip item]", ei.equiped_item_id, "->", ei.unequiped_item_id)
 
     async def greatness_increased(
@@ -696,7 +798,12 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         gi = decode_greatness_increased_event(data)
         update_adventurer_helper(info, gi.adventurer_state)
-        print("- [greatness increased]", gi.adventurer_state["adventurer_id"], "->", gi.item_id)
+        print(
+            "- [greatness increased]",
+            gi.adventurer_state["adventurer_id"],
+            "->",
+            gi.item_id,
+        )
 
     async def item_prefix_discovered(
         self,
@@ -710,17 +817,22 @@ class LootSurvivorIndexer(StarkNetIndexer):
         update_adventurer_helper(info, ip.adventurer_state)
         item_prefix_doc = {
             "namePrefix": check_exists_int(ip.item_description["name_prefix"]),
-            "nameSuffix": encode_int_as_bytes(ip.item_description["name_suffix"])
+            "nameSuffix": encode_int_as_bytes(ip.item_description["name_suffix"]),
         }
         await info.storage.find_one_and_update(
             "items",
             {
                 "item": check_exists_int(ip.item_description["id"]),
-                "adventurerId": check_exists_int(ip.adventurer_state["adventurer_id"])
+                "adventurerId": check_exists_int(ip.adventurer_state["adventurer_id"]),
             },
             {"$set": item_prefix_doc},
         )
-        print("- [item prefix discovered]", ip.adventurer_state["adventurer_id"], "->", ip.item_description["id"])
+        print(
+            "- [item prefix discovered]",
+            ip.adventurer_state["adventurer_id"],
+            "->",
+            ip.item_description["id"],
+        )
 
     async def item_suffix_discovered(
         self,
@@ -739,12 +851,16 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "items",
             {
                 "id": check_exists_int(isd.item_description["id"]),
-                "adventurerId": check_exists_int(isd.adventurer_state["adventurer_id"])
+                "adventurerId": check_exists_int(isd.adventurer_state["adventurer_id"]),
             },
             {"$set": item_suffix_doc},
         )
-        print("- [item suffix discovered]", isd.adventurer_state["adventurer_id"], "->", isd.item_description["id"])
-
+        print(
+            "- [item suffix discovered]",
+            isd.adventurer_state["adventurer_id"],
+            "->",
+            isd.item_description["id"],
+        )
 
     async def purchased_potion(
         self,
@@ -760,10 +876,15 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "txHash": tx_hash,
             "adventurerId": check_exists_int(pp.adventurer_state["adventurer_id"]),
             "healthAmount": encode_int_as_bytes(pp.health_amount),
-            "timestamp": block_time
+            "timestamp": block_time,
         }
         await info.storage.insert_one("health_purchases", purchase_doc)
-        print("- [purchased potion]", pp.adventurer_state["adventurer_id"], "->", pp.health_amount)
+        print(
+            "- [purchased potion]",
+            pp.adventurer_state["adventurer_id"],
+            "->",
+            pp.health_amount,
+        )
 
     async def new_high_score(
         self,
@@ -785,7 +906,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         print("- [new high score]", hs.adventurer_state["adventurer_id"])
 
     async def adventurer_died(
-                    self,
+        self,
         info: Info,
         block_time: datetime,
         _: FieldElement,
@@ -802,8 +923,11 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "timestamp": block_time,
         }
         await info.storage.insert_one("deaths", adventurer_died_doc)
-        print("- [adventurer died]", ad.adventurer_state["adventurer_id"], "->",  )
-
+        print(
+            "- [adventurer died]",
+            ad.adventurer_state["adventurer_id"],
+            "->",
+        )
 
     # async def discovery(
     #     self,

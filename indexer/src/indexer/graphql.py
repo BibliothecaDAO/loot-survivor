@@ -610,8 +610,6 @@ class AdventurersFilter:
     birthdate: Optional[DateTimeFilter] = None
     name: Optional[StringFilter] = None
     order: Optional[OrderFilter] = None
-    imageHash1: Optional[StringFilter] = None
-    imageHash2: Optional[StringFilter] = None
     health: Optional[FeltValueFilter] = None
     level: Optional[FeltValueFilter] = None
     strength: Optional[FeltValueFilter] = None
@@ -630,9 +628,9 @@ class AdventurersFilter:
     handsId: Optional[FeltValueFilter] = None
     neckId: Optional[FeltValueFilter] = None
     ringId: Optional[FeltValueFilter] = None
-    status: Optional[AdventurerStatusFilter] = None
     beast: Optional[FeltValueFilter] = None
-    upgrading: Optional[BooleanFilter] = None
+    beastHealth: Optional[FeltValueFilter] = None
+    statUpgrades: Optional[FeltValueFilter] = None
     gold: Optional[FeltValueFilter] = None
     lastUpdated: Optional[DateTimeFilter] = None
 
@@ -641,7 +639,7 @@ class AdventurersFilter:
 class ScoresFilter:
     adventurerId: Optional[FeltValueFilter] = None
     address: Optional[HexValueFilter] = None
-    xp: Optional[FeltValueFilter] = None
+    rank: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
     scoreTime: Optional[DateTimeFilter] = None
 
@@ -667,8 +665,8 @@ class BeastsFilter:
     attackLocation: Optional[SlotFilter] = None
     armorType: Optional[TypeFilter] = None
     rank: Optional[FeltValueFilter] = None
-    prefix1: Optional[NamePrefixFilter] = None
-    prefix2: Optional[NameSuffixFilter] = None
+    namePrefix: Optional[NamePrefixFilter] = None
+    nameSuffix: Optional[NameSuffixFilter] = None
     health: Optional[FeltValueFilter] = None
     xp: Optional[FeltValueFilter] = None
     level: Optional[FeltValueFilter] = None
@@ -704,8 +702,8 @@ class ItemsFilter:
     type: Optional[StringFilter] = None
     material: Optional[MaterialFilter] = None
     rank: Optional[FeltValueFilter] = None
-    prefix1: Optional[NamePrefixFilter] = None
-    prefix2: Optional[NameSuffixFilter] = None
+    namePrefix: Optional[NamePrefixFilter] = None
+    nameSuffix: Optional[NameSuffixFilter] = None
     suffix: Optional[SuffixFilter] = None
     greatness: Optional[FeltValueFilter] = None
     createdBlock: Optional[FeltValueFilter] = None
@@ -735,8 +733,6 @@ class AdventurersOrderByInput:
     birthdate: Optional[OrderByInput] = None
     name: Optional[OrderByInput] = None
     order: Optional[OrderByInput] = None
-    imageHash1: Optional[OrderByInput] = None
-    imageHash2: Optional[OrderByInput] = None
     health: Optional[OrderByInput] = None
     level: Optional[OrderByInput] = None
     strength: Optional[OrderByInput] = None
@@ -755,9 +751,9 @@ class AdventurersOrderByInput:
     handsId: Optional[OrderByInput] = None
     neckId: Optional[OrderByInput] = None
     ringId: Optional[OrderByInput] = None
-    status: Optional[OrderByInput] = None
     beast: Optional[OrderByInput] = None
-    upgrading: Optional[OrderByInput] = None
+    beastHealth: Optional[OrderByInput] = None
+    statUpgrades: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
     lastUpdated: Optional[OrderByInput] = None
 
@@ -766,7 +762,7 @@ class AdventurersOrderByInput:
 class ScoresOrderByInput:
     adventurerId: Optional[OrderByInput] = None
     address: Optional[OrderByInput] = None
-    xp: Optional[OrderByInput] = None
+    rank: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
     scoreTime: Optional[OrderByInput] = None
 
@@ -792,7 +788,8 @@ class BeastsOrderByInput:
     attackLocation: Optional[OrderByInput] = None
     armorType: Optional[OrderByInput] = None
     rank: Optional[OrderByInput] = None
-    prefixes: Optional[OrderByInput] = None
+    namePrefix: Optional[OrderByInput] = None
+    nameSuffix: Optional[OrderByInput] = None
     health: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
     level: Optional[OrderByInput] = None
@@ -827,9 +824,9 @@ class ItemsOrderByInput:
     type: Optional[OrderByInput] = None
     material: Optional[OrderByInput] = None
     rank: Optional[OrderByInput] = None
-    prefix1: Optional[OrderByInput] = None
-    prefix2: Optional[OrderByInput] = None
-    suffix: Optional[OrderByInput] = None
+    namePrefix: Optional[OrderByInput] = None
+    nameSuffix: Optional[OrderByInput] = None
+    itemSuffix: Optional[OrderByInput] = None
     greatness: Optional[OrderByInput] = None
     createdBlock: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
@@ -858,8 +855,6 @@ class Adventurer:
     birthdate: Optional[datetime]
     name: Optional[StringValue]
     order: Optional[OrderValue]
-    imageHash1: Optional[StringValue]
-    imageHash2: Optional[StringValue]
     health: Optional[FeltValue]
     level: Optional[FeltValue]
     strength: Optional[FeltValue]
@@ -878,9 +873,9 @@ class Adventurer:
     handsId: Optional[FeltValue]
     neckId: Optional[FeltValue]
     ringId: Optional[FeltValue]
-    status: Optional[AdventurerStatusValue]
     beastId: Optional[FeltValue]
-    upgrading: Optional[BooleanValue]
+    beastHealth: Optional[FeltValue]
+    statUpgrades: Optional[FeltValue]
     gold: Optional[FeltValue]
     lastUpdated: Optional[datetime]
 
@@ -894,8 +889,6 @@ class Adventurer:
             birthdate=data["birthdate"],
             name=data["name"],
             order=data["order"],
-            imageHash1=data["imageHash1"],
-            imageHash2=data["imageHash2"],
             health=data["health"],
             level=data["level"],
             strength=data["strength"],
@@ -914,9 +907,8 @@ class Adventurer:
             handsId=data["handsId"],
             neckId=data["neckId"],
             ringId=data["ringId"],
-            status=data["status"],
             beastId=data["beast"],
-            upgrading=data["upgrading"],
+            statUpgrades=data["statUpgrades"],
             gold=data["gold"],
             lastUpdated=data["lastUpdated"],
         )
@@ -926,7 +918,7 @@ class Adventurer:
 class Score:
     adventurerId: Optional[FeltValue]
     address: Optional[HexValue]
-    xp: Optional[FeltValue]
+    rank: Optional[FeltValue]
     txHash: Optional[HexValue]
     scoreTime: Optional[datetime]
 
@@ -935,7 +927,7 @@ class Score:
         return cls(
             adventurerId=data["adventurerId"],
             address=data["address"],
-            xp=data["xp"],
+            rank=data["rank"],
             txHash=data["txHash"],
             scoreTime=data["scoreTime"],
         )
@@ -975,8 +967,8 @@ class Beast:
     attackLocation: Optional[SlotValue]
     armorType: Optional[TypeValue]
     rank: Optional[FeltValue]
-    prefix1: Optional[NamePrefixValue]
-    prefix2: Optional[NameSuffixValue]
+    namePrefix: Optional[NamePrefixValue]
+    nameSuffix: Optional[NameSuffixValue]
     health: Optional[FeltValue]
     xp: Optional[FeltValue]
     level: Optional[FeltValue]
@@ -993,8 +985,8 @@ class Beast:
             attackLocation=data["attackLocation"],
             armorType=data["armorType"],
             rank=data["rank"],
-            prefix1=data["prefix1"],
-            prefix2=data["prefix2"],
+            namePrefix=data["namePrefix"],
+            nameSuffix=data["nameSuffix"],
             health=data["health"],
             xp=data["xp"],
             level=data["level"],
@@ -1046,9 +1038,9 @@ class Item:
     type: Optional[TypeValue]
     material: Optional[MaterialValue]
     rank: Optional[FeltValue]
-    prefix1: Optional[NamePrefixValue]
-    prefix2: Optional[NameSuffixValue]
-    suffix: Optional[SuffixValue]
+    namePrefix: Optional[NamePrefixValue]
+    nameSuffix: Optional[NameSuffixValue]
+    itemSuffix: Optional[SuffixValue]
     greatness: Optional[FeltValue]
     createdBlock: Optional[FeltValue]
     xp: Optional[FeltValue]
@@ -1073,9 +1065,9 @@ class Item:
             type=data["type"],
             material=data["material"],
             rank=data["rank"],
-            prefix1=data["prefix1"],
-            prefix2=data["prefix2"],
-            suffix=data["suffix"],
+            namePrefix=data["namePrefix"],
+            nameSuffix=data["nameSuffix"],
+            itemSuffix=data["itemSuffix"],
             greatness=data["greatness"],
             createdBlock=data["createdBlock"],
             xp=data["xp"],
