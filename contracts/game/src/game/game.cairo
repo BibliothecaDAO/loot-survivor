@@ -620,6 +620,8 @@ mod Game {
 
         adventurer.stat_upgrade_available -= 1;
 
+        __event__StatUpgraded(ref self, AdventurerState { owner: get_caller_address(), adventurer_id, adventurer: adventurer }, stat_id);
+
         _pack_adventurer(ref self, adventurer_id, adventurer);
     }
 
