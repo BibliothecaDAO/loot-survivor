@@ -1,9 +1,6 @@
 use core::result::ResultTrait;
 use core::serde::Serde;
-use integer::{
-    U128IntoFelt252, Felt252IntoU256, Felt252TryIntoU64, U256TryIntoFelt252, u256_from_felt252,
-    U16IntoU64, U8IntoU16, u16_overflowing_sub, u16_is_zero
-};
+use integer::{U64IntoU128, U16IntoU128, u16_overflowing_sub};
 use traits::{TryInto, Into};
 use option::OptionTrait;
 use debug::PrintTrait;
@@ -19,7 +16,7 @@ use lootitems::statistics::{constants, item_tier, item_type};
 use super::exploration::ExploreUtils;
 use super::constants::adventurer_constants::{
     STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_DISCOUNT,
-    MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE
+    MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, ITEM_XP_MULTIPLIER
 };
 use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
 use super::item_meta::{LootStatistics, LootDescription};
@@ -29,6 +26,7 @@ use combat::constants::CombatEnums::{Type, Tier, Slot};
 
 use obstacles::obstacle::{ImplObstacle, Obstacle};
 use beasts::beast::{ImplBeast, Beast};
+use beasts::constants::BeastSettings;
 
 
 #[derive(Drop, Copy, Serde)]
@@ -64,12 +62,12 @@ trait IAdventurer {
     fn pack(self: Adventurer) -> felt252;
     fn unpack(packed: felt252) -> Adventurer;
 
-    fn get_random_explore(entropy: u64) -> ExploreResult;
-    fn beast_encounter(ref self: Adventurer, entropy: u64) -> Adventurer;
-    fn discover_treasure(ref self: Adventurer, entropy: u64) -> Adventurer;
+    fn get_random_explore(entropy: u128) -> ExploreResult;
+    fn beast_encounter(ref self: Adventurer, entropy: u128) -> Adventurer;
+    fn discover_treasure(ref self: Adventurer, entropy: u128) -> Adventurer;
 
-    fn attack(ref self: Adventurer, entropy: u64) -> Adventurer;
-    fn flee(ref self: Adventurer, entropy: u64) -> Adventurer;
+    fn attack(ref self: Adventurer, entropy: u128) -> Adventurer;
+    fn flee(ref self: Adventurer, entropy: u128) -> Adventurer;
 
     fn add_health(ref self: Adventurer, value: u16) -> Adventurer;
     fn deduct_health(ref self: Adventurer, value: u16) -> Adventurer;
@@ -126,12 +124,13 @@ trait IAdventurer {
 
     fn get_item_at_slot(self: Adventurer, slot: Slot) -> LootStatistics;
 
-    fn get_battle_fixed_entropy(self: Adventurer) -> u16;
+    fn get_battle_fixed_entropy(self: Adventurer, adventurer_entropy: u64) -> u128;
 
     fn charisma_potion_discount(self: Adventurer) -> u16;
     fn charisma_item_discount(self: Adventurer) -> u16;
 
     fn get_item_cost(self: Adventurer, item_cost: u16) -> u16;
+    fn get_random_armor_slot(entropy: u128) -> Slot;
 }
 
 impl ImplAdventurer of IAdventurer {
@@ -194,7 +193,7 @@ impl ImplAdventurer of IAdventurer {
     // get_random_explore returns a random number between 0 and 3 based on provided entropy
     // @param entropy: entropy for generating random explore
     // @return u64: A random number between 0 and 3 denoting the outcome of the explore
-    fn get_random_explore(entropy: u64) -> ExploreResult {
+    fn get_random_explore(entropy: u128) -> ExploreResult {
         let result = entropy % 3;
         if (result == 0) {
             return ExploreResult::Beast(());
@@ -260,15 +259,21 @@ impl ImplAdventurer of IAdventurer {
         return ImplCombat::get_level_from_xp(self.xp);
     }
 
-    fn beast_encounter(ref self: Adventurer, entropy: u64) -> Adventurer {
-        // get the beast health
+    // beast_encounter psuedo discovers a beast for an adventurer
+    // since the beast is generated at runtime, we simply need to set the
+    // beasts health which will enable the contract to detect the adventurer is in a battle
+    // allowing adventurer to call "attack"
+    // @param self: Adventurer to discover beast for
+    // @param entropy: Entropy for generating beast
+    // @return Adventurer: Adventurer with beast discovered
+    fn beast_encounter(ref self: Adventurer, entropy: u128) -> Adventurer {
+        // if the adventurer is on level 1
         let adventurer_level = ImplAdventurer::get_level(self);
-        let beast_health = ImplBeast::get_starting_health(adventurer_level, entropy);
-        // add the beast to the adventurer
-        return self.add_beast(beast_health);
+        // otherwise generate random starting health for the beast
+        return self.add_beast(ImplBeast::get_starting_health(adventurer_level, entropy));
     }
 
-    fn discover_treasure(ref self: Adventurer, entropy: u64) -> Adventurer {
+    fn discover_treasure(ref self: Adventurer, entropy: u128) -> Adventurer {
         // generate random item discovery
         let item_type = ExploreUtils::get_random_treasury_discovery(self, entropy);
 
@@ -296,7 +301,7 @@ impl ImplAdventurer of IAdventurer {
     }
 
     // TODO: implement this function
-    fn attack(ref self: Adventurer, entropy: u64) -> Adventurer {
+    fn attack(ref self: Adventurer, entropy: u128) -> Adventurer {
         // get beast from adventurer
         // combat::calculate_damage_to_beast(adventurer, beast, adventurer_entropy, game_entropy);
         // if beast is dead, add xp to adventurer and items
@@ -306,7 +311,7 @@ impl ImplAdventurer of IAdventurer {
     }
 
     // TODO: implement this function
-    fn flee(ref self: Adventurer, entropy: u64) -> Adventurer {
+    fn flee(ref self: Adventurer, entropy: u128) -> Adventurer {
         // combat::attempt_flee(adventurer, adventurer_entropy, game_entropy;
         // if successful, return adventurer with adventurer.beast_health = 0;
         // if not successful, process beast counter_attack and return adventurer
@@ -323,7 +328,6 @@ impl ImplAdventurer of IAdventurer {
 
         // luck is combined greatness of equipped jewlery
         return necklace_greatness + ring_greatness;
-
     }
 
     // in_battle returns true if the adventurer is in battle
@@ -457,6 +461,7 @@ impl ImplAdventurer of IAdventurer {
     // @param value: u16 - the amount of xp to increase the items by
     // @return Adventurer - the adventurer with the updated items
     fn increase_item_xp(ref self: Adventurer, value: u16) -> Adventurer {
+        let xp_increase = value * ITEM_XP_MULTIPLIER;
         if self.weapon.id > 0 {
             self.weapon.xp = self.weapon.xp + value;
         }
@@ -520,18 +525,38 @@ impl ImplAdventurer of IAdventurer {
                 id: 0, xp: 0, metadata: 0, 
                 }, ring: LootStatistics {
                 id: 0, xp: 0, metadata: 0, 
-            }, beast_health: 10, stat_upgrade_available: 0,
+            }, beast_health: BeastSettings::STARTER_BEAST_HEALTH, stat_upgrade_available: 0,
         };
     }
 
-    // get_battle_fixed_entropy provides a source of entropy
-    // that is fixed when the adventurer is in combat
-    fn get_battle_fixed_entropy(self: Adventurer) -> u16 {
-        // while it's simple, using just XP is advantgeous because players can't easily maninpulate it. 
-        // if for example we include adventurer stats, it could be possible for an advanced bot to
-        // select specific stats to increase chance of beneficial outcome. The same applies to 
-        // gold and item xp. 
-        return self.xp;
+
+    // get_battle_fixed_entropy provides an entropy source that is fixed during battle
+    // it intentionally does not use game_entropy as that could change during battle and this
+    // entropy allows us to simulate a persistent battle without having to store beast
+    // details on-chain.
+    fn get_battle_fixed_entropy(self: Adventurer, adventurer_entropy: u64) -> u128 {
+        return U16IntoU128::into(self.xp) + U64IntoU128::into(adventurer_entropy);
+    }
+
+    fn get_random_armor_slot(entropy: u128) -> Slot {
+        // get a number between 0 and 5 inclusive
+        let slot = entropy % 6;
+
+        // return slot for each outcome
+        if (slot == 1) {
+            return Slot::Chest(());
+        } else if (slot == 2) {
+            return Slot::Head(());
+        } else if (slot == 3) {
+            return Slot::Waist(());
+        } else if (slot == 4) {
+            return Slot::Foot(());
+        } else if (slot == 5) {
+            return Slot::Hand(());
+        }
+
+        // fall through to Hand
+        return Slot::Hand(());
     }
 
     // pack the adventurer into a single felt252

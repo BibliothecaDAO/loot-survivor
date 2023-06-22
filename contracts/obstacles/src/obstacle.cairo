@@ -1,10 +1,9 @@
 use option::OptionTrait;
-use integer::{U64TryIntoU8, U8IntoU16, U8IntoU64};
+use integer::{U8IntoU16, U128TryIntoU8};
 use super::constants::{ObstacleId, ObstacleSettings};
 use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
 use combat::constants::CombatSettings;
 use combat::constants::CombatEnums::{Type, Tier, Slot};
-
 
 #[derive(Drop, Copy)]
 struct Obstacle {
@@ -13,15 +12,15 @@ struct Obstacle {
 }
 
 trait ObstacleTrait {
-    fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, entropy: u64) -> u16;
-    fn dodged(adventurer_level: u8, adventurer_intelligence: u8, entropy: u64) -> bool;
+    fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, entropy: u128) -> u16;
+    fn dodged(adventurer_level: u8, adventurer_intelligence: u8, entropy: u128) -> bool;
     fn obstacle_encounter(
-        adventurer_level: u8, adventurer_intelligence: u8, entropy: u64
+        adventurer_level: u8, adventurer_intelligence: u8, entropy: u128
     ) -> (Obstacle, bool);
     fn get_obstacle(id: u8, level: u8, damage_location: Slot) -> Obstacle;
-    fn get_random_level(adventurer_level: u8, entropy: u64) -> u8;
-    fn get_random_damage_location(entropy: u64) -> Slot;
-    fn obstacle_encounter_id(entropy: u64) -> u8;
+    fn get_random_level(adventurer_level: u8, entropy: u128) -> u8;
+    fn get_random_damage_location(entropy: u128) -> Slot;
+    fn obstacle_encounter_id(entropy: u128) -> u8;
     fn get_xp_reward(obstacle: Obstacle) -> u16;
     fn get_tier(id: u8) -> Tier;
     fn get_type(id: u8) -> Type;
@@ -30,9 +29,9 @@ trait ObstacleTrait {
 impl ImplObstacle of ObstacleTrait {
     // obstacle_encounter returns a random obstacle based on the adventurer level and entropy
     // @param adventurer_level: u8 - the adventurer level
-    // @param entropy: u64 - entropy for level generation
+    // @param entropy: u128 - entropy for level generation
     fn obstacle_encounter(
-        adventurer_level: u8, adventurer_intelligence: u8, entropy: u64
+        adventurer_level: u8, adventurer_intelligence: u8, entropy: u128
     ) -> (Obstacle, bool) {
         // get random obstacle id
         let obstacle_id = ImplObstacle::obstacle_encounter_id(entropy);
@@ -48,14 +47,14 @@ impl ImplObstacle of ObstacleTrait {
 
     // obstacle_encounter_id returns a random obstacle id based on adventurer, adventurer entropy, and game entropy
     // the obstacle id will be between 1 and the max obstacle id (inclusive)
-    // @param entropy: u64 - entropy from random id generation
+    // @param entropy: u128 - entropy from random id generation
     // @return u8 - the obstacle id
-    fn obstacle_encounter_id(entropy: u64) -> u8 {
+    fn obstacle_encounter_id(entropy: u128) -> u8 {
         // select an obstacle between 1 and max obstacle id (inclusive)
         let obstacle_id = (entropy % ObstacleId::MAX_ID) + 1;
 
         // return obstacle id as a u8
-        return U64TryIntoU8::try_into(obstacle_id).unwrap();
+        return U128TryIntoU8::try_into(obstacle_id).unwrap();
     }
     // get_obstacle returns an obstacle based on the provided obstacle id and level
     // @param id: u8 - the obstacle id
@@ -78,7 +77,7 @@ impl ImplObstacle of ObstacleTrait {
     // @param adventurer_level: the level of adventurer ()
     // @param entropy: entropy for random level generation
     // @return u8 - the obstacle level
-    fn get_random_level(adventurer_level: u8, entropy: u64) -> u8 {
+    fn get_random_level(adventurer_level: u8, entropy: u128) -> u8 {
         ImplCombat::get_random_level(
             adventurer_level,
             entropy,
@@ -170,12 +169,12 @@ impl ImplObstacle of ObstacleTrait {
     // get_attack_location returns the attack location of the obstacle based on the provided obstacle id
     // @param id: u8 - the obstacle id
     // @return u8 - the obstacle attack location
-    fn get_random_damage_location(entropy: u64) -> Slot {
+    fn get_random_damage_location(entropy: u128) -> Slot {
         return ImplCombat::get_random_damage_location(entropy);
     }
 
     // get_damage returns the damage of the obstacle based on the provided obstacle id
-    fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, entropy: u64) -> u16 {
+    fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, entropy: u128) -> u16 {
         // no critical hits for obstacles
         let is_critical_hit = false;
 
@@ -199,12 +198,14 @@ impl ImplObstacle of ObstacleTrait {
     // dodged returns true if the adventurer dodged the obstacle
     // @param adventurer_level: u8 - the adventurer level
     // @param adventurer_intelligence: u8 - the adventurer intelligence
-    // @param entropy: u64 - the entropy
+    // @param entropy: u128 - the entropy
     // @return bool - true if the adventurer dodged the obstacle
-    fn dodged(adventurer_level: u8, adventurer_intelligence: u8, entropy: u64) -> bool {
+    fn dodged(adventurer_level: u8, adventurer_intelligence: u8, entropy: u128) -> bool {
         // Delegate ambushed calculation to combat system
         // avoiding beast ambush requires wisdom
-        return ImplCombat::ability_based_avoid_threat(adventurer_level, adventurer_intelligence, entropy);
+        return ImplCombat::ability_based_avoid_threat(
+            adventurer_level, adventurer_intelligence, entropy
+        );
     }
 }
 

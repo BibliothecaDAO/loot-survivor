@@ -15,8 +15,8 @@ mod Game {
     use starknet::get_caller_address;
     use starknet::{ContractAddress, ContractAddressIntoFelt252};
     use integer::{
-        U256TryIntoU32, U256TryIntoU8, Felt252TryIntoU64, U8IntoU16, U16IntoU64, U8IntoU64,
-        U64TryIntoU8
+        Felt252TryIntoU64, U8IntoU16, U16IntoU64, U16IntoU128, U64IntoU128, U8IntoU128,
+        U128TryIntoU8,
     };
     use integer::U64IntoFelt252;
     use core::traits::{TryInto, Into};
@@ -45,7 +45,7 @@ mod Game {
     use obstacles::obstacle::{ImplObstacle};
     use combat::combat::{CombatSpec, SpecialPowers, ImplCombat};
     use combat::constants::CombatEnums;
-    use beasts::beast::{ImplBeast};
+    use beasts::beast::{Beast, IBeast, ImplBeast};
 
     #[storage]
     struct Storage {
@@ -108,10 +108,39 @@ mod Game {
             _explore(ref self, adventurer_id);
         }
         fn attack(ref self: ContractState, adventurer_id: u256) {
-            _attack(ref self, adventurer_id);
+            // check caller owns adventurer id
+            _assert_ownership(@self, adventurer_id);
+
+            // get adventurer from storage and unpack
+            let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+            // assert adventurer has a beast to attack
+            _assert_in_battle(@self, adventurer);
+
+            // pass adventurer ref into internal function
+            _attack(ref self, ref adventurer, adventurer_id);
+
+            // pack and save adventurer
+            _pack_adventurer(ref self, adventurer_id, adventurer);
         }
         fn flee(ref self: ContractState, adventurer_id: u256) {
-            _flee(ref self, adventurer_id);
+            // check caller owns adventurer id
+            _assert_ownership(@self, adventurer_id);
+
+            // get adventurer from storage and unpack
+            let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+            // can't flee from start beast
+            _assert_not_starter_beast(@self, adventurer);
+
+            // assert adventurer has a beast to attack
+            _assert_in_battle(@self, adventurer);
+
+            // pass adventurer ref into internal function
+            _flee(ref self, ref adventurer, adventurer_id);
+
+            // pack and save adventurer
+            _pack_adventurer(ref self, adventurer_id, adventurer);
         }
         fn equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
             _equip(ref self, adventurer_id, item_id);
@@ -233,16 +262,23 @@ mod Game {
         // TODO: get game_entropy from storage
         let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
 
-        let explore_result = ImplAdventurer::get_random_explore(game_entropy);
+        // get entropy for exploration
+        let exploration_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
+
+        let explore_result = ImplAdventurer::get_random_explore(exploration_entropy);
+
         match explore_result {
             ExploreResult::Beast(()) => {
-                adventurer.beast_encounter(game_entropy);
+                // TODO: Generate new entropy here
+                adventurer.beast_encounter(exploration_entropy);
             },
             ExploreResult::Obstacle(()) => {
-                _obstacle_encounter(ref self, ref adventurer, adventurer_id, game_entropy);
+                // TODO: Generate new entropy here
+                _obstacle_encounter(ref self, ref adventurer, adventurer_id, exploration_entropy);
             },
             ExploreResult::Treasure(()) => {
-                adventurer.discover_treasure(game_entropy);
+                // TODO: Generate new entropy here
+                adventurer.discover_treasure(exploration_entropy);
             },
         }
 
@@ -253,11 +289,11 @@ mod Game {
     fn _beast_discovery(ref self: ContractState, adventurer_id: u256) {}
 
     fn _obstacle_encounter(
-        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, entropy: u64
+        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, entropy: u128
     ) -> Adventurer {
         _assert_ownership(@self, adventurer_id);
         // get adventurer level from xp
-        let adventurer_level = ImplAdventurer::get_level(adventurer);
+        let adventurer_level = adventurer.get_level();
 
         // process obstacle encounter
         let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
@@ -276,7 +312,7 @@ mod Game {
         // if the obstacle was not dodged
         } else {
             // get item at the location the obstacle is dealing damage to
-            let armor = ImplAdventurer::get_item_at_slot(adventurer, obstacle.damage_location);
+            let armor = adventurer.get_item_at_slot(obstacle.damage_location);
 
             // get combat spec for that item
             let armor_combat_spec = _get_combat_spec(@self, adventurer_id, armor);
@@ -296,88 +332,169 @@ mod Game {
 
 
     // @loothero
-    fn _attack(ref self: ContractState, adventurer_id: u256) { //
-        // check beast exists on Adventurer
-        _assert_ownership(@self, adventurer_id);
-
-        // get adventurer from storage and unpack
-        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
-
-        // assert adventurer has a beast to attack
-        _assert_in_battle(@self, adventurer);
-
+    fn _attack(
+        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
+    ) -> Adventurer { //
         // get adventurer entropy from storage  
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
-        // generate a battle fixed source of randomness. If we used exclusively adventurer entropy
-        // the adventurer would get the same beast everytime. We can't use game_entropy because that
-        // could potentially change during battle and we need to be able to generate the same beast
-        // for combat calculations during the course of a battle.
-        let battle_fixed_entropy = adventurer_entropy
-            * U16IntoU64::into(adventurer.get_battle_fixed_entropy());
+        // generate battle fixed entropy by combining adventurer xp and adventurer entropy
+        let battle_fixed_entropy: u128 = adventurer.get_battle_fixed_entropy(adventurer_entropy);
 
-        // generate special names for beast using Loot name schema. We use Loot names because
-        // combat system will deal bonus damage for matching names. We do this here instead of in beast
-        // to prevent beast from depending on Loot
-        let beast_prefix1 = U64TryIntoU8::try_into(battle_fixed_entropy)
-            .unwrap() % NamePrefixLength;
-        let beast_prefix2 = U64TryIntoU8::try_into(battle_fixed_entropy)
-            .unwrap() % NameSuffixLength;
+        // generate special names for beast using Loot name schema. 
+        // We use Loot names because the combat system will deal bonus damage for matching names (these are the items super powers)
+        // We do this here instead of in beast to prevent beast from depending on Loot
+        let beast_prefix1 = U128TryIntoU8::try_into(
+            battle_fixed_entropy % U8IntoU128::into(NamePrefixLength)
+        )
+            .unwrap();
+        let beast_prefix2 = U128TryIntoU8::try_into(
+            battle_fixed_entropy % U8IntoU128::into(NameSuffixLength)
+        )
+            .unwrap();
+
+        // use the randomly generated prefixes but set suffic to 0
         let beast_name_prefix = SpecialPowers {
             prefix1: beast_prefix1, prefix2: beast_prefix2, suffix: 0
         };
 
-        // get battle fixed beast. The key to this is using battle fixed entropy
-        let beast = ImplBeast::get_beast(
-            adventurer.get_level(), beast_name_prefix, battle_fixed_entropy
-        );
-
         // if the items greatness is below 15, it won't have any special names so no need
         // to waste a read fetching them
-        let weapon = ImplAdventurer::get_item_at_slot(adventurer, CombatEnums::Slot::Weapon(()));
+        let weapon = adventurer.get_item_at_slot(CombatEnums::Slot::Weapon(()));
         let weapon_combat_spec = _get_combat_spec(@self, adventurer_id, weapon);
 
-        // TODO: get game_entropy from storage
+        // get battle fixed beast. The key to this is using battle fixed entropy
+        let adventurer_level = adventurer.get_level();
+        let beast = ImplBeast::get_beast(adventurer_level, beast_name_prefix, battle_fixed_entropy);
+        if (adventurer.get_level() == 1) {
+            let beast = ImplBeast::get_starter_beast(weapon_combat_spec.item_type);
+        }
+
+        // get game entropy from storage
         let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
 
         // When generating the beast, we need to ensure entropy remains fixed for the battle
         // for attacking however, we should change the entropy during battle so we use adventurer and beast health
         // to accomplish this
-        let attack_entropy = game_entropy + adventurer_entropy + U16IntoU64::into(adventurer.health + adventurer.beast_health);
-        let damage_dealt = ImplBeast::attack(adventurer.get_luck(), adventurer.strength, weapon_combat_spec, beast, attack_entropy);
+        let attack_entropy = U64IntoU128::into(
+            game_entropy
+                + adventurer_entropy
+                + U16IntoU64::into(adventurer.health + adventurer.beast_health)
+        );
+        let damage_dealt = beast
+            .attack(weapon_combat_spec, adventurer.get_luck(), adventurer.strength, attack_entropy);
         // if the amount of damage dealt to beast exceeds its health
-        if (damage_dealt > adventurer.beast_health) {
-            // TODO: Generate Event
+        if (damage_dealt >= adventurer.beast_health) {
             // the beast is dead so set health to zero
-            // get xp earned for adventurer and items
-            // get gold earned
-            // emit __event__SlayedBeast()
-)
+            adventurer.beast_health = 0;
+
+            // grant equipped items and adventurer xp for the encounter
+            adventurer.increase_adventurer_xp(beast.get_xp_reward());
+            adventurer.increase_item_xp(beast.get_xp_reward());
+
+            // grant adventurer gold reward. We use battle fixed entropy
+            // to fix this result at the start of the battle, mitigating simulate-and-wait strategies
+            adventurer.increase_gold(beast.get_gold_reward(battle_fixed_entropy));
+
+            // TODO: emit __event__SlayedBeast()
+            return adventurer;
         } else {
-            // the beast is still alive and proceeds to counter attack
-            let damage_taken = ImplBeast::counter_attack(adventurer.get_luck(), adventurer.strength, weapon_combat_spec, beast, attack_entropy);
-            //counter_attack(beast: Beast, armor: CombatSpec, entropy: u64) -> u16;
+            // beast has more health than was dealt so subtract damage dealt
+            adventurer.beast_health = adventurer.beast_health - damage_dealt;
 
+            // process beast counter attack
+            let damage_taken = _beast_counter_attack(
+                ref self, ref adventurer, adventurer_id, beast, attack_entropy
+            );
 
+            // TODO: emit __event__AttackBeast
+
+            return adventurer;
         }
+    }
 
+    fn _beast_counter_attack(
+        ref self: ContractState,
+        ref adventurer: Adventurer,
+        adventurer_id: u256,
+        beast: Beast,
+        entropy: u128
+    ) -> u16 {
+        // generate a random attack slot for the beast and get the armor the adventurer has at that slot
+        let armor = adventurer.get_item_at_slot(ImplAdventurer::get_random_armor_slot(entropy));
+
+        // convert loot item to combat spec so it can be used with combat library
+        let armor_combat_spec = _get_combat_spec(@self, adventurer_id, armor);
+
+        // process beast counter attack
+        let damage_taken = beast.counter_attack(armor_combat_spec, entropy);
+
+        // if the damage taken is greater than or equal to adventurers health
+        // the adventurer is dead
+        let adventurer_died = damage_taken >= adventurer.health;
+        if (adventurer_died) {
+            // set their health to 0
+            adventurer.health = 0;
+            // TODO: Emit AdventurerDied  __event_AdventurerDied
+            // TODO: Check for Top score
+            return damage_taken;
+        } // if the adventurer is not dead
+        else {
+            // deduct the damage dealt
+            adventurer.health -= damage_taken;
+            return damage_taken;
         }
-
-    // calculate attack dmg
-    // check if beast is dead
-    // if dead -> calculate xp & gold
-    // if not dead -> update beast health
-
-    // if adventurer dies -> set leaderboard, kill adventurer
     }
 
     // @loothero
-    fn _flee(ref self: ContractState, adventurer_id: u256) { // 
-    // check beast exists on Adventurer
-    // calculate if can flee
-    // if can flee -> set beast to null
-    // if can't flee -> beast counter attack
-    // if adventurer dies -> set leaderboard, kill adventurer
+    fn _flee(
+        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
+    ) -> Adventurer { // \
+        // get adventurer entropy from storage  
+        let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
+
+        // get game entropy from storage
+        let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
+
+        // generate live entropy from fixed entropy sources and live adventurer stats
+        let flee_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
+
+        let fled = ImplBeast::attempt_flee(
+            adventurer.get_level(), adventurer.dexterity, flee_entropy
+        );
+
+        if (fled) {
+            // set beast health to zero to denote adventurer is no longer in battle
+            adventurer.beast_health = 0;
+            // TODO: emit __event__FleeAttempt
+            return adventurer;
+        } else {
+            // if flee attempt was unsuccessful
+            // the beast will counter attack
+
+            // to process the counter attack we'll need
+            // the adventurers level
+            let adventurer_level = adventurer.get_level();
+            // our fixed battle entropy which we use to generate same beast during a single battle
+            let battle_fixed_entropy: u128 = adventurer
+                .get_battle_fixed_entropy(adventurer_entropy);
+
+            // here we save some compute by not looking up the beast's special names during a failed flee
+            // since they won't impact damage
+            let beast_name_prefix = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 };
+            let beast = ImplBeast::get_beast(
+                adventurer_level, beast_name_prefix, battle_fixed_entropy
+            );
+
+            // process counter attack (adventurer death will be handled as part of counter attack)
+            let damage_taken = _beast_counter_attack(
+                ref self, ref adventurer, adventurer_id, beast, flee_entropy
+            );
+
+            // TODO: emit __event__FleeAttempt
+
+            return adventurer;
+        }
     }
 
     // @loaf
@@ -487,7 +604,6 @@ mod Game {
         _pack_adventurer(ref self, adventurer_id, adventurer);
     }
 
-    // @loothero
     fn _purchase_health(ref self: ContractState, adventurer_id: u256) {
         _assert_ownership(@self, adventurer_id);
 
@@ -505,6 +621,25 @@ mod Game {
         adventurer.add_health(POTION_HEALTH_AMOUNT);
 
         _pack_adventurer(ref self, adventurer_id, adventurer);
+    }
+
+    // _get_live_entropy generates entropy for exploration
+    // @param adventurer_entropy - entropy from adventurer
+    // @param game_entropy - entropy from game
+    // @param adventurer - the adventurer
+    // @return u128 - entropy to be used for exploration
+    // TODOs:
+    // 1. Move this to Adventurer lib
+    // 2. Consider using cairo hashing algorithm
+    fn _get_live_entropy(
+        adventurer_entropy: u64, game_entropy: u64, adventurer: Adventurer
+    ) -> u128 {
+        // cast everything to u128 before adding to avoid overflow
+        return U64IntoU128::into(adventurer_entropy)
+            + U64IntoU128::into(game_entropy)
+            + U16IntoU128::into(adventurer.xp)
+            + U16IntoU128::into(adventurer.gold)
+            + U16IntoU128::into(adventurer.health);
     }
 
     // ------------------------------------------ //
@@ -564,6 +699,9 @@ mod Game {
     }
     fn _assert_in_battle(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.beast_health > 0, messages::ATTACK_CALLED_OUTSIDE_BATTLE);
+    }
+    fn _assert_not_starter_beast(self: @ContractState, adventurer: Adventurer) {
+        assert(adventurer.get_level() > 1, messages::CANT_FLEE_STARTER_BEAST);
     }
 
     fn _lords_address(self: @ContractState) -> ContractAddress {
@@ -715,6 +853,7 @@ mod Game {
         beast_health: u8,
         damage_dealt: u8,
         damage_taken: u8,
+        damage_location: u8,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -892,6 +1031,7 @@ mod Game {
         beast_health: u8,
         damage_dealt: u8,
         damage_taken: u8,
+        damage_location: u8,
     ) {
         self
             .emit(
@@ -905,6 +1045,7 @@ mod Game {
                         beast_health,
                         damage_dealt,
                         damage_taken,
+                        damage_location,
                     }
                 )
             );
