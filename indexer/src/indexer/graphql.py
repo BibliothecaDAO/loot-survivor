@@ -649,30 +649,20 @@ class DiscoveriesFilter:
     adventurerId: Optional[FeltValueFilter] = None
     disoveryType: Optional[StringFilter] = None
     subDiscoveryType: Optional[StringFilter] = None
-    entityId: Optional[FeltValueFilter] = None
     outputAmount: Optional[FeltValueFilter] = None
-    attackLocation: Optional[SlotFilter] = None
+    obstacle: Optional[ObstacleFilter] = None
+    obstacleLevel: Optional[FeltValueFilter] = None
+    dodgedObstacle: Optional[BooleanFilter] = None
+    damageTaken: Optional[FeltValueFilter] = None
+    damageLocation: Optional[SlotFilter] = None
+    xp_earned_adventurer: Optional[FeltValueFilter] = None
+    xp_earned_items: Optional[FeltValueFilter] = None
+    entityId: Optional[FeltValueFilter] = None
+    entityLevel: Optional[OrderByInput] = None
+    entityHealth: Optional[OrderByInput] = None
+    ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[DateTimeFilter] = None
     txHash: Optional[HexValueFilter] = None
-
-
-@strawberry.input
-class BeastsFilter:
-    id: Optional[FeltValueFilter] = None
-    adventurerId: Optional[FeltValueFilter] = None
-    beast: Optional[BeastFilter] = None
-    attackType: Optional[TypeFilter] = None
-    attackLocation: Optional[SlotFilter] = None
-    armorType: Optional[TypeFilter] = None
-    rank: Optional[FeltValueFilter] = None
-    namePrefix: Optional[NamePrefixFilter] = None
-    nameSuffix: Optional[NameSuffixFilter] = None
-    health: Optional[FeltValueFilter] = None
-    xp: Optional[FeltValueFilter] = None
-    level: Optional[FeltValueFilter] = None
-    slainOnDate: Optional[DateTimeFilter] = None
-    birthdate: Optional[DateTimeFilter] = None
-    lastUpdated: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -772,29 +762,20 @@ class DiscoveriesOrderByInput:
     adventurerId: Optional[OrderByInput] = None
     disoveryType: Optional[OrderByInput] = None
     subDiscoveryType: Optional[OrderByInput] = None
-    entityId: Optional[OrderByInput] = None
     outputAmount: Optional[OrderByInput] = None
-    attackLocation: Optional[OrderByInput] = None
+    obstacle: Optional[OrderByInput] = None
+    obstacleLevel: Optional[OrderByInput] = None
+    dodgedObstacle: Optional[OrderByInput] = None
+    damageTaken: Optional[OrderByInput] = None
+    damageLocation: Optional[OrderByInput] = None
+    xp_earned_adventurer: Optional[OrderByInput] = None
+    xp_earned_items: Optional[OrderByInput] = None
+    entityId: Optional[OrderByInput] = None
+    entityLevel: Optional[OrderByInput] = None
+    entityHealth: Optional[OrderByInput] = None
+    ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
-
-
-@strawberry.input
-class BeastsOrderByInput:
-    id: Optional[OrderByInput] = None
-    adventurerId: Optional[OrderByInput] = None
-    beastType: Optional[OrderByInput] = None
-    attackType: Optional[OrderByInput] = None
-    attackLocation: Optional[OrderByInput] = None
-    armorType: Optional[OrderByInput] = None
-    rank: Optional[OrderByInput] = None
-    namePrefix: Optional[OrderByInput] = None
-    nameSuffix: Optional[OrderByInput] = None
-    health: Optional[OrderByInput] = None
-    xp: Optional[OrderByInput] = None
-    level: Optional[OrderByInput] = None
-    slainOnDate: Optional[OrderByInput] = None
-    lastUpdated: Optional[OrderByInput] = None
 
 
 @strawberry.input
@@ -938,9 +919,18 @@ class Discovery:
     adventurerId: Optional[FeltValue]
     discoveryType: Optional[DiscoveryValue]
     subDiscoveryType: Optional[SubDiscoveryValue]
-    entityId: Optional[FeltValue]
     outputAmount: Optional[FeltValue]
-    attackLocation: Optional[SlotValue]
+    obstacle: Optional[ObstacleValue]
+    obstacleLevel: Optional[FeltValue]
+    dodgedObstacle: Optional[BooleanValue]
+    damageTaken: Optional[FeltValue]
+    damageLocation: Optional[SlotValue]
+    xp_earned_adventurer: Optional[FeltValue]
+    xp_earned_items: Optional[FeltValue]
+    entityId: Optional[FeltValue]
+    entityLevel: Optional[FeltValue]
+    entityHealth: Optional[FeltValue]
+    ambushed: Optional[BooleanValue]
     discoveryTime: Optional[datetime]
     txHash: Optional[HexValue]
 
@@ -950,48 +940,20 @@ class Discovery:
             adventurerId=data["adventurerId"],
             discoveryType=data["discoveryType"],
             subDiscoveryType=data["subDiscoveryType"],
-            entityId=data["entityId"],
             outputAmount=data["outputAmount"],
-            attackLocation=data["attackLocation"],
+            obstacle=data["obstacle"],
+            obstacleLevel=data["obstacleLevel"],
+            dodgedObstacle=data["dodgedObstacle"],
+            damageTaken=data["damageTaken"],
+            damageLocation=data["damageLocation"],
+            xpEarnedAdventurer=data["xpEarnedAdventurer"],
+            xpEarnedItems=data["xpEarnedItems"],
+            entityId=data["entityId"],
+            entityLevel=data["entityLevel"],
+            entityHealth=data["entityHealth"],
+            ambushed=data["ambushed"],
             discoveryTime=data["discoveryTime"],
             txHash=data["txHash"],
-        )
-
-
-@strawberry.type
-class Beast:
-    id: Optional[FeltValue]
-    adventurerId: Optional[FeltValue]
-    beast: Optional[BeastValue]
-    attackType: Optional[TypeValue]
-    attackLocation: Optional[SlotValue]
-    armorType: Optional[TypeValue]
-    rank: Optional[FeltValue]
-    namePrefix: Optional[NamePrefixValue]
-    nameSuffix: Optional[NameSuffixValue]
-    health: Optional[FeltValue]
-    xp: Optional[FeltValue]
-    level: Optional[FeltValue]
-    slainOnDate: Optional[datetime]
-    lastUpdated: Optional[datetime]
-
-    @classmethod
-    def from_mongo(cls, data):
-        return cls(
-            id=data["id"],
-            adventurerId=data["adventurerId"],
-            beast=data["beast"],
-            attackType=data["attackType"],
-            attackLocation=data["attackLocation"],
-            armorType=data["armorType"],
-            rank=data["rank"],
-            namePrefix=data["namePrefix"],
-            nameSuffix=data["nameSuffix"],
-            health=data["health"],
-            xp=data["xp"],
-            level=data["level"],
-            slainOnDate=data["slainOnDate"],
-            lastUpdated=data["lastUpdated"],
         )
 
 
