@@ -1,7 +1,14 @@
 const STARTING_GOLD: u16 = 40;
 const POTION_HEALTH_AMOUNT: u16 = 5;
-const POTION_PRICE: u16 = 5;
 const STARTING_HEALTH: u16 = 100;
+
+const POTION_PRICE: u16 = 2;
+const CHARISMA_DISCOUNT: u16 = 2;
+const MINIMUM_POTION_PRICE: u16 = 2;
+const MINIMUM_ITEM_PRICE: u16 = 2;
+
+// controls how much faster items level up compared to the player
+const ITEM_XP_MULTIPLIER: u16 = 4;
 
 mod StatisticIndex {
     const STRENGTH: u8 = 0;

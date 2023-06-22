@@ -1,5 +1,11 @@
 use combat::constants::{CombatEnums, CombatSettings};
 
+mod ObstacleSettings {
+    // Determines the minimum damage an obstacle can do
+    const MINIMUM_DAMAGE: u16 = 1;
+    const DAMAGE_BOOST: u16 = 0;
+}
+
 mod ObstacleId {
     const DemonicAlter: u8 = 1;
     const Curse: u8 = 2;
@@ -20,9 +26,9 @@ mod ObstacleId {
     const HiddenArrow: u8 = 15;
 
     // If you add obstacle, make sure to update MAX_ID below
-    // making this u64 as it's commonly used to select a random obstacle based
-    // on entropy variables which are u64 based
-    const MAX_ID: u64 = 15;
+    // making this u128 as it's commonly used to select a random obstacle based
+    // on entropy variables which are u128 based
+    const MAX_ID: u128 = 15;
 }
 
 mod Slot {
@@ -34,16 +40,4 @@ mod Slot {
     const Hand: u8 = 6;
     const Neck: u8 = 7;
     const Ring: u8 = 8;
-}
-
-mod ObstacleSettings {
-    // Determines the minimum damage an obstacle can do
-    const MINIMUM_DAMAGE: u16 = 1;
-    const DAMAGE_BOOST: u16 = 0;
-
-    enum Difficulty {
-        Easy: (),
-        Medium: (),
-        Hard: (),
-    }
 }

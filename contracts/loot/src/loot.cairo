@@ -80,7 +80,7 @@ impl ImplLoot of ILoot {
         // on the item level multiplier setting (currently 4) which means
         // items will level up 4x faster than entities without a multplier
         // such as adventurers
-        return ImplCombat::get_level_from_xp(xp * constants::Settings::ITEM_LEVEL_MULTIPLIER);
+        return ImplCombat::get_level_from_xp(xp);
     }
 
     fn pack(self: Loot) -> felt252 {

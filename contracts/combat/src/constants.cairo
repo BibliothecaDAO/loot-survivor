@@ -44,6 +44,9 @@ mod CombatSettings {
     // 2 = elemental bonus is half of base damage (-0.5x, 1x, 1.5x)
     // 3 = elemental bonus is 1/3 of base damage (-0.66x, 1x, 1.66x)
     const ELEMENTAL_DAMAGE_BONUS: u16 = 2; // u16 because this is used with other u16s
+
+    // controls the minimum damage bonus for elemental damage
+    const STRONG_ELEMENTAL_BONUS_MIN: u16 = 10; // u16 because this is used with other u16s
     const MAX_CRITICAL_HIT_LUCK: u8 = 40; // max luck for critical hit. Will produce 50% chance
 
     enum Difficulty {
@@ -66,6 +69,13 @@ mod CombatSettings {
         const EASY: u8 = 2; // increase level range by 2x each range increase
         const NORMAL: u8 = 4; // increase level range by 4x each range increase
         const HARD: u8 = 8; // increase level range by 8x each range increase
+    }
+
+    // Controls how fast max health increases for entities
+    mod HEALTH_MULTIPLIER {
+        const EASY: u8 = 10; // increase max health by 10x each range increase
+        const NORMAL: u8 = 15; // increase max health by 15x each range increase
+        const HARD: u8 = 20; // increase max health by 20x each range increase
     }
 
     // Determines xp multiplier for each tier
