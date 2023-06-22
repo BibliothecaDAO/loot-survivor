@@ -113,7 +113,7 @@ mod Game {
             let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
             // assert adventurer does not have stat upgrades available
-            _assert_no_stat_upgrades_available(@self, adventurer);  
+            _assert_no_stat_upgrades_available(@self, adventurer);
 
             // pass adventurer ref into internal function
             _explore(ref self, ref adventurer, adventurer_id);
@@ -285,7 +285,11 @@ mod Game {
             ExploreResult::Treasure(()) => {
                 // TODO: Generate new entropy here
                 let (treasure_type, amount) = adventurer.discover_treasure(exploration_entropy);
-                let adventurer_state = AdventurerState {owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer};
+                let adventurer_state = AdventurerState {
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                };
                 match treasure_type {
                     TreasureDiscovery::Gold(()) => {
                         __event__DiscoverGold(ref self, adventurer_state, amount);
@@ -481,38 +485,45 @@ mod Game {
             adventurer.get_level(), adventurer.dexterity, flee_entropy
         );
 
+        let adventurer_level = adventurer.get_level();
+        // our fixed battle entropy which we use to generate same beast during a single battle
+        let battle_fixed_entropy: u128 = adventurer.get_battle_fixed_entropy(adventurer_entropy);
+        // here we save some compute by not looking up the beast's special names during a failed flee
+        // since they won't impact damage
+        let beast_name_prefix = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 };
+        let beast = ImplBeast::get_beast(adventurer_level, beast_name_prefix, battle_fixed_entropy);
+        let mut damage_taken = 0;
+
         if (fled) {
             // set beast health to zero to denote adventurer is no longer in battle
             adventurer.beast_health = 0;
-            // TODO: emit __event__FleeAttempt
-            return adventurer;
         } else {
             // if flee attempt was unsuccessful
             // the beast will counter attack
 
             // to process the counter attack we'll need
             // the adventurers level
-            let adventurer_level = adventurer.get_level();
-            // our fixed battle entropy which we use to generate same beast during a single battle
-            let battle_fixed_entropy: u128 = adventurer
-                .get_battle_fixed_entropy(adventurer_entropy);
-
-            // here we save some compute by not looking up the beast's special names during a failed flee
-            // since they won't impact damage
-            let beast_name_prefix = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 };
-            let beast = ImplBeast::get_beast(
-                adventurer_level, beast_name_prefix, battle_fixed_entropy
-            );
 
             // process counter attack (adventurer death will be handled as part of counter attack)
-            let damage_taken = _beast_counter_attack(
+            damage_taken = _beast_counter_attack(
                 ref self, ref adventurer, adventurer_id, beast, flee_entropy
             );
-
-            // TODO: emit __event__FleeAttempt
-
-            return adventurer;
         }
+
+        // emit flee attempt event
+        __event__FleeAttempt(
+            ref self,
+            AdventurerState {
+                owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
+            },
+            beast.id,
+            beast.combat_spec.level,
+            adventurer.beast_health,
+            damage_taken,
+            fled
+        );
+
+        return adventurer;
     }
 
     // @loaf
@@ -533,6 +544,7 @@ mod Game {
 
         // check what item type exists on adventurer
         // if some exists pluck from adventurer and add to bag
+        let mut unequipping_item = LootStatistics { id: 0, xp: 0, metadata: 0 };
         if adventurer.is_slot_free(equipping_item) == false {
             let unequipping_item = adventurer
                 .get_item_at_slot(ImplLoot::get_slot(equipping_item.id));
@@ -541,6 +553,20 @@ mod Game {
 
         // equip item
         adventurer.add_item(equipping_item);
+
+        // emit equipped item event
+        __event_EquipItem(
+            ref self,
+            AdventurerStateWithBag {
+                adventurer_state: AdventurerState {
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                }, bag: bag
+            },
+            item_id,
+            unequipping_item.id,
+        );
 
         // pack and save
         _pack_adventurer(ref self, adventurer_id, adventurer);
@@ -586,6 +612,20 @@ mod Game {
         // deduct gold
         adventurer.deduct_gold(charisma_discount_price);
 
+        // emit purchased item event
+        __event_PurchasedItem(
+            ref self,
+            AdventurerStateWithBag {
+                adventurer_state: AdventurerState {
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                }, bag: bag
+            },
+            item_id,
+            charisma_discount_price,
+        );
+
         if equip == true {
             let unequipping_item = adventurer.get_item_at_slot(ImplLoot::get_slot(item.id));
 
@@ -612,16 +652,26 @@ mod Game {
     fn _upgrade_stat(ref self: ContractState, adventurer_id: u256, stat_id: u8) {
         _assert_ownership(@self, adventurer_id);
 
+        // get adventurer
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
+        // assert adventurer has stat upgrade available
         assert(adventurer.stat_upgrade_available > 0, messages::STAT_POINT_NOT_AVAILABLE);
 
+        // add stat to adventuer
         adventurer.add_statistic(stat_id);
 
+        //deduct one from the adventurers available stat upgrades
         adventurer.stat_upgrade_available -= 1;
 
-        __event__StatUpgraded(ref self, AdventurerState { owner: get_caller_address(), adventurer_id, adventurer: adventurer }, stat_id);
+        // emit stat upgraded event
+        __event__StatUpgraded(
+            ref self,
+            AdventurerState { owner: get_caller_address(), adventurer_id, adventurer: adventurer },
+            stat_id
+        );
 
+        // pack and save
         _pack_adventurer(ref self, adventurer_id, adventurer);
     }
 
@@ -640,6 +690,13 @@ mod Game {
 
         // TODO: We could remove the value from here altogether and have it within the function
         adventurer.add_health(POTION_HEALTH_AMOUNT);
+
+        // emit purchase potion event
+        __event_PurchasedPotion(
+            ref self,
+            AdventurerState { owner: get_caller_address(), adventurer_id, adventurer: adventurer },
+            POTION_HEALTH_AMOUNT
+        );
 
         _pack_adventurer(ref self, adventurer_id, adventurer);
     }
@@ -899,11 +956,9 @@ mod Game {
     struct FleeAttempt {
         adventurer_state: AdventurerState,
         beast_id: u8,
-        prefix_1: u8,
-        prefix_2: u8,
-        beast_level: u8,
-        beast_health: u8,
-        damage_taken: u8,
+        beast_level: u16,
+        beast_health: u16,
+        damage_taken: u16,
         fled: bool,
     }
 
@@ -911,7 +966,7 @@ mod Game {
     struct PurchasedItem {
         adventurer_state_with_bag: AdventurerStateWithBag,
         item_id: u8,
-        cost: u8,
+        cost: u16,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -942,7 +997,7 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     struct PurchasedPotion {
         adventurer_state: AdventurerState,
-        health_amount: u8,
+        health_amount: u16,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -1113,25 +1168,16 @@ mod Game {
         ref self: ContractState,
         adventurer_state: AdventurerState,
         beast_id: u8,
-        prefix_1: u8,
-        prefix_2: u8,
-        beast_level: u8,
-        beast_health: u8,
-        damage_taken: u8,
+        beast_level: u16,
+        beast_health: u16,
+        damage_taken: u16,
         fled: bool,
     ) {
         self
             .emit(
                 Event::FleeAttempt(
                     FleeAttempt {
-                        adventurer_state,
-                        beast_id,
-                        prefix_1,
-                        prefix_2,
-                        beast_level,
-                        beast_health,
-                        damage_taken,
-                        fled
+                        adventurer_state, beast_id, beast_level, beast_health, damage_taken, fled
                     }
                 )
             );
@@ -1141,7 +1187,7 @@ mod Game {
         ref self: ContractState,
         adventurer_state_with_bag: AdventurerStateWithBag,
         item_id: u8,
-        cost: u8
+        cost: u16
     ) {
         self.emit(Event::PurchasedItem(PurchasedItem { adventurer_state_with_bag, item_id, cost }));
     }
@@ -1194,7 +1240,7 @@ mod Game {
     }
 
     fn __event_PurchasedPotion(
-        ref self: ContractState, adventurer_state: AdventurerState, health_amount: u8
+        ref self: ContractState, adventurer_state: AdventurerState, health_amount: u16
     ) {
         self.emit(Event::PurchasedPotion(PurchasedPotion { adventurer_state, health_amount }));
     }
