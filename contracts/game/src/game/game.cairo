@@ -284,7 +284,19 @@ mod Game {
             },
             ExploreResult::Treasure(()) => {
                 // TODO: Generate new entropy here
-                adventurer.discover_treasure(exploration_entropy);
+                let (treasure_type, amount) = adventurer.discover_treasure(exploration_entropy);
+                let adventurer_state = AdventurerState {owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer};
+                match treasure_type {
+                    TreasureDiscovery::Gold(()) => {
+                        __event__DiscoverGold(ref self, adventurer_state, amount);
+                    },
+                    TreasureDiscovery::XP(()) => {
+                        __event__DiscoverXP(ref self, adventurer_state, amount);
+                    },
+                    TreasureDiscovery::Health(()) => {
+                        __event__DiscoverHealth(ref self, adventurer_state, amount);
+                    },
+                }
             },
         }
 
@@ -815,19 +827,19 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     struct DiscoverHealth {
         adventurer_state: AdventurerState,
-        health_amount: u8
+        health_amount: u16
     }
 
     #[derive(Drop, starknet::Event)]
     struct DiscoverGold {
         adventurer_state: AdventurerState,
-        gold_amount: u8
+        gold_amount: u16
     }
 
     #[derive(Drop, starknet::Event)]
     struct DiscoverXP {
         adventurer_state: AdventurerState,
-        xp_amount: u8
+        xp_amount: u16
     }
 
     #[derive(Drop, starknet::Event)]
@@ -960,19 +972,19 @@ mod Game {
     }
 
     fn __event__DiscoverHealth(
-        ref self: ContractState, adventurer_state: AdventurerState, health_amount: u8
+        ref self: ContractState, adventurer_state: AdventurerState, health_amount: u16
     ) {
         self.emit(Event::DiscoverHealth(DiscoverHealth { adventurer_state, health_amount }));
     }
 
     fn __event__DiscoverGold(
-        ref self: ContractState, adventurer_state: AdventurerState, gold_amount: u8
+        ref self: ContractState, adventurer_state: AdventurerState, gold_amount: u16
     ) {
         self.emit(Event::DiscoverGold(DiscoverGold { adventurer_state, gold_amount }));
     }
 
     fn __event__DiscoverXP(
-        ref self: ContractState, adventurer_state: AdventurerState, xp_amount: u8
+        ref self: ContractState, adventurer_state: AdventurerState, xp_amount: u16
     ) {
         self.emit(Event::DiscoverXP(DiscoverXP { adventurer_state, xp_amount }));
     }

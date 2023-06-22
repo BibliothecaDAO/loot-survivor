@@ -64,7 +64,7 @@ trait IAdventurer {
 
     fn get_random_explore(entropy: u128) -> ExploreResult;
     fn beast_encounter(ref self: Adventurer, entropy: u128) -> Adventurer;
-    fn discover_treasure(ref self: Adventurer, entropy: u128) -> Adventurer;
+    fn discover_treasure(ref self: Adventurer, entropy: u128) -> (TreasureDiscovery, u16);
 
     fn attack(ref self: Adventurer, entropy: u128) -> Adventurer;
     fn flee(ref self: Adventurer, entropy: u128) -> Adventurer;
@@ -273,29 +273,30 @@ impl ImplAdventurer of IAdventurer {
         return self.add_beast(ImplBeast::get_starting_health(adventurer_level, entropy));
     }
 
-    fn discover_treasure(ref self: Adventurer, entropy: u128) -> Adventurer {
+    fn discover_treasure(ref self: Adventurer, entropy: u128) -> (TreasureDiscovery, u16) {
         // generate random item discovery
         let item_type = ExploreUtils::get_random_treasury_discovery(self, entropy);
 
         match item_type {
             TreasureDiscovery::Gold(()) => {
-                let gold_disovery_amount = ExploreUtils::get_gold_discovery(
-                    self, entropy
-                ); // add the gold to the adventurer
-                return self.increase_gold(gold_disovery_amount); // if the discovery is xp
+                let gold_amount = ExploreUtils::get_gold_discovery(self, entropy);
+                // add the gold to the adventurer
+                self.increase_gold(gold_amount);
+                return (TreasureDiscovery::Gold(()), gold_amount);
             },
             TreasureDiscovery::XP(()) => {
-                let xp_discovery_amount = ExploreUtils::get_xp_discovery(
+                let xp_amount = ExploreUtils::get_xp_discovery(
                     self, entropy
                 ); // add the xp to the adventurer
-                return self
-                    .increase_adventurer_xp(xp_discovery_amount); // if the discovery is an item
+                self.increase_adventurer_xp(xp_amount); // if the discovery is an item
+                return (TreasureDiscovery::XP(()), xp_amount);
             },
             TreasureDiscovery::Health(()) => {
-                let health_discovery_amount = ExploreUtils::get_health_discovery(
+                let health_amount = ExploreUtils::get_health_discovery(
                     self, entropy
                 ); // add the health to the adventurer
-                return self.add_health(health_discovery_amount);
+                self.add_health(health_amount);
+                return (TreasureDiscovery::Health(()), health_amount);
             },
         }
     }
@@ -1061,7 +1062,6 @@ fn test_charisma_item_discount_overflow() {
 #[test]
 #[available_gas(90000)]
 fn test_increase_xp() {
-
     // initialize lvl 1 adventurer with no stat points available
     let mut adventurer = Adventurer {
         last_action: 511,
