@@ -1,12 +1,12 @@
 use core::result::ResultTrait;
 use core::serde::Serde;
-use integer::{U64IntoU128, U16IntoU128, u16_overflowing_sub};
+use integer::{U64IntoU128, U16IntoU128, U128TryIntoU8, U8IntoU128, u16_overflowing_sub};
 use traits::{TryInto, Into};
 use option::OptionTrait;
 use debug::PrintTrait;
 
 use pack::pack::{
-    pack_value, unpack_value, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8, U256TryIntoU64
+    pack_value, unpack_value, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8, U256TryIntoU64,
 };
 use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
@@ -191,11 +191,41 @@ impl ImplAdventurer of IAdventurer {
     // @param self: Adventurer to discover beast for
     // @param entropy: Entropy for generating beast
     // @return Adventurer: Adventurer with beast discovered
-    fn beast_encounter(ref self: Adventurer, entropy: u128) -> Adventurer {
-        // if the adventurer is on level 1
-        let adventurer_level = ImplAdventurer::get_level(self);
+    fn beast_encounter(ref self: Adventurer, battle_fixed_seed: u128) -> Beast {
+        // generate battle fixed entropy by combining adventurer xp and adventurer entropy
+        let battle_fixed_entropy: u128 = self
+            .get_battle_fixed_entropy(U128TryIntoU64::try_into(battle_fixed_seed).unwrap());
+
+        // generate special names for beast using Loot name schema. 
+        // We use Loot names because the combat system will deal bonus damage for matching names (these are the items super powers)
+        // We do this here instead of in beast to prevent beast from depending on Loot
+        let prefix1 = U128TryIntoU8::try_into(
+            battle_fixed_entropy % U8IntoU128::into(constants::NamePrefixLength)
+        )
+            .unwrap();
+        let prefix2 = U128TryIntoU8::try_into(
+            battle_fixed_entropy % U8IntoU128::into(constants::NameSuffixLength)
+        )
+            .unwrap();
+
+        // use the randomly generated prefixes but set suffic to 0
+        let special_names = SpecialPowers { prefix1: prefix1, prefix2: prefix2, suffix: 0 };
+
+        // get beast using battle fixed seed
+        // this is important because in the context of this call
+        // the player has just encountered the beast and will 
+        // subsequently be calling "attack" to attack the beast
+        // to enable the adventurer state to fit in a single 252felt, we
+        // don't store anything about the beast in the adventurer state
+        // except it's health. Instead the beast is generated at run-time
+        // via the battle_fixed_seed
+        let beast = ImplBeast::get_beast(self.get_level(), special_names, battle_fixed_seed);
+
         // otherwise generate random starting health for the beast
-        return self.add_beast(ImplBeast::get_starting_health(adventurer_level, entropy));
+        self.add_beast(beast.starting_health);
+
+        // return beast
+        return beast;
     }
 
     fn discover_treasure(ref self: Adventurer, entropy: u128) -> (TreasureDiscovery, u16) {
@@ -301,9 +331,16 @@ impl ImplAdventurer of IAdventurer {
         self
     }
     fn deduct_health(ref self: Adventurer, value: u16) -> Adventurer {
-        // TODO: overflow check
-        self.health = self.health - value;
+        // if amount to deduct is greater than or equal to health of adventurer
+        if value >= self.health {
+            // set adventurer health to zero
+            self.health = 0;
+        } else {
+            // otherwise deduct amount
+            self.health -= value;
+        }
 
+        // return adventurer
         self
     }
     fn increase_adventurer_xp(ref self: Adventurer, value: u16) -> Adventurer {

@@ -194,7 +194,7 @@ mod tests {
         game.upgrade_stat(0, 0);
 
         // manipulate game entrop so we discover another beast
-        game.set_entropy(1);
+        game.set_entropy(2);
         game.explore(0);
         let updated_adventurer = game.get_adventurer(0);
         assert(updated_adventurer.beast_health != 0, 'should have found a beast');
