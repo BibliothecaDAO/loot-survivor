@@ -50,6 +50,7 @@ mod Game {
     #[storage]
     struct Storage {
         _game_entropy: felt252,
+        _last_game_entropy_block: felt252,
         _adventurer: LegacyMap::<u256, felt252>,
         _owner: LegacyMap::<u256, ContractAddress>,
         _adventurer_meta: LegacyMap::<u256, felt252>,
@@ -105,7 +106,6 @@ mod Game {
             _start(ref self, starting_weapon, adventurer_meta);
         }
         fn explore(ref self: ContractState, adventurer_id: u256) {
-
             // assert caller owns adventurer id
             _assert_ownership(@self, adventurer_id);
 
@@ -113,7 +113,7 @@ mod Game {
             let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
             // assert adventurer does not have stat upgrades available
-            _assert_no_stat_upgrades_available(@self, adventurer);  
+            _assert_no_stat_upgrades_available(@self, adventurer);
 
             // pass adventurer ref into internal function
             _explore(ref self, ref adventurer, adventurer_id);
@@ -285,7 +285,11 @@ mod Game {
             ExploreResult::Treasure(()) => {
                 // TODO: Generate new entropy here
                 let (treasure_type, amount) = adventurer.discover_treasure(exploration_entropy);
-                let adventurer_state = AdventurerState {owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer};
+                let adventurer_state = AdventurerState {
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                };
                 match treasure_type {
                     TreasureDiscovery::Gold(()) => {
                         __event__DiscoverGold(ref self, adventurer_state, amount);
@@ -791,6 +795,7 @@ mod Game {
         // TODO: Replace with actual seed
         //starknet::get_tx_info().unbox().transaction_hash.into()
         self._game_entropy.write(entropy);
+        self._last_game_entropy_block.write(starknet::get_block_info().unbox().block_number.into());
     }
 
     fn _get_entropy(self: @ContractState) -> u256 {
