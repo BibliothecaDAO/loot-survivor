@@ -30,14 +30,3 @@ mod ObstacleId {
     // on entropy variables which are u128 based
     const MAX_ID: u128 = 15;
 }
-
-mod Slot {
-    const Weapon: u8 = 1;
-    const Chest: u8 = 2;
-    const Head: u8 = 3;
-    const Waist: u8 = 4;
-    const Foot: u8 = 5;
-    const Hand: u8 = 6;
-    const Neck: u8 = 7;
-    const Ring: u8 = 8;
-}

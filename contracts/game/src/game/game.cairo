@@ -36,7 +36,7 @@ mod Game {
     use survivor::constants::discovery_constants::DiscoveryEnums::{
         ExploreResult, TreasureDiscovery
     };
-    use survivor::constants::adventurer_constants::{POTION_HEALTH_AMOUNT};
+    use survivor::constants::adventurer_constants::{POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER};
     use survivor::item_meta::{
         ImplLootDescription, LootDescription, ILootDescription, LootDescriptionStorage
     };
@@ -105,7 +105,6 @@ mod Game {
             _start(ref self, starting_weapon, adventurer_meta);
         }
         fn explore(ref self: ContractState, adventurer_id: u256) {
-
             // assert caller owns adventurer id
             _assert_ownership(@self, adventurer_id);
 
@@ -260,23 +259,96 @@ mod Game {
     // TODO: distribute mint fees
     }
 
-    // @loothero
+    // _explore is called by the adventurer to explore the world
+    // @param self: ContractState
+    // @param adventurer: Adventurer
+    // @param adventurer_id: u256
     fn _explore(ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256) {
         // get adventurer entropy from storage  
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
-        // TODO: get game_entropy from storage
+        // get global game entropy
         let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
 
-        // get entropy for exploration
+        // use entropy sources to generate random exploration
         let exploration_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
 
+        //
         let explore_result = ImplAdventurer::get_random_explore(exploration_entropy);
 
         match explore_result {
             ExploreResult::Beast(()) => {
-                // TODO: Generate new entropy here
-                adventurer.beast_encounter(exploration_entropy);
+                // get a source of entropy that will be constant for the duration of the battle
+                let battle_fixed_entropy: u128 = adventurer
+                    .get_battle_fixed_entropy(adventurer_entropy);
+
+                // encounter beast and check if adventurer was ambushed
+                let (beast, was_ambushed) = ImplBeast::beast_encounter(
+                    adventurer.get_level(),
+                    adventurer.wisdom,
+                    NamePrefixLength,
+                    NameSuffixLength,
+                    exploration_entropy
+                );
+
+                // initialize the beast health. This is the only timeD beast.starting_health should be 
+                // used. In subsequent calls to attack the beast, adventurer.beast_health should be used as the persistent
+                // storage of the beast health
+                adventurer.beast_health = beast.starting_health;
+
+                // initialize damage taken to zero
+                let mut damage_taken = 0;
+
+                // if adventurer was ambushed
+                if (was_ambushed) {
+                    // determine damage (adventurer dieing will be handled as part of the counter attack)
+                    let damage_taken = _beast_counter_attack(
+                        ref self,
+                        ref adventurer,
+                        adventurer_id,
+                        CombatEnums::Slot::Chest(()),
+                        beast,
+                        battle_fixed_entropy
+                    );
+                }
+
+                // Emit Discover Beast event
+                __event__DiscoverBeast(
+                    ref self,
+                    DiscoverBeast {
+                        adventurer_state: AdventurerState {
+                            owner: get_caller_address(),
+                            adventurer_id: adventurer_id,
+                            adventurer: adventurer
+                        },
+                        id: beast.id,
+                        level: beast.combat_spec.level,
+                        ambushed: was_ambushed,
+                        damage_taken: damage_taken,
+                        health: beast.starting_health,
+                        prefix1: beast.combat_spec.special_powers.prefix1,
+                        prefix2: beast.combat_spec.special_powers.prefix2,
+                    }
+                );
+
+                // and if the adventurer is dead
+                if (adventurer.health == 0) {
+                    // emit adventurer died
+                    // note we technically could do this inside of _beast_counter_attack but
+                    // doing so would result in AdventurerDied being emitted before
+                    // the DiscoverBeast for the beast that killed them. 
+                    __event_AdventurerDied(
+                        ref self,
+                        AdventurerState {
+                            owner: get_caller_address(),
+                            adventurer_id: adventurer_id,
+                            adventurer: adventurer
+                        },
+                        killed_by_beast: true,
+                        killed_by_obstacle: false,
+                        killer_id: beast.id
+                    );
+                }
             },
             ExploreResult::Obstacle(()) => {
                 // TODO: Generate new entropy here
@@ -313,47 +385,74 @@ mod Game {
     fn _obstacle_encounter(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, entropy: u128
     ) -> Adventurer {
-        _assert_ownership(@self, adventurer_id);
-        // get adventurer level from xp
-        let adventurer_level = adventurer.get_level();
-
-        // process obstacle encounter
+        // delegate obstacle encounter to obstacle library
         let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
-            adventurer_level, adventurer.intelligence, entropy
+            adventurer.get_level(), adventurer.intelligence, entropy
         );
 
-        // grant equipped items and adventurer xp for the encounter
+        // grant xp to equipped items and adventurer regardless of obstacle outcome
         let xp_reward = ImplObstacle::get_xp_reward(obstacle);
         adventurer.increase_adventurer_xp(xp_reward);
         adventurer.increase_item_xp(xp_reward);
 
-        // if the obstacle was dodged, return the adventurer
-        if (dodged) {
-            // TODO: Generate ObstacleDodged event with obstacle details
-            return adventurer;
+        let mut damage_taken: u16 = 0;
+        let mut damage_location: u8 = 0;
+
         // if the obstacle was not dodged
-        } else {
-            // get item at the location the obstacle is dealing damage to
-            let armor = adventurer.get_item_at_slot(obstacle.damage_location);
+        if (!dodged) {
+            // get adventurer armor at the random location the obstacle is dealing damage to
+            let damage_slot = ImplAdventurer::get_random_armor_slot(entropy);
+            let damage_location = ImplCombat::slot_to_u8(damage_slot);
+            let armor = adventurer.get_item_at_slot(damage_slot);
 
             // get combat spec for that item
             let armor_combat_spec = _get_combat_spec(@self, adventurer_id, armor);
 
             // calculate damage from the obstacle
-            let obstacle_damage = ImplObstacle::get_damage(obstacle, armor_combat_spec, entropy);
+            damage_taken = ImplObstacle::get_damage(obstacle, armor_combat_spec, entropy);
 
             // deduct the health from the adventurer
-            adventurer.deduct_health(obstacle_damage);
-
-            // TODO: Generate HitByObstacle event with obstacle details
-            return adventurer;
+            adventurer.deduct_health(damage_taken);
         }
+
+        let adventurer_state = AdventurerState {
+            owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
+        };
+
+        // emit obstacle discover event
+        __event__DiscoverObstacle(
+            ref self,
+            DiscoverObstacle {
+                adventurer_state: adventurer_state,
+                id: obstacle.id,
+                level: obstacle.combat_specs.level,
+                dodged: dodged,
+                damage_taken: damage_taken,
+                damage_location: damage_location,
+                xp_earned_adventurer: xp_reward,
+                xp_earned_items: xp_reward * ITEM_XP_MULTIPLIER,
+            }
+        );
+
+        // if obstacle killed adventurer
+        if (adventurer.health == 0) {
+            // emit adventurer died event
+            __event_AdventurerDied(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                killed_by_beast: false,
+                killed_by_obstacle: true,
+                killer_id: obstacle.id
+            );
+        }
+
+        return adventurer;
     }
 
-    fn _treasure_discovery(ref self: ContractState, adventurer_id: u256) {}
-
-
-    // @loothero
     fn _attack(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
     ) -> Adventurer { //
@@ -411,26 +510,88 @@ mod Game {
             adventurer.beast_health = 0;
 
             // grant equipped items and adventurer xp for the encounter
-            adventurer.increase_adventurer_xp(beast.get_xp_reward());
-            adventurer.increase_item_xp(beast.get_xp_reward());
+            let xp_earned = beast.get_xp_reward();
+            adventurer.increase_adventurer_xp(xp_earned);
+            adventurer.increase_item_xp(xp_earned);
 
             // grant adventurer gold reward. We use battle fixed entropy
             // to fix this result at the start of the battle, mitigating simulate-and-wait strategies
-            adventurer.increase_gold(beast.get_gold_reward(battle_fixed_entropy));
+            let gold_reward = beast.get_gold_reward(battle_fixed_entropy);
+            adventurer.increase_gold(gold_reward);
 
-            // TODO: emit __event__SlayedBeast()
+            // emit slayed beast event
+            __event__SlayedBeast(
+                ref self,
+                SlayedBeast {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    },
+                    beast_id: beast.id,
+                    prefix_1: beast.combat_spec.special_powers.prefix1,
+                    prefix_2: beast.combat_spec.special_powers.prefix2,
+                    beast_level: beast.combat_spec.level,
+                    beast_health: adventurer.beast_health,
+                    damage_dealt: damage_dealt,
+                    xp_earned_adventurer: xp_earned,
+                    xp_earned_items: xp_earned * ITEM_XP_MULTIPLIER,
+                    gold_earned: gold_reward
+                }
+            );
             return adventurer;
         } else {
             // beast has more health than was dealt so subtract damage dealt
             adventurer.beast_health = adventurer.beast_health - damage_dealt;
 
-            // process beast counter attack
+            // then handle the beast counter attack
+
+            // start by generating a random attack location
+            let attack_location = ImplAdventurer::get_random_armor_slot(attack_entropy);
+
+            // then calling internal function to calculate damage
             let damage_taken = _beast_counter_attack(
-                ref self, ref adventurer, adventurer_id, beast, attack_entropy
+                ref self, ref adventurer, adventurer_id, attack_location, beast, attack_entropy
             );
 
-            // TODO: emit __event__AttackBeast
+            // if adventurer health is zero (beast_counter_attack checks for underflow)
+            if (adventurer.health == 0) {
+                // emit adventurer died
+                // note we technically could do this inside of _beast_counter_attack but
+                // doing so would result in AdventurerDied being emitted before
+                // the DiscoverBeast for the beast that killed them. 
+                __event_AdventurerDied(
+                    ref self,
+                    AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    },
+                    killed_by_beast: true,
+                    killed_by_obstacle: false,
+                    killer_id: beast.id
+                );
+            }
 
+            // emit attack beast event
+            __event__AttackBeast(
+                ref self,
+                AttackBeast {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    },
+                    beast_id: beast.id,
+                    beast_level: beast.combat_spec.level,
+                    beast_health: adventurer.beast_health,
+                    prefix_1: beast.combat_spec.special_powers.prefix1,
+                    prefix_2: beast.combat_spec.special_powers.prefix2,
+                    damage_dealt: damage_dealt,
+                    damage_taken: damage_taken,
+                    damage_location: ImplCombat::slot_to_u8(attack_location),
+                }
+            );
             return adventurer;
         }
     }
@@ -439,11 +600,12 @@ mod Game {
         ref self: ContractState,
         ref adventurer: Adventurer,
         adventurer_id: u256,
+        attack_location: CombatEnums::Slot,
         beast: Beast,
         entropy: u128
     ) -> u16 {
         // generate a random attack slot for the beast and get the armor the adventurer has at that slot
-        let armor = adventurer.get_item_at_slot(ImplAdventurer::get_random_armor_slot(entropy));
+        let armor = adventurer.get_item_at_slot(attack_location);
 
         // convert loot item to combat spec so it can be used with combat library
         let armor_combat_spec = _get_combat_spec(@self, adventurer_id, armor);
@@ -453,11 +615,10 @@ mod Game {
 
         // if the damage taken is greater than or equal to adventurers health
         // the adventurer is dead
-        let adventurer_died = damage_taken >= adventurer.health;
+        let adventurer_died = (damage_taken >= adventurer.health);
         if (adventurer_died) {
             // set their health to 0
             adventurer.health = 0;
-            // TODO: Emit AdventurerDied  __event_AdventurerDied
             // TODO: Check for Top score
             return damage_taken;
         } // if the adventurer is not dead
@@ -485,15 +646,16 @@ mod Game {
             adventurer.get_level(), adventurer.dexterity, flee_entropy
         );
 
-        let adventurer_level = adventurer.get_level();
         // our fixed battle entropy which we use to generate same beast during a single battle
         let battle_fixed_entropy: u128 = adventurer.get_battle_fixed_entropy(adventurer_entropy);
         // here we save some compute by not looking up the beast's special names during a failed flee
         // since they won't impact damage
         let beast_name_prefix = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 };
-        let beast = ImplBeast::get_beast(adventurer_level, beast_name_prefix, battle_fixed_entropy);
+        let beast = ImplBeast::get_beast(
+            adventurer.get_level(), beast_name_prefix, battle_fixed_entropy
+        );
         let mut damage_taken = 0;
-
+        let mut attack_location = 0;
         if (fled) {
             // set beast health to zero to denote adventurer is no longer in battle
             adventurer.beast_health = 0;
@@ -505,22 +667,30 @@ mod Game {
             // the adventurers level
 
             // process counter attack (adventurer death will be handled as part of counter attack)
-            damage_taken = _beast_counter_attack(
-                ref self, ref adventurer, adventurer_id, beast, flee_entropy
-            );
+            let attack_slot = ImplAdventurer::get_random_armor_slot(flee_entropy);
+            attack_location = ImplCombat::slot_to_u8(attack_slot);
+            damage_taken =
+                _beast_counter_attack(
+                    ref self, ref adventurer, adventurer_id, attack_slot, beast, flee_entropy
+                );
         }
 
         // emit flee attempt event
         __event__FleeAttempt(
             ref self,
-            AdventurerState {
-                owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
-            },
-            beast.id,
-            beast.combat_spec.level,
-            adventurer.beast_health,
-            damage_taken,
-            fled
+            flee_attempt: FleeAttempt {
+                adventurer_state: AdventurerState {
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                beast_id: beast.id,
+                beast_level: beast.combat_spec.level,
+                beast_health: adventurer.beast_health,
+                damage_taken: damage_taken,
+                damage_location: attack_location,
+                fled
+            }
         );
 
         return adventurer;
@@ -904,36 +1074,37 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     struct DiscoverObstacle {
         adventurer_state: AdventurerState,
-        obstacle_id: u8,
-        obstacle_level: u8,
+        id: u8,
+        level: u16,
         dodged: bool,
-        damage_taken: u8,
-        xp_earned_adventurer: u8,
-        xp_earned_items: u8,
+        damage_taken: u16,
+        damage_location: u8,
+        xp_earned_adventurer: u16,
+        xp_earned_items: u16,
     }
 
     #[derive(Drop, starknet::Event)]
     struct DiscoverBeast {
         adventurer_state: AdventurerState,
-        beast_id: u8,
-        prefix_1: u8,
-        prefix_2: u8,
-        beast_level: u8,
-        beast_health: u8,
+        id: u8,
+        level: u16,
         ambushed: bool,
-        damage_taken: u8,
+        damage_taken: u16,
+        health: u16,
+        prefix1: u8,
+        prefix2: u8,
     }
 
     #[derive(Drop, starknet::Event)]
     struct AttackBeast {
         adventurer_state: AdventurerState,
         beast_id: u8,
+        beast_level: u16,
+        beast_health: u16,
         prefix_1: u8,
         prefix_2: u8,
-        beast_level: u8,
-        beast_health: u8,
-        damage_dealt: u8,
-        damage_taken: u8,
+        damage_dealt: u16,
+        damage_taken: u16,
         damage_location: u8,
     }
 
@@ -943,13 +1114,12 @@ mod Game {
         beast_id: u8,
         prefix_1: u8,
         prefix_2: u8,
-        beast_level: u8,
-        beast_health: u8,
-        damage_dealt: u8,
-        damage_taken: u8,
-        xp_earned_adventurer: u8,
-        xp_earned_items: u8,
-        gold_earned: u8,
+        beast_level: u16,
+        beast_health: u16,
+        damage_dealt: u16,
+        xp_earned_adventurer: u16,
+        xp_earned_items: u16,
+        gold_earned: u16,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -959,6 +1129,7 @@ mod Game {
         beast_level: u16,
         beast_health: u16,
         damage_taken: u16,
+        damage_location: u8,
         fled: bool,
     }
 
@@ -1047,140 +1218,25 @@ mod Game {
     }
 
     fn __event__DiscoverObstacle(
-        ref self: ContractState,
-        adventurer_state: AdventurerState,
-        obstacle_id: u8,
-        obstacle_level: u8,
-        dodged: bool,
-        damage_taken: u8,
-        xp_earned_adventurer: u8,
-        xp_earned_items: u8,
+        ref self: ContractState, disover_obstacle_event: DiscoverObstacle
     ) {
-        self
-            .emit(
-                Event::DiscoverObstacle(
-                    DiscoverObstacle {
-                        adventurer_state,
-                        obstacle_id,
-                        obstacle_level,
-                        dodged,
-                        damage_taken,
-                        xp_earned_adventurer,
-                        xp_earned_items,
-                    }
-                )
-            );
+        self.emit(Event::DiscoverObstacle(disover_obstacle_event));
     }
 
-    fn __event__DiscoverBeast(
-        ref self: ContractState,
-        adventurer_state: AdventurerState,
-        beast_id: u8,
-        prefix_1: u8,
-        prefix_2: u8,
-        beast_level: u8,
-        beast_health: u8,
-        ambushed: bool,
-        damage_taken: u8,
-    ) {
-        self
-            .emit(
-                Event::DiscoverBeast(
-                    DiscoverBeast {
-                        adventurer_state,
-                        beast_id,
-                        prefix_1,
-                        prefix_2,
-                        beast_level,
-                        beast_health,
-                        ambushed,
-                        damage_taken,
-                    }
-                )
-            );
+    fn __event__DiscoverBeast(ref self: ContractState, discover_beast_event: DiscoverBeast, ) {
+        self.emit(Event::DiscoverBeast(discover_beast_event));
     }
 
-    fn __event__AttackBeast(
-        ref self: ContractState,
-        adventurer_state: AdventurerState,
-        beast_id: u8,
-        prefix_1: u8,
-        prefix_2: u8,
-        beast_level: u8,
-        beast_health: u8,
-        damage_dealt: u8,
-        damage_taken: u8,
-        damage_location: u8,
-    ) {
-        self
-            .emit(
-                Event::AttackBeast(
-                    AttackBeast {
-                        adventurer_state,
-                        beast_id,
-                        prefix_1,
-                        prefix_2,
-                        beast_level,
-                        beast_health,
-                        damage_dealt,
-                        damage_taken,
-                        damage_location,
-                    }
-                )
-            );
+    fn __event__AttackBeast(ref self: ContractState, attack_beast: AttackBeast, ) {
+        self.emit(Event::AttackBeast(attack_beast));
     }
 
-    fn __event__SlayedBeast(
-        ref self: ContractState,
-        adventurer_state: AdventurerState,
-        beast_id: u8,
-        prefix_1: u8,
-        prefix_2: u8,
-        beast_level: u8,
-        beast_health: u8,
-        damage_dealt: u8,
-        damage_taken: u8,
-        xp_earned_adventurer: u8,
-        xp_earned_items: u8,
-        gold_earned: u8,
-    ) {
-        self
-            .emit(
-                Event::SlayedBeast(
-                    SlayedBeast {
-                        adventurer_state,
-                        beast_id,
-                        prefix_1,
-                        prefix_2,
-                        beast_level,
-                        beast_health,
-                        damage_dealt,
-                        damage_taken,
-                        xp_earned_adventurer,
-                        xp_earned_items,
-                        gold_earned,
-                    }
-                )
-            );
+    fn __event__SlayedBeast(ref self: ContractState, slayed_beast: SlayedBeast, ) {
+        self.emit(Event::SlayedBeast(slayed_beast));
     }
 
-    fn __event__FleeAttempt(
-        ref self: ContractState,
-        adventurer_state: AdventurerState,
-        beast_id: u8,
-        beast_level: u16,
-        beast_health: u16,
-        damage_taken: u16,
-        fled: bool,
-    ) {
-        self
-            .emit(
-                Event::FleeAttempt(
-                    FleeAttempt {
-                        adventurer_state, beast_id, beast_level, beast_health, damage_taken, fled
-                    }
-                )
-            );
+    fn __event__FleeAttempt(ref self: ContractState, flee_attempt: FleeAttempt) {
+        self.emit(Event::FleeAttempt(flee_attempt));
     }
 
     fn __event_PurchasedItem(
