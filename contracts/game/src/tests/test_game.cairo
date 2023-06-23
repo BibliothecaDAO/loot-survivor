@@ -12,7 +12,7 @@ mod tests {
     use market::market::{ImplMarket};
 
     use lootitems::loot::{Loot, ImplLoot, ILoot};
-    use lootitems::loot::constants::{ItemId};
+    use lootitems::statistics::constants::{ItemId};
 
     use game::game::interfaces::{IGameDispatcherTrait, IGameDispatcher};
     use game::game::game::{Game};
@@ -191,7 +191,7 @@ mod tests {
         assert(updated_adventurer.beast_health == 0, 'beast should be dead');
 
         // use stat upgrade
-        game.upgrade_stat(0,0);
+        game.upgrade_stat(0, 0);
 
         // manipulate game entrop so we discover another beast
         game.set_entropy(1);

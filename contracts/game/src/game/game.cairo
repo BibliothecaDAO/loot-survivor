@@ -154,15 +154,23 @@ mod Game {
             _pack_adventurer(ref self, adventurer_id, adventurer);
         }
         fn equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
+            _assert_ownership(@self, adventurer_id);
+
             _equip(ref self, adventurer_id, item_id);
         }
         fn buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
+            _assert_ownership(@self, adventurer_id);
+
             _buy_item(ref self, adventurer_id, item_id, equip);
         }
         fn upgrade_stat(ref self: ContractState, adventurer_id: u256, stat: u8) {
+            _assert_ownership(@self, adventurer_id);
+
             _upgrade_stat(ref self, adventurer_id, stat);
         }
         fn purchase_health(ref self: ContractState, adventurer_id: u256) {
+            _assert_ownership(@self, adventurer_id);
+
             _purchase_health(ref self, adventurer_id);
         }
 
@@ -521,8 +529,6 @@ mod Game {
 
     // @loaf
     fn _equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
-        _assert_ownership(@self, adventurer_id);
-
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
         let mut bag = _bag_unpacked(@self, adventurer_id);
@@ -557,8 +563,6 @@ mod Game {
     // equips item if equip is true
     // stashes item in bag if equip is false
     fn _buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
-        _assert_ownership(@self, adventurer_id);
-
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
         // TODO: Remove after testing
@@ -614,8 +618,6 @@ mod Game {
 
 
     fn _upgrade_stat(ref self: ContractState, adventurer_id: u256, stat_id: u8) {
-        _assert_ownership(@self, adventurer_id);
-
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
         assert(adventurer.stat_upgrade_available > 0, messages::STAT_POINT_NOT_AVAILABLE);
@@ -628,8 +630,6 @@ mod Game {
     }
 
     fn _purchase_health(ref self: ContractState, adventurer_id: u256) {
-        _assert_ownership(@self, adventurer_id);
-
         let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
 
         // check gold balance
