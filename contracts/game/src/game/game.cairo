@@ -795,16 +795,16 @@ mod Game {
         // TODO: Replace with actual seed
         //starknet::get_tx_info().unbox().transaction_hash.into()
 
-        let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
+        // let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
 
-        assert(
-            blocknumber >= (self._last_game_entropy_block.read().try_into().unwrap()
-                + ENTROPY_BLOCK_TIME.into()),
-            messages::BLOCK_NUMBER_ERROR
-        );
+        // assert(
+        //     blocknumber >= (self._last_game_entropy_block.read().try_into().unwrap()
+        //         + ENTROPY_BLOCK_TIME.into()),
+        //     messages::BLOCK_NUMBER_ERROR
+        // );
 
         self._game_entropy.write(entropy);
-        self._last_game_entropy_block.write(blocknumber.into());
+    // self._last_game_entropy_block.write(blocknumber.into());
     }
 
     fn _get_entropy(self: @ContractState) -> u256 {
