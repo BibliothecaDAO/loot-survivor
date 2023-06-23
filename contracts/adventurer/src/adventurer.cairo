@@ -6,7 +6,7 @@ use option::OptionTrait;
 use debug::PrintTrait;
 
 use pack::pack::{
-    pack_value, unpack_value, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8, U256TryIntoU64, 
+    pack_value, unpack_value, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8, U256TryIntoU64,
 };
 use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
@@ -57,82 +57,7 @@ struct Adventurer {
     stat_upgrade_available: u8, // 3 bits
 }
 
-trait IAdventurer {
-    fn new(starting_item: u8, block_number: u64) -> Adventurer;
-    fn pack(self: Adventurer) -> felt252;
-    fn unpack(packed: felt252) -> Adventurer;
-
-    fn get_random_explore(entropy: u128) -> ExploreResult;
-    fn beast_encounter(ref self: Adventurer, battle_fixed_seed: u128) -> Beast;
-    fn discover_treasure(ref self: Adventurer, entropy: u128) -> (TreasureDiscovery, u16);
-
-    fn attack(ref self: Adventurer, entropy: u128) -> Adventurer;
-    fn flee(ref self: Adventurer, entropy: u128) -> Adventurer;
-
-    fn add_health(ref self: Adventurer, value: u16) -> Adventurer;
-    fn deduct_health(ref self: Adventurer, value: u16) -> Adventurer;
-
-    fn get_potion_cost(ref self: Adventurer) -> u16;
-
-    // gold
-    fn increase_gold(ref self: Adventurer, value: u16) -> Adventurer;
-
-    // TODO: tests
-    fn deduct_gold(ref self: Adventurer, value: u16) -> Adventurer;
-    fn check_gold(self: Adventurer, value: u16) -> bool;
-
-    // xp
-    fn increase_adventurer_xp(ref self: Adventurer, value: u16) -> Adventurer;
-    fn increase_item_xp(ref self: Adventurer, value: u16) -> Adventurer;
-
-    // stats
-    fn add_statistic(ref self: Adventurer, value: u8) -> Adventurer;
-    fn add_strength(ref self: Adventurer, value: u8) -> Adventurer;
-    fn add_dexterity(ref self: Adventurer, value: u8) -> Adventurer;
-    fn add_vitality(ref self: Adventurer, value: u8) -> Adventurer;
-    fn add_intelligence(ref self: Adventurer, value: u8) -> Adventurer;
-    fn add_wisdom(ref self: Adventurer, value: u8) -> Adventurer;
-    fn add_charisma(ref self: Adventurer, value: u8) -> Adventurer;
-
-    // This is generic and can be used for all items
-    fn add_item(ref self: Adventurer, value: LootStatistics) -> Adventurer;
-
-    // TODO: Do we keep these as helpers? We use in add_items
-    fn add_weapon(ref self: Adventurer, value: LootStatistics) -> Adventurer;
-    fn add_chest(ref self: Adventurer, value: LootStatistics) -> Adventurer;
-    fn add_head(ref self: Adventurer, value: LootStatistics) -> Adventurer;
-    fn add_waist(ref self: Adventurer, value: LootStatistics) -> Adventurer;
-    fn add_foot(ref self: Adventurer, value: LootStatistics) -> Adventurer;
-    fn add_hand(ref self: Adventurer, value: LootStatistics) -> Adventurer;
-    fn add_neck(ref self: Adventurer, value: LootStatistics) -> Adventurer;
-    fn add_ring(ref self: Adventurer, value: LootStatistics) -> Adventurer;
-
-    // beast 
-    fn deduct_beast_health(ref self: Adventurer, amount: u16) -> Adventurer;
-
-    // we just add the beast -> the beast is deterministic off the xp
-    fn add_beast(ref self: Adventurer, value: u16) -> Adventurer;
-    fn in_battle(self: Adventurer) -> bool;
-
-    fn get_luck(self: Adventurer) -> u8;
-
-    fn get_beast(self: Adventurer) -> u8;
-
-    fn get_level(self: Adventurer) -> u8;
-
-    fn is_slot_free(self: Adventurer, item: LootStatistics) -> bool;
-
-    fn get_item_at_slot(self: Adventurer, slot: Slot) -> LootStatistics;
-
-    fn get_battle_fixed_entropy(self: Adventurer, adventurer_entropy: u64) -> u128;
-
-    fn charisma_potion_discount(self: Adventurer) -> u16;
-    fn charisma_item_discount(self: Adventurer) -> u16;
-
-    fn get_item_cost(self: Adventurer, item_cost: u16) -> u16;
-    fn get_random_armor_slot(entropy: u128) -> Slot;
-}
-
+#[generate_trait]
 impl ImplAdventurer of IAdventurer {
     fn charisma_potion_discount(self: Adventurer) -> u16 {
         CHARISMA_DISCOUNT * self.charisma.into()
@@ -267,9 +192,9 @@ impl ImplAdventurer of IAdventurer {
     // @param entropy: Entropy for generating beast
     // @return Adventurer: Adventurer with beast discovered
     fn beast_encounter(ref self: Adventurer, battle_fixed_seed: u128) -> Beast {
-
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
-        let battle_fixed_entropy: u128 = self.get_battle_fixed_entropy(U128TryIntoU64::try_into(battle_fixed_seed).unwrap());
+        let battle_fixed_entropy: u128 = self
+            .get_battle_fixed_entropy(U128TryIntoU64::try_into(battle_fixed_seed).unwrap());
 
         // generate special names for beast using Loot name schema. 
         // We use Loot names because the combat system will deal bonus damage for matching names (these are the items super powers)
@@ -284,9 +209,7 @@ impl ImplAdventurer of IAdventurer {
             .unwrap();
 
         // use the randomly generated prefixes but set suffic to 0
-        let special_names = SpecialPowers {
-            prefix1: prefix1, prefix2: prefix2, suffix: 0
-        };
+        let special_names = SpecialPowers { prefix1: prefix1, prefix2: prefix2, suffix: 0 };
 
         // get beast using battle fixed seed
         // this is important because in the context of this call
@@ -296,16 +219,13 @@ impl ImplAdventurer of IAdventurer {
         // don't store anything about the beast in the adventurer state
         // except it's health. Instead the beast is generated at run-time
         // via the battle_fixed_seed
-        let beast = ImplBeast::get_beast(
-            self.get_level(), special_names, battle_fixed_seed
-        );
+        let beast = ImplBeast::get_beast(self.get_level(), special_names, battle_fixed_seed);
 
         // otherwise generate random starting health for the beast
         self.add_beast(beast.starting_health);
 
         // return beast
         return beast;
-        
     }
 
     fn discover_treasure(ref self: Adventurer, entropy: u128) -> (TreasureDiscovery, u16) {
@@ -411,7 +331,6 @@ impl ImplAdventurer of IAdventurer {
         self
     }
     fn deduct_health(ref self: Adventurer, value: u16) -> Adventurer {
-
         // if amount to deduct is greater than or equal to health of adventurer
         if value >= self.health {
             // set adventurer health to zero
