@@ -249,8 +249,10 @@ const getAdventurersByXPPaginated = gql`
 
 const getBeastById = gql`
   ${DISCOVERIES_FRAGMENT}
-  query get_beast_by_id($id: FeltValue) {
-    discoveries(where: { entityId: { eq: $id } }) {
+  query get_beast_by_id($id: FeltValue, $adventurerId: FeltValue) {
+    discoveries(
+      where: { entityId: { eq: $id }, adventurerId: { eq: $adventurerId } }
+    ) {
       ...DISCOVERY_FIELDS
     }
   }

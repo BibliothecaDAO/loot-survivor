@@ -45,6 +45,7 @@ export default function Beast() {
       id: adventurer?.beastId
         ? adventurer?.beastId
         : data.lastBattleQuery?.battles[0]?.beastId,
+      adventurerId: adventurer?.id,
     },
     txAccepted
   );

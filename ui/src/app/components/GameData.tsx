@@ -6,8 +6,8 @@ export class GameData {
   BEASTS: Dict<string>;
   BEAST_TIERS: Dict<number>;
   BEAST_TYPES: Dict<string>;
-  BEAST_ATTACK_TYPES: Dict<string>;
-  BEAST_ARMOR_TYPES: Dict<string>;
+  BEAST_ATTACK_TYPES: DictString<string>;
+  BEAST_ARMOR_TYPES: DictString<string>;
   ITEMS: Dict<string>;
   RACES: Dict<string>;
   ORDERS: Dict<string>;
@@ -294,9 +294,17 @@ export class GameData {
       75: "Brute",
     };
 
-    this.BEAST_ATTACK_TYPES = { 1: "Magic", 2: "Blade", 3: "Bludgeon" };
+    this.BEAST_ATTACK_TYPES = {
+      Magical: "Magic",
+      Hunter: "Blade",
+      Brute: "Bludgeon",
+    };
 
-    this.BEAST_ARMOR_TYPES = { 1: "Cloth", 2: "Hide", 3: "Metal" };
+    this.BEAST_ARMOR_TYPES = {
+      Magical: "Cloth",
+      Hunter: "Hide",
+      Brute: "Metal",
+    };
 
     this.ITEMS = {
       1: "Pendant",
