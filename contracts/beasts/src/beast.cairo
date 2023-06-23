@@ -23,8 +23,11 @@ trait IBeast {
     fn attack(
         self: Beast, weapon: CombatSpec, adventurer_luck: u8, adventurer_strength: u8, entropy: u128
     ) -> u16;
+    fn beast_encounter(
+        adventurer_level: u8, adventurer_wisdom: u8, special1_size: u8, special2_size: u8, battle_fixed_seed: u128
+    ) -> (Beast, bool);
     fn counter_attack(self: Beast, armor: CombatSpec, entropy: u128) -> u16;
-    fn avoided_ambushed(adventurer_level: u8, adventurer_wisdom: u8, entropy: u128) -> bool;
+    fn ambush(adventurer_level: u8, adventurer_wisdom: u8, battle_fixed_entropy: u128) -> bool;
     fn attempt_flee(adventurer_level: u8, adventurer_dexterity: u8, entropy: u128) -> bool;
     fn get_level(adventurer_level: u8, seed: u128) -> u8;
     fn get_starting_health(adventurer_level: u8, entropy: u128) -> u16;
@@ -73,7 +76,6 @@ impl ImplBeast of IBeast {
             Type::Ring(()) => beast_id = BeastId::Troll,
         }
 
-
         return Beast {
             id: beast_id,
             starting_health: BeastSettings::STARTER_BEAST_HEALTH,
@@ -86,6 +88,33 @@ impl ImplBeast of IBeast {
                 }
             }
         };
+    }
+
+    fn beast_encounter(
+        adventurer_level: u8, adventurer_wisdom: u8, special1_size: u8, special2_size: u8, battle_fixed_seed: u128
+    ) -> (Beast, bool) {
+
+        // assign special powers to the beast
+        let special1 = U128TryIntoU8::try_into(battle_fixed_seed % U8IntoU128::into(special1_size))
+            .unwrap();
+        let special2 = U128TryIntoU8::try_into(battle_fixed_seed % U8IntoU128::into(special2_size))
+            .unwrap();
+        let special3 = 0; // unused for now
+
+        let special_powers = SpecialPowers {
+            prefix1: special1, prefix2: special2, suffix: special3
+        };
+
+        // generate a beast based on the seed
+        let beast = ImplBeast::get_beast(
+            adventurer_level, special_powers, battle_fixed_seed
+        );
+
+        // check if beast ambushed adventurer
+        let ambushed_adventurer = ImplBeast::ambush(adventurer_level, adventurer_wisdom, battle_fixed_seed);
+
+        // return beast and whether or not the adventurer was ambushed
+        return (beast,ambushed_adventurer);
     }
 
     fn get_beast_id(seed: u128) -> u8 {
@@ -157,7 +186,9 @@ impl ImplBeast of IBeast {
     // @param entropy: the entropy used to generate the random number
     // @return: the damage dealt to the adventurer
     fn counter_attack(self: Beast, armor: CombatSpec, entropy: u128) -> u16 {
-        let is_critical_hit = false;
+
+        // beast have a fixed 1/6 chance of critical hit
+        let is_critical_hit = (entropy % 6) == 0;
 
         // delegate damage calculation to combat system
         return ImplCombat::calculate_damage(
@@ -170,15 +201,17 @@ impl ImplBeast of IBeast {
         );
     }
 
-    // avoid_ambushed is used to determine if an adventurer avoided a beast ambush
+    // ambush is used to determine if an adventurer avoided a beast ambush
     // @param adventurer_level: the level of the adventurer
     // @param adventurer_wisdom: the wisdom of the adventurer
     // @param entropy: the entropy used to generate the random number
-    // @return: true if the adventurer avoided the ambush, false otherwise
-    fn avoided_ambushed(adventurer_level: u8, adventurer_wisdom: u8, entropy: u128) -> bool {
-        // Delegate ambushed calculation to combat system
-        // avoiding beast ambush requires wisdom
-        return ImplCombat::ability_based_avoid_threat(adventurer_level, adventurer_wisdom, entropy);
+    // @return: true if the ambush was successful, false otherwise
+    fn ambush(adventurer_level: u8, adventurer_wisdom: u8, battle_fixed_entropy: u128) -> bool {
+        // Delegate ambushed calculation to combat system which uses an avoidance formula
+        // so we invert the result and use wisdom for the trait to avoid
+        return !ImplCombat::ability_based_avoid_threat(
+            adventurer_level, adventurer_wisdom, battle_fixed_entropy
+        );
     }
 
     // attempt_flee is used to determine if an adventurer is able to flee from a beast
@@ -189,7 +222,9 @@ impl ImplBeast of IBeast {
     fn attempt_flee(adventurer_level: u8, adventurer_dexterity: u8, entropy: u128) -> bool {
         // Delegate ambushed calculation to combat system
         // avoiding beast ambush requires wisdom
-        return ImplCombat::ability_based_avoid_threat(adventurer_level, adventurer_dexterity, entropy);
+        return ImplCombat::ability_based_avoid_threat(
+            adventurer_level, adventurer_dexterity, entropy
+        );
     }
 
     // get_xp_reward is used to determine the xp reward for defeating a beast
@@ -206,7 +241,8 @@ impl ImplBeast of IBeast {
 
     fn get_gold_reward(self: Beast, entropy: u128) -> u16 {
         // base for the gold reward is XP which uses beast tier and level
-        let mut base_reward = ImplCombat::get_xp_reward(self.combat_spec) / BeastSettings::GOLD_REWARD_DIVISOR;
+        let mut base_reward = ImplCombat::get_xp_reward(self.combat_spec)
+            / BeastSettings::GOLD_REWARD_DIVISOR;
         if (base_reward < BeastSettings::GOLD_REWARD_BASE_MINIMUM) {
             base_reward = BeastSettings::GOLD_REWARD_BASE_MINIMUM;
         }
@@ -216,7 +252,10 @@ impl ImplBeast of IBeast {
 
         // multiplier will be 0-10 inclusive, providing
         // a maximum gold bonus of 100%
-        let bonus_multiplier = U128TryIntoU16::try_into(entropy % (1+ BeastSettings::GOLD_REWARD_BONUS_MAX_MULTPLIER)).unwrap();
+        let bonus_multiplier = U128TryIntoU16::try_into(
+            entropy % (1 + BeastSettings::GOLD_REWARD_BONUS_MAX_MULTPLIER)
+        )
+            .unwrap();
 
         // return base reward + bonus
         return base_reward + (bonus_base * bonus_multiplier);
@@ -582,34 +621,34 @@ fn test_get_type() {
 }
 
 #[test]
-#[available_gas(180000)]
-fn test_avoided_ambushed() {
+#[available_gas(200000)]
+fn test_ambush() {
     // verify that below difficulty cliff, adventurers are immune to ambushes
     let mut adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL - 1;
     let mut adventurer_wisdom = 0;
     let mut entropy = 1;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == true,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
         'no ambush below difficult cliff'
     );
     entropy = 2;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == true,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
         'no ambush below difficult cliff'
     );
     entropy = 3;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == true,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
         'no ambush below difficult cliff'
     );
     entropy = 4;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == true,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
         'no ambush below difficult cliff'
     );
     entropy = 5;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == true,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
         'no ambush below difficult cliff'
     );
 
@@ -619,7 +658,7 @@ fn test_avoided_ambushed() {
     // since this adventurer has no wisdom, this will result in them getting ambushed
     entropy = U8IntoU128::into(adventurer_level) - 1;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == false,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == true,
         'unwise adventurer gets ambushed'
     );
 
@@ -627,32 +666,32 @@ fn test_avoided_ambushed() {
     // they remain immune to ambushes
     adventurer_wisdom = 1;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == true,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
         'wise adventurer avoids ambush'
     );
     entropy = 1;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == true,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
         'wise adventurer avoids ambush'
     );
     entropy = 2;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == true,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
         'wise adventurer avoids ambush'
     );
     entropy = 3;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == true,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
         'wise adventurer avoids ambush'
     );
     entropy = 4;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == true,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
         'wise adventurer avoids ambush'
     );
     entropy = 5;
     assert(
-        ImplBeast::avoided_ambushed(adventurer_level, adventurer_wisdom, entropy) == true,
+        ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
         'wise adventurer avoids ambush'
     );
 }
@@ -686,7 +725,7 @@ fn test_counter_attack() {
     let entropy = 0;
 
     let damage = beast.counter_attack(armor, entropy);
-    assert(damage == 36, 'warlock wrecks scrub brute');
+    assert(damage == 42, 'warlock wrecks scrub brute');
 }
 
 #[test]
@@ -857,58 +896,51 @@ fn test_get_beast() {
 #[test]
 #[available_gas(200000)]
 fn test_get_gold_reward() {
-
-        let mut beast = Beast {
-            id: 1,
-            starting_health: 100,
-            combat_spec: CombatSpec {
-                tier: Tier::T1(()),
-                item_type: Type::Magic_or_Cloth(()),
-                level: 10,
-                special_powers: SpecialPowers {
-                    prefix1: 1,
-                    prefix2: 2,
-                    suffix: 3,
-                },
+    let mut beast = Beast {
+        id: 1, starting_health: 100, combat_spec: CombatSpec {
+            tier: Tier::T1(()),
+            item_type: Type::Magic_or_Cloth(()),
+            level: 10,
+            special_powers: SpecialPowers {
+                prefix1: 1, prefix2: 2, suffix: 3, 
             },
-        };
+        },
+    };
 
-        // T1, LVL10 beast will produce a base reward of 50
-        // We will divide this by GOLD_REWARD_DIVISOR which is currently 2
-        // to create a base reward of 25. We'll then calculate a gold bonus
-        // based on GOLD_REWARD_BONUS_DIVISOR and GOLD_REWARD_BONUS_MAX_MULTPLIER
-        // with the current settings, there will be 10 discrete gold bonuses
-        // 0%, 10%, 20%, ..., 100%
-        // with entropy 0 we hit the 0% bonus case so reward should be 25
-        let mut entropy: u128 = 0;
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 25, 'gold reward should be 25');
+    // T1, LVL10 beast will produce a base reward of 50
+    // We will divide this by GOLD_REWARD_DIVISOR which is currently 2
+    // to create a base reward of 25. We'll then calculate a gold bonus
+    // based on GOLD_REWARD_BONUS_DIVISOR and GOLD_REWARD_BONUS_MAX_MULTPLIER
+    // with the current settings, there will be 10 discrete gold bonuses
+    // 0%, 10%, 20%, ..., 100%
+    // with entropy 0 we hit the 0% bonus case so reward should be 25
+    let mut entropy: u128 = 0;
+    let gold_reward = beast.get_gold_reward(entropy);
+    assert(gold_reward == 25, 'gold reward should be 25');
 
-        // increasing entropy to 1 should produce 10% bonus
-        // 10% of 2.5 is 2 so all the bonuses will be based on 2
-        entropy = 1;
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 27, 'gold reward should be 27');
+    // increasing entropy to 1 should produce ~10% bonus
+    entropy = 1;
+    let gold_reward = beast.get_gold_reward(entropy);
+    assert(gold_reward == 31, 'gold reward should be 31');
 
-        // increasing entropy to 2 should produce 20% bonus
-        entropy = 2;
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 29, 'gold reward should be 29');
+    // increasing entropy to 2 should produce ~20% bonus from base
+    entropy = 2;
+    let gold_reward = beast.get_gold_reward(entropy);
+    assert(gold_reward == 37, 'gold reward should be 37');
 
-        // increasing entropy to 10 should produce maximum bonus with current settings
-        // which will be ~100% of the base
-        // 2 * 10 = 20 bonus + 25 base = 45
-        entropy = 10;
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 45, 'gold reward should be 45');
+    // increasing entropy to 3 produces maximum bonus with current settings
+    // which will be ~100% of the base
+    entropy = 3;
+    let gold_reward = beast.get_gold_reward(entropy);
+    assert(gold_reward == 43, 'gold reward should be 43');
 
-        // if we double the beast level, we double the reward
-        beast.combat_spec.level = 20;
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 100, 'lvl 20 max gold reward is 100');
+    // if we double the beast level, we approximately double the reward
+    beast.combat_spec.level = 20;
+    let gold_reward = beast.get_gold_reward(entropy);
+    assert(gold_reward == 86, 'lvl 20 max gold reward is 86');
 
-        // dropping beast from T1 to T5, significantly drops the gold reward
-        beast.combat_spec.tier = Tier::T5(());
-        let gold_reward = beast.get_gold_reward(entropy);
-        assert(gold_reward == 20, 'lvl20 t5 max gold reward is 20');
+    // dropping beast from T1 to T5, significantly drops the gold reward
+    beast.combat_spec.tier = Tier::T5(());
+    let gold_reward = beast.get_gold_reward(entropy);
+    assert(gold_reward == 16, 'lvl20 t5 max gold reward is 16');
 }

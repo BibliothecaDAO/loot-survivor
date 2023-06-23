@@ -7,8 +7,8 @@ use combat::constants::CombatEnums::{Type, Tier, Slot};
 
 #[derive(Drop, Copy)]
 struct Obstacle {
+    id: u8,
     combat_specs: CombatSpec,
-    damage_location: Slot,
 }
 
 trait ObstacleTrait {
@@ -17,9 +17,8 @@ trait ObstacleTrait {
     fn obstacle_encounter(
         adventurer_level: u8, adventurer_intelligence: u8, entropy: u128
     ) -> (Obstacle, bool);
-    fn get_obstacle(id: u8, level: u8, damage_location: Slot) -> Obstacle;
+    fn get_obstacle(id: u8, level: u8) -> Obstacle;
     fn get_random_level(adventurer_level: u8, entropy: u128) -> u8;
-    fn get_random_damage_location(entropy: u128) -> Slot;
     fn obstacle_encounter_id(entropy: u128) -> u8;
     fn get_xp_reward(obstacle: Obstacle) -> u16;
     fn get_tier(id: u8) -> Tier;
@@ -37,10 +36,8 @@ impl ImplObstacle of ObstacleTrait {
         let obstacle_id = ImplObstacle::obstacle_encounter_id(entropy);
         // get random obstacle level
         let obstacle_level = ImplObstacle::get_random_level(adventurer_level, entropy);
-        // get random damage location
-        let damage_location = ImplObstacle::get_random_damage_location(entropy);
         // return obstacle
-        let obstacle = ImplObstacle::get_obstacle(obstacle_id, obstacle_level, damage_location);
+        let obstacle = ImplObstacle::get_obstacle(obstacle_id, obstacle_level);
         let dodged = ImplObstacle::dodged(adventurer_level, adventurer_intelligence, entropy);
         return (obstacle, dodged);
     }
@@ -60,7 +57,7 @@ impl ImplObstacle of ObstacleTrait {
     // @param id: u8 - the obstacle id
     // @param level: u8 - the obstacle level
     // @return Obstacle - the obstacle
-    fn get_obstacle(id: u8, level: u8, damage_location: Slot) -> Obstacle {
+    fn get_obstacle(id: u8, level: u8) -> Obstacle {
         let combat_specs = CombatSpec {
             tier: ImplObstacle::get_tier(id),
             item_type: ImplObstacle::get_type(id),
@@ -70,7 +67,7 @@ impl ImplObstacle of ObstacleTrait {
             }
         };
 
-        Obstacle { combat_specs: combat_specs, damage_location: damage_location,  }
+        Obstacle {id: id, combat_specs: combat_specs}
     }
 
     // get_level uses the combat lib to generate a random level scoped for the adventurer level
@@ -165,14 +162,7 @@ impl ImplObstacle of ObstacleTrait {
             return Type::Blade_or_Hide(());
         }
     }
-
-    // get_attack_location returns the attack location of the obstacle based on the provided obstacle id
-    // @param id: u8 - the obstacle id
-    // @return u8 - the obstacle attack location
-    fn get_random_damage_location(entropy: u128) -> Slot {
-        return ImplCombat::get_random_damage_location(entropy);
-    }
-
+    
     // get_damage returns the damage of the obstacle based on the provided obstacle id
     fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, entropy: u128) -> u16 {
         // no critical hits for obstacles
