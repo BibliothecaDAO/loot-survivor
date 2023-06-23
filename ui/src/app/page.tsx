@@ -43,7 +43,6 @@ import {
   getBattleByTxHash,
   getDiscoveryByTxHash,
   getLatestMarketItems,
-  getLatestMarketItemsNumber,
   getAdventurerByXP,
 } from "./hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
@@ -132,13 +131,6 @@ export default function Home() {
     },
     txAccepted
     // hash !== ""
-  );
-
-  useCustomQuery(
-    "latestMarketItemsNumberQuery",
-    getLatestMarketItemsNumber,
-    undefined,
-    txAccepted
   );
 
   const latestMarketItemsNumber = data.latestMarketItemsNumberQuery

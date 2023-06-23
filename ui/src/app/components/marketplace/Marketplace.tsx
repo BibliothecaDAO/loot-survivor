@@ -4,7 +4,6 @@ import { Button } from "../buttons/Button";
 import {
   getLatestMarketItems,
   getAdventurersInList,
-  getLatestMarketItemsNumber,
   getUnclaimedItemsByAdventurer,
 } from "../../hooks/graphql/queries";
 import { UTCClock, Countdown } from "../Clock";
@@ -87,13 +86,6 @@ const Marketplace = () => {
       ids: bidders,
     },
     false
-  );
-
-  useCustomQuery(
-    "latestMarketItemsNumberQuery",
-    getLatestMarketItemsNumber,
-    undefined,
-    true
   );
 
   const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
