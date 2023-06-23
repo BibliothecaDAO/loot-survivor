@@ -19,27 +19,18 @@ export const BattleDisplay = ({
         battleData.targetHealth > 0 ? (
           <p>
             You attacked the {beastName} with a mighty strike and dealt{" "}
-            {battleData.damage} damage!
+            {battleData.damageDealt} damage!
           </p>
         ) : battleData.fled ? (
           <p>You fled the {beastName}!</p>
         ) : (
           <p>
-            You slayed the {beastName} after inflicting {battleData.damage}{" "}
+            You slayed the {beastName} after inflicting {battleData.damageDealt}{" "}
             damage!
           </p>
         )
       ) : battleData.targetHealth > 0 ? (
-        battleData.ambushed ? (
-          battleData.damage == 0 ? (
-            <p>You were ambushed by the {beastName} but managed to avoid it!</p>
-          ) : (
-            <p>
-              You were ambushed by the {beastName} taking {battleData.damage}{" "}
-              damage!
-            </p>
-          )
-        ) : battleData.damage == 0 ? (
+        battleData.damage == 0 ? (
           <p>
             You were counter attacked by the {beastName} but defended the
             attack!
@@ -47,7 +38,7 @@ export const BattleDisplay = ({
         ) : (
           <p>
             You were counter attacked by the {beastName} taking{" "}
-            {battleData.damage} damage!
+            {battleData.damageTaken} damage!
           </p>
         )
       ) : battleData.ambushed ? (
@@ -91,28 +82,6 @@ export const NotificationBattleDisplay = ({
     <div>
       {isArray && battleData.some((data) => data.fled) ? (
         <p>You fled the {beastName ? beastName : ""}!</p>
-      ) : isArray &&
-        battleData[0]?.ambushed &&
-        battleData[0]?.targetHealth == 0 ? (
-        <p>
-          You were killed by the {beastName ? beastName : ""}, from an ambush
-          taking {battleData[0].damage}!
-        </p>
-      ) : isArray &&
-        battleData.length == 1 &&
-        battleData[0]?.ambushed &&
-        battleData[0]?.damage > 0 ? (
-        <p>
-          You were ambushed by the {beastName ? beastName : ""}, taking{" "}
-          {battleData[0]?.damage}!
-        </p>
-      ) : isArray &&
-        battleData.length == 1 &&
-        battleData[0]?.ambushed &&
-        battleData[0]?.damage == 0 ? (
-        <p>
-          You were ambushed by the {beastName ? beastName : ""}, but avoided it!
-        </p>
       ) : isArray &&
         type == "Flee" &&
         battleData.length == 1 &&

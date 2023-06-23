@@ -653,7 +653,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "adventurerId": check_exists_int(ba.adventurer_state["adventurer_id"]),
             "attacker": encode_int_as_bytes(1),
             "fled": check_exists_int(0),
-            "ambushed": check_exists_int(0),
             "damageDealt": encode_int_as_bytes(ba.damage_dealt),
             "damageTaken": encode_int_as_bytes(ba.damage_taken),
             "damageLocation": encode_int_as_bytes(ba.damage_location),
@@ -689,7 +688,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "adventurerId": check_exists_int(sb.adventurer_state["adventurer_id"]),
             "attacker": encode_int_as_bytes(1),
             "fled": check_exists_int(0),
-            "ambushed": check_exists_int(0),
             "damageDealt": encode_int_as_bytes(sb.damage_dealt),
             "damageTaken": encode_int_as_bytes(sb.damage_taken),
             "damageLocation": encode_int_as_bytes(0),
@@ -728,7 +726,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "adventurerId": check_exists_int(fa.adventurer_state["adventurer_id"]),
             "attacker": encode_int_as_bytes(1),
             "fled": check_exists_int(fa.fled),
-            "ambushed": check_exists_int(0),
             "damageDealt": encode_int_as_bytes(0),
             "damageTaken": encode_int_as_bytes(fa.damage_taken),
             "damageLocation": encode_int_as_bytes(0),
@@ -770,7 +767,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "owner": check_exists_int(
                 pi.adventurer_state_with_bag["adventurer_state"]["owner"]
             ),
-            "greatness": check_exists_int(0),
             "xp": encode_int_as_bytes(0),
             "cost": encode_int_as_bytes(pi.cost),
             "namePrefix": check_exists_int(0),
@@ -921,6 +917,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": encode_int_as_bytes(hs.adventurer_state["adventurer_id"]),
             "rank": encode_int_as_bytes(hs.rank),
+            "xp": encode_int_as_bytes(hs.adventurer_state["adventurer"]["xp"]),
             "owner": encode_int_as_bytes(hs.adventurer_state["owner"]),
             "timestamp": block_time,
         }

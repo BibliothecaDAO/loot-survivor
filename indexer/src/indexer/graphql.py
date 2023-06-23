@@ -640,6 +640,7 @@ class ScoresFilter:
     adventurerId: Optional[FeltValueFilter] = None
     address: Optional[HexValueFilter] = None
     rank: Optional[FeltValueFilter] = None
+    xp: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
     scoreTime: Optional[DateTimeFilter] = None
 
@@ -672,7 +673,6 @@ class BattlesFilter:
     timestamp: Optional[DateTimeFilter] = None
     attacker: Optional[AttackerFilter] = None
     fled: Optional[BooleanFilter] = None
-    ambushed: Optional[BooleanFilter] = None
     damage: Optional[FeltValueFilter] = None
     targetHealth: Optional[FeltValueFilter] = None
     xpEarned: Optional[FeltValueFilter] = None
@@ -682,29 +682,17 @@ class BattlesFilter:
 
 @strawberry.input
 class ItemsFilter:
-    id: Optional[FeltValueFilter] = None
-    marketId: Optional[FeltValueFilter] = None
+    item: Optional[ItemFilter] = None
+    cost: Optional[FeltValueFilter] = None
     owner: Optional[HexValueFilter] = None
     ownerAdventurerId: Optional[FeltValueFilter] = None
-    claimedTime: Optional[DateTimeFilter] = None
-    item: Optional[ItemFilter] = None
-    slot: Optional[StringFilter] = None
-    type: Optional[StringFilter] = None
-    material: Optional[MaterialFilter] = None
-    rank: Optional[FeltValueFilter] = None
+    equippedAdventurerId: Optional[FeltValueFilter] = None
+    purchasedTime: Optional[DateTimeFilter] = None
     namePrefix: Optional[NamePrefixFilter] = None
     nameSuffix: Optional[NameSuffixFilter] = None
-    suffix: Optional[SuffixFilter] = None
-    greatness: Optional[FeltValueFilter] = None
-    createdBlock: Optional[FeltValueFilter] = None
+    itemSuffix: Optional[SuffixFilter] = None
     xp: Optional[FeltValueFilter] = None
-    equippedAdventurerId: Optional[FeltValueFilter] = None
-    bag: Optional[FeltValueFilter] = None
-    price: Optional[FeltValueFilter] = None
-    expiry: Optional[DateTimeFilter] = None
-    bidder: Optional[FeltValueFilter] = None
-    status: Optional[StatusFilter] = None
-    lastUpdated: Optional[DateTimeFilter] = None
+    lastUpdatedTime: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -753,6 +741,7 @@ class ScoresOrderByInput:
     adventurerId: Optional[OrderByInput] = None
     address: Optional[OrderByInput] = None
     rank: Optional[OrderByInput] = None
+    xp: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
     scoreTime: Optional[OrderByInput] = None
 
@@ -785,7 +774,6 @@ class BattlesOrderByInput:
     timestamp: Optional[OrderByInput] = None
     attacker: Optional[OrderByInput] = None
     fled: Optional[OrderByInput] = None
-    ambushed: Optional[OrderByInput] = None
     damage: Optional[OrderByInput] = None
     targetHealth: Optional[OrderByInput] = None
     xpEarned: Optional[OrderByInput] = None
@@ -795,36 +783,17 @@ class BattlesOrderByInput:
 
 @strawberry.input
 class ItemsOrderByInput:
-    id: Optional[OrderByInput] = None
-    marketId: Optional[OrderByInput] = None
+    item: Optional[OrderByInput] = None
+    cost: Optional[OrderByInput] = None
     owner: Optional[OrderByInput] = None
     ownerAdventurerId: Optional[OrderByInput] = None
-    claimedTime: Optional[datetime] = None
-    item: Optional[OrderByInput] = None
-    slot: Optional[OrderByInput] = None
-    type: Optional[OrderByInput] = None
-    material: Optional[OrderByInput] = None
-    rank: Optional[OrderByInput] = None
+    equippedAdventurerId: Optional[OrderByInput] = None
+    purchasedTime: Optional[OrderByInput] = None
     namePrefix: Optional[OrderByInput] = None
     nameSuffix: Optional[OrderByInput] = None
     itemSuffix: Optional[OrderByInput] = None
-    greatness: Optional[OrderByInput] = None
-    createdBlock: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
-    equippedAdventurerId: Optional[OrderByInput] = None
-    bag: Optional[OrderByInput] = None
-    price: Optional[OrderByInput] = None
-    expiry: Optional[OrderByInput] = None
-    bidder: Optional[OrderByInput] = None
-    status: Optional[OrderByInput] = None
-    lastUpdated: Optional[OrderByInput] = None
-
-
-@strawberry.input
-class MarketOrderByInput:
-    caller: Optional[OrderByInput] = None
-    itemsNumber: Optional[OrderByInput] = None
-    timestamp: Optional[OrderByInput] = None
+    lastUpdatedTime: Optional[OrderByInput] = None
 
 
 @strawberry.type
@@ -900,6 +869,7 @@ class Score:
     adventurerId: Optional[FeltValue]
     address: Optional[HexValue]
     rank: Optional[FeltValue]
+    xp: Optional[FeltValue]
     txHash: Optional[HexValue]
     scoreTime: Optional[datetime]
 
@@ -909,6 +879,7 @@ class Score:
             adventurerId=data["adventurerId"],
             address=data["address"],
             rank=data["rank"],
+            xp=data["xp"],
             txHash=data["txHash"],
             scoreTime=data["scoreTime"],
         )
@@ -961,100 +932,65 @@ class Discovery:
 class Battle:
     adventurerId: Optional[FeltValue]
     beastId: Optional[FeltValue]
-    timestamp: Optional[datetime]
     attacker: Optional[AttackerValue]
     fled: Optional[BooleanValue]
-    ambushed: Optional[BooleanValue]
-    damage: Optional[FeltValue]
+    damageDealt: Optional[FeltValue]
+    damageTaken: Optional[FeltValue]
+    damageLocation: Optional[FeltValue]
     targetHealth: Optional[FeltValue]
-    xpEarned: Optional[FeltValue]
+    xpEarnedAdventurer: Optional[FeltValue]
+    xpEarnedItems: Optional[FeltValue]
     goldEarned: Optional[FeltValue]
     txHash: Optional[HexValue]
+    timestamp: Optional[datetime]
 
     @classmethod
     def from_mongo(cls, data):
         return cls(
             adventurerId=data["adventurerId"],
             beastId=data["beastId"],
-            timestamp=data["timestamp"],
             attacker=data["attacker"],
             fled=data["fled"],
-            ambushed=data["ambushed"],
-            damage=data["damage"],
+            damageDealt=data["damageDealt"],
+            damageTaken=data["damageTaken"],
+            damageLocation=data["damageLocation"],
             targetHealth=data["targetHealth"],
-            xpEarned=data["xpEarned"],
+            xpEarnedAdventurer=data["xpEarnedAdventurer"],
+            xpEarnedItems=data["xpEarnedItems"],
             goldEarned=data["goldEarned"],
             txHash=data["txHash"],
+            timestamp=data["timestamp"],
         )
 
 
 @strawberry.type
 class Item:
-    id: Optional[FeltValue]
-    marketId: Optional[FeltValue]
+    item: Optional[FeltValue]
+    cost: Optional[FeltValue]
     owner: Optional[HexValue]
     ownerAdventurerId: Optional[FeltValue]
-    claimedTime: Optional[datetime]
-    item: Optional[ItemValue]
-    slot: Optional[SlotValue]
-    type: Optional[TypeValue]
-    material: Optional[MaterialValue]
-    rank: Optional[FeltValue]
+    equippedAdventurerId: Optional[FeltValue]
+    purchasedTime: Optional[datetime]
     namePrefix: Optional[NamePrefixValue]
     nameSuffix: Optional[NameSuffixValue]
     itemSuffix: Optional[SuffixValue]
-    greatness: Optional[FeltValue]
-    createdBlock: Optional[FeltValue]
     xp: Optional[FeltValue]
-    equippedAdventurerId: Optional[FeltValue]
-    bag: Optional[FeltValue]
-    price: Optional[FeltValue]
-    expiry: Optional[datetime]
-    bidder: Optional[FeltValue]
-    status: Optional[StatusValue]
-    lastUpdated: Optional[datetime]
+    lastUpdatedTime: Optional[datetime]
 
     @classmethod
     def from_mongo(cls, data):
         return cls(
-            id=data["id"],
-            marketId=data["marketId"],
+            item=data["item"],
+            cost=data["cost"],
             owner=data["owner"],
             ownerAdventurerId=data["ownerAdventurerId"],
-            claimedTime=data["claimedTime"],
-            item=data["item"],
-            slot=data["slot"],
-            type=data["type"],
-            material=data["material"],
-            rank=data["rank"],
+            equippedAdventurerId=data["equippedAdventurerId"],
+            purchasedTime=data["purchasedTime"],
             namePrefix=data["namePrefix"],
             nameSuffix=data["nameSuffix"],
             itemSuffix=data["itemSuffix"],
-            greatness=data["greatness"],
-            createdBlock=data["createdBlock"],
             xp=data["xp"],
-            equippedAdventurerId=data["equippedAdventurerId"],
-            bag=data["bag"],
-            price=data["price"],
-            expiry=data["expiry"],
-            bidder=data["bidder"],
-            status=data["status"],
-            lastUpdated=data["lastUpdated"],
-        )
-
-
-@strawberry.type
-class Market:
-    caller: Optional[HexValue]
-    itemsNumber: Optional[FeltValue]
-    timestamp: Optional[datetime]
-
-    @classmethod
-    def from_mongo(cls, data):
-        return cls(
-            caller=data["caller"],
-            itemsNumber=data["itemsNumber"],
-            timestamp=data["timestamp"],
+            lastUpdatedTime=data["lastUpdatedTime"],
         )
 
 
@@ -1305,62 +1241,13 @@ def get_discoveries(
     return [Discovery.from_mongo(t) for t in query]
 
 
-def get_beasts(
-    info,
-    where: Optional[BeastsFilter] = {},
-    limit: Optional[int] = 10,
-    skip: Optional[int] = 0,
-    orderBy: Optional[BeastsOrderByInput] = {},
-) -> List[Beast]:
-    db = info.context["db"]
-
-    filter = {"_chain.valid_to": None}
-
-    if where:
-        processed_filters = process_filters(where)
-        for key, value in processed_filters.items():
-            if (
-                isinstance(value, StringFilter)
-                | isinstance(value, BeastFilter)
-                | isinstance(value, NamePrefixFilter)
-                | isinstance(value, NameSuffixFilter)
-                | isinstance(value, SlotFilter)
-            ):
-                filter[key] = get_str_filters(value)
-            elif isinstance(value, HexValueFilter):
-                filter[key] = get_hex_filters(value)
-            elif isinstance(value, DateTimeFilter):
-                filter[key] = get_date_filters(value)
-            elif isinstance(value, FeltValueFilter):
-                filter[key] = get_felt_filters(value)
-
-    sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
-
-    sort_var = "updated_at"
-    sort_dir = -1
-
-    for key, value in sort_options.items():
-        if value.asc:
-            sort_var = key
-            sort_dir = 1
-            break
-        if value.desc:
-            sort_var = key
-            sort_dir = -1
-            break
-
-    query = db["beasts"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
-
-    return [Beast.from_mongo(t) for t in query]
-
-
 def get_battles(
     info,
     where: Optional[BattlesFilter] = {},
     limit: Optional[int] = 10,
     skip: Optional[int] = 0,
     orderBy: Optional[BattlesOrderByInput] = {},
-) -> List[Beast]:
+) -> List[Battle]:
     db = info.context["db"]
 
     filter = {"_chain.valid_to": None}
@@ -1451,57 +1338,13 @@ def get_items(
     return [Item.from_mongo(t) for t in query]
 
 
-def get_market(
-    info,
-    where: Optional[MarketFilter] = {},
-    limit: Optional[int] = 10,
-    skip: Optional[int] = 0,
-    orderBy: Optional[MarketOrderByInput] = {},
-) -> List[Item]:
-    db = info.context["db"]
-
-    filter = {"_chain.valid_to": None}
-
-    if where:
-        processed_filters = process_filters(where)
-        for key, value in processed_filters.items():
-            if isinstance(value, StringFilter):
-                filter[key] = get_str_filters(value)
-            elif isinstance(value, HexValueFilter):
-                filter[key] = get_hex_filters(value)
-            elif isinstance(value, DateTimeFilter):
-                filter[key] = get_date_filters(value)
-            elif isinstance(value, FeltValueFilter):
-                filter[key] = get_felt_filters(value)
-
-    sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
-
-    sort_var = "updated_at"
-    sort_dir = -1
-
-    for key, value in sort_options.items():
-        if value.asc:
-            sort_var = key
-            sort_dir = 1
-            break
-        if value.desc:
-            sort_var = key
-            sort_dir = -1
-            break
-    query = db["market"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
-
-    return [Market.from_mongo(t) for t in query]
-
-
 @strawberry.type
 class Query:
     adventurers: List[Adventurer] = strawberry.field(resolver=get_adventurers)
     scores: List[Score] = strawberry.field(resolver=get_scores)
     discoveries: List[Discovery] = strawberry.field(resolver=get_discoveries)
-    beasts: List[Beast] = strawberry.field(resolver=get_beasts)
     battles: List[Battle] = strawberry.field(resolver=get_battles)
     items: List[Item] = strawberry.field(resolver=get_items)
-    market: List[Market] = strawberry.field(resolver=get_market)
 
 
 class IndexerGraphQLView(GraphQLView):
