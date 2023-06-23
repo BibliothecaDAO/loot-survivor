@@ -2,15 +2,19 @@ use traits::{TryInto, Into};
 use option::OptionTrait;
 use debug::PrintTrait;
 use core::serde::Serde;
-use integer::{U256TryIntoU32, U256TryIntoU8};
+use integer::{U256TryIntoU32, U256TryIntoU8, U32IntoU128, U8IntoU32};
 
 use core::clone::Clone;
 use array::ArrayTrait;
 
 use super::statistics::{item_tier, item_slot, item_type, item_index, item_slot_length};
 use super::statistics::constants::{
-    NamePrefixLength, ItemId, ItemNamePrefix, NameSuffixLength, ItemSuffixLength, ItemSuffix,
-    NUM_ITEMS
+    NamePrefixLength, ItemNameSuffix, ItemId, ItemNamePrefix, NameSuffixLength, ItemSuffixLength,
+    ItemSuffix, NUM_ITEMS
+};
+use super::utils::NameUtils::{
+    is_name_suffix_set1, is_name_suffix_set2, is_name_suffix_set3, is_item_suffix_set1,
+    is_item_suffix_set2, is_name_prefix_set1, is_name_prefix_set2, is_name_prefix_set3
 };
 
 use pack::pack::{pack_value, unpack_value};
@@ -132,152 +136,391 @@ impl ImplLoot of ILoot {
 // tests -----------------------------------------------------------------------//
 
 #[test]
-#[available_gas(1000000)]
+#[available_gas(5000000)]
 fn test_item_suffix() {
-    let item_id = ItemId::Katana;
-    let item = ImplLoot::get_item(item_id);
-    let katana_item_suffix = item.get_item_suffix(1232456);
+    
+    let grimoire = ImplLoot::get_item(ItemId::Grimoire);
+    let katana = ImplLoot::get_item(ItemId::Katana);
+    let ghost_wand = ImplLoot::get_item(ItemId::GhostWand);
 
-    katana_item_suffix.print();
-    assert(katana_item_suffix != ItemSuffix::of_Power, 'of_Power');
-    assert(katana_item_suffix != ItemSuffix::of_Titans, 'of_Titans');
-    assert(katana_item_suffix != ItemSuffix::of_Perfection, 'of_Perfection');
-    assert(katana_item_suffix != ItemSuffix::of_Enlightenment, 'of_Enlightenment');
-    assert(katana_item_suffix != ItemSuffix::of_Anger, 'of_Anger');
-    assert(katana_item_suffix != ItemSuffix::of_Fury, 'of_Fury');
-    assert(katana_item_suffix != ItemSuffix::of_the_Fox, 'of_the_Fox');
-    assert(katana_item_suffix != ItemSuffix::of_Reflection, 'of_Reflection');
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(ItemSuffixLength) {
+            break ();
+        }
+
+        // verify Grimoires only get item suffixes from set 1 (Power, Titans, Perfection, etc)
+        let grimoire_suffix = grimoire.get_item_suffix(U32IntoU128::into(i));
+        let valid_grimoire_name = is_item_suffix_set1(grimoire_suffix);
+        assert(valid_grimoire_name, 'invalid grimoire item suffix');
+
+        // verify Katanas only get item suffixes from set 2 (Giant, Skill, Brilliance, etc)
+        let katana_suffix = katana.get_item_suffix(U32IntoU128::into(i));
+        let valid_katana_name = is_item_suffix_set2(katana_suffix);
+        assert(valid_katana_name, 'invalid katana item suffix');
+
+        // verify dragonskin gloves only get suffixes from set 1
+        let ghost_wand_suffix = ghost_wand.get_item_suffix(U32IntoU128::into(i));
+        let valid_ghost_wand_suffix = is_item_suffix_set1(ghost_wand_suffix);
+        assert(valid_ghost_wand_suffix, 'invalid ghost wand suffix');
+    
+        // increment counter
+        i += 1;
+    };
 }
 
 #[test]
-#[available_gas(1000000)]
+#[available_gas(1000000000000)]
 fn test_item_name_suffix() {
-    let item_id = ItemId::Katana;
-    let item = ImplLoot::get_item(item_id);
-    let katana_name_suffix = item.get_name_suffix(1232456);
+    //
+    // Weapons
+    //
 
-    assert(katana_name_suffix == 6, 'Grasp');
-    let katana_name_suffix_1 = item.get_name_suffix(123456);
+    // katana is always 'X Grasp'
+    let mut i: usize = 0;
+    let item = ImplLoot::get_item(ItemId::Katana);
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        assert(
+            item.get_name_suffix(U32IntoU128::into(i)) == ItemNameSuffix::Grasp,
+            'katana should be grasp'
+        );
+        i += 1;
+    };
 
-    assert(katana_name_suffix_1 == 6, 'Grasp');
-    let katana_name_suffix_2 = item.get_name_suffix(123246);
-    assert(katana_name_suffix_2 == 6, 'Grasp');
+    // warhammer is always 'X Bane''
+    let item = ImplLoot::get_item(ItemId::Warhammer);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        assert(
+            item.get_name_suffix(U32IntoU128::into(i)) == ItemNameSuffix::Bane,
+            'warhammer should be bane'
+        );
+        i += 1;
+    };
 
-    let katana_name_suffix_3 = item.get_name_suffix(122456);
-    assert(katana_name_suffix_3 == 6, 'Grasp');
+    // Book is always 'X Moon''
+    let item = ImplLoot::get_item(ItemId::Book);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        assert(
+            item.get_name_suffix(U32IntoU128::into(i)) == ItemNameSuffix::Moon,
+            'book should be moon'
+        );
 
-    let katana_name_suffix_4 = item.get_name_suffix(12346);
-    assert(katana_name_suffix_4 == 6, 'Grasp');
+        i += 1;
+    };
+
+    //
+    // Chest Armor
+    //
+
+    // Divine Robe has six variants (name suffix set1)
+    // Bane, Song, Instrument, Shadow, Growl, Form
+    let item = ImplLoot::get_item(ItemId::DivineRobe);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set1(result);
+        assert(valid_name_suffix, 'invalid divine robe name suffix');
+        i += 1;
+    };
+
+    // Chain Mail has six variants (name suffix set2)
+    // Root, Roar, Glow, Whisper, Tear, Sun
+    let item = ImplLoot::get_item(ItemId::ChainMail);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set2(result);
+        assert(valid_name_suffix, 'invalid chain mail name suffix');
+        i += 1;
+    };
+
+    // Demon Husk has six variants (name suffix set3)
+    // 'X Bite', 'X Grasp', ' X Bender', 'X Shout', 'X Peak, 'X Moon'
+    let item = ImplLoot::get_item(ItemId::DemonHusk);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set3(result);
+        assert(valid_name_suffix, 'invalid demon husk name suffix');
+        i += 1;
+    };
+
+    //
+    // Head Armor
+    // 
+
+    // Ancient Helm uses name suffix set 1
+    let item = ImplLoot::get_item(ItemId::AncientHelm);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set1(result);
+        assert(valid_name_suffix, 'invalid war cap name suffix');
+        i += 1;
+    };
+
+    // Crown uses name suffix set 2
+    let item = ImplLoot::get_item(ItemId::Crown);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set2(result);
+        assert(valid_name_suffix, 'invalid crown name suffix');
+        i += 1;
+    };
+
+    // Divine Hood uses name suffix set 3
+    let item = ImplLoot::get_item(ItemId::DivineHood);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set3(result);
+        assert(valid_name_suffix, 'invalid divine hood name suffix');
+        i += 1;
+    };
+
+    //
+    // Waist Armor
+    //
+
+    // Ornate Belt uses name suffix set 1
+    let item = ImplLoot::get_item(ItemId::OrnateBelt);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set1(result);
+        assert(valid_name_suffix, 'invalid ornate belt suffix');
+        i += 1;
+    };
+
+    // Brightsilk sash uses name suffix set 2
+    let item = ImplLoot::get_item(ItemId::BrightsilkSash);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set2(result);
+        assert(valid_name_suffix, 'invalid brightsilk sash suffix');
+        i += 1;
+    };
+
+    // Hard Leather Belt uses name suffix set 3
+    let item = ImplLoot::get_item(ItemId::HardLeatherBelt);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set3(result);
+        assert(valid_name_suffix, 'wrong hard leather belt suffix');
+        i += 1;
+    };
+
+    //
+    // Foot Armor
+    //
+
+    // Holy Greaves use name suffix set 1
+    let item = ImplLoot::get_item(ItemId::HolyGreaves);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set1(result);
+        assert(valid_name_suffix, 'invalid holy greaves suffix');
+        i += 1;
+    };
+
+    // Heavy Boots use name suffix set 2
+    let item = ImplLoot::get_item(ItemId::HeavyBoots);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set2(result);
+        assert(valid_name_suffix, 'invalid heavy boots suffix');
+        i += 1;
+    };
+
+    // Silk Slippers use name suffix set 3
+    let item = ImplLoot::get_item(ItemId::SilkSlippers);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set3(result);
+        assert(valid_name_suffix, 'invalid silk slippers suffix');
+        i += 1;
+    };
+
+    //
+    // Hand Armor
+    //
+    // Holy Gauntlets use name suffix set 1
+    let item = ImplLoot::get_item(ItemId::HolyGauntlets);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set1(result);
+        assert(valid_name_suffix, 'invalid holy gauntlets suffix');
+        i += 1;
+    };
+
+    // Linen Golves use name suffix set 2
+    let item = ImplLoot::get_item(ItemId::LinenGloves);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set2(result);
+        assert(valid_name_suffix, 'invalid linen gloves suffix');
+        i += 1;
+    };
+
+    // Hard Leather Gloves use name suffix set 3
+    let item = ImplLoot::get_item(ItemId::HardLeatherGloves);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set3(result);
+        assert(valid_name_suffix, 'invalid hard lthr gloves suffix');
+        i += 1;
+    };
+
+    //
+    // Necklaces
+    //
+
+    // Necklace uses name suffix set 1
+    let item = ImplLoot::get_item(ItemId::Necklace);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set1(result);
+        assert(valid_name_suffix, 'invalid Necklace name suffix');
+        i += 1;
+    };
+
+    // Amulets use name suffix set 2
+    let item = ImplLoot::get_item(ItemId::Amulet);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set2(result);
+        assert(valid_name_suffix, 'invalid amulet name suffix');
+        i += 1;
+    };
+
+    // Pendents use name suffix set 3
+    let item = ImplLoot::get_item(ItemId::Pendant);
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NameSuffixLength) {
+            break ();
+        }
+        let result = item.get_name_suffix(U32IntoU128::into(i));
+        let valid_name_suffix = is_name_suffix_set3(result);
+        assert(valid_name_suffix, 'invalid pendant name suffix');
+        i += 1;
+    };
+//
+// Rings can have any name so no need to test
+// note while the contract doesn't generate any Rings with name prefix set 1 
+// such as "X Bane" Gold Ring of Power, this is because those ring variants
+// haven't yet reached G19 to receive their name. This is simlar to us
+// knowing that all Warhammers will eventually be "X Bane" even though have reached G19
+// in the present day. The contract is deterministic with the item naming and the name
+// assignment does not depend on the items greatness so the name is set for every item,
+// the contract merely shows the special names at G15 and G19
+//
 }
 
+
 #[test]
-#[available_gas(1000000)]
+#[available_gas(50000000)]
 fn test_item_prefix() {
-    let item_id = ItemId::Katana;
-    let item = ImplLoot::get_item(item_id);
-    let katana_name_prefix = item.get_name_prefix(123456);
+    let divine_robe = ImplLoot::get_item(ItemId::DivineRobe);
+    let katana = ImplLoot::get_item(ItemId::Katana);
+    let holy_chestplate = ImplLoot::get_item(ItemId::HolyChestplate);
 
-    katana_name_prefix.print();
+    let mut i: usize = 0;
+    loop {
+        if i > U8IntoU32::into(NamePrefixLength) {
+            break ();
+        }
 
-    assert(katana_name_prefix != ItemNamePrefix::Agony, 'Agony');
-    assert(katana_name_prefix != ItemNamePrefix::Apocalypse, 'Apocalypse');
-    assert(katana_name_prefix != ItemNamePrefix::Beast, 'Beast');
-    assert(katana_name_prefix != ItemNamePrefix::Behemoth, 'Behemoth');
-    assert(katana_name_prefix != ItemNamePrefix::Blood, 'Blood');
-    assert(katana_name_prefix != ItemNamePrefix::Bramble, 'Bramble');
-    assert(katana_name_prefix != ItemNamePrefix::Brood, 'Brood');
-    assert(katana_name_prefix != ItemNamePrefix::Carrion, 'Carrion');
-    assert(katana_name_prefix != ItemNamePrefix::Chimeric, 'Chimeric');
-    assert(katana_name_prefix != ItemNamePrefix::Corpse, 'Corpse');
-    assert(katana_name_prefix != ItemNamePrefix::Damnation, 'Damnation');
-    assert(katana_name_prefix != ItemNamePrefix::Death, 'Death');
-    assert(katana_name_prefix != ItemNamePrefix::Dire, 'Dire');
-    assert(katana_name_prefix != ItemNamePrefix::Dragon, 'Dragon');
-    assert(katana_name_prefix != ItemNamePrefix::Doom, 'Doom');
-    assert(katana_name_prefix != ItemNamePrefix::Dusk, 'Dusk');
-    assert(katana_name_prefix != ItemNamePrefix::Empyrean, 'Empyrean');
-    assert(katana_name_prefix != ItemNamePrefix::Fate, 'Fate');
-    assert(katana_name_prefix != ItemNamePrefix::Gale, 'Gale');
-    assert(katana_name_prefix != ItemNamePrefix::Ghoul, 'Ghoul');
-    assert(katana_name_prefix != ItemNamePrefix::Glyph, 'Glyph');
-    assert(katana_name_prefix != ItemNamePrefix::Golem, 'Golem');
-    assert(katana_name_prefix != ItemNamePrefix::Hate, 'Hate');
-    assert(katana_name_prefix != ItemNamePrefix::Havoc, 'Havoc');
-    assert(katana_name_prefix != ItemNamePrefix::Horror, 'Horror');
-    assert(katana_name_prefix != ItemNamePrefix::Hypnotic, 'Hypnotic');
-    assert(katana_name_prefix != ItemNamePrefix::Loath, 'Loath');
-    assert(katana_name_prefix != ItemNamePrefix::Maelstrom, 'Maelstrom');
-    assert(katana_name_prefix != ItemNamePrefix::Miracle, 'Miracle');
-    assert(katana_name_prefix != ItemNamePrefix::Morbid, 'Morbid');
-    assert(katana_name_prefix != ItemNamePrefix::Onslaught, 'Onslaught');
-    assert(katana_name_prefix != ItemNamePrefix::Pain, 'Pain');
-    assert(katana_name_prefix != ItemNamePrefix::Phoenix, 'Phoenix');
-    assert(katana_name_prefix != ItemNamePrefix::Plague, 'Plague');
-    assert(katana_name_prefix != ItemNamePrefix::Rapture, 'Rapture');
-    assert(katana_name_prefix != ItemNamePrefix::Rune, 'Rune');
-    assert(katana_name_prefix != ItemNamePrefix::Sol, 'Sol');
-    assert(katana_name_prefix != ItemNamePrefix::Soul, 'Soul');
-    assert(katana_name_prefix != ItemNamePrefix::Spirit, 'Spirit');
-    assert(katana_name_prefix != ItemNamePrefix::Storm, 'Storm');
-    assert(katana_name_prefix != ItemNamePrefix::Torment, 'Torment');
-    assert(katana_name_prefix != ItemNamePrefix::Vengeance, 'Vengeance');
-    assert(katana_name_prefix != ItemNamePrefix::Viper, 'Viper');
-    assert(katana_name_prefix != ItemNamePrefix::Vortex, 'Vortex');
-    assert(katana_name_prefix != ItemNamePrefix::Wrath, 'Wrath');
-    assert(katana_name_prefix != ItemNamePrefix::Lights, 'Lights');
+        // divine robe uses name prefix set 1
+        let divine_robe_prefix = divine_robe.get_name_prefix(U32IntoU128::into(i));
+        let divine_robe_prefix_valid = is_name_prefix_set1(divine_robe_prefix);
+        assert(divine_robe_prefix_valid, 'invalid divine robe belt prefix');
 
-    let demonhide_belt_id = ItemId::DemonhideBelt;
-    let item = ImplLoot::get_item(demonhide_belt_id);
-    let demonhide_belt_name_prefix = item.get_name_prefix(123456);
+        // holy chest plate uses name prefix set 2
+        let holy_chestplate_prefix = holy_chestplate.get_name_prefix(U32IntoU128::into(i));
+        let holy_chestplate_prefix_valid = is_name_prefix_set2(holy_chestplate_prefix);
+        assert(holy_chestplate_prefix_valid, 'invalid holy chestplate prefix');
 
-    katana_name_prefix.print();
+        // katana uses name prefix set 3
+        let katana_prefix = katana.get_name_prefix(U32IntoU128::into(i));
+        let katana_prefix_valid = is_name_prefix_set3(katana_prefix);
+        assert(katana_prefix_valid, 'invalid katana prefix');
 
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Agony, 'Agony');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Apocalypse, 'Apocalypse');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Beast, 'Beast');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Behemoth, 'Behemoth');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Blood, 'Blood');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Bramble, 'Bramble');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Brood, 'Brood');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Carrion, 'Carrion');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Chimeric, 'Chimeric');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Corpse, 'Corpse');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Damnation, 'Damnation');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Death, 'Death');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Dire, 'Dire');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Dragon, 'Dragon');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Doom, 'Doom');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Dusk, 'Dusk');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Empyrean, 'Empyrean');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Fate, 'Fate');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Gale, 'Gale');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Ghoul, 'Ghoul');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Glyph, 'Glyph');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Golem, 'Golem');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Hate, 'Hate');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Havoc, 'Havoc');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Horror, 'Horror');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Hypnotic, 'Hypnotic');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Loath, 'Loath');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Maelstrom, 'Maelstrom');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Miracle, 'Miracle');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Morbid, 'Morbid');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Onslaught, 'Onslaught');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Pain, 'Pain');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Phoenix, 'Phoenix');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Plague, 'Plague');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Rapture, 'Rapture');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Rune, 'Rune');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Sol, 'Sol');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Soul, 'Soul');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Spirit, 'Spirit');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Storm, 'Storm');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Torment, 'Torment');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Vengeance, 'Vengeance');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Viper, 'Viper');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Vortex, 'Vortex');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Wrath, 'Wrath');
-    assert(demonhide_belt_name_prefix != ItemNamePrefix::Lights, 'Lights');
+        i += 1;
+    };
 }
 
 #[test]
