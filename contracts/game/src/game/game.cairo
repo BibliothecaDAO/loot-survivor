@@ -24,7 +24,7 @@ mod Game {
     use game::game::messages::messages;
 
     use lootitems::loot::{Loot, ImplLoot};
-    use lootitems::loot::constants::{NamePrefixLength, NameSuffixLength};
+    use lootitems::statistics::constants::{NamePrefixLength, NameSuffixLength};
     use pack::pack::{pack_value, unpack_value};
 
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
