@@ -8,5 +8,6 @@ mod messages {
     const ATTACK_CALLED_OUTSIDE_BATTLE: felt252 = 'No beast to attack';
     const CANT_FLEE_STARTER_BEAST: felt252 = 'Cant flee starter beast';
     const STAT_UPGRADES_AVAILABLE: felt252 = 'Stat upgrade available';
+    const BLOCK_NUMBER_ERROR: felt252 = 'Too soon update';
 }
 

@@ -2,10 +2,10 @@
 mod Game {
     // TESTING CONSTS REMOVE 
 
+    const ENTROPY_BLOCK_TIME: u64 = 100;
     const TEST_ENTROPY: u64 = 12303548;
 
     use game::game::interfaces::IGame;
-
 
     const LOOT_DESCRIPTION_INDEX_1: u256 = 0;
     const LOOT_DESCRIPTION_INDEX_2: u256 = 1;
@@ -794,8 +794,17 @@ mod Game {
     fn _set_entropy(ref self: ContractState, entropy: felt252) {
         // TODO: Replace with actual seed
         //starknet::get_tx_info().unbox().transaction_hash.into()
+
+        let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
+
+        assert(
+            blocknumber >= (self._last_game_entropy_block.read().try_into().unwrap()
+                + ENTROPY_BLOCK_TIME.into()),
+            messages::BLOCK_NUMBER_ERROR
+        );
+
         self._game_entropy.write(entropy);
-        self._last_game_entropy_block.write(starknet::get_block_info().unbox().block_number.into());
+        self._last_game_entropy_block.write(blocknumber.into());
     }
 
     fn _get_entropy(self: @ContractState) -> u256 {
