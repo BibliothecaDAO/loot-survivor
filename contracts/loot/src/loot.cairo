@@ -29,18 +29,19 @@ struct Loot {
 
 #[generate_trait]
 impl ImplLoot of ILoot {
-    fn generate_naming_seed(self: Loot, id: u8, entropy: u128) -> u128 {
+    fn generate_naming_seed(self: Loot, entropy: u128) -> u128 {
         let rnd = entropy % NUM_ITEMS;
-        rnd * item_slot_length::get(ImplLoot::get_slot(id)).into() + item_index::get(id).into()
+        rnd * item_slot_length::get(ImplLoot::get_slot(self.id)).into()
+            + item_index::get(self.id).into()
     }
-    fn get_name_prefix(self: Loot, id: u8, entropy: u128) -> u8 {
-        (self.generate_naming_seed(id, entropy) % NamePrefixLength.into() + 1).try_into().unwrap()
+    fn get_name_prefix(self: Loot, entropy: u128) -> u8 {
+        (self.generate_naming_seed(entropy) % NamePrefixLength.into() + 1).try_into().unwrap()
     }
-    fn get_name_suffix(self: Loot, id: u8, entropy: u128) -> u8 {
-        (self.generate_naming_seed(id, entropy) % NameSuffixLength.into() + 1).try_into().unwrap()
+    fn get_name_suffix(self: Loot, entropy: u128) -> u8 {
+        (self.generate_naming_seed(entropy) % NameSuffixLength.into() + 1).try_into().unwrap()
     }
-    fn get_item_suffix(self: Loot, id: u8, entropy: u128) -> u8 {
-        (self.generate_naming_seed(id, entropy) % ItemSuffixLength.into() + 1).try_into().unwrap()
+    fn get_item_suffix(self: Loot, entropy: u128) -> u8 {
+        (self.generate_naming_seed(entropy) % ItemSuffixLength.into() + 1).try_into().unwrap()
     }
     fn get_item(id: u8) -> Loot {
         Loot {
@@ -135,7 +136,7 @@ impl ImplLoot of ILoot {
 fn test_item_suffix() {
     let item_id = ItemId::Katana;
     let item = ImplLoot::get_item(item_id);
-    let katana_item_suffix = item.get_item_suffix(item_id, 1232456);
+    let katana_item_suffix = item.get_item_suffix(1232456);
 
     katana_item_suffix.print();
     assert(katana_item_suffix != ItemSuffix::of_Power, 'of_Power');
@@ -153,19 +154,19 @@ fn test_item_suffix() {
 fn test_item_name_suffix() {
     let item_id = ItemId::Katana;
     let item = ImplLoot::get_item(item_id);
-    let katana_name_suffix = item.get_name_suffix(item_id, 1232456);
+    let katana_name_suffix = item.get_name_suffix(1232456);
 
     assert(katana_name_suffix == 6, 'Grasp');
-    let katana_name_suffix_1 = item.get_name_suffix(item_id, 123456);
+    let katana_name_suffix_1 = item.get_name_suffix(123456);
 
     assert(katana_name_suffix_1 == 6, 'Grasp');
-    let katana_name_suffix_2 = item.get_name_suffix(item_id, 123246);
+    let katana_name_suffix_2 = item.get_name_suffix(123246);
     assert(katana_name_suffix_2 == 6, 'Grasp');
 
-    let katana_name_suffix_3 = item.get_name_suffix(item_id, 122456);
+    let katana_name_suffix_3 = item.get_name_suffix(122456);
     assert(katana_name_suffix_3 == 6, 'Grasp');
 
-    let katana_name_suffix_4 = item.get_name_suffix(item_id, 12346);
+    let katana_name_suffix_4 = item.get_name_suffix(12346);
     assert(katana_name_suffix_4 == 6, 'Grasp');
 }
 
@@ -174,7 +175,7 @@ fn test_item_name_suffix() {
 fn test_item_prefix() {
     let item_id = ItemId::Katana;
     let item = ImplLoot::get_item(item_id);
-    let katana_name_prefix = item.get_name_prefix(item_id, 123456);
+    let katana_name_prefix = item.get_name_prefix(123456);
 
     katana_name_prefix.print();
 
@@ -227,7 +228,7 @@ fn test_item_prefix() {
 
     let demonhide_belt_id = ItemId::DemonhideBelt;
     let item = ImplLoot::get_item(demonhide_belt_id);
-    let demonhide_belt_name_prefix = item.get_name_prefix(demonhide_belt_id, 123456);
+    let demonhide_belt_name_prefix = item.get_name_prefix(123456);
 
     katana_name_prefix.print();
 
