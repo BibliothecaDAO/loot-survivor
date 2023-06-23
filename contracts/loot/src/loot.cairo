@@ -8,7 +8,10 @@ use core::clone::Clone;
 use array::ArrayTrait;
 
 use super::statistics::{item_tier, item_slot, item_type, item_index, item_slot_length};
-use super::statistics::constants::{NamePrefixLength, ItemId, ItemNamePrefix};
+use super::statistics::constants::{
+    NamePrefixLength, ItemId, ItemNamePrefix, NameSuffixLength, ItemSuffixLength, ItemSuffix,
+    NUM_ITEMS
+};
 
 use pack::pack::{pack_value, unpack_value};
 use pack::constants::{pow, mask};
@@ -26,23 +29,19 @@ struct Loot {
 
 #[generate_trait]
 impl ImplLoot of ILoot {
-    fn get_name_prefix(id: u8, entropy: u128) -> u8 {
-        // 
-        let rnd = entropy % 101;
-        let slot = ImplLoot::get_slot(id);
-        let slot_length = item_slot_length::get(slot);
-        let loot_item_index = item_index::get(id);
-
-        let new_rnd: u128 = rnd * slot_length.into() + loot_item_index.into();
-
-        (new_rnd % NamePrefixLength.into() + 1).try_into().unwrap()
+    fn generate_naming_seed(self: Loot, id: u8, entropy: u128) -> u128 {
+        let rnd = entropy % NUM_ITEMS;
+        rnd * item_slot_length::get(ImplLoot::get_slot(id)).into() + item_index::get(id).into()
     }
-    // fn get_name_suffix(id: u8) -> u8 {
-    //     return item_tier::get_name_suffix(id);
-    // }
-    // fn get_item_suffix(id: u8) -> u8 {
-    //     return item_tier::get_item_suffix(id);
-    // }
+    fn get_name_prefix(self: Loot, id: u8, entropy: u128) -> u8 {
+        (self.generate_naming_seed(id, entropy) % NamePrefixLength.into() + 1).try_into().unwrap()
+    }
+    fn get_name_suffix(self: Loot, id: u8, entropy: u128) -> u8 {
+        (self.generate_naming_seed(id, entropy) % NameSuffixLength.into() + 1).try_into().unwrap()
+    }
+    fn get_item_suffix(self: Loot, id: u8, entropy: u128) -> u8 {
+        (self.generate_naming_seed(id, entropy) % ItemSuffixLength.into() + 1).try_into().unwrap()
+    }
     fn get_item(id: u8) -> Loot {
         Loot {
             id: id,
@@ -129,12 +128,53 @@ impl ImplLoot of ILoot {
     }
 }
 
+// tests -----------------------------------------------------------------------//
+
+#[test]
+#[available_gas(1000000)]
+fn test_item_suffix() {
+    let item_id = ItemId::Katana;
+    let item = ImplLoot::get_item(item_id);
+    let katana_item_suffix = item.get_item_suffix(item_id, 1232456);
+
+    katana_item_suffix.print();
+    assert(katana_item_suffix != ItemSuffix::of_Power, 'of_Power');
+    assert(katana_item_suffix != ItemSuffix::of_Titans, 'of_Titans');
+    assert(katana_item_suffix != ItemSuffix::of_Perfection, 'of_Perfection');
+    assert(katana_item_suffix != ItemSuffix::of_Enlightenment, 'of_Enlightenment');
+    assert(katana_item_suffix != ItemSuffix::of_Anger, 'of_Anger');
+    assert(katana_item_suffix != ItemSuffix::of_Fury, 'of_Fury');
+    assert(katana_item_suffix != ItemSuffix::of_the_Fox, 'of_the_Fox');
+    assert(katana_item_suffix != ItemSuffix::of_Reflection, 'of_Reflection');
+}
+
+#[test]
+#[available_gas(1000000)]
+fn test_item_name_suffix() {
+    let item_id = ItemId::Katana;
+    let item = ImplLoot::get_item(item_id);
+    let katana_name_suffix = item.get_name_suffix(item_id, 1232456);
+
+    assert(katana_name_suffix == 6, 'Grasp');
+    let katana_name_suffix_1 = item.get_name_suffix(item_id, 123456);
+
+    assert(katana_name_suffix_1 == 6, 'Grasp');
+    let katana_name_suffix_2 = item.get_name_suffix(item_id, 123246);
+    assert(katana_name_suffix_2 == 6, 'Grasp');
+
+    let katana_name_suffix_3 = item.get_name_suffix(item_id, 122456);
+    assert(katana_name_suffix_3 == 6, 'Grasp');
+
+    let katana_name_suffix_4 = item.get_name_suffix(item_id, 12346);
+    assert(katana_name_suffix_4 == 6, 'Grasp');
+}
+
 #[test]
 #[available_gas(1000000)]
 fn test_item_prefix() {
     let item_id = ItemId::Katana;
     let item = ImplLoot::get_item(item_id);
-    let katana_name_prefix = ImplLoot::get_name_prefix(item_id, 123456);
+    let katana_name_prefix = item.get_name_prefix(item_id, 123456);
 
     katana_name_prefix.print();
 
@@ -184,6 +224,59 @@ fn test_item_prefix() {
     assert(katana_name_prefix != ItemNamePrefix::Vortex, 'Vortex');
     assert(katana_name_prefix != ItemNamePrefix::Wrath, 'Wrath');
     assert(katana_name_prefix != ItemNamePrefix::Lights, 'Lights');
+
+    let demonhide_belt_id = ItemId::DemonhideBelt;
+    let item = ImplLoot::get_item(demonhide_belt_id);
+    let demonhide_belt_name_prefix = item.get_name_prefix(demonhide_belt_id, 123456);
+
+    katana_name_prefix.print();
+
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Agony, 'Agony');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Apocalypse, 'Apocalypse');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Beast, 'Beast');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Behemoth, 'Behemoth');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Blood, 'Blood');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Bramble, 'Bramble');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Brood, 'Brood');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Carrion, 'Carrion');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Chimeric, 'Chimeric');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Corpse, 'Corpse');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Damnation, 'Damnation');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Death, 'Death');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Dire, 'Dire');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Dragon, 'Dragon');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Doom, 'Doom');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Dusk, 'Dusk');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Empyrean, 'Empyrean');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Fate, 'Fate');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Gale, 'Gale');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Ghoul, 'Ghoul');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Glyph, 'Glyph');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Golem, 'Golem');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Hate, 'Hate');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Havoc, 'Havoc');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Horror, 'Horror');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Hypnotic, 'Hypnotic');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Loath, 'Loath');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Maelstrom, 'Maelstrom');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Miracle, 'Miracle');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Morbid, 'Morbid');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Onslaught, 'Onslaught');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Pain, 'Pain');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Phoenix, 'Phoenix');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Plague, 'Plague');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Rapture, 'Rapture');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Rune, 'Rune');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Sol, 'Sol');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Soul, 'Soul');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Spirit, 'Spirit');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Storm, 'Storm');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Torment, 'Torment');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Vengeance, 'Vengeance');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Viper, 'Viper');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Vortex, 'Vortex');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Wrath, 'Wrath');
+    assert(demonhide_belt_name_prefix != ItemNamePrefix::Lights, 'Lights');
 }
 
 #[test]
