@@ -60,7 +60,8 @@ mod Game {
         _counter: u256,
         _lords: ContractAddress,
         _dao: ContractAddress,
-        _scoreboard: LegacyMap::<u256, ContractAddress>,
+        // 1,2,3 // Survivor ID
+        _scoreboard: LegacyMap::<u256, u256>,
         _scores: LegacyMap::<u256, u256>,
     }
 
@@ -94,11 +95,6 @@ mod Game {
         self._dao.write(dao);
 
         _set_entropy(ref self, 1);
-
-        // init the scoreboard with the dao address
-        self._scoreboard.write(1, dao);
-        self._scoreboard.write(2, dao);
-        self._scoreboard.write(3, dao);
     }
 
     // ------------------------------------------ //
@@ -1046,6 +1042,10 @@ mod Game {
         self._game_entropy.read().into()
     }
 
+    fn _get_score_for_adventurer(self: @ContractState, adventurer_id: u256) -> u256 {
+        self._scores.read(adventurer_id)
+    }
+
     fn _check_if_top_score(ref self: ContractState, score: u256) -> bool {
         if score > self._scores.read(3) {
             return true;
@@ -1053,25 +1053,27 @@ mod Game {
         false
     }
 
-    fn _set_scoreboard(ref self: ContractState, player: ContractAddress, score: u256) {
-        let third_place = self._scoreboard.read(3);
+
+    // sets the scoreboard
+    // we set the adventurer id in the scoreboard as we already store the owners address
+    fn _set_scoreboard(ref self: ContractState, adventurer_id: u256, score: u256) {
         let second_place = self._scoreboard.read(2);
         let first_place = self._scoreboard.read(1);
 
         if score > self._scores.read(1) {
             self._scoreboard.write(3, second_place);
             self._scoreboard.write(2, first_place);
-            self._scoreboard.write(1, player);
+            self._scoreboard.write(1, adventurer_id);
             self._scores.write(3, self._scores.read(2));
             self._scores.write(2, self._scores.read(1));
             self._scores.write(1, score);
         } else if score > self._scores.read(2) {
             self._scoreboard.write(3, second_place);
-            self._scoreboard.write(2, player);
+            self._scoreboard.write(2, adventurer_id);
             self._scores.write(3, self._scores.read(2));
             self._scores.write(2, score);
         } else if score > self._scores.read(3) {
-            self._scoreboard.write(3, player);
+            self._scoreboard.write(3, adventurer_id);
             self._scores.write(3, score);
         }
     }
