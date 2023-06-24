@@ -656,8 +656,8 @@ class DiscoveriesFilter:
     dodgedObstacle: Optional[BooleanFilter] = None
     damageTaken: Optional[FeltValueFilter] = None
     damageLocation: Optional[SlotFilter] = None
-    xp_earned_adventurer: Optional[FeltValueFilter] = None
-    xp_earned_items: Optional[FeltValueFilter] = None
+    xpEarnedAdventurer: Optional[FeltValueFilter] = None
+    xpEarnedItems: Optional[FeltValueFilter] = None
     entityId: Optional[FeltValueFilter] = None
     entityLevel: Optional[OrderByInput] = None
     entityHealth: Optional[OrderByInput] = None
@@ -670,14 +670,20 @@ class DiscoveriesFilter:
 class BattlesFilter:
     adventurerId: Optional[FeltValueFilter] = None
     beastId: Optional[FeltValueFilter] = None
-    timestamp: Optional[DateTimeFilter] = None
+    beastHealth: Optional[FeltValueFilter] = None
+    beastLevel: Optional[FeltValueFilter] = None
+    beastNamePrefix: Optional[NamePrefixFilter] = None
+    beastNameSuffix: Optional[NameSuffixFilter] = None
     attacker: Optional[AttackerFilter] = None
     fled: Optional[BooleanFilter] = None
-    damage: Optional[FeltValueFilter] = None
-    targetHealth: Optional[FeltValueFilter] = None
-    xpEarned: Optional[FeltValueFilter] = None
+    damageDealt: Optional[OrderByInput] = None
+    damageTaken: Optional[OrderByInput] = None
+    damageLocation: Optional[OrderByInput] = None
+    xpEarnedAdventurer: Optional[OrderByInput] = None
+    xpEarnedItems: Optional[OrderByInput] = None
     goldEarned: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
+    timestamp: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -693,13 +699,6 @@ class ItemsFilter:
     itemSuffix: Optional[SuffixFilter] = None
     xp: Optional[FeltValueFilter] = None
     lastUpdatedTime: Optional[DateTimeFilter] = None
-
-
-@strawberry.input
-class MarketFilter:
-    caller: Optional[HexValueFilter] = None
-    itemsNumber: Optional[FeltValueFilter] = None
-    timestamp: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -757,8 +756,8 @@ class DiscoveriesOrderByInput:
     dodgedObstacle: Optional[OrderByInput] = None
     damageTaken: Optional[OrderByInput] = None
     damageLocation: Optional[OrderByInput] = None
-    xp_earned_adventurer: Optional[OrderByInput] = None
-    xp_earned_items: Optional[OrderByInput] = None
+    xpEarnedAdventurer: Optional[OrderByInput] = None
+    xpEarnedItems: Optional[OrderByInput] = None
     entityId: Optional[OrderByInput] = None
     entityLevel: Optional[OrderByInput] = None
     entityHealth: Optional[OrderByInput] = None
@@ -771,14 +770,20 @@ class DiscoveriesOrderByInput:
 class BattlesOrderByInput:
     adventurerId: Optional[OrderByInput] = None
     beastId: Optional[OrderByInput] = None
-    timestamp: Optional[OrderByInput] = None
+    beastHealth: Optional[OrderByInput] = None
+    beastLevel: Optional[OrderByInput] = None
+    beastNamePrefix: Optional[OrderByInput] = None
+    beastNameSuffix: Optional[OrderByInput] = None
     attacker: Optional[OrderByInput] = None
     fled: Optional[OrderByInput] = None
-    damage: Optional[OrderByInput] = None
-    targetHealth: Optional[OrderByInput] = None
-    xpEarned: Optional[OrderByInput] = None
+    damageDealt: Optional[OrderByInput] = None
+    damageTaken: Optional[OrderByInput] = None
+    damageLocation: Optional[OrderByInput] = None
+    xpEarnedAdventurer: Optional[OrderByInput] = None
+    xpEarnedItems: Optional[OrderByInput] = None
     goldEarned: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
+    timestamp: Optional[OrderByInput] = None
 
 
 @strawberry.input
@@ -823,11 +828,11 @@ class Adventurer:
     handsId: Optional[FeltValue]
     neckId: Optional[FeltValue]
     ringId: Optional[FeltValue]
-    beastId: Optional[FeltValue]
+    beast: Optional[BeastValue]
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
     gold: Optional[FeltValue]
-    lastUpdated: Optional[datetime]
+    lastUpdatedTime: Optional[datetime]
 
     @classmethod
     def from_mongo(cls, data):
@@ -857,10 +862,10 @@ class Adventurer:
             handsId=data["handsId"],
             neckId=data["neckId"],
             ringId=data["ringId"],
-            beastId=data["beast"],
+            beast=data["beast"],
             statUpgrades=data["statUpgrades"],
             gold=data["gold"],
-            lastUpdated=data["lastUpdated"],
+            lastUpdatedTime=data["lastUpdatedTime"],
         )
 
 
@@ -896,9 +901,9 @@ class Discovery:
     dodgedObstacle: Optional[BooleanValue]
     damageTaken: Optional[FeltValue]
     damageLocation: Optional[SlotValue]
-    xp_earned_adventurer: Optional[FeltValue]
-    xp_earned_items: Optional[FeltValue]
-    entityId: Optional[FeltValue]
+    xpEarnedAdventurer: Optional[FeltValue]
+    xpEarnedItems: Optional[FeltValue]
+    entity: Optional[BeastValue]
     entityLevel: Optional[FeltValue]
     entityHealth: Optional[FeltValue]
     ambushed: Optional[BooleanValue]
@@ -919,7 +924,7 @@ class Discovery:
             damageLocation=data["damageLocation"],
             xpEarnedAdventurer=data["xpEarnedAdventurer"],
             xpEarnedItems=data["xpEarnedItems"],
-            entityId=data["entityId"],
+            entity=data["entity"],
             entityLevel=data["entityLevel"],
             entityHealth=data["entityHealth"],
             ambushed=data["ambushed"],
@@ -931,13 +936,16 @@ class Discovery:
 @strawberry.type
 class Battle:
     adventurerId: Optional[FeltValue]
-    beastId: Optional[FeltValue]
+    beast: Optional[BeastValue]
+    beastHealth: Optional[FeltValue]
+    beastLevel: Optional[FeltValue]
+    beastNamePrefix: Optional[NamePrefixValue]
+    beastNameSuffix: Optional[NameSuffixValue]
     attacker: Optional[AttackerValue]
     fled: Optional[BooleanValue]
     damageDealt: Optional[FeltValue]
     damageTaken: Optional[FeltValue]
     damageLocation: Optional[FeltValue]
-    targetHealth: Optional[FeltValue]
     xpEarnedAdventurer: Optional[FeltValue]
     xpEarnedItems: Optional[FeltValue]
     goldEarned: Optional[FeltValue]
@@ -948,13 +956,16 @@ class Battle:
     def from_mongo(cls, data):
         return cls(
             adventurerId=data["adventurerId"],
-            beastId=data["beastId"],
+            beast=data["beast"],
+            beastHealth=data["beastHealth"],
+            beastLevel=data["beastLevel"],
+            beastNamePrefix=data["beastNamePrefix"],
+            beastNameSuffix=data["beastNameSuffix"],
             attacker=data["attacker"],
             fled=data["fled"],
             damageDealt=data["damageDealt"],
             damageTaken=data["damageTaken"],
             damageLocation=data["damageLocation"],
-            targetHealth=data["targetHealth"],
             xpEarnedAdventurer=data["xpEarnedAdventurer"],
             xpEarnedItems=data["xpEarnedItems"],
             goldEarned=data["goldEarned"],

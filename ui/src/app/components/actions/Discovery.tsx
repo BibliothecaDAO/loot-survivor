@@ -20,7 +20,7 @@ const Discovery = ({ discoveries, beasts }: DiscoveryProps) => {
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
-  const { adventurerContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const { addTransaction } = useTransactionManager();
   const { writeAsync } = useContractWrite({ calls });
@@ -33,9 +33,9 @@ const Discovery = ({ discoveries, beasts }: DiscoveryProps) => {
   });
 
   const exploreTx = {
-    contractAddress: adventurerContract?.address ?? "",
+    contractAddress: gameContract?.address ?? "",
     entrypoint: "explore",
-    calldata: [adventurer?.id ?? "", "0"],
+    calldata: [adventurer?.id ?? ""],
   };
 
   return (
@@ -51,7 +51,7 @@ const Discovery = ({ discoveries, beasts }: DiscoveryProps) => {
                   className="w-full p-2 text-left border border-terminal-green text-sm sm:text-base"
                   key={index}
                 >
-                  <DiscoveryDisplay discoveryData={discovery} beasts={beasts} />
+                  <DiscoveryDisplay discoveryData={discovery} />
                 </div>
               ))}
             </div>

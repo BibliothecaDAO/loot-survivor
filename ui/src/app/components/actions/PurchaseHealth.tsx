@@ -12,14 +12,14 @@ interface PurchaseHealthProps {
 
 const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
   const [healthAmount, setHealthAmount] = useState(1);
-  const { adventurerContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
   const purchaseHealthTx = {
-    contractAddress: adventurerContract?.address ?? "",
+    contractAddress: gameContract?.address ?? "",
     entrypoint: "purchase_health",
-    calldata: [adventurer?.id ?? "", "0", healthAmount],
+    calldata: [adventurer?.id ?? "", healthAmount],
     metadata: `Purchasing ${healthAmount * 10} health`,
   };
 

@@ -29,16 +29,16 @@ export const InventoryRow = ({
   icon,
 }: InventoryRowProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const { adventurerContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
   const handleAddEquipItem = (itemId: any) => {
-    if (adventurerContract) {
+    if (gameContract) {
       const equipItem = {
-        contractAddress: adventurerContract?.address,
+        contractAddress: gameContract?.address,
         entrypoint: "equip_item",
-        calldata: [adventurer?.id, "0", itemId, "0"],
+        calldata: [adventurer?.id, itemId],
         metadata: `Equipping ${itemId}!`,
       };
       addToCalls(equipItem);

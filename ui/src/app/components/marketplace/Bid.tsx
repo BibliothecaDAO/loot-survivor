@@ -21,7 +21,7 @@ export function BidBox({
   const { account } = useAccount();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const { lootMarketArcadeContract } = useContracts();
+  const { gameContract } = useContracts();
   const [bidPrice, setBidPrice] = useState<number | undefined>(undefined);
   const adventurerCharisma = adventurer?.charisma ?? 0;
 
@@ -39,11 +39,11 @@ export function BidBox({
 
   const handleBid = (marketId: number) => {
     if (bidPrice != undefined && actualBid >= basePrice) {
-      if (lootMarketArcadeContract && formatAddress) {
+      if (gameContract && formatAddress) {
         const BidTx = {
-          contractAddress: lootMarketArcadeContract?.address,
+          contractAddress: gameContract?.address,
           entrypoint: "bid_on_item",
-          calldata: [marketId, "0", adventurer?.id, "0", bidPrice],
+          calldata: [marketId, adventurer?.id, bidPrice],
           metadata: `Bidding on ${item.item}`,
         };
         addToCalls(BidTx);

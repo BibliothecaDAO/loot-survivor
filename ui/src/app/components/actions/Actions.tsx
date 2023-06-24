@@ -25,7 +25,7 @@ export default function Actions() {
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
-  const { adventurerContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const { addTransaction } = useTransactionManager();
   const { writeAsync } = useContractWrite({ calls });
@@ -54,9 +54,9 @@ export default function Actions() {
     : [];
 
   const exploreTx = {
-    contractAddress: adventurerContract?.address ?? "",
+    contractAddress: gameContract?.address ?? "",
     entrypoint: "explore",
-    calldata: [adventurer?.id ?? "", "0"],
+    calldata: [adventurer?.id ?? ""],
   };
 
   useCustomQuery(

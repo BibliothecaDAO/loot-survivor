@@ -19,7 +19,7 @@ const Inventory: React.FC = () => {
   const formatAddress = account ? account.address : "0x0";
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const { adventurerContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
@@ -42,11 +42,11 @@ const Inventory: React.FC = () => {
     : [];
 
   const handleAddEquipItem = (item: any) => {
-    if (adventurerContract && formatAddress) {
+    if (gameContract && formatAddress) {
       const equipItem = {
-        contractAddress: adventurerContract?.address,
+        contractAddress: gameContract?.address,
         entrypoint: "equip_item",
-        calldata: [adventurer?.id, "0", item.id, "0"],
+        calldata: [adventurer?.id, item.id],
         metadata: `Equipping ${item.item}!`,
       };
       addToCalls(equipItem);

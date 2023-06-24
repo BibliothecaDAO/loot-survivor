@@ -20,7 +20,7 @@ const Marketplace = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const { lootMarketArcadeContract, adventurerContract } = useContracts();
+  const { gameContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
@@ -106,7 +106,7 @@ const Marketplace = () => {
     : [];
 
   const mintDailyItemsTx = {
-    contractAddress: lootMarketArcadeContract?.address ?? "",
+    contractAddress: gameContract?.address ?? "",
     entrypoint: "mint_daily_items",
     calldata: [],
     metadata: `Minting Loot Items!`,
@@ -124,11 +124,11 @@ const Marketplace = () => {
   };
 
   const handleClaimItem = (item: any) => {
-    if (adventurerContract) {
+    if (gameContract) {
       const claimItemTx = {
-        contractAddress: lootMarketArcadeContract?.address ?? "",
+        contractAddress: gameContract?.address ?? "",
         entrypoint: "claim_item",
-        calldata: [item.marketId, "0", adventurer?.id, "0"],
+        calldata: [item.marketId, adventurer?.id],
         metadata: `Claiming ${item.item}`,
       };
       addToCalls(claimItemTx);

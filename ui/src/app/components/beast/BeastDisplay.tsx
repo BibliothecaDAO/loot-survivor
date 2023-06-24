@@ -1,6 +1,6 @@
 import Image from "next/image";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { getValueFromKey } from "../../lib/utils";
+import { getBeastData, getValueFromKey } from "../../lib/utils";
 import { GameData } from "../GameData";
 import Heart from "../../../../public/heart.svg";
 import Head from "../../../../public/icons/loot/head.svg";
@@ -34,9 +34,12 @@ const getAttackLocationIcon = (beastType: string) => {
 };
 
 export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
-  const gameData = new GameData();
-
-  const beastName = processBeastName(beastData);
+  const beastName = processBeastName(
+    beastData?.beast,
+    beastData?.beastNamePrefix,
+    beastData?.beastNameSuffix
+  );
+  const { tier, attack, armor, image } = getBeastData(beastData?.beast);
 
   return (
     <div className="relative flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
@@ -62,64 +65,37 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
           </p>
           {/* <p className="text-3xl text-terminal-yellow">XP {beastData?.xp}</p> */}
           <p className="text-xl sm:text-3xl text-terminal-yellow">
-            Tier {beastData?.rank}
+            Tier {tier}
           </p>
         </div>
         <div className="flex flex-row justify-center items-center w-full py-4 space-x-2">
           <div className="flex flex-row gap-2 items-center ml-5">
             <EfficacyIcon
-              type={
-                gameData.BEAST_ATTACK_TYPES[
-                  getValueFromKey(gameData.BEAST_TYPES, beastData?.entityId) ??
-                    ""
-                ]
-              }
+              type={attack}
               size="w-6"
               className="self-center w-6 h-6"
             />
-            <p className="text-sm text-center sm:text-xl">
-              {
-                gameData.BEAST_ATTACK_TYPES[
-                  getValueFromKey(gameData.BEAST_TYPES, beastData?.entityId) ??
-                    ""
-                ]
-              }
-            </p>
+            <p className="text-sm text-center sm:text-xl">{attack}</p>
           </div>
           <div className="flex flex-row gap-2 items-center">
-            {beastData?.damageLocation}
+            {getAttackLocationIcon(beastData?.beast)}
             <p className="text-sm text-center sm:text-xl">
-              Attacks {beastData?.damageLocation}
+              Attacks {getAttackLocationIcon(beastData?.beast)}
             </p>
           </div>
           <div className="flex flex-row gap-2 items-center">
             <EfficacyIcon
-              type={
-                gameData.BEAST_ARMOR_TYPES[
-                  getValueFromKey(gameData.BEAST_TYPES, beastData?.entityId) ??
-                    ""
-                ]
-              }
+              type={armor}
               size="w-6"
               className="self-center w-6 h-6"
             />
-            <p className="text-sm text-center sm:text-xl">
-              {
-                gameData.BEAST_ARMOR_TYPES[
-                  getValueFromKey(gameData.BEAST_TYPES, beastData?.entityId) ??
-                    ""
-                ]
-              }
-            </p>
+            <p className="text-sm text-center sm:text-xl">{armor}</p>
           </div>
         </div>
       </div>
       <div className="relative flex-grow w-full h-40 sm:h-full pb-full">
         <Image
-          src={
-            getValueFromKey(gameData.BEAST_IMAGES, beastData?.beast) ||
-            "/monsters/phoenix.png"
-          }
+          src={image}
           alt="monsters"
           fill={true}
           style={{

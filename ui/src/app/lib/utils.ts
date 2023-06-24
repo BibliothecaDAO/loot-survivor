@@ -4,6 +4,7 @@ import BN from "bn.js";
 
 import Realms from "./realms.json";
 import { Item } from "../types";
+import { GameData } from "../components/GameData";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -172,12 +173,35 @@ export function processItemName(item: Item) {
   }
 }
 
-export function processBeastName(beastData: any) {
-  if (beastData?.prefix1 && beastData?.prefix2) {
-    return `"${beastData?.prefix1} ${beastData?.prefix2}" ${beastData?.beast}`;
+export function processBeastName(beast: any, namePrefix: any, nameSuffix: any) {
+  if (namePrefix && nameSuffix) {
+    return `"${namePrefix} ${nameSuffix}" ${beast}`;
   } else {
-    return `${beastData?.beast}`;
+    return `${beast}`;
   }
+}
+
+export function getBeastData(beast: any) {
+  const gameData = new GameData();
+  const tier =
+    gameData.BEAST_TIERS[
+      parseInt(getKeyFromValue(gameData.BEASTS, beast) ?? "")
+    ];
+  const attack =
+    gameData.BEAST_ATTACK_TYPES[
+      gameData.BEAST_TYPES[
+        parseInt(getKeyFromValue(gameData.BEASTS, beast) ?? "")
+      ]
+    ];
+  const armor =
+    gameData.BEAST_ARMOR_TYPES[
+      gameData.BEAST_TYPES[
+        parseInt(getKeyFromValue(gameData.BEASTS, beast) ?? "")
+      ]
+    ];
+  const image =
+    getValueFromKey(gameData.BEAST_IMAGES, beast) || "/monsters/phoenix.png";
+  return { tier, attack, armor, image };
 }
 
 export function getRandomElement(arr: string[]): string {

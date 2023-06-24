@@ -16,6 +16,7 @@ import useCustomQuery from "../../hooks/useCustomQuery";
 import {
   getBattlesByBeast,
   getBeastById,
+  getLastBeastDiscovery,
   getLastBattleByAdventurer,
 } from "../../hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
@@ -26,7 +27,7 @@ export default function Beast() {
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
-  const { beastContract } = useContracts();
+  const { gameContract } = useContracts();
   const { addTransaction } = useTransactionManager();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const { writeAsync } = useContractWrite({ calls });
@@ -39,12 +40,9 @@ export default function Beast() {
   const { data } = useQueriesStore();
 
   useCustomQuery(
-    "beastByIdQuery",
-    getBeastById,
+    "lastBeastQuery",
+    getLastBeastDiscovery,
     {
-      id: adventurer?.beastId
-        ? adventurer?.beastId
-        : data.lastBattleQuery?.battles[0]?.beastId,
       adventurerId: adventurer?.id,
     },
     txAccepted
@@ -59,44 +57,42 @@ export default function Beast() {
     txAccepted
   );
 
-  useCustomQuery(
-    "battlesByBeastQuery",
-    getBattlesByBeast,
-    {
-      adventurerId: adventurer?.id ?? 0,
-      beastId: adventurer?.beastId
-        ? adventurer?.beastId
-        : data.lastBattleQuery?.battles[0]?.beastId,
-    },
-    txAccepted
-  );
-
   console.log(txAccepted);
 
   console.log(
     data.battlesByBeastQuery,
     data.lastBattleQuery,
-    data.beastByIdQuery
+    data.lastBeastQuery
+  );
+
+  let beastData = data.lastBeastQuery
+    ? data.lastBeastQuery.beasts[0]
+    : NullBeast;
+
+  useCustomQuery(
+    "battlesByBeastQuery",
+    getBattlesByBeast,
+    {
+      adventurerId: adventurer?.id ?? 0,
+      beast: beastData?.beast,
+    },
+    txAccepted
   );
 
   const formatBattles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
     : [];
 
-  let beastData = data.beastByIdQuery
-    ? data.beastByIdQuery.beasts[0]
-    : NullBeast;
-
   const attack = {
-    contractAddress: beastContract?.address ?? "",
+    contractAddress: gameContract?.address ?? "",
     entrypoint: "attack",
-    calldata: [adventurer?.beastId ?? "", "0"],
+    calldata: [adventurer?.id ?? ""],
   };
 
   const flee = {
-    contractAddress: beastContract?.address ?? "",
+    contractAddress: gameContract?.address ?? "",
     entrypoint: "flee",
-    calldata: [adventurer?.beastId ?? "", "0"],
+    calldata: [adventurer?.id ?? ""],
   };
 
   const [buttonText, setButtonText] = useState("Flee!");
@@ -170,7 +166,11 @@ export default function Beast() {
 
   const isBeastDead = beastData?.health == "0";
 
-  const beastName = processBeastName(beastData);
+  const beastName = processBeastName(
+    beastData?.beast,
+    beastData?.entityNamePrefix,
+    beastData?.entityNameSuffix
+  );
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",

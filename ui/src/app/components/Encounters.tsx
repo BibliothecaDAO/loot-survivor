@@ -28,7 +28,6 @@ export const Encounters = ({ profile }: EncountersProps) => {
 
   const [loadingData, setLoadingData] = useState(true);
   const [sortedCombined, setSortedCombined] = useState<any[]>([]);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
 
   const { data: beastsByAdventurerData } = useQuery(getBeastsByAdventurer, {
     variables: {
@@ -104,6 +103,47 @@ export const Encounters = ({ profile }: EncountersProps) => {
     currentPage * encountersPerPage
   );
 
+  const discoveryExample = {
+    adventurerId: 1,
+    disoveryType: "Beast",
+    subDiscoveryType: null,
+    outputAmount: null,
+    obstacle: null,
+    obstacleLevel: null,
+    dodgedObstacle: null,
+    damageTaken: 10,
+    damageLocation: null,
+    xpEarnedAdventurer: null,
+    xpEarnedItems: null,
+    entityId: 20,
+    entityLevel: 5,
+    entityHealth: 30,
+    entityNamePrefix: "Agony",
+    entityNameSuffix: "Bane",
+    ambushed: true,
+    discoveryTime: 400,
+    txHash: "0x34gerg34g345g33wes",
+  };
+
+  const battleExample = {
+    adventurerId: 1,
+    beastId: 20,
+    beastLevel: 5,
+    beastHealth: 30,
+    beastNamePrefix: "Agony",
+    beastNameSuffix: "Bane",
+    attacker: "Adventurer",
+    fled: true,
+    damageDealt: 0,
+    damageTaken: 0,
+    damageLocation: 0,
+    xpEarnedAdventurer: 0,
+    xpEarnedItems: 0,
+    goldEarned: 0,
+    txHash: "0x34gerg34g345g33wes",
+    timestamp: 500,
+  };
+
   if (
     !beastsByAdventurerData ||
     !discoveriesByAdventurerData ||
@@ -128,17 +168,18 @@ export const Encounters = ({ profile }: EncountersProps) => {
             loadingData) && <LootIconLoader />}
           <div className="flex flex-col items-center gap-2 overflow-auto">
             {displayEncounters.map((encounter: any, index: number) => {
-              let beastName = processBeastName(encounter.beast);
+              let beastName = processBeastName(
+                encounter?.beast,
+                encounter?.entityNamePrefix,
+                encounter?.entityNameSuffix
+              );
               return (
                 <div
                   className="w-full p-2 text-left border border-terminal-green"
                   key={index}
                 >
                   {encounter.hasOwnProperty("discoveryType") ? (
-                    <DiscoveryDisplay
-                      discoveryData={encounter}
-                      beasts={beasts}
-                    />
+                    <DiscoveryDisplay discoveryData={encounter} />
                   ) : (
                     <BattleDisplay
                       battleData={encounter}

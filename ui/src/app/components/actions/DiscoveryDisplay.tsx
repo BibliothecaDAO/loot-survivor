@@ -1,48 +1,25 @@
 import { useQuery } from "@apollo/client";
-import { getItemsByTokenId } from "../../hooks/graphql/queries";
 import Heart from "../../../../public/heart.svg";
 import Coin from "../../../../public/coin.svg";
-import ItemDisplay from "../LootIcon";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { processBeastName } from "../../lib/utils";
-import { useQueriesStore } from "../../hooks/useQueryStore";
 import { getBattlesByBeast } from "../../hooks/graphql/queries";
 
 interface DiscoveryProps {
   discoveryData: any;
-  beasts: any[];
 }
 
-export const DiscoveryDisplay = ({ discoveryData, beasts }: DiscoveryProps) => {
+export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const { adventurer } = useAdventurerStore();
-  const { data } = useQueriesStore();
-  const { data: itemData } = useQuery(getItemsByTokenId, {
-    variables: { id: discoveryData?.entityId },
-  });
-
-  let beast = beasts.find(
-    (beasts: any) => discoveryData?.entityId === beasts?.id
+  const beastName = processBeastName(
+    discoveryData?.beast,
+    discoveryData?.beastNamePrefix,
+    discoveryData?.beastNameSuffix
   );
-  const beastName = processBeastName(beast);
-
-  const { data: discoveryBattleData } = useQuery(getBattlesByBeast, {
-    variables: { adventurerId: adventurer?.id ?? 0, beastId: beast?.id },
-  });
-
-  let discoveryBattles = discoveryBattleData ? discoveryBattleData.battles : [];
 
   const renderDiscoveryMessage = () => {
-    if (discoveryData?.discoveryType === "Nothing") {
-      return <p>NICE! You discovered {discoveryData.outputAmount} xp!</p>;
-    }
-
     if (discoveryData?.discoveryType === "Beast") {
-      if (
-        discoveryBattles &&
-        discoveryBattles.some(
-          (battle: any) => battle.ambush === true && battle.damage > 0
-        )
-      ) {
+      if (discoveryData?.ambushed) {
         return <p>YIKES! You were ambushed by a {beastName}</p>;
       } else {
         return <p>OH NO! You discovered a {beastName}!</p>;
@@ -50,7 +27,7 @@ export const DiscoveryDisplay = ({ discoveryData, beasts }: DiscoveryProps) => {
     }
 
     if (discoveryData?.discoveryType === "Obstacle") {
-      if (discoveryData.outputAmount === 0) {
+      if (discoveryData?.dodgedObstacle) {
         return (
           <p>
             PHEW! You avoided the{" "}
@@ -95,17 +72,6 @@ export const DiscoveryDisplay = ({ discoveryData, beasts }: DiscoveryProps) => {
         );
       }
 
-      if (discoveryData?.subDiscoveryType === "Loot") {
-        return itemData ? (
-          <div className="flex self-center">
-            <ItemDisplay className="mr-4 " type={itemData.items[0]?.slot} />
-            <p>GREAT! You discovered a loot item, {itemData.items[0]?.item}!</p>
-          </div>
-        ) : (
-          <></>
-        );
-      }
-
       if (discoveryData?.subDiscoveryType === "Health") {
         return (
           <div className="flex self-center">
@@ -113,6 +79,10 @@ export const DiscoveryDisplay = ({ discoveryData, beasts }: DiscoveryProps) => {
             <Heart className="self-center w-5 h-5 fill-current" />
           </div>
         );
+      }
+
+      if (discoveryData?.subDiscoveryType === "XP") {
+        return <p>NICE! You discovered {discoveryData.outputAmount} xp!</p>;
       }
     }
 

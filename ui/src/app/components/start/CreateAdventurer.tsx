@@ -60,7 +60,7 @@ export const CreateAdventurer = ({
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const { writeAsync } = useContractWrite({ calls });
-  const { adventurerContract, lordsContract } = useContracts();
+  const { gameContract, lordsContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const gameData = new GameData();
   const [firstAdventurer, setFirstAdventurer] = useState(false);
@@ -80,19 +80,19 @@ export const CreateAdventurer = ({
     const mintLords = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "mint",
-      calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
+      calldata: [formatAddress, (100 * 10 ** 18).toString()],
     };
     addToCalls(mintLords);
 
     const approveLords = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "approve",
-      calldata: [adventurerContract?.address, (100 * 10 ** 18).toString(), "0"],
+      calldata: [gameContract?.address, (100 * 10 ** 18).toString()],
     };
     addToCalls(approveLords);
 
     const mintAdventurer = {
-      contractAddress: adventurerContract?.address ?? "",
+      contractAddress: gameContract?.address ?? "",
       entrypoint: "mint_with_starting_weapon",
       calldata: [
         formatAddress,

@@ -2,7 +2,7 @@ import TwitterShareButton from "../buttons/TwitterShareButtons";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
-import { processBeastName } from "../../lib/utils";
+import { processBeastName, getBeastData } from "../../lib/utils";
 
 interface BattleDisplayProps {
   battleData: any;
@@ -63,14 +63,17 @@ interface NotificationBattleDisplayProps {
 
 export const NotificationBattleDisplay = ({
   battleData,
-  beast,
   type,
 }: NotificationBattleDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const appUrl = "https://loot-survivor.vercel.app/";
-  const beastName = processBeastName(beast);
-  const beastLevel = beast?.level;
-  const beastTier = beast?.rank;
+  const beastName = processBeastName(
+    battleData?.beast,
+    battleData?.beastNamePrefix,
+    battleData?.beastNameSuffix
+  );
+  const beastLevel = battleData?.beast_level;
+  const { tier, attack, armor, image } = getBeastData(battleData?.beast);
   const { data } = useQueriesStore();
   const rank = getRankFromList(
     adventurer?.id ?? 0,
@@ -116,7 +119,7 @@ export const NotificationBattleDisplay = ({
               {battleData[0]?.damage} damage!
             </p>
             <TwitterShareButton
-              text={`My adventurer just slew a level ${beastLevel} ${beastName} (Tier ${beastTier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+              text={`My adventurer just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
             />
           </div>
         ) : (

@@ -1,7 +1,6 @@
 import { gql } from "@apollo/client";
 
 const ADVENTURER_FIELDS = `
-  beastId
   beastHealth
   charisma
   chestId
@@ -38,16 +37,21 @@ const ADVENTURERS_FRAGMENT = `
 
 const BATTLE_FIELDS = `
   adventurerId
-  ambushed
+  beast
+  beastHealth
+  beastLevel
+  beastNamePrefix
+  beastNameSuffix
   attacker
-  beastId
-  damage
   fled
+  damageDealt
+  damageTaken
+  damageLocation
+  xpEarnedAdventurer
+  xpEarnedItems
   goldEarned
-  targetHealth
-  timestamp
   txHash
-  xpEarned
+  timestamp
 `;
 
 const BATTLES_FRAGMENT = `
@@ -57,29 +61,17 @@ const BATTLES_FRAGMENT = `
 `;
 
 const ITEM_FIELDS = `
-  bag
-  bidder
-  claimedTime
-  createdBlock
-  equippedAdventurerId
-  expiry
-  greatness
-  id
   item
-  lastUpdated
-  marketId
-  material
+  cost
   owner
   ownerAdventurerId
-  prefix1
-  prefix2
-  price
-  rank
-  slot
-  status
-  suffix
-  type
+  equippedAdventurerId
+  purchasedTime
+  namePrefix
+  nameSuffix
+  itemSuffix
   xp
+  lastUpdatedTime
 `;
 
 const ITEMS_FRAGMENT = `
@@ -151,7 +143,7 @@ const getLatestDiscoveries = gql`
 
 const getLastDiscovery = gql`
   ${DISCOVERIES_FRAGMENT}
-  query get_discoveries($adventurerId: FeltValue) {
+  query get_last_discovery($adventurerId: FeltValue) {
     discoveries(
       where: { adventurerId: { eq: $adventurerId } }
       limit: 1
@@ -159,6 +151,17 @@ const getLastDiscovery = gql`
     ) {
       ...DiscoveryFields
     }
+  }
+`;
+
+const getLastBeastDiscovery = gql`
+  ${DISCOVERIES_FRAGMENT}
+  query get_last_beast_query($adventurerId: FeltValue) {
+    discoveries(
+      where: { adventurerId: { eq: $adventurerId }, entity: { gt: 0 } }
+      limit: 1
+      orderBy: { discoveryTime: { desc: true } }
+    )
   }
 `;
 
@@ -399,6 +402,7 @@ export {
   getDiscoveries,
   getLatestDiscoveries,
   getLastDiscovery,
+  getLastBeastDiscovery,
   getDiscoveryByTxHash,
   getAdventurersByOwner,
   getAdventurerById,
