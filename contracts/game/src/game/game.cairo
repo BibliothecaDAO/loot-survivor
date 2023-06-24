@@ -1046,6 +1046,13 @@ mod Game {
         self._game_entropy.read().into()
     }
 
+    fn _check_if_top_score(ref self: ContractState, score: u256) -> bool {
+        if score > self._scores.read(3) {
+            return true;
+        }
+        false
+    }
+
     fn _set_scoreboard(ref self: ContractState, player: ContractAddress, score: u256) {
         let third_place = self._scoreboard.read(3);
         let second_place = self._scoreboard.read(2);
