@@ -59,7 +59,9 @@ mod Game {
         _bag: LegacyMap::<u256, felt252>,
         _counter: u256,
         _lords: ContractAddress,
-        _dao: ContractAddress
+        _dao: ContractAddress,
+        _scoreboard: LegacyMap::<u256, ContractAddress>,
+        _scores: LegacyMap::<u256, u256>,
     }
 
     #[event]
@@ -92,6 +94,11 @@ mod Game {
         self._dao.write(dao);
 
         _set_entropy(ref self, 1);
+
+        // init the scoreboard with the dao address
+        self._scoreboard.write(1, dao);
+        self._scoreboard.write(2, dao);
+        self._scoreboard.write(3, dao);
     }
 
     // ------------------------------------------ //
@@ -1038,6 +1045,30 @@ mod Game {
     fn _get_entropy(self: @ContractState) -> u256 {
         self._game_entropy.read().into()
     }
+
+    fn _set_scoreboard(ref self: ContractState, player: ContractAddress, score: u256) {
+        let third_place = self._scoreboard.read(3);
+        let second_place = self._scoreboard.read(2);
+        let first_place = self._scoreboard.read(1);
+
+        if score > self._scores.read(1) {
+            self._scoreboard.write(3, second_place);
+            self._scoreboard.write(2, first_place);
+            self._scoreboard.write(1, player);
+            self._scores.write(3, self._scores.read(2));
+            self._scores.write(2, self._scores.read(1));
+            self._scores.write(1, score);
+        } else if score > self._scores.read(2) {
+            self._scoreboard.write(3, second_place);
+            self._scoreboard.write(2, player);
+            self._scores.write(3, self._scores.read(2));
+            self._scores.write(2, score);
+        } else if score > self._scores.read(3) {
+            self._scoreboard.write(3, player);
+            self._scores.write(3, score);
+        }
+    }
+
 
     // EVENTS ------------------------------------ //
 
