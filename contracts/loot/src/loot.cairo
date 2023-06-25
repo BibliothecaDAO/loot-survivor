@@ -9,7 +9,7 @@ use super::{
         item_tier, item_slot, item_type, item_index, item_slot_length,
         constants::{
             NamePrefixLength, ItemNameSuffix, ItemId, ItemNamePrefix, NameSuffixLength,
-            ItemSuffixLength, ItemSuffix, NUM_ITEMS
+            ItemSuffixLength, ItemSuffix, NUM_ITEMS, Settings::ITEM_MAX_GREATNESS
         }
     },
     utils::NameUtils::{
@@ -19,8 +19,7 @@ use super::{
 };
 
 use combat::{combat::ImplCombat, constants::CombatEnums::{Type, Tier, Slot}};
-use pack::pack::{pack_value, unpack_value};
-use pack::constants::{pow, mask};
+use pack::{pack::{pack_value, unpack_value}, constants::{pow, mask}};
 
 #[derive(Copy, Drop, Clone, Serde)]
 struct Loot {
@@ -36,31 +35,40 @@ impl ImplLoot of ILoot {
     // @param self The item.
     // @param entropy The entropy.
     // @return The naming seed.
-    fn generate_naming_seed(self: Loot, entropy: u128) -> u128 {
+    fn generate_naming_seed(item_id: u8, entropy: u128) -> u128 {
         let rnd = entropy % NUM_ITEMS;
-        rnd * item_slot_length::get(ImplLoot::get_slot(self.id)).into()
-            + item_index::get(self.id).into()
+        rnd * item_slot_length::get(ImplLoot::get_slot(item_id)).into()
+            + item_index::get(item_id).into()
     }
 
     // get_name_prefix returns the name prefix of an item (Agony, Apocalypse, Armageddon, etc)
-    fn get_name_prefix(self: Loot, entropy: u128) -> u8 {
-        (self.generate_naming_seed(entropy) % NamePrefixLength.into() + 1).try_into().unwrap()
+    // @param self The item.
+    // @param entropy The entropy.
+    // @return The name prefix id.
+    fn get_name_prefix(item_id: u8, entropy: u128) -> u8 {
+        (ImplLoot::generate_naming_seed(item_id, entropy) % NamePrefixLength.into() + 1)
+            .try_into()
+            .unwrap()
     }
 
     // get_name_suffix returns the name suffix of an item (Bane, Root, Bite, etc)
     // @param self The item.
     // @param entropy The entropy.
     // @return The name suffix id.
-    fn get_name_suffix(self: Loot, entropy: u128) -> u8 {
-        (self.generate_naming_seed(entropy) % NameSuffixLength.into() + 1).try_into().unwrap()
+    fn get_name_suffix(item_id: u8, entropy: u128) -> u8 {
+        (ImplLoot::generate_naming_seed(item_id, entropy) % NameSuffixLength.into() + 1)
+            .try_into()
+            .unwrap()
     }
 
     // get_item_suffix returns the item suffix of an item (of_Power, of_Giant, of_Titans, etc)
     // @param self The item.
     // @param entropy The entropy.
     // @return The item suffix id.
-    fn get_item_suffix(self: Loot, entropy: u128) -> u8 {
-        (self.generate_naming_seed(entropy) % ItemSuffixLength.into() + 1).try_into().unwrap()
+    fn get_item_suffix(item_id: u8, entropy: u128) -> u8 {
+        (ImplLoot::generate_naming_seed(item_id, entropy) % ItemSuffixLength.into() + 1)
+            .try_into()
+            .unwrap()
     }
 
     // get_item returns an item from an id
@@ -122,7 +130,15 @@ impl ImplLoot of ILoot {
         // on the item level multiplier setting (currently 4) which means
         // items will level up 4x faster than entities without a multplier
         // such as adventurers
-        return ImplCombat::get_level_from_xp(xp);
+        let level = ImplCombat::get_level_from_xp(xp);
+
+        // if level exceeds max greatness
+        if level > ITEM_MAX_GREATNESS {
+            // return max greatness 
+            return ITEM_MAX_GREATNESS;
+        } else {
+            return level;
+        }
     }
 
     // pack an item for storage
@@ -175,12 +191,8 @@ impl ImplLoot of ILoot {
 // Tests
 //
 #[test]
-#[available_gas(5000000)]
+#[available_gas(4000000)]
 fn test_item_suffix() {
-    let grimoire = ImplLoot::get_item(ItemId::Grimoire);
-    let katana = ImplLoot::get_item(ItemId::Katana);
-    let ghost_wand = ImplLoot::get_item(ItemId::GhostWand);
-
     let mut i: usize = 0;
     loop {
         if i > U8IntoU32::into(ItemSuffixLength) {
@@ -188,17 +200,17 @@ fn test_item_suffix() {
         }
 
         // verify Grimoires only get item suffixes from set 1 (Power, Titans, Perfection, etc)
-        let grimoire_suffix = grimoire.get_item_suffix(U32IntoU128::into(i));
+        let grimoire_suffix = ImplLoot::get_item_suffix(ItemId::Grimoire, U32IntoU128::into(i));
         let valid_grimoire_name = is_item_suffix_set1(grimoire_suffix);
         assert(valid_grimoire_name, 'invalid grimoire item suffix');
 
         // verify Katanas only get item suffixes from set 2 (Giant, Skill, Brilliance, etc)
-        let katana_suffix = katana.get_item_suffix(U32IntoU128::into(i));
+        let katana_suffix = ImplLoot::get_item_suffix(ItemId::Katana, U32IntoU128::into(i));
         let valid_katana_name = is_item_suffix_set2(katana_suffix);
         assert(valid_katana_name, 'invalid katana item suffix');
 
         // verify dragonskin gloves only get suffixes from set 1
-        let ghost_wand_suffix = ghost_wand.get_item_suffix(U32IntoU128::into(i));
+        let ghost_wand_suffix = ImplLoot::get_item_suffix(ItemId::GhostWand, U32IntoU128::into(i));
         let valid_ghost_wand_suffix = is_item_suffix_set1(ghost_wand_suffix);
         assert(valid_ghost_wand_suffix, 'invalid ghost wand suffix');
 
@@ -246,19 +258,23 @@ fn test_item_name_suffix() {
         //
         // Katanas are always 'X Grasp'
         assert(
-            katana.get_name_suffix(U32IntoU128::into(i)) == ItemNameSuffix::Grasp,
+            ImplLoot::get_name_suffix(
+                ItemId::Katana, U32IntoU128::into(i)
+            ) == ItemNameSuffix::Grasp,
             'katana should be grasp'
         );
 
         // Warhammers are always 'X Bane'
         assert(
-            warhammer.get_name_suffix(U32IntoU128::into(i)) == ItemNameSuffix::Bane,
+            ImplLoot::get_name_suffix(
+                ItemId::Warhammer, U32IntoU128::into(i)
+            ) == ItemNameSuffix::Bane,
             'warhammer should be bane'
         );
 
         // Books are always 'X Moon'
         assert(
-            book.get_name_suffix(U32IntoU128::into(i)) == ItemNameSuffix::Moon,
+            ImplLoot::get_name_suffix(ItemId::Book, U32IntoU128::into(i)) == ItemNameSuffix::Moon,
             'book should be moon'
         );
 
@@ -266,19 +282,21 @@ fn test_item_name_suffix() {
         //
         // Divine Robes are always {X Bane, X Song, X Instrument, X Shadow, X Growl, X Form} (set 1)
         assert(
-            is_name_suffix_set1(divine_robe.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set1(
+                ImplLoot::get_name_suffix(ItemId::DivineRobe, U32IntoU128::into(i))
+            ),
             'invalid divine robe name suffix'
         );
 
         // Chain Mail is always {X Root, X Roar, X Glow, X Whisper, X Tear, X Sun} (set 2)
         assert(
-            is_name_suffix_set2(chain_mail.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set2(ImplLoot::get_name_suffix(ItemId::ChainMail, U32IntoU128::into(i))),
             'invalid chain mail name suffix'
         );
 
         // Demon Husks are always {X Bite, X Grasp, X Bender, X Shout, X Peak, X Moon} (set 3)
         assert(
-            is_name_suffix_set3(demon_husk.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set3(ImplLoot::get_name_suffix(ItemId::DemonHusk, U32IntoU128::into(i))),
             'invalid demon husk name suffix'
         );
         //
@@ -287,19 +305,23 @@ fn test_item_name_suffix() {
         //
         // Ancient Helms use name suffix set 1
         assert(
-            is_name_suffix_set1(ancient_helm.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set1(
+                ImplLoot::get_name_suffix(ItemId::AncientHelm, U32IntoU128::into(i))
+            ),
             'invalid war cap name suffix'
         );
 
         // Crown uses name suffix set 2
         assert(
-            is_name_suffix_set2(crown.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set2(ImplLoot::get_name_suffix(ItemId::Crown, U32IntoU128::into(i))),
             'invalid crown name suffix'
         );
 
         // Divine Hood uses name suffix set 3
         assert(
-            is_name_suffix_set3(divine_hood.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set3(
+                ImplLoot::get_name_suffix(ItemId::DivineHood, U32IntoU128::into(i))
+            ),
             'invalid divine hood name suffix'
         );
 
@@ -308,19 +330,25 @@ fn test_item_name_suffix() {
         //
         // Ornate Belt uses name suffix set 1
         assert(
-            is_name_suffix_set1(ornate_belt.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set1(
+                ImplLoot::get_name_suffix(ItemId::OrnateBelt, U32IntoU128::into(i))
+            ),
             'invalid ornate belt suffix'
         );
 
         // Brightsilk Sash uses name suffix set 2
         assert(
-            is_name_suffix_set2(brightsilk_sash.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set2(
+                ImplLoot::get_name_suffix(ItemId::BrightsilkSash, U32IntoU128::into(i))
+            ),
             'invalid brightsilk sash suffix'
         );
 
         // Hard Leather Belt uses name set 3
         assert(
-            is_name_suffix_set3(hard_leather_belt.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set3(
+                ImplLoot::get_name_suffix(ItemId::HardLeatherBelt, U32IntoU128::into(i))
+            ),
             'wrong hard leather belt suffix'
         );
 
@@ -329,19 +357,25 @@ fn test_item_name_suffix() {
         //
         // Holy Graves uses name suffix set 1
         assert(
-            is_name_suffix_set1(holy_greaves.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set1(
+                ImplLoot::get_name_suffix(ItemId::HolyGreaves, U32IntoU128::into(i))
+            ),
             'invalid holy greaves suffix'
         );
 
         // Heavy Boots use name suffix set 2
         assert(
-            is_name_suffix_set2(heavy_boots.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set2(
+                ImplLoot::get_name_suffix(ItemId::HeavyBoots, U32IntoU128::into(i))
+            ),
             'invalid heavy boots suffix'
         );
 
         // Silk Slippers use name suffix set 3
         assert(
-            is_name_suffix_set3(silk_slippers.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set3(
+                ImplLoot::get_name_suffix(ItemId::SilkSlippers, U32IntoU128::into(i))
+            ),
             'invalid silk slippers suffix'
         );
 
@@ -350,19 +384,25 @@ fn test_item_name_suffix() {
         //
         // Holy Gauntlets use name suffix set 1
         assert(
-            is_name_suffix_set1(holy_gauntlets.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set1(
+                ImplLoot::get_name_suffix(ItemId::HolyGauntlets, U32IntoU128::into(i))
+            ),
             'invalid holy gauntlets suffix'
         );
 
         // Linen Gloves use name suffix set 2
         assert(
-            is_name_suffix_set2(linen_gloves.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set2(
+                ImplLoot::get_name_suffix(ItemId::LinenGloves, U32IntoU128::into(i))
+            ),
             'invalid linen gloves suffix'
         );
 
         // Hard Leather Gloves use name suffix set 3
         assert(
-            is_name_suffix_set3(hard_leather_gloves.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set3(
+                ImplLoot::get_name_suffix(ItemId::HardLeatherGloves, U32IntoU128::into(i))
+            ),
             'invalid hard lthr gloves suffix'
         );
 
@@ -371,19 +411,19 @@ fn test_item_name_suffix() {
         //
         // Neckalce uses name suffix set 1
         assert(
-            is_name_suffix_set1(necklace.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set1(ImplLoot::get_name_suffix(ItemId::Necklace, U32IntoU128::into(i))),
             'invalid Necklace name suffix'
         );
 
         // Amulets use name suffix set 2
         assert(
-            is_name_suffix_set2(amulet.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set2(ImplLoot::get_name_suffix(ItemId::Amulet, U32IntoU128::into(i))),
             'invalid amulet name suffix'
         );
 
         // Pendants use name suffix set 3
         assert(
-            is_name_suffix_set3(pendant.get_name_suffix(U32IntoU128::into(i))),
+            is_name_suffix_set3(ImplLoot::get_name_suffix(ItemId::Pendant, U32IntoU128::into(i))),
             'invalid pendant name suffix'
         );
 
@@ -405,10 +445,6 @@ fn test_item_name_suffix() {
 #[test]
 #[available_gas(17000000)]
 fn test_item_prefix() {
-    let divine_robe = ImplLoot::get_item(ItemId::DivineRobe);
-    let katana = ImplLoot::get_item(ItemId::Katana);
-    let holy_chestplate = ImplLoot::get_item(ItemId::HolyChestplate);
-
     let mut i: usize = 0;
     loop {
         if i > U8IntoU32::into(NamePrefixLength) {
@@ -416,17 +452,21 @@ fn test_item_prefix() {
         }
 
         // divine robe uses name prefix set 1
-        let divine_robe_prefix = divine_robe.get_name_prefix(U32IntoU128::into(i));
+        let divine_robe_prefix = ImplLoot::get_name_prefix(
+            ItemId::DivineRobe, U32IntoU128::into(i)
+        );
         let divine_robe_prefix_valid = is_name_prefix_set1(divine_robe_prefix);
         assert(divine_robe_prefix_valid, 'invalid divine robe belt prefix');
 
         // holy chest plate uses name prefix set 2
-        let holy_chestplate_prefix = holy_chestplate.get_name_prefix(U32IntoU128::into(i));
+        let holy_chestplate_prefix = ImplLoot::get_name_prefix(
+            ItemId::Katana, U32IntoU128::into(i)
+        );
         let holy_chestplate_prefix_valid = is_name_prefix_set2(holy_chestplate_prefix);
         assert(holy_chestplate_prefix_valid, 'invalid holy chestplate prefix');
 
         // katana uses name prefix set 3
-        let katana_prefix = katana.get_name_prefix(U32IntoU128::into(i));
+        let katana_prefix = ImplLoot::get_name_prefix(ItemId::HolyChestplate, U32IntoU128::into(i));
         let katana_prefix_valid = is_name_prefix_set3(katana_prefix);
         assert(katana_prefix_valid, 'invalid katana prefix');
 

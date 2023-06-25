@@ -1,9 +1,7 @@
 use option::OptionTrait;
 use integer::{U8IntoU16, U128TryIntoU8};
 use super::constants::{ObstacleId, ObstacleSettings};
-use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
-use combat::constants::CombatSettings;
-use combat::constants::CombatEnums::{Type, Tier, Slot};
+use combat::{combat::{ImplCombat, CombatSpec, SpecialPowers}, constants::{CombatSettings, CombatEnums::{Type, Tier, Slot}}};
 
 #[derive(Drop, Copy)]
 struct Obstacle {
@@ -20,7 +18,7 @@ trait ObstacleTrait {
     fn get_obstacle(id: u8, level: u8) -> Obstacle;
     fn get_random_level(adventurer_level: u8, entropy: u128) -> u8;
     fn obstacle_encounter_id(entropy: u128) -> u8;
-    fn get_xp_reward(obstacle: Obstacle) -> u16;
+    fn get_xp_reward(self: Obstacle) -> u16;
     fn get_tier(id: u8) -> Tier;
     fn get_type(id: u8) -> Type;
 }
@@ -181,8 +179,8 @@ impl ImplObstacle of ObstacleTrait {
     // get_xp_reward returns the xp reward from encountering the obstacle
     // @param obstacle: Obstacle - the obstacle
     // @return u16 - the xp reward
-    fn get_xp_reward(obstacle: Obstacle) -> u16 {
-        ImplCombat::get_xp_reward(obstacle.combat_specs)
+    fn get_xp_reward(self: Obstacle) -> u16 {
+        ImplCombat::get_xp_reward(self.combat_specs)
     }
 
     // dodged returns true if the adventurer dodged the obstacle
