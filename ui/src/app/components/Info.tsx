@@ -75,17 +75,13 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
               </div>
 
               <div className="flex justify-between w-full text-lg sm:text-2xl">
-                <LevelBar
-                  xp={formatAdventurer.xp}
-                  level={formatAdventurer.level}
-                />
+                <LevelBar xp={formatAdventurer.xp} />
               </div>
 
               <div className="flex flex-row justify-between">
                 <div className="flex flex-col">
                   <div className="">
                     <ItemDisplay
-                      type={"weapon"}
                       item={items.find(
                         (item: any) => item.id == formatAdventurer.weaponId
                       )}
@@ -93,7 +89,6 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   </div>
                   <div className="">
                     <ItemDisplay
-                      type="head"
                       item={items.find(
                         (item: any) => item.id == formatAdventurer.headId
                       )}
@@ -101,7 +96,6 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   </div>
                   <div className="">
                     <ItemDisplay
-                      type="chest"
                       item={items.find(
                         (item: any) => item.id == formatAdventurer.chestId
                       )}
@@ -109,7 +103,6 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   </div>
                   <div className="">
                     <ItemDisplay
-                      type="hands"
                       item={items.find(
                         (item: any) => item.id == formatAdventurer.handsId
                       )}
@@ -117,7 +110,6 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   </div>
                   <div className="">
                     <ItemDisplay
-                      type="waist"
                       item={items.find(
                         (item: any) => item.id == formatAdventurer.waistId
                       )}
@@ -125,7 +117,6 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   </div>
                   <div className="">
                     <ItemDisplay
-                      type="feet"
                       item={items.find(
                         (item: any) => item.id == formatAdventurer.feetId
                       )}
@@ -133,7 +124,6 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   </div>
                   <div className="">
                     <ItemDisplay
-                      type="neck"
                       item={items.find(
                         (item: any) => item.id == formatAdventurer.neckId
                       )}
@@ -141,7 +131,6 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   </div>
                   <div className="">
                     <ItemDisplay
-                      type="ring"
                       item={items.find(
                         (item: any) => item.id == formatAdventurer.ringId
                       )}

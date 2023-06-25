@@ -55,28 +55,17 @@ export interface Adventurer {
 }
 
 export interface Item {
-  id?: number; // item id 1 - 100
   item?: string; // name
-  slot?: string; // weapon, head, chest, etc
-  type?: string; // weapon.blade, armor.metal, jewelry.ring
-  material?: number; // the material of the item
-  rank?: number; // 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
-  prefix1?: number; // First part of the name prefix (i.e Demon)
-  prefix2?: number; // Second part of the name prefix (i.e Grasp)
-  suffix?: number; // Stored value if item has a Suffix (i.e of Power)
-  greatness: number; // Item greatness
-  createdBlock?: number; // Timestamp of when item was created
-  xp?: number; // Experience of the item
-  adventurerId?: number; // Adventurer ID IF equipped
-  bag?: number; // Bag ID IF bagged
-  claimedTime?: Date;
-  bidder?: number;
-  expiry?: Date;
-  status?: string;
-  price?: number;
+  cost?: number; // purchase cost for the item
   owner?: string;
-  marketId?: number;
-  level?: number;
+  ownerAdventurerId?: number; // Adventurer ID IF equipped
+  equippedAdventurerId?: number; // Adventurer ID IF equipped
+  purchasedTime: Date;
+  namePrefix?: number; // First part of the name prefix (i.e Demon)
+  nameSuffix?: number; // Second part of the name prefix (i.e Grasp)
+  itemSuffix?: number; // Stored value if item has a Suffix (i.e of Power)
+  xp?: number; // Experience of the item
+  lastUpdatedTime: Date;
 }
 
 export interface MarketItem {

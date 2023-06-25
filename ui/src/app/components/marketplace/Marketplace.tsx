@@ -6,7 +6,7 @@ import {
   getAdventurersInList,
   getUnclaimedItemsByAdventurer,
 } from "../../hooks/graphql/queries";
-import { UTCClock, Countdown } from "../Clock";
+import { UTCClock, Countdown } from "./Clock";
 import { convertTime } from "../../lib/utils";
 import MarketplaceRow from "./MarketplaceRow";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
@@ -123,39 +123,11 @@ const Marketplace = () => {
     );
   };
 
-  const handleClaimItem = (item: any) => {
-    if (gameContract) {
-      const claimItemTx = {
-        contractAddress: gameContract?.address ?? "",
-        entrypoint: "claim_item",
-        calldata: [item.marketId, adventurer?.id],
-        metadata: `Claiming ${item.item}`,
-      };
-      addToCalls(claimItemTx);
-    }
-  };
-
-  const claimAllItems = () => {
-    const claimableItems = getClaimableItems();
-    claimableItems.forEach((item: any) => {
-      handleClaimItem(item);
-    });
-  };
-
   const headingToKeyMapping: { [key: string]: string } = {
-    "Market Id": "marketId",
     Item: "item",
     Tier: "rank",
     Slot: "slot",
     Type: "type",
-    Material: "material",
-    Greatness: "greatness",
-    XP: "xp",
-    Price: "price",
-    Bidder: "bidder",
-    "Bidding Ends": "expiry",
-    Status: "status",
-    "Claimed (UTC)": "claimedTime",
   };
 
   const handleSort = (heading: string) => {
@@ -230,41 +202,15 @@ const Marketplace = () => {
     }
   }, [selectedIndex]);
 
-  const headings = [
-    "Market Id",
-    "Item",
-    "Tier",
-    "Slot",
-    "Type",
-    "Material",
-    "Greatness",
-    "XP",
-    "Price",
-    "Bidder",
-    "Bidding Ends",
-    "Status",
-    "Claimed (UTC)",
-    "Actions",
-  ];
+  const headings = ["Item", "Tier", "Slot", "Type", "Price", "Actions"];
 
   const sum = calls
-    .filter((call) => call.entrypoint === "bid_on_item")
+    .filter((call) => call.entrypoint === "buy_item")
     .reduce((accumulator, current) => {
       const value = current.calldata[4];
       const parsedValue = value ? parseInt(value.toString(), 10) : 0;
       return accumulator + (isNaN(parsedValue) ? 0 : parsedValue);
     }, 0);
-
-  const currentTimezoneOffsetMinutes = new Date().getTimezoneOffset() * -1;
-
-  const nextMint = data.latestMarketItemsNumberQuery?.market[0]?.timestamp
-    ? new Date(
-        new Date(
-          data.latestMarketItemsNumberQuery?.market[0]?.timestamp
-        ).getTime() +
-          (3 * 60 + currentTimezoneOffsetMinutes) * 60 * 1000
-      )
-    : undefined;
 
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
 
@@ -273,30 +219,6 @@ const Marketplace = () => {
       {adventurer?.level != 1 ? (
         <div className="w-full">
           <div className="flex flex-row justify-between m-1 flex-wrap">
-            <div className="flex flex-row align-items flex-wrap">
-              <Button
-                onClick={() => addToCalls(mintDailyItemsTx)}
-                disabled={nextMint && currentTime < nextMint.getTime()}
-              >
-                Mint daily items
-              </Button>
-              <Button
-                onClick={claimAllItems}
-                disabled={claimExists() || getClaimableItems().length == 0}
-              >
-                Claim All
-              </Button>
-
-              <div className="self-center ml-1">
-                <Countdown
-                  countingMessage={
-                    nextMint ? "Next mint in:" : "No items minted yet!"
-                  }
-                  finishedMessage="Items can be minted!"
-                  targetTime={nextMint}
-                />
-              </div>
-            </div>
             <div>
               <span className="flex text-xl text-terminal-yellow">
                 <Coin className="self-center w-5 h-5 fill-current" />
@@ -310,7 +232,6 @@ const Marketplace = () => {
               <Coin className="w-5 h-5 fill-current text-terminal-yellow" />{" "}
               {"to bids)"}
             </span>
-            <UTCClock />
           </div>
           <div className="w-full overflow-y-auto border h-[650px] border-terminal-green table-scroll">
             {isLoading.latestMarketItemsQuery && (

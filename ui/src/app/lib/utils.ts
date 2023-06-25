@@ -159,18 +159,35 @@ export function getOrdinalSuffix(n: number): string {
   return n + "th";
 }
 
+export function calculateLevel(xp: number) {
+  return Math.floor(Math.sqrt(xp) / 2) + 1;
+}
+
 export function processItemName(item: Item) {
   if (item) {
-    if (item.prefix1 && item.suffix && item.greatness >= 20) {
-      return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix} +1`;
-    } else if (item.prefix1 && item.suffix) {
-      return `${item.prefix1} ${item.prefix2} ${item.item} ${item.suffix}`;
-    } else if (item.suffix) {
-      return `${item.item} ${item.suffix}`;
+    if (
+      item.namePrefix &&
+      item.nameSuffix &&
+      calculateLevel(item.xp ?? 0) >= 20
+    ) {
+      return `${item.namePrefix} ${item.nameSuffix} ${item.item} ${item.itemSuffix} +1`;
+    } else if (item.namePrefix && item.itemSuffix) {
+      return `${item.namePrefix} ${item.nameSuffix} ${item.item} ${item.itemSuffix}`;
+    } else if (item.itemSuffix) {
+      return `${item.item} ${item.itemSuffix}`;
     } else {
       return `${item.item}`;
     }
   }
+}
+
+export function getItemData(item: any) {
+  const gameData = new GameData();
+  const tier = gameData.ITEM_TIERS[item];
+  const type =
+    gameData.ITEM_TYPES[parseInt(getKeyFromValue(gameData.ITEMS, item) ?? "")];
+  const slot = gameData.ITEM_SLOTS[item];
+  return { tier, type, slot };
 }
 
 export function processBeastName(beast: any, namePrefix: any, nameSuffix: any) {

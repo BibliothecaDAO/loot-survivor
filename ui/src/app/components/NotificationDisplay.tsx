@@ -117,24 +117,23 @@ const processAnimation = (
 export const processNotification = (
   type: string,
   notificationData: any,
-  adventurer: any,
   battles: any[],
-  hasBeast: boolean,
-  beast: any,
-  beasts: any[]
+  hasBeast: boolean
 ) => {
+  const beastName = processBeastName(
+    battles[0]?.beast,
+    battles[0]?.beastNamePrefix,
+    battles[0]?.beastNameSuffix
+  );
   if (type == "Attack" || type == "Flee") {
     return (
       <NotificationBattleDisplay
         battleData={notificationData?.data ? notificationData?.data : []}
-        beast={notificationData.beast ? notificationData.beast : ""}
         type={type}
       />
     );
   } else if (type == "Explore") {
-    return (
-      <DiscoveryDisplay discoveryData={notificationData} beasts={beasts} />
-    );
+    return <DiscoveryDisplay discoveryData={notificationData} />;
   } else if (notificationData == "Rejected") {
     return (
       <p className="text-lg">
@@ -150,7 +149,7 @@ export const processNotification = (
             if (
               noti.startsWith("You equipped") &&
               battles[0]?.attacker == "Beast" &&
-              battles[0]?.targetHealth == 0
+              battles[0]?.beastHealth == 0
             ) {
               return (
                 <p key={index} className="text-lg">
@@ -161,25 +160,25 @@ export const processNotification = (
             } else if (
               noti.startsWith("You equipped") &&
               battles[0]?.attacker == "Beast" &&
-              battles[0]?.targetHealth > 0 &&
-              battles[0]?.damage > 0
+              battles[0]?.beastHealth > 0 &&
+              battles[0]?.damageTaken > 0
             ) {
               return (
                 <p key={index} className="text-lg">
-                  You were attacked by the {processBeastName(beast)} after
-                  equipping an item taking {battles[0].damage}!
+                  You were attacked by the {beastName} after equipping an item
+                  taking {battles[0].damageTaken}!
                 </p>
               );
             } else if (
               noti.startsWith("You equipped") &&
               battles[0]?.attacker == "Beast" &&
               battles[0]?.targetHealth > 0 &&
-              battles[0]?.damage == 0
+              battles[0]?.damageTaken == 0
             ) {
               return (
                 <p key={index} className="text-lg">
-                  You were attacked by the {processBeastName(beast)} after
-                  equipping an item but defended it!
+                  You were attacked by the {beastName} after equipping an item
+                  but defended it!
                 </p>
               );
             }
@@ -212,7 +211,6 @@ export const NotificationDisplay = ({
   const beasts = data.beastsByAdventurerQuery
     ? data.beastsByAdventurerQuery.beasts
     : [];
-  const beast = data.beastByIdQuery ? data.beastByIdQuery.beasts[0] : [];
   const animation = processAnimation(
     type,
     notificationData,
@@ -224,11 +222,8 @@ export const NotificationDisplay = ({
   const notification = processNotification(
     type,
     notificationData,
-    adventurer,
     battles,
-    hasBeast,
-    beast,
-    beasts
+    hasBeast
   );
 
   const [setSound, setSoundState] = useState(soundSelector.click);

@@ -57,7 +57,6 @@ export const BattleDisplay = ({
 
 interface NotificationBattleDisplayProps {
   battleData: any;
-  beast: any;
   type: string;
 }
 
@@ -89,34 +88,34 @@ export const NotificationBattleDisplay = ({
         type == "Flee" &&
         battleData.length == 1 &&
         battleData[0]?.attacker == "Beast" &&
-        battleData[0]?.targetHealth > 0 ? (
+        battleData[0]?.beastHealth > 0 ? (
         <p>
           You failed to flee the {beastName ? beastName : ""} and were attacked
-          taking {battleData[0]?.damage} damage!{" "}
+          taking {battleData[0]?.damageTaken} damage!{" "}
         </p>
       ) : isArray &&
         type == "Flee" &&
         battleData.length == 1 &&
         battleData[0]?.attacker == "Beast" &&
-        battleData[0]?.targetHealth == 0 ? (
+        adventurer?.health == 0 ? (
         <p>
           You were killed trying to flee the {beastName ? beastName : ""}
-          taking {battleData[0]?.damage} damage!{" "}
+          taking {battleData[0]?.damageTaken} damage!{" "}
         </p>
       ) : (
         battleData[0]?.attacker == "Adventurer" &&
-        (battleData[0]?.targetHealth > 0 && battleData[1]?.targetHealth > 0 ? (
+        (battleData[0]?.beastHealth > 0 && battleData[1]?.beastHealth > 0 ? (
           <p>
             You attacked the {beastName ? beastName : ""} with a mighty strike
-            and dealt {battleData[0]?.damage} damage! They counterattacked for{" "}
-            {battleData[1]?.damage} damage!
+            and dealt {battleData[0]?.damageDamage} damage! They counterattacked
+            for {battleData[1]?.damageTaken} damage!
           </p>
         ) : battleData[0]?.attacker == "Adventurer" &&
-          battleData[0]?.targetHealth == 0 ? (
+          battleData[0]?.beastHealth == 0 ? (
           <div className="flex flex-col gap-2 items-center justify-center">
             <p>
               You slayed the {beastName ? beastName : ""} after inflicting{" "}
-              {battleData[0]?.damage} damage!
+              {battleData[0]?.damageDealt} damage!
             </p>
             <TwitterShareButton
               text={`My adventurer just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
@@ -125,7 +124,7 @@ export const NotificationBattleDisplay = ({
         ) : (
           <p>
             You were killed by the {beastName ? beastName : ""} taking{" "}
-            {battleData[1]?.damage} damage!
+            {battleData[1]?.damageTaken} damage!
           </p>
         ))
       )}

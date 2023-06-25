@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { formatTime as libFormatTime } from "../lib/utils";
+import { formatTime as libFormatTime } from "../../lib/utils";
 
 export const UTCClock: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());

@@ -1,10 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../buttons/Button";
-import { BidBox } from "./Bid";
 import { useContracts } from "../../hooks/useContracts";
-import { formatTime } from "../../lib/utils";
-import { convertTime } from "../../lib/utils";
-import { Countdown } from "../Clock";
+import { getItemData } from "../../lib/utils";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import LootIcon from "../LootIcon";
@@ -34,9 +31,9 @@ const MarketplaceRow = ({
   calculatedNewGold,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
-  const { lootMarketArcadeContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const [showBidBox, setShowBidBox] = useState(-1);
+  const [showEquipQ, setShowEquipQ] = useState(false);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { hashes, transactions } = useTransactionManager();
@@ -45,46 +42,30 @@ const MarketplaceRow = ({
   const transactingMarketIds = (transactions[0]?.metadata as Metadata)
     ?.marketIds;
 
-  const currentTime = new Date().getTime();
-
-  const bidExists = (marketId: number) => {
+  const purchaseExists = (itemId: number) => {
     return calls.some(
-      (call: any) =>
-        call.entrypoint == "bid_on_item" && call.calldata[0] == marketId
+      (call: any) => call.entrypoint == "buy_item" && call.calldata[1] == itemId
     );
   };
 
-  const claimExists = (marketId: number) => {
-    return calls.some(
-      (call: any) =>
-        call.entrypoint == "claim_item" && call.calldata[0] == marketId
-    );
-  };
-
-  const checkBidBalance = () => {
+  const checkPurchaseBalance = () => {
     if (adventurer?.gold) {
       const sum = calls
-        .filter((call) => call.entrypoint == "bid_on_item")
+        .filter((call) => call.entrypoint == "buy_item")
         .reduce((accumulator, current) => {
-          const value = current.calldata[4];
-          const parsedValue = value ? parseInt(value.toString(), 10) : 0;
-          return accumulator + (isNaN(parsedValue) ? 0 : parsedValue);
+          return accumulator + (isNaN(item.price) ? 0 : item.price);
         }, 0);
       return sum >= adventurer.gold;
     }
     return true;
   };
 
-  const checkTransacting = (marketId: number) => {
+  const checkTransacting = (itemId: number) => {
     if (txData?.status == "RECEIVED" || txData?.status == "PENDING") {
-      return transactingMarketIds?.includes(marketId);
+      return transactingMarketIds?.includes(itemId);
     } else {
       return false;
     }
-  };
-
-  const checkBidder = (bidder: number) => {
-    return adventurer?.id === bidder;
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
@@ -119,24 +100,21 @@ const MarketplaceRow = ({
     }
   }, [isActive]);
 
-  const checkExpired = () => {
-    const currentDate = new Date();
-    const itemExpiryDate = new Date(convertTime(item.expiry));
-
-    return itemExpiryDate < currentDate;
-  };
-
-  const status = () => {
-    if (item.status == "Closed" && item.expiry == null) {
-      return "No bids";
-    } else if (item.expiry == null) {
-      return "Open";
-    } else if (checkExpired()) {
-      return "Closed";
-    } else {
-      return "Bids";
+  const handlePurchase = (itemId: number, equip: boolean) => {
+    if (gameContract) {
+      const PurchaseTx = {
+        contractAddress: gameContract?.address,
+        entrypoint: "buy_item",
+        calldata: [adventurer?.id, itemId, equip],
+        metadata: `Bidding on ${item.item}`,
+      };
+      addToCalls(PurchaseTx);
+      // Place bid logic
+      close();
     }
   };
+
+  const { tier, type, slot } = getItemData(item.item);
 
   return (
     <tr
@@ -145,92 +123,29 @@ const MarketplaceRow = ({
         (selectedIndex === index + 1 ? " bg-terminal-black" : "")
       }
     >
-      <td className="text-center">{item.marketId}</td>
       <td className="text-center">{item.item}</td>
-      <td className="text-center">{item.rank}</td>
+      <td className="text-center">{tier}</td>
       <td className="flex justify-center space-x-1 text-center ">
         {" "}
-        <LootIcon className="self-center pt-3" type={item.slot} />{" "}
+        <LootIcon className="self-center pt-3" type={slot} />{" "}
       </td>
-      <td className="text-center">{item.type}</td>
-      <td className="text-center">{item?.material || "Generic"}</td>
-      <td className="text-center">{item.greatness}</td>
-      <td className="text-center">{item.xp}</td>
+      <td className="text-center">{type}</td>
       <td className="text-center">{item.price}</td>
-      <td className="text-center">
-        {item.bidder
-          ? `${
-              adventurers.find(
-                (adventurer: any) => adventurer.id == item.bidder
-              )?.name
-            } - ${item.bidder}`
-          : ""}
-      </td>
-      <td className="text-center">
-        {item.expiry ? (
-          <Countdown
-            countingMessage=""
-            finishedMessage="Expired"
-            targetTime={new Date(convertTime(item.expiry))}
-          />
-        ) : (
-          ""
-        )}
-      </td>
 
-      <td className="text-center">{status()}</td>
-      <td className="text-center">
-        {item.claimedTime
-          ? formatTime(new Date(convertTime(item.claimedTime)))
-          : ""}
-      </td>
       <td className="w-64 text-center">
-        {showBidBox == index ? (
-          <BidBox
-            close={() => setShowBidBox(-1)}
-            marketId={item.marketId}
-            item={item}
-            calculatedNewGold={calculatedNewGold}
-          />
-        ) : (
-          <div>
-            <Button
-              onClick={() => setShowBidBox(index)}
-              disabled={
-                checkBidBalance() ||
-                item.claimedTime ||
-                (item.expiry && checkExpired()) ||
-                bidExists(item.marketId) ||
-                checkTransacting(item.marketId)
-                // checkBidder(item.bidder)
-              }
-              className={bidExists(item.marketId) ? "bg-white" : ""}
-            >
-              bid
-            </Button>
-            <Button
-              onClick={async () => {
-                const claimItemTx = {
-                  contractAddress: lootMarketArcadeContract?.address ?? "",
-                  entrypoint: "claim_item",
-                  calldata: [item.marketId, "0", adventurer?.id, "0"],
-                  metadata: `Claiming ${item.item}`,
-                };
-                addToCalls(claimItemTx);
-              }}
-              disabled={
-                item.claimedTime ||
-                claimExists(item.marketId) ||
-                !item.expiry ||
-                convertTime(item.expiry) > currentTime ||
-                adventurer?.id != item.bidder ||
-                checkTransacting(item.marketId)
-              }
-              className={claimExists(item.marketId) ? "" : ""}
-            >
-              claim
-            </Button>
+        {showEquipQ ? (
+          <div className="flex flex-row">
+            <Button onClick={() => handlePurchase(item.item, true)}>Yes</Button>
+            <Button onClick={() => handlePurchase(item.item, false)}>No</Button>
           </div>
+        ) : (
+          <Button
+            onClick={() => setShowEquipQ(true)}
+            disabled={checkPurchaseBalance() || checkTransacting(item.item)}
+            className={checkTransacting(item.item) ? "bg-white" : ""}
+          >
+            Purchase
+          </Button>
         )}
       </td>
     </tr>

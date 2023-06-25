@@ -1,19 +1,20 @@
 import React from "react";
+import { calculateLevel } from "../lib/utils";
 
 interface LevelBarProps {
   xp: number;
-  level: number;
 }
 
-const calculateProgress = (xp: number, level: number): number => {
-  const currentLevelXP = Math.floor(((level - 1) * 10) / 5) ** 2;
-  const nextLevelXP = Math.floor((level * 10) / 5) ** 2;
+const calculateProgress = (xp: number): number => {
+  const currentLevelXP = Math.floor(((calculateLevel(xp) - 1) * 10) / 5) ** 2;
+  const nextLevelXP = Math.floor((calculateLevel(xp) * 10) / 5) ** 2;
 
   return ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
 };
 
-const LevelBar: React.FC<LevelBarProps> = ({ xp, level }) => {
-  const progress = calculateProgress(xp, level);
+const LevelBar: React.FC<LevelBarProps> = ({ xp }) => {
+  const progress = calculateProgress(xp);
+  const level = calculateLevel(xp);
 
   return (
     <div className="w-full py-2 text-terminal-green">

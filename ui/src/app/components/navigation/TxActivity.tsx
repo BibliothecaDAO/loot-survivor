@@ -66,7 +66,7 @@ export const TxActivity = () => {
           refetch("discoveryByTxHashQuery");
           refetch("latestDiscoveriesQuery");
           refetch("adventurerByIdQuery");
-          refetch("beastByIdQuery");
+          refetch("lastBeastBattleQuery");
           stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
           setTxAccepted(false);
           resetDataUpdated(loadingQuery);

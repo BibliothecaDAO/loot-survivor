@@ -213,28 +213,6 @@ export const Encounters = ({ profile }: EncountersProps) => {
             {1}
           </Button>
 
-          {/* {currentPage > 3 && "..."}
-
-          {(
-            Array.from({ length: Math.min(5, totalPages - 2) }, (_, i) => {
-              const startPage = Math.max(2, currentPage - 2);
-              const endPage = Math.min(totalPages - 1, currentPage + 2);
-              const pageNum = startPage + i;
-              return pageNum <= endPage ? pageNum : null;
-            }).filter((pageNum) => pageNum !== null) as number[]
-          ).map((pageNum: number) => (
-            <Button
-              variant={"outline"}
-              key={pageNum}
-              onClick={() => handleClick(pageNum)}
-              className={currentPage === pageNum ? "animate-pulse" : ""}
-            >
-              {pageNum}
-            </Button>
-          ))}
-
-          {currentPage < totalPages - 2 && "..."} */}
-
           <Button
             variant={"outline"}
             key={totalPages}
