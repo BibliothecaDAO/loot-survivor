@@ -5,7 +5,6 @@ export type QueryKey =
   | "lastBattleQuery"
   | "lastBeastBattleQuery"
   | "battlesByAdventurerQuery"
-  | "battlesByBeastQuery"
   | "battlesByTxHashQuery"
   | "lastBeastQuery"
   | "discoveriesQuery"
@@ -16,9 +15,6 @@ export type QueryKey =
   | "leaderboardByIdQuery"
   | "adventurersByGoldQuery"
   | "adventurersByXPQuery"
-  | "unclaimedItemsByAdventurerQuery"
-  | "latestMarketItemsNumberQuery"
-  | "latestMarketItemsQuery"
   | "adventurersInListQuery"
   | "adventurersInListByXpQuery"
   | "itemsByAdventurerQuery"
@@ -44,7 +40,6 @@ const initialData: Record<QueryKey, any> = {
   lastBattleQuery: null,
   lastBeastBattleQuery: null,
   battlesByAdventurerQuery: null,
-  battlesByBeastQuery: null,
   battlesByTxHashQuery: null,
   lastBeastQuery: null,
   discoveriesQuery: null,
@@ -55,9 +50,6 @@ const initialData: Record<QueryKey, any> = {
   leaderboardByIdQuery: null,
   adventurersByGoldQuery: null,
   adventurersByXPQuery: null,
-  unclaimedItemsByAdventurerQuery: null,
-  latestMarketItemsNumberQuery: null,
-  latestMarketItemsQuery: null,
   adventurersInListQuery: null,
   adventurersInListByXpQuery: null,
   itemsByAdventurerQuery: null,
@@ -69,7 +61,6 @@ const initialLoading: Record<QueryKey, boolean> = {
   lastBattleQuery: false,
   lastBeastBattleQuery: false,
   battlesByAdventurerQuery: false,
-  battlesByBeastQuery: false,
   battlesByTxHashQuery: false,
   lastBeastQuery: false,
   discoveriesQuery: false,
@@ -80,9 +71,6 @@ const initialLoading: Record<QueryKey, boolean> = {
   leaderboardByIdQuery: false,
   adventurersByGoldQuery: false,
   adventurersByXPQuery: false,
-  unclaimedItemsByAdventurerQuery: false,
-  latestMarketItemsNumberQuery: false,
-  latestMarketItemsQuery: false,
   adventurersInListQuery: false,
   adventurersInListByXpQuery: false,
   itemsByAdventurerQuery: false,
@@ -94,7 +82,6 @@ const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
   lastBattleQuery: false,
   lastBeastBattleQuery: false,
   battlesByAdventurerQuery: false,
-  battlesByBeastQuery: false,
   battlesByTxHashQuery: false,
   lastBeastQuery: false,
   discoveriesQuery: false,
@@ -105,9 +92,6 @@ const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
   leaderboardByIdQuery: false,
   adventurersByGoldQuery: false,
   adventurersByXPQuery: false,
-  unclaimedItemsByAdventurerQuery: false,
-  latestMarketItemsNumberQuery: false,
-  latestMarketItemsQuery: false,
   adventurersInListQuery: false,
   adventurersInListByXpQuery: false,
   itemsByAdventurerQuery: false,
@@ -120,7 +104,6 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   lastBattleQuery: async () => {},
   lastBeastBattleQuery: async () => {},
   battlesByAdventurerQuery: async () => {},
-  battlesByBeastQuery: async () => {},
   battlesByTxHashQuery: async () => {},
   lastBeastQuery: async () => {},
   discoveriesQuery: async () => {},
@@ -131,9 +114,6 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   leaderboardByIdQuery: async () => {},
   adventurersByGoldQuery: async () => {},
   adventurersByXPQuery: async () => {},
-  unclaimedItemsByAdventurerQuery: async () => {},
-  latestMarketItemsNumberQuery: async () => {},
-  latestMarketItemsQuery: async () => {},
   adventurersInListQuery: async () => {},
   adventurersInListByXpQuery: async () => {},
   itemsByAdventurerQuery: async () => {},

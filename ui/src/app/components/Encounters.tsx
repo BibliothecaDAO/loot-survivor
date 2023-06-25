@@ -163,9 +163,9 @@ export const Encounters = ({ profile }: EncountersProps) => {
           <h3 className="text-center">
             {profile ? "Encounters" : "Your Encounters"}
           </h3>
-          {(isLoading.latestDiscoveriesQuery ||
-            isLoading.battlesByBeastQuery ||
-            loadingData) && <LootIconLoader />}
+          {(isLoading.latestDiscoveriesQuery || loadingData) && (
+            <LootIconLoader />
+          )}
           <div className="flex flex-col items-center gap-2 overflow-auto">
             {displayEncounters.map((encounter: any, index: number) => {
               let beastName = processBeastName(

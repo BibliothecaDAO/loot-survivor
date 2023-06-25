@@ -32,14 +32,14 @@ const processAnimation = (
     } else if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: any) => data.attacker == "Beast" && data.targetHealth > 0
+        (data: any) => data.attacker == "Beast" && data.beastHealth > 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
     } else if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: any) => data.attacker == "Beast" && data.targetHealth == 0
+        (data: any) => data.attacker == "Beast" && data.beastHealth == 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
@@ -48,14 +48,14 @@ const processAnimation = (
     if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: any) => data.attacker == "Beast" && data.targetHealth == 0
+        (data: any) => data.attacker == "Beast" && data.beastHealth == 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
     } else if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: any) => data.attacker == "Adventurer" && data.targetHealth == 0
+        (data: any) => data.attacker == "Adventurer" && data.beastHealth == 0
       )
     ) {
       return getRandomElement([
@@ -73,20 +73,22 @@ const processAnimation = (
   } else if (type == "Explore") {
     if (notificationData?.discoveryType == "Beast") {
       if (
-        Array.isArray(battles) &&
-        battles.some((battle) => battle.ambush && battle.targetHealth > 0)
+        notificationData.data.some(
+          (data: any) => data.ambushed && adventurer.health > 0
+        )
       ) {
         return gameData.ADVENTURER_ANIMATIONS["Ambush"];
       } else if (
-        Array.isArray(battles) &&
-        battles.some((battle) => battle.ambush && battle.targetHealth == 0)
+        notificationData.data.some(
+          (data: any) => data.ambushed && adventurer.health == 0
+        )
       ) {
         return gameData.ADVENTURER_ANIMATIONS["Dead"];
       } else {
         return gameData.ADVENTURER_ANIMATIONS["DiscoverBeast"];
       }
     } else if (notificationData?.discoveryType == "Obstacle") {
-      if (notificationData?.outputAmount > 0) {
+      if (notificationData?.damageTaken > 0) {
         if (adventurer?.health === 0) {
           return gameData.ADVENTURER_ANIMATIONS["Dead"];
         } else {
@@ -100,11 +102,9 @@ const processAnimation = (
       }
     } else if (notificationData?.discoveryType == "Item") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
-    } else if (notificationData?.discoveryType == "Nothing") {
-      return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
     }
   } else if (type == "Multicall") {
-    if (hasBeast) {
+    if (adventurer.beastHealth > 0) {
       return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
     } else {
       return gameData.ADVENTURER_ANIMATIONS[type];
@@ -172,7 +172,7 @@ export const processNotification = (
             } else if (
               noti.startsWith("You equipped") &&
               battles[0]?.attacker == "Beast" &&
-              battles[0]?.targetHealth > 0 &&
+              battles[0]?.beastHealth > 0 &&
               battles[0]?.damageTaken == 0
             ) {
               return (
@@ -205,8 +205,8 @@ export const NotificationDisplay = ({
 
   const { adventurer } = useAdventurerStore();
   const { data } = useQueriesStore();
-  const battles = data.battlesByBeastQuery
-    ? data.battlesByBeastQuery.battles
+  const battles = data.lastBeastBattleQuery
+    ? data.lastBeastBattleQuery.battles
     : [];
   const animation = processAnimation(
     type,

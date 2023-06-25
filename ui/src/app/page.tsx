@@ -121,19 +121,6 @@ export default function Home() {
     // hash !== ""
   );
 
-  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
-    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
-    : [];
-
-  useCustomQuery(
-    "latestMarketItemsQuery",
-    getLatestMarketItems,
-    {
-      itemsNumber: latestMarketItemsNumber,
-    },
-    txAccepted
-  );
-
   useCustomQuery(
     "adventurersByXPQuery",
     getAdventurerByXP,
@@ -205,8 +192,8 @@ export default function Home() {
           (data: any) => data.attacker == "Beast" && data.targetHealth == 0
         )
       ) {
-        const battles = data.battlesByBeastQuery
-          ? data.battlesByBeastQuery.battles
+        const battles = data.lastBattleQuery
+          ? data.lastBattleQuery.battles
           : [];
         const notification = processNotification(
           type,
@@ -243,8 +230,8 @@ export default function Home() {
         (pendingMessage as string[]).includes("Equipping") &&
         adventurer?.health == 0
       ) {
-        const battles = data.battlesByBeastQuery
-          ? data.battlesByBeastQuery.battles
+        const battles = data.lastBattleQuery
+          ? data.lastBattleQuery.battles
           : [];
         const notification = processNotification(
           type,
@@ -466,54 +453,6 @@ export default function Home() {
       setScreen("upgrade");
     }
   }, [upgrade]);
-
-  // const beast = data.beastByIdQuery ? data.beastByIdQuery.beasts[0] : [];
-  // const battleNotif = {
-  //   data: [
-  //     {
-  //       adventurerId: 73,
-  //       ambushed: null,
-  //       attacker: "Adventurer",
-  //       beastId: 223,
-  //       damage: 6,
-  //       fled: null,
-  //       goldEarned: 0,
-  //       targetHealth: 15,
-  //       timestamp: "2023-06-04T10:56:19",
-  //       txHash:
-  //         "0x03201a416f4f1bef9fbdb1bec72003ad93432cd16e75fef91990c0be68bca2aa",
-  //       xpEarned: 0,
-  //     },
-  //     {
-  //       adventurerId: 73,
-  //       ambushed: null,
-  //       attacker: "Beast",
-  //       beastId: 223,
-  //       damage: 81,
-  //       fled: null,
-  //       goldEarned: 0,
-  //       targetHealth: 0,
-  //       timestamp: "2023-06-04T10:56:19",
-  //       txHash:
-  //         "0x03201a416f4f1bef9fbdb1bec72003ad93432cd16e75fef91990c0be68bca2aa",
-  //       xpEarned: 15,
-  //     },
-  //   ],
-  //   beast: beast,
-  // };
-  // const battles = data.battlesByBeastQuery
-  //   ? data.battlesByBeastQuery.battles
-  //   : [];
-  // const notification = processNotification(
-  //   "Attack",
-  //   battleNotif,
-  //   adventurer,
-  //   battles,
-  //   hasBeast,
-  //   beast
-  // );
-  // setDeathMessage(notification);
-  // const dialog = true;
 
   // fetch adventurers on app start and account switch
   useEffect(() => {
