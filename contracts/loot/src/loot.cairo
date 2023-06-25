@@ -460,13 +460,13 @@ fn test_item_prefix() {
 
         // holy chest plate uses name prefix set 2
         let holy_chestplate_prefix = ImplLoot::get_name_prefix(
-            ItemId::Katana, U32IntoU128::into(i)
+            ItemId::HolyChestplate, U32IntoU128::into(i)
         );
         let holy_chestplate_prefix_valid = is_name_prefix_set2(holy_chestplate_prefix);
         assert(holy_chestplate_prefix_valid, 'invalid holy chestplate prefix');
 
         // katana uses name prefix set 3
-        let katana_prefix = ImplLoot::get_name_prefix(ItemId::HolyChestplate, U32IntoU128::into(i));
+        let katana_prefix = ImplLoot::get_name_prefix(ItemId::Katana, U32IntoU128::into(i));
         let katana_prefix_valid = is_name_prefix_set3(katana_prefix);
         assert(katana_prefix_valid, 'invalid katana prefix');
 
