@@ -93,18 +93,6 @@ export default function Home() {
     : NullAdventurer;
 
   useCustomQuery(
-    "beastsByAdventurerQuery",
-    getBeastsByAdventurer,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
-  const beasts = data.beastsByAdventurerQuery
-    ? data.beastsByAdventurerQuery.beasts
-    : [];
-
-  useCustomQuery(
     "adventurerByIdQuery",
     getAdventurerById,
     {

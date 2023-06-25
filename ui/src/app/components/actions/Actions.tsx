@@ -59,19 +59,6 @@ export default function Actions() {
     calldata: [adventurer?.id ?? ""],
   };
 
-  useCustomQuery(
-    "beastsByAdventurerQuery",
-    getBeastsByAdventurer,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
-
-  const beasts = data.beastsByAdventurerQuery
-    ? data.beastsByAdventurerQuery.beasts
-    : [];
-
   const buttonsData = [
     {
       id: 1,
@@ -141,7 +128,7 @@ export default function Actions() {
         <>
           <div className="flex flex-col items-center sm:w-1/3 bg-terminal-black">
             {selected == "explore" && (
-              <Discovery discoveries={latestDiscoveries} beasts={beasts} />
+              <Discovery discoveries={latestDiscoveries} />
             )}
             {selected == "purchase health" &&
               (adventurer?.isIdle ? (
@@ -173,7 +160,7 @@ export default function Actions() {
 
           <div className="flex flex-col sm:w-1/3 bg-terminal-black">
             {selected == "explore" && (
-              <Discovery discoveries={latestDiscoveries} beasts={beasts} />
+              <Discovery discoveries={latestDiscoveries} />
             )}
             {selected == "purchase health" &&
               (adventurer?.isIdle ? (

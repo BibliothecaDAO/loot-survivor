@@ -2,8 +2,6 @@ import { create } from "zustand";
 import { isEqual } from "lodash";
 
 export type QueryKey =
-  | "beastsQuery"
-  | "beastsByAdventurerQuery"
   | "lastBattleQuery"
   | "lastBeastBattleQuery"
   | "battlesByAdventurerQuery"
@@ -43,8 +41,6 @@ type QueriesState = {
 };
 
 const initialData: Record<QueryKey, any> = {
-  beastsQuery: null,
-  beastsByAdventurerQuery: null,
   lastBattleQuery: null,
   lastBeastBattleQuery: null,
   battlesByAdventurerQuery: null,
@@ -70,8 +66,6 @@ const initialData: Record<QueryKey, any> = {
 };
 
 const initialLoading: Record<QueryKey, boolean> = {
-  beastsQuery: false,
-  beastsByAdventurerQuery: false,
   lastBattleQuery: false,
   lastBeastBattleQuery: false,
   battlesByAdventurerQuery: false,
@@ -97,8 +91,6 @@ const initialLoading: Record<QueryKey, boolean> = {
 };
 
 const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
-  beastsQuery: false,
-  beastsByAdventurerQuery: false,
   lastBattleQuery: false,
   lastBeastBattleQuery: false,
   battlesByAdventurerQuery: false,
@@ -125,8 +117,6 @@ const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
 };
 
 const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
-  beastsQuery: async () => {},
-  beastsByAdventurerQuery: async () => {},
   lastBattleQuery: async () => {},
   lastBeastBattleQuery: async () => {},
   battlesByAdventurerQuery: async () => {},

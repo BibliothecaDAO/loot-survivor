@@ -11,10 +11,9 @@ import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 
 interface DiscoveryProps {
   discoveries: any[];
-  beasts: any[];
 }
 
-const Discovery = ({ discoveries, beasts }: DiscoveryProps) => {
+const Discovery = ({ discoveries }: DiscoveryProps) => {
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const handleSubmitCalls = useTransactionCartStore(

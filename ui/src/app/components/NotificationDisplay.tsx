@@ -208,9 +208,6 @@ export const NotificationDisplay = ({
   const battles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
     : [];
-  const beasts = data.beastsByAdventurerQuery
-    ? data.beastsByAdventurerQuery.beasts
-    : [];
   const animation = processAnimation(
     type,
     notificationData,
