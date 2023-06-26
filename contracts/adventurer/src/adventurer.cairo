@@ -1,9 +1,10 @@
 use core::result::ResultTrait;
 use core::serde::Serde;
-use integer::{U64IntoU128, U16IntoU128, U128TryIntoU8, U8IntoU128, u16_overflowing_sub};
+use integer::{
+    U64IntoU128, U16IntoU128, U128TryIntoU8, U8IntoU128, u16_overflowing_sub, u16_overflowing_add
+};
 use traits::{TryInto, Into};
 use option::OptionTrait;
-use debug::PrintTrait;
 
 use pack::pack::{
     pack_value, unpack_value, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8, U256TryIntoU64,
@@ -11,7 +12,7 @@ use pack::pack::{
 use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
 use lootitems::loot::{Loot, ILoot, ImplLoot};
-use lootitems::statistics::{constants, item_tier, item_type};
+use lootitems::statistics::{constants, item_tier, item_type, constants::Settings};
 
 use super::exploration::ExploreUtils;
 use super::constants::adventurer_constants::{
@@ -19,15 +20,15 @@ use super::constants::adventurer_constants::{
     MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, ITEM_XP_MULTIPLIER
 };
 use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
-use super::item_meta::{LootStatistics, LootDescription};
+use super::item_meta::{
+    LootStatistics, LootItemSpecialNames, LootItemSpecialNamesStorage, ImplLootItemSpecialNames
+};
 
 use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
 use combat::constants::CombatEnums::{Type, Tier, Slot};
-
 use obstacles::obstacle::{ImplObstacle, Obstacle};
 use beasts::beast::{ImplBeast, Beast};
 use beasts::constants::BeastSettings;
-
 
 #[derive(Drop, Copy, Serde)]
 struct Adventurer {
@@ -376,6 +377,10 @@ impl ImplAdventurer of IAdventurer {
         self
     }
     fn add_item(ref self: Adventurer, value: LootStatistics) -> Adventurer {
+        // TODO: @loaf does this need to check to ensure an item isn't
+        // already assigned to that slot? The other consideration I 
+        // thought of while writing test cases is dealing with 
+        // two items having the same meta data id. Is this handled somewhere?
         let slot = ImplLoot::get_slot(value.id);
         match slot {
             Slot::Weapon(()) => self.add_weapon(value),
@@ -422,38 +427,134 @@ impl ImplAdventurer of IAdventurer {
         self
     }
 
-    // increase_item_xp is used to increase the xp of all items that are equipped
-    // this is used when the adventurer kills a beast or takes damage from an obstacle
-    // @param self: Adventurer - the adventurer calling the function
-    // @param value: u16 - the amount of xp to increase the items by
-    // @return Adventurer - the adventurer with the updated items
-    fn increase_item_xp(ref self: Adventurer, value: u16) -> Adventurer {
-        let xp_increase = value * ITEM_XP_MULTIPLIER;
-        if self.weapon.id > 0 {
-            self.weapon.xp = self.weapon.xp + value;
+    // @title Increase Item Experience
+    // @notice This function is used to increase the experience points of a particular item.
+    // @dev This function calls the grant_xp_and_check_for_greatness_increase function to execute its logic.
+    //
+    // @param self A reference to the LootStatistics object which represents the item.
+    // @param amount The amount of experience points to be added to the item.
+    // @param name_storage A reference to the LootItemSpecialNamesStorage object.
+    // @param entropy A number used for randomization.
+    //
+    // @return Returns a tuple containing the original item level, new level, 
+    //         boolean indicating if a suffix was assigned, boolean indicating if a prefix was assigned,
+    //         and a LootItemSpecialNames object storing the special names for the item.
+    fn increase_item_xp(
+        ref self: LootStatistics,
+        amount: u16,
+        ref name_storage: LootItemSpecialNamesStorage,
+        entropy: u128
+    ) -> (u8, u8, bool, bool, LootItemSpecialNames) {
+        return self.grant_xp_and_check_for_greatness_increase(amount, ref name_storage, entropy);
+    }
+
+    // @title Grant Experience and Check for Greatness Increase
+    // @notice This function increases the experience points of an item and checks for possible level ups, assigning prefixes and suffixes as necessary.
+    // @dev The function should only be used internally within the smart contract.
+    //
+    // @param self A reference to the LootStatistics object which represents the item.
+    // @param value The amount of experience points to be added to the item.
+    // @param name_storage A reference to the LootItemSpecialNamesStorage object.
+    // @param entropy A number used for randomization.
+    //
+    // @return Returns a tuple containing the original item level, new level, 
+    //         boolean indicating if a suffix was assigned, boolean indicating if a prefix was assigned,
+    //         and a LootItemSpecialNames object storing the special names for the item.
+    fn grant_xp_and_check_for_greatness_increase(
+        ref self: LootStatistics,
+        value: u16,
+        ref name_storage: LootItemSpecialNamesStorage,
+        entropy: u128
+    ) -> (u8, u8, bool, bool, LootItemSpecialNames) {
+        // get the previous level of the item
+        let original_level = ImplLoot::get_greatness_level(self.xp);
+
+        if (u16_overflowing_add(self.xp, value).is_ok()) {
+            self.xp += value;
+        } else {
+            self.xp = 65535;
         }
-        if self.chest.id > 0 {
-            self.chest.xp = self.chest.xp + value;
+
+        // get the new level of the item
+        let new_level = ImplLoot::get_greatness_level(self.xp);
+
+        // initialize return bools to false
+        let mut prefix_assigned = false;
+        let mut suffix_assigned = false;
+
+        // if the level is the same
+        if (original_level == new_level) {
+            // no additional work required, return false for item changed and empty LootItemSpecialNames
+            return (
+                original_level, new_level, suffix_assigned, prefix_assigned, LootItemSpecialNames {
+                    id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0
+                }
+            );
         }
-        if self.head.id > 0 {
-            self.head.xp = self.head.xp + value;
+
+        // If the item leveled up, we need to check if it has reached G15 or G19 and
+        // unlocked a name suffix or prefix
+
+        // if the item was able to level up from below greatness 15 to 19 (unlikely but possible)
+        if (original_level < 15 && new_level >= 19) {
+            // set return bools both to true
+            suffix_assigned = true;
+            prefix_assigned = true;
+            // we assign the item it's prefixes and suffix
+            let special_names = LootItemSpecialNames {
+                id: self.id,
+                name_prefix: ImplLoot::get_name_prefix(self.id, entropy),
+                name_suffix: ImplLoot::get_name_suffix(self.id, entropy),
+                item_suffix: ImplLoot::get_item_suffix(self.id, entropy),
+            };
+
+            ImplLootItemSpecialNames::set_loot_special_names(
+                ref name_storage, self, special_names, 
+            );
+            return (original_level, new_level, suffix_assigned, prefix_assigned, special_names);
+        } // a more likely scenario is the item was previously below greatness 15 and is now at 15 or above
+        // in this case we only need to assign the name suffix (Of Power)
+        else if (original_level < 15 && new_level >= 15) {
+            // return bool suffix assigned is now true
+            suffix_assigned = true;
+            // return bool of prefix assigned will remain 
+
+            let special_names = LootItemSpecialNames {
+                id: self.id,
+                name_prefix: 0,
+                name_suffix: 0,
+                item_suffix: ImplLoot::get_item_suffix(self.id, entropy), // set item suffix
+            };
+            ImplLootItemSpecialNames::set_loot_special_names(ref name_storage, self, special_names);
+            return (original_level, new_level, suffix_assigned, prefix_assigned, special_names);
+        } // lastly, we check for the transition from below G19 to G19 or higher which results
+        // in the item receiving a name prefix (Demon Grasp)
+        else if (original_level < 19 && new_level >= 19) {
+            // return bool prefix assigned is now true
+            prefix_assigned = true;
+            // return bool suffix will keep default of false
+
+            // When handling the greatness upgrade to G19 we need to ensure we preserve
+            // the item name suffix applied at G15.
+            let special_names = LootItemSpecialNames {
+                id: self.id,
+                name_prefix: ImplLoot::get_name_prefix(self.id, entropy),
+                name_suffix: ImplLoot::get_name_suffix(self.id, entropy),
+                item_suffix: ImplLootItemSpecialNames::get_loot_special_names(name_storage, self)
+                    .item_suffix, // preserve previous item suffix from G15
+            };
+
+            ImplLootItemSpecialNames::set_loot_special_names(ref name_storage, self, special_names);
+
+            return (original_level, new_level, suffix_assigned, prefix_assigned, special_names);
         }
-        if self.waist.id > 0 {
-            self.waist.xp = self.waist.xp + value;
-        }
-        if self.foot.id > 0 {
-            self.foot.xp = self.foot.xp + value;
-        }
-        if self.hand.id > 0 {
-            self.hand.xp = self.hand.xp + value;
-        }
-        if self.neck.id > 0 {
-            self.neck.xp = self.neck.xp + value;
-        }
-        if self.ring.id > 0 {
-            self.ring.xp = self.ring.xp + value;
-        }
-        self
+
+        // level up should be true here but suffix and prefix assigned false
+        return (
+            original_level, new_level, suffix_assigned, prefix_assigned, LootItemSpecialNames {
+                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0
+            }
+        );
     }
 
     // create a new adventurer from a starting item and a block number
@@ -838,29 +939,209 @@ fn test_add_weapon() {
     assert(adventurer.weapon.metadata == 0, 'weapon.metadata');
 }
 
-
 #[test]
 #[available_gas(5000000)]
 fn test_increase_item_xp() {
     let mut adventurer = ImplAdventurer::new(1, 1);
-    let mut adventurer = ImplAdventurer::new(1, 1);
-
-    let item_pendant = LootStatistics { id: 1, xp: 1, metadata: 0 };
-    let item_silver_ring = LootStatistics { id: 4, xp: 1, metadata: 0 };
-    let item_ghost_wand = LootStatistics { id: 9, xp: 1, metadata: 0 };
-    let item_silk_robe = LootStatistics { id: 18, xp: 1, metadata: 0 };
-
-    adventurer.add_item(item_pendant);
-    adventurer.add_item(item_silver_ring);
+    let entropy = 1;
+    let item_ghost_wand = LootStatistics { id: constants::ItemId::GhostWand, xp: 1, metadata: 1 };
     adventurer.add_item(item_ghost_wand);
-    adventurer.add_item(item_silk_robe);
 
-    adventurer.increase_item_xp(1);
+    let blank_special_name = LootItemSpecialNames {
+        id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0
+    };
 
-    assert(adventurer.neck.xp == 2, 'weapon.xp');
-    assert(adventurer.ring.xp == 2, 'weapon.xp');
-    assert(adventurer.weapon.xp == 2, 'weapon.xp');
-    assert(adventurer.chest.xp == 2, 'weapon.xp');
+    let ghost_wand_special_name = LootItemSpecialNames {
+        id: item_ghost_wand.id, name_prefix: 0, name_suffix: 0, item_suffix: 0
+    };
+
+    let mut loot_item_name_storage = LootItemSpecialNamesStorage {
+        item_1: ghost_wand_special_name,
+        item_2: blank_special_name,
+        item_3: blank_special_name,
+        item_4: blank_special_name,
+        item_5: blank_special_name,
+        item_6: blank_special_name,
+        item_7: blank_special_name,
+        item_8: blank_special_name,
+        item_9: blank_special_name,
+        item_10: blank_special_name,
+    };
+
+    let original_level = ImplLoot::get_greatness_level(adventurer.weapon.xp);
+
+    // verify weapon starts on level 1
+    assert(original_level == 1, 'weapon should start on lvl 1');
+
+    // grant weapon 1XP
+    let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
+        .weapon
+        .increase_item_xp(1, ref loot_item_name_storage, 1);
+
+    // weapon should now have 2XP
+    assert(adventurer.weapon.xp == 2, 'weapon should have 2xp');
+
+    // call should return previous level of 1 (level 2 requires 4xp)
+    assert(previous_level == 1, 'weapon prev level should be 1');
+
+    // new level should be 2
+    assert(new_level == 1, 'weapon new level should be 1');
+
+    // item should not have received a suffix or prefix
+    assert(suffix_assigned == false, 'weapon should not recv suffix');
+    assert(prefix_assigned == false, 'weapon should not recv prefix');
+    assert(special_names.id == 0, 'weapon names should be empty');
+
+    // grant weapon another 2XP (should be enough to level up)
+    let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
+        .weapon
+        .increase_item_xp(2, ref loot_item_name_storage, 1);
+    assert(adventurer.weapon.xp == 4, 'weapon should have 4xp');
+    assert(previous_level == 1, 'weapon prev level should be 1');
+    assert(new_level == 2, 'weapon new level should be 2');
+    assert(suffix_assigned == false, 'weapon should not recv suffix');
+    assert(prefix_assigned == false, 'weapon should not recv prefix');
+    assert(special_names.id == 0, 'weapon names should be empty');
+
+    // grant weapon 192 more xp, bringing it to 196xp total (level 14)
+    let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
+        .weapon
+        .increase_item_xp(192, ref loot_item_name_storage, 1);
+    assert(adventurer.weapon.xp == 196, 'weapon should have 196xp');
+    assert(previous_level == 2, 'weapon prev level should be 1');
+    assert(new_level == 14, 'weapon new level should be 14');
+    assert(suffix_assigned == false, 'weapon should not recv suffix');
+    assert(prefix_assigned == false, 'weapon should not recv prefix');
+    assert(special_names.id == 0, 'weapon names should be empty');
+
+    // grant weapon 29 more xp, bringing it to 225 total (level 15 - suffix assigned)
+    let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
+        .weapon
+        .increase_item_xp(29, ref loot_item_name_storage, 1);
+    assert(adventurer.weapon.xp == 225, 'weapon should have 225');
+    assert(previous_level == 14, 'weapon prev level should be 14');
+    assert(new_level == 15, 'weapon new level should be 15');
+    assert(suffix_assigned == true, 'weapon should recv suffix');
+    assert(prefix_assigned == false, 'weapon should not recv prefix');
+    assert(special_names.id == constants::ItemId::GhostWand, 'special name id shld be GW');
+    assert(special_names.item_suffix != 0, 'suffix should be set');
+    assert(special_names.name_prefix == 0, 'name prefix should be 0');
+    assert(special_names.name_suffix == 0, 'name suffix should be 0');
+    // verify name was updated in storage
+    assert(loot_item_name_storage.item_1.item_suffix != 0, 'suffix should be set');
+
+    // save the suffix the item received at G15 to ensure it is persisted when prefixes get unlocked at G19
+    let original_weapon_suffix = loot_item_name_storage.item_1.item_suffix;
+    // grant weapon 136 more xp, bringing it to 361 total (level 19 - prefixes assigned)
+    let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
+        .weapon
+        .increase_item_xp(136, ref loot_item_name_storage, 1);
+    assert(adventurer.weapon.xp == 361, 'weapon should have 361');
+    assert(previous_level == 15, 'weapon prev level should be 15');
+    assert(new_level == 19, 'weapon new level should be 19');
+    assert(suffix_assigned == false, 'weapon should not recv suffix');
+    assert(prefix_assigned == true, 'weapon should recv prefixes');
+    assert(special_names.id == constants::ItemId::GhostWand, 'special name id shld be GW');
+    assert(special_names.item_suffix == original_weapon_suffix, 'suffix should not have changed');
+    assert(special_names.name_prefix != 0, 'name prefix should be set');
+    assert(special_names.name_suffix != 0, 'name suffix should be set');
+    // verify storage data was updated properly
+    assert(
+        loot_item_name_storage.item_1.item_suffix == original_weapon_suffix,
+        'suffix should not have changed'
+    );
+    assert(loot_item_name_storage.item_1.name_prefix != 0, 'name prefix should be set');
+    assert(loot_item_name_storage.item_1.name_suffix != 0, 'name suffix should be set');
+    let original_name_prefix = loot_item_name_storage.item_1.name_prefix;
+    let original_name_suffix = loot_item_name_storage.item_1.name_suffix;
+
+    // level weapon to 20
+    let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
+        .weapon
+        .increase_item_xp(39, ref loot_item_name_storage, 1);
+    assert(adventurer.weapon.xp == 400, 'weapon should have 400');
+    assert(previous_level == 19, 'weapon prev level should be 19');
+    assert(new_level == 20, 'weapon new level should be 20');
+    assert(suffix_assigned == false, 'weapon should not recv suffix');
+    assert(prefix_assigned == false, 'weapon should not recv prefixes');
+    // verify storage data was not updated
+    assert(
+        loot_item_name_storage.item_1.item_suffix == original_weapon_suffix,
+        'item suffix should be same'
+    );
+    assert(
+        loot_item_name_storage.item_1.name_prefix == original_name_prefix,
+        'name prefix should be same'
+    );
+    assert(
+        loot_item_name_storage.item_1.name_suffix == original_name_suffix,
+        'name suffix should be same'
+    );
+
+    // test with max XP input (2^16) - 1 = 65535;
+    let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
+        .weapon
+        .increase_item_xp(65535, ref loot_item_name_storage, 1);
+    assert(adventurer.weapon.xp == 65535, 'weapon should have 400');
+    assert(previous_level == 20, 'weapon prev level should be 20');
+    assert(new_level == Settings::ITEM_MAX_GREATNESS, 'weapon new lvl should be max');
+    assert(suffix_assigned == false, 'weapon should not recv suffix');
+    assert(prefix_assigned == false, 'weapon should not recv prefixes');
+    // verify storage data was not updated
+    assert(
+        loot_item_name_storage.item_1.item_suffix == original_weapon_suffix,
+        'item suffix should be same'
+    );
+    assert(
+        loot_item_name_storage.item_1.name_prefix == original_name_prefix,
+        'name prefix should be same'
+    );
+    assert(
+        loot_item_name_storage.item_1.name_suffix == original_name_suffix,
+        'name suffix should be same'
+    );
+
+    // There is one more variant to test when it comes to item leveling and name assignment
+    // which is an item going from < G15 to G19 in a single hop. This is highly unlikely
+    // but technically possible so the contract needs to be able to handle it
+
+    // to test this lets create a new item
+    let divine_robe = LootStatistics { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
+    adventurer.add_item(divine_robe);
+
+    // verify starting state
+    assert(adventurer.chest.id == constants::ItemId::DivineRobe, 'advntr should have divine robe');
+    assert(adventurer.chest.xp == 1, 'divine robe should have 1 xp');
+    assert(adventurer.chest.metadata == 2, 'advntr should have divine robe');
+    let divine_robe_starting_level = ImplLoot::get_greatness_level(adventurer.chest.xp);
+    assert(divine_robe_starting_level == 1, 'divine robe should be level 1');
+
+    // give divine robe max XP 65535
+    let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
+        .chest
+        .increase_item_xp(65535, ref loot_item_name_storage, 1);
+    assert(adventurer.chest.xp == 65535, 'divine robe should have 65535xp');
+    assert(previous_level == divine_robe_starting_level, 'DR prev level should be 1');
+    assert(new_level == Settings::ITEM_MAX_GREATNESS, 'DR new level should be MAX');
+    assert(suffix_assigned == true, 'DR should have recv suffix');
+    assert(prefix_assigned == true, 'DR should have recv prefix');
+    assert(special_names.id == constants::ItemId::DivineRobe, 'special name id shld be DR');
+    assert(special_names.item_suffix != 0, 'suffix should be set');
+    assert(special_names.name_prefix != 0, 'name prefix should be set');
+    assert(special_names.name_suffix != 0, 'name suffix should be set');
+    // verify storage data was updated properly
+    assert(
+        special_names.item_suffix == loot_item_name_storage.item_2.item_suffix,
+        'storage suffix should be set'
+    );
+    assert(
+        special_names.name_prefix == loot_item_name_storage.item_2.name_prefix,
+        'storage prefix1 should be set'
+    );
+    assert(
+        special_names.name_suffix == loot_item_name_storage.item_2.item_suffix,
+        'storage prefix2 should be set'
+    );
 }
 
 #[test]

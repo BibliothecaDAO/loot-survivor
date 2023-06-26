@@ -1,50 +1,44 @@
 #[starknet::contract]
 mod Game {
-    // TESTING CONSTS REMOVE 
-
+    // TODO: TESTING CONSTS REMOVE BEFORE DEPLOYMENT
     const ENTROPY_BLOCK_TIME: u64 = 100;
     const TEST_ENTROPY: u64 = 12303548;
+    const LOOT_NAME_STORAGE_INDEX_1: u256 = 0;
+    const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
 
     use game::game::interfaces::IGame;
-
-    const LOOT_DESCRIPTION_INDEX_1: u256 = 0;
-    const LOOT_DESCRIPTION_INDEX_2: u256 = 1;
-
     use option::OptionTrait;
     use box::BoxTrait;
     use starknet::get_caller_address;
     use starknet::{ContractAddress, ContractAddressIntoFelt252};
     use integer::{
         Felt252TryIntoU64, U8IntoU16, U16IntoU64, U16IntoU128, U64IntoU128, U8IntoU128,
-        U128TryIntoU8,
+        U128TryIntoU8, U64IntoFelt252
     };
-    use integer::U64IntoFelt252;
     use core::traits::{TryInto, Into};
 
     use game::game::messages::messages;
-
-    use lootitems::loot::{Loot, ImplLoot};
-    use lootitems::statistics::constants::{NamePrefixLength, NameSuffixLength};
+    use lootitems::{
+        loot::{Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
+    };
     use pack::pack::{pack_value, unpack_value};
-
-    use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
-    use survivor::bag::{Bag, BagActions, ImplBagActions, LootStatistics};
-    use survivor::adventurer_meta::{
-        AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata
+    use survivor::{
+        adventurer::{Adventurer, ImplAdventurer, IAdventurer},
+        bag::{Bag, BagActions, ImplBagActions, LootStatistics},
+        adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata},
+        exploration::ExploreUtils,
+        constants::{
+            discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
+            adventurer_constants::{POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER}
+        },
+        item_meta::{
+            ImplLootItemSpecialNames, LootItemSpecialNames, ILootItemSpecialNames,
+            LootItemSpecialNamesStorage
+        }
     };
-    use survivor::exploration::ExploreUtils;
-    use survivor::constants::discovery_constants::DiscoveryEnums::{
-        ExploreResult, TreasureDiscovery
-    };
-    use survivor::constants::adventurer_constants::{POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER};
-    use survivor::item_meta::{
-        ImplLootDescription, LootDescription, ILootDescription, LootDescriptionStorage
-    };
-
     use market::market::{ImplMarket};
     use obstacles::obstacle::{ImplObstacle};
-    use combat::combat::{CombatSpec, SpecialPowers, ImplCombat};
-    use combat::constants::CombatEnums;
+    use combat::{combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums};
     use beasts::beast::{Beast, IBeast, ImplBeast};
 
     #[storage]
@@ -55,7 +49,7 @@ mod Game {
         _owner: LegacyMap::<u256, ContractAddress>,
         _adventurer_meta: LegacyMap::<u256, felt252>,
         _loot: LegacyMap::<u256, felt252>,
-        _loot_description: LegacyMap::<(u256, u256), felt252>,
+        _loot_special_names: LegacyMap::<(u256, u256), felt252>,
         _bag: LegacyMap::<u256, felt252>,
         _counter: u256,
         _lords: ContractAddress,
@@ -127,6 +121,8 @@ mod Game {
 
             // get adventurer from storage and unpack
             let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+            // adventurer.update_last_action(current_block);
 
             // assert adventurer has a beast to attack
             _assert_in_battle(@self, adventurer);
@@ -397,15 +393,24 @@ mod Game {
     fn _obstacle_encounter(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, entropy: u128
     ) -> Adventurer {
+        // get total intelligence stat boost from items
+        // let intelligence_stat_boost = adventurer.get_intelligence_stat_boost(LootItemSpecialNamesStorage);
+        let intelligence_stat_boost = 1;
+
         // delegate obstacle encounter to obstacle library
         let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
-            adventurer.get_level(), adventurer.intelligence, entropy
+            adventurer.get_level(), adventurer.intelligence + intelligence_stat_boost, entropy
         );
 
-        // grant xp to equipped items and adventurer regardless of obstacle outcome
+        // get the xp reward for the obstacle
         let xp_reward = ImplObstacle::get_xp_reward(obstacle);
+
+        // reward adventurer with xp (regarldess of obstacle outcome)
         adventurer.increase_adventurer_xp(xp_reward);
-        adventurer.increase_item_xp(xp_reward);
+
+        // allocate XP to equipped items
+        // TODO: Temporarily disabled due to an apparent Cairo compiler error
+        //_grant_xp_to_equipped_items(ref self, adventurer_id, ref adventurer, xp_reward, entropy);
 
         let mut damage_taken: u16 = 0;
         let mut damage_location: u8 = 0;
@@ -465,6 +470,284 @@ mod Game {
         return adventurer;
     }
 
+    // @title Handle Item Leveling Events
+    // @notice This function handles the various events that may occur when an item levels up.
+    // @dev This function should only be called internally within the smart contract.
+    //
+    // @param self A reference to the ContractState. This function requires mutable access to the ContractState to handle item leveling events.
+    // @param adventurer The Adventurer object representing the adventurer who owns the item.
+    // @param adventurer_id The unique identifier for the adventurer who owns the item.
+    // @param item_id The unique identifier for the item that may level up.
+    // @param previous_level The previous level of the item before it possibly leveled up.
+    // @param new_level The new level of the item after it possibly leveled up.
+    // @param suffix_assigned A boolean indicating whether a suffix was assigned to the item when it leveled up.
+    // @param prefixes_assigned A boolean indicating whether a prefix was assigned to the item when it leveled up.
+    // @param special_names The LootItemSpecialNames object storing the special names for the item.
+    //
+    // The function first checks if the item's new level is higher than its previous level. If it is, it generates a 'GreatnessIncreased' event.
+    // The function then checks if a suffix was assigned to the item when it leveled up. If it was, it generates an 'ItemSuffixDiscovered' event.
+    // Lastly, the function checks if a prefix was assigned to the item when it leveled up. If it was, it generates an 'ItemPrefixDiscovered' event.
+    fn handle_item_leveling_events(
+        ref self: ContractState,
+        adventurer: Adventurer,
+        adventurer_id: u256,
+        item_id: u8,
+        previous_level: u8,
+        new_level: u8,
+        suffix_assigned: bool,
+        prefixes_assigned: bool,
+        special_names: LootItemSpecialNames
+    ) {
+        // if the new level is higher than the previous level
+        if (new_level > previous_level) {
+            // generate greatness increased event
+            __event_GreatnessIncreased(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                item_id,
+                previous_level,
+                new_level
+            );
+
+            // if item suffix was assigned
+            if (suffix_assigned) {
+                // generate item suffix discovered event
+                __event_ItemSuffixDiscovered(
+                    ref self,
+                    AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    },
+                    special_names
+                );
+            }
+
+            // if item prefixes were assigned
+            if (prefixes_assigned) {
+                // generate item prefix discovered event
+                __event_ItemPrefixDiscovered(
+                    ref self,
+                    AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    },
+                    special_names
+                );
+            }
+        }
+    }
+
+    /// @title Grant XP to Equipped Items
+    /// @notice This function handles the process of granting experience (XP) to all the equipped items of an adventurer.
+    /// @dev This function should only be called internally within the smart contract.
+    ///
+    /// @param self A reference to the ContractState. This function requires mutable access to the ContractState to update the adventurer's equipped items' XP.
+    /// @param adventurer_id The unique identifier for the adventurer whose equipped items will be updated.
+    /// @param adventurer A reference to the Adventurer object. This object represents the adventurer whose equipped items' XP will be updated.
+    /// @param value The amount of experience points to be added to the equipped items before applying the item XP multiplier.
+    /// @param entropy An unsigned integer used for entropy generation. This is often derived from a source of randomness.
+    ///
+    /// The function first retrieves the names of the special items an adventurer may possess. It then calculates the XP increase by applying a multiplier to the provided 'value'.
+    /// The function then checks each item slot (weapon, chest, head, waist, foot, hand, neck, ring) of the adventurer to see if an item is equipped (item ID > 0). 
+    /// If an item is equipped, it calls `_grant_xp_to_item_and_emit_event` to apply the XP increase to the item and handle any resulting events. 
+    fn _grant_xp_to_equipped_items(
+        ref self: ContractState,
+        adventurer_id: u256,
+        ref adventurer: Adventurer,
+        value: u16,
+        entropy: u128
+    ) {
+        let mut name_storage1 = _loot_special_names_storage_unpacked(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+        );
+        let mut name_storage2 = _loot_special_names_storage_unpacked(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+        );
+
+        let xp_increase = value * ITEM_XP_MULTIPLIER;
+
+        // if weapon is equipped
+        if adventurer.weapon.id > 0 {
+            // grant xp and handle any resulting events
+            _grant_xp_to_item_and_emit_event(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                ref adventurer.weapon,
+                xp_increase,
+                ref name_storage1,
+                ref name_storage2,
+                entropy
+            );
+        }
+        // if chest armor is equipped
+        if adventurer.chest.id > 0 {
+            // grant xp and handle any resulting events
+            _grant_xp_to_item_and_emit_event(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                ref adventurer.chest,
+                xp_increase,
+                ref name_storage1,
+                ref name_storage2,
+                entropy
+            );
+        }
+        // if head armor is equipped
+        if adventurer.head.id > 0 {
+            // grant xp and handle any resulting events
+            _grant_xp_to_item_and_emit_event(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                ref adventurer.head,
+                xp_increase,
+                ref name_storage1,
+                ref name_storage2,
+                entropy
+            );
+        }
+        // if waist armor is equipped
+        if adventurer.waist.id > 0 {
+            // grant xp and handle any resulting events
+            _grant_xp_to_item_and_emit_event(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                ref adventurer.waist,
+                xp_increase,
+                ref name_storage1,
+                ref name_storage2,
+                entropy
+            );
+        }
+        // if foot armor is equipped
+        if adventurer.foot.id > 0 {
+            // grant xp and handle any resulting events
+            _grant_xp_to_item_and_emit_event(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                ref adventurer.foot,
+                xp_increase,
+                ref name_storage1,
+                ref name_storage2,
+                entropy
+            );
+        }
+        // if hand armor is equipped
+        if adventurer.hand.id > 0 {
+            // grant xp and handle any resulting events
+            _grant_xp_to_item_and_emit_event(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                ref adventurer.hand,
+                xp_increase,
+                ref name_storage1,
+                ref name_storage2,
+                entropy
+            );
+        }
+        // if neck armor is equipped
+        if adventurer.neck.id > 0 {
+            // grant xp and handle any resulting events
+            _grant_xp_to_item_and_emit_event(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                ref adventurer.neck,
+                xp_increase,
+                ref name_storage1,
+                ref name_storage2,
+                entropy
+            );
+        }
+        // if ring is equipped
+        if adventurer.ring.id > 0 {
+            // grant xp and handle any resulting events
+            _grant_xp_to_item_and_emit_event(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                ref adventurer.ring,
+                xp_increase,
+                ref name_storage1,
+                ref name_storage2,
+                entropy
+            );
+        }
+    }
+
+    // @title Grant XP to Item and Emit Event
+    // @notice This function grants experience (XP) to a specified item and emits any resulting events.
+    // @dev This function should only be called internally within the smart contract.
+    //
+    // @param self A reference to the ContractState. This function requires mutable access to the ContractState to update the specified item's XP.
+    // @param adventurer_id The unique identifier for the adventurer who owns the item.
+    // @param adventurer A reference to the Adventurer object. This object represents the adventurer who owns the item.
+    // @param item A reference to the LootStatistics object. This object represents the item to which XP will be granted.
+    // @param amount The amount of experience points to be added to the item before applying the item XP multiplier.
+    // @param name_storage1 A reference to the LootItemSpecialNamesStorage object. This object stores the special names for items that an adventurer may possess.
+    // @param name_storage2 A reference to the LootItemSpecialNamesStorage object. This object stores the special names for items that an adventurer may possess.
+    // @param entropy An unsigned integer used for entropy generation. This is often derived from a source of randomness.
+    //
+    // The function first calculates the XP increase by applying a multiplier to the provided 'amount'.
+    // It then checks the description index of the item. If the index matches with LOOT_NAME_STORAGE_INDEX_1, it uses name_storage1 for the item's special names; otherwise, it uses name_storage2.
+    // It then calls `increase_item_xp` on the item to apply the XP increase and retrieve data about the item's original level, new level, and whether a suffix or prefix was assigned, and the item's special names.
+    // Lastly, it calls `handle_item_leveling_events` to handle any events resulting from the item leveling up.
+    fn _grant_xp_to_item_and_emit_event(
+        ref self: ContractState,
+        adventurer_id: u256,
+        ref adventurer: Adventurer,
+        ref item: LootStatistics,
+        amount: u16,
+        ref name_storage1: LootItemSpecialNamesStorage,
+        ref name_storage2: LootItemSpecialNamesStorage,
+        entropy: u128
+    ) {
+        let xp_increase = amount * ITEM_XP_MULTIPLIER;
+
+        if (_get_description_index(@self, item.metadata) == LOOT_NAME_STORAGE_INDEX_1) {
+            let (original_level, new_level, suffix_assigned, prefix_assigned, special_names) = item
+                .increase_item_xp(xp_increase, ref name_storage1, entropy);
+
+            handle_item_leveling_events(
+                ref self,
+                adventurer,
+                adventurer_id,
+                adventurer.chest.id,
+                original_level,
+                new_level,
+                suffix_assigned,
+                prefix_assigned,
+                special_names
+            );
+        } else {
+            let (original_level, new_level, suffix_assigned, prefix_assigned, special_names) = item
+                .increase_item_xp(xp_increase, ref name_storage2, entropy);
+            handle_item_leveling_events(
+                ref self,
+                adventurer,
+                adventurer_id,
+                adventurer.chest.id,
+                original_level,
+                new_level,
+                suffix_assigned,
+                prefix_assigned,
+                special_names
+            );
+        }
+    }
+
+
     fn _attack(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
     ) -> Adventurer { //
@@ -523,8 +806,13 @@ mod Game {
 
             // grant equipped items and adventurer xp for the encounter
             let xp_earned = beast.get_xp_reward();
+
+            // grant adventuer xp
             adventurer.increase_adventurer_xp(xp_earned);
-            adventurer.increase_item_xp(xp_earned);
+
+            // grant equipped items xp
+            // TODO: Temporarily disabled due to an apparent Cairo compiler error
+            //_grant_xp_to_equipped_items(ref self, adventurer_id, ref adventurer, xp_earned, attack_entropy);
 
             // grant adventurer gold reward. We use battle fixed entropy
             // to fix this result at the start of the battle, mitigating simulate-and-wait strategies
@@ -774,7 +1062,7 @@ mod Game {
         );
 
         // get item and determine metadata slot
-        let item = ImplLootDescription::get_loot_description_slot(
+        let item = ImplLootItemSpecialNames::get_loot_special_names_slot(
             adventurer, bag, ImplBagActions::new_item(item_id)
         );
 
@@ -927,21 +1215,23 @@ mod Game {
     }
 
     // we pack according to a storage index
-    fn _pack_loot_description_storage(
+    fn _pack_loot_special_names_storage(
         ref self: ContractState,
         adventurer_id: u256,
         storage_index: u256,
-        loot_description_storage: LootDescriptionStorage,
+        loot_special_names_storage: LootItemSpecialNamesStorage,
     ) {
         self
-            ._loot_description
-            .write((adventurer_id, storage_index), loot_description_storage.pack());
+            ._loot_special_names
+            .write((adventurer_id, storage_index), loot_special_names_storage.pack());
     }
 
-    fn _loot_description_storage_unpacked(
+    fn _loot_special_names_storage_unpacked(
         self: @ContractState, adventurer_id: u256, storage_index: u256
-    ) -> LootDescriptionStorage {
-        ImplLootDescription::unpack(self._loot_description.read((adventurer_id, storage_index)))
+    ) -> LootItemSpecialNamesStorage {
+        ImplLootItemSpecialNames::unpack(
+            self._loot_special_names.read((adventurer_id, storage_index))
+        )
     }
 
     fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
@@ -976,9 +1266,9 @@ mod Game {
 
     fn _get_description_index(self: @ContractState, meta_data_id: u8) -> u256 {
         if (meta_data_id <= 10) {
-            return LOOT_DESCRIPTION_INDEX_1;
+            return LOOT_NAME_STORAGE_INDEX_1;
         } else {
-            return LOOT_DESCRIPTION_INDEX_2;
+            return LOOT_NAME_STORAGE_INDEX_2;
         }
     }
 
@@ -1002,8 +1292,8 @@ mod Game {
             };
         } else {
             // if it's above 15, fetch the special names
-            let item_details = ImplLootDescription::get_loot_description(
-                _loot_description_storage_unpacked(
+            let item_details = ImplLootItemSpecialNames::get_loot_special_names(
+                _loot_special_names_storage_unpacked(
                     self, adventurer_id, _get_description_index(self, item.metadata)
                 ),
                 item
@@ -1203,19 +1493,21 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     struct GreatnessIncreased {
         adventurer_state: AdventurerState,
-        item_id: u8
+        item_id: u8,
+        previous_level: u8,
+        new_level: u8,
     }
 
     #[derive(Drop, starknet::Event)]
     struct ItemPrefixDiscovered {
         adventurer_state: AdventurerState,
-        item_description: LootDescription
+        special_names: LootItemSpecialNames
     }
 
     #[derive(Drop, starknet::Event)]
     struct ItemSuffixDiscovered {
         adventurer_state: AdventurerState,
-        item_description: LootDescription
+        special_names: LootItemSpecialNames
     }
 
     #[derive(Drop, starknet::Event)]
@@ -1317,20 +1609,29 @@ mod Game {
 
 
     fn __event_GreatnessIncreased(
-        ref self: ContractState, adventurer_state: AdventurerState, item_id: u8
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        item_id: u8,
+        previous_level: u8,
+        new_level: u8
     ) {
-        self.emit(Event::GreatnessIncreased(GreatnessIncreased { adventurer_state, item_id }));
+        self
+            .emit(
+                Event::GreatnessIncreased(
+                    GreatnessIncreased { adventurer_state, item_id, previous_level, new_level }
+                )
+            );
     }
 
     fn __event_ItemPrefixDiscovered(
         ref self: ContractState,
         adventurer_state: AdventurerState,
-        item_description: LootDescription
+        special_names: LootItemSpecialNames
     ) {
         self
             .emit(
                 Event::ItemPrefixDiscovered(
-                    ItemPrefixDiscovered { adventurer_state, item_description }
+                    ItemPrefixDiscovered { adventurer_state, special_names }
                 )
             );
     }
@@ -1338,12 +1639,12 @@ mod Game {
     fn __event_ItemSuffixDiscovered(
         ref self: ContractState,
         adventurer_state: AdventurerState,
-        item_description: LootDescription
+        special_names: LootItemSpecialNames
     ) {
         self
             .emit(
                 Event::ItemSuffixDiscovered(
-                    ItemSuffixDiscovered { adventurer_state, item_description }
+                    ItemSuffixDiscovered { adventurer_state, special_names }
                 )
             );
     }
