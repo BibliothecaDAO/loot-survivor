@@ -406,7 +406,8 @@ mod Game {
         adventurer.increase_adventurer_xp(xp_reward);
 
         // allocate XP to equipped items
-        _grant_xp_to_equipped_items(ref self, adventurer_id, ref adventurer, xp_reward, entropy);
+        // TODO: Temporarily disabled due to an apparent Cairo compiler error
+        //_grant_xp_to_equipped_items(ref self, adventurer_id, ref adventurer, xp_reward, entropy);
 
         let mut damage_taken: u16 = 0;
         let mut damage_location: u8 = 0;
@@ -807,9 +808,8 @@ mod Game {
             adventurer.increase_adventurer_xp(xp_earned);
 
             // grant equipped items xp
-            _grant_xp_to_equipped_items(
-                ref self, adventurer_id, ref adventurer, xp_earned, attack_entropy
-            );
+            // TODO: Temporarily disabled due to an apparent Cairo compiler error
+            //_grant_xp_to_equipped_items(ref self, adventurer_id, ref adventurer, xp_earned, attack_entropy);
 
             // grant adventurer gold reward. We use battle fixed entropy
             // to fix this result at the start of the battle, mitigating simulate-and-wait strategies
