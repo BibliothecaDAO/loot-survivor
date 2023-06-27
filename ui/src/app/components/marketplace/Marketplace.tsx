@@ -52,10 +52,6 @@ const Marketplace = () => {
     );
   };
 
-  const unclaimedItems = data.unclaimedItemsByAdventurerQuery
-    ? data.unclaimedItemsByAdventurerQuery.items
-    : [];
-
   const removeDuplicates = (arr: any) => {
     return arr.reduce((accumulator: any, currentItem: any) => {
       if (
@@ -68,7 +64,7 @@ const Marketplace = () => {
   };
 
   const marketLatestItems = data.latestMarketItemsQuery
-    ? removeDuplicates(unclaimedItems.concat(data.latestMarketItemsQuery.items))
+    ? data.latestMarketItemsQuery.items
     : [];
   const bidders: number[] = [];
 
@@ -87,40 +83,9 @@ const Marketplace = () => {
     false
   );
 
-  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
-    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
-    : [];
-
-  useCustomQuery(
-    "latestMarketItemsQuery",
-    getLatestMarketItems,
-    {
-      itemsNumber: latestMarketItemsNumber,
-    },
-    true
-  );
-
   const adventurers = data.adventurersInListQuery
     ? data.adventurersInListQuery.adventurers
     : [];
-
-  const mintDailyItemsTx = {
-    contractAddress: gameContract?.address ?? "",
-    entrypoint: "mint_daily_items",
-    calldata: [],
-    metadata: `Minting Loot Items!`,
-  };
-
-  const getClaimableItems = () => {
-    return marketLatestItems.filter(
-      (item: any) =>
-        !item.claimedTime &&
-        item.expiry &&
-        convertTime(item.expiry) <= currentTime &&
-        !singleClaimExists(item.marketId) &&
-        adventurer?.id === item.bidder
-    );
-  };
 
   const headingToKeyMapping: { [key: string]: string } = {
     Item: "item",
