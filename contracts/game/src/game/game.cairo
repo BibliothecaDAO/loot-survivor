@@ -100,14 +100,23 @@ mod Game {
         fn start(
             ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata
         ) {
+            // assert starting_weapon is a valid starting weapon
+            assert(
+                ImplLoot::is_starting_weapon(starting_weapon) == true,
+                messages::INVALID_STARTING_WEAPON
+            );
+
             _start(ref self, starting_weapon, adventurer_meta);
         }
         fn explore(ref self: ContractState, adventurer_id: u256) {
-            // assert caller owns adventurer id
+            // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
             // get adventurer from storage and unpack
             let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
 
             // assert adventurer does not have stat upgrades available
             _assert_no_stat_upgrades_available(@self, adventurer);
@@ -116,11 +125,14 @@ mod Game {
             _explore(ref self, ref adventurer, adventurer_id);
         }
         fn attack(ref self: ContractState, adventurer_id: u256) {
-            // assert caller owns adventurer id
+            // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
             // get adventurer from storage and unpack
             let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
 
             // adventurer.update_last_action(current_block);
 
@@ -134,11 +146,14 @@ mod Game {
             _pack_adventurer(ref self, adventurer_id, adventurer);
         }
         fn flee(ref self: ContractState, adventurer_id: u256) {
-            // check caller owns adventurer id
+            // check caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
             // get adventurer from storage and unpack
             let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
 
             // can't flee from start beast
             _assert_not_starter_beast(@self, adventurer);
@@ -153,29 +168,76 @@ mod Game {
             _pack_adventurer(ref self, adventurer_id, adventurer);
         }
         fn equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
+            // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
-            _equip(ref self, adventurer_id, item_id);
+            // unpack adventurer from storage
+            let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // equip item
+            _equip(ref self, adventurer_id, ref adventurer, item_id);
         }
         fn buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
+            // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
-            _buy_item(ref self, adventurer_id, item_id, equip);
+            // check item exists on Market
+            // TODO: replace entropy
+            assert(
+                ImplMarket::check_ownership(TEST_ENTROPY, item_id) == true,
+                messages::ITEM_DOES_NOT_EXIST
+            );
+
+            // unpack adventurer from storage
+            let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // buy item
+            _buy_item(ref self, adventurer_id, ref adventurer, item_id, equip);
         }
         fn upgrade_stat(ref self: ContractState, adventurer_id: u256, stat: u8) {
+            // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
-            _upgrade_stat(ref self, adventurer_id, stat);
+            // unpack adventurer from storage
+            let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // assert adventurer has stat upgrade available
+            assert(adventurer.stat_upgrade_available > 0, messages::STAT_POINT_NOT_AVAILABLE);
+
+            // upgrade adventurer's stat
+            _upgrade_stat(ref self, adventurer_id, ref adventurer, stat);
         }
         fn purchase_health(ref self: ContractState, adventurer_id: u256) {
+            // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
-            _purchase_health(ref self, adventurer_id);
+            // unpack adventurer from storage
+            let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // purchase health
+            _purchase_health(ref self, adventurer_id, ref adventurer);
         }
 
         // view functions
         fn get_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
-            _adventurer_unpacked(self, adventurer_id)
+            // get stock adventurer
+            let mut adventurer = _adventurer_unpacked(self, adventurer_id);
+            // apply stat boosts
+            _apply_stat_boots(self, adventurer_id, ref adventurer);
+            // return view
+            adventurer
         }
 
         fn get_adventurer_meta(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
@@ -217,10 +279,6 @@ mod Game {
 
     fn _start(ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata) {
         let caller = get_caller_address();
-
-        assert(
-            ImplLoot::is_starting_weapon(starting_weapon) == true, messages::INVALID_STARTING_WEAPON
-        );
 
         // get current block timestamp and convert to felt252
         let block_info = starknet::get_block_info().unbox();
@@ -290,10 +348,25 @@ mod Game {
                 let battle_fixed_entropy: u128 = adventurer
                     .get_battle_fixed_entropy(adventurer_entropy);
 
+                // TODO: Revert to real fn. This is a hack to get around a compiler crash
+                let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+                    @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+                );
+
+                // TODO: Revert to real fn. This is a hack to get around a compiler crash
+                let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+                    @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+                );
+
+                // get wisdom boost from item name suffixes
+                let wisdom_boost = adventurer
+                    .get_suffix_stat_boosts(name_storage1, name_storage2)
+                    .wisdom;
+
                 // encounter beast and check if adventurer was ambushed
                 let (beast, was_ambushed) = ImplBeast::beast_encounter(
                     adventurer.get_level(),
-                    adventurer.wisdom,
+                    adventurer.stats.wisdom + wisdom_boost,
                     NamePrefixLength,
                     NameSuffixLength,
                     exploration_entropy
@@ -393,13 +466,25 @@ mod Game {
     fn _obstacle_encounter(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, entropy: u128
     ) -> Adventurer {
-        // get total intelligence stat boost from items
-        // let intelligence_stat_boost = adventurer.get_intelligence_stat_boost(LootItemSpecialNamesStorage);
-        let intelligence_stat_boost = 1;
+
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+        );
+
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+        );
+
+        // get intelligence stat boost from equipped item name suffixes
+        let intelligence_stat_boost = adventurer
+            .get_suffix_stat_boosts(name_storage1, name_storage2)
+            .intelligence;
 
         // delegate obstacle encounter to obstacle library
         let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
-            adventurer.get_level(), adventurer.intelligence + intelligence_stat_boost, entropy
+            adventurer.get_level(), adventurer.stats.intelligence + intelligence_stat_boost, entropy
         );
 
         // get the xp reward for the obstacle
@@ -410,7 +495,7 @@ mod Game {
 
         // allocate XP to equipped items
         // TODO: Temporarily disabled due to an apparent Cairo compiler error
-        //_grant_xp_to_equipped_items(ref self, adventurer_id, ref adventurer, xp_reward, entropy);
+        //_grant_xp_to_equipped_items(ref self, adventurer_id, ref adventurer, xp_reward, ref name_storage1, ref name_storage2, entropy);
 
         let mut damage_taken: u16 = 0;
         let mut damage_location: u8 = 0;
@@ -561,15 +646,10 @@ mod Game {
         adventurer_id: u256,
         ref adventurer: Adventurer,
         value: u16,
+        ref name_storage1: LootItemSpecialNamesStorage,
+        ref name_storage2: LootItemSpecialNamesStorage,
         entropy: u128
     ) {
-        let mut name_storage1 = _loot_special_names_storage_unpacked(
-            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
-        );
-        let mut name_storage2 = _loot_special_names_storage_unpacked(
-            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
-        );
-
         let xp_increase = value * ITEM_XP_MULTIPLIER;
 
         // if weapon is equipped
@@ -715,7 +795,7 @@ mod Game {
     ) {
         let xp_increase = amount * ITEM_XP_MULTIPLIER;
 
-        if (_get_description_index(@self, item.metadata) == LOOT_NAME_STORAGE_INDEX_1) {
+        if (_get_storage_index(@self, item.metadata) == LOOT_NAME_STORAGE_INDEX_1) {
             let (original_level, new_level, suffix_assigned, prefix_assigned, special_names) = item
                 .increase_item_xp(xp_increase, ref name_storage1, entropy);
 
@@ -750,7 +830,17 @@ mod Game {
 
     fn _attack(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
-    ) -> Adventurer { //
+    ) -> Adventurer {
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+        );
+
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+        );
+
         // get adventurer entropy from storage  
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
@@ -797,8 +887,19 @@ mod Game {
                 + adventurer_entropy
                 + U16IntoU64::into(adventurer.health + adventurer.beast_health)
         );
+
+        // get strength boost from item suffixes
+        let strength_boost = adventurer
+            .get_suffix_stat_boosts(name_storage1, name_storage2)
+            .strength;
+
         let damage_dealt = beast
-            .attack(weapon_combat_spec, adventurer.get_luck(), adventurer.strength, attack_entropy);
+            .attack(
+                weapon_combat_spec,
+                adventurer.get_luck(),
+                adventurer.stats.strength + strength_boost,
+                attack_entropy
+            );
         // if the amount of damage dealt to beast exceeds its health
         if (damage_dealt >= adventurer.beast_health) {
             // the beast is dead so set health to zero
@@ -932,7 +1033,17 @@ mod Game {
     // @loothero
     fn _flee(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
-    ) -> Adventurer { // \
+    ) -> Adventurer {
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+        );
+
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+        );
+
         // get adventurer entropy from storage  
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
@@ -942,8 +1053,13 @@ mod Game {
         // generate live entropy from fixed entropy sources and live adventurer stats
         let flee_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
 
+        // get dexterity stat boost from item suffixes
+        let dexterity_boost = adventurer
+            .get_suffix_stat_boosts(name_storage1, name_storage2)
+            .dexterity;
+
         let fled = ImplBeast::attempt_flee(
-            adventurer.get_level(), adventurer.dexterity, flee_entropy
+            adventurer.get_level(), adventurer.stats.dexterity + dexterity_boost, flee_entropy
         );
 
         // our fixed battle entropy which we use to generate same beast during a single battle
@@ -997,9 +1113,9 @@ mod Game {
     }
 
     // @loaf
-    fn _equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
-        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
-
+    fn _equip(
+        ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer, item_id: u8
+    ) {
         let mut bag = _bag_unpacked(@self, adventurer_id);
 
         let equipping_item = bag.get_item(item_id);
@@ -1046,20 +1162,28 @@ mod Game {
     // checks adventurer has enough gold
     // equips item if equip is true
     // stashes item in bag if equip is false
-    fn _buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
-        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+    fn _buy_item(
+        ref self: ContractState,
+        adventurer_id: u256,
+        ref adventurer: Adventurer,
+        item_id: u8,
+        equip: bool
+    ) {
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+        );
+
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+        );
 
         // TODO: Remove after testing
         // assert(adventurer.stat_upgrade_available == 1, 'Not available');
 
+        // unpack Loot bag from storage
         let mut bag = _bag_unpacked(@self, adventurer_id);
-
-        // check item exists on Market
-        // TODO: replace entropy
-        assert(
-            ImplMarket::check_ownership(TEST_ENTROPY, item_id) == true,
-            messages::ITEM_DOES_NOT_EXIST
-        );
 
         // get item and determine metadata slot
         let item = ImplLootItemSpecialNames::get_loot_special_names_slot(
@@ -1070,7 +1194,13 @@ mod Game {
         let item_tier = ImplLoot::get_tier(item_id);
         let item_price = ImplMarket::get_price(item_tier);
 
-        let charisma_discount_price = adventurer.get_item_cost(item_price);
+        // get charisma boost from item name suffixes
+        let charisma_boost = adventurer
+            .get_suffix_stat_boosts(name_storage1, name_storage2)
+            .charisma;
+
+        // get item price after charisma discount
+        let charisma_discount_price = adventurer.get_item_cost(item_price, charisma_boost);
 
         // check adventurer has enough gold
         assert(adventurer.check_gold(charisma_discount_price) == true, messages::NOT_ENOUGH_GOLD);
@@ -1115,14 +1245,10 @@ mod Game {
     }
 
 
-    fn _upgrade_stat(ref self: ContractState, adventurer_id: u256, stat_id: u8) {
+    fn _upgrade_stat(
+        ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer, stat_id: u8
+    ) {
         _assert_ownership(@self, adventurer_id);
-
-        // get adventurer
-        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
-
-        // assert adventurer has stat upgrade available
-        assert(adventurer.stat_upgrade_available > 0, messages::STAT_POINT_NOT_AVAILABLE);
 
         // add stat to adventuer
         adventurer.add_statistic(stat_id);
@@ -1141,16 +1267,30 @@ mod Game {
         _pack_adventurer(ref self, adventurer_id, adventurer);
     }
 
-    fn _purchase_health(ref self: ContractState, adventurer_id: u256) {
-        let mut adventurer = _adventurer_unpacked(@self, adventurer_id);
+    fn _purchase_health(ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer) {
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+        );
+
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+        );
+
+        // get charisma boost from item name suffixes
+        let charisma_boost = adventurer
+            .get_suffix_stat_boosts(name_storage1, name_storage2)
+            .charisma;
 
         // check gold balance
         assert(
-            adventurer.check_gold(adventurer.get_potion_cost()) == true, messages::NOT_ENOUGH_GOLD
+            adventurer.check_gold(adventurer.get_potion_cost(charisma_boost)) == true,
+            messages::NOT_ENOUGH_GOLD
         );
 
         // calculate cost of potion based on the Adventurers level
-        adventurer.deduct_gold(adventurer.get_potion_cost());
+        adventurer.deduct_gold(adventurer.get_potion_cost(charisma_boost));
 
         // TODO: We could remove the value from here altogether and have it within the function
         adventurer.add_health(POTION_HEALTH_AMOUNT);
@@ -1190,6 +1330,29 @@ mod Game {
 
     fn _adventurer_unpacked(self: @ContractState, adventurer_id: u256) -> Adventurer {
         ImplAdventurer::unpack(self._adventurer.read(adventurer_id))
+    }
+
+    fn _apply_stat_boots(self: @ContractState, adventurer_id: u256, ref adventurer: Adventurer) {
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+
+        // TODO: Revert to real fn. This is a hack to get around a compiler crash
+        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+
+        let stat_boots = adventurer.get_suffix_stat_boosts(
+            name_storage1,
+            name_storage2,
+        );
+        adventurer.add_strength(stat_boots.strength);
+        adventurer.add_dexterity(stat_boots.dexterity);
+        adventurer.add_vitality(stat_boots.vitality);
+        adventurer.add_intelligence(stat_boots.intelligence);
+        adventurer.add_wisdom(stat_boots.wisdom);
+        adventurer.add_charisma(stat_boots.charisma);
     }
 
     fn _pack_adventurer(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {
@@ -1234,6 +1397,31 @@ mod Game {
         )
     }
 
+    // TODO: Delete this fn. This is a hack to get around a compiler crash on real unpack
+    fn _loot_special_names_storage_unpacked_FAKE(
+        self: @ContractState, adventurer_id: u256, storage_index: u256
+    ) -> LootItemSpecialNamesStorage {
+        let blank = LootItemSpecialNames {
+            id: 0, // 7 bits
+            name_prefix: 0, // 7 bits
+            name_suffix: 0, // 5 bits
+            item_suffix: 0, // 4 bit
+        };
+
+        LootItemSpecialNamesStorage {
+            item_1: blank,
+            item_2: blank,
+            item_3: blank,
+            item_4: blank,
+            item_5: blank,
+            item_6: blank,
+            item_7: blank,
+            item_8: blank,
+            item_9: blank,
+            item_10: blank,
+        }
+    }
+
     fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
         self._owner.read(adventurer_id)
     }
@@ -1250,6 +1438,9 @@ mod Game {
     fn _assert_no_stat_upgrades_available(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.stat_upgrade_available == 0, messages::STAT_UPGRADES_AVAILABLE);
     }
+    fn _assert_not_dead(self: @ContractState, adventurer: Adventurer) {
+        assert(adventurer.health > 0, messages::DEAD_ADVENTURER);
+    }
 
     fn _lords_address(self: @ContractState) -> ContractAddress {
         self._lords.read()
@@ -1264,7 +1455,7 @@ mod Game {
         ImplMarket::get_all_items(TEST_ENTROPY)
     }
 
-    fn _get_description_index(self: @ContractState, meta_data_id: u8) -> u256 {
+    fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u256 {
         if (meta_data_id <= 10) {
             return LOOT_NAME_STORAGE_INDEX_1;
         } else {
@@ -1292,9 +1483,10 @@ mod Game {
             };
         } else {
             // if it's above 15, fetch the special names
+            // TODO: Revert to real fn. This is a hack to get around a compiler crash
             let item_details = ImplLootItemSpecialNames::get_loot_special_names(
-                _loot_special_names_storage_unpacked(
-                    self, adventurer_id, _get_description_index(self, item.metadata)
+                _loot_special_names_storage_unpacked_FAKE(
+                    self, adventurer_id, _get_storage_index(self, item.metadata)
                 ),
                 item
             );
