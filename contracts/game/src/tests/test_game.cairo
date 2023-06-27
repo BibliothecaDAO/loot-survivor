@@ -170,7 +170,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(80000000)]
+    #[available_gas(90000000)]
     fn test_flee() {
         let mut game = new_adventurer();
         let adventurer_start = game.get_adventurer(0);
@@ -276,7 +276,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(30000000)]
+    #[available_gas(40000000)]
     fn test_equip_item_from_bag() {
         let mut deployed_game = new_adventurer();
         let market_items = @adventurer_market_items();

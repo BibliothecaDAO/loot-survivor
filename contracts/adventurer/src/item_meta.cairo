@@ -146,7 +146,9 @@ impl ImplLootItemSpecialNames of ILootItemSpecialNames {
 
         packed.try_into().unwrap()
     }
+
     fn unpack(packed: felt252) -> LootItemSpecialNamesStorage {
+        internal::revoke_ap_tracking();
         let packed = packed.into();
 
         LootItemSpecialNamesStorage {

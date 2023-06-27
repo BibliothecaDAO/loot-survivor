@@ -8,5 +8,5 @@
 			]
 		}
 	},
-	"postCreateCommand": "curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v 0.5.0-alpha.1"
+	"postCreateCommand": "curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v 0.5.0-alpha.2"
 }

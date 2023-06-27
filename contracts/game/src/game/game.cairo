@@ -349,12 +349,12 @@ mod Game {
                     .get_battle_fixed_entropy(adventurer_entropy);
 
                 // TODO: Revert to real fn. This is a hack to get around a compiler crash
-                let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+                let mut name_storage1 = _loot_special_names_storage_unpacked(
                     @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
                 );
 
                 // TODO: Revert to real fn. This is a hack to get around a compiler crash
-                let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+                let mut name_storage2 = _loot_special_names_storage_unpacked(
                     @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
                 );
 
@@ -466,7 +466,6 @@ mod Game {
     fn _obstacle_encounter(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, entropy: u128
     ) -> Adventurer {
-
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
         let mut name_storage1 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
@@ -832,12 +831,12 @@ mod Game {
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
     ) -> Adventurer {
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+        let mut name_storage1 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
         );
 
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+        let mut name_storage2 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
         );
 
@@ -1035,12 +1034,12 @@ mod Game {
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
     ) -> Adventurer {
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+        let mut name_storage1 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
         );
 
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+        let mut name_storage2 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
         );
 
@@ -1170,12 +1169,12 @@ mod Game {
         equip: bool
     ) {
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+        let mut name_storage1 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
         );
 
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+        let mut name_storage2 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
         );
 
@@ -1269,12 +1268,12 @@ mod Game {
 
     fn _purchase_health(ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer) {
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+        let mut name_storage1 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
         );
 
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+        let mut name_storage2 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
         );
 
@@ -1334,19 +1333,16 @@ mod Game {
 
     fn _apply_stat_boots(self: @ContractState, adventurer_id: u256, ref adventurer: Adventurer) {
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
-                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
-            );
+        let mut name_storage1 = _loot_special_names_storage_unpacked(
+            self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+        );
 
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
-                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
-            );
-
-        let stat_boots = adventurer.get_suffix_stat_boosts(
-            name_storage1,
-            name_storage2,
+        let mut name_storage2 = _loot_special_names_storage_unpacked(
+            self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
         );
+
+        let stat_boots = adventurer.get_suffix_stat_boosts(name_storage1, name_storage2, );
         adventurer.add_strength(stat_boots.strength);
         adventurer.add_dexterity(stat_boots.dexterity);
         adventurer.add_vitality(stat_boots.vitality);
@@ -1395,30 +1391,6 @@ mod Game {
         ImplLootItemSpecialNames::unpack(
             self._loot_special_names.read((adventurer_id, storage_index))
         )
-    }
-
-    // TODO: Delete this fn. This is a hack to get around a compiler crash on real unpack
-    fn _loot_special_names_storage_unpacked_FAKE(
-        self: @ContractState, adventurer_id: u256, storage_index: u256
-    ) -> LootItemSpecialNamesStorage {
-        let blank = LootItemSpecialNames {
-            name_prefix: 0, // 7 bits
-            name_suffix: 0, // 5 bits
-            item_suffix: 0, // 4 bit
-        };
-
-        LootItemSpecialNamesStorage {
-            item_1: blank,
-            item_2: blank,
-            item_3: blank,
-            item_4: blank,
-            item_5: blank,
-            item_6: blank,
-            item_7: blank,
-            item_8: blank,
-            item_9: blank,
-            item_10: blank,
-        }
     }
 
     fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
@@ -1484,7 +1456,7 @@ mod Game {
             // if it's above 15, fetch the special names
             // TODO: Revert to real fn. This is a hack to get around a compiler crash
             let item_details = ImplLootItemSpecialNames::get_loot_special_names(
-                _loot_special_names_storage_unpacked_FAKE(
+                _loot_special_names_storage_unpacked(
                     self, adventurer_id, _get_storage_index(self, item.metadata)
                 ),
                 item
