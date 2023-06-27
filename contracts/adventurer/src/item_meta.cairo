@@ -1,8 +1,10 @@
 use core::serde::Serde;
 use traits::{TryInto, Into};
 use option::OptionTrait;
-
-use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8};
+use integer::{
+    U256TryIntoU32, U256TryIntoU16, U256TryIntoU8
+};
+use pack::pack::{pack_value, unpack_value};
 use pack::constants::{pow, mask};
 
 use super::adventurer::{Adventurer, IAdventurer, ImplAdventurer};
@@ -23,7 +25,6 @@ mod STORAGE {
 
 #[derive(Drop, Copy, Serde)]
 struct LootItemSpecialNames {
-    id: u8, // 7 bits
     name_prefix: u8, // 7 bits
     name_suffix: u8, // 5 bits
     item_suffix: u8, // 4 bit
@@ -103,55 +104,45 @@ impl ImplLootItemSpecialNames of ILootItemSpecialNames {
 
     fn pack(self: LootItemSpecialNamesStorage) -> felt252 {
         let mut packed = 0;
-        packed = packed | pack_value(self.item_1.id.into(), pow::TWO_POW_244);
-        packed = packed | pack_value(self.item_1.name_prefix.into(), pow::TWO_POW_238);
-        packed = packed | pack_value(self.item_1.name_suffix.into(), pow::TWO_POW_233);
-        packed = packed | pack_value(self.item_1.item_suffix.into(), pow::TWO_POW_229);
+        packed = packed | pack_value(self.item_1.name_prefix.into(), pow::TWO_POW_244);
+        packed = packed | pack_value(self.item_1.name_suffix.into(), pow::TWO_POW_240);
+        packed = packed | pack_value(self.item_1.item_suffix.into(), pow::TWO_POW_236);
 
-        packed = packed | pack_value(self.item_2.id.into(), pow::TWO_POW_222);
-        packed = packed | pack_value(self.item_2.name_prefix.into(), pow::TWO_POW_215);
-        packed = packed | pack_value(self.item_2.name_suffix.into(), pow::TWO_POW_210);
-        packed = packed | pack_value(self.item_2.item_suffix.into(), pow::TWO_POW_206);
+        packed = packed | pack_value(self.item_2.name_prefix.into(), pow::TWO_POW_229);
+        packed = packed | pack_value(self.item_2.name_suffix.into(), pow::TWO_POW_224);
+        packed = packed | pack_value(self.item_2.item_suffix.into(), pow::TWO_POW_220);
 
-        packed = packed | pack_value(self.item_3.id.into(), pow::TWO_POW_199);
-        packed = packed | pack_value(self.item_3.name_prefix.into(), pow::TWO_POW_192);
-        packed = packed | pack_value(self.item_3.name_suffix.into(), pow::TWO_POW_187);
-        packed = packed | pack_value(self.item_3.item_suffix.into(), pow::TWO_POW_183);
+        packed = packed | pack_value(self.item_3.name_prefix.into(), pow::TWO_POW_213);
+        packed = packed | pack_value(self.item_3.name_suffix.into(), pow::TWO_POW_208);
+        packed = packed | pack_value(self.item_3.item_suffix.into(), pow::TWO_POW_204);
 
-        packed = packed | pack_value(self.item_4.id.into(), pow::TWO_POW_176);
-        packed = packed | pack_value(self.item_4.name_prefix.into(), pow::TWO_POW_169);
-        packed = packed | pack_value(self.item_4.name_suffix.into(), pow::TWO_POW_164);
-        packed = packed | pack_value(self.item_4.item_suffix.into(), pow::TWO_POW_160);
+        packed = packed | pack_value(self.item_4.name_prefix.into(), pow::TWO_POW_197);
+        packed = packed | pack_value(self.item_4.name_suffix.into(), pow::TWO_POW_192);
+        packed = packed | pack_value(self.item_4.item_suffix.into(), pow::TWO_POW_188);
 
-        packed = packed | pack_value(self.item_5.id.into(), pow::TWO_POW_153);
-        packed = packed | pack_value(self.item_5.name_prefix.into(), pow::TWO_POW_146);
-        packed = packed | pack_value(self.item_5.name_suffix.into(), pow::TWO_POW_141);
-        packed = packed | pack_value(self.item_5.item_suffix.into(), pow::TWO_POW_137);
+        packed = packed | pack_value(self.item_5.name_prefix.into(), pow::TWO_POW_181);
+        packed = packed | pack_value(self.item_5.name_suffix.into(), pow::TWO_POW_176);
+        packed = packed | pack_value(self.item_5.item_suffix.into(), pow::TWO_POW_172);
 
-        packed = packed | pack_value(self.item_6.id.into(), pow::TWO_POW_130);
-        packed = packed | pack_value(self.item_6.name_prefix.into(), pow::TWO_POW_123);
-        packed = packed | pack_value(self.item_6.name_suffix.into(), pow::TWO_POW_118);
-        packed = packed | pack_value(self.item_6.item_suffix.into(), pow::TWO_POW_114);
+        packed = packed | pack_value(self.item_6.name_prefix.into(), pow::TWO_POW_165);
+        packed = packed | pack_value(self.item_6.name_suffix.into(), pow::TWO_POW_160);
+        packed = packed | pack_value(self.item_6.item_suffix.into(), pow::TWO_POW_156);
 
-        packed = packed | pack_value(self.item_7.id.into(), pow::TWO_POW_107);
-        packed = packed | pack_value(self.item_7.name_prefix.into(), pow::TWO_POW_100);
-        packed = packed | pack_value(self.item_7.name_suffix.into(), pow::TWO_POW_95);
-        packed = packed | pack_value(self.item_7.item_suffix.into(), pow::TWO_POW_91);
+        packed = packed | pack_value(self.item_7.name_prefix.into(), pow::TWO_POW_149);
+        packed = packed | pack_value(self.item_7.name_suffix.into(), pow::TWO_POW_144);
+        packed = packed | pack_value(self.item_7.item_suffix.into(), pow::TWO_POW_140);
 
-        packed = packed | pack_value(self.item_8.id.into(), pow::TWO_POW_84);
-        packed = packed | pack_value(self.item_8.name_prefix.into(), pow::TWO_POW_77);
-        packed = packed | pack_value(self.item_8.name_suffix.into(), pow::TWO_POW_72);
-        packed = packed | pack_value(self.item_8.item_suffix.into(), pow::TWO_POW_68);
+        packed = packed | pack_value(self.item_8.name_prefix.into(), pow::TWO_POW_133);
+        packed = packed | pack_value(self.item_8.name_suffix.into(), pow::TWO_POW_128);
+        packed = packed | pack_value(self.item_8.item_suffix.into(), pow::TWO_POW_124);
 
-        packed = packed | pack_value(self.item_9.id.into(), pow::TWO_POW_61);
-        packed = packed | pack_value(self.item_9.name_prefix.into(), pow::TWO_POW_54);
-        packed = packed | pack_value(self.item_9.name_suffix.into(), pow::TWO_POW_49);
-        packed = packed | pack_value(self.item_9.item_suffix.into(), pow::TWO_POW_45);
+        packed = packed | pack_value(self.item_9.name_prefix.into(), pow::TWO_POW_117);
+        packed = packed | pack_value(self.item_9.name_suffix.into(), pow::TWO_POW_112);
+        packed = packed | pack_value(self.item_9.item_suffix.into(), pow::TWO_POW_108);
 
-        packed = packed | pack_value(self.item_10.id.into(), pow::TWO_POW_38);
-        packed = packed | pack_value(self.item_10.name_prefix.into(), pow::TWO_POW_31);
-        packed = packed | pack_value(self.item_10.name_suffix.into(), pow::TWO_POW_26);
-        packed = packed | pack_value(self.item_10.item_suffix.into(), pow::TWO_POW_22);
+        packed = packed | pack_value(self.item_10.name_prefix.into(), pow::TWO_POW_101);
+        packed = packed | pack_value(self.item_10.name_suffix.into(), pow::TWO_POW_96);
+        packed = packed | pack_value(self.item_10.item_suffix.into(), pow::TWO_POW_92);
 
         packed.try_into().unwrap()
     }
@@ -160,153 +151,133 @@ impl ImplLootItemSpecialNames of ILootItemSpecialNames {
 
         LootItemSpecialNamesStorage {
             item_1: LootItemSpecialNames {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_244, mask::MASK_7))
-                    .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_238, mask::MASK_7)
+                    unpack_value(packed, pow::TWO_POW_244, mask::MASK_7)
                 )
                     .unwrap(),
                 name_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_233, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_240, mask::MASK_5)
                 )
                     .unwrap(),
                 item_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_229, mask::MASK_4)
+                    unpack_value(packed, pow::TWO_POW_236, mask::MASK_4)
                 )
                     .unwrap(),
                 }, item_2: LootItemSpecialNames {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_222, mask::MASK_7))
-                    .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_215, mask::MASK_7)
+                    unpack_value(packed, pow::TWO_POW_229, mask::MASK_7)
                 )
                     .unwrap(),
                 name_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_210, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_224, mask::MASK_5)
                 )
                     .unwrap(),
                 item_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_206, mask::MASK_4)
+                    unpack_value(packed, pow::TWO_POW_220, mask::MASK_4)
                 )
                     .unwrap(),
                 }, item_3: LootItemSpecialNames {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_199, mask::MASK_7))
-                    .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_192, mask::MASK_7)
+                    unpack_value(packed, pow::TWO_POW_213, mask::MASK_7)
                 )
                     .unwrap(),
                 name_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_187, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_208, mask::MASK_5)
                 )
                     .unwrap(),
                 item_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_183, mask::MASK_4)
+                    unpack_value(packed, pow::TWO_POW_204, mask::MASK_4)
                 )
                     .unwrap(),
                 }, item_4: LootItemSpecialNames {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_176, mask::MASK_7))
-                    .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_169, mask::MASK_7)
+                    unpack_value(packed, pow::TWO_POW_197, mask::MASK_7)
                 )
                     .unwrap(),
                 name_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_164, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_192, mask::MASK_5)
                 )
                     .unwrap(),
                 item_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_160, mask::MASK_4)
+                    unpack_value(packed, pow::TWO_POW_188, mask::MASK_4)
                 )
                     .unwrap(),
                 }, item_5: LootItemSpecialNames {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_153, mask::MASK_7))
-                    .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_146, mask::MASK_7)
+                    unpack_value(packed, pow::TWO_POW_181, mask::MASK_7)
                 )
                     .unwrap(),
                 name_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_141, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_176, mask::MASK_5)
                 )
                     .unwrap(),
                 item_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_137, mask::MASK_4)
+                    unpack_value(packed, pow::TWO_POW_172, mask::MASK_4)
                 )
                     .unwrap(),
                 }, item_6: LootItemSpecialNames {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_130, mask::MASK_7))
-                    .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_123, mask::MASK_7)
+                    unpack_value(packed, pow::TWO_POW_165, mask::MASK_7)
                 )
                     .unwrap(),
                 name_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_118, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_160, mask::MASK_5)
                 )
                     .unwrap(),
                 item_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_114, mask::MASK_4)
+                    unpack_value(packed, pow::TWO_POW_156, mask::MASK_4)
                 )
                     .unwrap(),
                 }, item_7: LootItemSpecialNames {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_107, mask::MASK_7))
-                    .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_100, mask::MASK_7)
+                    unpack_value(packed, pow::TWO_POW_149, mask::MASK_7)
                 )
                     .unwrap(),
                 name_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_95, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_144, mask::MASK_5)
                 )
                     .unwrap(),
                 item_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_91, mask::MASK_4)
+                    unpack_value(packed, pow::TWO_POW_140, mask::MASK_4)
                 )
                     .unwrap(),
                 }, item_8: LootItemSpecialNames {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_84, mask::MASK_7))
-                    .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_77, mask::MASK_7)
+                    unpack_value(packed, pow::TWO_POW_133, mask::MASK_7)
                 )
                     .unwrap(),
                 name_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_72, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_128, mask::MASK_5)
                 )
                     .unwrap(),
                 item_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_68, mask::MASK_4)
+                    unpack_value(packed, pow::TWO_POW_124, mask::MASK_4)
                 )
                     .unwrap(),
                 }, item_9: LootItemSpecialNames {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_61, mask::MASK_7))
-                    .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_54, mask::MASK_7)
+                    unpack_value(packed, pow::TWO_POW_117, mask::MASK_7)
                 )
                     .unwrap(),
                 name_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_49, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_112, mask::MASK_5)
                 )
                     .unwrap(),
                 item_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_45, mask::MASK_4)
+                    unpack_value(packed, pow::TWO_POW_108, mask::MASK_4)
                 )
                     .unwrap(),
                 }, item_10: LootItemSpecialNames {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_38, mask::MASK_7))
-                    .unwrap(),
                 name_prefix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_31, mask::MASK_7)
+                    unpack_value(packed, pow::TWO_POW_101, mask::MASK_7)
                 )
                     .unwrap(),
                 name_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_26, mask::MASK_5)
+                    unpack_value(packed, pow::TWO_POW_96, mask::MASK_5)
                 )
                     .unwrap(),
                 item_suffix: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_22, mask::MASK_4)
+                    unpack_value(packed, pow::TWO_POW_92, mask::MASK_4)
                 )
                     .unwrap(),
             }
@@ -433,76 +404,66 @@ impl ImplLootItemSpecialNames of ILootItemSpecialNames {
 fn test_item_meta_packing() {
     let mut item_meta_storage = LootItemSpecialNamesStorage {
         item_1: LootItemSpecialNames {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            name_prefix: 127, name_suffix: 31, item_suffix: 15, 
             }, item_2: LootItemSpecialNames {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            name_prefix: 127, name_suffix: 31, item_suffix: 15, 
             }, item_3: LootItemSpecialNames {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            name_prefix: 127, name_suffix: 31, item_suffix: 15, 
             }, item_4: LootItemSpecialNames {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            name_prefix: 127, name_suffix: 31, item_suffix: 15, 
             }, item_5: LootItemSpecialNames {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            name_prefix: 127, name_suffix: 31, item_suffix: 15, 
             }, item_6: LootItemSpecialNames {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            name_prefix: 127, name_suffix: 31, item_suffix: 15, 
             }, item_7: LootItemSpecialNames {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            name_prefix: 127, name_suffix: 31, item_suffix: 15, 
             }, item_8: LootItemSpecialNames {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            name_prefix: 127, name_suffix: 31, item_suffix: 15, 
             }, item_9: LootItemSpecialNames {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            name_prefix: 127, name_suffix: 31, item_suffix: 15, 
             }, item_10: LootItemSpecialNames {
-            id: 127, name_prefix: 127, name_suffix: 31, item_suffix: 15, 
+            name_prefix: 127, name_suffix: 31, item_suffix: 15, 
         }
     };
 
     let unpacked = ImplLootItemSpecialNames::unpack(item_meta_storage.pack());
 
-    assert(unpacked.item_1.id == 127, 'item_1 id 127');
     assert(unpacked.item_1.name_prefix == 127, 'item_1 name_prefix  127');
     assert(unpacked.item_1.name_suffix == 31, 'item_1 name_suffix  31');
     assert(unpacked.item_1.item_suffix == 15, 'item_1 item_suffix 15');
 
-    assert(unpacked.item_2.id == 127, 'item_2 id 127');
     assert(unpacked.item_2.name_prefix == 127, 'item_2 name_prefix  127');
     assert(unpacked.item_2.name_suffix == 31, 'item_2 name_suffix  31');
     assert(unpacked.item_2.item_suffix == 15, 'item_2 item_suffix 15');
 
-    assert(unpacked.item_3.id == 127, 'item_3 id 127');
     assert(unpacked.item_3.name_prefix == 127, 'item_3 name_prefix  127');
     assert(unpacked.item_3.name_suffix == 31, 'item_3 name_suffix  31');
     assert(unpacked.item_3.item_suffix == 15, 'item_3 item_suffix 15');
 
-    assert(unpacked.item_4.id == 127, 'item_4 id 127');
     assert(unpacked.item_4.name_prefix == 127, 'item_4 name_prefix  127');
     assert(unpacked.item_4.name_suffix == 31, 'item_4 name_suffix  31');
     assert(unpacked.item_4.item_suffix == 15, 'item_4 item_suffix 15');
 
-    assert(unpacked.item_5.id == 127, 'item_5 id 127');
     assert(unpacked.item_5.name_prefix == 127, 'item_5 name_prefix  127');
     assert(unpacked.item_5.name_suffix == 31, 'item_5 name_suffix  31');
     assert(unpacked.item_5.item_suffix == 15, 'item_5 item_suffix 15');
 
-    assert(unpacked.item_6.id == 127, 'item_6 id 127');
     assert(unpacked.item_6.name_prefix == 127, 'item_6 name_prefix  127');
     assert(unpacked.item_6.name_suffix == 31, 'item_6 name_suffix  31');
     assert(unpacked.item_6.item_suffix == 15, 'item_6 item_suffix 15');
 
-    assert(unpacked.item_7.id == 127, 'item_7 id 127');
     assert(unpacked.item_7.name_prefix == 127, 'item_7 name_prefix  127');
     assert(unpacked.item_7.name_suffix == 31, 'item_7 name_suffix  31');
     assert(unpacked.item_7.item_suffix == 15, 'item_7 item_suffix 15');
 
-    assert(unpacked.item_8.id == 127, 'item_8 id 127');
     assert(unpacked.item_8.name_prefix == 127, 'item_8 name_prefix  127');
     assert(unpacked.item_8.name_suffix == 31, 'item_8 name_suffix  31');
     assert(unpacked.item_8.item_suffix == 15, 'item_8 item_suffix 15');
 
-    assert(unpacked.item_9.id == 127, 'item_9 id 127');
     assert(unpacked.item_9.name_prefix == 127, 'item_9 name_prefix  127');
     assert(unpacked.item_9.name_suffix == 31, 'item_9 name_suffix  31');
     assert(unpacked.item_9.item_suffix == 15, 'item_9 item_suffix 15');
 
-    assert(unpacked.item_10.id == 127, 'item_10 id 127');
     assert(unpacked.item_10.name_prefix == 127, 'item_10 name_prefix  127');
     assert(unpacked.item_10.name_suffix == 31, 'item_10 name_suffix  31');
     assert(unpacked.item_10.item_suffix == 15, 'item_10 item_suffix 15');
@@ -564,32 +525,32 @@ fn test_get_item_metadata_slot() {
 fn test_set_item_metadata_slot() {
     let mut item_meta_storage = LootItemSpecialNamesStorage {
         item_1: LootItemSpecialNames {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
             }, item_2: LootItemSpecialNames {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
             }, item_3: LootItemSpecialNames {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
             }, item_4: LootItemSpecialNames {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
             }, item_5: LootItemSpecialNames {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
             }, item_6: LootItemSpecialNames {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
             }, item_7: LootItemSpecialNames {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
             }, item_8: LootItemSpecialNames {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
             }, item_9: LootItemSpecialNames {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
             }, item_10: LootItemSpecialNames {
-            id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
         }
     };
 
     let loot_statistics_1 = LootStatistics { id: 102, xp: 0, metadata: 1 };
 
     let loot_special_names_2 = LootItemSpecialNames {
-        id: 1, name_prefix: 12, name_suffix: 11, item_suffix: 13
+        name_prefix: 12, name_suffix: 11, item_suffix: 13
     };
 
     item_meta_storage.set_loot_special_names(loot_statistics_1, loot_special_names_2);
@@ -601,7 +562,7 @@ fn test_set_item_metadata_slot() {
     let loot_statistics_2 = LootStatistics { id: 102, xp: 0, metadata: 2 };
 
     let loot_special_names_2 = LootItemSpecialNames {
-        id: 3, name_prefix: 12, name_suffix: 11, item_suffix: 13
+        name_prefix: 12, name_suffix: 11, item_suffix: 13
     };
 
     item_meta_storage.set_loot_special_names(loot_statistics_2, loot_special_names_2);
@@ -626,25 +587,25 @@ fn test_get_item_metadata() {
 
     let mut item_meta_storage = LootItemSpecialNamesStorage {
         item_1: LootItemSpecialNames {
-            id: 1, name_prefix: 2, name_suffix: 2, item_suffix: 10, 
+            name_prefix: 2, name_suffix: 2, item_suffix: 10, 
             }, item_2: LootItemSpecialNames {
-            id: 2, name_prefix: 4, name_suffix: 3, item_suffix: 11, 
+            name_prefix: 4, name_suffix: 3, item_suffix: 11, 
             }, item_3: LootItemSpecialNames {
-            id: 3, name_prefix: 5, name_suffix: 4, item_suffix: 11, 
+            name_prefix: 5, name_suffix: 4, item_suffix: 11, 
             }, item_4: LootItemSpecialNames {
-            id: 4, name_prefix: 6, name_suffix: 5, item_suffix: 3, 
+            name_prefix: 6, name_suffix: 5, item_suffix: 3, 
             }, item_5: LootItemSpecialNames {
-            id: 5, name_prefix: 8, name_suffix: 6, item_suffix: 2, 
+            name_prefix: 8, name_suffix: 6, item_suffix: 2, 
             }, item_6: LootItemSpecialNames {
-            id: 6, name_prefix: 9, name_suffix: 7, item_suffix: 1, 
+            name_prefix: 9, name_suffix: 7, item_suffix: 1, 
             }, item_7: LootItemSpecialNames {
-            id: 7, name_prefix: 11, name_suffix: 8, item_suffix: 5, 
+            name_prefix: 11, name_suffix: 8, item_suffix: 5, 
             }, item_8: LootItemSpecialNames {
-            id: 8, name_prefix: 2, name_suffix: 9, item_suffix: 6, 
+            name_prefix: 2, name_suffix: 9, item_suffix: 6, 
             }, item_9: LootItemSpecialNames {
-            id: 9, name_prefix: 3, name_suffix: 0, item_suffix: 7, 
+            name_prefix: 3, name_suffix: 0, item_suffix: 7, 
             }, item_10: LootItemSpecialNames {
-            id: 10, name_prefix: 11, name_suffix: 8, item_suffix: 5, 
+            name_prefix: 11, name_suffix: 8, item_suffix: 5, 
         }
     };
 

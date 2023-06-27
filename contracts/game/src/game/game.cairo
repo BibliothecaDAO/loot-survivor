@@ -468,12 +468,12 @@ mod Game {
     ) -> Adventurer {
 
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage1 = _loot_special_names_storage_unpacked_FAKE(
+        let mut name_storage1 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
         );
 
         // TODO: Revert to real fn. This is a hack to get around a compiler crash
-        let mut name_storage2 = _loot_special_names_storage_unpacked_FAKE(
+        let mut name_storage2 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
         );
 
@@ -1402,7 +1402,6 @@ mod Game {
         self: @ContractState, adventurer_id: u256, storage_index: u256
     ) -> LootItemSpecialNamesStorage {
         let blank = LootItemSpecialNames {
-            id: 0, // 7 bits
             name_prefix: 0, // 7 bits
             name_suffix: 0, // 5 bits
             item_suffix: 0, // 4 bit
