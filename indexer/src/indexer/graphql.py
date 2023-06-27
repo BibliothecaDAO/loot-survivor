@@ -689,10 +689,12 @@ class BattlesFilter:
 @strawberry.input
 class ItemsFilter:
     item: Optional[ItemFilter] = None
+    adventurerId: Optional[FeltValueFilter] = None
     cost: Optional[FeltValueFilter] = None
-    owner: Optional[HexValueFilter] = None
-    ownerAdventurerId: Optional[FeltValueFilter] = None
-    equippedAdventurerId: Optional[FeltValueFilter] = None
+    ownerAddress: Optional[HexValueFilter] = None
+    owner: Optional[BooleanFilter] = None
+    equipped: Optional[BooleanFilter] = None
+    createdTime: Optional[DateTimeFilter] = None
     purchasedTime: Optional[DateTimeFilter] = None
     namePrefix: Optional[NamePrefixFilter] = None
     nameSuffix: Optional[NameSuffixFilter] = None
@@ -789,10 +791,12 @@ class BattlesOrderByInput:
 @strawberry.input
 class ItemsOrderByInput:
     item: Optional[OrderByInput] = None
+    adventurerId: Optional[OrderByInput] = None
     cost: Optional[OrderByInput] = None
+    ownerAddress: Optional[OrderByInput] = None
     owner: Optional[OrderByInput] = None
-    ownerAdventurerId: Optional[OrderByInput] = None
-    equippedAdventurerId: Optional[OrderByInput] = None
+    equipped: Optional[OrderByInput] = None
+    createdTime: Optional[OrderByInput] = None
     purchasedTime: Optional[OrderByInput] = None
     namePrefix: Optional[OrderByInput] = None
     nameSuffix: Optional[OrderByInput] = None
@@ -804,14 +808,13 @@ class ItemsOrderByInput:
 @strawberry.type
 class Adventurer:
     id: Optional[FeltValue]
+    lastAction: Optional[FeltValue]
     owner: Optional[HexValue]
     race: Optional[RaceValue]
     homeRealm: Optional[FeltValue]
-    birthdate: Optional[datetime]
     name: Optional[StringValue]
     order: Optional[OrderValue]
     health: Optional[FeltValue]
-    level: Optional[FeltValue]
     strength: Optional[FeltValue]
     dexterity: Optional[FeltValue]
     vitality: Optional[FeltValue]
@@ -820,32 +823,32 @@ class Adventurer:
     charisma: Optional[FeltValue]
     luck: Optional[FeltValue]
     xp: Optional[FeltValue]
-    weaponId: Optional[FeltValue]
-    chestId: Optional[FeltValue]
-    headId: Optional[FeltValue]
-    waistId: Optional[FeltValue]
-    feetId: Optional[FeltValue]
-    handsId: Optional[FeltValue]
-    neckId: Optional[FeltValue]
-    ringId: Optional[FeltValue]
+    weapon: Optional[FeltValue]
+    chest: Optional[FeltValue]
+    head: Optional[FeltValue]
+    waist: Optional[FeltValue]
+    feet: Optional[FeltValue]
+    hands: Optional[FeltValue]
+    neck: Optional[FeltValue]
+    ring: Optional[FeltValue]
     beast: Optional[BeastValue]
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
     gold: Optional[FeltValue]
+    createdTime: Optional[datetime]
     lastUpdatedTime: Optional[datetime]
 
     @classmethod
     def from_mongo(cls, data):
         return cls(
             id=data["id"],
+            lastAction=data["lastAction"],
             owner=data["owner"],
             race=data["race"],
             homeRealm=data["homeRealm"],
-            birthdate=data["birthdate"],
             name=data["name"],
             order=data["order"],
             health=data["health"],
-            level=data["level"],
             strength=data["strength"],
             dexterity=data["dexterity"],
             vitality=data["vitality"],
@@ -854,17 +857,18 @@ class Adventurer:
             charisma=data["charisma"],
             luck=data["luck"],
             xp=data["xp"],
-            weaponId=data["weaponId"],
-            chestId=data["chestId"],
-            headId=data["headId"],
-            waistId=data["waistId"],
-            feetId=data["feetId"],
-            handsId=data["handsId"],
-            neckId=data["neckId"],
-            ringId=data["ringId"],
+            weapon=data["weapon"],
+            chest=data["chest"],
+            head=data["head"],
+            waist=data["waist"],
+            feet=data["feet"],
+            hands=data["hands"],
+            neck=data["neck"],
+            ring=data["ring"],
             beast=data["beast"],
             statUpgrades=data["statUpgrades"],
             gold=data["gold"],
+            createdTime=data["createdTime"],
             lastUpdatedTime=data["lastUpdatedTime"],
         )
 
@@ -977,10 +981,12 @@ class Battle:
 @strawberry.type
 class Item:
     item: Optional[FeltValue]
+    adventurerId: Optional[FeltValue]
     cost: Optional[FeltValue]
-    owner: Optional[HexValue]
-    ownerAdventurerId: Optional[FeltValue]
-    equippedAdventurerId: Optional[FeltValue]
+    ownerAddress: Optional[HexValue]
+    owner: Optional[BooleanValue]
+    equipped: Optional[BooleanValue]
+    createdTime: Optional[datetime]
     purchasedTime: Optional[datetime]
     namePrefix: Optional[NamePrefixValue]
     nameSuffix: Optional[NameSuffixValue]
@@ -992,10 +998,12 @@ class Item:
     def from_mongo(cls, data):
         return cls(
             item=data["item"],
+            advebturerId=data["adventurerId"],
             cost=data["cost"],
+            ownerAddress=data["ownerAddress"],
             owner=data["owner"],
-            ownerAdventurerId=data["ownerAdventurerId"],
-            equippedAdventurerId=data["equippedAdventurerId"],
+            equipped=data["equipped"],
+            createdTime=data["createdTime"],
             purchasedTime=data["purchasedTime"],
             namePrefix=data["namePrefix"],
             nameSuffix=data["nameSuffix"],

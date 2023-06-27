@@ -33,11 +33,10 @@ const Marketplace = () => {
   const currentTime = new Date().getTime();
 
   useCustomQuery(
-    "unclaimedItemsByAdventurerQuery",
-    getUnclaimedItemsByAdventurer,
+    "latestMarketItemsQuery",
+    getLatestMarketItems,
     {
-      bidder: adventurer?.id,
-      status: "Open",
+      adventurerId: adventurer?.id,
     },
     true
   );

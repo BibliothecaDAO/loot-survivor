@@ -246,3 +246,11 @@ export function dedupeByValue(arr: MyDict[], key: string): MyDict[] {
 export function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export function checkAvailableSlots(ownedItems: any[]) {
+  if (ownedItems.length < 20) {
+    return true;
+  } else {
+    return false;
+  }
+}

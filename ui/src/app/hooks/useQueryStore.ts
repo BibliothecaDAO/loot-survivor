@@ -19,7 +19,8 @@ export type QueryKey =
   | "adventurersInListByXpQuery"
   | "itemsByAdventurerQuery"
   | "itemsByProfileQuery"
-  | "topScoresQuery";
+  | "topScoresQuery"
+  | "latestMarketItemsQuery";
 
 type QueriesState = {
   data: Record<QueryKey, any>;
@@ -55,6 +56,7 @@ const initialData: Record<QueryKey, any> = {
   itemsByAdventurerQuery: null,
   itemsByProfileQuery: null,
   topScoresQuery: null,
+  latestMarketItemsQuery: null,
 };
 
 const initialLoading: Record<QueryKey, boolean> = {
@@ -76,6 +78,7 @@ const initialLoading: Record<QueryKey, boolean> = {
   itemsByAdventurerQuery: false,
   itemsByProfileQuery: false,
   topScoresQuery: false,
+  latestMarketItemsQuery: false,
 };
 
 const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
@@ -97,6 +100,7 @@ const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
   itemsByAdventurerQuery: false,
   itemsByProfileQuery: false,
   topScoresQuery: false,
+  latestMarketItemsQuery: false,
   global: false,
 };
 
@@ -119,6 +123,7 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   itemsByAdventurerQuery: async () => {},
   itemsByProfileQuery: async () => {},
   topScoresQuery: async () => {},
+  latestMarketItemsQuery: async () => {},
 };
 
 export const useQueriesStore = create<QueriesState>((set, get) => ({
