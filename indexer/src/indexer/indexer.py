@@ -916,13 +916,13 @@ class LootSurvivorIndexer(StarkNetIndexer):
         ip = decode_item_prefix_discovered_event(data)
         await update_adventurer_helper(info, ip.adventurer_state)
         item_prefix_doc = {
-            "namePrefix": check_exists_int(ip.item_description["name_prefix"]),
-            "nameSuffix": encode_int_as_bytes(ip.item_description["name_suffix"]),
+            "namePrefix": check_exists_int(ip.special_names["name_prefix"]),
+            "nameSuffix": encode_int_as_bytes(ip.special_names["name_suffix"]),
         }
         await info.storage.find_one_and_update(
             "items",
             {
-                "item": check_exists_int(ip.item_description["id"]),
+                "item": check_exists_int(ip.special_names["id"]),
                 "adventurerId": check_exists_int(ip.adventurer_state["adventurer_id"]),
                 "owner": check_exists_int(1)
             },
@@ -932,7 +932,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "- [item prefix discovered]",
             ip.adventurer_state["adventurer_id"],
             "->",
-            ip.item_description["id"],
+            ip.special_names["id"],
         )
 
     async def item_suffix_discovered(
@@ -946,12 +946,12 @@ class LootSurvivorIndexer(StarkNetIndexer):
         isd = decode_item_suffix_discovered_event(data)
         await update_adventurer_helper(info, isd.adventurer_state)
         item_suffix_doc = {
-            "itemSuffix": check_exists_int(isd.item_description["item_suffix"]),
+            "itemSuffix": check_exists_int(isd.special_names["item_suffix"]),
         }
         await info.storage.find_one_and_update(
             "items",
             {
-                "id": check_exists_int(isd.item_description["id"]),
+                "id": check_exists_int(isd.special_names["id"]),
                 "adventurerId": check_exists_int(isd.adventurer_state["adventurer_id"]),
                 "owner": check_exists_int(1)
             },
@@ -961,7 +961,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "- [item suffix discovered]",
             isd.adventurer_state["adventurer_id"],
             "->",
-            isd.item_description["id"],
+            isd.special_names["id"],
         )
 
     async def purchased_potion(
