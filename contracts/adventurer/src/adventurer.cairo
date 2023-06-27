@@ -1,13 +1,13 @@
 use core::result::ResultTrait;
 use core::serde::Serde;
 use integer::{
-    U64IntoU128, U16IntoU128, U128TryIntoU8, U8IntoU128, u16_overflowing_sub, u16_overflowing_add
+    U64IntoU128, U16IntoU128, U128TryIntoU8, U8IntoU128, u16_overflowing_sub, u16_overflowing_add, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8, U256TryIntoU64,
 };
 use traits::{TryInto, Into};
 use option::OptionTrait;
 
 use pack::pack::{
-    pack_value, unpack_value, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8, U256TryIntoU64,
+    pack_value, unpack_value
 };
 use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
@@ -94,7 +94,8 @@ impl ImplAdventurer of IAdventurer {
             POTION_PRICE * self.get_level().into(), self.charisma_potion_discount(item_stat_boost)
         )
             .is_ok()) {
-            let price = POTION_PRICE * self.get_level().into() - self.charisma_potion_discount(item_stat_boost);
+            let price = POTION_PRICE * self.get_level().into()
+                - self.charisma_potion_discount(item_stat_boost);
 
             // check if less than the base price - this can only happen rarely
             if (price < MINIMUM_POTION_PRICE) {
@@ -493,7 +494,7 @@ impl ImplAdventurer of IAdventurer {
             // no additional work required, return false for item changed and empty LootItemSpecialNames
             return (
                 original_level, new_level, suffix_assigned, prefix_assigned, LootItemSpecialNames {
-                    id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0
+                    name_prefix: 0, name_suffix: 0, item_suffix: 0
                 }
             );
         }
@@ -508,7 +509,6 @@ impl ImplAdventurer of IAdventurer {
             prefix_assigned = true;
             // we assign the item it's prefixes and suffix
             let special_names = LootItemSpecialNames {
-                id: self.id,
                 name_prefix: ImplLoot::get_name_prefix(self.id, entropy),
                 name_suffix: ImplLoot::get_name_suffix(self.id, entropy),
                 item_suffix: ImplLoot::get_item_suffix(self.id, entropy),
@@ -526,7 +526,6 @@ impl ImplAdventurer of IAdventurer {
             // return bool of prefix assigned will remain 
 
             let special_names = LootItemSpecialNames {
-                id: self.id,
                 name_prefix: 0,
                 name_suffix: 0,
                 item_suffix: ImplLoot::get_item_suffix(self.id, entropy), // set item suffix
@@ -543,7 +542,6 @@ impl ImplAdventurer of IAdventurer {
             // When handling the greatness upgrade to G19 we need to ensure we preserve
             // the item name suffix applied at G15.
             let special_names = LootItemSpecialNames {
-                id: self.id,
                 name_prefix: ImplLoot::get_name_prefix(self.id, entropy),
                 name_suffix: ImplLoot::get_name_suffix(self.id, entropy),
                 item_suffix: ImplLootItemSpecialNames::get_loot_special_names(name_storage, self)
@@ -558,7 +556,7 @@ impl ImplAdventurer of IAdventurer {
         // level up should be true here but suffix and prefix assigned false
         return (
             original_level, new_level, suffix_assigned, prefix_assigned, LootItemSpecialNames {
-                id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0
+                name_prefix: 0, name_suffix: 0, item_suffix: 0
             }
         );
     }
@@ -1132,11 +1130,11 @@ fn test_increase_item_xp() {
     adventurer.add_item(item_ghost_wand);
 
     let blank_special_name = LootItemSpecialNames {
-        id: 0, name_prefix: 0, name_suffix: 0, item_suffix: 0
+        name_prefix: 0, name_suffix: 0, item_suffix: 0
     };
 
     let ghost_wand_special_name = LootItemSpecialNames {
-        id: item_ghost_wand.id, name_prefix: 0, name_suffix: 0, item_suffix: 0
+        name_prefix: 0, name_suffix: 0, item_suffix: 0
     };
 
     let mut loot_item_name_storage = LootItemSpecialNamesStorage {
@@ -1174,7 +1172,6 @@ fn test_increase_item_xp() {
     // item should not have received a suffix or prefix
     assert(suffix_assigned == false, 'weapon should not recv suffix');
     assert(prefix_assigned == false, 'weapon should not recv prefix');
-    assert(special_names.id == 0, 'weapon names should be empty');
 
     // grant weapon another 2XP (should be enough to level up)
     let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
@@ -1185,7 +1182,6 @@ fn test_increase_item_xp() {
     assert(new_level == 2, 'weapon new level should be 2');
     assert(suffix_assigned == false, 'weapon should not recv suffix');
     assert(prefix_assigned == false, 'weapon should not recv prefix');
-    assert(special_names.id == 0, 'weapon names should be empty');
 
     // grant weapon 192 more xp, bringing it to 196xp total (level 14)
     let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
@@ -1196,7 +1192,6 @@ fn test_increase_item_xp() {
     assert(new_level == 14, 'weapon new level should be 14');
     assert(suffix_assigned == false, 'weapon should not recv suffix');
     assert(prefix_assigned == false, 'weapon should not recv prefix');
-    assert(special_names.id == 0, 'weapon names should be empty');
 
     // grant weapon 29 more xp, bringing it to 225 total (level 15 - suffix assigned)
     let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
@@ -1207,7 +1202,7 @@ fn test_increase_item_xp() {
     assert(new_level == 15, 'weapon new level should be 15');
     assert(suffix_assigned == true, 'weapon should recv suffix');
     assert(prefix_assigned == false, 'weapon should not recv prefix');
-    assert(special_names.id == constants::ItemId::GhostWand, 'special name id shld be GW');
+
     assert(special_names.item_suffix != 0, 'suffix should be set');
     assert(special_names.name_prefix == 0, 'name prefix should be 0');
     assert(special_names.name_suffix == 0, 'name suffix should be 0');
@@ -1225,7 +1220,7 @@ fn test_increase_item_xp() {
     assert(new_level == 19, 'weapon new level should be 19');
     assert(suffix_assigned == false, 'weapon should not recv suffix');
     assert(prefix_assigned == true, 'weapon should recv prefixes');
-    assert(special_names.id == constants::ItemId::GhostWand, 'special name id shld be GW');
+
     assert(special_names.item_suffix == original_weapon_suffix, 'suffix should not have changed');
     assert(special_names.name_prefix != 0, 'name prefix should be set');
     assert(special_names.name_suffix != 0, 'name suffix should be set');
@@ -1309,7 +1304,7 @@ fn test_increase_item_xp() {
     assert(new_level == Settings::ITEM_MAX_GREATNESS, 'DR new level should be MAX');
     assert(suffix_assigned == true, 'DR should have recv suffix');
     assert(prefix_assigned == true, 'DR should have recv prefix');
-    assert(special_names.id == constants::ItemId::DivineRobe, 'special name id shld be DR');
+
     assert(special_names.item_suffix != 0, 'suffix should be set');
     assert(special_names.name_prefix != 0, 'name prefix should be set');
     assert(special_names.name_suffix != 0, 'name suffix should be set');
@@ -1581,35 +1576,31 @@ fn test_get_suffix_stat_boosts() {
     };
 
     let item1_names = LootItemSpecialNames {
-        id: 1, name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Power, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Power, 
     };
     let item2_names = LootItemSpecialNames {
-        id: 1, name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Giant, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Giant, 
     };
     let item3_names = LootItemSpecialNames {
-        id: 1, name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Perfection, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Perfection, 
     };
     let item4_names = LootItemSpecialNames {
-        id: 1, name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Rage, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Rage, 
     };
     let item5_names = LootItemSpecialNames {
-        id: 1, name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Fury, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Fury, 
     };
     let item6_names = LootItemSpecialNames {
-        id: 1, name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Skill, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Skill, 
     };
     let item7_names = LootItemSpecialNames {
-        id: 1, name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Vitriol, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Vitriol, 
     };
     let item8_names = LootItemSpecialNames {
-        id: 1, name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_the_Fox, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_the_Fox, 
     };
-    let item9_names = LootItemSpecialNames {
-        id: 1, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-    };
-    let item10_names = LootItemSpecialNames {
-        id: 1, name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-    };
+    let item9_names = LootItemSpecialNames { name_prefix: 0, name_suffix: 0, item_suffix: 0,  };
+    let item10_names = LootItemSpecialNames { name_prefix: 0, name_suffix: 0, item_suffix: 0,  };
 
     let name_storage1 = LootItemSpecialNamesStorage {
         item_1: item1_names,
