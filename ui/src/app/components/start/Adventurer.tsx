@@ -6,7 +6,7 @@ import { AdventurersList } from "./AdventurersList";
 import { CreateAdventurer } from "./CreateAdventurer";
 import VerticalKeyboardControl from "../VerticalMenu";
 import { useQueriesStore } from "../../hooks/useQueryStore";
-import LootIconLoader from "../Loader";
+import LootIconLoader from "../icons/Loader";
 import useCustomQuery from "../../hooks/useCustomQuery";
 import useLoadingStore from "../../hooks/useLoadingStore";
 

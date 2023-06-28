@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "../buttons/Button";
-import Info from "../Info";
+import Info from "../adventurer/Info";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { ButtonData } from "../KeyboardControls";
 import { useQueriesStore } from "../../hooks/useQueryStore";

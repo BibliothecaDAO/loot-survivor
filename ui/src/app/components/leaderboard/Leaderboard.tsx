@@ -6,7 +6,7 @@ import {
 import { Button } from "../buttons/Button";
 import Coin from "../../../../public/coin.svg";
 import Lords from "../../../../public/lords.svg";
-import LootIconLoader from "../Loader";
+import LootIconLoader from "../icons/Loader";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useUIStore from "../../hooks/useUIStore";
 import useCustomQuery from "../../hooks/useCustomQuery";

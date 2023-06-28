@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "../buttons/Button";
 import { useConnectors, useAccount } from "@starknet-react/core";
-import { AddDevnetButton, SwitchToDevnetButton } from "../DevnetConnectors";
+import {
+  AddDevnetButton,
+  SwitchToDevnetButton,
+} from "../archived/DevnetConnectors";
 import useUIStore from "../../hooks/useUIStore";
 
 interface WalletSelectProps {

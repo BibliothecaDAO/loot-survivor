@@ -12,7 +12,7 @@ import MarketplaceRow from "./MarketplaceRow";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import Coin from "../../../../public/coin.svg";
-import LootIconLoader from "../Loader";
+import LootIconLoader from "../icons/Loader";
 import useCustomQuery from "../../hooks/useCustomQuery";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 

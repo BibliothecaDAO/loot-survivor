@@ -10,7 +10,7 @@ import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useUIStore from "../hooks/useUIStore";
-import Info from "./Info";
+import Info from "./adventurer/Info";
 import { Button } from "./buttons/Button";
 import { useMediaQuery } from "react-responsive";
 

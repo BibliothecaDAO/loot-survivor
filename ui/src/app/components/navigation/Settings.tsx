@@ -1,9 +1,9 @@
-import VerticalKeyboardControl from "./VerticalMenu";
-import { EncountersIcon, LedgerIcon } from "./Icons";
-import { GuideIcon } from "./Icons";
-import { ChatIcon } from "./Icons";
-import useUIStore from "../hooks/useUIStore";
-import { Button } from "./buttons/Button";
+import VerticalKeyboardControl from "../menu//VerticalMenu";
+import { EncountersIcon, LedgerIcon } from "../icons/Icons";
+import { GuideIcon } from "../icons/Icons";
+import { ChatIcon } from "../icons/Icons";
+import useUIStore from "../../hooks/useUIStore";
+import { Button } from "../buttons/Button";
 
 export default function Settings() {
   const setScreen = useUIStore((state) => state.setScreen);

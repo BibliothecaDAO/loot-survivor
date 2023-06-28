@@ -8,7 +8,7 @@ import Hand from "../../../../public/icons/loot/hand.svg";
 import Chest from "../../../../public/icons/loot/chest.svg";
 import Waist from "../../../../public/icons/loot/waist.svg";
 import Foot from "../../../../public/icons/loot/foot.svg";
-import EfficacyIcon from "../EfficacyIcon";
+import EfficacyIcon from "../icons/EfficacyIcon";
 import { processBeastName } from "../../lib/utils";
 
 interface BeastDisplayProps {

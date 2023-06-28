@@ -677,9 +677,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "discoveryTime": block_time,
         }
         await info.storage.insert_one("discoveries", discovery_doc)
-        # uid = create_uid(db.adventurer_state["adventurer_id"], db.beast_id, block_time)
         # beast_doc = {
-        #     "uid": check_exists_int(uid),
         #     "adventurerId": check_exists_int(db.adventurer_state["adventurer_id"]),
         #     "discoveredTime": block_time,
         #     "beast": check_exists_int(db.beast_id),
@@ -707,6 +705,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         ba = decode_attack_beast_event(data)
         await update_adventurer_helper(info, ba.adventurer_state)
+        beast_discovery = await info.storage.find_one("discoveries", {
+            "entityId": check_exists_int(ba.beast_id),
+            "adventurerId": check_exists_int(ba.adventurer_state["adventurer_id"]),
+        }, sort=[("discoveryTime", -1)])
         attacked_beast_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "beast": check_exists_int(ba.beast_id),
@@ -723,6 +725,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "xpEarnedAdventurer": encode_int_as_bytes(0),
             "xpEarnedItems": encode_int_as_bytes(0),
             "goldEarned": encode_int_as_bytes(0),
+            "discoveryTime": beast_discovery["discoveryTime"],
             "timestamp": block_time,
         }
         await info.storage.insert_one("battles", attacked_beast_doc)
@@ -745,6 +748,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         sb = decode_slayed_beast_event(data)
         await update_adventurer_helper(info, sb.adventurer_state)
+        beast_discovery = await info.storage.find_one("discoveries", {
+            "entityId": check_exists_int(sb.beast_id),
+            "adventurerId": check_exists_int(sb.adventurer_state["adventurer_id"]),
+        }, sort=[("discoveryTime", -1)])
         slayed_beast_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "beast": check_exists_int(sb.beast_id),
@@ -761,6 +768,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "xpEarnedAdventurer": encode_int_as_bytes(sb.xp_earned_adventurer),
             "xpEarnedItems": encode_int_as_bytes(sb.xp_earned_items),
             "goldEarned": encode_int_as_bytes(sb.gold_earned),
+            "discoveryTime": beast_discovery["discoveryTime"],
             "timestamp": block_time,
         }
         await info.storage.insert_one("battles", slayed_beast_doc)
@@ -786,6 +794,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         fa = decode_flee_attempt_event(data)
         await update_adventurer_helper(info, fa.adventurer_state)
+        beast_discovery = await info.storage.find_one("discoveries", {
+            "entityId": check_exists_int(sb.beast_id),
+            "adventurerId": check_exists_int(sb.adventurer_state["adventurer_id"]),
+        }, sort=[("discoveryTime", -1)])
         flee_attempt_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "beast": check_exists_int(fa.beast_id),
@@ -802,6 +814,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "xpEarnedAdventurer": encode_int_as_bytes(0),
             "xpEarnedItems": encode_int_as_bytes(0),
             "goldEarned": encode_int_as_bytes(0),
+            "discoveryTime": beast_discovery["discoveryTime"],
             "timestamp": block_time,
         }
         await info.storage.insert_one("battles", flee_attempt_doc)

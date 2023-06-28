@@ -1,7 +1,7 @@
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { Button } from "../buttons/Button";
 import { DiscoveryDisplay } from "./DiscoveryDisplay";
-import LootIconLoader from "../Loader";
+import LootIconLoader from "../icons/Loader";
 import { useMediaQuery } from "react-responsive";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import useLoadingStore from "../../hooks/useLoadingStore";

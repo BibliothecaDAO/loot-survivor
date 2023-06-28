@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Button } from "./buttons/Button";
-import { soundSelector, useUiSounds } from "../hooks/useUiSound";
-import { Menu } from "../types";
+import { Button } from "../buttons/Button";
+import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
+import { Menu } from "../../types";
 
 export interface ButtonData {
   id: number;

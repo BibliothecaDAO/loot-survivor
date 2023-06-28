@@ -4,7 +4,7 @@ import { useWaitForTransaction, useAccount } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../../lib/utils";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
-import LootIconLoader from "../Loader";
+import LootIconLoader from "../icons/Loader";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 
 export interface TxActivityProps {

@@ -1,11 +1,11 @@
-import TwitterShareButton from "./buttons/TwitterShareButtons";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import useLoadingStore from "../hooks/useLoadingStore";
-import { Button } from "./buttons/Button";
-import useUIStore from "../hooks/useUIStore";
+import TwitterShareButton from "../buttons/TwitterShareButtons";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import useLoadingStore from "../../hooks/useLoadingStore";
+import { Button } from "../buttons/Button";
+import useUIStore from "../../hooks/useUIStore";
 import Image from "next/image";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { getRankFromList, getOrdinalSuffix } from "../lib/utils";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
 
 export const DeathDialog = () => {
   const deathMessage = useLoadingStore((state) => state.deathMessage);

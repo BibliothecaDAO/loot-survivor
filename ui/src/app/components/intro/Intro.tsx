@@ -3,7 +3,7 @@ import { Button } from "../buttons/Button";
 import WalletSelect from "./WalletSelect";
 import { TypeAnimation } from "react-type-animation";
 import { prologue } from "../../lib/constants";
-import LootIconLoader from "../Loader";
+import LootIconLoader from "../icons/Loader";
 
 const Intro = () => {
   const [screen, setScreen] = useState(0);

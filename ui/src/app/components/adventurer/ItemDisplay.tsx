@@ -1,7 +1,7 @@
-import { Item } from "../types";
-import LootIcon from "./LootIcon";
-import Efficacyicon from "./EfficacyIcon";
-import { processItemName, calculateLevel, getItemData } from "../lib/utils";
+import { Item } from "../../types";
+import LootIcon from "../icons/LootIcon";
+import Efficacyicon from "../icons/EfficacyIcon";
+import { processItemName, calculateLevel, getItemData } from "../../lib/utils";
 
 interface ItemDisplayProps {
   item: Item;

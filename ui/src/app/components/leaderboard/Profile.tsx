@@ -1,4 +1,4 @@
-import Info from "../Info";
+import Info from "../adventurer/Info";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { Button } from "../buttons/Button";
 import useUIStore from "../../hooks/useUIStore";

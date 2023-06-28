@@ -6,6 +6,7 @@ export type QueryKey =
   | "lastBeastBattleQuery"
   | "battlesByAdventurerQuery"
   | "battlesByTxHashQuery"
+  | "battlesByBeastQuery"
   | "lastBeastQuery"
   | "discoveriesQuery"
   | "latestDiscoveriesQuery"
@@ -42,6 +43,7 @@ const initialData: Record<QueryKey, any> = {
   lastBeastBattleQuery: null,
   battlesByAdventurerQuery: null,
   battlesByTxHashQuery: null,
+  battlesByBeastQuery: null,
   lastBeastQuery: null,
   discoveriesQuery: null,
   latestDiscoveriesQuery: null,
@@ -64,6 +66,7 @@ const initialLoading: Record<QueryKey, boolean> = {
   lastBeastBattleQuery: false,
   battlesByAdventurerQuery: false,
   battlesByTxHashQuery: false,
+  battlesByBeastQuery: false,
   lastBeastQuery: false,
   discoveriesQuery: false,
   latestDiscoveriesQuery: false,
@@ -86,6 +89,7 @@ const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
   lastBeastBattleQuery: false,
   battlesByAdventurerQuery: false,
   battlesByTxHashQuery: false,
+  battlesByBeastQuery: false,
   lastBeastQuery: false,
   discoveriesQuery: false,
   latestDiscoveriesQuery: false,
@@ -109,6 +113,7 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   lastBeastBattleQuery: async () => {},
   battlesByAdventurerQuery: async () => {},
   battlesByTxHashQuery: async () => {},
+  battlesByBeastQuery: async () => {},
   lastBeastQuery: async () => {},
   discoveriesQuery: async () => {},
   latestDiscoveriesQuery: async () => {},

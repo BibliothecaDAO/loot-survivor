@@ -4,7 +4,7 @@ import { useContracts } from "../../hooks/useContracts";
 import { getItemData } from "../../lib/utils";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import LootIcon from "../LootIcon";
+import LootIcon from "../icons/LootIcon";
 import {
   useTransactionManager,
   useWaitForTransaction,

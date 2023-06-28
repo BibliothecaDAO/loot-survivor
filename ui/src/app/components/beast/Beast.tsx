@@ -2,7 +2,7 @@ import { useContracts } from "../../hooks/useContracts";
 import { NullBeast } from "../../types";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import KeyboardControl, { ButtonData } from "../KeyboardControls";
-import Info from "../Info";
+import Info from "../adventurer/Info";
 import { BattleDisplay } from "./BattleDisplay";
 import { BeastDisplay } from "./BeastDisplay";
 import useLoadingStore from "../../hooks/useLoadingStore";
@@ -75,6 +75,7 @@ export default function Beast() {
     {
       adventurerId: adventurer?.id ?? 0,
       beast: beastData?.beast,
+      discoveryTime: beastData?.discoveryTime,
     },
     txAccepted
   );

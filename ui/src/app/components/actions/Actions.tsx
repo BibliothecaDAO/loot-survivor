@@ -4,9 +4,9 @@ import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import VerticalKeyboardControl from "../VerticalMenu";
+import VerticalKeyboardControl from "../menu/VerticalMenu";
 import PurchaseHealth from "./PurchaseHealth";
-import Info from "../Info";
+import Info from "../adventurer/Info";
 import Discovery from "./Discovery";
 import useUIStore from "../../hooks/useUIStore";
 import { useQueriesStore } from "../../hooks/useQueryStore";
@@ -15,7 +15,7 @@ import {
   getLatestDiscoveries,
   getBeastsByAdventurer,
 } from "../../hooks/graphql/queries";
-import { MistIcon, HealthPotionsIcon, TargetIcon } from "../Icons";
+import { MistIcon, HealthPotionsIcon, TargetIcon } from "../icons/Icons";
 import { useMediaQuery } from "react-responsive";
 import KillAdventurer from "./KillAdventurer";
 

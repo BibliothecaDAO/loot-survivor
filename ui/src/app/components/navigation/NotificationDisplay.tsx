@@ -1,13 +1,13 @@
-import { NotificationBattleDisplay } from "./beast/BattleDisplay";
-import { DiscoveryDisplay } from "./actions/DiscoveryDisplay";
+import { NotificationBattleDisplay } from "../beast/BattleDisplay";
+import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
 import SpriteAnimation from "./SpriteAnimation";
-import { GameData } from "./GameData";
-import useAdventurerStore from "../hooks/useAdventurerStore";
-import { soundSelector, useUiSounds } from "../hooks/useUiSound";
+import { GameData } from "../GameData";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
 import { useCallback, useEffect, useState } from "react";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import { processBeastName } from "../lib/utils";
-import { getRandomElement } from "../lib/utils";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import { processBeastName } from "../../lib/utils";
+import { getRandomElement } from "../../lib/utils";
 
 interface NotificationDisplayProps {
   type: string;

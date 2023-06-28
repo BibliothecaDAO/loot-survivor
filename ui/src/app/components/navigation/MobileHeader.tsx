@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Button } from "./buttons/Button";
-import { ControllerIcon, TrophyIcon } from "./Icons";
-import useUIStore from "../hooks/useUIStore";
-import { capitalizeFirstLetter } from "../lib/utils";
+import { Button } from "../buttons/Button";
+import { ControllerIcon, TrophyIcon } from "../icons/Icons";
+import useUIStore from "../../hooks/useUIStore";
+import { capitalizeFirstLetter } from "../../lib/utils";
 
 export default function MobileHeader() {
   const screen = useUIStore((state) => state.screen);

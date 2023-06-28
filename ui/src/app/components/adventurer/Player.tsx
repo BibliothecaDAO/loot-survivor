@@ -1,5 +1,5 @@
 import Info from "./Info";
-import useAdventurerStore from "../hooks/useAdventurerStore";
+import useAdventurerStore from "../../hooks/useAdventurerStore";
 
 export default function Player() {
   const adventurer = useAdventurerStore((state) => state.adventurer);

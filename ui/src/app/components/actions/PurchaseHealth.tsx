@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import HealthSlider from "../HealthSlider";
+import HealthSlider from "./HealthSlider";
 import { Button } from "../buttons/Button";
 import { useContracts } from "../../hooks/useContracts";
 import useAdventurerStore from "../../hooks/useAdventurerStore";

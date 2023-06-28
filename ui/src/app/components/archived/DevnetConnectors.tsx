@@ -1,6 +1,6 @@
 import { useAccount } from "@starknet-react/core";
-import { Button } from "./buttons/Button";
-import { mintEth } from "../api/api";
+import { Button } from "../buttons/Button";
+import { mintEth } from "../../api/api";
 
 interface AddDevnetButtonProps {
   isDisabled: boolean;

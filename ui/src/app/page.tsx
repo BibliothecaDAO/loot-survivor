@@ -2,7 +2,7 @@
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "./components/buttons/Button";
-import HorizontalKeyboardControl from "./components/HorizontalMenu";
+import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
 import Actions from "./components/actions/Actions";
 import Marketplace from "./components/marketplace/Marketplace";
 import Adventurer from "./components/start/Adventurer";
@@ -16,7 +16,7 @@ import Intro from "./components/intro/Intro";
 import {
   AddDevnetEthButton,
   MintEthButton,
-} from "./components/DevnetConnectors";
+} from "./components/archived/DevnetConnectors";
 import Leaderboard from "./components/leaderboard/Leaderboard";
 import { TxActivity } from "./components/navigation/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
@@ -25,16 +25,16 @@ import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { CSSTransition } from "react-transition-group";
-import { NotificationDisplay } from "./components/NotificationDisplay";
+import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
 import { Menu, NullAdventurer } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./components/leaderboard/Profile";
-import { DeathDialog } from "./components/DeathDialog";
+import { DeathDialog } from "./components/adventurer/DeathDialog";
 import { Encounters } from "./components/Encounters";
 import Guide from "./components/Guide";
-import { processNotification } from "./components/NotificationDisplay";
+import { processNotification } from "./components/navigation/NotificationDisplay";
 import { DiscoveryDisplay } from "./components/actions/DiscoveryDisplay";
 import useCustomQuery from "./hooks/useCustomQuery";
 import {
@@ -46,10 +46,10 @@ import {
   getAdventurerByXP,
 } from "./hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
-import { CogIcon, MuteIcon, VolumeIcon } from "./components/Icons";
-import Settings from "./components/Settings";
-import MobileHeader from "./components/MobileHeader";
-import Player from "./components/Player";
+import { CogIcon, MuteIcon, VolumeIcon } from "./components/icons/Icons";
+import Settings from "./components/navigation/Settings";
+import MobileHeader from "./components/navigation/MobileHeader";
+import Player from "./components/adventurer/Player";
 import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
 

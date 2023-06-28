@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { DiscoveryDisplay } from "./actions/DiscoveryDisplay";
 import { BattleDisplay } from "./beast/BattleDisplay";
-import LootIconLoader from "./Loader";
+import LootIconLoader from "./icons/Loader";
 import { Button } from "./buttons/Button";
 import { NullBeast } from "../types";
 import { processBeastName } from "../lib/utils";

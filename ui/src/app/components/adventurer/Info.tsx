@@ -1,15 +1,15 @@
-import { Adventurer, NullAdventurer } from "../types";
+import { Adventurer, NullAdventurer } from "../../types";
 import { useQuery } from "@apollo/client";
-import { getItemsByAdventurer } from "../hooks/graphql/queries";
+import { getItemsByAdventurer } from "../../hooks/graphql/queries";
 import Heart from "../../../public/heart.svg";
 import Coin from "../../../public/coin.svg";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
-import { getRealmNameById } from "../lib/utils";
-import { useQueriesStore } from "../hooks/useQueryStore";
-import useCustomQuery from "../hooks/useCustomQuery";
-import useUIStore from "../hooks/useUIStore";
-import useLoadingStore from "../hooks/useLoadingStore";
+import { getRealmNameById } from "../../lib/utils";
+import { useQueriesStore } from "../../hooks/useQueryStore";
+import useCustomQuery from "../../hooks/useCustomQuery";
+import useUIStore from "../../hooks/useUIStore";
+import useLoadingStore from "../../hooks/useLoadingStore";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;

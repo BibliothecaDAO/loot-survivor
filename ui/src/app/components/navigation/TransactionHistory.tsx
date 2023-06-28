@@ -6,7 +6,7 @@ import { padAddress, shortenHex } from "../../lib/utils";
 import useOnClickOutside from "../../hooks/useOnClickOutside";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { processNotification } from "../NotificationDisplay";
+import { processNotification } from "./NotificationDisplay";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useUIStore from "../../hooks/useUIStore";
 import { MdClose } from "react-icons/md";
