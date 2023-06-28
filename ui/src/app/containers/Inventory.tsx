@@ -1,19 +1,23 @@
 import { useState, useEffect, useCallback } from "react";
-import { useContracts } from "../../hooks/useContracts";
+import { useContracts } from "../hooks/useContracts";
 import { useAccount } from "@starknet-react/core";
-import { getItemsByAdventurer } from "../../hooks/graphql/queries";
-import { groupBySlot } from "../../lib/utils";
-import { InventoryRow } from "./InventoryRow";
-import Info from "../adventurer/Info";
-import { ItemDisplay } from "../adventurer/ItemDisplay";
-import { Button } from "../buttons/Button";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import useCustomQuery from "../../hooks/useCustomQuery";
-import { useQueriesStore } from "../../hooks/useQueryStore";
-import useLoadingStore from "../../hooks/useLoadingStore";
-import LootIcon from "../icons/LootIcon";
+import { getItemsByAdventurer } from "../hooks/graphql/queries";
+import { groupBySlot } from "../lib/utils";
+import { InventoryRow } from "../components/inventory/InventoryRow";
+import Info from "../components/adventurer/Info";
+import { ItemDisplay } from "../components/adventurer/ItemDisplay";
+import { Button } from "../components/buttons/Button";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import useLoadingStore from "../hooks/useLoadingStore";
+import LootIcon from "../components/icons/LootIcon";
 
+/**
+ * @container
+ * @description Provides the inventory screen for the adventurer.
+ */
 const Inventory: React.FC = () => {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";

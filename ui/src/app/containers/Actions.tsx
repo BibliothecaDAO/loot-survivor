@@ -1,24 +1,32 @@
 import { useState } from "react";
-import { useContracts } from "../../hooks/useContracts";
+import { useContracts } from "../hooks/useContracts";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import useLoadingStore from "../../hooks/useLoadingStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import VerticalKeyboardControl from "../menu/VerticalMenu";
-import PurchaseHealth from "./PurchaseHealth";
-import Info from "../adventurer/Info";
-import Discovery from "./Discovery";
-import useUIStore from "../../hooks/useUIStore";
-import { useQueriesStore } from "../../hooks/useQueryStore";
-import useCustomQuery from "../../hooks/useCustomQuery";
+import useLoadingStore from "../hooks/useLoadingStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import VerticalKeyboardControl from "../components/menu/VerticalMenu";
+import PurchaseHealth from "../components/actions/PurchaseHealth";
+import Info from "../components/adventurer/Info";
+import Discovery from "../components/actions/Discovery";
+import useUIStore from "../hooks/useUIStore";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import useCustomQuery from "../hooks/useCustomQuery";
 import {
   getLatestDiscoveries,
   getBeastsByAdventurer,
-} from "../../hooks/graphql/queries";
-import { MistIcon, HealthPotionsIcon, TargetIcon } from "../icons/Icons";
+} from "../hooks/graphql/queries";
+import {
+  MistIcon,
+  HealthPotionsIcon,
+  TargetIcon,
+} from "../components/icons/Icons";
 import { useMediaQuery } from "react-responsive";
-import KillAdventurer from "./KillAdventurer";
+import KillAdventurer from "../components/actions/KillAdventurer";
 
+/**
+ * @container
+ * @description Provides the actions screen for the adventurer.
+ */
 export default function Actions() {
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);

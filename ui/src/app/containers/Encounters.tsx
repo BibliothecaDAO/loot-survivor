@@ -1,14 +1,12 @@
 import { useEffect, useState } from "react";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import { DiscoveryDisplay } from "./actions/DiscoveryDisplay";
-import { BattleDisplay } from "./beast/BattleDisplay";
-import LootIconLoader from "./icons/Loader";
-import { Button } from "./buttons/Button";
-import { NullBeast } from "../types";
+import { DiscoveryDisplay } from "../components/actions/DiscoveryDisplay";
+import { BattleDisplay } from "../components/beast/BattleDisplay";
+import LootIconLoader from "../components/icons/Loader";
+import { Button } from "../components/buttons/Button";
+import { Adventurer, NullBattle } from "../types";
 import { processBeastName } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
-import useCustomQuery from "../hooks/useCustomQuery";
-import useLoadingStore from "../hooks/useLoadingStore";
 import {
   getBattlesByAdventurer,
   getDiscoveries,
@@ -17,9 +15,14 @@ import {
 import { useQuery } from "@apollo/client";
 
 export interface EncountersProps {
-  profile?: any;
+  profile?: Adventurer;
 }
 
+/**
+ * @container
+ * @description Provides the encounters screen for the adventurer.
+ * @prop {Adventurer} profile - The adventurer profile to have encounters displayed.
+ */
 export const Encounters = ({ profile }: EncountersProps) => {
   const { adventurer } = useAdventurerStore();
   const { data, isLoading } = useQueriesStore();
@@ -70,7 +73,7 @@ export const Encounters = ({ profile }: EncountersProps) => {
         let beast = beasts.find((beasts: any) => beasts.id === battle.beastId);
         return {
           ...battle,
-          beast: beast ? beast : NullBeast,
+          beast: beast ? beast : NullBattle,
         };
       });
 

@@ -1,6 +1,10 @@
 import React from "react";
-import { Button } from "./buttons/Button";
+import { Button } from "../components/buttons/Button";
 
+/**
+ * @container
+ * @description Provides the guide screen for the adventurer.
+ */
 export const Guide = () => {
   const efficacyData = [
     { weapon: "Blade", metal: "Weak", hide: "Fair", cloth: "Strong" },

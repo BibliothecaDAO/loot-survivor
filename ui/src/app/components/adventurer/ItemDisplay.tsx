@@ -1,4 +1,4 @@
-import { Item } from "../../types";
+import Item from "../../types";
 import LootIcon from "../icons/LootIcon";
 import Efficacyicon from "../icons/EfficacyIcon";
 import { processItemName, calculateLevel, getItemData } from "../../lib/utils";

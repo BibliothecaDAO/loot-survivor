@@ -1,8 +1,8 @@
 import { ReactElement, useState, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { getKeyFromValue } from "../lib/utils";
-import { GameData } from "./GameData";
-import VerticalKeyboardControl from "./VerticalMenu";
+import { GameData } from "../components/GameData";
+import VerticalKeyboardControl from "../components/menu/VerticalMenu";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { getAdventurerById } from "../hooks/graphql/queries";
@@ -10,12 +10,16 @@ import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useUIStore from "../hooks/useUIStore";
-import Info from "./adventurer/Info";
-import { Button } from "./buttons/Button";
+import Info from "../components/adventurer/Info";
+import { Button } from "../components/buttons/Button";
 import { useMediaQuery } from "react-responsive";
 
+/**
+ * @container
+ * @description Provides the upgrade screen for the adventurer.
+ */
 const Upgrade = () => {
-  const { adventurerContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
@@ -90,11 +94,10 @@ const Upgrade = () => {
 
   const handleUpgradeTx = async (selected: any) => {
     const upgradeTx = {
-      contractAddress: adventurerContract?.address ?? "",
+      contractAddress: gameContract?.address ?? "",
       entrypoint: "upgrade_stat",
       calldata: [
         adventurer?.id ?? "",
-        "0",
         getKeyFromValue(gameData.STATS, selected) ?? "",
       ],
     };

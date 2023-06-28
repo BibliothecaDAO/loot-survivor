@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { useAccount } from "@starknet-react/core";
-import { getAdventurersByOwner } from "../../hooks/graphql/queries";
-import { padAddress } from "../../lib/utils";
-import { AdventurersList } from "./AdventurersList";
-import { CreateAdventurer } from "./CreateAdventurer";
-import VerticalKeyboardControl from "../VerticalMenu";
-import { useQueriesStore } from "../../hooks/useQueryStore";
-import LootIconLoader from "../icons/Loader";
-import useCustomQuery from "../../hooks/useCustomQuery";
-import useLoadingStore from "../../hooks/useLoadingStore";
+import { getAdventurersByOwner } from "../hooks/graphql/queries";
+import { padAddress } from "../lib/utils";
+import { AdventurersList } from "../components/start/AdventurersList";
+import { CreateAdventurer } from "../components/start/CreateAdventurer";
+import VerticalKeyboardControl from "../components/menu/VerticalMenu";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import LootIconLoader from "../components/icons/Loader";
+import useCustomQuery from "../hooks/useCustomQuery";
+import useLoadingStore from "../hooks/useLoadingStore";
 
+/**
+ * @container
+ * @description Provides the start screen for the adventurer.
+ */
 const Adventurer = () => {
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");

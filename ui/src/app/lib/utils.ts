@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 
 import Realms from "./realms.json";
-import { Item } from "../types";
+import Item from "../types";
 import { GameData } from "../components/GameData";
 
 export function cn(...inputs: ClassValue[]) {
@@ -76,7 +76,7 @@ export function getKeyFromValue(
   return null;
 }
 
-export function groupBySlot(items: any[]) {
+export function groupBySlot(items: Item[]) {
   const groups: any = {};
 
   items.forEach((item) => {

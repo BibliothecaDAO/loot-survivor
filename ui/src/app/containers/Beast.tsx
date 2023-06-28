@@ -1,26 +1,30 @@
-import { useContracts } from "../../hooks/useContracts";
-import { NullBeast } from "../../types";
+import { useContracts } from "../hooks/useContracts";
+import { NullBeast } from "../types";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import KeyboardControl, { ButtonData } from "../KeyboardControls";
-import Info from "../adventurer/Info";
-import { BattleDisplay } from "./BattleDisplay";
-import { BeastDisplay } from "./BeastDisplay";
-import useLoadingStore from "../../hooks/useLoadingStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { useQueriesStore } from "../../hooks/useQueryStore";
+import KeyboardControl, { ButtonData } from "../components/KeyboardControls";
+import Info from "../components/adventurer/Info";
+import { BattleDisplay } from "../components/beast/BattleDisplay";
+import { BeastDisplay } from "../components/beast/BeastDisplay";
+import useLoadingStore from "../hooks/useLoadingStore";
+import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import useAdventurerStore from "../hooks/useAdventurerStore";
+import { useQueriesStore } from "../hooks/useQueryStore";
 import { useState } from "react";
-import useUIStore from "../../hooks/useUIStore";
-import { processBeastName } from "../../lib/utils";
-import useCustomQuery from "../../hooks/useCustomQuery";
+import useUIStore from "../hooks/useUIStore";
+import { processBeastName } from "../lib/utils";
+import useCustomQuery from "../hooks/useCustomQuery";
 import {
   getBattlesByBeast,
   getBeastById,
   getLastBeastDiscovery,
   getLastBattleByAdventurer,
-} from "../../hooks/graphql/queries";
+} from "../hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
 
+/**
+ * @container
+ * @description Provides the beast screen for adventurer battles.
+ */
 export default function Beast() {
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);

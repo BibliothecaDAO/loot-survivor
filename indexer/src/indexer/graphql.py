@@ -831,7 +831,6 @@ class Adventurer:
     hands: Optional[FeltValue]
     neck: Optional[FeltValue]
     ring: Optional[FeltValue]
-    beast: Optional[BeastValue]
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
     gold: Optional[FeltValue]
@@ -865,7 +864,7 @@ class Adventurer:
             hands=data["hands"],
             neck=data["neck"],
             ring=data["ring"],
-            beast=data["beast"],
+            beastHealth=data["beastHealth"],
             statUpgrades=data["statUpgrades"],
             gold=data["gold"],
             createdTime=data["createdTime"],

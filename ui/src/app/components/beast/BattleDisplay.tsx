@@ -9,6 +9,10 @@ interface BattleDisplayProps {
   beastName: string;
 }
 
+/**
+ * @component
+ * @description Displays the battle results.
+ */
 export const BattleDisplay = ({
   battleData,
   beastName,

@@ -2,15 +2,19 @@ import React, { useState } from "react";
 import {
   getAdventurersInListByXp,
   getTopScores,
-} from "../../hooks/graphql/queries";
-import { Button } from "../buttons/Button";
+} from "../hooks/graphql/queries";
+import { Button } from "../components/buttons/Button";
 import Coin from "../../../../public/coin.svg";
 import Lords from "../../../../public/lords.svg";
-import LootIconLoader from "../icons/Loader";
-import { useQueriesStore } from "../../hooks/useQueryStore";
-import useUIStore from "../../hooks/useUIStore";
-import useCustomQuery from "../../hooks/useCustomQuery";
+import LootIconLoader from "../components/icons/Loader";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import useUIStore from "../hooks/useUIStore";
+import useCustomQuery from "../hooks/useCustomQuery";
 
+/**
+ * @container
+ * @description Provides the leaderboard screen for the adventurer.
+ */
 const Leaderboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;

@@ -5,7 +5,7 @@ import useUIStore from "../../hooks/useUIStore";
 import useCustomQuery from "../../hooks/useCustomQuery";
 import { getAdventurerById } from "../../hooks/graphql/queries";
 import { useState } from "react";
-import { Encounters } from "../Encounters";
+import { Encounters } from "../../containers/Encounters";
 import { useMediaQuery } from "react-responsive";
 
 export default function Profile() {
