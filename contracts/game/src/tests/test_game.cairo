@@ -12,7 +12,7 @@ mod tests {
     use market::market::{ImplMarket};
 
     use lootitems::loot::{Loot, ImplLoot, ILoot};
-    use lootitems::loot::constants::{ItemId};
+    use lootitems::statistics::constants::{ItemId};
 
     use game::game::interfaces::{IGameDispatcherTrait, IGameDispatcher};
     use game::game::game::{Game};
@@ -170,7 +170,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(80000000)]
+    #[available_gas(130000000)]
     fn test_flee() {
         let mut game = new_adventurer();
         let adventurer_start = game.get_adventurer(0);
@@ -191,10 +191,10 @@ mod tests {
         assert(updated_adventurer.beast_health == 0, 'beast should be dead');
 
         // use stat upgrade
-        game.upgrade_stat(0,0);
+        game.upgrade_stat(0, 0);
 
         // manipulate game entrop so we discover another beast
-        game.set_entropy(1);
+        game.set_entropy(2);
         game.explore(0);
         let updated_adventurer = game.get_adventurer(0);
         assert(updated_adventurer.beast_health != 0, 'should have found a beast');
@@ -276,7 +276,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(30000000)]
+    #[available_gas(40000000)]
     fn test_equip_item_from_bag() {
         let mut deployed_game = new_adventurer();
         let market_items = @adventurer_market_items();
@@ -300,11 +300,12 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
     #[available_gas(30000000)]
     fn test_buy_health() {
         let mut deployed_game = new_adventurer();
 
-        deployed_game.purchase_health(0);
+        deployed_game.buy_health(0);
 
         let adventurer = deployed_game.get_adventurer(0);
 

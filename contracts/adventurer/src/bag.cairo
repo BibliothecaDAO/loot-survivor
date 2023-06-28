@@ -1,12 +1,12 @@
 use core::serde::Serde;
 use integer::{
-    U128IntoFelt252, Felt252IntoU256, Felt252TryIntoU64, U256TryIntoFelt252, u256_from_felt252,
+    U128IntoFelt252, Felt252IntoU256, Felt252TryIntoU64, U256TryIntoFelt252, u256_from_felt252, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8
 };
 use traits::{TryInto, Into};
 use option::OptionTrait;
 use debug::PrintTrait;
 
-use pack::pack::{pack_value, unpack_value, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8};
+use pack::pack::{pack_value, unpack_value};
 use pack::constants::{pow, mask};
 
 use super::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
