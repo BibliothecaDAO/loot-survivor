@@ -1519,7 +1519,6 @@ mod Game {
             };
         } else {
             // if it's above 15, fetch the special names
-            // TODO: Revert to real fn. This is a hack to get around a compiler crash
             let item_details = ImplLootItemSpecialNames::get_loot_special_names(
                 _loot_special_names_storage_unpacked(
                     self, adventurer_id, _get_storage_index(self, item.metadata)

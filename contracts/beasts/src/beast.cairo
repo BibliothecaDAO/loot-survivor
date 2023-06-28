@@ -40,10 +40,8 @@ trait IBeast {
 
 impl ImplBeast of IBeast {
     fn get_beast(adventurer_level: u8, special_names: SpecialPowers, seed: u128) -> Beast {
-        // TODO: Generate a deterministic beast using the details of the adventurer
         let beast_id = ImplBeast::get_beast_id(seed);
-
-        return Beast {
+        Beast {
             id: beast_id,
             starting_health: ImplBeast::get_starting_health(adventurer_level, seed),
             combat_spec: CombatSpec {
@@ -52,7 +50,7 @@ impl ImplBeast of IBeast {
                 level: U8IntoU16::into(ImplBeast::get_level(adventurer_level, seed)),
                 special_powers: special_names
             }
-        };
+        }
     }
 
     // get_starter_beast returns a beast intended for the first battle of the game

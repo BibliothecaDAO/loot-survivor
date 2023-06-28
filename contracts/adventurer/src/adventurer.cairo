@@ -18,7 +18,7 @@ use lootitems::statistics::{
 use super::exploration::ExploreUtils;
 use super::constants::adventurer_constants::{
     STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_DISCOUNT,
-    MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, ITEM_XP_MULTIPLIER, VITALITY_HEALTH_INCREASE
+    MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, ITEM_XP_MULTIPLIER, VITALITY_HEALTH_INCREASE, MAX_GOLD
 };
 use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
 use super::item_meta::{
@@ -181,10 +181,6 @@ impl ImplAdventurer of IAdventurer {
             Slot::Ring(()) => self.ring.id == 0,
         }
     }
-    fn get_beast(self: Adventurer) -> u8 {
-        // TODO: return Beast struct generated from xp
-        return 1;
-    }
 
     fn get_level(self: Adventurer) -> u8 {
         return ImplCombat::get_level_from_xp(self.xp);
@@ -262,25 +258,6 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    // TODO: implement this function
-    fn attack(ref self: Adventurer, entropy: u128) -> Adventurer {
-        // get beast from adventurer
-        // combat::calculate_damage_to_beast(adventurer, beast, adventurer_entropy, game_entropy);
-        // if beast is dead, add xp to adventurer and items
-        // if beast is not dead, calculate damage to adventurer and return adventurer
-        //      the adventurer will have updated health for both adventurer and beast
-        return self;
-    }
-
-    // TODO: implement this function
-    fn flee(ref self: Adventurer, entropy: u128) -> Adventurer {
-        // combat::attempt_flee(adventurer, adventurer_entropy, game_entropy;
-        // if successful, return adventurer with adventurer.beast_health = 0;
-        // if not successful, process beast counter_attack and return adventurer
-        return self;
-    }
-
-
     // luck 
     fn get_luck(self: Adventurer) -> u8 {
         // get greatness of aventurers equipped necklace
@@ -343,7 +320,12 @@ impl ImplAdventurer of IAdventurer {
     }
 
     fn increase_gold(ref self: Adventurer, value: u16) -> Adventurer {
-        // TODO: overflow check
+        // if the gold to add is greater than or equal to the max gold
+        if (self.gold + value) > MAX_GOLD {
+            // set gold to max gold
+            self.gold = MAX_GOLD;
+            return self;
+        }
         self.gold = self.gold + value;
 
         self
