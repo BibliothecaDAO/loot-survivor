@@ -1,8 +1,7 @@
 import Image from "next/image";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { getBeastData, getValueFromKey } from "../../lib/utils";
+import { getBeastData } from "../../lib/utils";
 import { GameData } from "../GameData";
-import Heart from "../../../../public/heart.svg";
+import { HeartIcon } from "../icons/Icons";
 import Head from "../../../../public/icons/loot/head.svg";
 import Hand from "../../../../public/icons/loot/hand.svg";
 import Chest from "../../../../public/icons/loot/chest.svg";
@@ -53,7 +52,7 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
                 : "text-terminal-green"
             }`}
           >
-            <Heart className="self-center w-6 h-6 fill-current" />{" "}
+            <HeartIcon className="self-center w-6 h-6 fill-current" />{" "}
             <p className="self-center text-2xl sm:text-4xl">
               {beastData?.entityHealth}
             </p>

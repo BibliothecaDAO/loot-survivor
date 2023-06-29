@@ -1,5 +1,4 @@
 import { useContracts } from "../hooks/useContracts";
-import { NullBeast } from "../types";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import KeyboardControl, { ButtonData } from "../components/KeyboardControls";
 import Info from "../components/adventurer/Info";

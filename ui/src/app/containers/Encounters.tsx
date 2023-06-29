@@ -15,13 +15,13 @@ import {
 import { useQuery } from "@apollo/client";
 
 export interface EncountersProps {
-  profile?: Adventurer;
+  profile?: number;
 }
 
 /**
  * @container
  * @description Provides the encounters screen for the adventurer.
- * @prop {Adventurer} profile - The adventurer profile to have encounters displayed.
+ * @prop {number} profile - The adventurer profile to have encounters displayed.
  */
 export const Encounters = ({ profile }: EncountersProps) => {
   const { adventurer } = useAdventurerStore();

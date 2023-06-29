@@ -1,9 +1,6 @@
-import { useQuery } from "@apollo/client";
-import Heart from "../../../../public/heart.svg";
-import Coin from "../../../../public/coin.svg";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { processBeastName } from "../../lib/utils";
-import { getBattlesByBeast } from "../../hooks/graphql/queries";
+import { HeartIcon, CoinIcon } from "../icons/Icons";
 
 interface DiscoveryProps {
   discoveryData: any;
@@ -67,7 +64,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
                 {discoveryData.outputAmount}
               </span>{" "}
             </p>
-            <Coin className="self-center w-5 h-5 fill-current" />
+            <CoinIcon className="self-center w-5 h-5 fill-current" />
           </div>
         );
       }
@@ -76,7 +73,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         return (
           <div className="flex self-center">
             <p>GREAT! You discovered {discoveryData.outputAmount} health! </p>
-            <Heart className="self-center w-5 h-5 fill-current" />
+            <HeartIcon className="self-center w-5 h-5 fill-current" />
           </div>
         );
       }

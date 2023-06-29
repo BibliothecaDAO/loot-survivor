@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../SpriteAnimation.css";
+import "../../SpriteAnimation.css";
 
 interface AnimationInfo {
   name: string;

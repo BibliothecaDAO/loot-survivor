@@ -1,17 +1,13 @@
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { Button } from "../components/buttons/Button";
 import {
   getLatestMarketItems,
   getAdventurersInList,
-  getUnclaimedItemsByAdventurer,
 } from "../hooks/graphql/queries";
-import { UTCClock, Countdown } from "../components/marketplace/Clock";
-import { convertTime } from "../lib/utils";
 import MarketplaceRow from "../components/marketplace/MarketplaceRow";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import Coin from "../../../../public/coin.svg";
+import { CoinIcon } from "../components/icons/Icons";
 import LootIconLoader from "../components/icons/Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
@@ -189,7 +185,7 @@ const Marketplace = () => {
           <div className="flex flex-row justify-between m-1 flex-wrap">
             <div>
               <span className="flex text-xl text-terminal-yellow">
-                <Coin className="self-center w-5 h-5 fill-current" />
+                <CoinIcon className="self-center w-5 h-5 fill-current" />
                 {calculatedNewGold}
               </span>
             </div>
@@ -197,7 +193,7 @@ const Marketplace = () => {
               {`Charisma: ${adventurer?.charisma} (+ ${
                 adventurer?.charisma && adventurer?.charisma * 3
               }`}
-              <Coin className="w-5 h-5 fill-current text-terminal-yellow" />{" "}
+              <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />{" "}
               {"to bids)"}
             </span>
           </div>

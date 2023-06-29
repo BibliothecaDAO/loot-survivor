@@ -4,8 +4,8 @@ import {
   getTopScores,
 } from "../hooks/graphql/queries";
 import { Button } from "../components/buttons/Button";
-import Coin from "../../../../public/coin.svg";
-import Lords from "../../../../public/lords.svg";
+import { CoinIcon } from "../components/icons/Icons";
+import Lords from "../../../public/lords.svg";
 import LootIconLoader from "../components/icons/Loader";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
@@ -178,7 +178,7 @@ const Leaderboard: React.FC = () => {
                 <td>{`${adventurer.name} - ${adventurer.id}`}</td>
                 <td>
                   <span className="flex justify-center text-terminal-yellow">
-                    <Coin className="self-center w-4 h-4 sm:w-6 sm:h-6 fill-current" />
+                    <CoinIcon className="self-center w-4 h-4 sm:w-6 sm:h-6 fill-current" />
                     {adventurer.gold ? adventurer.gold : 0}
                   </span>
                 </td>

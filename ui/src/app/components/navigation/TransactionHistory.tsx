@@ -24,8 +24,8 @@ const TransactionHistory = () => {
   const displayHistory = useUIStore((state) => state.displayHistory);
   const { play } = useUiSounds(soundSelector.click);
 
-  const beasts = queryData.beastsByAdventurerQuery
-    ? queryData.beastsByAdventurerQuery.beasts
+  const beasts = queryData.lastBeastQuery
+    ? queryData.lastBeastQuery.beasts
     : [];
 
   const method = (transactions[0]?.metadata as Metadata)?.method;

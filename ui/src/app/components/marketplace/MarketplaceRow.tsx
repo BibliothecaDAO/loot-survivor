@@ -39,8 +39,7 @@ const MarketplaceRow = ({
   const { hashes, transactions } = useTransactionManager();
   const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
 
-  const transactingMarketIds = (transactions[0]?.metadata as Metadata)
-    ?.marketIds;
+  const transactingMarketIds = (transactions[0]?.metadata as Metadata)?.items;
 
   const purchaseExists = (itemId: number) => {
     return calls.some(
@@ -60,9 +59,9 @@ const MarketplaceRow = ({
     return true;
   };
 
-  const checkTransacting = (itemId: number) => {
+  const checkTransacting = (item: string) => {
     if (txData?.status == "RECEIVED" || txData?.status == "PENDING") {
-      return transactingMarketIds?.includes(itemId);
+      return transactingMarketIds?.includes(item);
     } else {
       return false;
     }

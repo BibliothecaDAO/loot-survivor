@@ -1,8 +1,6 @@
 import { Adventurer, NullAdventurer } from "../../types";
-import { useQuery } from "@apollo/client";
 import { getItemsByAdventurer } from "../../hooks/graphql/queries";
-import Heart from "../../../public/heart.svg";
-import Coin from "../../../public/coin.svg";
+import { HeartIcon, CoinIcon } from "../icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
 import { getRealmNameById } from "../../lib/utils";
@@ -56,26 +54,26 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
               <div className="flex justify-between w-full">
                 {formatAdventurer.race}{" "}
                 <span>
-                  {getRealmNameById(formatAdventurer.homeRealm)?.name}
+                  {getRealmNameById(formatAdventurer.homeRealm ?? 0)?.name}
                 </span>{" "}
                 <span>Order of {formatAdventurer.order}</span>
               </div>
               <div className="flex justify-between w-full text-2xl sm:text-4xl font-medium border-b border-terminal-green">
                 {formatAdventurer.name}
                 <span className="flex text-terminal-yellow">
-                  <Coin className="self-center w-6 h-6 fill-current" />{" "}
+                  <CoinIcon className="self-center w-6 h-6 fill-current" />{" "}
                   {formatAdventurer.gold ? formatAdventurer.gold : 0}
                 </span>
                 <span className="flex ">
-                  <Heart className="self-center w-6 h-6 fill-current" />{" "}
+                  <HeartIcon className="self-center w-6 h-6 fill-current" />{" "}
                   {`${formatAdventurer.health}/${
-                    100 + formatAdventurer.vitality * 20
+                    100 + (formatAdventurer.vitality ?? 0) * 20
                   }`}
                 </span>
               </div>
 
               <div className="flex justify-between w-full text-lg sm:text-2xl">
-                <LevelBar xp={formatAdventurer.xp} />
+                <LevelBar xp={formatAdventurer.xp ?? 0} />
               </div>
 
               <div className="flex flex-row justify-between">
@@ -83,56 +81,56 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   <div className="">
                     <ItemDisplay
                       item={items.find(
-                        (item: any) => item.id == formatAdventurer.weaponId
+                        (item: any) => item.id == formatAdventurer.weapon
                       )}
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
                       item={items.find(
-                        (item: any) => item.id == formatAdventurer.headId
+                        (item: any) => item.id == formatAdventurer.head
                       )}
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
                       item={items.find(
-                        (item: any) => item.id == formatAdventurer.chestId
+                        (item: any) => item.id == formatAdventurer.chest
                       )}
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
                       item={items.find(
-                        (item: any) => item.id == formatAdventurer.handsId
+                        (item: any) => item.id == formatAdventurer.hands
                       )}
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
                       item={items.find(
-                        (item: any) => item.id == formatAdventurer.waistId
+                        (item: any) => item.id == formatAdventurer.waist
                       )}
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
                       item={items.find(
-                        (item: any) => item.id == formatAdventurer.feetId
+                        (item: any) => item.id == formatAdventurer.feet
                       )}
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
                       item={items.find(
-                        (item: any) => item.id == formatAdventurer.neckId
+                        (item: any) => item.id == formatAdventurer.neck
                       )}
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
                       item={items.find(
-                        (item: any) => item.id == formatAdventurer.ringId
+                        (item: any) => item.id == formatAdventurer.ring
                       )}
                     />
                   </div>
