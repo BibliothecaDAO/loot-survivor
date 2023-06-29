@@ -134,6 +134,9 @@ mod Game {
             // assert adventurer does not have stat upgrades available
             _assert_no_stat_upgrades_available(@self, adventurer);
 
+            // assert adventurer has not already explored this block
+            _assert_one_explore_per_block(@self, adventurer);
+
             // if the adventurer hasn't been idle
             if !_is_idle(@self, adventurer) {
                 // send adventurer to go exploring
@@ -1555,6 +1558,13 @@ mod Game {
     fn _assert_not_dead(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.health > 0, messages::DEAD_ADVENTURER);
     }
+    fn _assert_one_explore_per_block(self: @ContractState, adventurer: Adventurer) {
+        let current_block: u16 = U64TryIntoU16::try_into(
+            starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
+        )
+            .unwrap();
+        assert(adventurer.last_action != current_block, messages::ONE_EXPLORE_PER_BLOCK);
+    }
     fn _assert_idle(self: @ContractState, adventurer: Adventurer) {
         // get the current block modulo 512 since that's the max storage blocks
         let current_block: u16 = U64TryIntoU16::try_into(
@@ -1589,7 +1599,10 @@ mod Game {
         if (current_block > adventurer.last_action) {
             return (current_block - adventurer.last_action) >= IDLE_MINOR_PENALTY_BLOCKS;
         } else {
-            return (adventurer.last_action - current_block) >= IDLE_MINOR_PENALTY_BLOCKS;
+            // the current block is lower than the players last action
+            // it means we the block number has wrapped around the 512 block storage
+            // as such the difference between block 511 and block 0 is 1.
+            return (U64TryIntoU16::try_into(MAX_STORAGE_BLOCKS).unwrap() - adventurer.last_action + current_block) >= IDLE_MINOR_PENALTY_BLOCKS;
         }
     }
 
