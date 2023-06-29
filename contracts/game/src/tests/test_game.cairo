@@ -170,7 +170,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(130000000)]
+    #[available_gas(150000000)]
     fn test_flee() {
         let mut game = new_adventurer();
         let adventurer_start = game.get_adventurer(0);

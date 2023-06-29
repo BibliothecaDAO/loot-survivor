@@ -45,21 +45,20 @@ struct Stats { // 5 bits each
 
 #[derive(Drop, Copy, Serde)]
 struct Adventurer {
-    last_action: u16, // 3 bits
+    last_action: u16, // 9 bits
     health: u16, // 9 bits     
     xp: u16, // 13 bits
-    stats: Stats,
+    stats: Stats, // 30 bits
     gold: u16, // 9 bits
-    weapon: LootStatistics, // 24 bits
-    chest: LootStatistics, // 24 bits
-    head: LootStatistics, // 24 bits
-    waist: LootStatistics, // 24 bits
-    foot: LootStatistics, // 24 bits
-    hand: LootStatistics, // 24 bits
-    neck: LootStatistics, // 24 bits
-    ring: LootStatistics, // 24 bits
-    // Beast health
-    beast_health: u16,
+    weapon: LootStatistics, // 21 bits
+    chest: LootStatistics, // 21 bits
+    head: LootStatistics, // 21 bits
+    waist: LootStatistics, // 21 bits
+    foot: LootStatistics, // 21 bits
+    hand: LootStatistics, // 21 bits
+    neck: LootStatistics, // 21 bits
+    ring: LootStatistics, // 21 bits
+    beast_health: u16, // 9 bits
     stat_upgrade_available: u8, // 3 bits
 }
 
