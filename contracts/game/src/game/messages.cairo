@@ -11,5 +11,7 @@ mod messages {
     const BLOCK_NUMBER_ERROR: felt252 = 'Too soon update';
     const DEAD_ADVENTURER: felt252 = 'Adventurer is dead. RIP';
     const HEALTH_FULL: felt252 = 'Health already full';
+    const ADVENTURER_NOT_IDLE: felt252 = 'Adventurer is not idle';
+    const ONE_EXPLORE_PER_BLOCK: felt252 = 'One explore per block';
 }
 

@@ -14,8 +14,9 @@ trait IGame<T> {
     fn flee(ref self: T, adventurer_id: u256);
     fn equip(ref self: T, adventurer_id: u256, item_id: u8);
     fn buy_item(ref self: T, adventurer_id: u256, item_id: u8, equip: bool);
-    fn upgrade_stat(ref self: T, adventurer_id: u256, stat: u8);
     fn buy_health(ref self: T, adventurer_id: u256);
+    fn upgrade_stat(ref self: T, adventurer_id: u256, stat: u8);
+    fn slay_idle_adventurer(ref self: T, adventurer_id: u256);
 
     // view ------------------------------------------------------
     fn get_adventurer(self: @T, adventurer_id: u256) -> Adventurer;
