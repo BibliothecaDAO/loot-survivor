@@ -11,10 +11,10 @@ use pack::constants::{pow, mask};
 
 use super::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
-#[derive(Drop, Copy, Serde)] // 24 bits
+#[derive(Drop, Copy, Serde)] // 21 bits
 struct LootStatistics {
     id: u8, // 7 bits
-    xp: u16, // 12 bits
+    xp: u16, // 9 bits
     // this is set as the items are found/purchased
     metadata: u8, // 5 bits 
 }

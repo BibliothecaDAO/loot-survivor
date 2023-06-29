@@ -1,7 +1,10 @@
 #[starknet::contract]
 mod Game {
     // TODO: TESTING CONSTS REMOVE BEFORE DEPLOYMENT
-    const ENTROPY_BLOCK_TIME: u64 = 100;
+    const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 100;
+    const IDLE_MINOR_PENALTY_BLOCKS: u16 = 100;
+    const IDLE_DEATH_PENALTY_BLOCKS: u16 = 300;
+    const MAX_STORAGE_BLOCKS: u64 = 512;
     const TEST_ENTROPY: u64 = 12303548;
     const LOOT_NAME_STORAGE_INDEX_1: u256 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
@@ -13,7 +16,7 @@ mod Game {
     use starknet::{ContractAddress, ContractAddressIntoFelt252};
     use integer::{
         Felt252TryIntoU64, U8IntoU16, U16IntoU64, U16IntoU128, U64IntoU128, U8IntoU128,
-        U128TryIntoU8, U64IntoFelt252
+        U128TryIntoU8, U64IntoFelt252, U64TryIntoU16
     };
     use core::traits::{TryInto, Into};
 
@@ -131,8 +134,41 @@ mod Game {
             // assert adventurer does not have stat upgrades available
             _assert_no_stat_upgrades_available(@self, adventurer);
 
-            // pass adventurer ref into internal function
-            _explore(ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2);
+            // if the adventurer hasn't been idle
+            if !_is_idle(@self, adventurer) {
+                // send adventurer to go exploring
+                _explore(
+                    ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2
+                );
+            } else {
+                // if adventurer has been idle for too long
+                // they receive a fixed penalty
+                adventurer.deduct_health(_idle_penalty(@self, adventurer));
+
+                // if adventurer is dead
+                if (adventurer.health == 0) {
+                    // emit AdventurerDied event
+                    __event_AdventurerDied(
+                        ref self,
+                        AdventurerState {
+                            owner: self._owner.read(adventurer_id),
+                            adventurer_id: adventurer_id,
+                            adventurer: adventurer
+                        },
+                        killed_by_beast: false,
+                        killed_by_obstacle: false,
+                        killer_id: 0
+                    );
+                }
+            }
+
+            // update players last action block number
+            adventurer
+                .last_action =
+                    U64TryIntoU16::try_into(
+                        starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
+                    )
+                .unwrap();
 
             // write the resulting adventurer to storage
             _pack_adventurer_remove_stat_boost(
@@ -159,13 +195,17 @@ mod Game {
             // assert adventurer is not dead
             _assert_not_dead(@self, adventurer);
 
-            // adventurer.update_last_action(current_block);
-
             // assert adventurer has a beast to attack
             _assert_in_battle(@self, adventurer);
 
             // pass adventurer ref into internal function
             _attack(ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2);
+
+            // update players last action block number
+            adventurer
+                .last_action =
+                    U64TryIntoU16::try_into(starknet::get_block_info().unbox().block_number % 511)
+                .unwrap();
 
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -201,6 +241,12 @@ mod Game {
             // pass adventurer ref into internal function
             _flee(ref self, ref adventurer, adventurer_id);
 
+            // update players last action block number
+            adventurer
+                .last_action =
+                    U64TryIntoU16::try_into(starknet::get_block_info().unbox().block_number % 511)
+                .unwrap();
+
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
                 ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
@@ -230,13 +276,6 @@ mod Game {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
-            // check item exists on Market
-            // TODO: replace entropy
-            assert(
-                ImplMarket::check_ownership(TEST_ENTROPY, item_id) == true,
-                messages::ITEM_DOES_NOT_EXIST
-            );
-
             // get item names from storage
             let mut name_storage1 = _loot_special_names_storage_unpacked(
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
@@ -252,6 +291,13 @@ mod Game {
 
             // assert adventurer is not dead
             _assert_not_dead(@self, adventurer);
+
+            // check item exists on Market
+            // TODO: replace entropy
+            assert(
+                ImplMarket::check_ownership(TEST_ENTROPY, item_id) == true,
+                messages::ITEM_DOES_NOT_EXIST
+            );
 
             // buy item
             _buy_item(ref self, adventurer_id, ref adventurer, item_id, equip);
@@ -307,6 +353,38 @@ mod Game {
             _pack_adventurer_remove_stat_boost(
                 ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
             );
+        }
+
+        fn slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
+            // anyone can call this function so we intentinoally don't _assert_ownership
+            // unpack adventurer from storage (stat boosts applied on unpacking)
+            let mut adventurer = _unpack_adventurer(@self, adventurer_id);
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // assert adventurer is idle
+            _assert_idle(@self, adventurer);
+
+            // set adventurer health to 0
+            adventurer.health = 0;
+
+            // emit adventurer dead event
+            // TODO: consider including caller address in event
+            __event_AdventurerDied(
+                ref self,
+                AdventurerState {
+                    owner: self._owner.read(adventurer_id),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                killed_by_beast: false,
+                killed_by_obstacle: false,
+                killer_id: 0
+            );
+
+            // pack and save adventurer
+            _pack_adventurer(ref self, adventurer_id, adventurer);
         }
 
         // view functions
@@ -1477,6 +1555,53 @@ mod Game {
     fn _assert_not_dead(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.health > 0, messages::DEAD_ADVENTURER);
     }
+    fn _assert_idle(self: @ContractState, adventurer: Adventurer) {
+        // get the current block modulo 512 since that's the max storage blocks
+        let current_block: u16 = U64TryIntoU16::try_into(
+            starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
+        )
+            .unwrap();
+
+        // since we are only storing 511 block numbers that automatically wrap
+        // we need to check which is great, the current_block or adventurer's last_action
+        if (current_block > adventurer.last_action) {
+            assert(
+                (current_block - adventurer.last_action) >= IDLE_DEATH_PENALTY_BLOCKS,
+                messages::ADVENTURER_NOT_IDLE
+            );
+        } else {
+            assert(
+                (adventurer.last_action - current_block) >= IDLE_DEATH_PENALTY_BLOCKS,
+                messages::ADVENTURER_NOT_IDLE
+            );
+        }
+    }
+
+    fn _is_idle(self: @ContractState, adventurer: Adventurer) -> bool {
+        // get the current block modulo 512 since that's the max storage blocks
+        let current_block: u16 = U64TryIntoU16::try_into(
+            starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
+        )
+            .unwrap();
+
+        // since we are only storing 511 block numbers that automatically wrap
+        // we need to check which is great, the current_block or adventurer's last_action
+        if (current_block > adventurer.last_action) {
+            return (current_block - adventurer.last_action) >= IDLE_MINOR_PENALTY_BLOCKS;
+        } else {
+            return (adventurer.last_action - current_block) >= IDLE_MINOR_PENALTY_BLOCKS;
+        }
+    }
+
+    fn _idle_penalty(self: @ContractState, adventurer: Adventurer) -> u16 {
+        // TODO: Get worst case scenario obstacle
+        // 1. Identify adventurers weakest armor
+        // 2. Get T1 obstacle that is strong against that armor
+        // 3. Level will be maximum allowed by combat system for that adventurers Level
+
+        // for now just return fixed 80 damage
+        return 80;
+    }
 
     fn _lords_address(self: @ContractState) -> ContractAddress {
         self._lords.read()
@@ -1547,7 +1672,7 @@ mod Game {
 
         // assert(
         //     blocknumber >= (self._last_game_entropy_block.read().try_into().unwrap()
-        //         + ENTROPY_BLOCK_TIME.into()),
+        //         + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()),
         //     messages::BLOCK_NUMBER_ERROR
         // );
 
