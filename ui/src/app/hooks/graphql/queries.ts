@@ -334,16 +334,16 @@ const getBattleByTxHash = gql`
 `;
 
 const getItemsByTokenId = gql`
-  ${ITEM_FIELDS}
-  query get_items($id: FeltValue) {
-    items(where: { id: { eq: $id } }) {
+  ${ITEMS_FRAGMENT}
+  query get_items($item: ItemValue) {
+    items(where: { item: { eq: $item } }) {
       ...ItemFields
     }
   }
 `;
 
 const getLatestMarketItems = gql`
-  ${ITEM_FIELDS}
+  ${ITEMS_FRAGMENT}
   query get_latest_market_items($adventurerId: FeltValue) {
     items(
       where: { adventurerId: { eq: $adventurerId } }
@@ -356,28 +356,16 @@ const getLatestMarketItems = gql`
 `;
 
 const getItemsByAdventurer = gql`
-  ${ITEM_FIELDS}
-  query get_items_by_adventurer($adventurer: FeltValue) {
-    items(where: { ownerAdventurerId: { eq: $adventurer } }, limit: 10000000) {
-      ...ItemFields
-    }
-  }
-`;
-
-const getUnclaimedItemsByAdventurer = gql`
-  ${ITEM_FIELDS}
-  query get_items_by_adventurer($bidder: FeltValue, $status: StatusValue) {
-    items(
-      where: { bidder: { eq: $bidder }, status: { eq: $status } }
-      limit: 10000000
-    ) {
+  ${ITEMS_FRAGMENT}
+  query get_items_by_adventurer($adventurerId: FeltValue) {
+    items(where: { adventurerId: { eq: $adventurerId } }, limit: 10000000) {
       ...ItemFields
     }
   }
 `;
 
 const getItemsByOwner = gql`
-  ${ITEM_FIELDS}
+  ${ITEMS_FRAGMENT}
   query get_items_by_owner($owner: HexValue) {
     items(where: { owner: { eq: $owner } }, limit: 10000000) {
       ...ItemFields
@@ -421,7 +409,6 @@ export {
   getLatestMarketItems,
   getItemsByOwner,
   getItemsByAdventurer,
-  getUnclaimedItemsByAdventurer,
   getAdventurerByXP,
   getAdventurersByXPPaginated,
   getTopScores,

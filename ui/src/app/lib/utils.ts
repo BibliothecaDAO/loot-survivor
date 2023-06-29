@@ -80,11 +80,13 @@ export function groupBySlot(items: Item[]) {
   const groups: any = {};
 
   items.forEach((item) => {
-    if (!groups[item.slot]) {
-      groups[item.slot] = [];
-    }
+    if (item.slot) {
+      if (!groups[item.slot]) {
+        groups[item.slot] = [];
+      }
 
-    groups[item.slot].push(item);
+      groups[item.slot].push(item);
+    }
   });
 
   return groups;

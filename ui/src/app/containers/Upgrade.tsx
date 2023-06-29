@@ -34,7 +34,7 @@ const Upgrade = () => {
   const { writeAsync } = useContractWrite({ calls });
   const setScreen = useUIStore((state) => state.setScreen);
   const [selected, setSelected] = useState("");
-  const upgrade = adventurer?.upgrading;
+  const statUpgrades = adventurer?.statUpgrades ?? 0;
 
   useCustomQuery(
     "adventurerByIdQuery",
@@ -183,10 +183,10 @@ const Upgrade = () => {
   );
 
   useEffect(() => {
-    if (!upgrade) {
+    if (!(statUpgrades > 0)) {
       setScreen("actions");
     }
-  }, [upgrade]);
+  }, [statUpgrades]);
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",

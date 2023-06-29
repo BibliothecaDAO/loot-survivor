@@ -13,7 +13,7 @@ interface InventoryRowProps {
   setActiveMenu: (value: any) => void;
   isSelected: boolean;
   setSelected: (value: any) => void;
-  equippedItemId: number | undefined;
+  equippedItem: string | undefined;
   icon?: any;
 }
 
@@ -25,7 +25,7 @@ export const InventoryRow = ({
   setActiveMenu,
   isSelected,
   setSelected,
-  equippedItemId,
+  equippedItem,
   icon,
 }: InventoryRowProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -45,7 +45,7 @@ export const InventoryRow = ({
     }
   };
 
-  const unequippedItems = items?.filter((item) => item.id != equippedItemId);
+  const unequippedItems = items?.filter((item) => item.id != equippedItem);
 
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {

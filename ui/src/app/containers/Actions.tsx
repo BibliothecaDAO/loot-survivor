@@ -11,10 +11,7 @@ import Discovery from "../components/actions/Discovery";
 import useUIStore from "../hooks/useUIStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useCustomQuery from "../hooks/useCustomQuery";
-import {
-  getLatestDiscoveries,
-  getBeastsByAdventurer,
-} from "../hooks/graphql/queries";
+import { getLatestDiscoveries } from "../hooks/graphql/queries";
 import {
   MistIcon,
   HealthPotionsIcon,
@@ -70,7 +67,8 @@ export default function Actions() {
   const buttonsData = [
     {
       id: 1,
-      label: adventurer?.isIdle ? "Into the mist" : "Beast found!!",
+      label:
+        adventurer?.beastHealth ?? 0 > 0 ? "Into the mist" : "Beast found!!",
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
@@ -97,7 +95,7 @@ export default function Actions() {
           }
         }
       },
-      disabled: !adventurer?.isIdle || loading,
+      disabled: !(adventurer?.beastHealth ?? 0 > 0) || loading,
       loading: loading,
     },
   ];
@@ -109,7 +107,7 @@ export default function Actions() {
       icon: <HealthPotionsIcon />,
       value: "purchase health",
       action: async () => setActiveMenu(1),
-      disabled: !adventurer?.isIdle || loading,
+      disabled: !(adventurer?.beastHealth ?? 0 > 0) || loading,
       loading: loading,
     });
     // buttonsData.push({
@@ -139,7 +137,7 @@ export default function Actions() {
               <Discovery discoveries={latestDiscoveries} />
             )}
             {selected == "purchase health" &&
-              (adventurer?.isIdle ? (
+              (adventurer?.beastHealth ?? 0 > 0 ? (
                 <PurchaseHealth
                   isActive={activeMenu == 1}
                   onEscape={() => setActiveMenu(0)}
@@ -171,7 +169,7 @@ export default function Actions() {
               <Discovery discoveries={latestDiscoveries} />
             )}
             {selected == "purchase health" &&
-              (adventurer?.isIdle ? (
+              (adventurer?.beastHealth ?? 0 > 0 ? (
                 <PurchaseHealth
                   isActive={activeMenu == 1}
                   onEscape={() => setActiveMenu(0)}
@@ -180,7 +178,7 @@ export default function Actions() {
                 <p>You are in a battle!</p>
               ))}
             {selected == "kill adventurer" &&
-              (adventurer?.isIdle ? (
+              (adventurer?.beastHealth ?? 0 > 0 ? (
                 <KillAdventurer />
               ) : (
                 <p>You are in a battle!</p>

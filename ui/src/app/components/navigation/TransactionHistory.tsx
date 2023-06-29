@@ -65,18 +65,15 @@ const TransactionHistory = () => {
                   const battles = queryData.battlesByBeastQuery
                     ? queryData.battlesByBeastQuery.battles
                     : [];
-                  const beast = queryData.beastByIdQuery
-                    ? queryData.beastByIdQuery.beasts[0]
+                  const beast = queryData.lastBeastQuery
+                    ? queryData.lastBeastQuery.beasts[0]
                     : [];
                   if (response) {
                     notification = processNotification(
                       response.type,
                       response.notificationData,
-                      adventurer,
                       battles,
-                      !!adventurer?.beastId,
-                      beast,
-                      beasts
+                      !!(adventurer?.beastHealth ?? 0 > 0)
                     );
                   }
                   return (

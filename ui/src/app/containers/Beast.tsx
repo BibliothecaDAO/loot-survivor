@@ -19,6 +19,7 @@ import {
   getLastBattleByAdventurer,
 } from "../hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
+import { NullBattle } from "../types";
 
 /**
  * @container
@@ -70,7 +71,7 @@ export default function Beast() {
 
   let beastData = data.lastBeastQuery
     ? data.lastBeastQuery.beasts[0]
-    : NullBeast;
+    : NullBattle;
 
   useCustomQuery(
     "battlesByBeastQuery",
@@ -134,7 +135,10 @@ export default function Beast() {
           }
         });
       },
-      disabled: adventurer?.beastId == undefined || loading,
+      disabled:
+        adventurer?.beastHealth == undefined ||
+        adventurer?.beastHealth == 0 ||
+        loading,
       loading: loading,
     },
     {
@@ -163,7 +167,11 @@ export default function Beast() {
           }
         });
       },
-      disabled: adventurer?.beastId == undefined || loading || !onboarded,
+      disabled:
+        adventurer?.beastHealth == undefined ||
+        adventurer?.beastHealth == 0 ||
+        loading ||
+        !onboarded,
       loading: loading,
     },
   ];
@@ -188,7 +196,8 @@ export default function Beast() {
       {isMobileDevice ? (
         <>
           <div className="sm:w-1/3">
-            {adventurer?.beastId || data.lastBattleQuery?.battles[0] ? (
+            {(adventurer?.beastHealth ?? 0 > 0) ||
+            data.lastBattleQuery?.battles[0] ? (
               <>
                 <BeastDisplay
                   beastData={beastData}
@@ -207,7 +216,8 @@ export default function Beast() {
           <div className="flex flex-col sm:w-1/3 gap-5 p-4">
             {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
 
-            {(adventurer?.beastId || formatBattles.length > 0) && (
+            {((adventurer?.beastHealth ?? 0 > 0) ||
+              formatBattles.length > 0) && (
               <>
                 <div className="flex flex-col items-center gap-5 p-2">
                   <div className="text-xl uppercase">
@@ -232,7 +242,8 @@ export default function Beast() {
           <div className="flex flex-col sm:w-1/3 gap-10 p-4">
             {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
 
-            {(adventurer?.beastId || formatBattles.length > 0) && (
+            {((adventurer?.beastHealth ?? 0 > 0) ||
+              formatBattles.length > 0) && (
               <>
                 <div className="flex flex-col items-center gap-5 p-2">
                   <div className="text-xl uppercase">
@@ -253,7 +264,8 @@ export default function Beast() {
           </div>
 
           <div className="sm:w-1/3">
-            {adventurer?.beastId || data.lastBattleQuery?.battles[0] ? (
+            {(adventurer?.beastHealth ?? 0 > 0) ||
+            data.lastBattleQuery?.battles[0] ? (
               <>
                 <BeastDisplay
                   beastData={beastData}

@@ -168,7 +168,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 0}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.weaponId}
+          equippedItem={adventurer?.weapon}
           icon={<LootIcon type="weapon" />}
         />
         <InventoryRow
@@ -179,7 +179,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 1}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.headId}
+          equippedItem={adventurer?.head}
           icon={<LootIcon type="head" />}
         />
         <InventoryRow
@@ -190,7 +190,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 2}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.chestId}
+          equippedItem={adventurer?.chest}
           icon={<LootIcon type="chest" />}
         />
         <InventoryRow
@@ -201,7 +201,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 3}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.handsId}
+          equippedItem={adventurer?.hands}
           icon={<LootIcon type="hand" />}
         />
         <InventoryRow
@@ -212,7 +212,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 4}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.waistId}
+          equippedItem={adventurer?.waist}
           icon={<LootIcon type="waist" />}
         />
         <InventoryRow
@@ -223,7 +223,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 5}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.feetId}
+          equippedItem={adventurer?.feet}
           icon={<LootIcon type="foot" />}
         />
         <InventoryRow
@@ -234,7 +234,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 6}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.neckId}
+          equippedItem={adventurer?.neck}
           icon={<LootIcon type="neck" />}
         />
         <InventoryRow
@@ -245,7 +245,7 @@ const Inventory: React.FC = () => {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 7}
           setSelected={setSelectedIndex}
-          equippedItemId={adventurer?.ringId}
+          equippedItem={adventurer?.ring}
           icon={<LootIcon type="ring" />}
         />
       </div>

@@ -84,7 +84,7 @@ export default function Home() {
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
-  const upgrade = adventurer?.upgrading;
+  const statUpgrades = adventurer?.statUpgrades ?? 0;
 
   const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
 
@@ -134,7 +134,7 @@ export default function Home() {
     }
   }, [updatedAdventurer]);
 
-  const hasBeast = !!adventurer?.beastId;
+  const hasBeast = !!(adventurer?.beastHealth ?? 0 > 0);
 
   const playState = useMemo(
     () => ({
@@ -300,7 +300,7 @@ export default function Home() {
             id: 2,
             label: "Actions",
             screen: "actions",
-            disabled: hasBeast || upgrade || adventurer.health == 0,
+            disabled: hasBeast || statUpgrades > 0 || adventurer.health == 0,
           },
           {
             id: 3,
@@ -318,7 +318,7 @@ export default function Home() {
             id: 5,
             label: "Beast",
             screen: "beast",
-            disabled: upgrade || adventurer.health == 0,
+            disabled: statUpgrades > 0 || adventurer.health == 0,
           },
           {
             id: 6,
@@ -329,7 +329,7 @@ export default function Home() {
             id: 7,
             label: "Upgrade",
             screen: "upgrade",
-            disabled: !upgrade,
+            disabled: !(statUpgrades > 0),
           },
           {
             id: 8,
@@ -349,7 +349,7 @@ export default function Home() {
             id: 2,
             label: "Actions",
             screen: "actions",
-            disabled: hasBeast || upgrade || adventurer.health == 0,
+            disabled: hasBeast || statUpgrades > 0 || adventurer.health == 0,
           },
           {
             id: 3,
@@ -367,13 +367,13 @@ export default function Home() {
             id: 5,
             label: "Beast",
             screen: "beast",
-            disabled: upgrade || adventurer.health == 0,
+            disabled: statUpgrades > 0 || adventurer.health == 0,
           },
           {
             id: 6,
             label: "Upgrade",
             screen: "upgrade",
-            disabled: !upgrade,
+            disabled: !(statUpgrades > 0),
           },
         ];
       }
@@ -404,7 +404,7 @@ export default function Home() {
         adventurers.length == 1 &&
         adventurer?.id &&
         adventurer?.xp == 0 &&
-        !adventurer.beastId
+        !(adventurer.beastHealth ?? 0 > 0)
       ) {
         setMenu([
           {
@@ -424,7 +424,7 @@ export default function Home() {
       } else if (
         adventurers.length == 1 &&
         adventurer?.xp == 0 &&
-        adventurer.beastId
+        (adventurer.beastHealth ?? 0 > 0)
       ) {
         setMenu([
           {
@@ -449,10 +449,10 @@ export default function Home() {
   }, [onboarded, adventurer, account]);
 
   useEffect(() => {
-    if (upgrade && adventurer?.health !== 0) {
+    if (statUpgrades > 0 && adventurer?.health !== 0) {
       setScreen("upgrade");
     }
-  }, [upgrade]);
+  }, [statUpgrades]);
 
   // fetch adventurers on app start and account switch
   useEffect(() => {
