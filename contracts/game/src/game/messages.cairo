@@ -14,4 +14,3 @@ mod messages {
     const ADVENTURER_NOT_IDLE: felt252 = 'Adventurer is not idle';
     const ONE_EXPLORE_PER_BLOCK: felt252 = 'One explore per block';
 }
-
