@@ -1,11 +1,13 @@
-use integer::{u256_from_felt252};
-use traits::{TryInto, Into};
-use option::OptionTrait;
-use debug::PrintTrait;
+use traits::Into;
+
+trait Packing<T> {
+    fn pack(self: T) -> felt252;
+    fn unpack(packed: felt252) -> T;
+}
 
 #[inline(always)]
 fn pack_value(value: felt252, pow: u256) -> u256 {
-    u256_from_felt252(value) * pow
+    value.into() * pow
 }
 
 #[inline(always)]

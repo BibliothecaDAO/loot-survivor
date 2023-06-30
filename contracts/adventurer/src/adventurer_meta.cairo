@@ -7,7 +7,7 @@ use traits::{TryInto, Into};
 use option::OptionTrait;
 use debug::PrintTrait;
 
-use pack::pack::{pack_value, unpack_value};
+use pack::pack::{Packing, pack_value, unpack_value};
 use pack::constants::{pow, mask};
 
 #[derive(Drop, Copy, Serde)]
@@ -19,12 +19,7 @@ struct AdventurerMetadata {
     entropy: u64,
 }
 
-trait IAdventurerMetadata {
-    fn pack(self: AdventurerMetadata) -> felt252;
-    fn unpack(packed: felt252) -> AdventurerMetadata;
-}
-
-impl ImplAdventurerMetadata of IAdventurerMetadata {
+impl PackingAdventurerMetadata of Packing<AdventurerMetadata> {
     fn pack(self: AdventurerMetadata) -> felt252 {
         (pack_value(self.name.into(), pow::TWO_POW_218) +
          pack_value(self.home_realm.into(), pow::TWO_POW_210) +
@@ -35,20 +30,12 @@ impl ImplAdventurerMetadata of IAdventurerMetadata {
     fn unpack(packed: felt252) -> AdventurerMetadata {
         let packed = packed.into();
         AdventurerMetadata {
-            name: U256TryIntoU32::try_into(unpack_value(packed, pow::TWO_POW_218, mask::MASK_32))
-                .unwrap(),
-            home_realm: U256TryIntoU8::try_into(
-                unpack_value(packed, pow::TWO_POW_210, mask::MASK_8)
-            )
-                .unwrap(),
-            race: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_202, mask::MASK_8))
-                .unwrap(),
-            order: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_194, mask::MASK_8))
-                .unwrap(),
-            entropy: U256TryIntoU64::try_into(unpack_value(packed, pow::TWO_POW_130, mask::MASK_64))
-                .unwrap()
+            name: unpack_value(packed, pow::TWO_POW_218, mask::MASK_32).try_into().unwrap(),
+            home_realm: unpack_value(packed, pow::TWO_POW_210, mask::MASK_8).try_into().unwrap(),
+            race: unpack_value(packed, pow::TWO_POW_202, mask::MASK_8).try_into().unwrap(),
+            order: unpack_value(packed, pow::TWO_POW_194, mask::MASK_8).try_into().unwrap(),
+            entropy: unpack_value(packed, pow::TWO_POW_130, mask::MASK_64).try_into().unwrap()
         }
-
     }
 }
 
@@ -60,10 +47,11 @@ fn test_meta() {
     };
 
     let packed = meta.pack();
-    let unpacked = ImplAdventurerMetadata::unpack(packed);
-    assert(@meta.name == @unpacked.name, 'name');
-    assert(@meta.home_realm == @unpacked.home_realm, 'home_realm');
-    assert(@meta.race == @unpacked.race, 'race');
-    assert(@meta.order == @unpacked.order, 'order');
-    assert(@meta.entropy == @unpacked.entropy, 'entropy');
+    //let unpacked = ImplAdventurerMetadata::unpack(packed);
+    let unpacked: AdventurerMetadata = Packing::unpack(packed);
+    assert(meta.name == unpacked.name, 'name');
+    assert(meta.home_realm == unpacked.home_realm, 'home_realm');
+    assert(meta.race == unpacked.race, 'race');
+    assert(meta.order == unpacked.order, 'order');
+    assert(meta.entropy == unpacked.entropy, 'entropy');
 }
