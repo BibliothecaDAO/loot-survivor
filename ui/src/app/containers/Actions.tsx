@@ -140,7 +140,7 @@ export default function Actions() {
               <Discovery discoveries={latestDiscoveries} />
             )}
             {selected == "purchase health" &&
-              (adventurer?.beastHealth ?? 0 > 0 ? (
+              (!(adventurer?.beastHealth ?? 0 > 0) ? (
                 <PurchaseHealth
                   isActive={activeMenu == 1}
                   onEscape={() => setActiveMenu(0)}

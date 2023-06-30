@@ -85,7 +85,8 @@ export default function Home() {
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
-  const statUpgrades = adventurer?.statUpgrades ?? 0;
+  // const statUpgrades = adventurer?.statUpgrades ?? 0;
+  const statUpgrades = 1;
 
   const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
 

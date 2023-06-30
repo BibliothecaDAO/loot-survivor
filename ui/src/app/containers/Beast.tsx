@@ -203,8 +203,7 @@ export default function Beast() {
       {isMobileDevice ? (
         <>
           <div className="sm:w-1/3">
-            {(adventurer?.beastHealth ?? 0 > 0) ||
-            data.lastBattleQuery?.battles[0] ? (
+            {(adventurer?.beastHealth ?? 0 > 0) || lastBattle ? (
               <>
                 <BeastDisplay
                   beastData={beastData}

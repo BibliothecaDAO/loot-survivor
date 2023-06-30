@@ -183,7 +183,7 @@ export function processItemName(item: Item) {
   }
 }
 
-export function getItemData(item: any) {
+export function getItemData(item: string) {
   const gameData = new GameData();
   const tier = gameData.ITEM_TIERS[item];
   const type =

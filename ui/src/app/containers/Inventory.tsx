@@ -253,11 +253,11 @@ const Inventory: React.FC = () => {
       <div className="w-2/3 sm:w-1/3">
         <h4>Loot</h4>
         <div className="flex flex-col gap-5">
-          <div className="flex flex-row items-center gap-5 p-2 border border-terminal-green">
+          <div className="flex flex-row items-center gap-5 p-2 border border-terminal-green hidden sm:block">
             <div className="w-10">
               <InfoIcon />
             </div>
-            <p className="pb-1 hidden sm:block">
+            <p className="pb-1">
               Items of Tier 1 carry the highest prestige and quality, whereas
               items of Tier 5 offer the most basic value.
             </p>

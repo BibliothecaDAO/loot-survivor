@@ -5,37 +5,37 @@ import { processItemName, calculateLevel, getItemData } from "../../lib/utils";
 
 interface ItemDisplayProps {
   item: Item;
-  type?: string;
 }
 
-export const ItemDisplay = (item: ItemDisplayProps) => {
-  const Item = item?.item;
+export const ItemDisplay = ({ item }: ItemDisplayProps) => {
+  const itemType = item?.item;
 
-  const itemName = processItemName(Item);
-  const { tier, type, slot } = getItemData(item.item);
+  const itemName = processItemName(item);
+  const { tier, type, slot } = getItemData(itemType ?? "");
+  console.log(tier, type, slot);
 
   return (
     <div
       className={`flex-shrink flex gap-2 p-1 sm:p-2 mb-1 text-sm sm:text-base ${
-        Item ? "bg-terminal-green text-terminal-black" : ""
+        item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >
       <LootIcon type={slot} />
-      {Item ? (
+      {item ? (
         <span className="flex flex-row justify-between w-full">
           <div className="w-full overflow-auto whitespace-normal">
             {" "}
             {/* Added the CSS classes here */}
             <span className="flex font-semibold whitespace-nowrap">
-              {itemName} {Item?.xp} XP
+              {itemName} {item?.xp} XP
               {slot == "Neck" || slot == "Ring"
-                ? ` [+${calculateLevel(Item?.xp ?? 0)} Luck]`
+                ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
                 : ""}
             </span>
             <span className="whitespace-nowrap">
-              {Item &&
+              {item &&
                 `Tier ${tier ?? 0}, Greatness ${
-                  calculateLevel(Item?.xp ?? 0) ?? 0
+                  calculateLevel(item?.xp ?? 0) ?? 0
                 }
                 `}
             </span>
