@@ -19,7 +19,7 @@ use super::{
 };
 
 use combat::{combat::ImplCombat, constants::CombatEnums::{Type, Tier, Slot}};
-use pack::{pack::{pack_value, unpack_value}, constants::{pow, mask}};
+use pack::{pack::{Packing, pack_value, unpack_value}, constants::{pow, mask}};
 
 #[derive(Copy, Drop, Clone, Serde)]
 struct Loot {
@@ -134,28 +134,28 @@ impl ImplLoot of ILoot {
 
         // if level exceeds max greatness
         if level > ITEM_MAX_GREATNESS {
-            // return max greatness 
+            // return max greatness
             return ITEM_MAX_GREATNESS;
         } else {
             return level;
         }
     }
+}
 
+impl PackingLoot of Packing<Loot> {
     // pack an item for storage
     // @param item The item to pack.
     // @return The packed item in a felt252
     fn pack(self: Loot) -> felt252 {
-        let mut packed = 0;
         let item_tier = ImplCombat::tier_to_u8(self.tier);
         let item_type = ImplCombat::type_to_u8(self.item_type);
         let item_slot = ImplCombat::slot_to_u8(self.slot);
 
-        packed = packed | pack_value(self.id.into(), pow::TWO_POW_236);
-        packed = packed | pack_value(item_tier.into(), pow::TWO_POW_220);
-        packed = packed | pack_value(item_type.into(), pow::TWO_POW_204);
-        packed = packed | pack_value(item_slot.into(), pow::TWO_POW_118);
-
-        packed.try_into().unwrap()
+        (pack_value(self.id.into(), pow::TWO_POW_236)
+         + pack_value(item_tier.into(), pow::TWO_POW_220)
+         + pack_value(item_type.into(), pow::TWO_POW_204)
+         + pack_value(item_slot.into(), pow::TWO_POW_118)
+        ).try_into().unwrap()
     }
 
     // unpack an item from storage
@@ -163,25 +163,13 @@ impl ImplLoot of ILoot {
     // @return The unpacked item
     fn unpack(packed: felt252) -> Loot {
         let packed = packed.into();
-        let item_tier_u8 = U256TryIntoU8::try_into(
-            unpack_value(packed, pow::TWO_POW_220, mask::MASK_16)
-        )
-            .unwrap();
-        let item_type_u8 = U256TryIntoU8::try_into(
-            unpack_value(packed, pow::TWO_POW_204, mask::MASK_16)
-        )
-            .unwrap();
-
-        let item_slot_u8 = U256TryIntoU8::try_into(
-            unpack_value(packed, pow::TWO_POW_118, mask::MASK_16)
-        )
-            .unwrap();
-
-        let item_id = U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_236, mask::MASK_16))
-            .unwrap();
-        let item_tier = ImplCombat::u8_to_tier(item_tier_u8);
-        let item_type = ImplCombat::u8_to_type(item_type_u8);
-        let item_slot = ImplCombat::u8_to_slot(item_slot_u8);
+        let item_tier: u8 = unpack_value(packed, pow::TWO_POW_220, mask::MASK_16).try_into().unwrap();
+        let item_type: u8 = unpack_value(packed, pow::TWO_POW_204, mask::MASK_16).try_into().unwrap();
+        let item_slot: u8 = unpack_value(packed, pow::TWO_POW_118, mask::MASK_16).try_into().unwrap();
+        let item_id = unpack_value(packed, pow::TWO_POW_236, mask::MASK_16).try_into().unwrap();
+        let item_tier = ImplCombat::u8_to_tier(item_tier);
+        let item_type = ImplCombat::u8_to_type(item_type);
+        let item_slot = ImplCombat::u8_to_slot(item_slot);
 
         Loot { id: item_id, tier: item_tier, item_type: item_type, slot: item_slot }
     }
@@ -428,9 +416,9 @@ fn test_item_name_suffix() {
         );
 
         //
-        // Rings 
+        // Rings
         //
-        // Can have any name so no need to test. Note while the contract doesn't generate any Rings with 
+        // Can have any name so no need to test. Note while the contract doesn't generate any Rings with
         // name prefix set 1  such as "X Bane" Gold Ring of Power, this is because those ring variants
         // haven't yet reached G19 to receive their name. This is simlar to us
         // knowing that all Warhammers will eventually be "X Bane" even though none have reached G19
@@ -481,9 +469,7 @@ fn test_pack_and_unpack() {
         id: 1, tier: Tier::T1(()), item_type: Type::Bludgeon_or_Metal(()), slot: Slot::Waist(())
     };
 
-    let unpacked = ImplLoot::unpack(loot.pack());
-
-    let unpacked = ImplLoot::unpack(loot.pack());
+    let unpacked: Loot = Packing::unpack(loot.pack());
     assert(loot.id == unpacked.id, 'id');
     assert(loot.tier == unpacked.tier, 'tier');
     assert(loot.item_type == unpacked.item_type, 'item_type');
