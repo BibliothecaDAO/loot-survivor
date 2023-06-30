@@ -12,22 +12,12 @@ import useLoadingStore from "../../hooks/useLoadingStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import useUIStore from "../../hooks/useUIStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { FormData } from "@/app/types";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
   onEscape: () => void;
   adventurers: any[];
-}
-
-interface FormData {
-  name: string;
-  race: string;
-  homeRealmId: string;
-  order: string;
-  startingWeapon: string;
-  imageHash1: string;
-  imageHash2: string;
-  interfaceaddress: string;
 }
 
 export const CreateAdventurer = ({
@@ -39,15 +29,11 @@ export const CreateAdventurer = ({
   const { addTransaction } = useTransactionManager();
   const formatAddress = account ? account.address : "0x0";
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    race: "",
-    homeRealmId: "1",
-    order: "",
     startingWeapon: "",
-    imageHash1: "1",
-    imageHash2: "1",
-    interfaceaddress:
-      "0x07642A1c8D575B0c0f9a7AD7cCEb5517c02f36E5F3B36B25429Cc7C99383ed0a",
+    name: "",
+    homeRealmId: "1",
+    race: "",
+    order: "",
   });
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const setScreen = useUIStore((state) => state.setScreen);
@@ -93,17 +79,13 @@ export const CreateAdventurer = ({
 
     const mintAdventurer = {
       contractAddress: gameContract?.address ?? "",
-      entrypoint: "mint_with_starting_weapon",
+      entrypoint: "start",
       calldata: [
-        formatAddress,
-        getKeyFromValue(gameData.RACES, formData.race)?.toString(),
-        formData.homeRealmId,
-        stringToFelt(formData.name),
-        getKeyFromValue(gameData.ORDERS, formData.order) ?? "",
-        formData.imageHash1,
-        formData.imageHash2,
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
-        formData.interfaceaddress,
+        stringToFelt(formData.name),
+        formData.homeRealmId,
+        getKeyFromValue(gameData.RACES, formData.race)?.toString(),
+        getKeyFromValue(gameData.ORDERS, formData.order) ?? "",
       ],
     };
     addToCalls(mintAdventurer);

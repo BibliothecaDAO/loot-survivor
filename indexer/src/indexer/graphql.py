@@ -659,8 +659,10 @@ class DiscoveriesFilter:
     xpEarnedAdventurer: Optional[FeltValueFilter] = None
     xpEarnedItems: Optional[FeltValueFilter] = None
     entityId: Optional[FeltValueFilter] = None
-    entityLevel: Optional[OrderByInput] = None
-    entityHealth: Optional[OrderByInput] = None
+    entityLevel: Optional[FeltValueFilter] = None
+    entityHealth: Optional[FeltValueFilter] = None
+    entityNamePrefix: Optional[NamePrefixFilter] = None
+    entityNameSuffix: Optional[NameSuffixFilter] = None
     ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[DateTimeFilter] = None
     txHash: Optional[HexValueFilter] = None
@@ -763,6 +765,8 @@ class DiscoveriesOrderByInput:
     entityId: Optional[OrderByInput] = None
     entityLevel: Optional[OrderByInput] = None
     entityHealth: Optional[OrderByInput] = None
+    entityNamePrefix: Optional[OrderByInput] = None
+    entityNameSuffix: Optional[OrderByInput] = None
     ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
@@ -909,6 +913,8 @@ class Discovery:
     entity: Optional[BeastValue]
     entityLevel: Optional[FeltValue]
     entityHealth: Optional[FeltValue]
+    entityNamePrefix: Optional[NamePrefixValue]
+    entityNameSuffix: Optional[NameSuffixValue]
     ambushed: Optional[BooleanValue]
     discoveryTime: Optional[datetime]
     txHash: Optional[HexValue]
@@ -930,6 +936,8 @@ class Discovery:
             entity=data["entity"],
             entityLevel=data["entityLevel"],
             entityHealth=data["entityHealth"],
+            entityNamePrefix=data["entityNamePrefix"],
+            entityNameSuffix=data["entityNameSuffix"],
             ambushed=data["ambushed"],
             discoveryTime=data["discoveryTime"],
             txHash=data["txHash"],

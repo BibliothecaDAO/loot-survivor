@@ -1,4 +1,4 @@
-import Item from "../../types";
+import { Item } from "../../types";
 import LootIcon from "../icons/LootIcon";
 import Efficacyicon from "../icons/EfficacyIcon";
 import { processItemName, calculateLevel, getItemData } from "../../lib/utils";
@@ -27,15 +27,17 @@ export const ItemDisplay = (item: ItemDisplayProps) => {
             {" "}
             {/* Added the CSS classes here */}
             <span className="flex font-semibold whitespace-nowrap">
-              {itemName} {calculateLevel(Item?.xp ?? 0)} {Item?.xp} XP
+              {itemName} {Item?.xp} XP
               {slot == "Neck" || slot == "Ring"
                 ? ` [+${calculateLevel(Item?.xp ?? 0)} Luck]`
                 : ""}
             </span>
             <span className="whitespace-nowrap">
               {Item &&
-                `Tier ${tier}, Greatness ${calculateLevel(Item?.xp ?? 0)}
-                }`}
+                `Tier ${tier ?? 0}, Greatness ${
+                  calculateLevel(Item?.xp ?? 0) ?? 0
+                }
+                `}
             </span>
           </div>
           <Efficacyicon type={type} />

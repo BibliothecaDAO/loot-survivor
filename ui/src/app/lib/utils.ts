@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 
 import Realms from "./realms.json";
-import Item from "../types";
+import { Item } from "../types";
 import { GameData } from "../components/GameData";
 
 export function cn(...inputs: ClassValue[]) {

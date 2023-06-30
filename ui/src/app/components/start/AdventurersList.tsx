@@ -3,13 +3,13 @@ import { Button } from "../buttons/Button";
 import Info from "../adventurer/Info";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { ButtonData } from "../KeyboardControls";
-import { useQueriesStore } from "../../hooks/useQueryStore";
+import { Adventurer } from "@/app/types";
 import { useMediaQuery } from "react-responsive";
 
 export interface AdventurerListProps {
   isActive: boolean;
   onEscape: () => void;
-  adventurers: any[];
+  adventurers: Adventurer[];
 }
 
 export const AdventurersList = ({
@@ -23,7 +23,9 @@ export const AdventurersList = ({
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
 
-  const sortedAdventurers = [...adventurers].sort((a, b) => b.level - a.level);
+  const sortedAdventurers = [...adventurers].sort(
+    (a, b) => (b.level ?? 0) - (a.level ?? 0)
+  );
 
   const filteredAdventurers = showZeroHealth
     ? sortedAdventurers

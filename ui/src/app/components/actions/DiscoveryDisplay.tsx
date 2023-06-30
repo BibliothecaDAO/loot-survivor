@@ -9,9 +9,9 @@ interface DiscoveryProps {
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const { adventurer } = useAdventurerStore();
   const beastName = processBeastName(
-    discoveryData?.beast,
-    discoveryData?.beastNamePrefix,
-    discoveryData?.beastNameSuffix
+    discoveryData?.entity,
+    discoveryData?.entityNamePrefix,
+    discoveryData?.entityNameSuffix
   );
 
   const renderDiscoveryMessage = () => {

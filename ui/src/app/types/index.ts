@@ -34,7 +34,7 @@ export interface Adventurer {
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
 }
 
-export default interface ItemIndexer {
+export interface ItemIndexer {
   item?: string; // name
   cost?: number; // purchase cost for the item
   adventurerId: number; // Adventurer ID
@@ -49,14 +49,14 @@ export default interface ItemIndexer {
   lastUpdatedTime: Date; // Block time the item was last updated
 }
 
-export default interface Item {
+export interface Item {
   item?: string; // name
   cost?: number; // purchase cost for the item
-  adventurerId: number; // Adventurer ID
+  adventurerId?: number; // Adventurer ID
   owneAddress?: string; // Hex Address of the Owner
   owner?: boolean; // Is the item owned by the adventurer?
   equipped?: boolean; // Is the item equipped by the adventurer?
-  purchasedTime: Date; // Block time the item was purchased
+  purchasedTime?: Date; // Block time the item was purchased
   namePrefix?: number; // First part of the name prefix (i.e Demon)
   nameSuffix?: number; // Second part of the name prefix (i.e Grasp)
   itemSuffix?: number; // Stored value if item has a Suffix (i.e of Power)
@@ -64,7 +64,7 @@ export default interface Item {
   slot?: string; // Item slot location
   tier?: number; // Tier of the item
   type?: string; // Type of the item
-  lastUpdatedTime: Date; // Block time the item was last updated
+  lastUpdatedTime?: Date; // Block time the item was last updated
 }
 export interface Battle {
   adventurerId?: number; // Adventurer ID
@@ -85,7 +85,7 @@ export interface Battle {
   timestamp?: Date; // Block time of the battle
 }
 
-export interface Discoveries {
+export interface Discovery {
   adventurerId?: number; // Adventurer ID
   discoveryType?: string; // Type of discovery
   subDiscoveryType?: string; // Sub type of discovery
@@ -97,9 +97,11 @@ export interface Discoveries {
   damageLocation?: string; // Location of the damage taken
   xpEarnedAdventurer?: number; // Experience earned by the adventurer
   xpEarnedItems?: number; // Experience earned by the items
-  entityId?: number; // Entity ID discovered
+  entity?: string; // Entity discovered
   entityLevel?: number; // Entity level discovered
   entityHealth?: number; // Entity health discovered
+  entityNamePrefix?: string; // Entity name prifix
+  entityNameSuffix?: string; // Entity name suffix
   ambushed?: boolean; // Did the adventurer ambush the entity?
   discoveryTime?: Date; // Block time of the discovery
   txHash?: string; // Transaction hash
@@ -117,6 +119,91 @@ export type Menu = {
   screen: ScreenPage;
   disabled?: boolean;
 };
+
+export type FormData = {
+  startingWeapon: string;
+  name: string;
+  homeRealmId: string;
+  race: string;
+  order: string;
+};
+
+export type Beast =
+  | "Basilisk"
+  | "Kitsune"
+  | "Jiangshi"
+  | "Rakshasa"
+  | "Warlock"
+  | "Minotaur"
+  | "Dragon"
+  | "Phoenix"
+  | "Manticore"
+  | "Griffin"
+  | "Cyclops"
+  | "Titan"
+  | "Yeti"
+  | "Colossus"
+  | "Balrog"
+  | "Gorgon"
+  | "Anansi"
+  | "Lich"
+  | "Chimera"
+  | "Wendigo"
+  | "Harpy"
+  | "Arachne"
+  | "Nue"
+  | "Skinwalker"
+  | "Chupacabra"
+  | "Oni"
+  | "Ogre"
+  | "Juggernaut"
+  | "Bigfoot"
+  | "Orc"
+  | "Cerberus"
+  | "Werewolf"
+  | "Banshee"
+  | "Draugr"
+  | "Vampire"
+  | "Weretiger"
+  | "Wyvern"
+  | "Roc"
+  | "Qilin"
+  | "Pegasus"
+  | "Behemoth"
+  | "Ent"
+  | "Giant"
+  | "Kraken"
+  | "Leviathan"
+  | "Golem"
+  | "Goblin"
+  | "Ghoul"
+  | "Pixie"
+  | "Sprite"
+  | "Kappa"
+  | "Hippogriff"
+  | "Fenrir"
+  | "Jaguar"
+  | "Ammit"
+  | "DireWolf"
+  | "Skeleton"
+  | "Nephilim"
+  | "Tarrasque"
+  | "Berserker"
+  | "Fairy"
+  | "Leprechaun"
+  | "Kelpie"
+  | "Wraith"
+  | "Gnome"
+  | "Bear"
+  | "Wolf"
+  | "Scorpion"
+  | "Spider"
+  | "Rat"
+  | "Ettin"
+  | "Jotunn"
+  | "Hydra"
+  | "NemeanLion"
+  | "Troll";
 
 export const NullAdventurer: Adventurer = {
   id: undefined,
@@ -151,7 +238,7 @@ export const NullAdventurer: Adventurer = {
   lastUpdatedTime: undefined,
 };
 
-export const NullBattle = {
+export const NullBattle: Battle = {
   adventurerId: undefined,
   beast: undefined,
   beastHealth: undefined,
@@ -170,7 +257,7 @@ export const NullBattle = {
   timestamp: undefined,
 };
 
-export const NullDiscovery = {
+export const NullDiscovery: Discovery = {
   adventurerId: undefined,
   discoveryType: undefined,
   subDiscoveryType: undefined,
@@ -182,15 +269,17 @@ export const NullDiscovery = {
   damageLocation: undefined,
   xpEarnedAdventurer: undefined,
   xpEarnedItems: undefined,
-  entityId: undefined,
+  entity: undefined,
   entityLevel: undefined,
   entityHealth: undefined,
+  entityNamePrefix: undefined,
+  entityNameSuffix: undefined,
   ambushed: undefined,
   discoveryTime: undefined,
   txHash: undefined,
 };
 
-export const NullItem = {
+export const NullItem: Item = {
   item: undefined,
   cost: undefined,
   adventurerId: undefined,

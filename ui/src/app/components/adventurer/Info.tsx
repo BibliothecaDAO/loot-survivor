@@ -1,4 +1,4 @@
-import { Adventurer, NullAdventurer } from "../../types";
+import { Adventurer, NullAdventurer, NullItem } from "../../types";
 import { getItemsByAdventurer } from "../../hooks/graphql/queries";
 import { HeartIcon, CoinIcon } from "../icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
@@ -8,6 +8,7 @@ import { useQueriesStore } from "../../hooks/useQueryStore";
 import useCustomQuery from "../../hooks/useCustomQuery";
 import useUIStore from "../../hooks/useUIStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
+import { ItemTemplate } from "@/app/types/templates";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
@@ -37,13 +38,14 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     },
     txAccepted
   );
-  const items = profileExists
-    ? data.itemsByProfileQuery
-      ? data.itemsByProfileQuery.items
-      : []
-    : data.itemsByAdventurerQuery
-    ? data.itemsByAdventurerQuery.items
-    : [];
+  // const items = profileExists
+  //   ? data.itemsByProfileQuery
+  //     ? data.itemsByProfileQuery.items
+  //     : []
+  //   : data.itemsByAdventurerQuery
+  //   ? data.itemsByAdventurerQuery.items
+  //   : [];
+  const items = [ItemTemplate];
 
   return (
     <div className="h-full border border-terminal-green overflow-auto">
@@ -66,7 +68,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                 </span>
                 <span className="flex ">
                   <HeartIcon className="self-center w-6 h-6 fill-current" />{" "}
-                  {`${formatAdventurer.health}/${
+                  {`${formatAdventurer.health ?? 0}/${
                     100 + (formatAdventurer.vitality ?? 0) * 20
                   }`}
                 </span>
@@ -80,58 +82,74 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                 <div className="flex flex-col">
                   <div className="">
                     <ItemDisplay
-                      item={items.find(
-                        (item: any) => item.id == formatAdventurer.weapon
-                      )}
+                      item={
+                        items.find(
+                          (item: any) => item.item == formatAdventurer.weapon
+                        ) || NullItem
+                      }
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
-                      item={items.find(
-                        (item: any) => item.id == formatAdventurer.head
-                      )}
+                      item={
+                        items.find(
+                          (item: any) => item.item == formatAdventurer.head
+                        ) || NullItem
+                      }
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
-                      item={items.find(
-                        (item: any) => item.id == formatAdventurer.chest
-                      )}
+                      item={
+                        items.find(
+                          (item: any) => item.item == formatAdventurer.chest
+                        ) || NullItem
+                      }
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
-                      item={items.find(
-                        (item: any) => item.id == formatAdventurer.hands
-                      )}
+                      item={
+                        items.find(
+                          (item: any) => item.item == formatAdventurer.hands
+                        ) || NullItem
+                      }
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
-                      item={items.find(
-                        (item: any) => item.id == formatAdventurer.waist
-                      )}
+                      item={
+                        items.find(
+                          (item: any) => item.item == formatAdventurer.waist
+                        ) || NullItem
+                      }
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
-                      item={items.find(
-                        (item: any) => item.id == formatAdventurer.feet
-                      )}
+                      item={
+                        items.find(
+                          (item: any) => item.item == formatAdventurer.feet
+                        ) || NullItem
+                      }
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
-                      item={items.find(
-                        (item: any) => item.id == formatAdventurer.neck
-                      )}
+                      item={
+                        items.find(
+                          (item: any) => item.item == formatAdventurer.neck
+                        ) || NullItem
+                      }
                     />
                   </div>
                   <div className="">
                     <ItemDisplay
-                      item={items.find(
-                        (item: any) => item.id == formatAdventurer.ring
-                      )}
+                      item={
+                        items.find(
+                          (item: any) => item.item == formatAdventurer.ring
+                        ) || NullItem
+                      }
                     />
                   </div>
                 </div>

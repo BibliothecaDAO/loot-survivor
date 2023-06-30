@@ -20,6 +20,7 @@ import {
 } from "../hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
 import { NullBattle } from "../types";
+import { DiscoveryTemplate, BattleTemplate } from "../types/templates";
 
 /**
  * @container
@@ -61,32 +62,38 @@ export default function Beast() {
     txAccepted
   );
 
-  console.log(txAccepted);
-
   console.log(
     data.battlesByBeastQuery,
     data.lastBattleQuery,
     data.lastBeastQuery
   );
 
-  let beastData = data.lastBeastQuery
-    ? data.lastBeastQuery.beasts[0]
-    : NullBattle;
+  // let beastData = data.lastBeastQuery
+  //   ? data.lastBeastQuery.beasts[0]
+  //   : NullBattle;
+
+  let beastData = DiscoveryTemplate;
 
   useCustomQuery(
     "battlesByBeastQuery",
     getBattlesByBeast,
     {
       adventurerId: adventurer?.id ?? 0,
-      beast: beastData?.beast,
-      discoveryTime: beastData?.discoveryTime,
+      beast: beastData?.entity,
+      discoveryTime: beastData?.discoveryTime?.toISOString(),
     },
     txAccepted
   );
 
-  const formatBattles = data.battlesByBeastQuery
-    ? data.battlesByBeastQuery.battles
-    : [];
+  // const formatBattles = data.battlesByBeastQuery
+  //   ? data.battlesByBeastQuery.battles
+  //   : [];
+
+  const formatBattles = [BattleTemplate];
+
+  // const lastBattle = data.lastBattleQuery?.battles[0];
+
+  const lastBattle = BattleTemplate;
 
   const attack = {
     contractAddress: gameContract?.address ?? "",
@@ -129,7 +136,7 @@ export default function Beast() {
             addTransaction({
               hash: tx.transaction_hash,
               metadata: {
-                method: `Attack ${beastData.beast}`,
+                method: `Attack ${beastData.entity}`,
               },
             });
           }
@@ -161,7 +168,7 @@ export default function Beast() {
             addTransaction({
               hash: tx.transaction_hash,
               metadata: {
-                method: `Flee ${beastData.beast}`,
+                method: `Flee ${beastData.entity}`,
               },
             });
           }
@@ -176,10 +183,10 @@ export default function Beast() {
     },
   ];
 
-  const isBeastDead = beastData?.health == "0";
+  const isBeastDead = adventurer?.health == 0;
 
   const beastName = processBeastName(
-    beastData?.beast,
+    beastData?.entity,
     beastData?.entityNamePrefix,
     beastData?.entityNameSuffix
   );
@@ -221,7 +228,7 @@ export default function Beast() {
               <>
                 <div className="flex flex-col items-center gap-5 p-2">
                   <div className="text-xl uppercase">
-                    Battle log with {beastData?.beast}
+                    Battle log with {beastData?.entity}
                   </div>
                   <div className="flex flex-col gap-2 text-sm">
                     {formatBattles.map((battle: any, index: number) => (
@@ -247,7 +254,7 @@ export default function Beast() {
               <>
                 <div className="flex flex-col items-center gap-5 p-2">
                   <div className="text-xl uppercase">
-                    Battle log with {beastData?.beast}
+                    Battle log with {beastData?.entity}
                   </div>
                   <div className="flex flex-col gap-2">
                     {formatBattles.map((battle: any, index: number) => (
@@ -264,8 +271,7 @@ export default function Beast() {
           </div>
 
           <div className="sm:w-1/3">
-            {(adventurer?.beastHealth ?? 0 > 0) ||
-            data.lastBattleQuery?.battles[0] ? (
+            {(adventurer?.beastHealth ?? 0 > 0) || lastBattle ? (
               <>
                 <BeastDisplay
                   beastData={beastData}

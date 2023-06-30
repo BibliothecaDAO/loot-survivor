@@ -59,33 +59,31 @@ const Discovery = ({ discoveries }: DiscoveryProps) => {
           <p>You have not yet made any discoveries!</p>
         )}
       </div>
-      {isMobileDevice && (
-        <Button
-          className="w-1/2 text-lg"
-          onClick={async () => {
-            addToCalls(exploreTx);
-            startLoading(
-              "Explore",
-              "Exploring",
-              "discoveryByTxHashQuery",
-              adventurer?.id
-            );
-            await handleSubmitCalls(writeAsync).then((tx: any) => {
-              if (tx) {
-                setTxHash(tx.transaction_hash);
-                addTransaction({
-                  hash: tx.transaction_hash,
-                  metadata: {
-                    method: `Explore with ${adventurer?.name}`,
-                  },
-                });
-              }
-            });
-          }}
-        >
-          Explore
-        </Button>
-      )}
+      <Button
+        className="w-1/2 text-lg"
+        onClick={async () => {
+          addToCalls(exploreTx);
+          startLoading(
+            "Explore",
+            "Exploring",
+            "discoveryByTxHashQuery",
+            adventurer?.id
+          );
+          await handleSubmitCalls(writeAsync).then((tx: any) => {
+            if (tx) {
+              setTxHash(tx.transaction_hash);
+              addTransaction({
+                hash: tx.transaction_hash,
+                metadata: {
+                  method: `Explore with ${adventurer?.name}`,
+                },
+              });
+            }
+          });
+        }}
+      >
+        Explore
+      </Button>
     </div>
   );
 };

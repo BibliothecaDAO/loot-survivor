@@ -21,6 +21,7 @@ import Encounters from "../../../../public/icons/encounters.svg";
 import Target from "../../../../public/icons/target.svg";
 import Heart from "../../../../public/icons/heart.svg";
 import Coin from "../../../../public/icons/coin.svg";
+import Info from "../../../../public/icons/info.svg";
 
 const ClothIcon = GiRolledCloth;
 const HideIcon = GiAnimalHide;
@@ -45,6 +46,7 @@ const EncountersIcon = Encounters;
 const TargetIcon = Target;
 const HeartIcon = Heart;
 const CoinIcon = Coin;
+const InfoIcon = Info;
 
 export {
   ClothIcon,
@@ -70,4 +72,5 @@ export {
   TargetIcon,
   HeartIcon,
   CoinIcon,
+  InfoIcon,
 };

@@ -13,6 +13,7 @@ import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useLoadingStore from "../hooks/useLoadingStore";
 import LootIcon from "../components/icons/LootIcon";
+import { InfoIcon } from "../components/icons/Icons";
 
 /**
  * @container
@@ -251,32 +252,39 @@ const Inventory: React.FC = () => {
       </div>
       <div className="w-2/3 sm:w-1/3">
         <h4>Loot</h4>
-        <p className="pb-1 hidden sm:block">
-          Items of Tier 1 carry the highest prestige and quality, whereas items
-          of Tier 5 offer the most basic value.
-        </p>
-        <div className="flex flex-col space-y-1">
-          {filteredItems.length ? (
-            filteredItems.map((item: any, index: number) => (
-              <div
-                className="flex flex-row gap-2 w-full items-center justify-between"
-                key={item.id}
-              >
-                <div className="w-full">
-                  <ItemDisplay item={item} />
-                </div>
-                <Button
-                  onClick={() => handleAddEquipItem(item)}
-                  disabled={singleEquipExists(item.id)}
-                  loading={loading}
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-row items-center gap-5 p-2 border border-terminal-green">
+            <div className="w-10">
+              <InfoIcon />
+            </div>
+            <p className="pb-1 hidden sm:block">
+              Items of Tier 1 carry the highest prestige and quality, whereas
+              items of Tier 5 offer the most basic value.
+            </p>
+          </div>
+          <div className="flex flex-col space-y-1">
+            {filteredItems.length ? (
+              filteredItems.map((item: any, index: number) => (
+                <div
+                  className="flex flex-row gap-2 w-full items-center justify-between"
+                  key={item.id}
                 >
-                  equip
-                </Button>
-              </div>
-            ))
-          ) : (
-            <div>You have no unequipped {selected} Loot</div>
-          )}
+                  <div className="w-full">
+                    <ItemDisplay item={item} />
+                  </div>
+                  <Button
+                    onClick={() => handleAddEquipItem(item)}
+                    disabled={singleEquipExists(item.id)}
+                    loading={loading}
+                  >
+                    equip
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <div>You have no unequipped {selected} Loot</div>
+            )}
+          </div>
         </div>
       </div>
     </div>

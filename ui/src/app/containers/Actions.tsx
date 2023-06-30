@@ -19,6 +19,7 @@ import {
 } from "../components/icons/Icons";
 import { useMediaQuery } from "react-responsive";
 import KillAdventurer from "../components/actions/KillAdventurer";
+import { DiscoveryTemplate } from "../types/templates";
 
 /**
  * @container
@@ -54,9 +55,11 @@ export default function Actions() {
     txAccepted
   );
 
-  const latestDiscoveries = data.latestDiscoveriesQuery
-    ? data.latestDiscoveriesQuery.discoveries
-    : [];
+  // const latestDiscoveries = data.latestDiscoveriesQuery
+  //   ? data.latestDiscoveriesQuery.discoveries
+  //   : [];
+
+  const latestDiscoveries = [DiscoveryTemplate];
 
   const exploreTx = {
     contractAddress: gameContract?.address ?? "",
@@ -72,30 +75,30 @@ export default function Actions() {
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
-        if (!isMobileDevice) {
-          {
-            addToCalls(exploreTx);
-            startLoading(
-              "Explore",
-              "Exploring",
-              "discoveryByTxHashQuery",
-              adventurer?.id
-            );
-            await handleSubmitCalls(writeAsync).then((tx: any) => {
-              if (tx) {
-                setTxHash(tx.transaction_hash);
-                addTransaction({
-                  hash: tx.transaction_hash,
-                  metadata: {
-                    method: `Explore with ${adventurer?.name}`,
-                  },
-                });
-              }
-            });
-          }
-        }
+        // if (!isMobileDevice) {
+        //   {
+        //     addToCalls(exploreTx);
+        //     startLoading(
+        //       "Explore",
+        //       "Exploring",
+        //       "discoveryByTxHashQuery",
+        //       adventurer?.id
+        //     );
+        //     await handleSubmitCalls(writeAsync).then((tx: any) => {
+        //       if (tx) {
+        //         setTxHash(tx.transaction_hash);
+        //         addTransaction({
+        //           hash: tx.transaction_hash,
+        //           metadata: {
+        //             method: `Explore with ${adventurer?.name}`,
+        //           },
+        //         });
+        //       }
+        //     });
+        //   }
+        // }
       },
-      disabled: !(adventurer?.beastHealth ?? 0 > 0) || loading,
+      disabled: (adventurer?.beastHealth ?? 0) > 0 || loading,
       loading: loading,
     },
   ];
@@ -107,18 +110,18 @@ export default function Actions() {
       icon: <HealthPotionsIcon />,
       value: "purchase health",
       action: async () => setActiveMenu(1),
-      disabled: !(adventurer?.beastHealth ?? 0 > 0) || loading,
+      disabled: (adventurer?.beastHealth ?? 0) > 0 || loading,
       loading: loading,
     });
-    // buttonsData.push({
-    //   id: 3,
-    //   label: "Kill Adventurer",
-    //   icon: <TargetIcon />,
-    //   value: "kill adventurer",
-    //   action: async () => setActiveMenu(2),
-    //   disabled: !adventurer?.isIdle || loading,
-    //   loading: loading,
-    // });
+    buttonsData.push({
+      id: 3,
+      label: "Kill Adventurer",
+      icon: <TargetIcon />,
+      value: "kill adventurer",
+      action: async () => setActiveMenu(2),
+      disabled: (adventurer?.beastHealth ?? 0) > 0 || loading,
+      loading: loading,
+    });
   }
 
   const isMobileDevice = useMediaQuery({
@@ -169,7 +172,7 @@ export default function Actions() {
               <Discovery discoveries={latestDiscoveries} />
             )}
             {selected == "purchase health" &&
-              (adventurer?.beastHealth ?? 0 > 0 ? (
+              (!(adventurer?.beastHealth ?? 0 > 0) ? (
                 <PurchaseHealth
                   isActive={activeMenu == 1}
                   onEscape={() => setActiveMenu(0)}
@@ -178,7 +181,7 @@ export default function Actions() {
                 <p>You are in a battle!</p>
               ))}
             {selected == "kill adventurer" &&
-              (adventurer?.beastHealth ?? 0 > 0 ? (
+              (!(adventurer?.beastHealth ?? 0 > 0) ? (
                 <KillAdventurer />
               ) : (
                 <p>You are in a battle!</p>
