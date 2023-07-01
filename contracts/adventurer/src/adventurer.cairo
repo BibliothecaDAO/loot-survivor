@@ -1,13 +1,9 @@
 use core::result::ResultTrait;
-use core::serde::Serde;
-use integer::{
-    U64IntoU128, U16IntoU128, U128TryIntoU8, U8IntoU128, u16_overflowing_sub, u16_overflowing_add,
-    U256TryIntoU32, U256TryIntoU16, U256TryIntoU8, U256TryIntoU64,
-};
+use integer::{u16_overflowing_add, u16_overflowing_sub};
 use traits::{TryInto, Into};
 use option::OptionTrait;
 
-use pack::pack::{pack_value, unpack_value};
+use pack::pack::{Packing, rshift_split};
 use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
 use lootitems::loot::{Loot, ILoot, ImplLoot};
@@ -21,8 +17,9 @@ use super::constants::adventurer_constants::{
     MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, ITEM_XP_MULTIPLIER, VITALITY_HEALTH_INCREASE, MAX_GOLD
 };
 use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
+use super::bag::LootStatistics;
 use super::item_meta::{
-    LootStatistics, LootItemSpecialNames, LootItemSpecialNamesStorage, ImplLootItemSpecialNames
+    LootItemSpecialNames, LootItemSpecialNamesStorage, ImplLootItemSpecialNames
 };
 
 use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
@@ -46,7 +43,7 @@ struct Stats { // 5 bits each
 #[derive(Drop, Copy, Serde)]
 struct Adventurer {
     last_action: u16, // 9 bits
-    health: u16, // 9 bits     
+    health: u16, // 9 bits
     xp: u16, // 13 bits
     stats: Stats, // 30 bits
     gold: u16, // 9 bits
@@ -60,6 +57,95 @@ struct Adventurer {
     ring: LootStatistics, // 21 bits
     beast_health: u16, // 9 bits
     stat_upgrade_available: u8, // 3 bits
+}
+
+impl StatsPacking of Packing<Stats> {
+    fn pack(self: Stats) -> felt252 {
+        (self.strength.into()
+         + self.dexterity.into() * pow::TWO_POW_5
+         + self.vitality.into() * pow::TWO_POW_10
+         + self.intelligence.into() * pow::TWO_POW_15
+         + self.wisdom.into() * pow::TWO_POW_20
+         + self.charisma.into() * pow::TWO_POW_25
+        ).try_into().unwrap()
+    }
+
+    fn unpack(packed: felt252) -> Stats {
+        let packed = packed.into();
+        let (packed, strength) = rshift_split(packed, pow::TWO_POW_5);
+        let (packed, dexterity) = rshift_split(packed, pow::TWO_POW_5);
+        let (packed, vitality) = rshift_split(packed, pow::TWO_POW_5);
+        let (packed, intelligence) = rshift_split(packed, pow::TWO_POW_5);
+        let (packed, wisdom) = rshift_split(packed, pow::TWO_POW_5);
+        let (_, charisma) = rshift_split(packed, pow::TWO_POW_5);
+
+        Stats {
+            strength: strength.try_into().unwrap(),
+            dexterity: dexterity.try_into().unwrap(),
+            vitality: vitality.try_into().unwrap(),
+            intelligence: intelligence.try_into().unwrap(),
+            wisdom: wisdom.try_into().unwrap(),
+            charisma: charisma.try_into().unwrap()
+        }
+    }
+}
+
+impl AdventurerPacking of Packing<Adventurer> {
+    fn pack(self: Adventurer) -> felt252 {
+        (self.last_action.into()
+         + self.health.into() * pow::TWO_POW_9
+         + self.xp.into() * pow::TWO_POW_18
+         + self.stats.pack().into() * pow::TWO_POW_31
+         + self.gold.into() * pow::TWO_POW_61
+         + self.weapon.pack().into() * pow::TWO_POW_70
+         + self.chest.pack().into() * pow::TWO_POW_91
+         + self.head.pack().into() * pow::TWO_POW_112
+         + self.waist.pack().into() * pow::TWO_POW_133
+         + self.foot.pack().into() * pow::TWO_POW_154
+         + self.hand.pack().into() * pow::TWO_POW_175
+         + self.neck.pack().into() * pow::TWO_POW_196
+         + self.ring.pack().into() * pow::TWO_POW_217
+         + self.beast_health.into() * pow::TWO_POW_238
+         + self.stat_upgrade_available.into() * pow::TWO_POW_247
+        ).try_into().unwrap()
+    }
+
+    fn unpack(packed: felt252) -> Adventurer {
+        let packed = packed.into();
+        let (packed, last_action) = rshift_split(packed, pow::TWO_POW_9);
+        let (packed, health) = rshift_split(packed, pow::TWO_POW_9);
+        let (packed, xp) = rshift_split(packed, pow::TWO_POW_13);
+        let (packed, stats) = rshift_split(packed, pow::TWO_POW_30);
+        let (packed, gold) = rshift_split(packed, pow::TWO_POW_9);
+        let (packed, weapon) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, chest) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, head) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, waist) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, foot) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, hand) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, neck) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, ring) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, beast_health) = rshift_split(packed, pow::TWO_POW_9);
+        let (_, stat_upgrade_available) = rshift_split(packed, pow::TWO_POW_3);
+
+        Adventurer {
+            last_action: last_action.try_into().unwrap(),
+            health: health.try_into().unwrap(),
+            xp: xp.try_into().unwrap(),
+            stats: Packing::unpack(stats.try_into().unwrap()),
+            gold: gold.try_into().unwrap(),
+            weapon: Packing::unpack(weapon.try_into().unwrap()),
+            chest: Packing::unpack(chest.try_into().unwrap()),
+            head: Packing::unpack(head.try_into().unwrap()),
+            waist: Packing::unpack(waist.try_into().unwrap()),
+            foot: Packing::unpack(foot.try_into().unwrap()),
+            hand: Packing::unpack(hand.try_into().unwrap()),
+            neck: Packing::unpack(neck.try_into().unwrap()),
+            ring: Packing::unpack(ring.try_into().unwrap()),
+            beast_health: beast_health.try_into().unwrap(),
+            stat_upgrade_available: stat_upgrade_available.try_into().unwrap()
+        }
+    }
 }
 
 #[generate_trait]
@@ -197,24 +283,22 @@ impl ImplAdventurer of IAdventurer {
         let battle_fixed_entropy: u128 = self
             .get_battle_fixed_entropy(U128TryIntoU64::try_into(battle_fixed_seed).unwrap());
 
-        // generate special names for beast using Loot name schema. 
+        // generate special names for beast using Loot name schema.
         // We use Loot names because the combat system will deal bonus damage for matching names (these are the items super powers)
         // We do this here instead of in beast to prevent beast from depending on Loot
-        let prefix1 = U128TryIntoU8::try_into(
-            battle_fixed_entropy % U8IntoU128::into(constants::NamePrefixLength)
-        )
-            .unwrap();
-        let prefix2 = U128TryIntoU8::try_into(
-            battle_fixed_entropy % U8IntoU128::into(constants::NameSuffixLength)
-        )
-            .unwrap();
+        let prefix1 = battle_fixed_entropy % constants::NamePrefixLength.into();
+        let prefix2 = battle_fixed_entropy % constants::NameSuffixLength.into();
 
         // use the randomly generated prefixes but set suffic to 0
-        let special_names = SpecialPowers { prefix1: prefix1, prefix2: prefix2, suffix: 0 };
+        let special_names = SpecialPowers {
+            prefix1: prefix1.try_into().unwrap(),
+            prefix2: prefix2.try_into().unwrap(),
+            suffix: 0
+        };
 
         // get beast using battle fixed seed
         // this is important because in the context of this call
-        // the player has just encountered the beast and will 
+        // the player has just encountered the beast and will
         // subsequently be calling "attack" to attack the beast
         // to enable the adventurer state to fit in a single 252felt, we
         // don't store anything about the beast in the adventurer state
@@ -257,7 +341,7 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    // luck 
+    // luck
     fn get_luck(self: Adventurer) -> u8 {
         // get greatness of aventurers equipped necklace
         let necklace_greatness = ImplLoot::get_greatness_level(self.neck.xp);
@@ -376,8 +460,8 @@ impl ImplAdventurer of IAdventurer {
     }
     fn add_item(ref self: Adventurer, value: LootStatistics) -> Adventurer {
         // TODO: @loaf does this need to check to ensure an item isn't
-        // already assigned to that slot? The other consideration I 
-        // thought of while writing test cases is dealing with 
+        // already assigned to that slot? The other consideration I
+        // thought of while writing test cases is dealing with
         // two items having the same meta data id. Is this handled somewhere?
         let slot = ImplLoot::get_slot(value.id);
         match slot {
@@ -434,7 +518,7 @@ impl ImplAdventurer of IAdventurer {
     // @param name_storage A reference to the LootItemSpecialNamesStorage object.
     // @param entropy A number used for randomization.
     //
-    // @return Returns a tuple containing the original item level, new level, 
+    // @return Returns a tuple containing the original item level, new level,
     //         boolean indicating if a suffix was assigned, boolean indicating if a prefix was assigned,
     //         and a LootItemSpecialNames object storing the special names for the item.
     fn increase_item_xp(
@@ -455,7 +539,7 @@ impl ImplAdventurer of IAdventurer {
     // @param name_storage A reference to the LootItemSpecialNamesStorage object.
     // @param entropy A number used for randomization.
     //
-    // @return Returns a tuple containing the original item level, new level, 
+    // @return Returns a tuple containing the original item level, new level,
     //         boolean indicating if a suffix was assigned, boolean indicating if a prefix was assigned,
     //         and a LootItemSpecialNames object storing the special names for the item.
     fn grant_xp_and_check_for_greatness_increase(
@@ -506,7 +590,7 @@ impl ImplAdventurer of IAdventurer {
             };
 
             ImplLootItemSpecialNames::set_loot_special_names(
-                ref name_storage, self, special_names, 
+                ref name_storage, self, special_names,
             );
             return (original_level, new_level, suffix_assigned, prefix_assigned, special_names);
         } // a more likely scenario is the item was previously below greatness 15 and is now at 15 or above
@@ -514,7 +598,7 @@ impl ImplAdventurer of IAdventurer {
         else if (original_level < 15 && new_level >= 15) {
             // return bool suffix assigned is now true
             suffix_assigned = true;
-            // return bool of prefix assigned will remain 
+            // return bool of prefix assigned will remain
 
             let special_names = LootItemSpecialNames {
                 name_prefix: 0,
@@ -565,21 +649,21 @@ impl ImplAdventurer of IAdventurer {
             last_action: last_action, health: STARTING_HEALTH, xp: 0, stats: Stats {
                 strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0
                 }, gold: STARTING_GOLD, weapon: LootStatistics {
-                id: starting_item, xp: 0, metadata: 1, 
+                id: starting_item, xp: 0, metadata: 1,
                 }, chest: LootStatistics {
-                id: 0, xp: 0, metadata: 0, 
+                id: 0, xp: 0, metadata: 0,
                 }, head: LootStatistics {
-                id: 0, xp: 0, metadata: 0, 
+                id: 0, xp: 0, metadata: 0,
                 }, waist: LootStatistics {
-                id: 0, xp: 0, metadata: 0, 
+                id: 0, xp: 0, metadata: 0,
                 }, foot: LootStatistics {
-                id: 0, xp: 0, metadata: 0, 
+                id: 0, xp: 0, metadata: 0,
                 }, hand: LootStatistics {
-                id: 0, xp: 0, metadata: 0, 
+                id: 0, xp: 0, metadata: 0,
                 }, neck: LootStatistics {
-                id: 0, xp: 0, metadata: 0, 
+                id: 0, xp: 0, metadata: 0,
                 }, ring: LootStatistics {
-                id: 0, xp: 0, metadata: 0, 
+                id: 0, xp: 0, metadata: 0,
             }, beast_health: BeastSettings::STARTER_BEAST_HEALTH, stat_upgrade_available: 0,
         };
     }
@@ -590,7 +674,7 @@ impl ImplAdventurer of IAdventurer {
     // entropy allows us to simulate a persistent battle without having to store beast
     // details on-chain.
     fn get_battle_fixed_entropy(self: Adventurer, adventurer_entropy: u64) -> u128 {
-        return U16IntoU128::into(self.xp) + U64IntoU128::into(adventurer_entropy);
+        self.xp.into() + adventurer_entropy.into()
     }
 
     fn get_random_armor_slot(entropy: u128) -> Slot {
@@ -957,214 +1041,34 @@ impl ImplAdventurer of IAdventurer {
             return 1;
         }
     }
-
-
-    // pack the adventurer into a single felt252
-    // this is used to store the adventurer in the contract
-    // @return the packed adventurer
-    fn pack(self: Adventurer) -> felt252 {
-        let mut packed = 0;
-        packed = packed | pack_value(self.last_action.into(), pow::TWO_POW_242);
-        packed = packed | pack_value(self.health.into(), pow::TWO_POW_233);
-        packed = packed | pack_value(self.xp.into(), pow::TWO_POW_220);
-        packed = packed | pack_value(self.stats.strength.into(), pow::TWO_POW_215);
-        packed = packed | pack_value(self.stats.dexterity.into(), pow::TWO_POW_210);
-        packed = packed | pack_value(self.stats.vitality.into(), pow::TWO_POW_205);
-        packed = packed | pack_value(self.stats.intelligence.into(), pow::TWO_POW_200);
-        packed = packed | pack_value(self.stats.wisdom.into(), pow::TWO_POW_195);
-        packed = packed | pack_value(self.stats.charisma.into(), pow::TWO_POW_190);
-        packed = packed | pack_value(self.gold.into(), pow::TWO_POW_181);
-
-        packed = packed | pack_value(self.weapon.id.into(), pow::TWO_POW_174);
-        packed = packed | pack_value(self.weapon.xp.into(), pow::TWO_POW_165);
-        packed = packed | pack_value(self.weapon.metadata.into(), pow::TWO_POW_160);
-
-        packed = packed | pack_value(self.chest.id.into(), pow::TWO_POW_153);
-        packed = packed | pack_value(self.chest.xp.into(), pow::TWO_POW_144);
-        packed = packed | pack_value(self.chest.metadata.into(), pow::TWO_POW_139);
-
-        packed = packed | pack_value(self.head.id.into(), pow::TWO_POW_132);
-        packed = packed | pack_value(self.head.xp.into(), pow::TWO_POW_123);
-        packed = packed | pack_value(self.head.metadata.into(), pow::TWO_POW_118);
-
-        packed = packed | pack_value(self.waist.id.into(), pow::TWO_POW_111);
-        packed = packed | pack_value(self.waist.xp.into(), pow::TWO_POW_102);
-        packed = packed | pack_value(self.waist.metadata.into(), pow::TWO_POW_97);
-
-        packed = packed | pack_value(self.foot.id.into(), pow::TWO_POW_90);
-        packed = packed | pack_value(self.foot.xp.into(), pow::TWO_POW_81);
-        packed = packed | pack_value(self.foot.metadata.into(), pow::TWO_POW_76);
-
-        packed = packed | pack_value(self.hand.id.into(), pow::TWO_POW_69);
-        packed = packed | pack_value(self.hand.xp.into(), pow::TWO_POW_60);
-        packed = packed | pack_value(self.hand.metadata.into(), pow::TWO_POW_55);
-
-        packed = packed | pack_value(self.neck.id.into(), pow::TWO_POW_48);
-        packed = packed | pack_value(self.neck.xp.into(), pow::TWO_POW_39);
-        packed = packed | pack_value(self.neck.metadata.into(), pow::TWO_POW_34);
-
-        packed = packed | pack_value(self.ring.id.into(), pow::TWO_POW_27);
-        packed = packed | pack_value(self.ring.xp.into(), pow::TWO_POW_18);
-        packed = packed | pack_value(self.ring.metadata.into(), pow::TWO_POW_13);
-
-        packed = packed | pack_value(self.beast_health.into(), pow::TWO_POW_3);
-
-        packed = packed | pack_value(self.stat_upgrade_available.into(), 1);
-
-        packed.try_into().unwrap()
-    }
-
-    // unpack a felt252 into an Adventurer
-    // @param packed: felt252
-    // @return Adventurer
-    fn unpack(packed: felt252) -> Adventurer {
-        let packed = packed.into();
-
-        Adventurer {
-            last_action: U256TryIntoU16::try_into(
-                unpack_value(packed, pow::TWO_POW_242, mask::MASK_9)
-            )
-                .unwrap(),
-            health: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_233, mask::MASK_10))
-                .unwrap(),
-            xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_220, mask::MASK_13))
-                .unwrap(),
-            stats: Stats {
-                strength: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_215, mask::MASK_5)
-                )
-                    .unwrap(),
-                dexterity: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_210, mask::MASK_5)
-                )
-                    .unwrap(),
-                vitality: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_205, mask::MASK_5)
-                )
-                    .unwrap(),
-                intelligence: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_200, mask::MASK_5)
-                )
-                    .unwrap(),
-                wisdom: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_195, mask::MASK_5)
-                )
-                    .unwrap(),
-                charisma: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_190, mask::MASK_5)
-                )
-                    .unwrap()
-                },
-                gold: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_181, mask::MASK_9))
-                    .unwrap(),
-                weapon: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_174, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_165, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_160, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, chest: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_153, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_144, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_139, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, head: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_132, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_123, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_118, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, waist: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_111, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_102, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_97, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, foot: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_90, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_81, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_76, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, hand: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_69, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_60, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_55, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, neck: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_48, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_39, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_34, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, ring: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_27, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_18, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_13, mask::MASK_5)
-                )
-                    .unwrap(),
-            },
-            beast_health: U256TryIntoU16::try_into(
-                unpack_value(packed, pow::TWO_POW_3, mask::MASK_10)
-            )
-                .unwrap(),
-            stat_upgrade_available: U256TryIntoU8::try_into(unpack_value(packed, 1, mask::MASK_3))
-                .unwrap(),
-        }
-    }
 }
+
 #[test]
 #[available_gas(5000000)]
 fn test_adventurer() {
     let adventurer = Adventurer {
-        last_action: 511, health: 1023, xp: 8191, stats: Stats {
-            strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 31, 
+        last_action: 511, health: 480, xp: 8191, stats: Stats {
+            strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 31,
             }, gold: 511, weapon: LootStatistics {
-            id: 100, xp: 511, metadata: 1, 
+            id: 100, xp: 511, metadata: 1,
             }, chest: LootStatistics {
-            id: 99, xp: 511, metadata: 2, 
+            id: 99, xp: 511, metadata: 2,
             }, head: LootStatistics {
-            id: 98, xp: 511, metadata: 3, 
+            id: 98, xp: 511, metadata: 3,
             }, waist: LootStatistics {
-            id: 87, xp: 511, metadata: 4, 
+            id: 87, xp: 511, metadata: 4,
             }, foot: LootStatistics {
-            id: 78, xp: 511, metadata: 5, 
+            id: 78, xp: 511, metadata: 5,
             }, hand: LootStatistics {
-            id: 34, xp: 511, metadata: 6, 
+            id: 34, xp: 511, metadata: 6,
             }, neck: LootStatistics {
-            id: 32, xp: 511, metadata: 7, 
+            id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
-            id: 1, xp: 511, metadata: 8, 
-        }, beast_health: 1023, stat_upgrade_available: 1,
+            id: 1, xp: 511, metadata: 8,
+        }, beast_health: 480, stat_upgrade_available: 1,
     };
     let packed = adventurer.pack();
-    let unpacked = ImplAdventurer::unpack(packed);
+    let unpacked: Adventurer = Packing::unpack(packed);
     assert(adventurer.last_action == unpacked.last_action, 'last_action');
     assert(adventurer.health == unpacked.health, 'health');
     assert(adventurer.xp == unpacked.xp, 'xp');
@@ -1549,23 +1453,23 @@ fn test_add_statistic() {
 fn test_charisma_health_discount_overflow() {
     let mut adventurer = Adventurer {
         last_action: 511, health: 1023, xp: 0, stats: Stats {
-            strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 100, 
+            strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 100,
             }, gold: 1, weapon: LootStatistics {
-            id: 100, xp: 511, metadata: 1, 
+            id: 100, xp: 511, metadata: 1,
             }, chest: LootStatistics {
-            id: 99, xp: 511, metadata: 2, 
+            id: 99, xp: 511, metadata: 2,
             }, head: LootStatistics {
-            id: 98, xp: 511, metadata: 3, 
+            id: 98, xp: 511, metadata: 3,
             }, waist: LootStatistics {
-            id: 87, xp: 511, metadata: 4, 
+            id: 87, xp: 511, metadata: 4,
             }, foot: LootStatistics {
-            id: 78, xp: 511, metadata: 5, 
+            id: 78, xp: 511, metadata: 5,
             }, hand: LootStatistics {
-            id: 34, xp: 511, metadata: 6, 
+            id: 34, xp: 511, metadata: 6,
             }, neck: LootStatistics {
-            id: 32, xp: 511, metadata: 7, 
+            id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
-            id: 1, xp: 511, metadata: 8, 
+            id: 1, xp: 511, metadata: 8,
         }, beast_health: 1023, stat_upgrade_available: 1,
     };
 
@@ -1586,23 +1490,23 @@ fn test_charisma_health_discount_overflow() {
 fn test_charisma_item_discount_overflow() {
     let mut adventurer = Adventurer {
         last_action: 511, health: 1023, xp: 100, stats: Stats {
-            strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 10, 
+            strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 10,
             }, gold: 40, weapon: LootStatistics {
-            id: 100, xp: 511, metadata: 1, 
+            id: 100, xp: 511, metadata: 1,
             }, chest: LootStatistics {
-            id: 99, xp: 511, metadata: 2, 
+            id: 99, xp: 511, metadata: 2,
             }, head: LootStatistics {
-            id: 98, xp: 511, metadata: 3, 
+            id: 98, xp: 511, metadata: 3,
             }, waist: LootStatistics {
-            id: 87, xp: 511, metadata: 4, 
+            id: 87, xp: 511, metadata: 4,
             }, foot: LootStatistics {
-            id: 78, xp: 511, metadata: 5, 
+            id: 78, xp: 511, metadata: 5,
             }, hand: LootStatistics {
-            id: 34, xp: 511, metadata: 6, 
+            id: 34, xp: 511, metadata: 6,
             }, neck: LootStatistics {
-            id: 32, xp: 511, metadata: 7, 
+            id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
-            id: 1, xp: 511, metadata: 8, 
+            id: 1, xp: 511, metadata: 8,
         }, beast_health: 1023, stat_upgrade_available: 1,
     };
 
@@ -1625,23 +1529,23 @@ fn test_increase_xp() {
     // initialize lvl 1 adventurer with no stat points available
     let mut adventurer = Adventurer {
         last_action: 511, health: 1023, xp: 1, stats: Stats {
-            strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 10, 
+            strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 10,
             }, gold: 40, weapon: LootStatistics {
-            id: 100, xp: 511, metadata: 1, 
+            id: 100, xp: 511, metadata: 1,
             }, chest: LootStatistics {
-            id: 99, xp: 511, metadata: 2, 
+            id: 99, xp: 511, metadata: 2,
             }, head: LootStatistics {
-            id: 98, xp: 511, metadata: 3, 
+            id: 98, xp: 511, metadata: 3,
             }, waist: LootStatistics {
-            id: 87, xp: 511, metadata: 4, 
+            id: 87, xp: 511, metadata: 4,
             }, foot: LootStatistics {
-            id: 78, xp: 511, metadata: 5, 
+            id: 78, xp: 511, metadata: 5,
             }, hand: LootStatistics {
-            id: 34, xp: 511, metadata: 6, 
+            id: 34, xp: 511, metadata: 6,
             }, neck: LootStatistics {
-            id: 32, xp: 511, metadata: 7, 
+            id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
-            id: 1, xp: 511, metadata: 8, 
+            id: 1, xp: 511, metadata: 8,
         }, beast_health: 1023, stat_upgrade_available: 0,
     };
 
@@ -1660,7 +1564,7 @@ fn test_increase_xp() {
 #[available_gas(100000)]
 fn test_add_suffix_boost() {
     let mut stats = Stats {
-        strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, 
+        strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
     };
 
     stats.add_suffix_boost(ItemSuffix::of_Power);
@@ -1709,49 +1613,49 @@ fn test_add_suffix_boost() {
 fn test_apply_item_stat_boosts() {
     let mut adventurer = Adventurer {
         last_action: 511, health: 100, xp: 1, stats: Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, 
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
             }, gold: 40, weapon: LootStatistics {
-            id: 1, xp: 225, metadata: 1, 
+            id: 1, xp: 225, metadata: 1,
             }, chest: LootStatistics {
-            id: 2, xp: 65535, metadata: 2, 
+            id: 2, xp: 65535, metadata: 2,
             }, head: LootStatistics {
-            id: 3, xp: 225, metadata: 3, 
+            id: 3, xp: 225, metadata: 3,
             }, waist: LootStatistics {
-            id: 4, xp: 225, metadata: 4, 
+            id: 4, xp: 225, metadata: 4,
             }, foot: LootStatistics {
-            id: 5, xp: 1000, metadata: 5, 
+            id: 5, xp: 1000, metadata: 5,
             }, hand: LootStatistics {
-            id: 6, xp: 224, metadata: 6, 
+            id: 6, xp: 224, metadata: 6,
             }, neck: LootStatistics {
-            id: 7, xp: 1, metadata: 7, 
+            id: 7, xp: 1, metadata: 7,
             }, ring: LootStatistics {
-            id: 8, xp: 1, metadata: 8, 
+            id: 8, xp: 1, metadata: 8,
         }, beast_health: 20, stat_upgrade_available: 0,
     };
 
     let item1_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Power, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Power,
     };
     let item2_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Giant, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Giant,
     };
     let item3_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Perfection, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Perfection,
     };
     let item4_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Rage, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Rage,
     };
     let item5_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Fury, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Fury,
     };
     let item6_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Skill, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Skill,
     };
     let item7_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Vitriol, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Vitriol,
     };
     let item8_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_the_Fox, 
+        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_the_Fox,
     };
     let item9_names = LootItemSpecialNames { name_prefix: 0, name_suffix: 0, item_suffix: 0,  };
     let item10_names = LootItemSpecialNames { name_prefix: 0, name_suffix: 0, item_suffix: 0,  };
