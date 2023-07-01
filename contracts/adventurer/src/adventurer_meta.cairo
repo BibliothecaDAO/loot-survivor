@@ -1,14 +1,8 @@
-use core::serde::Serde;
-use integer::{
-    U128IntoFelt252, Felt252IntoU256, Felt252TryIntoU64, U256TryIntoFelt252, u256_from_felt252,
-    U256TryIntoU32, U256TryIntoU128, U256TryIntoU16, U256TryIntoU8, U256TryIntoU64
-};
-use traits::{TryInto, Into};
 use option::OptionTrait;
-use debug::PrintTrait;
+use traits::{TryInto, Into};
 
-use pack::pack::{Packing, pack_value, unpack_value};
-use pack::constants::{pow, mask};
+use pack::constants::pow;
+use pack::pack::{Packing, rshift_split};
 
 #[derive(Drop, Copy, Serde)]
 struct AdventurerMetadata {
@@ -21,33 +15,40 @@ struct AdventurerMetadata {
 
 impl PackingAdventurerMetadata of Packing<AdventurerMetadata> {
     fn pack(self: AdventurerMetadata) -> felt252 {
-        (pack_value(self.name.into(), pow::TWO_POW_218) +
-         pack_value(self.home_realm.into(), pow::TWO_POW_210) +
-         pack_value(self.race.into(), pow::TWO_POW_202) +
-         pack_value(self.order.into(), pow::TWO_POW_194) +
-         pack_value(self.entropy.into(), pow::TWO_POW_130)).try_into().unwrap()
+        (self.name.into()
+         + self.home_realm.into() * pow::TWO_POW_32
+         + self.race.into() * pow::TWO_POW_40
+         + self.order.into() * pow::TWO_POW_48
+         + self.entropy.into() * pow::TWO_POW_56
+        ).try_into().unwrap()
     }
     fn unpack(packed: felt252) -> AdventurerMetadata {
         let packed = packed.into();
+        let (packed, name) = rshift_split(packed, pow::TWO_POW_32);
+        let (packed, home_realm) = rshift_split(packed, pow::TWO_POW_8);
+        let (packed, race) = rshift_split(packed, pow::TWO_POW_8);
+        let (packed, order) = rshift_split(packed, pow::TWO_POW_8);
+        let (_, entropy) = rshift_split(packed, pow::TWO_POW_64);
+
         AdventurerMetadata {
-            name: unpack_value(packed, pow::TWO_POW_218, mask::MASK_32).try_into().unwrap(),
-            home_realm: unpack_value(packed, pow::TWO_POW_210, mask::MASK_8).try_into().unwrap(),
-            race: unpack_value(packed, pow::TWO_POW_202, mask::MASK_8).try_into().unwrap(),
-            order: unpack_value(packed, pow::TWO_POW_194, mask::MASK_8).try_into().unwrap(),
-            entropy: unpack_value(packed, pow::TWO_POW_130, mask::MASK_64).try_into().unwrap()
+            name: name.try_into().unwrap(),
+            home_realm: home_realm.try_into().unwrap(),
+            race: race.try_into().unwrap(),
+            order: order.try_into().unwrap(),
+            entropy: entropy.try_into().unwrap()
         }
     }
 }
 
+#[cfg(test)]
 #[test]
 #[available_gas(50000000)]
 fn test_meta() {
-    let mut meta = AdventurerMetadata {
+    let meta = AdventurerMetadata {
         name: 4294962295, home_realm: 45, race: 28, order: 6, entropy: 4294937295
     };
 
     let packed = meta.pack();
-    //let unpacked = ImplAdventurerMetadata::unpack(packed);
     let unpacked: AdventurerMetadata = Packing::unpack(packed);
     assert(meta.name == unpacked.name, 'name');
     assert(meta.home_realm == unpacked.home_realm, 'home_realm');
