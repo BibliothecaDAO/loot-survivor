@@ -442,6 +442,8 @@ mod Game {
     // ------------------------------------------ //
 
     fn _start(ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // get caller address
         let caller = get_caller_address();
 
@@ -501,6 +503,8 @@ mod Game {
         ref name_storage1: LootItemSpecialNamesStorage,
         ref name_storage2: LootItemSpecialNamesStorage
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // get adventurer entropy from storage
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
@@ -621,7 +625,7 @@ mod Game {
         }
     }
 
-    fn _beast_discovery(ref self: ContractState, adventurer_id: u256) {}
+    //fn _beast_discovery(ref self: ContractState, adventurer_id: u256) {}
 
     fn _obstacle_encounter(
         ref self: ContractState,
@@ -631,6 +635,8 @@ mod Game {
         ref name_storage2: LootItemSpecialNamesStorage,
         entropy: u128
     ) -> Adventurer {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // delegate obstacle encounter to obstacle library
         let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
             adventurer.get_level(), adventurer.stats.intelligence, entropy
@@ -739,6 +745,8 @@ mod Game {
         prefixes_assigned: bool,
         special_names: LootItemSpecialNames
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // if the new level is higher than the previous level
         if (new_level > previous_level) {
             // generate greatness increased event
@@ -806,6 +814,8 @@ mod Game {
         value: u16,
         entropy: u128
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         let xp_increase = value * ITEM_XP_MULTIPLIER;
 
         // if weapon is equipped
@@ -992,6 +1002,8 @@ mod Game {
         ref name_storage1: LootItemSpecialNamesStorage,
         ref name_storage2: LootItemSpecialNamesStorage
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // get adventurer entropy from storage
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
@@ -1090,7 +1102,6 @@ mod Game {
                     gold_earned: gold_reward
                 }
             );
-            return;
         } else {
             // beast has more health than was dealt so subtract damage dealt
             adventurer.beast_health = adventurer.beast_health - damage_dealt;
@@ -1143,7 +1154,6 @@ mod Game {
                     damage_location: ImplCombat::slot_to_u8(attack_location),
                 }
             );
-            return;
         }
     }
 
@@ -1155,6 +1165,8 @@ mod Game {
         beast: Beast,
         entropy: u128
     ) -> u16 {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // generate a random attack slot for the beast and get the armor the adventurer has at that slot
         let armor = adventurer.get_item_at_slot(attack_location);
 
@@ -1184,6 +1196,8 @@ mod Game {
     fn _flee(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
     ) -> Adventurer {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // get adventurer entropy from storage
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
@@ -1254,6 +1268,8 @@ mod Game {
         item_id: u8,
         ref bag: Bag
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // get item the adventurer is equipping
         let equipping_item = bag.get_item(item_id);
 
@@ -1316,6 +1332,8 @@ mod Game {
         item_id: u8,
         equip: bool
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // TODO: Remove after testing
         // assert(adventurer.stat_upgrade_available == 1, 'Not available');
 
@@ -1377,6 +1395,8 @@ mod Game {
     fn _upgrade_stat(
         ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer, stat_id: u8
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         _assert_ownership(@self, adventurer_id);
 
         // add stat to adventuer

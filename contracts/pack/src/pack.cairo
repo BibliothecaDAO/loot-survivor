@@ -6,7 +6,7 @@ trait Packing<T> {
     fn unpack(packed: felt252) -> T;
 }
 
-#[inline(always)]
+//#[inline(always)]
 fn rshift_split(value: u256, bits: u256) -> (u256, u256) {
     integer::U256DivRem::div_rem(value, bits.try_into().expect('0 bits'))
 }
