@@ -1,13 +1,8 @@
-use core::serde::Serde;
-use integer::{
-    U128IntoFelt252, Felt252IntoU256, Felt252TryIntoU64, U256TryIntoFelt252, u256_from_felt252, U256TryIntoU32, U256TryIntoU16, U256TryIntoU8
-};
 use traits::{TryInto, Into};
 use option::OptionTrait;
-use debug::PrintTrait;
 
-use pack::pack::{pack_value, unpack_value};
-use pack::constants::{pow, mask};
+use pack::pack::{Packing, rshift_split};
+use pack::constants::pow;
 
 use super::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
@@ -16,7 +11,7 @@ struct LootStatistics {
     id: u8, // 7 bits
     xp: u16, // 9 bits
     // this is set as the items are found/purchased
-    metadata: u8, // 5 bits 
+    metadata: u8, // 5 bits
 }
 
 #[derive(Drop, Copy, Serde)]
@@ -36,8 +31,6 @@ struct Bag {
 }
 
 trait BagActions {
-    fn pack(self: Bag) -> felt252;
-    fn unpack(packed: felt252) -> Bag;
     // swap item
     // take bag and item to swap and item to equip
     // return bag with swapped items and item that was swapped for
@@ -60,170 +53,77 @@ trait BagActions {
     fn new_item(item_id: u8) -> LootStatistics;
 }
 
-impl ImplBagActions of BagActions {
-    fn pack(self: Bag) -> felt252 {
-        let mut packed = 0;
-        packed = packed | pack_value(self.item_1.id.into(), pow::TWO_POW_244);
-        packed = packed | pack_value(self.item_1.xp.into(), pow::TWO_POW_236);
-        packed = packed | pack_value(self.item_1.metadata.into(), pow::TWO_POW_231);
-
-        packed = packed | pack_value(self.item_2.id.into(), pow::TWO_POW_224);
-        packed = packed | pack_value(self.item_2.xp.into(), pow::TWO_POW_215);
-        packed = packed | pack_value(self.item_2.metadata.into(), pow::TWO_POW_210);
-
-        packed = packed | pack_value(self.item_3.id.into(), pow::TWO_POW_203);
-        packed = packed | pack_value(self.item_3.xp.into(), pow::TWO_POW_194);
-        packed = packed | pack_value(self.item_3.metadata.into(), pow::TWO_POW_189);
-
-        packed = packed | pack_value(self.item_4.id.into(), pow::TWO_POW_182);
-        packed = packed | pack_value(self.item_4.xp.into(), pow::TWO_POW_173);
-        packed = packed | pack_value(self.item_4.metadata.into(), pow::TWO_POW_168);
-
-        packed = packed | pack_value(self.item_5.id.into(), pow::TWO_POW_161);
-        packed = packed | pack_value(self.item_5.xp.into(), pow::TWO_POW_152);
-        packed = packed | pack_value(self.item_5.metadata.into(), pow::TWO_POW_147);
-
-        packed = packed | pack_value(self.item_6.id.into(), pow::TWO_POW_140);
-        packed = packed | pack_value(self.item_6.xp.into(), pow::TWO_POW_131);
-        packed = packed | pack_value(self.item_6.metadata.into(), pow::TWO_POW_126);
-
-        packed = packed | pack_value(self.item_7.id.into(), pow::TWO_POW_119);
-        packed = packed | pack_value(self.item_7.xp.into(), pow::TWO_POW_110);
-        packed = packed | pack_value(self.item_7.metadata.into(), pow::TWO_POW_105);
-
-        packed = packed | pack_value(self.item_8.id.into(), pow::TWO_POW_98);
-        packed = packed | pack_value(self.item_8.xp.into(), pow::TWO_POW_89);
-        packed = packed | pack_value(self.item_8.metadata.into(), pow::TWO_POW_84);
-
-        packed = packed | pack_value(self.item_9.id.into(), pow::TWO_POW_77);
-        packed = packed | pack_value(self.item_9.xp.into(), pow::TWO_POW_68);
-        packed = packed | pack_value(self.item_9.metadata.into(), pow::TWO_POW_63);
-
-        packed = packed | pack_value(self.item_10.id.into(), pow::TWO_POW_56);
-        packed = packed | pack_value(self.item_10.xp.into(), pow::TWO_POW_47);
-        packed = packed | pack_value(self.item_10.metadata.into(), pow::TWO_POW_42);
-
-        packed = packed | pack_value(self.item_11.id.into(), pow::TWO_POW_35);
-        packed = packed | pack_value(self.item_11.xp.into(), pow::TWO_POW_26);
-        packed = packed | pack_value(self.item_11.metadata.into(), pow::TWO_POW_21);
-
-        packed = packed | pack_value(self.item_12.id.into(), pow::TWO_POW_14);
-        packed = packed | pack_value(self.item_12.xp.into(), pow::TWO_POW_5);
-        packed = packed | pack_value(self.item_12.metadata.into(), 1);
-
-        packed.try_into().unwrap()
+impl LootStatisticsPacking of Packing<LootStatistics> {
+    fn pack(self: LootStatistics) -> felt252 {
+        (self.id.into()
+         + self.xp.into() * pow::TWO_POW_7
+         + self.metadata.into() * pow::TWO_POW_16
+        ).try_into().unwrap()
     }
-    fn unpack(packed: felt252) -> Bag {
+
+    fn unpack(packed: felt252) -> LootStatistics {
         let packed = packed.into();
-        Bag {
-            item_1: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_244, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_236, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_231, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, item_2: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_224, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_215, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_210, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, item_3: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_203, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_194, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_189, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, item_4: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_182, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_173, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_168, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, item_5: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_161, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_152, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_147, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, item_6: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_140, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_131, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_126, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, item_7: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_119, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_110, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_105, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, item_8: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_98, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_89, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_84, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, item_9: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_77, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_68, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_63, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, item_10: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_56, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_47, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_42, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, item_11: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_35, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_26, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(
-                    unpack_value(packed, pow::TWO_POW_21, mask::MASK_5)
-                )
-                    .unwrap(),
-                }, item_12: LootStatistics {
-                id: U256TryIntoU8::try_into(unpack_value(packed, pow::TWO_POW_14, mask::MASK_7))
-                    .unwrap(),
-                xp: U256TryIntoU16::try_into(unpack_value(packed, pow::TWO_POW_5, mask::MASK_9))
-                    .unwrap(),
-                metadata: U256TryIntoU8::try_into(unpack_value(packed, 1, mask::MASK_5)).unwrap(),
-            },
+        let (packed, id) = rshift_split(packed, pow::TWO_POW_7);
+        let (packed, xp) = rshift_split(packed, pow::TWO_POW_9);
+        let (_, metadata) = rshift_split(packed, pow::TWO_POW_5);
+
+        LootStatistics {
+            id: id.try_into().unwrap(),
+            xp: xp.try_into().unwrap(),
+            metadata: metadata.try_into().unwrap()
         }
     }
+}
+
+impl BagPacking of Packing<Bag> {
+    fn pack(self: Bag) -> felt252 {
+        (self.item_1.pack().into()
+         + self.item_2.pack().into() * pow::TWO_POW_21
+         + self.item_3.pack().into() * pow::TWO_POW_42
+         + self.item_4.pack().into() * pow::TWO_POW_63
+         + self.item_5.pack().into() * pow::TWO_POW_84
+         + self.item_6.pack().into() * pow::TWO_POW_105
+         + self.item_7.pack().into() * pow::TWO_POW_126
+         + self.item_8.pack().into() * pow::TWO_POW_147
+         + self.item_9.pack().into() * pow::TWO_POW_168
+         + self.item_10.pack().into() * pow::TWO_POW_189
+         + self.item_11.pack().into() * pow::TWO_POW_210
+         + self.item_12.pack().into() * pow::TWO_POW_231
+        ).try_into().unwrap()
+    }
+
+    fn unpack(packed: felt252) -> Bag {
+        let packed = packed.into();
+        let (packed, item_1) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, item_2) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, item_3) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, item_4) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, item_5) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, item_6) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, item_7) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, item_8) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, item_9) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, item_10) = rshift_split(packed, pow::TWO_POW_21);
+        let (packed, item_11) = rshift_split(packed, pow::TWO_POW_21);
+        let (_, item_12) = rshift_split(packed, pow::TWO_POW_21);
+
+        Bag {
+            item_1: Packing::unpack(item_1.try_into().unwrap()),
+            item_2: Packing::unpack(item_2.try_into().unwrap()),
+            item_3: Packing::unpack(item_3.try_into().unwrap()),
+            item_4: Packing::unpack(item_4.try_into().unwrap()),
+            item_5: Packing::unpack(item_5.try_into().unwrap()),
+            item_6: Packing::unpack(item_6.try_into().unwrap()),
+            item_7: Packing::unpack(item_7.try_into().unwrap()),
+            item_8: Packing::unpack(item_8.try_into().unwrap()),
+            item_9: Packing::unpack(item_9.try_into().unwrap()),
+            item_10: Packing::unpack(item_10.try_into().unwrap()),
+            item_11: Packing::unpack(item_11.try_into().unwrap()),
+            item_12: Packing::unpack(item_12.try_into().unwrap())
+        }
+    }
+}
+impl ImplBagActions of BagActions {
     fn add_item(ref self: Bag, item: LootStatistics) -> Bag {
         assert(self.is_full() == false, 'Bag is full');
 
@@ -405,7 +305,7 @@ fn test_pack_bag() {
         },
     };
 
-    let packed_bag = ImplBagActions::unpack(bag.pack());
+    let packed_bag: Bag = Packing::unpack(bag.pack());
 
     assert(packed_bag.item_1.id == 127, 'Loot 1 ID is not 127');
     assert(packed_bag.item_1.xp == 511, 'Loot 1 XP is not 511');
@@ -562,4 +462,3 @@ fn remove_item() {
 
     assert(bag.item_6.id == 0, 'Loot id should be 0');
 }
-
