@@ -24,11 +24,12 @@ mod Game {
     use lootitems::{
         loot::{Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
+    use pack::pack::Packing;
 
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer},
         bag::{Bag, BagActions, ImplBagActions, LootStatistics},
-        adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata},
+        adventurer_meta::AdventurerMetadata,
         exploration::ExploreUtils,
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
@@ -1445,7 +1446,7 @@ mod Game {
         name_storage2: LootItemSpecialNamesStorage
     ) -> Adventurer {
         // unpack adventurer
-        let mut adventurer = ImplAdventurer::unpack(self._adventurer.read(adventurer_id));
+        let mut adventurer: Adventurer = Packing::unpack(self._adventurer.read(adventurer_id));
         // apply stat boosts
         _apply_stat_boots(self, adventurer_id, ref adventurer, name_storage1, name_storage2)
     }
@@ -1494,7 +1495,7 @@ mod Game {
 
     fn _unpack_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
         // unpack adventurer
-        ImplAdventurer::unpack(self._adventurer.read(adventurer_id))
+        Packing::unpack(self._adventurer.read(adventurer_id))
     }
 
     fn _pack_adventurer(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {
@@ -1502,7 +1503,7 @@ mod Game {
     }
 
     fn _bag_unpacked(self: @ContractState, adventurer_id: u256) -> Bag {
-        ImplBagActions::unpack(self._bag.read(adventurer_id))
+        Packing::unpack(self._bag.read(adventurer_id))
     }
 
     fn _pack_bag(ref self: ContractState, adventurer_id: u256, bag: Bag) {
@@ -1510,7 +1511,7 @@ mod Game {
     }
 
     fn _adventurer_meta_unpacked(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
-        ImplAdventurerMetadata::unpack(self._adventurer_meta.read(adventurer_id))
+        Packing::unpack(self._adventurer_meta.read(adventurer_id))
     }
 
     fn _pack_adventurer_meta(
@@ -1534,7 +1535,7 @@ mod Game {
     fn _loot_special_names_storage_unpacked(
         self: @ContractState, adventurer_id: u256, storage_index: u256
     ) -> LootItemSpecialNamesStorage {
-        ImplLootItemSpecialNames::unpack(
+        Packing::unpack(
             self._loot_special_names.read((adventurer_id, storage_index))
         )
     }

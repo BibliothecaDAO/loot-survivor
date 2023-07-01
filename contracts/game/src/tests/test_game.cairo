@@ -16,9 +16,7 @@ mod tests {
 
     use game::game::interfaces::{IGameDispatcherTrait, IGameDispatcher};
     use game::game::game::{Game};
-    use survivor::adventurer_meta::{
-        AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata,
-    };
+    use survivor::adventurer_meta::AdventurerMetadata;
 
     use survivor::constants::adventurer_constants::{
         STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH
@@ -136,7 +134,7 @@ mod tests {
             // result in a panic. This test is annotated to expect a panic
             // so if it doesn't, this test will fail
             game.attack(0);
-        } // if the beast was not killed in one hit 
+        } // if the beast was not killed in one hit
         else {
             assert(updated_adventurer.xp == adventurer_start.xp, 'should have same xp');
             assert(updated_adventurer.gold == adventurer_start.gold, 'should have same gold');
