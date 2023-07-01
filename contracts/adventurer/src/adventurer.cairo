@@ -67,7 +67,7 @@ impl StatsPacking of Packing<Stats> {
          + self.intelligence.into() * pow::TWO_POW_15
          + self.wisdom.into() * pow::TWO_POW_20
          + self.charisma.into() * pow::TWO_POW_25
-        ).try_into().unwrap()
+        ).try_into().expect('pack Stats')
     }
 
     fn unpack(packed: felt252) -> Stats {
@@ -80,12 +80,12 @@ impl StatsPacking of Packing<Stats> {
         let (_, charisma) = rshift_split(packed, pow::TWO_POW_5);
 
         Stats {
-            strength: strength.try_into().unwrap(),
-            dexterity: dexterity.try_into().unwrap(),
-            vitality: vitality.try_into().unwrap(),
-            intelligence: intelligence.try_into().unwrap(),
-            wisdom: wisdom.try_into().unwrap(),
-            charisma: charisma.try_into().unwrap()
+            strength: strength.try_into().expect('unpack Stats strength'),
+            dexterity: dexterity.try_into().expect('unpack Stats dexterity'),
+            vitality: vitality.try_into().expect('unpack Stats vitality'),
+            intelligence: intelligence.try_into().expect('unpack Stats intelligence'),
+            wisdom: wisdom.try_into().expect('unpack Stats wisdom'),
+            charisma: charisma.try_into().expect('unpack Stats charisma')
         }
     }
 }
@@ -107,7 +107,7 @@ impl AdventurerPacking of Packing<Adventurer> {
          + self.ring.pack().into() * pow::TWO_POW_217
          + self.beast_health.into() * pow::TWO_POW_238
          + self.stat_upgrade_available.into() * pow::TWO_POW_247
-        ).try_into().unwrap()
+        ).try_into().expect('pack Adventurer')
     }
 
     fn unpack(packed: felt252) -> Adventurer {
@@ -129,21 +129,21 @@ impl AdventurerPacking of Packing<Adventurer> {
         let (_, stat_upgrade_available) = rshift_split(packed, pow::TWO_POW_3);
 
         Adventurer {
-            last_action: last_action.try_into().unwrap(),
-            health: health.try_into().unwrap(),
-            xp: xp.try_into().unwrap(),
-            stats: Packing::unpack(stats.try_into().unwrap()),
-            gold: gold.try_into().unwrap(),
-            weapon: Packing::unpack(weapon.try_into().unwrap()),
-            chest: Packing::unpack(chest.try_into().unwrap()),
-            head: Packing::unpack(head.try_into().unwrap()),
-            waist: Packing::unpack(waist.try_into().unwrap()),
-            foot: Packing::unpack(foot.try_into().unwrap()),
-            hand: Packing::unpack(hand.try_into().unwrap()),
-            neck: Packing::unpack(neck.try_into().unwrap()),
-            ring: Packing::unpack(ring.try_into().unwrap()),
-            beast_health: beast_health.try_into().unwrap(),
-            stat_upgrade_available: stat_upgrade_available.try_into().unwrap()
+            last_action: last_action.try_into().expect('unpack Adventurer last_action'),
+            health: health.try_into().expect('unpack Adventurer health'),
+            xp: xp.try_into().expect('unpack Adventurer xp'),
+            stats: Packing::unpack(stats.try_into().expect('unpack Adventurer stats')),
+            gold: gold.try_into().expect('unpack Adventurer gold'),
+            weapon: Packing::unpack(weapon.try_into().expect('unpack Adventurer weapon')),
+            chest: Packing::unpack(chest.try_into().expect('unpack Adventurer chest')),
+            head: Packing::unpack(head.try_into().expect('unpack Adventurer head')),
+            waist: Packing::unpack(waist.try_into().expect('unpack Adventurer waist')),
+            foot: Packing::unpack(foot.try_into().expect('unpack Adventurer foot')),
+            hand: Packing::unpack(hand.try_into().expect('unpack Adventurer hand')),
+            neck: Packing::unpack(neck.try_into().expect('unpack Adventurer neck')),
+            ring: Packing::unpack(ring.try_into().expect('unpack Adventurer ring')),
+            beast_health: beast_health.try_into().expect('unpack Adventurer beast_health'),
+            stat_upgrade_available: stat_upgrade_available.try_into().expect('unpack Adventurer stat_upgrade')
         }
     }
 }

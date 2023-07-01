@@ -155,7 +155,7 @@ impl PackingLoot of Packing<Loot> {
          + item_tier.into() * pow::TWO_POW_8
          + item_type.into() * pow::TWO_POW_16
          + item_slot.into() * pow::TWO_POW_24
-        ).try_into().unwrap()
+        ).try_into().expect('pack Loot')
     }
 
     // unpack an item from storage
@@ -169,10 +169,10 @@ impl PackingLoot of Packing<Loot> {
         let (_, item_slot) = rshift_split(packed, pow::TWO_POW_8);
 
         Loot {
-            id: item_id.try_into().unwrap(),
-            tier: ImplCombat::u8_to_tier(item_tier.try_into().unwrap()),
-            item_type: ImplCombat::u8_to_type(item_type.try_into().unwrap()),
-            slot: ImplCombat::u8_to_slot(item_slot.try_into().unwrap())
+            id: item_id.try_into().expect('unpack Loot id'),
+            tier: ImplCombat::u8_to_tier(item_tier.try_into().expect('unpack Loot tier')),
+            item_type: ImplCombat::u8_to_type(item_type.try_into().expect('unpack Loot item type')),
+            slot: ImplCombat::u8_to_slot(item_slot.try_into().expect('unpack Loot slot'))
         }
     }
 }

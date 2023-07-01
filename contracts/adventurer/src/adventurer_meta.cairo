@@ -20,7 +20,7 @@ impl PackingAdventurerMetadata of Packing<AdventurerMetadata> {
          + self.race.into() * pow::TWO_POW_40
          + self.order.into() * pow::TWO_POW_48
          + self.entropy.into() * pow::TWO_POW_56
-        ).try_into().unwrap()
+        ).try_into().expect('pack AdventurerMetadata')
     }
     fn unpack(packed: felt252) -> AdventurerMetadata {
         let packed = packed.into();
@@ -31,11 +31,11 @@ impl PackingAdventurerMetadata of Packing<AdventurerMetadata> {
         let (_, entropy) = rshift_split(packed, pow::TWO_POW_64);
 
         AdventurerMetadata {
-            name: name.try_into().unwrap(),
-            home_realm: home_realm.try_into().unwrap(),
-            race: race.try_into().unwrap(),
-            order: order.try_into().unwrap(),
-            entropy: entropy.try_into().unwrap()
+            name: name.try_into().expect('unpack AdvMetadata name'),
+            home_realm: home_realm.try_into().expect('unpack AdvMetadata home_realm'),
+            race: race.try_into().expect('unpack AdvMetadata race'),
+            order: order.try_into().expect('unpack AdvMetadata order'),
+            entropy: entropy.try_into().expect('unpack AdvMetadata entropy')
         }
     }
 }

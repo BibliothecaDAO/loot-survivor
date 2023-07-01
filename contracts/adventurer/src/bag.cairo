@@ -58,7 +58,7 @@ impl LootStatisticsPacking of Packing<LootStatistics> {
         (self.id.into()
          + self.xp.into() * pow::TWO_POW_7
          + self.metadata.into() * pow::TWO_POW_16
-        ).try_into().unwrap()
+        ).try_into().expect('pack LootStatistics')
     }
 
     fn unpack(packed: felt252) -> LootStatistics {
@@ -68,9 +68,9 @@ impl LootStatisticsPacking of Packing<LootStatistics> {
         let (_, metadata) = rshift_split(packed, pow::TWO_POW_5);
 
         LootStatistics {
-            id: id.try_into().unwrap(),
-            xp: xp.try_into().unwrap(),
-            metadata: metadata.try_into().unwrap()
+            id: id.try_into().expect('unpack LootStatistics id'),
+            xp: xp.try_into().expect('unpack LootStatistics xp'),
+            metadata: metadata.try_into().expect('unpack LootStatistics metadata')
         }
     }
 }
@@ -89,7 +89,7 @@ impl BagPacking of Packing<Bag> {
          + self.item_10.pack().into() * pow::TWO_POW_189
          + self.item_11.pack().into() * pow::TWO_POW_210
          + self.item_12.pack().into() * pow::TWO_POW_231
-        ).try_into().unwrap()
+        ).try_into().expect('pack Bag')
     }
 
     fn unpack(packed: felt252) -> Bag {
@@ -108,18 +108,18 @@ impl BagPacking of Packing<Bag> {
         let (_, item_12) = rshift_split(packed, pow::TWO_POW_21);
 
         Bag {
-            item_1: Packing::unpack(item_1.try_into().unwrap()),
-            item_2: Packing::unpack(item_2.try_into().unwrap()),
-            item_3: Packing::unpack(item_3.try_into().unwrap()),
-            item_4: Packing::unpack(item_4.try_into().unwrap()),
-            item_5: Packing::unpack(item_5.try_into().unwrap()),
-            item_6: Packing::unpack(item_6.try_into().unwrap()),
-            item_7: Packing::unpack(item_7.try_into().unwrap()),
-            item_8: Packing::unpack(item_8.try_into().unwrap()),
-            item_9: Packing::unpack(item_9.try_into().unwrap()),
-            item_10: Packing::unpack(item_10.try_into().unwrap()),
-            item_11: Packing::unpack(item_11.try_into().unwrap()),
-            item_12: Packing::unpack(item_12.try_into().unwrap())
+            item_1: Packing::unpack(item_1.try_into().expect('unpack Bag item_1')),
+            item_2: Packing::unpack(item_2.try_into().expect('unpack Bag item_2')),
+            item_3: Packing::unpack(item_3.try_into().expect('unpack Bag item_3')),
+            item_4: Packing::unpack(item_4.try_into().expect('unpack Bag item_4')),
+            item_5: Packing::unpack(item_5.try_into().expect('unpack Bag item_5')),
+            item_6: Packing::unpack(item_6.try_into().expect('unpack Bag item_6')),
+            item_7: Packing::unpack(item_7.try_into().expect('unpack Bag item_7')),
+            item_8: Packing::unpack(item_8.try_into().expect('unpack Bag item_8')),
+            item_9: Packing::unpack(item_9.try_into().expect('unpack Bag item_9')),
+            item_10: Packing::unpack(item_10.try_into().expect('unpack Bag item_10')),
+            item_11: Packing::unpack(item_11.try_into().expect('unpack Bag item_11')),
+            item_12: Packing::unpack(item_12.try_into().expect('unpack Bag item_12'))
         }
     }
 }

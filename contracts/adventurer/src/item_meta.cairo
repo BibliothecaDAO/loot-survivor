@@ -50,7 +50,7 @@ impl LootItemSpecialNamesPacking of Packing<LootItemSpecialNames> {
         (self.name_prefix.into()
          + self.name_suffix.into() * pow::TWO_POW_7
          + self.item_suffix.into() * pow::TWO_POW_12
-        ).try_into().unwrap()
+        ).try_into().expect('pack LootItemSpecialNames')
     }
 
     fn unpack(packed: felt252) -> LootItemSpecialNames {
@@ -60,9 +60,9 @@ impl LootItemSpecialNamesPacking of Packing<LootItemSpecialNames> {
         let (_, item_suffix) = rshift_split(packed, pow::TWO_POW_4);
 
         LootItemSpecialNames {
-            name_prefix: name_prefix.try_into().unwrap(),
-            name_suffix: name_suffix.try_into().unwrap(),
-            item_suffix: item_suffix.try_into().unwrap()
+            name_prefix: name_prefix.try_into().expect('unpack LISN name_prefix'),
+            name_suffix: name_suffix.try_into().expect('unpack LISN name_suffix'),
+            item_suffix: item_suffix.try_into().expect('unpack LISN item_suffix')
         }
     }
 }
@@ -79,7 +79,7 @@ impl LootItemSpecialNamesStoragePacking of Packing<LootItemSpecialNamesStorage> 
          + self.item_8.pack().into() * pow::TWO_POW_112
          + self.item_9.pack().into() * pow::TWO_POW_128
          + self.item_10.pack().into() * pow::TWO_POW_144
-        ).try_into().unwrap()
+        ).try_into().expect('pack LISNS')
     }
 
     fn unpack(packed: felt252) -> LootItemSpecialNamesStorage {
@@ -96,16 +96,16 @@ impl LootItemSpecialNamesStoragePacking of Packing<LootItemSpecialNamesStorage> 
         let (_, item_10) = rshift_split(packed, pow::TWO_POW_16);
 
         LootItemSpecialNamesStorage {
-            item_1: Packing::unpack(item_1.try_into().unwrap()),
-            item_2: Packing::unpack(item_2.try_into().unwrap()),
-            item_3: Packing::unpack(item_3.try_into().unwrap()),
-            item_4: Packing::unpack(item_4.try_into().unwrap()),
-            item_5: Packing::unpack(item_5.try_into().unwrap()),
-            item_6: Packing::unpack(item_6.try_into().unwrap()),
-            item_7: Packing::unpack(item_7.try_into().unwrap()),
-            item_8: Packing::unpack(item_8.try_into().unwrap()),
-            item_9: Packing::unpack(item_9.try_into().unwrap()),
-            item_10: Packing::unpack(item_10.try_into().unwrap())
+            item_1: Packing::unpack(item_1.try_into().expect('unpack LISNS item_1')),
+            item_2: Packing::unpack(item_2.try_into().expect('unpack LISNS item_2')),
+            item_3: Packing::unpack(item_3.try_into().expect('unpack LISNS item_3')),
+            item_4: Packing::unpack(item_4.try_into().expect('unpack LISNS item_4')),
+            item_5: Packing::unpack(item_5.try_into().expect('unpack LISNS item_5')),
+            item_6: Packing::unpack(item_6.try_into().expect('unpack LISNS item_6')),
+            item_7: Packing::unpack(item_7.try_into().expect('unpack LISNS item_7')),
+            item_8: Packing::unpack(item_8.try_into().expect('unpack LISNS item_8')),
+            item_9: Packing::unpack(item_9.try_into().expect('unpack LISNS item_9')),
+            item_10: Packing::unpack(item_10.try_into().expect('unpack LISNS item_10'))
         }
     }
 }
