@@ -24,7 +24,7 @@ mod Game {
     use lootitems::{
         loot::{Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
-    use pack::pack::{pack_value, unpack_value};
+
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer},
         bag::{Bag, BagActions, ImplBagActions, LootStatistics},
@@ -500,7 +500,7 @@ mod Game {
         ref name_storage1: LootItemSpecialNamesStorage,
         ref name_storage2: LootItemSpecialNamesStorage
     ) {
-        // get adventurer entropy from storage  
+        // get adventurer entropy from storage
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
         // get global game entropy
@@ -527,7 +527,7 @@ mod Game {
                     exploration_entropy
                 );
 
-                // initialize the beast health. This is the only timeD beast.starting_health should be 
+                // initialize the beast health. This is the only timeD beast.starting_health should be
                 // used. In subsequent calls to attack the beast, adventurer.beast_health should be used as the persistent
                 // storage of the beast health
                 adventurer.beast_health = beast.starting_health;
@@ -572,7 +572,7 @@ mod Game {
                     // emit adventurer died
                     // note we technically could do this inside of _beast_counter_attack but
                     // doing so would result in AdventurerDied being emitted before
-                    // the DiscoverBeast for the beast that killed them. 
+                    // the DiscoverBeast for the beast that killed them.
                     __event_AdventurerDied(
                         ref self,
                         AdventurerState {
@@ -794,8 +794,8 @@ mod Game {
     /// @param entropy An unsigned integer used for entropy generation. This is often derived from a source of randomness.
     ///
     /// The function first retrieves the names of the special items an adventurer may possess. It then calculates the XP increase by applying a multiplier to the provided 'value'.
-    /// The function then checks each item slot (weapon, chest, head, waist, foot, hand, neck, ring) of the adventurer to see if an item is equipped (item ID > 0). 
-    /// If an item is equipped, it calls `_grant_xp_to_item_and_emit_event` to apply the XP increase to the item and handle any resulting events. 
+    /// The function then checks each item slot (weapon, chest, head, waist, foot, hand, neck, ring) of the adventurer to see if an item is equipped (item ID > 0).
+    /// If an item is equipped, it calls `_grant_xp_to_item_and_emit_event` to apply the XP increase to the item and handle any resulting events.
     fn _grant_xp_to_equipped_items(
         ref self: ContractState,
         adventurer_id: u256,
@@ -991,13 +991,13 @@ mod Game {
         ref name_storage1: LootItemSpecialNamesStorage,
         ref name_storage2: LootItemSpecialNamesStorage
     ) {
-        // get adventurer entropy from storage  
+        // get adventurer entropy from storage
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
         let battle_fixed_entropy: u128 = adventurer.get_battle_fixed_entropy(adventurer_entropy);
 
-        // generate special names for beast using Loot name schema. 
+        // generate special names for beast using Loot name schema.
         // We use Loot names because the combat system will deal bonus damage for matching names (these are the items super powers)
         // We do this here instead of in beast to prevent beast from depending on Loot
         let beast_prefix1 = U128TryIntoU8::try_into(
@@ -1109,7 +1109,7 @@ mod Game {
                 // emit adventurer died
                 // note we technically could do this inside of _beast_counter_attack but
                 // doing so would result in AdventurerDied being emitted before
-                // the DiscoverBeast for the beast that killed them. 
+                // the DiscoverBeast for the beast that killed them.
                 __event_AdventurerDied(
                     ref self,
                     AdventurerState {
@@ -1183,7 +1183,7 @@ mod Game {
     fn _flee(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
     ) -> Adventurer {
-        // get adventurer entropy from storage  
+        // get adventurer entropy from storage
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
         // get game entropy from storage
