@@ -3,21 +3,23 @@ import { useAccount, useConnectors } from "@starknet-react/core";
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "./components/buttons/Button";
 import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
-import Actions from "./containers/Actions";
-import Marketplace from "./containers/Marketplace";
-import Adventurer from "./containers/Adventurer";
-import Beast from "./containers/Beast";
+import ActionsScreen from "./containers/ActionsScreen";
+import MarketplaceScreen from "./containers/MarketplaceScreen";
+import AdventurerScreen from "./containers/AdventurerScreen";
+import BeastScreen from "./containers/BeastScreen";
+import InventoryScreen from "./containers/InventoryScreen";
+import LeaderboardScreen from "./containers/LeaderboardScreen";
+import EncountersScreen from "./containers/EncountersScreen";
+import GuideScreen from "./containers/GuideScreen";
+import UpgradeScreen from "./containers/UpgradeScreen";
 import { displayAddress, padAddress } from "./lib/utils";
-import Inventory from "./containers/Inventory";
 import TransactionHistory from "./components/navigation/TransactionHistory";
 import TransactionCart from "./components/navigation/TransactionCart";
-import Upgrade from "./containers/Upgrade";
 import Intro from "./components/intro/Intro";
 import {
   AddDevnetEthButton,
   MintEthButton,
 } from "./components/archived/DevnetConnectors";
-import Leaderboard from "./containers/Leaderboard";
 import { TxActivity } from "./components/navigation/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
 import useAdventurerStore from "./hooks/useAdventurerStore";
@@ -30,10 +32,8 @@ import { useMusic } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
 import { Menu, NullAdventurer } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
-import Profile from "./components/leaderboard/Profile";
+import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
-import { Encounters } from "./containers/Encounters";
-import Guide from "./containers/Guide";
 import { processNotification } from "./components/navigation/NotificationDisplay";
 import { DiscoveryDisplay } from "./components/actions/DiscoveryDisplay";
 import useCustomQuery from "./hooks/useCustomQuery";
@@ -72,7 +72,8 @@ export default function Home() {
   const calls = useTransactionCartStore((state) => state.calls);
   const connected = useUIStore((state) => state.connected);
   const setConnected = useUIStore((state) => state.setConnected);
-  const onboarded = useUIStore((state) => state.onboarded);
+  // const onboarded = useUIStore((state) => state.onboarded);
+  const onboarded = true;
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
@@ -83,6 +84,7 @@ export default function Home() {
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
+  const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   // const statUpgrades = adventurer?.statUpgrades ?? 0;
@@ -93,6 +95,10 @@ export default function Home() {
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
+
+  const purchaseExists = () => {
+    return calls.some((call: any) => call.entrypoint == "buy_item");
+  };
 
   useCustomQuery(
     "adventurerByIdQuery",
@@ -131,7 +137,7 @@ export default function Home() {
   );
 
   useEffect(() => {
-    if (updatedAdventurer?.id > 0) {
+    if (updatedAdventurer?.id ?? 0 > 0) {
       setAdventurer(updatedAdventurer);
     }
   }, [updatedAdventurer]);
@@ -278,6 +284,8 @@ export default function Home() {
     );
   }, [account]);
 
+  console.log(purchaseExists());
+
   useEffect(() => {
     if (onboarded) {
       let newMenu: Menu[] = [
@@ -332,7 +340,11 @@ export default function Home() {
             id: 7,
             label: "Market",
             screen: "market",
-            disabled: !(statUpgrades > 0) || hasBeast || adventurer.health == 0,
+            disabled:
+              !(statUpgrades > 0) ||
+              hasBeast ||
+              adventurer.health == 0 ||
+              purchaseExists(),
           },
           {
             id: 8,
@@ -376,14 +388,26 @@ export default function Home() {
             id: 6,
             label: "Market",
             screen: "market",
-            disabled: !(statUpgrades > 0) || hasBeast || adventurer.health == 0,
+            disabled:
+              !(statUpgrades > 0) ||
+              hasBeast ||
+              adventurer.health == 0 ||
+              purchaseExists(),
           },
         ];
       }
       setMenu(newMenu);
       setMobileMenu(newMobileMenu);
     }
-  }, [adventurer, account, onboarded]);
+  }, [adventurer, account, onboarded, purchaseExists()]);
+
+  useEffect(() => {
+    if (purchaseExists()) {
+      setPurchasedItem(true);
+    } else {
+      setPurchasedItem(false);
+    }
+  }, [purchaseExists()]);
 
   useEffect(() => {
     if (!onboarded) {
@@ -591,16 +615,16 @@ export default function Home() {
 
                 {isMobileDevice && <MobileHeader />}
 
-                {screen === "start" && <Adventurer />}
-                {screen === "actions" && <Actions />}
-                {screen === "market" && <Marketplace />}
-                {screen === "inventory" && <Inventory />}
-                {screen === "beast" && <Beast />}
-                {screen === "leaderboard" && <Leaderboard />}
-                {screen === "upgrade" && <Upgrade />}
+                {screen === "start" && <AdventurerScreen />}
+                {screen === "actions" && <ActionsScreen />}
+                {screen === "market" && <MarketplaceScreen />}
+                {screen === "inventory" && <InventoryScreen />}
+                {screen === "beast" && <BeastScreen />}
+                {screen === "leaderboard" && <LeaderboardScreen />}
+                {screen === "upgrade" && <UpgradeScreen />}
                 {screen === "profile" && <Profile />}
-                {screen === "encounters" && <Encounters />}
-                {screen === "guide" && <Guide />}
+                {screen === "encounters" && <EncountersScreen />}
+                {screen === "guide" && <GuideScreen />}
                 {screen === "settings" && <Settings />}
                 {screen === "player" && <Player />}
               </>

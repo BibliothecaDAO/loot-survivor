@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../buttons/Button";
 import { useContracts } from "../../hooks/useContracts";
-import { getItemData } from "../../lib/utils";
+import { getItemData, getItemPrice } from "../../lib/utils";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import LootIcon from "../icons/LootIcon";
@@ -10,6 +10,11 @@ import {
   useWaitForTransaction,
 } from "@starknet-react/core";
 import { Metadata } from "../../types";
+import { CoinIcon } from "../icons/Icons";
+import EfficacyDisplay from "../icons/EfficacyIcon";
+import useUIStore from "@/app/hooks/useUIStore";
+import { getKeyFromValue } from "../../lib/utils";
+import { GameData } from "../GameData";
 
 interface MarketplaceRowProps {
   item: any;
@@ -38,13 +43,12 @@ const MarketplaceRow = ({
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { hashes, transactions } = useTransactionManager();
   const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
+  const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
 
   const transactingMarketIds = (transactions[0]?.metadata as Metadata)?.items;
 
-  const purchaseExists = (itemId: number) => {
-    return calls.some(
-      (call: any) => call.entrypoint == "buy_item" && call.calldata[1] == itemId
-    );
+  const purchaseExists = () => {
+    return calls.some((call: any) => call.entrypoint == "buy_item");
   };
 
   const checkPurchaseBalance = () => {
@@ -99,16 +103,20 @@ const MarketplaceRow = ({
     }
   }, [isActive]);
 
-  const handlePurchase = (itemId: number, equip: boolean) => {
+  const handlePurchase = (item: string, tier: number, equip: boolean) => {
     if (gameContract) {
+      const gameData = new GameData();
       const PurchaseTx = {
         contractAddress: gameContract?.address,
         entrypoint: "buy_item",
-        calldata: [adventurer?.id, itemId, equip],
-        metadata: `Bidding on ${item.item}`,
+        calldata: [
+          adventurer?.id,
+          getKeyFromValue(gameData.ITEMS, item),
+          equip,
+        ],
+        metadata: `Purchasing ${item} for ${getItemPrice(tier)} gold`,
       };
       addToCalls(PurchaseTx);
-      // Place bid logic
       close();
     }
   };
@@ -118,29 +126,61 @@ const MarketplaceRow = ({
   return (
     <tr
       className={
-        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black" +
+        "border-b border-terminal-green sm:text-2xl hover:bg-terminal-green hover:text-terminal-black" +
         (selectedIndex === index + 1 ? " bg-terminal-black" : "")
       }
     >
       <td className="text-center">{item.item}</td>
       <td className="text-center">{tier}</td>
-      <td className="flex justify-center space-x-1 text-center ">
-        {" "}
-        <LootIcon className="self-center pt-3" type={slot} />{" "}
+      <td className="text-center">
+        <div className="flex justify-center items-center ">
+          <LootIcon className="sm:w-8" type={slot} />
+        </div>
       </td>
-      <td className="text-center">{type}</td>
-      <td className="text-center">{item.price}</td>
+      <td className="text-center">
+        <div className="flex flex-row items-center justify-center gap-2">
+          <p>{type}</p>
+          <EfficacyDisplay className="sm:w-8" type={type} />
+        </div>
+      </td>
+      <td className="text-center">
+        <div className="flex flex-row items-center justify-center">
+          <p className="text-terminal-yellow">{getItemPrice(tier)}</p>
+          <CoinIcon className="w-5 h-5 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
+        </div>
+      </td>
 
       <td className="w-64 text-center">
         {showEquipQ ? (
-          <div className="flex flex-row">
-            <Button onClick={() => handlePurchase(item.item, true)}>Yes</Button>
-            <Button onClick={() => handlePurchase(item.item, false)}>No</Button>
+          <div className="flex flex-row items-center justify-center gap-2">
+            <p>Equip?</p>
+            <Button
+              onClick={() => {
+                handlePurchase(item.item, tier, true);
+                setShowEquipQ(false);
+                setPurchasedItem(true);
+              }}
+            >
+              Yes
+            </Button>
+            <Button
+              onClick={() => {
+                handlePurchase(item.item, tier, false);
+                setShowEquipQ(false);
+                setPurchasedItem(true);
+              }}
+            >
+              No
+            </Button>
           </div>
         ) : (
           <Button
             onClick={() => setShowEquipQ(true)}
-            disabled={checkPurchaseBalance() || checkTransacting(item.item)}
+            disabled={
+              checkPurchaseBalance() ||
+              checkTransacting(item.item) ||
+              purchaseExists()
+            }
             className={checkTransacting(item.item) ? "bg-white" : ""}
           >
             Purchase

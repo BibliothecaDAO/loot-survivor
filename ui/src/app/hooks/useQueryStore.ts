@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { isEqual } from "lodash";
+import { Battle, Item, Adventurer, Discovery, Score } from "../types";
 
 export type QueryKey =
   | "lastBattleQuery"
@@ -23,8 +24,51 @@ export type QueryKey =
   | "topScoresQuery"
   | "latestMarketItemsQuery";
 
+interface BattlesResult {
+  battles: Battle[];
+}
+
+interface DiscoveriesResult {
+  discoveries: Discovery[];
+}
+
+interface AdventurersResult {
+  adventurers: Adventurer[];
+}
+
+interface ItemsResult {
+  items: Item[];
+}
+
+interface ScoresResult {
+  scores: Score[];
+}
+
+interface InitialData {
+  lastBattleQuery: BattlesResult | null;
+  lastBeastBattleQuery: BattlesResult | null;
+  battlesByAdventurerQuery: BattlesResult | null;
+  battlesByTxHashQuery: BattlesResult | null;
+  battlesByBeastQuery: BattlesResult | null;
+  lastBeastQuery: BattlesResult | null;
+  discoveriesQuery: DiscoveriesResult | null;
+  latestDiscoveriesQuery: DiscoveriesResult | null;
+  discoveryByTxHashQuery: DiscoveriesResult | null;
+  adventurersByOwnerQuery: AdventurersResult | null;
+  adventurerByIdQuery: AdventurersResult | null;
+  leaderboardByIdQuery: AdventurersResult | null;
+  adventurersByGoldQuery: AdventurersResult | null;
+  adventurersByXPQuery: AdventurersResult | null;
+  adventurersInListQuery: AdventurersResult | null;
+  adventurersInListByXpQuery: AdventurersResult | null;
+  itemsByAdventurerQuery: ItemsResult | null;
+  itemsByProfileQuery: ItemsResult | null;
+  topScoresQuery: ScoresResult | null;
+  latestMarketItemsQuery: ItemsResult | null;
+}
+
 type QueriesState = {
-  data: Record<QueryKey, any>;
+  data: InitialData;
   isLoading: Record<QueryKey, boolean>;
   isDataUpdated: Record<QueryKey, boolean> & { global: boolean };
   refetchFunctions: Record<QueryKey, () => Promise<any>>;
@@ -38,7 +82,7 @@ type QueriesState = {
   resetDataUpdated: (queryKey?: QueryKey) => void;
 };
 
-const initialData: Record<QueryKey, any> = {
+const initialData: InitialData = {
   lastBattleQuery: null,
   lastBeastBattleQuery: null,
   battlesByAdventurerQuery: null,

@@ -15,7 +15,7 @@ import { AdventurerTemplate } from "../types/templates";
  * @container
  * @description Provides the start screen for the adventurer.
  */
-const Adventurer = () => {
+export default function AdventurerScreen() {
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
   const [loading, setLoading] = useState(false);
@@ -93,6 +93,4 @@ const Adventurer = () => {
       </div>
     </>
   );
-};
-
-export default Adventurer;
+}

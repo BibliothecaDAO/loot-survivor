@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from "react";
 import { Button } from "../buttons/Button";
 import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
 import { Menu } from "../../types";
+import useUIStore from "@/app/hooks/useUIStore";
 
 export interface ButtonData {
   id: number;
@@ -22,6 +23,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
   const { play } = useUiSounds(soundSelector.click);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const screen = useUIStore((state) => state.screen);
 
   useEffect(() => {
     onButtonClick(buttonsData[selectedIndex].screen);
@@ -74,7 +76,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
           className="px-3"
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
-          variant={selectedIndex === index ? "default" : "outline"}
+          variant={buttonData.screen === screen ? "default" : "outline"}
           onClick={() => {
             setSelectedIndex(index);
             onButtonClick(buttonData.screen);

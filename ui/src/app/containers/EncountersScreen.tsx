@@ -24,7 +24,7 @@ export interface EncountersProps {
  * @description Provides the encounters screen for the adventurer.
  * @prop {number} profile - The adventurer profile to have encounters displayed.
  */
-export const Encounters = ({ profile }: EncountersProps) => {
+export default function EncountersScreen({ profile }: EncountersProps) {
   const { adventurer } = useAdventurerStore();
   const { data, isLoading } = useQueriesStore();
   const encountersPerPage = 10;
@@ -180,4 +180,4 @@ export const Encounters = ({ profile }: EncountersProps) => {
       )}
     </div>
   );
-};
+}

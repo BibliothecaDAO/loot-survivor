@@ -10,12 +10,13 @@ import LootIconLoader from "../components/icons/Loader";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
 import useCustomQuery from "../hooks/useCustomQuery";
+import { AdventurerTemplate } from "../types/templates";
 
 /**
  * @container
  * @description Provides the leaderboard screen for the adventurer.
  */
-const Leaderboard: React.FC = () => {
+export default function LeaderboardScree() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
   const [loading, setLoading] = useState(false);
@@ -61,7 +62,9 @@ const Leaderboard: React.FC = () => {
       </div>
     );
 
-  const adventurers = data.adventurersByXPQuery?.adventurers;
+  // const adventurers = data.adventurersByXPQuery?.adventurers;
+
+  const adventurers = [AdventurerTemplate];
 
   const totalPages = Math.ceil(adventurers?.length / itemsPerPage);
 
@@ -262,6 +265,4 @@ const Leaderboard: React.FC = () => {
       )}
     </div>
   );
-};
-
-export default Leaderboard;
+}

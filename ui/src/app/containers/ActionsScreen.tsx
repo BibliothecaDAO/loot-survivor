@@ -25,7 +25,7 @@ import { DiscoveryTemplate } from "../types/templates";
  * @container
  * @description Provides the actions screen for the adventurer.
  */
-export default function Actions() {
+export default function ActionsScreen() {
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const handleSubmitCalls = useTransactionCartStore(

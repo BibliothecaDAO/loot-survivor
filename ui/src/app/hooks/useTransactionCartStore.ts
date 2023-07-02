@@ -3,7 +3,7 @@ import { create } from "zustand";
 interface Call {
   contractAddress: string;
   entrypoint: string;
-  calldata: Array<string | number | undefined | boolean>;
+  calldata: Array<string | number | undefined | boolean | null>;
   metadata?: any;
 }
 

@@ -19,7 +19,7 @@ import { InfoIcon } from "../components/icons/Icons";
  * @container
  * @description Provides the inventory screen for the adventurer.
  */
-const Inventory: React.FC = () => {
+export default function InventoryScreen() {
   const { account } = useAccount();
   const formatAddress = account ? account.address : "0x0";
   const calls = useTransactionCartStore((state) => state.calls);
@@ -253,7 +253,7 @@ const Inventory: React.FC = () => {
       <div className="w-2/3 sm:w-1/3">
         <h4>Loot</h4>
         <div className="flex flex-col gap-5">
-          <div className="flex flex-row items-center gap-5 p-2 border border-terminal-green hidden sm:block">
+          <div className="flex-row items-center gap-5 p-2 border border-terminal-green hidden sm:flex">
             <div className="w-10">
               <InfoIcon />
             </div>
@@ -289,6 +289,4 @@ const Inventory: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default Inventory;
+}

@@ -17,11 +17,11 @@ export const ItemDisplay = ({ item }: ItemDisplayProps) => {
   return (
     <div
       className={`flex-shrink flex gap-2 p-1 sm:p-2 mb-1 text-sm sm:text-base ${
-        item ? "bg-terminal-green text-terminal-black" : ""
+        item.item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >
       <LootIcon type={slot} />
-      {item ? (
+      {item.item ? (
         <span className="flex flex-row justify-between w-full">
           <div className="w-full overflow-auto whitespace-normal">
             {" "}

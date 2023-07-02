@@ -5,7 +5,7 @@ import { Button } from "../components/buttons/Button";
  * @container
  * @description Provides the guide screen for the adventurer.
  */
-export const Guide = () => {
+export default function GuideScreen() {
   const efficacyData = [
     { weapon: "Blade", metal: "Weak", hide: "Fair", cloth: "Strong" },
     { weapon: "Bludgeon", metal: "Fair", hide: "Strong", cloth: "Weak" },
@@ -303,6 +303,4 @@ export const Guide = () => {
       </p>
     </div>
   );
-};
-
-export default Guide;
+}

@@ -26,7 +26,7 @@ import { DiscoveryTemplate, BattleTemplate } from "../types/templates";
  * @container
  * @description Provides the beast screen for adventurer battles.
  */
-export default function Beast() {
+export default function BeastScreen() {
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const handleSubmitCalls = useTransactionCartStore(

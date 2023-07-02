@@ -1,17 +1,19 @@
-import Info from "../adventurer/Info";
-import { useQueriesStore } from "../../hooks/useQueryStore";
-import { Button } from "../buttons/Button";
-import useUIStore from "../../hooks/useUIStore";
-import useCustomQuery from "../../hooks/useCustomQuery";
-import { getAdventurerById } from "../../hooks/graphql/queries";
+import Info from "../components/adventurer/Info";
+import { useQueriesStore } from "../hooks/useQueryStore";
+import { Button } from "../components/buttons/Button";
+import useUIStore from "../hooks/useUIStore";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { getAdventurerById } from "../hooks/graphql/queries";
 import { useState } from "react";
-import { Encounters } from "../../containers/Encounters";
+import EncountersScreen from "./EncountersScreen";
 import { useMediaQuery } from "react-responsive";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
 export default function Profile() {
   const { data } = useQueriesStore();
   const profile = useUIStore((state) => state.profile);
   const [encounters, setEncounters] = useState(false);
+  const adventurer = useAdventurerStore((state) => state.adventurer);
   useCustomQuery(
     "leaderboardByIdQuery",
     getAdventurerById,
@@ -20,7 +22,8 @@ export default function Profile() {
     },
     false
   );
-  const adventurer = data.leaderboardByIdQuery?.adventurers[0];
+  // const adventurer = data.leaderboardByIdQuery?.adventurers[0];
+
   const setScreen = useUIStore((state) => state.setScreen);
 
   const isMobileDevice = useMediaQuery({
@@ -28,7 +31,7 @@ export default function Profile() {
   });
 
   return (
-    <div className="w-full m-auto">
+    <div className="w-full">
       <div className="flex flex-col sm:flex-row gap-5 sm:gap-10 items-center sm:items-start justify-center">
         <Button
           className="animate-pulse hidden sm:block"
@@ -47,9 +50,9 @@ export default function Profile() {
             <Info adventurer={adventurer} profileExists={true} />
           </div>
         ) : (
-          <Encounters profile={profile} />
+          <EncountersScreen profile={profile} />
         )}
-        {!isMobileDevice && <Encounters profile={profile} />}
+        {!isMobileDevice && <EncountersScreen profile={profile} />}
       </div>
     </div>
   );

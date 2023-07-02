@@ -256,3 +256,7 @@ export function checkAvailableSlots(ownedItems: any[]) {
     return false;
   }
 }
+
+export function getItemPrice(tier: number) {
+  return (6 - tier) * 3;
+}

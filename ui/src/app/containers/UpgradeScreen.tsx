@@ -18,7 +18,7 @@ import { useMediaQuery } from "react-responsive";
  * @container
  * @description Provides the upgrade screen for the adventurer.
  */
-const Upgrade = () => {
+export default function UpgradeScreen() {
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const startLoading = useLoadingStore((state) => state.startLoading);
@@ -33,6 +33,7 @@ const Upgrade = () => {
   );
   const { writeAsync } = useContractWrite({ calls });
   const setScreen = useUIStore((state) => state.setScreen);
+  const purchasedItem = useUIStore((state) => state.purchasedItem);
   const [selected, setSelected] = useState("");
   const statUpgrades = adventurer?.statUpgrades ?? 0;
 
@@ -182,8 +183,10 @@ const Upgrade = () => {
     </div>
   );
 
+  console.log(calls);
+
   useEffect(() => {
-    if (!(statUpgrades > 0)) {
+    if (statUpgrades == 0) {
       setScreen("actions");
     }
   }, [statUpgrades]);
@@ -197,11 +200,23 @@ const Upgrade = () => {
       <div className="w-1/3 mr-5 hidden sm:block">
         <Info adventurer={adventurer} />
       </div>
-      <div className="w-2/3 m-auto">
-        <div className="flex flex-col">
-          <p className="mx-auto items-center justify-center text-center text-lg animate-pulse mb-10">
-            You are now level {adventurer?.level}, please select upgrade!
-          </p>
+      <div className="w-2/3">
+        <div className="flex flex-col gap-10">
+          <div className="flex flex-col gap-5 p-10 items-center">
+            <p className="text-center text-lg sm:text-4xl animate-pulse">
+              You are now level {adventurer?.level}!
+            </p>
+            <p className="text-center text-lg sm:text-2xl">
+              Buy an item from the market and then choose an upgrade!
+            </p>
+            <Button
+              className="w-1/4"
+              onClick={() => setScreen("market")}
+              disabled={purchasedItem}
+            >
+              Market
+            </Button>
+          </div>
           <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full">
             {isMobileDevice ? (
               <>
@@ -245,6 +260,4 @@ const Upgrade = () => {
       </div>
     </div>
   );
-};
-
-export default Upgrade;
+}

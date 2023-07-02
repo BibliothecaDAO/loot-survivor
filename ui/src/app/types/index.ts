@@ -1,4 +1,3 @@
-import { AdventurerProps } from "../hooks/useAdventurerStore";
 import { ScreenPage } from "../hooks/useUIStore";
 
 export interface Adventurer {
@@ -105,6 +104,15 @@ export interface Discovery {
   ambushed?: boolean; // Did the adventurer ambush the entity?
   discoveryTime?: Date; // Block time of the discovery
   txHash?: string; // Transaction hash
+}
+
+export interface Score {
+  adventurerId: number; // Adventurer ID
+  address: string; // Hex Address of the adventurer owner
+  rank: number; // Rank of the score
+  xp: number; // Experience points of the adventurer
+  txHash: string; // Hex of the transaction hash
+  scoreTime: Date; // Time of the score
 }
 
 export interface Metadata {

@@ -11,12 +11,14 @@ import { CoinIcon } from "../components/icons/Icons";
 import LootIconLoader from "../components/icons/Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import { ItemTemplate } from "../types/templates";
+import useUIStore from "../hooks/useUIStore";
 
 /**
  * @container
  * @description Provides the marketplace/purchase screen for the adventurer.
  */
-const Marketplace = () => {
+export default function MarketplaceScreen() {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -27,6 +29,7 @@ const Marketplace = () => {
   const [itemsCount, setItemsCount] = useState(0);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const setScreen = useUIStore((state) => state.setScreen);
 
   const { data, isLoading, refetch } = useQueriesStore();
 
@@ -66,22 +69,6 @@ const Marketplace = () => {
   const marketLatestItems = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
     : [];
-  const bidders: number[] = [];
-
-  for (const dict of marketLatestItems) {
-    if (dict.bidder && !bidders.includes(dict.bidder)) {
-      bidders.push(dict.bidder);
-    }
-  }
-
-  useCustomQuery(
-    "adventurersInListQuery",
-    getAdventurersInList,
-    {
-      ids: bidders,
-    },
-    false
-  );
 
   const adventurers = data.adventurersInListQuery
     ? data.adventurersInListQuery.adventurers
@@ -104,26 +91,32 @@ const Marketplace = () => {
     }
   };
 
-  const sortedMarketLatestItems = useMemo(() => {
-    if (!sortField) return marketLatestItems;
-    const sortedItems = [...marketLatestItems].sort((a, b) => {
-      let aValue = a[sortField];
-      let bValue = b[sortField];
+  // const sortedMarketLatestItems = useMemo(() => {
+  //   if (!sortField) return marketLatestItems;
+  //   const sortedItems = [...marketLatestItems].sort((a, b) => {
+  //     let aValue = a[sortField];
+  //     let bValue = b[sortField];
 
-      if (aValue instanceof Date) {
-        aValue = aValue.getTime();
-        bValue = new Date(bValue).getTime();
-      } else if (typeof aValue === "string" && !isNaN(Number(aValue))) {
-        aValue = Number(aValue);
-        bValue = Number(bValue);
-      }
+  //     if (aValue instanceof Date) {
+  //       aValue = aValue.getTime();
+  //       bValue = new Date(bValue).getTime();
+  //     } else if (typeof aValue === "string" && !isNaN(Number(aValue))) {
+  //       aValue = Number(aValue);
+  //       bValue = Number(bValue);
+  //     }
 
-      if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-      if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-    return sortedItems;
-  }, [marketLatestItems, sortField, sortDirection]);
+  //     if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
+  //     if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
+  //     return 0;
+  //   });
+  //   return sortedItems;
+  // }, [marketLatestItems, sortField, sortDirection]);
+
+  const sortedMarketLatestItems = [];
+
+  for (var i = 0; i < 20; i++) {
+    sortedMarketLatestItems.push(ItemTemplate);
+  }
 
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
@@ -178,15 +171,26 @@ const Marketplace = () => {
 
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
 
+  const purchaseExists = () => {
+    return calls.some((call: any) => call.entrypoint == "buy_item");
+  };
+
+  useEffect(() => {
+    if (purchaseExists()) {
+      setScreen("upgrade");
+    }
+  }, [purchaseExists()]);
+
   return (
     <>
-      {adventurer?.level != 1 ? (
+      {adventurer?.level != 0 ? (
         <div className="w-full">
           <div className="flex flex-row justify-between m-1 flex-wrap">
-            <div>
+            <div className="flex flex-row gap-3">
+              <p>Balance:</p>
               <span className="flex text-xl text-terminal-yellow">
-                <CoinIcon className="self-center w-5 h-5 fill-current" />
                 {calculatedNewGold}
+                <CoinIcon className="self-center w-5 h-5 fill-current" />
               </span>
             </div>
             <span className="flex flex-row">
@@ -197,14 +201,14 @@ const Marketplace = () => {
               {"to bids)"}
             </span>
           </div>
-          <div className="w-full overflow-y-auto border h-[650px] border-terminal-green table-scroll">
+          <div className="w-full sm:w-3/4 sm:mx-auto overflow-y-auto border h-[650px] border-terminal-green table-scroll">
             {isLoading.latestMarketItemsQuery && (
               <div className="flex justify-center p-10 text-center">
                 <LootIconLoader />
               </div>
             )}
             <table className="w-full border border-terminal-green">
-              <thead className="sticky top-0 border z-5 border-terminal-green bg-terminal-black">
+              <thead className="sticky top-0 border z-5 border-terminal-green bg-terminal-black sm:text-xl">
                 <tr className="">
                   {headings.map((heading, index) => (
                     <th
@@ -244,6 +248,4 @@ const Marketplace = () => {
       )}
     </>
   );
-};
-
-export default Marketplace;
+}
