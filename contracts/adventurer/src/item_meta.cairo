@@ -229,9 +229,6 @@ impl ImplLootItemSpecialNames of ILootItemSpecialNames {
         if bag.item_11.metadata >= slot {
             slot = bag.item_11.metadata;
         }
-        if bag.item_12.metadata >= slot {
-            slot = bag.item_12.metadata;
-        }
 
         // if no slots -> return first index which is 0
         if slot == 1 {
@@ -389,9 +386,7 @@ fn test_get_item_metadata_slot() {
             id: 10, xp: 0, metadata: 0,
             }, item_11: LootStatistics {
             id: 11, xp: 0, metadata: 18,
-            }, item_12: LootStatistics {
-            id: 12, xp: 0, metadata: 0,
-        },
+            },
     };
 
     let new_item = LootStatistics { id: 1, xp: 1, metadata: 0 };

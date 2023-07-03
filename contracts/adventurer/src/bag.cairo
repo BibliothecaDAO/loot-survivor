@@ -27,7 +27,6 @@ struct Bag {
     item_9: LootStatistics, // club
     item_10: LootStatistics, // club
     item_11: LootStatistics, // club
-    item_12: LootStatistics, // club
 }
 
 trait BagActions {
@@ -88,7 +87,6 @@ impl BagPacking of Packing<Bag> {
          + self.item_9.pack().into() * pow::TWO_POW_168
          + self.item_10.pack().into() * pow::TWO_POW_189
          + self.item_11.pack().into() * pow::TWO_POW_210
-         + self.item_12.pack().into() * pow::TWO_POW_231
         ).try_into().expect('pack Bag')
     }
 
@@ -104,8 +102,7 @@ impl BagPacking of Packing<Bag> {
         let (packed, item_8) = rshift_split(packed, pow::TWO_POW_21);
         let (packed, item_9) = rshift_split(packed, pow::TWO_POW_21);
         let (packed, item_10) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, item_11) = rshift_split(packed, pow::TWO_POW_21);
-        let (_, item_12) = rshift_split(packed, pow::TWO_POW_21);
+        let (_, item_11) = rshift_split(packed, pow::TWO_POW_21);
 
         Bag {
             item_1: Packing::unpack(item_1.try_into().expect('unpack Bag item_1')),
@@ -119,7 +116,6 @@ impl BagPacking of Packing<Bag> {
             item_9: Packing::unpack(item_9.try_into().expect('unpack Bag item_9')),
             item_10: Packing::unpack(item_10.try_into().expect('unpack Bag item_10')),
             item_11: Packing::unpack(item_11.try_into().expect('unpack Bag item_11')),
-            item_12: Packing::unpack(item_12.try_into().expect('unpack Bag item_12'))
         }
     }
 }
@@ -162,9 +158,6 @@ impl ImplBagActions of BagActions {
         } else if slot == 10 {
             self.item_11 = item;
             return self;
-        } else if slot == 11 {
-            self.item_12 = item;
-            return self;
         } else {
             return self;
         }
@@ -190,14 +183,12 @@ impl ImplBagActions of BagActions {
             return 8;
         } else if self.item_10.id == 0 {
             return 9;
-        } else if self.item_11.id == 0 {
-            return 10;
         } else {
-            return 11;
+            return 10;
         }
     }
     fn is_full(self: Bag) -> bool {
-        if self.item_12.id == 0 {
+        if self.item_11.id == 0 {
             return false;
         } else {
             return true;
@@ -224,10 +215,8 @@ impl ImplBagActions of BagActions {
             return self.item_9;
         } else if self.item_10.id == item_id {
             return self.item_10;
-        } else if self.item_11.id == item_id {
-            return self.item_11;
         } else {
-            return self.item_12;
+            return self.item_11;
         }
     }
     fn remove_item(ref self: Bag, item_id: u8) -> Bag {
@@ -262,11 +251,8 @@ impl ImplBagActions of BagActions {
         } else if self.item_10.id == item_id {
             self.item_10 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
-        } else if self.item_11.id == item_id {
-            self.item_11 = LootStatistics { id: 0, xp: 0, metadata: 0 };
-            return self;
         } else {
-            self.item_12 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_11 = LootStatistics { id: 0, xp: 0, metadata: 0 };
             return self;
         }
     }
@@ -274,6 +260,7 @@ impl ImplBagActions of BagActions {
         LootStatistics { id: item_id, xp: 0, metadata: 0 }
     }
 }
+
 #[test]
 #[available_gas(5000000)]
 fn test_pack_bag() {
@@ -300,9 +287,7 @@ fn test_pack_bag() {
             id: 127, xp: 511, metadata: 31
             }, item_11: LootStatistics {
             id: 127, xp: 511, metadata: 31
-            }, item_12: LootStatistics {
-            id: 127, xp: 511, metadata: 31
-        },
+            }
     };
 
     let packed_bag: Bag = Packing::unpack(bag.pack());
@@ -350,10 +335,6 @@ fn test_pack_bag() {
     assert(packed_bag.item_11.id == 127, 'Loot 11 ID is not 127');
     assert(packed_bag.item_11.xp == 511, 'Loot 11 XP is not 511');
     assert(packed_bag.item_11.metadata == 31, ' 11 metadata is not 31');
-
-    assert(packed_bag.item_12.id == 127, 'Loot 12 ID is not 127');
-    assert(packed_bag.item_12.xp == 511, 'Loot 12 XP is not 511');
-    assert(packed_bag.item_12.metadata == 31, ' 12 metadata is not 31');
 }
 
 #[test]
@@ -382,9 +363,7 @@ fn test_add_item() {
             id: 0, xp: 0, metadata: 0
             }, item_11: LootStatistics {
             id: 0, xp: 0, metadata: 0
-            }, item_12: LootStatistics {
-            id: 0, xp: 0, metadata: 0
-        },
+            },
     };
 
     let item = LootStatistics { id: 23, xp: 1, metadata: 5 };
@@ -420,9 +399,7 @@ fn test_is_full() {
             id: 13, xp: 0, metadata: 0
             }, item_11: LootStatistics {
             id: 14, xp: 0, metadata: 0
-            }, item_12: LootStatistics {
-            id: 15, xp: 0, metadata: 0
-        },
+            },
     };
 
     assert(bag.is_full() == true, 'Bag should be full');
@@ -453,9 +430,7 @@ fn remove_item() {
             id: 13, xp: 0, metadata: 0
             }, item_11: LootStatistics {
             id: 14, xp: 0, metadata: 0
-            }, item_12: LootStatistics {
-            id: 15, xp: 0, metadata: 0
-        },
+            },
     };
 
     bag.remove_item(8);
