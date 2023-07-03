@@ -294,8 +294,6 @@ export default function Home() {
     );
   }, [setIndexer]);
 
-  console.log(purchaseExists());
-
   useEffect(() => {
     if (onboarded) {
       let newMenu: Menu[] = [
@@ -491,7 +489,6 @@ export default function Home() {
     handleOnboarded,
     menu,
     refetch,
-    setScreen,
   ]);
 
   useEffect(() => {

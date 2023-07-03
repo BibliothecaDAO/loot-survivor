@@ -167,20 +167,21 @@ export default function MarketplaceScreen() {
     <>
       {adventurer?.level != 0 ? (
         <div className="w-full">
-          <div className="flex flex-row justify-between m-1 flex-wrap">
+          <div className="flex flex-row justify-between m-1 flex-wrap sm:text-xl">
             <div className="flex flex-row gap-3">
               <p>Balance:</p>
               <span className="flex text-xl text-terminal-yellow">
-                {calculatedNewGold}
                 <CoinIcon className="self-center w-5 h-5 fill-current" />
+                {calculatedNewGold}
               </span>
             </div>
-            <span className="flex flex-row">
-              {`Charisma: ${adventurer?.charisma} (+ ${
-                adventurer?.charisma && adventurer?.charisma * 3
-              }`}
-              <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />{" "}
-              {"to bids)"}
+            <span className="flex flex-row gap-1">
+              {`Charisma: ${adventurer?.charisma} (-`}
+              <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
+              <p className="text-terminal-yellow">
+                {adventurer?.charisma && adventurer?.charisma * 3}
+              </p>
+              <p>{"to prices)"}</p>
             </span>
           </div>
           <div className="w-full sm:w-3/4 sm:mx-auto overflow-y-auto border h-[650px] border-terminal-green table-scroll">

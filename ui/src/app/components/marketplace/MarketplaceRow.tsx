@@ -148,8 +148,8 @@ const MarketplaceRow = ({
       </td>
       <td className="text-center">
         <div className="flex flex-row items-center justify-center">
-          <p className="text-terminal-yellow">{getItemPrice(tier)}</p>
           <CoinIcon className="w-5 h-5 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
+          <p className="text-terminal-yellow">{getItemPrice(tier)}</p>
         </div>
       </td>
 

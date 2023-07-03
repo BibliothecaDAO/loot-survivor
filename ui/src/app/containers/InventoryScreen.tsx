@@ -157,7 +157,7 @@ export default function InventoryScreen() {
   );
 
   return (
-    <div className="flex flex-row gap-5 sm:gap-0 sm:space-x-4 overflow-hidden flex-wrap">
+    <div className="flex flex-row gap-5 sm:gap-5 sm:space-x-4 overflow-hidden flex-wrap">
       <div className="hidden sm:block sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
@@ -258,7 +258,7 @@ export default function InventoryScreen() {
             <div className="w-10">
               <InfoIcon />
             </div>
-            <p className="pb-1">
+            <p className="leading-5">
               Items of Tier 1 carry the highest prestige and quality, whereas
               items of Tier 5 offer the most basic value.
             </p>
@@ -283,7 +283,9 @@ export default function InventoryScreen() {
                 </div>
               ))
             ) : (
-              <div>You have no unequipped {selected} Loot</div>
+              <p className="sm:text-xl">
+                You have no unequipped {selected} Loot
+              </p>
             )}
           </div>
         </div>

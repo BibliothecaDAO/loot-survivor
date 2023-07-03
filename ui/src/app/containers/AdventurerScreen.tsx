@@ -72,8 +72,8 @@ export default function AdventurerScreen() {
         </div>
 
         {selected === "choose adventurer" && (
-          <div className="sm:w-5/6">
-            <p className="text-center sm:hidden">Adventurers</p>
+          <div className="flex flex-col gap-2 sm:w-5/6">
+            <p className="text-center text-2xl sm:hidden">Adventurers</p>
             <AdventurersList
               isActive={activeMenu == 1}
               onEscape={() => setActiveMenu(0)}

@@ -156,7 +156,9 @@ export default function LeaderboardScree() {
           </tbody>
         </table>
       ) : (
-        <h3>No scores submitted yet. Be the first!</h3>
+        <h3 className="text-lg sm:text-2xl">
+          No scores submitted yet. Be the first!
+        </h3>
       )}
       <h1 className="text-lg sm:text-2xl">Live Leaderboard</h1>
       <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
