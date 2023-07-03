@@ -1,6 +1,6 @@
 "use client";
 import { useAccount, useConnectors } from "@starknet-react/core";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "./components/buttons/Button";
 import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
 import ActionsScreen from "./containers/ActionsScreen";
@@ -96,9 +96,9 @@ export default function Home() {
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
 
-  const purchaseExists = () => {
+  const purchaseExists = useCallback(() => {
     return calls.some((call: Call) => call.entrypoint == "buy_item");
-  };
+  }, [calls]);
 
   useCustomQuery(
     "adventurerByIdQuery",
@@ -140,7 +140,7 @@ export default function Home() {
     if (updatedAdventurer?.id ?? 0 > 0) {
       setAdventurer(updatedAdventurer);
     }
-  }, [updatedAdventurer]);
+  }, [updatedAdventurer, setAdventurer]);
 
   const hasBeast = !!(adventurer?.beastHealth ?? 0 > 0);
 
@@ -191,7 +191,7 @@ export default function Home() {
     if (!adventurer || adventurer?.health == 0) {
       setScreen(menu[0].screen);
     }
-  }, [adventurer]);
+  }, [adventurer, menu, setScreen]);
 
   useEffect(() => {
     if (data.battlesByTxHashQuery && isDataUpdated["battlesByTxHashQuery"]) {
@@ -259,13 +259,23 @@ export default function Home() {
     showNotification,
     data.battlesByTxHashQuery,
     data.discoveryByTxHashQuery,
+    adventurer?.health,
+    data.lastBattleQuery,
+    deathMessage,
+    hasBeast,
+    isDataUpdated,
+    notificationData,
+    pendingMessage,
+    setDeathMessage,
+    showDialog,
+    type,
   ]);
 
   useEffect(() => {
     if (!account?.address) {
       setConnected(false);
     }
-  }, [account]);
+  }, [account, setConnected]);
 
   const goerli_graphql =
     "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql";
@@ -282,7 +292,7 @@ export default function Home() {
       //   : goerli_graphql
       localhost_graphql
     );
-  }, [account]);
+  }, [setIndexer]);
 
   console.log(purchaseExists());
 
@@ -399,7 +409,7 @@ export default function Home() {
       setMenu(newMenu);
       setMobileMenu(newMobileMenu);
     }
-  }, [adventurer, account, onboarded, purchaseExists()]);
+  }, [adventurer, account, onboarded, hasBeast, purchaseExists]);
 
   useEffect(() => {
     if (purchaseExists()) {
@@ -407,7 +417,7 @@ export default function Home() {
     } else {
       setPurchasedItem(false);
     }
-  }, [purchaseExists()]);
+  }, [purchaseExists, setPurchasedItem]);
 
   useEffect(() => {
     if (!onboarded) {
@@ -473,18 +483,27 @@ export default function Home() {
         refetch("adventurersByOwnerQuery");
       }
     }
-  }, [onboarded, adventurer, account]);
+  }, [
+    onboarded,
+    adventurer,
+    account,
+    adventurers.length,
+    handleOnboarded,
+    menu,
+    refetch,
+    setScreen,
+  ]);
 
   useEffect(() => {
     if (statUpgrades > 0 && adventurer?.health !== 0) {
       setScreen("upgrade");
     }
-  }, [statUpgrades]);
+  }, [statUpgrades, adventurer?.health, setScreen]);
 
   // fetch adventurers on app start and account switch
   useEffect(() => {
     refetch("adventurersByOwnerQuery");
-  }, [account]);
+  }, [account, refetch]);
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",

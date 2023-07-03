@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import HealthSlider from "./HealthSlider";
 import { Button } from "../buttons/Button";
 import { useContracts } from "../../hooks/useContracts";
@@ -44,25 +44,28 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
     addToCalls(purchaseHealthTx);
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowRight":
-        setHealthAmount((prev) => {
-          const newAmount = Math.min(prev + 1, 10);
-          return newAmount;
-        });
-        break;
-      case "ArrowLeft":
-        setHealthAmount((prev) => {
-          const newAmount = Math.max(prev - 1, 1);
-          return newAmount;
-        });
-        break;
-      case "Enter":
-        handlePurchaseHealth();
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowRight":
+          setHealthAmount((prev) => {
+            const newAmount = Math.min(prev + 1, 10);
+            return newAmount;
+          });
+          break;
+        case "ArrowLeft":
+          setHealthAmount((prev) => {
+            const newAmount = Math.max(prev - 1, 1);
+            return newAmount;
+          });
+          break;
+        case "Enter":
+          handlePurchaseHealth();
+          break;
+      }
+    },
+    [healthAmount]
+  );
 
   useEffect(() => {
     if (isActive) {
@@ -73,7 +76,7 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isActive, healthAmount]);
+  }, [isActive, healthAmount, handleKeyDown]);
 
   return (
     <div className="flex flex-col gap-5 p-5 sm:p-0">

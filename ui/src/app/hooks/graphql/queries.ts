@@ -108,7 +108,7 @@ const DISCOVERIES_FRAGMENT = `
 
 const getAdventurer = gql`
   ${ADVENTURERS_FRAGMENT}
-  query get_adventurer($owner: HexValue) {
+  query getAdventurer($owner: HexValue) {
     adventurers(where: { owner: { eq: $owner } }) {
       ...AdventurerFields
     }
@@ -117,7 +117,7 @@ const getAdventurer = gql`
 
 const getDiscoveries = gql`
   ${DISCOVERIES_FRAGMENT}
-  query get_discoveries($adventurerId: FeltValue) {
+  query getDiscoveries($adventurerId: FeltValue) {
     discoveries(
       where: { adventurerId: { eq: $adventurerId } }
       limit: 1000000
@@ -130,7 +130,7 @@ const getDiscoveries = gql`
 
 const getLatestDiscoveries = gql`
   ${DISCOVERIES_FRAGMENT}
-  query get_latest_discoveries($adventurerId: FeltValue) {
+  query getLatestDiscoveries($adventurerId: FeltValue) {
     discoveries(
       where: { adventurerId: { eq: $adventurerId } }
       limit: 10

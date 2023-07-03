@@ -81,7 +81,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
       setSortedCombined(sorted);
       setLoadingData(false);
     }
-  }, [discoveriesByAdventurerData, battlesByAdventurerData]); // Runs whenever 'data' changes
+  }, [discoveriesByAdventurerData, battlesByAdventurerData, data]); // Runs whenever 'data' changes
 
   const totalPages = Math.ceil(sortedCombined.length / encountersPerPage);
 

@@ -226,7 +226,7 @@ export const NotificationDisplay = ({
 
   const playSound = useCallback(() => {
     play();
-  }, []);
+  }, [play]);
 
   useEffect(() => {
     if (animation) {
@@ -238,7 +238,12 @@ export const NotificationDisplay = ({
       }
       playSound();
     }
-  }, [animation]);
+  }, [
+    animation,
+    gameData.ADVENTURER_ANIMATIONS,
+    gameData.ADVENTURER_SOUNDS,
+    playSound,
+  ]);
 
   return (
     <div className="z-10 flex flex-row w-full gap-5 sm:p-2">

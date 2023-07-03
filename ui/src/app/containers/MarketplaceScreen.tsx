@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useContracts } from "../hooks/useContracts";
 import {
   getLatestMarketItems,
@@ -97,25 +97,28 @@ export default function MarketplaceScreen() {
     sortedMarketLatestItems.push(ItemTemplate);
   }
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowDown":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.min(prev + 1, itemsCount - 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowUp":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-        break;
-      case "Enter":
-        setActiveMenu(selectedIndex);
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowDown":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.min(prev + 1, itemsCount - 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowUp":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+          break;
+        case "Enter":
+          setActiveMenu(selectedIndex);
+          break;
+      }
+    },
+    [selectedIndex, itemsCount]
+  );
 
   useEffect(() => {
     if (!activeMenu) {
@@ -124,7 +127,7 @@ export default function MarketplaceScreen() {
         window.removeEventListener("keydown", handleKeyDown);
       };
     }
-  }, [activeMenu]);
+  }, [activeMenu, handleKeyDown]);
 
   useEffect(() => {
     if (!activeMenu) {
@@ -136,7 +139,7 @@ export default function MarketplaceScreen() {
         });
       }
     }
-  }, [selectedIndex]);
+  }, [selectedIndex, activeMenu]);
 
   const headings = ["Item", "Tier", "Slot", "Type", "Price", "Actions"];
 
@@ -150,15 +153,15 @@ export default function MarketplaceScreen() {
 
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
 
-  const purchaseExists = () => {
+  const purchaseExists = useCallback(() => {
     return calls.some((call: Call) => call.entrypoint == "buy_item");
-  };
+  }, [calls]);
 
   useEffect(() => {
     if (purchaseExists()) {
       setScreen("upgrade");
     }
-  }, [purchaseExists()]);
+  }, [purchaseExists, setScreen]);
 
   return (
     <>

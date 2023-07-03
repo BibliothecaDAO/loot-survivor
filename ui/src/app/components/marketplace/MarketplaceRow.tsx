@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "../buttons/Button";
 import { useContracts } from "../../hooks/useContracts";
 import { getItemData, getItemPrice, getKeyFromValue } from "../../lib/utils";
@@ -73,28 +73,31 @@ const MarketplaceRow = ({
     }
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowDown":
-        setSelectedButton((prev) => {
-          const newIndex = Math.min(prev + 1, 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowUp":
-        setSelectedButton((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-        break;
-      case "Enter":
-        setActiveMenu(0);
-        break;
-      case "Escape":
-        setActiveMenu(0);
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowDown":
+          setSelectedButton((prev) => {
+            const newIndex = Math.min(prev + 1, 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowUp":
+          setSelectedButton((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+          break;
+        case "Enter":
+          setActiveMenu(0);
+          break;
+        case "Escape":
+          setActiveMenu(0);
+          break;
+      }
+    },
+    [selectedButton, setActiveMenu]
+  );
 
   useEffect(() => {
     if (isActive) {
@@ -103,7 +106,7 @@ const MarketplaceRow = ({
         window.removeEventListener("keydown", handleKeyDown);
       };
     }
-  }, [isActive]);
+  }, [isActive, handleKeyDown]);
 
   const handlePurchase = (item: string, tier: number, equip: boolean) => {
     if (gameContract) {

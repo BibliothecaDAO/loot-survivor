@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import { Button } from "../buttons/Button";
@@ -50,7 +50,7 @@ const TransactionCart: React.FC = () => {
   //   txQueue.reorderQueue(dragIndex, hoverIndex);
   // }, []);
 
-  const handleLoadData = () => {
+  const handleLoadData = useCallback(() => {
     for (let call of calls) {
       if (call.entrypoint === "mint_daily_items") {
         setNotification([...notification, "New items minted!"]);
@@ -101,11 +101,11 @@ const TransactionCart: React.FC = () => {
         setLoadingMessage([...loadingMessage, "Purchasing Health"]);
       }
     }
-  };
+  }, [calls, marketItems, ownedItems, loadingMessage, notification]);
 
   useEffect(() => {
     handleLoadData();
-  }, [calls]);
+  }, [calls, handleLoadData]);
 
   return (
     <>

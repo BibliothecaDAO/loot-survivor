@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, ReactElement } from "react";
+import { useEffect, useState, useRef, ReactElement, useCallback } from "react";
 import { useContracts } from "../../hooks/useContracts";
 import { Button } from "../buttons/Button";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
@@ -51,28 +51,31 @@ export const InventoryRow = ({
 
   const unequippedItems = items?.filter((item) => item.item != equippedItem);
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowDown":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.min(prev + 1, unequippedItems?.length - 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowUp":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-        break;
-      case "Enter":
-        handleAddEquipItem(unequippedItems[selectedIndex]?.item ?? "");
-        break;
-      case "Escape":
-        setActiveMenu(undefined);
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowDown":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.min(prev + 1, unequippedItems?.length - 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowUp":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+          break;
+        case "Enter":
+          handleAddEquipItem(unequippedItems[selectedIndex]?.item ?? "");
+          break;
+        case "Escape":
+          setActiveMenu(undefined);
+          break;
+      }
+    },
+    [selectedIndex, handleAddEquipItem, setActiveMenu, unequippedItems]
+  );
 
   useEffect(() => {
     if (isActive) {
@@ -83,7 +86,7 @@ export const InventoryRow = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isActive, selectedIndex]);
+  }, [isActive, selectedIndex, handleKeyDown]);
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",

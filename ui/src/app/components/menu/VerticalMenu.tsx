@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useRef, ReactElement } from "react";
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  ReactElement,
+  useCallback,
+} from "react";
 import { Button } from "../buttons/Button";
 import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
 
@@ -32,31 +38,34 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
 
   useEffect(() => {
     onSelected(buttonsData[selectedIndex].value ?? "");
-  }, [selectedIndex]);
+  }, [selectedIndex, buttonsData, onSelected]);
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowDown":
-        play();
-        setSelectedIndex((prev) => {
-          const newIndex = Math.min(prev + 1, buttonsData.length - 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowUp":
-        play();
-        setSelectedIndex((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-        break;
-      case "Enter":
-        play();
-        setActiveMenu && setActiveMenu(buttonsData[selectedIndex].id);
-        onEnterAction && buttonsData[selectedIndex].action();
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowDown":
+          play();
+          setSelectedIndex((prev) => {
+            const newIndex = Math.min(prev + 1, buttonsData.length - 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowUp":
+          play();
+          setSelectedIndex((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+          break;
+        case "Enter":
+          play();
+          setActiveMenu && setActiveMenu(buttonsData[selectedIndex].id);
+          onEnterAction && buttonsData[selectedIndex].action();
+          break;
+      }
+    },
+    [selectedIndex, buttonsData, onEnterAction, setActiveMenu, play]
+  );
 
   useEffect(() => {
     if (isActive) {
@@ -67,7 +76,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isActive, selectedIndex]);
+  }, [isActive, selectedIndex, handleKeyDown]);
 
   return (
     <div className="flex flex-col w-full">

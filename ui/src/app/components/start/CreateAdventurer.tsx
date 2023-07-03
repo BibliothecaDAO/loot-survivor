@@ -1,4 +1,10 @@
-import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import React, {
+  useState,
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useCallback,
+} from "react";
 import { useContracts } from "../../hooks/useContracts";
 import { stringToFelt } from "../../lib/utils";
 import {
@@ -112,31 +118,32 @@ export const CreateAdventurer = ({
     }
   };
 
-  const handleKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement> | KeyboardEvent
-  ) => {
-    if (!event.currentTarget) return;
-    const form = (event.currentTarget as HTMLElement).closest("form");
-    if (!form) return;
-    const inputs = Array.from(form.querySelectorAll("input, select"));
-    switch (event.key) {
-      case "ArrowDown":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.min(prev + 1, inputs.length - 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowUp":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-      case "Escape":
-        onEscape();
-        break;
-    }
-    (inputs[selectedIndex] as HTMLElement).focus();
-  };
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement> | KeyboardEvent) => {
+      if (!event.currentTarget) return;
+      const form = (event.currentTarget as HTMLElement).closest("form");
+      if (!form) return;
+      const inputs = Array.from(form.querySelectorAll("input, select"));
+      switch (event.key) {
+        case "ArrowDown":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.min(prev + 1, inputs.length - 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowUp":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+        case "Escape":
+          onEscape();
+          break;
+      }
+      (inputs[selectedIndex] as HTMLElement).focus();
+    },
+    [selectedIndex, onEscape]
+  );
 
   useEffect(() => {
     if (isActive) {
@@ -147,14 +154,14 @@ export const CreateAdventurer = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isActive, selectedIndex]);
+  }, [isActive, selectedIndex, handleKeyDown]);
 
   useEffect(() => {
     if (adventurers[0] && firstAdventurer) {
       setScreen("actions");
       setAdventurer(adventurers[0]);
     }
-  }, [adventurers, firstAdventurer]);
+  }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
 
   return (
     <div className="flex flex-row w-full">

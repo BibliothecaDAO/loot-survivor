@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "../buttons/Button";
 import WalletSelect from "./WalletSelect";
 import { TypeAnimation } from "react-type-animation";
@@ -13,31 +13,35 @@ const Intro = () => {
 
   const [introComplete, setIntroComplete] = useState<boolean>(false);
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowRight":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.min(prev + 1, 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowLeft":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-        break;
-      case "Enter":
-        setScreen(selectedIndex + 1);
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowRight":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.min(prev + 1, 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowLeft":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+          break;
+        case "Enter":
+          setScreen(selectedIndex + 1);
+          break;
+      }
+    },
+    [selectedIndex]
+  );
+
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedIndex]);
+  }, [selectedIndex, handleKeyDown]);
 
   const [buttonText, setButtonText] = useState("do you dare?");
 

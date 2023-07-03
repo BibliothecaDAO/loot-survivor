@@ -189,7 +189,7 @@ export default function UpgradeScreen() {
     if (statUpgrades == 0) {
       setScreen("actions");
     }
-  }, [statUpgrades]);
+  }, [statUpgrades, setScreen]);
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",

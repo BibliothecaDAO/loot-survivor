@@ -66,7 +66,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
         setConnected(true);
       }
     }
-  }, [account, screen]);
+  }, [account, screen, setConnected]);
 
   return (
     <div className="flex flex-col p-8">

@@ -27,6 +27,7 @@ export default function RootLayout({
       >
         <img
           src="/crt_green_mask.png"
+          alt="crt green mask"
           className="absolute w-full pointer-events-none crt-frame hidden sm:block"
         />
         <StarknetConfig connectors={connectors} autoConnect>

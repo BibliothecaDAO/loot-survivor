@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Button } from "../buttons/Button";
 import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
 import { Menu } from "../../types";
@@ -27,47 +27,50 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
 
   useEffect(() => {
     onButtonClick(buttonsData[selectedIndex].screen);
-  }, [selectedIndex]);
+  }, [selectedIndex, buttonsData, onButtonClick]);
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    const getNextEnabledIndex = (currentIndex: number, direction: number) => {
-      let newIndex = currentIndex + direction;
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      const getNextEnabledIndex = (currentIndex: number, direction: number) => {
+        let newIndex = currentIndex + direction;
 
-      while (
-        newIndex >= 0 &&
-        newIndex < buttonsData.length &&
-        buttonsData[newIndex].disabled
-      ) {
-        newIndex += direction;
+        while (
+          newIndex >= 0 &&
+          newIndex < buttonsData.length &&
+          buttonsData[newIndex].disabled
+        ) {
+          newIndex += direction;
+        }
+
+        return newIndex;
+      };
+
+      switch (event.key) {
+        case "ArrowLeft":
+          play();
+          setSelectedIndex((prev) => {
+            const newIndex = getNextEnabledIndex(prev, -1);
+            return newIndex < 0 ? prev : newIndex;
+          });
+          break;
+        case "ArrowRight":
+          play();
+          setSelectedIndex((prev) => {
+            const newIndex = getNextEnabledIndex(prev, 1);
+            return newIndex >= buttonsData.length ? prev : newIndex;
+          });
+          break;
       }
-
-      return newIndex;
-    };
-
-    switch (event.key) {
-      case "ArrowLeft":
-        play();
-        setSelectedIndex((prev) => {
-          const newIndex = getNextEnabledIndex(prev, -1);
-          return newIndex < 0 ? prev : newIndex;
-        });
-        break;
-      case "ArrowRight":
-        play();
-        setSelectedIndex((prev) => {
-          const newIndex = getNextEnabledIndex(prev, 1);
-          return newIndex >= buttonsData.length ? prev : newIndex;
-        });
-        break;
-    }
-  };
+    },
+    [selectedIndex, buttonsData, play]
+  );
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedIndex]);
+  }, [selectedIndex, handleKeyDown]);
 
   return (
     <div>
