@@ -1,17 +1,18 @@
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { processBeastName } from "../../lib/utils";
 import { HeartIcon, CoinIcon } from "../icons/Icons";
+import { Discovery } from "@/app/types";
 
 interface DiscoveryProps {
-  discoveryData: any;
+  discoveryData: Discovery;
 }
 
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const { adventurer } = useAdventurerStore();
   const beastName = processBeastName(
-    discoveryData?.entity,
-    discoveryData?.entityNamePrefix,
-    discoveryData?.entityNameSuffix
+    discoveryData?.entity ?? "",
+    discoveryData?.entityNamePrefix ?? "",
+    discoveryData?.entityNameSuffix ?? ""
   );
 
   const renderDiscoveryMessage = () => {

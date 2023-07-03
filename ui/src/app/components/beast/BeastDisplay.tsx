@@ -9,10 +9,12 @@ import Waist from "../../../../public/icons/loot/waist.svg";
 import Foot from "../../../../public/icons/loot/foot.svg";
 import EfficacyIcon from "../icons/EfficacyIcon";
 import { processBeastName } from "../../lib/utils";
+import { Battle, Discovery, Adventurer } from "@/app/types";
 
 interface BeastDisplayProps {
-  beastData: any;
-  lastBattle: any;
+  beastData: Discovery;
+  lastBattle: Battle;
+  adventurer: Adventurer;
 }
 
 const getAttackLocationIcon = (beastType: string) => {
@@ -32,13 +34,17 @@ const getAttackLocationIcon = (beastType: string) => {
     return <Head className="self-center w-6 h-6 fill-current" />;
 };
 
-export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
+export const BeastDisplay = ({
+  beastData,
+  lastBattle,
+  adventurer,
+}: BeastDisplayProps) => {
   const beastName = processBeastName(
-    beastData?.entity,
-    beastData?.entityNamePrefix,
-    beastData?.entityNameSuffix
+    beastData?.entity ?? "",
+    beastData?.entityNamePrefix ?? "",
+    beastData?.entityNameSuffix ?? ""
   );
-  const { tier, attack, armor, image } = getBeastData(beastData?.entity);
+  const { tier, attack, armor, image } = getBeastData(beastData?.entity ?? "");
 
   return (
     <div className="relative flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
@@ -77,9 +83,9 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
             <p className="text-sm text-center sm:text-xl">{attack}</p>
           </div>
           <div className="flex flex-row gap-2 items-center">
-            {getAttackLocationIcon(beastData?.entity)}
+            {getAttackLocationIcon(beastData?.entity ?? "")}
             <p className="text-sm text-center sm:text-xl">
-              Attacks {getAttackLocationIcon(beastData?.entity)}
+              Attacks {getAttackLocationIcon(beastData?.entity ?? "")}
             </p>
           </div>
           <div className="flex flex-row gap-2 items-center">
@@ -105,7 +111,7 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
           }}
         />
       </div>
-      {beastData?.health === 0 && (
+      {adventurer?.health === 0 && (
         <div
           className="absolute inset-0 flex items-center justify-center"
           style={{ backdropFilter: "blur(1px)" }}

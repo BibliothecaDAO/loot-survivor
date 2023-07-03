@@ -9,7 +9,7 @@ import useCustomQuery from "../../hooks/useCustomQuery";
 import useUIStore from "../../hooks/useUIStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import { ItemTemplate } from "@/app/types/templates";
-
+import { Item } from "@/app/types";
 interface InfoProps {
   adventurer: Adventurer | undefined;
   profileExists?: boolean;
@@ -84,7 +84,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: any) => item.item == formatAdventurer.weapon
+                          (item: Item) => item.item == formatAdventurer.weapon
                         ) || NullItem
                       }
                     />
@@ -93,7 +93,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: any) => item.item == formatAdventurer.head
+                          (item: Item) => item.item == formatAdventurer.head
                         ) || NullItem
                       }
                     />
@@ -102,7 +102,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: any) => item.item == formatAdventurer.chest
+                          (item: Item) => item.item == formatAdventurer.chest
                         ) || NullItem
                       }
                     />
@@ -111,7 +111,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: any) => item.item == formatAdventurer.hands
+                          (item: Item) => item.item == formatAdventurer.hands
                         ) || NullItem
                       }
                     />
@@ -120,7 +120,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: any) => item.item == formatAdventurer.waist
+                          (item: Item) => item.item == formatAdventurer.waist
                         ) || NullItem
                       }
                     />
@@ -129,7 +129,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: any) => item.item == formatAdventurer.feet
+                          (item: Item) => item.item == formatAdventurer.feet
                         ) || NullItem
                       }
                     />
@@ -138,7 +138,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: any) => item.item == formatAdventurer.neck
+                          (item: Item) => item.item == formatAdventurer.neck
                         ) || NullItem
                       }
                     />
@@ -147,7 +147,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: any) => item.item == formatAdventurer.ring
+                          (item: Item) => item.item == formatAdventurer.ring
                         ) || NullItem
                       }
                     />

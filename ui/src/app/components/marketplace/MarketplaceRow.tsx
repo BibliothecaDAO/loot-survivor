@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "../buttons/Button";
 import { useContracts } from "../../hooks/useContracts";
-import { getItemData, getItemPrice } from "../../lib/utils";
+import { getItemData, getItemPrice, getKeyFromValue } from "../../lib/utils";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import LootIcon from "../icons/LootIcon";
@@ -9,20 +9,19 @@ import {
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
-import { Metadata } from "../../types";
+import { Metadata, Item, Adventurer, Call } from "../../types";
 import { CoinIcon } from "../icons/Icons";
 import EfficacyDisplay from "../icons/EfficacyIcon";
 import useUIStore from "@/app/hooks/useUIStore";
-import { getKeyFromValue } from "../../lib/utils";
 import { GameData } from "../GameData";
 
 interface MarketplaceRowProps {
-  item: any;
+  item: Item;
   index: number;
   selectedIndex: number;
-  adventurers: any[];
+  adventurers: Adventurer[];
   isActive: boolean;
-  setActiveMenu: (value: any) => void;
+  setActiveMenu: (value: number) => void;
   calculatedNewGold: number;
 }
 
@@ -48,15 +47,18 @@ const MarketplaceRow = ({
   const transactingMarketIds = (transactions[0]?.metadata as Metadata)?.items;
 
   const purchaseExists = () => {
-    return calls.some((call: any) => call.entrypoint == "buy_item");
+    return calls.some((call: Call) => call.entrypoint == "buy_item");
   };
+
+  const { tier, type, slot } = getItemData(item.item ?? "");
+  const itemPrice = getItemPrice(tier);
 
   const checkPurchaseBalance = () => {
     if (adventurer?.gold) {
       const sum = calls
         .filter((call) => call.entrypoint == "buy_item")
         .reduce((accumulator, current) => {
-          return accumulator + (isNaN(item.price) ? 0 : item.price);
+          return accumulator + (isNaN(itemPrice) ? 0 : itemPrice);
         }, 0);
       return sum >= adventurer.gold;
     }
@@ -121,8 +123,6 @@ const MarketplaceRow = ({
     }
   };
 
-  const { tier, type, slot } = getItemData(item.item);
-
   return (
     <tr
       className={
@@ -156,7 +156,7 @@ const MarketplaceRow = ({
             <p>Equip?</p>
             <Button
               onClick={() => {
-                handlePurchase(item.item, tier, true);
+                handlePurchase(item.item ?? "", tier, true);
                 setShowEquipQ(false);
                 setPurchasedItem(true);
               }}
@@ -165,7 +165,7 @@ const MarketplaceRow = ({
             </Button>
             <Button
               onClick={() => {
-                handlePurchase(item.item, tier, false);
+                handlePurchase(item.item ?? "", tier, false);
                 setShowEquipQ(false);
                 setPurchasedItem(true);
               }}
@@ -178,10 +178,10 @@ const MarketplaceRow = ({
             onClick={() => setShowEquipQ(true)}
             disabled={
               checkPurchaseBalance() ||
-              checkTransacting(item.item) ||
+              checkTransacting(item.item ?? "") ||
               purchaseExists()
             }
-            className={checkTransacting(item.item) ? "bg-white" : ""}
+            className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
           >
             Purchase
           </Button>

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import { Metadata } from "../../types";
 import { Button } from "../buttons/Button";
 import { MdClose } from "react-icons/md";
 import useLoadingStore from "../../hooks/useLoadingStore";
@@ -11,6 +10,7 @@ import { processItemName } from "../../lib/utils";
 import useUIStore from "../../hooks/useUIStore";
 import { useUiSounds } from "../../hooks/useUiSound";
 import { soundSelector } from "../../hooks/useUiSound";
+import { Item, NullItem, Call } from "../../types";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -58,9 +58,9 @@ const TransactionCart: React.FC = () => {
         setLoadingMessage([...loadingMessage, "Minting Items"]);
       } else if (call.entrypoint === "bid_on_item") {
         const item = marketItems.find(
-          (item: any) => item.marketId == call.calldata[0]
+          (item: Item) => item.item == call.calldata[0]
         );
-        const itemName = processItemName(item);
+        const itemName = processItemName(item ?? NullItem);
         setNotification([
           ...notification,
           `You bid ${call.calldata[4]} gold on ${item?.item && itemName}`,
@@ -69,9 +69,9 @@ const TransactionCart: React.FC = () => {
         setLoadingMessage([...loadingMessage, "Bidding"]);
       } else if (call.entrypoint === "claim_item") {
         const item = marketItems.find(
-          (item: any) => item.marketId == call.calldata[0]
+          (item: Item) => item.item == call.calldata[0]
         );
-        const itemName = processItemName(item);
+        const itemName = processItemName(item ?? NullItem);
         setNotification([
           ...notification,
           `You claimed ${item?.item && itemName}!`,
@@ -80,9 +80,9 @@ const TransactionCart: React.FC = () => {
         setLoadingMessage([...loadingMessage, "Claiming"]);
       } else if (call.entrypoint === "equip_item") {
         const item = ownedItems.find(
-          (item: any) => item.id == call.calldata[2]
+          (item: Item) => item.item == call.calldata[2]
         );
-        const itemName = processItemName(item);
+        const itemName = processItemName(item ?? NullItem);
         setNotification([
           ...notification,
           `You equipped ${item?.item && itemName}!`,
@@ -114,7 +114,7 @@ const TransactionCart: React.FC = () => {
           <p className="text-2xl">TRANSACTIONS</p>
           <div className="w-full border border-terminal-green "></div>
           <div className="flex flex-col h-[200px] overflow-auto">
-            {calls.map((call: any, i: number) => (
+            {calls.map((call: Call, i: number) => (
               <div key={i}>
                 <div className="flex flex-col gap-2">
                   {call && (
@@ -140,7 +140,7 @@ const TransactionCart: React.FC = () => {
           <div className="flex flex-row gap-2 absolute bottom-4">
             <Button
               onClick={async () => {
-                const marketIds: any[] = [];
+                const items: string[] = [];
 
                 for (const dict of calls) {
                   if (
@@ -148,7 +148,7 @@ const TransactionCart: React.FC = () => {
                     (dict["entrypoint"] === "bid_on_item" ||
                       dict["entrypoint"] === "claim_item")
                   ) {
-                    marketIds.push(dict.calldata[0]);
+                    items.push(dict.calldata[0]?.toString() ?? "");
                   }
                 }
                 startLoading(
@@ -166,7 +166,7 @@ const TransactionCart: React.FC = () => {
                       hash: tx.transaction_hash,
                       metadata: {
                         method: "Multicall",
-                        marketIds: marketIds,
+                        marketIds: items,
                       },
                     });
                   }

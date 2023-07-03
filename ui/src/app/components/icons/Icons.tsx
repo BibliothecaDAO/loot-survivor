@@ -22,6 +22,7 @@ import Target from "../../../../public/icons/target.svg";
 import Heart from "../../../../public/icons/heart.svg";
 import Coin from "../../../../public/icons/coin.svg";
 import Info from "../../../../public/icons/info.svg";
+import Cart from "../../../../public/icons/cart.svg";
 
 const ClothIcon = GiRolledCloth;
 const HideIcon = GiAnimalHide;
@@ -47,6 +48,7 @@ const TargetIcon = Target;
 const HeartIcon = Heart;
 const CoinIcon = Coin;
 const InfoIcon = Info;
+const CartIcon = Cart;
 
 export {
   ClothIcon,
@@ -73,4 +75,5 @@ export {
   HeartIcon,
   CoinIcon,
   InfoIcon,
+  CartIcon,
 };

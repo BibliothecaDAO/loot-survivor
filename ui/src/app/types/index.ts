@@ -1,6 +1,7 @@
 import { ScreenPage } from "../hooks/useUIStore";
 
 export interface Adventurer {
+  [key: string]: number | string | Date | undefined;
   id?: number; // Adventurer ID
   lastAction?: number; // Block number from last action
   owner?: string; // Hex address of the owner
@@ -135,6 +136,13 @@ export type FormData = {
   race: string;
   order: string;
 };
+
+export interface Call {
+  contractAddress: string;
+  entrypoint: string;
+  calldata: Array<string | number | undefined | boolean | null>;
+  metadata?: string;
+}
 
 export type Beast =
   | "Basilisk"

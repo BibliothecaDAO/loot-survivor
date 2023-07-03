@@ -3,7 +3,7 @@ import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 
 import Realms from "./realms.json";
-import { Item } from "../types";
+import { Adventurer, Item } from "../types";
 import { GameData } from "../components/GameData";
 
 export function cn(...inputs: ClassValue[]) {
@@ -77,7 +77,7 @@ export function getKeyFromValue(
 }
 
 export function groupBySlot(items: Item[]) {
-  const groups: any = {};
+  const groups: Dictionary = {};
 
   items.forEach((item) => {
     if (item.slot) {
@@ -92,7 +92,7 @@ export function groupBySlot(items: Item[]) {
   return groups;
 }
 
-type Dictionary = { [key: string]: any };
+type Dictionary = { [key: string]: Item[] };
 
 export const sortByKey = (key: string) => {
   return (a: Dictionary, b: Dictionary) => {
@@ -138,7 +138,7 @@ export function getRealmNameById(id: number) {
   return Realms.features.find((realm) => realm.id === id);
 }
 
-export function getRankFromList(id: number, data: any[]) {
+export function getRankFromList(id: number, data: Adventurer[]) {
   return data.findIndex((data) => data.id === id);
 }
 
@@ -192,7 +192,11 @@ export function getItemData(item: string) {
   return { tier, type, slot };
 }
 
-export function processBeastName(beast: any, namePrefix: any, nameSuffix: any) {
+export function processBeastName(
+  beast: string,
+  namePrefix: string,
+  nameSuffix: string
+) {
   if (namePrefix && nameSuffix) {
     return `"${namePrefix} ${nameSuffix}" ${beast}`;
   } else {
@@ -200,7 +204,7 @@ export function processBeastName(beast: any, namePrefix: any, nameSuffix: any) {
   }
 }
 
-export function getBeastData(beast: any) {
+export function getBeastData(beast: string) {
   const gameData = new GameData();
   const tier =
     gameData.BEAST_TIERS[
@@ -219,7 +223,10 @@ export function getBeastData(beast: any) {
       ]
     ];
   const image =
-    getValueFromKey(gameData.BEAST_IMAGES, beast) || "/monsters/phoenix.png";
+    getValueFromKey(
+      gameData.BEAST_IMAGES,
+      parseInt(getKeyFromValue(gameData.BEASTS, beast) ?? "")
+    ) || "/monsters/phoenix.png";
   return { tier, attack, armor, image };
 }
 
@@ -231,7 +238,7 @@ export function getRandomElement(arr: string[]): string {
   return arr[randomIndex];
 }
 
-type MyDict = { [key: string]: any }; // Or replace 'any' with the actual type if you know it
+type MyDict = { [key: string]: Item };
 
 export function dedupeByValue(arr: MyDict[], key: string): MyDict[] {
   const seen = new Set();
@@ -249,7 +256,7 @@ export function capitalizeFirstLetter(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
 
-export function checkAvailableSlots(ownedItems: any[]) {
+export function checkAvailableSlots(ownedItems: Item[]) {
   if (ownedItems.length < 20) {
     return true;
   } else {

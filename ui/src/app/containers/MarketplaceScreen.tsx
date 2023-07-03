@@ -13,6 +13,7 @@ import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { ItemTemplate } from "../types/templates";
 import useUIStore from "../hooks/useUIStore";
+import { Call, Item } from "../types";
 
 /**
  * @container
@@ -43,28 +44,6 @@ export default function MarketplaceScreen() {
     },
     true
   );
-
-  const claimExists = () => {
-    return calls.some((call: any) => call.entrypoint == "claim_item");
-  };
-
-  const singleClaimExists = (marketId: number) => {
-    return calls.some(
-      (call: any) =>
-        call.entrypoint == "claim_item" && call.calldata[0] == marketId
-    );
-  };
-
-  const removeDuplicates = (arr: any) => {
-    return arr.reduce((accumulator: any, currentItem: any) => {
-      if (
-        !accumulator.some((item: any) => item.marketId === currentItem.marketId)
-      ) {
-        accumulator.push(currentItem);
-      }
-      return accumulator;
-    }, []);
-  };
 
   const marketLatestItems = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
@@ -172,7 +151,7 @@ export default function MarketplaceScreen() {
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
 
   const purchaseExists = () => {
-    return calls.some((call: any) => call.entrypoint == "buy_item");
+    return calls.some((call: Call) => call.entrypoint == "buy_item");
   };
 
   useEffect(() => {
@@ -223,7 +202,7 @@ export default function MarketplaceScreen() {
               </thead>
               <tbody className="">
                 {!isLoading.latestMarketItemsQuery &&
-                  sortedMarketLatestItems.map((item: any, index: number) => (
+                  sortedMarketLatestItems.map((item: Item, index: number) => (
                     <MarketplaceRow
                       item={item}
                       index={index}

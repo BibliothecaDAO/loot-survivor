@@ -3,9 +3,11 @@ import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
 import { processBeastName, getBeastData } from "../../lib/utils";
+import { Adventurer, Battle } from "@/app/types";
 
 interface BattleDisplayProps {
-  battleData: any;
+  adventurer: Adventurer;
+  battleData: Battle;
   beastName: string;
 }
 
@@ -14,13 +16,14 @@ interface BattleDisplayProps {
  * @description Displays the battle results.
  */
 export const BattleDisplay = ({
+  adventurer,
   battleData,
   beastName,
 }: BattleDisplayProps) => {
   return (
     <div>
       {battleData.attacker == "Adventurer" ? (
-        battleData.targetHealth > 0 ? (
+        battleData.beastHealth ?? 0 > 0 ? (
           <p>
             You attacked the {beastName} with a mighty strike and dealt{" "}
             {battleData.damageDealt} damage!
@@ -33,8 +36,8 @@ export const BattleDisplay = ({
             damage!
           </p>
         )
-      ) : battleData.targetHealth > 0 ? (
-        battleData.damage == 0 ? (
+      ) : adventurer.health ?? 0 > 0 ? (
+        battleData.damageTaken == 0 ? (
           <p>
             You were counter attacked by the {beastName} but defended the
             attack!
@@ -45,14 +48,10 @@ export const BattleDisplay = ({
             {battleData.damageTaken} damage!
           </p>
         )
-      ) : battleData.ambushed ? (
-        <p>
-          You were killed by the {beastName} from an ambush taking{" "}
-          {battleData.damage} damage!
-        </p>
       ) : (
         <p>
-          You were killed by the {beastName} taking {battleData.damage} damage!
+          You were killed by the {beastName} taking {battleData.damageTaken}{" "}
+          damage!
         </p>
       )}
     </div>
@@ -60,7 +59,7 @@ export const BattleDisplay = ({
 };
 
 interface NotificationBattleDisplayProps {
-  battleData: any;
+  battleData: Battle[] | Battle;
   type: string;
 }
 
@@ -70,20 +69,40 @@ export const NotificationBattleDisplay = ({
 }: NotificationBattleDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const appUrl = "https://loot-survivor.vercel.app/";
-  const beastName = processBeastName(
-    battleData?.beast,
-    battleData?.beastNamePrefix,
-    battleData?.beastNameSuffix
-  );
-  const beastLevel = battleData?.beast_level;
-  const { tier, attack, armor, image } = getBeastData(battleData?.beast);
+  const isArray = Array.isArray(battleData);
+  const handleBeastInfo = () => {
+    if (isArray) {
+      const beastName = processBeastName(
+        battleData[0]?.beast ?? "",
+        battleData[0]?.beastNamePrefix ?? "",
+        battleData[0]?.beastNameSuffix ?? ""
+      );
+      const beastLevel = battleData[0]?.beastLevel;
+      const { tier, attack, armor, image } = getBeastData(
+        battleData[0]?.beast ?? ""
+      );
+      return { beastName, beastLevel, tier, attack, armor, image };
+    } else {
+      const beastName = processBeastName(
+        battleData?.beast ?? "",
+        battleData?.beastNamePrefix ?? "",
+        battleData?.beastNameSuffix ?? ""
+      );
+      const beastLevel = battleData?.beastLevel;
+      const { tier, attack, armor, image } = getBeastData(
+        battleData?.beast ?? ""
+      );
+      return { beastName, beastLevel, tier, attack, armor, image };
+    }
+  };
+
+  const { beastName, beastLevel, tier } = handleBeastInfo();
   const { data } = useQueriesStore();
   const rank = getRankFromList(
     adventurer?.id ?? 0,
     data.adventurersByXPQuery?.adventurers ?? []
   );
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
-  const isArray = Array.isArray(battleData);
   return (
     <div>
       {isArray && battleData.some((data) => data.fled) ? (
@@ -92,7 +111,7 @@ export const NotificationBattleDisplay = ({
         type == "Flee" &&
         battleData.length == 1 &&
         battleData[0]?.attacker == "Beast" &&
-        battleData[0]?.beastHealth > 0 ? (
+        (battleData[0]?.beastHealth ?? 0) > 0 ? (
         <p>
           You failed to flee the {beastName ? beastName : ""} and were attacked
           taking {battleData[0]?.damageTaken} damage!{" "}
@@ -107,11 +126,13 @@ export const NotificationBattleDisplay = ({
           taking {battleData[0]?.damageTaken} damage!{" "}
         </p>
       ) : (
+        isArray &&
         battleData[0]?.attacker == "Adventurer" &&
-        (battleData[0]?.beastHealth > 0 && battleData[1]?.beastHealth > 0 ? (
+        ((battleData[0]?.beastHealth ?? 0) > 0 &&
+        (battleData[1]?.beastHealth ?? 0) > 0 ? (
           <p>
             You attacked the {beastName ? beastName : ""} with a mighty strike
-            and dealt {battleData[0]?.damageDamage} damage! They counterattacked
+            and dealt {battleData[0]?.damageDealt} damage! They counterattacked
             for {battleData[1]?.damageTaken} damage!
           </p>
         ) : battleData[0]?.attacker == "Adventurer" &&

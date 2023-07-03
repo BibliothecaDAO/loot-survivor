@@ -4,6 +4,7 @@ import { useContracts } from "../../hooks/useContracts";
 import { useAccount } from "@starknet-react/core";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import { Item } from "@/app/types";
 
 interface BidBoxProps {
   close: () => void;

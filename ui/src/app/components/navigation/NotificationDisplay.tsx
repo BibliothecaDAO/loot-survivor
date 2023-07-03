@@ -6,8 +6,8 @@ import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
 import { useCallback, useEffect, useState } from "react";
 import { useQueriesStore } from "../../hooks/useQueryStore";
-import { processBeastName } from "../../lib/utils";
-import { getRandomElement } from "../../lib/utils";
+import { processBeastName, getRandomElement } from "../../lib/utils";
+import { Adventurer, Battle, Discovery, NullAdventurer } from "@/app/types";
 
 interface NotificationDisplayProps {
   type: string;
@@ -18,9 +18,7 @@ interface NotificationDisplayProps {
 const processAnimation = (
   type: string,
   notificationData: any,
-  adventurer: any,
-  battles: any[],
-  hasBeast: boolean
+  adventurer: Adventurer
 ) => {
   const gameData = new GameData();
   if (type == "Flee") {
@@ -32,14 +30,15 @@ const processAnimation = (
     } else if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: any) => data.attacker == "Beast" && data.beastHealth > 0
+        (data: Battle) =>
+          data.attacker == "Beast" && (data.beastHealth ?? 0) > 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
     } else if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: any) => data.attacker == "Beast" && data.beastHealth == 0
+        (data: Battle) => data.attacker == "Beast" && data.beastHealth == 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
@@ -48,14 +47,14 @@ const processAnimation = (
     if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: any) => data.attacker == "Beast" && data.beastHealth == 0
+        (data: Battle) => data.attacker == "Beast" && data.beastHealth == 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
     } else if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: any) => data.attacker == "Adventurer" && data.beastHealth == 0
+        (data: Battle) => data.attacker == "Adventurer" && data.beastHealth == 0
       )
     ) {
       return getRandomElement([
@@ -74,13 +73,13 @@ const processAnimation = (
     if (notificationData?.discoveryType == "Beast") {
       if (
         notificationData.data.some(
-          (data: any) => data.ambushed && adventurer.health > 0
+          (data: Discovery) => data.ambushed && (adventurer.health ?? 0) > 0
         )
       ) {
         return gameData.ADVENTURER_ANIMATIONS["Ambush"];
       } else if (
         notificationData.data.some(
-          (data: any) => data.ambushed && adventurer.health == 0
+          (data: Discovery) => data.ambushed && adventurer.health == 0
         )
       ) {
         return gameData.ADVENTURER_ANIMATIONS["Dead"];
@@ -104,7 +103,7 @@ const processAnimation = (
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
     }
   } else if (type == "Multicall") {
-    if (adventurer.beastHealth > 0) {
+    if ((adventurer.beastHealth ?? 0) > 0) {
       return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
     } else {
       return gameData.ADVENTURER_ANIMATIONS[type];
@@ -117,13 +116,13 @@ const processAnimation = (
 export const processNotification = (
   type: string,
   notificationData: any,
-  battles: any[],
+  battles: Battle[],
   hasBeast: boolean
 ) => {
   const beastName = processBeastName(
-    battles[0]?.beast,
-    battles[0]?.beastNamePrefix,
-    battles[0]?.beastNameSuffix
+    battles[0]?.beast ?? "",
+    battles[0]?.beastNamePrefix ?? "",
+    battles[0]?.beastNameSuffix ?? ""
   );
   if (type == "Attack" || type == "Flee") {
     return (
@@ -160,8 +159,8 @@ export const processNotification = (
             } else if (
               noti.startsWith("You equipped") &&
               battles[0]?.attacker == "Beast" &&
-              battles[0]?.beastHealth > 0 &&
-              battles[0]?.damageTaken > 0
+              (battles[0]?.beastHealth ?? 0) > 0 &&
+              (battles[0]?.beastHealth ?? 0) > 0
             ) {
               return (
                 <p key={index} className="text-lg">
@@ -172,8 +171,8 @@ export const processNotification = (
             } else if (
               noti.startsWith("You equipped") &&
               battles[0]?.attacker == "Beast" &&
-              battles[0]?.beastHealth > 0 &&
-              battles[0]?.damageTaken == 0
+              (battles[0]?.beastHealth ?? 0) > 0 &&
+              (battles[0]?.beastHealth ?? 0) == 0
             ) {
               return (
                 <p key={index} className="text-lg">
@@ -211,9 +210,7 @@ export const NotificationDisplay = ({
   const animation = processAnimation(
     type,
     notificationData,
-    adventurer,
-    battles,
-    hasBeast
+    adventurer ?? NullAdventurer
   );
   // const animation = "attack2";
   const notification = processNotification(

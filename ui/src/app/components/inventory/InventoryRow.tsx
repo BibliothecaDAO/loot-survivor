@@ -1,20 +1,23 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, ReactElement } from "react";
 import { useContracts } from "../../hooks/useContracts";
 import { Button } from "../buttons/Button";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useMediaQuery } from "react-responsive";
+import { Item, Menu } from "@/app/types";
+import { GameData } from "../GameData";
+import { getKeyFromValue } from "@/app/lib/utils";
 
 interface InventoryRowProps {
   title: string;
-  items: any[];
+  items: Item[];
   menuIndex: number;
   isActive: boolean;
-  setActiveMenu: (value: any) => void;
+  setActiveMenu: (value: number | undefined) => void;
   isSelected: boolean;
-  setSelected: (value: any) => void;
+  setSelected: (value: number) => void;
   equippedItem: string | undefined;
-  icon?: any;
+  icon?: ReactElement;
 }
 
 export const InventoryRow = ({
@@ -33,19 +36,20 @@ export const InventoryRow = ({
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
-  const handleAddEquipItem = (itemId: any) => {
+  const handleAddEquipItem = (item: string) => {
     if (gameContract) {
+      const gameData = new GameData();
       const equipItem = {
         contractAddress: gameContract?.address,
         entrypoint: "equip_item",
-        calldata: [adventurer?.id, itemId],
-        metadata: `Equipping ${itemId}!`,
+        calldata: [adventurer?.id, getKeyFromValue(gameData.ITEMS, item)],
+        metadata: `Equipping ${item}!`,
       };
       addToCalls(equipItem);
     }
   };
 
-  const unequippedItems = items?.filter((item) => item.id != equippedItem);
+  const unequippedItems = items?.filter((item) => item.item != equippedItem);
 
   const handleKeyDown = (event: KeyboardEvent) => {
     switch (event.key) {
@@ -62,7 +66,7 @@ export const InventoryRow = ({
         });
         break;
       case "Enter":
-        handleAddEquipItem(unequippedItems[selectedIndex]?.id);
+        handleAddEquipItem(unequippedItems[selectedIndex]?.item ?? "");
         break;
       case "Escape":
         setActiveMenu(undefined);

@@ -12,12 +12,12 @@ import useLoadingStore from "../../hooks/useLoadingStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import useUIStore from "../../hooks/useUIStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { FormData } from "@/app/types";
+import { FormData, Adventurer } from "@/app/types";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
   onEscape: () => void;
-  adventurers: any[];
+  adventurers: Adventurer[];
 }
 
 export const CreateAdventurer = ({

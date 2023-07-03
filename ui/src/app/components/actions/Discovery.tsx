@@ -8,9 +8,10 @@ import useLoadingStore from "../../hooks/useLoadingStore";
 import { useContracts } from "../../hooks/useContracts";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
+import { Discovery } from "@/app/types";
 
 interface DiscoveryProps {
-  discoveries: any[];
+  discoveries: Discovery[];
 }
 
 const Discovery = ({ discoveries }: DiscoveryProps) => {
@@ -45,7 +46,7 @@ const Discovery = ({ discoveries }: DiscoveryProps) => {
             <h3 className="text-center">Your travels</h3>
             {isLoading.discoveryByTxHashQuery && <LootIconLoader />}
             <div className="flex flex-col items-center gap-2 overflow-auto">
-              {discoveries.map((discovery: any, index: number) => (
+              {discoveries.map((discovery: Discovery, index: number) => (
                 <div
                   className="w-full p-2 text-left border border-terminal-green text-sm sm:text-base"
                   key={index}

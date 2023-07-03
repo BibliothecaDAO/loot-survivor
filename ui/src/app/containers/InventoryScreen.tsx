@@ -14,6 +14,7 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import useLoadingStore from "../hooks/useLoadingStore";
 import LootIcon from "../components/icons/LootIcon";
 import { InfoIcon } from "../components/icons/Icons";
+import { Adventurer, Call, Item, NullAdventurer } from "../types";
 
 /**
  * @container
@@ -46,12 +47,12 @@ export default function InventoryScreen() {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  const handleAddEquipItem = (item: any) => {
+  const handleAddEquipItem = (item: Item) => {
     if (gameContract && formatAddress) {
       const equipItem = {
         contractAddress: gameContract?.address,
         entrypoint: "equip_item",
-        calldata: [adventurer?.id, item.id],
+        calldata: [adventurer?.id, item.item],
         metadata: `Equipping ${item.item}!`,
       };
       addToCalls(equipItem);
@@ -60,7 +61,7 @@ export default function InventoryScreen() {
 
   const singleEquipExists = (id: number) => {
     return calls.some(
-      (call: any) => call.entrypoint == "equip_item" && call.calldata[2] == id
+      (call: Call) => call.entrypoint == "equip_item" && call.calldata[2] == id
     );
   };
 
@@ -128,7 +129,7 @@ export default function InventoryScreen() {
 
   const selectedItemType = groupedItems[selected || "Weapon"] || [];
 
-  function selectedIds(obj: any, keys: any) {
+  function selectedIds(obj: Adventurer, keys: string[]) {
     const values = [];
 
     for (const key of keys) {
@@ -140,7 +141,7 @@ export default function InventoryScreen() {
     return values;
   }
 
-  const equipedItemIds = selectedIds(adventurer, [
+  const equipedItems = selectedIds(adventurer ?? NullAdventurer, [
     "weaponId",
     "headId",
     "chestId",
@@ -152,7 +153,7 @@ export default function InventoryScreen() {
   ]);
 
   const filteredItems = selectedItemType.filter(
-    (item: any) => !equipedItemIds.includes(item.id)
+    (item: Item) => !equipedItems.includes(item.item)
   );
 
   return (

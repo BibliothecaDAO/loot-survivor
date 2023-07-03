@@ -30,7 +30,7 @@ import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
 import { testnet_addr } from "./lib/constants";
-import { Menu, NullAdventurer } from "./types";
+import { Menu, NullAdventurer, Call, Battle } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
@@ -97,7 +97,7 @@ export default function Home() {
     : NullAdventurer;
 
   const purchaseExists = () => {
-    return calls.some((call: any) => call.entrypoint == "buy_item");
+    return calls.some((call: Call) => call.entrypoint == "buy_item");
   };
 
   useCustomQuery(
@@ -198,7 +198,7 @@ export default function Home() {
       if (
         Array.isArray(data.battlesByTxHashQuery.battles) &&
         data.battlesByTxHashQuery.battles.some(
-          (data: any) => data.attacker == "Beast" && data.targetHealth == 0
+          (data: Battle) => data.attacker == "Beast" && data.beastHealth == 0
         )
       ) {
         const battles = data.lastBattleQuery

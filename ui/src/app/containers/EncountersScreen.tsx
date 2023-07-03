@@ -4,7 +4,7 @@ import { DiscoveryDisplay } from "../components/actions/DiscoveryDisplay";
 import { BattleDisplay } from "../components/beast/BattleDisplay";
 import LootIconLoader from "../components/icons/Loader";
 import { Button } from "../components/buttons/Button";
-import { Adventurer, NullBattle } from "../types";
+import { Battle, Discovery, NullAdventurer } from "../types";
 import { processBeastName } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import {
@@ -17,6 +17,9 @@ import { BattleTemplate, DiscoveryTemplate } from "../types/templates";
 
 export interface EncountersProps {
   profile?: number;
+}
+interface FormattedDiscovery extends Discovery {
+  timestamp: string | undefined;
 }
 
 /**
@@ -31,7 +34,9 @@ export default function EncountersScreen({ profile }: EncountersProps) {
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   const [loadingData, setLoadingData] = useState(true);
-  const [sortedCombined, setSortedCombined] = useState<any[]>([]);
+  const [sortedCombined, setSortedCombined] = useState<Battle[] | Discovery[]>(
+    []
+  );
 
   const { data: discoveriesByAdventurerData } = useQuery(getDiscoveries, {
     variables: {
@@ -61,7 +66,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
 
       const battles = [BattleTemplate];
 
-      const formattedDiscoveries = discoveries.map((discovery: any) => ({
+      const formattedDiscoveries = discoveries.map((discovery: Discovery) => ({
         ...discovery,
         timestamp: discovery.discoveryTime,
       }));
@@ -113,11 +118,6 @@ export default function EncountersScreen({ profile }: EncountersProps) {
           )}
           <div className="flex flex-col items-center gap-2 overflow-auto">
             {displayEncounters.map((encounter: any, index: number) => {
-              let beastName = processBeastName(
-                encounter?.beast,
-                encounter?.entityNamePrefix,
-                encounter?.entityNameSuffix
-              );
               return (
                 <div
                   className="w-full p-2 text-left border border-terminal-green"
@@ -128,7 +128,12 @@ export default function EncountersScreen({ profile }: EncountersProps) {
                   ) : (
                     <BattleDisplay
                       battleData={encounter}
-                      beastName={beastName}
+                      beastName={processBeastName(
+                        encounter?.beast,
+                        encounter?.beastNamePrefix,
+                        encounter?.beastNameSuffix
+                      )}
+                      adventurer={adventurer ?? NullAdventurer}
                     />
                   )}
                 </div>

@@ -1,6 +1,7 @@
 import { Adventurer } from "../types";
 
 export class AdventurerClass implements Adventurer {
+  [key: string]: number | string | Date | undefined;
   id?: number; // Adventurer ID
   lastAction?: number; // Block number from last action
   owner?: string; // Hex address of the owner

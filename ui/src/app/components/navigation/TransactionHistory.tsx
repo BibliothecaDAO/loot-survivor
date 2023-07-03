@@ -24,10 +24,6 @@ const TransactionHistory = () => {
   const displayHistory = useUIStore((state) => state.displayHistory);
   const { play } = useUiSounds(soundSelector.click);
 
-  const beasts = queryData.lastBeastQuery
-    ? queryData.lastBeastQuery.beasts
-    : [];
-
   const method = (transactions[0]?.metadata as Metadata)?.method;
 
   const history = useLoadingStore((state) => state.history);
@@ -64,9 +60,6 @@ const TransactionHistory = () => {
                   let notification: React.ReactNode = null;
                   const battles = queryData.battlesByBeastQuery
                     ? queryData.battlesByBeastQuery.battles
-                    : [];
-                  const beast = queryData.lastBeastQuery
-                    ? queryData.lastBeastQuery.beasts[0]
                     : [];
                   if (response) {
                     notification = processNotification(

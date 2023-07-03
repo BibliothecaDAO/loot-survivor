@@ -11,6 +11,7 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { AdventurerTemplate } from "../types/templates";
+import { Score, Adventurer } from "../types";
 
 /**
  * @container
@@ -43,7 +44,7 @@ export default function LeaderboardScree() {
     getAdventurersInListByXp,
     {
       ids: data.topScoresQuery?.scores
-        ? data.topScoresQuery?.scores.map((score: any) => score.adventurerId)
+        ? data.topScoresQuery?.scores.map((score: Score) => score.adventurerId)
         : [0],
     },
     false
@@ -83,14 +84,14 @@ export default function LeaderboardScree() {
   let currentRank = 0;
   let rankOffset = 0;
 
-  const rankGold = (adventurer: any, index: number) => {
+  const rankGold = (adventurer: Adventurer, index: number) => {
     if (adventurer.xp !== previousGold) {
       currentRank = index + 1 + (currentPage - 1) * itemsPerPage;
       rankOffset = 0;
     } else {
       rankOffset++;
     }
-    previousGold = adventurer.xp;
+    previousGold = adventurer.xp ?? 0;
     return currentRank;
   };
 
@@ -110,7 +111,7 @@ export default function LeaderboardScree() {
             </tr>
           </thead>
           <tbody>
-            {scores.map((adventurer: any, index: number) => {
+            {scores.map((adventurer: Adventurer, index: number) => {
               if (index > 2) {
                 return null;
               } else {
@@ -118,7 +119,7 @@ export default function LeaderboardScree() {
                   <tr
                     key={index}
                     className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
-                    onClick={() => handleRowSelected(adventurer.id)}
+                    onClick={() => handleRowSelected(adventurer.id ?? 0)}
                   >
                     <td>{index + 1}</td>
                     <td>{`${adventurer.name} - ${adventurer.id}`}</td>
@@ -169,13 +170,13 @@ export default function LeaderboardScree() {
           </tr>
         </thead>
         <tbody>
-          {displayAdventurers?.map((adventurer: any, index: number) => {
-            const dead = adventurer.health <= 0;
+          {displayAdventurers?.map((adventurer: Adventurer, index: number) => {
+            const dead = adventurer.health ?? 0 <= 0;
             return (
               <tr
                 key={index}
                 className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
-                onClick={() => handleRowSelected(adventurer.id)}
+                onClick={() => handleRowSelected(adventurer.id ?? 0)}
               >
                 <td>{rankGold(adventurer, index)}</td>
                 <td>{`${adventurer.name} - ${adventurer.id}`}</td>

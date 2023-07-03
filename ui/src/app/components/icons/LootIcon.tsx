@@ -12,14 +12,14 @@ import Ring from "../../../../public/icons/loot/ring.svg";
 export type IconSize = "w-5" | "w-6" | "w-7" | "w-8" | "w-10";
 
 export interface ItemDisplayProps {
-  type: any;
+  type: string;
   size?: IconSize;
   className?: string;
 }
 
 const ItemDisplay = ({ type, size = "w-5", className }: ItemDisplayProps) => {
   const classes = `fill-current ${size} ${className}`;
-  const Components: { [key in any]: ReactElement } = {
+  const Components: { [key in string]: ReactElement } = {
     chest: <Chest className={classes} />,
     weapon: <Weapon className={classes} />,
     head: <Head className={classes} />,

@@ -7,7 +7,7 @@ import useUIStore from "@/app/hooks/useUIStore";
 export interface ButtonData {
   id: number;
   label: string;
-  value: any;
+  value: string;
   disabled?: boolean;
 }
 

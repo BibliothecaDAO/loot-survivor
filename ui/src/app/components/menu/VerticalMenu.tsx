@@ -1,19 +1,19 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, ReactElement } from "react";
 import { Button } from "../buttons/Button";
 import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
 
 interface ButtonData {
   id: number;
   label: string;
-  icon?: any;
-  value?: any;
+  icon?: ReactElement;
+  value?: string;
   action: () => void;
   disabled?: boolean;
 }
 
 interface VerticalKeyboardControlProps {
   buttonsData: ButtonData[];
-  onSelected: (value: any) => void;
+  onSelected: (value: string) => void;
   onEnterAction?: boolean;
   isActive?: boolean;
   setActiveMenu?: (value: number) => void;
@@ -31,7 +31,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
-    onSelected(buttonsData[selectedIndex].value);
+    onSelected(buttonsData[selectedIndex].value ?? "");
   }, [selectedIndex]);
 
   const handleKeyDown = (event: KeyboardEvent) => {

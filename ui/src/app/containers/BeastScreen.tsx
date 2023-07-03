@@ -19,7 +19,7 @@ import {
   getLastBattleByAdventurer,
 } from "../hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
-import { NullBattle } from "../types";
+import { NullAdventurer, NullBattle, Battle } from "../types";
 import { DiscoveryTemplate, BattleTemplate } from "../types/templates";
 
 /**
@@ -186,9 +186,9 @@ export default function BeastScreen() {
   const isBeastDead = adventurer?.health == 0;
 
   const beastName = processBeastName(
-    beastData?.entity,
-    beastData?.entityNamePrefix,
-    beastData?.entityNameSuffix
+    beastData?.entity ?? "",
+    beastData?.entityNamePrefix ?? "",
+    beastData?.entityNameSuffix ?? ""
   );
 
   const isMobileDevice = useMediaQuery({
@@ -208,6 +208,7 @@ export default function BeastScreen() {
                 <BeastDisplay
                   beastData={beastData}
                   lastBattle={formatBattles[0]}
+                  adventurer={adventurer ?? NullAdventurer}
                 />
               </>
             ) : (
@@ -230,11 +231,12 @@ export default function BeastScreen() {
                     Battle log with {beastData?.entity}
                   </div>
                   <div className="flex flex-col gap-2 text-sm">
-                    {formatBattles.map((battle: any, index: number) => (
+                    {formatBattles.map((battle: Battle, index: number) => (
                       <BattleDisplay
                         key={index}
                         battleData={battle}
                         beastName={beastName}
+                        adventurer={adventurer ?? NullAdventurer}
                       />
                     ))}
                   </div>
@@ -256,11 +258,12 @@ export default function BeastScreen() {
                     Battle log with {beastData?.entity}
                   </div>
                   <div className="flex flex-col gap-2">
-                    {formatBattles.map((battle: any, index: number) => (
+                    {formatBattles.map((battle: Battle, index: number) => (
                       <BattleDisplay
                         key={index}
                         battleData={battle}
                         beastName={beastName}
+                        adventurer={adventurer ?? NullAdventurer}
                       />
                     ))}
                   </div>
@@ -275,6 +278,7 @@ export default function BeastScreen() {
                 <BeastDisplay
                   beastData={beastData}
                   lastBattle={formatBattles[0]}
+                  adventurer={adventurer ?? NullAdventurer}
                 />
               </>
             ) : (
