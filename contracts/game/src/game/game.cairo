@@ -24,11 +24,12 @@ mod Game {
     use lootitems::{
         loot::{Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
-    use pack::pack::{pack_value, unpack_value};
+    use pack::pack::Packing;
+
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer},
         bag::{Bag, BagActions, ImplBagActions, LootStatistics},
-        adventurer_meta::{AdventurerMetadata, ImplAdventurerMetadata, IAdventurerMetadata},
+        adventurer_meta::AdventurerMetadata,
         exploration::ExploreUtils,
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
@@ -441,6 +442,8 @@ mod Game {
     // ------------------------------------------ //
 
     fn _start(ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // get caller address
         let caller = get_caller_address();
 
@@ -500,7 +503,9 @@ mod Game {
         ref name_storage1: LootItemSpecialNamesStorage,
         ref name_storage2: LootItemSpecialNamesStorage
     ) {
-        // get adventurer entropy from storage  
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
+        // get adventurer entropy from storage
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
         // get global game entropy
@@ -527,7 +532,7 @@ mod Game {
                     exploration_entropy
                 );
 
-                // initialize the beast health. This is the only timeD beast.starting_health should be 
+                // initialize the beast health. This is the only timeD beast.starting_health should be
                 // used. In subsequent calls to attack the beast, adventurer.beast_health should be used as the persistent
                 // storage of the beast health
                 adventurer.beast_health = beast.starting_health;
@@ -572,7 +577,7 @@ mod Game {
                     // emit adventurer died
                     // note we technically could do this inside of _beast_counter_attack but
                     // doing so would result in AdventurerDied being emitted before
-                    // the DiscoverBeast for the beast that killed them. 
+                    // the DiscoverBeast for the beast that killed them.
                     __event_AdventurerDied(
                         ref self,
                         AdventurerState {
@@ -620,7 +625,7 @@ mod Game {
         }
     }
 
-    fn _beast_discovery(ref self: ContractState, adventurer_id: u256) {}
+    //fn _beast_discovery(ref self: ContractState, adventurer_id: u256) {}
 
     fn _obstacle_encounter(
         ref self: ContractState,
@@ -630,6 +635,8 @@ mod Game {
         ref name_storage2: LootItemSpecialNamesStorage,
         entropy: u128
     ) -> Adventurer {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // delegate obstacle encounter to obstacle library
         let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
             adventurer.get_level(), adventurer.stats.intelligence, entropy
@@ -738,6 +745,8 @@ mod Game {
         prefixes_assigned: bool,
         special_names: LootItemSpecialNames
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // if the new level is higher than the previous level
         if (new_level > previous_level) {
             // generate greatness increased event
@@ -794,8 +803,8 @@ mod Game {
     /// @param entropy An unsigned integer used for entropy generation. This is often derived from a source of randomness.
     ///
     /// The function first retrieves the names of the special items an adventurer may possess. It then calculates the XP increase by applying a multiplier to the provided 'value'.
-    /// The function then checks each item slot (weapon, chest, head, waist, foot, hand, neck, ring) of the adventurer to see if an item is equipped (item ID > 0). 
-    /// If an item is equipped, it calls `_grant_xp_to_item_and_emit_event` to apply the XP increase to the item and handle any resulting events. 
+    /// The function then checks each item slot (weapon, chest, head, waist, foot, hand, neck, ring) of the adventurer to see if an item is equipped (item ID > 0).
+    /// If an item is equipped, it calls `_grant_xp_to_item_and_emit_event` to apply the XP increase to the item and handle any resulting events.
     fn _grant_xp_to_equipped_items(
         ref self: ContractState,
         adventurer_id: u256,
@@ -805,6 +814,8 @@ mod Game {
         value: u16,
         entropy: u128
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         let xp_increase = value * ITEM_XP_MULTIPLIER;
 
         // if weapon is equipped
@@ -991,13 +1002,15 @@ mod Game {
         ref name_storage1: LootItemSpecialNamesStorage,
         ref name_storage2: LootItemSpecialNamesStorage
     ) {
-        // get adventurer entropy from storage  
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
+        // get adventurer entropy from storage
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
         let battle_fixed_entropy: u128 = adventurer.get_battle_fixed_entropy(adventurer_entropy);
 
-        // generate special names for beast using Loot name schema. 
+        // generate special names for beast using Loot name schema.
         // We use Loot names because the combat system will deal bonus damage for matching names (these are the items super powers)
         // We do this here instead of in beast to prevent beast from depending on Loot
         let beast_prefix1 = U128TryIntoU8::try_into(
@@ -1089,7 +1102,6 @@ mod Game {
                     gold_earned: gold_reward
                 }
             );
-            return;
         } else {
             // beast has more health than was dealt so subtract damage dealt
             adventurer.beast_health = adventurer.beast_health - damage_dealt;
@@ -1109,7 +1121,7 @@ mod Game {
                 // emit adventurer died
                 // note we technically could do this inside of _beast_counter_attack but
                 // doing so would result in AdventurerDied being emitted before
-                // the DiscoverBeast for the beast that killed them. 
+                // the DiscoverBeast for the beast that killed them.
                 __event_AdventurerDied(
                     ref self,
                     AdventurerState {
@@ -1142,7 +1154,6 @@ mod Game {
                     damage_location: ImplCombat::slot_to_u8(attack_location),
                 }
             );
-            return;
         }
     }
 
@@ -1154,6 +1165,8 @@ mod Game {
         beast: Beast,
         entropy: u128
     ) -> u16 {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // generate a random attack slot for the beast and get the armor the adventurer has at that slot
         let armor = adventurer.get_item_at_slot(attack_location);
 
@@ -1183,7 +1196,9 @@ mod Game {
     fn _flee(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
     ) -> Adventurer {
-        // get adventurer entropy from storage  
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
+        // get adventurer entropy from storage
         let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
 
         // get game entropy from storage
@@ -1253,6 +1268,8 @@ mod Game {
         item_id: u8,
         ref bag: Bag
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // get item the adventurer is equipping
         let equipping_item = bag.get_item(item_id);
 
@@ -1315,6 +1332,8 @@ mod Game {
         item_id: u8,
         equip: bool
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         // TODO: Remove after testing
         // assert(adventurer.stat_upgrade_available == 1, 'Not available');
 
@@ -1376,6 +1395,8 @@ mod Game {
     fn _upgrade_stat(
         ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer, stat_id: u8
     ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
         _assert_ownership(@self, adventurer_id);
 
         // add stat to adventuer
@@ -1445,7 +1466,7 @@ mod Game {
         name_storage2: LootItemSpecialNamesStorage
     ) -> Adventurer {
         // unpack adventurer
-        let mut adventurer = ImplAdventurer::unpack(self._adventurer.read(adventurer_id));
+        let mut adventurer: Adventurer = Packing::unpack(self._adventurer.read(adventurer_id));
         // apply stat boosts
         _apply_stat_boots(self, adventurer_id, ref adventurer, name_storage1, name_storage2)
     }
@@ -1494,7 +1515,7 @@ mod Game {
 
     fn _unpack_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
         // unpack adventurer
-        ImplAdventurer::unpack(self._adventurer.read(adventurer_id))
+        Packing::unpack(self._adventurer.read(adventurer_id))
     }
 
     fn _pack_adventurer(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {
@@ -1502,7 +1523,7 @@ mod Game {
     }
 
     fn _bag_unpacked(self: @ContractState, adventurer_id: u256) -> Bag {
-        ImplBagActions::unpack(self._bag.read(adventurer_id))
+        Packing::unpack(self._bag.read(adventurer_id))
     }
 
     fn _pack_bag(ref self: ContractState, adventurer_id: u256, bag: Bag) {
@@ -1510,7 +1531,7 @@ mod Game {
     }
 
     fn _adventurer_meta_unpacked(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
-        ImplAdventurerMetadata::unpack(self._adventurer_meta.read(adventurer_id))
+        Packing::unpack(self._adventurer_meta.read(adventurer_id))
     }
 
     fn _pack_adventurer_meta(
@@ -1534,7 +1555,7 @@ mod Game {
     fn _loot_special_names_storage_unpacked(
         self: @ContractState, adventurer_id: u256, storage_index: u256
     ) -> LootItemSpecialNamesStorage {
-        ImplLootItemSpecialNames::unpack(
+        Packing::unpack(
             self._loot_special_names.read((adventurer_id, storage_index))
         )
     }
