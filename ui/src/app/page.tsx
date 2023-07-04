@@ -46,7 +46,12 @@ import {
   getAdventurerByXP,
 } from "./hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
-import { CogIcon, MuteIcon, VolumeIcon } from "./components/icons/Icons";
+import {
+  CogIcon,
+  MuteIcon,
+  VolumeIcon,
+  CartIcon,
+} from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
 import Player from "./components/adventurer/Player";
@@ -542,9 +547,14 @@ export default function Home() {
                         setDisplayCart(!displayCart);
                         clickPlay();
                       }}
-                      className="relative flex px-1 sm:p-2 bg-black border border-terminal-green text-xs"
+                      className="relative flex flex-row items-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base"
                     >
-                      {displayCart ? "Hide Cart" : "Show Cart"}
+                      <div className="w-4 h-4">
+                        <CartIcon />
+                      </div>
+                      <p className="hidden sm:block">
+                        {displayCart ? "Hide Cart" : "Show Cart"}
+                      </p>
                     </button>
                     {displayCart && <TransactionCart />}
                   </>

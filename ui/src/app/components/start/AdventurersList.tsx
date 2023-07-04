@@ -122,11 +122,11 @@ export const AdventurersList = ({
                   </Button>
                 )}
               </div>
-              {filteredAdventurers.length > 0 && (
+              {/* {filteredAdventurers.length > 0 && (
                 <div className="sm:w-2/12 md:w-6/12 lg:w-2/3 w-full sm:ml-2">
                   <Info adventurer={filteredAdventurers[selectedIndex]} />
                 </div>
-              )}
+              )} */}
             </>
           ) : (
             <>

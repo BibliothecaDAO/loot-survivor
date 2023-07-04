@@ -184,7 +184,7 @@ export default function MarketplaceScreen() {
               <p>{"to prices)"}</p>
             </span>
           </div>
-          <div className="w-full sm:w-3/4 sm:mx-auto overflow-y-auto border h-[650px] border-terminal-green table-scroll">
+          <div className="w-full sm:w-3/4 sm:mx-auto overflow-y-auto border h-[400px] sm:h-[650px] border-terminal-green table-scroll">
             {isLoading.latestMarketItemsQuery && (
               <div className="flex justify-center p-10 text-center">
                 <LootIconLoader />
@@ -196,7 +196,7 @@ export default function MarketplaceScreen() {
                   {headings.map((heading, index) => (
                     <th
                       key={index}
-                      className="px-3 cursor-pointer"
+                      className="px-2.5 sm:px-3 cursor-pointer"
                       onClick={() => handleSort(heading)}
                     >
                       {heading}
