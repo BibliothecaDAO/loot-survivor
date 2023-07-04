@@ -76,7 +76,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
     <div>
       {buttonsData.map((buttonData, index) => (
         <Button
-          className="px-3"
+          className="px-2.5 sm:px-3"
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
           variant={buttonData.screen === screen ? "default" : "outline"}

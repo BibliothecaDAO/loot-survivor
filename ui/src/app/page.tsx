@@ -620,7 +620,7 @@ export default function Home() {
           {account ? (
             <div className="flex flex-col flex-grow w-full">
               <>
-                <div className="gap-10 pb-2">
+                <div className="flex justify-center sm:justify-normal sm:pb-2">
                   <HorizontalKeyboardControl
                     buttonsData={isMobileDevice ? mobileMenu : menu}
                     onButtonClick={(value) => {

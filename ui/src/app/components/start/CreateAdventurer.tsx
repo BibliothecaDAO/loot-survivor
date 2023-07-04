@@ -164,108 +164,106 @@ export const CreateAdventurer = ({
   }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
 
   return (
-    <div className="flex flex-row w-full">
-      <div className="flex items-center sm:w-1/2 mx-2 border border-terminal-green">
-        <div className="flex flex-row w-full gap-2 p-1">
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col w-full gap-2 p-1 text-lg sm:text-2xl"
-          >
-            <label className="flex justify-between">
-              <span className="self-center">Name:</span>
+    <div className="flex items-center sm:w-1/2 mx-2 border border-terminal-green">
+      <div className="flex flex-row w-full gap-2 p-1">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col w-full gap-2 p-1 text-lg sm:text-2xl"
+        >
+          <label className="flex justify-between">
+            <span className="self-center">Name:</span>
 
-              <input
-                type="text"
-                name="name"
-                onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black border border-slate-500"
-                onKeyDown={handleKeyDown}
-                maxLength={31}
-              />
-            </label>
-            <label className="flex justify-between">
-              <span className="self-center">Race:</span>
-              <select
-                name="race"
-                onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black"
-              >
-                <option value="">Select a race</option>
-                <option value="Elf">Elf</option>
-                <option value="Fox">Fox</option>
-                <option value="Giant">Giant</option>
-                <option value="Human">Human</option>
-                <option value="Orc">Orc</option>
-                <option value="Demon">Demon</option>
-                <option value="Goblin">Goblin</option>
-                <option value="Fish">Fish</option>
-                <option value="Cat">Cat</option>
-                <option value="Frog">Frog</option>
-              </select>
-            </label>
-            <label className="flex justify-between">
-              <span className="self-center">Home Realm:</span>
-              <input
-                type="number"
-                name="homeRealmId"
-                min="1"
-                max="8000"
-                onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black border border-slate-500"
-              />
-            </label>
-            <label className="flex justify-between">
-              <span className="self-center">Order of Divinity:</span>
-              <select
-                name="order"
-                onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black"
-              >
-                <option value="">Select an order</option>
-                <optgroup label="Order of Light">
-                  <option value="Power">Power</option>
-                  <option value="Giants">Giants</option>
-                  <option value="Perfection">Perfection</option>
-                  <option value="Brilliance">Brilliance</option>
-                  <option value="Enlightenment">Enlightenment</option>
-                  <option value="Protection">Protection</option>
-                  <option value="Skill">Skill</option>
-                  <option value="Titans">Titans</option>
-                </optgroup>
-                <optgroup label="Order of Dark">
-                  <option value="Twins">Twins</option>
-                  <option value="Detection">Detection</option>
-                  <option value="Reflection">Reflection</option>
-                  <option value="Fox">Fox</option>
-                  <option value="Vitriol">Vitriol</option>
-                  <option value="Fury">Fury</option>
-                  <option value="Rage">Rage</option>
-                  <option value="Anger">Anger</option>
-                </optgroup>
-              </select>
-            </label>
-            <label className="flex justify-between">
-              <span className="self-center">Starting Weapon:</span>
-              <select
-                name="startingWeapon"
-                onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black"
-              >
-                <option value="">Select a weapon</option>
-                <option value="Wand">Wand</option>
-                <option value="Book">Book</option>
-                <option value="Short Sword">Short Sword</option>
-                <option value="Club">Club</option>
-              </select>
-            </label>
-            <button
-              type="submit"
-              className="p-2 m-2 border bg-terminal-black border-terminal-green hover:bg-terminal-green/80 hover:animate-pulse hover:text-black"
+            <input
+              type="text"
+              name="name"
+              onChange={handleChange}
+              className="p-1 m-2 bg-terminal-black border border-slate-500"
+              onKeyDown={handleKeyDown}
+              maxLength={31}
+            />
+          </label>
+          <label className="flex justify-between">
+            <span className="self-center">Race:</span>
+            <select
+              name="race"
+              onChange={handleChange}
+              className="p-1 m-2 bg-terminal-black"
             >
-              Spawn
-            </button>
-          </form>
-        </div>
+              <option value="">Select a race</option>
+              <option value="Elf">Elf</option>
+              <option value="Fox">Fox</option>
+              <option value="Giant">Giant</option>
+              <option value="Human">Human</option>
+              <option value="Orc">Orc</option>
+              <option value="Demon">Demon</option>
+              <option value="Goblin">Goblin</option>
+              <option value="Fish">Fish</option>
+              <option value="Cat">Cat</option>
+              <option value="Frog">Frog</option>
+            </select>
+          </label>
+          <label className="flex justify-between">
+            <span className="self-center">Home Realm:</span>
+            <input
+              type="number"
+              name="homeRealmId"
+              min="1"
+              max="8000"
+              onChange={handleChange}
+              className="p-1 m-2 bg-terminal-black border border-slate-500"
+            />
+          </label>
+          <label className="flex justify-between">
+            <span className="self-center">Order of Divinity:</span>
+            <select
+              name="order"
+              onChange={handleChange}
+              className="p-1 m-2 bg-terminal-black"
+            >
+              <option value="">Select an order</option>
+              <optgroup label="Order of Light">
+                <option value="Power">Power</option>
+                <option value="Giants">Giants</option>
+                <option value="Perfection">Perfection</option>
+                <option value="Brilliance">Brilliance</option>
+                <option value="Enlightenment">Enlightenment</option>
+                <option value="Protection">Protection</option>
+                <option value="Skill">Skill</option>
+                <option value="Titans">Titans</option>
+              </optgroup>
+              <optgroup label="Order of Dark">
+                <option value="Twins">Twins</option>
+                <option value="Detection">Detection</option>
+                <option value="Reflection">Reflection</option>
+                <option value="Fox">Fox</option>
+                <option value="Vitriol">Vitriol</option>
+                <option value="Fury">Fury</option>
+                <option value="Rage">Rage</option>
+                <option value="Anger">Anger</option>
+              </optgroup>
+            </select>
+          </label>
+          <label className="flex justify-between">
+            <span className="self-center">Starting Weapon:</span>
+            <select
+              name="startingWeapon"
+              onChange={handleChange}
+              className="p-1 m-2 bg-terminal-black"
+            >
+              <option value="">Select a weapon</option>
+              <option value="Wand">Wand</option>
+              <option value="Book">Book</option>
+              <option value="Short Sword">Short Sword</option>
+              <option value="Club">Club</option>
+            </select>
+          </label>
+          <button
+            type="submit"
+            className="p-2 m-2 border bg-terminal-black border-terminal-green hover:bg-terminal-green/80 hover:animate-pulse hover:text-black"
+          >
+            Spawn
+          </button>
+        </form>
       </div>
     </div>
   );

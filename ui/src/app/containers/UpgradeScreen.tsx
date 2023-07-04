@@ -200,8 +200,8 @@ export default function UpgradeScreen() {
       <div className="w-1/3 mr-5 hidden sm:block">
         <Info adventurer={adventurer} />
       </div>
-      <div className="w-2/3">
-        <div className="flex flex-col gap-10">
+      <div className="w-full sm:w-2/3">
+        <div className="flex flex-col sm:gap-10">
           <div className="flex flex-col gap-5 p-10 items-center">
             <p className="text-center text-lg sm:text-4xl animate-pulse">
               You are now level {adventurer?.level}!
@@ -220,7 +220,7 @@ export default function UpgradeScreen() {
           <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full">
             {isMobileDevice ? (
               <>
-                <div className="flex sm:w-2/3 items-center justify-center">
+                <div className="flex sm:w-2/3 items-center justify-center border border-terminal-green">
                   {selected == "Strength" && <Strength />}
                   {selected == "Dexterity" && <Dexterity />}
                   {selected == "Vitality" && <Vitality />}
