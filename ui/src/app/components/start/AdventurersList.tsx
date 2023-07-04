@@ -5,6 +5,7 @@ import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { ButtonData } from "../KeyboardControls";
 import { Adventurer } from "@/app/types";
 import { useMediaQuery } from "react-responsive";
+import { SkullIcon } from "../icons/Icons";
 
 export interface AdventurerListProps {
   isActive: boolean;
@@ -30,10 +31,6 @@ export const AdventurersList = ({
   const filteredAdventurers = showZeroHealth
     ? sortedAdventurers
     : sortedAdventurers.filter((adventurer) => adventurer.health !== 0);
-
-  const DeadIcon = (
-    <img className="w-5 h-5" src="/pixel_skull.png" alt="Dead Adventurer" />
-  );
 
   const hasDeadAdventurers = sortedAdventurers.some(
     (adventurer) => adventurer.health === 0
@@ -110,7 +107,7 @@ export const AdventurersList = ({
                   >
                     <div className="flex-grow">{`${adventurer.name} - ${adventurer.id}`}</div>
                     <div className="w-5 text-right">
-                      {adventurer.health === 0 ? DeadIcon : null}
+                      {adventurer.health === 0 ? SkullIcon : null}
                     </div>
                   </Button>
                 ))}
@@ -148,7 +145,7 @@ export const AdventurersList = ({
                   >
                     <div className="flex-grow">{`${adventurer.name} - ${adventurer.id}`}</div>
                     <div className="w-5 text-right">
-                      {adventurer.health === 0 ? DeadIcon : null}
+                      {adventurer.health === 0 ? SkullIcon : null}
                     </div>
                   </Button>
                 ))}

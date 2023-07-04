@@ -51,6 +51,7 @@ import {
   MuteIcon,
   VolumeIcon,
   CartIcon,
+  SkullIcon,
 } from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
@@ -524,6 +525,12 @@ export default function Home() {
               <h1 className="glitch">Loot Survivor</h1>
               <div className="flex flex-row items-center self-end gap-2 flex-wrap">
                 {!isMobileDevice && <TxActivity />}
+                <div className="flex flex-row items-center gap-1 p-1 sm:px-2 border border-terminal-green">
+                  <div className="flex items-center w-4 h-4 sm:w-5 h-5">
+                    <SkullIcon />
+                  </div>
+                  <p className="text-red-500 sm:text-xl">20</p>
+                </div>
                 <button
                   onClick={() => {
                     setIsMuted(!isMuted);

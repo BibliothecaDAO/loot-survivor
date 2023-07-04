@@ -12,6 +12,7 @@ import useUIStore from "../hooks/useUIStore";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { AdventurerTemplate } from "../types/templates";
 import { Score, Adventurer } from "../types";
+import { useUiSounds, soundSelector } from "../hooks/useUiSound";
 
 /**
  * @container
@@ -21,6 +22,7 @@ export default function LeaderboardScree() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const itemsPerPage = 10;
   const [loading, setLoading] = useState(false);
+  const { play: clickPlay } = useUiSounds(soundSelector.click);
 
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
@@ -119,7 +121,10 @@ export default function LeaderboardScree() {
                   <tr
                     key={index}
                     className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
-                    onClick={() => handleRowSelected(adventurer.id ?? 0)}
+                    onClick={() => {
+                      handleRowSelected(adventurer.id ?? 0);
+                      clickPlay();
+                    }}
                   >
                     <td>{index + 1}</td>
                     <td>{`${adventurer.name} - ${adventurer.id}`}</td>
@@ -178,7 +183,10 @@ export default function LeaderboardScree() {
               <tr
                 key={index}
                 className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
-                onClick={() => handleRowSelected(adventurer.id ?? 0)}
+                onClick={() => {
+                  handleRowSelected(adventurer.id ?? 0);
+                  clickPlay();
+                }}
               >
                 <td>{rankGold(adventurer, index)}</td>
                 <td>{`${adventurer.name} - ${adventurer.id}`}</td>

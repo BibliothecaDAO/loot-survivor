@@ -125,7 +125,7 @@ export default function UpgradeScreen() {
   };
 
   const Strength = (): ReactElement => (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col gap-3 items-center">
       <p className="sm:text-[28px] text-center">
         Strength increases attack damage by 10%
       </p>
@@ -135,7 +135,7 @@ export default function UpgradeScreen() {
     </div>
   );
   const Dexterity = (): ReactElement => (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col gap-3 items-center">
       <p className="sm:text-[28px] text-center">
         Dexterity increases chance of fleeing Beasts
       </p>
@@ -145,7 +145,7 @@ export default function UpgradeScreen() {
     </div>
   );
   const Vitality = (): ReactElement => (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col gap-3 items-center">
       <p className="sm:text-[28px] text-center">
         Vitality increases current and max health each by 20hp
       </p>
@@ -155,7 +155,7 @@ export default function UpgradeScreen() {
     </div>
   );
   const Intelligence = (): ReactElement => (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col gap-3 items-center">
       <p className="sm:text-[28px] text-center">
         Intelligence increases chance of avoiding Obstacles
       </p>
@@ -165,7 +165,7 @@ export default function UpgradeScreen() {
     </div>
   );
   const Wisdom = (): ReactElement => (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col gap-3 items-center">
       <p className="sm:text-[28px] text-center">
         Wisdom increases chance of avoiding a Beast ambush
       </p>
@@ -173,7 +173,7 @@ export default function UpgradeScreen() {
     </div>
   );
   const Charisma = (): ReactElement => (
-    <div className="flex flex-col items-center">
+    <div className="flex flex-col gap-3 items-center">
       <p className="sm:text-[30px] text-center">
         Charisma provides discounts on the marketplace and potions
       </p>
@@ -182,8 +182,6 @@ export default function UpgradeScreen() {
       </Button>
     </div>
   );
-
-  console.log(calls);
 
   useEffect(() => {
     if (statUpgrades == 0) {
@@ -220,7 +218,7 @@ export default function UpgradeScreen() {
           <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full">
             {isMobileDevice ? (
               <>
-                <div className="flex sm:w-2/3 items-center justify-center border border-terminal-green">
+                <div className="flex sm:w-2/3 items-center justify-center border border-terminal-green p-2">
                   {selected == "Strength" && <Strength />}
                   {selected == "Dexterity" && <Dexterity />}
                   {selected == "Vitality" && <Vitality />}
