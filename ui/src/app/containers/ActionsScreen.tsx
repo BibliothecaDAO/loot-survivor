@@ -71,7 +71,7 @@ export default function ActionsScreen() {
     {
       id: 1,
       label:
-        adventurer?.beastHealth ?? 0 > 0 ? "Into the mist" : "Beast found!!",
+        adventurer?.beastHealth ?? 0 > 0 ? "Beast found!!" : "Into the mist",
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
@@ -119,7 +119,7 @@ export default function ActionsScreen() {
       icon: <TargetIcon />,
       value: "kill adventurer",
       action: async () => setActiveMenu(2),
-      disabled: (adventurer?.beastHealth ?? 0) > 0 || loading,
+      disabled: loading,
       loading: loading,
     });
   }
@@ -180,12 +180,7 @@ export default function ActionsScreen() {
               ) : (
                 <p>You are in a battle!</p>
               ))}
-            {selected == "kill adventurer" &&
-              (!(adventurer?.beastHealth ?? 0 > 0) ? (
-                <KillAdventurer />
-              ) : (
-                <p>You are in a battle!</p>
-              ))}
+            {selected == "kill adventurer" && <KillAdventurer />}
           </div>
         </>
       )}

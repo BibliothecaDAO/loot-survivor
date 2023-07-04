@@ -59,6 +59,7 @@ import Player from "./components/adventurer/Player";
 import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
 import { AdventurerTemplate } from "./types/templates";
+import { TutorialDialog } from "./components/tutorial/TutorialDialog";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -83,9 +84,12 @@ export default function Home() {
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
-  const dialog = useUIStore((state) => state.dialog);
-  // const dialog = true;
-  const showDialog = useUIStore((state) => state.showDialog);
+  const deathDialog = useUIStore((state) => state.deathDialog);
+  // const deathDialog = true;
+  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const tutorialDialog = useUIStore((state) => state.tutorialDialog);
+  // const tutorialDialog = true;
+  const showTutorialDialog = useUIStore((state) => state.showTutorialDialog);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const displayCart = useUIStore((state) => state.displayCart);
@@ -93,8 +97,7 @@ export default function Home() {
   const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
-  // const statUpgrades = adventurer?.statUpgrades ?? 0;
-  const statUpgrades = 1;
+  const statUpgrades = adventurer?.statUpgrades ?? 0;
 
   const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
 
@@ -219,7 +222,7 @@ export default function Home() {
         if (!deathMessage) {
           setDeathMessage(notification);
         }
-        showDialog(true);
+        showDeathDialog(true);
       }
     }
     // handle dead by discovering obstacle
@@ -237,7 +240,7 @@ export default function Home() {
             <DiscoveryDisplay discoveryData={notificationData} />
           );
         }
-        showDialog(true);
+        showDeathDialog(true);
       }
     }
     if (pendingMessage && isDataUpdated["adventurerByIdQuery"]) {
@@ -258,7 +261,7 @@ export default function Home() {
         if (!deathMessage) {
           setDeathMessage(notification);
         }
-        showDialog(true);
+        showDeathDialog(true);
       }
     }
   }, [
@@ -273,7 +276,7 @@ export default function Home() {
     notificationData,
     pendingMessage,
     setDeathMessage,
-    showDialog,
+    showDeathDialog,
     type,
   ]);
 
@@ -441,6 +444,7 @@ export default function Home() {
           },
         ]);
         setScreen(menu[0].screen);
+        showTutorialDialog(true);
       } else if (
         adventurers.length == 1 &&
         adventurer?.id &&
@@ -462,6 +466,7 @@ export default function Home() {
           },
         ]);
         setScreen("actions");
+        showTutorialDialog(true);
       } else if (
         adventurers.length == 1 &&
         adventurer?.xp == 0 &&
@@ -482,6 +487,14 @@ export default function Home() {
           },
         ]);
         setScreen("beast");
+        showTutorialDialog(true);
+      } else if (
+        adventurers.length == 1 &&
+        adventurer?.xp == 10 &&
+        (adventurer.beastHealth ?? 0 == 0) &&
+        (adventurer?.statUpgrades ?? 0) > 0
+      ) {
+        showTutorialDialog(true);
       } else {
         handleOnboarded();
         refetch("adventurersByOwnerQuery");
@@ -511,6 +524,8 @@ export default function Home() {
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
+
+  console.log(hasBeast, statUpgrades, adventurer?.health);
 
   return (
     // <Maintenance />
@@ -632,7 +647,9 @@ export default function Home() {
             </div>
           </CSSTransition>
 
-          {dialog && <DeathDialog />}
+          {deathDialog && <DeathDialog />}
+
+          {!onboarded && tutorialDialog && <TutorialDialog />}
 
           {account ? (
             <div className="flex flex-col flex-grow w-full">

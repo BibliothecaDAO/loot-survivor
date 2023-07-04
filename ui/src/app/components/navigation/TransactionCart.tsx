@@ -6,7 +6,7 @@ import { MdClose } from "react-icons/md";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useQueriesStore } from "../../hooks/useQueryStore";
-import { processItemName } from "../../lib/utils";
+import { processItemName, getItemPrice, getItemData } from "../../lib/utils";
 import useUIStore from "../../hooks/useUIStore";
 import { useUiSounds } from "../../hooks/useUiSound";
 import { soundSelector } from "../../hooks/useUiSound";
@@ -38,7 +38,7 @@ const TransactionCart: React.FC = () => {
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
 
-  const marketItems = data.latestMarketItemsQuery
+  const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
     : [];
 
@@ -46,38 +46,20 @@ const TransactionCart: React.FC = () => {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  // const reorderCards = useCallback((dragIndex: number, hoverIndex: number) => {
-  //   txQueue.reorderQueue(dragIndex, hoverIndex);
-  // }, []);
-
   const handleLoadData = useCallback(() => {
     for (let call of calls) {
-      if (call.entrypoint === "mint_daily_items") {
-        setNotification([...notification, "New items minted!"]);
-        setLoadingQuery("latestMarketItemsQuery");
-        setLoadingMessage([...loadingMessage, "Minting Items"]);
-      } else if (call.entrypoint === "bid_on_item") {
-        const item = marketItems.find(
-          (item: Item) => item.item == call.calldata[0]
-        );
+      if (call.entrypoint === "buy_item") {
+        const item = items.find((item: Item) => item.item == call.calldata[0]);
         const itemName = processItemName(item ?? NullItem);
+        const { tier } = getItemData(item?.item ?? "");
         setNotification([
           ...notification,
-          `You bid ${call.calldata[4]} gold on ${item?.item && itemName}`,
+          `You purchased ${item?.item && itemName} for ${getItemPrice(
+            tier
+          )} gold`,
         ]);
         setLoadingQuery("latestMarketItemsQuery");
-        setLoadingMessage([...loadingMessage, "Bidding"]);
-      } else if (call.entrypoint === "claim_item") {
-        const item = marketItems.find(
-          (item: Item) => item.item == call.calldata[0]
-        );
-        const itemName = processItemName(item ?? NullItem);
-        setNotification([
-          ...notification,
-          `You claimed ${item?.item && itemName}!`,
-        ]);
-        setLoadingQuery("latestMarketItemsQuery");
-        setLoadingMessage([...loadingMessage, "Claiming"]);
+        setLoadingMessage([...loadingMessage, "Purchasing"]);
       } else if (call.entrypoint === "equip_item") {
         const item = ownedItems.find(
           (item: Item) => item.item == call.calldata[2]
@@ -95,13 +77,21 @@ const TransactionCart: React.FC = () => {
           `You purchased ${
             call.calldata[2] && parseInt(call.calldata[2].toString()) * 10
           } health!`,
-          // `You purchased ${parseInt(call.calldata[2].toString()) * 10} health!`,
         ]);
         setLoadingQuery("adventurerByIdQuery");
         setLoadingMessage([...loadingMessage, "Purchasing Health"]);
+      } else if (call.entrypoint === "slay_idle_adventurer") {
+        setNotification([
+          ...notification,
+          `You slayed ${
+            call.calldata[0] && parseInt(call.calldata[0].toString())
+          }`,
+        ]);
+        setLoadingQuery("adventurerByIdQuery");
+        setLoadingMessage([...loadingMessage, "Slaying Adventurer"]);
       }
     }
-  }, [calls, marketItems, ownedItems, loadingMessage, notification]);
+  }, [calls, items, ownedItems, loadingMessage, notification]);
 
   useEffect(() => {
     handleLoadData();

@@ -82,6 +82,7 @@ const Discovery = ({ discoveries }: DiscoveryProps) => {
             }
           });
         }}
+        disabled={(adventurer?.beastHealth ?? 0) > 0}
       >
         Explore
       </Button>

@@ -11,7 +11,7 @@ export const DeathDialog = () => {
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const showDialog = useUIStore((state) => state.showDialog);
+  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const appUrl = "https://loot-survivor.vercel.app/";
   const { data } = useQueriesStore();
 
@@ -50,7 +50,7 @@ export const DeathDialog = () => {
           />
           <Button
             onClick={() => {
-              showDialog(false);
+              showDeathDialog(false);
               setDeathMessage(null);
             }}
           >

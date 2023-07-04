@@ -113,7 +113,6 @@ async def update_adventurer_bag(info: Info, adventurer_id, bag):
         "item9": bag["item_9"],
         "item10": bag["item_10"],
         "item11": bag["item_11"],
-        "item12": bag["item_12"],
     }
     await info.storage.find_one_and_update(
         "bags",

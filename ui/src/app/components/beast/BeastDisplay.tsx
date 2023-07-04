@@ -45,6 +45,7 @@ export const BeastDisplay = ({
     beastData?.entityNameSuffix ?? ""
   );
   const { tier, attack, armor, image } = getBeastData(beastData?.entity ?? "");
+  const gameData = new GameData();
 
   return (
     <div className="relative flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
@@ -81,12 +82,6 @@ export const BeastDisplay = ({
               className="self-center w-6 h-6"
             />
             <p className="text-sm text-center sm:text-xl">{attack}</p>
-          </div>
-          <div className="flex flex-row gap-2 items-center">
-            {getAttackLocationIcon(beastData?.entity ?? "")}
-            <p className="text-sm text-center sm:text-xl">
-              Attacks {getAttackLocationIcon(beastData?.entity ?? "")}
-            </p>
           </div>
           <div className="flex flex-row gap-2 items-center">
             <EfficacyIcon
