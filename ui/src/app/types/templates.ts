@@ -27,7 +27,7 @@ export const AdventurerTemplate: Adventurer = {
   neck: undefined,
   ring: undefined,
   beastHealth: 0,
-  statUpgrades: 0,
+  statUpgrades: 1,
   gold: 20,
   createdTime: new Date(),
   lastUpdatedTime: new Date(),

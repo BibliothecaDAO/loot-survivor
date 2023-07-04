@@ -22,7 +22,7 @@ class Config:
             8: "Lich",
             9: "Chimera",
             10: "Wendigo",
-            11: "Cerberus",
+            11: "Typhon",
             12: "Werewolf",
             13: "Banshee",
             14: "Draugr",
@@ -43,7 +43,7 @@ class Config:
             29: "Dragon",
             30: "Minotaur",
             31: "Harpy",
-            32: "Arachne",
+            32: "Satori",
             33: "Nue",
             34: "Skinwalker",
             35: "Chupacabra",
@@ -59,7 +59,7 @@ class Config:
             45: "DireWolf",
             46: "Bear",
             47: "Wolf",
-            48: "Scorpion",
+            48: "Mantis",
             49: "Spider",
             50: "Rat",
             51: "Cyclops",
@@ -87,99 +87,6 @@ class Config:
             73: "Hydra",
             74: "NemeanLion",
             75: "Colossus",
-        }
-
-        self.BEAST_TIERS = {
-            # Magical T1s
-            1: 1,
-            2: 1,
-            3: 1,
-            4: 1,
-            5: 1,
-            # Magical T2s
-            6: 2,
-            7: 2,
-            8: 2,
-            9: 2,
-            10: 2,
-            # Magical T3s
-            11: 3,
-            12: 3,
-            13: 3,
-            14: 3,
-            15: 3,
-            # Magical T4s
-            16: 4,
-            17: 4,
-            18: 4,
-            19: 4,
-            20: 4,
-            # Magical T5s
-            21: 5,
-            22: 5,
-            23: 5,
-            24: 5,
-            25: 5,
-            # Hunter T1s
-            26: 1,
-            27: 1,
-            28: 1,
-            29: 1,
-            30: 1,
-            # Hunter T2s
-            31: 2,
-            32: 2,
-            33: 2,
-            34: 2,
-            35: 2,
-            # Hunter T3s
-            36: 3,
-            37: 3,
-            38: 3,
-            39: 3,
-            40: 3,
-            # Hunter T4s
-            41: 4,
-            42: 4,
-            43: 4,
-            44: 4,
-            45: 4,
-            # Hunter T5s
-            46: 5,
-            47: 5,
-            48: 5,
-            49: 5,
-            50: 5,
-            # Brute T1s
-            51: 1,
-            52: 1,
-            53: 1,
-            54: 1,
-            55: 1,
-            # Brute T2s
-            56: 2,
-            57: 2,
-            58: 2,
-            59: 2,
-            60: 2,
-            # Brute T3s
-            61: 3,
-            62: 3,
-            63: 3,
-            64: 3,
-            65: 3,
-            # Brute T4s
-            66: 4,
-            67: 4,
-            68: 4,
-            69: 4,
-            70: 4,
-            # Brute T5s
-            71: 5,
-            72: 5,
-            73: 5,
-            74: 5,
-            75: 5,
         }
 
         self.BEAST_TYPES = {

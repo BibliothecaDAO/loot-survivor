@@ -13,6 +13,14 @@ import useUIStore from "../hooks/useUIStore";
 import Info from "../components/adventurer/Info";
 import { Button } from "../components/buttons/Button";
 import { useMediaQuery } from "react-responsive";
+import {
+  ArrowTargetIcon,
+  CatIcon,
+  CoinCharismaIcon,
+  HeartVitalityIcon,
+  LightbulbIcon,
+  ScrollIcon,
+} from "../components/icons/Icons";
 
 /**
  * @container
@@ -52,6 +60,7 @@ export default function UpgradeScreen() {
     {
       id: 1,
       label: `Strength - ${adventurer?.strength}`,
+      icon: <ArrowTargetIcon />,
       value: "Strength",
       action: async () => setSelected("Strength"),
       disabled: loading,
@@ -59,6 +68,7 @@ export default function UpgradeScreen() {
     {
       id: 2,
       label: `Dexterity - ${adventurer?.dexterity}`,
+      icon: <CatIcon />,
       value: "Dexterity",
       action: async () => setSelected("Dexterity"),
       disabled: loading,
@@ -66,6 +76,7 @@ export default function UpgradeScreen() {
     {
       id: 3,
       label: `Vitality - ${adventurer?.vitality}`,
+      icon: <HeartVitalityIcon />,
       value: "Vitality",
       action: async () => setSelected("Vitality"),
       disabled: loading,
@@ -73,6 +84,7 @@ export default function UpgradeScreen() {
     {
       id: 4,
       label: `Intelligence - ${adventurer?.intelligence}`,
+      icon: <LightbulbIcon />,
       value: "Intelligence",
       action: async () => setSelected("Intelligence"),
       disabled: loading,
@@ -80,6 +92,7 @@ export default function UpgradeScreen() {
     {
       id: 5,
       label: `Wisdom - ${adventurer?.wisdom}`,
+      icon: <ScrollIcon />,
       value: "Wisdom",
       action: async () => setSelected("Wisdom"),
       disabled: loading,
@@ -87,6 +100,7 @@ export default function UpgradeScreen() {
     {
       id: 6,
       label: `Charisma - ${adventurer?.charisma}`,
+      icon: <CoinCharismaIcon />,
       value: "Charisma",
       action: async () => setSelected("Charisma"),
       disabled: loading,

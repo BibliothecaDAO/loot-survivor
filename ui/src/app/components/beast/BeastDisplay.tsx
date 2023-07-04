@@ -1,12 +1,6 @@
 import Image from "next/image";
 import { getBeastData } from "../../lib/utils";
-import { GameData } from "../GameData";
 import { HeartIcon } from "../icons/Icons";
-import Head from "../../../../public/icons/loot/head.svg";
-import Hand from "../../../../public/icons/loot/hand.svg";
-import Chest from "../../../../public/icons/loot/chest.svg";
-import Waist from "../../../../public/icons/loot/waist.svg";
-import Foot from "../../../../public/icons/loot/foot.svg";
 import EfficacyIcon from "../icons/EfficacyIcon";
 import { processBeastName } from "../../lib/utils";
 import { Battle, Discovery, Adventurer } from "@/app/types";
@@ -16,23 +10,6 @@ interface BeastDisplayProps {
   lastBattle: Battle;
   adventurer: Adventurer;
 }
-
-const getAttackLocationIcon = (beastType: string) => {
-  const gameData = new GameData();
-  const iconPath = gameData.BEAST_ATTACK_LOCATION[beastType];
-  if (!iconPath) return null;
-
-  if (iconPath == "/icons/loot/hand.svg")
-    return <Hand className="self-center w-6 h-6 fill-current" />;
-  if (iconPath == "/icons/loot/chest.svg")
-    return <Chest className="self-center w-6 h-6 fill-current" />;
-  if (iconPath == "/icons/loot/waist.svg")
-    return <Waist className="self-center w-6 h-6 fill-current" />;
-  if (iconPath == "/icons/loot/foot.svg")
-    return <Foot className="self-center w-6 h-6 fill-current" />;
-  if (iconPath == "/icons/loot/head.svg")
-    return <Head className="self-center w-6 h-6 fill-current" />;
-};
 
 export const BeastDisplay = ({
   beastData,
@@ -45,7 +22,6 @@ export const BeastDisplay = ({
     beastData?.entityNameSuffix ?? ""
   );
   const { tier, attack, armor, image } = getBeastData(beastData?.entity ?? "");
-  const gameData = new GameData();
 
   return (
     <div className="relative flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">

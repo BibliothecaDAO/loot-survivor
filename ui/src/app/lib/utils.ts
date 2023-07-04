@@ -222,11 +222,7 @@ export function getBeastData(beast: string) {
         parseInt(getKeyFromValue(gameData.BEASTS, beast) ?? "")
       ]
     ];
-  const image =
-    getValueFromKey(
-      gameData.BEAST_IMAGES,
-      parseInt(getKeyFromValue(gameData.BEASTS, beast) ?? "")
-    ) || "/monsters/phoenix.png";
+  const image = `/monsters/${beast.toLowerCase()}.png`;
   return { tier, attack, armor, image };
 }
 

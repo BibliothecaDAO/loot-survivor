@@ -24,6 +24,12 @@ import Coin from "../../../../public/icons/coin.svg";
 import Info from "../../../../public/icons/info.svg";
 import Cart from "../../../../public/icons/cart.svg";
 import Skull from "../../../../public/icons/skull.svg";
+import Cat from "../../../../public/icons/cat.svg";
+import Lightbulb from "../../../../public/icons/lightbulb.svg";
+import CoinCharisma from "../../../../public/icons/coin-charisma.svg";
+import Scroll from "../../../../public/icons/scroll.svg";
+import ArrowTarget from "../../../../public/icons/arrow-target.svg";
+import HeartVitality from "../../../../public/icons/heart-vitality.svg";
 
 const ClothIcon = GiRolledCloth;
 const HideIcon = GiAnimalHide;
@@ -51,6 +57,12 @@ const CoinIcon = Coin;
 const InfoIcon = Info;
 const CartIcon = Cart;
 const SkullIcon = Skull;
+const CatIcon = Cat;
+const LightbulbIcon = Lightbulb;
+const CoinCharismaIcon = CoinCharisma;
+const ScrollIcon = Scroll;
+const ArrowTargetIcon = ArrowTarget;
+const HeartVitalityIcon = HeartVitality;
 
 export {
   ClothIcon,
@@ -79,4 +91,10 @@ export {
   InfoIcon,
   CartIcon,
   SkullIcon,
+  CatIcon,
+  LightbulbIcon,
+  CoinCharismaIcon,
+  ScrollIcon,
+  ArrowTargetIcon,
+  HeartVitalityIcon,
 };

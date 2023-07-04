@@ -13,7 +13,7 @@ export const TutorialDialog = () => {
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
-      <div className="fixed flex flex-col items-center justify-between text-center p-5 top-1/8 left-1/8 sm:left-1/4 w-3/4 sm:w-1/2 h-3/4 rounded-lg border border-terminal-green bg-terminal-black z-50">
+      <div className="fixed flex flex-col gap-5 items-center justify-between text-center p-5 top-1/8 left-1/8 sm:left-1/4 w-3/4 sm:w-1/2 h-3/4 rounded-lg border border-terminal-green bg-terminal-black z-50 overflow-y-auto">
         {screen == "start" && <AdventurerTutorial />}
         {screen == "actions" && <ActionsTutorial />}
         {screen == "beast" && <BeastTutorial />}

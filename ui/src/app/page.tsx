@@ -79,8 +79,7 @@ export default function Home() {
   const calls = useTransactionCartStore((state) => state.calls);
   const connected = useUIStore((state) => state.connected);
   const setConnected = useUIStore((state) => state.setConnected);
-  // const onboarded = useUIStore((state) => state.onboarded);
-  const onboarded = true;
+  const onboarded = useUIStore((state) => state.onboarded);
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
@@ -88,7 +87,6 @@ export default function Home() {
   // const deathDialog = true;
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const tutorialDialog = useUIStore((state) => state.tutorialDialog);
-  // const tutorialDialog = true;
   const showTutorialDialog = useUIStore((state) => state.showTutorialDialog);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
