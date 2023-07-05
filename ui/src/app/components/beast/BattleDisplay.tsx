@@ -4,12 +4,32 @@ import { useQueriesStore } from "../../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
 import { processBeastName, getBeastData } from "../../lib/utils";
 import { Adventurer, Battle } from "@/app/types";
+import Head from "../../../../public/icons/loot/head.svg";
+import Hand from "../../../../public/icons/loot/hand.svg";
+import Chest from "../../../../public/icons/loot/chest.svg";
+import Waist from "../../../../public/icons/loot/waist.svg";
+import Foot from "../../../../public/icons/loot/foot.svg";
 
 interface BattleDisplayProps {
   adventurer: Adventurer;
   battleData: Battle;
   beastName: string;
 }
+
+const getAttackLocationIcon = (attackLocation: string) => {
+  if (!attackLocation) return null;
+
+  if (attackLocation == "Hands")
+    return <Hand className="self-center w-6 h-6 fill-current" />;
+  if (attackLocation == "Chest")
+    return <Chest className="self-center w-6 h-6 fill-current" />;
+  if (attackLocation == "Waist")
+    return <Waist className="self-center w-6 h-6 fill-current" />;
+  if (attackLocation == "Foot")
+    return <Foot className="self-center w-6 h-6 fill-current" />;
+  if (attackLocation == "Head")
+    return <Head className="self-center w-6 h-6 fill-current" />;
+};
 
 /**
  * @component
@@ -20,6 +40,7 @@ export const BattleDisplay = ({
   battleData,
   beastName,
 }: BattleDisplayProps) => {
+  const damageLocation = battleData?.damageLocation ?? "";
   return (
     <div>
       {battleData.attacker == "Adventurer" ? (
@@ -39,19 +60,20 @@ export const BattleDisplay = ({
       ) : adventurer.health ?? 0 > 0 ? (
         battleData.damageTaken == 0 ? (
           <p>
-            You were counter attacked by the {beastName} but defended the
-            attack!
+            The {beastName} attacked your{" "}
+            {getAttackLocationIcon(damageLocation)} but you defended the attack!
           </p>
         ) : (
           <p>
-            You were counter attacked by the {beastName} taking{" "}
+            The {beastName} attacked your{" "}
+            {getAttackLocationIcon(damageLocation)} doing
             {battleData.damageTaken} damage!
           </p>
         )
       ) : (
         <p>
-          You were killed by the {beastName} taking {battleData.damageTaken}{" "}
-          damage!
+          The {beastName} killed you {battleData.damageTaken} damage to your{" "}
+          {getAttackLocationIcon(damageLocation)}!
         </p>
       )}
     </div>

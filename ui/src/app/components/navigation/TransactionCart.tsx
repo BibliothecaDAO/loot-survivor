@@ -10,7 +10,7 @@ import { processItemName, getItemPrice, getItemData } from "../../lib/utils";
 import useUIStore from "../../hooks/useUIStore";
 import { useUiSounds } from "../../hooks/useUiSound";
 import { soundSelector } from "../../hooks/useUiSound";
-import { Item, NullItem, Call } from "../../types";
+import { Item, NullItem, Call, NullAdventurer } from "../../types";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -45,6 +45,10 @@ const TransactionCart: React.FC = () => {
   const ownedItems = data.itemsByAdventurerQuery
     ? data.itemsByAdventurerQuery.items
     : [];
+
+  // const slayedAdventurer = data.adventurerToSlayQuery
+  //   ? data.adventurerToSlayQuery.adventurers?[0]
+  //   : NullAdventurer;
 
   const handleLoadData = useCallback(() => {
     for (let call of calls) {

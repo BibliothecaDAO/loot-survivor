@@ -22,7 +22,8 @@ export type QueryKey =
   | "itemsByAdventurerQuery"
   | "itemsByProfileQuery"
   | "topScoresQuery"
-  | "latestMarketItemsQuery";
+  | "latestMarketItemsQuery"
+  | "adventurerToSlayQuery";
 
 interface BattlesResult {
   battles: Battle[];
@@ -65,6 +66,7 @@ interface InitialData {
   itemsByProfileQuery: ItemsResult | null;
   topScoresQuery: ScoresResult | null;
   latestMarketItemsQuery: ItemsResult | null;
+  adventurerToSlayQuery: Adventurer | null;
 }
 
 type QueriesState = {
@@ -103,6 +105,7 @@ const initialData: InitialData = {
   itemsByProfileQuery: null,
   topScoresQuery: null,
   latestMarketItemsQuery: null,
+  adventurerToSlayQuery: null,
 };
 
 const initialLoading: Record<QueryKey, boolean> = {
@@ -126,6 +129,7 @@ const initialLoading: Record<QueryKey, boolean> = {
   itemsByProfileQuery: false,
   topScoresQuery: false,
   latestMarketItemsQuery: false,
+  adventurerToSlayQuery: false,
 };
 
 const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
@@ -149,6 +153,7 @@ const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
   itemsByProfileQuery: false,
   topScoresQuery: false,
   latestMarketItemsQuery: false,
+  adventurerToSlayQuery: false,
   global: false,
 };
 
@@ -173,6 +178,7 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   itemsByProfileQuery: async () => {},
   topScoresQuery: async () => {},
   latestMarketItemsQuery: async () => {},
+  adventurerToSlayQuery: async () => {},
 };
 
 export const useQueriesStore = create<QueriesState>((set, get) => ({

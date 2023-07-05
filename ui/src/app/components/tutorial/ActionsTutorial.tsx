@@ -8,7 +8,9 @@ export const ActionsTutorial = () => {
         include:
       </p>
       <ul className="text-sm sm:text-lg">
-        <li>Beasts - These will lock you in a battle.</li>
+        <li>
+          Beasts - These will lock you in a battle, Fight or Flee to escape!
+        </li>
         <li>
           Obstacles - These will damage your health unless they are avoided!
         </li>

@@ -9,8 +9,12 @@ export const AdventurerTutorial = () => {
         follow you through your game journey until you die.
       </p>
       <p className="text-sm sm:text-lg">
-        Select your adventurer's persona. Remember, there is no limit to the
-        number of adventurers you can spawn!
+        Select your adventurer&apos;s persona. Remember, there is no limit to
+        the number of adventurers you can spawn!
+      </p>
+      <p className="text-sm sm:text-lg">
+        Once your adventurer is minted you will be able to make several actions
+        in order to rank up1
       </p>
     </div>
   );

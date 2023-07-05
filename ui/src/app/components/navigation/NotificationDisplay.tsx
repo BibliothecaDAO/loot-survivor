@@ -164,8 +164,8 @@ export const processNotification = (
             ) {
               return (
                 <p key={index} className="text-lg">
-                  You were attacked by the {beastName} after equipping an item
-                  taking {battles[0].damageTaken}!
+                  OUCH! You were attacked by the {beastName} after equipping an
+                  item taking {battles[0].damageTaken}!
                 </p>
               );
             } else if (

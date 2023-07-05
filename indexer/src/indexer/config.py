@@ -370,22 +370,6 @@ class Config:
             4: "Adventurer",
         }
 
-        self.ITEM_DISCOVERY_TYPES = {0: "Gold", 1: "Loot", 2: "Health"}
-
-        self.ITEM_TYPES = {
-            0: "Generic",
-            100: "Generic Weapon",
-            101: "Bludgeon Weapon",
-            102: "Blade Weapon",
-            103: "Magic Weapon",
-            200: "Generic Armor",
-            201: "Metal Armor",
-            202: "Hide Armor",
-            203: "Cloth Armor",
-            300: "Ring Jewelry",
-            400: "Necklace Jewelry",
-        }
-
         self.MATERIALS = {
             0: "Generic",
             1000: "Generic Metal",
@@ -588,8 +572,6 @@ class Config:
             15: "Of Reflection",
             16: "Of The Twins",
         }
-
-        self.ITEM_STATUS = {0: "Closed", 1: "Open"}
 
         self.SLOTS = {
             1: "Weapon",

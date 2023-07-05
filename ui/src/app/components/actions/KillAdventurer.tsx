@@ -31,7 +31,7 @@ export default function KillAdventurer() {
   };
 
   useCustomQuery(
-    "adventurerByIdQuery",
+    "adventurerToSlayQuery",
     getAdventurerById,
     {
       id: adventurerTarget,
