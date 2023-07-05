@@ -28,7 +28,7 @@ trait IGame<TContractState> {
     fn get_entropy(self: @TContractState) -> u256;
 
     // setters ---------------------------------------------------
-    fn set_entropy(ref self: TContractState, entropy: felt252);
+    fn set_entropy(ref self: TContractState);
 
     // checks
     fn owner_of(self: @TContractState, adventurer_id: u256) -> ContractAddress;

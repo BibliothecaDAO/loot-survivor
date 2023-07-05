@@ -28,8 +28,7 @@ mod Game {
 
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer},
-        bag::{Bag, BagActions, ImplBagActions, LootStatistics},
-        adventurer_meta::AdventurerMetadata,
+        bag::{Bag, BagActions, ImplBagActions, LootStatistics}, adventurer_meta::AdventurerMetadata,
         exploration::ExploreUtils,
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
@@ -92,7 +91,7 @@ mod Game {
         self._lords.write(lords);
         self._dao.write(dao);
 
-        _set_entropy(ref self, 1);
+        _set_entropy(ref self);
     }
 
     // ------------------------------------------ //
@@ -299,7 +298,7 @@ mod Game {
             // check item exists on Market
             // TODO: replace entropy
             assert(
-                ImplMarket::check_ownership(TEST_ENTROPY, item_id) == true,
+                ImplMarket::check_ownership(adventurer.get_market_entropy(), item_id) == true,
                 messages::ITEM_DOES_NOT_EXIST
             );
 
@@ -401,7 +400,8 @@ mod Game {
                 self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
             // get adventurer (stat boosts automatically applied during unpacking)
-            _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+            // _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+            _unpack_adventurer(self, adventurer_id)
         }
 
         fn get_adventurer_meta(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
@@ -428,8 +428,8 @@ mod Game {
             _get_entropy(self)
         }
 
-        fn set_entropy(ref self: ContractState, entropy: felt252) {
-            _set_entropy(ref self, entropy)
+        fn set_entropy(ref self: ContractState) {
+            _set_entropy(ref self)
         }
 
         fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
@@ -464,11 +464,7 @@ mod Game {
             home_realm: adventurer_meta.home_realm,
             race: adventurer_meta.race,
             order: adventurer_meta.order,
-            entropy: Felt252TryIntoU64::try_into(
-                ContractAddressIntoFelt252::into(caller)
-                    + U64IntoFelt252::into(block_info.block_timestamp)
-            )
-                .unwrap()
+            entropy: 0
         };
 
         // emit the StartGame
@@ -1414,6 +1410,9 @@ mod Game {
     }
 
     fn _buy_health(ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer) {
+
+        internal::revoke_ap_tracking();
+        
         // check gold balance
         assert(
             adventurer.check_gold(adventurer.get_potion_cost()) == true, messages::NOT_ENOUGH_GOLD
@@ -1555,9 +1554,7 @@ mod Game {
     fn _loot_special_names_storage_unpacked(
         self: @ContractState, adventurer_id: u256, storage_index: u256
     ) -> LootItemSpecialNamesStorage {
-        Packing::unpack(
-            self._loot_special_names.read((adventurer_id, storage_index))
-        )
+        Packing::unpack(self._loot_special_names.read((adventurer_id, storage_index)))
     }
 
     fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
@@ -1623,7 +1620,9 @@ mod Game {
             // the current block is lower than the players last action
             // it means we the block number has wrapped around the 512 block storage
             // as such the difference between block 511 and block 0 is 1.
-            return (U64TryIntoU16::try_into(MAX_STORAGE_BLOCKS).unwrap() - adventurer.last_action + current_block) >= IDLE_MINOR_PENALTY_BLOCKS;
+            return (U64TryIntoU16::try_into(MAX_STORAGE_BLOCKS).unwrap()
+                - adventurer.last_action
+                + current_block) >= IDLE_MINOR_PENALTY_BLOCKS;
         }
     }
 
@@ -1647,7 +1646,7 @@ mod Game {
 
     fn _get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<Loot> {
         // TODO: Replace with actual seed
-        ImplMarket::get_all_items(TEST_ENTROPY)
+        ImplMarket::get_all_items(_unpack_adventurer(self, adventurer_id).get_market_entropy())
     }
 
     fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u256 {
@@ -1698,20 +1697,20 @@ mod Game {
         }
     }
 
-    fn _set_entropy(ref self: ContractState, entropy: felt252) {
+    fn _set_entropy(ref self: ContractState) {
         // TODO: Replace with actual seed
-        //starknet::get_tx_info().unbox().transaction_hash.into()
+        let hash: felt252  = starknet::get_tx_info().unbox().transaction_hash.into();
 
-        // let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
+        let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
 
-        // assert(
-        //     blocknumber >= (self._last_game_entropy_block.read().try_into().unwrap()
-        //         + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()),
-        //     messages::BLOCK_NUMBER_ERROR
-        // );
+        assert(
+            blocknumber >= (self._last_game_entropy_block.read().try_into().unwrap()
+                + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()),
+            messages::BLOCK_NUMBER_ERROR
+        );
 
-        self._game_entropy.write(entropy);
-    // self._last_game_entropy_block.write(blocknumber.into());
+        self._game_entropy.write(hash);
+        self._last_game_entropy_block.write(blocknumber.into());
     }
 
     fn _get_entropy(self: @ContractState) -> u256 {
@@ -1732,25 +1731,25 @@ mod Game {
 
     // sets the scoreboard
     // we set the adventurer id in the scoreboard as we already store the owners address
-    fn _set_scoreboard(ref self: ContractState, adventurer_id: u256, score: u256) {
+    fn _set_scoreboard(ref self: ContractState, adventurer_id: u256, score: u16) {
         let second_place = self._scoreboard.read(2);
         let first_place = self._scoreboard.read(1);
 
-        if score > self._scores.read(1) {
+        if score.into() > self._scores.read(1) {
             self._scoreboard.write(3, second_place);
             self._scoreboard.write(2, first_place);
             self._scoreboard.write(1, adventurer_id);
             self._scores.write(3, self._scores.read(2));
             self._scores.write(2, self._scores.read(1));
-            self._scores.write(1, score);
-        } else if score > self._scores.read(2) {
+            self._scores.write(1, score.into());
+        } else if score.into() > self._scores.read(2) {
             self._scoreboard.write(3, second_place);
             self._scoreboard.write(2, adventurer_id);
             self._scores.write(3, self._scores.read(2));
-            self._scores.write(2, score);
-        } else if score > self._scores.read(3) {
+            self._scores.write(2, score.into());
+        } else if score.into() > self._scores.read(3) {
             self._scoreboard.write(3, adventurer_id);
-            self._scores.write(3, score);
+            self._scores.write(3, score.into());
         }
     }
 
@@ -2052,6 +2051,7 @@ mod Game {
         killed_by_obstacle: bool,
         killer_id: u8
     ) {
+        _set_scoreboard(ref self, adventurer_state.adventurer_id, adventurer_state.adventurer.xp);
         self
             .emit(
                 Event::AdventurerDied(

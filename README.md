@@ -129,3 +129,17 @@ Loot Survivor is a onchain game, designed to be immutable and permanently hosted
 - Client: Nextjs
 - Indexer: Apibara
 - Contracts: Cairo 1.0
+
+
+
+0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47
+
+### Deploying
+
+```
+scarb build
+
+starknet declare --contract /home/os/Documents/code/bibliotheca/loot-survivor/contracts/game/target/dev/game_Game.sierra.json --account deployer_4
+
+starknet deploy --class_hash 0x6f94f476e9758913553294bea326011452667f663cd984db6b2e9c58f64fed2 --account deployer_4 --max_fee 100000000000000000 --input 0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b
+```

@@ -1,3 +1,4 @@
+use core::debug::PrintTrait;
 use core::result::ResultTrait;
 use integer::{u16_overflowing_add, u16_overflowing_sub};
 use traits::{TryInto, Into};
@@ -150,6 +151,9 @@ impl AdventurerPacking of Packing<Adventurer> {
 
 #[generate_trait]
 impl ImplAdventurer of IAdventurer {
+    fn get_market_entropy(self: Adventurer) -> u64 {
+        ((self.xp.into()) * pow::TWO_POW_9).try_into().expect('get_market_entropy')
+    }
     fn charisma_potion_discount(self: Adventurer) -> u16 {
         CHARISMA_DISCOUNT * self.stats.charisma.into()
     }
@@ -1695,4 +1699,34 @@ fn test_apply_item_stat_boosts() {
     assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
     assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
     assert(adventurer.stats.charisma == 2, 'charisma should be 2');
+}
+
+
+
+#[test]
+#[available_gas(300000)]
+fn test_get_market_entropy() {
+        let mut adventurer = Adventurer {
+        last_action: 511, health: 12, xp: 231, stats: Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+            }, gold: 40, weapon: LootStatistics {
+            id: 1, xp: 225, metadata: 1,
+            }, chest: LootStatistics {
+            id: 2, xp: 65535, metadata: 2,
+            }, head: LootStatistics {
+            id: 3, xp: 225, metadata: 3,
+            }, waist: LootStatistics {
+            id: 4, xp: 225, metadata: 4,
+            }, foot: LootStatistics {
+            id: 5, xp: 1000, metadata: 5,
+            }, hand: LootStatistics {
+            id: 6, xp: 224, metadata: 6,
+            }, neck: LootStatistics {
+            id: 7, xp: 1, metadata: 7,
+            }, ring: LootStatistics {
+            id: 8, xp: 1, metadata: 8,
+        }, beast_health: 20, stat_upgrade_available: 0,
+    };
+
+    adventurer.get_market_entropy().print();
 }
