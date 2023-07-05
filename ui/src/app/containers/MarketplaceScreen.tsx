@@ -146,7 +146,7 @@ export default function MarketplaceScreen() {
   const sum = calls
     .filter((call) => call.entrypoint === "buy_item")
     .reduce((accumulator, current) => {
-      const value = current.calldata[4];
+      const value = Array.isArray(current.calldata) && current.calldata[4];
       const parsedValue = value ? parseInt(value.toString(), 10) : 0;
       return accumulator + (isNaN(parsedValue) ? 0 : parsedValue);
     }, 0);

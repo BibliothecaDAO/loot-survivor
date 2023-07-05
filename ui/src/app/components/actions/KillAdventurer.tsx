@@ -6,7 +6,9 @@ import { useUiSounds, soundSelector } from "../../hooks/useUiSound";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { getAdventurerById } from "../../hooks/graphql/queries";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
-// import { Info } from "../adventurer/Info"
+import Info from "../adventurer/Info";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { NullAdventurer } from "@/app/types";
 
 export default function KillAdventurer() {
   const { gameContract } = useContracts();
@@ -14,6 +16,7 @@ export default function KillAdventurer() {
   const addToCalls = useTransactionCartStore((s) => s.addToCalls);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
+  const { data } = useQueriesStore();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAdventurerTarget(event.target.value);
@@ -39,6 +42,10 @@ export default function KillAdventurer() {
     txAccepted
   );
 
+  const slayAdventurer = data.adventurerToSlayQuery
+    ? data.adventurerToSlayQuery.adventurers[0]
+    : NullAdventurer;
+
   return (
     <div className="flex flex-col">
       <h4>Kill Idle Adventurer</h4>
@@ -61,6 +68,7 @@ export default function KillAdventurer() {
       >
         Kill
       </Button>
+      <Info adventurer={slayAdventurer} />
     </div>
   );
 }

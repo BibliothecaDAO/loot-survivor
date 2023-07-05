@@ -81,7 +81,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
                   key={index}
                   className="w-full"
                 >
-                  Connect {connector.id()}
+                  Connect {connector.id}
                 </Button>
               ))
             ) : (
@@ -95,14 +95,14 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
             ) ? (
               connectors.map((connector, index) => (
                 <>
-                  {connector.id() == "argentX" ? (
+                  {connector.id == "argentX" ? (
                     <Button
                       onClick={() => connect(connector)}
                       key={index}
                       className="w-full"
                       disabled={account ? true : false}
                     >
-                      Connect {connector.id()}
+                      Connect {connector.id}
                     </Button>
                   ) : null}
                 </>

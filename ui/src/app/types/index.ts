@@ -1,3 +1,4 @@
+import { RawArgs } from "starknet";
 import { ScreenPage } from "../hooks/useUIStore";
 
 export interface Adventurer {
@@ -140,7 +141,7 @@ export type FormData = {
 export interface Call {
   contractAddress: string;
   entrypoint: string;
-  calldata: Array<string | number | undefined | boolean | null>;
+  calldata: RawArgs;
   metadata?: string;
 }
 

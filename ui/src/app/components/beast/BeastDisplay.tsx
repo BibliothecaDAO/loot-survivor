@@ -50,14 +50,14 @@ export const BeastDisplay = ({
             Tier {tier}
           </p>
         </div>
-        <div className="flex flex-row justify-center items-center w-full py-4 space-x-2">
+        <div className="flex flex-row justify-center gap-4 items-center w-full py-4 space-x-2">
           <div className="flex flex-row gap-2 items-center ml-5">
             <EfficacyIcon
               type={attack}
               size="w-6"
               className="self-center w-6 h-6"
             />
-            <p className="text-sm text-center sm:text-xl">{attack}</p>
+            <p className="text-sm text-center sm:text-xl">{attack} Attack</p>
           </div>
           <div className="flex flex-row gap-2 items-center">
             <EfficacyIcon
@@ -65,7 +65,7 @@ export const BeastDisplay = ({
               size="w-6"
               className="self-center w-6 h-6"
             />
-            <p className="text-sm text-center sm:text-xl">{armor}</p>
+            <p className="text-sm text-center sm:text-xl">{armor} Armor</p>
           </div>
         </div>
       </div>

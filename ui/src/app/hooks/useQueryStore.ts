@@ -66,7 +66,7 @@ interface InitialData {
   itemsByProfileQuery: ItemsResult | null;
   topScoresQuery: ScoresResult | null;
   latestMarketItemsQuery: ItemsResult | null;
-  adventurerToSlayQuery: Adventurer | null;
+  adventurerToSlayQuery: AdventurersResult | null;
 }
 
 type QueriesState = {

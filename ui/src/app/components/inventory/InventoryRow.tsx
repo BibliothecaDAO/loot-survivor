@@ -39,13 +39,16 @@ export const InventoryRow = ({
   const handleAddEquipItem = (item: string) => {
     if (gameContract) {
       const gameData = new GameData();
-      const equipItem = {
+      const equipItemTx = {
         contractAddress: gameContract?.address,
         entrypoint: "equip_item",
-        calldata: [adventurer?.id, getKeyFromValue(gameData.ITEMS, item)],
+        calldata: [
+          adventurer?.id?.toString() ?? "",
+          getKeyFromValue(gameData.ITEMS, item) ?? "",
+        ],
         metadata: `Equipping ${item}!`,
       };
-      addToCalls(equipItem);
+      addToCalls(equipItemTx);
     }
   };
 

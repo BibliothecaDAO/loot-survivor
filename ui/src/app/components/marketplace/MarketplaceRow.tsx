@@ -14,6 +14,7 @@ import { CoinIcon } from "../icons/Icons";
 import EfficacyDisplay from "../icons/EfficacyIcon";
 import useUIStore from "@/app/hooks/useUIStore";
 import { GameData } from "../GameData";
+import { useMediaQuery } from "react-responsive";
 
 interface MarketplaceRowProps {
   item: Item;
@@ -115,9 +116,9 @@ const MarketplaceRow = ({
         contractAddress: gameContract?.address,
         entrypoint: "buy_item",
         calldata: [
-          adventurer?.id,
-          getKeyFromValue(gameData.ITEMS, item),
-          equip,
+          adventurer?.id?.toString() ?? "",
+          getKeyFromValue(gameData.ITEMS, item)?.toString() ?? "",
+          equip ? "1" : "0",
         ],
         metadata: `Purchasing ${item} for ${getItemPrice(tier)} gold`,
       };
@@ -126,71 +127,106 @@ const MarketplaceRow = ({
     }
   };
 
-  return (
-    <tr
-      className={
-        "border-b border-terminal-green sm:text-2xl hover:bg-terminal-green hover:text-terminal-black" +
-        (selectedIndex === index + 1 ? " bg-terminal-black" : "")
-      }
-    >
-      <td className="text-center">{item.item}</td>
-      <td className="text-center">{tier}</td>
-      <td className="text-center">
-        <div className="flex justify-center items-center ">
-          <LootIcon className="sm:w-8" type={slot} />
-        </div>
-      </td>
-      <td className="text-center">
-        <div className="flex flex-row items-center justify-center gap-2">
-          <p>{type}</p>
-          <EfficacyDisplay className="sm:w-8" type={type} />
-        </div>
-      </td>
-      <td className="text-center">
-        <div className="flex flex-row items-center justify-center">
-          <CoinIcon className="w-4 h-4 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
-          <p className="text-terminal-yellow">{getItemPrice(tier)}</p>
-        </div>
-      </td>
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
 
-      <td className="w-64 text-center">
-        {showEquipQ ? (
-          <div className="flex flex-row items-center justify-center gap-2">
-            <p>Equip?</p>
-            <Button
-              onClick={() => {
-                handlePurchase(item.item ?? "", tier, true);
-                setShowEquipQ(false);
-                setPurchasedItem(true);
-              }}
-            >
-              Yes
-            </Button>
-            <Button
-              onClick={() => {
-                handlePurchase(item.item ?? "", tier, false);
-                setShowEquipQ(false);
-                setPurchasedItem(true);
-              }}
-            >
-              No
-            </Button>
+  return (
+    <>
+      <tr
+        className={
+          "border-b border-terminal-green sm:text-2xl hover:bg-terminal-green hover:text-terminal-black" +
+          (selectedIndex === index + 1 ? " bg-terminal-black" : "")
+        }
+      >
+        <td className="text-center">{item.item}</td>
+        <td className="text-center">{tier}</td>
+        <td className="text-center">
+          <div className="flex justify-center items-center ">
+            <LootIcon className="sm:w-8" type={slot} />
           </div>
-        ) : (
+        </td>
+        <td className="text-center">
+          <div className="flex flex-row items-center justify-center gap-2">
+            <p>{type}</p>
+            <EfficacyDisplay className="sm:w-8" type={type} />
+          </div>
+        </td>
+        <td className="text-center">
+          <div className="flex flex-row items-center justify-center">
+            <CoinIcon className="w-4 h-4 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
+            <p className="text-terminal-yellow">{getItemPrice(tier)}</p>
+          </div>
+        </td>
+
+        <td className="w-64 text-center">
+          {!isMobileDevice && showEquipQ ? (
+            <div className="flex flex-row items-center justify-center gap-2">
+              <p>Equip?</p>
+              <Button
+                onClick={() => {
+                  handlePurchase(item.item ?? "", tier, true);
+                  setShowEquipQ(false);
+                  setPurchasedItem(true);
+                }}
+              >
+                Yes
+              </Button>
+              <Button
+                onClick={() => {
+                  handlePurchase(item.item ?? "", tier, false);
+                  setShowEquipQ(false);
+                  setPurchasedItem(true);
+                }}
+              >
+                No
+              </Button>
+              <Button onClick={() => setShowEquipQ(false)}>Cancel</Button>
+            </div>
+          ) : (
+            <Button
+              onClick={() => {
+                setShowEquipQ(true);
+                setActiveMenu(index + 1);
+              }}
+              disabled={
+                checkPurchaseBalance() ||
+                checkTransacting(item.item ?? "") ||
+                purchaseExists() ||
+                (isMobileDevice && showEquipQ && isActive)
+              }
+              className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
+            >
+              Purchase
+            </Button>
+          )}
+        </td>
+      </tr>
+      {isMobileDevice && showEquipQ && isActive && (
+        <div className="fixed bottom-40 left-25 flex flex-row items-center justify-center gap-2">
+          <p>{`Equip ${item.item} ?`}</p>
           <Button
-            onClick={() => setShowEquipQ(true)}
-            disabled={
-              checkPurchaseBalance() ||
-              checkTransacting(item.item ?? "") ||
-              purchaseExists()
-            }
-            className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
+            onClick={() => {
+              handlePurchase(item.item ?? "", tier, true);
+              setShowEquipQ(false);
+              setPurchasedItem(true);
+            }}
           >
-            Purchase
+            Yes
           </Button>
-        )}
-      </td>
-    </tr>
+          <Button
+            onClick={() => {
+              handlePurchase(item.item ?? "", tier, false);
+              setShowEquipQ(false);
+              setPurchasedItem(true);
+            }}
+          >
+            No
+          </Button>
+          <Button onClick={() => setShowEquipQ(false)}>Cancel</Button>
+        </div>
+      )}
+    </>
   );
 };
 

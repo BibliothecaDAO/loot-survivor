@@ -53,7 +53,10 @@ const TransactionCart: React.FC = () => {
   const handleLoadData = useCallback(() => {
     for (let call of calls) {
       if (call.entrypoint === "buy_item") {
-        const item = items.find((item: Item) => item.item == call.calldata[0]);
+        const item = items.find(
+          (item: Item) =>
+            item.item == (Array.isArray(call.calldata) && call.calldata[0])
+        );
         const itemName = processItemName(item ?? NullItem);
         const { tier } = getItemData(item?.item ?? "");
         setNotification([
@@ -66,7 +69,8 @@ const TransactionCart: React.FC = () => {
         setLoadingMessage([...loadingMessage, "Purchasing"]);
       } else if (call.entrypoint === "equip_item") {
         const item = ownedItems.find(
-          (item: Item) => item.item == call.calldata[2]
+          (item: Item) =>
+            item.item == (Array.isArray(call.calldata) && call.calldata[2])
         );
         const itemName = processItemName(item ?? NullItem);
         setNotification([
@@ -79,7 +83,9 @@ const TransactionCart: React.FC = () => {
         setNotification([
           ...notification,
           `You purchased ${
-            call.calldata[2] && parseInt(call.calldata[2].toString()) * 10
+            Array.isArray(call.calldata) &&
+            call.calldata[2] &&
+            parseInt(call.calldata[2].toString()) * 10
           } health!`,
         ]);
         setLoadingQuery("adventurerByIdQuery");
@@ -88,7 +94,9 @@ const TransactionCart: React.FC = () => {
         setNotification([
           ...notification,
           `You slayed ${
-            call.calldata[0] && parseInt(call.calldata[0].toString())
+            Array.isArray(call.calldata) &&
+            call.calldata[0] &&
+            parseInt(call.calldata[0].toString())
           }`,
         ]);
         setLoadingQuery("adventurerByIdQuery");
@@ -142,7 +150,9 @@ const TransactionCart: React.FC = () => {
                     (dict["entrypoint"] === "bid_on_item" ||
                       dict["entrypoint"] === "claim_item")
                   ) {
-                    items.push(dict.calldata[0]?.toString() ?? "");
+                    if (Array.isArray(dict.calldata)) {
+                      items.push(dict.calldata[0]?.toString() ?? "");
+                    }
                   }
                 }
                 startLoading(

@@ -26,7 +26,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
   const screen = useUIStore((state) => state.screen);
 
   useEffect(() => {
-    onButtonClick(buttonsData[selectedIndex].screen);
+    onButtonClick(buttonsData[selectedIndex]?.screen);
   }, [selectedIndex, buttonsData]);
 
   const handleKeyDown = useCallback(

@@ -35,7 +35,7 @@ const Discovery = ({ discoveries }: DiscoveryProps) => {
   const exploreTx = {
     contractAddress: gameContract?.address ?? "",
     entrypoint: "explore",
-    calldata: [adventurer?.id ?? ""],
+    calldata: [adventurer?.id?.toString() ?? ""],
   };
 
   return (

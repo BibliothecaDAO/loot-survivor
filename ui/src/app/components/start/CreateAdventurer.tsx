@@ -76,25 +76,25 @@ export const CreateAdventurer = ({
     };
     addToCalls(mintLords);
 
-    const approveLords = {
+    const approveLordsTx = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "approve",
-      calldata: [gameContract?.address, (100 * 10 ** 18).toString()],
+      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString()],
     };
-    addToCalls(approveLords);
+    addToCalls(approveLordsTx);
 
-    const mintAdventurer = {
+    const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "start",
       calldata: [
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name),
         formData.homeRealmId,
-        getKeyFromValue(gameData.RACES, formData.race)?.toString(),
+        getKeyFromValue(gameData.RACES, formData.race)?.toString() ?? "",
         getKeyFromValue(gameData.ORDERS, formData.order) ?? "",
       ],
     };
-    addToCalls(mintAdventurer);
+    addToCalls(mintAdventurerTx);
     startLoading(
       "Create",
       "Spawning Adventurer",

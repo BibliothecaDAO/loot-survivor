@@ -112,7 +112,7 @@ export default function UpgradeScreen() {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "upgrade_stat",
       calldata: [
-        adventurer?.id ?? "",
+        adventurer?.id?.toString() ?? "",
         getKeyFromValue(gameData.STATS, selected) ?? "",
       ],
     };

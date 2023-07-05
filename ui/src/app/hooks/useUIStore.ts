@@ -48,7 +48,7 @@ const useUIStore = create<State>((set) => ({
   setProfile: (value) => set({ profile: value }),
   deathDialog: false,
   showDeathDialog: (value) => set({ deathDialog: value }),
-  tutorialDialog: true,
+  tutorialDialog: false,
   showTutorialDialog: (value) => set({ tutorialDialog: value }),
   displayHistory: false,
   setDisplayHistory: (value) => set({ displayHistory: value }),

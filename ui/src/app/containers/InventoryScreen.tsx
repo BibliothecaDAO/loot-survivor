@@ -49,19 +49,22 @@ export default function InventoryScreen() {
 
   const handleAddEquipItem = (item: Item) => {
     if (gameContract && formatAddress) {
-      const equipItem = {
+      const equipItemTx = {
         contractAddress: gameContract?.address,
         entrypoint: "equip_item",
-        calldata: [adventurer?.id, item.item],
+        calldata: [adventurer?.id?.toString() ?? "", item.item ?? ""],
         metadata: `Equipping ${item.item}!`,
       };
-      addToCalls(equipItem);
+      addToCalls(equipItemTx);
     }
   };
 
   const singleEquipExists = (id: number) => {
     return calls.some(
-      (call: Call) => call.entrypoint == "equip_item" && call.calldata[2] == id
+      (call: Call) =>
+        call.entrypoint == "equip_item" &&
+        Array.isArray(call.calldata) &&
+        call.calldata[2] == id.toString()
     );
   };
 

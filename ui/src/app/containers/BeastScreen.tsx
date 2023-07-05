@@ -95,16 +95,16 @@ export default function BeastScreen() {
 
   const lastBattle = BattleTemplate;
 
-  const attack = {
+  const attackTx = {
     contractAddress: gameContract?.address ?? "",
     entrypoint: "attack",
-    calldata: [adventurer?.id ?? ""],
+    calldata: [adventurer?.id?.toString() ?? ""],
   };
 
-  const flee = {
+  const fleeTx = {
     contractAddress: gameContract?.address ?? "",
     entrypoint: "flee",
-    calldata: [adventurer?.id ?? ""],
+    calldata: [adventurer?.id?.toString() ?? ""],
   };
 
   const [buttonText, setButtonText] = useState("Flee!");
@@ -122,7 +122,7 @@ export default function BeastScreen() {
       id: 1,
       label: "ATTACK BEAST!",
       action: async () => {
-        addToCalls(attack);
+        addToCalls(attackTx);
         startLoading(
           "Attack",
           "Attacking",
@@ -154,7 +154,7 @@ export default function BeastScreen() {
       mouseEnter: handleMouseEnter,
       mouseLeave: handleMouseLeave,
       action: async () => {
-        addToCalls(flee);
+        addToCalls(fleeTx);
         startLoading(
           "Flee",
           "Fleeing",
