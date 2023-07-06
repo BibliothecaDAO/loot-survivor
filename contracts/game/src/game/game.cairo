@@ -1347,6 +1347,8 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
         // TODO: Remove after testing
+        
+        // market is only available when adventurer has stat upgrades available
         assert(adventurer.stat_points_available >= 1, 'Not available');
 
         // unpack Loot bag from storage
@@ -1706,7 +1708,6 @@ mod Game {
     }
 
     fn _get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<LootWithPrice> {
-        // TODO: Replace with actual seed
         ImplMarket::get_all_items_with_price(_unpack_adventurer(self, adventurer_id).get_market_entropy())
     }
 
