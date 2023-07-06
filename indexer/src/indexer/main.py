@@ -29,9 +29,7 @@ def cli():
 @click.option("--mongo-url", default=None, help="MongoDB url.")
 @click.option("--restart", is_flag=True, help="Restart indexing from the beginning.")
 @click.option("--network", default=None, help="Network id.")
-@click.option("--adventurer", is_flag=None, help="Adventurer contract address.")
-@click.option("--beast", is_flag=None, help="Beast contract address.")
-@click.option("--loot", is_flag=None, help="Loot contract address.")
+@click.option("--game", is_flag=None, help="Game contract address.")
 @click.option("--start_block", is_flag=None, help="Indexer starting block.")
 @async_command
 async def start(
@@ -58,7 +56,7 @@ async def start(
 
 @cli.command()
 @click.option("--mongo_goerli", default=None, help="Mongo url for goerli.")
-@click.option("--mongo_devnet", default=None, help="Mongo url for devnet.")
+@click.option("--mongo_mainnet", default=None, help="Mongo url for mainnet.")
 @click.option("--port", default=None, help="Port number.")
 @async_command
 async def graphql(mongo_goerli, mongo_devnet, port):

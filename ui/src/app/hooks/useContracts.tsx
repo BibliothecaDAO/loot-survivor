@@ -4,10 +4,10 @@ import LootMarketArcade from "../abi/LootMarketArcade.json";
 import Beast from "../abi/Beast.json";
 import Lords_ERC20_Mintable from "../abi/Lords_ERC20_Mintable.json";
 
-const testnet_addr = "https://survivor-indexer.bibliothecadao.xyz";
+const mainnet_addr = "https://alpha.starknet.io/";
 
 export const contracts = {
-  testnet: {
+  mainnet: {
     game: "0x0",
     lords_erc20_mintable:
       "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
@@ -24,17 +24,17 @@ export const useContracts = () => {
 
   const { contract: gameContract } = useContract({
     address:
-      (account as any)?.provider?.baseUrl == testnet_addr ||
-      (account as any)?.baseUrl == testnet_addr
-        ? contracts.testnet.game
+      (account as any)?.provider?.baseUrl == mainnet_addr ||
+      (account as any)?.baseUrl == mainnet_addr
+        ? contracts.mainnet.game
         : contracts.goerli.game,
     abi: Adventurer,
   });
   const { contract: lordsContract } = useContract({
     address:
-      (account as any)?.provider?.baseUrl == testnet_addr ||
-      (account as any)?.baseUrl == testnet_addr
-        ? contracts.testnet.lords_erc20_mintable
+      (account as any)?.provider?.baseUrl == mainnet_addr ||
+      (account as any)?.baseUrl == mainnet_addr
+        ? contracts.mainnet.lords_erc20_mintable
         : contracts.goerli.lords_erc20_mintable,
     abi: Lords_ERC20_Mintable,
   });

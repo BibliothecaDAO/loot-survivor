@@ -1382,47 +1382,23 @@ class IndexerGraphQLView(GraphQLView):
         return {"db": self._db}
 
 
-async def run_graphql_api(mongo_goerli=None, mongo_devnet=None, port="8080"):
+async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     mongo_goerli = MongoClient(mongo_goerli)
-    mongo_devnet = MongoClient(mongo_devnet)
+    mongo_mainnet = MongoClient(mongo_mainnet)
     db_name_goerli = "loot-survivor-indexer-goerli".replace("-", "_")
-    db_name_devnet = "loot-survivor-indexer-devnet".replace("-", "_")
+    db_name_mainnet = "loot-survivor-indexer-mainnet".replace("-", "_")
     db_goerli = mongo_goerli[db_name_goerli]
-    db_devnet = mongo_devnet[db_name_devnet]
+    db_mainnet = mongo_mainnet[db_name_mainnet]
 
     schema = strawberry.Schema(query=Query)
     view_goerli = IndexerGraphQLView(db_goerli, schema=schema)
-    view_devnet = IndexerGraphQLView(db_devnet, schema=schema)
+    view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
 
     app = web.Application()
-    # app.router.add_route("*", "/graphql", view)
 
     cors = aiohttp_cors.setup(app)
-    # resource = cors.add(app.router.add_resource("/graphql"))
-    # cors.add(
-    #     resource.add_route("POST", view),
-    #     {
-    #         "*": aiohttp_cors.ResourceOptions(
-    #             expose_headers="*", allow_headers="*", allow_methods="*"
-    #         ),
-    #     },
-    # )
-    # cors.add(
-    #     resource.add_route("GET", view),
-    #     {
-    #         "*": aiohttp_cors.ResourceOptions(
-    #             expose_headers="*", allow_headers="*", allow_methods="*"
-    #         ),
-    #     },
-    # )
-
-    ssl_cert = "/app/fullchain.pem"
-    ssl_key = "/app/privkey.pem"
-    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    ssl_context.load_cert_chain(ssl_cert, ssl_key)
-
     resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
-    resource_devnet = cors.add(app.router.add_resource("/devnet-graphql"))
+    resource_mainnet = cors.add(app.router.add_resource("/graphql"))
 
     cors.add(
         resource_goerli.add_route("POST", view_goerli),
@@ -1442,7 +1418,7 @@ async def run_graphql_api(mongo_goerli=None, mongo_devnet=None, port="8080"):
     )
 
     cors.add(
-        resource_devnet.add_route("POST", view_devnet),
+        resource_mainnet.add_route("POST", view_mainnet),
         {
             "*": aiohttp_cors.ResourceOptions(
                 expose_headers="*", allow_headers="*", allow_methods="*"
@@ -1450,7 +1426,7 @@ async def run_graphql_api(mongo_goerli=None, mongo_devnet=None, port="8080"):
         },
     )
     cors.add(
-        resource_devnet.add_route("GET", view_devnet),
+        resource_mainnet.add_route("GET", view_mainnet),
         {
             "*": aiohttp_cors.ResourceOptions(
                 expose_headers="*", allow_headers="*", allow_methods="*"
@@ -1460,7 +1436,7 @@ async def run_graphql_api(mongo_goerli=None, mongo_devnet=None, port="8080"):
 
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", int(port), ssl_context=ssl_context)
+    site = web.TCPSite(runner, "0.0.0.0", int(port))
     await site.start()
 
     print(f"GraphQL server started on port {port}")
