@@ -1730,7 +1730,7 @@ fn test_get_market_entropy() {
             id: 7, xp: 1, metadata: 7,
             }, ring: LootStatistics {
             id: 8, xp: 1, metadata: 8,
-        }, beast_health: 20, stat_upgrade_available: 0,
+        }, beast_health: 20, stat_points_available: 0,
     };
 
     adventurer.get_market_entropy().print();
