@@ -136,10 +136,29 @@ Loot Survivor is a onchain game, designed to be immutable and permanently hosted
 
 ### Deploying
 
+#### Set up env
+https://docs.starknet.io/documentation/getting_started/environment_setup/
+
+
+
 ```
+export STARKNET_NETWORK=alpha-goerli
+export STARKNET_WALLET=starkware.starknet.wallets.open_zeppelin.OpenZeppelinAccount
+export CAIRO_COMPILER_DIR=~/.cairo/target/release/
+export CAIRO_COMPILER_ARGS=--add-pythonic-hints
+
 scarb build
 
 starknet declare --contract /home/os/Documents/code/bibliotheca/loot-survivor/contracts/game/target/dev/game_Game.sierra.json --account deployer_4
 
-starknet deploy --class_hash 0x6f94f476e9758913553294bea326011452667f663cd984db6b2e9c58f64fed2 --account deployer_4 --max_fee 100000000000000000 --input 0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b
+starknet deploy --class_hash 0x19399ae3be61869ec28eeb85d9a9e669664a5eb4d3c8b6f1785d01bd369f1e7 --account deployer_4 --max_fee 100000000000000000 --input 0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b
 ```
+
+export CONTRACT_ADDRESS=0x07dd92b5ddd19655d5d13ff36def3df5caff6a0230e3305e0a208f737ce45d56
+
+#### Start
+starknet invoke --function start --address 0x07dd92b5ddd19655d5d13ff36def3df5caff6a0230e3305e0a208f737ce45d56 --input 12 123 0 0 0 0 --account deployer_4 --max_fee 10000000000000000
+
+
+#### Explore
+starknet invoke --function explore --address 0x07dd92b5ddd19655d5d13ff36def3df5caff6a0230e3305e0a208f737ce45d56 --input 0 0 --account deployer_4 --max_fee 10000000000000000

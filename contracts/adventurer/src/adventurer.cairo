@@ -285,7 +285,7 @@ impl ImplAdventurer of IAdventurer {
     fn beast_encounter(ref self: Adventurer, battle_fixed_seed: u128) -> Beast {
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
         let battle_fixed_entropy: u128 = self
-            .get_battle_fixed_entropy(U128TryIntoU64::try_into(battle_fixed_seed).unwrap());
+            .get_battle_fixed_entropy(battle_fixed_seed);
 
         // generate special names for beast using Loot name schema.
         // We use Loot names because the combat system will deal bonus damage for matching names (these are the items super powers)
@@ -677,7 +677,7 @@ impl ImplAdventurer of IAdventurer {
     // it intentionally does not use game_entropy as that could change during battle and this
     // entropy allows us to simulate a persistent battle without having to store beast
     // details on-chain.
-    fn get_battle_fixed_entropy(self: Adventurer, adventurer_entropy: u64) -> u128 {
+    fn get_battle_fixed_entropy(self: Adventurer, adventurer_entropy: u128) -> u128 {
         self.xp.into() + adventurer_entropy.into()
     }
 

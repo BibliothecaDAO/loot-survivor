@@ -46,7 +46,7 @@ mod Game {
 
     #[storage]
     struct Storage {
-        _game_entropy: felt252,
+        _game_entropy: u64,
         _last_game_entropy_block: felt252,
         _adventurer: LegacyMap::<u256, felt252>,
         _owner: LegacyMap::<u256, ContractAddress>,
@@ -135,7 +135,7 @@ mod Game {
             _assert_no_stat_upgrades_available(@self, adventurer);
 
             // assert adventurer has not already explored this block
-            _assert_one_explore_per_block(@self, adventurer);
+            // _assert_one_explore_per_block(@self, adventurer);
 
             // if the adventurer hasn't been idle
             if !_is_idle(@self, adventurer) {
@@ -424,7 +424,7 @@ mod Game {
             _lords_address(self)
         }
 
-        fn get_entropy(self: @ContractState) -> u256 {
+        fn get_entropy(self: @ContractState) -> u64 {
             _get_entropy(self)
         }
 
@@ -502,10 +502,10 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         internal::revoke_ap_tracking();
         // get adventurer entropy from storage
-        let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id).entropy.into();
 
         // get global game entropy
-        let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
+        let game_entropy = _get_entropy(@self).into();
 
         // use entropy sources to generate random exploration
         let exploration_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
@@ -1001,7 +1001,7 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         internal::revoke_ap_tracking();
         // get adventurer entropy from storage
-        let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id).entropy.into();
 
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
         let battle_fixed_entropy: u128 = adventurer.get_battle_fixed_entropy(adventurer_entropy);
@@ -1036,16 +1036,16 @@ mod Game {
         }
 
         // get game entropy from storage
-        let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
+        let game_entropy: u128 = _get_entropy(@self).into();
 
         // When generating the beast, we need to ensure entropy remains fixed for the battle
         // for attacking however, we should change the entropy during battle so we use adventurer and beast health
         // to accomplish this
-        let attack_entropy = U64IntoU128::into(
+        let attack_entropy = 
             game_entropy
                 + adventurer_entropy
-                + U16IntoU64::into(adventurer.health + adventurer.beast_health)
-        );
+                + U16IntoU128::into(adventurer.health + adventurer.beast_health);
+        
 
         let damage_dealt = beast
             .attack(
@@ -1195,10 +1195,10 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         internal::revoke_ap_tracking();
         // get adventurer entropy from storage
-        let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id).entropy.into();
 
         // get game entropy from storage
-        let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
+        let game_entropy: u128 = _get_entropy(@self).into();
 
         // generate live entropy from fixed entropy sources and live adventurer stats
         let flee_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
@@ -1444,11 +1444,11 @@ mod Game {
     // 1. Move this to Adventurer lib
     // 2. Consider using cairo hashing algorithm
     fn _get_live_entropy(
-        adventurer_entropy: u64, game_entropy: u64, adventurer: Adventurer
+        adventurer_entropy: u128, game_entropy: u128, adventurer: Adventurer
     ) -> u128 {
         // cast everything to u128 before adding to avoid overflow
-        return U64IntoU128::into(adventurer_entropy)
-            + U64IntoU128::into(game_entropy)
+        return adventurer_entropy
+            + game_entropy
             + U16IntoU128::into(adventurer.xp)
             + U16IntoU128::into(adventurer.gold)
             + U16IntoU128::into(adventurer.health);
@@ -1698,8 +1698,7 @@ mod Game {
     }
 
     fn _set_entropy(ref self: ContractState) {
-        // TODO: Replace with actual seed
-        let hash: felt252  = starknet::get_tx_info().unbox().transaction_hash.into();
+        // let hash: felt252  = starknet::get_tx_info().unbox().transaction_hash.into();
 
         let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
 
@@ -1709,12 +1708,12 @@ mod Game {
             messages::BLOCK_NUMBER_ERROR
         );
 
-        self._game_entropy.write(hash);
+        self._game_entropy.write(blocknumber);
         self._last_game_entropy_block.write(blocknumber.into());
     }
 
-    fn _get_entropy(self: @ContractState) -> u256 {
-        self._game_entropy.read().into()
+    fn _get_entropy(self: @ContractState) -> u64 {
+        self._game_entropy.read()
     }
 
     fn _get_score_for_adventurer(self: @ContractState, adventurer_id: u256) -> u256 {
