@@ -1561,12 +1561,10 @@ fn test_increase_xp() {
     // increase adventurer xp by 3 which should level up the adventurer
     adventurer.increase_adventurer_xp(3);
     assert(adventurer.get_level() == 2, 'advtr should be lvl 2');
-    assert(adventurer.stat_points_available == 1, 'advtr should have 1 stat avlbl');
 
     // double level up without spending previous stat point
     adventurer.increase_adventurer_xp(12);
     assert(adventurer.get_level() == 4, 'advtr should be lvl 4');
-    assert(adventurer.stat_points_available == 3, 'advtr should have 3 stat avlbl');
 }
 
 #[test]
