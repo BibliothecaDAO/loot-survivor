@@ -151,14 +151,20 @@ scarb build
 
 starknet declare --contract /home/os/Documents/code/bibliotheca/loot-survivor/contracts/game/target/dev/game_Game.sierra.json --account deployer_4
 
-starknet deploy --class_hash 0x19399ae3be61869ec28eeb85d9a9e669664a5eb4d3c8b6f1785d01bd369f1e7 --account deployer_4 --max_fee 100000000000000000 --input 0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b
+starknet deploy --class_hash 0x2592ba7e082159424d860bf65694d0181afe5e53a7f546aa596335489fb5126 --account deployer_4 --max_fee 100000000000000000 --input 0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b
 ```
 
-export CONTRACT_ADDRESS=0x07dd92b5ddd19655d5d13ff36def3df5caff6a0230e3305e0a208f737ce45d56
+export CONTRACT_ADDRESS=0x005afb26aa7ffc55fcb91ac7317b9ccc27ff4728aae8306e215f543367060bd3
 
 #### Start
-starknet invoke --function start --address 0x07dd92b5ddd19655d5d13ff36def3df5caff6a0230e3305e0a208f737ce45d56 --input 12 123 0 0 0 0 --account deployer_4 --max_fee 10000000000000000
+starknet invoke --function start --address 0x005afb26aa7ffc55fcb91ac7317b9ccc27ff4728aae8306e215f543367060bd3 --input 12 123 0 0 0 0 --account deployer_4 --max_fee 10000000000000000
 
 
 #### Explore
-starknet invoke --function explore --address 0x07dd92b5ddd19655d5d13ff36def3df5caff6a0230e3305e0a208f737ce45d56 --input 0 0 --account deployer_4 --max_fee 10000000000000000
+starknet invoke --function explore --address 0x005afb26aa7ffc55fcb91ac7317b9ccc27ff4728aae8306e215f543367060bd3 --input 0 0 --account deployer_4 --max_fee 10000000000000000
+
+#### Attack
+starknet invoke --function attack --address 0x005afb26aa7ffc55fcb91ac7317b9ccc27ff4728aae8306e215f543367060bd3 --input 0 0 --account deployer_4 --max_fee 10000000000000000
+
+#### Call
+starknet call --function get_adventurer --address 0x005afb26aa7ffc55fcb91ac7317b9ccc27ff4728aae8306e215f543367060bd3 --input 0 0 --account deployer_4
