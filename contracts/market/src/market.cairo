@@ -87,14 +87,14 @@ impl ImplMarket of IMarket {
     }
 
     fn is_item_available(seed: u64, item_id: u8) -> bool {
-        let mut i: u64 = 1;
+        let mut i: u64 = 0;
         let mut found_item = false;
         let result = loop {
-            if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
                 break ();
             }
 
-            let id = ImplMarket::get_id(seed);
+            let id = ImplMarket::get_id(seed + i);
 
             if item_id == id {
                 found_item = true;
