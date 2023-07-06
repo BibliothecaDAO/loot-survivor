@@ -57,7 +57,7 @@ struct Adventurer {
     neck: LootStatistics, // 21 bits
     ring: LootStatistics, // 21 bits
     beast_health: u16, // 9 bits
-    stat_upgrade_available: u8, // 3 bits
+    stat_points_available: u8, // 3 bits
 }
 
 impl StatsPacking of Packing<Stats> {
@@ -107,7 +107,7 @@ impl AdventurerPacking of Packing<Adventurer> {
          + self.neck.pack().into() * pow::TWO_POW_196
          + self.ring.pack().into() * pow::TWO_POW_217
          + self.beast_health.into() * pow::TWO_POW_238
-         + self.stat_upgrade_available.into() * pow::TWO_POW_247
+         + self.stat_points_available.into() * pow::TWO_POW_247
         ).try_into().expect('pack Adventurer')
     }
 
@@ -127,7 +127,7 @@ impl AdventurerPacking of Packing<Adventurer> {
         let (packed, neck) = rshift_split(packed, pow::TWO_POW_21);
         let (packed, ring) = rshift_split(packed, pow::TWO_POW_21);
         let (packed, beast_health) = rshift_split(packed, pow::TWO_POW_9);
-        let (_, stat_upgrade_available) = rshift_split(packed, pow::TWO_POW_3);
+        let (_, stat_points_available) = rshift_split(packed, pow::TWO_POW_3);
 
         Adventurer {
             last_action: last_action.try_into().expect('unpack Adventurer last_action'),
@@ -144,7 +144,7 @@ impl AdventurerPacking of Packing<Adventurer> {
             neck: Packing::unpack(neck.try_into().expect('unpack Adventurer neck')),
             ring: Packing::unpack(ring.try_into().expect('unpack Adventurer ring')),
             beast_health: beast_health.try_into().expect('unpack Adventurer beast_health'),
-            stat_upgrade_available: stat_upgrade_available.try_into().expect('unpack Adventurer stat_upgrade')
+            stat_points_available: stat_points_available.try_into().expect('unpack Adventurer stat_upgrade')
         }
     }
 }
@@ -430,13 +430,18 @@ impl ImplAdventurer of IAdventurer {
         // return adventurer
         self
     }
-    fn increase_adventurer_xp(ref self: Adventurer, value: u16) -> Adventurer {
+    fn increase_adventurer_xp(ref self: Adventurer, value: u16) -> (u8, u8) {
         let previous_level = self.get_level();
         self.xp = self.xp + value;
         let new_level = self.get_level();
-        // add the difference between previous level and new level to stat upgrades
-        self.stat_upgrade_available += (new_level - previous_level);
-        self
+        return (previous_level, new_level);
+    }
+    fn grant_stat_upgrades(ref self: Adventurer, value: u8) {
+        if (self.stat_points_available + value <= 8) {
+            self.stat_points_available += value;
+        } else {
+            self.stat_points_available = 8;
+        }
     }
     fn add_strength(ref self: Adventurer, value: u8) -> Adventurer {
         self.stats.strength = self.stats.strength + value;
@@ -668,7 +673,7 @@ impl ImplAdventurer of IAdventurer {
                 id: 0, xp: 0, metadata: 0,
                 }, ring: LootStatistics {
                 id: 0, xp: 0, metadata: 0,
-            }, beast_health: BeastSettings::STARTER_BEAST_HEALTH, stat_upgrade_available: 0,
+            }, beast_health: BeastSettings::STARTER_BEAST_HEALTH, stat_points_available: 0,
         };
     }
 
@@ -1069,7 +1074,7 @@ fn test_adventurer() {
             id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
             id: 1, xp: 511, metadata: 8,
-        }, beast_health: 480, stat_upgrade_available: 1,
+        }, beast_health: 480, stat_points_available: 1,
     };
     let packed = adventurer.pack();
     let unpacked: Adventurer = Packing::unpack(packed);
@@ -1109,8 +1114,8 @@ fn test_adventurer() {
     assert(adventurer.ring.metadata == unpacked.ring.metadata, 'ring.metadata');
     assert(adventurer.beast_health == unpacked.beast_health, 'beast_health');
     assert(
-        adventurer.stat_upgrade_available == unpacked.stat_upgrade_available,
-        'stat_upgrade_available'
+        adventurer.stat_points_available == unpacked.stat_points_available,
+        'stat_points_available'
     );
 }
 
@@ -1474,7 +1479,7 @@ fn test_charisma_health_discount_overflow() {
             id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
             id: 1, xp: 511, metadata: 8,
-        }, beast_health: 1023, stat_upgrade_available: 1,
+        }, beast_health: 1023, stat_points_available: 1,
     };
 
     let discount = adventurer.get_potion_cost();
@@ -1511,7 +1516,7 @@ fn test_charisma_item_discount_overflow() {
             id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
             id: 1, xp: 511, metadata: 8,
-        }, beast_health: 1023, stat_upgrade_available: 1,
+        }, beast_health: 1023, stat_points_available: 1,
     };
 
     let max_item_price = 15;
@@ -1550,18 +1555,18 @@ fn test_increase_xp() {
             id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
             id: 1, xp: 511, metadata: 8,
-        }, beast_health: 1023, stat_upgrade_available: 0,
+        }, beast_health: 1023, stat_points_available: 0,
     };
 
     // increase adventurer xp by 3 which should level up the adventurer
     adventurer.increase_adventurer_xp(3);
     assert(adventurer.get_level() == 2, 'advtr should be lvl 2');
-    assert(adventurer.stat_upgrade_available == 1, 'advtr should have 1 stat avlbl');
+    assert(adventurer.stat_points_available == 1, 'advtr should have 1 stat avlbl');
 
     // double level up without spending previous stat point
     adventurer.increase_adventurer_xp(12);
     assert(adventurer.get_level() == 4, 'advtr should be lvl 4');
-    assert(adventurer.stat_upgrade_available == 3, 'advtr should have 3 stat avlbl');
+    assert(adventurer.stat_points_available == 3, 'advtr should have 3 stat avlbl');
 }
 
 #[test]
@@ -1634,7 +1639,7 @@ fn test_apply_item_stat_boosts() {
             id: 7, xp: 1, metadata: 7,
             }, ring: LootStatistics {
             id: 8, xp: 1, metadata: 8,
-        }, beast_health: 20, stat_upgrade_available: 0,
+        }, beast_health: 20, stat_points_available: 0,
     };
 
     let item1_names = LootItemSpecialNames {

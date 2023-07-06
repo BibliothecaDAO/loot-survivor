@@ -13,4 +13,5 @@ mod messages {
     const HEALTH_FULL: felt252 = 'Health already full';
     const ADVENTURER_NOT_IDLE: felt252 = 'Adventurer is not idle';
     const ONE_EXPLORE_PER_BLOCK: felt252 = 'One explore per block';
+    const NO_STAT_UPGRADES_AVAILABLE: felt252 = 'No stat upgrades available';
 }
