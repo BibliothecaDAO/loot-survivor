@@ -1,3 +1,4 @@
+use core::debug::PrintTrait;
 use core::result::ResultTrait;
 use integer::{u16_overflowing_add, u16_overflowing_sub};
 use traits::{TryInto, Into};
@@ -56,7 +57,7 @@ struct Adventurer {
     neck: LootStatistics, // 21 bits
     ring: LootStatistics, // 21 bits
     beast_health: u16, // 9 bits
-    stat_upgrade_available: u8, // 3 bits
+    stat_points_available: u8, // 3 bits
 }
 
 impl StatsPacking of Packing<Stats> {
@@ -106,7 +107,7 @@ impl AdventurerPacking of Packing<Adventurer> {
          + self.neck.pack().into() * pow::TWO_POW_196
          + self.ring.pack().into() * pow::TWO_POW_217
          + self.beast_health.into() * pow::TWO_POW_238
-         + self.stat_upgrade_available.into() * pow::TWO_POW_247
+         + self.stat_points_available.into() * pow::TWO_POW_247
         ).try_into().expect('pack Adventurer')
     }
 
@@ -126,7 +127,7 @@ impl AdventurerPacking of Packing<Adventurer> {
         let (packed, neck) = rshift_split(packed, pow::TWO_POW_21);
         let (packed, ring) = rshift_split(packed, pow::TWO_POW_21);
         let (packed, beast_health) = rshift_split(packed, pow::TWO_POW_9);
-        let (_, stat_upgrade_available) = rshift_split(packed, pow::TWO_POW_3);
+        let (_, stat_points_available) = rshift_split(packed, pow::TWO_POW_3);
 
         Adventurer {
             last_action: last_action.try_into().expect('unpack Adventurer last_action'),
@@ -143,13 +144,16 @@ impl AdventurerPacking of Packing<Adventurer> {
             neck: Packing::unpack(neck.try_into().expect('unpack Adventurer neck')),
             ring: Packing::unpack(ring.try_into().expect('unpack Adventurer ring')),
             beast_health: beast_health.try_into().expect('unpack Adventurer beast_health'),
-            stat_upgrade_available: stat_upgrade_available.try_into().expect('unpack Adventurer stat_upgrade')
+            stat_points_available: stat_points_available.try_into().expect('unpack Adventurer stat_upgrade')
         }
     }
 }
 
 #[generate_trait]
 impl ImplAdventurer of IAdventurer {
+    fn get_market_entropy(self: Adventurer) -> u64 {
+        ((self.xp.into()) * pow::TWO_POW_9).try_into().expect('get_market_entropy')
+    }
     fn charisma_potion_discount(self: Adventurer) -> u16 {
         CHARISMA_DISCOUNT * self.stats.charisma.into()
     }
@@ -281,7 +285,7 @@ impl ImplAdventurer of IAdventurer {
     fn beast_encounter(ref self: Adventurer, battle_fixed_seed: u128) -> Beast {
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
         let battle_fixed_entropy: u128 = self
-            .get_battle_fixed_entropy(U128TryIntoU64::try_into(battle_fixed_seed).unwrap());
+            .get_battle_fixed_entropy(battle_fixed_seed);
 
         // generate special names for beast using Loot name schema.
         // We use Loot names because the combat system will deal bonus damage for matching names (these are the items super powers)
@@ -426,13 +430,18 @@ impl ImplAdventurer of IAdventurer {
         // return adventurer
         self
     }
-    fn increase_adventurer_xp(ref self: Adventurer, value: u16) -> Adventurer {
+    fn increase_adventurer_xp(ref self: Adventurer, value: u16) -> (u8, u8) {
         let previous_level = self.get_level();
         self.xp = self.xp + value;
         let new_level = self.get_level();
-        // add the difference between previous level and new level to stat upgrades
-        self.stat_upgrade_available += (new_level - previous_level);
-        self
+        return (previous_level, new_level);
+    }
+    fn grant_stat_upgrades(ref self: Adventurer, value: u8) {
+        if (self.stat_points_available + value <= 8) {
+            self.stat_points_available += value;
+        } else {
+            self.stat_points_available = 8;
+        }
     }
     fn add_strength(ref self: Adventurer, value: u8) -> Adventurer {
         self.stats.strength = self.stats.strength + value;
@@ -664,7 +673,7 @@ impl ImplAdventurer of IAdventurer {
                 id: 0, xp: 0, metadata: 0,
                 }, ring: LootStatistics {
                 id: 0, xp: 0, metadata: 0,
-            }, beast_health: BeastSettings::STARTER_BEAST_HEALTH, stat_upgrade_available: 0,
+            }, beast_health: BeastSettings::STARTER_BEAST_HEALTH, stat_points_available: 0,
         };
     }
 
@@ -673,7 +682,7 @@ impl ImplAdventurer of IAdventurer {
     // it intentionally does not use game_entropy as that could change during battle and this
     // entropy allows us to simulate a persistent battle without having to store beast
     // details on-chain.
-    fn get_battle_fixed_entropy(self: Adventurer, adventurer_entropy: u64) -> u128 {
+    fn get_battle_fixed_entropy(self: Adventurer, adventurer_entropy: u128) -> u128 {
         self.xp.into() + adventurer_entropy.into()
     }
 
@@ -1065,7 +1074,7 @@ fn test_adventurer() {
             id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
             id: 1, xp: 511, metadata: 8,
-        }, beast_health: 480, stat_upgrade_available: 1,
+        }, beast_health: 480, stat_points_available: 1,
     };
     let packed = adventurer.pack();
     let unpacked: Adventurer = Packing::unpack(packed);
@@ -1105,8 +1114,8 @@ fn test_adventurer() {
     assert(adventurer.ring.metadata == unpacked.ring.metadata, 'ring.metadata');
     assert(adventurer.beast_health == unpacked.beast_health, 'beast_health');
     assert(
-        adventurer.stat_upgrade_available == unpacked.stat_upgrade_available,
-        'stat_upgrade_available'
+        adventurer.stat_points_available == unpacked.stat_points_available,
+        'stat_points_available'
     );
 }
 
@@ -1470,7 +1479,7 @@ fn test_charisma_health_discount_overflow() {
             id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
             id: 1, xp: 511, metadata: 8,
-        }, beast_health: 1023, stat_upgrade_available: 1,
+        }, beast_health: 1023, stat_points_available: 1,
     };
 
     let discount = adventurer.get_potion_cost();
@@ -1507,7 +1516,7 @@ fn test_charisma_item_discount_overflow() {
             id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
             id: 1, xp: 511, metadata: 8,
-        }, beast_health: 1023, stat_upgrade_available: 1,
+        }, beast_health: 1023, stat_points_available: 1,
     };
 
     let max_item_price = 15;
@@ -1546,18 +1555,18 @@ fn test_increase_xp() {
             id: 32, xp: 511, metadata: 7,
             }, ring: LootStatistics {
             id: 1, xp: 511, metadata: 8,
-        }, beast_health: 1023, stat_upgrade_available: 0,
+        }, beast_health: 1023, stat_points_available: 0,
     };
 
     // increase adventurer xp by 3 which should level up the adventurer
     adventurer.increase_adventurer_xp(3);
     assert(adventurer.get_level() == 2, 'advtr should be lvl 2');
-    assert(adventurer.stat_upgrade_available == 1, 'advtr should have 1 stat avlbl');
+    assert(adventurer.stat_points_available == 1, 'advtr should have 1 stat avlbl');
 
     // double level up without spending previous stat point
     adventurer.increase_adventurer_xp(12);
     assert(adventurer.get_level() == 4, 'advtr should be lvl 4');
-    assert(adventurer.stat_upgrade_available == 3, 'advtr should have 3 stat avlbl');
+    assert(adventurer.stat_points_available == 3, 'advtr should have 3 stat avlbl');
 }
 
 #[test]
@@ -1630,7 +1639,7 @@ fn test_apply_item_stat_boosts() {
             id: 7, xp: 1, metadata: 7,
             }, ring: LootStatistics {
             id: 8, xp: 1, metadata: 8,
-        }, beast_health: 20, stat_upgrade_available: 0,
+        }, beast_health: 20, stat_points_available: 0,
     };
 
     let item1_names = LootItemSpecialNames {
@@ -1695,4 +1704,34 @@ fn test_apply_item_stat_boosts() {
     assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
     assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
     assert(adventurer.stats.charisma == 2, 'charisma should be 2');
+}
+
+
+
+#[test]
+#[available_gas(300000)]
+fn test_get_market_entropy() {
+        let mut adventurer = Adventurer {
+        last_action: 511, health: 12, xp: 231, stats: Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+            }, gold: 40, weapon: LootStatistics {
+            id: 1, xp: 225, metadata: 1,
+            }, chest: LootStatistics {
+            id: 2, xp: 65535, metadata: 2,
+            }, head: LootStatistics {
+            id: 3, xp: 225, metadata: 3,
+            }, waist: LootStatistics {
+            id: 4, xp: 225, metadata: 4,
+            }, foot: LootStatistics {
+            id: 5, xp: 1000, metadata: 5,
+            }, hand: LootStatistics {
+            id: 6, xp: 224, metadata: 6,
+            }, neck: LootStatistics {
+            id: 7, xp: 1, metadata: 7,
+            }, ring: LootStatistics {
+            id: 8, xp: 1, metadata: 8,
+        }, beast_health: 20, stat_points_available: 0,
+    };
+
+    adventurer.get_market_entropy().print();
 }

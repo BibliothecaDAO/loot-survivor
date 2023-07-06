@@ -15,8 +15,15 @@ use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET, TIER_P
 
 const MARKET_SEED: u64 = 123456;
 
+#[derive(Drop, Serde)]
+struct LootWithPrice {
+    item: Loot,
+    price: u16,
+}
+
 trait IMarket {
     fn get_all_items(seed: u64) -> Array<Loot>;
+    fn get_all_items_with_price(seed: u64) -> Array<LootWithPrice>;
     fn get_id(seed: u64) -> u8;
     fn check_ownership(seed: u64, item_id: u8) -> bool;
     fn get_price(tier: Tier) -> u16;
@@ -44,6 +51,23 @@ impl ImplMarket of IMarket {
 
             // TODO: We need to move this to fetch from state - it's too gassy...
             all_items.append(ImplLoot::get_item(ImplMarket::get_id(seed + i)));
+            i += OFFSET;
+        };
+
+        all_items
+    }
+
+    fn get_all_items_with_price(seed: u64) -> Array<LootWithPrice> {
+        let mut all_items = ArrayTrait::<LootWithPrice>::new();
+
+        let mut i: u64 = 0;
+        loop {
+            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+                break ();
+            }
+
+            // TODO: We need to move this to fetch from state - it's too gassy...
+            all_items.append(LootWithPrice {item: ImplLoot::get_item(ImplMarket::get_id(seed + i)), price: ImplMarket::get_price(ImplLoot::get_tier(ImplMarket::get_id(seed + i)))});
             i += OFFSET;
         };
 
