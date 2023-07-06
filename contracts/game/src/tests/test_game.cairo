@@ -10,7 +10,7 @@ mod tests {
     use debug::PrintTrait;
     use core::serde::Serde;
 
-    use market::market::{ImplMarket};
+    use market::market::{ImplMarket, LootWithPrice};
 
     use lootitems::loot::{Loot, ImplLoot, ILoot};
     use lootitems::statistics::constants::{ItemId};
@@ -60,7 +60,7 @@ mod tests {
         deployed_game
     }
 
-    fn adventurer_market_items() -> Array<Loot> {
+    fn adventurer_market_items() -> Array<LootWithPrice> {
         let mut deployed_game = new_adventurer();
 
         deployed_game.get_items_on_market(0)
@@ -234,7 +234,7 @@ mod tests {
 
         let updated_adventurer = game.get_adventurer(0);
         assert(updated_adventurer.get_level() == 2, 'advntr should be lvl 2');
-        assert(updated_adventurer.stat_upgrade_available == 1, 'advntr should have 1 stat avl');
+        assert(updated_adventurer.stat_points_available == 1, 'advntr should have 1 stat avl');
 
         // adventurer trying to explore should cause panic because they have stat upgrade available
         // using #[should_panic] to verify this
@@ -248,15 +248,15 @@ mod tests {
         let mut deployed_game = new_adventurer();
         let market_items = @adventurer_market_items();
 
-        let item = ImplLoot::get_item(*market_items.at(0).id);
+        let item = ImplLoot::get_item(*market_items.at(0).item.id);
         let item_price = ImplMarket::get_price(item.tier);
 
-        deployed_game.buy_item(0, *market_items.at(0).id, true);
+        deployed_game.buy_item(0, *market_items.at(0).item.id, true);
 
         let adventurer = deployed_game.get_adventurer(0);
 
         assert(adventurer.gold == STARTING_GOLD - item_price, 'gold');
-        assert(adventurer.waist.id == *market_items.at(0).id, 'sash is equiped');
+        assert(adventurer.waist.id == *market_items.at(0).item.id, 'sash is equiped');
     }
 
     // #[test]
@@ -277,11 +277,11 @@ mod tests {
         let mut deployed_game = new_adventurer();
         let market_items = @adventurer_market_items();
 
-        deployed_game.buy_item(0, *market_items.at(0).id, false);
+        deployed_game.buy_item(0, *market_items.at(0).item.id, false);
 
         let bag = deployed_game.get_bag(0);
 
-        assert(bag.item_1.id == *market_items.at(0).id, 'sash in bag');
+        assert(bag.item_1.id == *market_items.at(0).item.id, 'sash in bag');
     }
 
     #[test]
@@ -290,13 +290,13 @@ mod tests {
         let mut deployed_game = new_adventurer();
         let market_items = @adventurer_market_items();
 
-        deployed_game.buy_item(0, *market_items.at(0).id, false);
+        deployed_game.buy_item(0, *market_items.at(0).item.id, false);
 
         let bag = deployed_game.get_bag(0);
-        assert(bag.item_1.id == *market_items.at(0).id, 'sash in bag');
+        assert(bag.item_1.id == *market_items.at(0).item.id, 'sash in bag');
 
         let adventurer = deployed_game.get_adventurer(0);
-        assert(adventurer.waist.id == *market_items.at(0).id, 'sash is equiped');
+        assert(adventurer.waist.id == *market_items.at(0).item.id, 'sash is equiped');
 
         // refetch bag to make sure it's empty
         let bag = deployed_game.get_bag(0);

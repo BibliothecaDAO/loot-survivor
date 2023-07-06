@@ -4,6 +4,8 @@ use survivor::adventurer::Adventurer;
 use survivor::adventurer_meta::AdventurerMetadata;
 use survivor::bag::Bag;
 use lootitems::loot::Loot;
+use market::market::LootWithPrice;
+
 
 #[starknet::interface]
 trait IGame<TContractState> {
@@ -22,7 +24,7 @@ trait IGame<TContractState> {
     fn get_adventurer(self: @TContractState, adventurer_id: u256) -> Adventurer;
     fn get_adventurer_meta(self: @TContractState, adventurer_id: u256) -> AdventurerMetadata;
     fn get_bag(self: @TContractState, adventurer_id: u256) -> Bag;
-    fn get_items_on_market(self: @TContractState, adventurer_id: u256) -> Array<Loot>;
+    fn get_items_on_market(self: @TContractState, adventurer_id: u256) -> Array<LootWithPrice>;
     fn get_dao_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;
     fn get_entropy(self: @TContractState) -> u64;

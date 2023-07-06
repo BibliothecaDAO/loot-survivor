@@ -8,6 +8,7 @@ mod Game {
     const TEST_ENTROPY: u64 = 12303548;
     const LOOT_NAME_STORAGE_INDEX_1: u256 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
+    const STAT_UPGRADE_POINTS_PER_LEVEL: u8 = 1;
 
     use game::game::interfaces::IGame;
     use option::OptionTrait;
@@ -39,7 +40,7 @@ mod Game {
             LootItemSpecialNamesStorage
         }
     };
-    use market::market::{ImplMarket};
+    use market::market::{ImplMarket, LootWithPrice};
     use obstacles::obstacle::{ImplObstacle};
     use combat::{combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums};
     use beasts::beast::{Beast, IBeast, ImplBeast};
@@ -82,7 +83,9 @@ mod Game {
         ItemSuffixDiscovered: ItemSuffixDiscovered,
         PurchasedPotion: PurchasedPotion,
         NewHighScore: NewHighScore,
-        AdventurerDied: AdventurerDied
+        AdventurerDied: AdventurerDied,
+        AdventurerLeveledUp: AdventurerLeveledUp,
+        NewItemsAvailable: NewItemsAvailable,
     }
 
     #[constructor]
@@ -134,20 +137,19 @@ mod Game {
             // assert adventurer does not have stat upgrades available
             _assert_no_stat_upgrades_available(@self, adventurer);
 
+            // assert adventurer is not in battle
             _assert_not_in_battle(@self, adventurer);
 
-            // assert adventurer has not already explored this block
-            // _assert_one_explore_per_block(@self, adventurer);
-
-            // if the adventurer hasn't been idle
+            // if the adventurer hasn't exceeded idle threshold
             if !_is_idle(@self, adventurer) {
                 // send adventurer to go exploring
                 _explore(
                     ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2
                 );
             } else {
-                // if adventurer has been idle for too long
+                // if adventurer has exceeded idle threshold
                 // they receive a fixed penalty
+                // TODO: Make this based on worst case scenario obstacle discovery
                 adventurer.deduct_health(_idle_penalty(@self, adventurer));
 
                 // if adventurer is dead
@@ -322,8 +324,8 @@ mod Game {
             // assert adventurer is not dead
             _assert_not_dead(@self, adventurer);
 
-            // assert adventurer has stat upgrade available
-            assert(adventurer.stat_upgrade_available > 0, messages::STAT_POINT_NOT_AVAILABLE);
+            // assert adventurer has stat StatUpgradesAvailable available
+            _assert_has_stat_upgrades_available(@self, adventurer);
 
             // upgrade adventurer's stat
             _upgrade_stat(ref self, adventurer_id, ref adventurer, stat);
@@ -414,7 +416,7 @@ mod Game {
             _bag_unpacked(self, adventurer_id)
         }
 
-        fn get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<Loot> {
+        fn get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<LootWithPrice> {
             _get_items_on_market(self, adventurer_id)
         }
 
@@ -644,7 +646,12 @@ mod Game {
         let xp_reward = ImplObstacle::get_xp_reward(obstacle);
 
         // reward adventurer with xp (regarldess of obstacle outcome)
-        adventurer.increase_adventurer_xp(xp_reward);
+        let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_reward);
+        if (new_level > previous_level) {
+            _handle_adventurer_level_up(
+                ref self, ref adventurer, adventurer_id, previous_level, new_level
+            );
+        }
 
         // allocate XP to equipped items
         _grant_xp_to_equipped_items(
@@ -1062,7 +1069,14 @@ mod Game {
             let xp_earned = beast.get_xp_reward();
 
             // grant adventuer xp
-            adventurer.increase_adventurer_xp(xp_earned);
+            let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_earned);
+
+            // if adventurers new level is greater than previous level
+            if (new_level > previous_level) {
+                _handle_adventurer_level_up(
+                    ref self, ref adventurer, adventurer_id, previous_level, new_level
+                );
+            }
 
             // grant equipped items xp
             _grant_xp_to_equipped_items(
@@ -1333,7 +1347,9 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
         // TODO: Remove after testing
-        assert(adventurer.stat_upgrade_available == 1, 'Not available');
+        
+        // market is only available when adventurer has stat upgrades available
+        assert(adventurer.stat_points_available >= 1, 'Not available');
 
         // unpack Loot bag from storage
         let mut bag = _bag_unpacked(@self, adventurer_id);
@@ -1397,11 +1413,13 @@ mod Game {
         // internal::revoke_ap_tracking();
         _assert_ownership(@self, adventurer_id);
 
+        assert(adventurer.stat_points_available > 0, 'no stat points available');
+
         // add stat to adventuer
         adventurer.add_statistic(stat_id);
 
         //deduct one from the adventurers available stat upgrades
-        adventurer.stat_upgrade_available -= 1;
+        adventurer.stat_points_available -= 1;
 
         // emit stat upgraded event
         __event__StatUpgraded(
@@ -1514,6 +1532,42 @@ mod Game {
         adventurer.apply_item_stat_boosts(name_storage1, name_storage2);
     }
 
+    // @title Adventurer Level Up Handler
+    // @notice This function is responsible for managing the processes when an adventurer levels up. 
+    // It emits a level up event, grants the adventurer stat upgrade points, and emits an event about newly available items.
+    // @dev The function alters the state of the adventurer
+    //
+    // @param ref self A reference to the contract state.
+    // @param ref adventurer A reference to the adventurer whose level is being updated.
+    // @param adventurer_id The unique identifier of the adventurer.
+    // @param previous_level The level of the adventurer before this level up.
+    // @param new_level The new level of the adventurer after leveling up.
+    fn _handle_adventurer_level_up(
+        ref self: ContractState,
+        ref adventurer: Adventurer,
+        adventurer_id: u256,
+        previous_level: u8,
+        new_level: u8,
+    ) {
+        // emit level up event
+        __event_AdventurerLeveledUp(
+            ref self,
+            adventurer_state: AdventurerState {
+                owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
+            },
+            previous_level: previous_level,
+            new_level: new_level
+        );
+
+        // grant adventurer stat upgrade points
+        let stat_upgrade_points = (new_level - previous_level) * STAT_UPGRADE_POINTS_PER_LEVEL;
+        adventurer.grant_stat_upgrades(stat_upgrade_points);
+
+        // emit new items availble with available items
+        let available_items = _get_items_on_market(@self, adventurer_id);
+        __event_NewItemsAvailable(ref self, items: available_items);
+    }
+
     fn _unpack_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
         // unpack adventurer
         Packing::unpack(self._adventurer.read(adventurer_id))
@@ -1576,7 +1630,7 @@ mod Game {
         assert(adventurer.get_level() > 1, messages::CANT_FLEE_STARTER_BEAST);
     }
     fn _assert_no_stat_upgrades_available(self: @ContractState, adventurer: Adventurer) {
-        assert(adventurer.stat_upgrade_available == 0, messages::STAT_UPGRADES_AVAILABLE);
+        assert(adventurer.stat_points_available == 0, messages::STAT_UPGRADES_AVAILABLE);
     }
     fn _assert_not_dead(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.health > 0, messages::DEAD_ADVENTURER);
@@ -1608,6 +1662,10 @@ mod Game {
                 messages::ADVENTURER_NOT_IDLE
             );
         }
+    }
+
+    fn _assert_has_stat_upgrades_available(self: @ContractState, adventurer: Adventurer) {
+        assert(adventurer.stat_points_available > 0, messages::NO_STAT_UPGRADES_AVAILABLE);
     }
 
     fn _is_idle(self: @ContractState, adventurer: Adventurer) -> bool {
@@ -1649,9 +1707,8 @@ mod Game {
         self._dao.read()
     }
 
-    fn _get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<Loot> {
-        // TODO: Replace with actual seed
-        ImplMarket::get_all_items(_unpack_adventurer(self, adventurer_id).get_market_entropy())
+    fn _get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<LootWithPrice> {
+        ImplMarket::get_all_items_with_price(_unpack_adventurer(self, adventurer_id).get_market_entropy())
     }
 
     fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u256 {
@@ -1919,6 +1976,24 @@ mod Game {
         killer_id: u8,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct ShopAvailable {
+        inventory: Array<Loot>, 
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct AdventurerLeveledUp {
+        adventurer_state: AdventurerState,
+        previous_level: u8,
+        new_level: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct NewItemsAvailable {
+        items: Array<LootWithPrice>, 
+    }
+
+
     fn __event__StartGame(
         ref self: ContractState,
         adventurer_state: AdventurerState,
@@ -2064,5 +2139,23 @@ mod Game {
                     }
                 )
             );
+    }
+
+    fn __event_AdventurerLeveledUp(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        previous_level: u8,
+        new_level: u8,
+    ) {
+        self
+            .emit(
+                Event::AdventurerLeveledUp(
+                    AdventurerLeveledUp { adventurer_state, previous_level, new_level }
+                )
+            );
+    }
+
+    fn __event_NewItemsAvailable(ref self: ContractState, items: Array<LootWithPrice>, ) {
+        self.emit(Event::NewItemsAvailable(NewItemsAvailable { items }));
     }
 }
