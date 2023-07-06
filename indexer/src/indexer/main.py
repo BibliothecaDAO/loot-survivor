@@ -32,9 +32,7 @@ def cli():
 @click.option("--game", is_flag=None, help="Game contract address.")
 @click.option("--start_block", is_flag=None, help="Indexer starting block.")
 @async_command
-async def start(
-    server_url, mongo_url, restart, network, adventurer, beast, loot, start_block
-):
+async def start(server_url, mongo_url, restart, network, game, start_block):
     """Start the Apibara indexer."""
     if server_url is None:
         server_url = StreamAddress.StarkNet.Goerli
@@ -47,9 +45,7 @@ async def start(
         server_url=server_url,
         mongo_url=mongo_url,
         network=network,
-        adventurer=adventurer,
-        beast=beast,
-        loot=loot,
+        game=game,
         start_block=start_block,
     )
 

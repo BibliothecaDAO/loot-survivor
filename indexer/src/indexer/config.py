@@ -1,7 +1,7 @@
 class Config:
     def __init__(self, network=None, game=None, start_block=None):
         self.network = network
-        self.game_contract = game
+        self.GAME_CONTRACT = game
         if start_block:
             self.STARTING_BLOCK = int(start_block)
         else:
