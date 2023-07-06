@@ -72,14 +72,14 @@ export const CreateAdventurer = ({
     const mintLords = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "mint",
-      calldata: [formatAddress, (100 * 10 ** 18).toString()],
+      calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
     };
     addToCalls(mintLords);
 
     const approveLordsTx = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString()],
+      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
     };
     addToCalls(approveLordsTx);
 
@@ -88,12 +88,30 @@ export const CreateAdventurer = ({
       entrypoint: "start",
       calldata: [
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
-        stringToFelt(formData.name),
+        parseInt(stringToFelt(formData.name)).toString(),
         formData.homeRealmId,
         getKeyFromValue(gameData.RACES, formData.race)?.toString() ?? "",
         getKeyFromValue(gameData.ORDERS, formData.order) ?? "",
+        "1",
       ],
     };
+
+    console.log(mintAdventurerTx);
+
+    // const mintAdventurerTx = {
+    //   contractAddress: gameContract?.address ?? "",
+    //   entrypoint: "start",
+    //   calldata: [
+    //     getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
+    //     "0",
+    //     "0",
+    //     "0",
+    //     "0",
+    //     "0",
+    //   ],
+    // };
+
+    console.log(mintAdventurerTx);
     addToCalls(mintAdventurerTx);
     startLoading(
       "Create",

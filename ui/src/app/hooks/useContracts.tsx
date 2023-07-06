@@ -8,12 +8,12 @@ const testnet_addr = "https://survivor-indexer.bibliothecadao.xyz";
 
 export const contracts = {
   testnet: {
-    game: "0x00",
+    game: "0x0",
     lords_erc20_mintable:
       "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
   },
   goerli: {
-    game: "0x00",
+    game: "0x04b16f7c6399cc103ea2354d273121bf37f4283d6a2cab05d72c6255f560ebde",
     lords_erc20_mintable:
       "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
   },
