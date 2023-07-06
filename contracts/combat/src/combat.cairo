@@ -3,6 +3,7 @@ use integer::{
     U8IntoU16, U16IntoU64, U8IntoU64, U64TryIntoU16, U64TryIntoU8, U8IntoU128, U128TryIntoU8,
     U128TryIntoU16, u16_sqrt
 };
+use core::traits::{TryInto, Into};
 use core::traits::DivEq;
 use super::constants::CombatEnums::{Tier, Type, Slot, WeaponEffectiveness};
 use super::constants::CombatSettings;
@@ -623,7 +624,7 @@ impl ImplCombat of ICombat {
     fn ability_based_avoid_threat(adventurer_level: u8, relevant_stat: u8, entropy: u128) -> bool {
         // number of sides of the die will be based on adventurer_level
         // so the higher the adventurer level, the more sides the die has
-        let dice_roll = 1 + (U128TryIntoU8::try_into(entropy).unwrap() % adventurer_level);
+        let dice_roll = 1 + (U128TryIntoU8::try_into(entropy % adventurer_level.into()).unwrap());
 
         // in order to avoid the threat, the adventurer must roll a number less than or equal
         // to the the relevant stat + difficulty cliff.

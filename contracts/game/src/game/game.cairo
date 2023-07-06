@@ -1,8 +1,8 @@
 #[starknet::contract]
 mod Game {
     // TODO: TESTING CONSTS REMOVE BEFORE DEPLOYMENT
-    const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 100;
-    const IDLE_MINOR_PENALTY_BLOCKS: u16 = 100;
+    const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 10;
+    const IDLE_MINOR_PENALTY_BLOCKS: u16 = 10;
     const IDLE_DEATH_PENALTY_BLOCKS: u16 = 300;
     const MAX_STORAGE_BLOCKS: u64 = 512;
     const TEST_ENTROPY: u64 = 12303548;
@@ -28,8 +28,7 @@ mod Game {
 
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer},
-        bag::{Bag, BagActions, ImplBagActions, LootStatistics},
-        adventurer_meta::AdventurerMetadata,
+        bag::{Bag, BagActions, ImplBagActions, LootStatistics}, adventurer_meta::AdventurerMetadata,
         exploration::ExploreUtils,
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
@@ -47,7 +46,7 @@ mod Game {
 
     #[storage]
     struct Storage {
-        _game_entropy: felt252,
+        _game_entropy: u64,
         _last_game_entropy_block: felt252,
         _adventurer: LegacyMap::<u256, felt252>,
         _owner: LegacyMap::<u256, ContractAddress>,
@@ -92,7 +91,7 @@ mod Game {
         self._lords.write(lords);
         self._dao.write(dao);
 
-        _set_entropy(ref self, 1);
+        _set_entropy(ref self);
     }
 
     // ------------------------------------------ //
@@ -135,8 +134,10 @@ mod Game {
             // assert adventurer does not have stat upgrades available
             _assert_no_stat_upgrades_available(@self, adventurer);
 
+            _assert_not_in_battle(@self, adventurer);
+
             // assert adventurer has not already explored this block
-            _assert_one_explore_per_block(@self, adventurer);
+            // _assert_one_explore_per_block(@self, adventurer);
 
             // if the adventurer hasn't been idle
             if !_is_idle(@self, adventurer) {
@@ -299,7 +300,7 @@ mod Game {
             // check item exists on Market
             // TODO: replace entropy
             assert(
-                ImplMarket::check_ownership(TEST_ENTROPY, item_id) == true,
+                ImplMarket::check_ownership(adventurer.get_market_entropy(), item_id) == true,
                 messages::ITEM_DOES_NOT_EXIST
             );
 
@@ -401,7 +402,8 @@ mod Game {
                 self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
             // get adventurer (stat boosts automatically applied during unpacking)
-            _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+            // _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+            _unpack_adventurer(self, adventurer_id)
         }
 
         fn get_adventurer_meta(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
@@ -424,12 +426,12 @@ mod Game {
             _lords_address(self)
         }
 
-        fn get_entropy(self: @ContractState) -> u256 {
+        fn get_entropy(self: @ContractState) -> u64 {
             _get_entropy(self)
         }
 
-        fn set_entropy(ref self: ContractState, entropy: felt252) {
-            _set_entropy(ref self, entropy)
+        fn set_entropy(ref self: ContractState) {
+            _set_entropy(ref self)
         }
 
         fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
@@ -443,7 +445,7 @@ mod Game {
 
     fn _start(ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata) {
         // https://github.com/starkware-libs/cairo/issues/2942
-        internal::revoke_ap_tracking();
+        // internal::revoke_ap_tracking();
         // get caller address
         let caller = get_caller_address();
 
@@ -464,11 +466,7 @@ mod Game {
             home_realm: adventurer_meta.home_realm,
             race: adventurer_meta.race,
             order: adventurer_meta.order,
-            entropy: Felt252TryIntoU64::try_into(
-                ContractAddressIntoFelt252::into(caller)
-                    + U64IntoFelt252::into(block_info.block_timestamp)
-            )
-                .unwrap()
+            entropy: 0
         };
 
         // emit the StartGame
@@ -504,12 +502,12 @@ mod Game {
         ref name_storage2: LootItemSpecialNamesStorage
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
-        internal::revoke_ap_tracking();
+        // internal::revoke_ap_tracking();
         // get adventurer entropy from storage
-        let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id).entropy.into();
 
         // get global game entropy
-        let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
+        let game_entropy = _get_entropy(@self).into();
 
         // use entropy sources to generate random exploration
         let exploration_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
@@ -636,7 +634,7 @@ mod Game {
         entropy: u128
     ) -> Adventurer {
         // https://github.com/starkware-libs/cairo/issues/2942
-        internal::revoke_ap_tracking();
+        // internal::revoke_ap_tracking();
         // delegate obstacle encounter to obstacle library
         let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
             adventurer.get_level(), adventurer.stats.intelligence, entropy
@@ -746,7 +744,7 @@ mod Game {
         special_names: LootItemSpecialNames
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
-        internal::revoke_ap_tracking();
+        // internal::revoke_ap_tracking();
         // if the new level is higher than the previous level
         if (new_level > previous_level) {
             // generate greatness increased event
@@ -815,7 +813,7 @@ mod Game {
         entropy: u128
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
-        internal::revoke_ap_tracking();
+        // internal::revoke_ap_tracking();
         let xp_increase = value * ITEM_XP_MULTIPLIER;
 
         // if weapon is equipped
@@ -1003,9 +1001,9 @@ mod Game {
         ref name_storage2: LootItemSpecialNamesStorage
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
-        internal::revoke_ap_tracking();
+        // internal::revoke_ap_tracking();
         // get adventurer entropy from storage
-        let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id).entropy.into();
 
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
         let battle_fixed_entropy: u128 = adventurer.get_battle_fixed_entropy(adventurer_entropy);
@@ -1040,16 +1038,16 @@ mod Game {
         }
 
         // get game entropy from storage
-        let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
+        let game_entropy: u128 = _get_entropy(@self).into();
 
         // When generating the beast, we need to ensure entropy remains fixed for the battle
         // for attacking however, we should change the entropy during battle so we use adventurer and beast health
         // to accomplish this
-        let attack_entropy = U64IntoU128::into(
+        let attack_entropy = 
             game_entropy
                 + adventurer_entropy
-                + U16IntoU64::into(adventurer.health + adventurer.beast_health)
-        );
+                + U16IntoU128::into(adventurer.health + adventurer.beast_health);
+        
 
         let damage_dealt = beast
             .attack(
@@ -1166,7 +1164,7 @@ mod Game {
         entropy: u128
     ) -> u16 {
         // https://github.com/starkware-libs/cairo/issues/2942
-        internal::revoke_ap_tracking();
+        // internal::revoke_ap_tracking();
         // generate a random attack slot for the beast and get the armor the adventurer has at that slot
         let armor = adventurer.get_item_at_slot(attack_location);
 
@@ -1199,10 +1197,10 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         internal::revoke_ap_tracking();
         // get adventurer entropy from storage
-        let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id).entropy.into();
 
         // get game entropy from storage
-        let game_entropy: u64 = _get_entropy(@self).try_into().unwrap();
+        let game_entropy: u128 = _get_entropy(@self).into();
 
         // generate live entropy from fixed entropy sources and live adventurer stats
         let flee_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
@@ -1333,9 +1331,9 @@ mod Game {
         equip: bool
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
-        internal::revoke_ap_tracking();
+        // internal::revoke_ap_tracking();
         // TODO: Remove after testing
-        // assert(adventurer.stat_upgrade_available == 1, 'Not available');
+        assert(adventurer.stat_upgrade_available == 1, 'Not available');
 
         // unpack Loot bag from storage
         let mut bag = _bag_unpacked(@self, adventurer_id);
@@ -1396,7 +1394,7 @@ mod Game {
         ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer, stat_id: u8
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
-        internal::revoke_ap_tracking();
+        // internal::revoke_ap_tracking();
         _assert_ownership(@self, adventurer_id);
 
         // add stat to adventuer
@@ -1414,6 +1412,9 @@ mod Game {
     }
 
     fn _buy_health(ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer) {
+
+        internal::revoke_ap_tracking();
+        
         // check gold balance
         assert(
             adventurer.check_gold(adventurer.get_potion_cost()) == true, messages::NOT_ENOUGH_GOLD
@@ -1445,11 +1446,11 @@ mod Game {
     // 1. Move this to Adventurer lib
     // 2. Consider using cairo hashing algorithm
     fn _get_live_entropy(
-        adventurer_entropy: u64, game_entropy: u64, adventurer: Adventurer
+        adventurer_entropy: u128, game_entropy: u128, adventurer: Adventurer
     ) -> u128 {
         // cast everything to u128 before adding to avoid overflow
-        return U64IntoU128::into(adventurer_entropy)
-            + U64IntoU128::into(game_entropy)
+        return adventurer_entropy
+            + game_entropy
             + U16IntoU128::into(adventurer.xp)
             + U16IntoU128::into(adventurer.gold)
             + U16IntoU128::into(adventurer.health);
@@ -1555,9 +1556,7 @@ mod Game {
     fn _loot_special_names_storage_unpacked(
         self: @ContractState, adventurer_id: u256, storage_index: u256
     ) -> LootItemSpecialNamesStorage {
-        Packing::unpack(
-            self._loot_special_names.read((adventurer_id, storage_index))
-        )
+        Packing::unpack(self._loot_special_names.read((adventurer_id, storage_index)))
     }
 
     fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
@@ -1569,6 +1568,9 @@ mod Game {
     }
     fn _assert_in_battle(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.beast_health > 0, messages::ATTACK_CALLED_OUTSIDE_BATTLE);
+    }
+    fn _assert_not_in_battle(self: @ContractState, adventurer: Adventurer) {
+        assert(adventurer.beast_health == 0, messages::ATTACK_CALLED_OUTSIDE_BATTLE);
     }
     fn _assert_not_starter_beast(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.get_level() > 1, messages::CANT_FLEE_STARTER_BEAST);
@@ -1623,7 +1625,9 @@ mod Game {
             // the current block is lower than the players last action
             // it means we the block number has wrapped around the 512 block storage
             // as such the difference between block 511 and block 0 is 1.
-            return (U64TryIntoU16::try_into(MAX_STORAGE_BLOCKS).unwrap() - adventurer.last_action + current_block) >= IDLE_MINOR_PENALTY_BLOCKS;
+            return (U64TryIntoU16::try_into(MAX_STORAGE_BLOCKS).unwrap()
+                - adventurer.last_action
+                + current_block) >= IDLE_MINOR_PENALTY_BLOCKS;
         }
     }
 
@@ -1647,7 +1651,7 @@ mod Game {
 
     fn _get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<Loot> {
         // TODO: Replace with actual seed
-        ImplMarket::get_all_items(TEST_ENTROPY)
+        ImplMarket::get_all_items(_unpack_adventurer(self, adventurer_id).get_market_entropy())
     }
 
     fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u256 {
@@ -1698,24 +1702,23 @@ mod Game {
         }
     }
 
-    fn _set_entropy(ref self: ContractState, entropy: felt252) {
-        // TODO: Replace with actual seed
-        //starknet::get_tx_info().unbox().transaction_hash.into()
+    fn _set_entropy(ref self: ContractState) {
+        // let hash: felt252  = starknet::get_tx_info().unbox().transaction_hash.into();
 
-        // let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
+        let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
 
-        // assert(
-        //     blocknumber >= (self._last_game_entropy_block.read().try_into().unwrap()
-        //         + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()),
-        //     messages::BLOCK_NUMBER_ERROR
-        // );
+        assert(
+            blocknumber >= (self._last_game_entropy_block.read().try_into().unwrap()
+                + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()),
+            messages::BLOCK_NUMBER_ERROR
+        );
 
-        self._game_entropy.write(entropy);
-    // self._last_game_entropy_block.write(blocknumber.into());
+        self._game_entropy.write(blocknumber);
+        self._last_game_entropy_block.write(blocknumber.into());
     }
 
-    fn _get_entropy(self: @ContractState) -> u256 {
-        self._game_entropy.read().into()
+    fn _get_entropy(self: @ContractState) -> u64 {
+        self._game_entropy.read()
     }
 
     fn _get_score_for_adventurer(self: @ContractState, adventurer_id: u256) -> u256 {
@@ -1732,25 +1735,25 @@ mod Game {
 
     // sets the scoreboard
     // we set the adventurer id in the scoreboard as we already store the owners address
-    fn _set_scoreboard(ref self: ContractState, adventurer_id: u256, score: u256) {
+    fn _set_scoreboard(ref self: ContractState, adventurer_id: u256, score: u16) {
         let second_place = self._scoreboard.read(2);
         let first_place = self._scoreboard.read(1);
 
-        if score > self._scores.read(1) {
+        if score.into() > self._scores.read(1) {
             self._scoreboard.write(3, second_place);
             self._scoreboard.write(2, first_place);
             self._scoreboard.write(1, adventurer_id);
             self._scores.write(3, self._scores.read(2));
             self._scores.write(2, self._scores.read(1));
-            self._scores.write(1, score);
-        } else if score > self._scores.read(2) {
+            self._scores.write(1, score.into());
+        } else if score.into() > self._scores.read(2) {
             self._scoreboard.write(3, second_place);
             self._scoreboard.write(2, adventurer_id);
             self._scores.write(3, self._scores.read(2));
-            self._scores.write(2, score);
-        } else if score > self._scores.read(3) {
+            self._scores.write(2, score.into());
+        } else if score.into() > self._scores.read(3) {
             self._scoreboard.write(3, adventurer_id);
-            self._scores.write(3, score);
+            self._scores.write(3, score.into());
         }
     }
 
@@ -2052,6 +2055,7 @@ mod Game {
         killed_by_obstacle: bool,
         killer_id: u8
     ) {
+        _set_scoreboard(ref self, adventurer_state.adventurer_id, adventurer_state.adventurer.xp);
         self
             .emit(
                 Event::AdventurerDied(

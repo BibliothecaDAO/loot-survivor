@@ -6,8 +6,8 @@ mod BeastSettings {
     // Controls the level of the first beast in the game
     const STARTER_BEAST_LEVEL: u16 = 1;
 
-    // Controls the minimum damage from beasts
-    const MINIMUM_DAMAGE: u16 = 1;
+    // Controls the minimum damage
+    const MINIMUM_DAMAGE: u16 = 4;
 
     // Controls the strength boost for beasts
     const STRENGTH_BONUS: u16 = 0;
