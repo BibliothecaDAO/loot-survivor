@@ -1,11 +1,7 @@
 class Config:
-    def __init__(
-        self, network=None, adventurer=None, beast=None, loot=None, start_block=None
-    ):
+    def __init__(self, network=None, game=None, start_block=None):
         self.network = network
-        self.ADVENTURER_CONTRACT = adventurer
-        self.BEAST_CONTRACT = beast
-        self.LOOT_CONTRACT = loot
+        self.game_contract = game
         if start_block:
             self.STARTING_BLOCK = int(start_block)
         else:

@@ -32,7 +32,6 @@ from indexer.decoder import (
     decode_purchased_potion_event,
     decode_new_high_score_event,
     decode_adventurer_died_event,
-    decode_adventurer_shop_available_event,
 )
 from indexer.utils import (
     felt_to_str,
@@ -341,7 +340,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "PurchasedPotion",
             "NewHighScore",
             "AdventurerDied",
-            "ShopAvailable",
+            # "ShopAvailable",
         ]:
             add_filter(self.config.GAME_CONTRACT, survivor_event)
 
@@ -387,7 +386,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                     "PurchasedPotion": self.purchased_potion,
                     "NewHighScore": self.new_high_score,
                     "AdventurerDied": self.adventurer_died,
-                    "ShopAvailable": self.shop_available,
+                    # "ShopAvailable": self.shop_available,
                 }[event_name](
                     info,
                     block_time,
@@ -1070,33 +1069,33 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "->",
         )
 
-    async def shop_available(
-        self,
-        info: Info,
-        block_time: datetime,
-        _: FieldElement,
-        tx_hash: str,
-        data: List[FieldElement],
-    ):
-        sa = decode_adventurer_shop_available_event(data)
+    # async def shop_available(
+    #     self,
+    #     info: Info,
+    #     block_time: datetime,
+    #     _: FieldElement,
+    #     tx_hash: str,
+    #     data: List[FieldElement],
+    # ):
+    #     sa = decode_adventurer_shop_available_event(data)
 
-        for item in sa.items:
-            items_doc = {
-                "item": check_exists_int(item),
-                "adventurerId": check_exists_int(sa.adventurer_state["adventurer_id"]),
-                "owner": check_exists_int(0),
-                "equipped": check_exists_int(0),
-                "ownerAddress": check_exists_int(0),
-                "xp": encode_int_as_bytes(0),
-                "cost": encode_int_as_bytes(0),
-                "namePrefix": check_exists_int(0),
-                "nameSuffix": check_exists_int(0),
-                "itemSuffix": check_exists_int(0),
-                "createdTime": block_time,
-                "purchasedTime": check_exists_int(0),
-                "lastUpdatedTime": block_time,
-            }
-        await info.storage.insert_one("items", items_doc)
+    #     for item in sa.items:
+    #         items_doc = {
+    #             "item": check_exists_int(item),
+    #             "adventurerId": check_exists_int(sa.adventurer_state["adventurer_id"]),
+    #             "owner": check_exists_int(0),
+    #             "equipped": check_exists_int(0),
+    #             "ownerAddress": check_exists_int(0),
+    #             "xp": encode_int_as_bytes(0),
+    #             "cost": encode_int_as_bytes(0),
+    #             "namePrefix": check_exists_int(0),
+    #             "nameSuffix": check_exists_int(0),
+    #             "itemSuffix": check_exists_int(0),
+    #             "createdTime": block_time,
+    #             "purchasedTime": check_exists_int(0),
+    #             "lastUpdatedTime": block_time,
+    #         }
+    #     await info.storage.insert_one("items", items_doc)
 
     async def handle_invalidate(self, _info: Info, _cursor: Cursor):
         raise ValueError("data must be finalized")
