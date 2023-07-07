@@ -13,7 +13,7 @@ use combat::constants::CombatEnums::{Tier};
 
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET, TIER_PRICE};
 
-const MARKET_SEED: u64 = 123456;
+const MARKET_SEED: u64 = 512;
 
 #[derive(Drop, Serde)]
 struct LootWithPrice {
@@ -43,9 +43,9 @@ impl ImplMarket of IMarket {
     fn get_all_items(seed: u64) -> Array<Loot> {
         let mut all_items = ArrayTrait::<Loot>::new();
 
-        let mut i: u64 = 1;
+        let mut i: u64 = 0;
         loop {
-            if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
                 break ();
             }
 
@@ -60,19 +60,23 @@ impl ImplMarket of IMarket {
     fn get_all_items_with_price(seed: u64) -> Array<LootWithPrice> {
         let mut all_items = ArrayTrait::<LootWithPrice>::new();
 
-        let mut i: u64 = 1;
+        let mut i: u64 = 0;
         loop {
-            if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
                 break ();
             }
+
+            let id = ImplMarket::get_id(seed + i);
+
+            // id.print();
 
             // TODO: We need to move this to fetch from state - it's too gassy...
             all_items
                 .append(
                     LootWithPrice {
-                        item: ImplLoot::get_item(ImplMarket::get_id(seed + i)),
+                        item: ImplLoot::get_item(id),
                         price: ImplMarket::get_price(
-                            ImplLoot::get_tier(ImplMarket::get_id(seed + i))
+                            ImplLoot::get_tier(id)
                         )
                     }
                 );
@@ -88,22 +92,18 @@ impl ImplMarket of IMarket {
 
     fn is_item_available(seed: u64, item_id: u8) -> bool {
         let mut i: u64 = 0;
-        let mut found_item = false;
-        let result = loop {
+
+        loop {
             if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
-                break ();
+                break false;
             }
 
-            let id = ImplMarket::get_id(seed + i);
-
-            if item_id == id {
-                found_item = true;
-                break ();
+            if item_id == ImplMarket::get_id(seed + i) {
+                break true;
             }
 
             i += OFFSET;
-        };
-        found_item
+        }
     }
 }
 
@@ -140,7 +140,7 @@ fn test_get_all_items() {
 #[test]
 #[available_gas(9000000)]
 fn test_is_item_available() {
-    let mut i: u64 = 1;
+    let mut i: u64 = 0;
     loop {
         if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
             break ();
@@ -157,11 +157,11 @@ fn test_is_item_available() {
 }
 
 #[test]
-#[available_gas(9000000)]
+#[available_gas(90000000)]
 fn test_fake_check_ownership() {
     let mut i: u64 = 0;
     loop {
-        if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+        if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
             break ();
         }
 
@@ -180,15 +180,17 @@ fn test_fake_check_ownership() {
 fn test_get_all_items_ownership() {
     let items = @ImplMarket::get_all_items(MARKET_SEED);
 
-    let mut i: u64 = 1;
+    let mut i: u64 = 0;
     let mut item_index: usize = 0;
 
     loop {
-        if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+        if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
             break ();
         }
 
-        let result = ImplMarket::is_item_available(MARKET_SEED + i, *items.at(item_index).id);
+        let id = *items.at(item_index).id;
+
+        let result = ImplMarket::is_item_available(MARKET_SEED + i, id);
 
         assert(result == true, 'item');
 

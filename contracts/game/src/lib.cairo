@@ -305,7 +305,7 @@ mod Game {
             // check item exists on Market
             // TODO: replace entropy
             assert(
-                ImplMarket::is_item_available(adventurer.get_market_entropy(), item_id) == true,
+                ImplMarket::is_item_available(adventurer.get_market_entropy(adventurer_id), item_id) == true,
                 messages::ITEM_DOES_NOT_EXIST
             );
 
@@ -462,8 +462,8 @@ mod Game {
             starting_weapon, block_info.block_number
         );
 
-        // get the current adventurer id
-        let adventurer_id = self._counter.read();
+        // get the current adventurer id - start at 1
+        let adventurer_id = self._counter.read() + 1;
 
         // build meta
         let adventurer_meta = AdventurerMetadata {
@@ -1711,7 +1711,7 @@ mod Game {
     }
 
     fn _get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<LootWithPrice> {
-        ImplMarket::get_all_items_with_price(_unpack_adventurer(self, adventurer_id).get_market_entropy())
+        ImplMarket::get_all_items_with_price(_unpack_adventurer(self, adventurer_id).get_market_entropy(adventurer_id))
     }
 
     fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u256 {
