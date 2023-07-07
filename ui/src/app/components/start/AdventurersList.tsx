@@ -127,7 +127,7 @@ export const AdventurersList = ({
             </>
           ) : (
             <>
-              <div className="flex flex-col w-full sm:w-1/3 h-full overflow-y-auto mx-2">
+              <div className="flex flex-col w-full sm:w-1/3 h-full overflow-y-auto ml-4">
                 {filteredAdventurers.map((adventurer, index) => (
                   <Button
                     key={adventurer.id}
@@ -158,7 +158,7 @@ export const AdventurersList = ({
                 )}
               </div>
               {filteredAdventurers.length > 0 && (
-                <div className="sm:w-2/12 md:w-6/12 lg:w-2/3 w-full ml-2">
+                <div className="sm:w-2/12 md:w-6/12 lg:w-2/3 w-full">
                   <Info adventurer={filteredAdventurers[selectedIndex]} />
                 </div>
               )}
@@ -166,7 +166,7 @@ export const AdventurersList = ({
           )}
         </div>
       ) : (
-        <p className="text-lg">You do not have any adventurers!</p>
+        <p className="text-lg uppercase">You do not have any adventurers!</p>
       )}
     </div>
   );

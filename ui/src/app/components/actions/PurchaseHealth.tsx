@@ -79,7 +79,7 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
   }, [isActive, healthAmount, handleKeyDown]);
 
   return (
-    <div className="flex flex-col gap-5 p-5 sm:p-0">
+    <div className="flex flex-col gap-5 p-5 sm:p-0 md:p-2">
       <HealthSlider
         purchaseAmount={healthAmount}
         setPurchaseAmount={setHealthAmount}
