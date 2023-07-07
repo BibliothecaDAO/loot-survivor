@@ -338,7 +338,7 @@ mod Game {
             // pack and save (stat boosts weren't applied so no need to remove)
             _pack_adventurer(ref self, adventurer_id, adventurer);
         }
-        fn buy_health(ref self: ContractState, adventurer_id: u256) {
+        fn buy_potion(ref self: ContractState, adventurer_id: u256) {
             // get item names from storage
             let mut name_storage1 = _loot_special_names_storage_unpacked(
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
@@ -357,6 +357,9 @@ mod Game {
 
             // assert adventurer is not dead
             _assert_not_dead(@self, adventurer);
+
+            // assert adventurer is not in a battle
+            _assert_not_in_battle(@self, adventurer);
 
             // purchase health
             _buy_health(ref self, adventurer_id, ref adventurer);
@@ -1638,7 +1641,7 @@ mod Game {
         assert(adventurer.beast_health > 0, messages::ATTACK_CALLED_OUTSIDE_BATTLE);
     }
     fn _assert_not_in_battle(self: @ContractState, adventurer: Adventurer) {
-        assert(adventurer.beast_health == 0, messages::EXPLORE_CALLED_IN_BATTLE);
+        assert(adventurer.beast_health == 0, messages::ACTION_NOT_ALLOWED_DURING_BATTLE);
     }
     fn _assert_not_starter_beast(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.get_level() > 1, messages::CANT_FLEE_STARTER_BEAST);
