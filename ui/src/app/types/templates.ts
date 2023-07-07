@@ -35,7 +35,7 @@ export const AdventurerTemplate: Adventurer = {
 
 export const BattleTemplate: Battle = {
   adventurerId: 1,
-  beast: "Wraith",
+  beast: "Fairy",
   beastHealth: 0,
   beastLevel: 5,
   beastNamePrefix: "Agony",
@@ -64,7 +64,7 @@ export const DiscoveryTemplate: Discovery = {
   damageLocation: undefined,
   xpEarnedAdventurer: undefined,
   xpEarnedItems: undefined,
-  entity: "Wraith",
+  entity: "Bigfoot",
   entityLevel: 5,
   entityHealth: 42,
   entityNamePrefix: "Agony",

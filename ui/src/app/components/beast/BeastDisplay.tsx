@@ -69,16 +69,13 @@ export const BeastDisplay = ({
           </div>
         </div>
       </div>
-      <div className="relative flex-grow w-full h-40 sm:h-full pb-full">
+      <div className="relative flex-grow w-full h-40 sm:h-[150%]">
         <Image
           src={image}
           alt="monsters"
           fill={true}
           style={{
             objectFit: "contain",
-            position: "absolute",
-            width: "100%",
-            height: "100%",
           }}
         />
       </div>
