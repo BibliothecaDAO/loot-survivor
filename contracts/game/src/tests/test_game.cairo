@@ -185,10 +185,31 @@ mod tests {
     #[should_panic(expected: ('Cant flee starter beast', 'ENTRYPOINT_FAILED'))]
     #[available_gas(15000000)]
     fn test_cant_flee_starter_beast() {
+        // start new game
         let mut game = new_adventurer();
-        let adventurer_start = game.get_adventurer(0);
 
-        // attempt to flee starter beast - should_panic
+        // immediately attempt to flee starter beast
+        // which is not allowed and should result in a panic 'Cant flee starter beast'
+        // which is annotated in the test
+        game.flee(ADVENTURER_ID);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Not in battle', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(60000000)]
+    fn test_cant_flee_outside_battle() {
+        // start adventuer and advance to level 2
+        let mut game = lvl_2_adventurer();
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(0);
+
+        // assert adventurer is not in a battle
+        assert(adventurer.beast_health == 0, 'should not be in battle');
+
+        // attempt to flee despite not being in a battle
+        // this should trigger a panic 'Not in battle' which is
+        // annotated in the test
         game.flee(ADVENTURER_ID);
     }
 
