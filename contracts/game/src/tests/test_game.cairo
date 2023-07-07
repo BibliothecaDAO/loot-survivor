@@ -100,22 +100,20 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: ('In battle cannot explore','ENTRYPOINT_FAILED' ))]
     #[available_gas(30000000)]
-    fn test_explore() {
+    fn test_no_explore_during_battle() {
         let mut deployed_game = new_adventurer();
-
-        testing::set_block_number(1001);
-
         let original_adventurer = deployed_game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'should start with 0 xp');
         assert(original_adventurer.health == 100, 'should start with 100hp');
         assert(original_adventurer.weapon.id == ItemId::Wand, 'adventurer should have a wand');
+        assert(original_adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH, 'adventurer should have a wand');
 
-        // Go exploring an encounter an obstacle (explore is currently hard coded for an obstacle)
+        // try to explore before defeating start beast
+        // should result in a panic 'In battle cannot explore' which
+        // is annotated in the test
         deployed_game.explore(ADVENTURER_ID);
-        let updated_adventurer = deployed_game.get_adventurer(ADVENTURER_ID);
-        assert(updated_adventurer.health == 100, 'should have dodged obstacle');
     }
 
     #[test]
