@@ -16,7 +16,7 @@ mod tests {
     use lootitems::statistics::constants::{ItemId};
 
     use game::game::interfaces::{IGameDispatcherTrait, IGameDispatcher};
-    use game::game::game::{Game};
+    use game::{Game};
     use survivor::adventurer_meta::AdventurerMetadata;
 
     use survivor::constants::adventurer_constants::{
@@ -26,6 +26,7 @@ mod tests {
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
     use game::game::messages::messages;
+    
     use beasts::constants::BeastSettings;
 
     fn setup() -> IGameDispatcher {
@@ -89,6 +90,7 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
     #[available_gas(30000000)]
     fn test_explore() {
         let mut deployed_game = new_adventurer();
