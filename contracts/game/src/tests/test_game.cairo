@@ -100,7 +100,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('In battle cannot explore','ENTRYPOINT_FAILED' ))]
+    #[should_panic(expected: ('Action not allowed in battle','ENTRYPOINT_FAILED' ))]
     #[available_gas(30000000)]
     fn test_no_explore_during_battle() {
         let mut deployed_game = new_adventurer();
@@ -279,17 +279,49 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
-    #[available_gas(30000000)]
-    fn test_buy_health() {
+    #[available_gas(60000000)]
+    fn test_buy_potion() {
+        // deploy and start new game
+        let mut game = new_adventurer();
+
+        // Clear starter beast
+        game.attack(ADVENTURER_ID);
+        game.attack(ADVENTURER_ID);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // verify adventurer took damage from starter beast
+        assert(adventurer.health < STARTING_HEALTH, 'should take dmg from beast');
+
+        // get adventurer health and gold before buying potion
+        let adventurer_health_pre_potion = adventurer.health;
+        let adventurer_gold_pre_potion = adventurer.gold;
+
+        // buy potion
+        game.buy_potion(ADVENTURER_ID);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // verify potion increased health by POTION_HEALTH_AMOUNT or adventurer health is full
+        assert(adventurer.health == 100 || adventurer.health == adventurer_health_pre_potion + POTION_HEALTH_AMOUNT, 'potion did not give health');
+
+        // verify potion cost reduced adventurers gold balance by POTION_PRICE * adventurer level (no charisma discount here)
+        assert(adventurer.gold == adventurer_gold_pre_potion - (POTION_PRICE * adventurer.get_level().into()), 'potion cost is wrong');
+    }
+
+    #[test]
+    #[should_panic(expected: ('Action not allowed in battle','ENTRYPOINT_FAILED' ))]
+    #[available_gas(10000000)]
+    fn test_cant_buy_health_during_battle() {
+        // deploy and start new game
         let mut deployed_game = new_adventurer();
 
-        deployed_game.buy_health(ADVENTURER_ID);
-
-        let adventurer = deployed_game.get_adventurer(ADVENTURER_ID);
-
-        assert(adventurer.health == POTION_HEALTH_AMOUNT + STARTING_HEALTH, 'health');
-        assert(adventurer.gold == STARTING_GOLD - POTION_PRICE, 'gold');
+        // attempt to immediately buy health before clearing starter beast
+        // this should result in contract throwing a panic 'Action not allowed in battle'
+        // This test is annotated to expect that panic
+        deployed_game.buy_potion(ADVENTURER_ID);
     }
 
     #[test]
