@@ -36,7 +36,6 @@ const useCustomQuery = (
   }, [refetch]);
 
   useEffect(() => {
-    console.log(data, loading, queryKey, variables);
     if (data) {
       updateData(queryKey, data, loading, refetchWrapper);
     }

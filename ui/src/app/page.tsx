@@ -523,8 +523,6 @@ export default function Home() {
     query: "(max-device-width: 480px)",
   });
 
-  console.log(hasBeast, statUpgrades, adventurer?.health);
-
   return (
     // <Maintenance />
     <main

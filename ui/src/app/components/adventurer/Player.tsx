@@ -3,7 +3,6 @@ import useAdventurerStore from "../../hooks/useAdventurerStore";
 
 export default function Player() {
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  console.log(adventurer);
   return (
     <>
       {adventurer?.id ? (

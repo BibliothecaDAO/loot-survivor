@@ -62,12 +62,6 @@ export default function BeastScreen() {
     txAccepted
   );
 
-  console.log(
-    data.battlesByBeastQuery,
-    data.lastBattleQuery,
-    data.lastBeastQuery
-  );
-
   // let beastData = data.lastBeastQuery
   //   ? data.lastBeastQuery.beasts[0]
   //   : NullBattle;

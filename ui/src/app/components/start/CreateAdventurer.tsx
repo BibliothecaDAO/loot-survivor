@@ -96,8 +96,6 @@ export const CreateAdventurer = ({
       ],
     };
 
-    console.log(mintAdventurerTx);
-
     // const mintAdventurerTx = {
     //   contractAddress: gameContract?.address ?? "",
     //   entrypoint: "start",
@@ -111,7 +109,6 @@ export const CreateAdventurer = ({
     //   ],
     // };
 
-    console.log(mintAdventurerTx);
     addToCalls(mintAdventurerTx);
     startLoading(
       "Create",

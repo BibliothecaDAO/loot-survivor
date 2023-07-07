@@ -25,17 +25,20 @@ def cli():
 
 
 @cli.command()
-@click.option("--server-url", default=None, help="Apibara stream url.")
 @click.option("--mongo-url", default=None, help="MongoDB url.")
 @click.option("--restart", is_flag=True, help="Restart indexing from the beginning.")
 @click.option("--network", default=None, help="Network id.")
 @click.option("--game", is_flag=None, help="Game contract address.")
 @click.option("--start_block", is_flag=None, help="Indexer starting block.")
 @async_command
-async def start(server_url, mongo_url, restart, network, game, start_block):
+async def start(mongo_url, restart, network, game, start_block):
     """Start the Apibara indexer."""
-    if server_url is None:
+    if network is None:
         server_url = StreamAddress.StarkNet.Goerli
+    elif network == "goerli":
+        server_url = StreamAddress.StarkNet.Goerli
+    elif network == "mainnet":
+        server_url = StreamAddress.StarkNet.Mainnet
 
     if mongo_url is None:
         mongo_url = "mongodb://apibara:apibara@localhost:27017"
