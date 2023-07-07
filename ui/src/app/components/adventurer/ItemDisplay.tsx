@@ -12,7 +12,6 @@ export const ItemDisplay = ({ item }: ItemDisplayProps) => {
 
   const itemName = processItemName(item);
   const { tier, type, slot } = getItemData(itemType ?? "");
-  console.log(tier, type, slot);
 
   return (
     <div

@@ -91,8 +91,6 @@ export default function EncountersScreen({ profile }: EncountersProps) {
     }
   };
 
-  console.log(sortedCombined);
-
   const displayEncounters = sortedCombined.slice(
     (currentPage - 1) * encountersPerPage,
     currentPage * encountersPerPage

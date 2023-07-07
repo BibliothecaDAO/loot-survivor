@@ -10,6 +10,7 @@ import useUIStore from "../../hooks/useUIStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import { ItemTemplate } from "@/app/types/templates";
 import { Item } from "@/app/types";
+
 interface InfoProps {
   adventurer: Adventurer | undefined;
   profileExists?: boolean;
