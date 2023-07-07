@@ -160,12 +160,11 @@ export CONTRACT_ADDRESS=INSERT_ADDRESS_OF_NEWLY_DEPLOYED_CONTRACT_HERE
 #### Start
 starknet invoke --function start --address $CONTRACT_ADDRESS --input 12 123 0 0 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 
+#### Attack
+starknet invoke --function attack --address $CONTRACT_ADDRESS --input 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 
 #### Explore
 starknet invoke --function explore --address $CONTRACT_ADDRESS --input 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
-
-#### Attack
-starknet invoke --function attack --address $CONTRACT_ADDRESS --input 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 
 #### Call
 starknet call --function get_adventurer --address $CONTRACT_ADDRESS --input 0 0 --account $ACCOUNT_NAME
