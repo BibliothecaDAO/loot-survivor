@@ -286,8 +286,8 @@ mod tests {
     #[test]
     #[available_gas(60000000)]
     fn test_buy_and_equip_item() {
-        let mut deployed_game = lvl_2_adventurer();
-        let market_items = @deployed_game.get_items_on_market(ADVENTURER_ID);
+        let mut game = lvl_2_adventurer();
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
         let item_id = *market_items.at(0).item.id;
         let item_price = *market_items.at(0).price.into();
 
