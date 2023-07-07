@@ -25,7 +25,7 @@ mod tests {
 
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
-    use game::game::messages::messages;
+    use game::game::messages::messages::{STAT_UPGRADES_AVAILABLE};
     
     use beasts::constants::BeastSettings;
 
@@ -215,28 +215,24 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: ('Stat upgrade available','ENTRYPOINT_FAILED' ))]
     #[available_gas(80000000)]
-    fn test_explore_not_allowed_with_stat() {
+    fn test_explore_not_allowed_with_avail_stat_upgrade() {
         let mut game = new_adventurer();
 
-        // TODO: Need to determine why starter beast
-        // takes 5 attacks to take down on this test
-        // in the test_attack above it only takes two which is
-        // expected. For now my goal is to test flee so going to just
-        // send the 5x attack so I can discover a non-starter beast
-        game.attack(ADVENTURER_ID);
-        game.attack(ADVENTURER_ID);
-        game.attack(ADVENTURER_ID);
+        // take out starter beast
         game.attack(ADVENTURER_ID);
         game.attack(ADVENTURER_ID);
 
+        // get updated adventurer
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // assert adventurer is now level 2 and has 1 stat upgrade available
         assert(updated_adventurer.get_level() == 2, 'advntr should be lvl 2');
         assert(updated_adventurer.stat_points_available == 1, 'advntr should have 1 stat avl');
 
-        // adventurer trying to explore should cause panic because they have stat upgrade available
-        // using #[should_panic] to verify this
+        // verify adventurer is unable to explore with stat upgrade available
+        // this test is annotated to expect a panic so if it doesn't, this test will fail
         game.explore(ADVENTURER_ID);
     }
 
