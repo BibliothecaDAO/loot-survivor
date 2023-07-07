@@ -302,14 +302,14 @@ mod Game {
             // assert adventurer is not dead
             _assert_not_dead(@self, adventurer);
 
-            // check item exists on Market
-            // TODO: replace entropy
-            assert(
-                ImplMarket::is_item_available(
-                    adventurer.get_market_entropy(adventurer_id), item_id
-                ) == true,
-                messages::ITEM_DOES_NOT_EXIST
-            );
+            // assert adventurer is not in battle
+            _assert_not_in_battle(@self, adventurer);
+
+            // assert market is open
+            _assert_market_is_open(@self, adventurer);
+
+            // check item is available in market
+            _assert_item_is_available(@self, adventurer, adventurer_id, item_id);
 
             // buy item
             _buy_item(ref self, adventurer_id, ref adventurer, item_id, equip);
@@ -1360,9 +1360,6 @@ mod Game {
         // internal::revoke_ap_tracking();
         // TODO: Remove after testing
 
-        // market is only available when adventurer has stat upgrades available
-        assert(adventurer.stat_points_available >= 1, 'Not available');
-
         // unpack Loot bag from storage
         let mut bag = _bag_unpacked(@self, adventurer_id);
 
@@ -1642,6 +1639,19 @@ mod Game {
     }
     fn _assert_not_in_battle(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.beast_health == 0, messages::ACTION_NOT_ALLOWED_DURING_BATTLE);
+    }
+    fn _assert_market_is_open(self: @ContractState, adventurer: Adventurer) {
+        assert(adventurer.stat_points_available > 0, messages::MARKET_CLOSED);
+    }
+    fn _assert_item_is_available(
+        self: @ContractState, adventurer: Adventurer, adventurer_id: u256, item_id: u8
+    ) {
+        assert(
+            ImplMarket::is_item_available(
+                adventurer.get_market_entropy(adventurer_id), item_id
+            ) == true,
+            messages::ITEM_DOES_NOT_EXIST
+        );
     }
     fn _assert_not_starter_beast(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.get_level() > 1, messages::CANT_FLEE_STARTER_BEAST);
