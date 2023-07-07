@@ -151,8 +151,9 @@ impl AdventurerPacking of Packing<Adventurer> {
 
 #[generate_trait]
 impl ImplAdventurer of IAdventurer {
-    fn get_market_entropy(self: Adventurer) -> u64 {
-        ((self.xp.into()) * pow::TWO_POW_9).try_into().expect('get_market_entropy')
+    fn get_market_entropy(self: Adventurer, adventurer_id: u256) -> u64 {
+        // TODO: check potential overflow
+        ((self.xp.into() + 1) * pow::TWO_POW_9 * adventurer_id).try_into().expect('get_market_entropy')
     }
     fn charisma_potion_discount(self: Adventurer) -> u16 {
         CHARISMA_DISCOUNT * self.stats.charisma.into()
@@ -1731,5 +1732,5 @@ fn test_get_market_entropy() {
         }, beast_health: 20, stat_points_available: 0,
     };
 
-    adventurer.get_market_entropy().print();
+    adventurer.get_market_entropy(1).print();
 }
