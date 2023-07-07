@@ -140,6 +140,9 @@ Loot Survivor is a onchain game, designed to be immutable and permanently hosted
 https://docs.starknet.io/documentation/getting_started/environment_setup/
 
 
+```
+source ~/cairo_venv/bin/activate
+```
 
 ```
 export STARKNET_NETWORK=alpha-goerli
@@ -147,24 +150,24 @@ export STARKNET_WALLET=starkware.starknet.wallets.open_zeppelin.OpenZeppelinAcco
 export CAIRO_COMPILER_DIR=~/.cairo/target/release/
 export CAIRO_COMPILER_ARGS=--add-pythonic-hints
 
-scarb build
+scarb contracts/game/build
 
 starknet declare --contract /home/os/Documents/code/bibliotheca/loot-survivor/contracts/game/target/dev/game_Game.sierra.json --account deployer_4
 
-starknet deploy --class_hash 0x2592ba7e082159424d860bf65694d0181afe5e53a7f546aa596335489fb5126 --account deployer_4 --max_fee 100000000000000000 --input 0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b
+starknet deploy --class_hash 0x6643487b05168aef33802bdddeed13bb79c3f2ca9b7af556db1a51c9f368b84 --account deployer_4 --max_fee 100000000000000000 --input 0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b
 ```
 
-export CONTRACT_ADDRESS=0x005afb26aa7ffc55fcb91ac7317b9ccc27ff4728aae8306e215f543367060bd3
+export CONTRACT_ADDRESS=0x027d77fc03ab455caa198e01e9ba75392ac869391714baacbf0ddbf4645a2c13
 
 #### Start
-starknet invoke --function start --address 0x005afb26aa7ffc55fcb91ac7317b9ccc27ff4728aae8306e215f543367060bd3 --input 12 123 0 0 0 0 --account deployer_4 --max_fee 10000000000000000
+starknet invoke --function start --address 0x027d77fc03ab455caa198e01e9ba75392ac869391714baacbf0ddbf4645a2c13 --input 12 123 0 0 0 0 --account deployer_4 --max_fee 10000000000000000
 
 
 #### Explore
-starknet invoke --function explore --address 0x005afb26aa7ffc55fcb91ac7317b9ccc27ff4728aae8306e215f543367060bd3 --input 0 0 --account deployer_4 --max_fee 10000000000000000
+starknet invoke --function explore --address 0x027d77fc03ab455caa198e01e9ba75392ac869391714baacbf0ddbf4645a2c13 --input 0 0 --account deployer_4 --max_fee 10000000000000000
 
 #### Attack
-starknet invoke --function attack --address 0x005afb26aa7ffc55fcb91ac7317b9ccc27ff4728aae8306e215f543367060bd3 --input 0 0 --account deployer_4 --max_fee 10000000000000000
+starknet invoke --function attack --address 0x027d77fc03ab455caa198e01e9ba75392ac869391714baacbf0ddbf4645a2c13 --input 1 0 --account deployer_4 --max_fee 10000000000000000
 
 #### Call
-starknet call --function get_adventurer --address 0x005afb26aa7ffc55fcb91ac7317b9ccc27ff4728aae8306e215f543367060bd3 --input 0 0 --account deployer_4
+starknet call --function get_adventurer --address 0x027d77fc03ab455caa198e01e9ba75392ac869391714baacbf0ddbf4645a2c13 --input 1 0 --account deployer_4
