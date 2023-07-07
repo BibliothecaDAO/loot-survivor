@@ -1,3 +1,4 @@
+use core::box::BoxTrait;
 #[cfg(test)]
 mod tests {
     use array::ArrayTrait;
@@ -7,8 +8,9 @@ mod tests {
     use starknet::syscalls::deploy_syscall;
     use starknet::testing;
     use traits::TryInto;
-    use debug::PrintTrait;
     use core::serde::Serde;
+    use box::BoxTrait;
+
 
     use market::market::{ImplMarket, LootWithPrice};
 
@@ -51,21 +53,21 @@ mod tests {
     }
 
     fn new_adventurer() -> IGameDispatcher {
-        let mut deployed_game = setup();
+        let mut game = setup();
 
         let adventurer_meta = AdventurerMetadata {
             name: 'Loaf'.try_into().unwrap(), home_realm: 1, race: 1, order: 2, entropy: 0
         };
 
-        deployed_game.start(ItemId::Wand, adventurer_meta);
+        game.start(ItemId::Wand, adventurer_meta);
 
-        deployed_game
+        game
     }
 
     fn adventurer_market_items() -> Array<LootWithPrice> {
-        let mut deployed_game = new_adventurer();
+        let mut game = new_adventurer();
 
-        deployed_game.get_items_on_market(ADVENTURER_ID)
+        game.get_items_on_market(ADVENTURER_ID)
     }
 
     fn lvl_2_adventurer() -> IGameDispatcher {
@@ -79,10 +81,10 @@ mod tests {
     #[test]
     #[available_gas(30000000)]
     fn test_start() {
-        let mut deployed_game = new_adventurer();
+        let mut game = new_adventurer();
 
-        let adventurer_1 = deployed_game.get_adventurer(ADVENTURER_ID);
-        let adventurer_meta_1 = deployed_game.get_adventurer_meta(ADVENTURER_ID);
+        let adventurer_1 = game.get_adventurer(ADVENTURER_ID);
+        let adventurer_meta_1 = game.get_adventurer_meta(ADVENTURER_ID);
 
         // check adventurer
         assert(adventurer_1.weapon.id == ItemId::Wand, 'weapon');
@@ -101,8 +103,8 @@ mod tests {
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
     #[available_gas(30000000)]
     fn test_no_explore_during_battle() {
-        let mut deployed_game = new_adventurer();
-        let original_adventurer = deployed_game.get_adventurer(ADVENTURER_ID);
+        let mut game = new_adventurer();
+        let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'should start with 0 xp');
         assert(original_adventurer.health == 100, 'should start with 100hp');
         assert(original_adventurer.weapon.id == ItemId::Wand, 'adventurer should have a wand');
@@ -114,7 +116,7 @@ mod tests {
         // try to explore before defeating start beast
         // should result in a panic 'In battle cannot explore' which
         // is annotated in the test
-        deployed_game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
     }
 
     #[test]
@@ -284,15 +286,14 @@ mod tests {
     #[test]
     #[available_gas(60000000)]
     fn test_buy_and_equip_item() {
-        let mut deployed_game = lvl_2_adventurer();
-        let market_items = @deployed_game.get_items_on_market(ADVENTURER_ID);
-
+        let mut game = lvl_2_adventurer();
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
         let item_id = *market_items.at(0).item.id;
         let item_price = *market_items.at(0).price.into();
 
-        deployed_game.buy_item(ADVENTURER_ID, item_id, true);
+        game.buy_item(ADVENTURER_ID, item_id, true);
 
-        let adventurer = deployed_game.get_adventurer(ADVENTURER_ID);
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
 
         assert(
             adventurer.gold == (STARTING_GOLD + BeastSettings::GOLD_REWARD_BASE_MINIMUM)
@@ -304,12 +305,12 @@ mod tests {
     #[test]
     #[available_gas(60000000)]
     fn test_buy_and_bag_item() {
-        let mut deployed_game = lvl_2_adventurer();
+        let mut game = lvl_2_adventurer();
         let market_items = @adventurer_market_items();
 
-        deployed_game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
+        game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
 
-        let bag = deployed_game.get_bag(ADVENTURER_ID);
+        let bag = game.get_bag(ADVENTURER_ID);
 
         assert(bag.item_1.id == *market_items.at(0).item.id, 'sash in bag');
     }
@@ -317,14 +318,14 @@ mod tests {
     #[test]
     #[available_gas(4000000000)]
     fn test_equip_item_from_bag() {
-        let mut deployed_game = lvl_2_adventurer();
+        let mut game = lvl_2_adventurer();
         let market_items = @adventurer_market_items();
 
         market_items.at(0).item.id;
 
-        deployed_game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
+        game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
 
-        let bag = deployed_game.get_bag(ADVENTURER_ID);
+        let bag = game.get_bag(ADVENTURER_ID);
         assert(bag.item_1.id == *market_items.at(0).item.id, 'in bag');
     }
 
@@ -384,19 +385,200 @@ mod tests {
     #[available_gas(10000000)]
     fn test_cant_buy_health_during_battle() {
         // deploy and start new game
-        let mut deployed_game = new_adventurer();
+        let mut game = new_adventurer();
 
         // attempt to immediately buy health before clearing starter beast
         // this should result in contract throwing a panic 'Action not allowed in battle'
         // This test is annotated to expect that panic
-        deployed_game.buy_potion(ADVENTURER_ID);
+        game.buy_potion(ADVENTURER_ID);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(30000000)]
+    fn test_cant_slay_non_idle_adventurer_no_rollover() {
+        let STARTING_BLOCK_NUMBER = 1;
+        let IDLE_BLOCKS: u64 = Game::IDLE_DEATH_PENALTY_BLOCKS.into() - 1;
+
+        // deploy and start new game
+        let mut game = new_adventurer();
+
+        // use 1 for starting block number
+        let STARTING_BLOCK_NUMBER = STARTING_BLOCK_NUMBER;
+        testing::set_block_number(STARTING_BLOCK_NUMBER);
+
+        // attack starter beast, resulting in adventurer last action block number being 1
+        game.attack(ADVENTURER_ID);
+
+        // assert adventurers last action is expected value
+        assert(
+            game
+                .get_adventurer(ADVENTURER_ID)
+                .last_action == STARTING_BLOCK_NUMBER
+                .try_into()
+                .unwrap(),
+            'unexpected last action block'
+        );
+
+        // roll forward blockchain
+        testing::set_block_number(STARTING_BLOCK_NUMBER + IDLE_BLOCKS);
+
+        // try to slay adventurer for being idle
+        // this should result in contract throwing a panic 'Adventurer is not idle'
+        // because the adventurer is not idle for the full IDLE_DEATH_PENALTY_BLOCKS
+        // This test is annotated to expect that panic
+        game.slay_idle_adventurer(ADVENTURER_ID);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(30000000)]
+    fn test_cant_slay_non_idle_adventurer_with_rollover() {
+        // set starting block to just before the rollover at 511
+        let STARTING_BLOCK_NUMBER = 510;
+        // adventurer will be idle for one less than the idle death penalty blocks
+        let IDLE_BLOCKS: u64 = Game::IDLE_DEATH_PENALTY_BLOCKS.into() - 1;
+
+        // deploy and start new game
+        let mut game = new_adventurer();
+
+        // set current block number
+        testing::set_block_number(STARTING_BLOCK_NUMBER);
+
+        // attack beast to set adventurer last action block number
+        game.attack(ADVENTURER_ID);
+
+        // assert adventurers last action is expected value
+        assert(
+            game
+                .get_adventurer(ADVENTURER_ID)
+                .last_action == STARTING_BLOCK_NUMBER
+                .try_into()
+                .unwrap(),
+            'unexpected last action'
+        );
+
+        // roll forward block chain
+        testing::set_block_number(STARTING_BLOCK_NUMBER + IDLE_BLOCKS);
+
+        // try to slay adventurer for being idle
+        // this should result in contract throwing a panic 'Adventurer is not idle'
+        // because the adventurer is not idle for the full IDLE_DEATH_PENALTY_BLOCKS
+        // This test is annotated to expect that panic
+        game.slay_idle_adventurer(ADVENTURER_ID);
+        game.slay_idle_adventurer(ADVENTURER_ID);
+    }
+
+    #[test]
+    #[available_gas(50000000)]
+    // @dev since we only store 511 blocks, there are two cases for the idle adventurer
+    // the first is when the adventurer last action block number is less than the
+    // (current_block_number % 511) and the other is when it is greater
+    // this test covers the case where the adventurer last action block number is less than the
+    // (current_block_number % 511)
+    fn test_slay_idle_adventurer_with_block_rollover() {
+        let STARTING_BLOCK_NUMBER = 510;
+
+        // deploy and start new game
+        let mut game = new_adventurer();
+
+        // set current block number to 510
+        testing::set_block_number(STARTING_BLOCK_NUMBER);
+
+        // attack starter beast, resulting in adventurer last action block number being 510
+        game.attack(ADVENTURER_ID);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // verify last action block number is 1
+        assert(adventurer.last_action == STARTING_BLOCK_NUMBER.try_into().unwrap(), 'unexpected last action block');
+
+        // roll forward blockchain to make adventurer idle
+        testing::set_block_number(
+            adventurer.last_action.into() + Game::IDLE_DEATH_PENALTY_BLOCKS.into()
+        );
+
+        // get current block number
+        let current_block_number = starknet::get_block_info().unbox().block_number;
+
+        // verify current block number % MAX_STORAGE_BLOCKS is less than adventurers last action block number
+        // this is imperative because this test is testing the case where the adventurer last action block number
+        // is less than (current_block_number % MAX_STORAGE_BLOCKS)
+        assert(
+            (current_block_number % Game::MAX_STORAGE_BLOCKS) < adventurer.last_action.into(),
+            'last action !> current block'
+        );
+
+        // slay idle adventurer
+        game.slay_idle_adventurer(ADVENTURER_ID);
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // assert adventurer is dead
+        assert(adventurer.health == 0, 'adventurer should be dead');
+    }
+
+    #[test]
+    #[available_gas(50000000)]
+    // @dev since we only store 511 blocks, there are two cases for the idle adventurer
+    // the first is when the adventurer last action block number is less than the
+    // (current_block_number % 511) and the other is when it is greater
+    // this test covers the case where the adventurer last action block number is greater than
+    // (current_block_number % 511)
+    fn test_slay_idle_adventurer_without_block_rollover() {
+        let STARTING_BLOCK_NUMBER = 1;
+
+        // deploy and start new game
+        let mut game = new_adventurer();
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // set current block number to 1
+        testing::set_block_number(STARTING_BLOCK_NUMBER);
+
+        // attack starter beast, resulting in adventurer last action block number being 1
+        game.attack(ADVENTURER_ID);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // verify last action block number is 1
+        assert(adventurer.last_action == STARTING_BLOCK_NUMBER.try_into().unwrap(), 'unexpected last action block');
+
+        // roll forward blockchain to make adventurer idle
+        testing::set_block_number(
+            adventurer.last_action.into() + Game::IDLE_DEATH_PENALTY_BLOCKS.into()
+        );
+
+        // get current block number
+        let current_block_number = starknet::get_block_info().unbox().block_number;
+
+        // verify current block number % MAX_STORAGE_BLOCKS is greater than adventurers last action block number
+        // this is imperative because this test is testing the case where the adventurer last action block number
+        // is greater than the (current_block_number % MAX_STORAGE_BLOCKS)
+        assert(
+            (current_block_number % Game::MAX_STORAGE_BLOCKS) > adventurer.last_action.into(),
+            'last action !> current block'
+        );
+
+        // call slay idle adventurer
+        game.slay_idle_adventurer(ADVENTURER_ID);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // assert adventurer is dead
+        assert(adventurer.health == 0, 'adventurer should be dead');
     }
 
     #[test]
     #[available_gas(300000000)]
     fn test_entropy() {
-        let mut deployed_game = new_adventurer();
+        let mut game = new_adventurer();
 
-        deployed_game.get_entropy();
+        game.get_entropy();
     }
 }
