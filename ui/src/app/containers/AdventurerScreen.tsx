@@ -73,7 +73,9 @@ export default function AdventurerScreen() {
 
         {selected === "choose adventurer" && (
           <div className="flex flex-col gap-2 sm:w-5/6">
-            <p className="text-center text-2xl sm:hidden">Adventurers</p>
+            <p className="text-center text-2xl sm:hidden uppercase">
+              Adventurers
+            </p>
             <AdventurersList
               isActive={activeMenu == 1}
               onEscape={() => setActiveMenu(0)}
@@ -82,7 +84,7 @@ export default function AdventurerScreen() {
           </div>
         )}
         {selected === "create adventurer" && (
-          <div className="sm:w-8/12">
+          <div className="sm:w-8/12 md:w-10/12">
             <CreateAdventurer
               isActive={activeMenu == 2}
               onEscape={() => setActiveMenu(0)}

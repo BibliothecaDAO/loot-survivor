@@ -182,8 +182,8 @@ export const CreateAdventurer = ({
   }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
 
   return (
-    <div className="flex items-center sm:w-1/2 mx-2 border border-terminal-green">
-      <div className="flex flex-row w-full gap-2 p-1">
+    <div className="flex items-center sm:w-1/2 mx-4 border border-terminal-green">
+      <div className="flex flex-row w-full gap-2 p-2">
         <form
           onSubmit={handleSubmit}
           className="flex flex-col w-full gap-2 p-1 text-lg sm:text-2xl"
