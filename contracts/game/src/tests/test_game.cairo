@@ -26,13 +26,12 @@ mod tests {
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
     use game::game::messages::messages::{STAT_UPGRADES_AVAILABLE};
-    
+
     use beasts::constants::BeastSettings;
 
     const ADVENTURER_ID: u256 = 1;
 
     fn setup() -> IGameDispatcher {
-
         testing::set_block_number(1000);
 
         let mut calldata = Default::default();
@@ -96,11 +95,10 @@ mod tests {
         assert(adventurer_meta_1.order == 2, 'order');
 
         adventurer_meta_1.entropy;
-        
     }
 
     #[test]
-    #[should_panic(expected: ('Action not allowed in battle','ENTRYPOINT_FAILED' ))]
+    #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
     #[available_gas(30000000)]
     fn test_no_explore_during_battle() {
         let mut deployed_game = new_adventurer();
@@ -108,7 +106,10 @@ mod tests {
         assert(original_adventurer.xp == 0, 'should start with 0 xp');
         assert(original_adventurer.health == 100, 'should start with 100hp');
         assert(original_adventurer.weapon.id == ItemId::Wand, 'adventurer should have a wand');
-        assert(original_adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH, 'adventurer should have a wand');
+        assert(
+            original_adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
+            'adventurer should have a wand'
+        );
 
         // try to explore before defeating start beast
         // should result in a panic 'In battle cannot explore' which
@@ -179,7 +180,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('Cant flee starter beast','ENTRYPOINT_FAILED' ))]
+    #[should_panic(expected: ('Cant flee starter beast', 'ENTRYPOINT_FAILED'))]
     #[available_gas(15000000)]
     fn test_cant_flee_starter_beast() {
         let mut game = new_adventurer();
@@ -203,7 +204,7 @@ mod tests {
         // manipulate game entrop so we discover another beast
         testing::set_block_number(1002);
         game.explore(ADVENTURER_ID);
-           
+
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(updated_adventurer.beast_health != 0, 'should have found a beast');
 
@@ -213,7 +214,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('Stat upgrade available','ENTRYPOINT_FAILED' ))]
+    #[should_panic(expected: ('Stat upgrade available', 'ENTRYPOINT_FAILED'))]
     #[available_gas(80000000)]
     fn test_explore_not_allowed_with_avail_stat_upgrade() {
         let mut game = new_adventurer();
@@ -234,10 +235,55 @@ mod tests {
         game.explore(ADVENTURER_ID);
     }
 
+    #[test]
+    #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(16000000)]
+    fn test_cant_buy_items_during_battle() {
+        // mint new adventurer (will start in battle with starter beast)
+        let mut game = new_adventurer();
+
+        // get valid item from market
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let item_id = *market_items.at(0).item.id;
+        let item_price = *market_items.at(0).price.into();
+
+        // attempt to buy item during battle - should_panic with message 'Action not allowed in battle'
+        // this test is annotated to expect a panic so if it doesn't, this test will fail
+        game.buy_item(ADVENTURER_ID, item_id, true);
+    }
 
     #[test]
-    #[available_gas(300000000000)]
-    fn test_buy_equip() {
+    #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(60000000)]
+    fn test_cant_buy_items_without_stat_upgrade() {
+        // mint adventurer and advance to level 2
+        let mut game = lvl_2_adventurer();
+
+        // use the adventurers available stat
+        game.upgrade_stat(ADVENTURER_ID, 1);
+
+        // get valid item from market
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let item_id = *market_items.at(0).item.id;
+
+        // attempt to buy item
+        game.buy_item(ADVENTURER_ID, item_id, true);
+    // Since we have already used our stat upgrade the market should be closed
+    // resulting in a 'Market is closed' panic
+    // this test is annotated to expect that specific panic so if it doesn't, this test will fail
+    }
+
+    #[test]
+    #[should_panic(expected: ('Market item does not exist', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(60000000)]
+    fn test_buy_unavailable_item() {
+        let mut game = lvl_2_adventurer();
+        game.buy_item(ADVENTURER_ID, 200, true);
+    }
+
+    #[test]
+    #[available_gas(60000000)]
+    fn test_buy_and_equip_item() {
         let mut deployed_game = lvl_2_adventurer();
         let market_items = @deployed_game.get_items_on_market(ADVENTURER_ID);
 
@@ -248,11 +294,15 @@ mod tests {
 
         let adventurer = deployed_game.get_adventurer(ADVENTURER_ID);
 
-        assert(adventurer.gold == (STARTING_GOLD + BeastSettings::GOLD_REWARD_BASE_MINIMUM) - item_price, 'gold');
+        assert(
+            adventurer.gold == (STARTING_GOLD + BeastSettings::GOLD_REWARD_BASE_MINIMUM)
+                - item_price,
+            'gold'
+        );
     }
 
     #[test]
-    #[available_gas(3000000000)]
+    #[available_gas(60000000)]
     fn test_buy_and_bag_item() {
         let mut deployed_game = lvl_2_adventurer();
         let market_items = @adventurer_market_items();
@@ -269,7 +319,7 @@ mod tests {
     fn test_equip_item_from_bag() {
         let mut deployed_game = lvl_2_adventurer();
         let market_items = @adventurer_market_items();
-    
+
         market_items.at(0).item.id;
 
         deployed_game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
@@ -279,7 +329,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('Health already full','ENTRYPOINT_FAILED' ))]
+    #[should_panic(expected: ('Health already full', 'ENTRYPOINT_FAILED'))]
     #[available_gas(70000000)]
     fn test_buy_potion() {
         // deploy and start new game
@@ -306,10 +356,18 @@ mod tests {
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
         // verify potion increased health by POTION_HEALTH_AMOUNT or adventurer health is full
-        assert(adventurer.health == 100 || adventurer.health == adventurer_health_pre_potion + POTION_HEALTH_AMOUNT, 'potion did not give health');
+        assert(
+            adventurer.health == 100 || adventurer.health == adventurer_health_pre_potion
+                + POTION_HEALTH_AMOUNT,
+            'potion did not give health'
+        );
 
         // verify potion cost reduced adventurers gold balance by POTION_PRICE * adventurer level (no charisma discount here)
-        assert(adventurer.gold == adventurer_gold_pre_potion - (POTION_PRICE * adventurer.get_level().into()), 'potion cost is wrong');
+        assert(
+            adventurer.gold == adventurer_gold_pre_potion
+                - (POTION_PRICE * adventurer.get_level().into()),
+            'potion cost is wrong'
+        );
 
         // buy potions with full health
         // this should throw a panic 'Health already full' and this test is annotated to expect that panic
@@ -322,7 +380,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('Action not allowed in battle','ENTRYPOINT_FAILED' ))]
+    #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
     #[available_gas(10000000)]
     fn test_cant_buy_health_during_battle() {
         // deploy and start new game
