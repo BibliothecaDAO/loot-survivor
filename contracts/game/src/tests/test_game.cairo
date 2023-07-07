@@ -1,3 +1,4 @@
+use core::box::BoxTrait;
 #[cfg(test)]
 mod tests {
     use array::ArrayTrait;
@@ -7,8 +8,9 @@ mod tests {
     use starknet::syscalls::deploy_syscall;
     use starknet::testing;
     use traits::TryInto;
-    use debug::PrintTrait;
     use core::serde::Serde;
+    use box::BoxTrait;
+
 
     use market::market::{ImplMarket, LootWithPrice};
 
@@ -25,14 +27,13 @@ mod tests {
 
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
-    use game::game::messages::messages;
-    
+    use game::game::messages::messages::{STAT_UPGRADES_AVAILABLE};
+
     use beasts::constants::BeastSettings;
 
     const ADVENTURER_ID: u256 = 1;
 
     fn setup() -> IGameDispatcher {
-
         testing::set_block_number(1000);
 
         let mut calldata = Default::default();
@@ -52,21 +53,21 @@ mod tests {
     }
 
     fn new_adventurer() -> IGameDispatcher {
-        let mut deployed_game = setup();
+        let mut game = setup();
 
         let adventurer_meta = AdventurerMetadata {
             name: 'Loaf'.try_into().unwrap(), home_realm: 1, race: 1, order: 2, entropy: 0
         };
 
-        deployed_game.start(ItemId::Wand, adventurer_meta);
+        game.start(ItemId::Wand, adventurer_meta);
 
-        deployed_game
+        game
     }
 
     fn adventurer_market_items() -> Array<LootWithPrice> {
-        let mut deployed_game = new_adventurer();
+        let mut game = new_adventurer();
 
-        deployed_game.get_items_on_market(ADVENTURER_ID)
+        game.get_items_on_market(ADVENTURER_ID)
     }
 
     fn lvl_2_adventurer() -> IGameDispatcher {
@@ -80,10 +81,10 @@ mod tests {
     #[test]
     #[available_gas(30000000)]
     fn test_start() {
-        let mut deployed_game = new_adventurer();
+        let mut game = new_adventurer();
 
-        let adventurer_1 = deployed_game.get_adventurer(ADVENTURER_ID);
-        let adventurer_meta_1 = deployed_game.get_adventurer_meta(ADVENTURER_ID);
+        let adventurer_1 = game.get_adventurer(ADVENTURER_ID);
+        let adventurer_meta_1 = game.get_adventurer_meta(ADVENTURER_ID);
 
         // check adventurer
         assert(adventurer_1.weapon.id == ItemId::Wand, 'weapon');
@@ -96,26 +97,26 @@ mod tests {
         assert(adventurer_meta_1.order == 2, 'order');
 
         adventurer_meta_1.entropy;
-        
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
     #[available_gas(30000000)]
-    fn test_explore() {
-        let mut deployed_game = new_adventurer();
-
-        testing::set_block_number(1001);
-
-        let original_adventurer = deployed_game.get_adventurer(ADVENTURER_ID);
+    fn test_no_explore_during_battle() {
+        let mut game = new_adventurer();
+        let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'should start with 0 xp');
         assert(original_adventurer.health == 100, 'should start with 100hp');
         assert(original_adventurer.weapon.id == ItemId::Wand, 'adventurer should have a wand');
+        assert(
+            original_adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
+            'adventurer should have a wand'
+        );
 
-        // Go exploring an encounter an obstacle (explore is currently hard coded for an obstacle)
-        deployed_game.explore(ADVENTURER_ID);
-        let updated_adventurer = deployed_game.get_adventurer(ADVENTURER_ID);
-        assert(updated_adventurer.health == 100, 'should have dodged obstacle');
+        // try to explore before defeating start beast
+        // should result in a panic 'In battle cannot explore' which
+        // is annotated in the test
+        game.explore(ADVENTURER_ID);
     }
 
     #[test]
@@ -181,13 +182,34 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
-    #[available_gas(10000000)]
-    fn test_flee_starter_beast() {
+    #[should_panic(expected: ('Cant flee starter beast', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(15000000)]
+    fn test_cant_flee_starter_beast() {
+        // start new game
         let mut game = new_adventurer();
-        let adventurer_start = game.get_adventurer(0);
 
-        // attempt to flee starter beast - should_panic
+        // immediately attempt to flee starter beast
+        // which is not allowed and should result in a panic 'Cant flee starter beast'
+        // which is annotated in the test
+        game.flee(ADVENTURER_ID);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Not in battle', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(60000000)]
+    fn test_cant_flee_outside_battle() {
+        // start adventuer and advance to level 2
+        let mut game = lvl_2_adventurer();
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(0);
+
+        // assert adventurer is not in a battle
+        assert(adventurer.beast_health == 0, 'should not be in battle');
+
+        // attempt to flee despite not being in a battle
+        // this should trigger a panic 'Not in battle' which is
+        // annotated in the test
         game.flee(ADVENTURER_ID);
     }
 
@@ -205,7 +227,7 @@ mod tests {
         // manipulate game entrop so we discover another beast
         testing::set_block_number(1002);
         game.explore(ADVENTURER_ID);
-           
+
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(updated_adventurer.beast_health != 0, 'should have found a beast');
 
@@ -215,57 +237,101 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: ('Stat upgrade available', 'ENTRYPOINT_FAILED'))]
     #[available_gas(80000000)]
-    fn test_explore_not_allowed_with_stat() {
+    fn test_explore_not_allowed_with_avail_stat_upgrade() {
         let mut game = new_adventurer();
 
-        // TODO: Need to determine why starter beast
-        // takes 5 attacks to take down on this test
-        // in the test_attack above it only takes two which is
-        // expected. For now my goal is to test flee so going to just
-        // send the 5x attack so I can discover a non-starter beast
-        game.attack(ADVENTURER_ID);
-        game.attack(ADVENTURER_ID);
-        game.attack(ADVENTURER_ID);
+        // take out starter beast
         game.attack(ADVENTURER_ID);
         game.attack(ADVENTURER_ID);
 
+        // get updated adventurer
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // assert adventurer is now level 2 and has 1 stat upgrade available
         assert(updated_adventurer.get_level() == 2, 'advntr should be lvl 2');
         assert(updated_adventurer.stat_points_available == 1, 'advntr should have 1 stat avl');
 
-        // adventurer trying to explore should cause panic because they have stat upgrade available
-        // using #[should_panic] to verify this
+        // verify adventurer is unable to explore with stat upgrade available
+        // this test is annotated to expect a panic so if it doesn't, this test will fail
         game.explore(ADVENTURER_ID);
     }
 
-
     #[test]
-    #[available_gas(300000000000)]
-    fn test_buy_equip() {
-        let mut deployed_game = lvl_2_adventurer();
-        let market_items = @deployed_game.get_items_on_market(ADVENTURER_ID);
+    #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(16000000)]
+    fn test_cant_buy_items_during_battle() {
+        // mint new adventurer (will start in battle with starter beast)
+        let mut game = new_adventurer();
 
+        // get valid item from market
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
         let item_id = *market_items.at(0).item.id;
         let item_price = *market_items.at(0).price.into();
 
-        deployed_game.buy_item(ADVENTURER_ID, item_id, true);
-
-        let adventurer = deployed_game.get_adventurer(ADVENTURER_ID);
-
-        assert(adventurer.gold == (STARTING_GOLD + BeastSettings::GOLD_REWARD_BASE_MINIMUM) - item_price, 'gold');
+        // attempt to buy item during battle - should_panic with message 'Action not allowed in battle'
+        // this test is annotated to expect a panic so if it doesn't, this test will fail
+        game.buy_item(ADVENTURER_ID, item_id, true);
     }
 
     #[test]
-    #[available_gas(3000000000)]
+    #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(60000000)]
+    fn test_cant_buy_items_without_stat_upgrade() {
+        // mint adventurer and advance to level 2
+        let mut game = lvl_2_adventurer();
+
+        // use the adventurers available stat
+        game.upgrade_stat(ADVENTURER_ID, 1);
+
+        // get valid item from market
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let item_id = *market_items.at(0).item.id;
+
+        // attempt to buy item
+        game.buy_item(ADVENTURER_ID, item_id, true);
+    // Since we have already used our stat upgrade the market should be closed
+    // resulting in a 'Market is closed' panic
+    // this test is annotated to expect that specific panic so if it doesn't, this test will fail
+    }
+
+    #[test]
+    #[should_panic(expected: ('Market item does not exist', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(60000000)]
+    fn test_buy_unavailable_item() {
+        let mut game = lvl_2_adventurer();
+        game.buy_item(ADVENTURER_ID, 200, true);
+    }
+
+    #[test]
+    #[available_gas(60000000)]
+    fn test_buy_and_equip_item() {
+        let mut game = lvl_2_adventurer();
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let item_id = *market_items.at(0).item.id;
+        let item_price = *market_items.at(0).price.into();
+
+        game.buy_item(ADVENTURER_ID, item_id, true);
+
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        assert(
+            adventurer.gold == (STARTING_GOLD + BeastSettings::GOLD_REWARD_BASE_MINIMUM)
+                - item_price,
+            'gold'
+        );
+    }
+
+    #[test]
+    #[available_gas(60000000)]
     fn test_buy_and_bag_item() {
-        let mut deployed_game = lvl_2_adventurer();
+        let mut game = lvl_2_adventurer();
         let market_items = @adventurer_market_items();
 
-        deployed_game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
+        game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
 
-        let bag = deployed_game.get_bag(ADVENTURER_ID);
+        let bag = game.get_bag(ADVENTURER_ID);
 
         assert(bag.item_1.id == *market_items.at(0).item.id, 'sash in bag');
     }
@@ -273,36 +339,267 @@ mod tests {
     #[test]
     #[available_gas(4000000000)]
     fn test_equip_item_from_bag() {
-        let mut deployed_game = lvl_2_adventurer();
+        let mut game = lvl_2_adventurer();
         let market_items = @adventurer_market_items();
-    
+
         market_items.at(0).item.id;
 
-        deployed_game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
+        game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
 
-        let bag = deployed_game.get_bag(ADVENTURER_ID);
+        let bag = game.get_bag(ADVENTURER_ID);
         assert(bag.item_1.id == *market_items.at(0).item.id, 'in bag');
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected: ('Health already full', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(70000000)]
+    fn test_buy_potion() {
+        // deploy and start new game
+        let mut game = new_adventurer();
+
+        // Clear starter beast
+        game.attack(ADVENTURER_ID);
+        game.attack(ADVENTURER_ID);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // verify adventurer took damage from starter beast
+        assert(adventurer.health < STARTING_HEALTH, 'should take dmg from beast');
+
+        // get adventurer health and gold before buying potion
+        let adventurer_health_pre_potion = adventurer.health;
+        let adventurer_gold_pre_potion = adventurer.gold;
+
+        // buy potion
+        game.buy_potion(ADVENTURER_ID);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // verify potion increased health by POTION_HEALTH_AMOUNT or adventurer health is full
+        assert(
+            adventurer.health == 100 || adventurer.health == adventurer_health_pre_potion
+                + POTION_HEALTH_AMOUNT,
+            'potion did not give health'
+        );
+
+        // verify potion cost reduced adventurers gold balance by POTION_PRICE * adventurer level (no charisma discount here)
+        assert(
+            adventurer.gold == adventurer_gold_pre_potion
+                - (POTION_PRICE * adventurer.get_level().into()),
+            'potion cost is wrong'
+        );
+
+        // buy potions with full health
+        // this should throw a panic 'Health already full' and this test is annotated to expect that panic
+        // if it doesn't throw a panic, this test will fail.
+        // @dev buying five potions here to account for the possibility of game settings changing such that
+        // multiple potions are needed after started beast to fill up health
+        game.buy_potion(ADVENTURER_ID);
+        game.buy_potion(ADVENTURER_ID);
+        game.buy_potion(ADVENTURER_ID);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(10000000)]
+    fn test_cant_buy_health_during_battle() {
+        // deploy and start new game
+        let mut game = new_adventurer();
+
+        // attempt to immediately buy health before clearing starter beast
+        // this should result in contract throwing a panic 'Action not allowed in battle'
+        // This test is annotated to expect that panic
+        game.buy_potion(ADVENTURER_ID);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
     #[available_gas(30000000)]
-    fn test_buy_health() {
-        let mut deployed_game = new_adventurer();
+    fn test_cant_slay_non_idle_adventurer_no_rollover() {
+        let STARTING_BLOCK_NUMBER = 1;
+        let IDLE_BLOCKS: u64 = Game::IDLE_DEATH_PENALTY_BLOCKS.into() - 1;
 
-        deployed_game.buy_health(ADVENTURER_ID);
+        // deploy and start new game
+        let mut game = new_adventurer();
 
-        let adventurer = deployed_game.get_adventurer(ADVENTURER_ID);
+        // use 1 for starting block number
+        let STARTING_BLOCK_NUMBER = STARTING_BLOCK_NUMBER;
+        testing::set_block_number(STARTING_BLOCK_NUMBER);
 
-        assert(adventurer.health == POTION_HEALTH_AMOUNT + STARTING_HEALTH, 'health');
-        assert(adventurer.gold == STARTING_GOLD - POTION_PRICE, 'gold');
+        // attack starter beast, resulting in adventurer last action block number being 1
+        game.attack(ADVENTURER_ID);
+
+        // assert adventurers last action is expected value
+        assert(
+            game
+                .get_adventurer(ADVENTURER_ID)
+                .last_action == STARTING_BLOCK_NUMBER
+                .try_into()
+                .unwrap(),
+            'unexpected last action block'
+        );
+
+        // roll forward blockchain
+        testing::set_block_number(STARTING_BLOCK_NUMBER + IDLE_BLOCKS);
+
+        // try to slay adventurer for being idle
+        // this should result in contract throwing a panic 'Adventurer is not idle'
+        // because the adventurer is not idle for the full IDLE_DEATH_PENALTY_BLOCKS
+        // This test is annotated to expect that panic
+        game.slay_idle_adventurer(ADVENTURER_ID);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(30000000)]
+    fn test_cant_slay_non_idle_adventurer_with_rollover() {
+        // set starting block to just before the rollover at 511
+        let STARTING_BLOCK_NUMBER = 510;
+        // adventurer will be idle for one less than the idle death penalty blocks
+        let IDLE_BLOCKS: u64 = Game::IDLE_DEATH_PENALTY_BLOCKS.into() - 1;
+
+        // deploy and start new game
+        let mut game = new_adventurer();
+
+        // set current block number
+        testing::set_block_number(STARTING_BLOCK_NUMBER);
+
+        // attack beast to set adventurer last action block number
+        game.attack(ADVENTURER_ID);
+
+        // assert adventurers last action is expected value
+        assert(
+            game
+                .get_adventurer(ADVENTURER_ID)
+                .last_action == STARTING_BLOCK_NUMBER
+                .try_into()
+                .unwrap(),
+            'unexpected last action'
+        );
+
+        // roll forward block chain
+        testing::set_block_number(STARTING_BLOCK_NUMBER + IDLE_BLOCKS);
+
+        // try to slay adventurer for being idle
+        // this should result in contract throwing a panic 'Adventurer is not idle'
+        // because the adventurer is not idle for the full IDLE_DEATH_PENALTY_BLOCKS
+        // This test is annotated to expect that panic
+        game.slay_idle_adventurer(ADVENTURER_ID);
+        game.slay_idle_adventurer(ADVENTURER_ID);
+    }
+
+    #[test]
+    #[available_gas(50000000)]
+    // @dev since we only store 511 blocks, there are two cases for the idle adventurer
+    // the first is when the adventurer last action block number is less than the
+    // (current_block_number % 511) and the other is when it is greater
+    // this test covers the case where the adventurer last action block number is less than the
+    // (current_block_number % 511)
+    fn test_slay_idle_adventurer_with_block_rollover() {
+        let STARTING_BLOCK_NUMBER = 510;
+
+        // deploy and start new game
+        let mut game = new_adventurer();
+
+        // set current block number to 510
+        testing::set_block_number(STARTING_BLOCK_NUMBER);
+
+        // attack starter beast, resulting in adventurer last action block number being 510
+        game.attack(ADVENTURER_ID);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // verify last action block number is 1
+        assert(adventurer.last_action == STARTING_BLOCK_NUMBER.try_into().unwrap(), 'unexpected last action block');
+
+        // roll forward blockchain to make adventurer idle
+        testing::set_block_number(
+            adventurer.last_action.into() + Game::IDLE_DEATH_PENALTY_BLOCKS.into()
+        );
+
+        // get current block number
+        let current_block_number = starknet::get_block_info().unbox().block_number;
+
+        // verify current block number % MAX_STORAGE_BLOCKS is less than adventurers last action block number
+        // this is imperative because this test is testing the case where the adventurer last action block number
+        // is less than (current_block_number % MAX_STORAGE_BLOCKS)
+        assert(
+            (current_block_number % Game::MAX_STORAGE_BLOCKS) < adventurer.last_action.into(),
+            'last action !> current block'
+        );
+
+        // slay idle adventurer
+        game.slay_idle_adventurer(ADVENTURER_ID);
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // assert adventurer is dead
+        assert(adventurer.health == 0, 'adventurer should be dead');
+    }
+
+    #[test]
+    #[available_gas(50000000)]
+    // @dev since we only store 511 blocks, there are two cases for the idle adventurer
+    // the first is when the adventurer last action block number is less than the
+    // (current_block_number % 511) and the other is when it is greater
+    // this test covers the case where the adventurer last action block number is greater than
+    // (current_block_number % 511)
+    fn test_slay_idle_adventurer_without_block_rollover() {
+        let STARTING_BLOCK_NUMBER = 1;
+
+        // deploy and start new game
+        let mut game = new_adventurer();
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // set current block number to 1
+        testing::set_block_number(STARTING_BLOCK_NUMBER);
+
+        // attack starter beast, resulting in adventurer last action block number being 1
+        game.attack(ADVENTURER_ID);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // verify last action block number is 1
+        assert(adventurer.last_action == STARTING_BLOCK_NUMBER.try_into().unwrap(), 'unexpected last action block');
+
+        // roll forward blockchain to make adventurer idle
+        testing::set_block_number(
+            adventurer.last_action.into() + Game::IDLE_DEATH_PENALTY_BLOCKS.into()
+        );
+
+        // get current block number
+        let current_block_number = starknet::get_block_info().unbox().block_number;
+
+        // verify current block number % MAX_STORAGE_BLOCKS is greater than adventurers last action block number
+        // this is imperative because this test is testing the case where the adventurer last action block number
+        // is greater than the (current_block_number % MAX_STORAGE_BLOCKS)
+        assert(
+            (current_block_number % Game::MAX_STORAGE_BLOCKS) > adventurer.last_action.into(),
+            'last action !> current block'
+        );
+
+        // call slay idle adventurer
+        game.slay_idle_adventurer(ADVENTURER_ID);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // assert adventurer is dead
+        assert(adventurer.health == 0, 'adventurer should be dead');
     }
 
     #[test]
     #[available_gas(300000000)]
     fn test_entropy() {
-        let mut deployed_game = new_adventurer();
+        let mut game = new_adventurer();
 
-        deployed_game.get_entropy();
+        game.get_entropy();
     }
 }
