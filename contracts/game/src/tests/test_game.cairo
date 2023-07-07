@@ -8,7 +8,6 @@ mod tests {
     use starknet::syscalls::deploy_syscall;
     use starknet::testing;
     use traits::TryInto;
-    use debug::PrintTrait;
     use core::serde::Serde;
     use box::BoxTrait;
 
