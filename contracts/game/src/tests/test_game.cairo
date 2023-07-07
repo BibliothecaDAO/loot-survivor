@@ -179,9 +179,9 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
-    #[available_gas(10000000)]
-    fn test_flee_starter_beast() {
+    #[should_panic(expected: ('Cant flee starter beast','ENTRYPOINT_FAILED' ))]
+    #[available_gas(15000000)]
+    fn test_cant_flee_starter_beast() {
         let mut game = new_adventurer();
         let adventurer_start = game.get_adventurer(0);
 
