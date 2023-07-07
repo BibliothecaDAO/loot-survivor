@@ -146,7 +146,7 @@ export STARKNET_NETWORK=alpha-goerli
 export STARKNET_WALLET=starkware.starknet.wallets.open_zeppelin.OpenZeppelinAccount
 export CAIRO_COMPILER_DIR=~/.cairo/target/release/
 export CAIRO_COMPILER_ARGS=--add-pythonic-hints
-export ACCOUNT_NAME = INSERT_YOUR_ACCOUNT_NAME_HERE
+export ACCOUNT_NAME=INSERT_YOUR_ACCOUNT_NAME_HERE
 
 scarb build
 
