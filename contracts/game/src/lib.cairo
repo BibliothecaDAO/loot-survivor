@@ -305,7 +305,9 @@ mod Game {
             // check item exists on Market
             // TODO: replace entropy
             assert(
-                ImplMarket::is_item_available(adventurer.get_market_entropy(adventurer_id), item_id) == true,
+                ImplMarket::is_item_available(
+                    adventurer.get_market_entropy(adventurer_id), item_id
+                ) == true,
                 messages::ITEM_DOES_NOT_EXIST
             );
 
@@ -509,7 +511,9 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
         // get adventurer entropy from storage
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id).entropy.into();
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+            .entropy
+            .into();
 
         // get global game entropy
         let game_entropy = _get_entropy(@self).into();
@@ -1013,7 +1017,9 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
         // get adventurer entropy from storage
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id).entropy.into();
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+            .entropy
+            .into();
 
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
         let battle_fixed_entropy: u128 = adventurer.get_battle_fixed_entropy(adventurer_entropy);
@@ -1053,11 +1059,9 @@ mod Game {
         // When generating the beast, we need to ensure entropy remains fixed for the battle
         // for attacking however, we should change the entropy during battle so we use adventurer and beast health
         // to accomplish this
-        let attack_entropy = 
-            game_entropy
-                + adventurer_entropy
-                + U16IntoU128::into(adventurer.health + adventurer.beast_health);
-        
+        let attack_entropy = game_entropy
+            + adventurer_entropy
+            + U16IntoU128::into(adventurer.health + adventurer.beast_health);
 
         let damage_dealt = beast
             .attack(
@@ -1214,7 +1218,9 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         internal::revoke_ap_tracking();
         // get adventurer entropy from storage
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id).entropy.into();
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+            .entropy
+            .into();
 
         // get game entropy from storage
         let game_entropy: u128 = _get_entropy(@self).into();
@@ -1350,7 +1356,7 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
         // TODO: Remove after testing
-        
+
         // market is only available when adventurer has stat upgrades available
         assert(adventurer.stat_points_available >= 1, 'Not available');
 
@@ -1433,9 +1439,8 @@ mod Game {
     }
 
     fn _buy_health(ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer) {
-
         internal::revoke_ap_tracking();
-        
+
         // check gold balance
         assert(
             adventurer.check_gold(adventurer.get_potion_cost()) == true, messages::NOT_ENOUGH_GOLD
@@ -1568,7 +1573,13 @@ mod Game {
 
         // emit new items availble with available items
         let available_items = _get_items_on_market(@self, adventurer_id);
-        __event_NewItemsAvailable(ref self, items: available_items);
+        __event_NewItemsAvailable(
+            ref self,
+            adventurer_state: AdventurerState {
+                owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
+            },
+            items: available_items
+        );
     }
 
     fn _unpack_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
@@ -1711,7 +1722,9 @@ mod Game {
     }
 
     fn _get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<LootWithPrice> {
-        ImplMarket::get_all_items_with_price(_unpack_adventurer(self, adventurer_id).get_market_entropy(adventurer_id))
+        ImplMarket::get_all_items_with_price(
+            _unpack_adventurer(self, adventurer_id).get_market_entropy(adventurer_id)
+        )
     }
 
     fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u256 {
@@ -1993,7 +2006,8 @@ mod Game {
 
     #[derive(Drop, starknet::Event)]
     struct NewItemsAvailable {
-        items: Array<LootWithPrice>, 
+        adventurer_state: AdventurerState,
+        items: Array<LootWithPrice>,
     }
 
 
@@ -2158,7 +2172,9 @@ mod Game {
             );
     }
 
-    fn __event_NewItemsAvailable(ref self: ContractState, items: Array<LootWithPrice>, ) {
-        self.emit(Event::NewItemsAvailable(NewItemsAvailable { items }));
+    fn __event_NewItemsAvailable(
+        ref self: ContractState, adventurer_state: AdventurerState, items: Array<LootWithPrice>, 
+    ) {
+        self.emit(Event::NewItemsAvailable(NewItemsAvailable { adventurer_state, items }));
     }
 }
