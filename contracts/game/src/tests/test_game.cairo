@@ -237,13 +237,57 @@ mod tests {
         game.explore(ADVENTURER_ID);
     }
 
+    #[test]
+    #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(16000000)]
+    fn test_cant_buy_items_during_battle() {
+        // mint new adventurer (will start in battle with starter beast)
+        let mut game = new_adventurer();
+
+        // get valid item from market
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let item_id = *market_items.at(0).item.id;
+        let item_price = *market_items.at(0).price.into();
+
+        // attempt to buy item during battle - should_panic with message 'Action not allowed in battle'
+        // this test is annotated to expect a panic so if it doesn't, this test will fail
+        game.buy_item(ADVENTURER_ID, item_id, true);
+    }
 
     #[test]
-    #[available_gas(300000000000)]
-    fn test_buy_equip() {
+    #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(60000000)]
+    fn test_cant_buy_items_without_stat_upgrade() {
+        // mint adventurer and advance to level 2
         let mut game = lvl_2_adventurer();
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
 
+        // use the adventurers available stat
+        game.upgrade_stat(ADVENTURER_ID, 1);
+
+        // get valid item from market
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let item_id = *market_items.at(0).item.id;
+
+        // attempt to buy item
+        game.buy_item(ADVENTURER_ID, item_id, true);
+    // Since we have already used our stat upgrade the market should be closed
+    // resulting in a 'Market is closed' panic
+    // this test is annotated to expect that specific panic so if it doesn't, this test will fail
+    }
+
+    #[test]
+    #[should_panic(expected: ('Market item does not exist', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(60000000)]
+    fn test_buy_unavailable_item() {
+        let mut game = lvl_2_adventurer();
+        game.buy_item(ADVENTURER_ID, 200, true);
+    }
+
+    #[test]
+    #[available_gas(60000000)]
+    fn test_buy_and_equip_item() {
+        let mut deployed_game = lvl_2_adventurer();
+        let market_items = @deployed_game.get_items_on_market(ADVENTURER_ID);
         let item_id = *market_items.at(0).item.id;
         let item_price = *market_items.at(0).price.into();
 
@@ -259,7 +303,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(3000000000)]
+    #[available_gas(60000000)]
     fn test_buy_and_bag_item() {
         let mut game = lvl_2_adventurer();
         let market_items = @adventurer_market_items();
