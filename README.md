@@ -155,7 +155,7 @@ starknet declare --contract /home/os/Documents/code/bibliotheca/loot-survivor/co
 starknet deploy --class_hash 0x2592ba7e082159424d860bf65694d0181afe5e53a7f546aa596335489fb5126 --max_fee 100000000000000000 --input 0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b --account $ACCOUNT_NAME
 ```
 
-export CONTRACT_ADDRESS=0x005afb26aa7ffc55fcb91ac7317b9ccc27ff4728aae8306e215f543367060bd3
+export CONTRACT_ADDRESS=INSERT_ADDRESS_OF_NEWLY_DEPLOYED_CONTRACT_HERE
 
 #### Start
 starknet invoke --function start --address $CONTRACT_ADDRESS --input 12 123 0 0 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
