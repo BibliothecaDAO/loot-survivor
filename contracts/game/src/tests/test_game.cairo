@@ -279,7 +279,8 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(60000000)]
+    #[should_panic(expected: ('Health already full','ENTRYPOINT_FAILED' ))]
+    #[available_gas(70000000)]
     fn test_buy_potion() {
         // deploy and start new game
         let mut game = new_adventurer();
@@ -309,6 +310,15 @@ mod tests {
 
         // verify potion cost reduced adventurers gold balance by POTION_PRICE * adventurer level (no charisma discount here)
         assert(adventurer.gold == adventurer_gold_pre_potion - (POTION_PRICE * adventurer.get_level().into()), 'potion cost is wrong');
+
+        // buy potions with full health
+        // this should throw a panic 'Health already full' and this test is annotated to expect that panic
+        // if it doesn't throw a panic, this test will fail.
+        // @dev buying five potions here to account for the possibility of game settings changing such that
+        // multiple potions are needed after started beast to fill up health
+        game.buy_potion(ADVENTURER_ID);
+        game.buy_potion(ADVENTURER_ID);
+        game.buy_potion(ADVENTURER_ID);
     }
 
     #[test]
