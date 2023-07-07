@@ -6,7 +6,7 @@ mod messages {
     const ITEM_NOT_IN_BAG: felt252 = 'Item not in bag';
     const INVALID_STARTING_WEAPON: felt252 = 'Invalid starting weapon';
     const STAT_POINT_NOT_AVAILABLE: felt252 = 'Stat point not available';
-    const ATTACK_CALLED_OUTSIDE_BATTLE: felt252 = 'No beast to attack';
+    const NOT_IN_BATTLE: felt252 = 'Not in battle';
     const ACTION_NOT_ALLOWED_DURING_BATTLE: felt252 = 'Action not allowed in battle';
     const CANT_FLEE_STARTER_BEAST: felt252 = 'Cant flee starter beast';
     const STAT_UPGRADES_AVAILABLE: felt252 = 'Stat upgrade available';

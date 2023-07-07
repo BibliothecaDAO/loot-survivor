@@ -1635,7 +1635,7 @@ mod Game {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
     }
     fn _assert_in_battle(self: @ContractState, adventurer: Adventurer) {
-        assert(adventurer.beast_health > 0, messages::ATTACK_CALLED_OUTSIDE_BATTLE);
+        assert(adventurer.beast_health > 0, messages::NOT_IN_BATTLE);
     }
     fn _assert_not_in_battle(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.beast_health == 0, messages::ACTION_NOT_ALLOWED_DURING_BATTLE);
