@@ -1675,7 +1675,7 @@ mod Game {
             );
         } else {
             assert(
-                (adventurer.last_action - current_block) >= IDLE_DEATH_PENALTY_BLOCKS,
+                (MAX_STORAGE_BLOCKS - adventurer.last_action.into() + current_block.into()) >= IDLE_DEATH_PENALTY_BLOCKS.into(),
                 messages::ADVENTURER_NOT_IDLE
             );
         }
