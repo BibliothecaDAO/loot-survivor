@@ -322,25 +322,24 @@ class LootSurvivorIndexer(StarkNetIndexer):
             )
 
         for survivor_event in [
-            "game::game::game::Game::StartGame",
-            "game::game::game::Game::StatUpgraded",
-            "game::game::game::Game::DiscoverHealth",
-            "game::game::game::Game::DiscoverGold",
-            "game::game::game::Game::DiscoverXP",
-            "game::game::game::Game::DiscoverObstacle",
-            "game::game::game::Game::DiscoverBeast",
-            "game::game::game::Game::AttackBeast",
-            "game::game::game::Game::SlayedBeast",
-            "game::game::game::Game::FleeAttempt",
-            "game::game::game::Game::PurchasedItem",
-            "game::game::game::Game::EquipItem",
-            "game::game::game::Game::GreatnessIncreased",
-            "game::game::game::Game::ItemPrefixDiscovered",
-            "game::game::game::Game::ItemSuffixDiscovered",
-            "game::game::game::Game::PurchasedPotion",
-            "game::game::game::Game::NewHighScore",
-            "game::game::game::Game::AdventurerDied",
-            # "game::game::game::Game::ShopAvailable",
+            "StartGame",
+            "StatUpgraded",
+            "DiscoverHealth",
+            "DiscoverGold",
+            "DiscoverXP",
+            "DiscoverObstacle",
+            "DiscoverBeast",
+            "AttackBeast",
+            "SlayedBeast",
+            "FleeAttempt",
+            "PurchasedItem",
+            "EquipItem",
+            "GreatnessIncreased",
+            "ItemPrefixDiscovered",
+            "ItemSuffixDiscovered",
+            "PurchasedPotion",
+            "NewHighScore",
+            "AdventurerDied",
         ]:
             add_filter(self.config.GAME_CONTRACT, survivor_event)
 
@@ -354,41 +353,37 @@ class LootSurvivorIndexer(StarkNetIndexer):
         block_time = data.header.timestamp.ToDatetime()
         print(f"Indexing block {data.header.block_number} at {block_time}")
         # Handle one block of data
-        # Define the batch size
-        batch_size = 100  # adjust this number as necessary
 
-        for i in range(0, len(data.events), batch_size):
-            batch = data.events[i : i + batch_size]
-            for event_with_tx in batch:
-                event = event_with_tx.event
-                event_name = self.event_map[felt.to_int(event.keys[0])]
-                await {
-                    "game::game::game::Game::StartGame": self.start_game,
-                    "game::game::game::Game::StatUpgraded": self.stat_upgrade,
-                    "game::game::game::Game::DiscoverHealth": self.discover_health,
-                    "game::game::game::Game::DiscoverGold": self.discover_gold,
-                    "game::game::game::Game::DiscoverXP": self.discover_xp,
-                    "game::game::game::Game::DiscoverObstacle": self.discover_obstacle,
-                    "game::game::game::Game::DiscoverBeast": self.discover_beast,
-                    "game::game::game::Game::AttackBeast": self.attack_beast,
-                    "game::game::game::Game::SlayedBeast": self.slayed_beast,
-                    "game::game::game::Game::FleeAttempt": self.flee_attempt,
-                    "game::game::game::Game::PurchasedItem": self.purchased_item,
-                    "game::game::game::Game::EquipItem": self.equip_item,
-                    "game::game::game::Game::GreatnessIncreased": self.greatness_increased,
-                    "game::game::game::Game::ItemPrefixDiscovered": self.item_prefix_discovered,
-                    "game::game::game::Game::ItemSuffixDiscovered": self.item_suffix_discovered,
-                    "game::game::game::Game::PurchasedPotion": self.purchased_potion,
-                    "game::game::game::Game::NewHighScore": self.new_high_score,
-                    "game::game::game::Game::AdventurerDied": self.adventurer_died,
-                    # "ShopAvailable": self.shop_available,
-                }[event_name](
-                    info,
-                    block_time,
-                    event.from_address,
-                    felt.to_hex(event_with_tx.transaction.meta.hash),
-                    event.data,
-                )
+        for event_with_tx in len(data.events):
+            event = event_with_tx.event
+            event_name = self.event_map[felt.to_int(event.keys[0])]
+            await {
+                "StartGame": self.start_game,
+                "StatUpgraded": self.stat_upgrade,
+                "DiscoverHealth": self.discover_health,
+                "DiscoverGold": self.discover_gold,
+                "DiscoverXP": self.discover_xp,
+                "DiscoverObstacle": self.discover_obstacle,
+                "DiscoverBeast": self.discover_beast,
+                "AttackBeast": self.attack_beast,
+                "SlayedBeast": self.slayed_beast,
+                "FleeAttempt": self.flee_attempt,
+                "PurchasedItem": self.purchased_item,
+                "EquipItem": self.equip_item,
+                "GreatnessIncreased": self.greatness_increased,
+                "ItemPrefixDiscovered": self.item_prefix_discovered,
+                "ItemSuffixDiscovered": self.item_suffix_discovered,
+                "PurchasedPotion": self.purchased_potion,
+                "NewHighScore": self.new_high_score,
+                "AdventurerDied": self.adventurer_died,
+                # "ShopAvailable": self.shop_available,
+            }[event_name](
+                info,
+                block_time,
+                event.from_address,
+                felt.to_hex(event_with_tx.transaction.meta.hash),
+                event.data,
+            )
 
     async def start_game(
         self,
