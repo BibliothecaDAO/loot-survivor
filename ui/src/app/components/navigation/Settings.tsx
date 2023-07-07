@@ -3,13 +3,19 @@ import { EncountersIcon, LedgerIcon } from "../icons/Icons";
 import { GuideIcon } from "../icons/Icons";
 import { ChatIcon } from "../icons/Icons";
 import useUIStore from "../../hooks/useUIStore";
-import { Button } from "../buttons/Button";
+import { displayAddress } from "@/app/lib/utils";
+import { useConnectors } from "@starknet-react/core";
+import { useAccount } from "@starknet-react/core";
+import { ButtonData } from "@/app/types";
 
 export default function Settings() {
   const setScreen = useUIStore((state) => state.setScreen);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
-  const buttonsData = [
+  const { disconnect } = useConnectors();
+  const { account } = useAccount();
+
+  const buttonsData: ButtonData[] = [
     {
       id: 1,
       label: "Ledger",
@@ -33,6 +39,12 @@ export default function Settings() {
       label: "Discord",
       icon: <ChatIcon />,
       action: () => window.open("https://discord.gg/bibliothecadao", "_blank"),
+    },
+    {
+      id: 5,
+      label: displayAddress(account?.address ?? ""),
+      action: () => disconnect(),
+      variant: "default",
     },
   ];
   return (

@@ -1,6 +1,6 @@
 import { Adventurer, NullAdventurer, NullItem } from "../../types";
 import { getItemsByAdventurer } from "../../hooks/graphql/queries";
-import { HeartIcon, CoinIcon } from "../icons/Icons";
+import { HeartIcon, CoinIcon, BagIcon } from "../icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
 import { getRealmNameById } from "../../lib/utils";
@@ -66,6 +66,10 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                 <span className="flex text-terminal-yellow">
                   <CoinIcon className="self-center w-6 h-6 fill-current" />{" "}
                   {formatAdventurer.gold ? formatAdventurer.gold : 0}
+                </span>
+                <span className="flex text-lg items-center sm:text-2xl">
+                  <BagIcon className="self-center w-6 h-6 fill-current" />{" "}
+                  {`${items.length}/${19}`}
                 </span>
                 <span className="flex ">
                   <HeartIcon className="self-center w-6 h-6 fill-current" />{" "}

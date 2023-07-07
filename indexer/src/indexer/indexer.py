@@ -1074,7 +1074,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
         for item in sa.items:
             items_doc = {
                 "item": check_exists_int(item.item["id"]),
-                "adventurerId": check_exists_int(item.adventurer_id),
+                "adventurerId": check_exists_int(
+                    item.adventurer_state["adventurer_id"]
+                ),
                 "owner": check_exists_int(0),
                 "equipped": check_exists_int(0),
                 "ownerAddress": check_exists_int(0),

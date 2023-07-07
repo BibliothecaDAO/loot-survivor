@@ -30,6 +30,8 @@ import CoinCharisma from "../../../../public/icons/coin-charisma.svg";
 import Scroll from "../../../../public/icons/scroll.svg";
 import ArrowTarget from "../../../../public/icons/arrow-target.svg";
 import HeartVitality from "../../../../public/icons/heart-vitality.svg";
+import Bag from "../../../../public/icons/bag.svg";
+import Smile from "../../../../public/icons/smile.svg";
 
 const ClothIcon = GiRolledCloth;
 const HideIcon = GiAnimalHide;
@@ -63,6 +65,8 @@ const CoinCharismaIcon = CoinCharisma;
 const ScrollIcon = Scroll;
 const ArrowTargetIcon = ArrowTarget;
 const HeartVitalityIcon = HeartVitality;
+const BagIcon = Bag;
+const SmileIcon = Smile;
 
 export {
   ClothIcon,
@@ -97,4 +101,6 @@ export {
   ScrollIcon,
   ArrowTargetIcon,
   HeartVitalityIcon,
+  BagIcon,
+  SmileIcon,
 };

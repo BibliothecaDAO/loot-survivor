@@ -1,5 +1,6 @@
 import { RawArgs } from "starknet";
 import { ScreenPage } from "../hooks/useUIStore";
+import { ReactElement } from "react";
 
 export interface Adventurer {
   [key: string]: number | string | Date | undefined;
@@ -143,6 +144,16 @@ export interface Call {
   entrypoint: string;
   calldata: RawArgs;
   metadata?: string;
+}
+
+export interface ButtonData {
+  id: number;
+  label: string;
+  icon?: ReactElement;
+  value?: string;
+  action: () => void;
+  disabled?: boolean;
+  variant?: "default" | "outline";
 }
 
 export type Beast =

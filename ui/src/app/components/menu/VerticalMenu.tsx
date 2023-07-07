@@ -7,15 +7,7 @@ import React, {
 } from "react";
 import { Button } from "../buttons/Button";
 import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
-
-interface ButtonData {
-  id: number;
-  label: string;
-  icon?: ReactElement;
-  value?: string;
-  action: () => void;
-  disabled?: boolean;
-}
+import { ButtonData } from "@/app/types";
 
 interface VerticalKeyboardControlProps {
   buttonsData: ButtonData[];
@@ -89,7 +81,13 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
               ? "flex flex-row gap-5 animate-pulse w-full"
               : "flex flex-row gap-5 w-full"
           }
-          variant={selectedIndex === index ? "default" : "outline"}
+          variant={
+            buttonData.variant
+              ? buttonData.variant
+              : selectedIndex === index
+              ? "default"
+              : "outline"
+          }
           size={"lg"}
           onClick={() => {
             setSelectedIndex(index);

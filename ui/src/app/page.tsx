@@ -52,6 +52,7 @@ import {
   VolumeIcon,
   CartIcon,
   SkullIcon,
+  SmileIcon,
 } from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
@@ -96,6 +97,8 @@ export default function Home() {
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const statUpgrades = adventurer?.statUpgrades ?? 0;
+
+  const [showDeathCount, setShowDeathCount] = useState(true);
 
   const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
 
@@ -536,11 +539,26 @@ export default function Home() {
               <h1 className="glitch">Loot Survivor</h1>
               <div className="flex flex-row items-center self-end gap-2 flex-wrap">
                 {!isMobileDevice && <TxActivity />}
-                <div className="flex flex-row items-center gap-1 p-1 sm:px-2 border border-terminal-green">
-                  <div className="flex items-center w-4 h-4 sm:w-5 h-5">
-                    <SkullIcon />
-                  </div>
-                  <p className="text-red-500 sm:text-xl">20</p>
+                <div
+                  className="flex flex-row items-center gap-1 p-1 sm:px-2 border border-terminal-green cursor-pointer"
+                  onClick={() => setShowDeathCount(!showDeathCount)}
+                >
+                  {showDeathCount && (
+                    <>
+                      <div className="flex items-center w-4 h-4 sm:w-5 h-5">
+                        <SkullIcon />
+                      </div>
+                      <p className="text-red-500 sm:text-xl">20</p>
+                    </>
+                  )}
+                  {!showDeathCount && (
+                    <>
+                      <div className="flex items-center w-4 h-4 sm:w-5 h-5">
+                        <SmileIcon />
+                      </div>
+                      <p className="text-terminal-green sm:text-xl">20</p>
+                    </>
+                  )}
                 </div>
                 <button
                   onClick={() => {
@@ -608,14 +626,14 @@ export default function Home() {
                       (account as any)?.baseUrl == testnet_addr) && (
                       <MintEthButton />
                     )}
+                    {account && (
+                      <Button onClick={() => disconnect()}>
+                        {displayAddress(account.address)}
+                      </Button>
+                    )}
                   </>
                 )}
                 {account && displayHistory && <TransactionHistory />}
-                {account && (
-                  <Button onClick={() => disconnect()}>
-                    {displayAddress(account.address)}
-                  </Button>
-                )}
               </div>
             </div>
           </div>
