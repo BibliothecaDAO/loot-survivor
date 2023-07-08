@@ -493,7 +493,7 @@ mod Game {
         _pack_adventurer_meta(ref self, adventurer_id, adventurer_meta);
 
         // increment the adventurer counter
-        self._counter.write(adventurer_id + 1);
+        self._counter.write(adventurer_id);
 
         // set caller as owner
         self._owner.write(adventurer_id, caller);
