@@ -379,7 +379,7 @@ mod Game {
             _assert_not_dead(@self, adventurer);
 
             // assert adventurer is idle
-            _assert_idle(@self, adventurer);
+            _assert_fatally_idle(@self, adventurer);
 
             // set adventurer health to 0
             adventurer.health = 0;
@@ -1669,7 +1669,10 @@ mod Game {
             .unwrap();
         assert(adventurer.last_action != current_block, messages::ONE_EXPLORE_PER_BLOCK);
     }
-    fn _assert_idle(self: @ContractState, adventurer: Adventurer) {
+    fn _assert_has_stat_upgrades_available(self: @ContractState, adventurer: Adventurer) {
+        assert(adventurer.stat_points_available > 0, messages::NO_STAT_UPGRADES_AVAILABLE);
+    }
+    fn _assert_fatally_idle(self: @ContractState, adventurer: Adventurer) {
         // get the current block modulo 512 since that's the max storage blocks
         let current_block: u16 = U64TryIntoU16::try_into(
             starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
@@ -1685,14 +1688,13 @@ mod Game {
             );
         } else {
             assert(
-                (MAX_STORAGE_BLOCKS - adventurer.last_action.into() + current_block.into()) >= IDLE_DEATH_PENALTY_BLOCKS.into(),
+                (MAX_STORAGE_BLOCKS
+                    - adventurer.last_action.into()
+                    + current_block.into()) >= IDLE_DEATH_PENALTY_BLOCKS
+                    .into(),
                 messages::ADVENTURER_NOT_IDLE
             );
         }
-    }
-
-    fn _assert_has_stat_upgrades_available(self: @ContractState, adventurer: Adventurer) {
-        assert(adventurer.stat_points_available > 0, messages::NO_STAT_UPGRADES_AVAILABLE);
     }
 
     fn _is_idle(self: @ContractState, adventurer: Adventurer) -> bool {
@@ -1710,9 +1712,7 @@ mod Game {
             // the current block is lower than the players last action
             // it means we the block number has wrapped around the 512 block storage
             // as such the difference between block 511 and block 0 is 1.
-            return (U64TryIntoU16::try_into(MAX_STORAGE_BLOCKS).unwrap()
-                - adventurer.last_action
-                + current_block) >= IDLE_MINOR_PENALTY_BLOCKS;
+            return (MAX_STORAGE_BLOCKS - adventurer.last_action.into() + current_block.into()) >= IDLE_MINOR_PENALTY_BLOCKS.into();
         }
     }
 

@@ -482,37 +482,37 @@ impl ImplAdventurer of IAdventurer {
         }
         self
     }
-    fn add_weapon(ref self: Adventurer, value: LootStatistics) -> Adventurer {
-        self.weapon = value;
-        self
+    fn add_weapon(ref self: Adventurer, item: LootStatistics) {
+        assert(ImplLoot::get_slot(item.id) == Slot::Weapon(()), 'Item is not weapon');
+        self.weapon = item;
     }
-    fn add_chest(ref self: Adventurer, value: LootStatistics) -> Adventurer {
-        self.chest = value;
-        self
+    fn add_chest(ref self: Adventurer, item: LootStatistics) {
+        assert(ImplLoot::get_slot(item.id) == Slot::Chest(()), 'Item is not chest armor');
+        self.chest = item;
     }
-    fn add_head(ref self: Adventurer, value: LootStatistics) -> Adventurer {
-        self.head = value;
-        self
+    fn add_head(ref self: Adventurer, item: LootStatistics) {
+        assert(ImplLoot::get_slot(item.id) == Slot::Head(()), 'Item is not head armor');
+        self.head = item;
     }
-    fn add_waist(ref self: Adventurer, value: LootStatistics) -> Adventurer {
-        self.waist = value;
-        self
+    fn add_waist(ref self: Adventurer, item: LootStatistics) {
+        assert(ImplLoot::get_slot(item.id) == Slot::Waist(()), 'Item is not waist armor');
+        self.waist = item;
     }
-    fn add_foot(ref self: Adventurer, value: LootStatistics) -> Adventurer {
-        self.foot = value;
-        self
+    fn add_foot(ref self: Adventurer, item: LootStatistics) {
+        assert(ImplLoot::get_slot(item.id) == Slot::Foot(()), 'Item is not foot armor');
+        self.foot = item;
     }
-    fn add_hand(ref self: Adventurer, value: LootStatistics) -> Adventurer {
-        self.hand = value;
-        self
+    fn add_hand(ref self: Adventurer, item: LootStatistics) {
+        assert(ImplLoot::get_slot(item.id) == Slot::Hand(()), 'Item is not hand armor');
+        self.hand = item;
     }
-    fn add_neck(ref self: Adventurer, value: LootStatistics) -> Adventurer {
-        self.neck = value;
-        self
+    fn add_neck(ref self: Adventurer, item: LootStatistics) {
+        assert(ImplLoot::get_slot(item.id) == Slot::Neck(()), 'Item is not necklace');
+        self.neck = item;
     }
-    fn add_ring(ref self: Adventurer, value: LootStatistics) -> Adventurer {
-        self.ring = value;
-        self
+    fn add_ring(ref self: Adventurer, item: LootStatistics) {
+        assert(ImplLoot::get_slot(item.id) == Slot::Ring(()), 'Item is not a ring');
+        self.ring = item;
     }
 
     // @title Increase Item Experience
@@ -1171,17 +1171,228 @@ fn test_strength() {
 }
 
 #[test]
-#[available_gas(5000000)]
-fn test_add_weapon() {
+#[should_panic(expected: ('Item is not weapon',))]
+#[available_gas(50000)]
+fn test_add_invalid_weapon() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // create demon crown item
+    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    // try to equip it to adventurer as a weapon
+    adventurer.add_weapon(item);
+    // should panic with 'Item is not weapon' message
+    // because demon crown is not a weapon
+    // test is annotated to expect this panic and will
+    // pass if it does, otherwise it will fail
+}
+
+#[test]
+#[available_gas(50000)]
+fn test_add_valid_weapon() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
-    let item = LootStatistics { id: 1, xp: 1, metadata: 0 };
+    // Create Katana item
+    let item = LootStatistics { id: constants::ItemId::Katana, xp: 1, metadata: 0 };
 
+    // Equip to adventurer as a weapon
     adventurer.add_weapon(item);
 
-    assert(adventurer.weapon.id == 1, 'weapon.id');
-    assert(adventurer.weapon.xp == 1, 'weapon.xp');
-    assert(adventurer.weapon.metadata == 0, 'weapon.metadata');
+    // Assert item was equipped
+    assert(adventurer.weapon.id == constants::ItemId::Katana, 'did not equip weapon');
+    assert(adventurer.weapon.xp == 1, 'weapon xp is not 1');
+    assert(adventurer.weapon.metadata == 0, 'weapon metadata is not 0');
+}
+
+#[test]
+#[should_panic(expected: ('Item is not chest armor',))]
+#[available_gas(50000)]
+fn test_add_invalid_chest() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // try to equip a Demon Crown as chest item
+    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    adventurer.add_chest(item);
+    // should panic with 'Item is not chest armor' message
+    // because Demon Crown is not chest armor
+    // test is annotated to expect this panic and will
+    // pass if it does, otherwise it will fail
+}
+
+#[test]
+#[available_gas(50000)]
+fn test_add_valid_chest() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // equip Divine Robe as chest item
+    let item = LootStatistics { id: constants::ItemId::DivineRobe, xp: 1, metadata: 0 };
+    adventurer.add_chest(item);
+
+    // this should not panic
+    // assert item was equipped
+    assert(adventurer.chest.id == constants::ItemId::DivineRobe, 'did not equip chest armor');
+    assert(adventurer.chest.xp == 1, 'chest armor xp is not 1');
+    assert(adventurer.chest.metadata == 0, 'chest armor metadata is not 0');
+}
+
+#[test]
+#[should_panic(expected: ('Item is not head armor',))]
+#[available_gas(50000)]
+fn test_add_invalid_head() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // try to equip a Katana as head item
+    let item = LootStatistics { id: constants::ItemId::Katana, xp: 1, metadata: 0 };
+    adventurer.add_head(item);
+
+    // should panic with 'Item is not head armor' message
+}
+
+#[test]
+#[available_gas(50000)]
+fn test_add_valid_head() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // equip Crown as head item
+    let item = LootStatistics { id: constants::ItemId::Crown, xp: 1, metadata: 0 };
+    adventurer.add_head(item);
+    // this should not panic
+    // assert item was equipped
+    assert(adventurer.head.id == constants::ItemId::Crown, 'did not equip head armor');
+    assert(adventurer.head.xp == 1, 'head armor xp is not 1');
+    assert(adventurer.head.metadata == 0, 'head armor metadata is not 0');
+}
+
+#[test]
+#[should_panic(expected: ('Item is not waist armor',))]
+#[available_gas(50000)]
+fn test_add_invalid_waist() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // try to equip a Demon Crown as waist item
+    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    adventurer.add_waist(item);
+
+    // should panic with 'Item is not waist armor' message
+}
+
+#[test]
+#[available_gas(50000)]
+fn test_add_valid_waist() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+
+    // equip Wool Sash as waist item
+    let item = LootStatistics { id: constants::ItemId::WoolSash, xp: 1, metadata: 0 };
+    adventurer.add_waist(item);
+
+    // this should not panic
+    // assert item was equipped
+    assert(adventurer.waist.id == constants::ItemId::WoolSash, 'did not equip waist armor');
+    assert(adventurer.waist.xp == 1, 'waist armor xp is not 1');
+    assert(adventurer.waist.metadata == 0, 'waist armor metadata is not 0');
+}
+
+#[test]
+#[should_panic(expected: ('Item is not foot armor',))]
+#[available_gas(50000)]
+fn test_add_invalid_foot() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // try to equip a Demon Crown as foot item
+    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    adventurer.add_foot(item);
+
+    // should panic with 'Item is not foot armor' message
+}
+
+#[test]
+#[available_gas(50000)]
+fn test_add_valid_foot() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+
+    // equip Silk Slippers as foot item
+    let item = LootStatistics { id: constants::ItemId::SilkSlippers, xp: 1, metadata: 0 };
+    adventurer.add_foot(item);
+
+    // this should not panic
+    // assert item was equipped
+    assert(adventurer.foot.id == constants::ItemId::SilkSlippers, 'did not equip foot armor');
+    assert(adventurer.foot.xp == 1, 'foot armor xp is not 1');
+    assert(adventurer.foot.metadata == 0, 'foot armor metadata is not 0');
+}
+
+#[test]
+#[should_panic(expected: ('Item is not hand armor',))]
+#[available_gas(50000)]
+fn test_add_invalid_hand() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+
+    // try to equip a Demon Crown as hand item
+    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    adventurer.add_hand(item);
+
+    // should panic with 'Item is not hand armor' message
+}
+
+#[test]
+#[available_gas(50000)]
+fn test_add_valid_hand() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+
+    // equip Divine Gloves as hand item
+    let item = LootStatistics { id: constants::ItemId::DivineGloves, xp: 1, metadata: 0 };
+    adventurer.add_hand(item);
+
+    // this should not panic
+    // assert item was equipped
+    assert(adventurer.hand.id == constants::ItemId::DivineGloves, 'did not equip hand armor');
+    assert(adventurer.hand.xp == 1, 'hand armor xp is not 1');
+    assert(adventurer.hand.metadata == 0, 'hand armor metadata is not 0');
+}
+
+#[test]
+#[should_panic(expected: ('Item is not necklace',))]
+#[available_gas(50000)]
+fn test_add_invalid_neck() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+
+    // try to equip a Demon Crown as necklace
+    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    adventurer.add_neck(item);
+
+    // should panic with 'Item is not necklace' message
+}
+
+#[test]
+#[available_gas(50000)]
+fn test_add_valid_neck() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+
+    // equip Pendant as necklace
+    let item = LootStatistics { id: constants::ItemId::Pendant, xp: 1, metadata: 0 };
+    adventurer.add_neck(item);
+
+    // this should not panic
+    // assert item was equipped
+    assert(adventurer.neck.id == constants::ItemId::Pendant, 'did not equip necklace');
+    assert(adventurer.neck.xp == 1, 'necklace xp is not 1');
+    assert(adventurer.neck.metadata == 0, 'necklace metadata is not 0');
+}
+
+#[test]
+#[should_panic(expected: ('Item is not a ring',))]
+#[available_gas(50000)]
+fn test_add_invalid_ring() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+
+    // try to equip a Demon Crown as ring
+    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    adventurer.add_ring(item);
+
+    // should panic with 'Item is not a ring' message
+}
+
+#[test]
+#[available_gas(50000)]
+fn test_add_valid_ring() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    let item = LootStatistics { id: constants::ItemId::PlatinumRing, xp: 1, metadata: 0 };
+    adventurer.add_ring(item);
+    assert(adventurer.ring.id == constants::ItemId::PlatinumRing, 'did not equip ring');
+    assert(adventurer.ring.xp == 1, 'ring xp is not 1');
+    assert(adventurer.ring.metadata == 0, 'ring metadata is not 0');
 }
 
 #[test]
