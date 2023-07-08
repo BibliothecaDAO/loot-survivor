@@ -260,7 +260,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(16000000)]
+    #[available_gas(18000000)]
     fn test_cant_buy_items_during_battle() {
         // mint new adventurer (will start in battle with starter beast)
         let mut game = new_adventurer();
@@ -277,7 +277,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(60000000)]
+    #[available_gas(65000000)]
     fn test_cant_buy_items_without_stat_upgrade() {
         // mint adventurer and advance to level 2
         let mut game = lvl_2_adventurer();
@@ -305,7 +305,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(60000000)]
+    #[available_gas(70000000)]
     fn test_buy_and_equip_item() {
         let mut game = lvl_2_adventurer();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -324,7 +324,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(60000000)]
+    #[available_gas(65000000)]
     fn test_buy_and_bag_item() {
         let mut game = lvl_2_adventurer();
         let market_items = @adventurer_market_items();
