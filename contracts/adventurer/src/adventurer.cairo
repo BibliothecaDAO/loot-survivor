@@ -15,7 +15,7 @@ use super::exploration::ExploreUtils;
 use super::constants::adventurer_constants::{
     STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_DISCOUNT,
     MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, ITEM_XP_MULTIPLIER, VITALITY_HEALTH_INCREASE,
-    MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP
+    MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS
 };
 use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
 use super::bag::LootStatistics;
@@ -806,10 +806,12 @@ impl ImplAdventurer of IAdventurer {
     // @param block_number: the block number of the block that the adventurer was created in
     // @return Adventurer: the new adventurer
     fn new(starting_item: u8, block_number: u64) -> Adventurer {
-        let last_action: u16 = (block_number % 512).try_into().unwrap();
+        let current_block_modulo_512: u16 = (block_number % MAX_ADVENTURER_BLOCKS.into())
+            .try_into()
+            .unwrap();
 
         return Adventurer {
-            last_action: last_action, health: STARTING_HEALTH, xp: 0, stats: Stats {
+            last_action: current_block_modulo_512, health: STARTING_HEALTH, xp: 0, stats: Stats {
                 strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0
                 }, gold: STARTING_GOLD, weapon: LootStatistics {
                 id: starting_item, xp: 0, metadata: 1, 
@@ -1227,6 +1229,60 @@ impl ImplAdventurer of IAdventurer {
             return 1;
         }
     }
+
+    fn get_idle_blocks(self: Adventurer, current_block: u64) -> u16 {
+        // adventurer only has 9 bits of storage for block numbers
+        // the last_action on the adventurer is 0-511 which is based on 
+        // the current starknet block % 512. As such, when calculating the number Of
+        // idle blocks, we need to % 512 the current block
+        let current_block_modulo_512: u16 = (current_block % MAX_ADVENTURER_BLOCKS.into())
+            .try_into()
+            .unwrap();
+
+        // if the current block is greater than the last last_action
+        if (current_block_modulo_512 > self.last_action) {
+            // we can just subtract the two to get idle blocks
+            current_block_modulo_512 - self.last_action
+        } else {
+            // otherwise we need to add the two and subtract 512
+            MAX_ADVENTURER_BLOCKS - self.last_action + current_block_modulo_512
+        }
+    }
+}
+
+#[test]
+#[available_gas(5000000)]
+fn test_get_idle_blocks() {
+    let mut adventurer = Adventurer {
+        last_action: 1, health: 480, xp: 8191, stats: Stats {
+            strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 31, 
+            }, gold: 511, weapon: LootStatistics {
+            id: 100, xp: 511, metadata: 1, 
+            }, chest: LootStatistics {
+            id: 99, xp: 511, metadata: 2, 
+            }, head: LootStatistics {
+            id: 98, xp: 511, metadata: 3, 
+            }, waist: LootStatistics {
+            id: 87, xp: 511, metadata: 4, 
+            }, foot: LootStatistics {
+            id: 78, xp: 511, metadata: 5, 
+            }, hand: LootStatistics {
+            id: 34, xp: 511, metadata: 6, 
+            }, neck: LootStatistics {
+            id: 32, xp: 511, metadata: 7, 
+            }, ring: LootStatistics {
+            id: 1, xp: 511, metadata: 8, 
+        }, beast_health: 480, stat_points_available: 1,
+    };
+
+    // test with current block greater than last action
+    assert(adventurer.get_idle_blocks(3) == 2, 'idle blocks should be 2');
+    assert(adventurer.get_idle_blocks(10) == 9, 'idle blocks should be 9');
+
+    // test with current block less than last action
+    assert(adventurer.get_idle_blocks(0) == 511, 'idle blocks should be 511');
+    adventurer.last_action = 511;
+    assert(adventurer.get_idle_blocks(0) == 1, 'idle blocks should be 1');
 }
 
 #[test]

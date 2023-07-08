@@ -10,6 +10,7 @@ const MINIMUM_ITEM_PRICE: u16 = 2;
 const MAX_STAT_VALUE: u8 = 31;
 const MAX_STAT_UPGRADES: u8 = 8;
 const MAX_XP: u16 = 8191;
+const MAX_ADVENTURER_BLOCKS: u16 = 512;
 
 // controls how much faster items level up compared to the player
 const ITEM_XP_MULTIPLIER: u16 = 4;
