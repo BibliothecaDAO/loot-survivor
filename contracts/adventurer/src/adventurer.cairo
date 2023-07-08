@@ -1239,8 +1239,8 @@ impl ImplAdventurer of IAdventurer {
             .try_into()
             .unwrap();
 
-        // if the current block is greater than the last last_action
-        if (current_block_modulo_512 > self.last_action) {
+        // if the current block is greater than or equal to the last last_action
+        if (current_block_modulo_512 >= self.last_action) {
             // we can just subtract the two to get idle blocks
             current_block_modulo_512 - self.last_action
         } else {
@@ -1282,6 +1282,7 @@ fn test_get_idle_blocks() {
     // test with current block less than last action
     assert(adventurer.get_idle_blocks(0) == 511, 'idle blocks should be 511');
     adventurer.last_action = 511;
+    assert(adventurer.get_idle_blocks(511) == 0, 'idle blocks should be 0');
     assert(adventurer.get_idle_blocks(0) == 1, 'idle blocks should be 1');
 }
 

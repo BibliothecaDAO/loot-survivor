@@ -214,7 +214,7 @@ mod Game {
             // update players last action block number
             adventurer
                 .last_action =
-                    U64TryIntoU16::try_into(starknet::get_block_info().unbox().block_number % 511)
+                    U64TryIntoU16::try_into(starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS)
                 .unwrap();
 
             // pack and save adventurer
@@ -254,7 +254,7 @@ mod Game {
             // update players last action block number
             adventurer
                 .last_action =
-                    U64TryIntoU16::try_into(starknet::get_block_info().unbox().block_number % 511)
+                    U64TryIntoU16::try_into(starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS)
                 .unwrap();
 
             // pack and save adventurer
