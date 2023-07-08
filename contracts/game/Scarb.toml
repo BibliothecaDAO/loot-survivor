@@ -14,3 +14,6 @@ obstacles = { path = "../obstacles" }
 [[target.starknet-contract]]
 allowed-libfuncs-list.name = "experimental"
 allowed-libfuncs = true
+
+
+

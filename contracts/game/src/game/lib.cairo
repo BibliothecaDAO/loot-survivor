@@ -1,3 +1,3 @@
 mod game;
-mod messages;
+mod constants;
 mod interfaces;

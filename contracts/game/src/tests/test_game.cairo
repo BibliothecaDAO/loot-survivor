@@ -10,6 +10,7 @@ mod tests {
     use traits::TryInto;
     use core::serde::Serde;
     use box::BoxTrait;
+    use starknet::{ContractAddress, ContractAddressIntoFelt252, contract_address_const};
 
 
     use market::market::{ImplMarket, LootWithPrice};
@@ -27,9 +28,13 @@ mod tests {
 
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
-    use game::game::messages::messages::{STAT_UPGRADES_AVAILABLE};
+    use game::game::constants::messages::{STAT_UPGRADES_AVAILABLE};
 
     use beasts::constants::BeastSettings;
+
+    fn INTERFACE_ID() -> ContractAddress {
+        contract_address_const::<1>()
+    }
 
     const ADVENTURER_ID: u256 = 1;
 
@@ -59,7 +64,7 @@ mod tests {
             name: 'Loaf'.try_into().unwrap(), home_realm: 1, race: 1, order: 2, entropy: 0
         };
 
-        game.start(ItemId::Wand, adventurer_meta);
+        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta);
 
         game
     }
@@ -513,7 +518,10 @@ mod tests {
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
         // verify last action block number is 1
-        assert(adventurer.last_action == STARTING_BLOCK_NUMBER.try_into().unwrap(), 'unexpected last action block');
+        assert(
+            adventurer.last_action == STARTING_BLOCK_NUMBER.try_into().unwrap(),
+            'unexpected last action block'
+        );
 
         // roll forward blockchain to make adventurer idle
         testing::set_block_number(
@@ -567,7 +575,10 @@ mod tests {
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
         // verify last action block number is 1
-        assert(adventurer.last_action == STARTING_BLOCK_NUMBER.try_into().unwrap(), 'unexpected last action block');
+        assert(
+            adventurer.last_action == STARTING_BLOCK_NUMBER.try_into().unwrap(),
+            'unexpected last action block'
+        );
 
         // roll forward blockchain to make adventurer idle
         testing::set_block_number(
