@@ -5,7 +5,7 @@ mod tests;
 mod Game {
     // TODO: TESTING CONSTS REMOVE BEFORE DEPLOYMENT
     const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 10;
-    const IDLE_MINOR_PENALTY_BLOCKS: u16 = 10;
+    const IDLE_PENALTY_THRESHOLD_BLOCKS: u16 = 10;
     const IDLE_DEATH_PENALTY_BLOCKS: u16 = 300;
     const MAX_STORAGE_BLOCKS: u64 = 512;
     const TEST_ENTROPY: u64 = 12303548;
@@ -144,7 +144,7 @@ mod Game {
             _assert_not_in_battle(@self, adventurer);
 
             // if the adventurer hasn't exceeded idle threshold
-            if !_is_idle(@self, adventurer) {
+            if !_idle_longer_than_penalty_threshold(@self, adventurer) {
                 // send adventurer to go exploring
                 _explore(
                     ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2
@@ -460,11 +460,11 @@ mod Game {
         let caller = get_caller_address();
 
         // get current block timestamp and convert to felt252
-        let block_info = starknet::get_block_info().unbox();
+        let current_block = starknet::get_block_info().unbox().block_number;
 
         // and the current block number as start time
         let new_adventurer: Adventurer = ImplAdventurer::new(
-            starting_weapon, block_info.block_number
+            starting_weapon, current_block
         );
 
         // get the current adventurer id - start at 1
@@ -1673,49 +1673,16 @@ mod Game {
         assert(adventurer.stat_points_available > 0, messages::NO_STAT_UPGRADES_AVAILABLE);
     }
     fn _assert_fatally_idle(self: @ContractState, adventurer: Adventurer) {
-        // get the current block modulo 512 since that's the max storage blocks
-        let current_block: u16 = U64TryIntoU16::try_into(
-            starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
-        )
-            .unwrap();
+        let idle_blocks = adventurer
+            .get_idle_blocks(starknet::get_block_info().unbox().block_number);
 
-        // since we are only storing 511 block numbers that automatically wrap
-        // we need to check which is great, the current_block or adventurer's last_action
-        if (current_block > adventurer.last_action) {
-            assert(
-                (current_block - adventurer.last_action) >= IDLE_DEATH_PENALTY_BLOCKS,
-                messages::ADVENTURER_NOT_IDLE
-            );
-        } else {
-            assert(
-                (MAX_STORAGE_BLOCKS
-                    - adventurer.last_action.into()
-                    + current_block.into()) >= IDLE_DEATH_PENALTY_BLOCKS
-                    .into(),
-                messages::ADVENTURER_NOT_IDLE
-            );
-        }
+        assert(idle_blocks >= IDLE_DEATH_PENALTY_BLOCKS, messages::ADVENTURER_NOT_IDLE);
     }
-
-    fn _is_idle(self: @ContractState, adventurer: Adventurer) -> bool {
-        // get the current block modulo 512 since that's the max storage blocks
-        let current_block: u16 = U64TryIntoU16::try_into(
-            starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
-        )
-            .unwrap();
-
-        // since we are only storing 511 block numbers that automatically wrap
-        // we need to check which is great, the current_block or adventurer's last_action
-        if (current_block > adventurer.last_action) {
-            return (current_block - adventurer.last_action) >= IDLE_MINOR_PENALTY_BLOCKS;
-        } else {
-            // the current block is lower than the players last action
-            // it means we the block number has wrapped around the 512 block storage
-            // as such the difference between block 511 and block 0 is 1.
-            return (MAX_STORAGE_BLOCKS - adventurer.last_action.into() + current_block.into()) >= IDLE_MINOR_PENALTY_BLOCKS.into();
-        }
+    fn _idle_longer_than_penalty_threshold(self: @ContractState, adventurer: Adventurer) -> bool {
+        let idle_blocks = adventurer
+            .get_idle_blocks(starknet::get_block_info().unbox().block_number);
+        idle_blocks >= IDLE_PENALTY_THRESHOLD_BLOCKS
     }
-
     fn _idle_penalty(self: @ContractState, adventurer: Adventurer) -> u16 {
         // TODO: Get worst case scenario obstacle
         // 1. Identify adventurers weakest armor
