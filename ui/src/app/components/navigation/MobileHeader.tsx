@@ -8,30 +8,36 @@ export default function MobileHeader() {
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   return (
-    <div className="flex flex-row justify-between items-center">
-      <Button
-        onClick={() => setScreen("player")}
-        variant={screen === "player" ? "default" : "outline"}
-      >
-        <div className="flex flex-row items-center gap-2">
-          <div className="flex items-center w-6 h-6">
-            <ControllerIcon />
+    <>
+      <div className="flex flex-row justify-between items-center">
+        <Button
+          onClick={() => setScreen("player")}
+          variant={screen === "player" ? "default" : "outline"}
+        >
+          <div className="flex flex-row items-center gap-2">
+            <div className="flex items-center w-6 h-6">
+              <ControllerIcon />
+            </div>
+            <p>Profile</p>
           </div>
-          <p>Profile</p>
-        </div>
-      </Button>
-      <h2>{screen == "player" ? "Profile" : capitalizeFirstLetter(screen)}</h2>
-      <Button
-        onClick={() => setScreen("leaderboard")}
-        variant={screen === "leaderboard" ? "default" : "outline"}
-      >
-        <div className="flex flex-row items-center gap-2">
-          <div className="flex items-center w-6 h-6">
-            <TrophyIcon />
+        </Button>
+        <Button
+          onClick={() => setScreen("leaderboard")}
+          variant={screen === "leaderboard" ? "default" : "outline"}
+        >
+          <div className="flex flex-row items-center gap-2">
+            <div className="flex items-center w-6 h-6">
+              <TrophyIcon />
+            </div>
+            <p>Leaderboard</p>
           </div>
-          <p>Leaderboard</p>
-        </div>
-      </Button>
-    </div>
+        </Button>
+      </div>
+      <div className="absolute left-1/2 right-1/2 top-[7.25rem] flex justify-center">
+        <h2>
+          {screen == "player" ? "Profile" : capitalizeFirstLetter(screen ?? "")}
+        </h2>
+      </div>
+    </>
   );
 }

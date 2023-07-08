@@ -1,6 +1,6 @@
 import { ReactElement, useState, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { getKeyFromValue } from "../lib/utils";
+import { getKeyFromValue, calculateLevel } from "../lib/utils";
 import { GameData } from "../components/GameData";
 import VerticalKeyboardControl from "../components/menu/VerticalMenu";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
@@ -20,6 +20,7 @@ import {
   HeartVitalityIcon,
   LightbulbIcon,
   ScrollIcon,
+  DoubleArrowIcon,
 } from "../components/icons/Icons";
 
 /**
@@ -207,19 +208,32 @@ export default function UpgradeScreen() {
     query: "(max-device-width: 480px)",
   });
 
+  const currentLevel = adventurer?.level ?? 0;
+
+  const previousLevel = currentLevel - statUpgrades;
+
   return (
     <div className="flex flex-col sm:flex-row">
       <div className="w-1/3 mr-5 hidden sm:block">
         <Info adventurer={adventurer} />
       </div>
       <div className="w-full sm:w-2/3">
-        <div className="flex flex-col sm:gap-10">
-          <div className="flex flex-col gap-5 p-10 items-center">
-            <p className="text-center text-lg sm:text-4xl animate-pulse">
-              You are now level {adventurer?.level}!
-            </p>
+        <div className="flex flex-col gap-5 sm:gap-10">
+          <div className="flex flex-col gap-2 p-2 sm:p-10 items-center">
+            <span className="flex flex-col gap-2 text-center text-4xl">
+              <span className="animate-pulse">LEVEL UP!</span>
+              <span className="flex flex-row items-center justify-center gap-2 text-terminal-yellow">
+                {previousLevel}{" "}
+                <span className="w-10 h-10">
+                  <DoubleArrowIcon />
+                </span>{" "}
+                {currentLevel}
+              </span>
+            </span>
             <p className="text-center text-lg sm:text-2xl">
-              Buy an item from the market and then choose an upgrade!
+              {purchasedItem
+                ? "You have purchased an item!"
+                : "Items are on the market!"}
             </p>
             <Button
               className="w-1/4"

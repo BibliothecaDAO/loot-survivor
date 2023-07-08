@@ -1,4 +1,5 @@
 import { Adventurer } from "../types";
+import { calculateLevel } from "./utils";
 
 export class AdventurerClass implements Adventurer {
   [key: string]: number | string | Date | undefined;
@@ -83,7 +84,7 @@ export class AdventurerClass implements Adventurer {
     this.wisdom = wisdom;
     this.charisma = charisma;
     this.luck = luck;
-    this.xp = xp;
+    this.xp = calculateLevel(xp ?? 0);
     this.weapon = weapon;
     this.chest = chest;
     this.chest = chest;
