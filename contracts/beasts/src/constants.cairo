@@ -40,6 +40,8 @@ mod BeastSettings {
     const GOLD_REWARD_BASE_MINIMUM: u16 = 4;
 
     const XP_REWARD_MINIMUM: u16 = 4;
+
+    const BEAST_SPECIAL_NAME_UNLOCK_LEVEL: u8 = 15;
 }
 
 mod BeastId {

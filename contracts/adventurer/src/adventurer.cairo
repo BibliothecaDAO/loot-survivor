@@ -155,7 +155,7 @@ impl AdventurerPacking of Packing<Adventurer> {
 impl ImplAdventurer of IAdventurer {
     fn get_market_entropy(self: Adventurer, adventurer_id: u256) -> u64 {
         // TODO: check potential overflow
-        ((self.xp.into() + 1 + self.stat_points_available.into()) * pow::TWO_POW_9 * adventurer_id)
+        ((self.xp.into() + 1) * pow::TWO_POW_9 * adventurer_id)
             .try_into()
             .expect('get_market_entropy')
     }
@@ -181,7 +181,7 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    fn get_potion_cost(ref self: Adventurer) -> u16 {
+    fn get_potion_cost(self: Adventurer) -> u16 {
         // check if we overflow
         if (u16_overflowing_sub(
             POTION_PRICE * self.get_level().into(), self.charisma_potion_discount()
@@ -284,20 +284,10 @@ impl ImplAdventurer of IAdventurer {
     // @param self: Adventurer to discover beast for
     // @param entropy: Entropy for generating beast
     // @return Adventurer: Adventurer with beast discovered
-    fn beast_encounter(ref self: Adventurer, battle_fixed_seed: u128) -> Beast {
+    fn beast_encounter(ref self: Adventurer, adventurer_entropy: u128) -> Beast {
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
-        let battle_fixed_entropy: u128 = self.get_battle_fixed_entropy(battle_fixed_seed);
-
-        // generate special names for beast using Loot name schema.
-        // We use Loot names because the combat system will deal bonus damage for matching names (these are the items super powers)
-        // We do this here instead of in beast to prevent beast from depending on Loot
-        let prefix1 = battle_fixed_entropy % constants::NamePrefixLength.into();
-        let prefix2 = battle_fixed_entropy % constants::NameSuffixLength.into();
-
-        // use the randomly generated prefixes but set suffic to 0
-        let special_names = SpecialPowers {
-            prefix1: prefix1.try_into().unwrap(), prefix2: prefix2.try_into().unwrap(), suffix: 0
-        };
+        let beast_seed: u128 = self.get_beast_seed(adventurer_entropy);
+        let special_names = ImplBeast::get_special_names(self.get_level(), beast_seed, constants::NamePrefixLength.into(), constants::NameSuffixLength.into());
 
         // get beast using battle fixed seed
         // this is important because in the context of this call
@@ -307,7 +297,7 @@ impl ImplAdventurer of IAdventurer {
         // don't store anything about the beast in the adventurer state
         // except it's health. Instead the beast is generated at run-time
         // via the battle_fixed_seed
-        let beast = ImplBeast::get_beast(self.get_level(), special_names, battle_fixed_seed);
+        let beast = ImplBeast::get_beast(self.get_level(), special_names, beast_seed);
 
         // otherwise generate random starting health for the beast
         self.add_beast(beast.starting_health);
@@ -834,11 +824,11 @@ impl ImplAdventurer of IAdventurer {
     }
 
 
-    // get_battle_fixed_entropy provides an entropy source that is fixed during battle
+    // get_beast_seed provides an entropy source that is fixed during battle
     // it intentionally does not use game_entropy as that could change during battle and this
     // entropy allows us to simulate a persistent battle without having to store beast
     // details on-chain.
-    fn get_battle_fixed_entropy(self: Adventurer, adventurer_entropy: u128) -> u128 {
+    fn get_beast_seed(self: Adventurer, adventurer_entropy: u128) -> u128 {
         self.xp.into() + adventurer_entropy.into()
     }
 
