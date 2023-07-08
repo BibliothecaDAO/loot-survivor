@@ -155,7 +155,7 @@ impl AdventurerPacking of Packing<Adventurer> {
 impl ImplAdventurer of IAdventurer {
     fn get_market_entropy(self: Adventurer, adventurer_id: u256) -> u64 {
         // TODO: check potential overflow
-        ((self.xp.into() + 1) * pow::TWO_POW_9 * adventurer_id)
+        ((self.xp.into() + 1 + self.stat_points_available.into()) * pow::TWO_POW_9 * adventurer_id)
             .try_into()
             .expect('get_market_entropy')
     }
