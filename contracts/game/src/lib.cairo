@@ -1870,6 +1870,10 @@ mod Game {
     fn _get_attacking_beast(self: @ContractState, adventurer_id: u256) -> Beast {
         // get adventurer
         let adventurer = _unpack_adventurer(self, adventurer_id);
+
+        // assert adventurer is in battle
+        assert(adventurer.beast_health > 0, messages::NOT_IN_BATTLE);
+
         // get adventurer entropy seed
         let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
             .entropy
