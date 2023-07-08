@@ -602,4 +602,18 @@ mod tests {
 
         game.get_entropy();
     }
+
+    #[test]
+    #[available_gas(300000000)]
+    fn test_get_potion_price() {
+        let mut game = new_adventurer();
+        let potion_price = game.get_potion_price(ADVENTURER_ID);
+        let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level()   ;
+        assert(potion_price == POTION_PRICE * adventurer_level.into(),'wrong lvl1 potion price');
+
+        let mut game = lvl_2_adventurer();
+        let potion_price = game.get_potion_price(ADVENTURER_ID);
+        let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level()   ;
+        assert(potion_price == POTION_PRICE * adventurer_level.into(),'wrong lvl2 potion price');
+    }
 }
