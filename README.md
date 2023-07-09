@@ -140,6 +140,9 @@ Loot Survivor is a onchain game, designed to be immutable and permanently hosted
 https://docs.starknet.io/documentation/getting_started/environment_setup/
 
 
+```
+source ~/cairo_venv/bin/activate
+```
 
 ```
 export STARKNET_NETWORK=alpha-goerli
@@ -148,7 +151,7 @@ export CAIRO_COMPILER_DIR=~/.cairo/target/release/
 export CAIRO_COMPILER_ARGS=--add-pythonic-hints
 export ACCOUNT_NAME=INSERT_YOUR_ACCOUNT_NAME_HERE
 
-scarb build
+scarb contracts/game/build
 
 starknet declare --contract /home/os/Documents/code/bibliotheca/loot-survivor/contracts/game/target/dev/game_Game.sierra.json --account $ACCOUNT_NAME
 
@@ -158,13 +161,24 @@ starknet deploy --class_hash 0x2592ba7e082159424d860bf65694d0181afe5e53a7f546aa5
 export CONTRACT_ADDRESS=INSERT_ADDRESS_OF_NEWLY_DEPLOYED_CONTRACT_HERE
 
 #### Start
+
+```
 starknet invoke --function start --address $CONTRACT_ADDRESS --input 12 123 0 0 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 
+```
 #### Attack
-starknet invoke --function attack --address $CONTRACT_ADDRESS --input 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 
+```
+starknet invoke --function attack --address $CONTRACT_ADDRESS --input 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+```
 #### Explore
+
+```
 starknet invoke --function explore --address $CONTRACT_ADDRESS --input 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+```
 
 #### Call
+
+```
 starknet call --function get_adventurer --address $CONTRACT_ADDRESS --input 0 0 --account $ACCOUNT_NAME
+```

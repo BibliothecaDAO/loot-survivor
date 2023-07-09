@@ -13,18 +13,20 @@ mod Game {
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
     const STAT_UPGRADE_POINTS_PER_LEVEL: u8 = 1;
 
-    use game::game::interfaces::IGame;
+    use game::game::interfaces::{
+        IGame, IERC20Dispatcher, IERC20DispatcherTrait, IERC20LibraryDispatcher
+    };
     use option::OptionTrait;
     use box::BoxTrait;
     use starknet::get_caller_address;
-    use starknet::{ContractAddress, ContractAddressIntoFelt252};
+    use starknet::{ContractAddress, ContractAddressIntoFelt252, contract_address_const};
     use integer::{
         Felt252TryIntoU64, U8IntoU16, U16IntoU64, U16IntoU128, U64IntoU128, U8IntoU128,
         U128TryIntoU8, U64IntoFelt252, U64TryIntoU16
     };
     use core::traits::{TryInto, Into};
 
-    use game::game::messages::messages;
+    use game::game::constants::{messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK};
     use lootitems::{
         loot::{Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
@@ -64,6 +66,7 @@ mod Game {
         // 1,2,3 // Survivor ID
         _scoreboard: LegacyMap::<u256, u256>,
         _scores: LegacyMap::<u256, u256>,
+        _genesis_block: u64,
     }
 
     #[event]
@@ -97,6 +100,9 @@ mod Game {
         self._lords.write(lords);
         self._dao.write(dao);
 
+        // set the genesis block
+        self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
+
         _set_entropy(ref self);
     }
 
@@ -107,7 +113,10 @@ mod Game {
     #[external(v0)]
     impl Game of IGame<ContractState> {
         fn start(
-            ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata
+            ref self: ContractState,
+            interface_id: ContractAddress,
+            starting_weapon: u8,
+            adventurer_meta: AdventurerMetadata
         ) {
             // assert starting_weapon is a valid starting weapon
             assert(
@@ -115,7 +124,11 @@ mod Game {
                 messages::INVALID_STARTING_WEAPON
             );
 
-            _start(ref self, starting_weapon, adventurer_meta);
+            let caller = get_caller_address();
+            let block_number = starknet::get_block_info().unbox().block_number;
+
+            _start(ref self, block_number, caller, starting_weapon, adventurer_meta);
+            // _payout(ref self, caller, block_number, interface_id);
         }
         fn explore(ref self: ContractState, adventurer_id: u256) {
             // assert caller owns adventurer
@@ -658,17 +671,95 @@ mod Game {
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
 
-    fn _start(ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata) {
-        // https://github.com/starkware-libs/cairo/issues/2942
-        // internal::revoke_ap_tracking();
-        // get caller address
-        let caller = get_caller_address();
+    fn _to_ether(amount: u256) -> u256 {
+        amount * 10 ^ 18
+    }
 
-        // get current block timestamp and convert to felt252
-        let current_block = starknet::get_block_info().unbox().block_number;
+    fn _payout(
+        ref self: ContractState,
+        caller: ContractAddress,
+        block_number: u64,
+        interface: ContractAddress
+    ) {
+        let lords = self._lords.read();
+        let genesis_block = self._genesis_block.read();
 
+        if (BLOCKS_IN_A_WEEK + genesis_block) < block_number {
+            // burn baby
+            IERC20Dispatcher {
+                contract_address: lords
+            }.transfer_from(caller, contract_address_const::<0>(), _to_ether(25));
+            return;
+        }        
+
+        let mut week = Week {
+            DAO: _to_ether(WEEK_2::DAO),
+            INTERFACE: _to_ether(WEEK_2::INTERFACE),
+            FIRST_PLACE: _to_ether(WEEK_2::FIRST_PLACE),
+            SECOND_PLACE: _to_ether(WEEK_2::SECOND_PLACE),
+            THIRD_PLACE: _to_ether(WEEK_2::THIRD_PLACE)
+        };
+
+        // weeks 2-4
+        if (BLOCKS_IN_A_WEEK * 4 + genesis_block) > block_number {
+            week = Week {
+                DAO: _to_ether(WEEK_4::DAO),
+                INTERFACE: _to_ether(WEEK_4::INTERFACE),
+                FIRST_PLACE: _to_ether(WEEK_4::FIRST_PLACE),
+                SECOND_PLACE: _to_ether(WEEK_4::SECOND_PLACE),
+                THIRD_PLACE: _to_ether(WEEK_4::THIRD_PLACE)
+            }
+        }
+
+        if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
+            week = Week {
+                DAO: _to_ether(WEEK_8::DAO),
+                INTERFACE: _to_ether(WEEK_8::INTERFACE),
+                FIRST_PLACE: _to_ether(WEEK_8::FIRST_PLACE),
+                SECOND_PLACE: _to_ether(WEEK_8::SECOND_PLACE),
+                THIRD_PLACE: _to_ether(WEEK_8::THIRD_PLACE)
+            }
+        }
+
+        // DAO
+        if (week.DAO > 0) {
+            IERC20Dispatcher {
+                contract_address: lords
+            }.transfer_from(caller, self._dao.read(), week.DAO);
+        }
+        
+        // interface
+        if (week.INTERFACE > 0) {
+            IERC20Dispatcher {
+                contract_address: lords
+            }.transfer_from(caller, interface, week.INTERFACE);
+        }
+
+        // first place
+        IERC20Dispatcher {
+            contract_address: lords
+        }.transfer_from(caller, self._owner.read(self._scoreboard.read(1)), week.FIRST_PLACE);
+
+        // second place
+        IERC20Dispatcher {
+            contract_address: lords
+        }.transfer_from(caller, self._owner.read(self._scoreboard.read(2)), week.SECOND_PLACE);
+
+        // third place
+        IERC20Dispatcher {
+            contract_address: lords
+        }.transfer_from(caller, self._owner.read(self._scoreboard.read(3)), week.THIRD_PLACE);
+    }
+
+    fn _start(
+        ref self: ContractState,
+        block_number: u64,
+        caller: ContractAddress,
+        starting_weapon: u8,
+        adventurer_meta: AdventurerMetadata
+    ) {
         // and the current block number as start time
-        let new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, current_block);
+        let new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, block_number);
 
         // get the current adventurer id - start at 1
         let adventurer_id = self._counter.read() + 1;
@@ -679,7 +770,7 @@ mod Game {
             home_realm: adventurer_meta.home_realm,
             race: adventurer_meta.race,
             order: adventurer_meta.order,
-            entropy: 0
+            entropy: block_number
         };
 
         // emit the StartGame

@@ -10,7 +10,7 @@ use beasts::beast::Beast;
 #[starknet::interface]
 trait IGame<TContractState> {
     // actions ---------------------------------------------------
-    fn start(ref self: TContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata);
+    fn start(ref self: TContractState, interface_id: ContractAddress, starting_weapon: u8, adventurer_meta: AdventurerMetadata);
     fn explore(ref self: TContractState, adventurer_id: u256);
     fn attack(ref self: TContractState, adventurer_id: u256);
     fn flee(ref self: TContractState, adventurer_id: u256);
@@ -79,6 +79,12 @@ trait IGame<TContractState> {
     // setters ---------------------------------------------------
     fn set_entropy(ref self: TContractState);
 
-    // checks
+    // checks ----------------------------------------------------
     fn owner_of(self: @TContractState, adventurer_id: u256) -> ContractAddress;
+}
+
+
+#[starknet::interface]
+trait IERC20<TContractState>  {
+    fn transfer_from(ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool;
 }
