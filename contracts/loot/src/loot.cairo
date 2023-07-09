@@ -21,6 +21,36 @@ use super::{
 use combat::{combat::ImplCombat, constants::CombatEnums::{Type, Tier, Slot}};
 use pack::{pack::{Packing, rshift_split}, constants::pow};
 
+#[derive(Drop, Copy, Serde)] // 21 bits
+struct DynamicItem {
+    id: u8, // 7 bits
+    xp: u16, // 9 bits
+    // this is set as the items are found/purchased
+    metadata: u8, // 5 bits
+}
+
+impl DynamicItemPacking of Packing<DynamicItem> {
+    fn pack(self: DynamicItem) -> felt252 {
+        (self.id.into()
+         + self.xp.into() * pow::TWO_POW_7
+         + self.metadata.into() * pow::TWO_POW_16
+        ).try_into().expect('pack DynamicItem')
+    }
+
+    fn unpack(packed: felt252) -> DynamicItem {
+        let packed = packed.into();
+        let (packed, id) = rshift_split(packed, pow::TWO_POW_7);
+        let (packed, xp) = rshift_split(packed, pow::TWO_POW_9);
+        let (_, metadata) = rshift_split(packed, pow::TWO_POW_5);
+
+        DynamicItem {
+            id: id.try_into().expect('unpack DynamicItem id'),
+            xp: xp.try_into().expect('unpack DynamicItem xp'),
+            metadata: metadata.try_into().expect('unpack DynamicItem metadata')
+        }
+    }
+}
+
 #[derive(Copy, Drop, Clone, Serde)]
 struct Loot {
     id: u8,
@@ -122,22 +152,22 @@ impl ImplLoot of ILoot {
         }
     }
 
-    // get_greatness_level returns the greatness level of an item based on xp
+    // get_greatness returns the greatness level of an item based on xp
     // @param xp The xp of the item.
     // @return The greatness level of the item.
-    fn get_greatness_level(xp: u16) -> u8 {
+    fn get_greatness(self: DynamicItem) -> u8 {
         // use combat lib to determine the level but give items a bonus based
         // on the item level multiplier setting (currently 4) which means
         // items will level up 4x faster than entities without a multplier
         // such as adventurers
-        let level = ImplCombat::get_level_from_xp(xp);
+        let level = ImplCombat::get_level_from_xp(self.xp);
 
         // if level exceeds max greatness
         if level > ITEM_MAX_GREATNESS {
             // return max greatness
-            return ITEM_MAX_GREATNESS;
+            ITEM_MAX_GREATNESS
         } else {
-            return level;
+            level
         }
     }
 }

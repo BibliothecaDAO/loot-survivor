@@ -24,13 +24,20 @@ trait IBeast {
         self: Beast, weapon: CombatSpec, adventurer_luck: u8, adventurer_strength: u8, entropy: u128
     ) -> u16;
     fn beast_encounter(
-        adventurer_level: u8, adventurer_wisdom: u8, special1_size: u8, special2_size: u8, battle_fixed_seed: u128
+        adventurer_level: u8,
+        adventurer_wisdom: u8,
+        special1_size: u8,
+        special2_size: u8,
+        battle_fixed_seed: u128
     ) -> (Beast, bool);
     fn counter_attack(self: Beast, armor: CombatSpec, entropy: u128) -> u16;
     fn ambush(adventurer_level: u8, adventurer_wisdom: u8, battle_fixed_entropy: u128) -> bool;
     fn attempt_flee(adventurer_level: u8, adventurer_dexterity: u8, entropy: u128) -> bool;
     fn get_level(adventurer_level: u8, seed: u128) -> u8;
     fn get_starting_health(adventurer_level: u8, entropy: u128) -> u16;
+    fn get_special_names(
+        adventurer_level: u8, seed: u128, prefix1_size: u128, prefix2_size: u128
+    ) -> SpecialPowers;
     fn get_beast_id(seed: u128) -> u8;
     fn get_xp_reward(self: Beast) -> u16;
     fn get_gold_reward(self: Beast, entropy: u128) -> u16;
@@ -89,9 +96,12 @@ impl ImplBeast of IBeast {
     }
 
     fn beast_encounter(
-        adventurer_level: u8, adventurer_wisdom: u8, special1_size: u8, special2_size: u8, battle_fixed_seed: u128
+        adventurer_level: u8,
+        adventurer_wisdom: u8,
+        special1_size: u8,
+        special2_size: u8,
+        battle_fixed_seed: u128
     ) -> (Beast, bool) {
-
         // assign special powers to the beast
         let special1 = U128TryIntoU8::try_into(battle_fixed_seed % U8IntoU128::into(special1_size))
             .unwrap();
@@ -104,15 +114,15 @@ impl ImplBeast of IBeast {
         };
 
         // generate a beast based on the seed
-        let beast = ImplBeast::get_beast(
-            adventurer_level, special_powers, battle_fixed_seed
-        );
+        let beast = ImplBeast::get_beast(adventurer_level, special_powers, battle_fixed_seed);
 
         // check if beast ambushed adventurer
-        let ambushed_adventurer = ImplBeast::ambush(adventurer_level, adventurer_wisdom, battle_fixed_seed);
+        let ambushed_adventurer = ImplBeast::ambush(
+            adventurer_level, adventurer_wisdom, battle_fixed_seed
+        );
 
         // return beast and whether or not the adventurer was ambushed
-        return (beast,ambushed_adventurer);
+        return (beast, ambushed_adventurer);
     }
 
     fn get_beast_id(seed: u128) -> u8 {
@@ -140,6 +150,22 @@ impl ImplBeast of IBeast {
             CombatSettings::DIFFICULTY_CLIFF::NORMAL,
             CombatSettings::HEALTH_MULTIPLIER::NORMAL
         )
+    }
+
+    fn get_special_names(
+        adventurer_level: u8, seed: u128, prefix1_size: u128, prefix2_size: u128
+    ) -> SpecialPowers {
+
+        // if adventurer is below level 10, beasts don't get any special powers
+        if (adventurer_level < BeastSettings::BEAST_SPECIAL_NAME_UNLOCK_LEVEL) {
+            SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 }
+        } else {
+            let beast_prefix1 = U128TryIntoU8::try_into(seed % prefix1_size).unwrap();
+            let beast_prefix2 = U128TryIntoU8::try_into(seed % prefix2_size).unwrap();
+
+            // beast suffix is always 0 for now
+            SpecialPowers { prefix1: beast_prefix1, prefix2: beast_prefix2, suffix: 0 }
+        }
     }
     fn get_level(adventurer_level: u8, seed: u128) -> u8 {
         // Delegate level generation to combat system but pass in difficulty parameters
@@ -184,7 +210,6 @@ impl ImplBeast of IBeast {
     // @param entropy: the entropy used to generate the random number
     // @return: the damage dealt to the adventurer
     fn counter_attack(self: Beast, armor: CombatSpec, entropy: u128) -> u16 {
-
         // beast have a fixed 1/6 chance of critical hit
         let is_critical_hit = (entropy % 6) == 0;
 

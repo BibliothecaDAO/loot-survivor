@@ -17,3 +17,39 @@ mod messages {
     const ONE_EXPLORE_PER_BLOCK: felt252 = 'One explore per block';
     const NO_STAT_UPGRADES_AVAILABLE: felt252 = 'No stat upgrades available';
 }
+
+const BLOCKS_IN_A_WEEK: u64 = 3360;
+const COST_TO_PLAY: u256 = 25;
+
+#[derive(Drop, Copy)]
+struct Week {
+    DAO: u256,
+    INTERFACE: u256,
+    FIRST_PLACE: u256,
+    SECOND_PLACE: u256,
+    THIRD_PLACE: u256,
+}
+
+mod WEEK_2 {
+    const DAO: u256 = 0; // 0
+    const INTERFACE: u256 = 0; // 0
+    const FIRST_PLACE: u256 = 13; // 13
+    const SECOND_PLACE: u256 = 8; // 8
+    const THIRD_PLACE: u256 = 4; // 4
+}
+
+mod WEEK_4 {
+    const DAO: u256 = 4; // 4
+    const INTERFACE: u256 = 0; // 0
+    const FIRST_PLACE: u256 = 11; // 11
+    const SECOND_PLACE: u256 = 7; // 7
+    const THIRD_PLACE: u256 = 3; // 3
+}
+
+mod WEEK_8 {
+    const DAO: u256 = 5; // 5
+    const INTERFACE: u256 = 5; // 5
+    const FIRST_PLACE: u256 = 9; // 9
+    const SECOND_PLACE: u256 = 4; // 4
+    const THIRD_PLACE: u256 = 2; // 2
+}

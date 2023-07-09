@@ -13,26 +13,28 @@ mod Game {
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
     const STAT_UPGRADE_POINTS_PER_LEVEL: u8 = 1;
 
-    use game::game::interfaces::IGame;
+    use game::game::interfaces::{
+        IGame, IERC20Dispatcher, IERC20DispatcherTrait, IERC20LibraryDispatcher
+    };
     use option::OptionTrait;
     use box::BoxTrait;
     use starknet::get_caller_address;
-    use starknet::{ContractAddress, ContractAddressIntoFelt252};
+    use starknet::{ContractAddress, ContractAddressIntoFelt252, contract_address_const};
     use integer::{
         Felt252TryIntoU64, U8IntoU16, U16IntoU64, U16IntoU128, U64IntoU128, U8IntoU128,
         U128TryIntoU8, U64IntoFelt252, U64TryIntoU16
     };
     use core::traits::{TryInto, Into};
 
-    use game::game::messages::messages;
+    use game::game::constants::{messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY};
     use lootitems::{
-        loot::{Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
+        loot::{ILoot, Loot, ImplLoot, DynamicItem}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
     use pack::pack::Packing;
 
     use survivor::{
-        adventurer::{Adventurer, ImplAdventurer, IAdventurer},
-        bag::{Bag, BagActions, ImplBagActions, LootStatistics}, adventurer_meta::AdventurerMetadata,
+        adventurer::{Adventurer, ImplAdventurer, IAdventurer, Stats},
+        bag::{Bag, BagActions, ImplBagActions}, adventurer_meta::AdventurerMetadata,
         exploration::ExploreUtils,
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
@@ -64,6 +66,7 @@ mod Game {
         // 1,2,3 // Survivor ID
         _scoreboard: LegacyMap::<u256, u256>,
         _scores: LegacyMap::<u256, u256>,
+        _genesis_block: u64,
     }
 
     #[event]
@@ -97,6 +100,9 @@ mod Game {
         self._lords.write(lords);
         self._dao.write(dao);
 
+        // set the genesis block
+        self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
+
         _set_entropy(ref self);
     }
 
@@ -107,7 +113,10 @@ mod Game {
     #[external(v0)]
     impl Game of IGame<ContractState> {
         fn start(
-            ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata
+            ref self: ContractState,
+            interface_id: ContractAddress,
+            starting_weapon: u8,
+            adventurer_meta: AdventurerMetadata
         ) {
             // assert starting_weapon is a valid starting weapon
             assert(
@@ -115,7 +124,11 @@ mod Game {
                 messages::INVALID_STARTING_WEAPON
             );
 
-            _start(ref self, starting_weapon, adventurer_meta);
+            let caller = get_caller_address();
+            let block_number = starknet::get_block_info().unbox().block_number;
+
+            _start(ref self, block_number, caller, starting_weapon, adventurer_meta);
+            _payout(ref self, caller, block_number, interface_id);
         }
         fn explore(ref self: ContractState, adventurer_id: u256) {
             // assert caller owns adventurer
@@ -214,7 +227,9 @@ mod Game {
             // update players last action block number
             adventurer
                 .last_action =
-                    U64TryIntoU16::try_into(starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS)
+                    U64TryIntoU16::try_into(
+                        starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
+                    )
                 .unwrap();
 
             // pack and save adventurer
@@ -254,7 +269,9 @@ mod Game {
             // update players last action block number
             adventurer
                 .last_action =
-                    U64TryIntoU16::try_into(starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS)
+                    U64TryIntoU16::try_into(
+                        starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
+                    )
                 .unwrap();
 
             // pack and save adventurer
@@ -423,9 +440,210 @@ mod Game {
         fn get_bag(self: @ContractState, adventurer_id: u256) -> Bag {
             _bag_unpacked(self, adventurer_id)
         }
-
+        fn get_equipped_weapon_names(
+            self: @ContractState, adventurer_id: u256
+        ) -> LootItemSpecialNames {
+            let adventurer = _unpack_adventurer(self, adventurer_id);
+            _get_special_names(self, adventurer_id, adventurer.weapon)
+        }
+        fn get_equipped_chest_names(
+            self: @ContractState, adventurer_id: u256
+        ) -> LootItemSpecialNames {
+            let adventurer = _unpack_adventurer(self, adventurer_id);
+            _get_special_names(self, adventurer_id, adventurer.chest)
+        }
+        fn get_equipped_head_names(
+            self: @ContractState, adventurer_id: u256
+        ) -> LootItemSpecialNames {
+            let adventurer = _unpack_adventurer(self, adventurer_id);
+            _get_special_names(self, adventurer_id, adventurer.head)
+        }
+        fn get_equipped_waist_names(
+            self: @ContractState, adventurer_id: u256
+        ) -> LootItemSpecialNames {
+            let adventurer = _unpack_adventurer(self, adventurer_id);
+            _get_special_names(self, adventurer_id, adventurer.waist)
+        }
+        fn get_equipped_foot_names(
+            self: @ContractState, adventurer_id: u256
+        ) -> LootItemSpecialNames {
+            let adventurer = _unpack_adventurer(self, adventurer_id);
+            _get_special_names(self, adventurer_id, adventurer.foot)
+        }
+        fn get_equipped_hand_names(
+            self: @ContractState, adventurer_id: u256
+        ) -> LootItemSpecialNames {
+            let adventurer = _unpack_adventurer(self, adventurer_id);
+            _get_special_names(self, adventurer_id, adventurer.hand)
+        }
+        fn get_equipped_necklace_names(
+            self: @ContractState, adventurer_id: u256
+        ) -> LootItemSpecialNames {
+            let adventurer = _unpack_adventurer(self, adventurer_id);
+            _get_special_names(self, adventurer_id, adventurer.neck)
+        }
+        fn get_equipped_ring_names(
+            self: @ContractState, adventurer_id: u256
+        ) -> LootItemSpecialNames {
+            let adventurer = _unpack_adventurer(self, adventurer_id);
+            _get_special_names(self, adventurer_id, adventurer.ring)
+        }
         fn get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<LootWithPrice> {
             _get_items_on_market(self, adventurer_id)
+        }
+
+        fn get_potion_price(self: @ContractState, adventurer_id: u256) -> u16 {
+            _get_potion_price(self, adventurer_id)
+        }
+
+        fn get_attacking_beast(self: @ContractState, adventurer_id: u256) -> Beast {
+            _get_attacking_beast(self, adventurer_id)
+        }
+
+        fn get_health(self: @ContractState, adventurer_id: u256) -> u16 {
+            _unpack_adventurer(self, adventurer_id).health
+        }
+
+        fn get_xp(self: @ContractState, adventurer_id: u256) -> u16 {
+            _unpack_adventurer(self, adventurer_id).xp
+        }
+
+        fn get_level(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).get_level()
+        }
+
+        fn get_gold(self: @ContractState, adventurer_id: u256) -> u16 {
+            _unpack_adventurer(self, adventurer_id).gold
+        }
+        fn get_beast_health(self: @ContractState, adventurer_id: u256) -> u16 {
+            _unpack_adventurer(self, adventurer_id).beast_health
+        }
+        fn get_stat_points_available(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).stat_points_available
+        }
+        fn get_last_action(self: @ContractState, adventurer_id: u256) -> u16 {
+            _unpack_adventurer(self, adventurer_id).last_action
+        }
+        fn get_weapon_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).weapon.get_greatness()
+        }
+        fn get_chest_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).chest.get_greatness()
+        }
+        fn get_head_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).head.get_greatness()
+        }
+        fn get_waist_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).waist.get_greatness()
+        }
+        fn get_foot_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).foot.get_greatness()
+        }
+        fn get_hand_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).hand.get_greatness()
+        }
+        fn get_necklace_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).neck.get_greatness()
+        }
+        fn get_ring_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).ring.get_greatness()
+        }
+        fn get_base_stats(self: @ContractState, adventurer_id: u256) -> Stats {
+            _unpack_adventurer(self, adventurer_id).stats
+        }
+        fn get_boosted_stats(self: @ContractState, adventurer_id: u256) -> Stats {
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+            _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+                .stats
+        }
+        fn get_base_strength(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).stats.strength
+        }
+        fn get_boosted_strength(self: @ContractState, adventurer_id: u256) -> u8 {
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+            _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+                .stats
+                .strength
+        }
+        fn get_base_dexterity(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).stats.dexterity
+        }
+        fn get_boosted_dexterity(self: @ContractState, adventurer_id: u256) -> u8 {
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+            _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+                .stats
+                .dexterity
+        }
+        fn get_base_vitality(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).stats.vitality
+        }
+        fn get_boosted_vitality(self: @ContractState, adventurer_id: u256) -> u8 {
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+            _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+                .stats
+                .vitality
+        }
+        fn get_base_intelligence(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).stats.intelligence
+        }
+        fn get_boosted_intelligence(self: @ContractState, adventurer_id: u256) -> u8 {
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+            _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+                .stats
+                .intelligence
+        }
+        fn get_base_wisdom(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).stats.wisdom
+        }
+        fn get_boosted_wisdom(self: @ContractState, adventurer_id: u256) -> u8 {
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+            _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+                .stats
+                .wisdom
+        }
+        fn get_base_charisma(self: @ContractState, adventurer_id: u256) -> u8 {
+            _unpack_adventurer(self, adventurer_id).stats.charisma
+        }
+        fn get_boosted_charisma(self: @ContractState, adventurer_id: u256) -> u8 {
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+            _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+                .stats
+                .charisma
         }
 
         fn get_dao_address(self: @ContractState) -> ContractAddress {
@@ -453,19 +671,96 @@ mod Game {
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
 
-    fn _start(ref self: ContractState, starting_weapon: u8, adventurer_meta: AdventurerMetadata) {
-        // https://github.com/starkware-libs/cairo/issues/2942
-        // internal::revoke_ap_tracking();
-        // get caller address
-        let caller = get_caller_address();
+    fn _to_ether(amount: u256) -> u256 {
+        amount * 10 ^ 18
+    }
 
-        // get current block timestamp and convert to felt252
-        let current_block = starknet::get_block_info().unbox().block_number;
+    fn _payout(
+        ref self: ContractState,
+        caller: ContractAddress,
+        block_number: u64,
+        interface: ContractAddress
+    ) {
+        let lords = self._lords.read();
+        let genesis_block = self._genesis_block.read();
 
+        if (BLOCKS_IN_A_WEEK + genesis_block) > block_number {
+            // TODO: Update to actual Lords interface
+            // burn baby
+            // IERC20Dispatcher {
+            //     contract_address: lords
+            // }.burn_away(caller, _to_ether(COST_TO_PLAY));
+            return;
+        }        
+
+        let mut week = Week {
+            DAO: _to_ether(WEEK_2::DAO),
+            INTERFACE: _to_ether(WEEK_2::INTERFACE),
+            FIRST_PLACE: _to_ether(WEEK_2::FIRST_PLACE),
+            SECOND_PLACE: _to_ether(WEEK_2::SECOND_PLACE),
+            THIRD_PLACE: _to_ether(WEEK_2::THIRD_PLACE)
+        };
+
+        // weeks 2-4
+        if (BLOCKS_IN_A_WEEK * 4 + genesis_block) > block_number {
+            week = Week {
+                DAO: _to_ether(WEEK_4::DAO),
+                INTERFACE: _to_ether(WEEK_4::INTERFACE),
+                FIRST_PLACE: _to_ether(WEEK_4::FIRST_PLACE),
+                SECOND_PLACE: _to_ether(WEEK_4::SECOND_PLACE),
+                THIRD_PLACE: _to_ether(WEEK_4::THIRD_PLACE)
+            }
+        }
+
+        if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
+            week = Week {
+                DAO: _to_ether(WEEK_8::DAO),
+                INTERFACE: _to_ether(WEEK_8::INTERFACE),
+                FIRST_PLACE: _to_ether(WEEK_8::FIRST_PLACE),
+                SECOND_PLACE: _to_ether(WEEK_8::SECOND_PLACE),
+                THIRD_PLACE: _to_ether(WEEK_8::THIRD_PLACE)
+            }
+        }
+
+        // DAO
+        if (week.DAO > 0) {
+            IERC20Dispatcher {
+                contract_address: lords
+            }.transferFrom(caller, self._dao.read(), week.DAO);
+        }
+        
+        // interface
+        if (week.INTERFACE > 0) {
+            IERC20Dispatcher {
+                contract_address: lords
+            }.transferFrom(caller, interface, week.INTERFACE);
+        }
+
+        // first place
+        IERC20Dispatcher {
+            contract_address: lords
+        }.transferFrom(caller, self._owner.read(self._scoreboard.read(1)), week.FIRST_PLACE);
+
+        // second place
+        IERC20Dispatcher {
+            contract_address: lords
+        }.transferFrom(caller, self._owner.read(self._scoreboard.read(2)), week.SECOND_PLACE);
+
+        // third place
+        IERC20Dispatcher {
+            contract_address: lords
+        }.transferFrom(caller, self._owner.read(self._scoreboard.read(3)), week.THIRD_PLACE);
+    }
+
+    fn _start(
+        ref self: ContractState,
+        block_number: u64,
+        caller: ContractAddress,
+        starting_weapon: u8,
+        adventurer_meta: AdventurerMetadata
+    ) {
         // and the current block number as start time
-        let new_adventurer: Adventurer = ImplAdventurer::new(
-            starting_weapon, current_block
-        );
+        let new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, block_number);
 
         // get the current adventurer id - start at 1
         let adventurer_id = self._counter.read() + 1;
@@ -476,7 +771,7 @@ mod Game {
             home_realm: adventurer_meta.home_realm,
             race: adventurer_meta.race,
             order: adventurer_meta.order,
-            entropy: 0
+            entropy: block_number
         };
 
         // emit the StartGame
@@ -493,7 +788,7 @@ mod Game {
         _pack_adventurer_meta(ref self, adventurer_id, adventurer_meta);
 
         // increment the adventurer counter
-        self._counter.write(adventurer_id + 1);
+        self._counter.write(adventurer_id);
 
         // set caller as owner
         self._owner.write(adventurer_id, caller);
@@ -530,8 +825,7 @@ mod Game {
         match explore_result {
             ExploreResult::Beast(()) => {
                 // get a source of entropy that will be constant for the duration of the battle
-                let battle_fixed_entropy: u128 = adventurer
-                    .get_battle_fixed_entropy(adventurer_entropy);
+                let battle_fixed_entropy: u128 = adventurer.get_beast_seed(adventurer_entropy);
 
                 // encounter beast and check if adventurer was ambushed
                 let (beast, was_ambushed) = ImplBeast::beast_encounter(
@@ -539,7 +833,7 @@ mod Game {
                     adventurer.stats.wisdom,
                     NamePrefixLength,
                     NameSuffixLength,
-                    exploration_entropy
+                    adventurer_entropy
                 );
 
                 // initialize the beast health. This is the only timeD beast.starting_health should be
@@ -954,7 +1248,7 @@ mod Game {
     // @param self A reference to the ContractState. This function requires mutable access to the ContractState to update the specified item's XP.
     // @param adventurer_id The unique identifier for the adventurer who owns the item.
     // @param adventurer A reference to the Adventurer object. This object represents the adventurer who owns the item.
-    // @param item A reference to the LootStatistics object. This object represents the item to which XP will be granted.
+    // @param item A reference to the DynamicItem object. This object represents the item to which XP will be granted.
     // @param amount The amount of experience points to be added to the item before applying the item XP multiplier.
     // @param name_storage1 A reference to the LootItemSpecialNamesStorage object. This object stores the special names for items that an adventurer may possess.
     // @param name_storage2 A reference to the LootItemSpecialNamesStorage object. This object stores the special names for items that an adventurer may possess.
@@ -968,7 +1262,7 @@ mod Game {
         ref self: ContractState,
         adventurer_id: u256,
         ref adventurer: Adventurer,
-        ref item: LootStatistics,
+        ref item: DynamicItem,
         xp_increase: u16,
         ref name_storage1: LootItemSpecialNamesStorage,
         ref name_storage2: LootItemSpecialNamesStorage,
@@ -1025,24 +1319,13 @@ mod Game {
             .into();
 
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
-        let battle_fixed_entropy: u128 = adventurer.get_battle_fixed_entropy(adventurer_entropy);
-
-        // generate special names for beast using Loot name schema.
-        // We use Loot names because the combat system will deal bonus damage for matching names (these are the items super powers)
-        // We do this here instead of in beast to prevent beast from depending on Loot
-        let beast_prefix1 = U128TryIntoU8::try_into(
-            battle_fixed_entropy % U8IntoU128::into(NamePrefixLength)
-        )
-            .unwrap();
-        let beast_prefix2 = U128TryIntoU8::try_into(
-            battle_fixed_entropy % U8IntoU128::into(NameSuffixLength)
-        )
-            .unwrap();
-
-        // use the randomly generated prefixes but set suffic to 0
-        let beast_name_prefix = SpecialPowers {
-            prefix1: beast_prefix1, prefix2: beast_prefix2, suffix: 0
-        };
+        let battle_fixed_entropy: u128 = adventurer.get_beast_seed(adventurer_entropy);
+        let beast_special_names = ImplBeast::get_special_names(
+            adventurer.get_level(),
+            battle_fixed_entropy,
+            NamePrefixLength.into(),
+            NameSuffixLength.into(),
+        );
 
         // if the items greatness is below 15, it won't have any special names so no need
         // to waste a read fetching them
@@ -1051,7 +1334,9 @@ mod Game {
 
         // get battle fixed beast. The key to this is using battle fixed entropy
         let adventurer_level = adventurer.get_level();
-        let beast = ImplBeast::get_beast(adventurer_level, beast_name_prefix, battle_fixed_entropy);
+        let beast = ImplBeast::get_beast(
+            adventurer_level, beast_special_names, battle_fixed_entropy
+        );
         if (adventurer.get_level() == 1) {
             let beast = ImplBeast::get_starter_beast(weapon_combat_spec.item_type);
         }
@@ -1236,13 +1521,11 @@ mod Game {
         );
 
         // our fixed battle entropy which we use to generate same beast during a single battle
-        let battle_fixed_entropy: u128 = adventurer.get_battle_fixed_entropy(adventurer_entropy);
+        let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
         // here we save some compute by not looking up the beast's special names during a failed flee
         // since they won't impact damage
         let beast_name_prefix = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 };
-        let beast = ImplBeast::get_beast(
-            adventurer.get_level(), beast_name_prefix, battle_fixed_entropy
-        );
+        let beast = ImplBeast::get_beast(adventurer.get_level(), beast_name_prefix, beast_seed);
         let mut damage_taken = 0;
         let mut attack_location = 0;
         if (fled) {
@@ -1305,7 +1588,7 @@ mod Game {
 
         // check what item type exists on adventurer
         // if some exists pluck from adventurer and add to bag
-        let mut unequipping_item = LootStatistics { id: 0, xp: 0, metadata: 0 };
+        let mut unequipping_item = DynamicItem { id: 0, xp: 0, metadata: 0 };
         if adventurer.is_slot_free(equipping_item) == false {
             let unequipping_item = adventurer
                 .get_item_at_slot(ImplLoot::get_slot(equipping_item.id));
@@ -1627,6 +1910,15 @@ mod Game {
         Packing::unpack(self._loot_special_names.read((adventurer_id, storage_index)))
     }
 
+    fn _get_special_names(self: @ContractState, adventurer_id: u256, item: DynamicItem) -> LootItemSpecialNames {
+        ImplLootItemSpecialNames::get_loot_special_names(
+            _loot_special_names_storage_unpacked(
+                self, adventurer_id, _get_storage_index(self, item.metadata)
+            ),
+            item
+        )
+    }
+
     fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
         self._owner.read(adventurer_id)
     }
@@ -1707,6 +1999,53 @@ mod Game {
         )
     }
 
+    fn _get_potion_price(self: @ContractState, adventurer_id: u256) -> u16 {
+        let mut name_storage1 = _loot_special_names_storage_unpacked(
+            self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+        );
+        let mut name_storage2 = _loot_special_names_storage_unpacked(
+            self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+        );
+
+        let adventurer = _unpack_adventurer_apply_stat_boost(
+            self, adventurer_id, name_storage1, name_storage2
+        );
+
+        adventurer.get_potion_cost()
+    }
+
+    fn _get_attacking_beast(self: @ContractState, adventurer_id: u256) -> Beast {
+        // get adventurer
+        let adventurer = _unpack_adventurer(self, adventurer_id);
+
+        // assert adventurer is in battle
+        assert(adventurer.beast_health > 0, messages::NOT_IN_BATTLE);
+
+        if (adventurer.get_level() == 1) {
+            // return starter beast
+            ImplBeast::get_starter_beast(ImplLoot::get_type(adventurer.weapon.id))
+        } else {
+            // get adventurer entropy seed
+            let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
+                .entropy
+                .into();
+
+            // get beast seed based on adventurer entropy and current state
+            let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
+
+            // get beast special names based on beast seed
+            let beast_special_names = ImplBeast::get_special_names(
+                adventurer.get_level(),
+                beast_seed,
+                NamePrefixLength.into(),
+                NameSuffixLength.into(),
+            );
+
+            // get beast based on adventurer level and beast special names
+            ImplBeast::get_beast(adventurer.get_level(), beast_special_names, beast_seed)
+        }
+    }
+
     fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u256 {
         if (meta_data_id <= 10) {
             return LOOT_NAME_STORAGE_INDEX_1;
@@ -1718,17 +2057,17 @@ mod Game {
     // _get_combat_spec returns the combat spec of an item
     // as part of this we get the item details from the loot description
     fn _get_combat_spec(
-        self: @ContractState, adventurer_id: u256, item: LootStatistics
+        self: @ContractState, adventurer_id: u256, item: DynamicItem
     ) -> CombatSpec {
         // get the greatness of the item
-        let item_greatness = ImplLoot::get_greatness_level(item.xp);
+        let item_greatness = item.get_greatness();
 
         // if it's less than 15, no need to fetch the special names it doesn't have them
         if (item_greatness < 15) {
             return CombatSpec {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),
-                level: U8IntoU16::into(ImplLoot::get_greatness_level(item.xp)),
+                level: U8IntoU16::into(item.get_greatness()),
                 special_powers: SpecialPowers {
                     prefix1: 0, prefix2: 0, suffix: 0
                 }
@@ -1745,7 +2084,7 @@ mod Game {
             return CombatSpec {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),
-                level: U8IntoU16::into(ImplLoot::get_greatness_level(item.xp)),
+                level: U8IntoU16::into(item.get_greatness()),
                 special_powers: SpecialPowers {
                     prefix1: item_details.name_prefix,
                     prefix2: item_details.name_suffix,
