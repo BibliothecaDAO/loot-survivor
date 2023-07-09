@@ -472,7 +472,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "adventurerId": check_exists_int(sg.adventurer_state["adventurer_id"]),
             "owner": check_exists_int(1),
             "equipped": check_exists_int(1),
-            "ownerAddress": check_exists_int(sg.adventurer_state["adventurer_id"]),
+            "ownerAddress": check_exists_int(sg.adventurer_state["owner"]),
             "xp": encode_int_as_bytes(0),
             "cost": encode_int_as_bytes(0),
             "namePrefix": check_exists_int(0),

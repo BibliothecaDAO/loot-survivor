@@ -618,7 +618,6 @@ class AdventurersFilter:
     intelligence: Optional[FeltValueFilter] = None
     wisdom: Optional[FeltValueFilter] = None
     charisma: Optional[FeltValueFilter] = None
-    luck: Optional[FeltValueFilter] = None
     xp: Optional[FeltValueFilter] = None
     weaponId: Optional[FeltValueFilter] = None
     chestId: Optional[FeltValueFilter] = None
@@ -722,16 +721,15 @@ class AdventurersOrderByInput:
     intelligence: Optional[OrderByInput] = None
     wisdom: Optional[OrderByInput] = None
     charisma: Optional[OrderByInput] = None
-    luck: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
-    weaponId: Optional[OrderByInput] = None
-    chestId: Optional[OrderByInput] = None
-    headId: Optional[OrderByInput] = None
-    waistId: Optional[OrderByInput] = None
-    feetId: Optional[OrderByInput] = None
-    handsId: Optional[OrderByInput] = None
-    neckId: Optional[OrderByInput] = None
-    ringId: Optional[OrderByInput] = None
+    weapon: Optional[OrderByInput] = None
+    chest: Optional[OrderByInput] = None
+    head: Optional[OrderByInput] = None
+    waist: Optional[OrderByInput] = None
+    foot: Optional[OrderByInput] = None
+    hand: Optional[OrderByInput] = None
+    neck: Optional[OrderByInput] = None
+    ring: Optional[OrderByInput] = None
     beast: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     statUpgrades: Optional[OrderByInput] = None
@@ -825,14 +823,13 @@ class Adventurer:
     intelligence: Optional[FeltValue]
     wisdom: Optional[FeltValue]
     charisma: Optional[FeltValue]
-    luck: Optional[FeltValue]
     xp: Optional[FeltValue]
     weapon: Optional[FeltValue]
     chest: Optional[FeltValue]
     head: Optional[FeltValue]
     waist: Optional[FeltValue]
-    feet: Optional[FeltValue]
-    hands: Optional[FeltValue]
+    foot: Optional[FeltValue]
+    hand: Optional[FeltValue]
     neck: Optional[FeltValue]
     ring: Optional[FeltValue]
     beastHealth: Optional[FeltValue]
@@ -858,14 +855,13 @@ class Adventurer:
             intelligence=data["intelligence"],
             wisdom=data["wisdom"],
             charisma=data["charisma"],
-            luck=data["luck"],
             xp=data["xp"],
             weapon=data["weapon"],
             chest=data["chest"],
             head=data["head"],
             waist=data["waist"],
-            feet=data["feet"],
-            hands=data["hands"],
+            foot=data["foot"],
+            hand=data["hand"],
             neck=data["neck"],
             ring=data["ring"],
             beastHealth=data["beastHealth"],
@@ -1005,7 +1001,7 @@ class Item:
     def from_mongo(cls, data):
         return cls(
             item=data["item"],
-            advebturerId=data["adventurerId"],
+            adventurerId=data["adventurerId"],
             cost=data["cost"],
             ownerAddress=data["ownerAddress"],
             owner=data["owner"],
@@ -1385,8 +1381,8 @@ class IndexerGraphQLView(GraphQLView):
 async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     mongo_goerli = MongoClient(mongo_goerli)
     mongo_mainnet = MongoClient(mongo_mainnet)
-    db_name_goerli = "loot-survivor-indexer-goerli".replace("-", "_")
-    db_name_mainnet = "loot-survivor-indexer-mainnet".replace("-", "_")
+    db_name_goerli = "mongo-goerli".replace("-", "_")
+    db_name_mainnet = "mongo-mainnet".replace("-", "_")
     db_goerli = mongo_goerli[db_name_goerli]
     db_mainnet = mongo_mainnet[db_name_mainnet]
 
@@ -1395,6 +1391,7 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
 
     app = web.Application()
+    # app.router.add_route("*", "/graphql", view_goerli)
 
     cors = aiohttp_cors.setup(app)
     resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
