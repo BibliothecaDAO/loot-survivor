@@ -108,7 +108,7 @@ mod ItemId {
     const HeavyGloves: u8 = 101;
 }
 
-// DynamicItem Slot Length
+// ItemPrimitive Slot Length
 mod ItemSlotLength {
     const SlotItemsLengthWeapon: u8 = 18;
     const SlotItemsLengthChest: u8 = 15;

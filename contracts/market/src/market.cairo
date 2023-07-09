@@ -13,7 +13,7 @@ use combat::constants::CombatEnums::{Tier};
 
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET, TIER_PRICE};
 
-const MARKET_SEED: u64 = 512;
+const MARKET_SEED: u256 = 512;
 
 #[derive(Drop, Serde)]
 struct LootWithPrice {
@@ -22,10 +22,10 @@ struct LootWithPrice {
 }
 
 trait IMarket {
-    fn get_all_items(seed: u64) -> Array<Loot>;
-    fn get_all_items_with_price(seed: u64) -> Array<LootWithPrice>;
-    fn get_id(seed: u64) -> u8;
-    fn is_item_available(seed: u64, item_id: u8) -> bool;
+    fn get_all_items(seed: u256) -> Array<Loot>;
+    fn get_all_items_with_price(seed: u256) -> Array<LootWithPrice>;
+    fn get_id(seed: u256) -> u8;
+    fn is_item_available(seed: u256, item_id: u8) -> bool;
     fn get_price(tier: Tier) -> u16;
 }
 
@@ -40,10 +40,10 @@ impl ImplMarket of IMarket {
         }
     }
 
-    fn get_all_items(seed: u64) -> Array<Loot> {
+    fn get_all_items(seed: u256) -> Array<Loot> {
         let mut all_items = ArrayTrait::<Loot>::new();
 
-        let mut i: u64 = 0;
+        let mut i: u256 = 0;
         loop {
             if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
                 break ();
@@ -57,10 +57,10 @@ impl ImplMarket of IMarket {
         all_items
     }
 
-    fn get_all_items_with_price(seed: u64) -> Array<LootWithPrice> {
+    fn get_all_items_with_price(seed: u256) -> Array<LootWithPrice> {
         let mut all_items = ArrayTrait::<LootWithPrice>::new();
 
-        let mut i: u64 = 0;
+        let mut i: u256 = 0;
         loop {
             if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
                 break ();
@@ -86,12 +86,12 @@ impl ImplMarket of IMarket {
         all_items
     }
 
-    fn get_id(seed: u64) -> u8 {
-        (seed % NUM_LOOT_ITEMS).try_into().unwrap()
+    fn get_id(seed: u256) -> u8 {
+        (seed % NUM_LOOT_ITEMS.into()).try_into().unwrap()
     }
 
-    fn is_item_available(seed: u64, item_id: u8) -> bool {
-        let mut i: u64 = 0;
+    fn is_item_available(seed: u256, item_id: u8) -> bool {
+        let mut i: u256 = 0;
 
         loop {
             if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
@@ -132,7 +132,7 @@ fn test_get_price() {
 fn test_get_all_items() {
     let items = ImplMarket::get_all_items(1);
 
-    let len: u64 = items.len().into();
+    let len: u256 = items.len().into();
 
     assert(len == NUMBER_OF_ITEMS_PER_LEVEL, 'too many items');
 }
@@ -140,7 +140,7 @@ fn test_get_all_items() {
 #[test]
 #[available_gas(9000000)]
 fn test_is_item_available() {
-    let mut i: u64 = 0;
+    let mut i: u256 = 0;
     loop {
         if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
             break ();
@@ -159,7 +159,7 @@ fn test_is_item_available() {
 #[test]
 #[available_gas(90000000)]
 fn test_fake_check_ownership() {
-    let mut i: u64 = 0;
+    let mut i: u256 = 0;
     loop {
         if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
             break ();
@@ -180,7 +180,7 @@ fn test_fake_check_ownership() {
 fn test_get_all_items_ownership() {
     let items = @ImplMarket::get_all_items(MARKET_SEED);
 
-    let mut i: u64 = 0;
+    let mut i: u256 = 0;
     let mut item_index: usize = 0;
 
     loop {
