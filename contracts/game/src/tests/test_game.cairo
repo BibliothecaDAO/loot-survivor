@@ -69,12 +69,6 @@ mod tests {
         game
     }
 
-    fn adventurer_market_items() -> Array<LootWithPrice> {
-        let mut game = new_adventurer();
-
-        game.get_items_on_market(ADVENTURER_ID)
-    }
-
     fn lvl_2_adventurer() -> IGameDispatcher {
         let mut game = new_adventurer();
 
@@ -332,7 +326,7 @@ mod tests {
     #[available_gas(65000000)]
     fn test_buy_and_bag_item() {
         let mut game = lvl_2_adventurer();
-        let market_items = @adventurer_market_items();
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
 
         game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
 
@@ -345,7 +339,7 @@ mod tests {
     #[available_gas(4000000000)]
     fn test_equip_item_from_bag() {
         let mut game = lvl_2_adventurer();
-        let market_items = @adventurer_market_items();
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
 
         market_items.at(0).item.id;
 
