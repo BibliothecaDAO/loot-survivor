@@ -26,7 +26,7 @@ mod Game {
     };
     use core::traits::{TryInto, Into};
 
-    use game::game::constants::{messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK};
+    use game::game::constants::{messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY};
     use lootitems::{
         loot::{Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
@@ -128,7 +128,7 @@ mod Game {
             let block_number = starknet::get_block_info().unbox().block_number;
 
             _start(ref self, block_number, caller, starting_weapon, adventurer_meta);
-            // _payout(ref self, caller, block_number, interface_id);
+            _payout(ref self, caller, block_number, interface_id);
         }
         fn explore(ref self: ContractState, adventurer_id: u256) {
             // assert caller owns adventurer
@@ -688,7 +688,7 @@ mod Game {
             // burn baby
             IERC20Dispatcher {
                 contract_address: lords
-            }.transfer_from(caller, contract_address_const::<0>(), _to_ether(25));
+            }.transferFrom(caller, contract_address_const::<0>(), _to_ether(COST_TO_PLAY));
             return;
         }        
 
@@ -725,30 +725,30 @@ mod Game {
         if (week.DAO > 0) {
             IERC20Dispatcher {
                 contract_address: lords
-            }.transfer_from(caller, self._dao.read(), week.DAO);
+            }.transferFrom(caller, self._dao.read(), week.DAO);
         }
         
         // interface
         if (week.INTERFACE > 0) {
             IERC20Dispatcher {
                 contract_address: lords
-            }.transfer_from(caller, interface, week.INTERFACE);
+            }.transferFrom(caller, interface, week.INTERFACE);
         }
 
         // first place
         IERC20Dispatcher {
             contract_address: lords
-        }.transfer_from(caller, self._owner.read(self._scoreboard.read(1)), week.FIRST_PLACE);
+        }.transferFrom(caller, self._owner.read(self._scoreboard.read(1)), week.FIRST_PLACE);
 
         // second place
         IERC20Dispatcher {
             contract_address: lords
-        }.transfer_from(caller, self._owner.read(self._scoreboard.read(2)), week.SECOND_PLACE);
+        }.transferFrom(caller, self._owner.read(self._scoreboard.read(2)), week.SECOND_PLACE);
 
         // third place
         IERC20Dispatcher {
             contract_address: lords
-        }.transfer_from(caller, self._owner.read(self._scoreboard.read(3)), week.THIRD_PLACE);
+        }.transferFrom(caller, self._owner.read(self._scoreboard.read(3)), week.THIRD_PLACE);
     }
 
     fn _start(

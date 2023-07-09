@@ -19,6 +19,7 @@ mod messages {
 }
 
 const BLOCKS_IN_A_WEEK: u64 = 3360;
+const COST_TO_PLAY: u256 = 25;
 
 #[derive(Drop, Copy)]
 struct Week {

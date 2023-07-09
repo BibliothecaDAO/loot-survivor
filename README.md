@@ -144,41 +144,58 @@ https://docs.starknet.io/documentation/getting_started/environment_setup/
 source ~/cairo_venv/bin/activate
 ```
 
-```
+```bash
 export STARKNET_NETWORK=alpha-goerli
 export STARKNET_WALLET=starkware.starknet.wallets.open_zeppelin.OpenZeppelinAccount
 export CAIRO_COMPILER_DIR=~/.cairo/target/release/
 export CAIRO_COMPILER_ARGS=--add-pythonic-hints
+
+# you will have an account from the Starknet ENV setup
 export ACCOUNT_NAME=INSERT_YOUR_ACCOUNT_NAME_HERE
 
-scarb contracts/game/build
+export LORDS_ADDRESS=0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47
+export DAO_ADDRESS=0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b
 
-starknet declare --contract /home/os/Documents/code/bibliotheca/loot-survivor/contracts/game/target/dev/game_Game.sierra.json --account $ACCOUNT_NAME
+# nav to dir
+cd contracts/game
 
-starknet deploy --class_hash 0x2592ba7e082159424d860bf65694d0181afe5e53a7f546aa596335489fb5126 --max_fee 100000000000000000 --input 0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b --account $ACCOUNT_NAME
+# build
+scarb build
+
+# declare
+starknet declare --contract target/dev/game_Game.sierra.json --account $ACCOUNT_NAME
+
+# deploy
+# <classhash> will be in the the output of the previous command
+starknet deploy --class_hash 0x1feb9c05d31b70a1506decf52a809d57493bfcd5cc85d6a3e9fd54a12d64389 --max_fee 100000000000000000 --input $LORDS_ADDRESS $DAO_ADDRESS --account $ACCOUNT_NAME
 ```
 
-export CONTRACT_ADDRESS=INSERT_ADDRESS_OF_NEWLY_DEPLOYED_CONTRACT_HERE
+```bash
+# set contract address
+export CONTRACT_ADDRESS=0x01f2bd15e763fa19e767219a0a971d8e1ca473ddf6b465d1779ea069b81de8ec
+```
+
+```bash
+starknet invoke --function mint --address $LORDS_ADDRESS --input 0x1feb9c05d31b70a1506decf52a809d57493bfcd5cc85d6a3e9fd54a12d64389 1000000000000000000000 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+
+starknet invoke --function approve --address $LORDS_ADDRESS --input $CONTRACT_ADDRESS 1000000000000000000000 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+```
 
 #### Start
-
-```
-starknet invoke --function start --address $CONTRACT_ADDRESS --input 12 123 0 0 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
-
+```bash
+starknet invoke --function start --address $CONTRACT_ADDRESS --input $DAO_ADDRESS 12 123 0 0 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 #### Attack
-
-```
+```bash
 starknet invoke --function attack --address $CONTRACT_ADDRESS --input 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
-#### Explore
 
-```
+#### Explore
+```bash
 starknet invoke --function explore --address $CONTRACT_ADDRESS --input 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
 #### Call
-
-```
+```bash
 starknet call --function get_adventurer --address $CONTRACT_ADDRESS --input 0 0 --account $ACCOUNT_NAME
 ```
