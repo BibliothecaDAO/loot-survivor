@@ -28,12 +28,12 @@ mod Game {
 
     use game::game::constants::{messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY};
     use lootitems::{
-        loot::{ILoot, Loot, ImplLoot, DynamicItem}, statistics::constants::{NamePrefixLength, NameSuffixLength}
+        loot::{ILoot, Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
     use pack::pack::Packing;
 
     use survivor::{
-        adventurer::{Adventurer, ImplAdventurer, IAdventurer, Stats},
+        adventurer::{Adventurer, ImplAdventurer, IAdventurer, DynamicItem, Stats},
         bag::{Bag, BagActions, ImplBagActions}, adventurer_meta::AdventurerMetadata,
         exploration::ExploreUtils,
         constants::{
@@ -43,7 +43,8 @@ mod Game {
         item_meta::{
             ImplLootItemSpecialNames, LootItemSpecialNames, ILootItemSpecialNames,
             LootItemSpecialNamesStorage
-        }
+        },
+        adventurer_utils::AdventurerUtils
     };
     use market::market::{ImplMarket, LootWithPrice};
     use obstacles::obstacle::{ImplObstacle};
@@ -820,7 +821,7 @@ mod Game {
         let exploration_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
 
         //
-        let explore_result = ImplAdventurer::get_random_explore(exploration_entropy);
+        let explore_result = AdventurerUtils::get_random_explore(exploration_entropy);
 
         match explore_result {
             ExploreResult::Beast(()) => {
@@ -974,7 +975,7 @@ mod Game {
         // if the obstacle was not dodged
         if (!dodged) {
             // get adventurer armor at the random location the obstacle is dealing damage to
-            let damage_slot = ImplAdventurer::get_random_armor_slot(entropy);
+            let damage_slot = AdventurerUtils::get_random_armor_slot(entropy);
             let damage_location = ImplCombat::slot_to_u8(damage_slot);
             let armor = adventurer.get_item_at_slot(damage_slot);
 
@@ -1416,7 +1417,7 @@ mod Game {
             // then handle the beast counter attack
 
             // start by generating a random attack location
-            let attack_location = ImplAdventurer::get_random_armor_slot(attack_entropy);
+            let attack_location = AdventurerUtils::get_random_armor_slot(attack_entropy);
 
             // then calling internal function to calculate damage
             let damage_taken = _beast_counter_attack(
@@ -1539,7 +1540,7 @@ mod Game {
             // the adventurers level
 
             // process counter attack (adventurer death will be handled as part of counter attack)
-            let attack_slot = ImplAdventurer::get_random_armor_slot(flee_entropy);
+            let attack_slot = AdventurerUtils::get_random_armor_slot(flee_entropy);
             attack_location = ImplCombat::slot_to_u8(attack_slot);
             damage_taken =
                 _beast_counter_attack(

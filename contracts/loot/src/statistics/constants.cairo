@@ -1,6 +1,5 @@
 mod Settings {
     const ITEM_LEVEL_MULTIPLIER: u16 = 4;
-    const ITEM_MAX_GREATNESS: u8 = 20;
 }
 
 const NUM_ITEMS: u128 = 101;
