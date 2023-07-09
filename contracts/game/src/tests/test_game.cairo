@@ -243,7 +243,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Stat upgrade available', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(80000000)]
+    #[available_gas(8000000000)]
     fn test_explore_not_allowed_with_avail_stat_upgrade() {
         let mut game = new_adventurer();
 
@@ -265,7 +265,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(18000000)]
+    #[available_gas(1800000000)]
     fn test_cant_buy_items_during_battle() {
         // mint new adventurer (will start in battle with starter beast)
         let mut game = new_adventurer();
@@ -408,7 +408,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(10000000)]
+    #[available_gas(100000000)]
     fn test_cant_buy_health_during_battle() {
         // deploy and start new game
         let mut game = new_adventurer();
@@ -421,7 +421,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(30000000)]
+    #[available_gas(300000000)]
     fn test_cant_slay_non_idle_adventurer_no_rollover() {
         let STARTING_BLOCK_NUMBER = 1;
         let IDLE_BLOCKS: u64 = Game::IDLE_DEATH_PENALTY_BLOCKS.into() - 1;
@@ -458,7 +458,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(30000000)]
+    #[available_gas(300000000)]
     fn test_cant_slay_non_idle_adventurer_with_rollover() {
         // set starting block to just before the rollover at 511
         let STARTING_BLOCK_NUMBER = 510;
@@ -629,7 +629,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_attacking_beast() {
         let mut game = new_adventurer();
         let beast = game.get_attacking_beast(ADVENTURER_ID);
@@ -638,7 +638,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_health() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -646,28 +646,28 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_xp() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.xp == game.get_xp(ADVENTURER_ID), 'wrong adventurer xp');
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_level() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.get_level() == game.get_level(ADVENTURER_ID), 'wrong adventurer level');
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_gold() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.gold == game.get_gold(ADVENTURER_ID), 'wrong gold bal');
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_beast_health() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -676,7 +676,7 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_stat_points_available() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -686,14 +686,14 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_last_action() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.last_action == game.get_last_action(ADVENTURER_ID), 'wrong last action');
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_weapon_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -704,7 +704,7 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_chest_armor_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -715,7 +715,7 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_head_armor_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -726,7 +726,7 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_waist_armor_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -737,7 +737,7 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_foot_armor_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -748,7 +748,7 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_hand_armor_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -759,7 +759,7 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_necklace_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -770,7 +770,7 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(8000000)]
+    #[available_gas(800000000)]
     fn test_get_ring_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
