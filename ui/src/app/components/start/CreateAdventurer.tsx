@@ -87,6 +87,7 @@ export const CreateAdventurer = ({
       contractAddress: gameContract?.address ?? "",
       entrypoint: "start",
       calldata: [
+        "0x043f721181BdA07742453f9C9C0AD27a6c04e39D665B73A583b2E5c166B6F77e",
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         parseInt(stringToFelt(formData.name)).toString(),
         formData.homeRealmId,
