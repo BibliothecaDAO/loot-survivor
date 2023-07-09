@@ -1381,8 +1381,8 @@ class IndexerGraphQLView(GraphQLView):
 async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     mongo_goerli = MongoClient(mongo_goerli)
     mongo_mainnet = MongoClient(mongo_mainnet)
-    db_name_goerli = "goerli".replace("-", "_")
-    db_name_mainnet = "mainnet".replace("-", "_")
+    db_name_goerli = "mongo-goerli".replace("-", "_")
+    db_name_mainnet = "mongo-mainnet".replace("-", "_")
     db_goerli = mongo_goerli[db_name_goerli]
     db_mainnet = mongo_mainnet[db_name_mainnet]
 
