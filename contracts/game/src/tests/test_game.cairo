@@ -2,6 +2,7 @@ use core::box::BoxTrait;
 #[cfg(test)]
 mod tests {
     use array::ArrayTrait;
+    use debug::PrintTrait;
     use core::result::ResultTrait;
     use core::traits::Into;
     use option::OptionTrait;
@@ -13,13 +14,10 @@ mod tests {
     use starknet::{ContractAddress, ContractAddressIntoFelt252, contract_address_const};
 
     use market::market::{ImplMarket, LootWithPrice};
-
     use lootitems::loot::{Loot, ImplLoot, ILoot};
     use lootitems::statistics::constants::{ItemId};
-
     use game::game::interfaces::{IGameDispatcherTrait, IGameDispatcher};
     use game::{Game};
-
     use survivor::adventurer_meta::AdventurerMetadata;
     use survivor::constants::adventurer_constants::{
         STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH
@@ -27,8 +25,7 @@ mod tests {
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
     use game::game::constants::messages::{STAT_UPGRADES_AVAILABLE};
-
-    use beasts::constants::BeastSettings;
+    use beasts::constants::{BeastSettings, BeastId};
 
     fn INTERFACE_ID() -> ContractAddress {
         contract_address_const::<1>()
@@ -268,7 +265,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(16000000)]
+    #[available_gas(18000000)]
     fn test_cant_buy_items_during_battle() {
         // mint new adventurer (will start in battle with starter beast)
         let mut game = new_adventurer();
@@ -285,7 +282,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(60000000)]
+    #[available_gas(65000000)]
     fn test_cant_buy_items_without_stat_upgrade() {
         // mint adventurer and advance to level 2
         let mut game = lvl_2_adventurer();
@@ -313,7 +310,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(60000000)]
+    #[available_gas(70000000)]
     fn test_buy_and_equip_item() {
         let mut game = lvl_2_adventurer();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -332,7 +329,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(60000000)]
+    #[available_gas(65000000)]
     fn test_buy_and_bag_item() {
         let mut game = lvl_2_adventurer();
         let market_items = @adventurer_market_items();
@@ -615,5 +612,172 @@ mod tests {
         let mut game = new_adventurer();
 
         game.get_entropy();
+    }
+
+    #[test]
+    #[available_gas(300000000)]
+    fn test_get_potion_price() {
+        let mut game = new_adventurer();
+        let potion_price = game.get_potion_price(ADVENTURER_ID);
+        let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level();
+        assert(potion_price == POTION_PRICE * adventurer_level.into(), 'wrong lvl1 potion price');
+
+        let mut game = lvl_2_adventurer();
+        let potion_price = game.get_potion_price(ADVENTURER_ID);
+        let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level();
+        assert(potion_price == POTION_PRICE * adventurer_level.into(), 'wrong lvl2 potion price');
+    }
+
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_attacking_beast() {
+        let mut game = new_adventurer();
+        let beast = game.get_attacking_beast(ADVENTURER_ID);
+        // our adventurer starts with a wand so the starter beast should be a troll
+        assert(beast.id == BeastId::Troll, 'starter beast should be troll');
+    }
+
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_health() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.health == game.get_health(ADVENTURER_ID), 'wrong adventurer health');
+    }
+
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_xp() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.xp == game.get_xp(ADVENTURER_ID), 'wrong adventurer xp');
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_level() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.get_level() == game.get_level(ADVENTURER_ID), 'wrong adventurer level');
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_gold() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.gold == game.get_gold(ADVENTURER_ID), 'wrong gold bal');
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_beast_health() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(
+            adventurer.beast_health == game.get_beast_health(ADVENTURER_ID), 'wrong beast health'
+        );
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_stat_points_available() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(
+            adventurer.stat_points_available == game.get_stat_points_available(ADVENTURER_ID),
+            'wrong stat points avail'
+        );
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_last_action() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.last_action == game.get_last_action(ADVENTURER_ID), 'wrong last action');
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_weapon_greatness() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(
+            ImplLoot::get_greatness_level(adventurer.weapon.xp) == game
+                .get_weapon_greatness(ADVENTURER_ID),
+            'wrong weapon greatness'
+        );
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_chest_armor_greatness() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(
+            ImplLoot::get_greatness_level(adventurer.chest.xp) == game
+                .get_chest_armor_greatness(ADVENTURER_ID),
+            'wrong chest greatness'
+        );
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_head_armor_greatness() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(
+            ImplLoot::get_greatness_level(adventurer.head.xp) == game
+                .get_head_armor_greatness(ADVENTURER_ID),
+            'wrong head greatness'
+        );
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_waist_armor_greatness() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(
+            ImplLoot::get_greatness_level(adventurer.waist.xp) == game
+                .get_waist_armor_greatness(ADVENTURER_ID),
+            'wrong waist greatness'
+        );
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_foot_armor_greatness() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(
+            ImplLoot::get_greatness_level(adventurer.foot.xp) == game
+                .get_foot_armor_greatness(ADVENTURER_ID),
+            'wrong foot greatness'
+        );
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_hand_armor_greatness() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(
+            ImplLoot::get_greatness_level(adventurer.hand.xp) == game
+                .get_hand_armor_greatness(ADVENTURER_ID),
+            'wrong hand greatness'
+        );
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_necklace_greatness() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(
+            ImplLoot::get_greatness_level(adventurer.neck.xp) == game
+                .get_necklace_greatness(ADVENTURER_ID),
+            'wrong neck greatness'
+        );
+    }
+    #[test]
+    #[available_gas(8000000)]
+    fn test_get_ring_greatness() {
+        let mut game = new_adventurer();
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(
+            ImplLoot::get_greatness_level(adventurer.ring.xp) == game
+                .get_ring_greatness(ADVENTURER_ID),
+            'wrong ring greatness'
+        );
     }
 }
