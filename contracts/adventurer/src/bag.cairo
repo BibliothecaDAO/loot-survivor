@@ -5,28 +5,21 @@ use pack::pack::{Packing, rshift_split};
 use pack::constants::pow;
 
 use super::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
-
-#[derive(Drop, Copy, Serde)] // 21 bits
-struct LootStatistics {
-    id: u8, // 7 bits
-    xp: u16, // 9 bits
-    // this is set as the items are found/purchased
-    metadata: u8, // 5 bits
-}
+use lootitems::loot::DynamicItem;
 
 #[derive(Drop, Copy, Serde)]
 struct Bag {
-    item_1: LootStatistics, // club
-    item_2: LootStatistics, // club
-    item_3: LootStatistics, // club
-    item_4: LootStatistics, // club
-    item_5: LootStatistics, // club
-    item_6: LootStatistics, // club
-    item_7: LootStatistics, // club
-    item_8: LootStatistics, // club
-    item_9: LootStatistics, // club
-    item_10: LootStatistics, // club
-    item_11: LootStatistics, // club
+    item_1: DynamicItem, // club
+    item_2: DynamicItem, // club
+    item_3: DynamicItem, // club
+    item_4: DynamicItem, // club
+    item_5: DynamicItem, // club
+    item_6: DynamicItem, // club
+    item_7: DynamicItem, // club
+    item_8: DynamicItem, // club
+    item_9: DynamicItem, // club
+    item_10: DynamicItem, // club
+    item_11: DynamicItem, // club
 }
 
 trait BagActions {
@@ -34,10 +27,10 @@ trait BagActions {
     // take bag and item to swap and item to equip
     // return bag with swapped items and item that was swapped for
     // we then store the item on the Adventurer
-    // fn swap_items(self: Bag, incoming: u8, outgoing: u8) -> (Bag, LootStatistics);
+    // fn swap_items(self: Bag, incoming: u8, outgoing: u8) -> (Bag, DynamicItem);
 
     // set item in first available slot
-    fn add_item(ref self: Bag, item: LootStatistics) -> Bag;
+    fn add_item(ref self: Bag, item: DynamicItem) -> Bag;
 
     // // finds open slot
     fn find_slot(self: Bag) -> u8;
@@ -45,33 +38,11 @@ trait BagActions {
     // check if bag full
     fn is_full(self: Bag) -> bool;
     // get item by id
-    fn get_item(self: Bag, item_id: u8) -> LootStatistics;
+    fn get_item(self: Bag, item_id: u8) -> DynamicItem;
     fn remove_item(ref self: Bag, item_id: u8) -> Bag;
 
     // creates new item
-    fn new_item(item_id: u8) -> LootStatistics;
-}
-
-impl LootStatisticsPacking of Packing<LootStatistics> {
-    fn pack(self: LootStatistics) -> felt252 {
-        (self.id.into()
-         + self.xp.into() * pow::TWO_POW_7
-         + self.metadata.into() * pow::TWO_POW_16
-        ).try_into().expect('pack LootStatistics')
-    }
-
-    fn unpack(packed: felt252) -> LootStatistics {
-        let packed = packed.into();
-        let (packed, id) = rshift_split(packed, pow::TWO_POW_7);
-        let (packed, xp) = rshift_split(packed, pow::TWO_POW_9);
-        let (_, metadata) = rshift_split(packed, pow::TWO_POW_5);
-
-        LootStatistics {
-            id: id.try_into().expect('unpack LootStatistics id'),
-            xp: xp.try_into().expect('unpack LootStatistics xp'),
-            metadata: metadata.try_into().expect('unpack LootStatistics metadata')
-        }
-    }
+    fn new_item(item_id: u8) -> DynamicItem;
 }
 
 impl BagPacking of Packing<Bag> {
@@ -120,7 +91,7 @@ impl BagPacking of Packing<Bag> {
     }
 }
 impl ImplBagActions of BagActions {
-    fn add_item(ref self: Bag, item: LootStatistics) -> Bag {
+    fn add_item(ref self: Bag, item: DynamicItem) -> Bag {
         assert(self.is_full() == false, 'Bag is full');
 
         let slot = self.find_slot();
@@ -194,7 +165,7 @@ impl ImplBagActions of BagActions {
             return true;
         }
     }
-    fn get_item(self: Bag, item_id: u8) -> LootStatistics {
+    fn get_item(self: Bag, item_id: u8) -> DynamicItem {
         if self.item_1.id == item_id {
             return self.item_1;
         } else if self.item_2.id == item_id {
@@ -222,42 +193,42 @@ impl ImplBagActions of BagActions {
     fn remove_item(ref self: Bag, item_id: u8) -> Bag {
         // this doesn't check if item is in the bag... It just removes by id...
         if self.item_1.id == item_id {
-            self.item_1 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_1 = DynamicItem { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_2.id == item_id {
-            self.item_2 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_2 = DynamicItem { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_3.id == item_id {
-            self.item_3 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_3 = DynamicItem { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_4.id == item_id {
-            self.item_4 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_4 = DynamicItem { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_5.id == item_id {
-            self.item_5 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_5 = DynamicItem { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_6.id == item_id {
-            self.item_6 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_6 = DynamicItem { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_7.id == item_id {
-            self.item_7 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_7 = DynamicItem { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_8.id == item_id {
-            self.item_8 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_8 = DynamicItem { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_9.id == item_id {
-            self.item_9 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_9 = DynamicItem { id: 0, xp: 0, metadata: 0 };
             return self;
         } else if self.item_10.id == item_id {
-            self.item_10 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_10 = DynamicItem { id: 0, xp: 0, metadata: 0 };
             return self;
         } else {
-            self.item_11 = LootStatistics { id: 0, xp: 0, metadata: 0 };
+            self.item_11 = DynamicItem { id: 0, xp: 0, metadata: 0 };
             return self;
         }
     }
-    fn new_item(item_id: u8) -> LootStatistics {
-        LootStatistics { id: item_id, xp: 0, metadata: 0 }
+    fn new_item(item_id: u8) -> DynamicItem {
+        DynamicItem { id: item_id, xp: 0, metadata: 0 }
     }
 }
 
@@ -265,27 +236,27 @@ impl ImplBagActions of BagActions {
 #[available_gas(5000000)]
 fn test_pack_bag() {
     let mut bag = Bag {
-        item_1: LootStatistics {
+        item_1: DynamicItem {
             id: 127, xp: 511, metadata: 31
-            }, item_2: LootStatistics {
+            }, item_2: DynamicItem {
             id: 127, xp: 511, metadata: 31
-            }, item_3: LootStatistics {
+            }, item_3: DynamicItem {
             id: 127, xp: 511, metadata: 31
-            }, item_4: LootStatistics {
+            }, item_4: DynamicItem {
             id: 127, xp: 511, metadata: 31
-            }, item_5: LootStatistics {
+            }, item_5: DynamicItem {
             id: 127, xp: 511, metadata: 31
-            }, item_6: LootStatistics {
+            }, item_6: DynamicItem {
             id: 127, xp: 511, metadata: 31
-            }, item_7: LootStatistics {
+            }, item_7: DynamicItem {
             id: 127, xp: 511, metadata: 31
-            }, item_8: LootStatistics {
+            }, item_8: DynamicItem {
             id: 127, xp: 511, metadata: 31
-            }, item_9: LootStatistics {
+            }, item_9: DynamicItem {
             id: 127, xp: 511, metadata: 31
-            }, item_10: LootStatistics {
+            }, item_10: DynamicItem {
             id: 127, xp: 511, metadata: 31
-            }, item_11: LootStatistics {
+            }, item_11: DynamicItem {
             id: 127, xp: 511, metadata: 31
             }
     };
@@ -341,32 +312,32 @@ fn test_pack_bag() {
 #[available_gas(5000000)]
 fn test_add_item() {
     let mut bag = Bag {
-        item_1: LootStatistics {
+        item_1: DynamicItem {
             id: 1, xp: 0, metadata: 0
-            }, item_2: LootStatistics {
+            }, item_2: DynamicItem {
             id: 2, xp: 0, metadata: 0
-            }, item_3: LootStatistics {
+            }, item_3: DynamicItem {
             id: 3, xp: 0, metadata: 0
-            }, item_4: LootStatistics {
+            }, item_4: DynamicItem {
             id: 4, xp: 0, metadata: 0
-            }, item_5: LootStatistics {
+            }, item_5: DynamicItem {
             id: 5, xp: 0, metadata: 0
-            }, item_6: LootStatistics {
+            }, item_6: DynamicItem {
             id: 0, xp: 0, metadata: 0
-            }, item_7: LootStatistics {
+            }, item_7: DynamicItem {
             id: 0, xp: 0, metadata: 0
-            }, item_8: LootStatistics {
+            }, item_8: DynamicItem {
             id: 0, xp: 0, metadata: 0
-            }, item_9: LootStatistics {
+            }, item_9: DynamicItem {
             id: 0, xp: 0, metadata: 0
-            }, item_10: LootStatistics {
+            }, item_10: DynamicItem {
             id: 0, xp: 0, metadata: 0
-            }, item_11: LootStatistics {
+            }, item_11: DynamicItem {
             id: 0, xp: 0, metadata: 0
             },
     };
 
-    let item = LootStatistics { id: 23, xp: 1, metadata: 5 };
+    let item = DynamicItem { id: 23, xp: 1, metadata: 5 };
 
     bag.add_item(item);
 
@@ -377,27 +348,27 @@ fn test_add_item() {
 #[available_gas(5000000)]
 fn test_is_full() {
     let mut bag = Bag {
-        item_1: LootStatistics {
+        item_1: DynamicItem {
             id: 1, xp: 0, metadata: 0
-            }, item_2: LootStatistics {
+            }, item_2: DynamicItem {
             id: 2, xp: 0, metadata: 0
-            }, item_3: LootStatistics {
+            }, item_3: DynamicItem {
             id: 3, xp: 0, metadata: 0
-            }, item_4: LootStatistics {
+            }, item_4: DynamicItem {
             id: 4, xp: 0, metadata: 0
-            }, item_5: LootStatistics {
+            }, item_5: DynamicItem {
             id: 5, xp: 0, metadata: 0
-            }, item_6: LootStatistics {
+            }, item_6: DynamicItem {
             id: 8, xp: 0, metadata: 0
-            }, item_7: LootStatistics {
+            }, item_7: DynamicItem {
             id: 9, xp: 0, metadata: 0
-            }, item_8: LootStatistics {
+            }, item_8: DynamicItem {
             id: 11, xp: 0, metadata: 0
-            }, item_9: LootStatistics {
+            }, item_9: DynamicItem {
             id: 12, xp: 0, metadata: 0
-            }, item_10: LootStatistics {
+            }, item_10: DynamicItem {
             id: 13, xp: 0, metadata: 0
-            }, item_11: LootStatistics {
+            }, item_11: DynamicItem {
             id: 14, xp: 0, metadata: 0
             },
     };
@@ -408,27 +379,27 @@ fn test_is_full() {
 #[available_gas(5000000)]
 fn remove_item() {
     let mut bag = Bag {
-        item_1: LootStatistics {
+        item_1: DynamicItem {
             id: 1, xp: 0, metadata: 0
-            }, item_2: LootStatistics {
+            }, item_2: DynamicItem {
             id: 2, xp: 0, metadata: 0
-            }, item_3: LootStatistics {
+            }, item_3: DynamicItem {
             id: 3, xp: 0, metadata: 0
-            }, item_4: LootStatistics {
+            }, item_4: DynamicItem {
             id: 4, xp: 0, metadata: 0
-            }, item_5: LootStatistics {
+            }, item_5: DynamicItem {
             id: 5, xp: 0, metadata: 0
-            }, item_6: LootStatistics {
+            }, item_6: DynamicItem {
             id: 8, xp: 0, metadata: 0
-            }, item_7: LootStatistics {
+            }, item_7: DynamicItem {
             id: 9, xp: 0, metadata: 0
-            }, item_8: LootStatistics {
+            }, item_8: DynamicItem {
             id: 11, xp: 0, metadata: 0
-            }, item_9: LootStatistics {
+            }, item_9: DynamicItem {
             id: 12, xp: 0, metadata: 0
-            }, item_10: LootStatistics {
+            }, item_10: DynamicItem {
             id: 13, xp: 0, metadata: 0
-            }, item_11: LootStatistics {
+            }, item_11: DynamicItem {
             id: 14, xp: 0, metadata: 0
             },
     };

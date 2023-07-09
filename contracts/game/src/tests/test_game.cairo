@@ -687,7 +687,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            ImplLoot::get_greatness_level(adventurer.weapon.xp) == game
+            adventurer.weapon.get_greatness() == game
                 .get_weapon_greatness(ADVENTURER_ID),
             'wrong weapon greatness'
         );
@@ -698,7 +698,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            ImplLoot::get_greatness_level(adventurer.chest.xp) == game
+            adventurer.chest.get_greatness() == game
                 .get_chest_armor_greatness(ADVENTURER_ID),
             'wrong chest greatness'
         );
@@ -709,7 +709,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            ImplLoot::get_greatness_level(adventurer.head.xp) == game
+            adventurer.head.get_greatness() == game
                 .get_head_armor_greatness(ADVENTURER_ID),
             'wrong head greatness'
         );
@@ -720,7 +720,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            ImplLoot::get_greatness_level(adventurer.waist.xp) == game
+            adventurer.waist.get_greatness() == game
                 .get_waist_armor_greatness(ADVENTURER_ID),
             'wrong waist greatness'
         );
@@ -731,7 +731,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            ImplLoot::get_greatness_level(adventurer.foot.xp) == game
+            adventurer.foot.get_greatness() == game
                 .get_foot_armor_greatness(ADVENTURER_ID),
             'wrong foot greatness'
         );
@@ -742,7 +742,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            ImplLoot::get_greatness_level(adventurer.hand.xp) == game
+            adventurer.hand.get_greatness() == game
                 .get_hand_armor_greatness(ADVENTURER_ID),
             'wrong hand greatness'
         );
@@ -753,7 +753,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            ImplLoot::get_greatness_level(adventurer.neck.xp) == game
+            adventurer.neck.get_greatness() == game
                 .get_necklace_greatness(ADVENTURER_ID),
             'wrong neck greatness'
         );
@@ -764,7 +764,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            ImplLoot::get_greatness_level(adventurer.ring.xp) == game
+            adventurer.ring.get_greatness() == game
                 .get_ring_greatness(ADVENTURER_ID),
             'wrong ring greatness'
         );
