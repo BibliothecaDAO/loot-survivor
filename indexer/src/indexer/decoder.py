@@ -1,6 +1,7 @@
 from starknet_py.abi.v1.parser import AbiParser
 from starknet_py.serialization import serializer_for_payload
 
+
 from typing import Iterator
 
 raw_abi = [
