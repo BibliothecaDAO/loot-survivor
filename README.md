@@ -130,14 +130,13 @@ Loot Survivor is a onchain game, designed to be immutable and permanently hosted
 - Indexer: Apibara
 - Contracts: Cairo 1.0
 
-
-
-0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47
+---
 
 ### Deploying
 
 #### Set up env
-https://docs.starknet.io/documentation/getting_started/environment_setup/
+
+Follow instructions here: `https://docs.starknet.io/documentation/getting_started/environment_setup/`
 
 
 ```
@@ -152,6 +151,12 @@ export CAIRO_COMPILER_ARGS=--add-pythonic-hints
 
 # you will have an account from the Starknet ENV setup
 export ACCOUNT_NAME=INSERT_YOUR_ACCOUNT_NAME_HERE
+export ADVENTURER_ID=INSERT_YOUR_ADVENTURER_ID_HERE
+export STRENGTH=0
+export DEXTERITY=1
+export VITALITY=2
+export INTELLIGENCE=4
+export CHARISMA=5
 
 export LORDS_ADDRESS=0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47
 export DAO_ADDRESS=0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b
@@ -181,21 +186,68 @@ starknet invoke --function mint --address $LORDS_ADDRESS --input 0x1feb9c05d31b7
 starknet invoke --function approve --address $LORDS_ADDRESS --input $CONTRACT_ADDRESS 1000000000000000000000 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
+### Game Actions
+
 #### Start
 ```bash
-starknet invoke --function start --address $CONTRACT_ADDRESS --input $DAO_ADDRESS 12 123 0 0 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
-```
-#### Attack
-```bash
-starknet invoke --function attack --address $CONTRACT_ADDRESS --input 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+starknet invoke --function start --address $CONTRACT_ADDRESS --input 12 123 0 0 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
 #### Explore
 ```bash
-starknet invoke --function explore --address $CONTRACT_ADDRESS --input 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+starknet invoke --function explore --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
-#### Call
+#### Attack
 ```bash
-starknet call --function get_adventurer --address $CONTRACT_ADDRESS --input 0 0 --account $ACCOUNT_NAME
+starknet invoke --function attack --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
+
+#### Flee
+```bash
+starknet invoke --function flee --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+```
+
+#### Upgrade Stat (Charisma)
+```bash
+starknet invoke --function upgrade_stat --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 $CHARISMA --max_fee 10000000000000000 --account $ACCOUNT_NAME
+```
+
+
+### Checking On Your Adventurer
+
+##### Get full adventurer state
+```bash
+starknet call --function get_adventurer --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+```
+
+##### Get adventurer health
+```bash
+starknet call --function get_health --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+```
+
+##### Get adventurer gold
+```bash
+starknet call --function get_gold --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+```
+
+##### Get adventurer xp
+```bash
+starknet call --function get_xp --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+```
+
+##### Get upgradable stat points
+```bash
+starknet call --function get_stat_points_available --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+```
+
+##### Get base charisma stat (doesn't include boost from items)
+```bash
+starknet call --function get_base_charisma --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+```
+
+##### Get charisma stat including item boosts
+```bash
+starknet call --function get_boosted_charisma --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+```
+
