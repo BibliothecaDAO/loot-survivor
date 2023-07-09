@@ -130,25 +130,26 @@ Loot Survivor is a onchain game, designed to be immutable and permanently hosted
 - Indexer: Apibara
 - Contracts: Cairo 1.0
 
-
-
-0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47
+---
 
 ### Deploying
 
 #### Set up env
-https://docs.starknet.io/documentation/getting_started/environment_setup/
+
+Follow instructions here: `https://docs.starknet.io/documentation/getting_started/environment_setup/`
 
 
 ```
 source ~/cairo_venv/bin/activate
 ```
 
-```
+```bash
 export STARKNET_NETWORK=alpha-goerli
 export STARKNET_WALLET=starkware.starknet.wallets.open_zeppelin.OpenZeppelinAccount
 export CAIRO_COMPILER_DIR=~/.cairo/target/release/
 export CAIRO_COMPILER_ARGS=--add-pythonic-hints
+
+# you will have an account from the Starknet ENV setup
 export ACCOUNT_NAME=INSERT_YOUR_ACCOUNT_NAME_HERE
 export ADVENTURER_ID=INSERT_YOUR_ADVENTURER_ID_HERE
 export STRENGTH=0
@@ -157,37 +158,58 @@ export VITALITY=2
 export INTELLIGENCE=4
 export CHARISMA=5
 
-scarb contracts/game/build
-starknet declare --contract /home/os/Documents/code/bibliotheca/loot-survivor/contracts/game/target/dev/game_Game.sierra.json --account $ACCOUNT_NAME
-starknet deploy --class_hash 0x2592ba7e082159424d860bf65694d0181afe5e53a7f546aa596335489fb5126 --max_fee 100000000000000000 --input 0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b --account $ACCOUNT_NAME
+export LORDS_ADDRESS=0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47
+export DAO_ADDRESS=0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b
+
+# nav to dir
+cd contracts/game
+
+# build
+scarb build
+
+# declare
+starknet declare --contract target/dev/game_Game.sierra.json --account $ACCOUNT_NAME
+
+# deploy
+# <classhash> will be in the the output of the previous command
+starknet deploy --class_hash 0x07fbfcffe75a97b649ff7140441ef0c7ab7a342ef876c68fbde77aba2d7ef20f --max_fee 100000000000000000 --input $LORDS_ADDRESS $DAO_ADDRESS --account $ACCOUNT_NAME
 ```
 
-export CONTRACT_ADDRESS=INSERT_ADDRESS_OF_NEWLY_DEPLOYED_CONTRACT_HERE
+```bash
+# set contract address
+export CONTRACT_ADDRESS=0x06ee32da9f22c736c4ef049719c0021380c302e5d449fbc8acf97489e16a9d05
+```
+
+```bash
+starknet invoke --function mint --address $LORDS_ADDRESS --input 0x1feb9c05d31b70a1506decf52a809d57493bfcd5cc85d6a3e9fd54a12d64389 1000000000000000000000 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+
+starknet invoke --function approve --address $LORDS_ADDRESS --input $CONTRACT_ADDRESS 1000000000000000000000 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+```
 
 ### Game Actions
 
 #### Start
-```
+```bash
 starknet invoke --function start --address $CONTRACT_ADDRESS --input 12 123 0 0 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
 #### Explore
-```
+```bash
 starknet invoke --function explore --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
 #### Attack
-```
+```bash
 starknet invoke --function attack --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
 #### Flee
-```
+```bash
 starknet invoke --function flee --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
 #### Upgrade Stat (Charisma)
-```
+```bash
 starknet invoke --function upgrade_stat --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 $CHARISMA --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
@@ -195,37 +217,37 @@ starknet invoke --function upgrade_stat --address $CONTRACT_ADDRESS --input $ADV
 ### Checking On Your Adventurer
 
 ##### Get full adventurer state
-```
+```bash
 starknet call --function get_adventurer --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
 ```
 
 ##### Get adventurer health
-```
+```bash
 starknet call --function get_health --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
 ```
 
 ##### Get adventurer gold
-```
+```bash
 starknet call --function get_gold --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
 ```
 
 ##### Get adventurer xp
-```
+```bash
 starknet call --function get_xp --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
 ```
 
 ##### Get upgradable stat points
-```
+```bash
 starknet call --function get_stat_points_available --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
 ```
 
 ##### Get base charisma stat (doesn't include boost from items)
-```
+```bash
 starknet call --function get_base_charisma --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
 ```
 
 ##### Get charisma stat including item boosts
-```
+```bash
 starknet call --function get_boosted_charisma --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
 ```
 
