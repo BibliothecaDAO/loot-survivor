@@ -167,12 +167,12 @@ starknet declare --contract target/dev/game_Game.sierra.json --account $ACCOUNT_
 
 # deploy
 # <classhash> will be in the the output of the previous command
-starknet deploy --class_hash 0x1feb9c05d31b70a1506decf52a809d57493bfcd5cc85d6a3e9fd54a12d64389 --max_fee 100000000000000000 --input $LORDS_ADDRESS $DAO_ADDRESS --account $ACCOUNT_NAME
+starknet deploy --class_hash 0x07fbfcffe75a97b649ff7140441ef0c7ab7a342ef876c68fbde77aba2d7ef20f --max_fee 100000000000000000 --input $LORDS_ADDRESS $DAO_ADDRESS --account $ACCOUNT_NAME
 ```
 
 ```bash
 # set contract address
-export CONTRACT_ADDRESS=0x01f2bd15e763fa19e767219a0a971d8e1ca473ddf6b465d1779ea069b81de8ec
+export CONTRACT_ADDRESS=0x06ee32da9f22c736c4ef049719c0021380c302e5d449fbc8acf97489e16a9d05
 ```
 
 ```bash

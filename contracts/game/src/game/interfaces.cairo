@@ -87,4 +87,5 @@ trait IGame<TContractState> {
 #[starknet::interface]
 trait IERC20<TContractState>  {
     fn transferFrom(ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256) -> bool;
+    fn burn_away(ref self: TContractState, to: ContractAddress, amount: u256);
 }

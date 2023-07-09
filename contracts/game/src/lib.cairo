@@ -684,11 +684,12 @@ mod Game {
         let lords = self._lords.read();
         let genesis_block = self._genesis_block.read();
 
-        if (BLOCKS_IN_A_WEEK + genesis_block) < block_number {
+        if (BLOCKS_IN_A_WEEK + genesis_block) > block_number {
+            // TODO: Update to actual Lords interface
             // burn baby
-            IERC20Dispatcher {
-                contract_address: lords
-            }.transferFrom(caller, contract_address_const::<0>(), _to_ether(COST_TO_PLAY));
+            // IERC20Dispatcher {
+            //     contract_address: lords
+            // }.burn_away(caller, _to_ether(COST_TO_PLAY));
             return;
         }        
 
