@@ -12,7 +12,6 @@ mod tests {
     use box::BoxTrait;
     use starknet::{ContractAddress, ContractAddressIntoFelt252, contract_address_const};
 
-
     use market::market::{ImplMarket, LootWithPrice};
 
     use lootitems::loot::{Loot, ImplLoot, ILoot};
@@ -20,12 +19,11 @@ mod tests {
 
     use game::game::interfaces::{IGameDispatcherTrait, IGameDispatcher};
     use game::{Game};
-    use survivor::adventurer_meta::AdventurerMetadata;
 
+    use survivor::adventurer_meta::AdventurerMetadata;
     use survivor::constants::adventurer_constants::{
         STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH
     };
-
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
     use game::game::constants::messages::{STAT_UPGRADES_AVAILABLE};
@@ -36,18 +34,23 @@ mod tests {
         contract_address_const::<1>()
     }
 
+    fn DAO() -> ContractAddress {
+        contract_address_const::<1>()
+    }
+
+    fn CALLER() -> ContractAddress {
+        contract_address_const::<0x1>()
+    }
+
     const ADVENTURER_ID: u256 = 1;
+    const MAX_LORDS: felt252 = 500000000000000000000;
 
     fn setup() -> IGameDispatcher {
         testing::set_block_number(1000);
 
-        let mut calldata = Default::default();
-
-        // lords
-        calldata.append(100);
-
-        // dao
-        calldata.append(200);
+        let mut calldata = ArrayTrait::new();
+        calldata.append(DAO().into());
+        calldata.append(DAO().into());
 
         let (address0, _) = deploy_syscall(
             Game::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
@@ -84,7 +87,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(30000000)]
+    #[available_gas(30000000000)]
     fn test_start() {
         let mut game = new_adventurer();
 
