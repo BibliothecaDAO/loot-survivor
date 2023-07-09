@@ -3,28 +3,28 @@ use integer::{u16_overflowing_add, u16_overflowing_sub};
 use traits::{TryInto, Into};
 use option::OptionTrait;
 
-use pack::pack::{Packing, rshift_split};
-use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
-
-use lootitems::loot::{Loot, ILoot, ImplLoot, DynamicItem};
-use lootitems::statistics::{
-    constants, item_tier, item_type, constants::Settings, constants::ItemSuffix
+use super::{
+    item_meta::{LootItemSpecialNames, LootItemSpecialNamesStorage, ImplLootItemSpecialNames},
+    adventurer_utils::{AdventurerUtils}, exploration::ExploreUtils,
+    constants::{
+        adventurer_constants::{
+            STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_DISCOUNT,
+            MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, ITEM_XP_MULTIPLIER, VITALITY_HEALTH_INCREASE,
+            MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS
+        },
+        discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
+    }
 };
-
-use super::exploration::ExploreUtils;
-use super::constants::adventurer_constants::{
-    STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_DISCOUNT,
-    MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, ITEM_XP_MULTIPLIER, VITALITY_HEALTH_INCREASE,
-    MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS
+use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
+use lootitems::{
+    loot::{Loot, ILoot, ImplLoot},
+    statistics::{constants, item_tier, item_type, constants::Settings, constants::ItemSuffix}
 };
-use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
-use super::item_meta::{LootItemSpecialNames, LootItemSpecialNamesStorage, ImplLootItemSpecialNames};
-
-use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
-use combat::constants::CombatEnums::{Type, Tier, Slot};
+use combat::{
+    combat::{ImplCombat, CombatSpec, SpecialPowers}, constants::CombatEnums::{Type, Tier, Slot}
+};
 use obstacles::obstacle::{ImplObstacle, Obstacle};
-use beasts::beast::{ImplBeast, Beast};
-use beasts::constants::BeastSettings;
+use beasts::{beast::{ImplBeast, Beast}, constants::BeastSettings};
 
 #[derive(Drop, Copy, Serde)]
 struct Stats { // 5 bits each
@@ -36,6 +36,36 @@ struct Stats { // 5 bits each
     intelligence: u8, // increases obstacle avoidance
     wisdom: u8, // increase ambush avoidance
     charisma: u8, // provides shop discount
+}
+
+#[derive(Drop, Copy, Serde)] // 21 bits
+struct DynamicItem {
+    id: u8, // 7 bits
+    xp: u16, // 9 bits
+    // this is set as the items are found/purchased
+    metadata: u8, // 5 bits
+}
+
+impl DynamicItemPacking of Packing<DynamicItem> {
+    fn pack(self: DynamicItem) -> felt252 {
+        (self.id.into()
+         + self.xp.into() * pow::TWO_POW_7
+         + self.metadata.into() * pow::TWO_POW_16
+        ).try_into().expect('pack DynamicItem')
+    }
+
+    fn unpack(packed: felt252) -> DynamicItem {
+        let packed = packed.into();
+        let (packed, id) = rshift_split(packed, pow::TWO_POW_7);
+        let (packed, xp) = rshift_split(packed, pow::TWO_POW_9);
+        let (_, metadata) = rshift_split(packed, pow::TWO_POW_5);
+
+        DynamicItem {
+            id: id.try_into().expect('unpack DynamicItem id'),
+            xp: xp.try_into().expect('unpack DynamicItem xp'),
+            metadata: metadata.try_into().expect('unpack DynamicItem metadata')
+        }
+    }
 }
 
 #[derive(Drop, Copy, Serde)]
@@ -152,6 +182,7 @@ impl AdventurerPacking of Packing<Adventurer> {
 
 #[generate_trait]
 impl ImplAdventurer of IAdventurer {
+    // TODO: This shold also use adventurer entropy so that the market is more random
     fn get_market_entropy(self: Adventurer, adventurer_id: u256) -> u64 {
         // TODO: check potential overflow
         ((self.xp.into() + 1 + self.stat_points_available.into()) * pow::TWO_POW_9 * adventurer_id)
@@ -199,7 +230,7 @@ impl ImplAdventurer of IAdventurer {
         }
     }
     fn add_statistic(ref self: Adventurer, value: u8) {
-        assert(value < 6, 'Index out of bounds');
+        assert(value < 6, 'Valid stat range is 0-5');
         if (value == StatisticIndex::STRENGTH) {
             self.add_strength(1)
         } else if (value == StatisticIndex::DEXTERITY) {
@@ -214,23 +245,13 @@ impl ImplAdventurer of IAdventurer {
             self.add_charisma(1)
         }
     }
-    // get_random_explore returns a random number between 0 and 3 based on provided entropy
-    // @param entropy: entropy for generating random explore
-    // @return u64: A random number between 0 and 3 denoting the outcome of the explore
-    fn get_random_explore(entropy: u128) -> ExploreResult {
-        let result = entropy % 3;
-        if (result == 0) {
-            return ExploreResult::Beast(());
-        } else if (result == 1) {
-            return ExploreResult::Obstacle(());
-        } else {
-            return ExploreResult::Treasure(());
-        }
-    }
-    fn deduct_gold(ref self: Adventurer, value: u16) {
-        self.gold -= value;
-        if (self.gold < 0) {
+
+    fn deduct_gold(ref self: Adventurer, amount: u16) {
+        // underflow protection
+        if amount >= self.gold {
             self.gold = 0;
+        } else {
+            self.gold -= amount;
         }
     }
     fn check_gold(self: Adventurer, value: u16) -> bool {
@@ -286,7 +307,12 @@ impl ImplAdventurer of IAdventurer {
     fn beast_encounter(ref self: Adventurer, adventurer_entropy: u128) -> Beast {
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
         let beast_seed: u128 = self.get_beast_seed(adventurer_entropy);
-        let special_names = ImplBeast::get_special_names(self.get_level(), beast_seed, constants::NamePrefixLength.into(), constants::NameSuffixLength.into());
+        let special_names = ImplBeast::get_special_names(
+            self.get_level(),
+            beast_seed,
+            constants::NamePrefixLength.into(),
+            constants::NameSuffixLength.into()
+        );
 
         // get beast using battle fixed seed
         // this is important because in the context of this call
@@ -299,7 +325,7 @@ impl ImplAdventurer of IAdventurer {
         let beast = ImplBeast::get_beast(self.get_level(), special_names, beast_seed);
 
         // otherwise generate random starting health for the beast
-        self.add_beast(beast.starting_health);
+        self.set_beast_health(beast.starting_health);
 
         // return beast
         return beast;
@@ -355,36 +381,41 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    // deduct_beast_health deducts the beast health from the adventurer
-    // if the beast health is less than 0, it sets the beast health to 0
-    // @param self: Adventurer the adventurer to deduct the beast health from
-    // @param value: u16 the amount to deduct from the beast health
-    // @return Adventurer the adventurer with the beast health deducted
-    fn deduct_beast_health(ref self: Adventurer, amount: u16) -> Adventurer {
-        let mut new_beast_health = self.beast_health - amount;
-
-        // check if killed
-        if new_beast_health < 0 {
+    fn deduct_beast_health(ref self: Adventurer, amount: u16) {
+        // underflow protection
+        if amount >= self.beast_health {
             self.beast_health = 0;
         } else {
-            self.beast_health = new_beast_health;
+            self.beast_health -= amount;
         }
-        self
-    }
-    fn add_beast(ref self: Adventurer, value: u16) -> Adventurer {
-        self.beast_health = value;
-        self
     }
 
-    fn add_health(ref self: Adventurer, value: u16) {
-        // if the health to add is greater than or equal to the max health
-        if (self.health + value) >= self.get_max_health() {
-            // set health to max health
-            self.health = self.get_max_health();
+    fn set_beast_health(ref self: Adventurer, amount: u16) {
+        // check for overflow
+        // we currently use 9 bits for beast health so MAX HEALTH is 2^9 - 1
+        if (amount > BeastSettings::MAXIMUM_HEALTH) {
+            self.beast_health = BeastSettings::MAXIMUM_HEALTH;
         } else {
-            // otherwise add health
-            self.health += value;
+            self.beast_health = amount;
         }
+    }
+
+    fn add_health(ref self: Adventurer, amount: u16) {
+        // check for u16 overflow
+        if (u16_overflowing_add(self.health, amount).is_ok()) {
+            // if overflow is ok
+            // check if added amount is less than or equal to max health
+            if (self.health + amount <= self.get_max_health()) {
+                // if it is, add health
+                self.health += amount;
+                return;
+            }
+        }
+
+        // fall through is to set health to max health
+        // this will happen either in a u16 overflow case
+        // or if the health being added exceeds max health
+        self.health = self.get_max_health()
     }
 
     fn get_max_health(ref self: Adventurer) -> u16 {
@@ -420,15 +451,24 @@ impl ImplAdventurer of IAdventurer {
     // @dev The function calculates the new level after adding the experience points and returns the previous and new levels as a tuple.
     // @param value The amount of experience to be added to the Adventurer.
     // @return A tuple containing the Adventurer's level before and after the XP addition.
-    fn increase_adventurer_xp(ref self: Adventurer, value: u16) -> (u8, u8) {
+    fn increase_adventurer_xp(ref self: Adventurer, amount: u16) -> (u8, u8) {
         // get the previous level
         let previous_level = self.get_level();
 
-        // overflow check using MAX_XP
-        if self.xp + value >= MAX_XP {
-            self.xp = MAX_XP;
+        // check for u16 overflow
+        if (u16_overflowing_add(self.xp, amount).is_ok()) {
+            // if overflow is ok
+            // check if added amount is less than or equal to max xp
+            if (self.xp + amount <= MAX_XP) {
+                // if it is, add xp
+                self.xp += amount;
+            } else {
+                // if amount to add exceeds max xp, set xp to max
+                self.xp = MAX_XP;
+            }
         } else {
-            self.xp += value;
+            // if we overflow u16, set xp to max xp
+            self.xp = MAX_XP;
         }
 
         // get the new level
@@ -453,77 +493,70 @@ impl ImplAdventurer of IAdventurer {
     // @dev The function will add the specified amount to the strength stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the strength stat.
     fn add_strength(ref self: Adventurer, amount: u8) {
-        if (self.stats.strength + amount > MAX_STAT_VALUE) {
-            self.stats.strength = MAX_STAT_VALUE;
-        } else {
-            self.stats.strength += amount;
-        }
+        self
+            .stats
+            .strength =
+                AdventurerUtils::overflow_protected_stat_increase(self.stats.strength, amount);
     }
 
     // @notice Increase the Adventurer's dexterity stat.
     // @dev The function will add the specified amount to the dexterity stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the dexterity stat.
     fn add_dexterity(ref self: Adventurer, amount: u8) {
-        if (self.stats.dexterity + amount > MAX_STAT_VALUE) {
-            self.stats.dexterity = MAX_STAT_VALUE;
-        } else {
-            self.stats.dexterity += amount;
-        }
+        self
+            .stats
+            .dexterity =
+                AdventurerUtils::overflow_protected_stat_increase(self.stats.dexterity, amount);
     }
 
     // @notice Increase the Adventurer's vitality stat.
     // @dev The function will add the specified amount to the vitality stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the vitality stat.
     fn add_vitality(ref self: Adventurer, amount: u8) {
-        if (self.stats.vitality + amount > MAX_STAT_VALUE) {
-            self.stats.vitality = MAX_STAT_VALUE;
-        } else {
-            self.stats.vitality += amount;
-        }
+        self
+            .stats
+            .vitality =
+                AdventurerUtils::overflow_protected_stat_increase(self.stats.vitality, amount);
     }
 
     // @notice Increase the Adventurer's intelligence stat.
     // @dev The function will add the specified amount to the intelligence stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the intelligence stat.
     fn add_intelligence(ref self: Adventurer, amount: u8) {
-        if (self.stats.intelligence + amount > MAX_STAT_VALUE) {
-            self.stats.intelligence = MAX_STAT_VALUE;
-        } else {
-            self.stats.intelligence += amount;
-        }
+        self
+            .stats
+            .intelligence =
+                AdventurerUtils::overflow_protected_stat_increase(self.stats.intelligence, amount);
     }
 
     // @notice Increase the Adventurer's wisdom stat.
     // @dev The function will add the specified amount to the wisdom stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the wisdom stat.
     fn add_wisdom(ref self: Adventurer, amount: u8) {
-        if (self.stats.wisdom + amount > MAX_STAT_VALUE) {
-            self.stats.wisdom = MAX_STAT_VALUE;
-        } else {
-            self.stats.wisdom += amount;
-        }
+        self
+            .stats
+            .wisdom = AdventurerUtils::overflow_protected_stat_increase(self.stats.wisdom, amount);
     }
 
     // @notice Increase the Adventurer's charisma stat.
     // @dev The function will add the specified amount to the charisma stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the charisma stat.
     fn add_charisma(ref self: Adventurer, amount: u8) {
-        if (self.stats.charisma + amount > MAX_STAT_VALUE) {
-            self.stats.charisma = MAX_STAT_VALUE;
-        } else {
-            self.stats.charisma += amount;
-        }
+        self
+            .stats
+            .charisma =
+                AdventurerUtils::overflow_protected_stat_increase(self.stats.charisma, amount);
     }
 
     // @notice Decrease the Adventurer's strength stat.
     // @dev The function will subtract the specified amount from the strength stat without allowing it to fall below 0.
     // @param amount The amount to be subtracted from the strength stat.
     fn deduct_strength(ref self: Adventurer, amount: u8) {
-        // If subtraction doesn't cause underflow, subtract amount; otherwise, set to 0
-        if (u16_overflowing_sub(self.stats.strength.into(), amount.into()).is_ok()) {
-            self.stats.strength -= amount;
-        } else {
+        // underflow protection
+        if amount >= self.stats.strength {
             self.stats.strength = 0;
+        } else {
+            self.stats.strength -= amount;
         }
     }
 
@@ -531,11 +564,11 @@ impl ImplAdventurer of IAdventurer {
     // @dev The function will subtract the specified amount from the dexterity stat without allowing it to fall below 0.
     // @param amount The amount to be deducted from the dexterity stat.
     fn deduct_dexterity(ref self: Adventurer, amount: u8) {
-        // If subtraction doesn't cause underflow, subtract amount; otherwise, set to 0
-        if (u16_overflowing_sub(self.stats.dexterity.into(), amount.into()).is_ok()) {
-            self.stats.dexterity -= amount;
-        } else {
+        // underflow protection
+        if amount >= self.stats.dexterity {
             self.stats.dexterity = 0;
+        } else {
+            self.stats.dexterity -= amount;
         }
     }
 
@@ -543,11 +576,11 @@ impl ImplAdventurer of IAdventurer {
     // @dev The function will subtract the specified amount from the vitality stat without allowing it to fall below 0.
     // @param amount The amount to be deducted from the vitality stat.
     fn deduct_vitality(ref self: Adventurer, amount: u8) {
-        // If subtraction doesn't cause underflow, subtract amount; otherwise, set to 0
-        if (u16_overflowing_sub(self.stats.vitality.into(), amount.into()).is_ok()) {
-            self.stats.vitality -= amount;
-        } else {
+        // underflow protection
+        if amount >= self.stats.vitality {
             self.stats.vitality = 0;
+        } else {
+            self.stats.vitality -= amount;
         }
     }
 
@@ -555,11 +588,11 @@ impl ImplAdventurer of IAdventurer {
     // @dev The function will subtract the specified amount from the intelligence stat without allowing it to fall below 0.
     // @param amount The amount to be deducted from the intelligence stat.
     fn deduct_intelligence(ref self: Adventurer, amount: u8) {
-        // If subtraction doesn't cause underflow, subtract amount; otherwise, set to 0
-        if (u16_overflowing_sub(self.stats.intelligence.into(), amount.into()).is_ok()) {
-            self.stats.intelligence -= amount;
-        } else {
+        // underflow protection
+        if amount >= self.stats.intelligence {
             self.stats.intelligence = 0;
+        } else {
+            self.stats.intelligence -= amount;
         }
     }
 
@@ -567,11 +600,11 @@ impl ImplAdventurer of IAdventurer {
     // @dev The function will subtract the specified amount from the wisdom stat without allowing it to fall below 0.
     // @param amount The amount to be deducted from the wisdom stat.
     fn deduct_wisdom(ref self: Adventurer, amount: u8) {
-        // If subtraction doesn't cause underflow, subtract amount; otherwise, set to 0
-        if (u16_overflowing_sub(self.stats.wisdom.into(), amount.into()).is_ok()) {
-            self.stats.wisdom -= amount;
-        } else {
+        // underflow protection
+        if amount >= self.stats.wisdom {
             self.stats.wisdom = 0;
+        } else {
+            self.stats.wisdom -= amount;
         }
     }
 
@@ -579,11 +612,11 @@ impl ImplAdventurer of IAdventurer {
     // @dev The function will subtract the specified amount from the charisma stat without allowing it to fall below 0.
     // @param amount The amount to be deducted from the charisma stat.
     fn deduct_charisma(ref self: Adventurer, amount: u8) {
-        // If subtraction doesn't cause underflow, subtract amount; otherwise, set to 0
-        if (u16_overflowing_sub(self.stats.charisma.into(), amount.into()).is_ok()) {
-            self.stats.charisma -= amount;
-        } else {
+        // underflow protection
+        if amount >= self.stats.charisma {
             self.stats.charisma = 0;
+        } else {
+            self.stats.charisma -= amount;
         }
     }
 
@@ -593,70 +626,70 @@ impl ImplAdventurer of IAdventurer {
     fn add_item(ref self: Adventurer, item: DynamicItem) {
         let slot = ImplLoot::get_slot(item.id);
         match slot {
-            Slot::Weapon(()) => self.add_weapon(item),
-            Slot::Chest(()) => self.add_chest(item),
-            Slot::Head(()) => self.add_head(item),
-            Slot::Waist(()) => self.add_waist(item),
-            Slot::Foot(()) => self.add_foot(item),
-            Slot::Hand(()) => self.add_hand(item),
-            Slot::Neck(()) => self.add_neck(item),
-            Slot::Ring(()) => self.add_ring(item),
+            Slot::Weapon(()) => self.equip_weapon(item),
+            Slot::Chest(()) => self.equip_chest_armor(item),
+            Slot::Head(()) => self.equip_head_armor(item),
+            Slot::Waist(()) => self.equip_waist_armor(item),
+            Slot::Foot(()) => self.equip_foot_armor(item),
+            Slot::Hand(()) => self.equip_hand_armor(item),
+            Slot::Neck(()) => self.equip_necklace(item),
+            Slot::Ring(()) => self.equip_ring(item),
         }
     }
 
     // @notice Equips the adventurer with a weapon. 
     // @dev The function asserts that the given item is a weapon before adding it to the adventurer's weapon slot.
     // @param item The weapon to be added to the adventurer's equipment.
-    fn add_weapon(ref self: Adventurer, item: DynamicItem) {
+    fn equip_weapon(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Weapon(()), 'Item is not weapon');
         self.weapon = item;
     }
     // @notice Equips the adventurer with a chest armor. 
     // @dev The function asserts that the given item is a chest armor before adding it to the adventurer's chest slot.
     // @param item The chest armor to be added to the adventurer's equipment.
-    fn add_chest(ref self: Adventurer, item: DynamicItem) {
+    fn equip_chest_armor(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Chest(()), 'Item is not chest armor');
         self.chest = item;
     }
     // @notice Equips the adventurer with a head armor. 
     // @dev The function asserts that the given item is a head armor before adding it to the adventurer's head slot.
     // @param item The head armor to be added to the adventurer's equipment.
-    fn add_head(ref self: Adventurer, item: DynamicItem) {
+    fn equip_head_armor(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Head(()), 'Item is not head armor');
         self.head = item;
     }
     // @notice Equips the adventurer with a waist armor. 
     // @dev The function asserts that the given item is a waist armor before adding it to the adventurer's waist slot.
     // @param item The waist armor to be added to the adventurer's equipment.
-    fn add_waist(ref self: Adventurer, item: DynamicItem) {
+    fn equip_waist_armor(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Waist(()), 'Item is not waist armor');
         self.waist = item;
     }
     // @notice Equips the adventurer with a foot armor. 
     // @dev The function asserts that the given item is a foot armor before adding it to the adventurer's foot slot.
     // @param item The foot armor to be added to the adventurer's equipment.
-    fn add_foot(ref self: Adventurer, item: DynamicItem) {
+    fn equip_foot_armor(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Foot(()), 'Item is not foot armor');
         self.foot = item;
     }
     // @notice Equips the adventurer with a hand armor. 
     // @dev The function asserts that the given item is a hand armor before adding it to the adventurer's hand slot.
     // @param item The hand armor to be added to the adventurer's equipment.
-    fn add_hand(ref self: Adventurer, item: DynamicItem) {
+    fn equip_hand_armor(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Hand(()), 'Item is not hand armor');
         self.hand = item;
     }
     // @notice Equips the adventurer with a necklace. 
     // @dev The function asserts that the given item is a necklace before adding it to the adventurer's neck slot.
     // @param item The necklace to be added to the adventurer's equipment.
-    fn add_neck(ref self: Adventurer, item: DynamicItem) {
+    fn equip_necklace(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Neck(()), 'Item is not necklace');
         self.neck = item;
     }
     // @notice Equips the adventurer with a ring. 
     // @dev The function asserts that the given item is a ring before adding it to the adventurer's ring slot.
     // @param item The ring to be added to the adventurer's equipment.
-    fn add_ring(ref self: Adventurer, item: DynamicItem) {
+    fn equip_ring(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Ring(()), 'Item is not a ring');
         self.ring = item;
     }
@@ -829,27 +862,6 @@ impl ImplAdventurer of IAdventurer {
     // details on-chain.
     fn get_beast_seed(self: Adventurer, adventurer_entropy: u128) -> u128 {
         self.xp.into() + adventurer_entropy.into()
-    }
-
-    fn get_random_armor_slot(entropy: u128) -> Slot {
-        // get a number between 0 and 5 inclusive
-        let slot = entropy % 6;
-
-        // return slot for each outcome
-        if (slot == 1) {
-            return Slot::Chest(());
-        } else if (slot == 2) {
-            return Slot::Head(());
-        } else if (slot == 3) {
-            return Slot::Waist(());
-        } else if (slot == 4) {
-            return Slot::Foot(());
-        } else if (slot == 5) {
-            return Slot::Hand(());
-        }
-
-        // fall through to Hand
-        return Slot::Hand(());
     }
 
     // @dev This function adds a boost to an adventurer's attributes based on a provided suffix.
@@ -1237,10 +1249,29 @@ impl ImplAdventurer of IAdventurer {
             MAX_ADVENTURER_BLOCKS - self.last_action + current_block_modulo_512
         }
     }
+
+    // get_greatness returns the greatness level of an item based on xp
+    // @param xp The xp of the item.
+    // @return The greatness level of the item.
+    fn get_greatness(self: DynamicItem) -> u8 {
+        // use combat lib to determine the level but give items a bonus based
+        // on the item level multiplier setting (currently 4) which means
+        // items will level up 4x faster than entities without a multplier
+        // such as adventurers
+        let level = ImplCombat::get_level_from_xp(self.xp);
+
+        // if level exceeds max greatness
+        if level > ITEM_MAX_GREATNESS {
+            // return max greatness
+            ITEM_MAX_GREATNESS
+        } else {
+            level
+        }
+    }
 }
 
 #[test]
-#[available_gas(5000000)]
+#[available_gas(90000)]
 fn test_get_idle_blocks() {
     let mut adventurer = Adventurer {
         last_action: 1, health: 480, xp: 8191, stats: Stats {
@@ -1276,7 +1307,7 @@ fn test_get_idle_blocks() {
 }
 
 #[test]
-#[available_gas(5000000)]
+#[available_gas(3000000)]
 fn test_adventurer() {
     let adventurer = Adventurer {
         last_action: 511, health: 480, xp: 8191, stats: Stats {
@@ -1342,144 +1373,105 @@ fn test_adventurer() {
 }
 
 #[test]
-#[available_gas(5000000)]
+#[available_gas(2000000)]
 fn test_new_adventurer() {
     let new_adventurer = ImplAdventurer::new(1, 1);
-
     new_adventurer.pack();
-
     assert(new_adventurer.health == 100, 'health');
 }
 
 #[test]
-#[available_gas(5000000)]
+#[available_gas(200000)]
 fn test_add_health() {
     let mut adventurer = ImplAdventurer::new(1, 1);
+
+    // test stock max health is 100
     adventurer.add_health(5);
     assert(adventurer.health == 100, 'max health with 0 vit is 100');
 
+    // increase max health via vitality boost
     adventurer.stats.vitality = 1;
     adventurer.add_health(5);
     assert(adventurer.health == 105, 'health should be 105');
 
+    // verify max health is 120
     adventurer.add_health(50);
     assert(adventurer.health == 120, 'max health with 1 vit is 120');
-}
 
-#[test]
-#[available_gas(5000000)]
-fn test_deduct_health() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-
-    adventurer.deduct_health(5);
-
-    assert(adventurer.health == 95, 'strength');
-}
-
-#[test]
-#[available_gas(5000000)]
-fn test_xp() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-
-    adventurer.increase_adventurer_xp(5);
-
-    assert(adventurer.xp == 5, 'xp');
+    // check overflow
+    adventurer.add_health(65535);
+    assert(adventurer.health == 120, 'health should be 120');
 }
 
 #[test]
 #[available_gas(50000)]
+fn test_deduct_health() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    let starting_health = adventurer.health;
+    let deduct_amount = 5;
+
+    // base case
+    adventurer.deduct_health(deduct_amount);
+    assert(adventurer.health == starting_health - deduct_amount, 'wrong health');
+
+    // underflow case
+    adventurer.deduct_health(65535);
+    assert(adventurer.health == 0, 'health should be 0');
+}
+
+#[test]
+#[available_gas(50000)]
+fn test_deduct_gold() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    let starting_gold = adventurer.gold;
+    let deduct_amount = 5;
+
+    // base case
+    adventurer.deduct_gold(deduct_amount);
+    assert(adventurer.gold == starting_gold - deduct_amount, 'wrong gold');
+
+    // test underflow
+    adventurer.deduct_gold(65535);
+    assert(adventurer.gold == 0, 'gold should be 0');
+}
+
+#[test]
+#[available_gas(140000)]
+fn test_increase_adventurer_xp() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // base case level increase
+    let (previous_level, new_level) = adventurer.increase_adventurer_xp(4);
+    assert(adventurer.xp == 4, 'xp should be 4');
+    assert(previous_level == 1, 'previous level should be 1');
+    assert(new_level == 2, 'new level should be 2');
+
+    // base case no level increase
+    let (previous_level, new_level) = adventurer.increase_adventurer_xp(1);
+    assert(adventurer.xp == 5, 'xp should be 5');
+    assert(previous_level == 2, 'prev level should be 2');
+    assert(new_level == 2, 'new level should still be 2');
+
+    // multi-level and exceed max xp case
+    let (previous_level, new_level) = adventurer.increase_adventurer_xp(MAX_XP + 10);
+    assert(adventurer.xp == MAX_XP, 'xp should stop at max xp');
+    assert(previous_level == 2, 'prev level should be 2');
+    assert(new_level == 90, 'new level should be 90');
+
+    // u16 overflow case
+    adventurer.increase_adventurer_xp(65535);
+    assert(adventurer.xp == MAX_XP, 'xp should be max on overflow');
+}
+
+#[test]
+#[available_gas(70000)]
 fn test_add_strength() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
     adventurer.add_strength(1);
     assert(adventurer.stats.strength == 1, 'strength should be 1');
     // overflow case
-    adventurer.add_strength(100);
+    adventurer.add_strength(255);
     assert(adventurer.stats.strength == MAX_STAT_VALUE, 'strength should be max');
-}
-
-#[test]
-#[available_gas(90000)]
-fn test_deduct_strength() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-    // basic case
-    adventurer.add_strength(2);
-    adventurer.deduct_strength(1);
-    assert(adventurer.stats.strength == 1, 'strength should be 1');
-    // underflow case
-    adventurer.add_strength(5);
-    adventurer.deduct_strength(6);
-    assert(adventurer.stats.strength == 0, 'strength should be 0');
-}
-
-#[test]
-#[available_gas(90000)]
-fn test_deduct_dexterity() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-    // basic case
-    adventurer.add_dexterity(2);
-    adventurer.deduct_dexterity(1);
-    assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
-    // underflow case
-    adventurer.add_dexterity(5);
-    adventurer.deduct_dexterity(6);
-    assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
-}
-
-#[test]
-#[available_gas(90000)]
-fn test_deduct_vitality() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-    // basic case
-    adventurer.add_vitality(2);
-    adventurer.deduct_vitality(1);
-    assert(adventurer.stats.vitality == 1, 'vitality should be 1');
-    // underflow case
-    adventurer.add_vitality(5);
-    adventurer.deduct_vitality(6);
-    assert(adventurer.stats.vitality == 0, 'vitality should be 0');
-}
-
-#[test]
-#[available_gas(90000)]
-fn test_deduct_intelligence() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-    // basic case
-    adventurer.add_intelligence(2);
-    adventurer.deduct_intelligence(1);
-    assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
-    // underflow case
-    adventurer.add_intelligence(5);
-    adventurer.deduct_intelligence(6);
-    assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
-}
-
-#[test]
-#[available_gas(90000)]
-fn test_deduct_wisdom() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-    // basic case
-    adventurer.add_wisdom(2);
-    adventurer.deduct_wisdom(1);
-    assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
-    // underflow case
-    adventurer.add_wisdom(5);
-    adventurer.deduct_wisdom(6);
-    assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
-}
-
-#[test]
-#[available_gas(90000)]
-fn test_deduct_charisma() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
-    // basic case
-    adventurer.add_charisma(2);
-    adventurer.deduct_charisma(1);
-    assert(adventurer.stats.charisma == 1, 'charisma should be 1');
-    // underflow case
-    adventurer.add_charisma(5);
-    adventurer.deduct_charisma(6);
-    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
 }
 
 #[test]
@@ -1490,7 +1482,7 @@ fn test_add_dexterity() {
     adventurer.add_dexterity(1);
     assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
     // overflow case
-    adventurer.add_dexterity(100);
+    adventurer.add_dexterity(255);
     assert(adventurer.stats.dexterity == MAX_STAT_VALUE, 'dexterity should be max');
 }
 
@@ -1502,7 +1494,7 @@ fn test_add_vitality() {
     adventurer.add_vitality(1);
     assert(adventurer.stats.vitality == 1, 'vitality should be 1');
     // overflow case
-    adventurer.add_vitality(100);
+    adventurer.add_vitality(255);
     assert(adventurer.stats.vitality == MAX_STAT_VALUE, 'vitality should be max');
 }
 
@@ -1514,7 +1506,7 @@ fn test_add_intelligence() {
     adventurer.add_intelligence(1);
     assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
     // overflow case
-    adventurer.add_intelligence(100);
+    adventurer.add_intelligence(255);
     assert(adventurer.stats.intelligence == MAX_STAT_VALUE, 'intelligence should be max');
 }
 
@@ -1526,7 +1518,7 @@ fn test_add_wisdom() {
     adventurer.add_wisdom(1);
     assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
     // overflow case
-    adventurer.add_wisdom(100);
+    adventurer.add_wisdom(255);
     assert(adventurer.stats.wisdom == MAX_STAT_VALUE, 'wisdom should be max');
 }
 
@@ -1538,19 +1530,104 @@ fn test_add_charisma() {
     adventurer.add_charisma(1);
     assert(adventurer.stats.charisma == 1, 'charisma should be 1');
     // overflow case
-    adventurer.add_charisma(100);
+    adventurer.add_charisma(255);
     assert(adventurer.stats.charisma == MAX_STAT_VALUE, 'charisma should be max');
+}
+
+#[test]
+#[available_gas(80000)]
+fn test_deduct_strength() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // basic case
+    adventurer.add_strength(2);
+    adventurer.deduct_strength(1);
+    assert(adventurer.stats.strength == 1, 'strength should be 1');
+    // underflow case
+    adventurer.add_strength(5);
+    adventurer.deduct_strength(255);
+    assert(adventurer.stats.strength == 0, 'strength should be 0');
+}
+
+#[test]
+#[available_gas(80000)]
+fn test_deduct_dexterity() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // basic case
+    adventurer.add_dexterity(2);
+    adventurer.deduct_dexterity(1);
+    assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+    // underflow case
+    adventurer.add_dexterity(5);
+    adventurer.deduct_dexterity(255);
+    assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+}
+
+#[test]
+#[available_gas(80000)]
+fn test_deduct_vitality() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // basic case
+    adventurer.add_vitality(2);
+    adventurer.deduct_vitality(1);
+    assert(adventurer.stats.vitality == 1, 'vitality should be 1');
+    // underflow case
+    adventurer.add_vitality(5);
+    adventurer.deduct_vitality(255);
+    assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+}
+
+#[test]
+#[available_gas(80000)]
+fn test_deduct_intelligence() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // basic case
+    adventurer.add_intelligence(2);
+    adventurer.deduct_intelligence(1);
+    assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
+    // underflow case
+    adventurer.add_intelligence(5);
+    adventurer.deduct_intelligence(255);
+    assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+}
+
+#[test]
+#[available_gas(80000)]
+fn test_deduct_wisdom() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // basic case
+    adventurer.add_wisdom(2);
+    adventurer.deduct_wisdom(1);
+    assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
+    // underflow case
+    adventurer.add_wisdom(5);
+    adventurer.deduct_wisdom(255);
+    assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+}
+
+#[test]
+#[available_gas(80000)]
+fn test_deduct_charisma() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
+    // basic case
+    adventurer.add_charisma(2);
+    adventurer.deduct_charisma(1);
+    assert(adventurer.stats.charisma == 1, 'charisma should be 1');
+
+    // underflow case
+    adventurer.add_charisma(5);
+    adventurer.deduct_charisma(255);
+    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
 }
 
 #[test]
 #[should_panic(expected: ('Item is not weapon', ))]
 #[available_gas(50000)]
-fn test_add_invalid_weapon() {
+fn test_equip_invalid_weapon() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // create demon crown item
     let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
     // try to equip it to adventurer as a weapon
-    adventurer.add_weapon(item);
+    adventurer.equip_weapon(item);
 // should panic with 'Item is not weapon' message
 // because demon crown is not a weapon
 // test is annotated to expect this panic and will
@@ -1559,14 +1636,14 @@ fn test_add_invalid_weapon() {
 
 #[test]
 #[available_gas(50000)]
-fn test_add_valid_weapon() {
+fn test_equip_valid_weapon() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // Create Katana item
     let item = DynamicItem { id: constants::ItemId::Katana, xp: 1, metadata: 0 };
 
     // Equip to adventurer as a weapon
-    adventurer.add_weapon(item);
+    adventurer.equip_weapon(item);
 
     // Assert item was equipped
     assert(adventurer.weapon.id == constants::ItemId::Katana, 'did not equip weapon');
@@ -1577,11 +1654,11 @@ fn test_add_valid_weapon() {
 #[test]
 #[should_panic(expected: ('Item is not chest armor', ))]
 #[available_gas(50000)]
-fn test_add_invalid_chest() {
+fn test_equip_invalid_chest() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // try to equip a Demon Crown as chest item
     let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
-    adventurer.add_chest(item);
+    adventurer.equip_chest_armor(item);
 // should panic with 'Item is not chest armor' message
 // because Demon Crown is not chest armor
 // test is annotated to expect this panic and will
@@ -1590,11 +1667,11 @@ fn test_add_invalid_chest() {
 
 #[test]
 #[available_gas(50000)]
-fn test_add_valid_chest() {
+fn test_equip_valid_chest() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // equip Divine Robe as chest item
     let item = DynamicItem { id: constants::ItemId::DivineRobe, xp: 1, metadata: 0 };
-    adventurer.add_chest(item);
+    adventurer.equip_chest_armor(item);
 
     // this should not panic
     // assert item was equipped
@@ -1606,21 +1683,21 @@ fn test_add_valid_chest() {
 #[test]
 #[should_panic(expected: ('Item is not head armor', ))]
 #[available_gas(50000)]
-fn test_add_invalid_head() {
+fn test_equip_invalid_head() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // try to equip a Katana as head item
     let item = DynamicItem { id: constants::ItemId::Katana, xp: 1, metadata: 0 };
-    adventurer.add_head(item);
+    adventurer.equip_head_armor(item);
 // should panic with 'Item is not head armor' message
 }
 
 #[test]
 #[available_gas(50000)]
-fn test_add_valid_head() {
+fn test_equip_valid_head() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // equip Crown as head item
     let item = DynamicItem { id: constants::ItemId::Crown, xp: 1, metadata: 0 };
-    adventurer.add_head(item);
+    adventurer.equip_head_armor(item);
     // this should not panic
     // assert item was equipped
     assert(adventurer.head.id == constants::ItemId::Crown, 'did not equip head armor');
@@ -1631,22 +1708,22 @@ fn test_add_valid_head() {
 #[test]
 #[should_panic(expected: ('Item is not waist armor', ))]
 #[available_gas(50000)]
-fn test_add_invalid_waist() {
+fn test_equip_invalid_waist() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // try to equip a Demon Crown as waist item
     let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
-    adventurer.add_waist(item);
+    adventurer.equip_waist_armor(item);
 // should panic with 'Item is not waist armor' message
 }
 
 #[test]
 #[available_gas(50000)]
-fn test_add_valid_waist() {
+fn test_equip_valid_waist() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // equip Wool Sash as waist item
     let item = DynamicItem { id: constants::ItemId::WoolSash, xp: 1, metadata: 0 };
-    adventurer.add_waist(item);
+    adventurer.equip_waist_armor(item);
 
     // this should not panic
     // assert item was equipped
@@ -1658,22 +1735,22 @@ fn test_add_valid_waist() {
 #[test]
 #[should_panic(expected: ('Item is not foot armor', ))]
 #[available_gas(50000)]
-fn test_add_invalid_foot() {
+fn test_equip_invalid_foot() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // try to equip a Demon Crown as foot item
     let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
-    adventurer.add_foot(item);
+    adventurer.equip_foot_armor(item);
 // should panic with 'Item is not foot armor' message
 }
 
 #[test]
 #[available_gas(50000)]
-fn test_add_valid_foot() {
+fn test_equip_valid_foot() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // equip Silk Slippers as foot item
     let item = DynamicItem { id: constants::ItemId::SilkSlippers, xp: 1, metadata: 0 };
-    adventurer.add_foot(item);
+    adventurer.equip_foot_armor(item);
 
     // this should not panic
     // assert item was equipped
@@ -1685,23 +1762,23 @@ fn test_add_valid_foot() {
 #[test]
 #[should_panic(expected: ('Item is not hand armor', ))]
 #[available_gas(50000)]
-fn test_add_invalid_hand() {
+fn test_equip_invalid_hand() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // try to equip a Demon Crown as hand item
     let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
-    adventurer.add_hand(item);
+    adventurer.equip_hand_armor(item);
 // should panic with 'Item is not hand armor' message
 }
 
 #[test]
 #[available_gas(50000)]
-fn test_add_valid_hand() {
+fn test_equip_valid_hand() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // equip Divine Gloves as hand item
     let item = DynamicItem { id: constants::ItemId::DivineGloves, xp: 1, metadata: 0 };
-    adventurer.add_hand(item);
+    adventurer.equip_hand_armor(item);
 
     // this should not panic
     // assert item was equipped
@@ -1713,23 +1790,23 @@ fn test_add_valid_hand() {
 #[test]
 #[should_panic(expected: ('Item is not necklace', ))]
 #[available_gas(50000)]
-fn test_add_invalid_neck() {
+fn test_equip_invalid_neck() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // try to equip a Demon Crown as necklace
     let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
-    adventurer.add_neck(item);
+    adventurer.equip_necklace(item);
 // should panic with 'Item is not necklace' message
 }
 
 #[test]
 #[available_gas(50000)]
-fn test_add_valid_neck() {
+fn test_equip_valid_neck() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // equip Pendant as necklace
     let item = DynamicItem { id: constants::ItemId::Pendant, xp: 1, metadata: 0 };
-    adventurer.add_neck(item);
+    adventurer.equip_necklace(item);
 
     // this should not panic
     // assert item was equipped
@@ -1741,21 +1818,21 @@ fn test_add_valid_neck() {
 #[test]
 #[should_panic(expected: ('Item is not a ring', ))]
 #[available_gas(50000)]
-fn test_add_invalid_ring() {
+fn test_equip_invalid_ring() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // try to equip a Demon Crown as ring
     let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
-    adventurer.add_ring(item);
+    adventurer.equip_ring(item);
 // should panic with 'Item is not a ring' message
 }
 
 #[test]
 #[available_gas(50000)]
-fn test_add_valid_ring() {
+fn test_equip_valid_ring() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     let item = DynamicItem { id: constants::ItemId::PlatinumRing, xp: 1, metadata: 0 };
-    adventurer.add_ring(item);
+    adventurer.equip_ring(item);
     assert(adventurer.ring.id == constants::ItemId::PlatinumRing, 'did not equip ring');
     assert(adventurer.ring.xp == 1, 'ring xp is not 1');
     assert(adventurer.ring.metadata == 0, 'ring metadata is not 0');
@@ -1903,7 +1980,7 @@ fn test_increase_item_xp() {
         .increase_item_xp(65535, ref loot_item_name_storage, 1);
     assert(adventurer.weapon.xp == 65535, 'weapon should have 400');
     assert(previous_level == 20, 'weapon prev level should be 20');
-    assert(new_level == Settings::ITEM_MAX_GREATNESS, 'weapon new lvl should be max');
+    assert(new_level == ITEM_MAX_GREATNESS, 'weapon new lvl should be max');
     assert(suffix_assigned == false, 'weapon should not recv suffix');
     assert(prefix_assigned == false, 'weapon should not recv prefixes');
     // verify storage data was not updated
@@ -1941,7 +2018,7 @@ fn test_increase_item_xp() {
         .increase_item_xp(65535, ref loot_item_name_storage, 1);
     assert(adventurer.chest.xp == 65535, 'divine robe should have 65535xp');
     assert(previous_level == divine_robe_starting_level, 'DR prev level should be 1');
-    assert(new_level == Settings::ITEM_MAX_GREATNESS, 'DR new level should be MAX');
+    assert(new_level == ITEM_MAX_GREATNESS, 'DR new level should be MAX');
     assert(suffix_assigned == true, 'DR should have recv suffix');
     assert(prefix_assigned == true, 'DR should have recv prefix');
 
@@ -1965,32 +2042,33 @@ fn test_increase_item_xp() {
 
 #[test]
 #[available_gas(5000000)]
-fn test_deduct_beast_health() {
-    let mut adventurer = ImplAdventurer::new(1, 1);
+fn test_set_beast_health() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
-    adventurer.add_beast(100);
-    assert(adventurer.beast_health == 100, 'beast_health');
+    // base case
+    adventurer.set_beast_health(100);
+    assert(adventurer.beast_health == 100, 'wrong beast health');
 
-    adventurer.deduct_beast_health(5);
-    assert(adventurer.beast_health == 95, 'beast_health');
+    // overflow case
+    adventurer.set_beast_health(65535);
+    assert(adventurer.beast_health == BeastSettings::MAXIMUM_HEALTH, 'beast health should be max');
 }
 
 #[test]
 #[available_gas(5000000)]
-fn test_get_random_explore() {
-    // exploring with zero entropy will result in a beast discovery
-    let entropy = 0;
-    let discovery = ImplAdventurer::get_random_explore(entropy);
-    assert(discovery == ExploreResult::Beast(()), 'adventurer should find beast');
+fn test_deduct_beast_health() {
+    let mut adventurer = ImplAdventurer::new(1, 1);
 
-    let entropy = 1;
-    let discovery = ImplAdventurer::get_random_explore(entropy);
-    assert(discovery == ExploreResult::Obstacle(()), 'adventurer should find obstacle');
+    // stage beast with 100
+    adventurer.set_beast_health(100);
 
-    let entropy = 2;
-    let discovery = ImplAdventurer::get_random_explore(entropy);
-    assert(discovery == ExploreResult::Treasure(()), 'adventurer should find treasure');
+    // deduct 5 (base case)
+    adventurer.deduct_beast_health(5);
+    assert(adventurer.beast_health == 95, 'beast should have 95HP');
+
+    // deduct 2^16 - 1 (overflow case)
+    adventurer.deduct_beast_health(65535);
+    assert(adventurer.beast_health == 0, 'beast should have 0HP');
 }
 
 #[test]

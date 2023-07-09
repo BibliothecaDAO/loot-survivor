@@ -4,8 +4,7 @@ use option::OptionTrait;
 use pack::pack::{Packing, rshift_split};
 use pack::constants::pow;
 
-use super::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
-use lootitems::loot::DynamicItem;
+use super::adventurer::{Adventurer, ImplAdventurer, IAdventurer, DynamicItem};
 
 #[derive(Drop, Copy, Serde)]
 struct Bag {

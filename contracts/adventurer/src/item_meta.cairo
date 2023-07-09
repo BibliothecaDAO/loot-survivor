@@ -5,9 +5,8 @@ use integer::{U256TryIntoU32, U256TryIntoU16, U256TryIntoU8};
 use pack::pack::{Packing, rshift_split};
 use pack::constants::pow;
 
-use super::adventurer::{Adventurer, IAdventurer, ImplAdventurer};
+use super::adventurer::{Adventurer, IAdventurer, ImplAdventurer, DynamicItem};
 use super::bag::{Bag, BagActions};
-use lootitems::loot::DynamicItem;
 
 mod STORAGE {
     const INDEX_1: u8 = 1;
