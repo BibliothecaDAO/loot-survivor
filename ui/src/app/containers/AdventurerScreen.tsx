@@ -9,7 +9,6 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import LootIconLoader from "../components/icons/Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import useLoadingStore from "../hooks/useLoadingStore";
-import { AdventurerTemplate } from "../types/templates";
 
 /**
  * @container
@@ -33,11 +32,9 @@ export default function AdventurerScreen() {
     txAccepted
   );
 
-  // const adventurers = data.adventurersByOwnerQuery
-  //   ? data.adventurersByOwnerQuery.adventurers
-  //   : [];
-
-  const adventurers = [AdventurerTemplate];
+  const adventurers = data.adventurersByOwnerQuery
+    ? data.adventurersByOwnerQuery.adventurers
+    : [];
 
   const menu = [
     {

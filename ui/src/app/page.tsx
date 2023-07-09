@@ -288,19 +288,16 @@ export default function Home() {
   }, [account, setConnected]);
 
   const goerli_graphql =
-    "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql";
-  const devnet_graphql =
-    "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql";
-  const localhost_graphql =
-    "http://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql";
+    "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/goerli-graphql";
+  const mainnet_graphql =
+    "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/graphql";
 
   useMemo(() => {
     setIndexer(
-      // (account as any)?.provider?.baseUrl == testnet_addr ||
-      //   (account as any)?.baseUrl == testnet_addr
-      //   ? devnet_graphql
-      //   : goerli_graphql
-      localhost_graphql
+      (account as any)?.provider?.baseUrl == testnet_addr ||
+        (account as any)?.baseUrl == testnet_addr
+        ? mainnet_graphql
+        : goerli_graphql
     );
   }, [setIndexer]);
 
