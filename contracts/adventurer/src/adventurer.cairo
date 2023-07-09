@@ -6,7 +6,7 @@ use option::OptionTrait;
 use pack::pack::{Packing, rshift_split};
 use pack::constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask};
 
-use lootitems::loot::{Loot, ILoot, ImplLoot};
+use lootitems::loot::{Loot, ILoot, ImplLoot, DynamicItem};
 use lootitems::statistics::{
     constants, item_tier, item_type, constants::Settings, constants::ItemSuffix
 };
@@ -18,7 +18,6 @@ use super::constants::adventurer_constants::{
     MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS
 };
 use super::constants::discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery};
-use super::bag::LootStatistics;
 use super::item_meta::{LootItemSpecialNames, LootItemSpecialNamesStorage, ImplLootItemSpecialNames};
 
 use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
@@ -46,14 +45,14 @@ struct Adventurer {
     xp: u16, // 13 bits
     stats: Stats, // 30 bits
     gold: u16, // 9 bits
-    weapon: LootStatistics, // 21 bits
-    chest: LootStatistics, // 21 bits
-    head: LootStatistics, // 21 bits
-    waist: LootStatistics, // 21 bits
-    foot: LootStatistics, // 21 bits
-    hand: LootStatistics, // 21 bits
-    neck: LootStatistics, // 21 bits
-    ring: LootStatistics, // 21 bits
+    weapon: DynamicItem, // 21 bits
+    chest: DynamicItem, // 21 bits
+    head: DynamicItem, // 21 bits
+    waist: DynamicItem, // 21 bits
+    foot: DynamicItem, // 21 bits
+    hand: DynamicItem, // 21 bits
+    neck: DynamicItem, // 21 bits
+    ring: DynamicItem, // 21 bits
     beast_health: u16, // 9 bits
     stat_points_available: u8, // 3 bits
 }
@@ -241,8 +240,8 @@ impl ImplAdventurer of IAdventurer {
     // get_item_at_slot returns the item at a given item slot
     // @param self: Adventurer to check
     // @param slot: Slot to check
-    // @return LootStatistics: Item at slot
-    fn get_item_at_slot(self: Adventurer, slot: Slot) -> LootStatistics {
+    // @return DynamicItem: Item at slot
+    fn get_item_at_slot(self: Adventurer, slot: Slot) -> DynamicItem {
         match slot {
             Slot::Weapon(()) => self.weapon,
             Slot::Chest(()) => self.chest,
@@ -259,7 +258,7 @@ impl ImplAdventurer of IAdventurer {
     // @param self: Adventurer to check
     // @param item: Item to check
     // @return bool: True if slot is free, false if not
-    fn is_slot_free(self: Adventurer, item: LootStatistics) -> bool {
+    fn is_slot_free(self: Adventurer, item: DynamicItem) -> bool {
         let slot = ImplLoot::get_slot(item.id);
         match slot {
             Slot::Weapon(()) => self.weapon.id == 0,
@@ -337,9 +336,9 @@ impl ImplAdventurer of IAdventurer {
     // luck
     fn get_luck(self: Adventurer) -> u8 {
         // get greatness of aventurers equipped necklace
-        let necklace_greatness = ImplLoot::get_greatness_level(self.neck.xp);
+        let necklace_greatness = self.neck.get_greatness();
         // get greatness of aventurers equipped ring
-        let ring_greatness = ImplLoot::get_greatness_level(self.neck.xp);
+        let ring_greatness = self.neck.get_greatness();
 
         // luck is combined greatness of equipped jewlery
         return necklace_greatness + ring_greatness;
@@ -591,7 +590,7 @@ impl ImplAdventurer of IAdventurer {
     // @notice Adds an item to the adventurer's equipment.
     // @dev The type of the item determines which equipment slot it goes into.
     // @param item The item to be added to the adventurer's equipment.
-    fn add_item(ref self: Adventurer, item: LootStatistics) {
+    fn add_item(ref self: Adventurer, item: DynamicItem) {
         let slot = ImplLoot::get_slot(item.id);
         match slot {
             Slot::Weapon(()) => self.add_weapon(item),
@@ -608,56 +607,56 @@ impl ImplAdventurer of IAdventurer {
     // @notice Equips the adventurer with a weapon. 
     // @dev The function asserts that the given item is a weapon before adding it to the adventurer's weapon slot.
     // @param item The weapon to be added to the adventurer's equipment.
-    fn add_weapon(ref self: Adventurer, item: LootStatistics) {
+    fn add_weapon(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Weapon(()), 'Item is not weapon');
         self.weapon = item;
     }
     // @notice Equips the adventurer with a chest armor. 
     // @dev The function asserts that the given item is a chest armor before adding it to the adventurer's chest slot.
     // @param item The chest armor to be added to the adventurer's equipment.
-    fn add_chest(ref self: Adventurer, item: LootStatistics) {
+    fn add_chest(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Chest(()), 'Item is not chest armor');
         self.chest = item;
     }
     // @notice Equips the adventurer with a head armor. 
     // @dev The function asserts that the given item is a head armor before adding it to the adventurer's head slot.
     // @param item The head armor to be added to the adventurer's equipment.
-    fn add_head(ref self: Adventurer, item: LootStatistics) {
+    fn add_head(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Head(()), 'Item is not head armor');
         self.head = item;
     }
     // @notice Equips the adventurer with a waist armor. 
     // @dev The function asserts that the given item is a waist armor before adding it to the adventurer's waist slot.
     // @param item The waist armor to be added to the adventurer's equipment.
-    fn add_waist(ref self: Adventurer, item: LootStatistics) {
+    fn add_waist(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Waist(()), 'Item is not waist armor');
         self.waist = item;
     }
     // @notice Equips the adventurer with a foot armor. 
     // @dev The function asserts that the given item is a foot armor before adding it to the adventurer's foot slot.
     // @param item The foot armor to be added to the adventurer's equipment.
-    fn add_foot(ref self: Adventurer, item: LootStatistics) {
+    fn add_foot(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Foot(()), 'Item is not foot armor');
         self.foot = item;
     }
     // @notice Equips the adventurer with a hand armor. 
     // @dev The function asserts that the given item is a hand armor before adding it to the adventurer's hand slot.
     // @param item The hand armor to be added to the adventurer's equipment.
-    fn add_hand(ref self: Adventurer, item: LootStatistics) {
+    fn add_hand(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Hand(()), 'Item is not hand armor');
         self.hand = item;
     }
     // @notice Equips the adventurer with a necklace. 
     // @dev The function asserts that the given item is a necklace before adding it to the adventurer's neck slot.
     // @param item The necklace to be added to the adventurer's equipment.
-    fn add_neck(ref self: Adventurer, item: LootStatistics) {
+    fn add_neck(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Neck(()), 'Item is not necklace');
         self.neck = item;
     }
     // @notice Equips the adventurer with a ring. 
     // @dev The function asserts that the given item is a ring before adding it to the adventurer's ring slot.
     // @param item The ring to be added to the adventurer's equipment.
-    fn add_ring(ref self: Adventurer, item: LootStatistics) {
+    fn add_ring(ref self: Adventurer, item: DynamicItem) {
         assert(ImplLoot::get_slot(item.id) == Slot::Ring(()), 'Item is not a ring');
         self.ring = item;
     }
@@ -666,7 +665,7 @@ impl ImplAdventurer of IAdventurer {
     // @notice This function is used to increase the experience points of a particular item.
     // @dev This function calls the grant_xp_and_check_for_greatness_increase function to execute its logic.
     //
-    // @param self A reference to the LootStatistics object which represents the item.
+    // @param self A reference to the DynamicItem object which represents the item.
     // @param amount The amount of experience points to be added to the item.
     // @param name_storage A reference to the LootItemSpecialNamesStorage object.
     // @param entropy A number used for randomization.
@@ -675,7 +674,7 @@ impl ImplAdventurer of IAdventurer {
     //         boolean indicating if a suffix was assigned, boolean indicating if a prefix was assigned,
     //         and a LootItemSpecialNames object storing the special names for the item.
     fn increase_item_xp(
-        ref self: LootStatistics,
+        ref self: DynamicItem,
         amount: u16,
         ref name_storage: LootItemSpecialNamesStorage,
         entropy: u128
@@ -687,7 +686,7 @@ impl ImplAdventurer of IAdventurer {
     // @notice This function increases the experience points of an item and checks for possible level ups, assigning prefixes and suffixes as necessary.
     // @dev The function should only be used internally within the smart contract.
     //
-    // @param self A reference to the LootStatistics object which represents the item.
+    // @param self A reference to the DynamicItem object which represents the item.
     // @param value The amount of experience points to be added to the item.
     // @param name_storage A reference to the LootItemSpecialNamesStorage object.
     // @param entropy A number used for randomization.
@@ -696,13 +695,13 @@ impl ImplAdventurer of IAdventurer {
     //         boolean indicating if a suffix was assigned, boolean indicating if a prefix was assigned,
     //         and a LootItemSpecialNames object storing the special names for the item.
     fn grant_xp_and_check_for_greatness_increase(
-        ref self: LootStatistics,
+        ref self: DynamicItem,
         value: u16,
         ref name_storage: LootItemSpecialNamesStorage,
         entropy: u128
     ) -> (u8, u8, bool, bool, LootItemSpecialNames) {
         // get the previous level of the item
-        let original_level = ImplLoot::get_greatness_level(self.xp);
+        let original_level = self.get_greatness();
 
         if (u16_overflowing_add(self.xp, value).is_ok()) {
             self.xp += value;
@@ -711,7 +710,7 @@ impl ImplAdventurer of IAdventurer {
         }
 
         // get the new level of the item
-        let new_level = ImplLoot::get_greatness_level(self.xp);
+        let new_level = self.get_greatness();
 
         // initialize return bools to false
         let mut prefix_assigned = false;
@@ -803,21 +802,21 @@ impl ImplAdventurer of IAdventurer {
         return Adventurer {
             last_action: current_block_modulo_512, health: STARTING_HEALTH, xp: 0, stats: Stats {
                 strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0
-                }, gold: STARTING_GOLD, weapon: LootStatistics {
+                }, gold: STARTING_GOLD, weapon: DynamicItem {
                 id: starting_item, xp: 0, metadata: 1, 
-                }, chest: LootStatistics {
+                }, chest: DynamicItem {
                 id: 0, xp: 0, metadata: 0, 
-                }, head: LootStatistics {
+                }, head: DynamicItem {
                 id: 0, xp: 0, metadata: 0, 
-                }, waist: LootStatistics {
+                }, waist: DynamicItem {
                 id: 0, xp: 0, metadata: 0, 
-                }, foot: LootStatistics {
+                }, foot: DynamicItem {
                 id: 0, xp: 0, metadata: 0, 
-                }, hand: LootStatistics {
+                }, hand: DynamicItem {
                 id: 0, xp: 0, metadata: 0, 
-                }, neck: LootStatistics {
+                }, neck: DynamicItem {
                 id: 0, xp: 0, metadata: 0, 
-                }, ring: LootStatistics {
+                }, ring: DynamicItem {
                 id: 0, xp: 0, metadata: 0, 
             }, beast_health: BeastSettings::STARTER_BEAST_HEALTH, stat_points_available: 0,
         };
@@ -979,7 +978,7 @@ impl ImplAdventurer of IAdventurer {
         name_storage1: LootItemSpecialNamesStorage,
         name_storage2: LootItemSpecialNamesStorage
     ) -> Adventurer {
-        if (ImplLoot::get_greatness_level(self.weapon.xp) >= 15) {
+        if (self.weapon.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.weapon.metadata) == 0) {
                 let weapon_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.weapon
@@ -992,7 +991,7 @@ impl ImplAdventurer of IAdventurer {
                 self.add_suffix_boost(weapon_names.item_suffix, );
             }
         }
-        if (ImplLoot::get_greatness_level(self.chest.xp) >= 15) {
+        if (self.chest.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.chest.metadata) == 0) {
                 let chest_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.chest
@@ -1005,7 +1004,7 @@ impl ImplAdventurer of IAdventurer {
                 self.add_suffix_boost(chest_names.item_suffix, );
             }
         }
-        if (ImplLoot::get_greatness_level(self.head.xp) >= 15) {
+        if (self.head.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.head.metadata) == 0) {
                 let head_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.head
@@ -1018,7 +1017,7 @@ impl ImplAdventurer of IAdventurer {
                 self.add_suffix_boost(head_names.item_suffix, );
             }
         }
-        if (ImplLoot::get_greatness_level(self.waist.xp) >= 15) {
+        if (self.waist.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.waist.metadata) == 0) {
                 let waist_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.waist
@@ -1032,7 +1031,7 @@ impl ImplAdventurer of IAdventurer {
             }
         }
 
-        if (ImplLoot::get_greatness_level(self.foot.xp) >= 15) {
+        if (self.foot.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.foot.metadata) == 0) {
                 let foot_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.foot
@@ -1046,7 +1045,7 @@ impl ImplAdventurer of IAdventurer {
             }
         }
 
-        if (ImplLoot::get_greatness_level(self.hand.xp) >= 15) {
+        if (self.hand.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.hand.metadata) == 0) {
                 let hand_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.hand
@@ -1060,7 +1059,7 @@ impl ImplAdventurer of IAdventurer {
             }
         }
 
-        if (ImplLoot::get_greatness_level(self.neck.xp) >= 15) {
+        if (self.neck.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.neck.metadata) == 0) {
                 let neck_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.neck
@@ -1074,7 +1073,7 @@ impl ImplAdventurer of IAdventurer {
             }
         }
 
-        if (ImplLoot::get_greatness_level(self.ring.xp) >= 15) {
+        if (self.ring.get_greatness() >= 15) {
             // we need to get the suffix which is in one of the two meta data storages
             if (ImplAdventurer::get_storage_index(self.ring.metadata) == 0) {
                 // it's in storage slot 1
@@ -1099,7 +1098,7 @@ impl ImplAdventurer of IAdventurer {
         name_storage1: LootItemSpecialNamesStorage,
         name_storage2: LootItemSpecialNamesStorage
     ) {
-        if (ImplLoot::get_greatness_level(self.weapon.xp) >= 15) {
+        if (self.weapon.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.weapon.metadata) == 0) {
                 let weapon_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.weapon
@@ -1112,7 +1111,7 @@ impl ImplAdventurer of IAdventurer {
                 self.stats.remove_suffix_boost(weapon_names.item_suffix, );
             }
         }
-        if (ImplLoot::get_greatness_level(self.chest.xp) >= 15) {
+        if (self.chest.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.chest.metadata) == 0) {
                 let chest_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.chest
@@ -1125,7 +1124,7 @@ impl ImplAdventurer of IAdventurer {
                 self.stats.remove_suffix_boost(chest_names.item_suffix, );
             }
         }
-        if (ImplLoot::get_greatness_level(self.head.xp) >= 15) {
+        if (self.head.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.head.metadata) == 0) {
                 let head_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.head
@@ -1138,7 +1137,7 @@ impl ImplAdventurer of IAdventurer {
                 self.stats.remove_suffix_boost(head_names.item_suffix, );
             }
         }
-        if (ImplLoot::get_greatness_level(self.waist.xp) >= 15) {
+        if (self.waist.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.waist.metadata) == 0) {
                 let waist_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.waist
@@ -1152,7 +1151,7 @@ impl ImplAdventurer of IAdventurer {
             }
         }
 
-        if (ImplLoot::get_greatness_level(self.foot.xp) >= 15) {
+        if (self.foot.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.foot.metadata) == 0) {
                 let foot_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.foot
@@ -1166,7 +1165,7 @@ impl ImplAdventurer of IAdventurer {
             }
         }
 
-        if (ImplLoot::get_greatness_level(self.hand.xp) >= 15) {
+        if (self.hand.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.hand.metadata) == 0) {
                 let hand_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.hand
@@ -1180,7 +1179,7 @@ impl ImplAdventurer of IAdventurer {
             }
         }
 
-        if (ImplLoot::get_greatness_level(self.neck.xp) >= 15) {
+        if (self.neck.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.neck.metadata) == 0) {
                 let neck_names = ImplLootItemSpecialNames::get_loot_special_names(
                     name_storage1, self.neck
@@ -1194,7 +1193,7 @@ impl ImplAdventurer of IAdventurer {
             }
         }
 
-        if (ImplLoot::get_greatness_level(self.ring.xp) >= 15) {
+        if (self.ring.get_greatness() >= 15) {
             // we need to get the suffix which is in one of the two meta data storages
             if (ImplAdventurer::get_storage_index(self.ring.metadata) == 0) {
                 // it's in storage slot 1
@@ -1246,21 +1245,21 @@ fn test_get_idle_blocks() {
     let mut adventurer = Adventurer {
         last_action: 1, health: 480, xp: 8191, stats: Stats {
             strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 31, 
-            }, gold: 511, weapon: LootStatistics {
+            }, gold: 511, weapon: DynamicItem {
             id: 100, xp: 511, metadata: 1, 
-            }, chest: LootStatistics {
+            }, chest: DynamicItem {
             id: 99, xp: 511, metadata: 2, 
-            }, head: LootStatistics {
+            }, head: DynamicItem {
             id: 98, xp: 511, metadata: 3, 
-            }, waist: LootStatistics {
+            }, waist: DynamicItem {
             id: 87, xp: 511, metadata: 4, 
-            }, foot: LootStatistics {
+            }, foot: DynamicItem {
             id: 78, xp: 511, metadata: 5, 
-            }, hand: LootStatistics {
+            }, hand: DynamicItem {
             id: 34, xp: 511, metadata: 6, 
-            }, neck: LootStatistics {
+            }, neck: DynamicItem {
             id: 32, xp: 511, metadata: 7, 
-            }, ring: LootStatistics {
+            }, ring: DynamicItem {
             id: 1, xp: 511, metadata: 8, 
         }, beast_health: 480, stat_points_available: 1,
     };
@@ -1282,21 +1281,21 @@ fn test_adventurer() {
     let adventurer = Adventurer {
         last_action: 511, health: 480, xp: 8191, stats: Stats {
             strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 31, 
-            }, gold: 511, weapon: LootStatistics {
+            }, gold: 511, weapon: DynamicItem {
             id: 100, xp: 511, metadata: 1, 
-            }, chest: LootStatistics {
+            }, chest: DynamicItem {
             id: 99, xp: 511, metadata: 2, 
-            }, head: LootStatistics {
+            }, head: DynamicItem {
             id: 98, xp: 511, metadata: 3, 
-            }, waist: LootStatistics {
+            }, waist: DynamicItem {
             id: 87, xp: 511, metadata: 4, 
-            }, foot: LootStatistics {
+            }, foot: DynamicItem {
             id: 78, xp: 511, metadata: 5, 
-            }, hand: LootStatistics {
+            }, hand: DynamicItem {
             id: 34, xp: 511, metadata: 6, 
-            }, neck: LootStatistics {
+            }, neck: DynamicItem {
             id: 32, xp: 511, metadata: 7, 
-            }, ring: LootStatistics {
+            }, ring: DynamicItem {
             id: 1, xp: 511, metadata: 8, 
         }, beast_health: 480, stat_points_available: 1,
     };
@@ -1549,7 +1548,7 @@ fn test_add_charisma() {
 fn test_add_invalid_weapon() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // create demon crown item
-    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
     // try to equip it to adventurer as a weapon
     adventurer.add_weapon(item);
 // should panic with 'Item is not weapon' message
@@ -1564,7 +1563,7 @@ fn test_add_valid_weapon() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // Create Katana item
-    let item = LootStatistics { id: constants::ItemId::Katana, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::Katana, xp: 1, metadata: 0 };
 
     // Equip to adventurer as a weapon
     adventurer.add_weapon(item);
@@ -1581,7 +1580,7 @@ fn test_add_valid_weapon() {
 fn test_add_invalid_chest() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // try to equip a Demon Crown as chest item
-    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
     adventurer.add_chest(item);
 // should panic with 'Item is not chest armor' message
 // because Demon Crown is not chest armor
@@ -1594,7 +1593,7 @@ fn test_add_invalid_chest() {
 fn test_add_valid_chest() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // equip Divine Robe as chest item
-    let item = LootStatistics { id: constants::ItemId::DivineRobe, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::DivineRobe, xp: 1, metadata: 0 };
     adventurer.add_chest(item);
 
     // this should not panic
@@ -1610,7 +1609,7 @@ fn test_add_valid_chest() {
 fn test_add_invalid_head() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // try to equip a Katana as head item
-    let item = LootStatistics { id: constants::ItemId::Katana, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::Katana, xp: 1, metadata: 0 };
     adventurer.add_head(item);
 // should panic with 'Item is not head armor' message
 }
@@ -1620,7 +1619,7 @@ fn test_add_invalid_head() {
 fn test_add_valid_head() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // equip Crown as head item
-    let item = LootStatistics { id: constants::ItemId::Crown, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::Crown, xp: 1, metadata: 0 };
     adventurer.add_head(item);
     // this should not panic
     // assert item was equipped
@@ -1635,7 +1634,7 @@ fn test_add_valid_head() {
 fn test_add_invalid_waist() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // try to equip a Demon Crown as waist item
-    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
     adventurer.add_waist(item);
 // should panic with 'Item is not waist armor' message
 }
@@ -1646,7 +1645,7 @@ fn test_add_valid_waist() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // equip Wool Sash as waist item
-    let item = LootStatistics { id: constants::ItemId::WoolSash, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::WoolSash, xp: 1, metadata: 0 };
     adventurer.add_waist(item);
 
     // this should not panic
@@ -1662,7 +1661,7 @@ fn test_add_valid_waist() {
 fn test_add_invalid_foot() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // try to equip a Demon Crown as foot item
-    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
     adventurer.add_foot(item);
 // should panic with 'Item is not foot armor' message
 }
@@ -1673,7 +1672,7 @@ fn test_add_valid_foot() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // equip Silk Slippers as foot item
-    let item = LootStatistics { id: constants::ItemId::SilkSlippers, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::SilkSlippers, xp: 1, metadata: 0 };
     adventurer.add_foot(item);
 
     // this should not panic
@@ -1690,7 +1689,7 @@ fn test_add_invalid_hand() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // try to equip a Demon Crown as hand item
-    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
     adventurer.add_hand(item);
 // should panic with 'Item is not hand armor' message
 }
@@ -1701,7 +1700,7 @@ fn test_add_valid_hand() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // equip Divine Gloves as hand item
-    let item = LootStatistics { id: constants::ItemId::DivineGloves, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::DivineGloves, xp: 1, metadata: 0 };
     adventurer.add_hand(item);
 
     // this should not panic
@@ -1718,7 +1717,7 @@ fn test_add_invalid_neck() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // try to equip a Demon Crown as necklace
-    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
     adventurer.add_neck(item);
 // should panic with 'Item is not necklace' message
 }
@@ -1729,7 +1728,7 @@ fn test_add_valid_neck() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // equip Pendant as necklace
-    let item = LootStatistics { id: constants::ItemId::Pendant, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::Pendant, xp: 1, metadata: 0 };
     adventurer.add_neck(item);
 
     // this should not panic
@@ -1746,7 +1745,7 @@ fn test_add_invalid_ring() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // try to equip a Demon Crown as ring
-    let item = LootStatistics { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
     adventurer.add_ring(item);
 // should panic with 'Item is not a ring' message
 }
@@ -1755,7 +1754,7 @@ fn test_add_invalid_ring() {
 #[available_gas(50000)]
 fn test_add_valid_ring() {
     let mut adventurer = ImplAdventurer::new(1, 1);
-    let item = LootStatistics { id: constants::ItemId::PlatinumRing, xp: 1, metadata: 0 };
+    let item = DynamicItem { id: constants::ItemId::PlatinumRing, xp: 1, metadata: 0 };
     adventurer.add_ring(item);
     assert(adventurer.ring.id == constants::ItemId::PlatinumRing, 'did not equip ring');
     assert(adventurer.ring.xp == 1, 'ring xp is not 1');
@@ -1767,7 +1766,7 @@ fn test_add_valid_ring() {
 fn test_increase_item_xp() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     let entropy = 1;
-    let item_ghost_wand = LootStatistics { id: constants::ItemId::GhostWand, xp: 1, metadata: 1 };
+    let item_ghost_wand = DynamicItem { id: constants::ItemId::GhostWand, xp: 1, metadata: 1 };
     adventurer.add_item(item_ghost_wand);
 
     let blank_special_name = LootItemSpecialNames {
@@ -1791,7 +1790,7 @@ fn test_increase_item_xp() {
         item_10: blank_special_name,
     };
 
-    let original_level = ImplLoot::get_greatness_level(adventurer.weapon.xp);
+    let original_level = adventurer.weapon.get_greatness();
 
     // verify weapon starts on level 1
     assert(original_level == 1, 'weapon should start on lvl 1');
@@ -1926,14 +1925,14 @@ fn test_increase_item_xp() {
     // but technically possible so the contract needs to be able to handle it
 
     // to test this lets create a new item
-    let divine_robe = LootStatistics { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
+    let divine_robe = DynamicItem { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
     adventurer.add_item(divine_robe);
 
     // verify starting state
     assert(adventurer.chest.id == constants::ItemId::DivineRobe, 'advntr should have divine robe');
     assert(adventurer.chest.xp == 1, 'divine robe should have 1 xp');
     assert(adventurer.chest.metadata == 2, 'advntr should have divine robe');
-    let divine_robe_starting_level = ImplLoot::get_greatness_level(adventurer.chest.xp);
+    let divine_robe_starting_level = adventurer.chest.get_greatness();
     assert(divine_robe_starting_level == 1, 'divine robe should be level 1');
 
     // give divine robe max XP 65535
@@ -2037,21 +2036,21 @@ fn test_charisma_health_discount_overflow() {
     let mut adventurer = Adventurer {
         last_action: 511, health: 1023, xp: 0, stats: Stats {
             strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 100, 
-            }, gold: 1, weapon: LootStatistics {
+            }, gold: 1, weapon: DynamicItem {
             id: 100, xp: 511, metadata: 1, 
-            }, chest: LootStatistics {
+            }, chest: DynamicItem {
             id: 99, xp: 511, metadata: 2, 
-            }, head: LootStatistics {
+            }, head: DynamicItem {
             id: 98, xp: 511, metadata: 3, 
-            }, waist: LootStatistics {
+            }, waist: DynamicItem {
             id: 87, xp: 511, metadata: 4, 
-            }, foot: LootStatistics {
+            }, foot: DynamicItem {
             id: 78, xp: 511, metadata: 5, 
-            }, hand: LootStatistics {
+            }, hand: DynamicItem {
             id: 34, xp: 511, metadata: 6, 
-            }, neck: LootStatistics {
+            }, neck: DynamicItem {
             id: 32, xp: 511, metadata: 7, 
-            }, ring: LootStatistics {
+            }, ring: DynamicItem {
             id: 1, xp: 511, metadata: 8, 
         }, beast_health: 1023, stat_points_available: 1,
     };
@@ -2074,21 +2073,21 @@ fn test_charisma_item_discount_overflow() {
     let mut adventurer = Adventurer {
         last_action: 511, health: 1023, xp: 100, stats: Stats {
             strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 10, 
-            }, gold: 40, weapon: LootStatistics {
+            }, gold: 40, weapon: DynamicItem {
             id: 100, xp: 511, metadata: 1, 
-            }, chest: LootStatistics {
+            }, chest: DynamicItem {
             id: 99, xp: 511, metadata: 2, 
-            }, head: LootStatistics {
+            }, head: DynamicItem {
             id: 98, xp: 511, metadata: 3, 
-            }, waist: LootStatistics {
+            }, waist: DynamicItem {
             id: 87, xp: 511, metadata: 4, 
-            }, foot: LootStatistics {
+            }, foot: DynamicItem {
             id: 78, xp: 511, metadata: 5, 
-            }, hand: LootStatistics {
+            }, hand: DynamicItem {
             id: 34, xp: 511, metadata: 6, 
-            }, neck: LootStatistics {
+            }, neck: DynamicItem {
             id: 32, xp: 511, metadata: 7, 
-            }, ring: LootStatistics {
+            }, ring: DynamicItem {
             id: 1, xp: 511, metadata: 8, 
         }, beast_health: 1023, stat_points_available: 1,
     };
@@ -2113,21 +2112,21 @@ fn test_increase_xp() {
     let mut adventurer = Adventurer {
         last_action: 511, health: 1023, xp: 1, stats: Stats {
             strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 10, 
-            }, gold: 40, weapon: LootStatistics {
+            }, gold: 40, weapon: DynamicItem {
             id: 100, xp: 511, metadata: 1, 
-            }, chest: LootStatistics {
+            }, chest: DynamicItem {
             id: 99, xp: 511, metadata: 2, 
-            }, head: LootStatistics {
+            }, head: DynamicItem {
             id: 98, xp: 511, metadata: 3, 
-            }, waist: LootStatistics {
+            }, waist: DynamicItem {
             id: 87, xp: 511, metadata: 4, 
-            }, foot: LootStatistics {
+            }, foot: DynamicItem {
             id: 78, xp: 511, metadata: 5, 
-            }, hand: LootStatistics {
+            }, hand: DynamicItem {
             id: 34, xp: 511, metadata: 6, 
-            }, neck: LootStatistics {
+            }, neck: DynamicItem {
             id: 32, xp: 511, metadata: 7, 
-            }, ring: LootStatistics {
+            }, ring: DynamicItem {
             id: 1, xp: 511, metadata: 8, 
         }, beast_health: 1023, stat_points_available: 0,
     };
@@ -2148,21 +2147,21 @@ fn test_add_suffix_boost() {
     let mut adventurer = Adventurer {
         last_action: 511, health: 100, xp: 1, stats: Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, 
-            }, gold: 40, weapon: LootStatistics {
+            }, gold: 40, weapon: DynamicItem {
             id: 1, xp: 225, metadata: 1, 
-            }, chest: LootStatistics {
+            }, chest: DynamicItem {
             id: 2, xp: 65535, metadata: 2, 
-            }, head: LootStatistics {
+            }, head: DynamicItem {
             id: 3, xp: 225, metadata: 3, 
-            }, waist: LootStatistics {
+            }, waist: DynamicItem {
             id: 4, xp: 225, metadata: 4, 
-            }, foot: LootStatistics {
+            }, foot: DynamicItem {
             id: 5, xp: 1000, metadata: 5, 
-            }, hand: LootStatistics {
+            }, hand: DynamicItem {
             id: 6, xp: 224, metadata: 6, 
-            }, neck: LootStatistics {
+            }, neck: DynamicItem {
             id: 7, xp: 1, metadata: 7, 
-            }, ring: LootStatistics {
+            }, ring: DynamicItem {
             id: 8, xp: 1, metadata: 8, 
         }, beast_health: 20, stat_points_available: 0,
     };
@@ -2214,21 +2213,21 @@ fn test_apply_item_stat_boosts() {
     let mut adventurer = Adventurer {
         last_action: 511, health: 100, xp: 1, stats: Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, 
-            }, gold: 40, weapon: LootStatistics {
+            }, gold: 40, weapon: DynamicItem {
             id: 1, xp: 225, metadata: 1, 
-            }, chest: LootStatistics {
+            }, chest: DynamicItem {
             id: 2, xp: 65535, metadata: 2, 
-            }, head: LootStatistics {
+            }, head: DynamicItem {
             id: 3, xp: 225, metadata: 3, 
-            }, waist: LootStatistics {
+            }, waist: DynamicItem {
             id: 4, xp: 225, metadata: 4, 
-            }, foot: LootStatistics {
+            }, foot: DynamicItem {
             id: 5, xp: 1000, metadata: 5, 
-            }, hand: LootStatistics {
+            }, hand: DynamicItem {
             id: 6, xp: 224, metadata: 6, 
-            }, neck: LootStatistics {
+            }, neck: DynamicItem {
             id: 7, xp: 1, metadata: 7, 
-            }, ring: LootStatistics {
+            }, ring: DynamicItem {
             id: 8, xp: 1, metadata: 8, 
         }, beast_health: 20, stat_points_available: 0,
     };
@@ -2304,21 +2303,21 @@ fn test_get_market_entropy() {
     let mut adventurer = Adventurer {
         last_action: 511, health: 12, xp: 231, stats: Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, 
-            }, gold: 40, weapon: LootStatistics {
+            }, gold: 40, weapon: DynamicItem {
             id: 1, xp: 225, metadata: 1, 
-            }, chest: LootStatistics {
+            }, chest: DynamicItem {
             id: 2, xp: 65535, metadata: 2, 
-            }, head: LootStatistics {
+            }, head: DynamicItem {
             id: 3, xp: 225, metadata: 3, 
-            }, waist: LootStatistics {
+            }, waist: DynamicItem {
             id: 4, xp: 225, metadata: 4, 
-            }, foot: LootStatistics {
+            }, foot: DynamicItem {
             id: 5, xp: 1000, metadata: 5, 
-            }, hand: LootStatistics {
+            }, hand: DynamicItem {
             id: 6, xp: 224, metadata: 6, 
-            }, neck: LootStatistics {
+            }, neck: DynamicItem {
             id: 7, xp: 1, metadata: 7, 
-            }, ring: LootStatistics {
+            }, ring: DynamicItem {
             id: 8, xp: 1, metadata: 8, 
         }, beast_health: 20, stat_points_available: 0,
     };

@@ -28,13 +28,13 @@ mod Game {
 
     use game::game::constants::{messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY};
     use lootitems::{
-        loot::{Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
+        loot::{ILoot, Loot, ImplLoot, DynamicItem}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
     use pack::pack::Packing;
 
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer, Stats},
-        bag::{Bag, BagActions, ImplBagActions, LootStatistics}, adventurer_meta::AdventurerMetadata,
+        bag::{Bag, BagActions, ImplBagActions}, adventurer_meta::AdventurerMetadata,
         exploration::ExploreUtils,
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
@@ -525,28 +525,28 @@ mod Game {
             _unpack_adventurer(self, adventurer_id).last_action
         }
         fn get_weapon_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
-            ImplLoot::get_greatness_level(_unpack_adventurer(self, adventurer_id).weapon.xp)
+            _unpack_adventurer(self, adventurer_id).weapon.get_greatness()
         }
         fn get_chest_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
-            ImplLoot::get_greatness_level(_unpack_adventurer(self, adventurer_id).chest.xp)
+            _unpack_adventurer(self, adventurer_id).chest.get_greatness()
         }
         fn get_head_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
-            ImplLoot::get_greatness_level(_unpack_adventurer(self, adventurer_id).head.xp)
+            _unpack_adventurer(self, adventurer_id).head.get_greatness()
         }
         fn get_waist_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
-            ImplLoot::get_greatness_level(_unpack_adventurer(self, adventurer_id).waist.xp)
+            _unpack_adventurer(self, adventurer_id).waist.get_greatness()
         }
         fn get_foot_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
-            ImplLoot::get_greatness_level(_unpack_adventurer(self, adventurer_id).foot.xp)
+            _unpack_adventurer(self, adventurer_id).foot.get_greatness()
         }
         fn get_hand_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
-            ImplLoot::get_greatness_level(_unpack_adventurer(self, adventurer_id).hand.xp)
+            _unpack_adventurer(self, adventurer_id).hand.get_greatness()
         }
         fn get_necklace_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
-            ImplLoot::get_greatness_level(_unpack_adventurer(self, adventurer_id).neck.xp)
+            _unpack_adventurer(self, adventurer_id).neck.get_greatness()
         }
         fn get_ring_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
-            ImplLoot::get_greatness_level(_unpack_adventurer(self, adventurer_id).ring.xp)
+            _unpack_adventurer(self, adventurer_id).ring.get_greatness()
         }
         fn get_base_stats(self: @ContractState, adventurer_id: u256) -> Stats {
             _unpack_adventurer(self, adventurer_id).stats
@@ -1247,7 +1247,7 @@ mod Game {
     // @param self A reference to the ContractState. This function requires mutable access to the ContractState to update the specified item's XP.
     // @param adventurer_id The unique identifier for the adventurer who owns the item.
     // @param adventurer A reference to the Adventurer object. This object represents the adventurer who owns the item.
-    // @param item A reference to the LootStatistics object. This object represents the item to which XP will be granted.
+    // @param item A reference to the DynamicItem object. This object represents the item to which XP will be granted.
     // @param amount The amount of experience points to be added to the item before applying the item XP multiplier.
     // @param name_storage1 A reference to the LootItemSpecialNamesStorage object. This object stores the special names for items that an adventurer may possess.
     // @param name_storage2 A reference to the LootItemSpecialNamesStorage object. This object stores the special names for items that an adventurer may possess.
@@ -1261,7 +1261,7 @@ mod Game {
         ref self: ContractState,
         adventurer_id: u256,
         ref adventurer: Adventurer,
-        ref item: LootStatistics,
+        ref item: DynamicItem,
         xp_increase: u16,
         ref name_storage1: LootItemSpecialNamesStorage,
         ref name_storage2: LootItemSpecialNamesStorage,
@@ -1587,7 +1587,7 @@ mod Game {
 
         // check what item type exists on adventurer
         // if some exists pluck from adventurer and add to bag
-        let mut unequipping_item = LootStatistics { id: 0, xp: 0, metadata: 0 };
+        let mut unequipping_item = DynamicItem { id: 0, xp: 0, metadata: 0 };
         if adventurer.is_slot_free(equipping_item) == false {
             let unequipping_item = adventurer
                 .get_item_at_slot(ImplLoot::get_slot(equipping_item.id));
@@ -1909,7 +1909,7 @@ mod Game {
         Packing::unpack(self._loot_special_names.read((adventurer_id, storage_index)))
     }
 
-    fn _get_special_names(self: @ContractState, adventurer_id: u256, item: LootStatistics) -> LootItemSpecialNames {
+    fn _get_special_names(self: @ContractState, adventurer_id: u256, item: DynamicItem) -> LootItemSpecialNames {
         ImplLootItemSpecialNames::get_loot_special_names(
             _loot_special_names_storage_unpacked(
                 self, adventurer_id, _get_storage_index(self, item.metadata)
@@ -2056,17 +2056,17 @@ mod Game {
     // _get_combat_spec returns the combat spec of an item
     // as part of this we get the item details from the loot description
     fn _get_combat_spec(
-        self: @ContractState, adventurer_id: u256, item: LootStatistics
+        self: @ContractState, adventurer_id: u256, item: DynamicItem
     ) -> CombatSpec {
         // get the greatness of the item
-        let item_greatness = ImplLoot::get_greatness_level(item.xp);
+        let item_greatness = item.get_greatness();
 
         // if it's less than 15, no need to fetch the special names it doesn't have them
         if (item_greatness < 15) {
             return CombatSpec {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),
-                level: U8IntoU16::into(ImplLoot::get_greatness_level(item.xp)),
+                level: U8IntoU16::into(item.get_greatness()),
                 special_powers: SpecialPowers {
                     prefix1: 0, prefix2: 0, suffix: 0
                 }
@@ -2083,7 +2083,7 @@ mod Game {
             return CombatSpec {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),
-                level: U8IntoU16::into(ImplLoot::get_greatness_level(item.xp)),
+                level: U8IntoU16::into(item.get_greatness()),
                 special_powers: SpecialPowers {
                     prefix1: item_details.name_prefix,
                     prefix2: item_details.name_suffix,
