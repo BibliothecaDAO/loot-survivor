@@ -26,16 +26,18 @@ mod Game {
     };
     use core::traits::{TryInto, Into};
 
-    use game::game::constants::{messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY};
+    use game::game::constants::{
+        messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY
+    };
     use lootitems::{
         loot::{ILoot, Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
     use pack::pack::Packing;
 
     use survivor::{
-        adventurer::{Adventurer, ImplAdventurer, IAdventurer, DynamicItem, Stats},
-        bag::{Bag, BagActions, ImplBagActions}, adventurer_meta::AdventurerMetadata,
-        exploration::ExploreUtils,
+        adventurer::{Adventurer, ImplAdventurer, IAdventurer}, adventurer_stats::Stats,
+        item_primitive::ItemPrimitive, bag::{Bag, BagActions, ImplBagActions},
+        adventurer_meta::AdventurerMetadata, exploration::ExploreUtils,
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
             adventurer_constants::{POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER}
@@ -326,8 +328,14 @@ mod Game {
             // assert market is open
             _assert_market_is_open(@self, adventurer);
 
+            let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+                .entropy
+                .into();
+
             // check item is available in market
-            _assert_item_is_available(@self, adventurer, adventurer_id, item_id);
+            _assert_item_is_available(
+                @self, adventurer, adventurer_id, adventurer_entropy, item_id
+            );
 
             // buy item
             _buy_item(ref self, adventurer_id, ref adventurer, item_id, equip);
@@ -692,7 +700,7 @@ mod Game {
             //     contract_address: lords
             // }.burn_away(caller, _to_ether(COST_TO_PLAY));
             return;
-        }        
+        }
 
         let mut week = Week {
             DAO: _to_ether(WEEK_2::DAO),
@@ -729,7 +737,7 @@ mod Game {
                 contract_address: lords
             }.transferFrom(caller, self._dao.read(), week.DAO);
         }
-        
+
         // interface
         if (week.INTERFACE > 0) {
             IERC20Dispatcher {
@@ -1249,7 +1257,7 @@ mod Game {
     // @param self A reference to the ContractState. This function requires mutable access to the ContractState to update the specified item's XP.
     // @param adventurer_id The unique identifier for the adventurer who owns the item.
     // @param adventurer A reference to the Adventurer object. This object represents the adventurer who owns the item.
-    // @param item A reference to the DynamicItem object. This object represents the item to which XP will be granted.
+    // @param item A reference to the ItemPrimitive object. This object represents the item to which XP will be granted.
     // @param amount The amount of experience points to be added to the item before applying the item XP multiplier.
     // @param name_storage1 A reference to the LootItemSpecialNamesStorage object. This object stores the special names for items that an adventurer may possess.
     // @param name_storage2 A reference to the LootItemSpecialNamesStorage object. This object stores the special names for items that an adventurer may possess.
@@ -1263,7 +1271,7 @@ mod Game {
         ref self: ContractState,
         adventurer_id: u256,
         ref adventurer: Adventurer,
-        ref item: DynamicItem,
+        ref item: ItemPrimitive,
         xp_increase: u16,
         ref name_storage1: LootItemSpecialNamesStorage,
         ref name_storage2: LootItemSpecialNamesStorage,
@@ -1388,7 +1396,7 @@ mod Game {
             // grant adventurer gold reward. We use battle fixed entropy
             // to fix this result at the start of the battle, mitigating simulate-and-wait strategies
             let gold_reward = beast.get_gold_reward(battle_fixed_entropy);
-            adventurer.increase_gold(gold_reward);
+            adventurer.add_gold(gold_reward);
 
             // emit slayed beast event
             __event__SlayedBeast(
@@ -1589,7 +1597,7 @@ mod Game {
 
         // check what item type exists on adventurer
         // if some exists pluck from adventurer and add to bag
-        let mut unequipping_item = DynamicItem { id: 0, xp: 0, metadata: 0 };
+        let mut unequipping_item = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
         if adventurer.is_slot_free(equipping_item) == false {
             let unequipping_item = adventurer
                 .get_item_at_slot(ImplLoot::get_slot(equipping_item.id));
@@ -1851,9 +1859,9 @@ mod Game {
             new_level: new_level
         );
 
-        // grant adventurer stat upgrade points
+        // add stat upgrades points to adventurer
         let stat_upgrade_points = (new_level - previous_level) * STAT_UPGRADE_POINTS_PER_LEVEL;
-        adventurer.grant_stat_upgrades(stat_upgrade_points);
+        adventurer.add_stat_upgrade_points(stat_upgrade_points);
 
         // emit new items availble with available items
         let available_items = _get_items_on_market(@self, adventurer_id);
@@ -1911,7 +1919,9 @@ mod Game {
         Packing::unpack(self._loot_special_names.read((adventurer_id, storage_index)))
     }
 
-    fn _get_special_names(self: @ContractState, adventurer_id: u256, item: DynamicItem) -> LootItemSpecialNames {
+    fn _get_special_names(
+        self: @ContractState, adventurer_id: u256, item: ItemPrimitive
+    ) -> LootItemSpecialNames {
         ImplLootItemSpecialNames::get_loot_special_names(
             _loot_special_names_storage_unpacked(
                 self, adventurer_id, _get_storage_index(self, item.metadata)
@@ -1937,11 +1947,11 @@ mod Game {
         assert(adventurer.stat_points_available > 0, messages::MARKET_CLOSED);
     }
     fn _assert_item_is_available(
-        self: @ContractState, adventurer: Adventurer, adventurer_id: u256, item_id: u8
+        self: @ContractState, adventurer: Adventurer, adventurer_id: u256, adventurer_entropy: u128, item_id: u8
     ) {
         assert(
             ImplMarket::is_item_available(
-                adventurer.get_market_entropy(adventurer_id), item_id
+                adventurer.get_market_entropy(adventurer_id, adventurer_entropy), item_id
             ) == true,
             messages::ITEM_DOES_NOT_EXIST
         );
@@ -1995,8 +2005,12 @@ mod Game {
     }
 
     fn _get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<LootWithPrice> {
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
+            .entropy
+            .into();
+
         ImplMarket::get_all_items_with_price(
-            _unpack_adventurer(self, adventurer_id).get_market_entropy(adventurer_id)
+            _unpack_adventurer(self, adventurer_id).get_market_entropy(adventurer_id, adventurer_entropy)
         )
     }
 
@@ -2058,7 +2072,7 @@ mod Game {
     // _get_combat_spec returns the combat spec of an item
     // as part of this we get the item details from the loot description
     fn _get_combat_spec(
-        self: @ContractState, adventurer_id: u256, item: DynamicItem
+        self: @ContractState, adventurer_id: u256, item: ItemPrimitive
     ) -> CombatSpec {
         // get the greatness of the item
         let item_greatness = item.get_greatness();
