@@ -2,7 +2,6 @@ use core::result::ResultTrait;
 use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub};
 use traits::{TryInto, Into};
 use option::OptionTrait;
-use debug::PrintTrait;
 use poseidon::poseidon_hash_span;
 use array::ArrayTrait;
 

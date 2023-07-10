@@ -1,5 +1,4 @@
 use core::serde::Serde;
-use debug::PrintTrait;
 use traits::{TryInto, Into};
 use option::OptionTrait;
 use integer::{U256TryIntoU32, U256TryIntoU16, U256TryIntoU8};
@@ -111,33 +110,7 @@ impl LootItemSpecialNamesStoragePacking of Packing<LootItemSpecialNamesStorage> 
     }
 }
 
-// ItemPrimitive meta only is set once and is filled up as items are found
-// There is no swapping of positions
-// When an item is found we find the next available slot and set it on the ItemPrimitive NOT in the metadata -> this saves gas
-// We only set the metadata when an item is upgraded
-trait ILootItemSpecialNames {
-    // takes ItemPrimitive and sets the metadata slot for that item
-    // 1. Find highest slot from equipped and unequipped items
-    // 2. Return ItemPrimitive with slot which is then saved on the Adventurer/Bag
-
-    // this could be somewhere else
-    // this needs to be run when an item is found/purchased
-    fn get_loot_special_names_slot(
-        adventurer: Adventurer, bag: Bag, loot_statistics: ItemPrimitive
-    ) -> ItemPrimitive;
-
-    // on contract side we check if item.metadata > 10 if it is pass in second metadata storage
-    fn set_loot_special_names(
-        ref self: LootItemSpecialNamesStorage,
-        loot_statistics: ItemPrimitive,
-        loot_special_names: LootItemSpecialNames
-    );
-
-    fn get_loot_special_names(
-        self: LootItemSpecialNamesStorage, loot_statistics: ItemPrimitive
-    ) -> LootItemSpecialNames;
-}
-
+#[generate_trait]
 impl ImplLootItemSpecialNames of ILootItemSpecialNames {
     fn get_loot_special_names(
         self: LootItemSpecialNamesStorage, loot_statistics: ItemPrimitive

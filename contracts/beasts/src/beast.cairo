@@ -5,10 +5,28 @@ use integer::{
 };
 use traits::{TryInto, Into};
 use option::OptionTrait;
-use debug::PrintTrait;
-use super::constants::{BeastId, BeastSettings};
-use combat::constants::{CombatSettings, CombatEnums::{Type, Tier, Slot}};
-use combat::combat::{ImplCombat, CombatSpec, SpecialPowers};
+use super::constants::{BeastId::
+    {
+        Warlock, Typhon, Jiangshi, Anansi, Basilisk, Gorgon, Kitsune, Lich, Chimera, Wendigo,
+        Rakshasa, Werewolf, Banshee, Draugr, Vampire, Goblin, Ghoul, Wraith, Sprite, Kappa, Fairy,
+        Leprechaun, Kelpie, Pixie, Gnome, Griffin, Manticore, Phoenix, Dragon, Minotaur, Qilin,
+        Ammit, Nue, Skinwalker, Chupacabra, Weretiger, Wyvern, Roc, Harpy, Pegasus, Hippogriff,
+        Fenrir, Jaguar, Satori, DireWolf, Bear, Wolf, Mantis, Spider, Rat, Kraken, Colossus, Balrog,
+        Leviathan, Tarrasque, Titan, Nephilim, Behemoth, Hydra, Juggernaut, Oni, Jotunn, Ettin,
+        Cyclops, Giant, NemeanLion, Berserker, Yeti, Golem, Ent, Troll, Bigfoot, Ogre, Orc,
+        Skeleton, MAX_ID
+    },
+    BeastSettings::{
+        STARTER_BEAST_HEALTH, MINIMUM_HEALTH, BEAST_SPECIAL_NAME_UNLOCK_LEVEL, MINIMUM_DAMAGE,
+        STRENGTH_BONUS, MINIMUM_XP_REWARD, GOLD_REWARD_BASE_MINIMUM, GOLD_BASE_REWARD_DIVISOR,
+        GOLD_REWARD_BONUS_DIVISOR, GOLD_REWARD_BONUS_MAX_MULTPLIER
+    }
+};
+
+use combat::{
+    constants::{CombatSettings, CombatEnums::{Type, Tier, Slot}},
+    combat::{ICombat, ImplCombat, CombatSpec, SpecialPowers}
+};
 
 #[derive(Drop, Copy, Serde)] // 24 bits
 struct Beast {
@@ -17,34 +35,7 @@ struct Beast {
     combat_spec: CombatSpec, // Combat Spec
 }
 
-trait IBeast {
-    fn get_beast(adventurer_level: u8, special_names: SpecialPowers, seed: u128) -> Beast;
-    fn get_starter_beast(starter_weapon_type: Type) -> Beast;
-    fn attack(
-        self: Beast, weapon: CombatSpec, adventurer_luck: u8, adventurer_strength: u8, entropy: u128
-    ) -> u16;
-    fn beast_encounter(
-        adventurer_level: u8,
-        adventurer_wisdom: u8,
-        special1_size: u8,
-        special2_size: u8,
-        battle_fixed_seed: u128
-    ) -> (Beast, bool);
-    fn counter_attack(self: Beast, armor: CombatSpec, entropy: u128) -> u16;
-    fn ambush(adventurer_level: u8, adventurer_wisdom: u8, battle_fixed_entropy: u128) -> bool;
-    fn attempt_flee(adventurer_level: u8, adventurer_dexterity: u8, entropy: u128) -> bool;
-    fn get_level(adventurer_level: u8, seed: u128) -> u8;
-    fn get_starting_health(adventurer_level: u8, entropy: u128) -> u16;
-    fn get_special_names(
-        adventurer_level: u8, seed: u128, prefix1_size: u128, prefix2_size: u128
-    ) -> SpecialPowers;
-    fn get_beast_id(seed: u128) -> u8;
-    fn get_xp_reward(self: Beast) -> u16;
-    fn get_gold_reward(self: Beast, entropy: u128) -> u16;
-    fn get_tier(id: u8) -> Tier;
-    fn get_type(id: u8) -> Type;
-}
-
+#[generate_trait]
 impl ImplBeast of IBeast {
     fn get_beast(adventurer_level: u8, special_names: SpecialPowers, seed: u128) -> Beast {
         let beast_id = ImplBeast::get_beast_id(seed);
@@ -66,25 +57,23 @@ impl ImplBeast of IBeast {
     // @param starter_weapon_type: the type of weapon the adventurer starts with
     // @return: a beast that is weak against the weapon type
     fn get_starter_beast(starter_weapon_type: Type) -> Beast {
-        let mut beast_id: u8 = BeastId::Gnome;
+        let mut beast_id: u8 = Gnome;
 
         match starter_weapon_type {
             // if adventurer starts with a magical weapon, they face a troll as their first beast
-            Type::Magic_or_Cloth(()) => beast_id = BeastId::Troll,
+            Type::Magic_or_Cloth(()) => beast_id = Troll,
             // if the adventurer starts with a blade or hide weapon, they face a rat as their first beast
-            Type::Blade_or_Hide(()) => beast_id = BeastId::Gnome,
+            Type::Blade_or_Hide(()) => beast_id = Gnome,
             // if the adventurer starts with a bludgeon or metal weapon, they face a troll as their first beast
-            Type::Bludgeon_or_Metal(()) => beast_id = BeastId::Rat,
+            Type::Bludgeon_or_Metal(()) => beast_id = Rat,
             // starter weapon should never be a necklace or ring
             // but cairo needs us to define all cases so just default to troll
-            Type::Necklace(()) => beast_id = BeastId::Troll,
-            Type::Ring(()) => beast_id = BeastId::Troll,
+            Type::Necklace(()) => beast_id = Troll,
+            Type::Ring(()) => beast_id = Troll,
         }
 
         return Beast {
-            id: beast_id,
-            starting_health: BeastSettings::STARTER_BEAST_HEALTH,
-            combat_spec: CombatSpec {
+            id: beast_id, starting_health: STARTER_BEAST_HEALTH, combat_spec: CombatSpec {
                 tier: ImplBeast::get_tier(beast_id),
                 item_type: ImplBeast::get_type(beast_id),
                 level: 1,
@@ -133,7 +122,7 @@ impl ImplBeast of IBeast {
         // The value of this is an adventurer can battle
         // the same beast across multiple contract calls
         // without having to pay for gas to store the beast
-        let beast_id = (seed % BeastId::MAX_ID) + 1;
+        let beast_id = (seed % MAX_ID) + 1;
 
         // return beast id as a u8
         return U128TryIntoU8::try_into(beast_id).unwrap();
@@ -145,7 +134,7 @@ impl ImplBeast of IBeast {
         // which control when and how quickly beasts health increases
         ImplCombat::get_enemy_starting_health(
             adventurer_level,
-            BeastSettings::MINIMUM_HEALTH,
+            MINIMUM_HEALTH,
             entropy,
             CombatSettings::DIFFICULTY_CLIFF::NORMAL,
             CombatSettings::HEALTH_MULTIPLIER::NORMAL
@@ -156,7 +145,7 @@ impl ImplBeast of IBeast {
         adventurer_level: u8, seed: u128, prefix1_size: u128, prefix2_size: u128
     ) -> SpecialPowers {
         // if adventurer is below level 10, beasts don't get any special powers
-        if (adventurer_level < BeastSettings::BEAST_SPECIAL_NAME_UNLOCK_LEVEL) {
+        if (adventurer_level < BEAST_SPECIAL_NAME_UNLOCK_LEVEL) {
             SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 }
         } else {
             let beast_prefix1 = U128TryIntoU8::try_into(seed % prefix1_size).unwrap();
@@ -196,7 +185,7 @@ impl ImplBeast of IBeast {
         return ImplCombat::calculate_damage(
             weapon,
             self.combat_spec,
-            BeastSettings::MINIMUM_DAMAGE,
+            MINIMUM_DAMAGE,
             U8IntoU16::into(adventurer_strength),
             is_critical_hit,
             entropy
@@ -214,12 +203,7 @@ impl ImplBeast of IBeast {
 
         // delegate damage calculation to combat system
         return ImplCombat::calculate_damage(
-            self.combat_spec,
-            armor,
-            BeastSettings::MINIMUM_DAMAGE,
-            BeastSettings::STRENGTH_BONUS,
-            is_critical_hit,
-            entropy
+            self.combat_spec, armor, MINIMUM_DAMAGE, STRENGTH_BONUS, is_critical_hit, entropy
         );
     }
 
@@ -253,9 +237,9 @@ impl ImplBeast of IBeast {
     // @param beast: the beast being defeated
     // @return: the xp reward for defeating the beast
     fn get_xp_reward(self: Beast) -> u16 {
-        let xp_reward = ImplCombat::get_xp_reward(self.combat_spec);
-        if (xp_reward < BeastSettings::XP_REWARD_MINIMUM) {
-            return BeastSettings::XP_REWARD_MINIMUM;
+        let xp_reward = self.combat_spec.get_xp_reward();
+        if (xp_reward < MINIMUM_XP_REWARD) {
+            return MINIMUM_XP_REWARD;
         } else {
             return xp_reward;
         }
@@ -263,19 +247,18 @@ impl ImplBeast of IBeast {
 
     fn get_gold_reward(self: Beast, entropy: u128) -> u16 {
         // base for the gold reward is XP which uses beast tier and level
-        let mut base_reward = ImplCombat::get_xp_reward(self.combat_spec)
-            / BeastSettings::GOLD_REWARD_DIVISOR;
-        if (base_reward < BeastSettings::GOLD_REWARD_BASE_MINIMUM) {
-            base_reward = BeastSettings::GOLD_REWARD_BASE_MINIMUM;
+        let mut base_reward = self.combat_spec.get_xp_reward() / GOLD_BASE_REWARD_DIVISOR;
+        if (base_reward < GOLD_REWARD_BASE_MINIMUM) {
+            base_reward = GOLD_REWARD_BASE_MINIMUM;
         }
 
         // gold bonus will be based on 10% increments
-        let bonus_base = base_reward / BeastSettings::GOLD_REWARD_BONUS_DIVISOR;
+        let bonus_base = base_reward / GOLD_REWARD_BONUS_DIVISOR;
 
         // multiplier will be 0-10 inclusive, providing
         // a maximum gold bonus of 100%
         let bonus_multiplier = U128TryIntoU16::try_into(
-            entropy % (1 + BeastSettings::GOLD_REWARD_BONUS_MAX_MULTPLIER)
+            entropy % (1 + GOLD_REWARD_BONUS_MAX_MULTPLIER)
         )
             .unwrap();
 
@@ -284,83 +267,83 @@ impl ImplBeast of IBeast {
     }
 
     fn get_type(id: u8) -> Type {
-        if id == BeastId::Warlock
-            || id == BeastId::Typhon
-            || id == BeastId::Jiangshi
-            || id == BeastId::Anansi
-            || id == BeastId::Basilisk
-            || id == BeastId::Gorgon
-            || id == BeastId::Kitsune
-            || id == BeastId::Lich
-            || id == BeastId::Chimera
-            || id == BeastId::Wendigo
-            || id == BeastId::Rakshasa
-            || id == BeastId::Werewolf
-            || id == BeastId::Banshee
-            || id == BeastId::Draugr
-            || id == BeastId::Vampire
-            || id == BeastId::Goblin
-            || id == BeastId::Ghoul
-            || id == BeastId::Wraith
-            || id == BeastId::Sprite
-            || id == BeastId::Kappa
-            || id == BeastId::Fairy
-            || id == BeastId::Leprechaun
-            || id == BeastId::Kelpie
-            || id == BeastId::Pixie
-            || id == BeastId::Gnome {
+        if id == Warlock
+            || id == Typhon
+            || id == Jiangshi
+            || id == Anansi
+            || id == Basilisk
+            || id == Gorgon
+            || id == Kitsune
+            || id == Lich
+            || id == Chimera
+            || id == Wendigo
+            || id == Rakshasa
+            || id == Werewolf
+            || id == Banshee
+            || id == Draugr
+            || id == Vampire
+            || id == Goblin
+            || id == Ghoul
+            || id == Wraith
+            || id == Sprite
+            || id == Kappa
+            || id == Fairy
+            || id == Leprechaun
+            || id == Kelpie
+            || id == Pixie
+            || id == Gnome {
             return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Griffin
-            || id == BeastId::Manticore
-            || id == BeastId::Phoenix
-            || id == BeastId::Dragon
-            || id == BeastId::Minotaur
-            || id == BeastId::Qilin
-            || id == BeastId::Ammit
-            || id == BeastId::Nue
-            || id == BeastId::Skinwalker
-            || id == BeastId::Chupacabra
-            || id == BeastId::Weretiger
-            || id == BeastId::Wyvern
-            || id == BeastId::Roc
-            || id == BeastId::Harpy
-            || id == BeastId::Pegasus
-            || id == BeastId::Hippogriff
-            || id == BeastId::Fenrir
-            || id == BeastId::Jaguar
-            || id == BeastId::Satori
-            || id == BeastId::DireWolf
-            || id == BeastId::Bear
-            || id == BeastId::Wolf
-            || id == BeastId::Mantis
-            || id == BeastId::Spider
-            || id == BeastId::Rat {
+        } else if id == Griffin
+            || id == Manticore
+            || id == Phoenix
+            || id == Dragon
+            || id == Minotaur
+            || id == Qilin
+            || id == Ammit
+            || id == Nue
+            || id == Skinwalker
+            || id == Chupacabra
+            || id == Weretiger
+            || id == Wyvern
+            || id == Roc
+            || id == Harpy
+            || id == Pegasus
+            || id == Hippogriff
+            || id == Fenrir
+            || id == Jaguar
+            || id == Satori
+            || id == DireWolf
+            || id == Bear
+            || id == Wolf
+            || id == Mantis
+            || id == Spider
+            || id == Rat {
             return Type::Blade_or_Hide(());
-        } else if id == BeastId::Kraken
-            || id == BeastId::Colossus
-            || id == BeastId::Balrog
-            || id == BeastId::Leviathan
-            || id == BeastId::Tarrasque
-            || id == BeastId::Titan
-            || id == BeastId::Nephilim
-            || id == BeastId::Behemoth
-            || id == BeastId::Hydra
-            || id == BeastId::Juggernaut
-            || id == BeastId::Oni
-            || id == BeastId::Jotunn
-            || id == BeastId::Ettin
-            || id == BeastId::Cyclops
-            || id == BeastId::Giant
-            || id == BeastId::NemeanLion
-            || id == BeastId::Berserker
-            || id == BeastId::Yeti
-            || id == BeastId::Golem
-            || id == BeastId::Ent
-            || id == BeastId::Troll
-            || id == BeastId::Bigfoot
-            || id == BeastId::Ogre
-            || id == BeastId::Orc
-            || id == BeastId::Skeleton {
+        } else if id == Kraken
+            || id == Colossus
+            || id == Balrog
+            || id == Leviathan
+            || id == Tarrasque
+            || id == Titan
+            || id == Nephilim
+            || id == Behemoth
+            || id == Hydra
+            || id == Juggernaut
+            || id == Oni
+            || id == Jotunn
+            || id == Ettin
+            || id == Cyclops
+            || id == Giant
+            || id == NemeanLion
+            || id == Berserker
+            || id == Yeti
+            || id == Golem
+            || id == Ent
+            || id == Troll
+            || id == Bigfoot
+            || id == Ogre
+            || id == Orc
+            || id == Skeleton {
             return Type::Bludgeon_or_Metal(());
         }
         // unknown id gets type bludgeon/metal
@@ -368,85 +351,85 @@ impl ImplBeast of IBeast {
     }
 
     fn get_tier(id: u8) -> Tier {
-        if id == BeastId::Warlock
-            || id == BeastId::Typhon
-            || id == BeastId::Jiangshi
-            || id == BeastId::Anansi
-            || id == BeastId::Basilisk
-            || id == BeastId::Griffin
-            || id == BeastId::Manticore
-            || id == BeastId::Phoenix
-            || id == BeastId::Dragon
-            || id == BeastId::Minotaur
-            || id == BeastId::Kraken
-            || id == BeastId::Colossus
-            || id == BeastId::Balrog
-            || id == BeastId::Leviathan
-            || id == BeastId::Tarrasque {
+        if id == Warlock
+            || id == Typhon
+            || id == Jiangshi
+            || id == Anansi
+            || id == Basilisk
+            || id == Griffin
+            || id == Manticore
+            || id == Phoenix
+            || id == Dragon
+            || id == Minotaur
+            || id == Kraken
+            || id == Colossus
+            || id == Balrog
+            || id == Leviathan
+            || id == Tarrasque {
             return Tier::T1(());
-        } else if id == BeastId::Gorgon
-            || id == BeastId::Kitsune
-            || id == BeastId::Lich
-            || id == BeastId::Chimera
-            || id == BeastId::Wendigo
-            || id == BeastId::Qilin
-            || id == BeastId::Ammit
-            || id == BeastId::Nue
-            || id == BeastId::Skinwalker
-            || id == BeastId::Chupacabra
-            || id == BeastId::Titan
-            || id == BeastId::Nephilim
-            || id == BeastId::Behemoth
-            || id == BeastId::Hydra
-            || id == BeastId::Juggernaut {
+        } else if id == Gorgon
+            || id == Kitsune
+            || id == Lich
+            || id == Chimera
+            || id == Wendigo
+            || id == Qilin
+            || id == Ammit
+            || id == Nue
+            || id == Skinwalker
+            || id == Chupacabra
+            || id == Titan
+            || id == Nephilim
+            || id == Behemoth
+            || id == Hydra
+            || id == Juggernaut {
             return Tier::T2(());
-        } else if id == BeastId::Rakshasa
-            || id == BeastId::Werewolf
-            || id == BeastId::Banshee
-            || id == BeastId::Draugr
-            || id == BeastId::Vampire
-            || id == BeastId::Weretiger
-            || id == BeastId::Wyvern
-            || id == BeastId::Roc
-            || id == BeastId::Harpy
-            || id == BeastId::Pegasus
-            || id == BeastId::Oni
-            || id == BeastId::Jotunn
-            || id == BeastId::Ettin
-            || id == BeastId::Cyclops
-            || id == BeastId::Giant {
+        } else if id == Rakshasa
+            || id == Werewolf
+            || id == Banshee
+            || id == Draugr
+            || id == Vampire
+            || id == Weretiger
+            || id == Wyvern
+            || id == Roc
+            || id == Harpy
+            || id == Pegasus
+            || id == Oni
+            || id == Jotunn
+            || id == Ettin
+            || id == Cyclops
+            || id == Giant {
             return Tier::T3(());
-        } else if id == BeastId::Goblin
-            || id == BeastId::Ghoul
-            || id == BeastId::Wraith
-            || id == BeastId::Sprite
-            || id == BeastId::Kappa
-            || id == BeastId::Hippogriff
-            || id == BeastId::Fenrir
-            || id == BeastId::Jaguar
-            || id == BeastId::Satori
-            || id == BeastId::DireWolf
-            || id == BeastId::NemeanLion
-            || id == BeastId::Berserker
-            || id == BeastId::Yeti
-            || id == BeastId::Golem
-            || id == BeastId::Ent {
+        } else if id == Goblin
+            || id == Ghoul
+            || id == Wraith
+            || id == Sprite
+            || id == Kappa
+            || id == Hippogriff
+            || id == Fenrir
+            || id == Jaguar
+            || id == Satori
+            || id == DireWolf
+            || id == NemeanLion
+            || id == Berserker
+            || id == Yeti
+            || id == Golem
+            || id == Ent {
             return Tier::T4(());
-        } else if id == BeastId::Fairy
-            || id == BeastId::Leprechaun
-            || id == BeastId::Kelpie
-            || id == BeastId::Pixie
-            || id == BeastId::Gnome
-            || id == BeastId::Bear
-            || id == BeastId::Wolf
-            || id == BeastId::Mantis
-            || id == BeastId::Spider
-            || id == BeastId::Rat
-            || id == BeastId::Troll
-            || id == BeastId::Bigfoot
-            || id == BeastId::Ogre
-            || id == BeastId::Orc
-            || id == BeastId::Skeleton {
+        } else if id == Fairy
+            || id == Leprechaun
+            || id == Kelpie
+            || id == Pixie
+            || id == Gnome
+            || id == Bear
+            || id == Wolf
+            || id == Mantis
+            || id == Spider
+            || id == Rat
+            || id == Troll
+            || id == Bigfoot
+            || id == Ogre
+            || id == Orc
+            || id == Skeleton {
             return Tier::T5(());
         }
 
@@ -458,23 +441,23 @@ impl ImplBeast of IBeast {
 #[test]
 #[available_gas(300000)]
 fn test_get_tier() {
-    let warlock = BeastId::Warlock;
+    let warlock = Warlock;
     let warlock_tier = ImplBeast::get_tier(warlock);
     assert(warlock_tier == Tier::T1(()), 'Warlock should be T1');
 
-    let juggernaut = BeastId::Juggernaut;
+    let juggernaut = Juggernaut;
     let juggernaut_tier = ImplBeast::get_tier(juggernaut);
     assert(juggernaut_tier == Tier::T2(()), 'Juggernaut should be T2');
 
-    let pegasus = BeastId::Pegasus;
+    let pegasus = Pegasus;
     let pegasus_tier = ImplBeast::get_tier(pegasus);
     assert(pegasus_tier == Tier::T3(()), 'Pegasus should be T3');
 
-    let goblin = BeastId::Goblin;
+    let goblin = Goblin;
     let goblin_tier = ImplBeast::get_tier(goblin);
     assert(goblin_tier == Tier::T4(()), 'Goblin should be T4');
 
-    let bear = BeastId::Bear;
+    let bear = Bear;
     let bear_tier = ImplBeast::get_tier(bear);
     assert(bear_tier == Tier::T5(()), 'Bear should be T5');
 }
@@ -482,19 +465,19 @@ fn test_get_tier() {
 #[test]
 #[available_gas(300000)]
 fn test_get_type() {
-    let warlock_type = ImplBeast::get_type(BeastId::Warlock);
+    let warlock_type = ImplBeast::get_type(Warlock);
     assert(warlock_type == Type::Magic_or_Cloth(()), 'Warlock is magical');
 
-    let juggernaut_type = ImplBeast::get_type(BeastId::Juggernaut);
+    let juggernaut_type = ImplBeast::get_type(Juggernaut);
     assert(juggernaut_type == Type::Bludgeon_or_Metal(()), 'Juggernaut is a brute ');
 
-    let pegasus_type = ImplBeast::get_type(BeastId::Pegasus);
+    let pegasus_type = ImplBeast::get_type(Pegasus);
     assert(pegasus_type == Type::Blade_or_Hide(()), 'Pegasus is a hunter');
 
-    let goblin_type = ImplBeast::get_type(BeastId::Goblin);
+    let goblin_type = ImplBeast::get_type(Goblin);
     assert(goblin_type == Type::Magic_or_Cloth(()), 'Goblin is magical');
 
-    let bear_type = ImplBeast::get_type(BeastId::Bear);
+    let bear_type = ImplBeast::get_type(Bear);
     assert(bear_type == Type::Blade_or_Hide(()), 'Bear is a hunter');
 }
 
@@ -578,7 +561,7 @@ fn test_ambush() {
 #[available_gas(250000)]
 fn test_counter_attack() {
     // initialize warlock beast
-    let warlock = BeastId::Warlock;
+    let warlock = Warlock;
     let mut beast = Beast {
         id: warlock, starting_health: 100, combat_spec: CombatSpec {
             item_type: ImplBeast::get_type(warlock),
@@ -624,7 +607,7 @@ fn test_attack() {
     };
 
     // initialize goblin beast
-    let goblin = BeastId::Goblin;
+    let goblin = Goblin;
     let beast = Beast {
         id: goblin, starting_health: 100, combat_spec: CombatSpec {
             item_type: ImplBeast::get_type(goblin),
@@ -731,26 +714,17 @@ fn test_get_beast_id() {
     let zero_check = 0;
     let beast_id = ImplBeast::get_beast_id(zero_check);
     assert(beast_id != 0, 'beast should not be zero');
-    assert(
-        beast_id <= U128TryIntoU8::try_into(BeastId::MAX_ID).unwrap(),
-        'beast higher than max beastid'
-    );
+    assert(beast_id <= U128TryIntoU8::try_into(MAX_ID).unwrap(), 'beast higher than max beastid');
 
-    let max_beast_id = BeastId::MAX_ID;
+    let max_beast_id = MAX_ID;
     let beast_id = ImplBeast::get_beast_id(max_beast_id);
     assert(beast_id != 0, 'beast should not be zero');
-    assert(
-        beast_id <= U128TryIntoU8::try_into(BeastId::MAX_ID).unwrap(),
-        'beast higher than max beastid'
-    );
+    assert(beast_id <= U128TryIntoU8::try_into(MAX_ID).unwrap(), 'beast higher than max beastid');
 
-    let above_max_beast_id = BeastId::MAX_ID + 1;
+    let above_max_beast_id = MAX_ID + 1;
     let beast_id = ImplBeast::get_beast_id(max_beast_id);
     assert(beast_id != 0, 'beast should not be zero');
-    assert(
-        beast_id <= U128TryIntoU8::try_into(BeastId::MAX_ID).unwrap(),
-        'beast higher than max beastid'
-    );
+    assert(beast_id <= U128TryIntoU8::try_into(MAX_ID).unwrap(), 'beast higher than max beastid');
 }
 
 #[test]
@@ -772,7 +746,7 @@ fn test_get_beast() {
     assert(original_beast.id == new_beast.id, 'seed produced two diff beastIds');
 }
 #[test]
-#[available_gas(200000)]
+#[available_gas(250000)]
 fn test_get_gold_reward() {
     let mut beast = Beast {
         id: 1, starting_health: 100, combat_spec: CombatSpec {
@@ -786,7 +760,7 @@ fn test_get_gold_reward() {
     };
 
     // T1, LVL10 beast will produce a base reward of 50
-    // We will divide this by GOLD_REWARD_DIVISOR which is currently 2
+    // We will divide this by GOLD_BASE_REWARD_DIVISOR which is currently 2
     // to create a base reward of 25. We'll then calculate a gold bonus
     // based on GOLD_REWARD_BONUS_DIVISOR and GOLD_REWARD_BONUS_MAX_MULTPLIER
     // with the current settings, there will be 10 discrete gold bonuses
@@ -794,31 +768,31 @@ fn test_get_gold_reward() {
     // with entropy 0 we hit the 0% bonus case so reward should be 25
     let mut entropy: u128 = 0;
     let gold_reward = beast.get_gold_reward(entropy);
-    assert(gold_reward == 25, 'gold reward should be 25');
+    assert(gold_reward == 12, 'gold reward should be 12');
 
     // increasing entropy to 1 should produce ~10% bonus
     entropy = 1;
     let gold_reward = beast.get_gold_reward(entropy);
-    assert(gold_reward == 31, 'gold reward should be 31');
+    assert(gold_reward == 15, 'gold reward should be 15');
 
     // increasing entropy to 2 should produce ~20% bonus from base
     entropy = 2;
     let gold_reward = beast.get_gold_reward(entropy);
-    assert(gold_reward == 37, 'gold reward should be 37');
+    assert(gold_reward == 18, 'gold reward should be 18');
 
     // increasing entropy to 3 produces maximum bonus with current settings
     // which will be ~100% of the base
     entropy = 3;
     let gold_reward = beast.get_gold_reward(entropy);
-    assert(gold_reward == 43, 'gold reward should be 43');
+    assert(gold_reward == 21, 'gold reward should be 21');
 
     // if we double the beast level, we approximately double the reward
     beast.combat_spec.level = 20;
     let gold_reward = beast.get_gold_reward(entropy);
-    assert(gold_reward == 86, 'lvl 20 max gold reward is 86');
+    assert(gold_reward == 43, 'lvl 20 max gold reward is 43');
 
     // dropping beast from T1 to T5, significantly drops the gold reward
     beast.combat_spec.tier = Tier::T5(());
     let gold_reward = beast.get_gold_reward(entropy);
-    assert(gold_reward == 16, 'lvl20 t5 max gold reward is 16');
+    assert(gold_reward == 8, 'lvl20 t5 max gold reward is 8');
 }

@@ -22,7 +22,7 @@ mod BeastSettings {
     // increase it to lower gold reward. Note, unlike XP, the amount
     // of gold received after slaying a beast includes a random bonus
     // between 0%-100%
-    const GOLD_REWARD_DIVISOR: u16 = 2;
+    const GOLD_BASE_REWARD_DIVISOR: u16 = 2;
 
     // controls the size of the base gold reward bonus. The higher
     // this number, the smaller the base gold bonus will be. With the
@@ -39,7 +39,7 @@ mod BeastSettings {
     // the actual amount may be slightly higher based on bonus
     const GOLD_REWARD_BASE_MINIMUM: u16 = 4;
 
-    const XP_REWARD_MINIMUM: u16 = 4;
+    const MINIMUM_XP_REWARD: u16 = 1;
 
     const BEAST_SPECIAL_NAME_UNLOCK_LEVEL: u8 = 15;
 }

@@ -3,11 +3,15 @@ use integer::{
     U8IntoU16, U16IntoU64, U8IntoU64, U64TryIntoU16, U64TryIntoU8, U8IntoU128, U128TryIntoU8,
     U128TryIntoU16, u16_sqrt
 };
-use core::traits::{TryInto, Into};
-use core::traits::DivEq;
-use super::constants::CombatEnums::{Tier, Type, Slot, WeaponEffectiveness};
-use super::constants::CombatSettings;
-use core::debug::PrintTrait;
+use core::traits::{TryInto, Into, DivEq};
+use super::constants::{
+    CombatEnums::{Tier, Type, Slot, WeaponEffectiveness},
+    CombatSettings::{
+        XP_MULTIPLIER, DIFFICULTY_CLIFF, XP_REWARD_DIVISOR, WEAPON_TIER_DAMAGE_MULTIPLIER,
+        ARMOR_TIER_DAMAGE_MULTIPLIER, ELEMENTAL_DAMAGE_BONUS, STRONG_ELEMENTAL_BONUS_MIN,
+        MAX_CRITICAL_HIT_LUCK, LEVEL_MULTIPLIER
+    }
+};
 
 // SpecialPowers contains special names for combat items
 #[derive(Drop, Copy, Serde)]
@@ -26,65 +30,9 @@ struct CombatSpec {
     special_powers: SpecialPowers,
 }
 
-// Combat is a trait that provides functions for calculating damage during on-chain combat
-trait ICombat {
-    fn calculate_damage(
-        weapon: CombatSpec,
-        armor: CombatSpec,
-        minimum_damage: u16,
-        strength_boost: u16,
-        is_critical_hit: bool,
-        entropy: u128,
-    ) -> u16;
-
-    fn get_attack_hp(weapon: CombatSpec) -> u16;
-    fn get_armor_hp(armor: CombatSpec) -> u16;
-
-    fn get_weapon_effectiveness(weapon_type: Type, armor_type: Type) -> WeaponEffectiveness;
-    fn get_elemental_bonus(damage: u16, weapon_effectiveness: WeaponEffectiveness) -> u16;
-
-    fn is_critical_hit(luck: u8, entropy: u128) -> bool;
-    fn critical_hit_bonus(damage: u16, entropy: u128) -> u16;
-
-    fn get_name_prefix1_bonus(
-        damage: u16, weapon_prefix1: u8, armor_prefix1: u8, entropy: u128, 
-    ) -> u16;
-    fn get_name_prefix2_bonus(
-        base_damage: u16, weapon_prefix2: u8, armor_prefix2: u8, entropy: u128, 
-    ) -> u16;
-    fn get_name_damage_bonus(
-        base_damage: u16, weapon_name: SpecialPowers, armor_name: SpecialPowers, entropy: u128
-    ) -> u16;
-
-    fn get_strength_bonus(damage: u16, strength: u16) -> u16;
-    fn get_random_level(
-        adventurer_level: u8, entropy: u128, range_increase_interval: u8, level_multiplier: u8
-    ) -> u8;
-    fn get_enemy_starting_health(
-        adventurer_level: u8,
-        minimum_health: u8,
-        entropy: u128,
-        range_increase_interval: u8,
-        level_multiplier: u8
-    ) -> u16;
-    fn get_random_damage_location(entropy: u128, ) -> Slot;
-    fn get_xp_reward(defeated_entity: CombatSpec) -> u16;
-    fn get_level_from_xp(xp: u16) -> u8;
-
-    fn tier_to_u8(tier: Tier) -> u8;
-    fn u8_to_tier(item_type: u8) -> Tier;
-
-    fn type_to_u8(item_type: Type) -> u8;
-    fn u8_to_type(item_type: u8) -> Type;
-
-    fn slot_to_u8(slot: Slot) -> u8;
-    fn u8_to_slot(item_type: u8) -> Slot;
-
-    fn ability_based_avoid_threat(adventurer_level: u8, relevant_stat: u8, entropy: u128) -> bool;
-}
-
 // ImplCombat is an implementation of the Combat trait
 // It provides functions for calculating combat damage
+#[generate_trait]
 impl ImplCombat of ICombat {
     // calculate_damage calculates the damage done by an entity wielding a weapon against an entity wearing armor
     // @param weapon: the weapon used to attack
@@ -155,19 +103,19 @@ impl ImplCombat of ICombat {
     fn get_attack_hp(weapon: CombatSpec) -> u16 {
         match weapon.tier {
             Tier::T1(()) => {
-                return weapon.level * CombatSettings::WEAPON_TIER_DAMAGE_MULTIPLIER::T1;
+                return weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T1;
             },
             Tier::T2(()) => {
-                return weapon.level * CombatSettings::WEAPON_TIER_DAMAGE_MULTIPLIER::T2;
+                return weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T2;
             },
             Tier::T3(()) => {
-                return weapon.level * CombatSettings::WEAPON_TIER_DAMAGE_MULTIPLIER::T3;
+                return weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T3;
             },
             Tier::T4(()) => {
-                return weapon.level * CombatSettings::WEAPON_TIER_DAMAGE_MULTIPLIER::T4;
+                return weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T4;
             },
             Tier::T5(()) => {
-                return weapon.level * CombatSettings::WEAPON_TIER_DAMAGE_MULTIPLIER::T5;
+                return weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T5;
             }
         }
     }
@@ -178,19 +126,19 @@ impl ImplCombat of ICombat {
     fn get_armor_hp(armor: CombatSpec) -> u16 {
         match armor.tier {
             Tier::T1(()) => {
-                return armor.level * CombatSettings::ARMOR_TIER_DAMAGE_MULTIPLIER::T1;
+                return armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T1;
             },
             Tier::T2(()) => {
-                return armor.level * CombatSettings::ARMOR_TIER_DAMAGE_MULTIPLIER::T2;
+                return armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T2;
             },
             Tier::T3(()) => {
-                return armor.level * CombatSettings::ARMOR_TIER_DAMAGE_MULTIPLIER::T3;
+                return armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T3;
             },
             Tier::T4(()) => {
-                return armor.level * CombatSettings::ARMOR_TIER_DAMAGE_MULTIPLIER::T4;
+                return armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T4;
             },
             Tier::T5(()) => {
-                return armor.level * CombatSettings::ARMOR_TIER_DAMAGE_MULTIPLIER::T5;
+                return armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T5;
             }
         }
     }
@@ -202,7 +150,7 @@ impl ImplCombat of ICombat {
     fn get_elemental_bonus(damage: u16, weapon_effectiveness: WeaponEffectiveness) -> u16 {
         // CombatSettings::ELEMENTAL_DAMAGE_BONUS determines impact of elemental damage
         // default setting is 2 which results in -50%, 0%, or 50% damage bonus for elemental
-        let elemental_damage_effect = damage / CombatSettings::ELEMENTAL_DAMAGE_BONUS;
+        let elemental_damage_effect = damage / ELEMENTAL_DAMAGE_BONUS;
 
         // adjust base damage based on weapon effectiveness
         match weapon_effectiveness {
@@ -214,8 +162,8 @@ impl ImplCombat of ICombat {
             },
             WeaponEffectiveness::Strong(()) => {
                 let elemental_adjusted_damage = damage + elemental_damage_effect;
-                if (elemental_adjusted_damage < CombatSettings::STRONG_ELEMENTAL_BONUS_MIN) {
-                    return CombatSettings::STRONG_ELEMENTAL_BONUS_MIN;
+                if (elemental_adjusted_damage < STRONG_ELEMENTAL_BONUS_MIN) {
+                    return STRONG_ELEMENTAL_BONUS_MIN;
                 } else {
                     return elemental_adjusted_damage;
                 }
@@ -313,8 +261,8 @@ impl ImplCombat of ICombat {
         // maximum luck is governed by CombatSettings::MAX_CRITICAL_HIT_LUCK
         // current setting is 50. With Luck at 50, player has 50% chance of critical hit
         let mut effective_luck = luck;
-        if (luck > CombatSettings::MAX_CRITICAL_HIT_LUCK) {
-            effective_luck = CombatSettings::MAX_CRITICAL_HIT_LUCK;
+        if (luck > MAX_CRITICAL_HIT_LUCK) {
+            effective_luck = MAX_CRITICAL_HIT_LUCK;
         }
 
         // critical hit chance is whole number of luck / 10
@@ -515,22 +463,22 @@ impl ImplCombat of ICombat {
     // get_xp_reward returns the xp reward for defeating an entity
     // @param defeated_entity: the entity that was defeated
     // @return u16: the xp reward for defeating the entity
-    fn get_xp_reward(defeated_entity: CombatSpec) -> u16 {
-        match defeated_entity.tier {
+    fn get_xp_reward(self: CombatSpec) -> u16 {
+        match self.tier {
             Tier::T1(()) => {
-                return CombatSettings::XP_MULTIPLIER::T1 * defeated_entity.level;
+                (XP_MULTIPLIER::T1 * self.level) / XP_REWARD_DIVISOR
             },
             Tier::T2(()) => {
-                return CombatSettings::XP_MULTIPLIER::T2 * defeated_entity.level;
+                (XP_MULTIPLIER::T2 * self.level) / XP_REWARD_DIVISOR
             },
             Tier::T3(()) => {
-                return CombatSettings::XP_MULTIPLIER::T3 * defeated_entity.level;
+                (XP_MULTIPLIER::T3 * self.level) / XP_REWARD_DIVISOR
             },
             Tier::T4(()) => {
-                return CombatSettings::XP_MULTIPLIER::T4 * defeated_entity.level;
+                (XP_MULTIPLIER::T4 * self.level) / XP_REWARD_DIVISOR
             },
             Tier::T5(()) => {
-                return CombatSettings::XP_MULTIPLIER::T5 * defeated_entity.level;
+                (XP_MULTIPLIER::T5 * self.level) / XP_REWARD_DIVISOR
             }
         }
     }
@@ -631,7 +579,7 @@ impl ImplCombat of ICombat {
         // The difficulty cliff serves as a starting cushion for the adventurer before which
         // they can avoid all threats. Once the difficulty cliff has been passed, the adventurer
         // must invest in the proper stats to avoid threats.{Intelligence for obstalce, Wisdom for beast ambushes}
-        return (dice_roll <= (relevant_stat + CombatSettings::DIFFICULTY_CLIFF::NORMAL));
+        return (dice_roll <= (relevant_stat + DIFFICULTY_CLIFF::NORMAL));
     }
 }
 
@@ -1278,7 +1226,6 @@ fn test_calculate_damage() {
     let damage = ImplCombat::calculate_damage(
         weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
     );
-    damage.print();
     // even on level 1, it deals more damage than their starter short sword
     assert(damage == 4, 'upgrade to katana: 6HP');
 
@@ -1342,8 +1289,8 @@ fn test_calculate_damage() {
 fn test_get_random_level() {
     let mut adventurer_level = 1;
 
-    let range_level_increase = CombatSettings::DIFFICULTY_CLIFF::NORMAL;
-    let level_multiplier = CombatSettings::LEVEL_MULTIPLIER::NORMAL;
+    let range_level_increase = DIFFICULTY_CLIFF::NORMAL;
+    let level_multiplier = LEVEL_MULTIPLIER::NORMAL;
 
     // entity level and adventurer level will be equivalent up to the difficulty cliff
     let entity_level = ImplCombat::get_random_level(
@@ -1352,7 +1299,7 @@ fn test_get_random_level() {
     assert(entity_level == adventurer_level, 'lvl should eql advr lvl');
 
     // test at just before the difficult level cliff
-    adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL - 1;
+    adventurer_level = DIFFICULTY_CLIFF::NORMAL - 1;
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 0, range_level_increase, level_multiplier
     );
@@ -1366,7 +1313,7 @@ fn test_get_random_level() {
     // min_level: 1 + (5 - 3) = 3
     // the max level will be: adventurer_level + (1 + (LEVEL_MULTIPLIER * number of level increases))
     // for current settings that will be: 5 + (1 + (4*1) = 10
-    adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL + 1;
+    adventurer_level = DIFFICULTY_CLIFF::NORMAL + 1;
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 0, range_level_increase, level_multiplier
     );
@@ -1415,7 +1362,7 @@ fn test_get_random_level() {
 
     // test 6 * the difficulty cliff for mid-late game
     // difficulty cliff default is 4 so adventurer_level here would be 24
-    adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL * 6;
+    adventurer_level = DIFFICULTY_CLIFF::NORMAL * 6;
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 0, range_level_increase, level_multiplier
     );

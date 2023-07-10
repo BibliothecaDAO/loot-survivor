@@ -1,3 +1,4 @@
+use combat::combat::ICombat;
 use option::OptionTrait;
 use integer::{U8IntoU16, U128TryIntoU8};
 use super::constants::{ObstacleId, ObstacleSettings};
@@ -9,21 +10,8 @@ struct Obstacle {
     combat_specs: CombatSpec,
 }
 
-trait ObstacleTrait {
-    fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, entropy: u128) -> u16;
-    fn dodged(adventurer_level: u8, adventurer_intelligence: u8, entropy: u128) -> bool;
-    fn obstacle_encounter(
-        adventurer_level: u8, adventurer_intelligence: u8, entropy: u128
-    ) -> (Obstacle, bool);
-    fn get_obstacle(id: u8, level: u8) -> Obstacle;
-    fn get_random_level(adventurer_level: u8, entropy: u128) -> u8;
-    fn obstacle_encounter_id(entropy: u128) -> u8;
-    fn get_xp_reward(self: Obstacle) -> u16;
-    fn get_tier(id: u8) -> Tier;
-    fn get_type(id: u8) -> Type;
-}
-
-impl ImplObstacle of ObstacleTrait {
+#[generate_trait]
+impl ImplObstacle of IObstacle {
     // obstacle_encounter returns a random obstacle based on the adventurer level and entropy
     // @param adventurer_level: u8 - the adventurer level
     // @param entropy: u128 - entropy for level generation
@@ -180,7 +168,12 @@ impl ImplObstacle of ObstacleTrait {
     // @param obstacle: Obstacle - the obstacle
     // @return u16 - the xp reward
     fn get_xp_reward(self: Obstacle) -> u16 {
-        ImplCombat::get_xp_reward(self.combat_specs)
+        let xp_reward = self.combat_specs.get_xp_reward();
+        if (xp_reward < ObstacleSettings::MINIMUM_XP_REWARD) {
+            return ObstacleSettings::MINIMUM_XP_REWARD;
+        } else {
+            return xp_reward;
+        }
     }
 
     // dodged returns true if the adventurer dodged the obstacle

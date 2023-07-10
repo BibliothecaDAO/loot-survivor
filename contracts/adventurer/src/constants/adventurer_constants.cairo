@@ -20,7 +20,7 @@ const MAX_XP: u16 = 8191; // 2^13 - 1
 const MAX_ADVENTURER_BLOCKS: u16 = 512; // 2^9
 
 // controls how much faster items level up compared to the player
-const ITEM_XP_MULTIPLIER: u16 = 4;
+const ITEM_XP_MULTIPLIER: u16 = 3;
 const ITEM_MAX_GREATNESS: u8 = 20;
 
 mod StatisticIndex {

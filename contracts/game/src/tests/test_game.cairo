@@ -2,7 +2,6 @@ use core::box::BoxTrait;
 #[cfg(test)]
 mod tests {
     use array::ArrayTrait;
-    use debug::PrintTrait;
     use core::result::ResultTrait;
     use core::traits::Into;
     use option::OptionTrait;

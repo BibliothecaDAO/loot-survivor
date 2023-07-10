@@ -87,6 +87,10 @@ mod CombatSettings {
         const T5: u16 = 1; // 1 * level
     }
 
+    // The combat get_earned_xp will divide the xp reward by this number
+    // the higher the number, the less xp earned, which makes the game slower
+    const XP_REWARD_DIVISOR: u16 = 2;
+
     // Determines damage multiplier for each tier
     mod WEAPON_TIER_DAMAGE_MULTIPLIER {
         const T1: u16 = 5; // 5 * level
