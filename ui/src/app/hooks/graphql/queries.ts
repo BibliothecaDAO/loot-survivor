@@ -64,10 +64,12 @@ const BATTLES_FRAGMENT = `
 
 const ITEM_FIELDS = `
   item
+  adventurerId
   cost
+  ownerAddress
   owner
-  ownerAdventurerId
-  equippedAdventurerId
+  equipped
+  createdTime
   purchasedTime
   namePrefix
   nameSuffix
@@ -92,9 +94,9 @@ const DISCOVERY_FIELDS = `
   dodgedObstacle
   damageTaken
   damageLocation
-  xp_earned_adventurer
-  xp_earned_items
-  entityId
+  xpEarnedAdventurer
+  xpEarnedItems
+  entity
   entityLevel
   entityHealth
   ambushed
@@ -163,7 +165,9 @@ const getLastBeastDiscovery = gql`
       where: { adventurerId: { eq: $adventurerId }, entity: { gt: 0 } }
       limit: 1
       orderBy: { discoveryTime: { desc: true } }
-    )
+    ) {
+      ...DiscoveryFields
+    }
   }
 `;
 
@@ -258,7 +262,7 @@ const getBeastById = gql`
     discoveries(
       where: { entityId: { eq: $id }, adventurerId: { eq: $adventurerId } }
     ) {
-      ...DISCOVERY_FIELDS
+      ...DiscoveryFields
     }
   }
 `;
@@ -267,7 +271,7 @@ const getBeastsByAdventurer = gql`
   ${DISCOVERIES_FRAGMENT}
   query get_beast_by_id($id: FeltValue) {
     discoveries(where: { adventurerId: { eq: $id } }) {
-      ...DISCOVERY_FIELDS
+      ...DiscoveryFields
     }
   }
 `;

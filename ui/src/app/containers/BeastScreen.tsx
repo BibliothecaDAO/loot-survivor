@@ -66,6 +66,8 @@ export default function BeastScreen() {
     ? data.lastBeastQuery.discoveries[0]
     : NullDiscovery;
 
+  console.log(data.lastBeastQuery?.discoveries);
+
   useCustomQuery(
     "battlesByBeastQuery",
     getBattlesByBeast,

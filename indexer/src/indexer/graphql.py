@@ -656,7 +656,7 @@ class DiscoveriesFilter:
     damageLocation: Optional[SlotFilter] = None
     xpEarnedAdventurer: Optional[FeltValueFilter] = None
     xpEarnedItems: Optional[FeltValueFilter] = None
-    entityId: Optional[FeltValueFilter] = None
+    entity: Optional[FeltValueFilter] = None
     entityLevel: Optional[FeltValueFilter] = None
     entityHealth: Optional[FeltValueFilter] = None
     entityNamePrefix: Optional[NamePrefixFilter] = None
@@ -759,7 +759,7 @@ class DiscoveriesOrderByInput:
     damageLocation: Optional[OrderByInput] = None
     xpEarnedAdventurer: Optional[OrderByInput] = None
     xpEarnedItems: Optional[OrderByInput] = None
-    entityId: Optional[OrderByInput] = None
+    entity: Optional[OrderByInput] = None
     entityLevel: Optional[OrderByInput] = None
     entityHealth: Optional[OrderByInput] = None
     entityNamePrefix: Optional[OrderByInput] = None

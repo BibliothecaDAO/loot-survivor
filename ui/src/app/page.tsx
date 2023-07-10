@@ -29,7 +29,7 @@ import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
-import { testnet_addr } from "./lib/constants";
+import { mainnet_addr } from "./lib/constants";
 import { Menu, NullAdventurer, Call, Battle } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
@@ -270,16 +270,6 @@ export default function Home() {
     showNotification,
     data.battlesByTxHashQuery,
     data.discoveryByTxHashQuery,
-    adventurer?.health,
-    data.lastBattleQuery,
-    deathMessage,
-    hasBeast,
-    isDataUpdated,
-    notificationData,
-    pendingMessage,
-    setDeathMessage,
-    showDeathDialog,
-    type,
   ]);
 
   useEffect(() => {
@@ -295,8 +285,8 @@ export default function Home() {
 
   useMemo(() => {
     setIndexer(
-      (account as any)?.provider?.baseUrl == testnet_addr ||
-        (account as any)?.baseUrl == testnet_addr
+      (account as any)?.provider?.baseUrl == mainnet_addr ||
+        (account as any)?.baseUrl == mainnet_addr
         ? mainnet_graphql
         : goerli_graphql
     );
@@ -608,12 +598,12 @@ export default function Home() {
                         </Button>
                       </>
                     )}
-                    {((account as any)?.provider?.baseUrl == testnet_addr ||
-                      (account as any)?.baseUrl == testnet_addr) && (
+                    {((account as any)?.provider?.baseUrl == mainnet_addr ||
+                      (account as any)?.baseUrl == mainnet_addr) && (
                       <AddDevnetEthButton />
                     )}
-                    {((account as any)?.provider?.baseUrl == testnet_addr ||
-                      (account as any)?.baseUrl == testnet_addr) && (
+                    {((account as any)?.provider?.baseUrl == mainnet_addr ||
+                      (account as any)?.baseUrl == mainnet_addr) && (
                       <MintEthButton />
                     )}
                     {account && (

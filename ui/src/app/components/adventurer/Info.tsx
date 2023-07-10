@@ -25,7 +25,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     "itemsByAdventurerQuery",
     getItemsByAdventurer,
     {
-      adventurer: adventurer?.id ?? 0,
+      adventurerId: adventurer?.id ?? 0,
     },
     txAccepted
   );
@@ -34,7 +34,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     "itemsByProfileQuery",
     getItemsByAdventurer,
     {
-      adventurer: profile ?? 0,
+      adventurerId: profile ?? 0,
     },
     txAccepted
   );
@@ -45,6 +45,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     : data.itemsByAdventurerQuery
     ? data.itemsByAdventurerQuery.items
     : [];
+  console.log(adventurer?.id ?? 0);
+  console.log(items);
 
   return (
     <div className="h-full border border-terminal-green overflow-auto">

@@ -12,7 +12,7 @@ export default function RootLayout({
 }) {
   // const client = useIndexerStore((state) => state.client);
   const client = new ApolloClient({
-    uri: "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql",
+    uri: "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/goerli-graphql",
     cache: new InMemoryCache(),
   });
 
