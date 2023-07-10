@@ -99,19 +99,6 @@ export const CreateAdventurer = ({
 
     console.log(mintAdventurerTx);
 
-    // const mintAdventurerTx = {
-    //   contractAddress: gameContract?.address ?? "",
-    //   entrypoint: "start",
-    //   calldata: [
-    //     getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
-    //     "0",
-    //     "0",
-    //     "0",
-    //     "0",
-    //     "0",
-    //   ],
-    // };
-
     addToCalls(mintAdventurerTx);
     startLoading(
       "Create",

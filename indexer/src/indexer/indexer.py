@@ -331,6 +331,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         # Return initial configuration of the indexer.
         filter = Filter().with_header(weak=True)
         self.event_map = dict()
+        self.handle_pending_data = self.handle_data
 
         def add_filter(contract, event):
             selector = ContractFunction.get_selector(event)

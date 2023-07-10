@@ -86,7 +86,7 @@ export default function BeastScreen() {
   const attackTx = {
     contractAddress: gameContract?.address ?? "",
     entrypoint: "attack",
-    calldata: [adventurer?.id?.toString() ?? ""],
+    calldata: [adventurer?.id?.toString() ?? "", "0"],
   };
 
   const fleeTx = {
