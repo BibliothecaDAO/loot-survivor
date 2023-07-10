@@ -48,7 +48,7 @@ export default function BeastScreen() {
     "lastBeastQuery",
     getLastBeastDiscovery,
     {
-      adventurerId: adventurer?.id,
+      adventurerId: adventurer?.id ?? 0,
     },
     txAccepted
   );
@@ -66,15 +66,13 @@ export default function BeastScreen() {
     ? data.lastBeastQuery.discoveries[0]
     : NullDiscovery;
 
-  console.log(data.lastBeastQuery?.discoveries);
-
   useCustomQuery(
     "battlesByBeastQuery",
     getBattlesByBeast,
     {
       adventurerId: adventurer?.id ?? 0,
       beast: beastData?.entity,
-      discoveryTime: beastData?.discoveryTime?.toISOString(),
+      discoveryTime: beastData?.discoveryTime,
     },
     txAccepted
   );

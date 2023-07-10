@@ -5,7 +5,7 @@ import { AdventurerQuery, BattleQuery, ItemQuery } from "./graphql/types";
 
 type Variables = Record<
   string,
-  string | number | number[] | boolean | null | undefined
+  string | number | number[] | boolean | null | undefined | Date
 >;
 
 // type Queries = | AdventurerQuery | BattleQuery

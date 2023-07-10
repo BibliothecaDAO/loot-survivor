@@ -34,18 +34,11 @@ export default function InventoryScreen() {
 
   const { data } = useQueriesStore();
 
-  useCustomQuery(
-    "itemsByAdventurerQuery",
-    getItemsByAdventurer,
-    {
-      adventurer: adventurer?.id,
-    },
-    txAccepted
-  );
-
   const items = data.itemsByAdventurerQuery
     ? data.itemsByAdventurerQuery.items
     : [];
+
+  // const items: any[] = [];
 
   const handleAddEquipItem = (item: Item) => {
     if (gameContract && formatAddress) {

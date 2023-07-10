@@ -683,6 +683,7 @@ class BattlesFilter:
     xpEarnedItems: Optional[OrderByInput] = None
     goldEarned: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
+    discoveryTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
 
 
@@ -786,6 +787,7 @@ class BattlesOrderByInput:
     xpEarnedItems: Optional[OrderByInput] = None
     goldEarned: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
+    discoveryTime: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
 
 
@@ -956,6 +958,7 @@ class Battle:
     xpEarnedItems: Optional[FeltValue]
     goldEarned: Optional[FeltValue]
     txHash: Optional[HexValue]
+    discoveryTime: Optional[datetime]
     timestamp: Optional[datetime]
 
     @classmethod
@@ -976,6 +979,7 @@ class Battle:
             xpEarnedItems=data["xpEarnedItems"],
             goldEarned=data["goldEarned"],
             txHash=data["txHash"],
+            discoveryTime=data["discoveryTime"],
             timestamp=data["timestamp"],
         )
 

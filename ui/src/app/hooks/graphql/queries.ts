@@ -105,7 +105,7 @@ const DISCOVERY_FIELDS = `
 `;
 
 const DISCOVERIES_FRAGMENT = `
-  fragment DiscoveryFields on Item {
+  fragment DiscoveryFields on Discovery {
     ${DISCOVERY_FIELDS}
   }
 `;
@@ -304,9 +304,17 @@ const getBattlesByAdventurer = gql`
 
 const getBattlesByBeast = gql`
   ${BATTLES_FRAGMENT}
-  query get_battles_by_beast($adventurerId: FeltValue, $beastId: FeltValue) {
+  query get_battles_by_beast(
+    $adventurerId: FeltValue
+    $beastId: FeltValue
+    $discoveryTime: DateTime
+  ) {
     battles(
-      where: { adventurerId: { eq: $adventurerId }, beastId: { eq: $beastId } }
+      where: {
+        adventurerId: { eq: $adventurerId }
+        beastId: { eq: $beastId }
+        discoveryTime: { eq: $discoveryTime }
+      }
       orderBy: { timestamp: { desc: true } }
     ) {
       ...BattleFields
