@@ -359,12 +359,12 @@ class Config:
         }
 
         self.DISCOVERY_TYPES = {
-            0: "Nothing",
             1: "Beast",
             2: "Obstacle",
             3: "Item",
-            4: "Adventurer",
         }
+
+        self.SUB_DISCOVERY_TYPES = {1: "Health", 2: "Gold", 3: "XP"}
 
         self.MATERIALS = {
             0: "Generic",
@@ -581,5 +581,3 @@ class Config:
         }
 
         self.ATTACKERS = {1: "Adventurer", 2: "Beast"}
-
-        self.SUB_DISCOVERY_TYPES = {1: "Health", 2: "Gold", 3: "XP"}

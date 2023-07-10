@@ -483,6 +483,37 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "lastUpdatedTime": block_time,
         }
         await info.storage.insert_one("items", start_item_doc)
+        if (
+            sg.adventurer_state["adventurer"]["weapon"]["id"] == 16
+            or sg.adventurer_state["adventurer"]["weapon"]["id"] == 12
+        ):
+            starter_beast = 71
+        elif sg.adventurer_state["adventurer"]["weapon"]["id"] == 46:
+            starter_beast = 25
+        else:
+            starter_beast = 50
+        start_beast_doc = {
+            "txHash": encode_hex_as_bytes(tx_hash),
+            "adventurerId": check_exists_int(sg.adventurer_state["adventurer_id"]),
+            "discoveryType": encode_int_as_bytes(1),
+            "subDiscoveryType": check_exists_int(0),
+            "outputAmount": encode_int_as_bytes(0),
+            "obstacle": check_exists_int(0),
+            "obstacleLevel": check_exists_int(0),
+            "dodgedObstacle": encode_int_as_bytes(0),
+            "damageTaken": encode_int_as_bytes(0),
+            "damageLocation": check_exists_int(0),
+            "xpEarnedAdventurer": check_exists_int(0),
+            "xpEarnedItems": check_exists_int(0),
+            "entity": check_exists_int(starter_beast),
+            "entityLevel": check_exists_int(1),
+            "entityHealth": encode_int_as_bytes(1),
+            "entityNamePrefix": check_exists_int(0),
+            "entityNameSuffix": check_exists_int(0),
+            "ambushed": check_exists_int(0),
+            "discoveryTime": block_time,
+        }
+        await info.storage.insert_one("discoveries", start_beast_doc)
         print(
             "- [start game]",
             sg.adventurer_state["adventurer_id"],
@@ -687,7 +718,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": check_exists_int(db.adventurer_state["adventurer_id"]),
-            "discoveryType": encode_int_as_bytes(2),
+            "discoveryType": encode_int_as_bytes(1),
             "subDiscoveryType": check_exists_int(0),
             "outputAmount": encode_int_as_bytes(0),
             "obstacle": check_exists_int(0),
@@ -706,17 +737,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "discoveryTime": block_time,
         }
         await info.storage.insert_one("discoveries", discovery_doc)
-        # beast_doc = {
-        #     "adventurerId": check_exists_int(db.adventurer_state["adventurer_id"]),
-        #     "discoveredTime": block_time,
-        #     "beast": check_exists_int(db.beast_id),
-        #     "prefix1": check_exists_int(db.prefix1),
-        #     "prefix2": check_exists_int(db.prefix2),
-        #     "level": encode_int_as_bytes(db.beast_level),
-        #     "health": encode_int_as_bytes(db.beast_health),
-        #     "lastUpdated": block_time,
-        # }
-        # await info.storage.insert_one("beasts", beast_doc)
         print(
             "- [discovered beast]",
             db.adventurer_state["adventurer_id"],
