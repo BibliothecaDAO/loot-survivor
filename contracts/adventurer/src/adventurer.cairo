@@ -3,6 +3,8 @@ use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub};
 use traits::{TryInto, Into};
 use option::OptionTrait;
 use debug::PrintTrait;
+use poseidon::poseidon_hash_span;
+use array::ArrayTrait;
 
 use super::{
     item_meta::{LootItemSpecialNames, LootItemSpecialNamesStorage, ImplLootItemSpecialNames},
@@ -152,16 +154,17 @@ impl ImplAdventurer of IAdventurer {
     // @param adventurer_entropy An additional entropy input for the adventurer.
     //
     // @return u256 The calculated market entropy for the given adventurer.
-    fn get_market_entropy(self: Adventurer, adventurer_id: u256, adventurer_entropy: u128) -> u256 {
-        // modulo adventurer_id by 2^64 (prevents subsequent multiplication from overflowing)
-        let adventurer_id_modulo_remainder = 1 + (adventurer_id % pow::TWO_POW_64);
-        // use the adventurer's stats, xp, and stat points available to generate entropy
-        let adventurer_fixed_stat_entropy = 1
-            + self.xp.into()
-            + adventurer_entropy.into()
-            + self.stat_points_available.into();
-        // return market entropy
-        adventurer_fixed_stat_entropy * pow::TWO_POW_9 * adventurer_id_modulo_remainder
+    fn get_market_seed(self: Adventurer, adventurer_id: u256, adventurer_entropy: u128) -> u128 {
+        let mut hash_span = ArrayTrait::new();
+
+        hash_span.append(self.xp.into());
+        hash_span.append(self.stat_points_available.into());
+        hash_span.append(adventurer_entropy.into());
+        hash_span.append(adventurer_id.try_into().unwrap());
+
+        let poseidon = poseidon_hash_span(hash_span.span());
+        let p: u256 = (poseidon.into() % 340282366920938463463374607431768211455);
+        p.try_into().unwrap()
     }
 
     // @notice Calculates the charisma potion discount for the adventurer based on their charisma stat.
@@ -883,7 +886,13 @@ impl ImplAdventurer of IAdventurer {
     // @param adventurer_entropy A number used for randomization.
     // @return Returns a number used for generated a random beast.
     fn get_beast_seed(self: Adventurer, adventurer_entropy: u128) -> u128 {
-        self.xp.into() + adventurer_entropy.into()
+        let mut hash_span = ArrayTrait::new();
+        hash_span.append(self.xp.into());
+        hash_span.append(adventurer_entropy.into());
+
+        let poseidon = poseidon_hash_span(hash_span.span());
+        let p: u256 = (poseidon.into() % 340282366920938463463374607431768211455);
+        p.try_into().unwrap()
     }
 
     // @notice This function adds a boost to an adventurer's attributes based on a provided suffix.
@@ -2610,19 +2619,19 @@ fn test_get_market_entropy() {
         }, beast_health: 20, stat_points_available: 0,
     };
 
-    // assert get_market_entropy doesn't fail with zero case
+    // assert get_market_seed doesn't fail with zero case
     // result isn't important, just that it doesn't fail
-    let market_entropy = adventurer.get_market_entropy(0, 0);
+    let market_entropy = adventurer.get_market_seed(1, 1);
 
     // test extreme/overflow case
     adventurer.xp = 8191; // max value for 13 bits
     adventurer.stat_points_available = 7; // max value for 3 bits
     let max_adventurer_id: u256 =
-        115792089237316195423570985008687907853269984665640564039457584007913129639935; // max value for 256 bits
+        340282366920938463463374607431768211455; // max value for 256 bits
     let max_adventurer_entropy: u128 =
         340282366920938463463374607431768211455; // max value for 128 bits
-    let market_entropy = adventurer.get_market_entropy(max_adventurer_id, max_adventurer_entropy);
-// result isn't important, just that it doesn't fail via overflow
+    let market_entropy = adventurer.get_market_seed(max_adventurer_id, max_adventurer_entropy);
+    // result isn't important, just that it doesn't fail via overflow
 }
 
 #[test]
