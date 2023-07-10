@@ -828,7 +828,7 @@ mod Game {
         // use entropy sources to generate random exploration
         let exploration_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
 
-        //
+        // get a random explore result
         let explore_result = AdventurerUtils::get_random_explore(exploration_entropy);
 
         match explore_result {
@@ -1665,7 +1665,7 @@ mod Game {
         let item_price = ImplMarket::get_price(item_tier);
 
         // get item price after charisma discount
-        let charisma_discount_price = adventurer.get_item_cost(item_price);
+        let charisma_discount_price = adventurer.charisma_adjusted_item_price(item_price);
 
         // check adventurer has enough gold
         assert(adventurer.check_gold(charisma_discount_price) == true, messages::NOT_ENOUGH_GOLD);
@@ -1717,7 +1717,7 @@ mod Game {
         assert(adventurer.stat_points_available > 0, 'no stat points available');
 
         // add stat to adventuer
-        adventurer.add_statistic(stat_id);
+        adventurer.increment_stat(stat_id);
 
         //deduct one from the adventurers available stat upgrades
         adventurer.stat_points_available -= 1;
@@ -1735,14 +1735,14 @@ mod Game {
 
         // check gold balance
         assert(
-            adventurer.check_gold(adventurer.get_potion_cost()) == true, messages::NOT_ENOUGH_GOLD
+            adventurer.check_gold(adventurer.charisma_adjusted_potion_price()) == true, messages::NOT_ENOUGH_GOLD
         );
 
         // verify adventurer isn't already at max health
         assert(adventurer.get_max_health() != adventurer.health, messages::HEALTH_FULL);
 
         // calculate cost of potion based on the Adventurers level
-        adventurer.deduct_gold(adventurer.get_potion_cost());
+        adventurer.deduct_gold(adventurer.charisma_adjusted_potion_price());
 
         // TODO: We could remove the value from here altogether and have it within the function
         adventurer.add_health(POTION_HEALTH_AMOUNT);
@@ -2026,7 +2026,7 @@ mod Game {
             self, adventurer_id, name_storage1, name_storage2
         );
 
-        adventurer.get_potion_cost()
+        adventurer.charisma_adjusted_potion_price()
     }
 
     fn _get_attacking_beast(self: @ContractState, adventurer_id: u256) -> Beast {
