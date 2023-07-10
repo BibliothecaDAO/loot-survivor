@@ -581,3 +581,5 @@ class Config:
         }
 
         self.ATTACKERS = {1: "Adventurer", 2: "Beast"}
+
+        self.SUB_DISCOVERY_TYPES = {1: "Health", 2: "Gold", 3: "XP"}
