@@ -155,7 +155,6 @@ impl ImplBeast of IBeast {
     fn get_special_names(
         adventurer_level: u8, seed: u128, prefix1_size: u128, prefix2_size: u128
     ) -> SpecialPowers {
-
         // if adventurer is below level 10, beasts don't get any special powers
         if (adventurer_level < BeastSettings::BEAST_SPECIAL_NAME_UNLOCK_LEVEL) {
             SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 }
@@ -285,314 +284,170 @@ impl ImplBeast of IBeast {
     }
 
     fn get_type(id: u8) -> Type {
-        if id == BeastId::Warlock {
+        if id == BeastId::Warlock
+            || id == BeastId::Typhon
+            || id == BeastId::Jiangshi
+            || id == BeastId::Anansi
+            || id == BeastId::Basilisk
+            || id == BeastId::Gorgon
+            || id == BeastId::Kitsune
+            || id == BeastId::Lich
+            || id == BeastId::Chimera
+            || id == BeastId::Wendigo
+            || id == BeastId::Rakshasa
+            || id == BeastId::Werewolf
+            || id == BeastId::Banshee
+            || id == BeastId::Draugr
+            || id == BeastId::Vampire
+            || id == BeastId::Goblin
+            || id == BeastId::Ghoul
+            || id == BeastId::Wraith
+            || id == BeastId::Sprite
+            || id == BeastId::Kappa
+            || id == BeastId::Fairy
+            || id == BeastId::Leprechaun
+            || id == BeastId::Kelpie
+            || id == BeastId::Pixie
+            || id == BeastId::Gnome {
             return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Rakshasa {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Jiangshi {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Kitsune {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Basilisk {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Gorgon {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Anansi {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Lich {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Chimera {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Wendigo {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Cerberus {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Werewolf {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Banshee {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Draugr {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Vampire {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Goblin {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Ghoul {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Pixie {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Sprite {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Kappa {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Fairy {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Leprechaun {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Kelpie {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Wraith {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Gnome {
-            return Type::Magic_or_Cloth(());
-        } else if id == BeastId::Griffin {
+        } else if id == BeastId::Griffin
+            || id == BeastId::Manticore
+            || id == BeastId::Phoenix
+            || id == BeastId::Dragon
+            || id == BeastId::Minotaur
+            || id == BeastId::Qilin
+            || id == BeastId::Ammit
+            || id == BeastId::Nue
+            || id == BeastId::Skinwalker
+            || id == BeastId::Chupacabra
+            || id == BeastId::Weretiger
+            || id == BeastId::Wyvern
+            || id == BeastId::Roc
+            || id == BeastId::Harpy
+            || id == BeastId::Pegasus
+            || id == BeastId::Hippogriff
+            || id == BeastId::Fenrir
+            || id == BeastId::Jaguar
+            || id == BeastId::Satori
+            || id == BeastId::DireWolf
+            || id == BeastId::Bear
+            || id == BeastId::Wolf
+            || id == BeastId::Mantis
+            || id == BeastId::Spider
+            || id == BeastId::Rat {
             return Type::Blade_or_Hide(());
-        } else if id == BeastId::Manticore {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Phoenix {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Dragon {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Minotaur {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Harpy {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Arachne {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Nue {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Skinwalker {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Chupacabra {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Weretiger {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Wyvern {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Roc {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Qilin {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Pegasus {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Hippogriff {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Fenrir {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Jaguar {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Ammit {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::DireWolf {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Bear {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Wolf {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Scorpion {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Spider {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Rat {
-            return Type::Blade_or_Hide(());
-        } else if id == BeastId::Cyclops {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Golem {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Titan {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Yeti {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Troll {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Oni {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Ogre {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Juggernaut {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Bigfoot {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Orc {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Behemoth {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Ent {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Giant {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Kraken {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Leviathan {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Skeleton {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Nephilim {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Tarrasque {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Beserker {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Balrog {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Ettin {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Jotunn {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Hydra {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::NemeanLion {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == BeastId::Colossus {
+        } else if id == BeastId::Kraken
+            || id == BeastId::Colossus
+            || id == BeastId::Balrog
+            || id == BeastId::Leviathan
+            || id == BeastId::Tarrasque
+            || id == BeastId::Titan
+            || id == BeastId::Nephilim
+            || id == BeastId::Behemoth
+            || id == BeastId::Hydra
+            || id == BeastId::Juggernaut
+            || id == BeastId::Oni
+            || id == BeastId::Jotunn
+            || id == BeastId::Ettin
+            || id == BeastId::Cyclops
+            || id == BeastId::Giant
+            || id == BeastId::NemeanLion
+            || id == BeastId::Berserker
+            || id == BeastId::Yeti
+            || id == BeastId::Golem
+            || id == BeastId::Ent
+            || id == BeastId::Troll
+            || id == BeastId::Bigfoot
+            || id == BeastId::Ogre
+            || id == BeastId::Orc
+            || id == BeastId::Skeleton {
             return Type::Bludgeon_or_Metal(());
         }
-
         // unknown id gets type bludgeon/metal
         return Type::Bludgeon_or_Metal(());
     }
 
-
     fn get_tier(id: u8) -> Tier {
-        if id == BeastId::Warlock {
+        if id == BeastId::Warlock
+            || id == BeastId::Typhon
+            || id == BeastId::Jiangshi
+            || id == BeastId::Anansi
+            || id == BeastId::Basilisk
+            || id == BeastId::Griffin
+            || id == BeastId::Manticore
+            || id == BeastId::Phoenix
+            || id == BeastId::Dragon
+            || id == BeastId::Minotaur
+            || id == BeastId::Kraken
+            || id == BeastId::Colossus
+            || id == BeastId::Balrog
+            || id == BeastId::Leviathan
+            || id == BeastId::Tarrasque {
             return Tier::T1(());
-        } else if id == BeastId::Rakshasa {
-            return Tier::T1(());
-        } else if id == BeastId::Jiangshi {
-            return Tier::T1(());
-        } else if id == BeastId::Kitsune {
-            return Tier::T1(());
-        } else if id == BeastId::Basilisk {
-            return Tier::T1(());
-        } else if id == BeastId::Gorgon {
+        } else if id == BeastId::Gorgon
+            || id == BeastId::Kitsune
+            || id == BeastId::Lich
+            || id == BeastId::Chimera
+            || id == BeastId::Wendigo
+            || id == BeastId::Qilin
+            || id == BeastId::Ammit
+            || id == BeastId::Nue
+            || id == BeastId::Skinwalker
+            || id == BeastId::Chupacabra
+            || id == BeastId::Titan
+            || id == BeastId::Nephilim
+            || id == BeastId::Behemoth
+            || id == BeastId::Hydra
+            || id == BeastId::Juggernaut {
             return Tier::T2(());
-        } else if id == BeastId::Anansi {
-            return Tier::T2(());
-        } else if id == BeastId::Lich {
-            return Tier::T2(());
-        } else if id == BeastId::Chimera {
-            return Tier::T2(());
-        } else if id == BeastId::Wendigo {
-            return Tier::T2(());
-        } else if id == BeastId::Cerberus {
+        } else if id == BeastId::Rakshasa
+            || id == BeastId::Werewolf
+            || id == BeastId::Banshee
+            || id == BeastId::Draugr
+            || id == BeastId::Vampire
+            || id == BeastId::Weretiger
+            || id == BeastId::Wyvern
+            || id == BeastId::Roc
+            || id == BeastId::Harpy
+            || id == BeastId::Pegasus
+            || id == BeastId::Oni
+            || id == BeastId::Jotunn
+            || id == BeastId::Ettin
+            || id == BeastId::Cyclops
+            || id == BeastId::Giant {
             return Tier::T3(());
-        } else if id == BeastId::Werewolf {
-            return Tier::T3(());
-        } else if id == BeastId::Banshee {
-            return Tier::T3(());
-        } else if id == BeastId::Draugr {
-            return Tier::T3(());
-        } else if id == BeastId::Vampire {
-            return Tier::T3(());
-        } else if id == BeastId::Goblin {
+        } else if id == BeastId::Goblin
+            || id == BeastId::Ghoul
+            || id == BeastId::Wraith
+            || id == BeastId::Sprite
+            || id == BeastId::Kappa
+            || id == BeastId::Hippogriff
+            || id == BeastId::Fenrir
+            || id == BeastId::Jaguar
+            || id == BeastId::Satori
+            || id == BeastId::DireWolf
+            || id == BeastId::NemeanLion
+            || id == BeastId::Berserker
+            || id == BeastId::Yeti
+            || id == BeastId::Golem
+            || id == BeastId::Ent {
             return Tier::T4(());
-        } else if id == BeastId::Ghoul {
-            return Tier::T4(());
-        } else if id == BeastId::Pixie {
-            return Tier::T4(());
-        } else if id == BeastId::Sprite {
-            return Tier::T4(());
-        } else if id == BeastId::Kappa {
-            return Tier::T4(());
-        } else if id == BeastId::Fairy {
+        } else if id == BeastId::Fairy
+            || id == BeastId::Leprechaun
+            || id == BeastId::Kelpie
+            || id == BeastId::Pixie
+            || id == BeastId::Gnome
+            || id == BeastId::Bear
+            || id == BeastId::Wolf
+            || id == BeastId::Mantis
+            || id == BeastId::Spider
+            || id == BeastId::Rat
+            || id == BeastId::Troll
+            || id == BeastId::Bigfoot
+            || id == BeastId::Ogre
+            || id == BeastId::Orc
+            || id == BeastId::Skeleton {
             return Tier::T5(());
-        } else if id == BeastId::Leprechaun {
-            return Tier::T5(());
-        } else if id == BeastId::Kelpie {
-            return Tier::T5(());
-        } else if id == BeastId::Wraith {
-            return Tier::T5(());
-        } else if id == BeastId::Gnome {
-            return Tier::T5(());
-        } else if id == BeastId::Griffin {
-            return Tier::T1(());
-        } else if id == BeastId::Manticore {
-            return Tier::T1(());
-        } else if id == BeastId::Phoenix {
-            return Tier::T1(());
-        } else if id == BeastId::Dragon {
-            return Tier::T1(());
-        } else if id == BeastId::Minotaur {
-            return Tier::T1(());
-        } else if id == BeastId::Harpy {
-            return Tier::T2(());
-        } else if id == BeastId::Arachne {
-            return Tier::T2(());
-        } else if id == BeastId::Nue {
-            return Tier::T2(());
-        } else if id == BeastId::Skinwalker {
-            return Tier::T2(());
-        } else if id == BeastId::Chupacabra {
-            return Tier::T2(());
-        } else if id == BeastId::Weretiger {
-            return Tier::T3(());
-        } else if id == BeastId::Wyvern {
-            return Tier::T3(());
-        } else if id == BeastId::Roc {
-            return Tier::T3(());
-        } else if id == BeastId::Qilin {
-            return Tier::T3(());
-        } else if id == BeastId::Pegasus {
-            return Tier::T3(());
-        } else if id == BeastId::Hippogriff {
-            return Tier::T4(());
-        } else if id == BeastId::Fenrir {
-            return Tier::T4(());
-        } else if id == BeastId::Jaguar {
-            return Tier::T4(());
-        } else if id == BeastId::Ammit {
-            return Tier::T4(());
-        } else if id == BeastId::DireWolf {
-            return Tier::T4(());
-        } else if id == BeastId::Bear {
-            return Tier::T5(());
-        } else if id == BeastId::Wolf {
-            return Tier::T5(());
-        } else if id == BeastId::Scorpion {
-            return Tier::T5(());
-        } else if id == BeastId::Spider {
-            return Tier::T5(());
-        } else if id == BeastId::Rat {
-            return Tier::T5(());
-        } else if id == BeastId::Cyclops {
-            return Tier::T1(());
-        } else if id == BeastId::Golem {
-            return Tier::T1(());
-        } else if id == BeastId::Titan {
-            return Tier::T1(());
-        } else if id == BeastId::Yeti {
-            return Tier::T1(());
-        } else if id == BeastId::Troll {
-            return Tier::T5(());
-        } else if id == BeastId::Oni {
-            return Tier::T2(());
-        } else if id == BeastId::Ogre {
-            return Tier::T2(());
-        } else if id == BeastId::Juggernaut {
-            return Tier::T2(());
-        } else if id == BeastId::Bigfoot {
-            return Tier::T2(());
-        } else if id == BeastId::Orc {
-            return Tier::T2(());
-        } else if id == BeastId::Behemoth {
-            return Tier::T3(());
-        } else if id == BeastId::Ent {
-            return Tier::T3(());
-        } else if id == BeastId::Giant {
-            return Tier::T3(());
-        } else if id == BeastId::Kraken {
-            return Tier::T3(());
-        } else if id == BeastId::Leviathan {
-            return Tier::T3(());
-        } else if id == BeastId::Skeleton {
-            return Tier::T5(());
-        } else if id == BeastId::Nephilim {
-            return Tier::T4(());
-        } else if id == BeastId::Tarrasque {
-            return Tier::T4(());
-        } else if id == BeastId::Beserker {
-            return Tier::T4(());
-        } else if id == BeastId::Balrog {
-            return Tier::T4(());
-        } else if id == BeastId::Ettin {
-            return Tier::T5(());
-        } else if id == BeastId::Jotunn {
-            return Tier::T5(());
-        } else if id == BeastId::Hydra {
-            return Tier::T5(());
-        } else if id == BeastId::NemeanLion {
-            return Tier::T1(());
-        } else if id == BeastId::Colossus {
-            return Tier::T4(());
         }
 
         // fall through for unknown obstacle id return T5
@@ -601,7 +456,7 @@ impl ImplBeast of IBeast {
 }
 
 #[test]
-#[available_gas(90000)]
+#[available_gas(300000)]
 fn test_get_tier() {
     let warlock = BeastId::Warlock;
     let warlock_tier = ImplBeast::get_tier(warlock);
@@ -625,7 +480,7 @@ fn test_get_tier() {
 }
 
 #[test]
-#[available_gas(90000)]
+#[available_gas(300000)]
 fn test_get_type() {
     let warlock_type = ImplBeast::get_type(BeastId::Warlock);
     assert(warlock_type == Type::Magic_or_Cloth(()), 'Warlock is magical');
@@ -720,7 +575,7 @@ fn test_ambush() {
 }
 
 #[test]
-#[available_gas(180000)]
+#[available_gas(250000)]
 fn test_counter_attack() {
     // initialize warlock beast
     let warlock = BeastId::Warlock;
@@ -752,7 +607,7 @@ fn test_counter_attack() {
 }
 
 #[test]
-#[available_gas(400000)]
+#[available_gas(500000)]
 fn test_attack() {
     let mut adventurer_strength = 0;
     let mut adventurer_luck = 0;
@@ -899,7 +754,7 @@ fn test_get_beast_id() {
 }
 
 #[test]
-#[available_gas(190000)]
+#[available_gas(360000)]
 fn test_get_beast() {
     let adventurer_level = 1;
     let special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 };
