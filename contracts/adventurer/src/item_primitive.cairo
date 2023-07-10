@@ -3,7 +3,7 @@ use traits::{TryInto, Into};
 use pack::{pack::{Packing, rshift_split}, constants::pow};
 use debug::PrintTrait;
 
-#[derive(Drop, Copy, Serde)] // 21 bits
+#[derive(Drop, Copy, PartialEq, Serde)] // 21 bits
 struct ItemPrimitive {
     id: u8, // 7 bits
     xp: u16, // 9 bits
