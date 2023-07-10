@@ -755,6 +755,17 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         ba = decode_attack_beast_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(info, ba.adventurer_state)
+        # beast_discovery = await info.storage.find(
+        #     "discoveries",
+        #     {
+        #         "entityId": check_exists_int(ba.beast_id),
+        #         "adventurerId": check_exists_int(ba.adventurer_state["adventurer_id"]),
+        #     },
+        #     sort={"discoveryTime": -1},
+        #     limit=1,
+        # )
+        # beast_document = next(beast_discovery)
+        print(ba.beast_id, ba.adventurer_state["adventurer_id"])
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
@@ -809,6 +820,17 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         sb = decode_slayed_beast_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(info, sb.adventurer_state)
+        # beast_discovery = await info.storage.find(
+        #     "discoveries",
+        #     {
+        #         "entityId": check_exists_int(sb.beast_id),
+        #         "adventurerId": check_exists_int(sb.adventurer_state["adventurer_id"]),
+        #     },
+        #     sort={"discoveryTime": -1},
+        #     limit=1,
+        # )
+        # beast_document = next(beast_discovery)
+        print(sb.beast_id, sb.adventurer_state["adventurer_id"])
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
@@ -866,6 +888,17 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         fa = decode_flee_attempt_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(info, fa.adventurer_state)
+        # beast_discovery = await info.storage.find(
+        #     "discoveries",
+        #     {
+        #         "entityId": check_exists_int(fa.beast_id),
+        #         "adventurerId": check_exists_int(fa.adventurer_state["adventurer_id"]),
+        #     },
+        #     sort={"discoveryTime": -1},
+        #     limit=1,
+        # )
+        # beast_document = next(beast_discovery)
+        print(fa.beast_id, fa.adventurer_state["adventurer_id"])
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
@@ -1007,7 +1040,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
         gi = decode_greatness_increased_event.deserialize(
             [felt.to_int(i) for i in data]
         )
-        print(gi)
         await update_adventurer_helper(info, gi.adventurer_state)
         print(
             "- [greatness increased]",

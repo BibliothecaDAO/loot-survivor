@@ -47,6 +47,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     : [];
   console.log(adventurer?.id ?? 0);
   console.log(items);
+  console.log(formatAdventurer);
 
   return (
     <div className="h-full border border-terminal-green overflow-auto">

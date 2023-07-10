@@ -75,7 +75,7 @@ export class AdventurerClass implements Adventurer {
     this.name = name;
     this.order = order;
     this.health = health;
-    this.level = level;
+    this.level = calculateLevel(xp ?? 0);
     this.strength = strength;
     this.dexterity = dexterity;
     this.vitality = vitality;
@@ -84,7 +84,7 @@ export class AdventurerClass implements Adventurer {
     this.wisdom = wisdom;
     this.charisma = charisma;
     this.luck = luck;
-    this.xp = calculateLevel(xp ?? 0);
+    this.xp = xp;
     this.weapon = weapon;
     this.chest = chest;
     this.chest = chest;

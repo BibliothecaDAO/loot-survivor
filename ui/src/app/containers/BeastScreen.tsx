@@ -92,7 +92,7 @@ export default function BeastScreen() {
   const fleeTx = {
     contractAddress: gameContract?.address ?? "",
     entrypoint: "flee",
-    calldata: [adventurer?.id?.toString() ?? ""],
+    calldata: [adventurer?.id?.toString() ?? "", "0"],
   };
 
   const [buttonText, setButtonText] = useState("Flee!");
