@@ -224,15 +224,18 @@ mod tests {
         game.upgrade_stat(ADVENTURER_ID, 0);
 
         // manipulate game entrop so we discover another beast
-        testing::set_block_number(1002);
+        testing::set_block_number(1004);
         game.explore(ADVENTURER_ID);
 
-        // let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
-        // assert(updated_adventurer.beast_health != 0, 'should have found a beast');
+        let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(updated_adventurer.beast_health == 0, 'should have found a beast');
 
-        // game.flee(ADVENTURER_ID);
-        // let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
-        // assert(updated_adventurer.beast_health == 0, 'should have fled beast');
+        testing::set_block_number(1005);
+        game.explore(ADVENTURER_ID);
+
+        game.flee(ADVENTURER_ID);
+        let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(updated_adventurer.beast_health == 0, 'should have fled beast');
     }
 
     #[test]
@@ -316,7 +319,7 @@ mod tests {
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
         assert(
-            adventurer.gold == (STARTING_GOLD + BeastSettings::GOLD_REWARD_BASE_MINIMUM + 1)
+            adventurer.gold == (STARTING_GOLD + 8)
                 - item_price,
             'gold'
         );

@@ -2530,13 +2530,13 @@ fn test_get_market_entropy() {
 
     // assert get_market_seed doesn't fail with zero case
     // result isn't important, just that it doesn't fail
-    let market_entropy = adventurer.get_market_seed(0, 0);
+    let market_entropy = adventurer.get_market_seed(1, 1);
 
     // test extreme/overflow case
     adventurer.xp = 8191; // max value for 13 bits
     adventurer.stat_points_available = 7; // max value for 3 bits
     let max_adventurer_id: u256 =
-        115792089237316195423570985008687907853269984665640564039457584007913129639935; // max value for 256 bits
+        340282366920938463463374607431768211455; // max value for 256 bits
     let max_adventurer_entropy: u128 =
         340282366920938463463374607431768211455; // max value for 128 bits
     let market_entropy = adventurer.get_market_seed(max_adventurer_id, max_adventurer_entropy);

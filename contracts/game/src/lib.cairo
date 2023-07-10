@@ -781,7 +781,7 @@ mod Game {
         hash_span.append(adventurer_id.try_into().unwrap());
 
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
-        let entropy: u256 = (poseidon.into() % U64_MAX.into());
+        let entropy: u256 = (poseidon.into() % U128_MAX.into());
         
         // build meta
         let adventurer_meta = AdventurerMetadata {
