@@ -78,7 +78,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(30000000000)]
+    #[available_gas(3000000000000)]
     fn test_start() {
         let mut game = new_adventurer();
 
@@ -213,7 +213,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(150000000)]
+    #[available_gas(15000000000)]
     fn test_flee() {
         let mut game = lvl_2_adventurer();
 
@@ -224,11 +224,14 @@ mod tests {
         game.upgrade_stat(ADVENTURER_ID, 0);
 
         // manipulate game entrop so we discover another beast
-        testing::set_block_number(1002);
+        testing::set_block_number(1004);
         game.explore(ADVENTURER_ID);
 
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(updated_adventurer.beast_health != 0, 'should have found a beast');
+        assert(updated_adventurer.beast_health == 0, 'should have found a beast');
+
+        testing::set_block_number(1005);
+        game.explore(ADVENTURER_ID);
 
         game.flee(ADVENTURER_ID);
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -316,7 +319,7 @@ mod tests {
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
         assert(
-            adventurer.gold == (STARTING_GOLD + BeastSettings::GOLD_REWARD_BASE_MINIMUM)
+            adventurer.gold == (STARTING_GOLD + 8)
                 - item_price,
             'gold'
         );

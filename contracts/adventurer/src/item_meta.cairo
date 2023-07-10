@@ -1,13 +1,13 @@
 use core::serde::Serde;
+use debug::PrintTrait;
 use traits::{TryInto, Into};
 use option::OptionTrait;
 use integer::{U256TryIntoU32, U256TryIntoU16, U256TryIntoU8};
 use pack::pack::{Packing, rshift_split};
 use pack::constants::pow;
 
-use super::adventurer::{Adventurer, IAdventurer, ImplAdventurer};
+use super::{adventurer::{Adventurer, IAdventurer, ImplAdventurer}, item_primitive::ItemPrimitive};
 use super::bag::{Bag, BagActions};
-use lootitems::loot::DynamicItem;
 
 mod STORAGE {
     const INDEX_1: u8 = 1;
@@ -111,36 +111,36 @@ impl LootItemSpecialNamesStoragePacking of Packing<LootItemSpecialNamesStorage> 
     }
 }
 
-// DynamicItem meta only is set once and is filled up as items are found
+// ItemPrimitive meta only is set once and is filled up as items are found
 // There is no swapping of positions
-// When an item is found we find the next available slot and set it on the DynamicItem NOT in the metadata -> this saves gas
+// When an item is found we find the next available slot and set it on the ItemPrimitive NOT in the metadata -> this saves gas
 // We only set the metadata when an item is upgraded
 trait ILootItemSpecialNames {
-    // takes DynamicItem and sets the metadata slot for that item
+    // takes ItemPrimitive and sets the metadata slot for that item
     // 1. Find highest slot from equipped and unequipped items
-    // 2. Return DynamicItem with slot which is then saved on the Adventurer/Bag
+    // 2. Return ItemPrimitive with slot which is then saved on the Adventurer/Bag
 
     // this could be somewhere else
     // this needs to be run when an item is found/purchased
     fn get_loot_special_names_slot(
-        adventurer: Adventurer, bag: Bag, loot_statistics: DynamicItem
-    ) -> DynamicItem;
+        adventurer: Adventurer, bag: Bag, loot_statistics: ItemPrimitive
+    ) -> ItemPrimitive;
 
     // on contract side we check if item.metadata > 10 if it is pass in second metadata storage
     fn set_loot_special_names(
         ref self: LootItemSpecialNamesStorage,
-        loot_statistics: DynamicItem,
+        loot_statistics: ItemPrimitive,
         loot_special_names: LootItemSpecialNames
-    ) -> LootItemSpecialNamesStorage;
+    );
 
     fn get_loot_special_names(
-        self: LootItemSpecialNamesStorage, loot_statistics: DynamicItem
+        self: LootItemSpecialNamesStorage, loot_statistics: ItemPrimitive
     ) -> LootItemSpecialNames;
 }
 
 impl ImplLootItemSpecialNames of ILootItemSpecialNames {
     fn get_loot_special_names(
-        self: LootItemSpecialNamesStorage, loot_statistics: DynamicItem
+        self: LootItemSpecialNamesStorage, loot_statistics: ItemPrimitive
     ) -> LootItemSpecialNames {
         if loot_statistics.metadata == STORAGE::INDEX_1 {
             return self.item_1;
@@ -166,8 +166,8 @@ impl ImplLootItemSpecialNames of ILootItemSpecialNames {
     }
 
     fn get_loot_special_names_slot(
-        adventurer: Adventurer, bag: Bag, loot_statistics: DynamicItem
-    ) -> DynamicItem {
+        adventurer: Adventurer, bag: Bag, loot_statistics: ItemPrimitive
+    ) -> ItemPrimitive {
         // check slots
 
         let mut slot = 0;
@@ -233,48 +233,37 @@ impl ImplLootItemSpecialNames of ILootItemSpecialNames {
 
         // if no slots -> return first index which is 0
         if slot == 1 {
-            DynamicItem { id: loot_statistics.id, xp: loot_statistics.xp, metadata: 1 }
+            ItemPrimitive { id: loot_statistics.id, xp: loot_statistics.xp, metadata: 1 }
         } else {
-            DynamicItem { id: loot_statistics.id, xp: loot_statistics.xp, metadata: slot + 1 }
+            ItemPrimitive { id: loot_statistics.id, xp: loot_statistics.xp, metadata: slot + 1 }
         }
     }
     fn set_loot_special_names(
         ref self: LootItemSpecialNamesStorage,
-        loot_statistics: DynamicItem,
+        loot_statistics: ItemPrimitive,
         loot_special_names: LootItemSpecialNames
-    ) -> LootItemSpecialNamesStorage {
+    ) {
         if loot_statistics.metadata == STORAGE::INDEX_1 {
             self.item_1 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_2 {
             self.item_2 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_3 {
             self.item_3 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_4 {
             self.item_4 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_5 {
             self.item_5 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_6 {
             self.item_6 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_7 {
             self.item_7 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_8 {
             self.item_8 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_9 {
             self.item_9 = loot_special_names;
-            self
         } else {
             self.item_10 = loot_special_names;
-            self
         }
-        self
     }
 }
 
@@ -354,10 +343,10 @@ fn test_get_item_metadata_slot() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     // add test items
-    let item_pendant = DynamicItem { id: 1, xp: 1, metadata: 3 };
-    let item_silver_ring = DynamicItem { id: 4, xp: 1, metadata: 4 };
-    let item_ghost_wand = DynamicItem { id: 9, xp: 1, metadata: 5 };
-    let item_silk_robe = DynamicItem { id: 18, xp: 1, metadata: 6 };
+    let item_pendant = ItemPrimitive { id: 1, xp: 1, metadata: 3 };
+    let item_silver_ring = ItemPrimitive { id: 4, xp: 1, metadata: 4 };
+    let item_ghost_wand = ItemPrimitive { id: 9, xp: 1, metadata: 5 };
+    let item_silk_robe = ItemPrimitive { id: 18, xp: 1, metadata: 6 };
 
     adventurer.add_item(item_pendant);
     adventurer.add_item(item_silver_ring);
@@ -365,36 +354,36 @@ fn test_get_item_metadata_slot() {
     adventurer.add_item(item_silk_robe);
 
     let bag = Bag {
-        item_1: DynamicItem {
+        item_1: ItemPrimitive {
             id: 1, xp: 0, metadata: 4, 
-            }, item_2: DynamicItem {
+            }, item_2: ItemPrimitive {
             id: 2, xp: 0, metadata: 5, 
-            }, item_3: DynamicItem {
+            }, item_3: ItemPrimitive {
             id: 3, xp: 0, metadata: 6, 
-            }, item_4: DynamicItem {
+            }, item_4: ItemPrimitive {
             id: 4, xp: 0, metadata: 7, 
-            }, item_5: DynamicItem {
+            }, item_5: ItemPrimitive {
             id: 5, xp: 0, metadata: 8, 
-            }, item_6: DynamicItem {
+            }, item_6: ItemPrimitive {
             id: 6, xp: 0, metadata: 11, 
-            }, item_7: DynamicItem {
+            }, item_7: ItemPrimitive {
             id: 7, xp: 0, metadata: 0, 
-            }, item_8: DynamicItem {
+            }, item_8: ItemPrimitive {
             id: 8, xp: 0, metadata: 12, 
-            }, item_9: DynamicItem {
+            }, item_9: ItemPrimitive {
             id: 9, xp: 0, metadata: 0, 
-            }, item_10: DynamicItem {
+            }, item_10: ItemPrimitive {
             id: 10, xp: 0, metadata: 0, 
-            }, item_11: DynamicItem {
+            }, item_11: ItemPrimitive {
             id: 11, xp: 0, metadata: 18, 
         },
     };
 
-    let new_item = DynamicItem { id: 1, xp: 1, metadata: 0 };
+    let new_item = ItemPrimitive { id: 1, xp: 1, metadata: 0 };
 
     let item = ILootItemSpecialNames::get_loot_special_names_slot(adventurer, bag, new_item);
 
-    assert(item.metadata == 19, 'DynamicItem');
+    assert(item.metadata == 19, 'ItemPrimitive');
 }
 
 #[test]
@@ -424,7 +413,7 @@ fn test_set_item_metadata_slot() {
         }
     };
 
-    let loot_statistics_1 = DynamicItem { id: 102, xp: 0, metadata: 1 };
+    let loot_statistics_1 = ItemPrimitive { id: 102, xp: 0, metadata: 1 };
 
     let loot_special_names_2 = LootItemSpecialNames {
         name_prefix: 12, name_suffix: 11, item_suffix: 13
@@ -436,7 +425,7 @@ fn test_set_item_metadata_slot() {
     assert(item_meta_storage.item_1.name_suffix == 11, 'should be 11');
     assert(item_meta_storage.item_1.item_suffix == 13, 'should be 13');
 
-    let loot_statistics_2 = DynamicItem { id: 102, xp: 0, metadata: 2 };
+    let loot_statistics_2 = ItemPrimitive { id: 102, xp: 0, metadata: 2 };
 
     let loot_special_names_2 = LootItemSpecialNames {
         name_prefix: 12, name_suffix: 11, item_suffix: 13
@@ -451,16 +440,16 @@ fn test_set_item_metadata_slot() {
 #[test]
 #[available_gas(5000000)]
 fn test_get_item_metadata() {
-    let item_pendant = DynamicItem { id: 1, xp: 1, metadata: 1 };
-    let item_silver_ring = DynamicItem { id: 2, xp: 1, metadata: 2 };
-    let item_silk_robe = DynamicItem { id: 3, xp: 1, metadata: 3 };
-    let item_iron_sword = DynamicItem { id: 4, xp: 1, metadata: 4 };
-    let item_katana = DynamicItem { id: 5, xp: 1, metadata: 5 };
-    let item_falchion = DynamicItem { id: 6, xp: 1, metadata: 6 };
-    let item_leather_gloves = DynamicItem { id: 7, xp: 1, metadata: 7 };
-    let item_silk_gloves = DynamicItem { id: 8, xp: 1, metadata: 8 };
-    let item_linen_gloves = DynamicItem { id: 9, xp: 1, metadata: 9 };
-    let item_crown = DynamicItem { id: 10, xp: 1, metadata: 10 };
+    let item_pendant = ItemPrimitive { id: 1, xp: 1, metadata: 1 };
+    let item_silver_ring = ItemPrimitive { id: 2, xp: 1, metadata: 2 };
+    let item_silk_robe = ItemPrimitive { id: 3, xp: 1, metadata: 3 };
+    let item_iron_sword = ItemPrimitive { id: 4, xp: 1, metadata: 4 };
+    let item_katana = ItemPrimitive { id: 5, xp: 1, metadata: 5 };
+    let item_falchion = ItemPrimitive { id: 6, xp: 1, metadata: 6 };
+    let item_leather_gloves = ItemPrimitive { id: 7, xp: 1, metadata: 7 };
+    let item_silk_gloves = ItemPrimitive { id: 8, xp: 1, metadata: 8 };
+    let item_linen_gloves = ItemPrimitive { id: 9, xp: 1, metadata: 9 };
+    let item_crown = ItemPrimitive { id: 10, xp: 1, metadata: 10 };
 
     let mut item_meta_storage = LootItemSpecialNamesStorage {
         item_1: LootItemSpecialNames {

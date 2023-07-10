@@ -9,7 +9,7 @@ use super::{
         item_tier, item_slot, item_type, item_index, item_slot_length,
         constants::{
             NamePrefixLength, ItemNameSuffix, ItemId, ItemNamePrefix, NameSuffixLength,
-            ItemSuffixLength, ItemSuffix, NUM_ITEMS, Settings::ITEM_MAX_GREATNESS
+            ItemSuffixLength, ItemSuffix, NUM_ITEMS,
         }
     },
     utils::NameUtils::{
@@ -20,36 +20,6 @@ use super::{
 
 use combat::{combat::ImplCombat, constants::CombatEnums::{Type, Tier, Slot}};
 use pack::{pack::{Packing, rshift_split}, constants::pow};
-
-#[derive(Drop, Copy, Serde)] // 21 bits
-struct DynamicItem {
-    id: u8, // 7 bits
-    xp: u16, // 9 bits
-    // this is set as the items are found/purchased
-    metadata: u8, // 5 bits
-}
-
-impl DynamicItemPacking of Packing<DynamicItem> {
-    fn pack(self: DynamicItem) -> felt252 {
-        (self.id.into()
-         + self.xp.into() * pow::TWO_POW_7
-         + self.metadata.into() * pow::TWO_POW_16
-        ).try_into().expect('pack DynamicItem')
-    }
-
-    fn unpack(packed: felt252) -> DynamicItem {
-        let packed = packed.into();
-        let (packed, id) = rshift_split(packed, pow::TWO_POW_7);
-        let (packed, xp) = rshift_split(packed, pow::TWO_POW_9);
-        let (_, metadata) = rshift_split(packed, pow::TWO_POW_5);
-
-        DynamicItem {
-            id: id.try_into().expect('unpack DynamicItem id'),
-            xp: xp.try_into().expect('unpack DynamicItem xp'),
-            metadata: metadata.try_into().expect('unpack DynamicItem metadata')
-        }
-    }
-}
 
 #[derive(Copy, Drop, Clone, Serde)]
 struct Loot {
@@ -149,25 +119,6 @@ impl ImplLoot of ILoot {
             return true;
         } else {
             return false;
-        }
-    }
-
-    // get_greatness returns the greatness level of an item based on xp
-    // @param xp The xp of the item.
-    // @return The greatness level of the item.
-    fn get_greatness(self: DynamicItem) -> u8 {
-        // use combat lib to determine the level but give items a bonus based
-        // on the item level multiplier setting (currently 4) which means
-        // items will level up 4x faster than entities without a multplier
-        // such as adventurers
-        let level = ImplCombat::get_level_from_xp(self.xp);
-
-        // if level exceeds max greatness
-        if level > ITEM_MAX_GREATNESS {
-            // return max greatness
-            ITEM_MAX_GREATNESS
-        } else {
-            level
         }
     }
 }

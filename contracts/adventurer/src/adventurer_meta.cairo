@@ -7,28 +7,28 @@ use pack::pack::{Packing, rshift_split};
 #[derive(Drop, Copy, Serde)]
 struct AdventurerMetadata {
     name: u32,
-    home_realm: u8,
+    home_realm: u16,
     race: u8,
     order: u8,
-    entropy: u64,
+    entropy: u128,
 }
 
 impl PackingAdventurerMetadata of Packing<AdventurerMetadata> {
     fn pack(self: AdventurerMetadata) -> felt252 {
         (self.name.into()
          + self.home_realm.into() * pow::TWO_POW_32
-         + self.race.into() * pow::TWO_POW_40
-         + self.order.into() * pow::TWO_POW_48
-         + self.entropy.into() * pow::TWO_POW_56
+         + self.race.into() * pow::TWO_POW_48
+         + self.order.into() * pow::TWO_POW_56
+         + self.entropy.into() * pow::TWO_POW_64
         ).try_into().expect('pack AdventurerMetadata')
     }
     fn unpack(packed: felt252) -> AdventurerMetadata {
         let packed = packed.into();
         let (packed, name) = rshift_split(packed, pow::TWO_POW_32);
-        let (packed, home_realm) = rshift_split(packed, pow::TWO_POW_8);
+        let (packed, home_realm) = rshift_split(packed, pow::TWO_POW_16);
         let (packed, race) = rshift_split(packed, pow::TWO_POW_8);
         let (packed, order) = rshift_split(packed, pow::TWO_POW_8);
-        let (_, entropy) = rshift_split(packed, pow::TWO_POW_64);
+        let (_, entropy) = rshift_split(packed, pow::TWO_POW_128);
 
         AdventurerMetadata {
             name: name.try_into().expect('unpack AdvMetadata name'),
@@ -45,7 +45,7 @@ impl PackingAdventurerMetadata of Packing<AdventurerMetadata> {
 #[available_gas(50000000)]
 fn test_meta() {
     let meta = AdventurerMetadata {
-        name: 4294962295, home_realm: 45, race: 28, order: 6, entropy: 4294937295
+        name: 4294962295, home_realm: 8000, race: 28, order: 6, entropy: 340282366920938463463374607431768211455
     };
 
     let packed = meta.pack();

@@ -1,6 +1,5 @@
 mod Settings {
     const ITEM_LEVEL_MULTIPLIER: u16 = 4;
-    const ITEM_MAX_GREATNESS: u8 = 20;
 }
 
 const NUM_ITEMS: u128 = 101;
@@ -109,7 +108,7 @@ mod ItemId {
     const HeavyGloves: u8 = 101;
 }
 
-// DynamicItem Slot Length
+// ItemPrimitive Slot Length
 mod ItemSlotLength {
     const SlotItemsLengthWeapon: u8 = 18;
     const SlotItemsLengthChest: u8 = 15;
