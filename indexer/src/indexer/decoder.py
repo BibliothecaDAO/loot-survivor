@@ -13,7 +13,7 @@ raw_abi = [
             {"name": "home_realm", "type": "core::integer::u8"},
             {"name": "race", "type": "core::integer::u8"},
             {"name": "order", "type": "core::integer::u8"},
-            {"name": "entropy", "type": "core::integer::u64"},
+            {"name": "entropy", "type": "core::integer::u128"},
         ],
     },
     {

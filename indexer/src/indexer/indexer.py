@@ -1136,15 +1136,13 @@ class LootSurvivorIndexer(StarkNetIndexer):
 
         for item in sa.items:
             items_doc = {
-                "item": check_exists_int(item.item["id"]),
-                "adventurerId": check_exists_int(
-                    item.adventurer_state["adventurer_id"]
-                ),
+                "item": check_exists_int(item["item"]["id"]),
+                "adventurerId": check_exists_int(sa.adventurer_state["adventurer_id"]),
                 "owner": check_exists_int(0),
                 "equipped": check_exists_int(0),
                 "ownerAddress": check_exists_int(0),
                 "xp": encode_int_as_bytes(0),
-                "cost": encode_int_as_bytes(item.item["cost"]),
+                "cost": encode_int_as_bytes(item["price"]),
                 "namePrefix": check_exists_int(0),
                 "nameSuffix": check_exists_int(0),
                 "itemSuffix": check_exists_int(0),
@@ -1156,9 +1154,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
 
         print(
             "- [new items available]",
-            sa.items,
-            "->",
-            sa.adventurer_id,
+            sa.adventurer_state["adventurer_id"],
         )
 
     async def handle_invalidate(self, _info: Info, _cursor: Cursor):
