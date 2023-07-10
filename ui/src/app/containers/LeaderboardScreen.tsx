@@ -65,11 +65,11 @@ export default function LeaderboardScree() {
       </div>
     );
 
-  // const adventurers = data.adventurersByXPQuery?.adventurers;
+  const adventurers = data.adventurersByXPQuery?.adventurers
+    ? data.adventurersByXPQuery?.adventurers
+    : [];
 
-  const adventurers = [AdventurerTemplate];
-
-  const totalPages = Math.ceil(adventurers?.length / itemsPerPage);
+  const totalPages = Math.ceil(adventurers.length / itemsPerPage);
 
   const handleClick = (newPage: number): void => {
     if (newPage >= 1 && newPage <= totalPages) {

@@ -19,7 +19,7 @@ import {
   getLastBattleByAdventurer,
 } from "../hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
-import { NullAdventurer, NullBattle, Battle } from "../types";
+import { NullAdventurer, NullBattle, Battle, NullDiscovery } from "../types";
 import { DiscoveryTemplate, BattleTemplate } from "../types/templates";
 
 /**
@@ -62,11 +62,9 @@ export default function BeastScreen() {
     txAccepted
   );
 
-  // let beastData = data.lastBeastQuery
-  //   ? data.lastBeastQuery.beasts[0]
-  //   : NullBattle;
-
-  let beastData = DiscoveryTemplate;
+  let beastData = data.lastBeastQuery
+    ? data.lastBeastQuery.discoveries[0]
+    : NullDiscovery;
 
   useCustomQuery(
     "battlesByBeastQuery",
@@ -79,15 +77,11 @@ export default function BeastScreen() {
     txAccepted
   );
 
-  // const formatBattles = data.battlesByBeastQuery
-  //   ? data.battlesByBeastQuery.battles
-  //   : [];
+  const formatBattles = data.battlesByBeastQuery
+    ? data.battlesByBeastQuery.battles
+    : [];
 
-  const formatBattles = [BattleTemplate];
-
-  // const lastBattle = data.lastBattleQuery?.battles[0];
-
-  const lastBattle = BattleTemplate;
+  const lastBattle = data.lastBattleQuery?.battles[0];
 
   const attackTx = {
     contractAddress: gameContract?.address ?? "",

@@ -54,17 +54,13 @@ export default function EncountersScreen({ profile }: EncountersProps) {
     if (data) {
       setLoadingData(true);
 
-      // const discoveries = discoveriesByAdventurerData
-      //   ? discoveriesByAdventurerData.discoveries
-      //   : [];
+      const discoveries = discoveriesByAdventurerData
+        ? discoveriesByAdventurerData.discoveries
+        : [];
 
-      const discoveries = [DiscoveryTemplate];
-
-      // const battles = battlesByAdventurerData
-      //   ? battlesByAdventurerData.battles
-      //   : [];
-
-      const battles = [BattleTemplate];
+      const battles = battlesByAdventurerData
+        ? battlesByAdventurerData.battles
+        : [];
 
       const formattedDiscoveries = discoveries.map((discovery: Discovery) => ({
         ...discovery,

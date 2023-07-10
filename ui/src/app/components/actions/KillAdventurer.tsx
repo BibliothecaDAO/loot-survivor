@@ -8,8 +8,8 @@ import { getAdventurerById } from "../../hooks/graphql/queries";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import TopInfo from "../adventurer/TopInfo";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import { AdventurerTemplate } from "@/app/types/templates";
 import { useBlock } from "@starknet-react/core";
+import { NullAdventurer } from "@/app/types";
 
 export default function KillAdventurer() {
   const { gameContract } = useContracts();
@@ -21,6 +21,7 @@ export default function KillAdventurer() {
     refetchInterval: false,
     blockIdentifier: "latest",
   });
+  const { data } = useQueriesStore();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAdventurerTarget(event.target.value);
@@ -46,11 +47,9 @@ export default function KillAdventurer() {
     txAccepted
   );
 
-  // const slayAdventurer = data.adventurerToSlayQuery
-  //   ? data.adventurerToSlayQuery.adventurers[0]
-  //   : NullAdventurer;
-
-  const slayAdventurer = AdventurerTemplate;
+  const slayAdventurer = data.adventurerToSlayQuery
+    ? data.adventurerToSlayQuery.adventurers[0]
+    : NullAdventurer;
 
   const formatLastActionBlock = (slayAdventurer?.lastAction ?? 0) % 512;
   const formatCurrentBlock = (blockData?.block_number ?? 0) % 512;

@@ -59,8 +59,8 @@ import MobileHeader from "./components/navigation/MobileHeader";
 import Player from "./components/adventurer/Player";
 import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
-import { AdventurerTemplate } from "./types/templates";
 import { TutorialDialog } from "./components/tutorial/TutorialDialog";
+import { AdventurerTemplate } from "./types/templates";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -192,10 +192,11 @@ export default function Home() {
     },
   ]);
 
-  // const adventurers = data.adventurersByOwnerQuery
-  //   ? data.adventurersByOwnerQuery.adventurers
-  //   : [];
-  const adventurers = [AdventurerTemplate];
+  const adventurers = data.adventurersByOwnerQuery
+    ? data.adventurersByOwnerQuery.adventurers
+    : [];
+
+  // const adventurers = [AdventurerTemplate];
 
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
@@ -498,15 +499,7 @@ export default function Home() {
         refetch("adventurersByOwnerQuery");
       }
     }
-  }, [
-    onboarded,
-    adventurer,
-    account,
-    adventurers.length,
-    handleOnboarded,
-    menu,
-    refetch,
-  ]);
+  }, [onboarded, adventurer, account]);
 
   useEffect(() => {
     if (statUpgrades > 0 && adventurer?.health !== 0) {

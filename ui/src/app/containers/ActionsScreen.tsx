@@ -19,7 +19,6 @@ import {
 } from "../components/icons/Icons";
 import { useMediaQuery } from "react-responsive";
 import KillAdventurer from "../components/actions/KillAdventurer";
-import { DiscoveryTemplate } from "../types/templates";
 
 /**
  * @container
@@ -55,11 +54,9 @@ export default function ActionsScreen() {
     txAccepted
   );
 
-  // const latestDiscoveries = data.latestDiscoveriesQuery
-  //   ? data.latestDiscoveriesQuery.discoveries
-  //   : [];
-
-  const latestDiscoveries = [DiscoveryTemplate];
+  const latestDiscoveries = data.latestDiscoveriesQuery
+    ? data.latestDiscoveriesQuery.discoveries
+    : [];
 
   const exploreTx = {
     contractAddress: gameContract?.address ?? "",

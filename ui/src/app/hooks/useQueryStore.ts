@@ -51,7 +51,7 @@ interface InitialData {
   battlesByAdventurerQuery: BattlesResult | null;
   battlesByTxHashQuery: BattlesResult | null;
   battlesByBeastQuery: BattlesResult | null;
-  lastBeastQuery: BattlesResult | null;
+  lastBeastQuery: DiscoveriesResult | null;
   discoveriesQuery: DiscoveriesResult | null;
   latestDiscoveriesQuery: DiscoveriesResult | null;
   discoveryByTxHashQuery: DiscoveriesResult | null;

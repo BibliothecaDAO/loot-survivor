@@ -8,7 +8,6 @@ import { useQueriesStore } from "../../hooks/useQueryStore";
 import useCustomQuery from "../../hooks/useCustomQuery";
 import useUIStore from "../../hooks/useUIStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
-import { ItemTemplate } from "@/app/types/templates";
 import { Item } from "@/app/types";
 
 interface InfoProps {
@@ -39,14 +38,13 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     },
     txAccepted
   );
-  // const items = profileExists
-  //   ? data.itemsByProfileQuery
-  //     ? data.itemsByProfileQuery.items
-  //     : []
-  //   : data.itemsByAdventurerQuery
-  //   ? data.itemsByAdventurerQuery.items
-  //   : [];
-  const items = [ItemTemplate];
+  const items = profileExists
+    ? data.itemsByProfileQuery
+      ? data.itemsByProfileQuery.items
+      : []
+    : data.itemsByAdventurerQuery
+    ? data.itemsByAdventurerQuery.items
+    : [];
 
   return (
     <div className="h-full border border-terminal-green overflow-auto">
