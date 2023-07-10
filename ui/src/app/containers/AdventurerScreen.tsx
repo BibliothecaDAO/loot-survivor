@@ -23,16 +23,18 @@ export default function AdventurerScreen() {
 
   const txAccepted = useLoadingStore((state) => state.txAccepted);
 
-  useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
-    owner: padAddress(account?.address ?? ""),
-  });
+  useCustomQuery(
+    "adventurersByOwnerQuery",
+    getAdventurersByOwner,
+    {
+      owner: padAddress(account?.address ?? ""),
+    },
+    txAccepted
+  );
 
   const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers
     : [];
-
-  console.log(padAddress(account?.address ?? ""));
-  console.log(adventurers);
 
   const menu = [
     {
