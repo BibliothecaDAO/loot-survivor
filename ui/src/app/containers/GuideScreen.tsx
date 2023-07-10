@@ -34,22 +34,28 @@ export default function GuideScreen() {
   ];
 
   const suffixData = [
-    { suffix: "of Power", attribute: "Strength" },
-    { suffix: "of Giant", attribute: "Vitality" },
-    { suffix: "of Titans", attribute: "Dexterity" },
-    { suffix: "of Skill", attribute: "Intelligence" },
-    { suffix: "of Perfection", attribute: "Intelligence" },
-    { suffix: "of Brilliance", attribute: "Intelligence" },
-    { suffix: "of Enlightenment", attribute: "Wisdom" },
-    { suffix: "of Protection", attribute: "Vitality" },
-    { suffix: "of Anger", attribute: "Strength" },
-    { suffix: "of Rage", attribute: "Wisdom" },
-    { suffix: "of Fury", attribute: "Dexterity" },
-    { suffix: "of Vitriol", attribute: "Charisma" },
-    { suffix: "of the Fox", attribute: "Intelligence" },
-    { suffix: "of Detection", attribute: "Wisdom" },
-    { suffix: "of Reflection", attribute: "Wisdom" },
-    { suffix: "of the Twins", attribute: "Dexterity" },
+    { suffix: "of Power", attribute: "Strength +3" },
+    { suffix: "of Giant", attribute: "Vitality +3" },
+    { suffix: "of Titans", attribute: "Strength +2, Charisma +1" },
+    { suffix: "of Skill", attribute: "Dexterity +3" },
+    {
+      suffix: "of Perfection",
+      attribute: "Strength +1, Dexterity +1, Vitality +1",
+    },
+    { suffix: "of Brilliance", attribute: "Intelligence +3" },
+    { suffix: "of Enlightenment", attribute: "Wisdom +3" },
+    { suffix: "of Protection", attribute: "Vitality +2, Dexterity +1" },
+    { suffix: "of Anger", attribute: "Strength +2, Dexterity +1" },
+    { suffix: "of Rage", attribute: "Wisdom +1, Strength +1, Charisma +1" },
+    {
+      suffix: "of Fury",
+      attribute: "Vitality +1, Charisma +1, Intelligence +1",
+    },
+    { suffix: "of Vitriol", attribute: "Intelligence +2, Wisdom +1" },
+    { suffix: "of the Fox", attribute: "Dexterity +2, Charisma +1" },
+    { suffix: "of Detection", attribute: "Wisdom +2, Dexterity +1" },
+    { suffix: "of Reflection", attribute: "Wisdom +2, Intelligence +1" },
+    { suffix: "of the Twins", attribute: "Charisma +3" },
   ];
 
   return (
@@ -83,16 +89,14 @@ export default function GuideScreen() {
       <h3 className="mb-2">The Trials</h3>
       <p>
         During your exploration, you may stumble upon a Beast, an Obstacle, a
-        valuable Item such as Gold, Health Potion & Loot, or perhaps you will
-        gain XP.
+        valuable Item such as Gold, Health or XP.
       </p>
 
       <h3 className="mb-2">Beasts</h3>
       <p>
         If you encounter a beast, ready yourself for a potential onslaught!
-        Assess the beast&apos;s armor, method and area of attack. Prepare your
-        offense, or choose to flee if you are not prepared for battle! Beware,
-        adventurer this is not for feint hearted!
+        Assess the beast&apos;s armor and method of attack. Prepare your
+        offense, or choose to flee if you are not prepared for battle!
       </p>
       <h3 className="mb-2">Weapons and Armor</h3>
       <p className="mb-2">
@@ -168,12 +172,16 @@ export default function GuideScreen() {
       <h3 className="mb-2">The Lore of Items</h3>
       <p>
         Items have prefixes and suffixes assigned to them when they reach
-        certain Greatness. The suffix is randomly generated from 1 of 16 orders.
-        Once an item reaches greatness 15 it receives a name suffix which grants
-        the adventurer +3 stat boost while it is equipped. Items are also
-        granted a coveted +1 modifier when they hit 20 Greatness and an
-        additional +1 stat boost. If you meet a beast with the same suffix and
-        prefix of your item, special hits can be achieved!
+        certain Greatness. The suffix is randomly generated from one of the 16
+        Orders of Divinity
+      </p>
+      <p>
+        {" "}
+        Once an item reaches greatness 15 it achieves a suffix which grants the
+        adventurer +3 stat boost while it is equipped. Items are also granted a
+        coveted +1 modifier when they reach 20 Greatness and an additional +1
+        stat boost to your adventurer. If you meet a beast with the same suffix
+        and prefix of your item, special hits can be achieved!
       </p>
       <h4 className="mb-2 text-center">Item Suffixes and Their Attributes</h4>
       <div className="overflow-x-auto">
@@ -205,16 +213,10 @@ export default function GuideScreen() {
 
       <h3 className="mb-2">Market</h3>
       <p>
-        You can purchase items in the Marketplace auction and equip them in each
-        item slot. Available slots include: Weapon, Head, Chest, Hands, Waist,
-        Feet, Neck and Ring. Once you bid on items, a 15 minute auction
-        countdown will start where you can be outbid by other players, after 15
-        minutes the auction closes the highest bidder can claim their items.
-        Claimed items appear in your Inventory and can be equipped. Expect to
-        pay more for higher tier items, even when not bidding against other
-        adventurers. Every 3 hours new items will be available to mint, anyone
-        can mint items to refresh the marketplace. You can still claim items
-        even if new items have been minted.
+        You can purchase items in the Marketplace on each level up, after you
+        upgrade the Market will be closed. Buy items for each item slots:
+        Weapon, Head, Chest, Hands, Waist, Feet, Neck and Ring. Adventurers can
+        only carry 19 items in total.
       </p>
 
       <h3 className="mb-2">Swap Items</h3>
@@ -297,9 +299,9 @@ export default function GuideScreen() {
       <p>
         Purchase health potions to rejuvenate your weary adventurer. Health
         potions cannot be bought if you are in battle or if your character has
-        died. Maximum health is fixed at 100HP unless you upgrade your Vitality
-        which adds +20 to your maximum health. The cost of Health Potions
-        increase with your adventurer level and grants 10HP.
+        died. Maximum health is fixed at 100HP unless you upgrade Vitality. The
+        cost of Health Potions increase with your adventurer level and grants
+        10HP.
       </p>
     </div>
   );
