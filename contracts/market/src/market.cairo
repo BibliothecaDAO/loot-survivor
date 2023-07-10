@@ -87,7 +87,8 @@ impl ImplMarket of IMarket {
     }
 
     fn get_id(seed: u256) -> u8 {
-        (seed % NUM_LOOT_ITEMS.into()).try_into().unwrap()
+        let cast_seed: u128 = seed.try_into().unwrap();
+        (cast_seed % NUM_LOOT_ITEMS.into()).try_into().unwrap()
     }
 
     fn is_item_available(seed: u256, item_id: u8) -> bool {
