@@ -97,8 +97,6 @@ export const CreateAdventurer = ({
       ],
     };
 
-    console.log(mintAdventurerTx);
-
     addToCalls(mintAdventurerTx);
     startLoading(
       "Create",
