@@ -798,7 +798,6 @@ mod Game {
             name: adventurer_meta.name,
             home_realm: adventurer_meta.home_realm,
             race: adventurer_meta.race,
-            order: adventurer_meta.order,
             entropy: r.try_into().unwrap()
         };
 

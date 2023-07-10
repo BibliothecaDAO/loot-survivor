@@ -61,7 +61,7 @@ mod tests {
         let mut game = setup();
 
         let adventurer_meta = AdventurerMetadata {
-            name: 'Loaf'.try_into().unwrap(), home_realm: 1, race: 1, order: 2, entropy: 0
+            name: 'Loaf'.try_into().unwrap(), home_realm: 1, race: 1, entropy: 1
         };
 
         game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta);
@@ -93,7 +93,6 @@ mod tests {
         assert(adventurer_meta_1.name == 'Loaf', 'name');
         assert(adventurer_meta_1.home_realm == 1, 'home_realm');
         assert(adventurer_meta_1.race == 1, 'race');
-        assert(adventurer_meta_1.order == 2, 'order');
 
         adventurer_meta_1.entropy;
     }
