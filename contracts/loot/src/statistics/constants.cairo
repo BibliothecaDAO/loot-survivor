@@ -1,5 +1,5 @@
 mod Settings {
-    const ITEM_LEVEL_MULTIPLIER: u16 = 4;
+    const ITEM_LEVEL_MULTIPLIER: u16 = 3;
 }
 
 const NUM_ITEMS: u128 = 101;

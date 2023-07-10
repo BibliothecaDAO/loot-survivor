@@ -3,9 +3,10 @@ mod tests;
 
 #[starknet::contract]
 mod Game {
-    // TODO: TESTING CONSTS REMOVE BEFORE DEPLOYMENT
-    const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 10;
-    const IDLE_PENALTY_THRESHOLD_BLOCKS: u16 = 10;
+    // TODO: TESTING CONFIGS 
+    // ADJUST THESE BEFORE DEPLOYMENT
+    const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 4;
+    const IDLE_PENALTY_THRESHOLD_BLOCKS: u16 = 4;
     const IDLE_DEATH_PENALTY_BLOCKS: u16 = 300;
     const MAX_STORAGE_BLOCKS: u64 = 512;
     const TEST_ENTROPY: u64 = 12303548;
@@ -1805,8 +1806,7 @@ mod Game {
     ) -> u128 {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(adventurer.xp.into());
-        hash_span.append(adventurer.health.into());
-        hash_span.append(adventurer.gold.into());
+        hash_span.append(adventurer.last_action.into());
         hash_span.append(adventurer_entropy.into());
         hash_span.append(game_entropy.into());
 
