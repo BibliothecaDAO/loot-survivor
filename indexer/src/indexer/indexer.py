@@ -507,7 +507,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "xpEarnedItems": check_exists_int(0),
             "entity": check_exists_int(starter_beast),
             "entityLevel": check_exists_int(1),
-            "entityHealth": encode_int_as_bytes(1),
+            "entityHealth": encode_int_as_bytes(5),
             "entityNamePrefix": check_exists_int(0),
             "entityNameSuffix": check_exists_int(0),
             "ambushed": check_exists_int(0),
@@ -1006,6 +1006,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         gi = decode_greatness_increased_event.deserialize(
             [felt.to_int(i) for i in data]
         )
+        print(gi)
         await update_adventurer_helper(info, gi.adventurer_state)
         print(
             "- [greatness increased]",

@@ -604,14 +604,13 @@ class OrderByInput:
 @strawberry.input
 class AdventurersFilter:
     id: Optional[FeltValueFilter] = None
+    lastAction: Optional[FeltValueFilter] = None
     owner: Optional[HexValueFilter] = None
     race: Optional[RaceFilter] = None
     homeRealm: Optional[FeltValueFilter] = None
-    birthdate: Optional[DateTimeFilter] = None
     name: Optional[StringFilter] = None
     order: Optional[OrderFilter] = None
     health: Optional[FeltValueFilter] = None
-    level: Optional[FeltValueFilter] = None
     strength: Optional[FeltValueFilter] = None
     dexterity: Optional[FeltValueFilter] = None
     vitality: Optional[FeltValueFilter] = None
@@ -619,19 +618,19 @@ class AdventurersFilter:
     wisdom: Optional[FeltValueFilter] = None
     charisma: Optional[FeltValueFilter] = None
     xp: Optional[FeltValueFilter] = None
-    weaponId: Optional[FeltValueFilter] = None
-    chestId: Optional[FeltValueFilter] = None
-    headId: Optional[FeltValueFilter] = None
-    waistId: Optional[FeltValueFilter] = None
-    feetId: Optional[FeltValueFilter] = None
-    handsId: Optional[FeltValueFilter] = None
-    neckId: Optional[FeltValueFilter] = None
-    ringId: Optional[FeltValueFilter] = None
-    beast: Optional[FeltValueFilter] = None
+    weapon: Optional[FeltValueFilter] = None
+    chest: Optional[FeltValueFilter] = None
+    head: Optional[FeltValueFilter] = None
+    waist: Optional[FeltValueFilter] = None
+    foot: Optional[FeltValueFilter] = None
+    hand: Optional[FeltValueFilter] = None
+    neck: Optional[FeltValueFilter] = None
+    ring: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     statUpgrades: Optional[FeltValueFilter] = None
     gold: Optional[FeltValueFilter] = None
-    lastUpdated: Optional[DateTimeFilter] = None
+    createdTime: Optional[OrderByInput] = None
+    lastUpdatedTime: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -707,10 +706,10 @@ class ItemsFilter:
 @strawberry.input
 class AdventurersOrderByInput:
     id: Optional[OrderByInput] = None
+    lastAction: Optional[OrderByInput] = None
     owner: Optional[OrderByInput] = None
     race: Optional[OrderByInput] = None
     homeRealm: Optional[OrderByInput] = None
-    birthdate: Optional[OrderByInput] = None
     name: Optional[OrderByInput] = None
     order: Optional[OrderByInput] = None
     health: Optional[OrderByInput] = None
@@ -730,11 +729,11 @@ class AdventurersOrderByInput:
     hand: Optional[OrderByInput] = None
     neck: Optional[OrderByInput] = None
     ring: Optional[OrderByInput] = None
-    beast: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     statUpgrades: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
-    lastUpdated: Optional[OrderByInput] = None
+    createdTime: Optional[OrderByInput] = None
+    lastUpdatedTime: Optional[OrderByInput] = None
 
 
 @strawberry.input
@@ -1391,45 +1390,45 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
 
     app = web.Application()
-    # app.router.add_route("*", "/graphql", view_goerli)
+    app.router.add_route("*", "/graphql", view_goerli)
 
-    cors = aiohttp_cors.setup(app)
-    resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
-    resource_mainnet = cors.add(app.router.add_resource("/graphql"))
+    # cors = aiohttp_cors.setup(app)
+    # resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
+    # resource_mainnet = cors.add(app.router.add_resource("/graphql"))
 
-    cors.add(
-        resource_goerli.add_route("POST", view_goerli),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
-    cors.add(
-        resource_goerli.add_route("GET", view_goerli),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
+    # cors.add(
+    #     resource_goerli.add_route("POST", view_goerli),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
+    # cors.add(
+    #     resource_goerli.add_route("GET", view_goerli),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
 
-    cors.add(
-        resource_mainnet.add_route("POST", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
-    cors.add(
-        resource_mainnet.add_route("GET", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
+    # cors.add(
+    #     resource_mainnet.add_route("POST", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
+    # cors.add(
+    #     resource_mainnet.add_route("GET", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
 
     runner = web.AppRunner(app)
     await runner.setup()

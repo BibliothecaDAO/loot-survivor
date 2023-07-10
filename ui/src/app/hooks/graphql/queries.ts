@@ -1,32 +1,34 @@
 import { gql } from "@apollo/client";
 
 const ADVENTURER_FIELDS = `
-  beastHealth
-  charisma
-  chestId
-  dexterity
-  feetId
-  handsId
-  headId
-  health
   id
-  intelligence
-  level
-  luck
-  name
-  neckId
-  order
+  lastAction
   owner
   race
-  ringId
-  statUpgrades
+  homeRealm
+  name
+  order
+  health
   strength
+  dexterity
   vitality
-  waistId
-  weaponId
+  intelligence
   wisdom
+  charisma
   xp
+  weapon
+  chest
+  head
+  waist
+  foot
+  hand
+  neck
+  ring
+  beastHealth
+  statUpgrades
   gold
+  createdTime
+  lastUpdatedTime
 `;
 
 const ADVENTURERS_FRAGMENT = `
