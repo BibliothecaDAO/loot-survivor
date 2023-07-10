@@ -34,8 +34,8 @@ mod Game {
     use lootitems::{
         loot::{ILoot, Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
-    use pack::pack::Packing;
-
+    // use pack::pack::Packing; 
+    use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, adventurer_stats::Stats,
         item_primitive::ItemPrimitive, bag::{Bag, BagActions, ImplBagActions},
@@ -781,15 +781,17 @@ mod Game {
         hash_span.append(adventurer_id.try_into().unwrap());
 
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
-        let entropy: u256 = (poseidon.into() % U128_MAX.into());
-        
+        // let entropy: u256 = (poseidon.into() % U128_MAX.into());
+
+        let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
+
         // build meta
         let adventurer_meta = AdventurerMetadata {
             name: adventurer_meta.name,
             home_realm: adventurer_meta.home_realm,
             race: adventurer_meta.race,
             order: adventurer_meta.order,
-            entropy: entropy.try_into().unwrap()
+            entropy: r.try_into().unwrap()
         };
 
         // emit the StartGame
@@ -1784,8 +1786,8 @@ mod Game {
         hash_span.append(game_entropy.into());
 
         let poseidon = poseidon_hash_span(hash_span.span());
-        let p: u256 = (poseidon.into() % U128_MAX.into());
-        p.try_into().unwrap()
+        let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
+        r.try_into().unwrap()
     }
 
     // ------------------------------------------ //
@@ -2140,9 +2142,9 @@ mod Game {
         hash_span.append(timestamp.into());
 
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
-        let entropy: u256 = (poseidon.into() % U64_MAX.into());
+        let (d, r) = rshift_split(poseidon.into(), U64_MAX.into());
 
-        self._game_entropy.write(entropy.try_into().unwrap());
+        self._game_entropy.write(r.try_into().unwrap());
         self._last_game_entropy_block.write(blocknumber.into());
     }
 

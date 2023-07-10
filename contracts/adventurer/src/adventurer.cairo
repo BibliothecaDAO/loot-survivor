@@ -163,8 +163,10 @@ impl ImplAdventurer of IAdventurer {
         hash_span.append(adventurer_id.try_into().unwrap());
 
         let poseidon = poseidon_hash_span(hash_span.span());
-        let p: u256 = (poseidon.into() % 340282366920938463463374607431768211455);
-        p.try_into().unwrap()
+
+        let (d, r) = rshift_split(poseidon.into(), 340282366920938463463374607431768211455);
+
+        r.try_into().unwrap()
     }
 
     // @notice Calculates the charisma potion discount for the adventurer based on their charisma stat.
@@ -891,8 +893,9 @@ impl ImplAdventurer of IAdventurer {
         hash_span.append(adventurer_entropy.into());
 
         let poseidon = poseidon_hash_span(hash_span.span());
-        let p: u256 = (poseidon.into() % 340282366920938463463374607431768211455);
-        p.try_into().unwrap()
+        let (d, r) = rshift_split(poseidon.into(), 340282366920938463463374607431768211455);
+
+        r.try_into().unwrap()
     }
 
     // @notice This function adds a boost to an adventurer's attributes based on a provided suffix.
