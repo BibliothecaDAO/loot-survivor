@@ -25,9 +25,11 @@ mod Game {
         U128TryIntoU8, U64IntoFelt252, U64TryIntoU16
     };
     use core::traits::{TryInto, Into};
+    use array::ArrayTrait;
+    use poseidon::poseidon_hash_span;
 
     use game::game::constants::{
-        messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY
+        messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX
     };
     use lootitems::{
         loot::{ILoot, Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
@@ -774,13 +776,20 @@ mod Game {
         // get the current adventurer id - start at 1
         let adventurer_id = self._counter.read() + 1;
 
+        let mut hash_span = ArrayTrait::<felt252>::new();
+        hash_span.append(block_number.into());
+        hash_span.append(adventurer_id.try_into().unwrap());
+
+        let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
+        let entropy: u256 = (poseidon.into() % U64_MAX.into());
+        
         // build meta
         let adventurer_meta = AdventurerMetadata {
             name: adventurer_meta.name,
             home_realm: adventurer_meta.home_realm,
             race: adventurer_meta.race,
             order: adventurer_meta.order,
-            entropy: block_number
+            entropy: entropy.try_into().unwrap()
         };
 
         // emit the StartGame
@@ -1766,12 +1775,17 @@ mod Game {
     fn _get_live_entropy(
         adventurer_entropy: u128, game_entropy: u128, adventurer: Adventurer
     ) -> u128 {
-        // cast everything to u128 before adding to avoid overflow
-        return adventurer_entropy
-            + game_entropy
-            + U16IntoU128::into(adventurer.xp)
-            + U16IntoU128::into(adventurer.gold)
-            + U16IntoU128::into(adventurer.health);
+
+        let mut hash_span = ArrayTrait::<felt252>::new();
+        hash_span.append(adventurer.xp.into());
+        hash_span.append(adventurer.health.into());
+        hash_span.append(adventurer.gold.into());
+        hash_span.append(adventurer_entropy.into());
+        hash_span.append(game_entropy.into());
+
+        let poseidon = poseidon_hash_span(hash_span.span());
+        let p: u256 = (poseidon.into() % U128_MAX.into());
+        p.try_into().unwrap()
     }
 
     // ------------------------------------------ //
@@ -1951,7 +1965,7 @@ mod Game {
     ) {
         assert(
             ImplMarket::is_item_available(
-                adventurer.get_market_entropy(adventurer_id, adventurer_entropy), item_id
+                adventurer.get_market_seed(adventurer_id, adventurer_entropy).into(), item_id
             ) == true,
             messages::ITEM_DOES_NOT_EXIST
         );
@@ -2010,7 +2024,7 @@ mod Game {
             .into();
 
         ImplMarket::get_all_items_with_price(
-            _unpack_adventurer(self, adventurer_id).get_market_entropy(adventurer_id, adventurer_entropy)
+            _unpack_adventurer(self, adventurer_id).get_market_seed(adventurer_id, adventurer_entropy).into()
         )
     }
 
@@ -2113,6 +2127,7 @@ mod Game {
         // let hash: felt252  = starknet::get_tx_info().unbox().transaction_hash.into();
 
         let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
+        let timestamp: u64 = starknet::get_block_info().unbox().block_timestamp.into();
 
         assert(
             blocknumber >= (self._last_game_entropy_block.read().try_into().unwrap()
@@ -2120,7 +2135,14 @@ mod Game {
             messages::BLOCK_NUMBER_ERROR
         );
 
-        self._game_entropy.write(blocknumber);
+        let mut hash_span = ArrayTrait::<felt252>::new();
+        hash_span.append(blocknumber.into());
+        hash_span.append(timestamp.into());
+
+        let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
+        let entropy: u256 = (poseidon.into() % U64_MAX.into());
+
+        self._game_entropy.write(entropy.try_into().unwrap());
         self._last_game_entropy_block.write(blocknumber.into());
     }
 

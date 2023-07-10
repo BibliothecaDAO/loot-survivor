@@ -21,6 +21,9 @@ mod messages {
 const BLOCKS_IN_A_WEEK: u64 = 3360;
 const COST_TO_PLAY: u256 = 25;
 
+const U64_MAX: u64 = 18446744073709551615;
+const U128_MAX: u128 = 340282366920938463463374607431768211455;
+
 #[derive(Drop, Copy)]
 struct Week {
     DAO: u256,
