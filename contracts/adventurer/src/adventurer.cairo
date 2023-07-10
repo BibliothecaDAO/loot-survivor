@@ -154,7 +154,7 @@ impl ImplAdventurer of IAdventurer {
     // @param adventurer_entropy An additional entropy input for the adventurer.
     //
     // @return u256 The calculated market entropy for the given adventurer.
-    fn get_market_seed(self: Adventurer, adventurer_id: u256, adventurer_entropy: u128) -> felt252 {
+    fn get_market_seed(self: Adventurer, adventurer_id: u256, adventurer_entropy: u128) -> u128 {
         let mut hash_span = ArrayTrait::new();
 
         hash_span.append(self.xp.into());
@@ -162,7 +162,9 @@ impl ImplAdventurer of IAdventurer {
         hash_span.append(adventurer_entropy.into());
         hash_span.append(adventurer_id.try_into().unwrap());
 
-        poseidon_hash_span(hash_span.span())
+        let poseidon = poseidon_hash_span(hash_span.span());
+        let p: u256 = (poseidon.into() % 340282366920938463463374607431768211455);
+        p.try_into().unwrap()
     }
 
     // @notice Calculates the charisma potion discount for the adventurer based on their charisma stat.
@@ -882,7 +884,13 @@ impl ImplAdventurer of IAdventurer {
     // @param adventurer_entropy A number used for randomization.
     // @return Returns a number used for generated a random beast.
     fn get_beast_seed(self: Adventurer, adventurer_entropy: u128) -> u128 {
-        self.xp.into() + adventurer_entropy.into()
+        let mut hash_span = ArrayTrait::new();
+        hash_span.append(self.xp.into());
+        hash_span.append(adventurer_entropy.into());
+
+        let poseidon = poseidon_hash_span(hash_span.span());
+        let p: u256 = (poseidon.into() % 340282366920938463463374607431768211455);
+        p.try_into().unwrap()
     }
 
     // @notice This function adds a boost to an adventurer's attributes based on a provided suffix.

@@ -316,7 +316,7 @@ mod tests {
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
         assert(
-            adventurer.gold == (STARTING_GOLD + BeastSettings::GOLD_REWARD_BASE_MINIMUM)
+            adventurer.gold == (STARTING_GOLD + BeastSettings::GOLD_REWARD_BASE_MINIMUM + 1)
                 - item_price,
             'gold'
         );
