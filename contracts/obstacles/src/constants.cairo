@@ -4,7 +4,7 @@ mod ObstacleSettings {
     // Determines the minimum damage an obstacle can do
     const MINIMUM_DAMAGE: u16 = 1;
     const DAMAGE_BOOST: u16 = 0;
-    const MINIMUM_XP_REWARD: u16 = 1;
+    const MINIMUM_XP_REWARD: u16 = 4;
 }
 
 mod ObstacleId {

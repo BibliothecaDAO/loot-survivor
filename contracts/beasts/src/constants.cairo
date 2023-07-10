@@ -39,7 +39,7 @@ mod BeastSettings {
     // the actual amount may be slightly higher based on bonus
     const GOLD_REWARD_BASE_MINIMUM: u16 = 4;
 
-    const MINIMUM_XP_REWARD: u16 = 1;
+    const MINIMUM_XP_REWARD: u16 = 4;
 
     const BEAST_SPECIAL_NAME_UNLOCK_LEVEL: u8 = 15;
 }
