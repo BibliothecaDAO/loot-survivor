@@ -21,7 +21,7 @@ impl ExploreUtils of Explore {
     // @param game_entropy: The global game entropy seed
     // @return u64: A random number between 0 and 3 denoting the outcome of the explore
     fn get_random_treasury_discovery(adventurer: Adventurer, entropy: u128) -> TreasureDiscovery {
-        let discovery_type = entropy + adventurer.xp.into() % 3;
+        let discovery_type = (entropy + adventurer.xp.into()) % 3;
         if (discovery_type == 0) {
             return TreasureDiscovery::Gold(());
         } else if (discovery_type == 1) {
@@ -47,7 +47,7 @@ impl ExploreUtils of Explore {
         let discovery_range = U8IntoU128::into((discovery_multiplier + 1) * 3);
 
         // divide rnd by discovery_range and store the remainder as discovery amount
-        let discovery_amount = entropy % discovery_range;
+        let discovery_amount = 1 + (entropy % discovery_range);
 
         // return discovery amount as a u16
         return U128TryIntoU16::try_into(discovery_amount).unwrap();

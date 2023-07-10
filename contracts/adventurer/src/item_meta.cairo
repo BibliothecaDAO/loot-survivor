@@ -1,4 +1,5 @@
 use core::serde::Serde;
+use debug::PrintTrait;
 use traits::{TryInto, Into};
 use option::OptionTrait;
 use integer::{U256TryIntoU32, U256TryIntoU16, U256TryIntoU8};
@@ -130,7 +131,7 @@ trait ILootItemSpecialNames {
         ref self: LootItemSpecialNamesStorage,
         loot_statistics: ItemPrimitive,
         loot_special_names: LootItemSpecialNames
-    ) -> LootItemSpecialNamesStorage;
+    );
 
     fn get_loot_special_names(
         self: LootItemSpecialNamesStorage, loot_statistics: ItemPrimitive
@@ -241,39 +242,28 @@ impl ImplLootItemSpecialNames of ILootItemSpecialNames {
         ref self: LootItemSpecialNamesStorage,
         loot_statistics: ItemPrimitive,
         loot_special_names: LootItemSpecialNames
-    ) -> LootItemSpecialNamesStorage {
+    ) {
         if loot_statistics.metadata == STORAGE::INDEX_1 {
             self.item_1 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_2 {
             self.item_2 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_3 {
             self.item_3 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_4 {
             self.item_4 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_5 {
             self.item_5 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_6 {
             self.item_6 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_7 {
             self.item_7 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_8 {
             self.item_8 = loot_special_names;
-            self
         } else if loot_statistics.metadata == STORAGE::INDEX_9 {
             self.item_9 = loot_special_names;
-            self
         } else {
             self.item_10 = loot_special_names;
-            self
         }
-        self
     }
 }
 
