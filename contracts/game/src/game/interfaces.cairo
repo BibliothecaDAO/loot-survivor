@@ -72,6 +72,12 @@ trait IGame<TContractState> {
     fn get_boosted_wisdom(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_base_charisma(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_boosted_charisma(self: @TContractState, adventurer_id: u256) -> u8;
+
+    // beast details
+    fn get_beast_type(self: @TContractState, beast_id: u8) -> u8;
+    fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;
+
+    // contract details
     fn get_dao_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;
     fn get_entropy(self: @TContractState) -> u64;

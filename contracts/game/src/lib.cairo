@@ -656,6 +656,13 @@ mod Game {
                 .stats
                 .charisma
         }
+        fn get_beast_type(self: @ContractState, beast_id: u8) -> u8 {
+            ImplCombat::type_to_u8(ImplBeast::get_type(beast_id))
+        }
+
+        fn get_beast_tier(self: @ContractState, beast_id: u8) -> u8 {
+            ImplCombat::tier_to_u8(ImplBeast::get_tier(beast_id))
+        }
 
         fn get_dao_address(self: @ContractState) -> ContractAddress {
             _dao_address(self)
@@ -799,6 +806,24 @@ mod Game {
             ref self,
             AdventurerState { owner: caller, adventurer_id, adventurer: new_adventurer },
             adventurer_meta
+        );
+
+        // emit BeastDiscovered
+        let starter_beast = ImplBeast::get_starter_beast(ImplLoot::get_type(starting_weapon));
+        __event__DiscoverBeast(
+            ref self,
+            DiscoverBeast {
+                adventurer_state: AdventurerState {
+                    owner: caller, adventurer_id, adventurer: new_adventurer
+                },
+                id: starter_beast.id,
+                level: starter_beast.combat_spec.level,
+                ambushed: false,
+                damage_taken: 0,
+                health: starter_beast.starting_health,
+                prefix1: starter_beast.combat_spec.special_powers.prefix1,
+                prefix2: starter_beast.combat_spec.special_powers.prefix2,
+            }
         );
 
         // write the new adventurer to storage
@@ -1746,7 +1771,8 @@ mod Game {
 
         // check gold balance
         assert(
-            adventurer.check_gold(adventurer.charisma_adjusted_potion_price()) == true, messages::NOT_ENOUGH_GOLD
+            adventurer.check_gold(adventurer.charisma_adjusted_potion_price()) == true,
+            messages::NOT_ENOUGH_GOLD
         );
 
         // verify adventurer isn't already at max health
@@ -1777,7 +1803,6 @@ mod Game {
     fn _get_live_entropy(
         adventurer_entropy: u128, game_entropy: u128, adventurer: Adventurer
     ) -> u128 {
-
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(adventurer.xp.into());
         hash_span.append(adventurer.health.into());
@@ -1963,7 +1988,11 @@ mod Game {
         assert(adventurer.stat_points_available > 0, messages::MARKET_CLOSED);
     }
     fn _assert_item_is_available(
-        self: @ContractState, adventurer: Adventurer, adventurer_id: u256, adventurer_entropy: u128, item_id: u8
+        self: @ContractState,
+        adventurer: Adventurer,
+        adventurer_id: u256,
+        adventurer_entropy: u128,
+        item_id: u8
     ) {
         assert(
             ImplMarket::is_item_available(
@@ -2026,7 +2055,9 @@ mod Game {
             .into();
 
         ImplMarket::get_all_items_with_price(
-            _unpack_adventurer(self, adventurer_id).get_market_seed(adventurer_id, adventurer_entropy).into()
+            _unpack_adventurer(self, adventurer_id)
+                .get_market_seed(adventurer_id, adventurer_entropy)
+                .into()
         )
     }
 
