@@ -19,9 +19,9 @@ export const AdventurerTutorial = () => {
       </p>
       <p className="text-sm sm:text-lg">
         Once your Adventurer is minted, a world of opportunities opens up.
-        You'll be able to perform a range of actions to help them climb the
+        You&apos;ll be able to perform a range of actions to help them climb the
         ranks and achieve the glory they deserve. So, are you ready to Loot
-        Survivor? Let's get adventuring!
+        Survivor? Let&apos;s get adventuring!
       </p>
     </div>
   );

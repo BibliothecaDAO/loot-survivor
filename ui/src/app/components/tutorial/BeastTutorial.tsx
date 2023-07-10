@@ -3,9 +3,9 @@ export const BeastTutorial = () => {
     <div className="flex flex-col">
       <h1 className="mt-0">Beast</h1>
       <p className="text-sm sm:text-lg">
-        Oh dear! You've stumbled upon a beast! A potential ambush lurks, with
-        only your Wisdom providing a chance at evasion! Equip your chosen weapon
-        and armor for both offense and defense against this formidable
+        Oh dear! You&apos;ve stumbled upon a beast! A potential ambush lurks,
+        with only your Wisdom providing a chance at evasion! Equip your chosen
+        weapon and armor for both offense and defense against this formidable
         adversary. Beware, swapping gear mid-battle will invite an immediate
         counterattack!
       </p>
