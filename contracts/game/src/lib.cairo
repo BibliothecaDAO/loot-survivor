@@ -14,13 +14,11 @@ mod Game {
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
     const STAT_UPGRADE_POINTS_PER_LEVEL: u8 = 1;
 
-    use game::game::interfaces::{
-        IGame, IERC20Dispatcher, IERC20DispatcherTrait, IERC20LibraryDispatcher
-    };
     use option::OptionTrait;
     use box::BoxTrait;
-    use starknet::get_caller_address;
-    use starknet::{ContractAddress, ContractAddressIntoFelt252, contract_address_const};
+    use starknet::{
+        get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const
+    };
     use integer::{
         Felt252TryIntoU64, U8IntoU16, U16IntoU64, U16IntoU128, U64IntoU128, U8IntoU128,
         U128TryIntoU8, U64IntoFelt252, U64TryIntoU16
@@ -29,13 +27,16 @@ mod Game {
     use array::ArrayTrait;
     use poseidon::poseidon_hash_span;
 
-    use game::game::constants::{
-        messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX
+    use game::game::{
+        interfaces::{IGame, IERC20Dispatcher, IERC20DispatcherTrait, IERC20LibraryDispatcher},
+        constants::{
+            messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
+            U128_MAX
+        }
     };
     use lootitems::{
         loot::{ILoot, Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
-    // use pack::pack::Packing; 
     use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, adventurer_stats::Stats,
@@ -52,7 +53,7 @@ mod Game {
         adventurer_utils::AdventurerUtils
     };
     use market::market::{ImplMarket, LootWithPrice};
-    use obstacles::obstacle::{ImplObstacle};
+    use obstacles::obstacle::{ImplObstacle, IObstacle};
     use combat::{combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums};
     use beasts::beast::{Beast, IBeast, ImplBeast};
 
@@ -992,7 +993,7 @@ mod Game {
         );
 
         // get the xp reward for the obstacle
-        let xp_reward = ImplObstacle::get_xp_reward(obstacle);
+        let xp_reward = obstacle.get_xp_reward();
 
         // reward adventurer with xp (regarldess of obstacle outcome)
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_reward);

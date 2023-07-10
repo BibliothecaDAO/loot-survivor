@@ -1,19 +1,15 @@
 use core::option::OptionTrait;
 use core::traits::Into;
-use survivor::adventurer::{Adventurer, ImplAdventurer};
-use survivor::constants::discovery_constants::{
-    DiscoveryEnums::TreasureDiscovery, DiscoveryEnums::ExploreResult
+use integer::{U8IntoU128, U128TryIntoU16};
+
+use survivor::{
+    adventurer::{Adventurer, ImplAdventurer},
+    constants::discovery_constants::{
+        DiscoveryEnums::TreasureDiscovery, DiscoveryEnums::ExploreResult
+    }
 };
-use integer::{U8IntoU64, U64TryIntoU16, U8IntoU128, U128TryIntoU16};
 
-trait Explore {
-    fn get_random_treasury_discovery(adventurer: Adventurer, entropy: u128) -> TreasureDiscovery;
-    fn get_level_adjusted_discovery_amount(adventurer: Adventurer, entropy: u128) -> u16;
-    fn get_gold_discovery(adventurer: Adventurer, entropy: u128) -> u16;
-    fn get_health_discovery(adventurer: Adventurer, entropy: u128) -> u16;
-    fn get_xp_discovery(adventurer: Adventurer, entropy: u128) -> u16;
-}
-
+#[generate_trait]
 impl ExploreUtils of Explore {
     // get_random_treasury_discovery returns a random number between 0 and 3 based on provided entropy
     // @param adventurer: Adventurer
