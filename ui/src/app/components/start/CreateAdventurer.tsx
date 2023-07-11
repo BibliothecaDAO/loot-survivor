@@ -19,6 +19,7 @@ import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import useUIStore from "../../hooks/useUIStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { FormData, Adventurer } from "@/app/types";
+import { getRealmNameById } from "../../lib/utils";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
@@ -37,7 +38,7 @@ export const CreateAdventurer = ({
   const [formData, setFormData] = useState<FormData>({
     startingWeapon: "",
     name: "",
-    homeRealmId: "1",
+    homeRealmId: "",
     race: "",
     order: "",
   });
@@ -92,7 +93,6 @@ export const CreateAdventurer = ({
         parseInt(stringToFelt(formData.name)).toString(),
         formData.homeRealmId,
         getKeyFromValue(gameData.RACES, formData.race)?.toString() ?? "",
-        getKeyFromValue(gameData.ORDERS, formData.order) ?? "",
         "1",
       ],
     };
@@ -166,6 +166,10 @@ export const CreateAdventurer = ({
     }
   }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
 
+  const realm = getRealmNameById(parseInt(formData.homeRealmId) ?? 0);
+
+  console.log(formData.homeRealmId);
+
   return (
     <div className="flex items-center sm:w-1/2 mx-4 border border-terminal-green">
       <div className="flex flex-row w-full gap-2 p-2">
@@ -182,7 +186,7 @@ export const CreateAdventurer = ({
               onChange={handleChange}
               className="p-1 m-2 bg-terminal-black border border-slate-500"
               onKeyDown={handleKeyDown}
-              maxLength={31}
+              maxLength={16}
             />
           </label>
           <label className="flex justify-between">
@@ -207,44 +211,21 @@ export const CreateAdventurer = ({
           </label>
           <label className="flex justify-between">
             <span className="self-center">Home Realm:</span>
-            <input
-              type="number"
-              name="homeRealmId"
-              min="1"
-              max="8000"
-              onChange={handleChange}
-              className="p-1 m-2 bg-terminal-black border border-slate-500"
-            />
-          </label>
-          <label className="flex justify-between">
-            <span className="self-center">Order of Divinity:</span>
-            <select
-              name="order"
-              onChange={handleChange}
-              className="p-1 m-2 bg-terminal-black"
-            >
-              <option value="">Select an order</option>
-              <optgroup label="Order of Light">
-                <option value="Power">Power</option>
-                <option value="Giants">Giants</option>
-                <option value="Perfection">Perfection</option>
-                <option value="Brilliance">Brilliance</option>
-                <option value="Enlightenment">Enlightenment</option>
-                <option value="Protection">Protection</option>
-                <option value="Skill">Skill</option>
-                <option value="Titans">Titans</option>
-              </optgroup>
-              <optgroup label="Order of Dark">
-                <option value="Twins">Twins</option>
-                <option value="Detection">Detection</option>
-                <option value="Reflection">Reflection</option>
-                <option value="Fox">Fox</option>
-                <option value="Vitriol">Vitriol</option>
-                <option value="Fury">Fury</option>
-                <option value="Rage">Rage</option>
-                <option value="Anger">Anger</option>
-              </optgroup>
-            </select>
+            <span>
+              {formData.homeRealmId && (
+                <span className="self-center text-terminal-yellow">
+                  {realm?.name}
+                </span>
+              )}
+              <input
+                type="number"
+                name="homeRealmId"
+                min="1"
+                max="8000"
+                onChange={handleChange}
+                className="p-1 m-2 bg-terminal-black border border-slate-500"
+              />
+            </span>
           </label>
           <label className="flex justify-between">
             <span className="self-center">Starting Weapon:</span>

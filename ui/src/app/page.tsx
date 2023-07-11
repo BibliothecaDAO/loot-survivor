@@ -88,6 +88,7 @@ export default function Home() {
   // const deathDialog = true;
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const tutorialDialog = useUIStore((state) => state.tutorialDialog);
+  // const tutorialDialog = true;
   const showTutorialDialog = useUIStore((state) => state.showTutorialDialog);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);

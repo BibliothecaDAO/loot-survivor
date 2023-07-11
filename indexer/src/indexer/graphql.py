@@ -42,16 +42,6 @@ def serialize_string(value):
     return value.decode("utf-8").replace("\u0000", "")
 
 
-def parse_order(value):
-    felt = get_key_by_value(value, config.ORDERS)
-    return felt.to_bytes(32, "big")
-
-
-def serialize_order(value):
-    felt = int.from_bytes(value, "big")
-    return config.ORDERS.get(felt)
-
-
 def parse_race(value):
     felt = get_key_by_value(value, config.RACES)
     return felt.to_bytes(32, "big")
@@ -231,10 +221,6 @@ BooleanValue = strawberry.scalar(
     NewType("BooleanValue", bytes), parse_value=parse_felt, serialize=serialize_felt
 )
 
-OrderValue = strawberry.scalar(
-    NewType("OrderValue", bytes), parse_value=parse_order, serialize=serialize_order
-)
-
 RaceValue = strawberry.scalar(
     NewType("RaceValue", bytes), parse_value=parse_race, serialize=serialize_race
 )
@@ -378,20 +364,6 @@ class DateTimeFilter:
 @strawberry.input
 class BooleanFilter:
     eq: Optional[bool] = None
-
-
-@strawberry.input
-class OrderFilter:
-    eq: Optional[OrderValue] = None
-    _in: Optional[List[OrderValue]] = None
-    notIn: Optional[OrderValue] = None
-    lt: Optional[OrderValue] = None
-    lte: Optional[OrderValue] = None
-    gt: Optional[OrderValue] = None
-    gte: Optional[OrderValue] = None
-    contains: Optional[OrderValue] = None
-    startsWith: Optional[OrderValue] = None
-    endsWith: Optional[OrderValue] = None
 
 
 @strawberry.input
@@ -609,7 +581,6 @@ class AdventurersFilter:
     race: Optional[RaceFilter] = None
     homeRealm: Optional[FeltValueFilter] = None
     name: Optional[StringFilter] = None
-    order: Optional[OrderFilter] = None
     health: Optional[FeltValueFilter] = None
     strength: Optional[FeltValueFilter] = None
     dexterity: Optional[FeltValueFilter] = None
@@ -712,7 +683,6 @@ class AdventurersOrderByInput:
     race: Optional[OrderByInput] = None
     homeRealm: Optional[OrderByInput] = None
     name: Optional[OrderByInput] = None
-    order: Optional[OrderByInput] = None
     health: Optional[OrderByInput] = None
     level: Optional[OrderByInput] = None
     strength: Optional[OrderByInput] = None
@@ -816,7 +786,6 @@ class Adventurer:
     race: Optional[RaceValue]
     homeRealm: Optional[FeltValue]
     name: Optional[StringValue]
-    order: Optional[OrderValue]
     health: Optional[FeltValue]
     strength: Optional[FeltValue]
     dexterity: Optional[FeltValue]
@@ -848,7 +817,6 @@ class Adventurer:
             race=data["race"],
             homeRealm=data["homeRealm"],
             name=data["name"],
-            order=data["order"],
             health=data["health"],
             strength=data["strength"],
             dexterity=data["dexterity"],
@@ -1137,7 +1105,6 @@ def get_adventurers(
         for key, value in processed_filters.items():
             if (
                 isinstance(value, StringFilter)
-                | isinstance(value, OrderFilter)
                 | isinstance(value, RaceFilter)
                 | isinstance(value, AdventurerStatusFilter)
             ):

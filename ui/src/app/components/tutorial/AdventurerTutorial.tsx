@@ -10,13 +10,32 @@ export const AdventurerTutorial = () => {
         sturdy boots that will carry you across the vast expanses of our game
         world until the very end.
       </p>
+      <br />
       <p className="text-sm sm:text-lg">
-        To bring your Adventurer to life, you&apos;ll need a unique name, a home
-        Realm, Order and Divinity, race and of course, your initial weapon of
-        choice. This will be your identity throughout your journey. And the best
-        part? There&apos;s absolutely no limit to the number of Adventurers you
-        can conjure up!
+        To bring your Adventurer to life, you&apos;ll need some unique stats:
       </p>
+      <br />
+      <ul>
+        <li>
+          Name - A worthy name for a lordly adventurer. Max of 16 characters.
+        </li>
+        <li>
+          Home Realm - An id of a realm from where your adventurer was born.
+        </li>
+        <li>Race - What race shall your adventurer be?</li>
+        <li>
+          Starting Weapon - There are 4 choices of starter weapon. Choose
+          wisely!
+        </li>
+      </ul>
+      <br />
+      <p className="text-sm sm:text-lg">
+        Minting will cost only 5 $LORDS that will follow a scheduled
+        distribution pattern to players and the DAO. After 8 weeks, a new front
+        end provider will be able to be paid for attracting new players to the
+        game.
+      </p>
+      <br />
       <p className="text-sm sm:text-lg">
         Once your Adventurer is minted, a world of opportunities opens up.
         You&apos;ll be able to perform a range of actions to help them climb the

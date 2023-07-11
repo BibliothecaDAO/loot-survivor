@@ -285,25 +285,6 @@ class Config:
             10: "Frog",
         }
 
-        self.ORDERS = {
-            1: "Power",
-            2: "Giants",
-            3: "Titans",
-            4: "Skill",
-            5: "Perfection",
-            6: "Brilliance",
-            7: "Enlightenment",
-            8: "Protection",
-            9: "Twins",
-            10: "Reflection",
-            11: "Detection",
-            12: "Fox",
-            13: "Vitriol",
-            14: "Fury",
-            15: "Rage",
-            16: "Anger",
-        }
-
         self.STATS = {
             2: "Strength",
             3: "Dexterity",

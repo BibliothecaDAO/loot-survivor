@@ -9,10 +9,9 @@ raw_abi = [
         "name": "survivor::adventurer_meta::AdventurerMetadata",
         "type": "struct",
         "members": [
-            {"name": "name", "type": "core::integer::u32"},
-            {"name": "home_realm", "type": "core::integer::u8"},
+            {"name": "name", "type": "core::integer::u128"},
+            {"name": "home_realm", "type": "core::integer::u16"},
             {"name": "race", "type": "core::integer::u8"},
-            {"name": "order", "type": "core::integer::u8"},
             {"name": "entropy", "type": "core::integer::u128"},
         ],
     },

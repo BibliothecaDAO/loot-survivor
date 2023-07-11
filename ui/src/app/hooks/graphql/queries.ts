@@ -7,7 +7,6 @@ const ADVENTURER_FIELDS = `
   race
   homeRealm
   name
-  order
   health
   strength
   dexterity

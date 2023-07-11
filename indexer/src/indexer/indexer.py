@@ -462,7 +462,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "name": check_exists_int(sg.adventurer_meta["name"]),
             "homeRealm": check_exists_int(sg.adventurer_meta["home_realm"]),
             "race": check_exists_int(sg.adventurer_meta["race"]),
-            "order": check_exists_int(sg.adventurer_meta["order"]),
             "entropy": check_exists_int(sg.adventurer_meta["entropy"]),
             "createdTime": block_time,
             "lastUpdatedTime": block_time,
