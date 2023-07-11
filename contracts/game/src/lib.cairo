@@ -870,8 +870,10 @@ mod Game {
 
         match explore_result {
             ExploreResult::Beast(()) => {
-                // get a source of entropy that will be constant for the duration of the battle
-                let battle_fixed_entropy: u128 = adventurer.get_beast_seed(adventurer_entropy);
+                // get a seed for the beast based on adventurer stats
+                // this seed needs to be fixed during the course of the battle
+                // so we can use it to dynamically generate the same beast during combat
+                let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
 
                 // encounter beast and check if adventurer was ambushed
                 let (beast, was_ambushed) = ImplBeast::beast_encounter(
@@ -879,7 +881,7 @@ mod Game {
                     adventurer.stats.wisdom,
                     NamePrefixLength,
                     NameSuffixLength,
-                    adventurer_entropy
+                    beast_seed
                 );
 
                 // initialize the beast health. This is the only timeD beast.starting_health should be
@@ -899,7 +901,7 @@ mod Game {
                         adventurer_id,
                         CombatEnums::Slot::Chest(()),
                         beast,
-                        battle_fixed_entropy
+                        beast_seed
                     );
                 }
 
@@ -1365,12 +1367,9 @@ mod Game {
             .into();
 
         // generate battle fixed entropy by combining adventurer xp and adventurer entropy
-        let battle_fixed_entropy: u128 = adventurer.get_beast_seed(adventurer_entropy);
+        let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
         let beast_special_names = ImplBeast::get_special_names(
-            adventurer.get_level(),
-            battle_fixed_entropy,
-            NamePrefixLength.into(),
-            NameSuffixLength.into(),
+            adventurer.get_level(), beast_seed, NamePrefixLength.into(), NameSuffixLength.into(), 
         );
 
         // if the items greatness is below 15, it won't have any special names so no need
@@ -1380,9 +1379,7 @@ mod Game {
 
         // get battle fixed beast. The key to this is using battle fixed entropy
         let adventurer_level = adventurer.get_level();
-        let beast = ImplBeast::get_beast(
-            adventurer_level, beast_special_names, battle_fixed_entropy
-        );
+        let beast = ImplBeast::get_beast(adventurer_level, beast_special_names, beast_seed);
         if (adventurer.get_level() == 1) {
             let beast = ImplBeast::get_starter_beast(weapon_combat_spec.item_type);
         }
@@ -1432,7 +1429,7 @@ mod Game {
 
             // grant adventurer gold reward. We use battle fixed entropy
             // to fix this result at the start of the battle, mitigating simulate-and-wait strategies
-            let gold_reward = beast.get_gold_reward(battle_fixed_entropy);
+            let gold_reward = beast.get_gold_reward(beast_seed);
             adventurer.add_gold(gold_reward);
 
             // emit slayed beast event
