@@ -232,68 +232,73 @@ export default function GuideScreen() {
         their explorations. While you cannot directly upgrade Luck, you can
         increase it by equipping jewelry items.
       </p>
-      <table className="w-1/2 m-auto uppercase text-center whitespace-nowrap border border-terminal-green">
-        <tbody>
-          <tr className="border border-terminal-green">
-            <td
-              rowSpan={3}
-              className="px-4 py-3 border-r border-terminal-green"
-            >
-              3D Physical
-            </td>
-            <td className="px-4 py-3 border-r border-terminal-green">
-              Strength
-            </td>
-            <td>Boosts attack damage by 10%</td>
-          </tr>
-          <tr className="border border-terminal-green">
-            <td className="px-4 py-3 border-r border-terminal-green">
-              Vitality
-            </td>
-            <td>Increases health by +20hp and max health by +20hp</td>
-          </tr>
-          <tr className="py-4 border border-terminal-green">
-            <td className="px-4 py-3 border-r border-terminal-green">
-              Dexterity
-            </td>
-            <td>Improves chances of successfully fleeing</td>
-          </tr>
-          <tr className="py-4 border border-terminal-green">
-            <td
-              rowSpan={3}
-              className="px-4 py-3 border-r border-terminal-green"
-            >
-              3D Mental
-            </td>
-            <td className="px-4 py-3 border-r border-terminal-green">
-              Intelligence
-            </td>
-            <td>Aids in avoiding Obstacles</td>
-          </tr>
-          <tr className="py-4 border border-terminal-green">
-            <td className="px-4 py-3 border-r border-terminal-green">Wisdom</td>
-            <td>Helps evade Beast ambushes</td>
-          </tr>
-          <tr className="py-4 border border-terminal-green">
-            <td className="px-4 py-3 border-r border-terminal-green">
-              Charisma
-            </td>
-            <td>Gives 3 Gold Discount on items and health potions</td>
-          </tr>
-          <tr className="py-4 border border-terminal-green">
-            <td
-              rowSpan={1}
-              className="px-4 py-3 border-r border-terminal-green"
-            >
-              1D Metaphysical
-            </td>
-            <td className="px-4 py-3 border-r border-terminal-green">Luck</td>
-            <td className="px-4 py-3 border-r border-terminal-green">
-              Raises chances of critical damage and cannot be upgraded directly
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div>
+        <table className="w-1/2 m-auto uppercase text-center whitespace-nowrap border border-terminal-green">
+          <tbody>
+            <tr className="border border-terminal-green">
+              <td
+                rowSpan={3}
+                className="px-4 py-3 border-r border-terminal-green"
+              >
+                3D Physical
+              </td>
+              <td className="px-4 py-3 border-r border-terminal-green">
+                Strength
+              </td>
+              <td>Boosts attack damage by 10%</td>
+            </tr>
+            <tr className="border border-terminal-green">
+              <td className="px-4 py-3 border-r border-terminal-green">
+                Vitality
+              </td>
+              <td>Increases health by +20hp and max health by +20hp</td>
+            </tr>
+            <tr className="py-4 border border-terminal-green">
+              <td className="px-4 py-3 border-r border-terminal-green">
+                Dexterity
+              </td>
+              <td>Improves chances of successfully fleeing</td>
+            </tr>
+            <tr className="py-4 border border-terminal-green">
+              <td
+                rowSpan={3}
+                className="px-4 py-3 border-r border-terminal-green"
+              >
+                3D Mental
+              </td>
+              <td className="px-4 py-3 border-r border-terminal-green">
+                Intelligence
+              </td>
+              <td>Aids in avoiding Obstacles</td>
+            </tr>
+            <tr className="py-4 border border-terminal-green">
+              <td className="px-4 py-3 border-r border-terminal-green">
+                Wisdom
+              </td>
+              <td>Helps evade Beast ambushes</td>
+            </tr>
+            <tr className="py-4 border border-terminal-green">
+              <td className="px-4 py-3 border-r border-terminal-green">
+                Charisma
+              </td>
+              <td>Gives 3 Gold Discount on items and health potions</td>
+            </tr>
+            <tr className="py-4 border border-terminal-green">
+              <td
+                rowSpan={1}
+                className="px-4 py-3 border-r border-terminal-green"
+              >
+                1D Metaphysical
+              </td>
+              <td className="px-4 py-3 border-r border-terminal-green">Luck</td>
+              <td className="px-4 py-3 border-r border-terminal-green">
+                Raises chances of critical damage and cannot be upgraded
+                directly
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
       <h3 className="mb-2">Health Potions</h3>
       <p>
