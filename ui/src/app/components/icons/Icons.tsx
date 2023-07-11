@@ -33,6 +33,7 @@ import HeartVitality from "../../../../public/icons/heart-vitality.svg";
 import Bag from "../../../../public/icons/bag.svg";
 import Smile from "../../../../public/icons/smile.svg";
 import DoubleArrow from "../../../../public/icons/double-arrow.svg";
+import Arrow from "../../../../public/icons/arrow.svg";
 
 const ClothIcon = GiRolledCloth;
 const HideIcon = GiAnimalHide;
@@ -69,6 +70,7 @@ const HeartVitalityIcon = HeartVitality;
 const BagIcon = Bag;
 const SmileIcon = Smile;
 const DoubleArrowIcon = DoubleArrow;
+const ArrowIcon = Arrow;
 
 export {
   ClothIcon,
@@ -106,4 +108,5 @@ export {
   BagIcon,
   SmileIcon,
   DoubleArrowIcon,
+  ArrowIcon,
 };

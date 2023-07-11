@@ -633,6 +633,7 @@ class DiscoveriesFilter:
     special1: Optional[OrderByInput] = None
     special2: Optional[Special1Filter] = None
     special3: Optional[Special2Filter] = None
+    seed: Optional[FeltValueFilter] = None
     ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[DateTimeFilter] = None
     txHash: Optional[HexValueFilter] = None
@@ -647,6 +648,7 @@ class BattlesFilter:
     special1: Optional[OrderByInput] = None
     special2: Optional[Special1Filter] = None
     special3: Optional[Special2Filter] = None
+    seed: Optional[FeltValueFilter] = None
     attacker: Optional[AttackerFilter] = None
     fled: Optional[BooleanFilter] = None
     damageDealt: Optional[OrderByInput] = None
@@ -740,6 +742,7 @@ class DiscoveriesOrderByInput:
     special3: Optional[OrderByInput] = None
     ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[OrderByInput] = None
+    seed: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
 
 
@@ -752,6 +755,7 @@ class BattlesOrderByInput:
     special1: Optional[OrderByInput] = None
     special2: Optional[OrderByInput] = None
     special3: Optional[OrderByInput] = None
+    seed: Optional[OrderByInput] = None
     attacker: Optional[OrderByInput] = None
     fled: Optional[OrderByInput] = None
     damageDealt: Optional[OrderByInput] = None
@@ -887,6 +891,7 @@ class Discovery:
     special3: Optional[Special3Value]
     ambushed: Optional[BooleanValue]
     discoveryTime: Optional[datetime]
+    seed: Optional[FeltValue]
     txHash: Optional[HexValue]
 
     @classmethod
@@ -911,6 +916,7 @@ class Discovery:
             special3=data["special3"],
             ambushed=data["ambushed"],
             discoveryTime=data["discoveryTime"],
+            seed=data["seed"],
             txHash=data["txHash"],
         )
 
@@ -924,6 +930,7 @@ class Battle:
     special1: Optional[Special1Value]
     special2: Optional[Special2Value]
     special3: Optional[Special3Value]
+    seed: Optional[FeltValue]
     attacker: Optional[AttackerValue]
     fled: Optional[BooleanValue]
     damageDealt: Optional[FeltValue]
@@ -946,6 +953,7 @@ class Battle:
             special1=data["special1"],
             special2=data["special2"],
             special3=data["special3"],
+            seed=data["seed"],
             attacker=data["attacker"],
             fled=data["fled"],
             damageDealt=data["damageDealt"],
@@ -1369,45 +1377,45 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
 
     app = web.Application()
-    # app.router.add_route("*", "/graphql", view_goerli)
+    app.router.add_route("*", "/graphql", view_goerli)
 
-    cors = aiohttp_cors.setup(app)
-    resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
-    resource_mainnet = cors.add(app.router.add_resource("/graphql"))
+    # cors = aiohttp_cors.setup(app)
+    # resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
+    # resource_mainnet = cors.add(app.router.add_resource("/graphql"))
 
-    cors.add(
-        resource_goerli.add_route("POST", view_goerli),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
-    cors.add(
-        resource_goerli.add_route("GET", view_goerli),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
+    # cors.add(
+    #     resource_goerli.add_route("POST", view_goerli),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
+    # cors.add(
+    #     resource_goerli.add_route("GET", view_goerli),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
 
-    cors.add(
-        resource_mainnet.add_route("POST", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
-    cors.add(
-        resource_mainnet.add_route("GET", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
+    # cors.add(
+    #     resource_mainnet.add_route("POST", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
+    # cors.add(
+    #     resource_mainnet.add_route("GET", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
 
     runner = web.AppRunner(app)
     await runner.setup()

@@ -20,7 +20,7 @@ import {
   HeartVitalityIcon,
   LightbulbIcon,
   ScrollIcon,
-  DoubleArrowIcon,
+  ArrowIcon,
 } from "../components/icons/Icons";
 
 /**
@@ -224,8 +224,8 @@ export default function UpgradeScreen() {
               <span className="animate-pulse">LEVEL UP!</span>
               <span className="flex flex-row items-center justify-center gap-2 text-terminal-yellow">
                 {previousLevel}{" "}
-                <span className="w-10 h-10">
-                  <DoubleArrowIcon />
+                <span className="w-7 h-7">
+                  <ArrowIcon />
                 </span>{" "}
                 {currentLevel}
               </span>
