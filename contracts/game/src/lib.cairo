@@ -950,7 +950,8 @@ mod Game {
                 );
             },
             ExploreResult::Treasure(()) => {
-                let (treasure_type, amount) = adventurer.discover_treasure(sub_explore_rnd);
+                let (treasure_type, amount, previous_level, new_level) = adventurer
+                    .discover_treasure(sub_explore_rnd);
                 let adventurer_state = AdventurerState {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
@@ -962,6 +963,13 @@ mod Game {
                     },
                     TreasureDiscovery::XP(()) => {
                         __event__DiscoverXP(ref self, adventurer_state, amount);
+                        // check if xp discovery leveled up adventurer
+                        if (new_level > previous_level) {
+                            // level up event emitted within function
+                            _handle_adventurer_level_up(
+                                ref self, ref adventurer, adventurer_id, previous_level, new_level
+                            );
+                        }
                     },
                     TreasureDiscovery::Health(()) => {
                         __event__DiscoverHealth(ref self, adventurer_state, amount);
@@ -1554,7 +1562,9 @@ mod Game {
         let game_entropy: u128 = _get_entropy(@self).into();
 
         // generate live entropy from fixed entropy sources and live adventurer stats
-        let (flee_entropy, ambush_entropy) = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
+        let (flee_entropy, ambush_entropy) = _get_live_entropy(
+            adventurer_entropy, game_entropy, adventurer
+        );
 
         let fled = ImplBeast::attempt_flee(
             adventurer.get_level(), adventurer.stats.dexterity, flee_entropy
