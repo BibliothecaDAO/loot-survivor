@@ -796,19 +796,15 @@ mod Game {
             ref self,
             DiscoverBeast {
                 adventurer_state: AdventurerState {
-                    owner: caller, adventurer_id, adventurer: new_adventurer
-                    },
-                    seed: 0,
-                    id: starter_beast.id,
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: new_adventurer
+                    }, seed: 0, id: starter_beast.id, beast_specs: CombatSpec {
+                    tier: starter_beast.combat_spec.tier,
+                    item_type: starter_beast.combat_spec.item_type,
                     level: starter_beast.combat_spec.level,
-                    ambushed: false,
-                    damage_taken: 0,
-                    health: starter_beast.starting_health,
-                    specials: SpecialPowers {
-                    special1: starter_beast.combat_spec.specials.special1,
-                    special2: starter_beast.combat_spec.specials.special2,
-                    special3: starter_beast.combat_spec.specials.special3
-                }
+                    specials: starter_beast.combat_spec.specials
+                }, health: starter_beast.starting_health, ambushed: false, damage_taken: 0,
             }
         );
 
@@ -890,6 +886,12 @@ mod Game {
                     );
                 }
 
+                //                 struct CombatSpec {
+                //     tier: Tier,
+                //     item_type: Type,
+                //     level: u16,
+                //     specials: SpecialPowers,
+                // }
                 // Emit Discover Beast event
                 __event__DiscoverBeast(
                     ref self,
@@ -898,18 +900,15 @@ mod Game {
                             owner: get_caller_address(),
                             adventurer_id: adventurer_id,
                             adventurer: adventurer
-                            },
-                            seed: beast_seed,
-                            id: beast.id,
+                            }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                            tier: beast.combat_spec.tier,
+                            item_type: beast.combat_spec.item_type,
                             level: beast.combat_spec.level,
-                            ambushed: was_ambushed,
-                            damage_taken: damage_taken,
-                            health: beast.starting_health,
-                            specials: SpecialPowers {
-                            special1: beast.combat_spec.specials.special1,
-                            special2: beast.combat_spec.specials.special2,
-                            special3: beast.combat_spec.specials.special3
-                        }
+                            specials: beast.combat_spec.specials
+                        },
+                        ambushed: was_ambushed,
+                        damage_taken: damage_taken,
+                        health: beast.starting_health,
                     }
                 );
 
@@ -1025,15 +1024,15 @@ mod Game {
             adventurer.deduct_health(damage_taken);
         }
 
-        let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
-        };
-
         // emit obstacle discover event
         __event__DiscoverObstacle(
             ref self,
             DiscoverObstacle {
-                adventurer_state: adventurer_state,
+                adventurer_state: AdventurerState {
+                    owner: get_caller_address(), 
+                    adventurer_id: adventurer_id, 
+                    adventurer: adventurer
+                },
                 id: obstacle.id,
                 level: obstacle.combat_specs.level,
                 dodged: dodged,
@@ -1428,14 +1427,14 @@ mod Game {
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
                         },
-                        seed: beast_seed,
-                        id: beast.id,
-                        health: adventurer.beast_health,
+                    seed: beast_seed,
+                    id: beast.id,
+                    health: adventurer.beast_health,
+                    beast_specs: CombatSpec {
+                        tier: beast.combat_spec.tier,
+                        item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
-                        specials: SpecialPowers {
-                        special1: beast.combat_spec.specials.special1,
-                        special2: beast.combat_spec.specials.special2,
-                        special3: beast.combat_spec.specials.special3
+                        specials: beast.combat_spec.specials
                     },
                     damage_dealt: damage_dealt,
                     xp_earned_adventurer: xp_earned,
@@ -1485,14 +1484,14 @@ mod Game {
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
                         },
-                        seed: beast_seed,
-                        id: beast.id,
+                    seed: beast_seed,
+                    id: beast.id,
+                    health: adventurer.beast_health,
+                    beast_specs: CombatSpec {
+                        tier: beast.combat_spec.tier,
+                        item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
-                        health: adventurer.beast_health,
-                        specials: SpecialPowers {
-                        special1: beast.combat_spec.specials.special1,
-                        special2: beast.combat_spec.specials.special2,
-                        special3: beast.combat_spec.specials.special3
+                        specials: beast.combat_spec.specials
                     },
                     damage_dealt: damage_dealt,
                     damage_taken: damage_taken,
@@ -1605,15 +1604,18 @@ mod Game {
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
                     },
-                    seed: beast_seed,
-                    id: beast.id,
-                    health: adventurer.beast_health,
+                seed: beast_seed,
+                id: beast.id,
+                health: adventurer.beast_health,
+                beast_specs: CombatSpec {
+                    tier: beast.combat_spec.tier,
+                    item_type: beast.combat_spec.item_type,
                     level: beast.combat_spec.level,
-                    specials: SpecialPowers {
-                    special1: beast.combat_spec.specials.special1,
-                    special2: beast.combat_spec.specials.special2,
-                    special3: beast.combat_spec.specials.special3
-                }, damage_taken: damage_taken, damage_location: attack_location, fled
+                    specials: beast.combat_spec.specials
+                }, 
+                damage_taken: damage_taken, 
+                damage_location: attack_location, 
+                fled
             }
         );
 
@@ -2297,8 +2299,7 @@ mod Game {
         seed: u128,
         id: u8,
         health: u16,
-        level: u16,
-        specials: SpecialPowers,
+        beast_specs: CombatSpec,
         ambushed: bool,
         damage_taken: u16,
     }
@@ -2309,8 +2310,7 @@ mod Game {
         seed: u128,
         id: u8,
         health: u16,
-        level: u16,
-        specials: SpecialPowers,
+        beast_specs: CombatSpec,
         damage_dealt: u16,
         damage_taken: u16,
         damage_location: u8,
@@ -2322,8 +2322,7 @@ mod Game {
         seed: u128,
         id: u8,
         health: u16,
-        level: u16,
-        specials: SpecialPowers,
+        beast_specs: CombatSpec,
         damage_dealt: u16,
         xp_earned_adventurer: u16,
         xp_earned_items: u16,
@@ -2336,8 +2335,7 @@ mod Game {
         seed: u128,
         id: u8,
         health: u16,
-        level: u16,
-        specials: SpecialPowers,
+        beast_specs: CombatSpec,
         fled: bool,
         damage_taken: u16,
         damage_location: u8,
