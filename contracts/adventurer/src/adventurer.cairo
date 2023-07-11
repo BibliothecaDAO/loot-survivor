@@ -6,7 +6,7 @@ use poseidon::poseidon_hash_span;
 use array::ArrayTrait;
 
 use super::{
-    item_meta::{LootItemSpecialNames, LootItemSpecialNamesStorage, ImplLootItemSpecialNames},
+    item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials},
     adventurer_stats::Stats, item_primitive::ItemPrimitive, adventurer_utils::{AdventurerUtils},
     exploration::ExploreUtils,
     constants::{
@@ -776,18 +776,18 @@ impl ImplAdventurer of IAdventurer {
     //
     // @param self A reference to the ItemPrimitive object which represents the item.
     // @param amount The amount of experience points to be added to the item.
-    // @param name_storage A reference to the LootItemSpecialNamesStorage object.
+    // @param name_storage A reference to the ItemSpecialsStorage object.
     // @param entropy A number used for randomization.
     //
     // @return Returns a tuple containing the original item level, new level,
     //         boolean indicating if a suffix was assigned, boolean indicating if a prefix was assigned,
-    //         and a LootItemSpecialNames object storing the special names for the item.
+    //         and a ItemSpecials object storing the special names for the item.
     fn increase_item_xp(
         ref self: ItemPrimitive,
         amount: u16,
-        ref name_storage: LootItemSpecialNamesStorage,
+        ref name_storage: ItemSpecialsStorage,
         entropy: u128
-    ) -> (u8, u8, bool, bool, LootItemSpecialNames) {
+    ) -> (u8, u8, bool, bool, ItemSpecials) {
         return self.grant_xp_and_check_for_greatness_increase(amount, ref name_storage, entropy);
     }
 
@@ -796,18 +796,18 @@ impl ImplAdventurer of IAdventurer {
     //
     // @param self A reference to the ItemPrimitive object which represents the item.
     // @param value The amount of experience points to be added to the item.
-    // @param name_storage A reference to the LootItemSpecialNamesStorage object.
+    // @param name_storage A reference to the ItemSpecialsStorage object.
     // @param entropy A number used for randomization.
     //
     // @return Returns a tuple containing the original item level, new level,
     //         boolean indicating if a suffix was assigned, boolean indicating if a prefix was assigned,
-    //         and a LootItemSpecialNames object storing the special names for the item.
+    //         and a ItemSpecials object storing the special names for the item.
     fn grant_xp_and_check_for_greatness_increase(
         ref self: ItemPrimitive,
         value: u16,
-        ref name_storage: LootItemSpecialNamesStorage,
+        ref name_storage: ItemSpecialsStorage,
         entropy: u128
-    ) -> (u8, u8, bool, bool, LootItemSpecialNames) {
+    ) -> (u8, u8, bool, bool, ItemSpecials) {
         // get the previous level of the item
         let original_level = self.get_greatness();
 
@@ -826,10 +826,10 @@ impl ImplAdventurer of IAdventurer {
 
         // if the level is the same
         if (original_level == new_level) {
-            // no additional work required, return false for item changed and empty LootItemSpecialNames
+            // no additional work required, return false for item changed and empty ItemSpecials
             return (
-                original_level, new_level, suffix_assigned, prefix_assigned, LootItemSpecialNames {
-                    name_prefix: 0, name_suffix: 0, item_suffix: 0
+                original_level, new_level, suffix_assigned, prefix_assigned, ItemSpecials {
+                    special2: 0, special3: 0, special1: 0
                 }
             );
         }
@@ -843,13 +843,13 @@ impl ImplAdventurer of IAdventurer {
             suffix_assigned = true;
             prefix_assigned = true;
             // we assign the item it's prefixes and suffix
-            let special_names = LootItemSpecialNames {
-                name_prefix: ImplLoot::get_name_prefix(self.id, entropy),
-                name_suffix: ImplLoot::get_name_suffix(self.id, entropy),
-                item_suffix: ImplLoot::get_item_suffix(self.id, entropy),
+            let special_names = ItemSpecials {
+                special2: ImplLoot::get_special2(self.id, entropy),
+                special3: ImplLoot::get_special3(self.id, entropy),
+                special1: ImplLoot::get_special1(self.id, entropy),
             };
 
-            ImplLootItemSpecialNames::set_loot_special_names(
+            ImplItemSpecials::set_loot_special_names(
                 ref name_storage, self, special_names, 
             );
             return (original_level, new_level, suffix_assigned, prefix_assigned, special_names);
@@ -860,13 +860,13 @@ impl ImplAdventurer of IAdventurer {
             suffix_assigned = true;
             // return bool of prefix assigned will remain
 
-            let special_names = LootItemSpecialNames {
-                name_prefix: 0,
-                name_suffix: 0,
-                item_suffix: ImplLoot::get_item_suffix(self.id, entropy), // set item suffix
+            let special_names = ItemSpecials {
+                special2: 0,
+                special3: 0,
+                special1: ImplLoot::get_special1(self.id, entropy), // set item suffix
             };
 
-            ImplLootItemSpecialNames::set_loot_special_names(ref name_storage, self, special_names);
+            ImplItemSpecials::set_loot_special_names(ref name_storage, self, special_names);
             return (original_level, new_level, suffix_assigned, prefix_assigned, special_names);
         } // lastly, we check for the transition from below G19 to G19 or higher which results
         // in the item receiving a name prefix (Demon Grasp)
@@ -877,22 +877,22 @@ impl ImplAdventurer of IAdventurer {
 
             // When handling the greatness upgrade to G19 we need to ensure we preserve
             // the item name suffix applied at G15.
-            let special_names = LootItemSpecialNames {
-                name_prefix: ImplLoot::get_name_prefix(self.id, entropy),
-                name_suffix: ImplLoot::get_name_suffix(self.id, entropy),
-                item_suffix: ImplLootItemSpecialNames::get_loot_special_names(name_storage, self)
-                    .item_suffix, // preserve previous item suffix from G15
+            let special_names = ItemSpecials {
+                special2: ImplLoot::get_special2(self.id, entropy),
+                special3: ImplLoot::get_special3(self.id, entropy),
+                special1: ImplItemSpecials::get_loot_special_names(name_storage, self)
+                    .special1, // preserve previous item suffix from G15
             };
 
-            ImplLootItemSpecialNames::set_loot_special_names(ref name_storage, self, special_names);
+            ImplItemSpecials::set_loot_special_names(ref name_storage, self, special_names);
 
             return (original_level, new_level, suffix_assigned, prefix_assigned, special_names);
         }
 
         // level up should be true here but suffix and prefix assigned false
         return (
-            original_level, new_level, suffix_assigned, prefix_assigned, LootItemSpecialNames {
-                name_prefix: 0, name_suffix: 0, item_suffix: 0
+            original_level, new_level, suffix_assigned, prefix_assigned, ItemSpecials {
+                special2: 0, special3: 0, special1: 0
             }
         );
     }
@@ -1047,221 +1047,221 @@ impl ImplAdventurer of IAdventurer {
     // @param name_storage2 The second storage of special item names.
     fn apply_item_stat_boosts(
         ref self: Adventurer,
-        name_storage1: LootItemSpecialNamesStorage,
-        name_storage2: LootItemSpecialNamesStorage
+        name_storage1: ItemSpecialsStorage,
+        name_storage2: ItemSpecialsStorage
     ) {
         if (self.weapon.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.weapon.metadata) == 0) {
-                let weapon_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let weapon_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.weapon
                 );
-                self.add_suffix_boost(weapon_names.item_suffix, );
+                self.add_suffix_boost(weapon_names.special1, );
             } else {
-                let weapon_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let weapon_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.weapon
                 );
-                self.add_suffix_boost(weapon_names.item_suffix, );
+                self.add_suffix_boost(weapon_names.special1, );
             }
         }
         if (self.chest.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.chest.metadata) == 0) {
-                let chest_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let chest_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.chest
                 );
-                self.add_suffix_boost(chest_names.item_suffix, );
+                self.add_suffix_boost(chest_names.special1, );
             } else {
-                let chest_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let chest_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.chest
                 );
-                self.add_suffix_boost(chest_names.item_suffix, );
+                self.add_suffix_boost(chest_names.special1, );
             }
         }
         if (self.head.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.head.metadata) == 0) {
-                let head_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let head_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.head
                 );
-                self.add_suffix_boost(head_names.item_suffix, );
+                self.add_suffix_boost(head_names.special1, );
             } else {
-                let head_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let head_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.head
                 );
-                self.add_suffix_boost(head_names.item_suffix, );
+                self.add_suffix_boost(head_names.special1, );
             }
         }
         if (self.waist.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.waist.metadata) == 0) {
-                let waist_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let waist_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.waist
                 );
-                self.add_suffix_boost(waist_names.item_suffix, );
+                self.add_suffix_boost(waist_names.special1, );
             } else {
-                let waist_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let waist_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.waist
                 );
-                self.add_suffix_boost(waist_names.item_suffix, );
+                self.add_suffix_boost(waist_names.special1, );
             }
         }
 
         if (self.foot.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.foot.metadata) == 0) {
-                let foot_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let foot_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.foot
                 );
-                self.add_suffix_boost(foot_names.item_suffix, );
+                self.add_suffix_boost(foot_names.special1, );
             } else {
-                let foot_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let foot_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.foot
                 );
-                self.add_suffix_boost(foot_names.item_suffix, );
+                self.add_suffix_boost(foot_names.special1, );
             }
         }
 
         if (self.hand.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.hand.metadata) == 0) {
-                let hand_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let hand_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.hand
                 );
-                self.add_suffix_boost(hand_names.item_suffix, );
+                self.add_suffix_boost(hand_names.special1, );
             } else {
-                let hand_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let hand_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.hand
                 );
-                self.add_suffix_boost(hand_names.item_suffix, );
+                self.add_suffix_boost(hand_names.special1, );
             }
         }
 
         if (self.neck.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.neck.metadata) == 0) {
-                let neck_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let neck_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.neck
                 );
-                self.add_suffix_boost(neck_names.item_suffix, );
+                self.add_suffix_boost(neck_names.special1, );
             } else {
-                let neck_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let neck_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.neck
                 );
-                self.add_suffix_boost(neck_names.item_suffix, );
+                self.add_suffix_boost(neck_names.special1, );
             }
         }
 
         if (self.ring.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.ring.metadata) == 0) {
-                let ring_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let ring_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.ring
                 );
-                self.add_suffix_boost(ring_names.item_suffix, );
+                self.add_suffix_boost(ring_names.special1, );
             } else {
-                let ring_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let ring_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.ring
                 );
-                self.add_suffix_boost(ring_names.item_suffix, );
+                self.add_suffix_boost(ring_names.special1, );
             }
         }
     }
 
-    // @notice The `remove_item_stat_boosts` function takes a reference to an Adventurer and two LootItemSpecialNamesStorages 
+    // @notice The `remove_item_stat_boosts` function takes a reference to an Adventurer and two ItemSpecialsStorages 
     // and removes the item stat boosts from the Adventurer's equipment.
     // @param self A reference to the Adventurer instance.
-    // @param name_storage1 The first LootItemSpecialNamesStorage instance.
-    // @param name_storage2 The second LootItemSpecialNamesStorage instance.
+    // @param name_storage1 The first ItemSpecialsStorage instance.
+    // @param name_storage2 The second ItemSpecialsStorage instance.
     fn remove_item_stat_boosts(
         ref self: Adventurer,
-        name_storage1: LootItemSpecialNamesStorage,
-        name_storage2: LootItemSpecialNamesStorage
+        name_storage1: ItemSpecialsStorage,
+        name_storage2: ItemSpecialsStorage
     ) {
         if (self.weapon.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.weapon.metadata) == 0) {
-                let weapon_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let weapon_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.weapon
                 );
-                self.remove_suffix_boost(weapon_names.item_suffix, );
+                self.remove_suffix_boost(weapon_names.special1, );
             } else {
-                let weapon_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let weapon_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.weapon
                 );
-                self.remove_suffix_boost(weapon_names.item_suffix, );
+                self.remove_suffix_boost(weapon_names.special1, );
             }
         }
         if (self.chest.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.chest.metadata) == 0) {
-                let chest_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let chest_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.chest
                 );
-                self.remove_suffix_boost(chest_names.item_suffix, );
+                self.remove_suffix_boost(chest_names.special1, );
             } else {
-                let chest_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let chest_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.chest
                 );
-                self.remove_suffix_boost(chest_names.item_suffix, );
+                self.remove_suffix_boost(chest_names.special1, );
             }
         }
         if (self.head.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.head.metadata) == 0) {
-                let head_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let head_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.head
                 );
-                self.remove_suffix_boost(head_names.item_suffix, );
+                self.remove_suffix_boost(head_names.special1, );
             } else {
-                let head_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let head_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.head
                 );
-                self.remove_suffix_boost(head_names.item_suffix, );
+                self.remove_suffix_boost(head_names.special1, );
             }
         }
         if (self.waist.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.waist.metadata) == 0) {
-                let waist_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let waist_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.waist
                 );
-                self.remove_suffix_boost(waist_names.item_suffix, );
+                self.remove_suffix_boost(waist_names.special1, );
             } else {
-                let waist_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let waist_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.waist
                 );
-                self.remove_suffix_boost(waist_names.item_suffix, );
+                self.remove_suffix_boost(waist_names.special1, );
             }
         }
 
         if (self.foot.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.foot.metadata) == 0) {
-                let foot_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let foot_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.foot
                 );
-                self.remove_suffix_boost(foot_names.item_suffix, );
+                self.remove_suffix_boost(foot_names.special1, );
             } else {
-                let foot_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let foot_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.foot
                 );
-                self.remove_suffix_boost(foot_names.item_suffix, );
+                self.remove_suffix_boost(foot_names.special1, );
             }
         }
 
         if (self.hand.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.hand.metadata) == 0) {
-                let hand_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let hand_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.hand
                 );
-                self.remove_suffix_boost(hand_names.item_suffix, );
+                self.remove_suffix_boost(hand_names.special1, );
             } else {
-                let hand_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let hand_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.hand
                 );
-                self.remove_suffix_boost(hand_names.item_suffix, );
+                self.remove_suffix_boost(hand_names.special1, );
             }
         }
 
         if (self.neck.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.neck.metadata) == 0) {
-                let neck_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let neck_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.neck
                 );
-                self.remove_suffix_boost(neck_names.item_suffix, );
+                self.remove_suffix_boost(neck_names.special1, );
             } else {
-                let neck_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let neck_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.neck
                 );
-                self.remove_suffix_boost(neck_names.item_suffix, );
+                self.remove_suffix_boost(neck_names.special1, );
             }
         }
 
@@ -1269,16 +1269,16 @@ impl ImplAdventurer of IAdventurer {
             // we need to get the suffix which is in one of the two meta data storages
             if (ImplAdventurer::get_storage_index(self.ring.metadata) == 0) {
                 // it's in storage slot 1
-                let ring_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let ring_names = ImplItemSpecials::get_loot_special_names(
                     name_storage1, self.ring
                 );
-                self.remove_suffix_boost(ring_names.item_suffix, );
+                self.remove_suffix_boost(ring_names.special1, );
             } else {
                 // it's in storage slot 2
-                let ring_names = ImplLootItemSpecialNames::get_loot_special_names(
+                let ring_names = ImplItemSpecials::get_loot_special_names(
                     name_storage2, self.ring
                 );
-                self.remove_suffix_boost(ring_names.item_suffix, );
+                self.remove_suffix_boost(ring_names.special1, );
             }
         }
     }
@@ -2063,15 +2063,15 @@ fn test_increase_item_xp() {
     let item_ghost_wand = ItemPrimitive { id: constants::ItemId::GhostWand, xp: 1, metadata: 1 };
     adventurer.add_item(item_ghost_wand);
 
-    let blank_special_name = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: 0
+    let blank_special_name = ItemSpecials {
+        special2: 0, special3: 0, special1: 0
     };
 
-    let ghost_wand_special_name = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: 0
+    let ghost_wand_special_name = ItemSpecials {
+        special2: 0, special3: 0, special1: 0
     };
 
-    let mut loot_item_name_storage = LootItemSpecialNamesStorage {
+    let mut loot_item_name_storage = ItemSpecialsStorage {
         item_1: ghost_wand_special_name,
         item_2: blank_special_name,
         item_3: blank_special_name,
@@ -2137,14 +2137,14 @@ fn test_increase_item_xp() {
     assert(suffix_assigned == true, 'weapon should recv suffix');
     assert(prefix_assigned == false, 'weapon should not recv prefix');
 
-    assert(special_names.item_suffix != 0, 'suffix should be set');
-    assert(special_names.name_prefix == 0, 'name prefix should be 0');
-    assert(special_names.name_suffix == 0, 'name suffix should be 0');
+    assert(special_names.special1 != 0, 'suffix should be set');
+    assert(special_names.special2 == 0, 'name prefix should be 0');
+    assert(special_names.special3 == 0, 'name suffix should be 0');
     // verify name was updated in storage
-    assert(loot_item_name_storage.item_1.item_suffix != 0, 'suffix should be set');
+    assert(loot_item_name_storage.item_1.special1 != 0, 'suffix should be set');
 
     // save the suffix the item received at G15 to ensure it is persisted when prefixes get unlocked at G19
-    let original_weapon_suffix = loot_item_name_storage.item_1.item_suffix;
+    let original_weapon_suffix = loot_item_name_storage.item_1.special1;
     // grant weapon 136 more xp, bringing it to 361 total (level 19 - prefixes assigned)
     let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
         .weapon
@@ -2155,18 +2155,18 @@ fn test_increase_item_xp() {
     assert(suffix_assigned == false, 'weapon should not recv suffix');
     assert(prefix_assigned == true, 'weapon should recv prefixes');
 
-    assert(special_names.item_suffix == original_weapon_suffix, 'suffix should not have changed');
-    assert(special_names.name_prefix != 0, 'name prefix should be set');
-    assert(special_names.name_suffix != 0, 'name suffix should be set');
+    assert(special_names.special1 == original_weapon_suffix, 'suffix should not have changed');
+    assert(special_names.special2 != 0, 'name prefix should be set');
+    assert(special_names.special3 != 0, 'name suffix should be set');
     // verify storage data was updated properly
     assert(
-        loot_item_name_storage.item_1.item_suffix == original_weapon_suffix,
+        loot_item_name_storage.item_1.special1 == original_weapon_suffix,
         'suffix should not have changed'
     );
-    assert(loot_item_name_storage.item_1.name_prefix != 0, 'name prefix should be set');
-    assert(loot_item_name_storage.item_1.name_suffix != 0, 'name suffix should be set');
-    let original_name_prefix = loot_item_name_storage.item_1.name_prefix;
-    let original_name_suffix = loot_item_name_storage.item_1.name_suffix;
+    assert(loot_item_name_storage.item_1.special2 != 0, 'name prefix should be set');
+    assert(loot_item_name_storage.item_1.special3 != 0, 'name suffix should be set');
+    let original_special2 = loot_item_name_storage.item_1.special2;
+    let original_special3 = loot_item_name_storage.item_1.special3;
 
     // level weapon to 20
     let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
@@ -2179,15 +2179,15 @@ fn test_increase_item_xp() {
     assert(prefix_assigned == false, 'weapon should not recv prefixes');
     // verify storage data was not updated
     assert(
-        loot_item_name_storage.item_1.item_suffix == original_weapon_suffix,
+        loot_item_name_storage.item_1.special1 == original_weapon_suffix,
         'item suffix should be same'
     );
     assert(
-        loot_item_name_storage.item_1.name_prefix == original_name_prefix,
+        loot_item_name_storage.item_1.special2 == original_special2,
         'name prefix should be same'
     );
     assert(
-        loot_item_name_storage.item_1.name_suffix == original_name_suffix,
+        loot_item_name_storage.item_1.special3 == original_special3,
         'name suffix should be same'
     );
 
@@ -2202,15 +2202,15 @@ fn test_increase_item_xp() {
     assert(prefix_assigned == false, 'weapon should not recv prefixes');
     // verify storage data was not updated
     assert(
-        loot_item_name_storage.item_1.item_suffix == original_weapon_suffix,
+        loot_item_name_storage.item_1.special1 == original_weapon_suffix,
         'item suffix should be same'
     );
     assert(
-        loot_item_name_storage.item_1.name_prefix == original_name_prefix,
+        loot_item_name_storage.item_1.special2 == original_special2,
         'name prefix should be same'
     );
     assert(
-        loot_item_name_storage.item_1.name_suffix == original_name_suffix,
+        loot_item_name_storage.item_1.special3 == original_special3,
         'name suffix should be same'
     );
 
@@ -2239,20 +2239,20 @@ fn test_increase_item_xp() {
     assert(suffix_assigned == true, 'DR should have recv suffix');
     assert(prefix_assigned == true, 'DR should have recv prefix');
 
-    assert(special_names.item_suffix != 0, 'suffix should be set');
-    assert(special_names.name_prefix != 0, 'name prefix should be set');
-    assert(special_names.name_suffix != 0, 'name suffix should be set');
+    assert(special_names.special1 != 0, 'suffix should be set');
+    assert(special_names.special2 != 0, 'name prefix should be set');
+    assert(special_names.special3 != 0, 'name suffix should be set');
     // verify storage data was updated properly
     assert(
-        special_names.item_suffix == loot_item_name_storage.item_2.item_suffix,
+        special_names.special1 == loot_item_name_storage.item_2.special1,
         'storage suffix should be set'
     );
     assert(
-        special_names.name_prefix == loot_item_name_storage.item_2.name_prefix,
+        special_names.special2 == loot_item_name_storage.item_2.special2,
         'storage prefix1 should be set'
     );
     assert(
-        special_names.name_suffix == loot_item_name_storage.item_2.item_suffix,
+        special_names.special3 == loot_item_name_storage.item_2.special1,
         'storage prefix2 should be set'
     );
 }
@@ -2579,34 +2579,34 @@ fn test_apply_item_stat_boosts() {
         }, beast_health: 20, stat_points_available: 0,
     };
 
-    let item1_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Power, 
+    let item1_names = ItemSpecials {
+        special2: 0, special3: 0, special1: ItemSuffix::of_Power, 
     };
-    let item2_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Giant, 
+    let item2_names = ItemSpecials {
+        special2: 0, special3: 0, special1: ItemSuffix::of_Giant, 
     };
-    let item3_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Perfection, 
+    let item3_names = ItemSpecials {
+        special2: 0, special3: 0, special1: ItemSuffix::of_Perfection, 
     };
-    let item4_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Rage, 
+    let item4_names = ItemSpecials {
+        special2: 0, special3: 0, special1: ItemSuffix::of_Rage, 
     };
-    let item5_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Fury, 
+    let item5_names = ItemSpecials {
+        special2: 0, special3: 0, special1: ItemSuffix::of_Fury, 
     };
-    let item6_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Skill, 
+    let item6_names = ItemSpecials {
+        special2: 0, special3: 0, special1: ItemSuffix::of_Skill, 
     };
-    let item7_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_Vitriol, 
+    let item7_names = ItemSpecials {
+        special2: 0, special3: 0, special1: ItemSuffix::of_Vitriol, 
     };
-    let item8_names = LootItemSpecialNames {
-        name_prefix: 0, name_suffix: 0, item_suffix: ItemSuffix::of_the_Fox, 
+    let item8_names = ItemSpecials {
+        special2: 0, special3: 0, special1: ItemSuffix::of_the_Fox, 
     };
-    let item9_names = LootItemSpecialNames { name_prefix: 0, name_suffix: 0, item_suffix: 0,  };
-    let item10_names = LootItemSpecialNames { name_prefix: 0, name_suffix: 0, item_suffix: 0,  };
+    let item9_names = ItemSpecials { special2: 0, special3: 0, special1: 0,  };
+    let item10_names = ItemSpecials { special2: 0, special3: 0, special1: 0,  };
 
-    let name_storage1 = LootItemSpecialNamesStorage {
+    let name_storage1 = ItemSpecialsStorage {
         item_1: item1_names,
         item_2: item2_names,
         item_3: item3_names,
@@ -2619,7 +2619,7 @@ fn test_apply_item_stat_boosts() {
         item_10: item10_names,
     };
 
-    let name_storage2 = LootItemSpecialNamesStorage {
+    let name_storage2 = ItemSpecialsStorage {
         item_1: item1_names,
         item_2: item2_names,
         item_3: item3_names,
@@ -2797,27 +2797,27 @@ fn test_grant_xp_and_check_for_greatness_increase() {
     let mut chest_armor = ItemPrimitive { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
 
     // state name storage
-    let mut special_name_storage = LootItemSpecialNamesStorage {
-        item_1: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0
-            }, item_2: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0
-            }, item_3: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0
-            }, item_4: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0
-            }, item_5: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0
-            }, item_6: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0
-            }, item_7: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0
-            }, item_8: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0
-            }, item_9: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0
-            }, item_10: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0
+    let mut special_name_storage = ItemSpecialsStorage {
+        item_1: ItemSpecials {
+            special2: 0, special3: 0, special1: 0
+            }, item_2: ItemSpecials {
+            special2: 0, special3: 0, special1: 0
+            }, item_3: ItemSpecials {
+            special2: 0, special3: 0, special1: 0
+            }, item_4: ItemSpecials {
+            special2: 0, special3: 0, special1: 0
+            }, item_5: ItemSpecials {
+            special2: 0, special3: 0, special1: 0
+            }, item_6: ItemSpecials {
+            special2: 0, special3: 0, special1: 0
+            }, item_7: ItemSpecials {
+            special2: 0, special3: 0, special1: 0
+            }, item_8: ItemSpecials {
+            special2: 0, special3: 0, special1: 0
+            }, item_9: ItemSpecials {
+            special2: 0, special3: 0, special1: 0
+            }, item_10: ItemSpecials {
+            special2: 0, special3: 0, special1: 0
         },
     };
 
@@ -2828,9 +2828,9 @@ fn test_grant_xp_and_check_for_greatness_increase() {
     assert(new_level == 2, 'new level should be 2');
     assert(suffix_assigned == false, 'no suffix_assigned');
     assert(prefixes_assigned == false, 'no prefix assigned');
-    assert(special_names.name_prefix == 0, 'no prefix assigned');
-    assert(special_names.name_suffix == 0, 'no suffix assigned');
-    assert(special_names.item_suffix == 0, 'no item suffix assigned');
+    assert(special_names.special2 == 0, 'no prefix assigned');
+    assert(special_names.special3 == 0, 'no suffix assigned');
+    assert(special_names.special1 == 0, 'no item suffix assigned');
 
     // level weapon from greatness 2 to greatness 15
     let (previous_level, new_level, suffix_assigned, prefixes_assigned, special_names) = weapon
@@ -2839,14 +2839,14 @@ fn test_grant_xp_and_check_for_greatness_increase() {
     assert(new_level == 15, 'new level should be 15');
     assert(suffix_assigned == true, 'suffix should be assigned');
     assert(prefixes_assigned == false, 'prefix should not be assigned');
-    assert(special_names.name_prefix == 0, 'no prefix');
-    assert(special_names.name_suffix == 0, 'no suffix');
-    assert(special_names.item_suffix > 0, 'suffix should be assigned');
+    assert(special_names.special2 == 0, 'no prefix');
+    assert(special_names.special3 == 0, 'no suffix');
+    assert(special_names.special1 > 0, 'suffix should be assigned');
     assert(
-        special_name_storage.item_1.item_suffix == special_names.item_suffix,
+        special_name_storage.item_1.special1 == special_names.special1,
         'suffix should be in storage'
     );
-    let assigned_suffix = special_names.item_suffix;
+    let assigned_suffix = special_names.special1;
 
     // level weapon from greatness 15 to 16 by giving it 31 xp
     let (previous_level, new_level, suffix_assigned, prefixes_assigned, special_names) = weapon
@@ -2855,10 +2855,10 @@ fn test_grant_xp_and_check_for_greatness_increase() {
     assert(new_level == 16, 'new level should be 16');
     assert(suffix_assigned == false, 'suffix should not be assigned');
     assert(prefixes_assigned == false, 'prefix should not be assigned');
-    assert(special_names.name_prefix == 0, 'no prefix');
-    assert(special_names.name_suffix == 0, 'no suffix');
+    assert(special_names.special2 == 0, 'no prefix');
+    assert(special_names.special3 == 0, 'no suffix');
     assert(
-        special_name_storage.item_1.item_suffix == assigned_suffix, 'suffix should not be changed'
+        special_name_storage.item_1.special1 == assigned_suffix, 'suffix should not be changed'
     );
 
     // level weapon to greatness 19 by giving it 105xp
@@ -2868,22 +2868,22 @@ fn test_grant_xp_and_check_for_greatness_increase() {
     assert(new_level == 19, 'new level should be 19');
     assert(suffix_assigned == false, 'suffix already already assigned');
     assert(prefixes_assigned == true, 'prefixes should be assigned');
-    assert(special_names.name_prefix > 0, 'prefix1 should be assigned');
-    assert(special_names.name_suffix > 0, 'prefix2 should be assigned');
-    assert(special_names.item_suffix == assigned_suffix, 'suffix should be assigned');
+    assert(special_names.special2 > 0, 'prefix1 should be assigned');
+    assert(special_names.special3 > 0, 'prefix2 should be assigned');
+    assert(special_names.special1 == assigned_suffix, 'suffix should be assigned');
     assert(
-        special_name_storage.item_1.name_prefix == special_names.name_prefix,
+        special_name_storage.item_1.special2 == special_names.special2,
         'prefix1 should be in storage'
     );
     assert(
-        special_name_storage.item_1.name_suffix == special_names.name_suffix,
+        special_name_storage.item_1.special3 == special_names.special3,
         'prefix2 should be in storage'
     );
     assert(
-        special_name_storage.item_1.item_suffix == assigned_suffix, 'suffix should not be changed'
+        special_name_storage.item_1.special1 == assigned_suffix, 'suffix should not be changed'
     );
-    let assigned_prefix1 = special_names.name_prefix;
-    let assigned_prefix2 = special_names.name_suffix;
+    let assigned_prefix1 = special_names.special2;
+    let assigned_prefix2 = special_names.special3;
 
     // last test case we need to cover is leveling from below greatness 15 to above greatness 19
     let (previous_level, new_level, suffix_assigned, prefixes_assigned, special_names) = chest_armor
@@ -2892,19 +2892,19 @@ fn test_grant_xp_and_check_for_greatness_increase() {
     assert(new_level == 20, 'new level should be 20');
     assert(suffix_assigned == true, 'suffix should be assigned');
     assert(prefixes_assigned == true, 'prefixes should be assigned');
-    assert(special_names.name_prefix > 0, 'prefix1 should be assigned');
-    assert(special_names.name_suffix > 0, 'prefix2 should be assigned');
-    assert(special_names.item_suffix > 0, 'suffix should be assigned');
+    assert(special_names.special2 > 0, 'prefix1 should be assigned');
+    assert(special_names.special3 > 0, 'prefix2 should be assigned');
+    assert(special_names.special1 > 0, 'suffix should be assigned');
     assert(
-        special_name_storage.item_2.name_prefix == special_names.name_prefix,
+        special_name_storage.item_2.special2 == special_names.special2,
         'prefix1 should be in storage'
     );
     assert(
-        special_name_storage.item_2.name_suffix == special_names.name_suffix,
+        special_name_storage.item_2.special3 == special_names.special3,
         'prefix2 should be in storage'
     );
     assert(
-        special_name_storage.item_2.item_suffix == special_names.item_suffix,
+        special_name_storage.item_2.special1 == special_names.special1,
         'suffix should be in storage'
     );
 }
