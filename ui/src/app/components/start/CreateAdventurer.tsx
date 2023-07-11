@@ -169,6 +169,7 @@ export const CreateAdventurer = ({
   const realm = getRealmNameById(parseInt(formData.homeRealmId) ?? 0);
 
   console.log(formData.homeRealmId);
+  console.log(realm);
 
   return (
     <div className="flex items-center sm:w-1/2 mx-4 border border-terminal-green">
@@ -214,7 +215,7 @@ export const CreateAdventurer = ({
             <span>
               {formData.homeRealmId && (
                 <span className="self-center text-terminal-yellow">
-                  {realm?.name}
+                  {realm?.properties.name}
                 </span>
               )}
               <input

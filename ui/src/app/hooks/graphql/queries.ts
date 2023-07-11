@@ -41,6 +41,7 @@ const BATTLE_FIELDS = `
   beast
   beastHealth
   beastLevel
+  special1
   special2
   special3
   attacker
@@ -98,6 +99,7 @@ const DISCOVERY_FIELDS = `
   entity
   entityLevel
   entityHealth
+  special1
   special2
   special3
   ambushed

@@ -630,6 +630,7 @@ class DiscoveriesFilter:
     entity: Optional[FeltValueFilter] = None
     entityLevel: Optional[FeltValueFilter] = None
     entityHealth: Optional[FeltValueFilter] = None
+    special1: Optional[OrderByInput] = None
     special2: Optional[Special1Filter] = None
     special3: Optional[Special2Filter] = None
     ambushed: Optional[OrderByInput] = None
@@ -643,6 +644,7 @@ class BattlesFilter:
     beastId: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     beastLevel: Optional[FeltValueFilter] = None
+    special1: Optional[OrderByInput] = None
     special2: Optional[Special1Filter] = None
     special3: Optional[Special2Filter] = None
     attacker: Optional[AttackerFilter] = None
@@ -733,6 +735,7 @@ class DiscoveriesOrderByInput:
     entity: Optional[OrderByInput] = None
     entityLevel: Optional[OrderByInput] = None
     entityHealth: Optional[OrderByInput] = None
+    special1: Optional[OrderByInput] = None
     special2: Optional[OrderByInput] = None
     special3: Optional[OrderByInput] = None
     ambushed: Optional[OrderByInput] = None
@@ -746,6 +749,7 @@ class BattlesOrderByInput:
     beastId: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     beastLevel: Optional[OrderByInput] = None
+    special1: Optional[OrderByInput] = None
     special2: Optional[OrderByInput] = None
     special3: Optional[OrderByInput] = None
     attacker: Optional[OrderByInput] = None
@@ -878,6 +882,7 @@ class Discovery:
     entity: Optional[BeastValue]
     entityLevel: Optional[FeltValue]
     entityHealth: Optional[FeltValue]
+    special1: Optional[Special1Value]
     special2: Optional[Special2Value]
     special3: Optional[Special3Value]
     ambushed: Optional[BooleanValue]
@@ -901,6 +906,7 @@ class Discovery:
             entity=data["entity"],
             entityLevel=data["entityLevel"],
             entityHealth=data["entityHealth"],
+            special1=data["special1"],
             special2=data["special2"],
             special3=data["special3"],
             ambushed=data["ambushed"],
@@ -915,6 +921,7 @@ class Battle:
     beast: Optional[BeastValue]
     beastHealth: Optional[FeltValue]
     beastLevel: Optional[FeltValue]
+    special1: Optional[Special1Value]
     special2: Optional[Special2Value]
     special3: Optional[Special3Value]
     attacker: Optional[AttackerValue]
@@ -936,6 +943,7 @@ class Battle:
             beast=data["beast"],
             beastHealth=data["beastHealth"],
             beastLevel=data["beastLevel"],
+            special1=data["special1"],
             special2=data["special2"],
             special3=data["special3"],
             attacker=data["attacker"],
