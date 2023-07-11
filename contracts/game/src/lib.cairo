@@ -3,9 +3,10 @@ mod tests;
 
 #[starknet::contract]
 mod Game {
-    // TODO: TESTING CONSTS REMOVE BEFORE DEPLOYMENT
-    const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 10;
-    const IDLE_PENALTY_THRESHOLD_BLOCKS: u16 = 10;
+    // TODO: TESTING CONFIGS 
+    // ADJUST THESE BEFORE DEPLOYMENT
+    const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 4;
+    const IDLE_PENALTY_THRESHOLD_BLOCKS: u16 = 4;
     const IDLE_DEATH_PENALTY_BLOCKS: u16 = 300;
     const MAX_STORAGE_BLOCKS: u64 = 512;
     const TEST_ENTROPY: u64 = 12303548;
@@ -13,13 +14,11 @@ mod Game {
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
     const STAT_UPGRADE_POINTS_PER_LEVEL: u8 = 1;
 
-    use game::game::interfaces::{
-        IGame, IERC20Dispatcher, IERC20DispatcherTrait, IERC20LibraryDispatcher
-    };
     use option::OptionTrait;
     use box::BoxTrait;
-    use starknet::get_caller_address;
-    use starknet::{ContractAddress, ContractAddressIntoFelt252, contract_address_const};
+    use starknet::{
+        get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const
+    };
     use integer::{
         Felt252TryIntoU64, U8IntoU16, U16IntoU64, U16IntoU128, U64IntoU128, U8IntoU128,
         U128TryIntoU8, U64IntoFelt252, U64TryIntoU16
@@ -28,13 +27,16 @@ mod Game {
     use array::ArrayTrait;
     use poseidon::poseidon_hash_span;
 
-    use game::game::constants::{
-        messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX
+    use game::game::{
+        interfaces::{IGame, IERC20Dispatcher, IERC20DispatcherTrait, IERC20LibraryDispatcher},
+        constants::{
+            messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
+            U128_MAX
+        }
     };
     use lootitems::{
         loot::{ILoot, Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
     };
-    // use pack::pack::Packing; 
     use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, adventurer_stats::Stats,
@@ -51,7 +53,7 @@ mod Game {
         adventurer_utils::AdventurerUtils
     };
     use market::market::{ImplMarket, LootWithPrice};
-    use obstacles::obstacle::{ImplObstacle};
+    use obstacles::obstacle::{ImplObstacle, IObstacle};
     use combat::{combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums};
     use beasts::beast::{Beast, IBeast, ImplBeast};
 
@@ -656,6 +658,13 @@ mod Game {
                 .stats
                 .charisma
         }
+        fn get_beast_type(self: @ContractState, beast_id: u8) -> u8 {
+            ImplCombat::type_to_u8(ImplBeast::get_type(beast_id))
+        }
+
+        fn get_beast_tier(self: @ContractState, beast_id: u8) -> u8 {
+            ImplCombat::tier_to_u8(ImplBeast::get_tier(beast_id))
+        }
 
         fn get_dao_address(self: @ContractState) -> ContractAddress {
             _dao_address(self)
@@ -790,7 +799,6 @@ mod Game {
             name: adventurer_meta.name,
             home_realm: adventurer_meta.home_realm,
             race: adventurer_meta.race,
-            order: adventurer_meta.order,
             entropy: r.try_into().unwrap()
         };
 
@@ -799,6 +807,24 @@ mod Game {
             ref self,
             AdventurerState { owner: caller, adventurer_id, adventurer: new_adventurer },
             adventurer_meta
+        );
+
+        // emit BeastDiscovered
+        let starter_beast = ImplBeast::get_starter_beast(ImplLoot::get_type(starting_weapon));
+        __event__DiscoverBeast(
+            ref self,
+            DiscoverBeast {
+                adventurer_state: AdventurerState {
+                    owner: caller, adventurer_id, adventurer: new_adventurer
+                },
+                id: starter_beast.id,
+                level: starter_beast.combat_spec.level,
+                ambushed: false,
+                damage_taken: 0,
+                health: starter_beast.starting_health,
+                prefix1: starter_beast.combat_spec.special_powers.prefix1,
+                prefix2: starter_beast.combat_spec.special_powers.prefix2,
+            }
         );
 
         // write the new adventurer to storage
@@ -967,7 +993,7 @@ mod Game {
         );
 
         // get the xp reward for the obstacle
-        let xp_reward = ImplObstacle::get_xp_reward(obstacle);
+        let xp_reward = obstacle.get_xp_reward();
 
         // reward adventurer with xp (regarldess of obstacle outcome)
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_reward);
@@ -1746,7 +1772,8 @@ mod Game {
 
         // check gold balance
         assert(
-            adventurer.check_gold(adventurer.charisma_adjusted_potion_price()) == true, messages::NOT_ENOUGH_GOLD
+            adventurer.check_gold(adventurer.charisma_adjusted_potion_price()) == true,
+            messages::NOT_ENOUGH_GOLD
         );
 
         // verify adventurer isn't already at max health
@@ -1777,11 +1804,9 @@ mod Game {
     fn _get_live_entropy(
         adventurer_entropy: u128, game_entropy: u128, adventurer: Adventurer
     ) -> u128 {
-
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(adventurer.xp.into());
-        hash_span.append(adventurer.health.into());
-        hash_span.append(adventurer.gold.into());
+        hash_span.append(adventurer.last_action.into());
         hash_span.append(adventurer_entropy.into());
         hash_span.append(game_entropy.into());
 
@@ -1963,7 +1988,11 @@ mod Game {
         assert(adventurer.stat_points_available > 0, messages::MARKET_CLOSED);
     }
     fn _assert_item_is_available(
-        self: @ContractState, adventurer: Adventurer, adventurer_id: u256, adventurer_entropy: u128, item_id: u8
+        self: @ContractState,
+        adventurer: Adventurer,
+        adventurer_id: u256,
+        adventurer_entropy: u128,
+        item_id: u8
     ) {
         assert(
             ImplMarket::is_item_available(
@@ -2026,7 +2055,9 @@ mod Game {
             .into();
 
         ImplMarket::get_all_items_with_price(
-            _unpack_adventurer(self, adventurer_id).get_market_seed(adventurer_id, adventurer_entropy).into()
+            _unpack_adventurer(self, adventurer_id)
+                .get_market_seed(adventurer_id, adventurer_entropy)
+                .into()
         )
     }
 

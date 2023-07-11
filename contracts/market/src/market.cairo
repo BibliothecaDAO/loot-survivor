@@ -2,7 +2,6 @@
 use traits::{TryInto, Into};
 use core::clone::Clone;
 use array::ArrayTrait;
-use debug::PrintTrait;
 use option::OptionTrait;
 
 use lootitems::statistics::constants::ItemId;
@@ -21,14 +20,7 @@ struct LootWithPrice {
     price: u16,
 }
 
-trait IMarket {
-    fn get_all_items(seed: u256) -> Array<Loot>;
-    fn get_all_items_with_price(seed: u256) -> Array<LootWithPrice>;
-    fn get_id(seed: u256) -> u8;
-    fn is_item_available(seed: u256, item_id: u8) -> bool;
-    fn get_price(tier: Tier) -> u16;
-}
-
+#[generate_trait]
 impl ImplMarket of IMarket {
     fn get_price(tier: Tier) -> u16 {
         match tier {

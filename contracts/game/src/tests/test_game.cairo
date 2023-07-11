@@ -2,7 +2,6 @@ use core::box::BoxTrait;
 #[cfg(test)]
 mod tests {
     use array::ArrayTrait;
-    use debug::PrintTrait;
     use core::result::ResultTrait;
     use core::traits::Into;
     use option::OptionTrait;
@@ -61,7 +60,7 @@ mod tests {
         let mut game = setup();
 
         let adventurer_meta = AdventurerMetadata {
-            name: 'Loaf'.try_into().unwrap(), home_realm: 1, race: 1, order: 2, entropy: 0
+            name: 'Loaf'.try_into().unwrap(), home_realm: 1, race: 1, entropy: 1
         };
 
         game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta);
@@ -93,7 +92,6 @@ mod tests {
         assert(adventurer_meta_1.name == 'Loaf', 'name');
         assert(adventurer_meta_1.home_realm == 1, 'home_realm');
         assert(adventurer_meta_1.race == 1, 'race');
-        assert(adventurer_meta_1.order == 2, 'order');
 
         adventurer_meta_1.entropy;
     }
@@ -195,7 +193,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Not in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(60000000)]
+    #[available_gas(65000000)]
     fn test_cant_flee_outside_battle() {
         // start adventuer and advance to level 2
         let mut game = lvl_2_adventurer();
@@ -231,6 +229,10 @@ mod tests {
         assert(updated_adventurer.beast_health == 0, 'should have found a beast');
 
         testing::set_block_number(1005);
+        game.explore(ADVENTURER_ID);
+
+        // explore again to find a beast
+        testing::set_block_number(1006);
         game.explore(ADVENTURER_ID);
 
         game.flee(ADVENTURER_ID);
@@ -300,7 +302,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Market item does not exist', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(60000000)]
+    #[available_gas(65000000)]
     fn test_buy_unavailable_item() {
         let mut game = lvl_2_adventurer();
         game.buy_item(ADVENTURER_ID, 200, true);

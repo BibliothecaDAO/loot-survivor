@@ -1,7 +1,6 @@
 use option::OptionTrait;
 use traits::{TryInto, Into};
 use pack::{pack::{Packing, rshift_split}, constants::pow};
-use debug::PrintTrait;
 
 #[derive(Drop, Copy, PartialEq, Serde)] // 21 bits
 struct ItemPrimitive {
