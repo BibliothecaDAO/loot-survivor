@@ -147,7 +147,6 @@ async def get_item(info, item_id, adventurer_id):
 
 
 async def update_item_xp(info, item, adventurer_id, xp):
-    print(xp, encode_int_as_bytes(xp))
     await info.storage.find_one_and_update(
         "items",
         {
@@ -723,18 +722,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         ba = decode_attack_beast_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(info, ba.adventurer_state)
-        beast_discovery = await info.storage.find(
-            "discoveries",
-            {
-                "entity": check_exists_int(ba.beast_id),
-                "adventurerId": check_exists_int(ba.adventurer_state["adventurer_id"]),
-            },
-            sort={"discoveryTime": -1},
-            limit=1,
-        )
-        beast_document = next(beast_discovery)
-        print(beast_document)
-        # print(ba.beast_id, ba.adventurer_state["adventurer_id"])
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
@@ -773,8 +760,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 ba.beast_id,
                 "->",
                 ba.adventurer_state["adventurer_id"],
-                "-",
-                attacked_beast_doc,
             )
         except StopIteration:
             print("No documents found in beast_discovery")
@@ -789,17 +774,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         sb = decode_slayed_beast_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(info, sb.adventurer_state)
-        # beast_discovery = await info.storage.find(
-        #     "discoveries",
-        #     {
-        #         "entityId": check_exists_int(sb.beast_id),
-        #         "adventurerId": check_exists_int(sb.adventurer_state["adventurer_id"]),
-        #     },
-        #     sort={"discoveryTime": -1},
-        #     limit=1,
-        # )
-        # beast_document = next(beast_discovery)
-        print(sb.beast_id, sb.beast_level, sb.adventurer_state["adventurer_id"])
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
@@ -824,7 +798,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "attacker": encode_int_as_bytes(1),
                 "fled": check_exists_int(0),
                 "damageDealt": encode_int_as_bytes(sb.damage_dealt),
-                "damageTaken": encode_int_as_bytes(sb.damage_taken),
+                "damageTaken": encode_int_as_bytes(0),
                 "damageLocation": encode_int_as_bytes(0),
                 "xpEarnedAdventurer": encode_int_as_bytes(sb.xp_earned_adventurer),
                 "xpEarnedItems": encode_int_as_bytes(sb.xp_earned_items),
@@ -837,12 +811,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 info, sb.adventurer_state["adventurer_id"], sb.xp_earned_items
             )
             print(
-                "- [attack beast]",
+                "- [slayed beast]",
                 sb.beast_id,
                 "->",
                 sb.adventurer_state["adventurer_id"],
-                "-",
-                slayed_beast_doc,
             )
         except StopIteration:
             print("No documents found in beast_discovery")
@@ -857,17 +829,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         fa = decode_flee_attempt_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(info, fa.adventurer_state)
-        # beast_discovery = await info.storage.find(
-        #     "discoveries",
-        #     {
-        #         "entityId": check_exists_int(fa.beast_id),
-        #         "adventurerId": check_exists_int(fa.adventurer_state["adventurer_id"]),
-        #     },
-        #     sort={"discoveryTime": -1},
-        #     limit=1,
-        # )
-        # beast_document = next(beast_discovery)
-        print(fa.beast_id, fa.adventurer_state["adventurer_id"])
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
