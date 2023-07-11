@@ -15,21 +15,24 @@ interface FinalTutorialProps {
 
 const UpgradeContent = () => {
   return (
-    <>
+    <div className="uppercase">
       <h1>You leveled up!</h1>
       <p className="text-sm sm:text-lg">
-        Well done oh noble one! You have defeated your first beast and have
-        leveled up to level 2. Here is the final tutorial to get you to grips
-        with all the other features in Loot Survivor.
+        You have defeated your first beast and have leveled up to level 2! Here
+        is the final tutorial to get you to grips with all the other features in
+        Loot Survivor.
       </p>
-      <h2 className="text-xl sm:text-2xl">Upgrade</h2>
-      <h3 className="text-xl sm:text-2xl">Marketplace</h3>
+      <h2 className="text-xl sm:text-2xl">Marketplace</h2>
       <p className="text-sm sm:text-lg">
-        Every upgrade the adventurer will have a choice to purchase one item
+        Every upgrade your adventurer will have a choice to purchase one item
         from the market. They will pay a price of gold related to the tier of
         the item (the higher the tier the more expensive the item). Item prices
         will increase every level, but charisma will discount the item
         accordingly!
+      </p>
+      <h2 className="text-xl sm:text-2xl">Upgrade</h2>
+      <p className="text-sm sm:text-lg">
+        Every time you level up you recieve a stat point upgrade.
       </p>
       <h3 className="text-xl sm:text-2xl">Stat Points</h3>
       <p className="text-sm sm:text-lg">
@@ -49,13 +52,13 @@ const UpgradeContent = () => {
           <LightbulbIcon /> Intelligence: Increase chance of avoiding obstacles
         </li>
         <li>
-          <ScrollIcon /> Wisdom: Increases chnce of avoiding beast ambushes
+          <ScrollIcon /> Wisdom: Increases chance of avoiding beast ambushes
         </li>
         <li>
           <CoinCharismaIcon /> Charisma: Reduces item prices
         </li>
       </ul>
-    </>
+    </div>
   );
 };
 

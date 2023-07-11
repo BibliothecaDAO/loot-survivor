@@ -1,6 +1,6 @@
 export const ActionsTutorial = () => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 uppercase">
       <h1 className="mt-0">Actions</h1>
       <h3 className="text-xl sm:text-2xl">Explore</h3>
       <p className="text-sm sm:text-lg">

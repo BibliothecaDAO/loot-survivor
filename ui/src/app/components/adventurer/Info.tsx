@@ -76,8 +76,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   <CoinIcon className="self-center w-6 h-6 fill-current" />{" "}
                   {formatAdventurer.gold ? formatAdventurer.gold : 0}
                 </span>
-                <span className="flex text-lg items-center sm:text-2xl">
-                  <BagIcon className="self-center w-6 h-6 fill-current" />{" "}
+                <span className="flex text-lg items-center sm:text-3xl">
+                  <BagIcon className="self-center w-4 h-4 fill-current" />{" "}
                   {`${items.length}/${19}`}
                 </span>
                 <span className="flex ">
