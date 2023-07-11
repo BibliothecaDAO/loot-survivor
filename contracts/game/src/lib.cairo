@@ -817,13 +817,14 @@ mod Game {
                 adventurer_state: AdventurerState {
                     owner: caller, adventurer_id, adventurer: new_adventurer
                 },
+                seed: 0,
                 id: starter_beast.id,
                 level: starter_beast.combat_spec.level,
                 ambushed: false,
                 damage_taken: 0,
                 health: starter_beast.starting_health,
-                prefix1: starter_beast.combat_spec.special_powers.prefix1,
-                prefix2: starter_beast.combat_spec.special_powers.prefix2,
+                special1: starter_beast.combat_spec.special_powers.prefix1,
+                special2: starter_beast.combat_spec.special_powers.prefix2,
             }
         );
 
@@ -914,13 +915,14 @@ mod Game {
                             adventurer_id: adventurer_id,
                             adventurer: adventurer
                         },
+                        seed: beast_seed,
                         id: beast.id,
                         level: beast.combat_spec.level,
                         ambushed: was_ambushed,
                         damage_taken: damage_taken,
                         health: beast.starting_health,
-                        prefix1: beast.combat_spec.special_powers.prefix1,
-                        prefix2: beast.combat_spec.special_powers.prefix2,
+                        special1: beast.combat_spec.special_powers.prefix1,
+                        special2: beast.combat_spec.special_powers.prefix2,
                     }
                 );
 
@@ -1368,14 +1370,13 @@ mod Game {
 
         // get beast seed based on adventurer state and adventurer entropy
         let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
-        let beast_special_names = ImplBeast::get_special_names(
-            adventurer.get_level(), beast_seed, NamePrefixLength.into(), NameSuffixLength.into(), 
-        );
 
         // regenerate beast from seed
         let beast = ImplBeast::get_beast(
             adventurer.get_level(),
-            beast_special_names,
+            ImplBeast::get_special_names(
+                adventurer.get_level(), beast_seed, NamePrefixLength.into(), NameSuffixLength.into()
+            ),
             beast_seed,
             ImplLoot::get_type(adventurer.weapon.id)
         );
@@ -1440,11 +1441,12 @@ mod Game {
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
                     },
-                    beast_id: beast.id,
-                    prefix_1: beast.combat_spec.special_powers.prefix1,
-                    prefix_2: beast.combat_spec.special_powers.prefix2,
-                    beast_level: beast.combat_spec.level,
-                    beast_health: adventurer.beast_health,
+                    seed: beast_seed,
+                    id: beast.id,
+                    health: adventurer.beast_health,
+                    level: beast.combat_spec.level,
+                    special1: beast.combat_spec.special_powers.prefix1,
+                    special2: beast.combat_spec.special_powers.prefix2,
                     damage_dealt: damage_dealt,
                     xp_earned_adventurer: xp_earned,
                     xp_earned_items: xp_earned * ITEM_XP_MULTIPLIER,
@@ -1493,11 +1495,12 @@ mod Game {
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
                     },
-                    beast_id: beast.id,
-                    beast_level: beast.combat_spec.level,
-                    beast_health: adventurer.beast_health,
-                    prefix_1: beast.combat_spec.special_powers.prefix1,
-                    prefix_2: beast.combat_spec.special_powers.prefix2,
+                    seed: beast_seed,
+                    id: beast.id,
+                    level: beast.combat_spec.level,
+                    health: adventurer.beast_health,
+                    special1: beast.combat_spec.special_powers.prefix1,
+                    special2: beast.combat_spec.special_powers.prefix2,
                     damage_dealt: damage_dealt,
                     damage_taken: damage_taken,
                     damage_location: ImplCombat::slot_to_u8(attack_location),
@@ -1565,7 +1568,9 @@ mod Game {
         // generate beast without special powers ()
         let beast = ImplBeast::get_beast(
             adventurer.get_level(),
-            SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 },
+            ImplBeast::get_special_names(
+                adventurer.get_level(), beast_seed, NamePrefixLength.into(), NameSuffixLength.into()
+            ),
             beast_seed,
             ImplLoot::get_type(adventurer.weapon.id)
         );
@@ -1594,9 +1599,12 @@ mod Game {
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
                 },
-                beast_id: beast.id,
-                beast_level: beast.combat_spec.level,
-                beast_health: adventurer.beast_health,
+                seed: beast_seed,
+                id: beast.id,
+                health: adventurer.beast_health,
+                level: beast.combat_spec.level,
+                special1: beast.combat_spec.special_powers.prefix1,
+                special2: beast.combat_spec.special_powers.prefix2,
                 damage_taken: damage_taken,
                 damage_location: attack_location,
                 fled
@@ -2280,23 +2288,25 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     struct DiscoverBeast {
         adventurer_state: AdventurerState,
+        seed: u128,
         id: u8,
+        health: u16,
         level: u16,
+        special1: u8,
+        special2: u8,
         ambushed: bool,
         damage_taken: u16,
-        health: u16,
-        prefix1: u8,
-        prefix2: u8,
     }
 
     #[derive(Drop, starknet::Event)]
     struct AttackBeast {
         adventurer_state: AdventurerState,
-        beast_id: u8,
-        beast_level: u16,
-        beast_health: u16,
-        prefix_1: u8,
-        prefix_2: u8,
+        seed: u128,
+        id: u8,
+        health: u16,
+        level: u16,
+        special1: u8,
+        special2: u8,
         damage_dealt: u16,
         damage_taken: u16,
         damage_location: u8,
@@ -2305,11 +2315,12 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     struct SlayedBeast {
         adventurer_state: AdventurerState,
-        beast_id: u8,
-        prefix_1: u8,
-        prefix_2: u8,
-        beast_level: u16,
-        beast_health: u16,
+        seed: u128,
+        id: u8,
+        health: u16,
+        level: u16,
+        special1: u8,
+        special2: u8,
         damage_dealt: u16,
         xp_earned_adventurer: u16,
         xp_earned_items: u16,
@@ -2319,12 +2330,15 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     struct FleeAttempt {
         adventurer_state: AdventurerState,
-        beast_id: u8,
-        beast_level: u16,
-        beast_health: u16,
+        seed: u128,
+        id: u8,
+        health: u16,
+        level: u16,
+        special1: u8,
+        special2: u8,
+        fled: bool,
         damage_taken: u16,
         damage_location: u8,
-        fled: bool,
     }
 
     #[derive(Drop, starknet::Event)]
