@@ -691,11 +691,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         db = decode_discover_beast_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(info, db.adventurer_state)
-        print(
-            db.beast_specs["specials"]["special1"],
-            db.beast_specs["specials"]["special2"],
-            db.beast_specs["specials"]["special3"],
-        )
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": check_exists_int(db.adventurer_state["adventurer_id"]),
@@ -850,7 +845,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         fa = decode_flee_attempt_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(info, fa.adventurer_state)
-        print(fa.id, fa.adventurer_state["adventurer_id"], fa.seed)
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
