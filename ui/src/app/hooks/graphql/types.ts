@@ -79,6 +79,8 @@ export type DiscoveriesQuery = {
     entity: Maybe<Scalars["String"]>;
     entityLevel: Maybe<Scalars["Int"]>;
     entityHealth: Maybe<Scalars["Int"]>;
+    special2: Maybe<Scalars["String"]>;
+    special3: Maybe<Scalars["String"]>;
     ambushed: Maybe<Scalars["Boolean"]>;
     discoveryTime: Maybe<Scalars["Timestamp"]>;
     txHash: Maybe<Scalars["Hex"]>;
@@ -92,8 +94,8 @@ export type BattleQuery = {
   beast: Maybe<Scalars["String"]>;
   beastHealth: Maybe<Scalars["Int"]>;
   beastLevel: Maybe<Scalars["Int"]>;
-  special1: Maybe<Scalars["String"]>;
   special2: Maybe<Scalars["String"]>;
+  special3: Maybe<Scalars["String"]>;
   attacker: Maybe<Scalars["String"]>;
   fled: Maybe<Scalars["Boolean"]>;
   damageDealt: Maybe<Scalars["Int"]>;

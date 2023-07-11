@@ -124,8 +124,8 @@ export default function EncountersScreen({ profile }: EncountersProps) {
                       battleData={encounter}
                       beastName={processBeastName(
                         encounter?.beast,
-                        encounter?.special1,
-                        encounter?.special2
+                        encounter?.special2,
+                        encounter?.special3
                       )}
                       adventurer={adventurer ?? NullAdventurer}
                     />

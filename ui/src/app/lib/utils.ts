@@ -167,12 +167,12 @@ export function calculateLevel(xp: number) {
 
 export function processItemName(item: Item) {
   if (item) {
-    if (item.special1 && item.special2 && calculateLevel(item.xp ?? 0) >= 20) {
-      return `${item.special1} ${item.special2} ${item.item} ${item.special3} +1`;
-    } else if (item.special1 && item.special3) {
-      return `${item.special1} ${item.special2} ${item.item} ${item.special3}`;
-    } else if (item.special3) {
-      return `${item.item} ${item.special3}`;
+    if (item.special2 && item.special3 && calculateLevel(item.xp ?? 0) >= 20) {
+      return `${item.special2} ${item.special3} ${item.item} ${item.special1} +1`;
+    } else if (item.special2 && item.special1) {
+      return `${item.special2} ${item.special3} ${item.item} ${item.special1}`;
+    } else if (item.special1) {
+      return `${item.item} ${item.special1}`;
     } else {
       return `${item.item}`;
     }
@@ -190,11 +190,11 @@ export function getItemData(item: string) {
 
 export function processBeastName(
   beast: string,
-  special1: string,
-  special2: string
+  special2: string,
+  special3: string
 ) {
-  if (special1 && special2) {
-    return `"${special1} ${special2}" ${beast}`;
+  if (special2 && special3) {
+    return `"${special2} ${special3}" ${beast}`;
   } else {
     return `${beast}`;
   }

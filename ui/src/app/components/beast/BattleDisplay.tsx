@@ -96,8 +96,8 @@ export const NotificationBattleDisplay = ({
     if (isArray) {
       const beastName = processBeastName(
         battleData[0]?.beast ?? "",
-        battleData[0]?.special1 ?? "",
-        battleData[0]?.special2 ?? ""
+        battleData[0]?.special2 ?? "",
+        battleData[0]?.special3 ?? ""
       );
       const beastLevel = battleData[0]?.beastLevel;
       const { tier, attack, armor, image } = getBeastData(
@@ -107,8 +107,8 @@ export const NotificationBattleDisplay = ({
     } else {
       const beastName = processBeastName(
         battleData?.beast ?? "",
-        battleData?.special1 ?? "",
-        battleData?.special2 ?? ""
+        battleData?.special2 ?? "",
+        battleData?.special3 ?? ""
       );
       const beastLevel = battleData?.beastLevel;
       const { tier, attack, armor, image } = getBeastData(

@@ -18,8 +18,8 @@ export const BeastDisplay = ({
 }: BeastDisplayProps) => {
   const beastName = processBeastName(
     beastData?.entity ?? "",
-    beastData?.special1 ?? "",
-    beastData?.special2 ?? ""
+    beastData?.special2 ?? "",
+    beastData?.special3 ?? ""
   );
   const { tier, attack, armor, image } = getBeastData(beastData?.entity ?? "");
 

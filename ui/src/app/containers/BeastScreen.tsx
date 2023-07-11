@@ -175,8 +175,8 @@ export default function BeastScreen() {
 
   const beastName = processBeastName(
     beastData?.entity ?? "",
-    beastData?.special1 ?? "",
-    beastData?.special2 ?? ""
+    beastData?.special2 ?? "",
+    beastData?.special3 ?? ""
   );
 
   const isMobileDevice = useMediaQuery({

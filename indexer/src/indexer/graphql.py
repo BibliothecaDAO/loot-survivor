@@ -142,12 +142,12 @@ def serialize_item_type(value):
     return config.ITEM_TYPES.get(felt)
 
 
-def parse_special_1(value):
+def parse_special_2(value):
     felt = get_key_by_value(value, config.ITEM_NAME_PREFIXES)
     return felt.to_bytes(32, "big")
 
 
-def serialize_special_1(value):
+def serialize_special_2(value):
     felt = int.from_bytes(value, "big")
     if felt == 0:
         return None
@@ -155,22 +155,22 @@ def serialize_special_1(value):
         return config.ITEM_NAME_PREFIXES.get(felt)
 
 
-def parse_special_2(value):
+def parse_special_3(value):
     felt = get_key_by_value(value, config.ITEM_NAME_SUFFIXES)
     return felt.to_bytes(32, "big")
 
 
-def serialize_special_2(value):
+def serialize_special_3(value):
     felt = int.from_bytes(value, "big")
     return config.ITEM_NAME_SUFFIXES.get(felt)
 
 
-def parse_special_3(value):
+def parse_special_1(value):
     felt = get_key_by_value(value, config.ITEM_SUFFIXES)
     return felt.to_bytes(32, "big")
 
 
-def serialize_special_3(value):
+def serialize_special_1(value):
     felt = int.from_bytes(value, "big")
     return config.ITEM_SUFFIXES.get(felt)
 
@@ -630,8 +630,8 @@ class DiscoveriesFilter:
     entity: Optional[FeltValueFilter] = None
     entityLevel: Optional[FeltValueFilter] = None
     entityHealth: Optional[FeltValueFilter] = None
-    special1: Optional[Special1Filter] = None
-    special2: Optional[Special2Filter] = None
+    special2: Optional[Special1Filter] = None
+    special3: Optional[Special2Filter] = None
     ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[DateTimeFilter] = None
     txHash: Optional[HexValueFilter] = None
@@ -643,8 +643,8 @@ class BattlesFilter:
     beastId: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     beastLevel: Optional[FeltValueFilter] = None
-    special1: Optional[Special1Filter] = None
-    special2: Optional[Special2Filter] = None
+    special2: Optional[Special1Filter] = None
+    special3: Optional[Special2Filter] = None
     attacker: Optional[AttackerFilter] = None
     fled: Optional[BooleanFilter] = None
     damageDealt: Optional[OrderByInput] = None
@@ -733,8 +733,8 @@ class DiscoveriesOrderByInput:
     entity: Optional[OrderByInput] = None
     entityLevel: Optional[OrderByInput] = None
     entityHealth: Optional[OrderByInput] = None
-    special1: Optional[OrderByInput] = None
     special2: Optional[OrderByInput] = None
+    special3: Optional[OrderByInput] = None
     ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
@@ -746,8 +746,8 @@ class BattlesOrderByInput:
     beastId: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     beastLevel: Optional[OrderByInput] = None
-    special1: Optional[OrderByInput] = None
     special2: Optional[OrderByInput] = None
+    special3: Optional[OrderByInput] = None
     attacker: Optional[OrderByInput] = None
     fled: Optional[OrderByInput] = None
     damageDealt: Optional[OrderByInput] = None
@@ -878,8 +878,8 @@ class Discovery:
     entity: Optional[BeastValue]
     entityLevel: Optional[FeltValue]
     entityHealth: Optional[FeltValue]
-    special1: Optional[Special1Value]
     special2: Optional[Special2Value]
+    special3: Optional[Special3Value]
     ambushed: Optional[BooleanValue]
     discoveryTime: Optional[datetime]
     txHash: Optional[HexValue]
@@ -901,8 +901,8 @@ class Discovery:
             entity=data["entity"],
             entityLevel=data["entityLevel"],
             entityHealth=data["entityHealth"],
-            special1=data["special1"],
             special2=data["special2"],
+            special3=data["special3"],
             ambushed=data["ambushed"],
             discoveryTime=data["discoveryTime"],
             txHash=data["txHash"],
@@ -915,8 +915,8 @@ class Battle:
     beast: Optional[BeastValue]
     beastHealth: Optional[FeltValue]
     beastLevel: Optional[FeltValue]
-    special1: Optional[Special1Value]
     special2: Optional[Special2Value]
+    special3: Optional[Special3Value]
     attacker: Optional[AttackerValue]
     fled: Optional[BooleanValue]
     damageDealt: Optional[FeltValue]
@@ -936,8 +936,8 @@ class Battle:
             beast=data["beast"],
             beastHealth=data["beastHealth"],
             beastLevel=data["beastLevel"],
-            special1=data["special1"],
             special2=data["special2"],
+            special3=data["special3"],
             attacker=data["attacker"],
             fled=data["fled"],
             damageDealt=data["damageDealt"],

@@ -121,8 +121,8 @@ export const processNotification = (
 ) => {
   const beastName = processBeastName(
     battles[0]?.beast ?? "",
-    battles[0]?.special1 ?? "",
-    battles[0]?.special2 ?? ""
+    battles[0]?.special2 ?? "",
+    battles[0]?.special3 ?? ""
   );
   if (type == "Attack" || type == "Flee") {
     return (
