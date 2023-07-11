@@ -1579,6 +1579,19 @@ mod Game {
         if (fled) {
             // set beast health to zero to denote adventurer is no longer in battle
             adventurer.beast_health = 0;
+
+            // to prevent game looping between game entroy changes
+            // we need to ensure the resulting adventurer state
+            // is different than the original, otherwise the next
+            // time the adventurer explores, they will discover the same beast
+
+            // as a simple and low-impact way to achieve this
+            // we either add or subtract 1 gold from the adventurer
+            if (adventurer.gold > 0) {
+                adventurer.deduct_gold(1);
+            } else {
+                adventurer.add_gold(1);
+            }
         } else {
             // if flee attempt was unsuccessful the beast counter attacks
             // adventurer death will be handled as part of counter attack
