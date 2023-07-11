@@ -318,7 +318,7 @@ impl ImplAdventurer of IAdventurer {
         // don't store anything about the beast in the adventurer state
         // except it's health. Instead the beast is generated at run-time
         // via the battle_fixed_seed
-        let beast = ImplBeast::get_beast(self.get_level(), special_names, beast_seed);
+        let beast = ImplBeast::get_beast(self.get_level(), special_names, beast_seed, ImplLoot::get_type(self.weapon.id));
 
         // otherwise generate random starting health for the beast
         self.set_beast_health(beast.starting_health);
