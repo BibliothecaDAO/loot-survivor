@@ -12,7 +12,7 @@ use combat::constants::CombatEnums::{Tier};
 
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET, TIER_PRICE};
 
-const MARKET_SEED: u256 = 512;
+const MARKET_SEED: u256 = 515;
 
 #[derive(Drop, Serde)]
 struct LootWithPrice {
@@ -80,7 +80,7 @@ impl ImplMarket of IMarket {
 
     fn get_id(seed: u256) -> u8 {
         let cast_seed: u128 = seed.try_into().unwrap();
-        (cast_seed % NUM_LOOT_ITEMS.into()).try_into().unwrap()
+        (1 + (cast_seed % NUM_LOOT_ITEMS.into())).try_into().unwrap()
     }
 
     fn is_item_available(seed: u256, item_id: u8) -> bool {
@@ -182,6 +182,7 @@ fn test_get_all_items_ownership() {
         }
 
         let id = *items.at(item_index).id;
+        assert(id != 0, 'item id should not be 0');
 
         let result = ImplMarket::is_item_available(MARKET_SEED + i, id);
 
