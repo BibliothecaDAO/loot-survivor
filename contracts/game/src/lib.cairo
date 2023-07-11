@@ -870,8 +870,10 @@ mod Game {
 
         match explore_result {
             ExploreResult::Beast(()) => {
-                // get a source of entropy that will be constant for the duration of the battle
-                let battle_fixed_entropy: u128 = adventurer.get_beast_seed(adventurer_entropy);
+                // get a seed for the beast based on adventurer stats
+                // this seed needs to be fixed during the course of the battle
+                // so we can use it to dynamically generate the same beast during combat
+                let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
 
                 // encounter beast and check if adventurer was ambushed
                 let (beast, was_ambushed) = ImplBeast::beast_encounter(
@@ -879,7 +881,7 @@ mod Game {
                     adventurer.stats.wisdom,
                     NamePrefixLength,
                     NameSuffixLength,
-                    adventurer_entropy
+                    beast_seed
                 );
 
                 // initialize the beast health. This is the only timeD beast.starting_health should be
@@ -899,7 +901,7 @@ mod Game {
                         adventurer_id,
                         CombatEnums::Slot::Chest(()),
                         beast,
-                        battle_fixed_entropy
+                        beast_seed
                     );
                 }
 
@@ -1364,28 +1366,19 @@ mod Game {
             .entropy
             .into();
 
-        // generate battle fixed entropy by combining adventurer xp and adventurer entropy
-        let battle_fixed_entropy: u128 = adventurer.get_beast_seed(adventurer_entropy);
+        // get beast seed based on adventurer state and adventurer entropy
+        let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
         let beast_special_names = ImplBeast::get_special_names(
-            adventurer.get_level(),
-            battle_fixed_entropy,
-            NamePrefixLength.into(),
-            NameSuffixLength.into(),
+            adventurer.get_level(), beast_seed, NamePrefixLength.into(), NameSuffixLength.into(), 
         );
 
-        // if the items greatness is below 15, it won't have any special names so no need
-        // to waste a read fetching them
-        let weapon = adventurer.get_item_at_slot(CombatEnums::Slot::Weapon(()));
-        let weapon_combat_spec = _get_combat_spec(@self, adventurer_id, weapon);
-
-        // get battle fixed beast. The key to this is using battle fixed entropy
-        let adventurer_level = adventurer.get_level();
+        // regenerate beast from seed
         let beast = ImplBeast::get_beast(
-            adventurer_level, beast_special_names, battle_fixed_entropy
+            adventurer.get_level(),
+            beast_special_names,
+            beast_seed,
+            ImplLoot::get_type(adventurer.weapon.id)
         );
-        if (adventurer.get_level() == 1) {
-            let beast = ImplBeast::get_starter_beast(weapon_combat_spec.item_type);
-        }
 
         // get game entropy from storage
         let game_entropy: u128 = _get_entropy(@self).into();
@@ -1399,7 +1392,10 @@ mod Game {
 
         let damage_dealt = beast
             .attack(
-                weapon_combat_spec, adventurer.get_luck(), adventurer.stats.strength, attack_entropy
+                _get_combat_spec(@self, adventurer_id, adventurer.weapon),
+                adventurer.get_luck(),
+                adventurer.stats.strength,
+                attack_entropy
             );
         // if the amount of damage dealt to beast exceeds its health
         if (damage_dealt >= adventurer.beast_health) {
@@ -1432,7 +1428,7 @@ mod Game {
 
             // grant adventurer gold reward. We use battle fixed entropy
             // to fix this result at the start of the battle, mitigating simulate-and-wait strategies
-            let gold_reward = beast.get_gold_reward(battle_fixed_entropy);
+            let gold_reward = beast.get_gold_reward(beast_seed);
             adventurer.add_gold(gold_reward);
 
             // emit slayed beast event
@@ -1540,15 +1536,12 @@ mod Game {
         } // if the adventurer is not dead
         else {
             // deduct the damage dealt
-            adventurer.health -= damage_taken;
+            adventurer.deduct_health(damage_taken);
             return damage_taken;
         }
     }
 
-    // @loothero
-    fn _flee(
-        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256
-    ) -> Adventurer {
+    fn _flee(ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256) {
         // https://github.com/starkware-libs/cairo/issues/2942
         internal::revoke_ap_tracking();
         // get adventurer entropy from storage
@@ -1566,25 +1559,24 @@ mod Game {
             adventurer.get_level(), adventurer.stats.dexterity, flee_entropy
         );
 
-        // our fixed battle entropy which we use to generate same beast during a single battle
+        // get beast seed based on adventurer entropy and adventurer state
         let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
-        // here we save some compute by not looking up the beast's special names during a failed flee
-        // since they won't impact damage
-        let beast_name_prefix = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 };
-        let beast = ImplBeast::get_beast(adventurer.get_level(), beast_name_prefix, beast_seed);
+
+        // generate beast without special powers ()
+        let beast = ImplBeast::get_beast(
+            adventurer.get_level(),
+            SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 },
+            beast_seed,
+            ImplLoot::get_type(adventurer.weapon.id)
+        );
         let mut damage_taken = 0;
         let mut attack_location = 0;
         if (fled) {
             // set beast health to zero to denote adventurer is no longer in battle
             adventurer.beast_health = 0;
         } else {
-            // if flee attempt was unsuccessful
-            // the beast will counter attack
-
-            // to process the counter attack we'll need
-            // the adventurers level
-
-            // process counter attack (adventurer death will be handled as part of counter attack)
+            // if flee attempt was unsuccessful the beast counter attacks
+            // adventurer death will be handled as part of counter attack
             let attack_slot = AdventurerUtils::get_random_armor_slot(flee_entropy);
             attack_location = ImplCombat::slot_to_u8(attack_slot);
             damage_taken =
@@ -1611,7 +1603,21 @@ mod Game {
             }
         );
 
-        return adventurer;
+        // if adventurer died trying to flee
+        if (adventurer.health == 0) {
+            // emit adventurer died event
+            __event_AdventurerDied(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                killed_by_beast: true,
+                killed_by_obstacle: false,
+                killer_id: beast.id
+            );
+        }
     }
 
     fn _equip(
@@ -2083,29 +2089,26 @@ mod Game {
         // assert adventurer is in battle
         assert(adventurer.beast_health > 0, messages::NOT_IN_BATTLE);
 
-        if (adventurer.get_level() == 1) {
-            // return starter beast
-            ImplBeast::get_starter_beast(ImplLoot::get_type(adventurer.weapon.id))
-        } else {
-            // get adventurer entropy seed
-            let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
-                .entropy
-                .into();
+        // get adventurer entropy
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
+            .entropy
+            .into();
 
-            // get beast seed based on adventurer entropy and current state
-            let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
+        // get beast seed based on adventurer entropy and adventurer state
+        let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
 
-            // get beast special names based on beast seed
-            let beast_special_names = ImplBeast::get_special_names(
+        // get beast based on adventurer level and beast special names
+        ImplBeast::get_beast(
+            adventurer.get_level(),
+            ImplBeast::get_special_names(
                 adventurer.get_level(),
                 beast_seed,
                 NamePrefixLength.into(),
                 NameSuffixLength.into(),
-            );
-
-            // get beast based on adventurer level and beast special names
-            ImplBeast::get_beast(adventurer.get_level(), beast_special_names, beast_seed)
-        }
+            ),
+            beast_seed,
+            ImplLoot::get_type(adventurer.weapon.id)
+        )
     }
 
     fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u256 {
@@ -2121,11 +2124,8 @@ mod Game {
     fn _get_combat_spec(
         self: @ContractState, adventurer_id: u256, item: ItemPrimitive
     ) -> CombatSpec {
-        // get the greatness of the item
-        let item_greatness = item.get_greatness();
-
-        // if it's less than 15, no need to fetch the special names it doesn't have them
-        if (item_greatness < 15) {
+        // if item greatness is less than 15, no need to fetch the special names it doesn't have them
+        if (item.get_greatness() < 15) {
             return CombatSpec {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),

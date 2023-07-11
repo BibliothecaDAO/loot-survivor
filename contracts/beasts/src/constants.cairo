@@ -42,6 +42,10 @@ mod BeastSettings {
     const MINIMUM_XP_REWARD: u16 = 4;
 
     const BEAST_SPECIAL_NAME_UNLOCK_LEVEL: u8 = 15;
+
+    // controls at what level adventurers will discover random beasts
+    // vs starter beasts which are always the same and maximally easy
+    const STARTER_BEAST_LEVEL_THRESHOLD: u8 = 1;
 }
 
 mod BeastId {
