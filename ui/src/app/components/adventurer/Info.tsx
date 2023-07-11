@@ -58,9 +58,17 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
               <div className="flex justify-between w-full">
                 {formatAdventurer.race}{" "}
                 <span>
-                  {getRealmNameById(formatAdventurer.homeRealm ?? 0)?.name}
-                </span>{" "}
-                <span>Order of {formatAdventurer.order}</span>
+                  {
+                    getRealmNameById(formatAdventurer.homeRealm ?? 0)
+                      ?.properties.name
+                  }
+                </span>
+                <span>
+                  {
+                    getRealmNameById(formatAdventurer.homeRealm ?? 0)
+                      ?.properties.order
+                  }
+                </span>
               </div>
               <div className="flex justify-between w-full text-2xl sm:text-4xl font-medium border-b border-terminal-green">
                 {formatAdventurer.name}

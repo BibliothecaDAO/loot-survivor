@@ -135,7 +135,9 @@ export function convertTime(time: string) {
 }
 
 export function getRealmNameById(id: number) {
-  return Realms.features.find((realm) => realm.id === id);
+  return Realms.features.find(
+    (realm: any) => realm.properties.realm_idx === id
+  );
 }
 
 export function getRankFromList(id: number, data: Adventurer[]) {

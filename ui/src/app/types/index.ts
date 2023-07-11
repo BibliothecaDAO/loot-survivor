@@ -73,8 +73,9 @@ export interface Battle {
   beast?: string; // Beast adventurer is engaging
   beastHealth?: number; // Beast health adventurer is engaging
   beastLevel?: number; // Beast level adventurer is engaging
-  special2?: string; // First special on the beast (i.e Demon)
-  special3?: string; // Second special on the beast (i.e Grasp)
+  special1?: string; // First special on the beast (i.e Demon)
+  special2?: string; // Second special on the beast (i.e Demon)
+  special3?: string; // Third special on the beast (i.e Grasp)
   attacker?: string; // Attacker in the battle (Adventurer or Beast)
   fled?: boolean; // Did the adventurer flee?
   damageDealt?: number; // Damage dealt to the beast
@@ -102,8 +103,9 @@ export interface Discovery {
   entity?: string; // Entity discovered
   entityLevel?: number; // Entity level discovered
   entityHealth?: number; // Entity health discovered
-  special2?: string; // First special on the beast (i.e Demon)
-  special3?: string; // Second special on the beast (i.e Grasp)
+  special1?: string; // First special on the beast (i.e Demon)
+  special2?: string; // Second special on the beast (i.e Demon)
+  special3?: string; // Third special on the beast (i.e Grasp)
   ambushed?: boolean; // Did the adventurer ambush the entity?
   discoveryTime?: Date; // Block time of the discovery
   txHash?: string; // Transaction hash
@@ -271,6 +273,7 @@ export const NullBattle: Battle = {
   beast: undefined,
   beastHealth: undefined,
   beastLevel: undefined,
+  special1: undefined,
   special2: undefined,
   special3: undefined,
   attacker: undefined,
@@ -300,6 +303,7 @@ export const NullDiscovery: Discovery = {
   entity: undefined,
   entityLevel: undefined,
   entityHealth: undefined,
+  special1: undefined,
   special2: undefined,
   special3: undefined,
   ambushed: undefined,
