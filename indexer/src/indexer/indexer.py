@@ -146,12 +146,14 @@ async def get_item(info, item_id, adventurer_id):
     return item
 
 
-async def update_item_xp(info, item, adventurer_id, xp):
+async def update_item_xp(info, item, adventurer_id, xp, createdTime):
+    print(createdTime)
     await info.storage.find_one_and_update(
         "items",
         {
             "item": check_exists_int(item),
             "adventurerId": check_exists_int(adventurer_id),
+            "createdTime": createdTime,
         },
         {
             "$set": {"xp": encode_int_as_bytes(xp)},
@@ -170,48 +172,64 @@ async def update_items_xp(info, adventurer_id, xp_increase):
         "items",
         {
             "item": adventurer["weapon"],
+            "adventurerId": check_exists_int(adventurer_id),
+            "owner": check_exists_int(1),
         },
     )
     chest_item = await info.storage.find_one(
         "items",
         {
             "item": adventurer["chest"],
+            "adventurerId": check_exists_int(adventurer_id),
+            "owner": check_exists_int(1),
         },
     )
     head_item = await info.storage.find_one(
         "items",
         {
             "item": adventurer["head"],
+            "adventurerId": check_exists_int(adventurer_id),
+            "owner": check_exists_int(1),
         },
     )
     waist_item = await info.storage.find_one(
         "items",
         {
             "item": adventurer["waist"],
+            "adventurerId": check_exists_int(adventurer_id),
+            "owner": check_exists_int(1),
         },
     )
     foot_item = await info.storage.find_one(
         "items",
         {
             "item": adventurer["foot"],
+            "adventurerId": check_exists_int(adventurer_id),
+            "owner": check_exists_int(1),
         },
     )
     hand_item = await info.storage.find_one(
         "items",
         {
             "item": adventurer["hand"],
+            "adventurerId": check_exists_int(adventurer_id),
+            "owner": check_exists_int(1),
         },
     )
     neck_item = await info.storage.find_one(
         "items",
         {
             "item": adventurer["neck"],
+            "adventurerId": check_exists_int(adventurer_id),
+            "owner": check_exists_int(1),
         },
     )
     ring_item = await info.storage.find_one(
         "items",
         {
             "item": adventurer["ring"],
+            "adventurerId": check_exists_int(adventurer_id),
+            "owner": check_exists_int(1),
         },
     )
     if weapon_item:
@@ -220,6 +238,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
             decode_bytes_as_int(weapon_item["item"]),
             adventurer_id,
             decode_bytes_as_int(weapon_item["xp"]) + xp_increase,
+            weapon_item["createdTime"],
         )
     if chest_item:
         await update_item_xp(
@@ -227,6 +246,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
             decode_bytes_as_int(chest_item["item"]),
             adventurer_id,
             decode_bytes_as_int(chest_item["xp"]) + xp_increase,
+            chest_item["createdTime"],
         )
     if head_item:
         await update_item_xp(
@@ -234,6 +254,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
             decode_bytes_as_int(head_item["item"]),
             adventurer_id,
             decode_bytes_as_int(head_item["xp"]) + xp_increase,
+            head_item["createdTime"],
         )
     if waist_item:
         await update_item_xp(
@@ -241,6 +262,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
             decode_bytes_as_int(waist_item["item"]),
             adventurer_id,
             decode_bytes_as_int(waist_item["xp"]) + xp_increase,
+            waist_item["createdTime"],
         )
     if foot_item:
         await update_item_xp(
@@ -248,6 +270,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
             decode_bytes_as_int(foot_item["item"]),
             adventurer_id,
             decode_bytes_as_int(foot_item["xp"]) + xp_increase,
+            foot_item["createdTime"],
         )
     if hand_item:
         await update_item_xp(
@@ -255,6 +278,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
             decode_bytes_as_int(hand_item["item"]),
             adventurer_id,
             decode_bytes_as_int(hand_item["xp"]) + xp_increase,
+            hand_item["createdTime"],
         )
     if neck_item:
         await update_item_xp(
@@ -262,6 +286,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
             decode_bytes_as_int(neck_item["item"]),
             adventurer_id,
             decode_bytes_as_int(neck_item["xp"]) + xp_increase,
+            neck_item["createdTime"],
         )
     if ring_item:
         await update_item_xp(
@@ -269,6 +294,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
             decode_bytes_as_int(ring_item["item"]),
             adventurer_id,
             decode_bytes_as_int(ring_item["xp"]) + xp_increase,
+            ring_item["createdTime"],
         )
 
 
