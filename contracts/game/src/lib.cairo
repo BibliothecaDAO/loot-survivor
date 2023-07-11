@@ -242,7 +242,7 @@ mod Game {
             );
         }
         fn flee(ref self: ContractState, adventurer_id: u256) {
-            // check caller owns adventurer
+            // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
             // get item names from storage
@@ -303,6 +303,7 @@ mod Game {
             _pack_adventurer(ref self, adventurer_id, adventurer);
             _pack_bag(ref self, adventurer_id, bag);
         }
+
         fn buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -346,6 +347,42 @@ mod Game {
                 ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
             );
         }
+
+        fn buy_potion(ref self: ContractState, adventurer_id: u256) {
+            // assert caller owns adventurer
+            _assert_ownership(@self, adventurer_id);
+
+            // get item names from storage
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+
+            // unpack adventurer from storage (stat boosts applied on unpacking)
+            let mut adventurer = _unpack_adventurer_apply_stat_boost(
+                @self, adventurer_id, name_storage1, name_storage2
+            );
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // assert adventurer is not in a battle
+            _assert_not_in_battle(@self, adventurer);
+
+            // assert market is open
+            _assert_market_is_open(@self, adventurer);
+
+            // purchase health
+            _buy_potion(ref self, adventurer_id, ref adventurer);
+
+            // pack and save adventurer
+            _pack_adventurer_remove_stat_boost(
+                ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
+            );
+        }
+
         fn upgrade_stat(ref self: ContractState, adventurer_id: u256, stat: u8) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -364,37 +401,6 @@ mod Game {
 
             // pack and save (stat boosts weren't applied so no need to remove)
             _pack_adventurer(ref self, adventurer_id, adventurer);
-        }
-        fn buy_potion(ref self: ContractState, adventurer_id: u256) {
-            // get item names from storage
-            let mut name_storage1 = _loot_special_names_storage_unpacked(
-                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
-            );
-            let mut name_storage2 = _loot_special_names_storage_unpacked(
-                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
-            );
-
-            // assert caller owns adventurer
-            _assert_ownership(@self, adventurer_id);
-
-            // unpack adventurer from storage (stat boosts applied on unpacking)
-            let mut adventurer = _unpack_adventurer_apply_stat_boost(
-                @self, adventurer_id, name_storage1, name_storage2
-            );
-
-            // assert adventurer is not dead
-            _assert_not_dead(@self, adventurer);
-
-            // assert adventurer is not in a battle
-            _assert_not_in_battle(@self, adventurer);
-
-            // purchase health
-            _buy_health(ref self, adventurer_id, ref adventurer);
-
-            // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(
-                ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
-            );
         }
 
         fn slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
@@ -844,10 +850,12 @@ mod Game {
         let game_entropy = _get_entropy(@self).into();
 
         // use entropy sources to generate random exploration
-        let exploration_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
+        let (main_explore_rnd, sub_explore_rnd) = _get_live_entropy(
+            adventurer_entropy, game_entropy, adventurer
+        );
 
         // get a random explore result
-        let explore_result = AdventurerUtils::get_random_explore(exploration_entropy);
+        let explore_result = AdventurerUtils::get_random_explore(main_explore_rnd);
 
         match explore_result {
             ExploreResult::Beast(()) => {
@@ -932,19 +940,17 @@ mod Game {
                 }
             },
             ExploreResult::Obstacle(()) => {
-                // TODO: Generate new entropy here
                 _obstacle_encounter(
                     ref self,
                     ref adventurer,
                     adventurer_id,
                     ref name_storage1,
                     ref name_storage2,
-                    exploration_entropy
+                    sub_explore_rnd
                 );
             },
             ExploreResult::Treasure(()) => {
-                // TODO: Generate new entropy here
-                let (treasure_type, amount) = adventurer.discover_treasure(exploration_entropy);
+                let (treasure_type, amount) = adventurer.discover_treasure(sub_explore_rnd);
                 let adventurer_state = AdventurerState {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
@@ -1029,8 +1035,8 @@ mod Game {
             ref self,
             DiscoverObstacle {
                 adventurer_state: AdventurerState {
-                    owner: get_caller_address(), 
-                    adventurer_id: adventurer_id, 
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
                     adventurer: adventurer
                 },
                 id: obstacle.id,
@@ -1427,10 +1433,10 @@ mod Game {
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
                         },
-                    seed: beast_seed,
-                    id: beast.id,
-                    health: adventurer.beast_health,
-                    beast_specs: CombatSpec {
+                        seed: beast_seed,
+                        id: beast.id,
+                        health: adventurer.beast_health,
+                        beast_specs: CombatSpec {
                         tier: beast.combat_spec.tier,
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
@@ -1484,10 +1490,10 @@ mod Game {
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
                         },
-                    seed: beast_seed,
-                    id: beast.id,
-                    health: adventurer.beast_health,
-                    beast_specs: CombatSpec {
+                        seed: beast_seed,
+                        id: beast.id,
+                        health: adventurer.beast_health,
+                        beast_specs: CombatSpec {
                         tier: beast.combat_spec.tier,
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
@@ -1548,7 +1554,7 @@ mod Game {
         let game_entropy: u128 = _get_entropy(@self).into();
 
         // generate live entropy from fixed entropy sources and live adventurer stats
-        let flee_entropy = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
+        let (flee_entropy, ambush_entropy) = _get_live_entropy(adventurer_entropy, game_entropy, adventurer);
 
         let fled = ImplBeast::attempt_flee(
             adventurer.get_level(), adventurer.stats.dexterity, flee_entropy
@@ -1587,11 +1593,11 @@ mod Game {
         } else {
             // if flee attempt was unsuccessful the beast counter attacks
             // adventurer death will be handled as part of counter attack
-            let attack_slot = AdventurerUtils::get_random_armor_slot(flee_entropy);
+            let attack_slot = AdventurerUtils::get_random_armor_slot(ambush_entropy);
             attack_location = ImplCombat::slot_to_u8(attack_slot);
             damage_taken =
                 _beast_counter_attack(
-                    ref self, ref adventurer, adventurer_id, attack_slot, beast, flee_entropy
+                    ref self, ref adventurer, adventurer_id, attack_slot, beast, ambush_entropy
                 );
         }
 
@@ -1604,18 +1610,15 @@ mod Game {
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
                     },
-                seed: beast_seed,
-                id: beast.id,
-                health: adventurer.beast_health,
-                beast_specs: CombatSpec {
+                    seed: beast_seed,
+                    id: beast.id,
+                    health: adventurer.beast_health,
+                    beast_specs: CombatSpec {
                     tier: beast.combat_spec.tier,
                     item_type: beast.combat_spec.item_type,
                     level: beast.combat_spec.level,
                     specials: beast.combat_spec.specials
-                }, 
-                damage_taken: damage_taken, 
-                damage_location: attack_location, 
-                fled
+                }, damage_taken: damage_taken, damage_location: attack_location, fled
             }
         );
 
@@ -1789,7 +1792,7 @@ mod Game {
         );
     }
 
-    fn _buy_health(ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer) {
+    fn _buy_potion(ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer) {
         internal::revoke_ap_tracking();
 
         // check gold balance
@@ -1825,16 +1828,17 @@ mod Game {
     // 2. Consider using cairo hashing algorithm
     fn _get_live_entropy(
         adventurer_entropy: u128, game_entropy: u128, adventurer: Adventurer
-    ) -> u128 {
+    ) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(adventurer.xp.into());
-        hash_span.append(adventurer.last_action.into());
+        hash_span.append(adventurer.gold.into());
+        hash_span.append(adventurer.health.into());
         hash_span.append(adventurer_entropy.into());
         hash_span.append(game_entropy.into());
 
         let poseidon = poseidon_hash_span(hash_span.span());
         let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
-        r.try_into().unwrap()
+        return (r.try_into().unwrap(), d.try_into().unwrap());
     }
 
     // ------------------------------------------ //
