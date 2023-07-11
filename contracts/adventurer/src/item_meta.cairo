@@ -23,9 +23,9 @@ mod STORAGE {
 
 #[derive(Drop, Copy, Serde)]
 struct ItemSpecials {
+    special1: u8, // 4 bit
     special2: u8, // 7 bits
     special3: u8, // 5 bits
-    special1: u8, // 4 bit
 }
 
 // Player can have a total of 20 items. We map the items index to a slot in the metadata
