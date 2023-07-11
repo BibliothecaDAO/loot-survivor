@@ -1,6 +1,6 @@
 export const BeastTutorial = () => {
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col uppercase">
       <h1 className="mt-0">Beast</h1>
       <p className="text-sm sm:text-lg">
         Oh dear! You&apos;ve stumbled upon a beast! A potential ambush lurks,

@@ -1,18 +1,17 @@
 export const AdventurerTutorial = () => {
   return (
-    <div className="flex flex-col">
-      <h1 className="mt-0">Welcome to Loot Survivor</h1>
+    <div className="flex flex-col uppercase">
+      <h1 className="mt-0">Welcome to Loot Survivor!</h1>
       <h3 className="text-xl sm:text-2xl">Create an Adventurer</h3>
       <p className="text-sm sm:text-lg">
-        Welcome to the thrilling world of Loot Survivor. To kickstart your epic
-        adventure, you will first need to create your very own Adventurer. Think
-        of it as stepping into a pair of sturdy boots that will carry you across
-        the vast expanses of our game world until the very end.
+        You will first need to create your very own Adventurer. Think of it as
+        stepping into a pair of sturdy boots that will carry you across the vast
+        expanses of our eerie world until the very end.
       </p>
       <br />
       <p className="text-sm sm:text-lg">
-        To bring your Adventurer to life, you&apos;ll need to provide some
-        unique information:
+        To bring your Adventurer to life, you will need to provide some unique
+        information:
       </p>
       <br />
       <ul>
@@ -35,18 +34,17 @@ export const AdventurerTutorial = () => {
       </ul>
       <br />
       <p className="text-sm sm:text-lg">
-        Minting will cost only 5 $LORDS that will follow a scheduled
-        distribution pattern to players and the DAO. After 8 weeks, a new front
-        end provider will be able to be paid for attracting new players to the
-        game.
+        Once your Adventurer is minted, you will be able to perform a range of
+        actions to help them climb the ranks, achieve the glory they deserve and
+        reap the rewards of making the prestigious top three leaderboard.
       </p>
       <br />
       <p className="text-sm sm:text-lg">
-        Once your Adventurer is minted, a world of opportunities opens up.
-        You&apos;ll be able to perform a range of actions to help them climb the
-        ranks and achieve the glory they deserve.
+        Minting you adventure will cost only 25 $LORDS with rewards split
+        between the top three players, DAO and frontend provider.
       </p>
-      <p className="text-sm sm:text-lg mb-1">Are you ready to survive?</p>
+      <br />
+      <p className="text-sm sm:text-lg">Are you ready to survive?</p>
     </div>
   );
 };
