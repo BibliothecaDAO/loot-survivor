@@ -46,10 +46,7 @@ mod Game {
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
             adventurer_constants::{POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER}
         },
-        item_meta::{
-            ImplItemSpecials, ItemSpecials, IItemSpecials,
-            ItemSpecialsStorage
-        },
+        item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
         adventurer_utils::AdventurerUtils
     };
     use market::market::{ImplMarket, LootWithPrice};
@@ -453,51 +450,35 @@ mod Game {
         fn get_bag(self: @ContractState, adventurer_id: u256) -> Bag {
             _bag_unpacked(self, adventurer_id)
         }
-        fn get_equipped_weapon_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> ItemSpecials {
+        fn get_equipped_weapon_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.weapon)
         }
-        fn get_equipped_chest_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> ItemSpecials {
+        fn get_equipped_chest_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.chest)
         }
-        fn get_equipped_head_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> ItemSpecials {
+        fn get_equipped_head_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.head)
         }
-        fn get_equipped_waist_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> ItemSpecials {
+        fn get_equipped_waist_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.waist)
         }
-        fn get_equipped_foot_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> ItemSpecials {
+        fn get_equipped_foot_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.foot)
         }
-        fn get_equipped_hand_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> ItemSpecials {
+        fn get_equipped_hand_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.hand)
         }
-        fn get_equipped_necklace_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> ItemSpecials {
+        fn get_equipped_necklace_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.neck)
         }
-        fn get_equipped_ring_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> ItemSpecials {
+        fn get_equipped_ring_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.ring)
         }
@@ -816,15 +797,18 @@ mod Game {
             DiscoverBeast {
                 adventurer_state: AdventurerState {
                     owner: caller, adventurer_id, adventurer: new_adventurer
-                },
-                seed: 0,
-                id: starter_beast.id,
-                level: starter_beast.combat_spec.level,
-                ambushed: false,
-                damage_taken: 0,
-                health: starter_beast.starting_health,
-                special1: starter_beast.combat_spec.special_powers.prefix1,
-                special2: starter_beast.combat_spec.special_powers.prefix2,
+                    },
+                    seed: 0,
+                    id: starter_beast.id,
+                    level: starter_beast.combat_spec.level,
+                    ambushed: false,
+                    damage_taken: 0,
+                    health: starter_beast.starting_health,
+                    specials: SpecialPowers {
+                    special1: starter_beast.combat_spec.specials.special1,
+                    special2: starter_beast.combat_spec.specials.special2,
+                    special3: starter_beast.combat_spec.specials.special3
+                }
             }
         );
 
@@ -914,15 +898,18 @@ mod Game {
                             owner: get_caller_address(),
                             adventurer_id: adventurer_id,
                             adventurer: adventurer
-                        },
-                        seed: beast_seed,
-                        id: beast.id,
-                        level: beast.combat_spec.level,
-                        ambushed: was_ambushed,
-                        damage_taken: damage_taken,
-                        health: beast.starting_health,
-                        special1: beast.combat_spec.special_powers.prefix1,
-                        special2: beast.combat_spec.special_powers.prefix2,
+                            },
+                            seed: beast_seed,
+                            id: beast.id,
+                            level: beast.combat_spec.level,
+                            ambushed: was_ambushed,
+                            damage_taken: damage_taken,
+                            health: beast.starting_health,
+                            specials: SpecialPowers {
+                            special1: beast.combat_spec.specials.special1,
+                            special2: beast.combat_spec.specials.special2,
+                            special3: beast.combat_spec.specials.special3
+                        }
                     }
                 );
 
@@ -1440,13 +1427,16 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
+                        },
+                        seed: beast_seed,
+                        id: beast.id,
+                        health: adventurer.beast_health,
+                        level: beast.combat_spec.level,
+                        specials: SpecialPowers {
+                        special1: beast.combat_spec.specials.special1,
+                        special2: beast.combat_spec.specials.special2,
+                        special3: beast.combat_spec.specials.special3
                     },
-                    seed: beast_seed,
-                    id: beast.id,
-                    health: adventurer.beast_health,
-                    level: beast.combat_spec.level,
-                    special1: beast.combat_spec.special_powers.prefix1,
-                    special2: beast.combat_spec.special_powers.prefix2,
                     damage_dealt: damage_dealt,
                     xp_earned_adventurer: xp_earned,
                     xp_earned_items: xp_earned * ITEM_XP_MULTIPLIER,
@@ -1494,13 +1484,16 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
+                        },
+                        seed: beast_seed,
+                        id: beast.id,
+                        level: beast.combat_spec.level,
+                        health: adventurer.beast_health,
+                        specials: SpecialPowers {
+                        special1: beast.combat_spec.specials.special1,
+                        special2: beast.combat_spec.specials.special2,
+                        special3: beast.combat_spec.specials.special3
                     },
-                    seed: beast_seed,
-                    id: beast.id,
-                    level: beast.combat_spec.level,
-                    health: adventurer.beast_health,
-                    special1: beast.combat_spec.special_powers.prefix1,
-                    special2: beast.combat_spec.special_powers.prefix2,
                     damage_dealt: damage_dealt,
                     damage_taken: damage_taken,
                     damage_location: ImplCombat::slot_to_u8(attack_location),
@@ -1611,16 +1604,16 @@ mod Game {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
-                },
-                seed: beast_seed,
-                id: beast.id,
-                health: adventurer.beast_health,
-                level: beast.combat_spec.level,
-                special1: beast.combat_spec.special_powers.prefix1,
-                special2: beast.combat_spec.special_powers.prefix2,
-                damage_taken: damage_taken,
-                damage_location: attack_location,
-                fled
+                    },
+                    seed: beast_seed,
+                    id: beast.id,
+                    health: adventurer.beast_health,
+                    level: beast.combat_spec.level,
+                    specials: SpecialPowers {
+                    special1: beast.combat_spec.specials.special1,
+                    special2: beast.combat_spec.specials.special2,
+                    special3: beast.combat_spec.specials.special3
+                }, damage_taken: damage_taken, damage_location: attack_location, fled
             }
         );
 
@@ -2151,8 +2144,8 @@ mod Game {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),
                 level: U8IntoU16::into(item.get_greatness()),
-                special_powers: SpecialPowers {
-                    prefix1: 0, prefix2: 0, suffix: 0
+                specials: SpecialPowers {
+                    special1: 0, special2: 0, special3: 0
                 }
             };
         } else {
@@ -2168,10 +2161,10 @@ mod Game {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),
                 level: U8IntoU16::into(item.get_greatness()),
-                special_powers: SpecialPowers {
-                    prefix1: item_details.special2,
-                    prefix2: item_details.special3,
-                    suffix: item_details.special1
+                specials: SpecialPowers {
+                    special1: item_details.special1,
+                    special2: item_details.special2,
+                    special3: item_details.special3
                 }
             };
         }
@@ -2305,8 +2298,7 @@ mod Game {
         id: u8,
         health: u16,
         level: u16,
-        special1: u8,
-        special2: u8,
+        specials: SpecialPowers,
         ambushed: bool,
         damage_taken: u16,
     }
@@ -2318,8 +2310,7 @@ mod Game {
         id: u8,
         health: u16,
         level: u16,
-        special1: u8,
-        special2: u8,
+        specials: SpecialPowers,
         damage_dealt: u16,
         damage_taken: u16,
         damage_location: u8,
@@ -2332,8 +2323,7 @@ mod Game {
         id: u8,
         health: u16,
         level: u16,
-        special1: u8,
-        special2: u8,
+        specials: SpecialPowers,
         damage_dealt: u16,
         xp_earned_adventurer: u16,
         xp_earned_items: u16,
@@ -2347,8 +2337,7 @@ mod Game {
         id: u8,
         health: u16,
         level: u16,
-        special1: u8,
-        special2: u8,
+        specials: SpecialPowers,
         fled: bool,
         damage_taken: u16,
         damage_location: u8,
@@ -2521,9 +2510,7 @@ mod Game {
     }
 
     fn __event_ItemPrefixDiscovered(
-        ref self: ContractState,
-        adventurer_state: AdventurerState,
-        special_names: ItemSpecials
+        ref self: ContractState, adventurer_state: AdventurerState, special_names: ItemSpecials
     ) {
         self
             .emit(
@@ -2534,9 +2521,7 @@ mod Game {
     }
 
     fn __event_ItemSuffixDiscovered(
-        ref self: ContractState,
-        adventurer_state: AdventurerState,
-        special_names: ItemSpecials
+        ref self: ContractState, adventurer_state: AdventurerState, special_names: ItemSpecials
     ) {
         self
             .emit(
