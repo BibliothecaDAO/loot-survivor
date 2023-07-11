@@ -229,10 +229,14 @@ mod tests {
         testing::set_block_number(1005);
         game.explore(ADVENTURER_ID);
 
+        // use stat upgrade
+        game.upgrade_stat(ADVENTURER_ID, 0);
+
         // explore again to find a beast
         testing::set_block_number(1006);
         game.explore(ADVENTURER_ID);
 
+        // run from beast
         game.flee(ADVENTURER_ID);
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(updated_adventurer.beast_health == 0, 'should have fled beast');
@@ -395,9 +399,25 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(100000000)]
+    fn test_cant_buy_potion_without_stat_upgrade() {
+        // deploy and start new game
+        let mut game = lvl_2_adventurer();
+
+        // use stat upgrade
+        game.upgrade_stat(ADVENTURER_ID, 0);
+
+        // attempt to buy potion
+        // should panic with 'Market is closed'
+        // this test is annotated to expect that panic
+        game.buy_potion(ADVENTURER_ID);
+    }
+
+    #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
     #[available_gas(100000000)]
-    fn test_cant_buy_health_during_battle() {
+    fn test_cant_buy_potion_during_battle() {
         // deploy and start new game
         let mut game = new_adventurer();
 

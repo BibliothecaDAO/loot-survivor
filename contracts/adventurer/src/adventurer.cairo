@@ -908,10 +908,8 @@ impl ImplAdventurer of IAdventurer {
         let mut hash_span = ArrayTrait::new();
         hash_span.append(self.xp.into());
         hash_span.append(adventurer_entropy.into());
-
         let poseidon = poseidon_hash_span(hash_span.span());
         let (d, r) = rshift_split(poseidon.into(), 340282366920938463463374607431768211455);
-
         r.try_into().unwrap()
     }
 
