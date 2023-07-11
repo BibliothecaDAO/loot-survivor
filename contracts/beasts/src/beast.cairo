@@ -46,7 +46,7 @@ impl ImplBeast of IBeast {
     //@param weapon_type A Type value indicating the type of weapon that the adventurer uses.
     //@return A Beast instance with either generated attributes or the default starter attributes, based on the adventurer's level.
     fn get_beast(
-        adventurer_level: u8, specials: SpecialPowers, seed: u128, weapon_type: Type
+        adventurer_level: u8, special_names: SpecialPowers, seed: u128, weapon_type: Type
     ) -> Beast {
         // if the adventurer has passed the starter beast level threshold
         if (adventurer_level > STARTER_BEAST_LEVEL_THRESHOLD) {
@@ -59,7 +59,7 @@ impl ImplBeast of IBeast {
                     tier: ImplBeast::get_tier(beast_id),
                     item_type: ImplBeast::get_type(beast_id),
                     level: U8IntoU16::into(ImplBeast::get_level(adventurer_level, seed)),
-                    specials: specials
+                    specials: special_names
                 }
             }
         } else {
@@ -90,7 +90,7 @@ impl ImplBeast of IBeast {
             Type::Ring(()) => beast_id = Troll,
         }
 
-        return Beast {
+        Beast {
             id: beast_id, starting_health: STARTER_BEAST_HEALTH, combat_spec: CombatSpec {
                 tier: ImplBeast::get_tier(beast_id),
                 item_type: ImplBeast::get_type(beast_id),
@@ -99,7 +99,7 @@ impl ImplBeast of IBeast {
                     special1: 0, special2: 0, special3: 0
                 }
             }
-        };
+        }
     }
 
     fn beast_encounter(
@@ -109,23 +109,17 @@ impl ImplBeast of IBeast {
         special3_size: u8,
         battle_fixed_seed: u128
     ) -> (Beast, bool) {
-        // assign special powers to the beast
-        // special1 is currently unused (this maps to Loot item suffix which beasts don't currently have)
-
-        let special_powers = SpecialPowers {
-            special1: 0,
-            special2: U128TryIntoU8::try_into(battle_fixed_seed % U8IntoU128::into(special2_size))
-                .unwrap(),
-            special3: U128TryIntoU8::try_into(battle_fixed_seed % U8IntoU128::into(special3_size))
-                .unwrap()
-        };
-
         // generate a beast based on the seed
         // @dev: since we don't have default values for func parameters in cairo
         //       we need to pass in a dummy value for the unused type param
         let unused_type_param = Type::Ring(());
         let beast = ImplBeast::get_beast(
-            adventurer_level, special_powers, battle_fixed_seed, unused_type_param
+            adventurer_level,
+            ImplBeast::get_special_names(
+                adventurer_level, battle_fixed_seed, special2_size.into(), special3_size.into()
+            ),
+            battle_fixed_seed,
+            unused_type_param
         );
 
         // check if beast ambushed adventurer
@@ -175,8 +169,8 @@ impl ImplBeast of IBeast {
             // special1 is intentionally 0 for now
             SpecialPowers {
                 special1: 0,
-                special2: U128TryIntoU8::try_into(seed % special2_size).unwrap(),
-                special3: U128TryIntoU8::try_into(seed % special3_size).unwrap()
+                special2: U128TryIntoU8::try_into(1 + (seed % special2_size)).unwrap(),
+                special3: U128TryIntoU8::try_into(1 + (seed % special3_size)).unwrap()
             }
         }
     }
