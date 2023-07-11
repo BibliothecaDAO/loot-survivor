@@ -142,7 +142,7 @@ impl ImplBeast of IBeast {
         let beast_id = (seed % MAX_ID) + 1;
 
         // return beast id as a u8
-        return U128TryIntoU8::try_into(beast_id).unwrap();
+        U128TryIntoU8::try_into(beast_id).unwrap()
     }
 
 

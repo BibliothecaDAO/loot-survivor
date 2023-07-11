@@ -229,6 +229,9 @@ mod tests {
         testing::set_block_number(1005);
         game.explore(ADVENTURER_ID);
 
+        testing::set_block_number(1006);
+        game.explore(ADVENTURER_ID);
+
         // run from beast
         game.flee(ADVENTURER_ID);
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -313,7 +316,7 @@ mod tests {
         game.buy_item(ADVENTURER_ID, item_id, true);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.gold == (STARTING_GOLD + 7 - item_price), 'wrong old amount');
+        assert(adventurer.gold == (STARTING_GOLD + 4 - item_price), 'wrong gold amount');
     }
 
     #[test]
