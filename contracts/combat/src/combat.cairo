@@ -1091,7 +1091,7 @@ fn test_get_special3_bonus() {
     assert(special3_bonus == 0, 'no prefix2 == no bonus');
 
     // assign armor a prefix2 name and ensure lack of weapon special name still results in no bonus
-    armor_specials.special2 = 1;
+    armor_specials.special3 = 1;
     let special3_bonus = ImplCombat::get_special3_bonus(
         base_damage, weapon_specials.special3, armor_specials.special3, entropy
     );
@@ -1100,7 +1100,7 @@ fn test_get_special3_bonus() {
     // give weapon matching prefix2 to qualify it for bonus
     // actual amount (25% - 100%) will depend on entropy
     // entropy 0: 25%
-    weapon_specials.special2 = 1;
+    weapon_specials.special3 = 1;
     let special3_bonus = ImplCombat::get_special3_bonus(
         base_damage, weapon_specials.special3, armor_specials.special3, entropy
     );
