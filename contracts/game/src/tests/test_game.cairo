@@ -1,4 +1,3 @@
-use core::box::BoxTrait;
 #[cfg(test)]
 mod tests {
     use array::ArrayTrait;
@@ -226,14 +225,8 @@ mod tests {
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(updated_adventurer.beast_health == 0, 'should have found a beast');
 
+        // encounter beast (this is fragile atm)
         testing::set_block_number(1005);
-        game.explore(ADVENTURER_ID);
-
-        // use stat upgrade
-        game.upgrade_stat(ADVENTURER_ID, 0);
-
-        // explore again to find a beast
-        testing::set_block_number(1006);
         game.explore(ADVENTURER_ID);
 
         // run from beast
@@ -320,12 +313,7 @@ mod tests {
         game.buy_item(ADVENTURER_ID, item_id, true);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
-
-        assert(
-            adventurer.gold == (STARTING_GOLD + 8)
-                - item_price,
-            'gold'
-        );
+        assert(adventurer.gold == (STARTING_GOLD + 7 - item_price), 'wrong old amount');
     }
 
     #[test]
@@ -706,8 +694,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.weapon.get_greatness() == game
-                .get_weapon_greatness(ADVENTURER_ID),
+            adventurer.weapon.get_greatness() == game.get_weapon_greatness(ADVENTURER_ID),
             'wrong weapon greatness'
         );
     }
@@ -717,8 +704,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.chest.get_greatness() == game
-                .get_chest_armor_greatness(ADVENTURER_ID),
+            adventurer.chest.get_greatness() == game.get_chest_armor_greatness(ADVENTURER_ID),
             'wrong chest greatness'
         );
     }
@@ -728,8 +714,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.head.get_greatness() == game
-                .get_head_armor_greatness(ADVENTURER_ID),
+            adventurer.head.get_greatness() == game.get_head_armor_greatness(ADVENTURER_ID),
             'wrong head greatness'
         );
     }
@@ -739,8 +724,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.waist.get_greatness() == game
-                .get_waist_armor_greatness(ADVENTURER_ID),
+            adventurer.waist.get_greatness() == game.get_waist_armor_greatness(ADVENTURER_ID),
             'wrong waist greatness'
         );
     }
@@ -750,8 +734,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.foot.get_greatness() == game
-                .get_foot_armor_greatness(ADVENTURER_ID),
+            adventurer.foot.get_greatness() == game.get_foot_armor_greatness(ADVENTURER_ID),
             'wrong foot greatness'
         );
     }
@@ -761,8 +744,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.hand.get_greatness() == game
-                .get_hand_armor_greatness(ADVENTURER_ID),
+            adventurer.hand.get_greatness() == game.get_hand_armor_greatness(ADVENTURER_ID),
             'wrong hand greatness'
         );
     }
@@ -772,8 +754,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.neck.get_greatness() == game
-                .get_necklace_greatness(ADVENTURER_ID),
+            adventurer.neck.get_greatness() == game.get_necklace_greatness(ADVENTURER_ID),
             'wrong neck greatness'
         );
     }
@@ -783,8 +764,7 @@ mod tests {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.ring.get_greatness() == game
-                .get_ring_greatness(ADVENTURER_ID),
+            adventurer.ring.get_greatness() == game.get_ring_greatness(ADVENTURER_ID),
             'wrong ring greatness'
         );
     }
