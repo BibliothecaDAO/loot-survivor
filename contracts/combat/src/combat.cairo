@@ -16,9 +16,9 @@ use super::constants::{
 // SpecialPowers contains special names for combat items
 #[derive(Drop, Copy, Serde)]
 struct SpecialPowers {
-    prefix1: u8,
-    prefix2: u8,
-    suffix: u8,
+    special1: u8,
+    special2: u8,
+    special3: u8
 }
 
 // CombatSpec is used for combat calculations 
@@ -27,7 +27,7 @@ struct CombatSpec {
     tier: Tier,
     item_type: Type,
     level: u16,
-    special_powers: SpecialPowers,
+    specials: SpecialPowers,
 }
 
 // ImplCombat is an implementation of the Combat trait
@@ -72,8 +72,8 @@ impl ImplCombat of ICombat {
         }
 
         // get special name damage bonus
-        let name_prefix_bonus = ImplCombat::get_name_damage_bonus(
-            base_attack_hp, weapon.special_powers, armor.special_powers, entropy
+        let item_specials_bonus = ImplCombat::get_name_damage_bonus(
+            base_attack_hp, weapon.specials, armor.specials, entropy
         );
 
         // get adventurer strength bonus
@@ -82,7 +82,7 @@ impl ImplCombat of ICombat {
         // total attack hit points
         let total_attack = elemental_adjusted_attack
             + critical_hit_bonus
-            + name_prefix_bonus
+            + item_specials_bonus
             + strength_bonus;
 
         // if the total attack is greater than the armor HP plus the minimum damage
@@ -298,13 +298,13 @@ impl ImplCombat of ICombat {
         return damage_boost_base * (damage_multplier + 1);
     }
 
-    // get_name_prefix1_bonus returns the bonus damage done by a weapon as a result of the first part of its name
+    // get_special2_bonus returns the bonus damage done by a weapon as a result of the weapon special2
     // @param damage: the base damage done by the attacker
     // @param weapon_name: the name of the weapon used to attack
     // @param armor_name: the name of the armor worn by the defender
     // @param entropy: entropy for randomizing name prefix damage bonus
-    // @return u16: the bonus damage done by a name prefix
-    fn get_name_prefix1_bonus(
+    // @return u16: the bonus damage
+    fn get_special2_bonus(
         damage: u16, weapon_prefix1: u8, armor_prefix1: u8, entropy: u128, 
     ) -> u16 {
         // is the weapon does not have a prefix
@@ -323,13 +323,13 @@ impl ImplCombat of ICombat {
         0
     }
 
-    // get_name_prefix2_bonus returns the bonus damage done by a weapon as a result of the second part of its name
+    // get_special3_bonus returns the bonus damage done by a weapon as a result of the weapon special3
     // @param base_damage: the base damage done by the attacker
     // @param weapon_name: the name of the weapon used by the attacker
     // @param armor_name: the name of the armor worn by the defender
     // @param entropy: entropy for randomizing name prefix 2 damage bonus
-    // @return u16: the bonus damage done by a weapon as a result of the second part of its name
-    fn get_name_prefix2_bonus(
+    // @return u16: the bonus damage
+    fn get_special3_bonus(
         base_damage: u16, weapon_prefix2: u8, armor_prefix2: u8, entropy: u128, 
     ) -> u16 {
         // is the weapon does not have a prefix
@@ -361,16 +361,16 @@ impl ImplCombat of ICombat {
     fn get_name_damage_bonus(
         base_damage: u16, weapon_name: SpecialPowers, armor_name: SpecialPowers, entropy: u128
     ) -> u16 {
-        let name_prefix1_bonus = ImplCombat::get_name_prefix1_bonus(
-            base_damage, weapon_name.prefix1, armor_name.prefix1, entropy
+        let special2_bonus = ImplCombat::get_special2_bonus(
+            base_damage, weapon_name.special2, armor_name.special2, entropy
         );
 
-        let name_prefix2_bonus = ImplCombat::get_name_prefix2_bonus(
-            base_damage, weapon_name.prefix2, armor_name.prefix2, entropy
+        let special3_bonus = ImplCombat::get_special3_bonus(
+            base_damage, weapon_name.special3, armor_name.special3, entropy
         );
 
         // return the sum of the name prefix and name suffix bonuses
-        return name_prefix1_bonus + name_prefix2_bonus;
+        return special2_bonus + special3_bonus;
     }
 
     // get_adventurer_strength_bonus returns the bonus damage for adventurer strength
@@ -630,12 +630,10 @@ fn test_get_level_from_xp() {
 fn test_get_attack_hp() {
     // Initialize weapon struct
     // for this test we just need item tier and level so we can ignore other properties
-    let weapon_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
     let mut weapon = CombatSpec {
-        item_type: Type::Blade_or_Hide(()),
-        tier: Tier::T5(()),
-        level: 0,
-        special_powers: weapon_special_names
+        item_type: Type::Blade_or_Hide(()), tier: Tier::T5(()), level: 0, specials: SpecialPowers {
+            special1: 0, special2: 0, special3: 0
+        }
     };
 
     // T5 Level 0 Weapon Deals 0HP of Damage
@@ -762,13 +760,11 @@ fn test_get_attack_hp() {
 #[test]
 #[available_gas(170000)]
 fn test_get_armor_hp() {
-    // T1 Level 20 Armor
-    let armor_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
+    // T1 Level 20 Armor (no special powers)
     let mut armor = CombatSpec {
-        item_type: Type::Blade_or_Hide(()),
-        tier: Tier::T1(()),
-        level: 20,
-        special_powers: armor_special_names
+        item_type: Type::Blade_or_Hide(()), tier: Tier::T1(()), level: 20, specials: SpecialPowers {
+            special2: 0, special3: 0, special1: 0
+        }
     };
 
     // T5 Level 0 Weapon Deals 0HP of Damage
@@ -1028,108 +1024,108 @@ fn test_get_elemental_bonus() {
 
 #[test]
 #[available_gas(90000)]
-fn test_get_name_prefix1_bonus() {
+fn test_get_special2_bonus() {
     let base_damage = 100;
     let mut entropy = 0;
 
-    let mut weapon_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
-    let mut armor_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let mut weapon_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
+    let mut armor_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
 
     // weapon without special name should have no bonus
-    let name_prefix1_bonus = ImplCombat::get_name_prefix1_bonus(
-        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
+    let special2_bonus = ImplCombat::get_special2_bonus(
+        base_damage, weapon_specials.special2, armor_specials.special2, entropy
     );
-    assert(name_prefix1_bonus == 0, 'should be no bonus');
+    assert(special2_bonus == 0, 'should be no bonus');
 
-    // assign armor a prefix1 name and ensure lack of weapon special name still results in no bonus
-    armor_special_names.prefix1 = 1;
-    let name_prefix1_bonus = ImplCombat::get_name_prefix1_bonus(
-        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
+    // assign armor a special2 name and ensure lack of weapon special name still results in no bonus
+    armor_specials.special2 = 1;
+    let special2_bonus = ImplCombat::get_special2_bonus(
+        base_damage, weapon_specials.special2, armor_specials.special2, entropy
     );
-    assert(name_prefix1_bonus == 0, 'should be no bonus');
+    assert(special2_bonus == 0, 'should be no bonus');
 
-    // give weapon matching prefix1 to qualify it for bonus
+    // give weapon matching special2 to qualify it for bonus
     // actual amount (4x-7x) will depend on entropy
     // entropy 0: 4x
-    weapon_special_names.prefix1 = 1;
-    let name_prefix1_bonus = ImplCombat::get_name_prefix1_bonus(
-        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
+    weapon_specials.special2 = 1;
+    let special2_bonus = ImplCombat::get_special2_bonus(
+        base_damage, weapon_specials.special2, armor_specials.special2, entropy
     );
-    assert(name_prefix1_bonus == 400, 'should be +400hp bonus');
+    assert(special2_bonus == 400, 'should be +400hp bonus');
 
     // entropy 1: 5x
     entropy = 1;
-    let name_prefix1_bonus = ImplCombat::get_name_prefix1_bonus(
-        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
+    let special2_bonus = ImplCombat::get_special2_bonus(
+        base_damage, weapon_specials.special2, armor_specials.special2, entropy
     );
-    assert(name_prefix1_bonus == 500, 'should be +500hp bonus');
+    assert(special2_bonus == 500, 'should be +500hp bonus');
 
     // entropy 2: 6x
     entropy = 2;
-    let name_prefix1_bonus = ImplCombat::get_name_prefix1_bonus(
-        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
+    let special2_bonus = ImplCombat::get_special2_bonus(
+        base_damage, weapon_specials.special2, armor_specials.special2, entropy
     );
-    assert(name_prefix1_bonus == 600, 'should be +600hp bonus');
+    assert(special2_bonus == 600, 'should be +600hp bonus');
 
     // entropy 3: 7x
     entropy = 3;
-    let name_prefix1_bonus = ImplCombat::get_name_prefix1_bonus(
-        base_damage, weapon_special_names.prefix1, armor_special_names.prefix1, entropy
+    let special2_bonus = ImplCombat::get_special2_bonus(
+        base_damage, weapon_specials.special2, armor_specials.special2, entropy
     );
-    assert(name_prefix1_bonus == 700, 'should be +700hp bonus');
+    assert(special2_bonus == 700, 'should be +700hp bonus');
 }
 
 #[test]
 #[available_gas(130000)]
-fn test_get_name_prefix2_bonus() {
+fn test_get_special3_bonus() {
     let base_damage = 100;
     let mut entropy = 0;
 
-    let mut weapon_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
-    let mut armor_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let mut weapon_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
+    let mut armor_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
 
     // weapon without special name should have no bonus
-    let name_prefix2_bonus = ImplCombat::get_name_prefix2_bonus(
-        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
+    let special3_bonus = ImplCombat::get_special3_bonus(
+        base_damage, weapon_specials.special3, armor_specials.special3, entropy
     );
-    assert(name_prefix2_bonus == 0, 'no prefix2 == no bonus');
+    assert(special3_bonus == 0, 'no prefix2 == no bonus');
 
     // assign armor a prefix2 name and ensure lack of weapon special name still results in no bonus
-    armor_special_names.prefix2 = 1;
-    let name_prefix2_bonus = ImplCombat::get_name_prefix2_bonus(
-        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
+    armor_specials.special3 = 1;
+    let special3_bonus = ImplCombat::get_special3_bonus(
+        base_damage, weapon_specials.special3, armor_specials.special3, entropy
     );
-    assert(name_prefix2_bonus == 0, 'no prefix2 == no bonus');
+    assert(special3_bonus == 0, 'no prefix2 == no bonus');
 
     // give weapon matching prefix2 to qualify it for bonus
     // actual amount (25% - 100%) will depend on entropy
     // entropy 0: 25%
-    weapon_special_names.prefix2 = 1;
-    let name_prefix2_bonus = ImplCombat::get_name_prefix2_bonus(
-        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
+    weapon_specials.special3 = 1;
+    let special3_bonus = ImplCombat::get_special3_bonus(
+        base_damage, weapon_specials.special3, armor_specials.special3, entropy
     );
-    assert(name_prefix2_bonus == 25, 'should be +25hp bonus');
+    assert(special3_bonus == 25, 'should be +25hp bonus');
 
     // entropy 1: 50%
     entropy = 1;
-    let name_prefix2_bonus = ImplCombat::get_name_prefix2_bonus(
-        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
+    let special3_bonus = ImplCombat::get_special3_bonus(
+        base_damage, weapon_specials.special3, armor_specials.special3, entropy
     );
-    assert(name_prefix2_bonus == 50, 'should be +50hp bonus');
+    assert(special3_bonus == 50, 'should be +50hp bonus');
 
     // entropy 2: 75%
     entropy = 2;
-    let name_prefix2_bonus = ImplCombat::get_name_prefix2_bonus(
-        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
+    let special3_bonus = ImplCombat::get_special3_bonus(
+        base_damage, weapon_specials.special3, armor_specials.special3, entropy
     );
-    assert(name_prefix2_bonus == 75, 'should be +75hp bonus');
+    assert(special3_bonus == 75, 'should be +75hp bonus');
 
     // entropy 3: 100%
     entropy = 3;
-    let name_prefix2_bonus = ImplCombat::get_name_prefix2_bonus(
-        base_damage, weapon_special_names.prefix2, armor_special_names.prefix2, entropy
+    let special3_bonus = ImplCombat::get_special3_bonus(
+        base_damage, weapon_specials.special3, armor_specials.special3, entropy
     );
-    assert(name_prefix2_bonus == 100, 'should be +100hp bonus');
+    assert(special3_bonus == 100, 'should be +100hp bonus');
 }
 
 #[test]
@@ -1163,21 +1159,21 @@ fn test_get_strength_bonus() {
 #[available_gas(1100000)]
 fn test_calculate_damage() {
     // initialize weapon
-    let weapon_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let weapon_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
     let mut weapon = CombatSpec {
         item_type: Type::Blade_or_Hide(()),
         tier: Tier::T5(()),
         level: 1,
-        special_powers: weapon_special_names
+        specials: weapon_specials
     };
 
     // initialize armor
-    let armor_special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0,  };
+    let armor_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
     let mut armor = CombatSpec {
         item_type: Type::Blade_or_Hide(()),
         tier: Tier::T5(()),
         level: 1,
-        special_powers: armor_special_names
+        specials: armor_specials
     };
 
     // initialize other combat parameters

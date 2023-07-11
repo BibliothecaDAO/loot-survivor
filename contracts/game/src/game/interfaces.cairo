@@ -1,7 +1,7 @@
 use starknet::ContractAddress;
 use survivor::{
     bag::Bag, adventurer::{Adventurer, Stats}, adventurer_meta::AdventurerMetadata,
-    item_meta::LootItemSpecialNames
+    item_meta::ItemSpecials
 };
 use lootitems::loot::{Loot};
 use market::market::LootWithPrice;
@@ -48,14 +48,14 @@ trait IGame<TContractState> {
     fn get_ring_greatness(self: @TContractState, adventurer_id: u256) -> u8;
 
     // item details
-    fn get_equipped_weapon_names(self: @TContractState, adventurer_id: u256) -> LootItemSpecialNames;
-    fn get_equipped_chest_names(self: @TContractState, adventurer_id: u256) -> LootItemSpecialNames;
-    fn get_equipped_head_names(self: @TContractState, adventurer_id: u256) -> LootItemSpecialNames;
-    fn get_equipped_waist_names(self: @TContractState, adventurer_id: u256) -> LootItemSpecialNames;
-    fn get_equipped_foot_names(self: @TContractState, adventurer_id: u256) -> LootItemSpecialNames;
-    fn get_equipped_hand_names(self: @TContractState, adventurer_id: u256) -> LootItemSpecialNames;
-    fn get_equipped_necklace_names(self: @TContractState, adventurer_id: u256) -> LootItemSpecialNames;
-    fn get_equipped_ring_names(self: @TContractState, adventurer_id: u256) -> LootItemSpecialNames;
+    fn get_equipped_weapon_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_equipped_chest_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_equipped_head_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_equipped_waist_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_equipped_foot_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_equipped_hand_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_equipped_necklace_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_equipped_ring_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
 
     // adventurer stats
     fn get_base_stats(self: @TContractState, adventurer_id: u256) -> Stats;

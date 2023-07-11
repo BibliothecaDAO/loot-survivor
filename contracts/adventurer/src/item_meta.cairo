@@ -22,52 +22,52 @@ mod STORAGE {
 }
 
 #[derive(Drop, Copy, Serde)]
-struct LootItemSpecialNames {
-    name_prefix: u8, // 7 bits
-    name_suffix: u8, // 5 bits
-    item_suffix: u8, // 4 bit
+struct ItemSpecials {
+    special1: u8, // 4 bit
+    special2: u8, // 7 bits
+    special3: u8, // 5 bits
 }
 
 // Player can have a total of 20 items. We map the items index to a slot in the metadata
 #[derive(Drop, Copy, Serde)]
-struct LootItemSpecialNamesStorage {
-    item_1: LootItemSpecialNames,
-    item_2: LootItemSpecialNames,
-    item_3: LootItemSpecialNames,
-    item_4: LootItemSpecialNames,
-    item_5: LootItemSpecialNames,
-    item_6: LootItemSpecialNames,
-    item_7: LootItemSpecialNames,
-    item_8: LootItemSpecialNames,
-    item_9: LootItemSpecialNames,
-    item_10: LootItemSpecialNames,
+struct ItemSpecialsStorage {
+    item_1: ItemSpecials,
+    item_2: ItemSpecials,
+    item_3: ItemSpecials,
+    item_4: ItemSpecials,
+    item_5: ItemSpecials,
+    item_6: ItemSpecials,
+    item_7: ItemSpecials,
+    item_8: ItemSpecials,
+    item_9: ItemSpecials,
+    item_10: ItemSpecials,
 }
 
-impl LootItemSpecialNamesPacking of Packing<LootItemSpecialNames> {
-    fn pack(self: LootItemSpecialNames) -> felt252 {
-        (self.name_prefix.into()
-            + self.name_suffix.into() * pow::TWO_POW_7
-            + self.item_suffix.into() * pow::TWO_POW_12)
+impl ItemSpecialsPacking of Packing<ItemSpecials> {
+    fn pack(self: ItemSpecials) -> felt252 {
+        (self.special2.into()
+            + self.special3.into() * pow::TWO_POW_7
+            + self.special1.into() * pow::TWO_POW_12)
             .try_into()
-            .expect('pack LootItemSpecialNames')
+            .expect('pack ItemSpecials')
     }
 
-    fn unpack(packed: felt252) -> LootItemSpecialNames {
+    fn unpack(packed: felt252) -> ItemSpecials {
         let packed = packed.into();
-        let (packed, name_prefix) = rshift_split(packed, pow::TWO_POW_7);
-        let (packed, name_suffix) = rshift_split(packed, pow::TWO_POW_5);
-        let (_, item_suffix) = rshift_split(packed, pow::TWO_POW_4);
+        let (packed, special2) = rshift_split(packed, pow::TWO_POW_7);
+        let (packed, special3) = rshift_split(packed, pow::TWO_POW_5);
+        let (_, special1) = rshift_split(packed, pow::TWO_POW_4);
 
-        LootItemSpecialNames {
-            name_prefix: name_prefix.try_into().expect('unpack LISN name_prefix'),
-            name_suffix: name_suffix.try_into().expect('unpack LISN name_suffix'),
-            item_suffix: item_suffix.try_into().expect('unpack LISN item_suffix')
+        ItemSpecials {
+            special2: special2.try_into().expect('unpack LISN special2'),
+            special3: special3.try_into().expect('unpack LISN special3'),
+            special1: special1.try_into().expect('unpack LISN special1')
         }
     }
 }
 
-impl LootItemSpecialNamesStoragePacking of Packing<LootItemSpecialNamesStorage> {
-    fn pack(self: LootItemSpecialNamesStorage) -> felt252 {
+impl ItemSpecialsStoragePacking of Packing<ItemSpecialsStorage> {
+    fn pack(self: ItemSpecialsStorage) -> felt252 {
         (self.item_1.pack().into()
             + self.item_2.pack().into() * pow::TWO_POW_16
             + self.item_3.pack().into() * pow::TWO_POW_32
@@ -82,7 +82,7 @@ impl LootItemSpecialNamesStoragePacking of Packing<LootItemSpecialNamesStorage> 
             .expect('pack LISNS')
     }
 
-    fn unpack(packed: felt252) -> LootItemSpecialNamesStorage {
+    fn unpack(packed: felt252) -> ItemSpecialsStorage {
         let packed = packed.into();
         let (packed, item_1) = rshift_split(packed, pow::TWO_POW_16);
         let (packed, item_2) = rshift_split(packed, pow::TWO_POW_16);
@@ -95,7 +95,7 @@ impl LootItemSpecialNamesStoragePacking of Packing<LootItemSpecialNamesStorage> 
         let (packed, item_9) = rshift_split(packed, pow::TWO_POW_16);
         let (_, item_10) = rshift_split(packed, pow::TWO_POW_16);
 
-        LootItemSpecialNamesStorage {
+        ItemSpecialsStorage {
             item_1: Packing::unpack(item_1.try_into().expect('unpack LISNS item_1')),
             item_2: Packing::unpack(item_2.try_into().expect('unpack LISNS item_2')),
             item_3: Packing::unpack(item_3.try_into().expect('unpack LISNS item_3')),
@@ -111,10 +111,10 @@ impl LootItemSpecialNamesStoragePacking of Packing<LootItemSpecialNamesStorage> 
 }
 
 #[generate_trait]
-impl ImplLootItemSpecialNames of ILootItemSpecialNames {
+impl ImplItemSpecials of IItemSpecials {
     fn get_loot_special_names(
-        self: LootItemSpecialNamesStorage, loot_statistics: ItemPrimitive
-    ) -> LootItemSpecialNames {
+        self: ItemSpecialsStorage, loot_statistics: ItemPrimitive
+    ) -> ItemSpecials {
         if loot_statistics.metadata == STORAGE::INDEX_1 {
             return self.item_1;
         } else if loot_statistics.metadata == STORAGE::INDEX_2 {
@@ -212,9 +212,9 @@ impl ImplLootItemSpecialNames of ILootItemSpecialNames {
         }
     }
     fn set_loot_special_names(
-        ref self: LootItemSpecialNamesStorage,
+        ref self: ItemSpecialsStorage,
         loot_statistics: ItemPrimitive,
-        loot_special_names: LootItemSpecialNames
+        loot_special_names: ItemSpecials
     ) {
         if loot_statistics.metadata == STORAGE::INDEX_1 {
             self.item_1 = loot_special_names;
@@ -243,71 +243,71 @@ impl ImplLootItemSpecialNames of ILootItemSpecialNames {
 #[test]
 #[available_gas(5000000)]
 fn test_item_meta_packing() {
-    let storage = LootItemSpecialNamesStorage {
-        item_1: LootItemSpecialNames {
-            name_prefix: 11, name_suffix: 1, item_suffix: 15, 
-            }, item_2: LootItemSpecialNames {
-            name_prefix: 22, name_suffix: 2, item_suffix: 14, 
-            }, item_3: LootItemSpecialNames {
-            name_prefix: 33, name_suffix: 3, item_suffix: 13, 
-            }, item_4: LootItemSpecialNames {
-            name_prefix: 44, name_suffix: 4, item_suffix: 12, 
-            }, item_5: LootItemSpecialNames {
-            name_prefix: 55, name_suffix: 5, item_suffix: 11, 
-            }, item_6: LootItemSpecialNames {
-            name_prefix: 66, name_suffix: 6, item_suffix: 10, 
-            }, item_7: LootItemSpecialNames {
-            name_prefix: 77, name_suffix: 7, item_suffix: 9, 
-            }, item_8: LootItemSpecialNames {
-            name_prefix: 88, name_suffix: 8, item_suffix: 8, 
-            }, item_9: LootItemSpecialNames {
-            name_prefix: 99, name_suffix: 9, item_suffix: 7, 
-            }, item_10: LootItemSpecialNames {
-            name_prefix: 111, name_suffix: 10, item_suffix: 6, 
+    let storage = ItemSpecialsStorage {
+        item_1: ItemSpecials {
+            special2: 11, special3: 1, special1: 15, 
+            }, item_2: ItemSpecials {
+            special2: 22, special3: 2, special1: 14, 
+            }, item_3: ItemSpecials {
+            special2: 33, special3: 3, special1: 13, 
+            }, item_4: ItemSpecials {
+            special2: 44, special3: 4, special1: 12, 
+            }, item_5: ItemSpecials {
+            special2: 55, special3: 5, special1: 11, 
+            }, item_6: ItemSpecials {
+            special2: 66, special3: 6, special1: 10, 
+            }, item_7: ItemSpecials {
+            special2: 77, special3: 7, special1: 9, 
+            }, item_8: ItemSpecials {
+            special2: 88, special3: 8, special1: 8, 
+            }, item_9: ItemSpecials {
+            special2: 99, special3: 9, special1: 7, 
+            }, item_10: ItemSpecials {
+            special2: 111, special3: 10, special1: 6, 
         }
     };
 
-    let unpacked: LootItemSpecialNamesStorage = Packing::unpack(storage.pack());
+    let unpacked: ItemSpecialsStorage = Packing::unpack(storage.pack());
 
-    assert(unpacked.item_1.name_prefix == storage.item_1.name_prefix, 'item_1 name_prefix');
-    assert(unpacked.item_1.name_suffix == storage.item_1.name_suffix, 'item_1 name_suffix');
-    assert(unpacked.item_1.item_suffix == storage.item_1.item_suffix, 'item_1 item_suffix');
+    assert(unpacked.item_1.special2 == storage.item_1.special2, 'item_1 special2');
+    assert(unpacked.item_1.special3 == storage.item_1.special3, 'item_1 special3');
+    assert(unpacked.item_1.special1 == storage.item_1.special1, 'item_1 special1');
 
-    assert(unpacked.item_2.name_prefix == storage.item_2.name_prefix, 'item_2 name_prefix');
-    assert(unpacked.item_2.name_suffix == storage.item_2.name_suffix, 'item_2 name_suffix');
-    assert(unpacked.item_2.item_suffix == storage.item_2.item_suffix, 'item_2 item_suffix');
+    assert(unpacked.item_2.special2 == storage.item_2.special2, 'item_2 special2');
+    assert(unpacked.item_2.special3 == storage.item_2.special3, 'item_2 special3');
+    assert(unpacked.item_2.special1 == storage.item_2.special1, 'item_2 special1');
 
-    assert(unpacked.item_3.name_prefix == storage.item_3.name_prefix, 'item_3 name_prefix');
-    assert(unpacked.item_3.name_suffix == storage.item_3.name_suffix, 'item_3 name_suffix');
-    assert(unpacked.item_3.item_suffix == storage.item_3.item_suffix, 'item_3 item_suffix');
+    assert(unpacked.item_3.special2 == storage.item_3.special2, 'item_3 special2');
+    assert(unpacked.item_3.special3 == storage.item_3.special3, 'item_3 special3');
+    assert(unpacked.item_3.special1 == storage.item_3.special1, 'item_3 special1');
 
-    assert(unpacked.item_4.name_prefix == storage.item_4.name_prefix, 'item_4 name_prefix');
-    assert(unpacked.item_4.name_suffix == storage.item_4.name_suffix, 'item_4 name_suffix');
-    assert(unpacked.item_4.item_suffix == storage.item_4.item_suffix, 'item_4 item_suffix');
+    assert(unpacked.item_4.special2 == storage.item_4.special2, 'item_4 special2');
+    assert(unpacked.item_4.special3 == storage.item_4.special3, 'item_4 special3');
+    assert(unpacked.item_4.special1 == storage.item_4.special1, 'item_4 special1');
 
-    assert(unpacked.item_5.name_prefix == storage.item_5.name_prefix, 'item_5 name_prefix');
-    assert(unpacked.item_5.name_suffix == storage.item_5.name_suffix, 'item_5 name_suffix');
-    assert(unpacked.item_5.item_suffix == storage.item_5.item_suffix, 'item_5 item_suffix');
+    assert(unpacked.item_5.special2 == storage.item_5.special2, 'item_5 special2');
+    assert(unpacked.item_5.special3 == storage.item_5.special3, 'item_5 special3');
+    assert(unpacked.item_5.special1 == storage.item_5.special1, 'item_5 special1');
 
-    assert(unpacked.item_6.name_prefix == storage.item_6.name_prefix, 'item_6 name_prefix');
-    assert(unpacked.item_6.name_suffix == storage.item_6.name_suffix, 'item_6 name_suffix');
-    assert(unpacked.item_6.item_suffix == storage.item_6.item_suffix, 'item_6 item_suffix');
+    assert(unpacked.item_6.special2 == storage.item_6.special2, 'item_6 special2');
+    assert(unpacked.item_6.special3 == storage.item_6.special3, 'item_6 special3');
+    assert(unpacked.item_6.special1 == storage.item_6.special1, 'item_6 special1');
 
-    assert(unpacked.item_7.name_prefix == storage.item_7.name_prefix, 'item_7 name_prefix');
-    assert(unpacked.item_7.name_suffix == storage.item_7.name_suffix, 'item_7 name_suffix');
-    assert(unpacked.item_7.item_suffix == storage.item_7.item_suffix, 'item_7 item_suffix');
+    assert(unpacked.item_7.special2 == storage.item_7.special2, 'item_7 special2');
+    assert(unpacked.item_7.special3 == storage.item_7.special3, 'item_7 special3');
+    assert(unpacked.item_7.special1 == storage.item_7.special1, 'item_7 special1');
 
-    assert(unpacked.item_8.name_prefix == storage.item_8.name_prefix, 'item_8 name_prefix');
-    assert(unpacked.item_8.name_suffix == storage.item_8.name_suffix, 'item_8 name_suffix');
-    assert(unpacked.item_8.item_suffix == storage.item_8.item_suffix, 'item_8 item_suffix');
+    assert(unpacked.item_8.special2 == storage.item_8.special2, 'item_8 special2');
+    assert(unpacked.item_8.special3 == storage.item_8.special3, 'item_8 special3');
+    assert(unpacked.item_8.special1 == storage.item_8.special1, 'item_8 special1');
 
-    assert(unpacked.item_9.name_prefix == storage.item_9.name_prefix, 'item_9 name_prefix');
-    assert(unpacked.item_9.name_suffix == storage.item_9.name_suffix, 'item_9 name_suffix');
-    assert(unpacked.item_9.item_suffix == storage.item_9.item_suffix, 'item_9 item_suffix');
+    assert(unpacked.item_9.special2 == storage.item_9.special2, 'item_9 special2');
+    assert(unpacked.item_9.special3 == storage.item_9.special3, 'item_9 special3');
+    assert(unpacked.item_9.special1 == storage.item_9.special1, 'item_9 special1');
 
-    assert(unpacked.item_10.name_prefix == storage.item_10.name_prefix, 'item_10 name_prefix');
-    assert(unpacked.item_10.name_suffix == storage.item_10.name_suffix, 'item_10 name_suffix');
-    assert(unpacked.item_10.item_suffix == storage.item_10.item_suffix, 'item_10 item_suffix');
+    assert(unpacked.item_10.special2 == storage.item_10.special2, 'item_10 special2');
+    assert(unpacked.item_10.special3 == storage.item_10.special3, 'item_10 special3');
+    assert(unpacked.item_10.special1 == storage.item_10.special1, 'item_10 special1');
 }
 
 #[test]
@@ -354,7 +354,7 @@ fn test_get_item_metadata_slot() {
 
     let new_item = ItemPrimitive { id: 1, xp: 1, metadata: 0 };
 
-    let item = ILootItemSpecialNames::get_loot_special_names_slot(adventurer, bag, new_item);
+    let item = IItemSpecials::get_loot_special_names_slot(adventurer, bag, new_item);
 
     assert(item.metadata == 19, 'ItemPrimitive');
 }
@@ -362,52 +362,52 @@ fn test_get_item_metadata_slot() {
 #[test]
 #[available_gas(5000000)]
 fn test_set_item_metadata_slot() {
-    let mut item_meta_storage = LootItemSpecialNamesStorage {
-        item_1: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_2: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_3: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_4: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_5: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_6: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_7: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_8: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_9: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
-            }, item_10: LootItemSpecialNames {
-            name_prefix: 0, name_suffix: 0, item_suffix: 0, 
+    let mut item_meta_storage = ItemSpecialsStorage {
+        item_1: ItemSpecials {
+            special2: 0, special3: 0, special1: 0, 
+            }, item_2: ItemSpecials {
+            special2: 0, special3: 0, special1: 0, 
+            }, item_3: ItemSpecials {
+            special2: 0, special3: 0, special1: 0, 
+            }, item_4: ItemSpecials {
+            special2: 0, special3: 0, special1: 0, 
+            }, item_5: ItemSpecials {
+            special2: 0, special3: 0, special1: 0, 
+            }, item_6: ItemSpecials {
+            special2: 0, special3: 0, special1: 0, 
+            }, item_7: ItemSpecials {
+            special2: 0, special3: 0, special1: 0, 
+            }, item_8: ItemSpecials {
+            special2: 0, special3: 0, special1: 0, 
+            }, item_9: ItemSpecials {
+            special2: 0, special3: 0, special1: 0, 
+            }, item_10: ItemSpecials {
+            special2: 0, special3: 0, special1: 0, 
         }
     };
 
     let loot_statistics_1 = ItemPrimitive { id: 102, xp: 0, metadata: 1 };
 
-    let loot_special_names_2 = LootItemSpecialNames {
-        name_prefix: 12, name_suffix: 11, item_suffix: 13
+    let loot_special_names_2 = ItemSpecials {
+        special2: 12, special3: 11, special1: 13
     };
 
     item_meta_storage.set_loot_special_names(loot_statistics_1, loot_special_names_2);
 
-    assert(item_meta_storage.item_1.name_prefix == 12, 'should be 12');
-    assert(item_meta_storage.item_1.name_suffix == 11, 'should be 11');
-    assert(item_meta_storage.item_1.item_suffix == 13, 'should be 13');
+    assert(item_meta_storage.item_1.special2 == 12, 'should be 12');
+    assert(item_meta_storage.item_1.special3 == 11, 'should be 11');
+    assert(item_meta_storage.item_1.special1 == 13, 'should be 13');
 
     let loot_statistics_2 = ItemPrimitive { id: 102, xp: 0, metadata: 2 };
 
-    let loot_special_names_2 = LootItemSpecialNames {
-        name_prefix: 12, name_suffix: 11, item_suffix: 13
+    let loot_special_names_2 = ItemSpecials {
+        special2: 12, special3: 11, special1: 13
     };
 
     item_meta_storage.set_loot_special_names(loot_statistics_2, loot_special_names_2);
-    assert(item_meta_storage.item_2.name_prefix == 12, 'should be 12');
-    assert(item_meta_storage.item_2.name_suffix == 11, 'should be 11');
-    assert(item_meta_storage.item_2.item_suffix == 13, 'should be 13');
+    assert(item_meta_storage.item_2.special2 == 12, 'should be 12');
+    assert(item_meta_storage.item_2.special3 == 11, 'should be 11');
+    assert(item_meta_storage.item_2.special1 == 13, 'should be 13');
 }
 
 #[test]
@@ -424,86 +424,86 @@ fn test_get_item_metadata() {
     let item_linen_gloves = ItemPrimitive { id: 9, xp: 1, metadata: 9 };
     let item_crown = ItemPrimitive { id: 10, xp: 1, metadata: 10 };
 
-    let mut item_meta_storage = LootItemSpecialNamesStorage {
-        item_1: LootItemSpecialNames {
-            name_prefix: 2, name_suffix: 2, item_suffix: 10, 
-            }, item_2: LootItemSpecialNames {
-            name_prefix: 4, name_suffix: 3, item_suffix: 11, 
-            }, item_3: LootItemSpecialNames {
-            name_prefix: 5, name_suffix: 4, item_suffix: 11, 
-            }, item_4: LootItemSpecialNames {
-            name_prefix: 6, name_suffix: 5, item_suffix: 3, 
-            }, item_5: LootItemSpecialNames {
-            name_prefix: 8, name_suffix: 6, item_suffix: 2, 
-            }, item_6: LootItemSpecialNames {
-            name_prefix: 9, name_suffix: 7, item_suffix: 1, 
-            }, item_7: LootItemSpecialNames {
-            name_prefix: 11, name_suffix: 8, item_suffix: 5, 
-            }, item_8: LootItemSpecialNames {
-            name_prefix: 2, name_suffix: 9, item_suffix: 6, 
-            }, item_9: LootItemSpecialNames {
-            name_prefix: 3, name_suffix: 0, item_suffix: 7, 
-            }, item_10: LootItemSpecialNames {
-            name_prefix: 11, name_suffix: 8, item_suffix: 5, 
+    let mut item_meta_storage = ItemSpecialsStorage {
+        item_1: ItemSpecials {
+            special2: 2, special3: 2, special1: 10, 
+            }, item_2: ItemSpecials {
+            special2: 4, special3: 3, special1: 11, 
+            }, item_3: ItemSpecials {
+            special2: 5, special3: 4, special1: 11, 
+            }, item_4: ItemSpecials {
+            special2: 6, special3: 5, special1: 3, 
+            }, item_5: ItemSpecials {
+            special2: 8, special3: 6, special1: 2, 
+            }, item_6: ItemSpecials {
+            special2: 9, special3: 7, special1: 1, 
+            }, item_7: ItemSpecials {
+            special2: 11, special3: 8, special1: 5, 
+            }, item_8: ItemSpecials {
+            special2: 2, special3: 9, special1: 6, 
+            }, item_9: ItemSpecials {
+            special2: 3, special3: 0, special1: 7, 
+            }, item_10: ItemSpecials {
+            special2: 11, special3: 8, special1: 5, 
         }
     };
 
     let meta_data = item_meta_storage.get_loot_special_names(item_pendant);
 
-    assert(meta_data.name_prefix == 2, 'item_pendant.name_prefix');
-    assert(meta_data.name_suffix == 2, 'item_pendant.name_suffix');
-    assert(meta_data.item_suffix == 10, 'item_pendant.item_suffix');
+    assert(meta_data.special2 == 2, 'item_pendant.special2');
+    assert(meta_data.special3 == 2, 'item_pendant.special3');
+    assert(meta_data.special1 == 10, 'item_pendant.special1');
     let meta_data = item_meta_storage.get_loot_special_names(item_silver_ring);
 
-    assert(meta_data.name_prefix == 4, 'item_silver_ring.name_prefix');
-    assert(meta_data.name_suffix == 3, 'item_silver_ring.name_suffix');
-    assert(meta_data.item_suffix == 11, 'item_silver_ring.item_suffix');
+    assert(meta_data.special2 == 4, 'item_silver_ring.special2');
+    assert(meta_data.special3 == 3, 'item_silver_ring.special3');
+    assert(meta_data.special1 == 11, 'item_silver_ring.special1');
 
     let meta_data = item_meta_storage.get_loot_special_names(item_silk_robe);
 
-    assert(meta_data.name_prefix == 5, 'item_silk_robe.name_prefix');
-    assert(meta_data.name_suffix == 4, 'item_silk_robe.name_suffix');
-    assert(meta_data.item_suffix == 11, 'item_silk_robe.item_suffix');
+    assert(meta_data.special2 == 5, 'item_silk_robe.special2');
+    assert(meta_data.special3 == 4, 'item_silk_robe.special3');
+    assert(meta_data.special1 == 11, 'item_silk_robe.special1');
 
     let meta_data = item_meta_storage.get_loot_special_names(item_iron_sword);
 
-    assert(meta_data.name_prefix == 6, 'item_iron_sword.name_prefix');
-    assert(meta_data.name_suffix == 5, 'item_iron_sword.name_suffix');
-    assert(meta_data.item_suffix == 3, 'item_iron_sword.item_suffix');
+    assert(meta_data.special2 == 6, 'item_iron_sword.special2');
+    assert(meta_data.special3 == 5, 'item_iron_sword.special3');
+    assert(meta_data.special1 == 3, 'item_iron_sword.special1');
 
     let meta_data = item_meta_storage.get_loot_special_names(item_katana);
 
-    assert(meta_data.name_prefix == 8, 'item_katana');
-    assert(meta_data.name_suffix == 6, 'item_katana');
-    assert(meta_data.item_suffix == 2, 'item_katana');
+    assert(meta_data.special2 == 8, 'item_katana');
+    assert(meta_data.special3 == 6, 'item_katana');
+    assert(meta_data.special1 == 2, 'item_katana');
 
     let meta_data = item_meta_storage.get_loot_special_names(item_falchion);
 
-    assert(meta_data.name_prefix == 9, 'item_falchion');
-    assert(meta_data.name_suffix == 7, 'item_falchion');
-    assert(meta_data.item_suffix == 1, 'item_falchion');
+    assert(meta_data.special2 == 9, 'item_falchion');
+    assert(meta_data.special3 == 7, 'item_falchion');
+    assert(meta_data.special1 == 1, 'item_falchion');
 
     let meta_data = item_meta_storage.get_loot_special_names(item_leather_gloves);
 
-    assert(meta_data.name_prefix == 11, 'item_leather_gloves');
-    assert(meta_data.name_suffix == 8, 'item_leather_gloves');
-    assert(meta_data.item_suffix == 5, 'item_leather_gloves');
+    assert(meta_data.special2 == 11, 'item_leather_gloves');
+    assert(meta_data.special3 == 8, 'item_leather_gloves');
+    assert(meta_data.special1 == 5, 'item_leather_gloves');
 
     let meta_data = item_meta_storage.get_loot_special_names(item_silk_gloves);
 
-    assert(meta_data.name_prefix == 2, 'item_silk_gloves');
-    assert(meta_data.name_suffix == 9, 'item_silk_gloves');
-    assert(meta_data.item_suffix == 6, 'item_silk_gloves');
+    assert(meta_data.special2 == 2, 'item_silk_gloves');
+    assert(meta_data.special3 == 9, 'item_silk_gloves');
+    assert(meta_data.special1 == 6, 'item_silk_gloves');
 
     let meta_data = item_meta_storage.get_loot_special_names(item_linen_gloves);
 
-    assert(meta_data.name_prefix == 3, 'item_linen_gloves');
-    assert(meta_data.name_suffix == 0, 'item_linen_gloves');
-    assert(meta_data.item_suffix == 7, 'item_linen_gloves');
+    assert(meta_data.special2 == 3, 'item_linen_gloves');
+    assert(meta_data.special3 == 0, 'item_linen_gloves');
+    assert(meta_data.special1 == 7, 'item_linen_gloves');
 
     let meta_data = item_meta_storage.get_loot_special_names(item_crown);
 
-    assert(meta_data.name_prefix == 11, 'item_crown');
-    assert(meta_data.name_suffix == 8, 'item_crown');
-    assert(meta_data.item_suffix == 5, 'item_crown');
+    assert(meta_data.special2 == 11, 'item_crown');
+    assert(meta_data.special3 == 8, 'item_crown');
+    assert(meta_data.special1 == 5, 'item_crown');
 }

@@ -41,12 +41,12 @@ impl ImplBeast of IBeast {
     //@dev If the adventurer's level exceeds the STARTER_BEAST_LEVEL_THRESHOLD, the beast is generated with attributes (id, starting_health, combat_spec) based on the adventurer's level and the provided seed. 
     //Otherwise, a starter beast is generated according to the adventurer's weapon type.
     //@param adventurer_level The level of the adventurer, represented as a u8 (unsigned 8-bit integer). 
-    //@param special_names A SpecialPowers type value indicating the adventurer's special powers.
+    //@param specials Special powers for the beast
     //@param seed A u128 (unsigned 128-bit integer) value used to generate randomness in the Beast's attributes.
     //@param weapon_type A Type value indicating the type of weapon that the adventurer uses.
     //@return A Beast instance with either generated attributes or the default starter attributes, based on the adventurer's level.
     fn get_beast(
-        adventurer_level: u8, special_names: SpecialPowers, seed: u128, weapon_type: Type
+        adventurer_level: u8, specials: SpecialPowers, seed: u128, weapon_type: Type
     ) -> Beast {
         // if the adventurer has passed the starter beast level threshold
         if (adventurer_level > STARTER_BEAST_LEVEL_THRESHOLD) {
@@ -59,7 +59,7 @@ impl ImplBeast of IBeast {
                     tier: ImplBeast::get_tier(beast_id),
                     item_type: ImplBeast::get_type(beast_id),
                     level: U8IntoU16::into(ImplBeast::get_level(adventurer_level, seed)),
-                    special_powers: special_names
+                    specials: specials
                 }
             }
         } else {
@@ -95,8 +95,8 @@ impl ImplBeast of IBeast {
                 tier: ImplBeast::get_tier(beast_id),
                 item_type: ImplBeast::get_type(beast_id),
                 level: 1,
-                special_powers: SpecialPowers {
-                    prefix1: 0, prefix2: 0, suffix: 0
+                specials: SpecialPowers {
+                    special1: 0, special2: 0, special3: 0
                 }
             }
         };
@@ -105,19 +105,19 @@ impl ImplBeast of IBeast {
     fn beast_encounter(
         adventurer_level: u8,
         adventurer_wisdom: u8,
-        special1_size: u8,
         special2_size: u8,
+        special3_size: u8,
         battle_fixed_seed: u128
     ) -> (Beast, bool) {
         // assign special powers to the beast
-        let special1 = U128TryIntoU8::try_into(battle_fixed_seed % U8IntoU128::into(special1_size))
-            .unwrap();
-        let special2 = U128TryIntoU8::try_into(battle_fixed_seed % U8IntoU128::into(special2_size))
-            .unwrap();
-        let special3 = 0; // unused for now
+        // special1 is currently unused (this maps to Loot item suffix which beasts don't currently have)
 
         let special_powers = SpecialPowers {
-            prefix1: special1, prefix2: special2, suffix: special3
+            special1: 0,
+            special2: U128TryIntoU8::try_into(battle_fixed_seed % U8IntoU128::into(special2_size))
+                .unwrap(),
+            special3: U128TryIntoU8::try_into(battle_fixed_seed % U8IntoU128::into(special3_size))
+                .unwrap()
         };
 
         // generate a beast based on the seed
@@ -165,17 +165,19 @@ impl ImplBeast of IBeast {
     }
 
     fn get_special_names(
-        adventurer_level: u8, seed: u128, prefix1_size: u128, prefix2_size: u128
+        adventurer_level: u8, seed: u128, special2_size: u128, special3_size: u128
     ) -> SpecialPowers {
         // if adventurer is below level 10, beasts don't get any special powers
         if (adventurer_level < BEAST_SPECIAL_NAME_UNLOCK_LEVEL) {
-            SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 }
+            SpecialPowers { special1: 0, special2: 0, special3: 0 }
         } else {
-            let beast_prefix1 = U128TryIntoU8::try_into(seed % prefix1_size).unwrap();
-            let beast_prefix2 = U128TryIntoU8::try_into(seed % prefix2_size).unwrap();
-
-            // beast suffix is always 0 for now
-            SpecialPowers { prefix1: beast_prefix1, prefix2: beast_prefix2, suffix: 0 }
+            // return special powers for beast
+            // special1 is intentionally 0 for now
+            SpecialPowers {
+                special1: 0,
+                special2: U128TryIntoU8::try_into(seed % special2_size).unwrap(),
+                special3: U128TryIntoU8::try_into(seed % special3_size).unwrap()
+            }
         }
     }
     fn get_level(adventurer_level: u8, seed: u128) -> u8 {
@@ -590,8 +592,8 @@ fn test_counter_attack() {
             item_type: ImplBeast::get_type(warlock),
             tier: ImplBeast::get_tier(warlock),
             level: 5,
-            special_powers: SpecialPowers {
-                prefix1: 0, prefix2: 0, suffix: 0, 
+            specials: SpecialPowers {
+                special1: 0, special2: 0, special3: 0, 
             }
         }
     };
@@ -601,8 +603,8 @@ fn test_counter_attack() {
         item_type: Type::Bludgeon_or_Metal(()),
         tier: Tier::T5(()),
         level: 1,
-        special_powers: SpecialPowers {
-            prefix1: 0, prefix2: 0, suffix: 0
+        specials: SpecialPowers {
+            special1: 0, special2: 0, special3: 0, 
         }
     };
 
@@ -621,11 +623,8 @@ fn test_attack() {
 
     // initialize adventurer weapon (G20 Katana)
     let mut weapon = CombatSpec {
-        item_type: Type::Blade_or_Hide(()),
-        tier: Tier::T1(()),
-        level: 20,
-        special_powers: SpecialPowers {
-            prefix1: 0, prefix2: 0, suffix: 0
+        item_type: Type::Blade_or_Hide(()), tier: Tier::T1(()), level: 20, specials: SpecialPowers {
+            special1: 0, special2: 0, special3: 0
         }
     };
 
@@ -636,8 +635,8 @@ fn test_attack() {
             item_type: ImplBeast::get_type(goblin),
             tier: ImplBeast::get_tier(goblin),
             level: 5,
-            special_powers: SpecialPowers {
-                prefix1: 0, prefix2: 0, suffix: 0, 
+            specials: SpecialPowers {
+                special1: 0, special2: 0, special3: 0
             }
         }
     };
@@ -754,7 +753,7 @@ fn test_get_beast_id() {
 #[available_gas(360000)]
 fn test_get_beast() {
     let adventurer_level = 2;
-    let special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 };
+    let special_names = SpecialPowers { special1: 0, special2: 0, special3: 0 };
     let seed = 1;
 
     // generate beast for seed
@@ -765,7 +764,7 @@ fn test_get_beast() {
 
     // adjust the other input paramters
     let adventurer_level = 3;
-    let special_names = SpecialPowers { prefix1: 1, prefix2: 1, suffix: 1 };
+    let special_names = SpecialPowers { special1: 1, special2: 1, special3: 1 };
     let new_beast = ImplBeast::get_beast(adventurer_level, special_names, seed, starting_weapon);
 
     // verify beasts are the same since the seed did not change
@@ -779,8 +778,8 @@ fn test_get_gold_reward() {
             tier: Tier::T1(()),
             item_type: Type::Magic_or_Cloth(()),
             level: 10,
-            special_powers: SpecialPowers {
-                prefix1: 1, prefix2: 2, suffix: 3, 
+            specials: SpecialPowers {
+                special1: 3, special2: 1, special3: 2
             },
         },
     };
