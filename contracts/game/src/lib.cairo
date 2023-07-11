@@ -46,10 +46,7 @@ mod Game {
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
             adventurer_constants::{POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER}
         },
-        item_meta::{
-            ImplLootItemSpecialNames, LootItemSpecialNames, ILootItemSpecialNames,
-            LootItemSpecialNamesStorage
-        },
+        item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
         adventurer_utils::AdventurerUtils
     };
     use market::market::{ImplMarket, LootWithPrice};
@@ -453,51 +450,35 @@ mod Game {
         fn get_bag(self: @ContractState, adventurer_id: u256) -> Bag {
             _bag_unpacked(self, adventurer_id)
         }
-        fn get_equipped_weapon_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> LootItemSpecialNames {
+        fn get_equipped_weapon_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.weapon)
         }
-        fn get_equipped_chest_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> LootItemSpecialNames {
+        fn get_equipped_chest_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.chest)
         }
-        fn get_equipped_head_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> LootItemSpecialNames {
+        fn get_equipped_head_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.head)
         }
-        fn get_equipped_waist_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> LootItemSpecialNames {
+        fn get_equipped_waist_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.waist)
         }
-        fn get_equipped_foot_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> LootItemSpecialNames {
+        fn get_equipped_foot_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.foot)
         }
-        fn get_equipped_hand_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> LootItemSpecialNames {
+        fn get_equipped_hand_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.hand)
         }
-        fn get_equipped_necklace_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> LootItemSpecialNames {
+        fn get_equipped_necklace_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.neck)
         }
-        fn get_equipped_ring_names(
-            self: @ContractState, adventurer_id: u256
-        ) -> LootItemSpecialNames {
+        fn get_equipped_ring_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.ring)
         }
@@ -815,16 +796,15 @@ mod Game {
             ref self,
             DiscoverBeast {
                 adventurer_state: AdventurerState {
-                    owner: caller, adventurer_id, adventurer: new_adventurer
-                },
-                seed: 0,
-                id: starter_beast.id,
-                level: starter_beast.combat_spec.level,
-                ambushed: false,
-                damage_taken: 0,
-                health: starter_beast.starting_health,
-                special1: starter_beast.combat_spec.special_powers.prefix1,
-                special2: starter_beast.combat_spec.special_powers.prefix2,
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: new_adventurer
+                    }, seed: 0, id: starter_beast.id, beast_specs: CombatSpec {
+                    tier: starter_beast.combat_spec.tier,
+                    item_type: starter_beast.combat_spec.item_type,
+                    level: starter_beast.combat_spec.level,
+                    specials: starter_beast.combat_spec.specials
+                }, health: starter_beast.starting_health, ambushed: false, damage_taken: 0,
             }
         );
 
@@ -850,8 +830,8 @@ mod Game {
         ref self: ContractState,
         ref adventurer: Adventurer,
         adventurer_id: u256,
-        ref name_storage1: LootItemSpecialNamesStorage,
-        ref name_storage2: LootItemSpecialNamesStorage
+        ref name_storage1: ItemSpecialsStorage,
+        ref name_storage2: ItemSpecialsStorage
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
@@ -906,6 +886,12 @@ mod Game {
                     );
                 }
 
+                //                 struct CombatSpec {
+                //     tier: Tier,
+                //     item_type: Type,
+                //     level: u16,
+                //     specials: SpecialPowers,
+                // }
                 // Emit Discover Beast event
                 __event__DiscoverBeast(
                     ref self,
@@ -914,15 +900,15 @@ mod Game {
                             owner: get_caller_address(),
                             adventurer_id: adventurer_id,
                             adventurer: adventurer
+                            }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                            tier: beast.combat_spec.tier,
+                            item_type: beast.combat_spec.item_type,
+                            level: beast.combat_spec.level,
+                            specials: beast.combat_spec.specials
                         },
-                        seed: beast_seed,
-                        id: beast.id,
-                        level: beast.combat_spec.level,
                         ambushed: was_ambushed,
                         damage_taken: damage_taken,
                         health: beast.starting_health,
-                        special1: beast.combat_spec.special_powers.prefix1,
-                        special2: beast.combat_spec.special_powers.prefix2,
                     }
                 );
 
@@ -985,8 +971,8 @@ mod Game {
         ref self: ContractState,
         ref adventurer: Adventurer,
         adventurer_id: u256,
-        ref name_storage1: LootItemSpecialNamesStorage,
-        ref name_storage2: LootItemSpecialNamesStorage,
+        ref name_storage1: ItemSpecialsStorage,
+        ref name_storage2: ItemSpecialsStorage,
         entropy: u128
     ) -> Adventurer {
         // https://github.com/starkware-libs/cairo/issues/2942
@@ -1038,15 +1024,15 @@ mod Game {
             adventurer.deduct_health(damage_taken);
         }
 
-        let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
-        };
-
         // emit obstacle discover event
         __event__DiscoverObstacle(
             ref self,
             DiscoverObstacle {
-                adventurer_state: adventurer_state,
+                adventurer_state: AdventurerState {
+                    owner: get_caller_address(), 
+                    adventurer_id: adventurer_id, 
+                    adventurer: adventurer
+                },
                 id: obstacle.id,
                 level: obstacle.combat_specs.level,
                 dodged: dodged,
@@ -1088,7 +1074,7 @@ mod Game {
     // @param new_level The new level of the item after it possibly leveled up.
     // @param suffix_assigned A boolean indicating whether a suffix was assigned to the item when it leveled up.
     // @param prefixes_assigned A boolean indicating whether a prefix was assigned to the item when it leveled up.
-    // @param special_names The LootItemSpecialNames object storing the special names for the item.
+    // @param special_names The ItemSpecials object storing the special names for the item.
     //
     // The function first checks if the item's new level is higher than its previous level. If it is, it generates a 'GreatnessIncreased' event.
     // The function then checks if a suffix was assigned to the item when it leveled up. If it was, it generates an 'ItemSuffixDiscovered' event.
@@ -1102,7 +1088,7 @@ mod Game {
         new_level: u8,
         suffix_assigned: bool,
         prefixes_assigned: bool,
-        special_names: LootItemSpecialNames
+        special_names: ItemSpecials
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
@@ -1168,8 +1154,8 @@ mod Game {
         ref self: ContractState,
         adventurer_id: u256,
         ref adventurer: Adventurer,
-        ref name_storage1: LootItemSpecialNamesStorage,
-        ref name_storage2: LootItemSpecialNamesStorage,
+        ref name_storage1: ItemSpecialsStorage,
+        ref name_storage2: ItemSpecialsStorage,
         value: u16,
         entropy: u128
     ) {
@@ -1300,8 +1286,8 @@ mod Game {
     // @param adventurer A reference to the Adventurer object. This object represents the adventurer who owns the item.
     // @param item A reference to the ItemPrimitive object. This object represents the item to which XP will be granted.
     // @param amount The amount of experience points to be added to the item before applying the item XP multiplier.
-    // @param name_storage1 A reference to the LootItemSpecialNamesStorage object. This object stores the special names for items that an adventurer may possess.
-    // @param name_storage2 A reference to the LootItemSpecialNamesStorage object. This object stores the special names for items that an adventurer may possess.
+    // @param name_storage1 A reference to the ItemSpecialsStorage object. This object stores the special names for items that an adventurer may possess.
+    // @param name_storage2 A reference to the ItemSpecialsStorage object. This object stores the special names for items that an adventurer may possess.
     // @param entropy An unsigned integer used for entropy generation. This is often derived from a source of randomness.
     //
     // The function first calculates the XP increase by applying a multiplier to the provided 'amount'.
@@ -1314,8 +1300,8 @@ mod Game {
         ref adventurer: Adventurer,
         ref item: ItemPrimitive,
         xp_increase: u16,
-        ref name_storage1: LootItemSpecialNamesStorage,
-        ref name_storage2: LootItemSpecialNamesStorage,
+        ref name_storage1: ItemSpecialsStorage,
+        ref name_storage2: ItemSpecialsStorage,
         entropy: u128
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
@@ -1358,8 +1344,8 @@ mod Game {
         ref self: ContractState,
         ref adventurer: Adventurer,
         adventurer_id: u256,
-        ref name_storage1: LootItemSpecialNamesStorage,
-        ref name_storage2: LootItemSpecialNamesStorage
+        ref name_storage1: ItemSpecialsStorage,
+        ref name_storage2: ItemSpecialsStorage
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
@@ -1440,13 +1426,16 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
-                    },
+                        },
                     seed: beast_seed,
                     id: beast.id,
                     health: adventurer.beast_health,
-                    level: beast.combat_spec.level,
-                    special1: beast.combat_spec.special_powers.prefix1,
-                    special2: beast.combat_spec.special_powers.prefix2,
+                    beast_specs: CombatSpec {
+                        tier: beast.combat_spec.tier,
+                        item_type: beast.combat_spec.item_type,
+                        level: beast.combat_spec.level,
+                        specials: beast.combat_spec.specials
+                    },
                     damage_dealt: damage_dealt,
                     xp_earned_adventurer: xp_earned,
                     xp_earned_items: xp_earned * ITEM_XP_MULTIPLIER,
@@ -1494,13 +1483,16 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
-                    },
+                        },
                     seed: beast_seed,
                     id: beast.id,
-                    level: beast.combat_spec.level,
                     health: adventurer.beast_health,
-                    special1: beast.combat_spec.special_powers.prefix1,
-                    special2: beast.combat_spec.special_powers.prefix2,
+                    beast_specs: CombatSpec {
+                        tier: beast.combat_spec.tier,
+                        item_type: beast.combat_spec.item_type,
+                        level: beast.combat_spec.level,
+                        specials: beast.combat_spec.specials
+                    },
                     damage_dealt: damage_dealt,
                     damage_taken: damage_taken,
                     damage_location: ImplCombat::slot_to_u8(attack_location),
@@ -1611,15 +1603,18 @@ mod Game {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
-                },
+                    },
                 seed: beast_seed,
                 id: beast.id,
                 health: adventurer.beast_health,
-                level: beast.combat_spec.level,
-                special1: beast.combat_spec.special_powers.prefix1,
-                special2: beast.combat_spec.special_powers.prefix2,
-                damage_taken: damage_taken,
-                damage_location: attack_location,
+                beast_specs: CombatSpec {
+                    tier: beast.combat_spec.tier,
+                    item_type: beast.combat_spec.item_type,
+                    level: beast.combat_spec.level,
+                    specials: beast.combat_spec.specials
+                }, 
+                damage_taken: damage_taken, 
+                damage_location: attack_location, 
                 fled
             }
         );
@@ -1720,7 +1715,7 @@ mod Game {
         let mut bag = _bag_unpacked(@self, adventurer_id);
 
         // get item and determine metadata slot
-        let item = ImplLootItemSpecialNames::get_loot_special_names_slot(
+        let item = ImplItemSpecials::get_loot_special_names_slot(
             adventurer, bag, ImplBagActions::new_item(item_id)
         );
 
@@ -1849,8 +1844,8 @@ mod Game {
     fn _unpack_adventurer_apply_stat_boost(
         self: @ContractState,
         adventurer_id: u256,
-        name_storage1: LootItemSpecialNamesStorage,
-        name_storage2: LootItemSpecialNamesStorage
+        name_storage1: ItemSpecialsStorage,
+        name_storage2: ItemSpecialsStorage
     ) -> Adventurer {
         // unpack adventurer
         let mut adventurer: Adventurer = Packing::unpack(self._adventurer.read(adventurer_id));
@@ -1862,8 +1857,8 @@ mod Game {
         ref self: ContractState,
         adventurer_id: u256,
         ref adventurer: Adventurer,
-        name_storage1: LootItemSpecialNamesStorage,
-        name_storage2: LootItemSpecialNamesStorage
+        name_storage1: ItemSpecialsStorage,
+        name_storage2: ItemSpecialsStorage
     ) {
         // remove stat boosts
         _remove_stat_boots(@self, adventurer_id, ref adventurer, name_storage1, name_storage2);
@@ -1875,8 +1870,8 @@ mod Game {
         self: @ContractState,
         adventurer_id: u256,
         ref adventurer: Adventurer,
-        name_storage1: LootItemSpecialNamesStorage,
-        name_storage2: LootItemSpecialNamesStorage
+        name_storage1: ItemSpecialsStorage,
+        name_storage2: ItemSpecialsStorage
     ) -> Adventurer {
         // apply stat boosts to adventurer from item names
         adventurer.apply_item_stat_boosts(name_storage1, name_storage2);
@@ -1893,8 +1888,8 @@ mod Game {
         self: @ContractState,
         adventurer_id: u256,
         ref adventurer: Adventurer,
-        name_storage1: LootItemSpecialNamesStorage,
-        name_storage2: LootItemSpecialNamesStorage
+        name_storage1: ItemSpecialsStorage,
+        name_storage2: ItemSpecialsStorage
     ) {
         // apply stat boosts to adventurer from item names
         adventurer.apply_item_stat_boosts(name_storage1, name_storage2);
@@ -1974,7 +1969,7 @@ mod Game {
         ref self: ContractState,
         adventurer_id: u256,
         storage_index: u256,
-        loot_special_names_storage: LootItemSpecialNamesStorage,
+        loot_special_names_storage: ItemSpecialsStorage,
     ) {
         self
             ._loot_special_names
@@ -1983,14 +1978,14 @@ mod Game {
 
     fn _loot_special_names_storage_unpacked(
         self: @ContractState, adventurer_id: u256, storage_index: u256
-    ) -> LootItemSpecialNamesStorage {
+    ) -> ItemSpecialsStorage {
         Packing::unpack(self._loot_special_names.read((adventurer_id, storage_index)))
     }
 
     fn _get_special_names(
         self: @ContractState, adventurer_id: u256, item: ItemPrimitive
-    ) -> LootItemSpecialNames {
-        ImplLootItemSpecialNames::get_loot_special_names(
+    ) -> ItemSpecials {
+        ImplItemSpecials::get_loot_special_names(
             _loot_special_names_storage_unpacked(
                 self, adventurer_id, _get_storage_index(self, item.metadata)
             ),
@@ -2151,13 +2146,13 @@ mod Game {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),
                 level: U8IntoU16::into(item.get_greatness()),
-                special_powers: SpecialPowers {
-                    prefix1: 0, prefix2: 0, suffix: 0
+                specials: SpecialPowers {
+                    special1: 0, special2: 0, special3: 0
                 }
             };
         } else {
             // if it's above 15, fetch the special names
-            let item_details = ImplLootItemSpecialNames::get_loot_special_names(
+            let item_details = ImplItemSpecials::get_loot_special_names(
                 _loot_special_names_storage_unpacked(
                     self, adventurer_id, _get_storage_index(self, item.metadata)
                 ),
@@ -2168,10 +2163,10 @@ mod Game {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),
                 level: U8IntoU16::into(item.get_greatness()),
-                special_powers: SpecialPowers {
-                    prefix1: item_details.name_prefix,
-                    prefix2: item_details.name_suffix,
-                    suffix: item_details.item_suffix
+                specials: SpecialPowers {
+                    special1: item_details.special1,
+                    special2: item_details.special2,
+                    special3: item_details.special3
                 }
             };
         }
@@ -2304,9 +2299,7 @@ mod Game {
         seed: u128,
         id: u8,
         health: u16,
-        level: u16,
-        special1: u8,
-        special2: u8,
+        beast_specs: CombatSpec,
         ambushed: bool,
         damage_taken: u16,
     }
@@ -2317,9 +2310,7 @@ mod Game {
         seed: u128,
         id: u8,
         health: u16,
-        level: u16,
-        special1: u8,
-        special2: u8,
+        beast_specs: CombatSpec,
         damage_dealt: u16,
         damage_taken: u16,
         damage_location: u8,
@@ -2331,9 +2322,7 @@ mod Game {
         seed: u128,
         id: u8,
         health: u16,
-        level: u16,
-        special1: u8,
-        special2: u8,
+        beast_specs: CombatSpec,
         damage_dealt: u16,
         xp_earned_adventurer: u16,
         xp_earned_items: u16,
@@ -2346,9 +2335,7 @@ mod Game {
         seed: u128,
         id: u8,
         health: u16,
-        level: u16,
-        special1: u8,
-        special2: u8,
+        beast_specs: CombatSpec,
         fled: bool,
         damage_taken: u16,
         damage_location: u8,
@@ -2379,13 +2366,13 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     struct ItemPrefixDiscovered {
         adventurer_state: AdventurerState,
-        special_names: LootItemSpecialNames
+        special_names: ItemSpecials
     }
 
     #[derive(Drop, starknet::Event)]
     struct ItemSuffixDiscovered {
         adventurer_state: AdventurerState,
-        special_names: LootItemSpecialNames
+        special_names: ItemSpecials
     }
 
     #[derive(Drop, starknet::Event)]
@@ -2521,9 +2508,7 @@ mod Game {
     }
 
     fn __event_ItemPrefixDiscovered(
-        ref self: ContractState,
-        adventurer_state: AdventurerState,
-        special_names: LootItemSpecialNames
+        ref self: ContractState, adventurer_state: AdventurerState, special_names: ItemSpecials
     ) {
         self
             .emit(
@@ -2534,9 +2519,7 @@ mod Game {
     }
 
     fn __event_ItemSuffixDiscovered(
-        ref self: ContractState,
-        adventurer_state: AdventurerState,
-        special_names: LootItemSpecialNames
+        ref self: ContractState, adventurer_state: AdventurerState, special_names: ItemSpecials
     ) {
         self
             .emit(

@@ -48,8 +48,8 @@ impl ImplObstacle of IObstacle {
             tier: ImplObstacle::get_tier(id),
             item_type: ImplObstacle::get_type(id),
             level: U8IntoU16::into(level),
-            special_powers: SpecialPowers {
-                prefix1: 0, prefix2: 0, suffix: 0, 
+            specials: SpecialPowers {
+                special1: 0, special2: 0, special3: 0, 
             }
         };
 
