@@ -2619,7 +2619,7 @@ fn test_get_market_entropy() {
 }
 
 #[test]
-#[available_gas(350000)]
+#[available_gas(390000)]
 fn test_discover_treasure() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
