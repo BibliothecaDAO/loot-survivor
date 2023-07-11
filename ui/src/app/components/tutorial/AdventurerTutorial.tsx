@@ -4,28 +4,33 @@ export const AdventurerTutorial = () => {
       <h1 className="mt-0">Welcome to Loot Survivor</h1>
       <h3 className="text-xl sm:text-2xl">Create an Adventurer</h3>
       <p className="text-sm sm:text-lg">
-        Hello there, fellow explorer! Welcome to the thrilling world of Loot
-        Survivor. To kickstart your epic adventure, you will first need to
-        create your very own Adventurer. Think of it as stepping into a pair of
-        sturdy boots that will carry you across the vast expanses of our game
-        world until the very end.
+        Welcome to the thrilling world of Loot Survivor. To kickstart your epic
+        adventure, you will first need to create your very own Adventurer. Think
+        of it as stepping into a pair of sturdy boots that will carry you across
+        the vast expanses of our game world until the very end.
       </p>
       <br />
       <p className="text-sm sm:text-lg">
-        To bring your Adventurer to life, you&apos;ll need some unique stats:
+        To bring your Adventurer to life, you&apos;ll need to provide some
+        unique information:
       </p>
       <br />
       <ul>
         <li>
-          Name - A worthy name for a lordly adventurer. Max of 16 characters.
+          <span className="text-xl">Name</span> - A worthy name for a lordly
+          adventurer. Max of 16 characters.
         </li>
         <li>
-          Home Realm - An id of a realm from where your adventurer was born.
+          <span className="text-xl">Home Realm</span> - An id of a realm from
+          where your adventurer was born.
         </li>
-        <li>Race - What race shall your adventurer be?</li>
         <li>
-          Starting Weapon - There are 4 choices of starter weapon. Choose
-          wisely!
+          <span className="text-xl">Race</span> - What race shall your
+          adventurer be?
+        </li>
+        <li>
+          <span className="text-xl">Starting Weapon</span> - There are 4 choices
+          of starter weapon. Choose wisely!
         </li>
       </ul>
       <br />

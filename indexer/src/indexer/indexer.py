@@ -483,37 +483,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "lastUpdatedTime": block_time,
         }
         await info.storage.insert_one("items", start_item_doc)
-        if (
-            sg.adventurer_state["adventurer"]["weapon"]["id"] == 16
-            or sg.adventurer_state["adventurer"]["weapon"]["id"] == 12
-        ):
-            starter_beast = 71
-        elif sg.adventurer_state["adventurer"]["weapon"]["id"] == 46:
-            starter_beast = 25
-        else:
-            starter_beast = 50
-        start_beast_doc = {
-            "txHash": encode_hex_as_bytes(tx_hash),
-            "adventurerId": check_exists_int(sg.adventurer_state["adventurer_id"]),
-            "discoveryType": encode_int_as_bytes(1),
-            "subDiscoveryType": check_exists_int(0),
-            "outputAmount": encode_int_as_bytes(0),
-            "obstacle": check_exists_int(0),
-            "obstacleLevel": check_exists_int(0),
-            "dodgedObstacle": encode_int_as_bytes(0),
-            "damageTaken": encode_int_as_bytes(0),
-            "damageLocation": check_exists_int(0),
-            "xpEarnedAdventurer": check_exists_int(0),
-            "xpEarnedItems": check_exists_int(0),
-            "entity": check_exists_int(starter_beast),
-            "entityLevel": check_exists_int(1),
-            "entityHealth": encode_int_as_bytes(5),
-            "entityNamePrefix": check_exists_int(0),
-            "entityNameSuffix": check_exists_int(0),
-            "ambushed": check_exists_int(0),
-            "discoveryTime": block_time,
-        }
-        await info.storage.insert_one("discoveries", start_beast_doc)
         print(
             "- [start game]",
             sg.adventurer_state["adventurer_id"],
@@ -754,22 +723,23 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         ba = decode_attack_beast_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(info, ba.adventurer_state)
-        # beast_discovery = await info.storage.find(
-        #     "discoveries",
-        #     {
-        #         "entityId": check_exists_int(ba.beast_id),
-        #         "adventurerId": check_exists_int(ba.adventurer_state["adventurer_id"]),
-        #     },
-        #     sort={"discoveryTime": -1},
-        #     limit=1,
-        # )
-        # beast_document = next(beast_discovery)
-        print(ba.beast_id, ba.adventurer_state["adventurer_id"])
+        beast_discovery = await info.storage.find(
+            "discoveries",
+            {
+                "entity": check_exists_int(ba.beast_id),
+                "adventurerId": check_exists_int(ba.adventurer_state["adventurer_id"]),
+            },
+            sort={"discoveryTime": -1},
+            limit=1,
+        )
+        beast_document = next(beast_discovery)
+        print(beast_document)
+        # print(ba.beast_id, ba.adventurer_state["adventurer_id"])
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
                 {
-                    "entityId": check_exists_int(ba.beast_id),
+                    "entity": check_exists_int(ba.beast_id),
                     "adventurerId": check_exists_int(
                         ba.adventurer_state["adventurer_id"]
                     ),
@@ -829,12 +799,12 @@ class LootSurvivorIndexer(StarkNetIndexer):
         #     limit=1,
         # )
         # beast_document = next(beast_discovery)
-        print(sb.beast_id, sb.adventurer_state["adventurer_id"])
+        print(sb.beast_id, sb.beast_level, sb.adventurer_state["adventurer_id"])
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
                 {
-                    "entityId": check_exists_int(sb.beast_id),
+                    "entity": check_exists_int(sb.beast_id),
                     "adventurerId": check_exists_int(
                         sb.adventurer_state["adventurer_id"]
                     ),
@@ -902,7 +872,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             beast_discovery = await info.storage.find(
                 "discoveries",
                 {
-                    "entityId": check_exists_int(fa.beast_id),
+                    "entity": check_exists_int(fa.beast_id),
                     "adventurerId": check_exists_int(
                         fa.adventurer_state["adventurer_id"]
                     ),
