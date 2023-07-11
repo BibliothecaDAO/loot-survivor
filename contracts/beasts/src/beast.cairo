@@ -5,8 +5,8 @@ use integer::{
 };
 use traits::{TryInto, Into};
 use option::OptionTrait;
-use super::constants::{BeastId::
-    {
+use super::constants::{
+    BeastId::{
         Warlock, Typhon, Jiangshi, Anansi, Basilisk, Gorgon, Kitsune, Lich, Chimera, Wendigo,
         Rakshasa, Werewolf, Banshee, Draugr, Vampire, Goblin, Ghoul, Wraith, Sprite, Kappa, Fairy,
         Leprechaun, Kelpie, Pixie, Gnome, Griffin, Manticore, Phoenix, Dragon, Minotaur, Qilin,
@@ -19,7 +19,7 @@ use super::constants::{BeastId::
     BeastSettings::{
         STARTER_BEAST_HEALTH, MINIMUM_HEALTH, BEAST_SPECIAL_NAME_UNLOCK_LEVEL, MINIMUM_DAMAGE,
         STRENGTH_BONUS, MINIMUM_XP_REWARD, GOLD_REWARD_BASE_MINIMUM, GOLD_BASE_REWARD_DIVISOR,
-        GOLD_REWARD_BONUS_DIVISOR, GOLD_REWARD_BONUS_MAX_MULTPLIER
+        GOLD_REWARD_BONUS_DIVISOR, GOLD_REWARD_BONUS_MAX_MULTPLIER, STARTER_BEAST_LEVEL_THRESHOLD
     }
 };
 
@@ -37,17 +37,35 @@ struct Beast {
 
 #[generate_trait]
 impl ImplBeast of IBeast {
-    fn get_beast(adventurer_level: u8, special_names: SpecialPowers, seed: u128) -> Beast {
-        let beast_id = ImplBeast::get_beast_id(seed);
-        Beast {
-            id: beast_id,
-            starting_health: ImplBeast::get_starting_health(adventurer_level, seed),
-            combat_spec: CombatSpec {
-                tier: ImplBeast::get_tier(beast_id),
-                item_type: ImplBeast::get_type(beast_id),
-                level: U8IntoU16::into(ImplBeast::get_level(adventurer_level, seed)),
-                special_powers: special_names
+    //@notice This function generates a Beast instance based on the given adventurer's level, their special powers, a seed for randomness, and their weapon type.
+    //@dev If the adventurer's level exceeds the STARTER_BEAST_LEVEL_THRESHOLD, the beast is generated with attributes (id, starting_health, combat_spec) based on the adventurer's level and the provided seed. 
+    //Otherwise, a starter beast is generated according to the adventurer's weapon type.
+    //@param adventurer_level The level of the adventurer, represented as a u8 (unsigned 8-bit integer). 
+    //@param special_names A SpecialPowers type value indicating the adventurer's special powers.
+    //@param seed A u128 (unsigned 128-bit integer) value used to generate randomness in the Beast's attributes.
+    //@param weapon_type A Type value indicating the type of weapon that the adventurer uses.
+    //@return A Beast instance with either generated attributes or the default starter attributes, based on the adventurer's level.
+    fn get_beast(
+        adventurer_level: u8, special_names: SpecialPowers, seed: u128, weapon_type: Type
+    ) -> Beast {
+        // if the adventurer has passed the starter beast level threshold
+        if (adventurer_level > STARTER_BEAST_LEVEL_THRESHOLD) {
+            // generate a beast based on the provided seed
+            let beast_id = ImplBeast::get_beast_id(seed);
+            Beast {
+                id: beast_id,
+                starting_health: ImplBeast::get_starting_health(adventurer_level, seed),
+                combat_spec: CombatSpec {
+                    tier: ImplBeast::get_tier(beast_id),
+                    item_type: ImplBeast::get_type(beast_id),
+                    level: U8IntoU16::into(ImplBeast::get_level(adventurer_level, seed)),
+                    special_powers: special_names
+                }
             }
+        } else {
+            // if the adventurer has not passed the starter beast level threshold
+            // generate a starter beast
+            ImplBeast::get_starter_beast(weapon_type)
         }
     }
 
@@ -103,7 +121,12 @@ impl ImplBeast of IBeast {
         };
 
         // generate a beast based on the seed
-        let beast = ImplBeast::get_beast(adventurer_level, special_powers, battle_fixed_seed);
+        // @dev: since we don't have default values for func parameters in cairo
+        //       we need to pass in a dummy value for the unused type param
+        let unused_type_param = Type::Ring(());
+        let beast = ImplBeast::get_beast(
+            adventurer_level, special_powers, battle_fixed_seed, unused_type_param
+        );
 
         // check if beast ambushed adventurer
         let ambushed_adventurer = ImplBeast::ambush(
@@ -730,17 +753,20 @@ fn test_get_beast_id() {
 #[test]
 #[available_gas(360000)]
 fn test_get_beast() {
-    let adventurer_level = 1;
+    let adventurer_level = 2;
     let special_names = SpecialPowers { prefix1: 0, prefix2: 0, suffix: 0 };
     let seed = 1;
 
     // generate beast for seed
-    let original_beast = ImplBeast::get_beast(adventurer_level, special_names, seed);
+    let starting_weapon = Type::Magic_or_Cloth(());
+    let original_beast = ImplBeast::get_beast(
+        adventurer_level, special_names, seed, starting_weapon
+    );
 
     // adjust the other input paramters
     let adventurer_level = 3;
     let special_names = SpecialPowers { prefix1: 1, prefix2: 1, suffix: 1 };
-    let new_beast = ImplBeast::get_beast(adventurer_level, special_names, seed);
+    let new_beast = ImplBeast::get_beast(adventurer_level, special_names, seed, starting_weapon);
 
     // verify beasts are the same since the seed did not change
     assert(original_beast.id == new_beast.id, 'seed produced two diff beastIds');

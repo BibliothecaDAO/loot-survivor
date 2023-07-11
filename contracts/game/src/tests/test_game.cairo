@@ -70,8 +70,6 @@ mod tests {
 
     fn lvl_2_adventurer() -> IGameDispatcher {
         let mut game = new_adventurer();
-
-        game.attack(ADVENTURER_ID);
         game.attack(ADVENTURER_ID);
         game
     }
@@ -248,7 +246,6 @@ mod tests {
 
         // take out starter beast
         game.attack(ADVENTURER_ID);
-        game.attack(ADVENTURER_ID);
 
         // get updated adventurer
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -358,18 +355,10 @@ mod tests {
     #[should_panic(expected: ('Health already full', 'ENTRYPOINT_FAILED'))]
     #[available_gas(70000000)]
     fn test_buy_potion() {
-        // deploy and start new game
-        let mut game = new_adventurer();
-
-        // Clear starter beast
-        game.attack(ADVENTURER_ID);
-        game.attack(ADVENTURER_ID);
+        let mut game = lvl_2_adventurer();
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
-
-        // verify adventurer took damage from starter beast
-        assert(adventurer.health < STARTING_HEALTH, 'should take dmg from beast');
 
         // get adventurer health and gold before buying potion
         let adventurer_health_pre_potion = adventurer.health;
