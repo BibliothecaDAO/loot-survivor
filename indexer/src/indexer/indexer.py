@@ -474,9 +474,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "ownerAddress": check_exists_int(sg.adventurer_state["owner"]),
             "xp": encode_int_as_bytes(0),
             "cost": encode_int_as_bytes(0),
-            "namePrefix": check_exists_int(0),
-            "nameSuffix": check_exists_int(0),
-            "itemSuffix": check_exists_int(0),
+            "special1": check_exists_int(0),
+            "special2": check_exists_int(0),
+            "special3": check_exists_int(0),
             "createdTime": block_time,
             "purchasedTime": check_exists_int(0),
             "lastUpdatedTime": block_time,
@@ -537,9 +537,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "entity": check_exists_int(0),
             "entityLevel": check_exists_int(0),
             "entityHealth": encode_int_as_bytes(0),
-            "entityNamePrefix": check_exists_int(0),
-            "entityNameSuffix": check_exists_int(0),
+            "special1": check_exists_int(0),
+            "special2": check_exists_int(0),
             "ambushed": check_exists_int(0),
+            "seed": encode_int_as_bytes(0),
             "discoveryTime": block_time,
         }
         await info.storage.insert_one("discoveries", discovery_doc)
@@ -577,9 +578,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "entity": check_exists_int(0),
             "entityLevel": check_exists_int(0),
             "entityHealth": encode_int_as_bytes(0),
-            "entityNamePrefix": check_exists_int(0),
-            "entityNameSuffix": check_exists_int(0),
+            "special1": check_exists_int(0),
+            "special2": check_exists_int(0),
             "ambushed": check_exists_int(0),
+            "seed": encode_int_as_bytes(0),
             "discoveryTime": block_time,
         }
         await info.storage.insert_one("discoveries", discovery_doc)
@@ -617,9 +619,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "entity": check_exists_int(0),
             "entityLevel": check_exists_int(0),
             "entityHealth": encode_int_as_bytes(0),
-            "entityNamePrefix": check_exists_int(0),
-            "entityNameSuffix": check_exists_int(0),
+            "special1": check_exists_int(0),
+            "special2": check_exists_int(0),
             "ambushed": check_exists_int(0),
+            "seed": encode_int_as_bytes(0),
             "discoveryTime": block_time,
         }
         await info.storage.insert_one("discoveries", discovery_doc)
@@ -657,9 +660,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "entity": check_exists_int(0),
             "entityLevel": check_exists_int(0),
             "entityHealth": encode_int_as_bytes(0),
-            "entityNamePrefix": check_exists_int(0),
-            "entityNameSuffix": check_exists_int(0),
+            "special1": check_exists_int(0),
+            "special2": check_exists_int(0),
             "ambushed": check_exists_int(0),
+            "seed": encode_int_as_bytes(0),
             "discoveryTime": block_time,
         }
         await info.storage.insert_one("discoveries", discovery_doc)
@@ -699,9 +703,10 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "entity": check_exists_int(db.id),
             "entityLevel": check_exists_int(db.level),
             "entityHealth": encode_int_as_bytes(db.health),
-            "entityNamePrefix": check_exists_int(db.prefix1),
-            "entityNameSuffix": check_exists_int(db.prefix2),
+            "special1": check_exists_int(db.special1),
+            "special2": check_exists_int(db.special2),
             "ambushed": check_exists_int(db.ambushed),
+            "seed": encode_int_as_bytes(db.seed),
             "discoveryTime": block_time,
         }
         await info.storage.insert_one("discoveries", discovery_doc)
@@ -730,6 +735,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                     "adventurerId": check_exists_int(
                         ba.adventurer_state["adventurer_id"]
                     ),
+                    "seed": encode_int_as_bytes(ba.beast_seed),
                 },
                 sort={"discoveryTime": -1},
                 limit=1,
@@ -740,8 +746,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "beast": check_exists_int(ba.beast_id),
                 "beastHealth": encode_int_as_bytes(ba.beast_health),
                 "beastLevel": encode_int_as_bytes(ba.beast_level),
-                "beastNamePrefix": check_exists_int(ba.prefix_1),
-                "beastNameSuffix": check_exists_int(ba.prefix_2),
+                "special1": check_exists_int(ba.special1),
+                "special2": check_exists_int(ba.special2),
+                "beast_seed": encode_int_as_bytes(ba.beast_seed),
                 "adventurerId": check_exists_int(ba.adventurer_state["adventurer_id"]),
                 "attacker": encode_int_as_bytes(1),
                 "fled": check_exists_int(0),
@@ -782,6 +789,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                     "adventurerId": check_exists_int(
                         sb.adventurer_state["adventurer_id"]
                     ),
+                    "seed": encode_int_as_bytes(sb.beast_seed),
                 },
                 sort={"discoveryTime": -1},
                 limit=1,
@@ -792,8 +800,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "beast": check_exists_int(sb.beast_id),
                 "beastHealth": encode_int_as_bytes(sb.beast_health),
                 "beastLevel": encode_int_as_bytes(sb.beast_level),
-                "beastNamePrefix": check_exists_int(sb.prefix_1),
-                "beastNameSuffix": check_exists_int(sb.prefix_2),
+                "special1": check_exists_int(sb.special1),
+                "special2": check_exists_int(sb.special2),
+                "beast_seed": encode_int_as_bytes(sb.beast_seed),
                 "adventurerId": check_exists_int(sb.adventurer_state["adventurer_id"]),
                 "attacker": encode_int_as_bytes(1),
                 "fled": check_exists_int(0),
@@ -837,6 +846,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                     "adventurerId": check_exists_int(
                         fa.adventurer_state["adventurer_id"]
                     ),
+                    "seed": encode_int_as_bytes(fa.beast_seed),
                 },
                 sort={"discoveryTime": -1},
                 limit=1,
@@ -847,10 +857,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "beast": check_exists_int(fa.beast_id),
                 "beastHealth": encode_int_as_bytes(fa.beast_health),
                 "beastLevel": encode_int_as_bytes(fa.beast_level),
-                # "beastNamePrefix": check_exists_int(fa.prefix_1),
-                # "beastNameSuffix": check_exists_int(fa.prefix_2),
-                "beastNamePrefix": check_exists_int(0),
-                "beastNameSuffix": check_exists_int(0),
+                "special1": check_exists_int(fa.special1),
+                "special2": check_exists_int(fa.special2),
+                "beast_seed": encode_int_as_bytes(fa.beast_seed),
                 "adventurerId": check_exists_int(fa.adventurer_state["adventurer_id"]),
                 "attacker": encode_int_as_bytes(2),
                 "fled": check_exists_int(fa.fled),
@@ -993,8 +1002,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
         )
         await update_adventurer_helper(info, ip.adventurer_state)
         item_prefix_doc = {
-            "namePrefix": check_exists_int(ip.special_names["name_prefix"]),
-            "nameSuffix": encode_int_as_bytes(ip.special_names["name_suffix"]),
+            "special1": check_exists_int(ip.special_names["special1"]),
+            "special2": encode_int_as_bytes(ip.special_names["special2"]),
         }
         await info.storage.find_one_and_update(
             "items",
@@ -1025,7 +1034,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         )
         await update_adventurer_helper(info, isd.adventurer_state)
         item_suffix_doc = {
-            "itemSuffix": check_exists_int(isd.special_names["item_suffix"]),
+            "special3": check_exists_int(isd.special_names["special3"]),
         }
         await info.storage.find_one_and_update(
             "items",
@@ -1132,9 +1141,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "ownerAddress": check_exists_int(0),
                 "xp": encode_int_as_bytes(0),
                 "cost": encode_int_as_bytes(item["price"]),
-                "namePrefix": check_exists_int(0),
-                "nameSuffix": check_exists_int(0),
-                "itemSuffix": check_exists_int(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
                 "createdTime": block_time,
                 "purchasedTime": check_exists_int(0),
                 "lastUpdatedTime": block_time,

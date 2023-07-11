@@ -11,8 +11,8 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const { adventurer } = useAdventurerStore();
   const beastName = processBeastName(
     discoveryData?.entity ?? "",
-    discoveryData?.entityNamePrefix ?? "",
-    discoveryData?.entityNameSuffix ?? ""
+    discoveryData?.special1 ?? "",
+    discoveryData?.special2 ?? ""
   );
 
   const renderDiscoveryMessage = () => {

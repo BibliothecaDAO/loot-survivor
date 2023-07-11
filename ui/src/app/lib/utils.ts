@@ -167,16 +167,12 @@ export function calculateLevel(xp: number) {
 
 export function processItemName(item: Item) {
   if (item) {
-    if (
-      item.namePrefix &&
-      item.nameSuffix &&
-      calculateLevel(item.xp ?? 0) >= 20
-    ) {
-      return `${item.namePrefix} ${item.nameSuffix} ${item.item} ${item.itemSuffix} +1`;
-    } else if (item.namePrefix && item.itemSuffix) {
-      return `${item.namePrefix} ${item.nameSuffix} ${item.item} ${item.itemSuffix}`;
-    } else if (item.itemSuffix) {
-      return `${item.item} ${item.itemSuffix}`;
+    if (item.special1 && item.special2 && calculateLevel(item.xp ?? 0) >= 20) {
+      return `${item.special1} ${item.special2} ${item.item} ${item.special3} +1`;
+    } else if (item.special1 && item.special3) {
+      return `${item.special1} ${item.special2} ${item.item} ${item.special3}`;
+    } else if (item.special3) {
+      return `${item.item} ${item.special3}`;
     } else {
       return `${item.item}`;
     }
@@ -194,11 +190,11 @@ export function getItemData(item: string) {
 
 export function processBeastName(
   beast: string,
-  namePrefix: string,
-  nameSuffix: string
+  special1: string,
+  special2: string
 ) {
-  if (namePrefix && nameSuffix) {
-    return `"${namePrefix} ${nameSuffix}" ${beast}`;
+  if (special1 && special2) {
+    return `"${special1} ${special2}" ${beast}`;
   } else {
     return `${beast}`;
   }

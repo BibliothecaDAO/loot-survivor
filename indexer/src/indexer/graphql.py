@@ -142,12 +142,12 @@ def serialize_item_type(value):
     return config.ITEM_TYPES.get(felt)
 
 
-def parse_name_prefixes(value):
+def parse_special_1(value):
     felt = get_key_by_value(value, config.ITEM_NAME_PREFIXES)
     return felt.to_bytes(32, "big")
 
 
-def serialize_name_prefixes(value):
+def serialize_special_1(value):
     felt = int.from_bytes(value, "big")
     if felt == 0:
         return None
@@ -155,22 +155,22 @@ def serialize_name_prefixes(value):
         return config.ITEM_NAME_PREFIXES.get(felt)
 
 
-def parse_name_suffixes(value):
+def parse_special_2(value):
     felt = get_key_by_value(value, config.ITEM_NAME_SUFFIXES)
     return felt.to_bytes(32, "big")
 
 
-def serialize_name_suffixes(value):
+def serialize_special_2(value):
     felt = int.from_bytes(value, "big")
     return config.ITEM_NAME_SUFFIXES.get(felt)
 
 
-def parse_suffixes(value):
+def parse_special_3(value):
     felt = get_key_by_value(value, config.ITEM_SUFFIXES)
     return felt.to_bytes(32, "big")
 
 
-def serialize_suffixes(value):
+def serialize_special_3(value):
     felt = int.from_bytes(value, "big")
     return config.ITEM_SUFFIXES.get(felt)
 
@@ -277,22 +277,22 @@ TypeValue = strawberry.scalar(
     serialize=serialize_item_type,
 )
 
-NamePrefixValue = strawberry.scalar(
-    NewType("NamePrefixValue", bytes),
-    parse_value=parse_name_prefixes,
-    serialize=serialize_name_prefixes,
+Special1Value = strawberry.scalar(
+    NewType("Special1Value", bytes),
+    parse_value=parse_special_1,
+    serialize=serialize_special_1,
 )
 
-NameSuffixValue = strawberry.scalar(
-    NewType("NameSuffixValue", bytes),
-    parse_value=parse_name_suffixes,
-    serialize=serialize_name_suffixes,
+Special2Value = strawberry.scalar(
+    NewType("Special2Value", bytes),
+    parse_value=parse_special_2,
+    serialize=serialize_special_2,
 )
 
-SuffixValue = strawberry.scalar(
-    NewType("SuffixValue", bytes),
-    parse_value=parse_suffixes,
-    serialize=serialize_suffixes,
+Special3Value = strawberry.scalar(
+    NewType("Special3Value", bytes),
+    parse_value=parse_special_3,
+    serialize=serialize_special_3,
 )
 
 StatusValue = strawberry.scalar(
@@ -498,45 +498,45 @@ class TypeFilter:
 
 
 @strawberry.input
-class NamePrefixFilter:
-    eq: Optional[NamePrefixValue] = None
-    _in: Optional[List[NamePrefixValue]] = None
-    notIn: Optional[NamePrefixValue] = None
-    lt: Optional[NamePrefixValue] = None
-    lte: Optional[NamePrefixValue] = None
-    gt: Optional[NamePrefixValue] = None
-    gte: Optional[NamePrefixValue] = None
-    contains: Optional[NamePrefixValue] = None
-    startsWith: Optional[NamePrefixValue] = None
-    endsWith: Optional[NamePrefixValue] = None
+class Special1Filter:
+    eq: Optional[Special1Value] = None
+    _in: Optional[List[Special1Value]] = None
+    notIn: Optional[Special1Value] = None
+    lt: Optional[Special1Value] = None
+    lte: Optional[Special1Value] = None
+    gt: Optional[Special1Value] = None
+    gte: Optional[Special1Value] = None
+    contains: Optional[Special1Value] = None
+    startsWith: Optional[Special1Value] = None
+    endsWith: Optional[Special1Value] = None
 
 
 @strawberry.input
-class NameSuffixFilter:
-    eq: Optional[NameSuffixValue] = None
-    _in: Optional[List[NameSuffixValue]] = None
-    notIn: Optional[NameSuffixValue] = None
-    lt: Optional[NameSuffixValue] = None
-    lte: Optional[NameSuffixValue] = None
-    gt: Optional[NameSuffixValue] = None
-    gte: Optional[NameSuffixValue] = None
-    contains: Optional[NameSuffixValue] = None
-    startsWith: Optional[NameSuffixValue] = None
-    endsWith: Optional[NameSuffixValue] = None
+class Special2Filter:
+    eq: Optional[Special2Value] = None
+    _in: Optional[List[Special2Value]] = None
+    notIn: Optional[Special2Value] = None
+    lt: Optional[Special2Value] = None
+    lte: Optional[Special2Value] = None
+    gt: Optional[Special2Value] = None
+    gte: Optional[Special2Value] = None
+    contains: Optional[Special2Value] = None
+    startsWith: Optional[Special2Value] = None
+    endsWith: Optional[Special2Value] = None
 
 
 @strawberry.input
-class SuffixFilter:
-    eq: Optional[SuffixValue] = None
-    _in: Optional[List[SuffixValue]] = None
-    notIn: Optional[SuffixValue] = None
-    lt: Optional[SuffixValue] = None
-    lte: Optional[SuffixValue] = None
-    gt: Optional[SuffixValue] = None
-    gte: Optional[SuffixValue] = None
-    contains: Optional[SuffixValue] = None
-    startsWith: Optional[SuffixValue] = None
-    endsWith: Optional[SuffixValue] = None
+class Special3Filter:
+    eq: Optional[Special3Value] = None
+    _in: Optional[List[Special3Value]] = None
+    notIn: Optional[Special3Value] = None
+    lt: Optional[Special3Value] = None
+    lte: Optional[Special3Value] = None
+    gt: Optional[Special3Value] = None
+    gte: Optional[Special3Value] = None
+    contains: Optional[Special3Value] = None
+    startsWith: Optional[Special3Value] = None
+    endsWith: Optional[Special3Value] = None
 
 
 @strawberry.input
@@ -630,8 +630,8 @@ class DiscoveriesFilter:
     entity: Optional[FeltValueFilter] = None
     entityLevel: Optional[FeltValueFilter] = None
     entityHealth: Optional[FeltValueFilter] = None
-    entityNamePrefix: Optional[NamePrefixFilter] = None
-    entityNameSuffix: Optional[NameSuffixFilter] = None
+    special1: Optional[Special1Filter] = None
+    special2: Optional[Special2Filter] = None
     ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[DateTimeFilter] = None
     txHash: Optional[HexValueFilter] = None
@@ -643,8 +643,8 @@ class BattlesFilter:
     beastId: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     beastLevel: Optional[FeltValueFilter] = None
-    beastNamePrefix: Optional[NamePrefixFilter] = None
-    beastNameSuffix: Optional[NameSuffixFilter] = None
+    special1: Optional[Special1Filter] = None
+    special2: Optional[Special2Filter] = None
     attacker: Optional[AttackerFilter] = None
     fled: Optional[BooleanFilter] = None
     damageDealt: Optional[OrderByInput] = None
@@ -668,9 +668,9 @@ class ItemsFilter:
     equipped: Optional[BooleanFilter] = None
     createdTime: Optional[DateTimeFilter] = None
     purchasedTime: Optional[DateTimeFilter] = None
-    namePrefix: Optional[NamePrefixFilter] = None
-    nameSuffix: Optional[NameSuffixFilter] = None
-    itemSuffix: Optional[SuffixFilter] = None
+    special1: Optional[Special1Filter] = None
+    special2: Optional[Special2Filter] = None
+    special3: Optional[Special3Filter] = None
     xp: Optional[FeltValueFilter] = None
     lastUpdatedTime: Optional[DateTimeFilter] = None
 
@@ -733,8 +733,8 @@ class DiscoveriesOrderByInput:
     entity: Optional[OrderByInput] = None
     entityLevel: Optional[OrderByInput] = None
     entityHealth: Optional[OrderByInput] = None
-    entityNamePrefix: Optional[OrderByInput] = None
-    entityNameSuffix: Optional[OrderByInput] = None
+    special1: Optional[OrderByInput] = None
+    special2: Optional[OrderByInput] = None
     ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
@@ -746,8 +746,8 @@ class BattlesOrderByInput:
     beastId: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     beastLevel: Optional[OrderByInput] = None
-    beastNamePrefix: Optional[OrderByInput] = None
-    beastNameSuffix: Optional[OrderByInput] = None
+    special1: Optional[OrderByInput] = None
+    special2: Optional[OrderByInput] = None
     attacker: Optional[OrderByInput] = None
     fled: Optional[OrderByInput] = None
     damageDealt: Optional[OrderByInput] = None
@@ -771,9 +771,9 @@ class ItemsOrderByInput:
     equipped: Optional[OrderByInput] = None
     createdTime: Optional[OrderByInput] = None
     purchasedTime: Optional[OrderByInput] = None
-    namePrefix: Optional[OrderByInput] = None
-    nameSuffix: Optional[OrderByInput] = None
-    itemSuffix: Optional[OrderByInput] = None
+    special1: Optional[OrderByInput] = None
+    special2: Optional[OrderByInput] = None
+    special3: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
     lastUpdatedTime: Optional[OrderByInput] = None
 
@@ -878,8 +878,8 @@ class Discovery:
     entity: Optional[BeastValue]
     entityLevel: Optional[FeltValue]
     entityHealth: Optional[FeltValue]
-    entityNamePrefix: Optional[NamePrefixValue]
-    entityNameSuffix: Optional[NameSuffixValue]
+    special1: Optional[Special1Value]
+    special2: Optional[Special2Value]
     ambushed: Optional[BooleanValue]
     discoveryTime: Optional[datetime]
     txHash: Optional[HexValue]
@@ -901,8 +901,8 @@ class Discovery:
             entity=data["entity"],
             entityLevel=data["entityLevel"],
             entityHealth=data["entityHealth"],
-            entityNamePrefix=data["entityNamePrefix"],
-            entityNameSuffix=data["entityNameSuffix"],
+            special1=data["special1"],
+            special2=data["special2"],
             ambushed=data["ambushed"],
             discoveryTime=data["discoveryTime"],
             txHash=data["txHash"],
@@ -915,8 +915,8 @@ class Battle:
     beast: Optional[BeastValue]
     beastHealth: Optional[FeltValue]
     beastLevel: Optional[FeltValue]
-    beastNamePrefix: Optional[NamePrefixValue]
-    beastNameSuffix: Optional[NameSuffixValue]
+    special1: Optional[Special1Value]
+    special2: Optional[Special2Value]
     attacker: Optional[AttackerValue]
     fled: Optional[BooleanValue]
     damageDealt: Optional[FeltValue]
@@ -936,8 +936,8 @@ class Battle:
             beast=data["beast"],
             beastHealth=data["beastHealth"],
             beastLevel=data["beastLevel"],
-            beastNamePrefix=data["beastNamePrefix"],
-            beastNameSuffix=data["beastNameSuffix"],
+            special1=data["special1"],
+            special2=data["special2"],
             attacker=data["attacker"],
             fled=data["fled"],
             damageDealt=data["damageDealt"],
@@ -962,9 +962,9 @@ class Item:
     equipped: Optional[BooleanValue]
     createdTime: Optional[datetime]
     purchasedTime: Optional[datetime]
-    namePrefix: Optional[NamePrefixValue]
-    nameSuffix: Optional[NameSuffixValue]
-    itemSuffix: Optional[SuffixValue]
+    special1: Optional[Special1Value]
+    special2: Optional[Special2Value]
+    special3: Optional[Special3Value]
     xp: Optional[FeltValue]
     lastUpdatedTime: Optional[datetime]
 
@@ -979,9 +979,9 @@ class Item:
             equipped=data["equipped"],
             createdTime=data["createdTime"],
             purchasedTime=data["purchasedTime"],
-            namePrefix=data["namePrefix"],
-            nameSuffix=data["nameSuffix"],
-            itemSuffix=data["itemSuffix"],
+            special1=data["special1"],
+            special2=data["special2"],
+            special3=data["special3"],
             xp=data["xp"],
             lastUpdatedTime=data["lastUpdatedTime"],
         )
@@ -1298,9 +1298,9 @@ def get_items(
                 | isinstance(value, SlotFilter)
                 | isinstance(value, TypeFilter)
                 | isinstance(value, MaterialFilter)
-                | isinstance(value, NamePrefixFilter)
-                | isinstance(value, NameSuffixFilter)
-                | isinstance(value, SuffixFilter)
+                | isinstance(value, Special1Filter)
+                | isinstance(value, Special2Filter)
+                | isinstance(value, Special3Filter)
                 | isinstance(value, StatusFilter)
             ):
                 filter[key] = get_str_filters(value)

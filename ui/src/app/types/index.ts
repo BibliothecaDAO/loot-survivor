@@ -44,9 +44,9 @@ export interface ItemIndexer {
   owner?: boolean; // Is the item owned by the adventurer?
   equipped?: boolean; // Is the item equipped by the adventurer?
   purchasedTime: Date; // Block time the item was purchased
-  namePrefix?: number; // First part of the name prefix (i.e Demon)
-  nameSuffix?: number; // Second part of the name prefix (i.e Grasp)
-  itemSuffix?: number; // Stored value if item has a Suffix (i.e of Power)
+  special1?: string; // First special on the item (i.e Demon)
+  special2?: string; // Second special on the item (i.e Grasp)
+  special3?: string; // Third special on the item (i.e of Power)
   xp?: number; // Experience of the item
   lastUpdatedTime: Date; // Block time the item was last updated
 }
@@ -59,9 +59,9 @@ export interface Item {
   owner?: boolean; // Is the item owned by the adventurer?
   equipped?: boolean; // Is the item equipped by the adventurer?
   purchasedTime?: Date; // Block time the item was purchased
-  namePrefix?: number; // First part of the name prefix (i.e Demon)
-  nameSuffix?: number; // Second part of the name prefix (i.e Grasp)
-  itemSuffix?: number; // Stored value if item has a Suffix (i.e of Power)
+  special1?: string; // First special on the item (i.e Demon)
+  special2?: string; // Second special on the item (i.e Grasp)
+  special3?: string; // Third special on the item (i.e of Power)
   xp?: number; // Experience of the item
   slot?: string; // Item slot location
   tier?: number; // Tier of the item
@@ -73,8 +73,8 @@ export interface Battle {
   beast?: string; // Beast adventurer is engaging
   beastHealth?: number; // Beast health adventurer is engaging
   beastLevel?: number; // Beast level adventurer is engaging
-  beastNamePrefix?: string; // Name prefix of the beast
-  beastNameSuffix?: string; // Name suffix of the beast
+  special1?: string; // First special on the beast (i.e Demon)
+  special2?: string; // Second special on the beast (i.e Grasp)
   attacker?: string; // Attacker in the battle (Adventurer or Beast)
   fled?: boolean; // Did the adventurer flee?
   damageDealt?: number; // Damage dealt to the beast
@@ -102,8 +102,8 @@ export interface Discovery {
   entity?: string; // Entity discovered
   entityLevel?: number; // Entity level discovered
   entityHealth?: number; // Entity health discovered
-  entityNamePrefix?: string; // Entity name prifix
-  entityNameSuffix?: string; // Entity name suffix
+  special1?: string; // First special on the beast (i.e Demon)
+  special2?: string; // Second special on the beast (i.e Grasp)
   ambushed?: boolean; // Did the adventurer ambush the entity?
   discoveryTime?: Date; // Block time of the discovery
   txHash?: string; // Transaction hash
@@ -271,8 +271,8 @@ export const NullBattle: Battle = {
   beast: undefined,
   beastHealth: undefined,
   beastLevel: undefined,
-  beastNamePrefix: undefined,
-  beastNameSuffix: undefined,
+  special1: undefined,
+  special2: undefined,
   attacker: undefined,
   fled: undefined,
   damageDealt: undefined,
@@ -300,8 +300,8 @@ export const NullDiscovery: Discovery = {
   entity: undefined,
   entityLevel: undefined,
   entityHealth: undefined,
-  entityNamePrefix: undefined,
-  entityNameSuffix: undefined,
+  special1: undefined,
+  special2: undefined,
   ambushed: undefined,
   discoveryTime: undefined,
   txHash: undefined,
@@ -315,9 +315,9 @@ export const NullItem: Item = {
   owner: undefined,
   equipped: undefined,
   purchasedTime: undefined,
-  namePrefix: undefined,
-  nameSuffix: undefined,
-  itemSuffix: undefined,
+  special1: undefined,
+  special2: undefined,
+  special3: undefined,
   xp: undefined,
   slot: undefined,
   tier: undefined,

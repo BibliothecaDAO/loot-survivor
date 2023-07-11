@@ -41,8 +41,8 @@ const BATTLE_FIELDS = `
   beast
   beastHealth
   beastLevel
-  beastNamePrefix
-  beastNameSuffix
+  special1
+  special2
   attacker
   fled
   damageDealt
@@ -70,9 +70,9 @@ const ITEM_FIELDS = `
   equipped
   createdTime
   purchasedTime
-  namePrefix
-  nameSuffix
-  itemSuffix
+  special1
+  special2
+  special3
   xp
   lastUpdatedTime
 `;
@@ -98,6 +98,8 @@ const DISCOVERY_FIELDS = `
   entity
   entityLevel
   entityHealth
+  special1
+  special2
   ambushed
   discoveryTime
   txHash

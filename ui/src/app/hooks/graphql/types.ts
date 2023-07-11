@@ -92,8 +92,8 @@ export type BattleQuery = {
   beast: Maybe<Scalars["String"]>;
   beastHealth: Maybe<Scalars["Int"]>;
   beastLevel: Maybe<Scalars["Int"]>;
-  beastNamePrefix: Maybe<Scalars["String"]>;
-  beastNameSuffix: Maybe<Scalars["String"]>;
+  special1: Maybe<Scalars["String"]>;
+  special2: Maybe<Scalars["String"]>;
   attacker: Maybe<Scalars["String"]>;
   fled: Maybe<Scalars["Boolean"]>;
   damageDealt: Maybe<Scalars["Int"]>;
@@ -115,9 +115,9 @@ export type ItemQuery = {
   ownerAdventurerId: Maybe<Scalars["Int"]>;
   equippedAdventurerId: Maybe<Scalars["Int"]>;
   purchasedTime: Maybe<Scalars["Timestamp"]>;
-  namePrefix: Maybe<Scalars["String"]>;
-  nameSuffix: Maybe<Scalars["String"]>;
-  itemSuffix: Maybe<Scalars["String"]>;
+  special1: Maybe<Scalars["String"]>;
+  special2: Maybe<Scalars["String"]>;
+  special3: Maybe<Scalars["String"]>;
   xp: Maybe<Scalars["Int"]>;
   lastUpdatedTime: Maybe<Scalars["Timestamp"]>;
 };
