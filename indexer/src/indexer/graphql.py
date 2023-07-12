@@ -657,7 +657,7 @@ class BeastsFilter:
 @strawberry.input
 class BattlesFilter:
     adventurerId: Optional[FeltValueFilter] = None
-    beastId: Optional[FeltValueFilter] = None
+    beast: Optional[BeastFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     beastLevel: Optional[FeltValueFilter] = None
     special1: Optional[OrderByInput] = None
@@ -779,7 +779,7 @@ class BeastsOrderByInput:
 @strawberry.input
 class BattlesOrderByInput:
     adventurerId: Optional[OrderByInput] = None
-    beastId: Optional[OrderByInput] = None
+    beast: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     beastLevel: Optional[OrderByInput] = None
     special1: Optional[OrderByInput] = None

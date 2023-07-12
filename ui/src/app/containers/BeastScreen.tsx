@@ -72,8 +72,6 @@ export default function BeastScreen() {
     ? data.lastBeastQuery.discoveries[0]
     : NullDiscovery;
 
-  console.log(adventurer?.id ?? 0, lastBeast?.entity, lastBeast?.seed);
-
   useCustomQuery(
     "beastQuery",
     getBeast,
@@ -95,7 +93,7 @@ export default function BeastScreen() {
     {
       adventurerId: adventurer?.id ?? 0,
       beast: lastBeast?.entity,
-      discoveryTime: lastBeast?.discoveryTime,
+      seed: lastBeast?.seed,
     },
     txAccepted
   );

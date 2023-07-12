@@ -339,14 +339,14 @@ const getBattlesByBeast = gql`
   ${BATTLES_FRAGMENT}
   query get_battles_by_beast(
     $adventurerId: FeltValue
-    $beastId: FeltValue
-    $discoveryTime: DateTime
+    $beast: BeastValue
+    $seed: HexValue
   ) {
     battles(
       where: {
         adventurerId: { eq: $adventurerId }
-        beastId: { eq: $beastId }
-        discoveryTime: { eq: $discoveryTime }
+        beast: { eq: $beast }
+        seed: { eq: $seed }
       }
       orderBy: { timestamp: { desc: true } }
     ) {
