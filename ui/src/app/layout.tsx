@@ -10,8 +10,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const client = new ApolloClient({
-    // uri: "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/goerli-graphql",
-    uri: "http://localhost:8080/goerli-graphql",
+    uri: "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/goerli-graphql",
+    // uri: "http://localhost:8080/goerli-graphql",
     cache: new InMemoryCache(),
   });
 
