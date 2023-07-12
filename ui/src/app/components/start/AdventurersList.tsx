@@ -145,7 +145,7 @@ export const AdventurersList = ({
                   >
                     <div className="flex-grow">{`${adventurer.name} - ${adventurer.id}`}</div>
                     <div className="w-5 text-right">
-                      {adventurer.health === 0 ? SkullIcon : null}
+                      {adventurer.health === 0 ? <SkullIcon /> : null}
                     </div>
                   </Button>
                 ))}

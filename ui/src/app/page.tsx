@@ -120,25 +120,29 @@ export default function Home() {
     txAccepted
   );
 
-  useCustomQuery(
-    "battlesByTxHashQuery",
-    getBattleByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted
-    // hash !== ""
-  );
 
-  useCustomQuery(
-    "discoveryByTxHashQuery",
-    getDiscoveryByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted
-    // hash !== ""
-  );
+    useCustomQuery(
+      "battlesByTxHashQuery",
+      getBattleByTxHash,
+      {
+        txHash: padAddress(hash),
+      },
+      txAccepted
+      // hash !== ""
+    );
+  
+
+
+    useCustomQuery(
+      "discoveryByTxHashQuery",
+      getDiscoveryByTxHash,
+      {
+        txHash: padAddress(hash),
+      },
+      txAccepted
+      // hash !== ""
+    );
+  
 
   useCustomQuery(
     "adventurersByXPQuery",
@@ -170,8 +174,6 @@ export default function Home() {
   });
 
   useEffect(() => {
-    // play();
-
     return () => {
       stop();
     };
@@ -339,7 +341,7 @@ export default function Home() {
           },
           {
             id: 6,
-            label: "Upgrade",
+            label: <span>{statUpgrades > 0 ? "Upgrade!" : "Upgrade"}</span>,
             screen: "upgrade",
             disabled: !(statUpgrades > 0),
           },
@@ -387,7 +389,7 @@ export default function Home() {
           },
           {
             id: 5,
-            label: "Upgrade",
+            label: <span>{statUpgrades > 0 ? "Upgrade !" : "Upgrade"}</span>,
             screen: "upgrade",
             disabled: !(statUpgrades > 0),
           },
@@ -487,6 +489,7 @@ export default function Home() {
         showTutorialDialog(true);
       } else {
         handleOnboarded();
+        console.log("fetching adventurers", account)
         refetch("adventurersByOwnerQuery");
       }
     }
@@ -500,6 +503,7 @@ export default function Home() {
 
   // fetch adventurers on app start and account switch
   useEffect(() => {
+    console.log("fetching adventurers", account)
     refetch("adventurersByOwnerQuery");
   }, [account, refetch]);
 

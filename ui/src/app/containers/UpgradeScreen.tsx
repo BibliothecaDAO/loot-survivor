@@ -114,6 +114,7 @@ export default function UpgradeScreen() {
       entrypoint: "upgrade_stat",
       calldata: [
         adventurer?.id?.toString() ?? "",
+        '0',
         getKeyFromValue(gameData.STATS, selected) ?? "",
       ],
     };

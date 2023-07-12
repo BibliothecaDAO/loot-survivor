@@ -18,8 +18,8 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
 
   const purchaseHealthTx = {
     contractAddress: gameContract?.address ?? "",
-    entrypoint: "purchase_health",
-    calldata: [adventurer?.id?.toString() ?? "", healthAmount.toString()],
+    entrypoint: "buy_potion",
+    calldata: [adventurer?.id?.toString() ?? "", "0"],
     metadata: `Purchasing ${healthAmount * 10} health`,
   };
 
@@ -41,7 +41,9 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
     adventurer?.gold && adventurer?.gold >= purchaseGoldAmount ? true : false;
 
   const handlePurchaseHealth = async () => {
-    addToCalls(purchaseHealthTx);
+    for (let i = 0; i < healthAmount; i++) {
+      addToCalls(purchaseHealthTx);
+    }
   };
 
   const handleKeyDown = useCallback(

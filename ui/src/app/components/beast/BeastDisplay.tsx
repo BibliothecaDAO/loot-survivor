@@ -23,6 +23,7 @@ export const BeastDisplay = ({
   );
   const { tier, attack, armor, image } = getBeastData(beastData?.entity ?? "");
 
+  console.log(beastData)
   return (
     <div className="relative flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
       <div className="flex flex-col w-full h-full p-3 uppercase">

@@ -31,7 +31,7 @@ export default function MarketplaceScreen() {
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const setScreen = useUIStore((state) => state.setScreen);
-
+  const profile = useUIStore((state) => state.profile);
   const { data, isLoading, refetch } = useQueriesStore();
 
   const currentTime = new Date().getTime();
@@ -45,9 +45,15 @@ export default function MarketplaceScreen() {
     true
   );
 
-  const marketLatestItems = data.latestMarketItemsQuery
-    ? data.latestMarketItemsQuery.items
-    : [];
+  const marketLatestItems = profile
+  ? data.itemsByProfileQuery
+    ? data.itemsByProfileQuery.items
+    : []
+  : data.itemsByAdventurerQuery
+  ? data.itemsByAdventurerQuery.items
+  : [];
+
+  console.log(marketLatestItems)
 
   const adventurers = data.adventurersInListQuery
     ? data.adventurersInListQuery.adventurers

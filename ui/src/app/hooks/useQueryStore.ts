@@ -187,7 +187,7 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
   isDataUpdated: initialIsDataUpdated,
   refetchFunctions: initialRefetchFunctions,
   updateData: (queryKey, newData, loading, refetch) => {
-    console.log("here");
+    console.log("DEBUG: updateData", queryKey, newData, loading);
     set((state) => {
       const oldData = state.data[queryKey];
       const queryKeysToIgnore = [

@@ -128,7 +128,7 @@ export interface Metadata {
 
 export type Menu = {
   id: number;
-  label: string;
+  label: string | ReactElement;
   screen: ScreenPage;
   disabled?: boolean;
 };

@@ -23,12 +23,12 @@ const useCustomQuery = (
     query,
     {
       variables: variables,
-      // skip: skip,
+      // skip: !variables?.owner,
     }
   );
 
-  console.log(error);
-
+  if (error) console.log("ERROR: useCustomQuery", queryKey, error);
+  
   const refetchWrapper = useCallback(async () => {
     try {
       await refetch();
@@ -51,9 +51,6 @@ const useCustomQuery = (
     }
   }, [shouldPoll, startPolling, stopPolling]);
 
-  // useEffect(() => {
-  //   refetch();
-  // }, []);
 };
 
 export default useCustomQuery;

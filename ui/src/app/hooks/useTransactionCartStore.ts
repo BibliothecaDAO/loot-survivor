@@ -35,7 +35,7 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
       set({ calls: [], error: false });
       return tx;
     } catch (error) {
-      console.log(error);
+      console.log("ERROR: handleSubmitCalls", error);
       setError(true);
       resetCalls();
     }
