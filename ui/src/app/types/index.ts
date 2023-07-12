@@ -76,6 +76,7 @@ export interface Battle {
   special1?: string; // First special on the beast (i.e Demon)
   special2?: string; // Second special on the beast (i.e Demon)
   special3?: string; // Third special on the beast (i.e Grasp)
+  seed?: number; // Seed to generate beast
   attacker?: string; // Attacker in the battle (Adventurer or Beast)
   fled?: boolean; // Did the adventurer flee?
   damageDealt?: number; // Damage dealt to the beast
@@ -106,9 +107,24 @@ export interface Discovery {
   special1?: string; // First special on the beast (i.e Demon)
   special2?: string; // Second special on the beast (i.e Demon)
   special3?: string; // Third special on the beast (i.e Grasp)
+  seed?: number; // Seed to generate beast
   ambushed?: boolean; // Did the adventurer ambush the entity?
   discoveryTime?: Date; // Block time of the discovery
   txHash?: string; // Transaction hash
+}
+
+export interface Beast {
+  beast?: string; // Beast type
+  adventurerId?: number; // Adventurer ID
+  seed?: number; // Seed to generate beast
+  special1?: string; // First special on the beast (i.e Demon)
+  special2?: string; // Second special on the beast (i.e Demon)
+  special3?: string; // Third special on the beast (i.e Grasp)
+  health?: number; // Beast health
+  level?: number; // Beast level
+  slainOnTime?: Date; // Block time of the beast being slayed
+  createdTime?: Date; // Block time of when the beast was discovered
+  lastUpdatedTime?: Date; // Block time of when the beast was last updated
 }
 
 export interface Score {
@@ -158,7 +174,7 @@ export interface ButtonData {
   variant?: "default" | "outline";
 }
 
-export type Beast =
+export type BeastType =
   | "Basilisk"
   | "Kitsune"
   | "Jiangshi"
@@ -276,6 +292,7 @@ export const NullBattle: Battle = {
   special1: undefined,
   special2: undefined,
   special3: undefined,
+  seed: undefined,
   attacker: undefined,
   fled: undefined,
   damageDealt: undefined,
@@ -306,9 +323,24 @@ export const NullDiscovery: Discovery = {
   special1: undefined,
   special2: undefined,
   special3: undefined,
+  seed: undefined,
   ambushed: undefined,
   discoveryTime: undefined,
   txHash: undefined,
+};
+
+export const NullBeast: Beast = {
+  beast: undefined,
+  adventurerId: undefined,
+  seed: undefined,
+  special1: undefined,
+  special2: undefined,
+  special3: undefined,
+  health: undefined,
+  level: undefined,
+  slainOnTime: undefined,
+  createdTime: undefined,
+  lastUpdatedTime: undefined,
 };
 
 export const NullItem: Item = {

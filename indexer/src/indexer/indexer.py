@@ -135,6 +135,33 @@ async def update_adventurer_bag(info: Info, adventurer_id, bag):
     )
 
 
+async def update_beast_health(
+    info: Info, beast, adventurer_id, seed, health, slayed, block_time
+):
+    if slayed:
+        update_beast_doc = {
+            "health": encode_int_as_bytes(health),
+            "lastUpdatedTime": block_time,
+        }
+    else:
+        update_beast_doc = {
+            "health": encode_int_as_bytes(health),
+            "slainOnTime": block_time,
+            "lastUpdatedTime": block_time,
+        }
+    await info.storage.find_one_and_update(
+        "beasts",
+        {
+            "beast": check_exists_int(beast),
+            "adventurerId": check_exists_int(adventurer_id),
+            "seed": encode_int_as_bytes(seed),
+        },
+        {
+            "$set": update_beast_doc,
+        },
+    )
+
+
 async def get_item(info, item_id, adventurer_id):
     item = await info.storage.find_one(
         "items",
@@ -147,7 +174,6 @@ async def get_item(info, item_id, adventurer_id):
 
 
 async def update_item_xp(info, item, adventurer_id, xp, createdTime):
-    print(createdTime)
     await info.storage.find_one_and_update(
         "items",
         {
@@ -173,7 +199,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
         {
             "item": adventurer["weapon"],
             "adventurerId": check_exists_int(adventurer_id),
-            "owner": check_exists_int(1),
+            "owner": True,
         },
     )
     chest_item = await info.storage.find_one(
@@ -181,7 +207,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
         {
             "item": adventurer["chest"],
             "adventurerId": check_exists_int(adventurer_id),
-            "owner": check_exists_int(1),
+            "owner": True,
         },
     )
     head_item = await info.storage.find_one(
@@ -189,7 +215,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
         {
             "item": adventurer["head"],
             "adventurerId": check_exists_int(adventurer_id),
-            "owner": check_exists_int(1),
+            "owner": True,
         },
     )
     waist_item = await info.storage.find_one(
@@ -197,7 +223,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
         {
             "item": adventurer["waist"],
             "adventurerId": check_exists_int(adventurer_id),
-            "owner": check_exists_int(1),
+            "owner": True,
         },
     )
     foot_item = await info.storage.find_one(
@@ -205,7 +231,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
         {
             "item": adventurer["foot"],
             "adventurerId": check_exists_int(adventurer_id),
-            "owner": check_exists_int(1),
+            "owner": True,
         },
     )
     hand_item = await info.storage.find_one(
@@ -213,7 +239,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
         {
             "item": adventurer["hand"],
             "adventurerId": check_exists_int(adventurer_id),
-            "owner": check_exists_int(1),
+            "owner": True,
         },
     )
     neck_item = await info.storage.find_one(
@@ -221,7 +247,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
         {
             "item": adventurer["neck"],
             "adventurerId": check_exists_int(adventurer_id),
-            "owner": check_exists_int(1),
+            "owner": True,
         },
     )
     ring_item = await info.storage.find_one(
@@ -229,7 +255,7 @@ async def update_items_xp(info, adventurer_id, xp_increase):
         {
             "item": adventurer["ring"],
             "adventurerId": check_exists_int(adventurer_id),
-            "owner": check_exists_int(1),
+            "owner": True,
         },
     )
     if weapon_item:
@@ -304,7 +330,7 @@ async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
         {
             "id": check_exists_int(equipped_item),
             "adventurerId": check_exists_int(adventurer_id),
-            "owner": check_exists_int(1),
+            "owner": True,
         },
         {
             "$set": {
@@ -318,7 +344,7 @@ async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
         {
             "id": check_exists_int(unequipped_item),
             "adventurerId": check_exists_int(adventurer_id),
-            "owner": check_exists_int(1),
+            "owner": True,
         },
         {
             "$set": {"equipped": check_exists_int(0), "lastUpdatedTime": time},
@@ -495,7 +521,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         start_item_doc = {
             "item": check_exists_int(sg.adventurer_state["adventurer"]["weapon"]["id"]),
             "adventurerId": check_exists_int(sg.adventurer_state["adventurer_id"]),
-            "owner": check_exists_int(1),
+            "owner": True,
             "equipped": check_exists_int(1),
             "ownerAddress": check_exists_int(sg.adventurer_state["owner"]),
             "xp": encode_int_as_bytes(0),
@@ -741,6 +767,20 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "discoveryTime": block_time,
         }
         await info.storage.insert_one("discoveries", discovery_doc)
+        beast_doc = {
+            "beast": check_exists_int(db.id),
+            "health": encode_int_as_bytes(db.health),
+            "level": encode_int_as_bytes(db.beast_specs["level"]),
+            "special1": check_exists_int(db.beast_specs["specials"]["special1"]),
+            "special2": check_exists_int(db.beast_specs["specials"]["special2"]),
+            "special3": check_exists_int(db.beast_specs["specials"]["special3"]),
+            "seed": encode_int_as_bytes(db.seed),
+            "adventurerId": check_exists_int(db.adventurer_state["adventurer_id"]),
+            "slainOnTime": check_exists_timestamp(0),
+            "createdTime": block_time,
+            "lastUpdatedTime": block_time,
+        }
+        await info.storage.insert_one("beasts", beast_doc)
         print(
             "- [discovered beast]",
             db.adventurer_state["adventurer_id"],
@@ -758,6 +798,15 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         ba = decode_attack_beast_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(info, ba.adventurer_state)
+        await update_beast_health(
+            info,
+            ba.id,
+            ba.adventurer_state["adventurer_id"],
+            ba.seed,
+            ba.health,
+            False,
+            block_time,
+        )
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
@@ -813,6 +862,15 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         sb = decode_slayed_beast_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(info, sb.adventurer_state)
+        await update_beast_health(
+            info,
+            sb.id,
+            sb.adventurer_state["adventurer_id"],
+            sb.seed,
+            sb.health,
+            True,
+            block_time,
+        )
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
@@ -928,7 +986,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         pi = decode_purchased_item_event.deserialize([felt.to_int(i) for i in data])
         purchased_item_doc = {
-            "owner": check_exists_int(1),
+            "owner": True,
             "equipped": check_exists_int(1) if pi.equipped else check_exists_int(0),
             "ownerAddress": check_exists_int(
                 pi.adventurer_state_with_bag["adventurer_state"]["owner"]
@@ -1044,7 +1102,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             {
                 "item": check_exists_int(ip.special_names["id"]),
                 "adventurerId": check_exists_int(ip.adventurer_state["adventurer_id"]),
-                "owner": check_exists_int(1),
+                "owner": True,
             },
             {"$set": item_prefix_doc},
         )
@@ -1075,7 +1133,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             {
                 "id": check_exists_int(isd.special_names["id"]),
                 "adventurerId": check_exists_int(isd.adventurer_state["adventurer_id"]),
-                "owner": check_exists_int(1),
+                "owner": True,
             },
             {"$set": item_suffix_doc},
         )
@@ -1169,7 +1227,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             items_doc = {
                 "item": check_exists_int(item["item"]["id"]),
                 "adventurerId": check_exists_int(sa.adventurer_state["adventurer_id"]),
-                "owner": check_exists_int(0),
+                "owner": False,
                 "equipped": check_exists_int(0),
                 "ownerAddress": check_exists_int(0),
                 "xp": encode_int_as_bytes(0),

@@ -42,7 +42,7 @@ export default function UpgradeScreen() {
   );
   const { writeAsync } = useContractWrite({ calls });
   const setScreen = useUIStore((state) => state.setScreen);
-  const purchasedItem = useUIStore((state) => state.purchasedItem);
+  // const purchasedItem = useUIStore((state) => state.purchasedItem);
   const [selected, setSelected] = useState("");
   const statUpgrades = adventurer?.statUpgrades ?? 0;
 
@@ -114,7 +114,7 @@ export default function UpgradeScreen() {
       entrypoint: "upgrade_stat",
       calldata: [
         adventurer?.id?.toString() ?? "",
-        '0',
+        "0",
         getKeyFromValue(gameData.STATS, selected) ?? "",
       ],
     };
@@ -232,14 +232,15 @@ export default function UpgradeScreen() {
               </span>
             </span>
             <p className="text-center text-lg sm:text-2xl">
-              {purchasedItem
+              {/* {purchasedItem
                 ? "You have purchased an item!"
-                : "Items are on the market!"}
+                : "Items are on the market!"} */}
+              Items are on the market!
             </p>
             <Button
               className="w-1/4"
               onClick={() => setScreen("market")}
-              disabled={purchasedItem}
+              // disabled={purchasedItem}
             >
               Market
             </Button>

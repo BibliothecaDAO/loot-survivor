@@ -25,8 +25,6 @@ export default function AdventurerScreen() {
 
   const owner = account?.address ? padAddress(account.address) : "";
 
-  console.log("ACCOUNT:", account?.address)
-  
   // TODO: Remove polling
   useCustomQuery(
     "adventurersByOwnerQuery",

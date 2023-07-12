@@ -6,6 +6,8 @@ import { useQueriesStore } from "../../hooks/useQueryStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import LootIconLoader from "../icons/Loader";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import useUIStore from "@/app/hooks/useUIStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
 export interface TxActivityProps {
   hash: string | undefined;
@@ -23,6 +25,8 @@ export const TxActivity = () => {
   const type = useLoadingStore((state) => state.type);
   const error = useTransactionCartStore((state) => state.error);
   const setError = useTransactionCartStore((state) => state.setError);
+  const setScreen = useUIStore((state) => state.setScreen);
+  const adventurer = useAdventurerStore((state) => state.adventurer);
   const {
     data: queryData,
     isDataUpdated,
@@ -59,6 +63,9 @@ export const TxActivity = () => {
         }
         setTxAccepted(false);
         resetDataUpdated(loadingQuery);
+        if ((adventurer?.statUpgrades ?? 0) > 0) {
+          setScreen("upgrade");
+        }
       }
 
       // Handle "Explore" type
@@ -71,11 +78,17 @@ export const TxActivity = () => {
           stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
           setTxAccepted(false);
           resetDataUpdated(loadingQuery);
+          if ((adventurer?.statUpgrades ?? 0) > 0) {
+            setScreen("upgrade");
+          }
         }
       } else if (type == "Upgrade") {
         stopLoading(notificationData);
         setTxAccepted(false);
         resetDataUpdated(loadingQuery);
+        if ((adventurer?.statUpgrades ?? 0) > 0) {
+          setScreen("upgrade");
+        }
       } else if (
         type == "Multicall" &&
         notificationData.some((noti: string) => noti.startsWith("You equipped"))
@@ -85,6 +98,9 @@ export const TxActivity = () => {
         stopLoading(notificationData);
         setTxAccepted(false);
         resetDataUpdated(loadingQuery);
+        if ((adventurer?.statUpgrades ?? 0) > 0) {
+          setScreen("upgrade");
+        }
       }
 
       // Handle other types
@@ -92,6 +108,9 @@ export const TxActivity = () => {
         stopLoading(notificationData);
         setTxAccepted(false);
         resetDataUpdated(loadingQuery);
+        if ((adventurer?.statUpgrades ?? 0) > 0) {
+          setScreen("upgrade");
+        }
       }
     }
   }, [

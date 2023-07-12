@@ -94,7 +94,7 @@ export default function Home() {
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
-  const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
+  // const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const statUpgrades = adventurer?.statUpgrades ?? 0;
@@ -120,29 +120,25 @@ export default function Home() {
     txAccepted
   );
 
+  useCustomQuery(
+    "battlesByTxHashQuery",
+    getBattleByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    txAccepted
+    // hash !== ""
+  );
 
-    useCustomQuery(
-      "battlesByTxHashQuery",
-      getBattleByTxHash,
-      {
-        txHash: padAddress(hash),
-      },
-      txAccepted
-      // hash !== ""
-    );
-  
-
-
-    useCustomQuery(
-      "discoveryByTxHashQuery",
-      getDiscoveryByTxHash,
-      {
-        txHash: padAddress(hash),
-      },
-      txAccepted
-      // hash !== ""
-    );
-  
+  useCustomQuery(
+    "discoveryByTxHashQuery",
+    getDiscoveryByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    txAccepted
+    // hash !== ""
+  );
 
   useCustomQuery(
     "adventurersByXPQuery",
@@ -410,13 +406,13 @@ export default function Home() {
     }
   }, [adventurer, account, onboarded, hasBeast, purchaseExists]);
 
-  useEffect(() => {
-    if (purchaseExists()) {
-      setPurchasedItem(true);
-    } else {
-      setPurchasedItem(false);
-    }
-  }, [purchaseExists, setPurchasedItem]);
+  // useEffect(() => {
+  //   if (purchaseExists()) {
+  //     setPurchasedItem(true);
+  //   } else {
+  //     setPurchasedItem(false);
+  //   }
+  // }, [purchaseExists, setPurchasedItem]);
 
   useEffect(() => {
     if (!onboarded) {
@@ -489,7 +485,6 @@ export default function Home() {
         showTutorialDialog(true);
       } else {
         handleOnboarded();
-        console.log("fetching adventurers", account)
         refetch("adventurersByOwnerQuery");
       }
     }
@@ -503,7 +498,6 @@ export default function Home() {
 
   // fetch adventurers on app start and account switch
   useEffect(() => {
-    console.log("fetching adventurers", account)
     refetch("adventurersByOwnerQuery");
   }, [account, refetch]);
 

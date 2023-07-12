@@ -27,8 +27,6 @@ const useCustomQuery = (
     }
   );
 
-  if (error) console.log("ERROR: useCustomQuery", queryKey, error);
-  
   const refetchWrapper = useCallback(async () => {
     try {
       await refetch();
@@ -50,7 +48,6 @@ const useCustomQuery = (
       stopPolling();
     }
   }, [shouldPoll, startPolling, stopPolling]);
-
 };
 
 export default useCustomQuery;

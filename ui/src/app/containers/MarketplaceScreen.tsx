@@ -45,15 +45,9 @@ export default function MarketplaceScreen() {
     true
   );
 
-  const marketLatestItems = profile
-  ? data.itemsByProfileQuery
-    ? data.itemsByProfileQuery.items
-    : []
-  : data.itemsByAdventurerQuery
-  ? data.itemsByAdventurerQuery.items
-  : [];
-
-  console.log(marketLatestItems)
+  const marketLatestItems = data.latestMarketItemsQuery
+    ? data.latestMarketItemsQuery.items
+    : [];
 
   const adventurers = data.adventurersInListQuery
     ? data.adventurersInListQuery.adventurers
@@ -159,15 +153,15 @@ export default function MarketplaceScreen() {
 
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
 
-  const purchaseExists = useCallback(() => {
-    return calls.some((call: Call) => call.entrypoint == "buy_item");
-  }, [calls]);
+  // const purchaseExists = useCallback(() => {
+  //   return calls.some((call: Call) => call.entrypoint == "buy_item");
+  // }, [calls]);
 
-  useEffect(() => {
-    if (purchaseExists()) {
-      setScreen("upgrade");
-    }
-  }, [purchaseExists, setScreen]);
+  // useEffect(() => {
+  //   if (purchaseExists()) {
+  //     setScreen("upgrade");
+  //   }
+  // }, [purchaseExists, setScreen]);
 
   return (
     <>

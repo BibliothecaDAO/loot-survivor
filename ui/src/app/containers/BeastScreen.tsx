@@ -14,12 +14,18 @@ import { processBeastName } from "../lib/utils";
 import useCustomQuery from "../hooks/useCustomQuery";
 import {
   getBattlesByBeast,
-  getBeastById,
+  getBeast,
   getLastBeastDiscovery,
   getLastBattleByAdventurer,
 } from "../hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
-import { NullAdventurer, NullBattle, Battle, NullDiscovery } from "../types";
+import {
+  NullAdventurer,
+  NullBattle,
+  Battle,
+  NullDiscovery,
+  NullBeast,
+} from "../types";
 import { DiscoveryTemplate, BattleTemplate } from "../types/templates";
 
 /**
@@ -62,24 +68,37 @@ export default function BeastScreen() {
     txAccepted
   );
 
-  let beastData = data.lastBeastQuery
+  let lastBeast = data.lastBeastQuery
     ? data.lastBeastQuery.discoveries[0]
     : NullDiscovery;
 
-    console.log("beastData", beastData)
+  console.log(adventurer?.id ?? 0, lastBeast?.entity, lastBeast?.seed);
+
+  useCustomQuery(
+    "beastQuery",
+    getBeast,
+    {
+      adventurerId: adventurer?.id ?? 0,
+      beast: lastBeast?.entity,
+      seed: lastBeast?.seed,
+    },
+    txAccepted
+  );
+
+  let beastData = data.beastQuery ? data.beastQuery.beasts[0] : NullBeast;
+
+  console.log(beastData);
 
   useCustomQuery(
     "battlesByBeastQuery",
     getBattlesByBeast,
     {
       adventurerId: adventurer?.id ?? 0,
-      beast: beastData?.entity,
-      discoveryTime: beastData?.discoveryTime,
+      beast: lastBeast?.entity,
+      discoveryTime: lastBeast?.discoveryTime,
     },
     txAccepted
   );
-
-  console.log("battlesByBeastQuery", data)
 
   const formatBattles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
@@ -128,7 +147,7 @@ export default function BeastScreen() {
             addTransaction({
               hash: tx.transaction_hash,
               metadata: {
-                method: `Attack ${beastData.entity}`,
+                method: `Attack ${beastData.beast}`,
               },
             });
           }
@@ -160,7 +179,7 @@ export default function BeastScreen() {
             addTransaction({
               hash: tx.transaction_hash,
               metadata: {
-                method: `Flee ${beastData.entity}`,
+                method: `Flee ${beastData.beast}`,
               },
             });
           }
@@ -178,7 +197,7 @@ export default function BeastScreen() {
   const isBeastDead = adventurer?.health == 0;
 
   const beastName = processBeastName(
-    beastData?.entity ?? "",
+    beastData?.beast ?? "",
     beastData?.special2 ?? "",
     beastData?.special3 ?? ""
   );
@@ -220,7 +239,7 @@ export default function BeastScreen() {
               <>
                 <div className="flex flex-col items-center gap-5 p-2">
                   <div className="text-xl uppercase">
-                    Battle log with {beastData?.entity}
+                    Battle log with {beastData?.beast}
                   </div>
                   <div className="flex flex-col gap-2 text-sm">
                     {formatBattles.map((battle: Battle, index: number) => (
@@ -247,7 +266,7 @@ export default function BeastScreen() {
               <>
                 <div className="flex flex-col items-center gap-5 p-2">
                   <div className="text-xl uppercase">
-                    Battle log with {beastData?.entity}
+                    Battle log with {beastData?.beast}
                   </div>
                   <div className="flex flex-col gap-2">
                     {formatBattles.map((battle: Battle, index: number) => (

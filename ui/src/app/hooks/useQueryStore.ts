@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { isEqual } from "lodash";
-import { Battle, Item, Adventurer, Discovery, Score } from "../types";
+import { Battle, Beast, Item, Adventurer, Discovery, Score } from "../types";
 
 export type QueryKey =
   | "lastBattleQuery"
@@ -9,6 +9,7 @@ export type QueryKey =
   | "battlesByTxHashQuery"
   | "battlesByBeastQuery"
   | "lastBeastQuery"
+  | "beastQuery"
   | "discoveriesQuery"
   | "latestDiscoveriesQuery"
   | "discoveryByTxHashQuery"
@@ -33,6 +34,10 @@ interface DiscoveriesResult {
   discoveries: Discovery[];
 }
 
+interface BeastsResult {
+  beasts: Beast[];
+}
+
 interface AdventurersResult {
   adventurers: Adventurer[];
 }
@@ -52,6 +57,7 @@ interface InitialData {
   battlesByTxHashQuery: BattlesResult | null;
   battlesByBeastQuery: BattlesResult | null;
   lastBeastQuery: DiscoveriesResult | null;
+  beastQuery: BeastsResult | null;
   discoveriesQuery: DiscoveriesResult | null;
   latestDiscoveriesQuery: DiscoveriesResult | null;
   discoveryByTxHashQuery: DiscoveriesResult | null;
@@ -91,6 +97,7 @@ const initialData: InitialData = {
   battlesByTxHashQuery: null,
   battlesByBeastQuery: null,
   lastBeastQuery: null,
+  beastQuery: null,
   discoveriesQuery: null,
   latestDiscoveriesQuery: null,
   discoveryByTxHashQuery: null,
@@ -115,6 +122,7 @@ const initialLoading: Record<QueryKey, boolean> = {
   battlesByTxHashQuery: false,
   battlesByBeastQuery: false,
   lastBeastQuery: false,
+  beastQuery: false,
   discoveriesQuery: false,
   latestDiscoveriesQuery: false,
   discoveryByTxHashQuery: false,
@@ -139,6 +147,7 @@ const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
   battlesByTxHashQuery: false,
   battlesByBeastQuery: false,
   lastBeastQuery: false,
+  beastQuery: false,
   discoveriesQuery: false,
   latestDiscoveriesQuery: false,
   discoveryByTxHashQuery: false,
@@ -164,6 +173,7 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   battlesByTxHashQuery: async () => {},
   battlesByBeastQuery: async () => {},
   lastBeastQuery: async () => {},
+  beastQuery: async () => {},
   discoveriesQuery: async () => {},
   latestDiscoveriesQuery: async () => {},
   discoveryByTxHashQuery: async () => {},
@@ -187,7 +197,6 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
   isDataUpdated: initialIsDataUpdated,
   refetchFunctions: initialRefetchFunctions,
   updateData: (queryKey, newData, loading, refetch) => {
-    console.log("DEBUG: updateData", queryKey, newData, loading);
     set((state) => {
       const oldData = state.data[queryKey];
       const queryKeysToIgnore = [

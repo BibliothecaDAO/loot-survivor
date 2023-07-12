@@ -3,10 +3,10 @@ import { getBeastData } from "../../lib/utils";
 import { HeartIcon } from "../icons/Icons";
 import EfficacyIcon from "../icons/EfficacyIcon";
 import { processBeastName } from "../../lib/utils";
-import { Battle, Discovery, Adventurer } from "@/app/types";
+import { Battle, Beast, Adventurer } from "@/app/types";
 
 interface BeastDisplayProps {
-  beastData: Discovery;
+  beastData: Beast;
   lastBattle: Battle;
   adventurer: Adventurer;
 }
@@ -17,13 +17,12 @@ export const BeastDisplay = ({
   adventurer,
 }: BeastDisplayProps) => {
   const beastName = processBeastName(
-    beastData?.entity ?? "",
+    beastData?.beast ?? "",
     beastData?.special2 ?? "",
     beastData?.special3 ?? ""
   );
-  const { tier, attack, armor, image } = getBeastData(beastData?.entity ?? "");
+  const { tier, attack, armor, image } = getBeastData(beastData?.beast ?? "");
 
-  console.log(beastData)
   return (
     <div className="relative flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
       <div className="flex flex-col w-full h-full p-3 uppercase">
@@ -31,20 +30,18 @@ export const BeastDisplay = ({
           {beastName}
           <span
             className={`text-4xl flex ${
-              beastData?.entityHealth === 0
-                ? "text-red-600"
-                : "text-terminal-green"
+              beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
             }`}
           >
             <HeartIcon className="self-center w-6 h-6 fill-current" />{" "}
             <p className="self-center text-2xl sm:text-4xl">
-              {beastData?.entityHealth}
+              {beastData?.health}
             </p>
           </span>
         </div>
         <div className="flex justify-between w-full py-2 ">
           <p className="text-xl sm:text-3xl text-terminal-yellow">
-            Level {beastData?.entityLevel}
+            Level {beastData?.level}
           </p>
           {/* <p className="text-3xl text-terminal-yellow">XP {beastData?.xp}</p> */}
           <p className="text-xl sm:text-3xl text-terminal-yellow">
@@ -80,7 +77,7 @@ export const BeastDisplay = ({
           }}
         />
       </div>
-      {adventurer?.health === 0 && (
+      {beastData?.health === 0 && (
         <div
           className="absolute inset-0 flex items-center justify-center"
           style={{ backdropFilter: "blur(1px)" }}
