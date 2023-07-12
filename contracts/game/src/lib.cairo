@@ -489,7 +489,7 @@ mod Game {
             _get_special_names(self, adventurer_id, adventurer.ring)
         }
         fn get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<LootWithPrice> {
-            _get_items_on_market(self, adventurer_id)
+            _get_items_on_market(self, adventurer_id, _unpack_adventurer(self, adventurer_id))
         }
 
         fn get_potion_price(self: @ContractState, adventurer_id: u256) -> u16 {
@@ -1930,7 +1930,7 @@ mod Game {
         __event_AdventurerLeveledUp(
             ref self,
             adventurer_state: AdventurerState {
-                owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
+                owner: get_caller_address(), adventurer_id, adventurer
             },
             previous_level: previous_level,
             new_level: new_level
@@ -1941,13 +1941,12 @@ mod Game {
         adventurer.add_stat_upgrade_points(stat_upgrade_points);
 
         // emit new items availble with available items
-        let available_items = _get_items_on_market(@self, adventurer_id);
         __event_NewItemsAvailable(
             ref self,
             adventurer_state: AdventurerState {
-                owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
+                owner: get_caller_address(), adventurer_id, adventurer
             },
-            items: available_items
+            items: _get_items_on_market(@self, adventurer_id, adventurer)
         );
     }
 
@@ -2085,15 +2084,15 @@ mod Game {
         self._dao.read()
     }
 
-    fn _get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<LootWithPrice> {
+    fn _get_items_on_market(
+        self: @ContractState, adventurer_id: u256, adventurer: Adventurer
+    ) -> Array<LootWithPrice> {
         let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
             .entropy
             .into();
 
         ImplMarket::get_all_items_with_price(
-            _unpack_adventurer(self, adventurer_id)
-                .get_market_seed(adventurer_id, adventurer_entropy)
-                .into()
+            adventurer.get_market_seed(adventurer_id, adventurer_entropy).into()
         )
     }
 
