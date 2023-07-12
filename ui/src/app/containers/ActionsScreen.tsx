@@ -58,11 +58,7 @@ export default function ActionsScreen() {
     ? data.latestDiscoveriesQuery.discoveries
     : [];
 
-  const exploreTx = {
-    contractAddress: gameContract?.address ?? "",
-    entrypoint: "explore",
-    calldata: [adventurer?.id ?? ""],
-  };
+  console.log(latestDiscoveries);
 
   const buttonsData = [
     {
@@ -101,24 +97,12 @@ export default function ActionsScreen() {
   ];
   if (onboarded) {
     buttonsData.push({
-      id: 3,
+      id: 2,
       label: "Kill Adventurer",
       icon: <TargetIcon />,
       value: "kill adventurer",
       action: async () => setActiveMenu(2),
       disabled: loading,
-      loading: loading,
-    });
-  }
-
-  if (onboarded && adventurer && adventurer?.statUpgrades > 0) {
-    buttonsData.push({
-      id: 2,
-      label: "Buy Health",
-      icon: <HealthPotionsIcon />,
-      value: "purchase health",
-      action: async () => setActiveMenu(1),
-      disabled: (adventurer?.beastHealth ?? 0) > 0 || loading,
       loading: loading,
     });
   }
@@ -138,15 +122,6 @@ export default function ActionsScreen() {
             {selected == "explore" && (
               <Discovery discoveries={latestDiscoveries} />
             )}
-            {selected == "purchase health" &&
-              (!(adventurer?.beastHealth ?? 0 > 0) ? (
-                <PurchaseHealth
-                  isActive={activeMenu == 1}
-                  onEscape={() => setActiveMenu(0)}
-                />
-              ) : (
-                <p>You are in a battle!</p>
-              ))}
           </div>
           <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8">
             <VerticalKeyboardControl
@@ -170,15 +145,6 @@ export default function ActionsScreen() {
             {selected == "explore" && (
               <Discovery discoveries={latestDiscoveries} />
             )}
-            {selected == "purchase health" &&
-              (!(adventurer?.beastHealth ?? 0 > 0) ? (
-                <PurchaseHealth
-                  isActive={activeMenu == 1}
-                  onEscape={() => setActiveMenu(0)}
-                />
-              ) : (
-                <p>You are in a battle!</p>
-              ))}
             {selected == "kill adventurer" && <KillAdventurer />}
           </div>
         </>

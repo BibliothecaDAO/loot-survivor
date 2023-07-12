@@ -43,21 +43,21 @@ export const BattleDisplay = ({
   const damageLocation = battleData?.damageLocation ?? "";
   return (
     <div>
-      {battleData.attacker == "Adventurer" ? (
+      {battleData.fled ? (
+        <p>You fled the {beastName}!</p>
+      ) : battleData.attacker == "Adventurer" ? (
         battleData.beastHealth ?? 0 > 0 ? (
           <p>
             You attacked the {beastName} with a mighty strike and dealt{" "}
             {battleData.damageDealt} damage!
           </p>
-        ) : battleData.fled ? (
-          <p>You fled the {beastName}!</p>
         ) : (
           <p>
             You slayed the {beastName} after inflicting {battleData.damageDealt}{" "}
             damage!
           </p>
         )
-      ) : adventurer.health ?? 0 > 0 ? (
+      ) : (adventurer.health ?? 0) > 0 ? (
         battleData.damageTaken == 0 ? (
           <p>
             The {beastName} attacked your{" "}

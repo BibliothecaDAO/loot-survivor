@@ -208,7 +208,7 @@ export default function Home() {
       if (
         Array.isArray(data.battlesByTxHashQuery.battles) &&
         data.battlesByTxHashQuery.battles.some(
-          (data: Battle) => data.attacker == "Beast" && data.beastHealth == 0
+          (data: Battle) => data.attacker == "Beast" && adventurer?.health == 0
         )
       ) {
         const battles = data.lastBattleQuery

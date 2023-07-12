@@ -30,7 +30,7 @@ export default function KillAdventurer() {
   const purchaseHealthTx = {
     contractAddress: gameContract?.address ?? "",
     entrypoint: "slay_idle_adventurer",
-    calldata: [adventurerTarget],
+    calldata: [adventurerTarget, "0"],
     metadata: `Slaying ${adventurerTarget}`,
   };
 
@@ -82,7 +82,9 @@ export default function KillAdventurer() {
           handleSlayAdventurer();
           clickPlay();
         }}
-        disabled={idleTime < 300 || slayAdventurer?.health === 0}
+        disabled={
+          idleTime < IDLE_DEATH_PENALTY_BLOCKS || slayAdventurer?.health === 0
+        }
       >
         Kill
       </Button>

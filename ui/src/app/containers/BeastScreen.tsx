@@ -101,6 +101,7 @@ export default function BeastScreen() {
   const formatBattles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
     : [];
+  console.log(formatBattles);
 
   const lastBattle = data.lastBattleQuery?.battles[0];
 
