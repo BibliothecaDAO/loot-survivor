@@ -22,6 +22,7 @@ Table of contents
 
 - [Game Design](#🕹️-game-design)
 - [Technology](#⛓️-technology)
+- [Infrastructure] (#🖥️-infrastructure)
 - [Contributing](#🏗️-contributing)
 
 ---
@@ -128,7 +129,20 @@ Loot Survivor is a onchain game, designed to be immutable and permanently hosted
 
 - Client: Nextjs
 - Indexer: Apibara
+- Graphql: Strawberry, AIOHTTP
 - Contracts: Cairo 1.0
+
+---
+
+## 🖥️ Infrastructure
+
+### Servers
+
+#### Goerli
+
+- Indexer: Northflank loot-survivor-indexer
+- Mongo DB: Northflank loot-survivor-mongo-goerli
+- Graph QL: Northflank loot-survivor-graphql
 
 ---
 
