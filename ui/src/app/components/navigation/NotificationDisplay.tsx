@@ -72,13 +72,13 @@ const processAnimation = (
   } else if (type == "Explore") {
     if (notificationData?.discoveryType == "Beast") {
       if (
-        notificationData.data.some(
+        notificationData?.data?.some(
           (data: Discovery) => data.ambushed && (adventurer.health ?? 0) > 0
         )
       ) {
         return gameData.ADVENTURER_ANIMATIONS["Ambush"];
       } else if (
-        notificationData.data.some(
+        notificationData.data?.some(
           (data: Discovery) => data.ambushed && adventurer.health == 0
         )
       ) {

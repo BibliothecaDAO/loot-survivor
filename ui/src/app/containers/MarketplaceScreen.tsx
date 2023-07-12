@@ -31,7 +31,7 @@ export default function MarketplaceScreen() {
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const setScreen = useUIStore((state) => state.setScreen);
-
+  const profile = useUIStore((state) => state.profile);
   const { data, isLoading, refetch } = useQueriesStore();
 
   const currentTime = new Date().getTime();
@@ -91,11 +91,11 @@ export default function MarketplaceScreen() {
   //   return sortedItems;
   // }, [marketLatestItems, sortField, sortDirection]);
 
-  const sortedMarketLatestItems = [];
+  const sortedMarketLatestItems = marketLatestItems;
 
-  for (var i = 0; i < 20; i++) {
-    sortedMarketLatestItems.push(ItemTemplate);
-  }
+  // for (var i = 0; i < 20; i++) {
+  //   sortedMarketLatestItems.push(ItemTemplate);
+  // }
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -153,15 +153,15 @@ export default function MarketplaceScreen() {
 
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
 
-  const purchaseExists = useCallback(() => {
-    return calls.some((call: Call) => call.entrypoint == "buy_item");
-  }, [calls]);
+  // const purchaseExists = useCallback(() => {
+  //   return calls.some((call: Call) => call.entrypoint == "buy_item");
+  // }, [calls]);
 
-  useEffect(() => {
-    if (purchaseExists()) {
-      setScreen("upgrade");
-    }
-  }, [purchaseExists, setScreen]);
+  // useEffect(() => {
+  //   if (purchaseExists()) {
+  //     setScreen("upgrade");
+  //   }
+  // }, [purchaseExists, setScreen]);
 
   return (
     <>

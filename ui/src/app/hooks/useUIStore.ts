@@ -31,8 +31,8 @@ type State = {
   setDisplayHistory: (value: boolean) => void;
   displayCart: boolean;
   setDisplayCart: (value: boolean) => void;
-  purchasedItem: boolean;
-  setPurchasedItem: (value: boolean) => void;
+  // purchasedItem: boolean;
+  // setPurchasedItem: (value: boolean) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -54,8 +54,8 @@ const useUIStore = create<State>((set) => ({
   setDisplayHistory: (value) => set({ displayHistory: value }),
   displayCart: false,
   setDisplayCart: (value) => set({ displayCart: value }),
-  purchasedItem: false,
-  setPurchasedItem: (value) => set({ purchasedItem: value }),
+  // purchasedItem: false,
+  // setPurchasedItem: (value) => set({ purchasedItem: value }),
 }));
 
 export default useUIStore;

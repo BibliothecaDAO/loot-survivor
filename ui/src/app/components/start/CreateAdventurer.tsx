@@ -168,9 +168,6 @@ export const CreateAdventurer = ({
 
   const realm = getRealmNameById(parseInt(formData.homeRealmId) ?? 0);
 
-  console.log(formData.homeRealmId);
-  console.log(realm);
-
   return (
     <div className="flex items-center sm:w-1/2 mx-4 border border-terminal-green">
       <div className="flex flex-row w-full gap-2 p-2">

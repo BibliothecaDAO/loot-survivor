@@ -99,17 +99,7 @@ export default function ActionsScreen() {
       loading: loading,
     },
   ];
-
   if (onboarded) {
-    buttonsData.push({
-      id: 2,
-      label: "Buy Health",
-      icon: <HealthPotionsIcon />,
-      value: "purchase health",
-      action: async () => setActiveMenu(1),
-      disabled: (adventurer?.beastHealth ?? 0) > 0 || loading,
-      loading: loading,
-    });
     buttonsData.push({
       id: 3,
       label: "Kill Adventurer",
@@ -117,6 +107,18 @@ export default function ActionsScreen() {
       value: "kill adventurer",
       action: async () => setActiveMenu(2),
       disabled: loading,
+      loading: loading,
+    });
+  }
+
+  if (onboarded && adventurer && adventurer?.statUpgrades > 0) {
+    buttonsData.push({
+      id: 2,
+      label: "Buy Health",
+      icon: <HealthPotionsIcon />,
+      value: "purchase health",
+      action: async () => setActiveMenu(1),
+      disabled: (adventurer?.beastHealth ?? 0) > 0 || loading,
       loading: loading,
     });
   }

@@ -2,7 +2,6 @@
 
 import "./globals.css";
 import { StarknetConfig } from "@starknet-react/core";
-import useIndexerStore from "./hooks/useIndexerStore";
 import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
 import { connectors } from "./lib/connectors";
 export default function RootLayout({
@@ -10,9 +9,9 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // const client = useIndexerStore((state) => state.client);
   const client = new ApolloClient({
     uri: "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/goerli-graphql",
+    // uri: "http://localhost:8080/goerli-graphql",
     cache: new InMemoryCache(),
   });
 

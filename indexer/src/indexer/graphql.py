@@ -630,13 +630,28 @@ class DiscoveriesFilter:
     entity: Optional[FeltValueFilter] = None
     entityLevel: Optional[FeltValueFilter] = None
     entityHealth: Optional[FeltValueFilter] = None
-    special1: Optional[OrderByInput] = None
-    special2: Optional[Special1Filter] = None
-    special3: Optional[Special2Filter] = None
-    seed: Optional[FeltValueFilter] = None
+    special1: Optional[Special1Filter] = None
+    special2: Optional[Special2Filter] = None
+    special3: Optional[Special3Filter] = None
+    seed: Optional[HexValueFilter] = None
     ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[DateTimeFilter] = None
     txHash: Optional[HexValueFilter] = None
+
+
+@strawberry.input
+class BeastsFilter:
+    beast: Optional[BeastFilter] = None
+    adventurerId: Optional[FeltValueFilter] = None
+    seed: Optional[HexValueFilter] = None
+    special1: Optional[Special1Filter] = None
+    special2: Optional[Special2Filter] = None
+    special3: Optional[Special3Filter] = None
+    health: Optional[FeltValueFilter] = None
+    level: Optional[FeltValueFilter] = None
+    slainOnTime: Optional[DateTimeFilter] = None
+    createdTime: Optional[DateTimeFilter] = None
+    lastUpdatedTime: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -648,14 +663,14 @@ class BattlesFilter:
     special1: Optional[OrderByInput] = None
     special2: Optional[Special1Filter] = None
     special3: Optional[Special2Filter] = None
-    seed: Optional[FeltValueFilter] = None
+    seed: Optional[HexValueFilter] = None
     attacker: Optional[AttackerFilter] = None
     fled: Optional[BooleanFilter] = None
-    damageDealt: Optional[OrderByInput] = None
-    damageTaken: Optional[OrderByInput] = None
-    damageLocation: Optional[OrderByInput] = None
-    xpEarnedAdventurer: Optional[OrderByInput] = None
-    xpEarnedItems: Optional[OrderByInput] = None
+    damageDealt: Optional[FeltValueFilter] = None
+    damageTaken: Optional[FeltValueFilter] = None
+    damageLocation: Optional[SlotFilter] = None
+    xpEarnedAdventurer: Optional[FeltValueFilter] = None
+    xpEarnedItems: Optional[FeltValueFilter] = None
     goldEarned: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
     discoveryTime: Optional[DateTimeFilter] = None
@@ -744,6 +759,21 @@ class DiscoveriesOrderByInput:
     discoveryTime: Optional[OrderByInput] = None
     seed: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
+
+
+@strawberry.input
+class BeastsOrderByInput:
+    beast: Optional[OrderByInput] = None
+    adventurerId: Optional[OrderByInput] = None
+    seed: Optional[OrderByInput] = None
+    special1: Optional[OrderByInput] = None
+    special2: Optional[OrderByInput] = None
+    special3: Optional[OrderByInput] = None
+    health: Optional[OrderByInput] = None
+    level: Optional[OrderByInput] = None
+    slainOnTime: Optional[OrderByInput] = None
+    createdTime: Optional[OrderByInput] = None
+    lastUpdatedTime: Optional[OrderByInput] = None
 
 
 @strawberry.input
@@ -891,7 +921,7 @@ class Discovery:
     special3: Optional[Special3Value]
     ambushed: Optional[BooleanValue]
     discoveryTime: Optional[datetime]
-    seed: Optional[FeltValue]
+    seed: Optional[HexValue]
     txHash: Optional[HexValue]
 
     @classmethod
@@ -922,6 +952,37 @@ class Discovery:
 
 
 @strawberry.type
+class Beast:
+    beast: Optional[BeastValue] = None
+    adventurerId: Optional[FeltValue] = None
+    seed: Optional[HexValue] = None
+    special1: Optional[Special1Value] = None
+    special2: Optional[Special2Value] = None
+    special3: Optional[Special3Value] = None
+    health: Optional[FeltValue] = None
+    level: Optional[FeltValue] = None
+    slainOnTime: Optional[datetime] = None
+    createdTime: Optional[datetime] = None
+    lastUpdatedTime: Optional[datetime] = None
+
+    @classmethod
+    def from_mongo(cls, data):
+        return cls(
+            beast=data["beast"],
+            adventurerId=data["adventurerId"],
+            seed=data["seed"],
+            special1=data["special1"],
+            special2=data["special2"],
+            special3=data["special3"],
+            health=data["health"],
+            level=data["level"],
+            slainOnTime=data["slainOnTime"],
+            createdTime=data["createdTime"],
+            lastUpdatedTime=data["lastUpdatedTime"],
+        )
+
+
+@strawberry.type
 class Battle:
     adventurerId: Optional[FeltValue]
     beast: Optional[BeastValue]
@@ -930,7 +991,7 @@ class Battle:
     special1: Optional[Special1Value]
     special2: Optional[Special2Value]
     special3: Optional[Special3Value]
-    seed: Optional[FeltValue]
+    seed: Optional[HexValue]
     attacker: Optional[AttackerValue]
     fled: Optional[BooleanValue]
     damageDealt: Optional[FeltValue]
@@ -974,7 +1035,7 @@ class Item:
     adventurerId: Optional[FeltValue]
     cost: Optional[FeltValue]
     ownerAddress: Optional[HexValue]
-    owner: Optional[BooleanValue]
+    owner: Optional[bool]
     equipped: Optional[BooleanValue]
     createdTime: Optional[datetime]
     purchasedTime: Optional[datetime]
@@ -1249,6 +1310,55 @@ def get_discoveries(
     return [Discovery.from_mongo(t) for t in query]
 
 
+def get_beasts(
+    info,
+    where: Optional[BeastsFilter] = {},
+    limit: Optional[int] = 10,
+    skip: Optional[int] = 0,
+    orderBy: Optional[BeastsOrderByInput] = {},
+) -> List[Discovery]:
+    db = info.context["db"]
+
+    filter = {"_chain.valid_to": None}
+
+    if where:
+        processed_filters = process_filters(where)
+        for key, value in processed_filters.items():
+            if (
+                isinstance(value, StringFilter)
+                | isinstance(value, BeastFilter)
+                | isinstance(value, Special1Filter)
+                | isinstance(value, Special2Filter)
+                | isinstance(value, Special3Filter)
+            ):
+                filter[key] = get_str_filters(value)
+            elif isinstance(value, HexValueFilter):
+                filter[key] = get_hex_filters(value)
+            elif isinstance(value, DateTimeFilter):
+                filter[key] = get_date_filters(value)
+            elif isinstance(value, FeltValueFilter):
+                filter[key] = get_felt_filters(value)
+
+    sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
+
+    sort_var = "updated_at"
+    sort_dir = -1
+
+    for key, value in sort_options.items():
+        if value.asc:
+            sort_var = key
+            sort_dir = 1
+            break
+        if value.desc:
+            sort_var = key
+            sort_dir = -1
+            break
+
+    query = db["beasts"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
+
+    return [Beast.from_mongo(t) for t in query]
+
+
 def get_battles(
     info,
     where: Optional[BattlesFilter] = {},
@@ -1326,6 +1436,8 @@ def get_items(
                 filter[key] = get_date_filters(value)
             elif isinstance(value, FeltValueFilter):
                 filter[key] = get_felt_filters(value)
+            elif isinstance(value, BooleanFilter):
+                filter[key] = get_bool_filters(value)
 
     sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
 
@@ -1351,6 +1463,7 @@ class Query:
     adventurers: List[Adventurer] = strawberry.field(resolver=get_adventurers)
     scores: List[Score] = strawberry.field(resolver=get_scores)
     discoveries: List[Discovery] = strawberry.field(resolver=get_discoveries)
+    beasts: List[Beast] = strawberry.field(resolver=get_beasts)
     battles: List[Battle] = strawberry.field(resolver=get_battles)
     items: List[Item] = strawberry.field(resolver=get_items)
 

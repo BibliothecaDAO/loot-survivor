@@ -23,13 +23,16 @@ export default function AdventurerScreen() {
 
   const txAccepted = useLoadingStore((state) => state.txAccepted);
 
+  const owner = account?.address ? padAddress(account.address) : "";
+
+  // TODO: Remove polling
   useCustomQuery(
     "adventurersByOwnerQuery",
     getAdventurersByOwner,
     {
-      owner: padAddress(account?.address ?? ""),
+      owner: owner,
     },
-    txAccepted
+    true
   );
 
   const adventurers = data.adventurersByOwnerQuery
@@ -41,14 +44,14 @@ export default function AdventurerScreen() {
       id: 1,
       label: "Choose Adventurer",
       value: "choose adventurer",
-      action: () => setSelected,
+      action: () => setSelected("choose adventurer"),
       disabled: adventurers.length == 0,
     },
     {
       id: 2,
       label: "Create Adventurer",
       value: "create adventurer",
-      action: () => setSelected,
+      action: () => setSelected("create adventurer"),
       disabled: false,
     },
   ];
@@ -56,6 +59,7 @@ export default function AdventurerScreen() {
   if (loading) {
     return <LootIconLoader />;
   }
+
   return (
     <>
       <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap">

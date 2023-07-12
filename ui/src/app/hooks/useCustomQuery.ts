@@ -23,11 +23,9 @@ const useCustomQuery = (
     query,
     {
       variables: variables,
-      // skip: skip,
+      // skip: !variables?.owner,
     }
   );
-
-  console.log(error);
 
   const refetchWrapper = useCallback(async () => {
     try {
@@ -50,10 +48,6 @@ const useCustomQuery = (
       stopPolling();
     }
   }, [shouldPoll, startPolling, stopPolling]);
-
-  // useEffect(() => {
-  //   refetch();
-  // }, []);
 };
 
 export default useCustomQuery;

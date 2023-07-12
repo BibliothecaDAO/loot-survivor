@@ -94,7 +94,7 @@ export default function Home() {
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
-  const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
+  // const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const statUpgrades = adventurer?.statUpgrades ?? 0;
@@ -170,8 +170,6 @@ export default function Home() {
   });
 
   useEffect(() => {
-    // play();
-
     return () => {
       stop();
     };
@@ -339,7 +337,7 @@ export default function Home() {
           },
           {
             id: 6,
-            label: "Upgrade",
+            label: <span>{statUpgrades > 0 ? "Upgrade!" : "Upgrade"}</span>,
             screen: "upgrade",
             disabled: !(statUpgrades > 0),
           },
@@ -387,7 +385,7 @@ export default function Home() {
           },
           {
             id: 5,
-            label: "Upgrade",
+            label: <span>{statUpgrades > 0 ? "Upgrade !" : "Upgrade"}</span>,
             screen: "upgrade",
             disabled: !(statUpgrades > 0),
           },
@@ -408,13 +406,13 @@ export default function Home() {
     }
   }, [adventurer, account, onboarded, hasBeast, purchaseExists]);
 
-  useEffect(() => {
-    if (purchaseExists()) {
-      setPurchasedItem(true);
-    } else {
-      setPurchasedItem(false);
-    }
-  }, [purchaseExists, setPurchasedItem]);
+  // useEffect(() => {
+  //   if (purchaseExists()) {
+  //     setPurchasedItem(true);
+  //   } else {
+  //     setPurchasedItem(false);
+  //   }
+  // }, [purchaseExists, setPurchasedItem]);
 
   useEffect(() => {
     if (!onboarded) {

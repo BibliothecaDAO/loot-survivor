@@ -755,13 +755,13 @@ export class GameData {
     };
 
     this.STATS = {
-      2: "Strength",
-      3: "Dexterity",
-      4: "Vitality",
-      5: "Intelligence",
-      6: "Wisdom",
-      7: "Charisma",
-      8: "Luck",
+      0: "Strength",
+      1: "Dexterity",
+      2: "Vitality",
+      3: "Intelligence",
+      4: "Wisdom",
+      5: "Charisma",
+      6: "Luck",
     };
 
     this.OBSTACLES = {

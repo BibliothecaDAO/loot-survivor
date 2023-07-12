@@ -35,7 +35,6 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
       set({ calls: [], error: false });
       return tx;
     } catch (error) {
-      console.log(error);
       setError(true);
       resetCalls();
     }

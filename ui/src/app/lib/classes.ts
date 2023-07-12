@@ -29,7 +29,7 @@ export class AdventurerClass implements Adventurer {
   neck?: string; // Necklace of the adventure
   ring?: string; // Ring of the adventure
   beastHealth?: number; // Beast health adventurer is engaging
-  statUpgrades?: number; // Stat upgrades adventurer has
+  statUpgrades: number | 0; // Stat upgrades adventurer has
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
@@ -95,7 +95,7 @@ export class AdventurerClass implements Adventurer {
     this.neck = neck;
     this.ring = ring;
     this.beastHealth = beastHealth;
-    this.statUpgrades = statUpgrades;
+    this.statUpgrades = statUpgrades || 0;
     this.gold = gold;
     this.createdTime = createdTime;
     this.lastUpdatedTime = lastUpdatedTime;

@@ -44,6 +44,7 @@ const BATTLE_FIELDS = `
   special1
   special2
   special3
+  seed
   attacker
   fled
   damageDealt
@@ -102,6 +103,7 @@ const DISCOVERY_FIELDS = `
   special1
   special2
   special3
+  seed
   ambushed
   discoveryTime
   txHash
@@ -110,6 +112,26 @@ const DISCOVERY_FIELDS = `
 const DISCOVERIES_FRAGMENT = `
   fragment DiscoveryFields on Discovery {
     ${DISCOVERY_FIELDS}
+  }
+`;
+
+const BEAST_FIELDS = `
+  adventurerId
+  beast
+  createdTime
+  health
+  lastUpdatedTime
+  level
+  seed
+  slainOnTime
+  special1
+  special2
+  special3
+`;
+
+const BEASTS_FRAGMENT = `
+  fragment BeastFields on Beast {
+    ${BEAST_FIELDS}
   }
 `;
 
@@ -259,13 +281,21 @@ const getAdventurersByXPPaginated = gql`
   }
 `;
 
-const getBeastById = gql`
-  ${DISCOVERIES_FRAGMENT}
-  query get_beast_by_id($id: FeltValue, $adventurerId: FeltValue) {
-    discoveries(
-      where: { entityId: { eq: $id }, adventurerId: { eq: $adventurerId } }
+const getBeast = gql`
+  ${BEASTS_FRAGMENT}
+  query get_beast_by_id(
+    $beast: BeastValue
+    $adventurerId: FeltValue
+    $seed: HexValue
+  ) {
+    beasts(
+      where: {
+        beast: { eq: $beast }
+        adventurerId: { eq: $adventurerId }
+        seed: { eq: $seed }
+      }
     ) {
-      ...DiscoveryFields
+      ...BeastFields
     }
   }
 `;
@@ -365,7 +395,7 @@ const getLatestMarketItems = gql`
     items(
       where: { adventurerId: { eq: $adventurerId } }
       limit: 20
-      orderBy: { createdBlock: { desc: true } }
+      orderBy: { createdTime: { desc: true } }
     ) {
       ...ItemFields
     }
@@ -375,7 +405,10 @@ const getLatestMarketItems = gql`
 const getItemsByAdventurer = gql`
   ${ITEMS_FRAGMENT}
   query get_items_by_adventurer($adventurerId: FeltValue) {
-    items(where: { adventurerId: { eq: $adventurerId } }, limit: 10000000) {
+    items(
+      where: { adventurerId: { eq: $adventurerId }, owner: { eq: true } }
+      limit: 10000000
+    ) {
       ...ItemFields
     }
   }
@@ -415,7 +448,7 @@ export {
   getAdventurersInListByXp,
   getAdventurerByGold,
   getBeastsByAdventurer,
-  getBeastById,
+  getBeast,
   getLatestBattlesByAdventurer,
   getBattlesByBeast,
   getLastBattleByAdventurer,

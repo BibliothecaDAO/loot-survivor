@@ -43,9 +43,20 @@ const MarketplaceRow = ({
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { hashes, transactions } = useTransactionManager();
   const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
-  const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
+  // const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
 
   const transactingMarketIds = (transactions[0]?.metadata as Metadata)?.items;
+
+  const gameData = new GameData();
+
+  const singlePurchaseExists = (item: string) => {
+    return calls.some(
+      (call: Call) =>
+        call.entrypoint == "buy_item" &&
+        Array.isArray(call.calldata) &&
+        call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
+    );
+  };
 
   const purchaseExists = () => {
     return calls.some((call: Call) => call.entrypoint == "buy_item");
@@ -117,6 +128,7 @@ const MarketplaceRow = ({
         entrypoint: "buy_item",
         calldata: [
           adventurer?.id?.toString() ?? "",
+          "0",
           getKeyFromValue(gameData.ITEMS, item)?.toString() ?? "",
           equip ? "1" : "0",
         ],
@@ -167,7 +179,7 @@ const MarketplaceRow = ({
                 onClick={() => {
                   handlePurchase(item.item ?? "", tier, true);
                   setShowEquipQ(false);
-                  setPurchasedItem(true);
+                  // setPurchasedItem(true);
                 }}
               >
                 Yes
@@ -176,7 +188,7 @@ const MarketplaceRow = ({
                 onClick={() => {
                   handlePurchase(item.item ?? "", tier, false);
                   setShowEquipQ(false);
-                  setPurchasedItem(true);
+                  // setPurchasedItem(true);
                 }}
               >
                 No
@@ -192,7 +204,7 @@ const MarketplaceRow = ({
               disabled={
                 checkPurchaseBalance() ||
                 checkTransacting(item.item ?? "") ||
-                purchaseExists() ||
+                singlePurchaseExists(item.item ?? "") ||
                 (isMobileDevice && showEquipQ && isActive)
               }
               className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
@@ -209,7 +221,7 @@ const MarketplaceRow = ({
             onClick={() => {
               handlePurchase(item.item ?? "", tier, true);
               setShowEquipQ(false);
-              setPurchasedItem(true);
+              // setPurchasedItem(true);
             }}
           >
             Yes
@@ -218,7 +230,7 @@ const MarketplaceRow = ({
             onClick={() => {
               handlePurchase(item.item ?? "", tier, false);
               setShowEquipQ(false);
-              setPurchasedItem(true);
+              // setPurchasedItem(true);
             }}
           >
             No
