@@ -1,16 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import { Metadata } from "../../types";
 import { Button } from "../buttons/Button";
 import { MdClose } from "react-icons/md";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useQueriesStore } from "../../hooks/useQueryStore";
-import { processItemName } from "../../lib/utils";
+import { processItemName, getItemPrice, getItemData } from "../../lib/utils";
 import useUIStore from "../../hooks/useUIStore";
 import { useUiSounds } from "../../hooks/useUiSound";
 import { soundSelector } from "../../hooks/useUiSound";
+import { Item, NullItem, Call, NullAdventurer } from "../../types";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -38,7 +38,7 @@ const TransactionCart: React.FC = () => {
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
 
-  const marketItems = data.latestMarketItemsQuery
+  const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
     : [];
 
@@ -46,43 +46,33 @@ const TransactionCart: React.FC = () => {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  // const reorderCards = useCallback((dragIndex: number, hoverIndex: number) => {
-  //   txQueue.reorderQueue(dragIndex, hoverIndex);
-  // }, []);
+  // const slayedAdventurer = data.adventurerToSlayQuery
+  //   ? data.adventurerToSlayQuery.adventurers?[0]
+  //   : NullAdventurer;
 
-  const handleLoadData = () => {
+  const handleLoadData = useCallback(() => {
     for (let call of calls) {
-      if (call.entrypoint === "mint_daily_items") {
-        setNotification([...notification, "New items minted!"]);
-        setLoadingQuery("latestMarketItemsQuery");
-        setLoadingMessage([...loadingMessage, "Minting Items"]);
-      } else if (call.entrypoint === "bid_on_item") {
-        const item = marketItems.find(
-          (item: any) => item.marketId == call.calldata[0]
+      if (call.entrypoint === "buy_item") {
+        const item = items.find(
+          (item: Item) =>
+            item.item == (Array.isArray(call.calldata) && call.calldata[0])
         );
-        const itemName = processItemName(item);
+        const itemName = processItemName(item ?? NullItem);
+        const { tier } = getItemData(item?.item ?? "");
         setNotification([
           ...notification,
-          `You bid ${call.calldata[4]} gold on ${item?.item && itemName}`,
+          `You purchased ${item?.item && itemName} for ${getItemPrice(
+            tier
+          )} gold`,
         ]);
         setLoadingQuery("latestMarketItemsQuery");
-        setLoadingMessage([...loadingMessage, "Bidding"]);
-      } else if (call.entrypoint === "claim_item") {
-        const item = marketItems.find(
-          (item: any) => item.marketId == call.calldata[0]
-        );
-        const itemName = processItemName(item);
-        setNotification([
-          ...notification,
-          `You claimed ${item?.item && itemName}!`,
-        ]);
-        setLoadingQuery("latestMarketItemsQuery");
-        setLoadingMessage([...loadingMessage, "Claiming"]);
+        setLoadingMessage([...loadingMessage, "Purchasing"]);
       } else if (call.entrypoint === "equip_item") {
         const item = ownedItems.find(
-          (item: any) => item.id == call.calldata[2]
+          (item: Item) =>
+            item.item == (Array.isArray(call.calldata) && call.calldata[2])
         );
-        const itemName = processItemName(item);
+        const itemName = processItemName(item ?? NullItem);
         setNotification([
           ...notification,
           `You equipped ${item?.item && itemName}!`,
@@ -93,19 +83,31 @@ const TransactionCart: React.FC = () => {
         setNotification([
           ...notification,
           `You purchased ${
-            call.calldata[2] && parseInt(call.calldata[2].toString()) * 10
+            Array.isArray(call.calldata) &&
+            call.calldata[2] &&
+            parseInt(call.calldata[2].toString()) * 10
           } health!`,
-          // `You purchased ${parseInt(call.calldata[2].toString()) * 10} health!`,
         ]);
         setLoadingQuery("adventurerByIdQuery");
         setLoadingMessage([...loadingMessage, "Purchasing Health"]);
+      } else if (call.entrypoint === "slay_idle_adventurer") {
+        setNotification([
+          ...notification,
+          `You slayed ${
+            Array.isArray(call.calldata) &&
+            call.calldata[0] &&
+            parseInt(call.calldata[0].toString())
+          }`,
+        ]);
+        setLoadingQuery("adventurerByIdQuery");
+        setLoadingMessage([...loadingMessage, "Slaying Adventurer"]);
       }
     }
-  };
+  }, [calls, items, ownedItems, loadingMessage, notification]);
 
   useEffect(() => {
     handleLoadData();
-  }, [calls]);
+  }, [calls, handleLoadData]);
 
   return (
     <>
@@ -114,7 +116,7 @@ const TransactionCart: React.FC = () => {
           <p className="text-2xl">TRANSACTIONS</p>
           <div className="w-full border border-terminal-green "></div>
           <div className="flex flex-col h-[200px] overflow-auto">
-            {calls.map((call: any, i: number) => (
+            {calls.map((call: Call, i: number) => (
               <div key={i}>
                 <div className="flex flex-col gap-2">
                   {call && (
@@ -140,7 +142,7 @@ const TransactionCart: React.FC = () => {
           <div className="flex flex-row gap-2 absolute bottom-4">
             <Button
               onClick={async () => {
-                const marketIds: any[] = [];
+                const items: string[] = [];
 
                 for (const dict of calls) {
                   if (
@@ -148,7 +150,9 @@ const TransactionCart: React.FC = () => {
                     (dict["entrypoint"] === "bid_on_item" ||
                       dict["entrypoint"] === "claim_item")
                   ) {
-                    marketIds.push(dict.calldata[0]);
+                    if (Array.isArray(dict.calldata)) {
+                      items.push(dict.calldata[0]?.toString() ?? "");
+                    }
                   }
                 }
                 startLoading(
@@ -166,7 +170,7 @@ const TransactionCart: React.FC = () => {
                       hash: tx.transaction_hash,
                       metadata: {
                         method: "Multicall",
-                        marketIds: marketIds,
+                        marketIds: items,
                       },
                     });
                   }

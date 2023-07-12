@@ -1,4 +1,10 @@
-import React, { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import React, {
+  useState,
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useCallback,
+} from "react";
 import { useContracts } from "../../hooks/useContracts";
 import { stringToFelt } from "../../lib/utils";
 import {
@@ -12,22 +18,13 @@ import useLoadingStore from "../../hooks/useLoadingStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import useUIStore from "../../hooks/useUIStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
+import { FormData, Adventurer } from "@/app/types";
+import { getRealmNameById } from "../../lib/utils";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
   onEscape: () => void;
-  adventurers: any[];
-}
-
-interface FormData {
-  name: string;
-  race: string;
-  homeRealmId: string;
-  order: string;
-  startingWeapon: string;
-  imageHash1: string;
-  imageHash2: string;
-  interfaceaddress: string;
+  adventurers: Adventurer[];
 }
 
 export const CreateAdventurer = ({
@@ -39,15 +36,11 @@ export const CreateAdventurer = ({
   const { addTransaction } = useTransactionManager();
   const formatAddress = account ? account.address : "0x0";
   const [formData, setFormData] = useState<FormData>({
-    name: "",
-    race: "",
-    homeRealmId: "1",
-    order: "",
     startingWeapon: "",
-    imageHash1: "1",
-    imageHash2: "1",
-    interfaceaddress:
-      "0x07642A1c8D575B0c0f9a7AD7cCEb5517c02f36E5F3B36B25429Cc7C99383ed0a",
+    name: "",
+    homeRealmId: "",
+    race: "",
+    order: "",
   });
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const setScreen = useUIStore((state) => state.setScreen);
@@ -60,7 +53,7 @@ export const CreateAdventurer = ({
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const { writeAsync } = useContractWrite({ calls });
-  const { adventurerContract, lordsContract } = useContracts();
+  const { gameContract, lordsContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const gameData = new GameData();
   const [firstAdventurer, setFirstAdventurer] = useState(false);
@@ -84,29 +77,27 @@ export const CreateAdventurer = ({
     };
     addToCalls(mintLords);
 
-    const approveLords = {
+    const approveLordsTx = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "approve",
-      calldata: [adventurerContract?.address, (100 * 10 ** 18).toString(), "0"],
+      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
     };
-    addToCalls(approveLords);
+    addToCalls(approveLordsTx);
 
-    const mintAdventurer = {
-      contractAddress: adventurerContract?.address ?? "",
-      entrypoint: "mint_with_starting_weapon",
+    const mintAdventurerTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "start",
       calldata: [
-        formatAddress,
-        getKeyFromValue(gameData.RACES, formData.race)?.toString(),
-        formData.homeRealmId,
-        stringToFelt(formData.name),
-        getKeyFromValue(gameData.ORDERS, formData.order) ?? "",
-        formData.imageHash1,
-        formData.imageHash2,
+        "0x043f721181BdA07742453f9C9C0AD27a6c04e39D665B73A583b2E5c166B6F77e",
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
-        formData.interfaceaddress,
+        parseInt(stringToFelt(formData.name)).toString(),
+        formData.homeRealmId,
+        getKeyFromValue(gameData.RACES, formData.race)?.toString() ?? "",
+        "1",
       ],
     };
-    addToCalls(mintAdventurer);
+
+    addToCalls(mintAdventurerTx);
     startLoading(
       "Create",
       "Spawning Adventurer",
@@ -130,31 +121,32 @@ export const CreateAdventurer = ({
     }
   };
 
-  const handleKeyDown = (
-    event: React.KeyboardEvent<HTMLInputElement> | KeyboardEvent
-  ) => {
-    if (!event.currentTarget) return;
-    const form = (event.currentTarget as HTMLElement).closest("form");
-    if (!form) return;
-    const inputs = Array.from(form.querySelectorAll("input, select"));
-    switch (event.key) {
-      case "ArrowDown":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.min(prev + 1, inputs.length - 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowUp":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-      case "Escape":
-        onEscape();
-        break;
-    }
-    (inputs[selectedIndex] as HTMLElement).focus();
-  };
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement> | KeyboardEvent) => {
+      if (!event.currentTarget) return;
+      const form = (event.currentTarget as HTMLElement).closest("form");
+      if (!form) return;
+      const inputs = Array.from(form.querySelectorAll("input, select"));
+      switch (event.key) {
+        case "ArrowDown":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.min(prev + 1, inputs.length - 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowUp":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+        case "Escape":
+          onEscape();
+          break;
+      }
+      (inputs[selectedIndex] as HTMLElement).focus();
+    },
+    [selectedIndex, onEscape]
+  );
 
   useEffect(() => {
     if (isActive) {
@@ -165,57 +157,67 @@ export const CreateAdventurer = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isActive, selectedIndex]);
+  }, [isActive, selectedIndex, handleKeyDown]);
 
   useEffect(() => {
     if (adventurers[0] && firstAdventurer) {
       setScreen("actions");
       setAdventurer(adventurers[0]);
     }
-  }, [adventurers, firstAdventurer]);
+  }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
+
+  const realm = getRealmNameById(parseInt(formData.homeRealmId) ?? 0);
+
+  console.log(formData.homeRealmId);
+  console.log(realm);
 
   return (
-    <div className="flex flex-row w-full">
-      <div className="flex items-center sm:w-1/2 mx-2 border border-terminal-green">
-        <div className="flex flex-row w-full gap-2 p-1">
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col w-full gap-2 p-1 text-lg sm:text-2xl"
-          >
-            <label className="flex justify-between">
-              <span className="self-center">Name:</span>
+    <div className="flex items-center sm:w-1/2 mx-4 border border-terminal-green">
+      <div className="flex flex-row w-full gap-2 p-2">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col w-full gap-2 p-1 text-lg sm:text-2xl"
+        >
+          <label className="flex justify-between">
+            <span className="self-center">Name:</span>
 
-              <input
-                type="text"
-                name="name"
-                onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black border border-slate-500"
-                onKeyDown={handleKeyDown}
-                maxLength={31}
-              />
-            </label>
-            <label className="flex justify-between">
-              <span className="self-center">Race:</span>
-              <select
-                name="race"
-                onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black"
-              >
-                <option value="">Select a race</option>
-                <option value="Elf">Elf</option>
-                <option value="Fox">Fox</option>
-                <option value="Giant">Giant</option>
-                <option value="Human">Human</option>
-                <option value="Orc">Orc</option>
-                <option value="Demon">Demon</option>
-                <option value="Goblin">Goblin</option>
-                <option value="Fish">Fish</option>
-                <option value="Cat">Cat</option>
-                <option value="Frog">Frog</option>
-              </select>
-            </label>
-            <label className="flex justify-between">
-              <span className="self-center">Home Realm:</span>
+            <input
+              type="text"
+              name="name"
+              onChange={handleChange}
+              className="p-1 m-2 bg-terminal-black border border-slate-500"
+              onKeyDown={handleKeyDown}
+              maxLength={16}
+            />
+          </label>
+          <label className="flex justify-between">
+            <span className="self-center">Race:</span>
+            <select
+              name="race"
+              onChange={handleChange}
+              className="p-1 m-2 bg-terminal-black"
+            >
+              <option value="">Select a race</option>
+              <option value="Elf">Elf</option>
+              <option value="Fox">Fox</option>
+              <option value="Giant">Giant</option>
+              <option value="Human">Human</option>
+              <option value="Orc">Orc</option>
+              <option value="Demon">Demon</option>
+              <option value="Goblin">Goblin</option>
+              <option value="Fish">Fish</option>
+              <option value="Cat">Cat</option>
+              <option value="Frog">Frog</option>
+            </select>
+          </label>
+          <label className="flex justify-between">
+            <span className="self-center">Home Realm:</span>
+            <span>
+              {formData.homeRealmId && (
+                <span className="self-center text-terminal-yellow">
+                  {realm?.properties.name}
+                </span>
+              )}
               <input
                 type="number"
                 name="homeRealmId"
@@ -224,59 +226,29 @@ export const CreateAdventurer = ({
                 onChange={handleChange}
                 className="p-1 m-2 bg-terminal-black border border-slate-500"
               />
-            </label>
-            <label className="flex justify-between">
-              <span className="self-center">Order of Divinity:</span>
-              <select
-                name="order"
-                onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black"
-              >
-                <option value="">Select an order</option>
-                <optgroup label="Order of Light">
-                  <option value="Power">Power</option>
-                  <option value="Giants">Giants</option>
-                  <option value="Perfection">Perfection</option>
-                  <option value="Brilliance">Brilliance</option>
-                  <option value="Enlightenment">Enlightenment</option>
-                  <option value="Protection">Protection</option>
-                  <option value="Skill">Skill</option>
-                  <option value="Titans">Titans</option>
-                </optgroup>
-                <optgroup label="Order of Dark">
-                  <option value="Twins">Twins</option>
-                  <option value="Detection">Detection</option>
-                  <option value="Reflection">Reflection</option>
-                  <option value="Fox">Fox</option>
-                  <option value="Vitriol">Vitriol</option>
-                  <option value="Fury">Fury</option>
-                  <option value="Rage">Rage</option>
-                  <option value="Anger">Anger</option>
-                </optgroup>
-              </select>
-            </label>
-            <label className="flex justify-between">
-              <span className="self-center">Starting Weapon:</span>
-              <select
-                name="startingWeapon"
-                onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black"
-              >
-                <option value="">Select a weapon</option>
-                <option value="Wand">Wand</option>
-                <option value="Book">Book</option>
-                <option value="Short Sword">Short Sword</option>
-                <option value="Club">Club</option>
-              </select>
-            </label>
-            <button
-              type="submit"
-              className="p-2 m-2 border bg-terminal-black border-terminal-green hover:bg-terminal-green/80 hover:animate-pulse hover:text-black"
+            </span>
+          </label>
+          <label className="flex justify-between">
+            <span className="self-center">Starting Weapon:</span>
+            <select
+              name="startingWeapon"
+              onChange={handleChange}
+              className="p-1 m-2 bg-terminal-black"
             >
-              Spawn
-            </button>
-          </form>
-        </div>
+              <option value="">Select a weapon</option>
+              <option value="Wand">Wand</option>
+              <option value="Book">Book</option>
+              <option value="Short Sword">Short Sword</option>
+              <option value="Club">Club</option>
+            </select>
+          </label>
+          <button
+            type="submit"
+            className="p-2 m-2 border bg-terminal-black border-terminal-green hover:bg-terminal-green/80 hover:animate-pulse hover:text-black"
+          >
+            Spawn
+          </button>
+        </form>
       </div>
     </div>
   );

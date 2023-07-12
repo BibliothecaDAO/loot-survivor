@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "../buttons/Button";
 import { useConnectors, useAccount } from "@starknet-react/core";
-import { AddDevnetButton, SwitchToDevnetButton } from "../DevnetConnectors";
+import {
+  AddDevnetButton,
+  SwitchToDevnetButton,
+} from "../archived/DevnetConnectors";
 import useUIStore from "../../hooks/useUIStore";
 
 interface WalletSelectProps {
@@ -63,7 +66,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
         setConnected(true);
       }
     }
-  }, [account, screen]);
+  }, [account, screen, setConnected]);
 
   return (
     <div className="flex flex-col p-8">
@@ -78,7 +81,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
                   key={index}
                   className="w-full"
                 >
-                  Connect {connector.id()}
+                  Connect {connector.id}
                 </Button>
               ))
             ) : (
@@ -92,14 +95,14 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
             ) ? (
               connectors.map((connector, index) => (
                 <>
-                  {connector.id() == "argentX" ? (
+                  {connector.id == "argentX" ? (
                     <Button
                       onClick={() => connect(connector)}
                       key={index}
                       className="w-full"
                       disabled={account ? true : false}
                     >
-                      Connect {connector.id()}
+                      Connect {connector.id}
                     </Button>
                   ) : null}
                 </>

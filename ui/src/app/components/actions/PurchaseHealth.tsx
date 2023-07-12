@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import HealthSlider from "../HealthSlider";
+import { useState, useEffect, useCallback } from "react";
+import HealthSlider from "./HealthSlider";
 import { Button } from "../buttons/Button";
 import { useContracts } from "../../hooks/useContracts";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
@@ -12,24 +12,28 @@ interface PurchaseHealthProps {
 
 const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
   const [healthAmount, setHealthAmount] = useState(1);
-  const { adventurerContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
   const purchaseHealthTx = {
-    contractAddress: adventurerContract?.address ?? "",
+    contractAddress: gameContract?.address ?? "",
     entrypoint: "purchase_health",
-    calldata: [adventurer?.id ?? "", "0", healthAmount],
+    calldata: [adventurer?.id?.toString() ?? "", healthAmount.toString()],
     metadata: `Purchasing ${healthAmount * 10} health`,
   };
 
   let purchaseGoldAmount;
 
-  if (adventurer && adventurer?.level - adventurer?.charisma <= 3) {
+  if (
+    adventurer &&
+    (adventurer?.level ?? 0) - (adventurer?.charisma ?? 0) <= 3
+  ) {
     purchaseGoldAmount = healthAmount * 3;
   } else {
     let discount =
-      (adventurer && adventurer?.level - adventurer?.charisma) || 0;
+      (adventurer && (adventurer?.level ?? 0) - (adventurer?.charisma ?? 0)) ||
+      0;
     purchaseGoldAmount = healthAmount * (3 * discount);
   }
 
@@ -40,25 +44,28 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
     addToCalls(purchaseHealthTx);
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowRight":
-        setHealthAmount((prev) => {
-          const newAmount = Math.min(prev + 1, 10);
-          return newAmount;
-        });
-        break;
-      case "ArrowLeft":
-        setHealthAmount((prev) => {
-          const newAmount = Math.max(prev - 1, 1);
-          return newAmount;
-        });
-        break;
-      case "Enter":
-        handlePurchaseHealth();
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowRight":
+          setHealthAmount((prev) => {
+            const newAmount = Math.min(prev + 1, 10);
+            return newAmount;
+          });
+          break;
+        case "ArrowLeft":
+          setHealthAmount((prev) => {
+            const newAmount = Math.max(prev - 1, 1);
+            return newAmount;
+          });
+          break;
+        case "Enter":
+          handlePurchaseHealth();
+          break;
+      }
+    },
+    [healthAmount]
+  );
 
   useEffect(() => {
     if (isActive) {
@@ -69,10 +76,10 @@ const PurchaseHealth = ({ isActive, onEscape }: PurchaseHealthProps) => {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isActive, healthAmount]);
+  }, [isActive, healthAmount, handleKeyDown]);
 
   return (
-    <div className="flex flex-col gap-5 p-5 sm:p-0 m-auto">
+    <div className="flex flex-col gap-5 p-5 sm:p-0 md:p-2">
       <HealthSlider
         purchaseAmount={healthAmount}
         setPurchaseAmount={setHealthAmount}

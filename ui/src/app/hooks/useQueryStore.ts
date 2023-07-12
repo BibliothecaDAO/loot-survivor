@@ -1,14 +1,14 @@
 import { create } from "zustand";
 import { isEqual } from "lodash";
+import { Battle, Item, Adventurer, Discovery, Score } from "../types";
 
 export type QueryKey =
-  | "beastsQuery"
-  | "beastsByAdventurerQuery"
   | "lastBattleQuery"
+  | "lastBeastBattleQuery"
   | "battlesByAdventurerQuery"
-  | "battlesByBeastQuery"
   | "battlesByTxHashQuery"
-  | "beastByIdQuery"
+  | "battlesByBeastQuery"
+  | "lastBeastQuery"
   | "discoveriesQuery"
   | "latestDiscoveriesQuery"
   | "discoveryByTxHashQuery"
@@ -17,17 +17,60 @@ export type QueryKey =
   | "leaderboardByIdQuery"
   | "adventurersByGoldQuery"
   | "adventurersByXPQuery"
-  | "unclaimedItemsByAdventurerQuery"
-  | "latestMarketItemsNumberQuery"
-  | "latestMarketItemsQuery"
   | "adventurersInListQuery"
   | "adventurersInListByXpQuery"
   | "itemsByAdventurerQuery"
   | "itemsByProfileQuery"
-  | "topScoresQuery";
+  | "topScoresQuery"
+  | "latestMarketItemsQuery"
+  | "adventurerToSlayQuery";
+
+interface BattlesResult {
+  battles: Battle[];
+}
+
+interface DiscoveriesResult {
+  discoveries: Discovery[];
+}
+
+interface AdventurersResult {
+  adventurers: Adventurer[];
+}
+
+interface ItemsResult {
+  items: Item[];
+}
+
+interface ScoresResult {
+  scores: Score[];
+}
+
+interface InitialData {
+  lastBattleQuery: BattlesResult | null;
+  lastBeastBattleQuery: BattlesResult | null;
+  battlesByAdventurerQuery: BattlesResult | null;
+  battlesByTxHashQuery: BattlesResult | null;
+  battlesByBeastQuery: BattlesResult | null;
+  lastBeastQuery: DiscoveriesResult | null;
+  discoveriesQuery: DiscoveriesResult | null;
+  latestDiscoveriesQuery: DiscoveriesResult | null;
+  discoveryByTxHashQuery: DiscoveriesResult | null;
+  adventurersByOwnerQuery: AdventurersResult | null;
+  adventurerByIdQuery: AdventurersResult | null;
+  leaderboardByIdQuery: AdventurersResult | null;
+  adventurersByGoldQuery: AdventurersResult | null;
+  adventurersByXPQuery: AdventurersResult | null;
+  adventurersInListQuery: AdventurersResult | null;
+  adventurersInListByXpQuery: AdventurersResult | null;
+  itemsByAdventurerQuery: ItemsResult | null;
+  itemsByProfileQuery: ItemsResult | null;
+  topScoresQuery: ScoresResult | null;
+  latestMarketItemsQuery: ItemsResult | null;
+  adventurerToSlayQuery: AdventurersResult | null;
+}
 
 type QueriesState = {
-  data: Record<QueryKey, any>;
+  data: InitialData;
   isLoading: Record<QueryKey, boolean>;
   isDataUpdated: Record<QueryKey, boolean> & { global: boolean };
   refetchFunctions: Record<QueryKey, () => Promise<any>>;
@@ -41,14 +84,13 @@ type QueriesState = {
   resetDataUpdated: (queryKey?: QueryKey) => void;
 };
 
-const initialData: Record<QueryKey, any> = {
-  beastsQuery: null,
-  beastsByAdventurerQuery: null,
+const initialData: InitialData = {
   lastBattleQuery: null,
+  lastBeastBattleQuery: null,
   battlesByAdventurerQuery: null,
-  battlesByBeastQuery: null,
   battlesByTxHashQuery: null,
-  beastByIdQuery: null,
+  battlesByBeastQuery: null,
+  lastBeastQuery: null,
   discoveriesQuery: null,
   latestDiscoveriesQuery: null,
   discoveryByTxHashQuery: null,
@@ -57,24 +99,22 @@ const initialData: Record<QueryKey, any> = {
   leaderboardByIdQuery: null,
   adventurersByGoldQuery: null,
   adventurersByXPQuery: null,
-  unclaimedItemsByAdventurerQuery: null,
-  latestMarketItemsNumberQuery: null,
-  latestMarketItemsQuery: null,
   adventurersInListQuery: null,
   adventurersInListByXpQuery: null,
   itemsByAdventurerQuery: null,
   itemsByProfileQuery: null,
   topScoresQuery: null,
+  latestMarketItemsQuery: null,
+  adventurerToSlayQuery: null,
 };
 
 const initialLoading: Record<QueryKey, boolean> = {
-  beastsQuery: false,
-  beastsByAdventurerQuery: false,
   lastBattleQuery: false,
+  lastBeastBattleQuery: false,
   battlesByAdventurerQuery: false,
-  battlesByBeastQuery: false,
   battlesByTxHashQuery: false,
-  beastByIdQuery: false,
+  battlesByBeastQuery: false,
+  lastBeastQuery: false,
   discoveriesQuery: false,
   latestDiscoveriesQuery: false,
   discoveryByTxHashQuery: false,
@@ -83,24 +123,22 @@ const initialLoading: Record<QueryKey, boolean> = {
   leaderboardByIdQuery: false,
   adventurersByGoldQuery: false,
   adventurersByXPQuery: false,
-  unclaimedItemsByAdventurerQuery: false,
-  latestMarketItemsNumberQuery: false,
-  latestMarketItemsQuery: false,
   adventurersInListQuery: false,
   adventurersInListByXpQuery: false,
   itemsByAdventurerQuery: false,
   itemsByProfileQuery: false,
   topScoresQuery: false,
+  latestMarketItemsQuery: false,
+  adventurerToSlayQuery: false,
 };
 
 const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
-  beastsQuery: false,
-  beastsByAdventurerQuery: false,
   lastBattleQuery: false,
+  lastBeastBattleQuery: false,
   battlesByAdventurerQuery: false,
-  battlesByBeastQuery: false,
   battlesByTxHashQuery: false,
-  beastByIdQuery: false,
+  battlesByBeastQuery: false,
+  lastBeastQuery: false,
   discoveriesQuery: false,
   latestDiscoveriesQuery: false,
   discoveryByTxHashQuery: false,
@@ -109,25 +147,23 @@ const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
   leaderboardByIdQuery: false,
   adventurersByGoldQuery: false,
   adventurersByXPQuery: false,
-  unclaimedItemsByAdventurerQuery: false,
-  latestMarketItemsNumberQuery: false,
-  latestMarketItemsQuery: false,
   adventurersInListQuery: false,
   adventurersInListByXpQuery: false,
   itemsByAdventurerQuery: false,
   itemsByProfileQuery: false,
   topScoresQuery: false,
+  latestMarketItemsQuery: false,
+  adventurerToSlayQuery: false,
   global: false,
 };
 
 const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
-  beastsQuery: async () => {},
-  beastsByAdventurerQuery: async () => {},
   lastBattleQuery: async () => {},
+  lastBeastBattleQuery: async () => {},
   battlesByAdventurerQuery: async () => {},
-  battlesByBeastQuery: async () => {},
   battlesByTxHashQuery: async () => {},
-  beastByIdQuery: async () => {},
+  battlesByBeastQuery: async () => {},
+  lastBeastQuery: async () => {},
   discoveriesQuery: async () => {},
   latestDiscoveriesQuery: async () => {},
   discoveryByTxHashQuery: async () => {},
@@ -136,14 +172,13 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
   leaderboardByIdQuery: async () => {},
   adventurersByGoldQuery: async () => {},
   adventurersByXPQuery: async () => {},
-  unclaimedItemsByAdventurerQuery: async () => {},
-  latestMarketItemsNumberQuery: async () => {},
-  latestMarketItemsQuery: async () => {},
   adventurersInListQuery: async () => {},
   adventurersInListByXpQuery: async () => {},
   itemsByAdventurerQuery: async () => {},
   itemsByProfileQuery: async () => {},
   topScoresQuery: async () => {},
+  latestMarketItemsQuery: async () => {},
+  adventurerToSlayQuery: async () => {},
 };
 
 export const useQueriesStore = create<QueriesState>((set, get) => ({
@@ -152,7 +187,7 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
   isDataUpdated: initialIsDataUpdated,
   refetchFunctions: initialRefetchFunctions,
   updateData: (queryKey, newData, loading, refetch) => {
-    console.log("now");
+    console.log("here");
     set((state) => {
       const oldData = state.data[queryKey];
       const queryKeysToIgnore = [

@@ -1,23 +1,25 @@
 "use client";
 import { useAccount, useConnectors } from "@starknet-react/core";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { Button } from "./components/buttons/Button";
-import HorizontalKeyboardControl from "./components/HorizontalMenu";
-import Actions from "./components/actions/Actions";
-import Marketplace from "./components/marketplace/Marketplace";
-import Adventurer from "./components/start/Adventurer";
-import Beast from "./components/beast/Beast";
+import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
+import ActionsScreen from "./containers/ActionsScreen";
+import MarketplaceScreen from "./containers/MarketplaceScreen";
+import AdventurerScreen from "./containers/AdventurerScreen";
+import BeastScreen from "./containers/BeastScreen";
+import InventoryScreen from "./containers/InventoryScreen";
+import LeaderboardScreen from "./containers/LeaderboardScreen";
+import EncountersScreen from "./containers/EncountersScreen";
+import GuideScreen from "./containers/GuideScreen";
+import UpgradeScreen from "./containers/UpgradeScreen";
 import { displayAddress, padAddress } from "./lib/utils";
-import Inventory from "./components/inventory/Inventory";
 import TransactionHistory from "./components/navigation/TransactionHistory";
 import TransactionCart from "./components/navigation/TransactionCart";
-import Upgrade from "./components/Upgrade";
 import Intro from "./components/intro/Intro";
 import {
   AddDevnetEthButton,
   MintEthButton,
-} from "./components/DevnetConnectors";
-import Leaderboard from "./components/leaderboard/Leaderboard";
+} from "./components/archived/DevnetConnectors";
 import { TxActivity } from "./components/navigation/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
 import useAdventurerStore from "./hooks/useAdventurerStore";
@@ -25,16 +27,14 @@ import useUIStore from "./hooks/useUIStore";
 import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { CSSTransition } from "react-transition-group";
-import { NotificationDisplay } from "./components/NotificationDisplay";
+import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
-import { testnet_addr } from "./lib/constants";
-import { Menu, NullAdventurer } from "./types";
+import { mainnet_addr } from "./lib/constants";
+import { Menu, NullAdventurer, Call, Battle } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
-import Profile from "./components/leaderboard/Profile";
-import { DeathDialog } from "./components/DeathDialog";
-import { Encounters } from "./components/Encounters";
-import Guide from "./components/Guide";
-import { processNotification } from "./components/NotificationDisplay";
+import Profile from "./containers/ProfileScreen";
+import { DeathDialog } from "./components/adventurer/DeathDialog";
+import { processNotification } from "./components/navigation/NotificationDisplay";
 import { DiscoveryDisplay } from "./components/actions/DiscoveryDisplay";
 import useCustomQuery from "./hooks/useCustomQuery";
 import {
@@ -43,16 +43,24 @@ import {
   getBattleByTxHash,
   getDiscoveryByTxHash,
   getLatestMarketItems,
-  getLatestMarketItemsNumber,
   getAdventurerByXP,
 } from "./hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
-import { CogIcon, MuteIcon, VolumeIcon } from "./components/Icons";
-import Settings from "./components/Settings";
-import MobileHeader from "./components/MobileHeader";
-import Player from "./components/Player";
+import {
+  CogIcon,
+  MuteIcon,
+  VolumeIcon,
+  CartIcon,
+  SkullIcon,
+  SmileIcon,
+} from "./components/icons/Icons";
+import Settings from "./components/navigation/Settings";
+import MobileHeader from "./components/navigation/MobileHeader";
+import Player from "./components/adventurer/Player";
 import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
+import { TutorialDialog } from "./components/tutorial/TutorialDialog";
+import { AdventurerTemplate } from "./types/templates";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -76,16 +84,22 @@ export default function Home() {
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
-  const dialog = useUIStore((state) => state.dialog);
-  // const dialog = true;
-  const showDialog = useUIStore((state) => state.showDialog);
+  const deathDialog = useUIStore((state) => state.deathDialog);
+  // const deathDialog = true;
+  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const tutorialDialog = useUIStore((state) => state.tutorialDialog);
+  // const tutorialDialog = true;
+  const showTutorialDialog = useUIStore((state) => state.showTutorialDialog);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
+  const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
-  const upgrade = adventurer?.upgrading;
+  const statUpgrades = adventurer?.statUpgrades ?? 0;
+
+  const [showDeathCount, setShowDeathCount] = useState(true);
 
   const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
 
@@ -93,17 +107,9 @@ export default function Home() {
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
 
-  useCustomQuery(
-    "beastsByAdventurerQuery",
-    getBeastsByAdventurer,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
-  const beasts = data.beastsByAdventurerQuery
-    ? data.beastsByAdventurerQuery.beasts
-    : [];
+  const purchaseExists = useCallback(() => {
+    return calls.some((call: Call) => call.entrypoint == "buy_item");
+  }, [calls]);
 
   useCustomQuery(
     "adventurerByIdQuery",
@@ -135,26 +141,6 @@ export default function Home() {
   );
 
   useCustomQuery(
-    "latestMarketItemsNumberQuery",
-    getLatestMarketItemsNumber,
-    undefined,
-    txAccepted
-  );
-
-  const latestMarketItemsNumber = data.latestMarketItemsNumberQuery
-    ? data.latestMarketItemsNumberQuery.market[0]?.itemsNumber
-    : [];
-
-  useCustomQuery(
-    "latestMarketItemsQuery",
-    getLatestMarketItems,
-    {
-      itemsNumber: latestMarketItemsNumber,
-    },
-    txAccepted
-  );
-
-  useCustomQuery(
     "adventurersByXPQuery",
     getAdventurerByXP,
     undefined,
@@ -162,12 +148,12 @@ export default function Home() {
   );
 
   useEffect(() => {
-    if (updatedAdventurer?.id > 0) {
+    if (updatedAdventurer?.id ?? 0 > 0) {
       setAdventurer(updatedAdventurer);
     }
-  }, [updatedAdventurer]);
+  }, [updatedAdventurer, setAdventurer]);
 
-  const hasBeast = !!adventurer?.beastId;
+  const hasBeast = !!(adventurer?.beastHealth ?? 0 > 0);
 
   const playState = useMemo(
     () => ({
@@ -211,37 +197,35 @@ export default function Home() {
     ? data.adventurersByOwnerQuery.adventurers
     : [];
 
+  // const adventurers = [AdventurerTemplate];
+
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
       setScreen(menu[0].screen);
     }
-  }, [adventurer]);
+  }, [adventurer, menu, setScreen]);
 
   useEffect(() => {
     if (data.battlesByTxHashQuery && isDataUpdated["battlesByTxHashQuery"]) {
       if (
         Array.isArray(data.battlesByTxHashQuery.battles) &&
         data.battlesByTxHashQuery.battles.some(
-          (data: any) => data.attacker == "Beast" && data.targetHealth == 0
+          (data: Battle) => data.attacker == "Beast" && data.beastHealth == 0
         )
       ) {
-        const beast = data.beastByIdQuery ? data.beastByIdQuery.beasts[0] : [];
-        const battles = data.battlesByBeastQuery
-          ? data.battlesByBeastQuery.battles
+        const battles = data.lastBattleQuery
+          ? data.lastBattleQuery.battles
           : [];
         const notification = processNotification(
           type,
           notificationData,
-          adventurer,
           battles,
-          hasBeast,
-          beast,
-          beasts
+          hasBeast
         );
         if (!deathMessage) {
           setDeathMessage(notification);
         }
-        showDialog(true);
+        showDeathDialog(true);
       }
     }
     // handle dead by discovering obstacle
@@ -256,13 +240,10 @@ export default function Home() {
       ) {
         if (!deathMessage) {
           setDeathMessage(
-            <DiscoveryDisplay
-              discoveryData={notificationData}
-              beasts={beasts}
-            />
+            <DiscoveryDisplay discoveryData={notificationData} />
           );
         }
-        showDialog(true);
+        showDeathDialog(true);
       }
     }
     if (pendingMessage && isDataUpdated["adventurerByIdQuery"]) {
@@ -270,24 +251,20 @@ export default function Home() {
         (pendingMessage as string[]).includes("Equipping") &&
         adventurer?.health == 0
       ) {
-        const beast = data.beastByIdQuery ? data.beastByIdQuery.beasts[0] : [];
-        const battles = data.battlesByBeastQuery
-          ? data.battlesByBeastQuery.battles
+        const battles = data.lastBattleQuery
+          ? data.lastBattleQuery.battles
           : [];
         const notification = processNotification(
           type,
           notificationData,
-          adventurer,
           battles,
-          hasBeast,
-          beast,
-          beasts
+          hasBeast
         );
         console.log(notification);
         if (!deathMessage) {
           setDeathMessage(notification);
         }
-        showDialog(true);
+        showDeathDialog(true);
       }
     }
   }, [
@@ -300,21 +277,21 @@ export default function Home() {
     if (!account?.address) {
       setConnected(false);
     }
-  }, [account]);
+  }, [account, setConnected]);
 
   const goerli_graphql =
-    "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql";
-  const devnet_graphql =
-    "https://survivor-indexer.bibliothecadao.xyz:8080/devnet-graphql";
+    "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/goerli-graphql";
+  const mainnet_graphql =
+    "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/graphql";
 
   useMemo(() => {
     setIndexer(
-      (account as any)?.provider?.baseUrl == testnet_addr ||
-        (account as any)?.baseUrl == testnet_addr
-        ? devnet_graphql
+      (account as any)?.provider?.baseUrl == mainnet_addr ||
+        (account as any)?.baseUrl == mainnet_addr
+        ? mainnet_graphql
         : goerli_graphql
     );
-  }, [account]);
+  }, [setIndexer]);
 
   useEffect(() => {
     if (onboarded) {
@@ -341,36 +318,40 @@ export default function Home() {
             id: 2,
             label: "Actions",
             screen: "actions",
-            disabled: hasBeast || upgrade || adventurer.health == 0,
+            disabled: hasBeast || statUpgrades > 0 || adventurer.health == 0,
           },
           {
             id: 3,
-            label: "Market",
-            screen: "market",
-            disabled: hasBeast || adventurer.health == 0,
-          },
-          {
-            id: 4,
             label: "Inventory",
             screen: "inventory",
             disabled: adventurer.health == 0,
           },
           {
-            id: 5,
+            id: 4,
             label: "Beast",
             screen: "beast",
-            disabled: upgrade || adventurer.health == 0,
+            disabled: statUpgrades > 0 || adventurer.health == 0,
           },
           {
-            id: 6,
+            id: 5,
             label: "Leaderboard",
             screen: "leaderboard",
           },
           {
-            id: 7,
+            id: 6,
             label: "Upgrade",
             screen: "upgrade",
-            disabled: !upgrade,
+            disabled: !(statUpgrades > 0),
+          },
+          {
+            id: 7,
+            label: "Market",
+            screen: "market",
+            disabled:
+              !(statUpgrades > 0) ||
+              hasBeast ||
+              adventurer.health == 0 ||
+              purchaseExists(),
           },
           {
             id: 8,
@@ -390,38 +371,50 @@ export default function Home() {
             id: 2,
             label: "Actions",
             screen: "actions",
-            disabled: hasBeast || upgrade || adventurer.health == 0,
+            disabled: hasBeast || statUpgrades > 0 || adventurer.health == 0,
           },
           {
             id: 3,
-            label: "Market",
-            screen: "market",
-            disabled: hasBeast || adventurer.health == 0,
-          },
-          {
-            id: 4,
             label: "Inventory",
             screen: "inventory",
             disabled: adventurer.health == 0,
           },
           {
-            id: 5,
+            id: 4,
             label: "Beast",
             screen: "beast",
-            disabled: upgrade || adventurer.health == 0,
+            disabled: statUpgrades > 0 || adventurer.health == 0,
+          },
+          {
+            id: 5,
+            label: "Upgrade",
+            screen: "upgrade",
+            disabled: !(statUpgrades > 0),
           },
           {
             id: 6,
-            label: "Upgrade",
-            screen: "upgrade",
-            disabled: !upgrade,
+            label: "Market",
+            screen: "market",
+            disabled:
+              !(statUpgrades > 0) ||
+              hasBeast ||
+              adventurer.health == 0 ||
+              purchaseExists(),
           },
         ];
       }
       setMenu(newMenu);
       setMobileMenu(newMobileMenu);
     }
-  }, [adventurer, account, onboarded]);
+  }, [adventurer, account, onboarded, hasBeast, purchaseExists]);
+
+  useEffect(() => {
+    if (purchaseExists()) {
+      setPurchasedItem(true);
+    } else {
+      setPurchasedItem(false);
+    }
+  }, [purchaseExists, setPurchasedItem]);
 
   useEffect(() => {
     if (!onboarded) {
@@ -441,11 +434,12 @@ export default function Home() {
           },
         ]);
         setScreen(menu[0].screen);
+        showTutorialDialog(true);
       } else if (
         adventurers.length == 1 &&
         adventurer?.id &&
         adventurer?.xp == 0 &&
-        !adventurer.beastId
+        !(adventurer.beastHealth ?? 0 > 0)
       ) {
         setMenu([
           {
@@ -462,10 +456,11 @@ export default function Home() {
           },
         ]);
         setScreen("actions");
+        showTutorialDialog(true);
       } else if (
         adventurers.length == 1 &&
         adventurer?.xp == 0 &&
-        adventurer.beastId
+        (adventurer.beastHealth ?? 0 > 0)
       ) {
         setMenu([
           {
@@ -482,6 +477,14 @@ export default function Home() {
           },
         ]);
         setScreen("beast");
+        showTutorialDialog(true);
+      } else if (
+        adventurers.length == 1 &&
+        adventurer?.xp == 10 &&
+        (adventurer.beastHealth ?? 0 == 0) &&
+        (adventurer?.statUpgrades ?? 0) > 0
+      ) {
+        showTutorialDialog(true);
       } else {
         handleOnboarded();
         refetch("adventurersByOwnerQuery");
@@ -490,63 +493,15 @@ export default function Home() {
   }, [onboarded, adventurer, account]);
 
   useEffect(() => {
-    if (upgrade && adventurer?.health !== 0) {
+    if (statUpgrades > 0 && adventurer?.health !== 0) {
       setScreen("upgrade");
     }
-  }, [upgrade]);
-
-  // const beast = data.beastByIdQuery ? data.beastByIdQuery.beasts[0] : [];
-  // const battleNotif = {
-  //   data: [
-  //     {
-  //       adventurerId: 73,
-  //       ambushed: null,
-  //       attacker: "Adventurer",
-  //       beastId: 223,
-  //       damage: 6,
-  //       fled: null,
-  //       goldEarned: 0,
-  //       targetHealth: 15,
-  //       timestamp: "2023-06-04T10:56:19",
-  //       txHash:
-  //         "0x03201a416f4f1bef9fbdb1bec72003ad93432cd16e75fef91990c0be68bca2aa",
-  //       xpEarned: 0,
-  //     },
-  //     {
-  //       adventurerId: 73,
-  //       ambushed: null,
-  //       attacker: "Beast",
-  //       beastId: 223,
-  //       damage: 81,
-  //       fled: null,
-  //       goldEarned: 0,
-  //       targetHealth: 0,
-  //       timestamp: "2023-06-04T10:56:19",
-  //       txHash:
-  //         "0x03201a416f4f1bef9fbdb1bec72003ad93432cd16e75fef91990c0be68bca2aa",
-  //       xpEarned: 15,
-  //     },
-  //   ],
-  //   beast: beast,
-  // };
-  // const battles = data.battlesByBeastQuery
-  //   ? data.battlesByBeastQuery.battles
-  //   : [];
-  // const notification = processNotification(
-  //   "Attack",
-  //   battleNotif,
-  //   adventurer,
-  //   battles,
-  //   hasBeast,
-  //   beast
-  // );
-  // setDeathMessage(notification);
-  // const dialog = true;
+  }, [statUpgrades, adventurer?.health, setScreen]);
 
   // fetch adventurers on app start and account switch
   useEffect(() => {
     refetch("adventurersByOwnerQuery");
-  }, [account]);
+  }, [account, refetch]);
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
@@ -565,6 +520,27 @@ export default function Home() {
               <h1 className="glitch">Loot Survivor</h1>
               <div className="flex flex-row items-center self-end gap-2 flex-wrap">
                 {!isMobileDevice && <TxActivity />}
+                <div
+                  className="flex flex-row items-center gap-1 p-1 sm:px-2 border border-terminal-green cursor-pointer"
+                  onClick={() => setShowDeathCount(!showDeathCount)}
+                >
+                  {showDeathCount && (
+                    <>
+                      <div className="flex items-center w-4 h-4 sm:w-5 h-5">
+                        <SkullIcon />
+                      </div>
+                      <p className="text-red-500 sm:text-xl">20</p>
+                    </>
+                  )}
+                  {!showDeathCount && (
+                    <>
+                      <div className="flex items-center w-4 h-4 sm:w-5 h-5">
+                        <SmileIcon />
+                      </div>
+                      <p className="text-terminal-green sm:text-xl">20</p>
+                    </>
+                  )}
+                </div>
                 <button
                   onClick={() => {
                     setIsMuted(!isMuted);
@@ -588,9 +564,14 @@ export default function Home() {
                         setDisplayCart(!displayCart);
                         clickPlay();
                       }}
-                      className="relative flex px-1 sm:p-2 bg-black border border-terminal-green text-xs"
+                      className="relative flex flex-row items-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base"
                     >
-                      {displayCart ? "Hide Cart" : "Show Cart"}
+                      <div className="w-4 h-4">
+                        <CartIcon />
+                      </div>
+                      <p className="hidden sm:block">
+                        {displayCart ? "Hide Cart" : "Show Cart"}
+                      </p>
                     </button>
                     {displayCart && <TransactionCart />}
                   </>
@@ -618,22 +599,22 @@ export default function Home() {
                         </Button>
                       </>
                     )}
-                    {((account as any)?.provider?.baseUrl == testnet_addr ||
-                      (account as any)?.baseUrl == testnet_addr) && (
+                    {((account as any)?.provider?.baseUrl == mainnet_addr ||
+                      (account as any)?.baseUrl == mainnet_addr) && (
                       <AddDevnetEthButton />
                     )}
-                    {((account as any)?.provider?.baseUrl == testnet_addr ||
-                      (account as any)?.baseUrl == testnet_addr) && (
+                    {((account as any)?.provider?.baseUrl == mainnet_addr ||
+                      (account as any)?.baseUrl == mainnet_addr) && (
                       <MintEthButton />
+                    )}
+                    {account && (
+                      <Button onClick={() => disconnect()}>
+                        {displayAddress(account.address)}
+                      </Button>
                     )}
                   </>
                 )}
                 {account && displayHistory && <TransactionHistory />}
-                {account && (
-                  <Button onClick={() => disconnect()}>
-                    {displayAddress(account.address)}
-                  </Button>
-                )}
               </div>
             </div>
           </div>
@@ -661,12 +642,14 @@ export default function Home() {
             </div>
           </CSSTransition>
 
-          {dialog && <DeathDialog />}
+          {deathDialog && <DeathDialog />}
+
+          {!onboarded && tutorialDialog && <TutorialDialog />}
 
           {account ? (
             <div className="flex flex-col flex-grow w-full">
               <>
-                <div className="gap-10 pb-2">
+                <div className="flex justify-center sm:justify-normal sm:pb-2">
                   <HorizontalKeyboardControl
                     buttonsData={isMobileDevice ? mobileMenu : menu}
                     onButtonClick={(value) => {
@@ -677,16 +660,16 @@ export default function Home() {
 
                 {isMobileDevice && <MobileHeader />}
 
-                {screen === "start" && <Adventurer />}
-                {screen === "actions" && <Actions />}
-                {screen === "market" && <Marketplace />}
-                {screen === "inventory" && <Inventory />}
-                {screen === "beast" && <Beast />}
-                {screen === "leaderboard" && <Leaderboard />}
-                {screen === "upgrade" && <Upgrade />}
+                {screen === "start" && <AdventurerScreen />}
+                {screen === "actions" && <ActionsScreen />}
+                {screen === "market" && <MarketplaceScreen />}
+                {screen === "inventory" && <InventoryScreen />}
+                {screen === "beast" && <BeastScreen />}
+                {screen === "leaderboard" && <LeaderboardScreen />}
+                {screen === "upgrade" && <UpgradeScreen />}
                 {screen === "profile" && <Profile />}
-                {screen === "encounters" && <Encounters />}
-                {screen === "guide" && <Guide />}
+                {screen === "encounters" && <EncountersScreen />}
+                {screen === "guide" && <GuideScreen />}
                 {screen === "settings" && <Settings />}
                 {screen === "player" && <Player />}
               </>

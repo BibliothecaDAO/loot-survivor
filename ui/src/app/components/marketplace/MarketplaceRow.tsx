@@ -1,26 +1,28 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "../buttons/Button";
-import { BidBox } from "./Bid";
 import { useContracts } from "../../hooks/useContracts";
-import { formatTime } from "../../lib/utils";
-import { convertTime } from "../../lib/utils";
-import { Countdown } from "../Clock";
+import { getItemData, getItemPrice, getKeyFromValue } from "../../lib/utils";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import LootIcon from "../LootIcon";
+import LootIcon from "../icons/LootIcon";
 import {
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
-import { Metadata } from "../../types";
+import { Metadata, Item, Adventurer, Call } from "../../types";
+import { CoinIcon } from "../icons/Icons";
+import EfficacyDisplay from "../icons/EfficacyIcon";
+import useUIStore from "@/app/hooks/useUIStore";
+import { GameData } from "../GameData";
+import { useMediaQuery } from "react-responsive";
 
 interface MarketplaceRowProps {
-  item: any;
+  item: Item;
   index: number;
   selectedIndex: number;
-  adventurers: any[];
+  adventurers: Adventurer[];
   isActive: boolean;
-  setActiveMenu: (value: any) => void;
+  setActiveMenu: (value: number) => void;
   calculatedNewGold: number;
 }
 
@@ -34,81 +36,69 @@ const MarketplaceRow = ({
   calculatedNewGold,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
-  const { lootMarketArcadeContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const [showBidBox, setShowBidBox] = useState(-1);
+  const [showEquipQ, setShowEquipQ] = useState(false);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { hashes, transactions } = useTransactionManager();
   const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
+  const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
 
-  const transactingMarketIds = (transactions[0]?.metadata as Metadata)
-    ?.marketIds;
+  const transactingMarketIds = (transactions[0]?.metadata as Metadata)?.items;
 
-  const currentTime = new Date().getTime();
-
-  const bidExists = (marketId: number) => {
-    return calls.some(
-      (call: any) =>
-        call.entrypoint == "bid_on_item" && call.calldata[0] == marketId
-    );
+  const purchaseExists = () => {
+    return calls.some((call: Call) => call.entrypoint == "buy_item");
   };
 
-  const claimExists = (marketId: number) => {
-    return calls.some(
-      (call: any) =>
-        call.entrypoint == "claim_item" && call.calldata[0] == marketId
-    );
-  };
+  const { tier, type, slot } = getItemData(item.item ?? "");
+  const itemPrice = getItemPrice(tier);
 
-  const checkBidBalance = () => {
+  const checkPurchaseBalance = () => {
     if (adventurer?.gold) {
       const sum = calls
-        .filter((call) => call.entrypoint == "bid_on_item")
+        .filter((call) => call.entrypoint == "buy_item")
         .reduce((accumulator, current) => {
-          const value = current.calldata[4];
-          const parsedValue = value ? parseInt(value.toString(), 10) : 0;
-          return accumulator + (isNaN(parsedValue) ? 0 : parsedValue);
+          return accumulator + (isNaN(itemPrice) ? 0 : itemPrice);
         }, 0);
       return sum >= adventurer.gold;
     }
     return true;
   };
 
-  const checkTransacting = (marketId: number) => {
+  const checkTransacting = (item: string) => {
     if (txData?.status == "RECEIVED" || txData?.status == "PENDING") {
-      return transactingMarketIds?.includes(marketId);
+      return transactingMarketIds?.includes(item);
     } else {
       return false;
     }
   };
 
-  const checkBidder = (bidder: number) => {
-    return adventurer?.id === bidder;
-  };
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowDown":
-        setSelectedButton((prev) => {
-          const newIndex = Math.min(prev + 1, 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowUp":
-        setSelectedButton((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-        break;
-      case "Enter":
-        setActiveMenu(0);
-        break;
-      case "Escape":
-        setActiveMenu(0);
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowDown":
+          setSelectedButton((prev) => {
+            const newIndex = Math.min(prev + 1, 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowUp":
+          setSelectedButton((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+          break;
+        case "Enter":
+          setActiveMenu(0);
+          break;
+        case "Escape":
+          setActiveMenu(0);
+          break;
+      }
+    },
+    [selectedButton, setActiveMenu]
+  );
 
   useEffect(() => {
     if (isActive) {
@@ -117,123 +107,126 @@ const MarketplaceRow = ({
         window.removeEventListener("keydown", handleKeyDown);
       };
     }
-  }, [isActive]);
+  }, [isActive, handleKeyDown]);
 
-  const checkExpired = () => {
-    const currentDate = new Date();
-    const itemExpiryDate = new Date(convertTime(item.expiry));
-
-    return itemExpiryDate < currentDate;
-  };
-
-  const status = () => {
-    if (item.status == "Closed" && item.expiry == null) {
-      return "No bids";
-    } else if (item.expiry == null) {
-      return "Open";
-    } else if (checkExpired()) {
-      return "Closed";
-    } else {
-      return "Bids";
+  const handlePurchase = (item: string, tier: number, equip: boolean) => {
+    if (gameContract) {
+      const gameData = new GameData();
+      const PurchaseTx = {
+        contractAddress: gameContract?.address,
+        entrypoint: "buy_item",
+        calldata: [
+          adventurer?.id?.toString() ?? "",
+          getKeyFromValue(gameData.ITEMS, item)?.toString() ?? "",
+          equip ? "1" : "0",
+        ],
+        metadata: `Purchasing ${item} for ${getItemPrice(tier)} gold`,
+      };
+      addToCalls(PurchaseTx);
+      close();
     }
   };
 
-  return (
-    <tr
-      className={
-        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black" +
-        (selectedIndex === index + 1 ? " bg-terminal-black" : "")
-      }
-    >
-      <td className="text-center">{item.marketId}</td>
-      <td className="text-center">{item.item}</td>
-      <td className="text-center">{item.rank}</td>
-      <td className="flex justify-center space-x-1 text-center ">
-        {" "}
-        <LootIcon className="self-center pt-3" type={item.slot} />{" "}
-      </td>
-      <td className="text-center">{item.type}</td>
-      <td className="text-center">{item?.material || "Generic"}</td>
-      <td className="text-center">{item.greatness}</td>
-      <td className="text-center">{item.xp}</td>
-      <td className="text-center">{item.price}</td>
-      <td className="text-center">
-        {item.bidder
-          ? `${
-              adventurers.find(
-                (adventurer: any) => adventurer.id == item.bidder
-              )?.name
-            } - ${item.bidder}`
-          : ""}
-      </td>
-      <td className="text-center">
-        {item.expiry ? (
-          <Countdown
-            countingMessage=""
-            finishedMessage="Expired"
-            targetTime={new Date(convertTime(item.expiry))}
-          />
-        ) : (
-          ""
-        )}
-      </td>
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
 
-      <td className="text-center">{status()}</td>
-      <td className="text-center">
-        {item.claimedTime
-          ? formatTime(new Date(convertTime(item.claimedTime)))
-          : ""}
-      </td>
-      <td className="w-64 text-center">
-        {showBidBox == index ? (
-          <BidBox
-            close={() => setShowBidBox(-1)}
-            marketId={item.marketId}
-            item={item}
-            calculatedNewGold={calculatedNewGold}
-          />
-        ) : (
-          <div>
+  return (
+    <>
+      <tr
+        className={
+          "border-b border-terminal-green sm:text-2xl hover:bg-terminal-green hover:text-terminal-black" +
+          (selectedIndex === index + 1 ? " bg-terminal-black" : "")
+        }
+      >
+        <td className="text-center">{item.item}</td>
+        <td className="text-center">{tier}</td>
+        <td className="text-center">
+          <div className="flex justify-center items-center ">
+            <LootIcon className="sm:w-8" type={slot} />
+          </div>
+        </td>
+        <td className="text-center">
+          <div className="flex flex-row items-center justify-center gap-2">
+            <p>{type}</p>
+            <EfficacyDisplay className="sm:w-8" type={type} />
+          </div>
+        </td>
+        <td className="text-center">
+          <div className="flex flex-row items-center justify-center">
+            <CoinIcon className="w-4 h-4 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
+            <p className="text-terminal-yellow">{getItemPrice(tier)}</p>
+          </div>
+        </td>
+
+        <td className="w-64 text-center">
+          {!isMobileDevice && showEquipQ ? (
+            <div className="flex flex-row items-center justify-center gap-2">
+              <p>Equip?</p>
+              <Button
+                onClick={() => {
+                  handlePurchase(item.item ?? "", tier, true);
+                  setShowEquipQ(false);
+                  setPurchasedItem(true);
+                }}
+              >
+                Yes
+              </Button>
+              <Button
+                onClick={() => {
+                  handlePurchase(item.item ?? "", tier, false);
+                  setShowEquipQ(false);
+                  setPurchasedItem(true);
+                }}
+              >
+                No
+              </Button>
+              <Button onClick={() => setShowEquipQ(false)}>Cancel</Button>
+            </div>
+          ) : (
             <Button
-              onClick={() => setShowBidBox(index)}
-              disabled={
-                checkBidBalance() ||
-                item.claimedTime ||
-                (item.expiry && checkExpired()) ||
-                bidExists(item.marketId) ||
-                checkTransacting(item.marketId)
-                // checkBidder(item.bidder)
-              }
-              className={bidExists(item.marketId) ? "bg-white" : ""}
-            >
-              bid
-            </Button>
-            <Button
-              onClick={async () => {
-                const claimItemTx = {
-                  contractAddress: lootMarketArcadeContract?.address ?? "",
-                  entrypoint: "claim_item",
-                  calldata: [item.marketId, "0", adventurer?.id, "0"],
-                  metadata: `Claiming ${item.item}`,
-                };
-                addToCalls(claimItemTx);
+              onClick={() => {
+                setShowEquipQ(true);
+                setActiveMenu(index + 1);
               }}
               disabled={
-                item.claimedTime ||
-                claimExists(item.marketId) ||
-                !item.expiry ||
-                convertTime(item.expiry) > currentTime ||
-                adventurer?.id != item.bidder ||
-                checkTransacting(item.marketId)
+                checkPurchaseBalance() ||
+                checkTransacting(item.item ?? "") ||
+                purchaseExists() ||
+                (isMobileDevice && showEquipQ && isActive)
               }
-              className={claimExists(item.marketId) ? "" : ""}
+              className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
             >
-              claim
+              Purchase
             </Button>
-          </div>
-        )}
-      </td>
-    </tr>
+          )}
+        </td>
+      </tr>
+      {isMobileDevice && showEquipQ && isActive && (
+        <div className="fixed bottom-40 left-25 flex flex-row items-center justify-center gap-2">
+          <p>{`Equip ${item.item} ?`}</p>
+          <Button
+            onClick={() => {
+              handlePurchase(item.item ?? "", tier, true);
+              setShowEquipQ(false);
+              setPurchasedItem(true);
+            }}
+          >
+            Yes
+          </Button>
+          <Button
+            onClick={() => {
+              handlePurchase(item.item ?? "", tier, false);
+              setShowEquipQ(false);
+              setPurchasedItem(true);
+            }}
+          >
+            No
+          </Button>
+          <Button onClick={() => setShowEquipQ(false)}>Cancel</Button>
+        </div>
+      )}
+    </>
   );
 };
 

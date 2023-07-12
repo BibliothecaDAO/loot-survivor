@@ -25,21 +25,20 @@ def cli():
 
 
 @cli.command()
-@click.option("--server-url", default=None, help="Apibara stream url.")
 @click.option("--mongo-url", default=None, help="MongoDB url.")
 @click.option("--restart", is_flag=True, help="Restart indexing from the beginning.")
 @click.option("--network", default=None, help="Network id.")
-@click.option("--adventurer", is_flag=None, help="Adventurer contract address.")
-@click.option("--beast", is_flag=None, help="Beast contract address.")
-@click.option("--loot", is_flag=None, help="Loot contract address.")
+@click.option("--game", is_flag=None, help="Game contract address.")
 @click.option("--start_block", is_flag=None, help="Indexer starting block.")
 @async_command
-async def start(
-    server_url, mongo_url, restart, network, adventurer, beast, loot, start_block
-):
+async def start(mongo_url, restart, network, game, start_block):
     """Start the Apibara indexer."""
-    if server_url is None:
+    if network is None:
         server_url = StreamAddress.StarkNet.Goerli
+    elif network == "goerli":
+        server_url = StreamAddress.StarkNet.Goerli
+    elif network == "mainnet":
+        server_url = StreamAddress.StarkNet.Mainnet
 
     if mongo_url is None:
         mongo_url = "mongodb://apibara:apibara@localhost:27017"
@@ -49,23 +48,25 @@ async def start(
         server_url=server_url,
         mongo_url=mongo_url,
         network=network,
-        adventurer=adventurer,
-        beast=beast,
-        loot=loot,
+        game=game,
         start_block=start_block,
     )
 
 
 @cli.command()
 @click.option("--mongo_goerli", default=None, help="Mongo url for goerli.")
-@click.option("--mongo_devnet", default=None, help="Mongo url for devnet.")
+@click.option("--mongo_mainnet", default=None, help="Mongo url for mainnet.")
 @click.option("--port", default=None, help="Port number.")
 @async_command
-async def graphql(mongo_goerli, mongo_devnet, port):
+async def graphql(mongo_goerli, mongo_mainnet, port):
     """Start the GraphQL server."""
     if port is None:
         port = "8080"
+    if mongo_goerli is None:
+        mongo_goerli = "mongodb://apibara:apibara@localhost:27017"
+    if mongo_mainnet is None:
+        mongo_mainnet = "mongodb://apibara:apibara@localhost:27018"
 
     await run_graphql_api(
-        mongo_goerli=mongo_goerli, mongo_devnet=mongo_devnet, port=port
+        mongo_goerli=mongo_goerli, mongo_mainnet=mongo_mainnet, port=port
     )

@@ -6,7 +6,7 @@ import { padAddress, shortenHex } from "../../lib/utils";
 import useOnClickOutside from "../../hooks/useOnClickOutside";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { processNotification } from "../NotificationDisplay";
+import { processNotification } from "./NotificationDisplay";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useUIStore from "../../hooks/useUIStore";
 import { MdClose } from "react-icons/md";
@@ -23,10 +23,6 @@ const TransactionHistory = () => {
   const { data: queryData } = useQueriesStore();
   const displayHistory = useUIStore((state) => state.displayHistory);
   const { play } = useUiSounds(soundSelector.click);
-
-  const beasts = queryData.beastsByAdventurerQuery
-    ? queryData.beastsByAdventurerQuery.beasts
-    : [];
 
   const method = (transactions[0]?.metadata as Metadata)?.method;
 
@@ -65,18 +61,12 @@ const TransactionHistory = () => {
                   const battles = queryData.battlesByBeastQuery
                     ? queryData.battlesByBeastQuery.battles
                     : [];
-                  const beast = queryData.beastByIdQuery
-                    ? queryData.beastByIdQuery.beasts[0]
-                    : [];
                   if (response) {
                     notification = processNotification(
                       response.type,
                       response.notificationData,
-                      adventurer,
                       battles,
-                      !!adventurer?.beastId,
-                      beast,
-                      beasts
+                      !!(adventurer?.beastHealth ?? 0 > 0)
                     );
                   }
                   return (

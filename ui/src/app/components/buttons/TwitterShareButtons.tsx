@@ -1,6 +1,6 @@
 import React from "react";
 import { Button } from "./Button";
-import { TwitterIcon } from "../Icons";
+import { TwitterIcon } from "../icons/Icons";
 
 interface Props {
   text: string;

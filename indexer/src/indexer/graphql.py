@@ -42,16 +42,6 @@ def serialize_string(value):
     return value.decode("utf-8").replace("\u0000", "")
 
 
-def parse_order(value):
-    felt = get_key_by_value(value, config.ORDERS)
-    return felt.to_bytes(32, "big")
-
-
-def serialize_order(value):
-    felt = int.from_bytes(value, "big")
-    return config.ORDERS.get(felt)
-
-
 def parse_race(value):
     felt = get_key_by_value(value, config.RACES)
     return felt.to_bytes(32, "big")
@@ -152,12 +142,12 @@ def serialize_item_type(value):
     return config.ITEM_TYPES.get(felt)
 
 
-def parse_name_prefixes(value):
+def parse_special_2(value):
     felt = get_key_by_value(value, config.ITEM_NAME_PREFIXES)
     return felt.to_bytes(32, "big")
 
 
-def serialize_name_prefixes(value):
+def serialize_special_2(value):
     felt = int.from_bytes(value, "big")
     if felt == 0:
         return None
@@ -165,22 +155,22 @@ def serialize_name_prefixes(value):
         return config.ITEM_NAME_PREFIXES.get(felt)
 
 
-def parse_name_suffixes(value):
+def parse_special_3(value):
     felt = get_key_by_value(value, config.ITEM_NAME_SUFFIXES)
     return felt.to_bytes(32, "big")
 
 
-def serialize_name_suffixes(value):
+def serialize_special_3(value):
     felt = int.from_bytes(value, "big")
     return config.ITEM_NAME_SUFFIXES.get(felt)
 
 
-def parse_suffixes(value):
+def parse_special_1(value):
     felt = get_key_by_value(value, config.ITEM_SUFFIXES)
     return felt.to_bytes(32, "big")
 
 
-def serialize_suffixes(value):
+def serialize_special_1(value):
     felt = int.from_bytes(value, "big")
     return config.ITEM_SUFFIXES.get(felt)
 
@@ -229,10 +219,6 @@ StringValue = strawberry.scalar(
 
 BooleanValue = strawberry.scalar(
     NewType("BooleanValue", bytes), parse_value=parse_felt, serialize=serialize_felt
-)
-
-OrderValue = strawberry.scalar(
-    NewType("OrderValue", bytes), parse_value=parse_order, serialize=serialize_order
 )
 
 RaceValue = strawberry.scalar(
@@ -291,22 +277,22 @@ TypeValue = strawberry.scalar(
     serialize=serialize_item_type,
 )
 
-NamePrefixValue = strawberry.scalar(
-    NewType("NamePrefixValue", bytes),
-    parse_value=parse_name_prefixes,
-    serialize=serialize_name_prefixes,
+Special1Value = strawberry.scalar(
+    NewType("Special1Value", bytes),
+    parse_value=parse_special_1,
+    serialize=serialize_special_1,
 )
 
-NameSuffixValue = strawberry.scalar(
-    NewType("NameSuffixValue", bytes),
-    parse_value=parse_name_suffixes,
-    serialize=serialize_name_suffixes,
+Special2Value = strawberry.scalar(
+    NewType("Special2Value", bytes),
+    parse_value=parse_special_2,
+    serialize=serialize_special_2,
 )
 
-SuffixValue = strawberry.scalar(
-    NewType("SuffixValue", bytes),
-    parse_value=parse_suffixes,
-    serialize=serialize_suffixes,
+Special3Value = strawberry.scalar(
+    NewType("Special3Value", bytes),
+    parse_value=parse_special_3,
+    serialize=serialize_special_3,
 )
 
 StatusValue = strawberry.scalar(
@@ -378,20 +364,6 @@ class DateTimeFilter:
 @strawberry.input
 class BooleanFilter:
     eq: Optional[bool] = None
-
-
-@strawberry.input
-class OrderFilter:
-    eq: Optional[OrderValue] = None
-    _in: Optional[List[OrderValue]] = None
-    notIn: Optional[OrderValue] = None
-    lt: Optional[OrderValue] = None
-    lte: Optional[OrderValue] = None
-    gt: Optional[OrderValue] = None
-    gte: Optional[OrderValue] = None
-    contains: Optional[OrderValue] = None
-    startsWith: Optional[OrderValue] = None
-    endsWith: Optional[OrderValue] = None
 
 
 @strawberry.input
@@ -526,45 +498,45 @@ class TypeFilter:
 
 
 @strawberry.input
-class NamePrefixFilter:
-    eq: Optional[NamePrefixValue] = None
-    _in: Optional[List[NamePrefixValue]] = None
-    notIn: Optional[NamePrefixValue] = None
-    lt: Optional[NamePrefixValue] = None
-    lte: Optional[NamePrefixValue] = None
-    gt: Optional[NamePrefixValue] = None
-    gte: Optional[NamePrefixValue] = None
-    contains: Optional[NamePrefixValue] = None
-    startsWith: Optional[NamePrefixValue] = None
-    endsWith: Optional[NamePrefixValue] = None
+class Special1Filter:
+    eq: Optional[Special1Value] = None
+    _in: Optional[List[Special1Value]] = None
+    notIn: Optional[Special1Value] = None
+    lt: Optional[Special1Value] = None
+    lte: Optional[Special1Value] = None
+    gt: Optional[Special1Value] = None
+    gte: Optional[Special1Value] = None
+    contains: Optional[Special1Value] = None
+    startsWith: Optional[Special1Value] = None
+    endsWith: Optional[Special1Value] = None
 
 
 @strawberry.input
-class NameSuffixFilter:
-    eq: Optional[NameSuffixValue] = None
-    _in: Optional[List[NameSuffixValue]] = None
-    notIn: Optional[NameSuffixValue] = None
-    lt: Optional[NameSuffixValue] = None
-    lte: Optional[NameSuffixValue] = None
-    gt: Optional[NameSuffixValue] = None
-    gte: Optional[NameSuffixValue] = None
-    contains: Optional[NameSuffixValue] = None
-    startsWith: Optional[NameSuffixValue] = None
-    endsWith: Optional[NameSuffixValue] = None
+class Special2Filter:
+    eq: Optional[Special2Value] = None
+    _in: Optional[List[Special2Value]] = None
+    notIn: Optional[Special2Value] = None
+    lt: Optional[Special2Value] = None
+    lte: Optional[Special2Value] = None
+    gt: Optional[Special2Value] = None
+    gte: Optional[Special2Value] = None
+    contains: Optional[Special2Value] = None
+    startsWith: Optional[Special2Value] = None
+    endsWith: Optional[Special2Value] = None
 
 
 @strawberry.input
-class SuffixFilter:
-    eq: Optional[SuffixValue] = None
-    _in: Optional[List[SuffixValue]] = None
-    notIn: Optional[SuffixValue] = None
-    lt: Optional[SuffixValue] = None
-    lte: Optional[SuffixValue] = None
-    gt: Optional[SuffixValue] = None
-    gte: Optional[SuffixValue] = None
-    contains: Optional[SuffixValue] = None
-    startsWith: Optional[SuffixValue] = None
-    endsWith: Optional[SuffixValue] = None
+class Special3Filter:
+    eq: Optional[Special3Value] = None
+    _in: Optional[List[Special3Value]] = None
+    notIn: Optional[Special3Value] = None
+    lt: Optional[Special3Value] = None
+    lte: Optional[Special3Value] = None
+    gt: Optional[Special3Value] = None
+    gte: Optional[Special3Value] = None
+    contains: Optional[Special3Value] = None
+    startsWith: Optional[Special3Value] = None
+    endsWith: Optional[Special3Value] = None
 
 
 @strawberry.input
@@ -604,43 +576,39 @@ class OrderByInput:
 @strawberry.input
 class AdventurersFilter:
     id: Optional[FeltValueFilter] = None
+    lastAction: Optional[FeltValueFilter] = None
     owner: Optional[HexValueFilter] = None
     race: Optional[RaceFilter] = None
     homeRealm: Optional[FeltValueFilter] = None
-    birthdate: Optional[DateTimeFilter] = None
     name: Optional[StringFilter] = None
-    order: Optional[OrderFilter] = None
-    imageHash1: Optional[StringFilter] = None
-    imageHash2: Optional[StringFilter] = None
     health: Optional[FeltValueFilter] = None
-    level: Optional[FeltValueFilter] = None
     strength: Optional[FeltValueFilter] = None
     dexterity: Optional[FeltValueFilter] = None
     vitality: Optional[FeltValueFilter] = None
     intelligence: Optional[FeltValueFilter] = None
     wisdom: Optional[FeltValueFilter] = None
     charisma: Optional[FeltValueFilter] = None
-    luck: Optional[FeltValueFilter] = None
     xp: Optional[FeltValueFilter] = None
-    weaponId: Optional[FeltValueFilter] = None
-    chestId: Optional[FeltValueFilter] = None
-    headId: Optional[FeltValueFilter] = None
-    waistId: Optional[FeltValueFilter] = None
-    feetId: Optional[FeltValueFilter] = None
-    handsId: Optional[FeltValueFilter] = None
-    neckId: Optional[FeltValueFilter] = None
-    ringId: Optional[FeltValueFilter] = None
-    status: Optional[AdventurerStatusFilter] = None
-    beast: Optional[FeltValueFilter] = None
-    upgrading: Optional[BooleanFilter] = None
+    weapon: Optional[FeltValueFilter] = None
+    chest: Optional[FeltValueFilter] = None
+    head: Optional[FeltValueFilter] = None
+    waist: Optional[FeltValueFilter] = None
+    foot: Optional[FeltValueFilter] = None
+    hand: Optional[FeltValueFilter] = None
+    neck: Optional[FeltValueFilter] = None
+    ring: Optional[FeltValueFilter] = None
+    beastHealth: Optional[FeltValueFilter] = None
+    statUpgrades: Optional[FeltValueFilter] = None
     gold: Optional[FeltValueFilter] = None
-    lastUpdated: Optional[DateTimeFilter] = None
+    createdTime: Optional[OrderByInput] = None
+    lastUpdatedTime: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
 class ScoresFilter:
     adventurerId: Optional[FeltValueFilter] = None
     address: Optional[HexValueFilter] = None
+    rank: Optional[FeltValueFilter] = None
     xp: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
     scoreTime: Optional[DateTimeFilter] = None
@@ -651,92 +619,74 @@ class DiscoveriesFilter:
     adventurerId: Optional[FeltValueFilter] = None
     disoveryType: Optional[StringFilter] = None
     subDiscoveryType: Optional[StringFilter] = None
-    entityId: Optional[FeltValueFilter] = None
     outputAmount: Optional[FeltValueFilter] = None
-    attackLocation: Optional[SlotFilter] = None
+    obstacle: Optional[ObstacleFilter] = None
+    obstacleLevel: Optional[FeltValueFilter] = None
+    dodgedObstacle: Optional[BooleanFilter] = None
+    damageTaken: Optional[FeltValueFilter] = None
+    damageLocation: Optional[SlotFilter] = None
+    xpEarnedAdventurer: Optional[FeltValueFilter] = None
+    xpEarnedItems: Optional[FeltValueFilter] = None
+    entity: Optional[FeltValueFilter] = None
+    entityLevel: Optional[FeltValueFilter] = None
+    entityHealth: Optional[FeltValueFilter] = None
+    special1: Optional[OrderByInput] = None
+    special2: Optional[Special1Filter] = None
+    special3: Optional[Special2Filter] = None
+    seed: Optional[FeltValueFilter] = None
+    ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[DateTimeFilter] = None
     txHash: Optional[HexValueFilter] = None
-
-
-@strawberry.input
-class BeastsFilter:
-    id: Optional[FeltValueFilter] = None
-    adventurerId: Optional[FeltValueFilter] = None
-    beast: Optional[BeastFilter] = None
-    attackType: Optional[TypeFilter] = None
-    attackLocation: Optional[SlotFilter] = None
-    armorType: Optional[TypeFilter] = None
-    rank: Optional[FeltValueFilter] = None
-    prefix1: Optional[NamePrefixFilter] = None
-    prefix2: Optional[NameSuffixFilter] = None
-    health: Optional[FeltValueFilter] = None
-    xp: Optional[FeltValueFilter] = None
-    level: Optional[FeltValueFilter] = None
-    slainOnDate: Optional[DateTimeFilter] = None
-    birthdate: Optional[DateTimeFilter] = None
-    lastUpdated: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
 class BattlesFilter:
     adventurerId: Optional[FeltValueFilter] = None
     beastId: Optional[FeltValueFilter] = None
-    timestamp: Optional[DateTimeFilter] = None
+    beastHealth: Optional[FeltValueFilter] = None
+    beastLevel: Optional[FeltValueFilter] = None
+    special1: Optional[OrderByInput] = None
+    special2: Optional[Special1Filter] = None
+    special3: Optional[Special2Filter] = None
+    seed: Optional[FeltValueFilter] = None
     attacker: Optional[AttackerFilter] = None
     fled: Optional[BooleanFilter] = None
-    ambushed: Optional[BooleanFilter] = None
-    damage: Optional[FeltValueFilter] = None
-    targetHealth: Optional[FeltValueFilter] = None
-    xpEarned: Optional[FeltValueFilter] = None
+    damageDealt: Optional[OrderByInput] = None
+    damageTaken: Optional[OrderByInput] = None
+    damageLocation: Optional[OrderByInput] = None
+    xpEarnedAdventurer: Optional[OrderByInput] = None
+    xpEarnedItems: Optional[OrderByInput] = None
     goldEarned: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
+    discoveryTime: Optional[DateTimeFilter] = None
+    timestamp: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
 class ItemsFilter:
-    id: Optional[FeltValueFilter] = None
-    marketId: Optional[FeltValueFilter] = None
-    owner: Optional[HexValueFilter] = None
-    ownerAdventurerId: Optional[FeltValueFilter] = None
-    claimedTime: Optional[DateTimeFilter] = None
     item: Optional[ItemFilter] = None
-    slot: Optional[StringFilter] = None
-    type: Optional[StringFilter] = None
-    material: Optional[MaterialFilter] = None
-    rank: Optional[FeltValueFilter] = None
-    prefix1: Optional[NamePrefixFilter] = None
-    prefix2: Optional[NameSuffixFilter] = None
-    suffix: Optional[SuffixFilter] = None
-    greatness: Optional[FeltValueFilter] = None
-    createdBlock: Optional[FeltValueFilter] = None
+    adventurerId: Optional[FeltValueFilter] = None
+    cost: Optional[FeltValueFilter] = None
+    ownerAddress: Optional[HexValueFilter] = None
+    owner: Optional[BooleanFilter] = None
+    equipped: Optional[BooleanFilter] = None
+    createdTime: Optional[DateTimeFilter] = None
+    purchasedTime: Optional[DateTimeFilter] = None
+    special1: Optional[Special1Filter] = None
+    special2: Optional[Special2Filter] = None
+    special3: Optional[Special3Filter] = None
     xp: Optional[FeltValueFilter] = None
-    equippedAdventurerId: Optional[FeltValueFilter] = None
-    bag: Optional[FeltValueFilter] = None
-    price: Optional[FeltValueFilter] = None
-    expiry: Optional[DateTimeFilter] = None
-    bidder: Optional[FeltValueFilter] = None
-    status: Optional[StatusFilter] = None
-    lastUpdated: Optional[DateTimeFilter] = None
-
-
-@strawberry.input
-class MarketFilter:
-    caller: Optional[HexValueFilter] = None
-    itemsNumber: Optional[FeltValueFilter] = None
-    timestamp: Optional[DateTimeFilter] = None
+    lastUpdatedTime: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
 class AdventurersOrderByInput:
     id: Optional[OrderByInput] = None
+    lastAction: Optional[OrderByInput] = None
     owner: Optional[OrderByInput] = None
     race: Optional[OrderByInput] = None
     homeRealm: Optional[OrderByInput] = None
-    birthdate: Optional[OrderByInput] = None
     name: Optional[OrderByInput] = None
-    order: Optional[OrderByInput] = None
-    imageHash1: Optional[OrderByInput] = None
-    imageHash2: Optional[OrderByInput] = None
     health: Optional[OrderByInput] = None
     level: Optional[OrderByInput] = None
     strength: Optional[OrderByInput] = None
@@ -745,27 +695,27 @@ class AdventurersOrderByInput:
     intelligence: Optional[OrderByInput] = None
     wisdom: Optional[OrderByInput] = None
     charisma: Optional[OrderByInput] = None
-    luck: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
-    weaponId: Optional[OrderByInput] = None
-    chestId: Optional[OrderByInput] = None
-    headId: Optional[OrderByInput] = None
-    waistId: Optional[OrderByInput] = None
-    feetId: Optional[OrderByInput] = None
-    handsId: Optional[OrderByInput] = None
-    neckId: Optional[OrderByInput] = None
-    ringId: Optional[OrderByInput] = None
-    status: Optional[OrderByInput] = None
-    beast: Optional[OrderByInput] = None
-    upgrading: Optional[OrderByInput] = None
+    weapon: Optional[OrderByInput] = None
+    chest: Optional[OrderByInput] = None
+    head: Optional[OrderByInput] = None
+    waist: Optional[OrderByInput] = None
+    foot: Optional[OrderByInput] = None
+    hand: Optional[OrderByInput] = None
+    neck: Optional[OrderByInput] = None
+    ring: Optional[OrderByInput] = None
+    beastHealth: Optional[OrderByInput] = None
+    statUpgrades: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
-    lastUpdated: Optional[OrderByInput] = None
+    createdTime: Optional[OrderByInput] = None
+    lastUpdatedTime: Optional[OrderByInput] = None
 
 
 @strawberry.input
 class ScoresOrderByInput:
     adventurerId: Optional[OrderByInput] = None
     address: Optional[OrderByInput] = None
+    rank: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
     scoreTime: Optional[OrderByInput] = None
@@ -776,149 +726,126 @@ class DiscoveriesOrderByInput:
     adventurerId: Optional[OrderByInput] = None
     disoveryType: Optional[OrderByInput] = None
     subDiscoveryType: Optional[OrderByInput] = None
-    entityId: Optional[OrderByInput] = None
     outputAmount: Optional[OrderByInput] = None
-    attackLocation: Optional[OrderByInput] = None
+    obstacle: Optional[OrderByInput] = None
+    obstacleLevel: Optional[OrderByInput] = None
+    dodgedObstacle: Optional[OrderByInput] = None
+    damageTaken: Optional[OrderByInput] = None
+    damageLocation: Optional[OrderByInput] = None
+    xpEarnedAdventurer: Optional[OrderByInput] = None
+    xpEarnedItems: Optional[OrderByInput] = None
+    entity: Optional[OrderByInput] = None
+    entityLevel: Optional[OrderByInput] = None
+    entityHealth: Optional[OrderByInput] = None
+    special1: Optional[OrderByInput] = None
+    special2: Optional[OrderByInput] = None
+    special3: Optional[OrderByInput] = None
+    ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[OrderByInput] = None
+    seed: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
-
-
-@strawberry.input
-class BeastsOrderByInput:
-    id: Optional[OrderByInput] = None
-    adventurerId: Optional[OrderByInput] = None
-    beastType: Optional[OrderByInput] = None
-    attackType: Optional[OrderByInput] = None
-    attackLocation: Optional[OrderByInput] = None
-    armorType: Optional[OrderByInput] = None
-    rank: Optional[OrderByInput] = None
-    prefixes: Optional[OrderByInput] = None
-    health: Optional[OrderByInput] = None
-    xp: Optional[OrderByInput] = None
-    level: Optional[OrderByInput] = None
-    slainOnDate: Optional[OrderByInput] = None
-    lastUpdated: Optional[OrderByInput] = None
 
 
 @strawberry.input
 class BattlesOrderByInput:
     adventurerId: Optional[OrderByInput] = None
     beastId: Optional[OrderByInput] = None
-    timestamp: Optional[OrderByInput] = None
+    beastHealth: Optional[OrderByInput] = None
+    beastLevel: Optional[OrderByInput] = None
+    special1: Optional[OrderByInput] = None
+    special2: Optional[OrderByInput] = None
+    special3: Optional[OrderByInput] = None
+    seed: Optional[OrderByInput] = None
     attacker: Optional[OrderByInput] = None
     fled: Optional[OrderByInput] = None
-    ambushed: Optional[OrderByInput] = None
-    damage: Optional[OrderByInput] = None
-    targetHealth: Optional[OrderByInput] = None
-    xpEarned: Optional[OrderByInput] = None
+    damageDealt: Optional[OrderByInput] = None
+    damageTaken: Optional[OrderByInput] = None
+    damageLocation: Optional[OrderByInput] = None
+    xpEarnedAdventurer: Optional[OrderByInput] = None
+    xpEarnedItems: Optional[OrderByInput] = None
     goldEarned: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
+    discoveryTime: Optional[OrderByInput] = None
+    timestamp: Optional[OrderByInput] = None
 
 
 @strawberry.input
 class ItemsOrderByInput:
-    id: Optional[OrderByInput] = None
-    marketId: Optional[OrderByInput] = None
-    owner: Optional[OrderByInput] = None
-    ownerAdventurerId: Optional[OrderByInput] = None
-    claimedTime: Optional[datetime] = None
     item: Optional[OrderByInput] = None
-    slot: Optional[OrderByInput] = None
-    type: Optional[OrderByInput] = None
-    material: Optional[OrderByInput] = None
-    rank: Optional[OrderByInput] = None
-    prefix1: Optional[OrderByInput] = None
-    prefix2: Optional[OrderByInput] = None
-    suffix: Optional[OrderByInput] = None
-    greatness: Optional[OrderByInput] = None
-    createdBlock: Optional[OrderByInput] = None
+    adventurerId: Optional[OrderByInput] = None
+    cost: Optional[OrderByInput] = None
+    ownerAddress: Optional[OrderByInput] = None
+    owner: Optional[OrderByInput] = None
+    equipped: Optional[OrderByInput] = None
+    createdTime: Optional[OrderByInput] = None
+    purchasedTime: Optional[OrderByInput] = None
+    special1: Optional[OrderByInput] = None
+    special2: Optional[OrderByInput] = None
+    special3: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
-    equippedAdventurerId: Optional[OrderByInput] = None
-    bag: Optional[OrderByInput] = None
-    price: Optional[OrderByInput] = None
-    expiry: Optional[OrderByInput] = None
-    bidder: Optional[OrderByInput] = None
-    status: Optional[OrderByInput] = None
-    lastUpdated: Optional[OrderByInput] = None
-
-
-@strawberry.input
-class MarketOrderByInput:
-    caller: Optional[OrderByInput] = None
-    itemsNumber: Optional[OrderByInput] = None
-    timestamp: Optional[OrderByInput] = None
+    lastUpdatedTime: Optional[OrderByInput] = None
 
 
 @strawberry.type
 class Adventurer:
     id: Optional[FeltValue]
+    lastAction: Optional[FeltValue]
     owner: Optional[HexValue]
     race: Optional[RaceValue]
     homeRealm: Optional[FeltValue]
-    birthdate: Optional[datetime]
     name: Optional[StringValue]
-    order: Optional[OrderValue]
-    imageHash1: Optional[StringValue]
-    imageHash2: Optional[StringValue]
     health: Optional[FeltValue]
-    level: Optional[FeltValue]
     strength: Optional[FeltValue]
     dexterity: Optional[FeltValue]
     vitality: Optional[FeltValue]
     intelligence: Optional[FeltValue]
     wisdom: Optional[FeltValue]
     charisma: Optional[FeltValue]
-    luck: Optional[FeltValue]
     xp: Optional[FeltValue]
-    weaponId: Optional[FeltValue]
-    chestId: Optional[FeltValue]
-    headId: Optional[FeltValue]
-    waistId: Optional[FeltValue]
-    feetId: Optional[FeltValue]
-    handsId: Optional[FeltValue]
-    neckId: Optional[FeltValue]
-    ringId: Optional[FeltValue]
-    status: Optional[AdventurerStatusValue]
-    beastId: Optional[FeltValue]
-    upgrading: Optional[BooleanValue]
+    weapon: Optional[ItemValue]
+    chest: Optional[ItemValue]
+    head: Optional[ItemValue]
+    waist: Optional[ItemValue]
+    foot: Optional[ItemValue]
+    hand: Optional[ItemValue]
+    neck: Optional[ItemValue]
+    ring: Optional[ItemValue]
+    beastHealth: Optional[FeltValue]
+    statUpgrades: Optional[FeltValue]
     gold: Optional[FeltValue]
-    lastUpdated: Optional[datetime]
+    createdTime: Optional[datetime]
+    lastUpdatedTime: Optional[datetime]
 
     @classmethod
     def from_mongo(cls, data):
         return cls(
             id=data["id"],
+            lastAction=data["lastAction"],
             owner=data["owner"],
             race=data["race"],
             homeRealm=data["homeRealm"],
-            birthdate=data["birthdate"],
             name=data["name"],
-            order=data["order"],
-            imageHash1=data["imageHash1"],
-            imageHash2=data["imageHash2"],
             health=data["health"],
-            level=data["level"],
             strength=data["strength"],
             dexterity=data["dexterity"],
             vitality=data["vitality"],
             intelligence=data["intelligence"],
             wisdom=data["wisdom"],
             charisma=data["charisma"],
-            luck=data["luck"],
             xp=data["xp"],
-            weaponId=data["weaponId"],
-            chestId=data["chestId"],
-            headId=data["headId"],
-            waistId=data["waistId"],
-            feetId=data["feetId"],
-            handsId=data["handsId"],
-            neckId=data["neckId"],
-            ringId=data["ringId"],
-            status=data["status"],
-            beastId=data["beast"],
-            upgrading=data["upgrading"],
+            weapon=data["weapon"],
+            chest=data["chest"],
+            head=data["head"],
+            waist=data["waist"],
+            foot=data["foot"],
+            hand=data["hand"],
+            neck=data["neck"],
+            ring=data["ring"],
+            beastHealth=data["beastHealth"],
+            statUpgrades=data["statUpgrades"],
             gold=data["gold"],
-            lastUpdated=data["lastUpdated"],
+            createdTime=data["createdTime"],
+            lastUpdatedTime=data["lastUpdatedTime"],
         )
 
 
@@ -926,6 +853,7 @@ class Adventurer:
 class Score:
     adventurerId: Optional[FeltValue]
     address: Optional[HexValue]
+    rank: Optional[FeltValue]
     xp: Optional[FeltValue]
     txHash: Optional[HexValue]
     scoreTime: Optional[datetime]
@@ -935,6 +863,7 @@ class Score:
         return cls(
             adventurerId=data["adventurerId"],
             address=data["address"],
+            rank=data["rank"],
             xp=data["xp"],
             txHash=data["txHash"],
             scoreTime=data["scoreTime"],
@@ -946,10 +875,23 @@ class Discovery:
     adventurerId: Optional[FeltValue]
     discoveryType: Optional[DiscoveryValue]
     subDiscoveryType: Optional[SubDiscoveryValue]
-    entityId: Optional[FeltValue]
     outputAmount: Optional[FeltValue]
-    attackLocation: Optional[SlotValue]
+    obstacle: Optional[ObstacleValue]
+    obstacleLevel: Optional[FeltValue]
+    dodgedObstacle: Optional[BooleanValue]
+    damageTaken: Optional[FeltValue]
+    damageLocation: Optional[SlotValue]
+    xpEarnedAdventurer: Optional[FeltValue]
+    xpEarnedItems: Optional[FeltValue]
+    entity: Optional[BeastValue]
+    entityLevel: Optional[FeltValue]
+    entityHealth: Optional[FeltValue]
+    special1: Optional[Special1Value]
+    special2: Optional[Special2Value]
+    special3: Optional[Special3Value]
+    ambushed: Optional[BooleanValue]
     discoveryTime: Optional[datetime]
+    seed: Optional[FeltValue]
     txHash: Optional[HexValue]
 
     @classmethod
@@ -958,149 +900,106 @@ class Discovery:
             adventurerId=data["adventurerId"],
             discoveryType=data["discoveryType"],
             subDiscoveryType=data["subDiscoveryType"],
-            entityId=data["entityId"],
             outputAmount=data["outputAmount"],
-            attackLocation=data["attackLocation"],
+            obstacle=data["obstacle"],
+            obstacleLevel=data["obstacleLevel"],
+            dodgedObstacle=data["dodgedObstacle"],
+            damageTaken=data["damageTaken"],
+            damageLocation=data["damageLocation"],
+            xpEarnedAdventurer=data["xpEarnedAdventurer"],
+            xpEarnedItems=data["xpEarnedItems"],
+            entity=data["entity"],
+            entityLevel=data["entityLevel"],
+            entityHealth=data["entityHealth"],
+            special1=data["special1"],
+            special2=data["special2"],
+            special3=data["special3"],
+            ambushed=data["ambushed"],
             discoveryTime=data["discoveryTime"],
+            seed=data["seed"],
             txHash=data["txHash"],
-        )
-
-
-@strawberry.type
-class Beast:
-    id: Optional[FeltValue]
-    adventurerId: Optional[FeltValue]
-    beast: Optional[BeastValue]
-    attackType: Optional[TypeValue]
-    attackLocation: Optional[SlotValue]
-    armorType: Optional[TypeValue]
-    rank: Optional[FeltValue]
-    prefix1: Optional[NamePrefixValue]
-    prefix2: Optional[NameSuffixValue]
-    health: Optional[FeltValue]
-    xp: Optional[FeltValue]
-    level: Optional[FeltValue]
-    slainOnDate: Optional[datetime]
-    lastUpdated: Optional[datetime]
-
-    @classmethod
-    def from_mongo(cls, data):
-        return cls(
-            id=data["id"],
-            adventurerId=data["adventurerId"],
-            beast=data["beast"],
-            attackType=data["attackType"],
-            attackLocation=data["attackLocation"],
-            armorType=data["armorType"],
-            rank=data["rank"],
-            prefix1=data["prefix1"],
-            prefix2=data["prefix2"],
-            health=data["health"],
-            xp=data["xp"],
-            level=data["level"],
-            slainOnDate=data["slainOnDate"],
-            lastUpdated=data["lastUpdated"],
         )
 
 
 @strawberry.type
 class Battle:
     adventurerId: Optional[FeltValue]
-    beastId: Optional[FeltValue]
-    timestamp: Optional[datetime]
+    beast: Optional[BeastValue]
+    beastHealth: Optional[FeltValue]
+    beastLevel: Optional[FeltValue]
+    special1: Optional[Special1Value]
+    special2: Optional[Special2Value]
+    special3: Optional[Special3Value]
+    seed: Optional[FeltValue]
     attacker: Optional[AttackerValue]
     fled: Optional[BooleanValue]
-    ambushed: Optional[BooleanValue]
-    damage: Optional[FeltValue]
-    targetHealth: Optional[FeltValue]
-    xpEarned: Optional[FeltValue]
+    damageDealt: Optional[FeltValue]
+    damageTaken: Optional[FeltValue]
+    damageLocation: Optional[FeltValue]
+    xpEarnedAdventurer: Optional[FeltValue]
+    xpEarnedItems: Optional[FeltValue]
     goldEarned: Optional[FeltValue]
     txHash: Optional[HexValue]
+    discoveryTime: Optional[datetime]
+    timestamp: Optional[datetime]
 
     @classmethod
     def from_mongo(cls, data):
         return cls(
             adventurerId=data["adventurerId"],
-            beastId=data["beastId"],
-            timestamp=data["timestamp"],
+            beast=data["beast"],
+            beastHealth=data["beastHealth"],
+            beastLevel=data["beastLevel"],
+            special1=data["special1"],
+            special2=data["special2"],
+            special3=data["special3"],
+            seed=data["seed"],
             attacker=data["attacker"],
             fled=data["fled"],
-            ambushed=data["ambushed"],
-            damage=data["damage"],
-            targetHealth=data["targetHealth"],
-            xpEarned=data["xpEarned"],
+            damageDealt=data["damageDealt"],
+            damageTaken=data["damageTaken"],
+            damageLocation=data["damageLocation"],
+            xpEarnedAdventurer=data["xpEarnedAdventurer"],
+            xpEarnedItems=data["xpEarnedItems"],
             goldEarned=data["goldEarned"],
             txHash=data["txHash"],
+            discoveryTime=data["discoveryTime"],
+            timestamp=data["timestamp"],
         )
 
 
 @strawberry.type
 class Item:
-    id: Optional[FeltValue]
-    marketId: Optional[FeltValue]
-    owner: Optional[HexValue]
-    ownerAdventurerId: Optional[FeltValue]
-    claimedTime: Optional[datetime]
     item: Optional[ItemValue]
-    slot: Optional[SlotValue]
-    type: Optional[TypeValue]
-    material: Optional[MaterialValue]
-    rank: Optional[FeltValue]
-    prefix1: Optional[NamePrefixValue]
-    prefix2: Optional[NameSuffixValue]
-    suffix: Optional[SuffixValue]
-    greatness: Optional[FeltValue]
-    createdBlock: Optional[FeltValue]
+    adventurerId: Optional[FeltValue]
+    cost: Optional[FeltValue]
+    ownerAddress: Optional[HexValue]
+    owner: Optional[BooleanValue]
+    equipped: Optional[BooleanValue]
+    createdTime: Optional[datetime]
+    purchasedTime: Optional[datetime]
+    special1: Optional[Special1Value]
+    special2: Optional[Special2Value]
+    special3: Optional[Special3Value]
     xp: Optional[FeltValue]
-    equippedAdventurerId: Optional[FeltValue]
-    bag: Optional[FeltValue]
-    price: Optional[FeltValue]
-    expiry: Optional[datetime]
-    bidder: Optional[FeltValue]
-    status: Optional[StatusValue]
-    lastUpdated: Optional[datetime]
+    lastUpdatedTime: Optional[datetime]
 
     @classmethod
     def from_mongo(cls, data):
         return cls(
-            id=data["id"],
-            marketId=data["marketId"],
-            owner=data["owner"],
-            ownerAdventurerId=data["ownerAdventurerId"],
-            claimedTime=data["claimedTime"],
             item=data["item"],
-            slot=data["slot"],
-            type=data["type"],
-            material=data["material"],
-            rank=data["rank"],
-            prefix1=data["prefix1"],
-            prefix2=data["prefix2"],
-            suffix=data["suffix"],
-            greatness=data["greatness"],
-            createdBlock=data["createdBlock"],
+            adventurerId=data["adventurerId"],
+            cost=data["cost"],
+            ownerAddress=data["ownerAddress"],
+            owner=data["owner"],
+            equipped=data["equipped"],
+            createdTime=data["createdTime"],
+            purchasedTime=data["purchasedTime"],
+            special1=data["special1"],
+            special2=data["special2"],
+            special3=data["special3"],
             xp=data["xp"],
-            equippedAdventurerId=data["equippedAdventurerId"],
-            bag=data["bag"],
-            price=data["price"],
-            expiry=data["expiry"],
-            bidder=data["bidder"],
-            status=data["status"],
-            lastUpdated=data["lastUpdated"],
-        )
-
-
-@strawberry.type
-class Market:
-    caller: Optional[HexValue]
-    itemsNumber: Optional[FeltValue]
-    timestamp: Optional[datetime]
-
-    @classmethod
-    def from_mongo(cls, data):
-        return cls(
-            caller=data["caller"],
-            itemsNumber=data["itemsNumber"],
-            timestamp=data["timestamp"],
+            lastUpdatedTime=data["lastUpdatedTime"],
         )
 
 
@@ -1222,7 +1121,6 @@ def get_adventurers(
         for key, value in processed_filters.items():
             if (
                 isinstance(value, StringFilter)
-                | isinstance(value, OrderFilter)
                 | isinstance(value, RaceFilter)
                 | isinstance(value, AdventurerStatusFilter)
             ):
@@ -1351,62 +1249,13 @@ def get_discoveries(
     return [Discovery.from_mongo(t) for t in query]
 
 
-def get_beasts(
-    info,
-    where: Optional[BeastsFilter] = {},
-    limit: Optional[int] = 10,
-    skip: Optional[int] = 0,
-    orderBy: Optional[BeastsOrderByInput] = {},
-) -> List[Beast]:
-    db = info.context["db"]
-
-    filter = {"_chain.valid_to": None}
-
-    if where:
-        processed_filters = process_filters(where)
-        for key, value in processed_filters.items():
-            if (
-                isinstance(value, StringFilter)
-                | isinstance(value, BeastFilter)
-                | isinstance(value, NamePrefixFilter)
-                | isinstance(value, NameSuffixFilter)
-                | isinstance(value, SlotFilter)
-            ):
-                filter[key] = get_str_filters(value)
-            elif isinstance(value, HexValueFilter):
-                filter[key] = get_hex_filters(value)
-            elif isinstance(value, DateTimeFilter):
-                filter[key] = get_date_filters(value)
-            elif isinstance(value, FeltValueFilter):
-                filter[key] = get_felt_filters(value)
-
-    sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
-
-    sort_var = "updated_at"
-    sort_dir = -1
-
-    for key, value in sort_options.items():
-        if value.asc:
-            sort_var = key
-            sort_dir = 1
-            break
-        if value.desc:
-            sort_var = key
-            sort_dir = -1
-            break
-
-    query = db["beasts"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
-
-    return [Beast.from_mongo(t) for t in query]
-
-
 def get_battles(
     info,
     where: Optional[BattlesFilter] = {},
     limit: Optional[int] = 10,
     skip: Optional[int] = 0,
     orderBy: Optional[BattlesOrderByInput] = {},
-) -> List[Beast]:
+) -> List[Battle]:
     db = info.context["db"]
 
     filter = {"_chain.valid_to": None}
@@ -1465,9 +1314,9 @@ def get_items(
                 | isinstance(value, SlotFilter)
                 | isinstance(value, TypeFilter)
                 | isinstance(value, MaterialFilter)
-                | isinstance(value, NamePrefixFilter)
-                | isinstance(value, NameSuffixFilter)
-                | isinstance(value, SuffixFilter)
+                | isinstance(value, Special1Filter)
+                | isinstance(value, Special2Filter)
+                | isinstance(value, Special3Filter)
                 | isinstance(value, StatusFilter)
             ):
                 filter[key] = get_str_filters(value)
@@ -1497,57 +1346,13 @@ def get_items(
     return [Item.from_mongo(t) for t in query]
 
 
-def get_market(
-    info,
-    where: Optional[MarketFilter] = {},
-    limit: Optional[int] = 10,
-    skip: Optional[int] = 0,
-    orderBy: Optional[MarketOrderByInput] = {},
-) -> List[Item]:
-    db = info.context["db"]
-
-    filter = {"_chain.valid_to": None}
-
-    if where:
-        processed_filters = process_filters(where)
-        for key, value in processed_filters.items():
-            if isinstance(value, StringFilter):
-                filter[key] = get_str_filters(value)
-            elif isinstance(value, HexValueFilter):
-                filter[key] = get_hex_filters(value)
-            elif isinstance(value, DateTimeFilter):
-                filter[key] = get_date_filters(value)
-            elif isinstance(value, FeltValueFilter):
-                filter[key] = get_felt_filters(value)
-
-    sort_options = {k: v for k, v in orderBy.__dict__.items() if v is not None}
-
-    sort_var = "updated_at"
-    sort_dir = -1
-
-    for key, value in sort_options.items():
-        if value.asc:
-            sort_var = key
-            sort_dir = 1
-            break
-        if value.desc:
-            sort_var = key
-            sort_dir = -1
-            break
-    query = db["market"].find(filter).skip(skip).limit(limit).sort(sort_var, sort_dir)
-
-    return [Market.from_mongo(t) for t in query]
-
-
 @strawberry.type
 class Query:
     adventurers: List[Adventurer] = strawberry.field(resolver=get_adventurers)
     scores: List[Score] = strawberry.field(resolver=get_scores)
     discoveries: List[Discovery] = strawberry.field(resolver=get_discoveries)
-    beasts: List[Beast] = strawberry.field(resolver=get_beasts)
     battles: List[Battle] = strawberry.field(resolver=get_battles)
     items: List[Item] = strawberry.field(resolver=get_items)
-    market: List[Market] = strawberry.field(resolver=get_market)
 
 
 class IndexerGraphQLView(GraphQLView):
@@ -1559,47 +1364,24 @@ class IndexerGraphQLView(GraphQLView):
         return {"db": self._db}
 
 
-async def run_graphql_api(mongo_goerli=None, mongo_devnet=None, port="8080"):
+async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     mongo_goerli = MongoClient(mongo_goerli)
-    mongo_devnet = MongoClient(mongo_devnet)
-    db_name_goerli = "loot-survivor-indexer-goerli".replace("-", "_")
-    db_name_devnet = "loot-survivor-indexer-devnet".replace("-", "_")
+    mongo_mainnet = MongoClient(mongo_mainnet)
+    db_name_goerli = "mongo-goerli".replace("-", "_")
+    db_name_mainnet = "mongo-mainnet".replace("-", "_")
     db_goerli = mongo_goerli[db_name_goerli]
-    db_devnet = mongo_devnet[db_name_devnet]
+    db_mainnet = mongo_mainnet[db_name_mainnet]
 
     schema = strawberry.Schema(query=Query)
     view_goerli = IndexerGraphQLView(db_goerli, schema=schema)
-    view_devnet = IndexerGraphQLView(db_devnet, schema=schema)
+    view_mainnet = IndexerGraphQLView(db_mainnet, schema=schema)
 
     app = web.Application()
-    # app.router.add_route("*", "/graphql", view)
+    # app.router.add_route("*", "/graphql", view_goerli)
 
     cors = aiohttp_cors.setup(app)
-    # resource = cors.add(app.router.add_resource("/graphql"))
-    # cors.add(
-    #     resource.add_route("POST", view),
-    #     {
-    #         "*": aiohttp_cors.ResourceOptions(
-    #             expose_headers="*", allow_headers="*", allow_methods="*"
-    #         ),
-    #     },
-    # )
-    # cors.add(
-    #     resource.add_route("GET", view),
-    #     {
-    #         "*": aiohttp_cors.ResourceOptions(
-    #             expose_headers="*", allow_headers="*", allow_methods="*"
-    #         ),
-    #     },
-    # )
-
-    ssl_cert = "/app/fullchain.pem"
-    ssl_key = "/app/privkey.pem"
-    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    ssl_context.load_cert_chain(ssl_cert, ssl_key)
-
     resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
-    resource_devnet = cors.add(app.router.add_resource("/devnet-graphql"))
+    resource_mainnet = cors.add(app.router.add_resource("/graphql"))
 
     cors.add(
         resource_goerli.add_route("POST", view_goerli),
@@ -1619,7 +1401,7 @@ async def run_graphql_api(mongo_goerli=None, mongo_devnet=None, port="8080"):
     )
 
     cors.add(
-        resource_devnet.add_route("POST", view_devnet),
+        resource_mainnet.add_route("POST", view_mainnet),
         {
             "*": aiohttp_cors.ResourceOptions(
                 expose_headers="*", allow_headers="*", allow_methods="*"
@@ -1627,7 +1409,7 @@ async def run_graphql_api(mongo_goerli=None, mongo_devnet=None, port="8080"):
         },
     )
     cors.add(
-        resource_devnet.add_route("GET", view_devnet),
+        resource_mainnet.add_route("GET", view_mainnet),
         {
             "*": aiohttp_cors.ResourceOptions(
                 expose_headers="*", allow_headers="*", allow_methods="*"
@@ -1637,7 +1419,7 @@ async def run_graphql_api(mongo_goerli=None, mongo_devnet=None, port="8080"):
 
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", int(port), ssl_context=ssl_context)
+    site = web.TCPSite(runner, "0.0.0.0", int(port))
     await site.start()
 
     print(f"GraphQL server started on port {port}")

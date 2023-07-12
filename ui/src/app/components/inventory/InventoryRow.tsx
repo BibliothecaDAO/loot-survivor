@@ -1,20 +1,23 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, ReactElement, useCallback } from "react";
 import { useContracts } from "../../hooks/useContracts";
 import { Button } from "../buttons/Button";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useMediaQuery } from "react-responsive";
+import { Item, Menu } from "@/app/types";
+import { GameData } from "../GameData";
+import { getKeyFromValue } from "@/app/lib/utils";
 
 interface InventoryRowProps {
   title: string;
-  items: any[];
+  items: Item[];
   menuIndex: number;
   isActive: boolean;
-  setActiveMenu: (value: any) => void;
+  setActiveMenu: (value: number | undefined) => void;
   isSelected: boolean;
-  setSelected: (value: any) => void;
-  equippedItemId: number | undefined;
-  icon?: any;
+  setSelected: (value: number) => void;
+  equippedItem: string | undefined;
+  icon?: ReactElement;
 }
 
 export const InventoryRow = ({
@@ -25,50 +28,57 @@ export const InventoryRow = ({
   setActiveMenu,
   isSelected,
   setSelected,
-  equippedItemId,
+  equippedItem,
   icon,
 }: InventoryRowProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const { adventurerContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
-  const handleAddEquipItem = (itemId: any) => {
-    if (adventurerContract) {
-      const equipItem = {
-        contractAddress: adventurerContract?.address,
+  const handleAddEquipItem = (item: string) => {
+    if (gameContract) {
+      const gameData = new GameData();
+      const equipItemTx = {
+        contractAddress: gameContract?.address,
         entrypoint: "equip_item",
-        calldata: [adventurer?.id, "0", itemId, "0"],
-        metadata: `Equipping ${itemId}!`,
+        calldata: [
+          adventurer?.id?.toString() ?? "",
+          getKeyFromValue(gameData.ITEMS, item) ?? "",
+        ],
+        metadata: `Equipping ${item}!`,
       };
-      addToCalls(equipItem);
+      addToCalls(equipItemTx);
     }
   };
 
-  const unequippedItems = items?.filter((item) => item.id != equippedItemId);
+  const unequippedItems = items?.filter((item) => item.item != equippedItem);
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowDown":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.min(prev + 1, unequippedItems?.length - 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowUp":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-        break;
-      case "Enter":
-        handleAddEquipItem(unequippedItems[selectedIndex]?.id);
-        break;
-      case "Escape":
-        setActiveMenu(undefined);
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowDown":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.min(prev + 1, unequippedItems?.length - 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowUp":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+          break;
+        case "Enter":
+          handleAddEquipItem(unequippedItems[selectedIndex]?.item ?? "");
+          break;
+        case "Escape":
+          setActiveMenu(undefined);
+          break;
+      }
+    },
+    [selectedIndex, handleAddEquipItem, setActiveMenu, unequippedItems]
+  );
 
   useEffect(() => {
     if (isActive) {
@@ -79,7 +89,7 @@ export const InventoryRow = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isActive, selectedIndex]);
+  }, [isActive, selectedIndex, handleKeyDown]);
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",

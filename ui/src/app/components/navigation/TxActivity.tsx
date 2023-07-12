@@ -4,7 +4,7 @@ import { useWaitForTransaction, useAccount } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../../lib/utils";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
-import LootIconLoader from "../Loader";
+import LootIconLoader from "../icons/Loader";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 
 export interface TxActivityProps {
@@ -41,10 +41,11 @@ export const TxActivity = () => {
   });
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
+  const isLoadingQueryUpdated = loadingQuery && isDataUpdated[loadingQuery];
 
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
-    if (txAccepted && hash && loadingQuery && isDataUpdated[loadingQuery]) {
+    if (txAccepted && hash && isLoadingQueryUpdated) {
       // Handle "Attack" or "Flee" types
       if (type === "Attack" || type === "Flee") {
         if (queryData?.battlesByTxHashQuery) {
@@ -66,7 +67,7 @@ export const TxActivity = () => {
           refetch("discoveryByTxHashQuery");
           refetch("latestDiscoveriesQuery");
           refetch("adventurerByIdQuery");
-          refetch("beastByIdQuery");
+          refetch("lastBeastBattleQuery");
           stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
           setTxAccepted(false);
           resetDataUpdated(loadingQuery);
@@ -93,7 +94,21 @@ export const TxActivity = () => {
         resetDataUpdated(loadingQuery);
       }
     }
-  }, [loadingQuery && isDataUpdated[loadingQuery], txAccepted, hash]);
+  }, [
+    isLoadingQueryUpdated,
+    txAccepted,
+    hash,
+    isDataUpdated,
+    loadingQuery,
+    notificationData,
+    queryData.battlesByTxHashQuery,
+    queryData.discoveryByTxHashQuery,
+    refetch,
+    resetDataUpdated,
+    setTxAccepted,
+    stopLoading,
+    type,
+  ]);
 
   // stop loading when an error is caught
   useEffect(() => {
@@ -110,7 +125,7 @@ export const TxActivity = () => {
       }, 2000);
       return () => clearInterval(interval); // This is important, it will clear the interval when the component is unmounted.
     }
-  }, [pendingMessage, messageIndex]);
+  }, [pendingMessage, messageIndex, pendingArray]);
 
   return (
     <>

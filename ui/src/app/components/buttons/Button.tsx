@@ -13,14 +13,15 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-terminal-green text-black hover:bg-terminal-green/80 hover:animate-pulse shadow-inner ",
+          "bg-terminal-green text-black hover:bg-terminal-green/80 hover:animate-pulse shadow-inner text-center ",
         destructive:
           "bg-red-500 text-white hover:bg-red-600 dark:hover:bg-red-600",
         outline:
-          "bg-transparent hover:bg-terminal-black dark:border-slate-700 dark:text-slate-100",
+          "bg-transparent hover:bg-terminal-black dark:border-slate-700 dark:text-slate-100 text-center",
         subtle:
           "bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-100",
-        ghost: "bg-transparent hover:border-terminal-green hover:border",
+        ghost:
+          "bg-transparent hover:border-terminal-green hover:border text-center",
         link: "bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-slate-900 dark:text-slate-100 hover:bg-transparent dark:hover:bg-transparent",
       },
       size: {
