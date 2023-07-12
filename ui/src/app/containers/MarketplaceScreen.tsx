@@ -97,11 +97,11 @@ export default function MarketplaceScreen() {
   //   return sortedItems;
   // }, [marketLatestItems, sortField, sortDirection]);
 
-  const sortedMarketLatestItems = [];
+  const sortedMarketLatestItems = marketLatestItems;
 
-  for (var i = 0; i < 20; i++) {
-    sortedMarketLatestItems.push(ItemTemplate);
-  }
+  // for (var i = 0; i < 20; i++) {
+  //   sortedMarketLatestItems.push(ItemTemplate);
+  // }
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {

@@ -183,10 +183,12 @@ export function processItemName(item: Item) {
 
 export function getItemData(item: string) {
   const gameData = new GameData();
-  const tier = gameData.ITEM_TIERS[item];
+
+  const item_name_format = item.replaceAll(" ", "")
+  const tier = gameData.ITEM_TIERS[item_name_format];
   const type =
     gameData.ITEM_TYPES[parseInt(getKeyFromValue(gameData.ITEMS, item) ?? "")];
-  const slot = gameData.ITEM_SLOTS[item];
+  const slot = gameData.ITEM_SLOTS[item_name_format];
   return { tier, type, slot };
 }
 

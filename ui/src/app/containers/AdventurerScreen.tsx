@@ -27,13 +27,14 @@ export default function AdventurerScreen() {
 
   console.log("ACCOUNT:", account?.address)
   
+  // TODO: Remove polling
   useCustomQuery(
     "adventurersByOwnerQuery",
     getAdventurersByOwner,
     {
       owner: owner,
     },
-    txAccepted
+    true
   );
 
   const adventurers = data.adventurersByOwnerQuery

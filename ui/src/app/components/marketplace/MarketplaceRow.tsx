@@ -117,6 +117,7 @@ const MarketplaceRow = ({
         entrypoint: "buy_item",
         calldata: [
           adventurer?.id?.toString() ?? "",
+          "0",
           getKeyFromValue(gameData.ITEMS, item)?.toString() ?? "",
           equip ? "1" : "0",
         ],
@@ -166,8 +167,8 @@ const MarketplaceRow = ({
               <Button
                 onClick={() => {
                   handlePurchase(item.item ?? "", tier, true);
-                  setShowEquipQ(false);
-                  setPurchasedItem(true);
+                  // setShowEquipQ(false);
+                  // setPurchasedItem(true);
                 }}
               >
                 Yes
