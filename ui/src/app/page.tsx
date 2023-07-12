@@ -258,7 +258,6 @@ export default function Home() {
           battles,
           hasBeast
         );
-        console.log(notification);
         if (!deathMessage) {
           setDeathMessage(notification);
         }

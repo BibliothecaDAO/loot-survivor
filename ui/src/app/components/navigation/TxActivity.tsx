@@ -47,6 +47,9 @@ export const TxActivity = () => {
   const [messageIndex, setMessageIndex] = useState(0);
   const isLoadingQueryUpdated = loadingQuery && isDataUpdated[loadingQuery];
 
+  console.log(isLoadingQueryUpdated);
+  console.log(queryData?.adventurerByIdQuery);
+
   useEffect(() => {
     // Check if loading, loadingQuery, and isDataUpdated are truthy
     if (txAccepted && hash && isLoadingQueryUpdated) {

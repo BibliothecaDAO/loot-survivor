@@ -82,6 +82,8 @@ export default function LeaderboardScree() {
     currentPage * itemsPerPage
   );
 
+  console.log(displayAdventurers);
+
   let previousGold = -1;
   let currentRank = 0;
   let rankOffset = 0;
@@ -178,7 +180,7 @@ export default function LeaderboardScree() {
         </thead>
         <tbody>
           {displayAdventurers?.map((adventurer: Adventurer, index: number) => {
-            const dead = adventurer.health ?? 0 <= 0;
+            const dead = (adventurer.health ?? 0) <= 0;
             return (
               <tr
                 key={index}
