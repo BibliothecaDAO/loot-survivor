@@ -1941,13 +1941,12 @@ mod Game {
         adventurer.add_stat_upgrade_points(stat_upgrade_points);
 
         // emit new items availble with available items
-        let available_items = _get_items_on_market(@self, adventurer_id, adventurer);
         __event_NewItemsAvailable(
             ref self,
             adventurer_state: AdventurerState {
                 owner: get_caller_address(), adventurer_id, adventurer
             },
-            items: available_items
+            items: _get_items_on_market(@self, adventurer_id, adventurer)
         );
     }
 
