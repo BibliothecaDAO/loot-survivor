@@ -1757,6 +1757,7 @@ mod Game {
             },
             item_id,
             charisma_discount_price,
+            equipped: equip
         );
 
         if equip == true {
@@ -2359,6 +2360,7 @@ mod Game {
         adventurer_state_with_bag: AdventurerStateWithBag,
         item_id: u8,
         cost: u16,
+        equipped: bool,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -2485,9 +2487,10 @@ mod Game {
         ref self: ContractState,
         adventurer_state_with_bag: AdventurerStateWithBag,
         item_id: u8,
-        cost: u16
+        cost: u16,
+        equipped: bool,
     ) {
-        self.emit(Event::PurchasedItem(PurchasedItem { adventurer_state_with_bag, item_id, cost }));
+        self.emit(Event::PurchasedItem(PurchasedItem { adventurer_state_with_bag, item_id, cost, equipped }));
     }
 
     fn __event_EquipItem(

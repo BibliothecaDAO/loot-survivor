@@ -25,8 +25,6 @@ const TransactionCart: React.FC = () => {
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const {
-    hashes,
-    transactions: queuedTransactions,
     addTransaction,
   } = useTransactionManager();
   const { writeAsync } = useContractWrite({ calls });
@@ -35,7 +33,6 @@ const TransactionCart: React.FC = () => {
   const [loadingQuery, setLoadingQuery] = useState("");
   const { data } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
-  const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
 
   const items = data.latestMarketItemsQuery
@@ -46,68 +43,87 @@ const TransactionCart: React.FC = () => {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  // const slayedAdventurer = data.adventurerToSlayQuery
-  //   ? data.adventurerToSlayQuery.adventurers?[0]
-  //   : NullAdventurer;
+  const handleBuyItem = useCallback((call: any) => {
+    const item = items.find(
+      (item: Item) =>
+        item.item === (Array.isArray(call.calldata) && call.calldata[0])
+    );
+    const itemName = processItemName(item ?? NullItem);
+    const { tier } = getItemData(item?.item ?? "");
+    setNotification((notifications) => [
+      ...notifications,
+      `You purchased ${item?.item && itemName} for ${getItemPrice(
+        tier
+      )} gold`,
+    ]);
+    setLoadingQuery("latestMarketItemsQuery");
+    setLoadingMessage((messages) => [...messages, "Purchasing"]);
+  }, [items]);
+
+  const handleEquipItem = useCallback((call: any) => {
+    const item = ownedItems.find(
+      (item: Item) =>
+        item.item === (Array.isArray(call.calldata) && call.calldata[2])
+    );
+    const itemName = processItemName(item ?? NullItem);
+    setNotification((notifications) => [
+      ...notifications,
+      `You equipped ${item?.item && itemName}!`,
+    ]);
+    setLoadingQuery("adventurerByIdQuery");
+    setLoadingMessage((messages) => [...messages, "Equipping"]);
+  }, [ownedItems]);
+
+  const handlePurchaseHealth = useCallback((call: any) => {
+    setNotification((notifications) => [
+      ...notifications,
+      `You purchased ${
+        Array.isArray(call.calldata) &&
+        call.calldata[2] &&
+        parseInt(call.calldata[2].toString()) * 10
+      } health!`,
+    ]);
+    setLoadingQuery("adventurerByIdQuery");
+    setLoadingMessage((messages) => [...messages, "Purchasing Health"]);
+  }, []);
+
+  const handleSlayIdleAdventurer = useCallback((call: any) => {
+    setNotification((notifications) => [
+      ...notifications,
+      `You slayed ${
+        Array.isArray(call.calldata) &&
+        call.calldata[0] &&
+        parseInt(call.calldata[0].toString())
+      }`,
+    ]);
+    setLoadingQuery("adventurerByIdQuery");
+    setLoadingMessage((messages) => [...messages, "Slaying Adventurer"]);
+  }, []);
 
   const handleLoadData = useCallback(() => {
     for (let call of calls) {
-      if (call.entrypoint === "buy_item") {
-        const item = items.find(
-          (item: Item) =>
-            item.item == (Array.isArray(call.calldata) && call.calldata[0])
-        );
-        const itemName = processItemName(item ?? NullItem);
-        const { tier } = getItemData(item?.item ?? "");
-        setNotification([
-          ...notification,
-          `You purchased ${item?.item && itemName} for ${getItemPrice(
-            tier
-          )} gold`,
-        ]);
-        setLoadingQuery("latestMarketItemsQuery");
-        setLoadingMessage([...loadingMessage, "Purchasing"]);
-      } else if (call.entrypoint === "equip_item") {
-        const item = ownedItems.find(
-          (item: Item) =>
-            item.item == (Array.isArray(call.calldata) && call.calldata[2])
-        );
-        const itemName = processItemName(item ?? NullItem);
-        setNotification([
-          ...notification,
-          `You equipped ${item?.item && itemName}!`,
-        ]);
-        setLoadingQuery("adventurerByIdQuery");
-        setLoadingMessage([...loadingMessage, "Equipping"]);
-      } else if (call.entrypoint === "purchase_health") {
-        setNotification([
-          ...notification,
-          `You purchased ${
-            Array.isArray(call.calldata) &&
-            call.calldata[2] &&
-            parseInt(call.calldata[2].toString()) * 10
-          } health!`,
-        ]);
-        setLoadingQuery("adventurerByIdQuery");
-        setLoadingMessage([...loadingMessage, "Purchasing Health"]);
-      } else if (call.entrypoint === "slay_idle_adventurer") {
-        setNotification([
-          ...notification,
-          `You slayed ${
-            Array.isArray(call.calldata) &&
-            call.calldata[0] &&
-            parseInt(call.calldata[0].toString())
-          }`,
-        ]);
-        setLoadingQuery("adventurerByIdQuery");
-        setLoadingMessage([...loadingMessage, "Slaying Adventurer"]);
+      switch(call.entrypoint) {
+        case "buy_item":
+          handleBuyItem(call);
+          break;
+        case "equip_item":
+          handleEquipItem(call);
+          break;
+        case "purchase_health":
+          handlePurchaseHealth(call);
+          break;
+        case "slay_idle_adventurer":
+          handleSlayIdleAdventurer(call);
+          break;
+        default:
+          break;
       }
     }
-  }, [calls, items, ownedItems, loadingMessage, notification]);
+  }, [calls, handleBuyItem, handleEquipItem, handlePurchaseHealth, handleSlayIdleAdventurer]);
 
   useEffect(() => {
     handleLoadData();
-  }, [calls, handleLoadData]);
+  }, [calls]);
 
   return (
     <>
