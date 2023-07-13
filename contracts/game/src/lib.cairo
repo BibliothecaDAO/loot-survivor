@@ -867,7 +867,11 @@ mod Game {
                     item_type: starter_beast.combat_spec.item_type,
                     level: starter_beast.combat_spec.level,
                     specials: starter_beast.combat_spec.specials
-                }, health: starter_beast.starting_health, ambushed: false, damage_taken: 0,
+                },
+                health: starter_beast.starting_health,
+                ambushed: false,
+                damage_taken: 0,
+                damage_location: CombatEnums::Slot::Ring(())
             }
         );
 
@@ -935,6 +939,9 @@ mod Game {
                 // storage of the beast health
                 adventurer.beast_health = beast.starting_health;
 
+                // get random attack location
+                let damage_slot = AdventurerUtils::get_random_armor_slot(sub_explore_rnd);
+
                 // initialize damage taken to zero
                 let mut damage_taken = 0;
 
@@ -945,7 +952,7 @@ mod Game {
                         ref self,
                         ref adventurer,
                         adventurer_id,
-                        CombatEnums::Slot::Chest(()),
+                        damage_slot,
                         beast,
                         beast_seed
                     );
@@ -974,6 +981,7 @@ mod Game {
                         ambushed: was_ambushed,
                         damage_taken: damage_taken,
                         health: beast.starting_health,
+                        damage_location: damage_slot
                     }
                 );
 
@@ -2409,6 +2417,7 @@ mod Game {
         beast_specs: CombatSpec,
         ambushed: bool,
         damage_taken: u16,
+        damage_location: CombatEnums::Slot,
     }
 
     #[derive(Drop, starknet::Event)]
