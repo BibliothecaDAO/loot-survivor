@@ -69,6 +69,7 @@ export const BeastDisplay = ({
       </div>
       <div className="relative flex-grow w-full h-40 sm:h-[150%]">
         <Image
+          className="animate-pulse"
           src={image}
           alt="monsters"
           fill={true}
