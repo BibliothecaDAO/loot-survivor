@@ -602,6 +602,7 @@ class AdventurersFilter:
     gold: Optional[FeltValueFilter] = None
     createdTime: Optional[OrderByInput] = None
     lastUpdatedTime: Optional[DateTimeFilter] = None
+    timestamp: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -612,6 +613,7 @@ class ScoresFilter:
     xp: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
     scoreTime: Optional[DateTimeFilter] = None
+    timestamp: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -636,6 +638,7 @@ class DiscoveriesFilter:
     seed: Optional[HexValueFilter] = None
     ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[DateTimeFilter] = None
+    timestamp: Optional[DateTimeFilter] = None
     txHash: Optional[HexValueFilter] = None
 
 
@@ -652,6 +655,7 @@ class BeastsFilter:
     slainOnTime: Optional[DateTimeFilter] = None
     createdTime: Optional[DateTimeFilter] = None
     lastUpdatedTime: Optional[DateTimeFilter] = None
+    timestamp: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -674,7 +678,7 @@ class BattlesFilter:
     goldEarned: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
     discoveryTime: Optional[DateTimeFilter] = None
-    timestamp: Optional[DateTimeFilter] = None
+    blockTime: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -692,6 +696,7 @@ class ItemsFilter:
     special3: Optional[Special3Filter] = None
     xp: Optional[FeltValueFilter] = None
     lastUpdatedTime: Optional[DateTimeFilter] = None
+    timestamp: Optional[DateTimeFilter] = None
 
 
 @strawberry.input
@@ -724,6 +729,7 @@ class AdventurersOrderByInput:
     gold: Optional[OrderByInput] = None
     createdTime: Optional[OrderByInput] = None
     lastUpdatedTime: Optional[OrderByInput] = None
+    timestamp: Optional[OrderByInput] = None
 
 
 @strawberry.input
@@ -734,6 +740,7 @@ class ScoresOrderByInput:
     xp: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
     scoreTime: Optional[OrderByInput] = None
+    timestamp: Optional[OrderByInput] = None
 
 
 @strawberry.input
@@ -757,6 +764,7 @@ class DiscoveriesOrderByInput:
     special3: Optional[OrderByInput] = None
     ambushed: Optional[OrderByInput] = None
     discoveryTime: Optional[OrderByInput] = None
+    timestamp: Optional[OrderByInput] = None
     seed: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
 
@@ -774,6 +782,7 @@ class BeastsOrderByInput:
     slainOnTime: Optional[OrderByInput] = None
     createdTime: Optional[OrderByInput] = None
     lastUpdatedTime: Optional[OrderByInput] = None
+    timestamp: Optional[OrderByInput] = None
 
 
 @strawberry.input
@@ -796,6 +805,7 @@ class BattlesOrderByInput:
     goldEarned: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
     discoveryTime: Optional[OrderByInput] = None
+    blockTime: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
 
 
@@ -814,6 +824,7 @@ class ItemsOrderByInput:
     special3: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
     lastUpdatedTime: Optional[OrderByInput] = None
+    timestamp: Optional[OrderByInput] = None
 
 
 @strawberry.type
@@ -845,6 +856,7 @@ class Adventurer:
     gold: Optional[FeltValue]
     createdTime: Optional[datetime]
     lastUpdatedTime: Optional[datetime]
+    timestamp: Optional[datetime]
 
     @classmethod
     def from_mongo(cls, data):
@@ -876,6 +888,7 @@ class Adventurer:
             gold=data["gold"],
             createdTime=data["createdTime"],
             lastUpdatedTime=data["lastUpdatedTime"],
+            timestamp=data["timestamp"],
         )
 
 
@@ -887,6 +900,7 @@ class Score:
     xp: Optional[FeltValue]
     txHash: Optional[HexValue]
     scoreTime: Optional[datetime]
+    timestamp: Optional[datetime]
 
     @classmethod
     def from_mongo(cls, data):
@@ -897,6 +911,7 @@ class Score:
             xp=data["xp"],
             txHash=data["txHash"],
             scoreTime=data["scoreTime"],
+            timestamp=data["timestamp"],
         )
 
 
@@ -921,6 +936,7 @@ class Discovery:
     special3: Optional[Special3Value]
     ambushed: Optional[BooleanValue]
     discoveryTime: Optional[datetime]
+    timestamp: Optional[datetime]
     seed: Optional[HexValue]
     txHash: Optional[HexValue]
 
@@ -946,6 +962,7 @@ class Discovery:
             special3=data["special3"],
             ambushed=data["ambushed"],
             discoveryTime=data["discoveryTime"],
+            timestamp=data["timestamp"],
             seed=data["seed"],
             txHash=data["txHash"],
         )
@@ -964,6 +981,7 @@ class Beast:
     slainOnTime: Optional[datetime] = None
     createdTime: Optional[datetime] = None
     lastUpdatedTime: Optional[datetime] = None
+    timestamp: Optional[datetime] = None
 
     @classmethod
     def from_mongo(cls, data):
@@ -979,6 +997,7 @@ class Beast:
             slainOnTime=data["slainOnTime"],
             createdTime=data["createdTime"],
             lastUpdatedTime=data["lastUpdatedTime"],
+            timestamp=data["timestamp"],
         )
 
 
@@ -1002,6 +1021,7 @@ class Battle:
     goldEarned: Optional[FeltValue]
     txHash: Optional[HexValue]
     discoveryTime: Optional[datetime]
+    blockTime: Optional[datetime]
     timestamp: Optional[datetime]
 
     @classmethod
@@ -1025,6 +1045,7 @@ class Battle:
             goldEarned=data["goldEarned"],
             txHash=data["txHash"],
             discoveryTime=data["discoveryTime"],
+            blockTime=data["blockTime"],
             timestamp=data["timestamp"],
         )
 
@@ -1044,6 +1065,7 @@ class Item:
     special3: Optional[Special3Value]
     xp: Optional[FeltValue]
     lastUpdatedTime: Optional[datetime]
+    timestamp: Optional[datetime]
 
     @classmethod
     def from_mongo(cls, data):
@@ -1061,6 +1083,7 @@ class Item:
             special3=data["special3"],
             xp=data["xp"],
             lastUpdatedTime=data["lastUpdatedTime"],
+            timestamp=data["timestamp"],
         )
 
 

@@ -142,12 +142,14 @@ async def update_beast_health(
         update_beast_doc = {
             "health": encode_int_as_bytes(health),
             "lastUpdatedTime": block_time,
+            "timestamp": datetime.now(),
         }
     else:
         update_beast_doc = {
             "health": encode_int_as_bytes(health),
             "slainOnTime": block_time,
             "lastUpdatedTime": block_time,
+            "timestamp": datetime.now(),
         }
     await info.storage.find_one_and_update(
         "beasts",
@@ -180,6 +182,7 @@ async def update_item_xp(info, item, adventurer_id, xp, createdTime):
             "item": check_exists_int(item),
             "adventurerId": check_exists_int(adventurer_id),
             "createdTime": createdTime,
+            "timestamp": datetime.now(),
         },
         {
             "$set": {"xp": encode_int_as_bytes(xp)},
@@ -336,6 +339,7 @@ async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
             "$set": {
                 "equipped": check_exists_int(1),
                 "lastUpdatedTime": time,
+                "timestamp": datetime.now(),
             }
         },
     )
@@ -347,7 +351,11 @@ async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
             "owner": True,
         },
         {
-            "$set": {"equipped": check_exists_int(0), "lastUpdatedTime": time},
+            "$set": {
+                "equipped": check_exists_int(0),
+                "lastUpdatedTime": time,
+                "timestamp": datetime.now(),
+            },
         },
     )
 
@@ -516,6 +524,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "entropy": check_exists_int(sg.adventurer_meta["entropy"]),
             "createdTime": block_time,
             "lastUpdatedTime": block_time,
+            "timestamp": datetime.now(),
         }
         await info.storage.insert_one("adventurers", start_game_doc)
         start_item_doc = {
@@ -532,6 +541,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "createdTime": block_time,
             "purchasedTime": check_exists_int(0),
             "lastUpdatedTime": block_time,
+            "timestamp": datetime.now(),
         }
         await info.storage.insert_one("items", start_item_doc)
         print(
@@ -553,7 +563,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
         await update_adventurer_helper(info, su.adventurer_state)
         stat_upgrade_doc = {
             "stat_id": check_exists_int(su.stat_id),
-            "timestamp": block_time,
+            "blockTime": block_time,
+            "timestamp": datetime.now(),
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurer_id": check_exists_int(su.adventurer_state["adventurer_id"]),
         }
@@ -595,6 +606,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "ambushed": check_exists_int(0),
             "seed": encode_int_as_bytes(0),
             "discoveryTime": block_time,
+            "timestamp": datetime.now(),
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         print(
@@ -637,6 +649,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "ambushed": check_exists_int(0),
             "seed": encode_int_as_bytes(0),
             "discoveryTime": block_time,
+            "timestamp": datetime.now(),
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         print(
@@ -679,6 +692,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "ambushed": check_exists_int(0),
             "seed": encode_int_as_bytes(0),
             "discoveryTime": block_time,
+            "timestamp": datetime.now(),
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         print(
@@ -721,6 +735,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "ambushed": check_exists_int(0),
             "seed": encode_int_as_bytes(0),
             "discoveryTime": block_time,
+            "timestamp": datetime.now(),
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         await update_items_xp(
@@ -765,6 +780,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "ambushed": check_exists_int(db.ambushed),
             "seed": encode_int_as_bytes(db.seed),
             "discoveryTime": block_time,
+            "timestamp": datetime.now(),
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         beast_doc = {
@@ -779,6 +795,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "slainOnTime": check_exists_timestamp(0),
             "createdTime": block_time,
             "lastUpdatedTime": block_time,
+            "timestamp": datetime.now(),
         }
         await info.storage.insert_one("beasts", beast_doc)
         print(
@@ -840,7 +857,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "xpEarnedItems": encode_int_as_bytes(0),
                 "goldEarned": encode_int_as_bytes(0),
                 "discoveryTime": beast_document["discoveryTime"],
-                "timestamp": block_time,
+                "blockTime": block_time,
+                "timestamp": datetime.now(),
             }
             await info.storage.insert_one("battles", attacked_beast_doc)
             print(
@@ -904,7 +922,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "xpEarnedItems": encode_int_as_bytes(sb.xp_earned_items),
                 "goldEarned": encode_int_as_bytes(sb.gold_earned),
                 "discoveryTime": beast_document["discoveryTime"],
-                "timestamp": block_time,
+                "blockTime": block_time,
+                "timestamp": datetime.now(),
             }
             await info.storage.insert_one("battles", slayed_beast_doc)
             await update_items_xp(
@@ -962,7 +981,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "xpEarnedItems": encode_int_as_bytes(0),
                 "goldEarned": encode_int_as_bytes(0),
                 "discoveryTime": beast_document["discoveryTime"],
-                "timestamp": block_time,
+                "blockTime": block_time,
+                "timestamp": datetime.now(),
             }
             await info.storage.insert_one("battles", flee_attempt_doc)
             print(
@@ -994,6 +1014,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "cost": encode_int_as_bytes(pi.cost),
             "purchasedTime": block_time,
             "lastUpdatedTime": block_time,
+            "timestamp": datetime.now(),
         }
         # Get the most recently created item so it can be updated
         try:
@@ -1021,6 +1042,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                         "adventurer_id"
                     ],
                     "createdTime": item_document.createdTime,
+                    "timestamp": datetime.now(),
                 },
                 {"$set": purchased_item_doc},
             )
@@ -1096,6 +1118,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         item_prefix_doc = {
             "special2": check_exists_int(ip.special_names["special2"]),
             "special3": encode_int_as_bytes(ip.special_names["special3"]),
+            "timestamp": datetime.now(),
         }
         await info.storage.find_one_and_update(
             "items",
@@ -1127,6 +1150,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         await update_adventurer_helper(info, isd.adventurer_state)
         item_suffix_doc = {
             "special1": check_exists_int(isd.special_names["special1"]),
+            "timestamp": datetime.now(),
         }
         await info.storage.find_one_and_update(
             "items",
@@ -1158,7 +1182,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "txHash": tx_hash,
             "adventurerId": check_exists_int(pp.adventurer_state["adventurer_id"]),
             "healthAmount": encode_int_as_bytes(pp.health_amount),
-            "timestamp": block_time,
+            "blockTime": block_time,
+            "timestamp": datetime.now(),
         }
         await info.storage.insert_one("health_purchases", purchase_doc)
         print(
@@ -1183,7 +1208,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "rank": encode_int_as_bytes(hs.rank),
             "xp": encode_int_as_bytes(hs.adventurer_state["adventurer"]["xp"]),
             "owner": encode_int_as_bytes(hs.adventurer_state["owner"]),
-            "timestamp": block_time,
+            "blockTime": block_time,
+            "timestamp": datetime.now(),
         }
         await info.storage.insert_one("scores", new_high_score_doc)
         print("- [new high score]", hs.adventurer_state["adventurer_id"])
@@ -1203,7 +1229,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "adventurerId": encode_int_as_bytes(ad.adventurer_state["adventurer_id"]),
             "death": check_exists_int(1) if ad.killed_by_beast == 1 else 2,
             "killerId": check_exists_int(ad.killer_id),
-            "timestamp": block_time,
+            "blockTime": block_time,
+            "timestamp": datetime.now(),
         }
         await info.storage.insert_one("deaths", adventurer_died_doc)
         print(
@@ -1238,6 +1265,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "createdTime": block_time,
                 "purchasedTime": check_exists_int(0),
                 "lastUpdatedTime": block_time,
+                "timestamp": datetime.now(),
             }
             await info.storage.insert_one("items", items_doc)
 
