@@ -98,7 +98,7 @@ export default function ActionsScreen() {
   if (onboarded) {
     buttonsData.push({
       id: 2,
-      label: "Kill Adventurer",
+      label: "Slay Adventurer",
       icon: <TargetIcon />,
       value: "kill adventurer",
       action: async () => setActiveMenu(2),

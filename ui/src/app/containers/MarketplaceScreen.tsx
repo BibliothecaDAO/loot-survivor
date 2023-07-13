@@ -183,7 +183,7 @@ export default function MarketplaceScreen() {
               {`Charisma: ${adventurer?.charisma} (-`}
               <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
               <p className="text-terminal-yellow">
-                {adventurer?.charisma && adventurer?.charisma * 3}
+                {adventurer?.charisma && adventurer?.charisma * 2}
               </p>
               <p>{" to price) Min item price: 3"}</p>
             </span>
