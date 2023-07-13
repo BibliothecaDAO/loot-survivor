@@ -32,8 +32,9 @@ export const ActionsTutorial = () => {
       <h3 className="text-xl sm:text-2xl">Kill Adventurer</h3>
       <p className="text-sm sm:text-lg">
         An adventurer has a limited time to make a move for face the
-        consequences. Once 300 blocks have passed (roughly an hour) with no
-        activity then the adventurer becomes a target and anyone may kill them.{" "}
+        consequences. If you do not play with your adventurer for a certain time
+        with no activity then the adventurer becomes a target and anyone may
+        kill them.
       </p>
     </div>
   );
