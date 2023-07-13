@@ -2257,24 +2257,57 @@ fn test_explore_xp_discovery() { // TODO: test xp discovery
 }
 
 #[test]
-#[available_gas(200000)]
+#[available_gas(220000)]
 fn test_increment_stat_valid() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     adventurer.increment_stat(StatisticIndex::STRENGTH);
     assert(adventurer.stats.strength == 1, 'strength');
+    assert(adventurer.stats.dexterity ==  0, 'dexterity should be 0');
+    assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+    assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+    assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
 
     adventurer.increment_stat(StatisticIndex::DEXTERITY);
     assert(adventurer.stats.dexterity == 1, 'dexterity');
+    assert(adventurer.stats.strength == 1, 'strength should be 1');
+    assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+    assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+    assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
 
     adventurer.increment_stat(StatisticIndex::INTELLIGENCE);
     assert(adventurer.stats.intelligence == 1, 'intelligence');
+    assert(adventurer.stats.strength == 1, 'strength should be 1');
+    assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+    assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+    assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
 
     adventurer.increment_stat(StatisticIndex::VITALITY);
     assert(adventurer.stats.vitality == 1, 'vitality');
+    assert(adventurer.stats.strength == 1, 'strength should be 1');
+    assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+    assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
+    assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
 
     adventurer.increment_stat(StatisticIndex::WISDOM);
     assert(adventurer.stats.wisdom == 1, 'wisdom');
+    assert(adventurer.stats.strength == 1, 'strength should be 1');
+    assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+    assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
+    assert(adventurer.stats.vitality == 1, 'vitality should be 1');
+    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+
+    adventurer.increment_stat(StatisticIndex::CHARISMA);
+    assert(adventurer.stats.charisma == 1, 'charisma');
+    assert(adventurer.stats.strength == 1, 'strength should be 1');
+    assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+    assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
+    assert(adventurer.stats.vitality == 1, 'vitality should be 1');
+    assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
 }
 
 #[test]
