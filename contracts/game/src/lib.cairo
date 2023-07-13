@@ -2167,7 +2167,7 @@ mod Game {
 
         // emit event
         let in_battle = (adventurer.beast_health > 0);
-        __event_IdlePenaltyDamage(
+        __event_IdleDamagePenalty(
             ref self,
             AdventurerState {
                 owner: self._owner.read(adventurer_id),
@@ -2724,7 +2724,7 @@ mod Game {
         self.emit(Event::NewItemsAvailable(NewItemsAvailable { adventurer_state, items }));
     }
 
-    fn __event_IdlePenaltyDamage(
+    fn __event_IdleDamagePenalty(
         ref self: ContractState,
         adventurer_state: AdventurerState,
         idle_blocks: u16,
