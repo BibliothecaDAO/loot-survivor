@@ -1782,28 +1782,59 @@ mod Game {
         // internal::revoke_ap_tracking();
         // TODO: Remove after testing
 
+        // get item price
+        let base_item_price = ImplMarket::get_price(ImplLoot::get_tier(item_id));
+
+        // get item price after charisma discount
+        let charisma_adjusted_price = adventurer.charisma_adjusted_item_price(base_item_price);
+
+        // check adventurer has enough gold
+        assert(adventurer.check_gold(charisma_adjusted_price) == true, messages::NOT_ENOUGH_GOLD);
+
         // unpack Loot bag from storage
         let mut bag = _bag_unpacked(@self, adventurer_id);
 
         // get item and determine metadata slot
-        let item = ImplItemSpecials::get_loot_special_names_slot(
+        let item = ImplItemSpecials::get_special_name_storage_slot(
             adventurer, bag, ImplBagActions::new_item(item_id)
         );
 
-        // TODO: Replace with read from state. We could also move all to lib
-        let item_tier = ImplLoot::get_tier(item_id);
-        let item_price = ImplMarket::get_price(item_tier);
-
-        // get item price after charisma discount
-        let charisma_discount_price = adventurer.charisma_adjusted_item_price(item_price);
-
-        // check adventurer has enough gold
-        assert(adventurer.check_gold(charisma_discount_price) == true, messages::NOT_ENOUGH_GOLD);
-
         // deduct gold
-        adventurer.deduct_gold(charisma_discount_price);
+        adventurer.deduct_gold(charisma_adjusted_price);
 
-        // emit purchased item event
+        let mut unequipped_item_id: u8 = 0;
+
+        if equip == true {
+            // get the item the adventurer currently has equipped in that slot
+            let unequipping_item = adventurer.get_item_at_slot(ImplLoot::get_slot(item.id));
+
+            // add new item to adventurer
+            adventurer.add_item(item);
+
+            // if the unequipped item is not empty
+            if unequipping_item.id > 0 {
+                // add item to the adventurer's bag
+                bag.add_item(unequipping_item);
+
+                unequipped_item_id = unequipping_item.id;
+
+                // pack and save bag
+                _pack_bag(ref self, adventurer_id, bag);
+                return;
+            }
+        } else {
+            // if adventurers didn't opt to equip the newly purchased item
+            // put it in their bag
+            bag.add_item(item);
+
+            // pack and save bag
+            _pack_bag(ref self, adventurer_id, bag);
+        }
+
+        // if the adventurer opted to equip their item
+        // and had a 
+        // emit a purchased item event
+        // with the unequipped item id set to 0
         __event_PurchasedItem(
             ref self,
             AdventurerStateWithBag {
@@ -1814,26 +1845,10 @@ mod Game {
                 }, bag: bag
             },
             item_id,
-            charisma_discount_price,
+            charisma_adjusted_price,
+            equip,
+            unequipped_item_id,
         );
-
-        if equip == true {
-            let unequipping_item = adventurer.get_item_at_slot(ImplLoot::get_slot(item.id));
-
-            adventurer.add_item(item);
-
-            // check if item exists
-            if unequipping_item.id > 0 {
-                bag.add_item(unequipping_item);
-
-                // pack and save bag
-                _pack_bag(ref self, adventurer_id, bag);
-            }
-        } else {
-            bag.add_item(item);
-            // pack and save bag
-            _pack_bag(ref self, adventurer_id, bag);
-        }
     }
 
 
@@ -2435,13 +2450,15 @@ mod Game {
         adventurer_state_with_bag: AdventurerStateWithBag,
         item_id: u8,
         cost: u16,
+        equipped: bool,
+        unequipped_item_id: u8
     }
 
     #[derive(Drop, starknet::Event)]
     struct EquipItem {
         adventurer_state_with_bag: AdventurerStateWithBag,
-        equiped_item_id: u8,
-        unequiped_item_id: u8,
+        equipped_item_id: u8,
+        unequipped_item_id: u8,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -2562,21 +2579,30 @@ mod Game {
         ref self: ContractState,
         adventurer_state_with_bag: AdventurerStateWithBag,
         item_id: u8,
-        cost: u16
+        cost: u16,
+        equipped: bool,
+        unequipped_item_id: u8
     ) {
-        self.emit(Event::PurchasedItem(PurchasedItem { adventurer_state_with_bag, item_id, cost }));
+        self
+            .emit(
+                Event::PurchasedItem(
+                    PurchasedItem {
+                        adventurer_state_with_bag, item_id, cost, equipped, unequipped_item_id
+                    }
+                )
+            );
     }
 
     fn __event_EquipItem(
         ref self: ContractState,
         adventurer_state_with_bag: AdventurerStateWithBag,
-        equiped_item_id: u8,
-        unequiped_item_id: u8,
+        equipped_item_id: u8,
+        unequipped_item_id: u8,
     ) {
         self
             .emit(
                 Event::EquipItem(
-                    EquipItem { adventurer_state_with_bag, equiped_item_id, unequiped_item_id }
+                    EquipItem { adventurer_state_with_bag, equipped_item_id, unequipped_item_id }
                 )
             );
     }
