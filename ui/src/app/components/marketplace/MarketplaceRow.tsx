@@ -135,7 +135,6 @@ const MarketplaceRow = ({
         metadata: `Purchasing ${item} for ${getItemPrice(tier)} gold`,
       };
       addToCalls(PurchaseTx);
-      close();
     }
   };
 
