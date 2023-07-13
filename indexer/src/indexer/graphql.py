@@ -1036,7 +1036,7 @@ class Item:
     cost: Optional[FeltValue]
     ownerAddress: Optional[HexValue]
     owner: Optional[bool]
-    equipped: Optional[BooleanValue]
+    equipped: Optional[bool]
     createdTime: Optional[datetime]
     purchasedTime: Optional[datetime]
     special1: Optional[Special1Value]
