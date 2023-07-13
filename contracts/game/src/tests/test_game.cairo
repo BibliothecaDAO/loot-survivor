@@ -67,8 +67,17 @@ mod tests {
         game
     }
 
-    fn lvl_2_adventurer() -> IGameDispatcher {
+    fn new_adventurer_lvl2() -> IGameDispatcher {
         let mut game = new_adventurer();
+        game.attack(ADVENTURER_ID);
+        game
+    }
+
+    fn new_adventurer_lvl2_with_idle_penalty() -> IGameDispatcher {
+        testing::set_block_number(1);
+        let mut game = new_adventurer();
+        testing::set_block_number(200);
+        game.attack(ADVENTURER_ID);
         game.attack(ADVENTURER_ID);
         game
     }
@@ -193,7 +202,7 @@ mod tests {
     #[available_gas(65000000)]
     fn test_cant_flee_outside_battle() {
         // start adventuer and advance to level 2
-        let mut game = lvl_2_adventurer();
+        let mut game = new_adventurer_lvl2();
 
         // get adventurer state
         let adventurer = game.get_adventurer(0);
@@ -210,7 +219,7 @@ mod tests {
     #[test]
     #[available_gas(15000000000)]
     fn test_flee() {
-        let mut game = lvl_2_adventurer();
+        let mut game = new_adventurer_lvl2();
 
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(updated_adventurer.beast_health == 0, 'beast should be dead');
@@ -281,7 +290,7 @@ mod tests {
     #[available_gas(65000000)]
     fn test_cant_buy_items_without_stat_upgrade() {
         // mint adventurer and advance to level 2
-        let mut game = lvl_2_adventurer();
+        let mut game = new_adventurer_lvl2();
 
         // use the adventurers available stat
         game.upgrade_stat(ADVENTURER_ID, 1);
@@ -301,14 +310,14 @@ mod tests {
     #[should_panic(expected: ('Market item does not exist', 'ENTRYPOINT_FAILED'))]
     #[available_gas(65000000)]
     fn test_buy_unavailable_item() {
-        let mut game = lvl_2_adventurer();
+        let mut game = new_adventurer_lvl2();
         game.buy_item(ADVENTURER_ID, 200, true);
     }
 
     #[test]
     #[available_gas(70000000)]
     fn test_buy_and_equip_item() {
-        let mut game = lvl_2_adventurer();
+        let mut game = new_adventurer_lvl2();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
         let item_id = *market_items.at(0).item.id;
         let item_price = *market_items.at(0).price.into();
@@ -322,7 +331,7 @@ mod tests {
     #[test]
     #[available_gas(65000000)]
     fn test_buy_and_bag_item() {
-        let mut game = lvl_2_adventurer();
+        let mut game = new_adventurer_lvl2();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
 
         game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
@@ -335,7 +344,7 @@ mod tests {
     #[test]
     #[available_gas(4000000000)]
     fn test_equip_item_from_bag() {
-        let mut game = lvl_2_adventurer();
+        let mut game = new_adventurer_lvl2();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
 
         market_items.at(0).item.id;
@@ -347,10 +356,9 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('Health already full', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(70000000)]
+    #[available_gas(110000000)]
     fn test_buy_potion() {
-        let mut game = lvl_2_adventurer();
+        let mut game = new_adventurer_lvl2_with_idle_penalty();
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -367,8 +375,7 @@ mod tests {
 
         // verify potion increased health by POTION_HEALTH_AMOUNT or adventurer health is full
         assert(
-            adventurer.health == 100 || adventurer.health == adventurer_health_pre_potion
-                + POTION_HEALTH_AMOUNT,
+            adventurer.health == adventurer_health_pre_potion + POTION_HEALTH_AMOUNT,
             'potion did not give health'
         );
 
@@ -378,15 +385,75 @@ mod tests {
                 - (POTION_PRICE * adventurer.get_level().into()),
             'potion cost is wrong'
         );
+    }
 
-        // buy potions with full health
-        // this should throw a panic 'Health already full' and this test is annotated to expect that panic
-        // if it doesn't throw a panic, this test will fail.
-        // @dev buying five potions here to account for the possibility of game settings changing such that
-        // multiple potions are needed after started beast to fill up health
+    #[test]
+    #[available_gas(61000000)]
+    fn test_buy_potions() {
+        let mut game = new_adventurer_lvl2_with_idle_penalty();
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // store original adventurer health and gold before buying potion
+        let adventurer_health_pre_potion = adventurer.health;
+        let adventurer_gold_pre_potion = adventurer.gold;
+
+        // buy potions
+        let number_of_potions = 8;
+        game.buy_potions(ADVENTURER_ID, number_of_potions);
+
+        // get updated adventurer stat
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        // verify potion increased health by POTION_HEALTH_AMOUNT or adventurer health is full
+        assert(
+            adventurer.health == adventurer_health_pre_potion
+                + (POTION_HEALTH_AMOUNT * number_of_potions.into()),
+            'potion did not give health'
+        );
+
+        // verify potion cost reduced adventurers gold balance by POTION_PRICE * adventurer level (no charisma discount here)
+        assert(
+            adventurer.gold == adventurer_gold_pre_potion
+                - (POTION_PRICE * adventurer.get_level().into() * number_of_potions.into()),
+            'potion cost is wrong'
+        );
+    }
+
+    #[test]
+    #[should_panic(expected: ('Health already full', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(40000000)]
+    fn test_buy_potion_exceed_max_health() {
+        let mut game = new_adventurer_lvl2();
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // assert adventurer has full health
+        assert(adventurer.health == STARTING_HEALTH, 'advntr should have full health');
+
+        // attempt to buy a potion
+        // this should result in a panic 'Health already full'
+        // this test is annotated to expect that panic
         game.buy_potion(ADVENTURER_ID);
-        game.buy_potion(ADVENTURER_ID);
-        game.buy_potion(ADVENTURER_ID);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Health already full', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(40000000)]
+    fn test_buy_potions_exceed_max_health() {
+        let mut game = new_adventurer_lvl2();
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // assert adventurer has full health
+        assert(adventurer.health == STARTING_HEALTH, 'advntr should have full health');
+
+        // attempt to buy a potion
+        // this should result in a panic 'Health already full'
+        // this test is annotated to expect that panic
+        game.buy_potions(ADVENTURER_ID, 1);
     }
 
     #[test]
@@ -394,7 +461,7 @@ mod tests {
     #[available_gas(100000000)]
     fn test_cant_buy_potion_without_stat_upgrade() {
         // deploy and start new game
-        let mut game = lvl_2_adventurer();
+        let mut game = new_adventurer_lvl2();
 
         // use stat upgrade
         game.upgrade_stat(ADVENTURER_ID, 0);
@@ -621,7 +688,7 @@ mod tests {
         let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level();
         assert(potion_price == POTION_PRICE * adventurer_level.into(), 'wrong lvl1 potion price');
 
-        let mut game = lvl_2_adventurer();
+        let mut game = new_adventurer_lvl2();
         let potion_price = game.get_potion_price(ADVENTURER_ID);
         let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level();
         assert(potion_price == POTION_PRICE * adventurer_level.into(), 'wrong lvl2 potion price');

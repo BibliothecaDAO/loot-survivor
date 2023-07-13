@@ -160,33 +160,15 @@ mod Game {
             // assert adventurer is not in battle
             _assert_not_in_battle(@self, adventurer);
 
-            // if the adventurer hasn't exceeded idle threshold
-            if !_idle_longer_than_penalty_threshold(@self, adventurer) {
-                // send adventurer to go exploring
+            // if the adventurer has exceeded the idle penalty threshold
+            if _idle_longer_than_penalty_threshold(@self, adventurer) {
+                // apply idle penalty
+                _apply_idle_penalty(ref self, adventurer_id, ref adventurer);
+            } else {
+                // else send them off to explore
                 _explore(
                     ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2
                 );
-            } else {
-                // if adventurer has exceeded idle threshold
-                // they receive a fixed penalty
-                // TODO: Make this based on worst case scenario obstacle discovery
-                adventurer.deduct_health(_idle_penalty(@self, adventurer));
-
-                // if adventurer is dead
-                if (adventurer.health == 0) {
-                    // emit AdventurerDied event
-                    __event_AdventurerDied(
-                        ref self,
-                        AdventurerState {
-                            owner: self._owner.read(adventurer_id),
-                            adventurer_id: adventurer_id,
-                            adventurer: adventurer
-                        },
-                        killed_by_beast: false,
-                        killed_by_obstacle: false,
-                        killer_id: 0
-                    );
-                }
             }
 
             // update players last action block number
@@ -225,8 +207,16 @@ mod Game {
             // assert adventurer has a beast to attack
             _assert_in_battle(@self, adventurer);
 
-            // pass adventurer ref into internal function
-            _attack(ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2);
+            // if the adventurer has exceeded the idle penalty threshold
+            if _idle_longer_than_penalty_threshold(@self, adventurer) {
+                // apply idle penalty
+                _apply_idle_penalty(ref self, adventurer_id, ref adventurer);
+            } else {
+                // otherwise process their attack
+                _attack(
+                    ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2
+                );
+            }
 
             // update players last action block number
             adventurer
@@ -267,8 +257,14 @@ mod Game {
             // assert adventurer has a beast to attack
             _assert_in_battle(@self, adventurer);
 
-            // pass adventurer ref into internal function
-            _flee(ref self, ref adventurer, adventurer_id);
+            // if the adventurer has exceeded the idle penalty threshold
+            if _idle_longer_than_penalty_threshold(@self, adventurer) {
+                // apply idle penalty
+                _apply_idle_penalty(ref self, adventurer_id, ref adventurer);
+            } else {
+                // process flee
+                _flee(ref self, ref adventurer, adventurer_id);
+            }
 
             // update players last action block number
             adventurer
@@ -376,6 +372,68 @@ mod Game {
 
             // purchase health
             _buy_potion(ref self, adventurer_id, ref adventurer);
+
+            // emit purchase potion event
+            __event_PurchasedPotion(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(), adventurer_id, adventurer: adventurer
+                },
+                1,
+                POTION_HEALTH_AMOUNT
+            );
+
+            // pack and save adventurer
+            _pack_adventurer_remove_stat_boost(
+                ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
+            );
+        }
+
+        fn buy_potions(ref self: ContractState, adventurer_id: u256, amount: u8) {
+            // assert caller owns adventurer
+            _assert_ownership(@self, adventurer_id);
+
+            // get item names from storage
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+
+            // unpack adventurer from storage (stat boosts applied on unpacking)
+            let mut adventurer = _unpack_adventurer_apply_stat_boost(
+                @self, adventurer_id, name_storage1, name_storage2
+            );
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // assert adventurer is not in a battle
+            _assert_not_in_battle(@self, adventurer);
+
+            // assert market is open
+            _assert_market_is_open(@self, adventurer);
+
+            // buy potions
+            let mut i: u8 = 0;
+            loop {
+                if i >= amount {
+                    break ();
+                }
+                _buy_potion(ref self, adventurer_id, ref adventurer);
+                i += 1;
+            };
+
+            // emit purchase potion event
+            __event_PurchasedPotion(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(), adventurer_id, adventurer: adventurer
+                },
+                amount,
+                POTION_HEALTH_AMOUNT * amount.into(),
+            );
 
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -1814,18 +1872,11 @@ mod Game {
         // verify adventurer isn't already at max health
         assert(adventurer.get_max_health() != adventurer.health, messages::HEALTH_FULL);
 
-        // calculate cost of potion based on the Adventurers level
+        // calculate cost of potion based on the adventurer's level
         adventurer.deduct_gold(adventurer.charisma_adjusted_potion_price());
 
-        // TODO: We could remove the value from here altogether and have it within the function
+        // add health to adventurer
         adventurer.add_health(POTION_HEALTH_AMOUNT);
-
-        // emit purchase potion event
-        __event_PurchasedPotion(
-            ref self,
-            AdventurerState { owner: get_caller_address(), adventurer_id, adventurer: adventurer },
-            POTION_HEALTH_AMOUNT
-        );
     }
 
     // _get_live_entropy generates entropy for exploration
@@ -2066,7 +2117,7 @@ mod Game {
             .get_idle_blocks(starknet::get_block_info().unbox().block_number);
         idle_blocks >= IDLE_PENALTY_THRESHOLD_BLOCKS
     }
-    fn _idle_penalty(self: @ContractState, adventurer: Adventurer) -> u16 {
+    fn _get_idle_penalty(self: @ContractState, adventurer: Adventurer) -> u16 {
         // TODO: Get worst case scenario obstacle
         // 1. Identify adventurers weakest armor
         // 2. Get T1 obstacle that is strong against that armor
@@ -2074,6 +2125,31 @@ mod Game {
 
         // for now just return fixed 80 damage
         return 80;
+    }
+
+    fn _apply_idle_penalty(
+        ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer
+    ) {
+        // if adventurer has exceeded idle threshold
+        // they receive a fixed penalty
+        // TODO: Make this based on worst case scenario obstacle discovery
+        adventurer.deduct_health(_get_idle_penalty(@self, adventurer));
+
+        // if adventurer is dead
+        if (adventurer.health == 0) {
+            // emit AdventurerDied event
+            __event_AdventurerDied(
+                ref self,
+                AdventurerState {
+                    owner: self._owner.read(adventurer_id),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                killed_by_beast: false,
+                killed_by_obstacle: false,
+                killer_id: 0
+            );
+        }
     }
 
     fn _lords_address(self: @ContractState) -> ContractAddress {
@@ -2391,6 +2467,7 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     struct PurchasedPotion {
         adventurer_state: AdventurerState,
+        quantity: u8,
         health_amount: u16,
     }
 
@@ -2543,9 +2620,14 @@ mod Game {
     }
 
     fn __event_PurchasedPotion(
-        ref self: ContractState, adventurer_state: AdventurerState, health_amount: u16
+        ref self: ContractState, adventurer_state: AdventurerState, quantity: u8, health_amount: u16
     ) {
-        self.emit(Event::PurchasedPotion(PurchasedPotion { adventurer_state, health_amount }));
+        self
+            .emit(
+                Event::PurchasedPotion(
+                    PurchasedPotion { adventurer_state, quantity, health_amount }
+                )
+            );
     }
 
     fn __event_NewHighScore(ref self: ContractState, adventurer_state: AdventurerState, rank: u8) {
