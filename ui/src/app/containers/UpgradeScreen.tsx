@@ -22,6 +22,7 @@ import {
   ScrollIcon,
   ArrowIcon,
 } from "../components/icons/Icons";
+import PurchaseHealth from "../components/actions/PurchaseHealth";
 
 /**
  * @container
@@ -231,19 +232,26 @@ export default function UpgradeScreen() {
                 {currentLevel}
               </span>
             </span>
-            <p className="text-center text-lg sm:text-2xl">
-              {/* {purchasedItem
-                ? "You have purchased an item!"
-                : "Items are on the market!"} */}
-              Items are on the market!
-            </p>
-            <Button
-              className="w-1/4"
-              onClick={() => setScreen("market")}
-              // disabled={purchasedItem}
-            >
-              Market
-            </Button>
+            <div className="w-full flex flex-col items-center sm:flex-row gap-5">
+              <div className="flex flex-col gap-5 items-center w-full sm:w-1/2">
+                <p className="text-center text-lg sm:text-2xl">
+                  Items are on the market!
+                </p>
+                <Button
+                  className="w-1/4"
+                  onClick={() => setScreen("market")}
+                  // disabled={purchasedItem}
+                >
+                  Market
+                </Button>
+              </div>
+              <div className="w-full sm:w-1/2">
+                <p className="text-center text-lg sm:text-2xl">
+                  Health shop open!
+                </p>
+                <PurchaseHealth />
+              </div>
+            </div>
           </div>
           <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full">
             {isMobileDevice ? (
