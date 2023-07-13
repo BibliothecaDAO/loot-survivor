@@ -4,6 +4,7 @@ import WalletSelect from "./WalletSelect";
 import { TypeAnimation } from "react-type-animation";
 import { prologue } from "../../lib/constants";
 import LootIconLoader from "../icons/Loader";
+import Image from "next/image";
 
 const Intro = () => {
   const [screen, setScreen] = useState(0);
@@ -73,8 +74,10 @@ const Intro = () => {
         <>
           {screen == 0 ? (
             <div className="flex flex-col w-full h-full p-4 sm:p-8">
-              <div className="flex">
-                <p className="sm:p-4 text-xs sm:text-xl leading-tight">
+              <div className="flex flex-wrap">
+                <div className="w-full"><Image className=" mx-auto p-10 animate-pulse" src={'/monsters/balrog.png'} alt="start" width={500} height={500}/></div>
+                
+                <p className="sm:p-4 text-xs sm:text-xl leading-loose">
                   <TypeAnimation
                     sequence={[
                       prologue,
@@ -84,7 +87,7 @@ const Intro = () => {
                     ]}
                     wrapper="span"
                     cursor={true}
-                    speed={45}
+                    speed={90}
                     // repeat={Infinity}
                     style={{ fontSize: "2em" }}
                   />
