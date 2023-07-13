@@ -2,18 +2,18 @@ export const AdventurerTutorial = () => {
   return (
     <div className="flex flex-col uppercase">
       <h1 className="mt-0">Welcome to Loot Survivor!</h1>
-      <h3 className="text-xl sm:text-2xl">Create an Adventurer</h3>
+      <br />
+      {/* <h3 className="text-xl sm:text-2xl">Create an Adventurer</h3> */}
       <p className="text-sm sm:text-lg">
-        You will first need to create your very own Adventurer. Think of it as
-        stepping into a pair of sturdy boots that will carry you across the vast
-        expanses of our eerie world until the very end.
+        You will first need to create your Adventurer. Think of it as stepping
+        into a pair of sturdy boots that will carry you across the vast expanses
+        of our eerie world until the very end.
       </p>
       <br />
       <p className="text-sm sm:text-lg">
         To bring your Adventurer to life, you will need to provide some unique
         information:
       </p>
-      <br />
       <ul>
         <li>
           <span className="text-xl">Name</span> - A worthy name for a lordly
@@ -34,17 +34,17 @@ export const AdventurerTutorial = () => {
       </ul>
       <br />
       <p className="text-sm sm:text-lg">
-        Once your Adventurer is minted, you will be able to perform a range of
-        actions to help them climb the ranks, achieve the glory they deserve and
-        reap the rewards of making the prestigious top three leaderboard.
+        Once your Adventurer is minted, you will be able need to perform actions
+        with the hope to climb the ranks, achieve glory and reap the rewards if
+        you manage reach prestigious top three highest score.
       </p>
       <br />
       <p className="text-sm sm:text-lg">
-        Minting you adventure will cost only 25 $LORDS with rewards split
+        Minting you adventure will cost just 25 $LORDS with rewards split
         between the top three players, DAO and frontend provider.
       </p>
       <br />
-      <p className="text-sm sm:text-lg">Are you ready to survive?</p>
+      <p className="text-sm sm:text-lg">So... Are you ready to survive?</p>
     </div>
   );
 };

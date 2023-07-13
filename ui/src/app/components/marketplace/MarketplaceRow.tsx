@@ -208,7 +208,12 @@ const MarketplaceRow = ({
               }
               className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
             >
-              Purchase
+              {checkPurchaseBalance() ||
+              checkTransacting(item.item ?? "") ||
+              singlePurchaseExists(item.item ?? "") ||
+              (isMobileDevice && showEquipQ && isActive)
+                ? "In Cart"
+                : "Purchase"}
             </Button>
           )}
         </td>
