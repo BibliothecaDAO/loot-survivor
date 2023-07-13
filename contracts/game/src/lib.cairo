@@ -1921,6 +1921,7 @@ mod Game {
         hash_span.append(adventurer.gold.into());
         hash_span.append(adventurer.health.into());
         hash_span.append(adventurer_entropy.into());
+        hash_span.append(adventurer.last_action.into());
         hash_span.append(game_entropy.into());
 
         let poseidon = poseidon_hash_span(hash_span.span());
