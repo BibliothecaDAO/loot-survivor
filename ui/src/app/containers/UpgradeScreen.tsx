@@ -202,7 +202,7 @@ export default function UpgradeScreen() {
 
   useEffect(() => {
     if (statUpgrades == 0) {
-      setScreen("actions");
+      setScreen("play");
     }
   }, [statUpgrades, setScreen]);
 
