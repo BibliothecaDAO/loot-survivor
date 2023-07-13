@@ -397,27 +397,6 @@ export default function Home() {
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
-
-  const Screens = ({ screen }: any) => {
-    const ScreenMapping: any = {
-      start: AdventurerScreen,
-      actions: ActionsScreen,
-      market: MarketplaceScreen,
-      inventory: InventoryScreen,
-      beast: BeastScreen,
-      leaderboard: LeaderboardScreen,
-      upgrade: UpgradeScreen,
-      profile: Profile,
-      encounters: EncountersScreen,
-      guide: GuideScreen,
-      settings: Settings,
-      player: Player,
-    };
-  
-    const ScreenComponent = ScreenMapping[screen];
-  
-    return ScreenComponent ? <ScreenComponent /> : null;
-  };
   
 
   return (
@@ -573,7 +552,18 @@ export default function Home() {
 
                 {isMobileDevice && <MobileHeader />}
 
-                <Screens screen={screen} />
+                {screen === "start" && <AdventurerScreen />}
+                {screen === "actions" && <ActionsScreen />}
+                {screen === "market" && <MarketplaceScreen />}
+                {screen === "inventory" && <InventoryScreen />}
+                {screen === "beast" && <BeastScreen />}
+                {screen === "leaderboard" && <LeaderboardScreen />}
+                {screen === "upgrade" && <UpgradeScreen />}
+                {screen === "profile" && <Profile />}
+                {screen === "encounters" && <EncountersScreen />}
+                {screen === "guide" && <GuideScreen />}
+                {screen === "settings" && <Settings />}
+                {screen === "player" && <Player />}
               </>
             </div>
           ) : null}

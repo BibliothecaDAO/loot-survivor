@@ -11,8 +11,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const client = new ApolloClient({
-    ssrMode: false,
-    uri: getGraphQLUrl(),
+    uri: getGraphQLUrl,
     cache: new InMemoryCache(),
   });
 
