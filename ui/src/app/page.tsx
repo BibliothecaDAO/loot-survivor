@@ -292,8 +292,8 @@ export default function Home() {
           ? [
               {
                 id: isMobile ? 3 : 2,
-                label: "Actions",
-                screen: "actions",
+                label: "Play",
+                screen: "play",
                 disabled:
                   hasBeast || statUpgrades > 0 || adventurer.health == 0,
               },
@@ -390,7 +390,7 @@ export default function Home() {
       menu("Start", "start");
     } else if (hasAdventurers && adventurerExistsAndHasXP) {
       if (beastHealth <= 0) {
-        menu("Actions", "actions");
+        menu("Play", "play");
       } else if (beastHealth > 0) {
         menu("Beast", "beast");
       }
@@ -573,7 +573,7 @@ export default function Home() {
                 {isMobileDevice && <MobileHeader />}
 
                 {screen === "start" && <AdventurerScreen />}
-                {screen === "actions" && <ActionsScreen />}
+                {screen === "play" && <ActionsScreen />}
                 {screen === "market" && <MarketplaceScreen />}
                 {screen === "inventory" && <InventoryScreen />}
                 {screen === "beast" && <BeastScreen />}
