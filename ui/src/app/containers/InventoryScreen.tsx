@@ -38,6 +38,8 @@ export default function InventoryScreen() {
     ? data.itemsByAdventurerQuery.items
     : [];
 
+  console.log(items);
+
   // const items: any[] = [];
 
   const handleAddEquipItem = (item: Item) => {
@@ -138,15 +140,17 @@ export default function InventoryScreen() {
   }
 
   const equipedItems = selectedIds(adventurer ?? NullAdventurer, [
-    "weaponId",
-    "headId",
-    "chestId",
-    "handsId",
-    "waistId",
-    "feetId",
-    "neckId",
-    "ringId",
+    "weapon",
+    "head",
+    "chest",
+    "hand",
+    "waist",
+    "foot",
+    "neck",
+    "ring",
   ]);
+
+  console.log(adventurer?.hand);
 
   const filteredItems = selectedItemType.filter(
     (item: Item) => !equipedItems.includes(item.item)
@@ -199,7 +203,7 @@ export default function InventoryScreen() {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 3}
           setSelected={setSelectedIndex}
-          equippedItem={adventurer?.hands}
+          equippedItem={adventurer?.hand}
           icon={<LootIcon type="hand" />}
         />
         <InventoryRow
@@ -221,7 +225,7 @@ export default function InventoryScreen() {
           setActiveMenu={setActiveMenu}
           isSelected={selectedIndex == 5}
           setSelected={setSelectedIndex}
-          equippedItem={adventurer?.feet}
+          equippedItem={adventurer?.foot}
           icon={<LootIcon type="foot" />}
         />
         <InventoryRow

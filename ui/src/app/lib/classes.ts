@@ -24,8 +24,8 @@ export class AdventurerClass implements Adventurer {
   chest?: string; // Chest armor of the adventurer
   head?: string; // Head armor of the adventurer
   waist?: string; // Waist armor of the adventurer
-  feet?: string; // Feet armor of the adventurer
-  hands?: string; // Hands armor of the adventurer
+  foot?: string; // Feet armor of the adventurer
+  hand?: string; // Hands armor of the adventurer
   neck?: string; // Necklace of the adventure
   ring?: string; // Ring of the adventure
   beastHealth?: number; // Beast health adventurer is engaging
