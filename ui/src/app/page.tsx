@@ -342,7 +342,7 @@ export default function Home() {
       setMenu(newMenu);
       setMobileMenu(newMobileMenu);
     }
-  }, [adventurer, account, onboarded, hasBeast, purchaseExists]);
+  }, [adventurer, account, onboarded, hasBeast]);
 
   useEffect(() => {
     if (onboarded) {
