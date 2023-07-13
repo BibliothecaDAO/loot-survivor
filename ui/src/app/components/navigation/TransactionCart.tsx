@@ -24,9 +24,7 @@ const TransactionCart: React.FC = () => {
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const {
-    addTransaction,
-  } = useTransactionManager();
+  const { addTransaction } = useTransactionManager();
   const { writeAsync } = useContractWrite({ calls });
   const [notification, setNotification] = useState<string[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
@@ -43,36 +41,43 @@ const TransactionCart: React.FC = () => {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  const handleBuyItem = useCallback((call: any) => {
-    const item = items.find(
-      (item: Item) =>
-        item.item === (Array.isArray(call.calldata) && call.calldata[0])
-    );
-    const itemName = processItemName(item ?? NullItem);
-    const { tier } = getItemData(item?.item ?? "");
-    setNotification((notifications) => [
-      ...notifications,
-      `You purchased ${item?.item && itemName} for ${getItemPrice(
-        tier
-      )} gold`,
-    ]);
-    setLoadingQuery("latestMarketItemsQuery");
-    setLoadingMessage((messages) => [...messages, "Purchasing"]);
-  }, [items]);
+  const handleBuyItem = useCallback(
+    (call: any) => {
+      const item = items.find(
+        (item: Item) =>
+          item.item === (Array.isArray(call.calldata) && call.calldata[0])
+      );
+      const itemName = processItemName(item ?? NullItem);
+      const { tier } = getItemData(item?.item ?? "");
+      setNotification((notifications) => [
+        ...notifications,
+        `You purchased ${item?.item && itemName} for ${getItemPrice(
+          tier,
+          adventurer?.charisma ?? 0
+        )} gold`,
+      ]);
+      setLoadingQuery("latestMarketItemsQuery");
+      setLoadingMessage((messages) => [...messages, "Purchasing"]);
+    },
+    [items]
+  );
 
-  const handleEquipItem = useCallback((call: any) => {
-    const item = ownedItems.find(
-      (item: Item) =>
-        item.item === (Array.isArray(call.calldata) && call.calldata[2])
-    );
-    const itemName = processItemName(item ?? NullItem);
-    setNotification((notifications) => [
-      ...notifications,
-      `You equipped ${item?.item && itemName}!`,
-    ]);
-    setLoadingQuery("adventurerByIdQuery");
-    setLoadingMessage((messages) => [...messages, "Equipping"]);
-  }, [ownedItems]);
+  const handleEquipItem = useCallback(
+    (call: any) => {
+      const item = ownedItems.find(
+        (item: Item) =>
+          item.item === (Array.isArray(call.calldata) && call.calldata[2])
+      );
+      const itemName = processItemName(item ?? NullItem);
+      setNotification((notifications) => [
+        ...notifications,
+        `You equipped ${item?.item && itemName}!`,
+      ]);
+      setLoadingQuery("adventurerByIdQuery");
+      setLoadingMessage((messages) => [...messages, "Equipping"]);
+    },
+    [ownedItems]
+  );
 
   const handlePurchaseHealth = useCallback((call: any) => {
     setNotification((notifications) => [
@@ -102,7 +107,7 @@ const TransactionCart: React.FC = () => {
 
   const handleLoadData = useCallback(() => {
     for (let call of calls) {
-      switch(call.entrypoint) {
+      switch (call.entrypoint) {
         case "buy_item":
           handleBuyItem(call);
           break;
@@ -119,7 +124,13 @@ const TransactionCart: React.FC = () => {
           break;
       }
     }
-  }, [calls, handleBuyItem, handleEquipItem, handlePurchaseHealth, handleSlayIdleAdventurer]);
+  }, [
+    calls,
+    handleBuyItem,
+    handleEquipItem,
+    handlePurchaseHealth,
+    handleSlayIdleAdventurer,
+  ]);
 
   useEffect(() => {
     handleLoadData();

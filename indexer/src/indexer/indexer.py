@@ -1054,6 +1054,15 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
                 pi.adventurer_state_with_bag["bag"],
             )
+            # if pi.equipped:
+            #     await swap_item(
+            #         info,
+            #         pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+            #         pi.item_id,
+            #         pi.unequiped_item_id,
+            #         block_time,
+            #     )
+
             print(
                 "- [purchased item]",
                 pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
@@ -1077,11 +1086,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
         await update_adventurer_helper(
             info, ei.adventurer_state_with_bag["adventurer_state"]
         )
-        # await update_adventurer_bag(
-        #     info,
-        #     ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-        #     ei.adventurer_state_with_bag["bag"],
-        # )
         await swap_item(
             info,
             ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],

@@ -62,7 +62,7 @@ const MarketplaceRow = ({
   };
 
   const { tier, type, slot } = getItemData(item.item ?? "");
-  const itemPrice = getItemPrice(tier);
+  const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
 
   const checkPurchaseBalance = () => {
     if (adventurer?.gold) {
@@ -131,7 +131,10 @@ const MarketplaceRow = ({
           getKeyFromValue(gameData.ITEMS, item)?.toString() ?? "",
           equip ? "1" : "0",
         ],
-        metadata: `Purchasing ${item} for ${getItemPrice(tier)} gold`,
+        metadata: `Purchasing ${item} for ${getItemPrice(
+          tier,
+          adventurer?.charisma ?? 0
+        )} gold`,
       };
       addToCalls(PurchaseTx);
     }
@@ -165,7 +168,9 @@ const MarketplaceRow = ({
         <td className="text-center">
           <div className="flex flex-row items-center justify-center">
             <CoinIcon className="w-4 h-4 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
-            <p className="text-terminal-yellow">{getItemPrice(tier)}</p>
+            <p className="text-terminal-yellow">
+              {getItemPrice(tier, adventurer?.charisma ?? 0)}
+            </p>
           </div>
         </td>
 
