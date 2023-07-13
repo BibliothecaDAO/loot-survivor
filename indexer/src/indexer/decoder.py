@@ -265,6 +265,7 @@ raw_abi = [
             },
             {"name": "ambushed", "type": "core::bool"},
             {"name": "damage_taken", "type": "core::integer::u16"},
+            {"name": "damage_location", "type": "core::integer::u8"},
         ],
     },
     {
@@ -335,6 +336,7 @@ raw_abi = [
             {"name": "item_id", "type": "core::integer::u8"},
             {"name": "cost", "type": "core::integer::u16"},
             {"name": "equipped", "type": "core::bool"},
+            {"name": "unequipped_item_id", "type": "core::integer::u8"},
         ],
     },
     {
@@ -346,8 +348,8 @@ raw_abi = [
                 "name": "adventurer_state_with_bag",
                 "type": "game::Game::AdventurerStateWithBag",
             },
-            {"name": "equiped_item_id", "type": "core::integer::u8"},
-            {"name": "unequiped_item_id", "type": "core::integer::u8"},
+            {"name": "equipped_item_id", "type": "core::integer::u8"},
+            {"name": "unequipped_item_id", "type": "core::integer::u8"},
         ],
     },
     {
@@ -384,32 +386,13 @@ raw_abi = [
     },
     {
         "kind": "struct",
-        "name": "game::Game::ItemPrefixDiscovered",
+        "name": "game::Game::ItemSpecialUnlocked",
         "type": "event",
         "inputs": [
-            {
-                "name": "adventurer_state",
-                "type": "game::Game::AdventurerState",
-            },
-            {
-                "name": "special_names",
-                "type": "survivor::item_meta::ItemSpecials",
-            },
-        ],
-    },
-    {
-        "kind": "struct",
-        "name": "game::Game::ItemSuffixDiscovered",
-        "type": "event",
-        "inputs": [
-            {
-                "name": "adventurer_state",
-                "type": "game::Game::AdventurerState",
-            },
-            {
-                "name": "special_names",
-                "type": "survivor::item_meta::ItemSpecials",
-            },
+            {"name": "adventurer_state", "type": "game::Game::AdventurerState"},
+            {"name": "id", "type": "core::integer::u8"},
+            {"name": "level", "type": "core::integer::u8"},
+            {"name": "specials", "type": "survivor::item_meta::ItemSpecials"},
         ],
     },
     {
@@ -421,6 +404,7 @@ raw_abi = [
                 "name": "adventurer_state",
                 "type": "game::Game::AdventurerState",
             },
+            {"name": "quantity", "type": "core::integer::u8"},
             {"name": "health_amount", "type": "core::integer::u16"},
         ],
     },
@@ -473,6 +457,16 @@ raw_abi = [
                 "name": "items",
                 "type": "core::array::Array::<market::market::LootWithPrice>",
             },
+        ],
+    },
+    {
+        "kind": "struct",
+        "name": "game::Game::IdleDamagePenalty",
+        "type": "event",
+        "inputs": [
+            {"name": "adventurer_state", "type": "game::Game::AdventurerState"},
+            {"name": "idle_blocks", "type": "core::integer::u16"},
+            {"name": "damage_taken", "type": "core::integer::u16"},
         ],
     },
 ]
@@ -531,12 +525,8 @@ decode_greatness_increased_event = serializer_for_payload(
     game_contract_abi.events["game::Game::GreatnessIncreased"].inputs
 )
 
-decode_item_prefix_discovered_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::ItemPrefixDiscovered"].inputs
-)
-
-decode_item_suffix_discovered_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::ItemSuffixDiscovered"].inputs
+decode_item_special_unlocked_event = serializer_for_payload(
+    game_contract_abi.events["game::Game::ItemSpecialUnlocked"].inputs
 )
 
 decode_purchased_potion_event = serializer_for_payload(
@@ -557,4 +547,8 @@ decode_adventurer_leveled_up_event = serializer_for_payload(
 
 decode_new_items_available_event = serializer_for_payload(
     game_contract_abi.events["game::Game::NewItemsAvailable"].inputs
+)
+
+decode_idle_damage_penalty_event = serializer_for_payload(
+    game_contract_abi.events["game::Game::IdleDamagePenalty"].inputs
 )
