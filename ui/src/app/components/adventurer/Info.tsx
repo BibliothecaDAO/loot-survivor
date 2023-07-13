@@ -123,7 +123,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: Item) => item.item == formatAdventurer.hands
+                          (item: Item) => item.item == formatAdventurer.hand
                         ) || NullItem
                       }
                     />
@@ -141,7 +141,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: Item) => item.item == formatAdventurer.feet
+                          (item: Item) => item.item == formatAdventurer.foot
                         ) || NullItem
                       }
                     />

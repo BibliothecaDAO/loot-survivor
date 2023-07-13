@@ -182,7 +182,6 @@ async def update_item_xp(info, item, adventurer_id, xp, createdTime):
             "item": check_exists_int(item),
             "adventurerId": check_exists_int(adventurer_id),
             "createdTime": createdTime,
-            "timestamp": datetime.now(),
         },
         {
             "$set": {"xp": encode_int_as_bytes(xp)},
@@ -1037,12 +1036,13 @@ class LootSurvivorIndexer(StarkNetIndexer):
             await info.storage.find_one_and_update(
                 "items",
                 {
-                    "item": pi.item_id,
-                    "adventurerId": pi.adventurer_state_with_bag["adventurer_state"][
-                        "adventurer_id"
-                    ],
-                    "createdTime": item_document.createdTime,
-                    "timestamp": datetime.now(),
+                    "item": check_exists_int(pi.item_id),
+                    "adventurerId": check_exists_int(
+                        pi.adventurer_state_with_bag["adventurer_state"][
+                            "adventurer_id"
+                        ]
+                    ),
+                    "createdTime": item_document["createdTime"],
                 },
                 {"$set": purchased_item_doc},
             )
