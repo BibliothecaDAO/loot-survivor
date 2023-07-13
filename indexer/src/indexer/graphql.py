@@ -1015,7 +1015,7 @@ class Battle:
     fled: Optional[BooleanValue]
     damageDealt: Optional[FeltValue]
     damageTaken: Optional[FeltValue]
-    damageLocation: Optional[FeltValue]
+    damageLocation: Optional[SlotValue]
     xpEarnedAdventurer: Optional[FeltValue]
     xpEarnedItems: Optional[FeltValue]
     goldEarned: Optional[FeltValue]
@@ -1515,43 +1515,43 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
     app = web.Application()
     # app.router.add_route("*", "/graphql", view_goerli)
 
-    cors = aiohttp_cors.setup(app)
-    resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
-    resource_mainnet = cors.add(app.router.add_resource("/graphql"))
+    # cors = aiohttp_cors.setup(app)
+    # resource_goerli = cors.add(app.router.add_resource("/goerli-graphql"))
+    # resource_mainnet = cors.add(app.router.add_resource("/graphql"))
 
-    cors.add(
-        resource_goerli.add_route("POST", view_goerli),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
-    cors.add(
-        resource_goerli.add_route("GET", view_goerli),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
+    # cors.add(
+    #     resource_goerli.add_route("POST", view_goerli),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
+    # cors.add(
+    #     resource_goerli.add_route("GET", view_goerli),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
 
-    cors.add(
-        resource_mainnet.add_route("POST", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
-    cors.add(
-        resource_mainnet.add_route("GET", view_mainnet),
-        {
-            "*": aiohttp_cors.ResourceOptions(
-                expose_headers="*", allow_headers="*", allow_methods="*"
-            ),
-        },
-    )
+    # cors.add(
+    #     resource_mainnet.add_route("POST", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
+    # cors.add(
+    #     resource_mainnet.add_route("GET", view_mainnet),
+    #     {
+    #         "*": aiohttp_cors.ResourceOptions(
+    #             expose_headers="*", allow_headers="*", allow_methods="*"
+    #         ),
+    #     },
+    # )
 
     runner = web.AppRunner(app)
     await runner.setup()

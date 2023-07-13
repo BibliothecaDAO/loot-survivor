@@ -22,7 +22,11 @@ const PurchaseHealth = () =>
     const purchaseHealthTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "buy_potion",
-      calldata: [adventurer?.id?.toString() ?? "", "0"],
+      calldata: [
+        adventurer?.id?.toString() ?? "",
+        "0",
+        potionAmount.toString(),
+      ],
       metadata: `Purchasing ${potionAmount * 10} health`,
     };
 

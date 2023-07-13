@@ -40,7 +40,7 @@ export const CreateAdventurer = ({
     startingWeapon: "",
     name: "",
     homeRealmId: "",
-    race: ""
+    race: "",
   });
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const setScreen = useUIStore((state) => state.setScreen);
@@ -88,14 +88,16 @@ export const CreateAdventurer = ({
       contractAddress: gameContract?.address ?? "",
       entrypoint: "start",
       calldata: [
-        "0x043f721181BdA07742453f9C9C0AD27a6c04e39D665B73A583b2E5c166B6F77e",
+        "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
-        parseInt(stringToFelt(formData.name)).toString(),
+        stringToFelt(formData.name).toString(),
         formData.homeRealmId,
         getKeyFromValue(gameData.RACES, formData.race)?.toString() ?? "",
         "1",
       ],
     };
+
+    console.log(stringToFelt(formData.name));
 
     addToCalls(mintAdventurerTx);
     startLoading(
@@ -171,7 +173,12 @@ export const CreateAdventurer = ({
   const [formFilled, setFormFilled] = useState(false);
 
   useEffect(() => {
-    if (formData.homeRealmId && formData.name && formData.startingWeapon && formData.race) {
+    if (
+      formData.homeRealmId &&
+      formData.name &&
+      formData.startingWeapon &&
+      formData.race
+    ) {
       setFormFilled(true);
     } else {
       setFormFilled(false);
@@ -252,11 +259,10 @@ export const CreateAdventurer = ({
             </select>
           </label>
           <Button
-            variant={'default'}
+            variant={"default"}
             type="submit"
-            size={'lg'}
+            size={"lg"}
             disabled={!formFilled}
-
           >
             {formFilled ? "Spawn" : "Fill details"}
           </Button>

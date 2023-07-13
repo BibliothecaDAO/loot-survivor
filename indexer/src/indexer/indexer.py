@@ -27,12 +27,12 @@ from indexer.decoder import (
     decode_purchased_item_event,
     decode_equip_item_event,
     decode_greatness_increased_event,
-    decode_item_prefix_discovered_event,
-    decode_item_suffix_discovered_event,
+    decode_item_special_unlocked_event,
     decode_purchased_potion_event,
     decode_new_high_score_event,
     decode_adventurer_died_event,
     decode_new_items_available_event,
+    decode_idle_damage_penalty_event,
 )
 from indexer.utils import (
     felt_to_str,
@@ -414,12 +414,12 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "PurchasedItem",
             "EquipItem",
             "GreatnessIncreased",
-            "ItemPrefixDiscovered",
-            "ItemSuffixDiscovered",
+            "ItemSpecialUnlocked",
             "PurchasedPotion",
             "NewHighScore",
             "AdventurerDied",
             "NewItemsAvailable",
+            "IdleDamagePenalty",
         ]:
             add_filter(self.config.GAME_CONTRACT, survivor_event)
 
@@ -451,12 +451,12 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "PurchasedItem": self.purchased_item,
                 "EquipItem": self.equip_item,
                 "GreatnessIncreased": self.greatness_increased,
-                "ItemPrefixDiscovered": self.item_prefix_discovered,
-                "ItemSuffixDiscovered": self.item_suffix_discovered,
+                "ItemSpecialUnlocked": self.item_special_unlocked,
                 "PurchasedPotion": self.purchased_potion,
                 "NewHighScore": self.new_high_score,
                 "AdventurerDied": self.adventurer_died,
                 "NewItemsAvailable": self.new_items_available,
+                "IdleDamagePenalty": self.idle_damage_penalty,
             }[event_name](
                 info,
                 block_time,
@@ -975,7 +975,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "fled": check_exists_int(fa.fled),
                 "damageDealt": encode_int_as_bytes(0),
                 "damageTaken": encode_int_as_bytes(fa.damage_taken),
-                "damageLocation": encode_int_as_bytes(0),
+                "damageLocation": check_exists_int(fa.damage_location),
                 "xpEarnedAdventurer": encode_int_as_bytes(0),
                 "xpEarnedItems": encode_int_as_bytes(0),
                 "goldEarned": encode_int_as_bytes(0),
@@ -1054,15 +1054,14 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
                 pi.adventurer_state_with_bag["bag"],
             )
-            # if pi.equipped:
-            #     await swap_item(
-            #         info,
-            #         pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-            #         pi.item_id,
-            #         pi.unequiped_item_id,
-            #         block_time,
-            #     )
-
+            if pi.equipped:
+                await swap_item(
+                    info,
+                    pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+                    pi.item_id,
+                    pi.unequipped_item_id,
+                    block_time,
+                )
             print(
                 "- [purchased item]",
                 pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
@@ -1089,11 +1088,11 @@ class LootSurvivorIndexer(StarkNetIndexer):
         await swap_item(
             info,
             ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-            ei.equiped_item_id,
-            ei.unequiped_item_id,
+            ei.equipped_item_id,
+            ei.unequipped_item_id,
             block_time,
         )
-        print("- [equip item]", ei.equiped_item_id, "->", ei.unequiped_item_id)
+        print("- [equip item]", ei.equipped_item_id, "->", ei.unequipped_item_id)
 
     async def greatness_increased(
         self,
@@ -1114,7 +1113,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             gi.item_id,
         )
 
-    async def item_prefix_discovered(
+    async def item_special_unlocked(
         self,
         info: Info,
         block_time: datetime,
@@ -1122,61 +1121,30 @@ class LootSurvivorIndexer(StarkNetIndexer):
         tx_hash: str,
         data: List[FieldElement],
     ):
-        ip = decode_item_prefix_discovered_event.deserialize(
+        isu = decode_item_special_unlocked_event.deserialize(
             [felt.to_int(i) for i in data]
         )
-        await update_adventurer_helper(info, ip.adventurer_state)
-        item_prefix_doc = {
-            "special2": check_exists_int(ip.special_names["special2"]),
-            "special3": encode_int_as_bytes(ip.special_names["special3"]),
+        await update_adventurer_helper(info, isu.adventurer_state)
+        item_special_doc = {
+            "special1": check_exists_int(isu.specials["special1"]),
+            "special2": check_exists_int(isu.specials["special2"]),
+            "special3": encode_int_as_bytes(isu.specials["special3"]),
             "timestamp": datetime.now(),
         }
         await info.storage.find_one_and_update(
             "items",
             {
-                "item": check_exists_int(ip.special_names["id"]),
-                "adventurerId": check_exists_int(ip.adventurer_state["adventurer_id"]),
+                "item": check_exists_int(isu.id),
+                "adventurerId": check_exists_int(isu.adventurer_state["adventurer_id"]),
                 "owner": True,
             },
-            {"$set": item_prefix_doc},
+            {"$set": item_special_doc},
         )
         print(
-            "- [item prefix discovered]",
-            ip.adventurer_state["adventurer_id"],
+            "- [item special unlocked]",
+            isu.adventurer_state["adventurer_id"],
             "->",
-            ip.special_names["id"],
-        )
-
-    async def item_suffix_discovered(
-        self,
-        info: Info,
-        block_time: datetime,
-        _: FieldElement,
-        tx_hash: str,
-        data: List[FieldElement],
-    ):
-        isd = decode_item_suffix_discovered_event.deserialize(
-            [felt.to_int(i) for i in data]
-        )
-        await update_adventurer_helper(info, isd.adventurer_state)
-        item_suffix_doc = {
-            "special1": check_exists_int(isd.special_names["special1"]),
-            "timestamp": datetime.now(),
-        }
-        await info.storage.find_one_and_update(
-            "items",
-            {
-                "id": check_exists_int(isd.special_names["id"]),
-                "adventurerId": check_exists_int(isd.adventurer_state["adventurer_id"]),
-                "owner": True,
-            },
-            {"$set": item_suffix_doc},
-        )
-        print(
-            "- [item suffix discovered]",
-            isd.adventurer_state["adventurer_id"],
-            "->",
-            isd.special_names["id"],
+            isu.id,
         )
 
     async def purchased_potion(
@@ -1192,6 +1160,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         purchase_doc = {
             "txHash": tx_hash,
             "adventurerId": check_exists_int(pp.adventurer_state["adventurer_id"]),
+            "quantity": check_exists_int(pp.quantity),
             "healthAmount": encode_int_as_bytes(pp.health_amount),
             "blockTime": block_time,
             "timestamp": datetime.now(),
@@ -1283,6 +1252,74 @@ class LootSurvivorIndexer(StarkNetIndexer):
         print(
             "- [new items available]",
             sa.adventurer_state["adventurer_id"],
+        )
+
+    async def idle_damage_penalty(
+        self,
+        info: Info,
+        block_time: datetime,
+        _: FieldElement,
+        tx_hash: str,
+        data: List[FieldElement],
+    ):
+        idp = decode_idle_damage_penalty_event.deserialize(
+            [felt.to_int(i) for i in data]
+        )
+        if idp.adventurer_state["beast_health"] > 0:
+            penalty_battle_doc = {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "beast": check_exists_int(0),
+                "beastHealth": encode_int_as_bytes(0),
+                "beastLevel": encode_int_as_bytes(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
+                "seed": encode_int_as_bytes(0),
+                "adventurerId": check_exists_int(idp.adventurer_state["adventurer_id"]),
+                "attacker": encode_int_as_bytes(0),
+                "fled": check_exists_int(0),
+                "damageDealt": encode_int_as_bytes(0),
+                "damageTaken": encode_int_as_bytes(idp.damage_taken),
+                "damageLocation": check_exists_int(0),
+                "xpEarnedAdventurer": encode_int_as_bytes(0),
+                "xpEarnedItems": encode_int_as_bytes(0),
+                "goldEarned": encode_int_as_bytes(0),
+                "discoveryTime": block_time,
+                "blockTime": block_time,
+                "timestamp": datetime.now(),
+            }
+            await info.storage.insert_one("battles", penalty_battle_doc)
+        else:
+            penalty_discovery_doc = {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "adventurerId": check_exists_int(idp.adventurer_state["adventurer_id"]),
+                "discoveryType": encode_int_as_bytes(0),
+                "subDiscoveryType": check_exists_int(0),
+                "outputAmount": encode_int_as_bytes(0),
+                "obstacle": check_exists_int(0),
+                "obstacleLevel": check_exists_int(0),
+                "dodgedObstacle": encode_int_as_bytes(0),
+                "damageTaken": encode_int_as_bytes(idp.damage_taken),
+                "damageLocation": check_exists_int(0),
+                "xpEarnedAdventurer": check_exists_int(0),
+                "xpEarnedItems": check_exists_int(0),
+                "entity": check_exists_int(0),
+                "entityLevel": check_exists_int(0),
+                "entityHealth": encode_int_as_bytes(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
+                "ambushed": check_exists_int(0),
+                "seed": encode_int_as_bytes(0),
+                "discoveryTime": block_time,
+                "timestamp": datetime.now(),
+            }
+            await info.storage.insert_one("discoveries", penalty_discovery_doc)
+        print(
+            "- [idle damage penalty]",
+            idp.adventurer_state["adventurer_id"],
+            "->",
+            idp.adventurer_state["health"],
         )
 
     async def handle_invalidate(self, _info: Info, _cursor: Cursor):
