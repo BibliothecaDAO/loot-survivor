@@ -398,6 +398,28 @@ export default function Home() {
     query: "(max-device-width: 480px)",
   });
 
+  const Screens = ({ screen }: any) => {
+    const ScreenMapping: any = {
+      start: AdventurerScreen,
+      actions: ActionsScreen,
+      market: MarketplaceScreen,
+      inventory: InventoryScreen,
+      beast: BeastScreen,
+      leaderboard: LeaderboardScreen,
+      upgrade: UpgradeScreen,
+      profile: Profile,
+      encounters: EncountersScreen,
+      guide: GuideScreen,
+      settings: Settings,
+      player: Player,
+    };
+  
+    const ScreenComponent = ScreenMapping[screen];
+  
+    return ScreenComponent ? <ScreenComponent /> : null;
+  };
+  
+
   return (
     // <Maintenance />
     <main
@@ -417,7 +439,7 @@ export default function Home() {
                 >
                   {showDeathCount && (
                     <>
-                      <div className="flex items-center w-4 h-4 sm:w-5 h-5">
+                      <div className="flex items-center w-4 h-4 sm:w-5">
                         <SkullIcon />
                       </div>
                       <p className="text-red-500 sm:text-xl">20</p>
@@ -425,7 +447,7 @@ export default function Home() {
                   )}
                   {!showDeathCount && (
                     <>
-                      <div className="flex items-center w-4 h-4 sm:w-5 h-5">
+                      <div className="flex items-center w-4 h-4 sm:w-5">
                         <SmileIcon />
                       </div>
                       <p className="text-terminal-green sm:text-xl">20</p>
@@ -551,18 +573,7 @@ export default function Home() {
 
                 {isMobileDevice && <MobileHeader />}
 
-                {screen === "start" && <AdventurerScreen />}
-                {screen === "actions" && <ActionsScreen />}
-                {screen === "market" && <MarketplaceScreen />}
-                {screen === "inventory" && <InventoryScreen />}
-                {screen === "beast" && <BeastScreen />}
-                {screen === "leaderboard" && <LeaderboardScreen />}
-                {screen === "upgrade" && <UpgradeScreen />}
-                {screen === "profile" && <Profile />}
-                {screen === "encounters" && <EncountersScreen />}
-                {screen === "guide" && <GuideScreen />}
-                {screen === "settings" && <Settings />}
-                {screen === "player" && <Player />}
+                <Screens screen={screen} />
               </>
             </div>
           ) : null}

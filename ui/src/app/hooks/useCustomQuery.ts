@@ -1,3 +1,5 @@
+"use client"
+
 import { use, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "./useQueryStore";

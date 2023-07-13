@@ -1,4 +1,3 @@
-"use client";
 import { useEffect, useState } from "react";
 import { useWaitForTransaction, useAccount } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../../lib/utils";
