@@ -89,8 +89,7 @@ mod Game {
         PurchasedItem: PurchasedItem,
         EquipItem: EquipItem,
         GreatnessIncreased: GreatnessIncreased,
-        ItemPrefixDiscovered: ItemPrefixDiscovered,
-        ItemSuffixDiscovered: ItemSuffixDiscovered,
+        ItemSpecialUnlocked: ItemSpecialUnlocked,
         PurchasedPotion: PurchasedPotion,
         NewHighScore: NewHighScore,
         AdventurerDied: AdventurerDied,
@@ -1149,8 +1148,8 @@ mod Game {
     // @param special_names The ItemSpecials object storing the special names for the item.
     //
     // The function first checks if the item's new level is higher than its previous level. If it is, it generates a 'GreatnessIncreased' event.
-    // The function then checks if a suffix was assigned to the item when it leveled up. If it was, it generates an 'ItemSuffixDiscovered' event.
-    // Lastly, the function checks if a prefix was assigned to the item when it leveled up. If it was, it generates an 'ItemPrefixDiscovered' event.
+    // The function then checks if a suffix was assigned to the item when it leveled up. If it was, it generates an 'ItemSpecialUnlocked' event.
+    // Lastly, the function checks if a prefix was assigned to the item when it leveled up. If it was, it generates an 'ItemSpecialUnlocked' event.
     fn handle_item_leveling_events(
         ref self: ContractState,
         adventurer: Adventurer,
@@ -1182,13 +1181,15 @@ mod Game {
             // if item suffix was assigned
             if (suffix_assigned) {
                 // generate item suffix discovered event
-                __event_ItemSuffixDiscovered(
+                __event_ItemSpecialUnlocked(
                     ref self,
                     AdventurerState {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
                     },
+                    item_id,
+                    new_level,
                     special_names
                 );
             }
@@ -1196,13 +1197,15 @@ mod Game {
             // if item prefixes were assigned
             if (prefixes_assigned) {
                 // generate item prefix discovered event
-                __event_ItemPrefixDiscovered(
+                __event_ItemSpecialUnlocked(
                     ref self,
                     AdventurerState {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
                     },
+                    item_id,
+                    new_level,
                     special_names
                 );
             }
@@ -2470,15 +2473,11 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct ItemPrefixDiscovered {
+    struct ItemSpecialUnlocked {
         adventurer_state: AdventurerState,
-        special_names: ItemSpecials
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct ItemSuffixDiscovered {
-        adventurer_state: AdventurerState,
-        special_names: ItemSpecials
+        id: u8,
+        level: u8,
+        specials: ItemSpecials
     }
 
     #[derive(Drop, starknet::Event)]
@@ -2623,24 +2622,17 @@ mod Game {
             );
     }
 
-    fn __event_ItemPrefixDiscovered(
-        ref self: ContractState, adventurer_state: AdventurerState, special_names: ItemSpecials
+    fn __event_ItemSpecialUnlocked(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        id: u8,
+        level: u8,
+        specials: ItemSpecials
     ) {
         self
             .emit(
-                Event::ItemPrefixDiscovered(
-                    ItemPrefixDiscovered { adventurer_state, special_names }
-                )
-            );
-    }
-
-    fn __event_ItemSuffixDiscovered(
-        ref self: ContractState, adventurer_state: AdventurerState, special_names: ItemSpecials
-    ) {
-        self
-            .emit(
-                Event::ItemSuffixDiscovered(
-                    ItemSuffixDiscovered { adventurer_state, special_names }
+                Event::ItemSpecialUnlocked(
+                    ItemSpecialUnlocked { adventurer_state, id, level, specials }
                 )
             );
     }
