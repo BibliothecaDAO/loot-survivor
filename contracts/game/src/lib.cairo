@@ -875,7 +875,7 @@ mod Game {
                 health: starter_beast.starting_health,
                 ambushed: false,
                 damage_taken: 0,
-                damage_location: CombatEnums::Slot::Ring(())
+                damage_location: ImplCombat::slot_to_u8(CombatEnums::Slot::Ring(())) 
             }
         );
 
@@ -980,7 +980,7 @@ mod Game {
                         ambushed: was_ambushed,
                         damage_taken: damage_taken,
                         health: beast.starting_health,
-                        damage_location: damage_slot
+                        damage_location: ImplCombat::slot_to_u8(damage_slot)  
                     }
                 );
 
@@ -2433,7 +2433,7 @@ mod Game {
         beast_specs: CombatSpec,
         ambushed: bool,
         damage_taken: u16,
-        damage_location: CombatEnums::Slot,
+        damage_location: u8,
     }
 
     #[derive(Drop, starknet::Event)]
