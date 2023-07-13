@@ -95,6 +95,7 @@ mod Game {
         AdventurerDied: AdventurerDied,
         AdventurerLeveledUp: AdventurerLeveledUp,
         NewItemsAvailable: NewItemsAvailable,
+        IdleDamagePenalty: IdleDamagePenalty,
     }
 
     #[constructor]
@@ -160,9 +161,10 @@ mod Game {
             _assert_not_in_battle(@self, adventurer);
 
             // if the adventurer has exceeded the idle penalty threshold
-            if _idle_longer_than_penalty_threshold(@self, adventurer) {
+            let (is_idle, num_blocks) = _idle_longer_than_penalty_threshold(@self, adventurer);
+            if (is_idle) {
                 // apply idle penalty
-                _apply_idle_penalty(ref self, adventurer_id, ref adventurer);
+                _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
             } else {
                 // else send them off to explore
                 _explore(
@@ -207,9 +209,10 @@ mod Game {
             _assert_in_battle(@self, adventurer);
 
             // if the adventurer has exceeded the idle penalty threshold
-            if _idle_longer_than_penalty_threshold(@self, adventurer) {
+            let (is_idle, num_blocks) = _idle_longer_than_penalty_threshold(@self, adventurer);
+            if (is_idle) {
                 // apply idle penalty
-                _apply_idle_penalty(ref self, adventurer_id, ref adventurer);
+                _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
             } else {
                 // otherwise process their attack
                 _attack(
@@ -257,9 +260,10 @@ mod Game {
             _assert_in_battle(@self, adventurer);
 
             // if the adventurer has exceeded the idle penalty threshold
-            if _idle_longer_than_penalty_threshold(@self, adventurer) {
+            let (is_idle, num_blocks) = _idle_longer_than_penalty_threshold(@self, adventurer);
+            if (is_idle) {
                 // apply idle penalty
-                _apply_idle_penalty(ref self, adventurer_id, ref adventurer);
+                _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
             } else {
                 // process flee
                 _flee(ref self, ref adventurer, adventurer_id);
@@ -949,12 +953,7 @@ mod Game {
                 if (was_ambushed) {
                     // determine damage (adventurer dieing will be handled as part of the counter attack)
                     let damage_taken = _beast_counter_attack(
-                        ref self,
-                        ref adventurer,
-                        adventurer_id,
-                        damage_slot,
-                        beast,
-                        beast_seed
+                        ref self, ref adventurer, adventurer_id, damage_slot, beast, beast_seed
                     );
                 }
 
@@ -2139,10 +2138,13 @@ mod Game {
 
         assert(idle_blocks >= IDLE_DEATH_PENALTY_BLOCKS, messages::ADVENTURER_NOT_IDLE);
     }
-    fn _idle_longer_than_penalty_threshold(self: @ContractState, adventurer: Adventurer) -> bool {
+    fn _idle_longer_than_penalty_threshold(
+        self: @ContractState, adventurer: Adventurer
+    ) -> (bool, u16) {
         let idle_blocks = adventurer
             .get_idle_blocks(starknet::get_block_info().unbox().block_number);
-        idle_blocks >= IDLE_PENALTY_THRESHOLD_BLOCKS
+
+        return (idle_blocks >= IDLE_PENALTY_THRESHOLD_BLOCKS, idle_blocks);
     }
     fn _get_idle_penalty(self: @ContractState, adventurer: Adventurer) -> u16 {
         // TODO: Get worst case scenario obstacle
@@ -2155,12 +2157,25 @@ mod Game {
     }
 
     fn _apply_idle_penalty(
-        ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer
+        ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer, num_blocks: u16
     ) {
-        // if adventurer has exceeded idle threshold
-        // they receive a fixed penalty
-        // TODO: Make this based on worst case scenario obstacle discovery
-        adventurer.deduct_health(_get_idle_penalty(@self, adventurer));
+        // get idle penalty
+        let idle_penalty_damage = _get_idle_penalty(@self, adventurer);
+
+        // deduct it from adventurer's health
+        adventurer.deduct_health(idle_penalty_damage);
+
+        // emit event
+        __event_IdlePenaltyDamage(
+            ref self,
+            AdventurerState {
+                owner: self._owner.read(adventurer_id),
+                adventurer_id: adventurer_id,
+                adventurer: adventurer
+            },
+            num_blocks,
+            idle_penalty_damage
+        );
 
         // if adventurer is dead
         if (adventurer.health == 0) {
@@ -2529,6 +2544,12 @@ mod Game {
         items: Array<LootWithPrice>,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct IdleDamagePenalty {
+        adventurer_state: AdventurerState,
+        idle_blocks: u16,
+        damage_taken: u16
+    }
 
     fn __event__StartGame(
         ref self: ContractState,
@@ -2698,5 +2719,19 @@ mod Game {
         ref self: ContractState, adventurer_state: AdventurerState, items: Array<LootWithPrice>, 
     ) {
         self.emit(Event::NewItemsAvailable(NewItemsAvailable { adventurer_state, items }));
+    }
+
+    fn __event_IdlePenaltyDamage(
+        ref self: ContractState,
+        adventurer_state: AdventurerState,
+        idle_blocks: u16,
+        damage_taken: u16
+    ) {
+        self
+            .emit(
+                Event::IdleDamagePenalty(
+                    IdleDamagePenalty { adventurer_state, idle_blocks, damage_taken }
+                )
+            );
     }
 }
