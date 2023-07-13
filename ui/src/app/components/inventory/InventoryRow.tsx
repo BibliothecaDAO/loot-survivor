@@ -41,9 +41,10 @@ export const InventoryRow = ({
       const gameData = new GameData();
       const equipItemTx = {
         contractAddress: gameContract?.address,
-        entrypoint: "equip_item",
+        entrypoint: "equip",
         calldata: [
           adventurer?.id?.toString() ?? "",
+          "0",
           getKeyFromValue(gameData.ITEMS, item) ?? "",
         ],
         metadata: `Equipping ${item}!`,

@@ -96,7 +96,9 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: Item) => item.item == formatAdventurer.weapon
+                          (item: Item) =>
+                            item.item == formatAdventurer.weapon &&
+                            item.equipped
                         ) || NullItem
                       }
                     />
@@ -105,7 +107,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: Item) => item.item == formatAdventurer.head
+                          (item: Item) =>
+                            item.item == formatAdventurer.head && item.equipped
                         ) || NullItem
                       }
                     />
@@ -114,7 +117,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: Item) => item.item == formatAdventurer.chest
+                          (item: Item) =>
+                            item.item == formatAdventurer.chest && item.equipped
                         ) || NullItem
                       }
                     />
@@ -123,7 +127,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: Item) => item.item == formatAdventurer.hand
+                          (item: Item) =>
+                            item.item == formatAdventurer.hand && item.equipped
                         ) || NullItem
                       }
                     />
@@ -132,7 +137,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: Item) => item.item == formatAdventurer.waist
+                          (item: Item) =>
+                            item.item == formatAdventurer.waist && item.equipped
                         ) || NullItem
                       }
                     />
@@ -141,7 +147,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: Item) => item.item == formatAdventurer.foot
+                          (item: Item) =>
+                            item.item == formatAdventurer.foot && item.equipped
                         ) || NullItem
                       }
                     />
@@ -150,7 +157,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: Item) => item.item == formatAdventurer.neck
+                          (item: Item) =>
+                            item.item == formatAdventurer.neck && item.equipped
                         ) || NullItem
                       }
                     />
@@ -159,7 +167,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <ItemDisplay
                       item={
                         items.find(
-                          (item: Item) => item.item == formatAdventurer.ring
+                          (item: Item) =>
+                            item.item == formatAdventurer.ring && item.equipped
                         ) || NullItem
                       }
                     />

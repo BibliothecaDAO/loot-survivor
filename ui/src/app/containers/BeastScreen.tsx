@@ -101,7 +101,6 @@ export default function BeastScreen() {
   const formatBattles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
     : [];
-  console.log(formatBattles);
 
   const lastBattle = data.lastBattleQuery?.battles[0];
 
@@ -188,7 +187,8 @@ export default function BeastScreen() {
         adventurer?.beastHealth == undefined ||
         adventurer?.beastHealth == 0 ||
         loading ||
-        !onboarded,
+        !onboarded ||
+        beastData?.seed == 0,
       loading: loading,
     },
   ];

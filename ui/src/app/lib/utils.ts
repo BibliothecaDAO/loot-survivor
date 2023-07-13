@@ -80,12 +80,13 @@ export function groupBySlot(items: Item[]) {
   const groups: Dictionary = {};
 
   items.forEach((item) => {
-    if (item.slot) {
-      if (!groups[item.slot]) {
-        groups[item.slot] = [];
+    const { slot } = getItemData(item.item ?? "");
+    if (slot) {
+      if (!groups[slot]) {
+        groups[slot] = [];
       }
 
-      groups[item.slot].push(item);
+      groups[slot].push(item);
     }
   });
 
@@ -184,7 +185,7 @@ export function processItemName(item: Item) {
 export function getItemData(item: string) {
   const gameData = new GameData();
 
-  const item_name_format = item.replaceAll(" ", "")
+  const item_name_format = item.replaceAll(" ", "");
   const tier = gameData.ITEM_TIERS[item_name_format];
   const type =
     gameData.ITEM_TYPES[parseInt(getKeyFromValue(gameData.ITEMS, item) ?? "")];

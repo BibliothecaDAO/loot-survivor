@@ -198,11 +198,21 @@ export default function Home() {
   }, [adventurer, menu, setScreen]);
 
   useEffect(() => {
-    const { battlesByTxHashQuery, discoveryByTxHashQuery, lastBattleQuery } = data;
+    const { battlesByTxHashQuery, discoveryByTxHashQuery, lastBattleQuery } =
+      data;
     const battles = lastBattleQuery ? lastBattleQuery.battles : [];
 
-    const setNotification = (type: any, notificationData: any, hasBeast: any) => {
-      const notification = processNotification(type, notificationData, battles, hasBeast);
+    const setNotification = (
+      type: any,
+      notificationData: any,
+      hasBeast: any
+    ) => {
+      const notification = processNotification(
+        type,
+        notificationData,
+        battles,
+        hasBeast
+      );
       if (!deathMessage) {
         setDeathMessage(notification);
       }
@@ -225,8 +235,9 @@ export default function Home() {
       if (!discoveryByTxHashQuery || !isDataUpdated["discoveryByTxHashQuery"]) {
         return;
       }
-      const hasObstacle = discoveryByTxHashQuery.discoveries[0]?.discoveryType == "Obstacle"
-        && adventurer?.health == 0;
+      const hasObstacle =
+        discoveryByTxHashQuery.discoveries[0]?.discoveryType == "Obstacle" &&
+        adventurer?.health == 0;
       if (hasObstacle && !deathMessage) {
         setDeathMessage(<DiscoveryDisplay discoveryData={notificationData} />);
         showDeathDialog(true);
@@ -237,7 +248,9 @@ export default function Home() {
       if (!pendingMessage || !isDataUpdated["adventurerByIdQuery"]) {
         return;
       }
-      const isEquipping = (pendingMessage as string[]).includes("Equipping") && adventurer?.health == 0;
+      const isEquipping =
+        (pendingMessage as string[]).includes("Equipping") &&
+        adventurer?.health == 0;
       if (isEquipping) {
         setNotification(type, notificationData, hasBeast);
       }
@@ -253,7 +266,7 @@ export default function Home() {
     deathMessage,
     pendingMessage,
     isDataUpdated,
-    adventurer
+    adventurer,
   ]);
 
   useEffect(() => {
@@ -281,7 +294,8 @@ export default function Home() {
                 id: isMobile ? 3 : 2,
                 label: "Actions",
                 screen: "actions",
-                disabled: hasBeast || statUpgrades > 0 || adventurer.health == 0,
+                disabled:
+                  hasBeast || statUpgrades > 0 || adventurer.health == 0,
               },
               {
                 id: isMobile ? 4 : 3,
@@ -306,7 +320,10 @@ export default function Home() {
                 label: "Market",
                 screen: "market",
                 disabled:
-                  !(statUpgrades > 0) || hasBeast || adventurer.health == 0 || purchaseExists(),
+                  !(statUpgrades > 0) ||
+                  hasBeast ||
+                  adventurer.health == 0 ||
+                  purchaseExists(),
               },
             ]
           : []),
@@ -333,12 +350,14 @@ export default function Home() {
               },
             ]),
       ];
-  
-      const newMenu: any = adventurer ? commonMenuItems() : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+
+      const newMenu: any = adventurer
+        ? commonMenuItems()
+        : [{ id: 1, label: "Start", screen: "start", disabled: false }];
       const newMobileMenu: any = adventurer
         ? commonMenuItems(true)
         : [{ id: 1, label: "Start", screen: "start", disabled: false }];
-  
+
       setMenu(newMenu);
       setMobileMenu(newMobileMenu);
     }
@@ -358,7 +377,7 @@ export default function Home() {
       const menuData = {
         id: 1,
         label: label,
-        screen: screen
+        screen: screen,
       };
 
       setMenu([menuData]);
@@ -397,7 +416,8 @@ export default function Home() {
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
-  
+
+  console.log(calls);
 
   return (
     // <Maintenance />
@@ -493,12 +513,12 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <AddDevnetEthButton />
-                      )}
+                      <AddDevnetEthButton />
+                    )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <MintEthButton />
-                      )}
+                      <MintEthButton />
+                    )}
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}

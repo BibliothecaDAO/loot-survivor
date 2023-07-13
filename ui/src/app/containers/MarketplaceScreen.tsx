@@ -34,8 +34,6 @@ export default function MarketplaceScreen() {
   const profile = useUIStore((state) => state.profile);
   const { data, isLoading, refetch } = useQueriesStore();
 
-  const currentTime = new Date().getTime();
-
   useCustomQuery(
     "latestMarketItemsQuery",
     getLatestMarketItems,

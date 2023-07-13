@@ -330,7 +330,7 @@ async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
     await info.storage.find_one_and_update(
         "items",
         {
-            "id": check_exists_int(equipped_item),
+            "item": check_exists_int(equipped_item),
             "adventurerId": check_exists_int(adventurer_id),
             "owner": True,
         },
@@ -345,13 +345,13 @@ async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
     await info.storage.find_one_and_update(
         "items",
         {
-            "id": check_exists_int(unequipped_item),
+            "item": check_exists_int(unequipped_item),
             "adventurerId": check_exists_int(adventurer_id),
             "owner": True,
         },
         {
             "$set": {
-                "equipped": check_exists_int(0),
+                "equipped": False,
                 "lastUpdatedTime": time,
                 "timestamp": datetime.now(),
             },
@@ -1077,16 +1077,16 @@ class LootSurvivorIndexer(StarkNetIndexer):
         await update_adventurer_helper(
             info, ei.adventurer_state_with_bag["adventurer_state"]
         )
-        await update_adventurer_bag(
-            info,
-            ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-            ei.adventurer_state_with_bag["bag"],
-        )
+        # await update_adventurer_bag(
+        #     info,
+        #     ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+        #     ei.adventurer_state_with_bag["bag"],
+        # )
         await swap_item(
             info,
             ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-            ei.equip_item_id,
-            ei.unequipped_item_id,
+            ei.equiped_item_id,
+            ei.unequiped_item_id,
             block_time,
         )
         print("- [equip item]", ei.equiped_item_id, "->", ei.unequiped_item_id)

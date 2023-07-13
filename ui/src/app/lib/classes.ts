@@ -43,7 +43,6 @@ export class AdventurerClass implements Adventurer {
       name,
       order,
       health,
-      level,
       strength,
       dexterity,
       vitality,
@@ -56,8 +55,8 @@ export class AdventurerClass implements Adventurer {
       chest,
       head,
       waist,
-      feet,
-      hands,
+      foot,
+      hand,
       neck,
       ring,
       beastHealth,
@@ -90,8 +89,8 @@ export class AdventurerClass implements Adventurer {
     this.chest = chest;
     this.head = head;
     this.waist = waist;
-    this.feet = feet;
-    this.hands = hands;
+    this.foot = foot;
+    this.hand = hand;
     this.neck = neck;
     this.ring = ring;
     this.beastHealth = beastHealth;

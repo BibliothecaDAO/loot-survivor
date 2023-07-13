@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { useAccount } from "@starknet-react/core";
 import { getItemsByAdventurer } from "../hooks/graphql/queries";
-import { groupBySlot } from "../lib/utils";
+import { getKeyFromValue, groupBySlot } from "../lib/utils";
 import { InventoryRow } from "../components/inventory/InventoryRow";
 import Info from "../components/adventurer/Info";
 import { ItemDisplay } from "../components/adventurer/ItemDisplay";
@@ -15,6 +15,7 @@ import useLoadingStore from "../hooks/useLoadingStore";
 import LootIcon from "../components/icons/LootIcon";
 import { InfoIcon } from "../components/icons/Icons";
 import { Adventurer, Call, Item, NullAdventurer } from "../types";
+import { GameData } from "../components/GameData";
 
 /**
  * @container
@@ -38,28 +39,33 @@ export default function InventoryScreen() {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  console.log(items);
-
   // const items: any[] = [];
 
-  const handleAddEquipItem = (item: Item) => {
+  const handleAddEquipItem = (item: string) => {
     if (gameContract && formatAddress) {
       const equipItemTx = {
         contractAddress: gameContract?.address,
-        entrypoint: "equip_item",
-        calldata: [adventurer?.id?.toString() ?? "", item.item ?? ""],
-        metadata: `Equipping ${item.item}!`,
+        entrypoint: "equip",
+        calldata: [
+          adventurer?.id?.toString() ?? "",
+          "0",
+          getKeyFromValue(gameData.ITEMS, item) ?? "",
+        ],
+        metadata: `Equipping ${item}!`,
       };
       addToCalls(equipItemTx);
     }
   };
 
-  const singleEquipExists = (id: number) => {
+  const gameData = new GameData();
+
+  const singleEquipExists = (item: string) => {
+    console.log(getKeyFromValue(gameData.ITEMS, item)?.toString());
     return calls.some(
       (call: Call) =>
-        call.entrypoint == "equip_item" &&
+        call.entrypoint == "equip" &&
         Array.isArray(call.calldata) &&
-        call.calldata[2] == id.toString()
+        call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
     );
   };
 
@@ -92,25 +98,17 @@ export default function InventoryScreen() {
     };
   }, [activeMenu, handleKeyDown]);
 
-  const groupedItems = groupBySlot(items);
+  const unequippedItems = items.filter((item: Item) => !item.equipped);
 
-  // useEffect(() => {
-  //   const button = buttonRefs.current[selectedIndex];
-  //   if (button) {
-  //     button.scrollIntoView({
-  //       behavior: "smooth",
-  //       block: "nearest",
-  //     });
-  //   }
-  // }, [selectedIndex]);
+  const groupedItems = groupBySlot(unequippedItems);
 
   enum Menu {
     Weapon = "Weapon",
     Head = "Head",
     Chest = "Chest",
-    Hands = "Hand",
+    Hand = "Hand",
     Waist = "Waist",
-    Feet = "Foot",
+    Foot = "Foot",
     Neck = "Neck",
     Ring = "Ring",
   }
@@ -125,36 +123,7 @@ export default function InventoryScreen() {
 
   const selected = getValueByIndex(Menu, selectedIndex);
 
-  const selectedItemType = groupedItems[selected || "Weapon"] || [];
-
-  function selectedIds(obj: Adventurer, keys: string[]) {
-    const values = [];
-
-    for (const key of keys) {
-      if (obj.hasOwnProperty(key)) {
-        values.push(obj[key]);
-      }
-    }
-
-    return values;
-  }
-
-  const equipedItems = selectedIds(adventurer ?? NullAdventurer, [
-    "weapon",
-    "head",
-    "chest",
-    "hand",
-    "waist",
-    "foot",
-    "neck",
-    "ring",
-  ]);
-
-  console.log(adventurer?.hand);
-
-  const filteredItems = selectedItemType.filter(
-    (item: Item) => !equipedItems.includes(item.item)
-  );
+  const selectedItems = groupedItems[selected || "Weapon"] || [];
 
   return (
     <div className="flex flex-row gap-5 sm:gap-5 sm:space-x-4 overflow-hidden flex-wrap">
@@ -264,8 +233,8 @@ export default function InventoryScreen() {
             </p>
           </div>
           <div className="flex flex-col space-y-1">
-            {filteredItems.length ? (
-              filteredItems.map((item: any, index: number) => (
+            {selectedItems.length ? (
+              selectedItems.map((item: any, index: number) => (
                 <div
                   className="flex flex-row gap-2 w-full items-center justify-between"
                   key={item.id}
@@ -274,8 +243,8 @@ export default function InventoryScreen() {
                     <ItemDisplay item={item} />
                   </div>
                   <Button
-                    onClick={() => handleAddEquipItem(item)}
-                    disabled={singleEquipExists(item.id)}
+                    onClick={() => handleAddEquipItem(item.item)}
+                    disabled={singleEquipExists(item.item)}
                     loading={loading}
                   >
                     equip

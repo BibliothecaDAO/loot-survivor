@@ -12,7 +12,6 @@ import {
 import { Metadata, Item, Adventurer, Call } from "../../types";
 import { CoinIcon } from "../icons/Icons";
 import EfficacyDisplay from "../icons/EfficacyIcon";
-import useUIStore from "@/app/hooks/useUIStore";
 import { GameData } from "../GameData";
 import { useMediaQuery } from "react-responsive";
 
@@ -204,6 +203,7 @@ const MarketplaceRow = ({
                 checkPurchaseBalance() ||
                 checkTransacting(item.item ?? "") ||
                 singlePurchaseExists(item.item ?? "") ||
+                item.owner ||
                 (isMobileDevice && showEquipQ && isActive)
               }
               className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
