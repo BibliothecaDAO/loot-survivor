@@ -65,8 +65,8 @@ export const BattleDisplay = ({
           </p>
         ) : (
           <p>
-            The {beastName} attacked your{" "}
-            {getAttackLocationIcon(damageLocation)} doing
+            The {beastName} attacked {getAttackLocationIcon(damageLocation)}
+            {""} doing
             {battleData.damageTaken} damage!
           </p>
         )

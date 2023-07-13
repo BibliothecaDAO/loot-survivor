@@ -28,6 +28,7 @@ const ADVENTURER_FIELDS = `
   gold
   createdTime
   lastUpdatedTime
+  timestamp
 `;
 
 const ADVENTURERS_FRAGMENT = `
@@ -77,6 +78,7 @@ const ITEM_FIELDS = `
   special3
   xp
   lastUpdatedTime
+  timestamp
 `;
 
 const ITEMS_FRAGMENT = `
@@ -107,6 +109,7 @@ const DISCOVERY_FIELDS = `
   ambushed
   discoveryTime
   txHash
+  timestamp
 `;
 
 const DISCOVERIES_FRAGMENT = `
@@ -127,6 +130,7 @@ const BEAST_FIELDS = `
   special1
   special2
   special3
+  timestamp
 `;
 
 const BEASTS_FRAGMENT = `
@@ -150,7 +154,7 @@ const getDiscoveries = gql`
     discoveries(
       where: { adventurerId: { eq: $adventurerId } }
       limit: 1000000
-      orderBy: { discoveryTime: { desc: true } }
+      orderBy: { tiemstamp: { desc: true } }
     ) {
       ...DiscoveryFields
     }
@@ -163,7 +167,7 @@ const getLatestDiscoveries = gql`
     discoveries(
       where: { adventurerId: { eq: $adventurerId } }
       limit: 10
-      orderBy: { discoveryTime: { desc: true } }
+      orderBy: { timestamp: { desc: true } }
     ) {
       ...DiscoveryFields
     }
@@ -176,7 +180,7 @@ const getLastDiscovery = gql`
     discoveries(
       where: { adventurerId: { eq: $adventurerId } }
       limit: 1
-      orderBy: { discoveryTime: { desc: true } }
+      orderBy: { timestamp: { desc: true } }
     ) {
       ...DiscoveryFields
     }
@@ -189,7 +193,7 @@ const getLastBeastDiscovery = gql`
     discoveries(
       where: { adventurerId: { eq: $adventurerId }, entity: { gt: 0 } }
       limit: 1
-      orderBy: { discoveryTime: { desc: true } }
+      orderBy: { timestamp: { desc: true } }
     ) {
       ...DiscoveryFields
     }

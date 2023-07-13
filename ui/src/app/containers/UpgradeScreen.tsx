@@ -220,7 +220,7 @@ export default function UpgradeScreen() {
         <Info adventurer={adventurer} />
       </div>
       <div className="w-full sm:w-2/3">
-        <div className="flex flex-col gap-5 sm:gap-10">
+        <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-2 p-2 sm:p-10 items-center">
             <span className="flex flex-col gap-2 text-center text-4xl">
               <span className="animate-pulse">LEVEL UP!</span>

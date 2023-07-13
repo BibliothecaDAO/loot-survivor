@@ -1015,7 +1015,7 @@ class Battle:
     fled: Optional[BooleanValue]
     damageDealt: Optional[FeltValue]
     damageTaken: Optional[FeltValue]
-    damageLocation: Optional[FeltValue]
+    damageLocation: Optional[SlotValue]
     xpEarnedAdventurer: Optional[FeltValue]
     xpEarnedItems: Optional[FeltValue]
     goldEarned: Optional[FeltValue]
