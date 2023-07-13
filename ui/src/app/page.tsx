@@ -536,7 +536,7 @@ export default function Home() {
 
           {deathDialog && <DeathDialog />}
 
-          {!onboarded && tutorialDialog && <TutorialDialog />}
+          {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
 
           {account ? (
             <div className="flex flex-col flex-grow w-full">
