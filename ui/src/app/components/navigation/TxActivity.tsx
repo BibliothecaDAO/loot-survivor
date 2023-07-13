@@ -7,6 +7,7 @@ import LootIconLoader from "../icons/Loader";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import useUIStore from "@/app/hooks/useUIStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { useMediaQuery } from "react-responsive";
 
 export interface TxActivityProps {
   hash: string | undefined;
@@ -46,16 +47,20 @@ export const TxActivity = () => {
   const [messageIndex, setMessageIndex] = useState(0);
   const isLoadingQueryUpdated = loadingQuery && isDataUpdated[loadingQuery];
 
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
+
   console.log(isLoadingQueryUpdated);
   console.log(queryData?.adventurerByIdQuery);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!txAccepted || !hash || !isLoadingQueryUpdated) return;
-  
+
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
-  
+
         await refetch("battlesByTxHashQuery");
         await refetch("adventurerByIdQuery");
         await refetch("battlesByBeastQuery");
@@ -64,33 +69,38 @@ export const TxActivity = () => {
           beast: notificationData.beast,
         });
       };
-  
+
       const handleExplore = async () => {
         if (!queryData?.discoveryByTxHashQuery) return;
-  
+
         await refetch("discoveryByTxHashQuery");
         await refetch("latestDiscoveriesQuery");
         await refetch("adventurerByIdQuery");
         await refetch("lastBeastBattleQuery");
         stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
       };
-  
+
       const handleUpgrade = async () => {
         stopLoading(notificationData);
       };
-  
+
       const handleMulticall = async () => {
-        if (!notificationData.some((noti: string) => noti.startsWith("You equipped"))) return;
-  
+        if (
+          !notificationData.some((noti: string) =>
+            noti.startsWith("You equipped")
+          )
+        )
+          return;
+
         await refetch("adventurerByIdQuery");
         await refetch("battlesByBeastQuery");
         stopLoading(notificationData);
       };
-  
+
       const handleDefault = async () => {
         stopLoading(notificationData);
       };
-  
+
       const handleDataUpdate = () => {
         setTxAccepted(false);
         resetDataUpdated(loadingQuery);
@@ -98,7 +108,7 @@ export const TxActivity = () => {
           setScreen("upgrade");
         }
       };
-  
+
       try {
         switch (type) {
           case "Attack":
@@ -122,10 +132,10 @@ export const TxActivity = () => {
         console.error("An error occurred during fetching:", error);
         // handle error (e.g., update state to show error message)
       }
-  
+
       handleDataUpdate();
     };
-  
+
     fetchData();
   }, [
     isLoadingQueryUpdated,
@@ -163,8 +173,11 @@ export const TxActivity = () => {
     <>
       {loading ? (
         <div className="flex flex-row absolute top-5 sm:top-0 sm:relative items-center gap-5 justify-between text-xs sm:text-base">
-          <div className="flex flex-row items-center w-32 sm:w-48 loading-ellipsis">
-            <LootIconLoader className="self-center mr-3" />
+          <div className="flex flex-row items-center w-40 sm:w-48 loading-ellipsis">
+            <LootIconLoader
+              className="self-center mr-3"
+              size={isMobileDevice ? "w-4" : "w-5"}
+            />
             {hash
               ? pendingArray
                 ? (pendingMessage as string[])[messageIndex]
@@ -173,7 +186,7 @@ export const TxActivity = () => {
           </div>
           {hash && (
             <div className="flex flex-row gap-2">
-              Hash:{" "}
+              {!isMobileDevice && "Hash:"}
               <a
                 href={`https://testnet.starkscan.co/tx/${padAddress(hash)}`}
                 target="_blank"
@@ -183,7 +196,11 @@ export const TxActivity = () => {
               </a>
             </div>
           )}
-          {data && hash && <div>Status: {data.status}</div>}
+          {data && hash && (
+            <div>
+              {!isMobileDevice && "Status:"} {data.status}
+            </div>
+          )}
         </div>
       ) : null}
     </>
