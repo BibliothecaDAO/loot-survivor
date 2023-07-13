@@ -109,7 +109,6 @@ const DISCOVERY_FIELDS = `
   ambushed
   discoveryTime
   txHash
-  blockTime
   timestamp
 `;
 

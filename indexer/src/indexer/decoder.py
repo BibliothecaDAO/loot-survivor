@@ -265,10 +265,7 @@ raw_abi = [
             },
             {"name": "ambushed", "type": "core::bool"},
             {"name": "damage_taken", "type": "core::integer::u16"},
-            {
-                "name": "damage_location",
-                "type": "combat::constants::CombatEnums::Slot",
-            },
+            {"name": "damage_location", "type": "core::integer::u8"},
         ],
     },
     {
