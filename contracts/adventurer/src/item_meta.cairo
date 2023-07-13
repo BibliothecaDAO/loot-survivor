@@ -138,7 +138,7 @@ impl ImplItemSpecials of IItemSpecials {
         }
     }
 
-    fn get_loot_special_names_slot(
+    fn get_special_name_storage_slot(
         adventurer: Adventurer, bag: Bag, loot_statistics: ItemPrimitive
     ) -> ItemPrimitive {
         // check slots
@@ -354,7 +354,7 @@ fn test_get_item_metadata_slot() {
 
     let new_item = ItemPrimitive { id: 1, xp: 1, metadata: 0 };
 
-    let item = IItemSpecials::get_loot_special_names_slot(adventurer, bag, new_item);
+    let item = IItemSpecials::get_special_name_storage_slot(adventurer, bag, new_item);
 
     assert(item.metadata == 19, 'ItemPrimitive');
 }
