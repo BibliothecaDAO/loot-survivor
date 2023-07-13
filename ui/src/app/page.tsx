@@ -29,7 +29,7 @@ import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
-import { mainnet_addr } from "./lib/constants";
+import { mainnet_addr, getGraphQLUrl } from "./lib/constants";
 import { Menu, NullAdventurer, Call, Battle } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
@@ -38,11 +38,9 @@ import { processNotification } from "./components/navigation/NotificationDisplay
 import { DiscoveryDisplay } from "./components/actions/DiscoveryDisplay";
 import useCustomQuery from "./hooks/useCustomQuery";
 import {
-  getBeastsByAdventurer,
   getAdventurerById,
   getBattleByTxHash,
   getDiscoveryByTxHash,
-  getLatestMarketItems,
   getAdventurerByXP,
 } from "./hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
@@ -60,7 +58,6 @@ import Player from "./components/adventurer/Player";
 import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
 import { TutorialDialog } from "./components/tutorial/TutorialDialog";
-import { AdventurerTemplate } from "./types/templates";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -85,23 +82,34 @@ export default function Home() {
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const deathDialog = useUIStore((state) => state.deathDialog);
-  // const deathDialog = true;
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const tutorialDialog = useUIStore((state) => state.tutorialDialog);
-  // const tutorialDialog = true;
   const showTutorialDialog = useUIStore((state) => state.showTutorialDialog);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
-  // const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const statUpgrades = adventurer?.statUpgrades ?? 0;
-
   const [showDeathCount, setShowDeathCount] = useState(true);
+  const { data, isDataUpdated, refetch } = useQueriesStore();
 
-  const { data, isDataUpdated, refetch, refetchFunctions } = useQueriesStore();
+  const [menu, setMenu] = useState<Menu[]>([
+    {
+      id: 1,
+      label: "Start",
+      screen: "start",
+    },
+  ]);
+
+  const [mobileMenu, setMobileMenu] = useState<Menu[]>([
+    {
+      id: 1,
+      label: "Start",
+      screen: "start",
+    },
+  ]);
 
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
@@ -117,7 +125,7 @@ export default function Home() {
     {
       id: adventurer?.id ?? 0,
     },
-    txAccepted
+    true
   );
 
   useCustomQuery(
@@ -153,7 +161,11 @@ export default function Home() {
     }
   }, [updatedAdventurer, setAdventurer]);
 
-  const hasBeast = !!(adventurer?.beastHealth ?? 0 > 0);
+  const [hasBeast, setHasBeast] = useState(false);
+
+  useEffect(() => {
+    setHasBeast(!!(adventurer?.beastHealth ?? 0 > 0));
+  }, [adventurer]);
 
   const playState = useMemo(
     () => ({
@@ -175,27 +187,9 @@ export default function Home() {
     };
   }, [play, stop]);
 
-  const [menu, setMenu] = useState<Menu[]>([
-    {
-      id: 1,
-      label: "Start",
-      screen: "start",
-    },
-  ]);
-
-  const [mobileMenu, setMobileMenu] = useState<Menu[]>([
-    {
-      id: 1,
-      label: "Start",
-      screen: "start",
-    },
-  ]);
-
   const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers
     : [];
-
-  // const adventurers = [AdventurerTemplate];
 
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
@@ -204,70 +198,62 @@ export default function Home() {
   }, [adventurer, menu, setScreen]);
 
   useEffect(() => {
-    if (data.battlesByTxHashQuery && isDataUpdated["battlesByTxHashQuery"]) {
-      if (
-        Array.isArray(data.battlesByTxHashQuery.battles) &&
-        data.battlesByTxHashQuery.battles.some(
-          (data: Battle) => data.attacker == "Beast" && adventurer?.health == 0
-        )
-      ) {
-        const battles = data.lastBattleQuery
-          ? data.lastBattleQuery.battles
-          : [];
-        const notification = processNotification(
-          type,
-          notificationData,
-          battles,
-          hasBeast
-        );
-        if (!deathMessage) {
-          setDeathMessage(notification);
-        }
+    const { battlesByTxHashQuery, discoveryByTxHashQuery, lastBattleQuery } = data;
+    const battles = lastBattleQuery ? lastBattleQuery.battles : [];
+
+    const setNotification = (type: any, notificationData: any, hasBeast: any) => {
+      const notification = processNotification(type, notificationData, battles, hasBeast);
+      if (!deathMessage) {
+        setDeathMessage(notification);
+      }
+      showDeathDialog(true);
+    };
+
+    const checkBattles = () => {
+      if (!battlesByTxHashQuery || !isDataUpdated["battlesByTxHashQuery"]) {
+        return;
+      }
+      const hasBeastAttacker = battlesByTxHashQuery.battles.some(
+        (battle) => battle.attacker == "Beast" && adventurer?.health == 0
+      );
+      if (hasBeastAttacker) {
+        setNotification(type, notificationData, hasBeast);
+      }
+    };
+
+    const checkDiscovery = () => {
+      if (!discoveryByTxHashQuery || !isDataUpdated["discoveryByTxHashQuery"]) {
+        return;
+      }
+      const hasObstacle = discoveryByTxHashQuery.discoveries[0]?.discoveryType == "Obstacle"
+        && adventurer?.health == 0;
+      if (hasObstacle && !deathMessage) {
+        setDeathMessage(<DiscoveryDisplay discoveryData={notificationData} />);
         showDeathDialog(true);
       }
-    }
-    // handle dead by discovering obstacle
-    if (
-      data.discoveryByTxHashQuery &&
-      isDataUpdated["discoveryByTxHashQuery"]
-    ) {
-      if (
-        data.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
-          "Obstacle" &&
-        adventurer?.health == 0
-      ) {
-        if (!deathMessage) {
-          setDeathMessage(
-            <DiscoveryDisplay discoveryData={notificationData} />
-          );
-        }
-        showDeathDialog(true);
+    };
+
+    const checkEquipping = () => {
+      if (!pendingMessage || !isDataUpdated["adventurerByIdQuery"]) {
+        return;
       }
-    }
-    if (pendingMessage && isDataUpdated["adventurerByIdQuery"]) {
-      if (
-        (pendingMessage as string[]).includes("Equipping") &&
-        adventurer?.health == 0
-      ) {
-        const battles = data.lastBattleQuery
-          ? data.lastBattleQuery.battles
-          : [];
-        const notification = processNotification(
-          type,
-          notificationData,
-          battles,
-          hasBeast
-        );
-        if (!deathMessage) {
-          setDeathMessage(notification);
-        }
-        showDeathDialog(true);
+      const isEquipping = (pendingMessage as string[]).includes("Equipping") && adventurer?.health == 0;
+      if (isEquipping) {
+        setNotification(type, notificationData, hasBeast);
       }
-    }
+    };
+
+    checkBattles();
+    checkDiscovery();
+    checkEquipping();
   }, [
     showNotification,
     data.battlesByTxHashQuery,
     data.discoveryByTxHashQuery,
+    deathMessage,
+    pendingMessage,
+    isDataUpdated,
+    adventurer
   ]);
 
   useEffect(() => {
@@ -276,216 +262,124 @@ export default function Home() {
     }
   }, [account, setConnected]);
 
-  const goerli_graphql =
-    "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/goerli-graphql";
-  const mainnet_graphql =
-    "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/graphql";
-
   useMemo(() => {
-    setIndexer(
-      (account as any)?.provider?.baseUrl == mainnet_addr ||
-        (account as any)?.baseUrl == mainnet_addr
-        ? mainnet_graphql
-        : goerli_graphql
-    );
+    setIndexer(getGraphQLUrl());
   }, [setIndexer]);
 
   useEffect(() => {
     if (onboarded) {
-      let newMenu: Menu[] = [
+      const commonMenuItems = (isMobile = false) => [
         {
-          id: 1,
+          id: isMobile ? 2 : 1,
           label: "Start",
           screen: "start",
+          disabled: false,
         },
+        ...(adventurer
+          ? [
+              {
+                id: isMobile ? 3 : 2,
+                label: "Actions",
+                screen: "actions",
+                disabled: hasBeast || statUpgrades > 0 || adventurer.health == 0,
+              },
+              {
+                id: isMobile ? 4 : 3,
+                label: "Inventory",
+                screen: "inventory",
+                disabled: adventurer.health == 0,
+              },
+              {
+                id: isMobile ? 5 : 4,
+                label: "Beast",
+                screen: "beast",
+                disabled: statUpgrades > 0 || adventurer.health == 0,
+              },
+              {
+                id: isMobile ? 6 : 5,
+                label: statUpgrades > 0 ? <span>Upgrade!</span> : "Upgrade",
+                screen: "upgrade",
+                disabled: !(statUpgrades > 0),
+              },
+              {
+                id: isMobile ? 7 : 6,
+                label: "Market",
+                screen: "market",
+                disabled:
+                  !(statUpgrades > 0) || hasBeast || adventurer.health == 0 || purchaseExists(),
+              },
+            ]
+          : []),
+        ...(isMobile
+          ? []
+          : [
+              {
+                id: 7,
+                label: "Leaderboard",
+                screen: "leaderboard",
+                disabled: false,
+              },
+              {
+                id: 8,
+                label: "Encounters",
+                screen: "encounters",
+                disabled: false,
+              },
+              {
+                id: 9,
+                label: "Guide",
+                screen: "guide",
+                disabled: false,
+              },
+            ]),
       ];
-
-      let newMobileMenu: Menu[] = [
-        {
-          id: 1,
-          label: "Start",
-          screen: "start",
-        },
-      ];
-
-      if (adventurer) {
-        newMenu = [
-          ...newMenu,
-          {
-            id: 2,
-            label: "Actions",
-            screen: "actions",
-            disabled: hasBeast || statUpgrades > 0 || adventurer.health == 0,
-          },
-          {
-            id: 3,
-            label: "Inventory",
-            screen: "inventory",
-            disabled: adventurer.health == 0,
-          },
-          {
-            id: 4,
-            label: "Beast",
-            screen: "beast",
-            disabled: statUpgrades > 0 || adventurer.health == 0,
-          },
-          {
-            id: 5,
-            label: "Leaderboard",
-            screen: "leaderboard",
-          },
-          {
-            id: 6,
-            label: <span>{statUpgrades > 0 ? "Upgrade!" : "Upgrade"}</span>,
-            screen: "upgrade",
-            disabled: !(statUpgrades > 0),
-          },
-          {
-            id: 7,
-            label: "Market",
-            screen: "market",
-            disabled:
-              !(statUpgrades > 0) ||
-              hasBeast ||
-              adventurer.health == 0 ||
-              purchaseExists(),
-          },
-          {
-            id: 8,
-            label: "Encounters",
-            screen: "encounters",
-          },
-          {
-            id: 9,
-            label: "Guide",
-            screen: "guide",
-          },
-        ];
-
-        newMobileMenu = [
-          ...newMobileMenu,
-          {
-            id: 2,
-            label: "Actions",
-            screen: "actions",
-            disabled: hasBeast || statUpgrades > 0 || adventurer.health == 0,
-          },
-          {
-            id: 3,
-            label: "Inventory",
-            screen: "inventory",
-            disabled: adventurer.health == 0,
-          },
-          {
-            id: 4,
-            label: "Beast",
-            screen: "beast",
-            disabled: statUpgrades > 0 || adventurer.health == 0,
-          },
-          {
-            id: 5,
-            label: <span>{statUpgrades > 0 ? "Upgrade !" : "Upgrade"}</span>,
-            screen: "upgrade",
-            disabled: !(statUpgrades > 0),
-          },
-          {
-            id: 6,
-            label: "Market",
-            screen: "market",
-            disabled:
-              !(statUpgrades > 0) ||
-              hasBeast ||
-              adventurer.health == 0 ||
-              purchaseExists(),
-          },
-        ];
-      }
+  
+      const newMenu: any = adventurer ? commonMenuItems() : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+      const newMobileMenu: any = adventurer
+        ? commonMenuItems(true)
+        : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+  
       setMenu(newMenu);
       setMobileMenu(newMobileMenu);
     }
-  }, [adventurer, account, onboarded, hasBeast, purchaseExists]);
-
-  // useEffect(() => {
-  //   if (purchaseExists()) {
-  //     setPurchasedItem(true);
-  //   } else {
-  //     setPurchasedItem(false);
-  //   }
-  // }, [purchaseExists, setPurchasedItem]);
+  }, [adventurer, account, onboarded, hasBeast]);
 
   useEffect(() => {
-    if (!onboarded) {
-      if (adventurers.length == 0) {
-        setMenu([
-          {
-            id: 1,
-            label: "Start",
-            screen: "start",
-          },
-        ]);
-        setMobileMenu([
-          {
-            id: 1,
-            label: "Start",
-            screen: "start",
-          },
-        ]);
-        setScreen(menu[0].screen);
-        showTutorialDialog(true);
-      } else if (
-        adventurers.length == 1 &&
-        adventurer?.id &&
-        adventurer?.xp == 0 &&
-        !(adventurer.beastHealth ?? 0 > 0)
-      ) {
-        setMenu([
-          {
-            id: 1,
-            label: "Actions",
-            screen: "actions",
-          },
-        ]);
-        setMobileMenu([
-          {
-            id: 1,
-            label: "Actions",
-            screen: "actions",
-          },
-        ]);
-        setScreen("actions");
-        showTutorialDialog(true);
-      } else if (
-        adventurers.length == 1 &&
-        adventurer?.xp == 0 &&
-        (adventurer.beastHealth ?? 0 > 0)
-      ) {
-        setMenu([
-          {
-            id: 1,
-            label: "Beast",
-            screen: "beast",
-          },
-        ]);
-        setMobileMenu([
-          {
-            id: 1,
-            label: "Actions",
-            screen: "actions",
-          },
-        ]);
-        setScreen("beast");
-        showTutorialDialog(true);
-      } else if (
-        adventurers.length == 1 &&
-        adventurer?.xp == 10 &&
-        (adventurer.beastHealth ?? 0 == 0) &&
-        (adventurer?.statUpgrades ?? 0) > 0
-      ) {
-        showTutorialDialog(true);
-      } else {
-        handleOnboarded();
-        refetch("adventurersByOwnerQuery");
+    if (onboarded) {
+      return;
+    }
+
+    const hasAdventurers = adventurers.length > 0;
+    const adventurerExistsAndHasXP = adventurer?.xp === 0;
+    const beastHealth = adventurer?.beastHealth ?? 0;
+    const statUpgrades = adventurer?.statUpgrades ?? 0;
+
+    const menu = (label: any, screen: any) => {
+      const menuData = {
+        id: 1,
+        label: label,
+        screen: screen
+      };
+
+      setMenu([menuData]);
+      setMobileMenu([menuData]);
+      setScreen(screen);
+      showTutorialDialog(true);
+    };
+
+    if (!hasAdventurers) {
+      menu("Start", "start");
+    } else if (hasAdventurers && adventurerExistsAndHasXP) {
+      if (beastHealth <= 0) {
+        menu("Actions", "actions");
+      } else if (beastHealth > 0) {
+        menu("Beast", "beast");
       }
+    } else if (adventurer?.xp === 10 && beastHealth === 0 && statUpgrades > 0) {
+      showTutorialDialog(true);
+    } else {
+      handleOnboarded();
+      refetch("adventurersByOwnerQuery");
     }
   }, [onboarded, adventurer, account]);
 
@@ -503,6 +397,7 @@ export default function Home() {
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
+  
 
   return (
     // <Maintenance />
@@ -523,7 +418,7 @@ export default function Home() {
                 >
                   {showDeathCount && (
                     <>
-                      <div className="flex items-center w-4 h-4 sm:w-5 h-5">
+                      <div className="flex items-center w-4 h-4 sm:w-5">
                         <SkullIcon />
                       </div>
                       <p className="text-red-500 sm:text-xl">20</p>
@@ -531,7 +426,7 @@ export default function Home() {
                   )}
                   {!showDeathCount && (
                     <>
-                      <div className="flex items-center w-4 h-4 sm:w-5 h-5">
+                      <div className="flex items-center w-4 h-4 sm:w-5">
                         <SmileIcon />
                       </div>
                       <p className="text-terminal-green sm:text-xl">20</p>
@@ -598,12 +493,12 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                      <AddDevnetEthButton />
-                    )}
+                        <AddDevnetEthButton />
+                      )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                      <MintEthButton />
-                    )}
+                        <MintEthButton />
+                      )}
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}

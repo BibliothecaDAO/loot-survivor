@@ -20,6 +20,7 @@ import useUIStore from "../../hooks/useUIStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { FormData, Adventurer } from "@/app/types";
 import { getRealmNameById } from "../../lib/utils";
+import { Button } from "../buttons/Button";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
@@ -39,8 +40,7 @@ export const CreateAdventurer = ({
     startingWeapon: "",
     name: "",
     homeRealmId: "",
-    race: "",
-    order: "",
+    race: ""
   });
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const setScreen = useUIStore((state) => state.setScreen);
@@ -168,12 +168,24 @@ export const CreateAdventurer = ({
 
   const realm = getRealmNameById(parseInt(formData.homeRealmId) ?? 0);
 
+  const [formFilled, setFormFilled] = useState(false);
+
+  useEffect(() => {
+    if (formData.homeRealmId && formData.name && formData.startingWeapon && formData.race) {
+      setFormFilled(true);
+    } else {
+      setFormFilled(false);
+    }
+  }, [formData]);
+
   return (
-    <div className="flex items-center sm:w-1/2 mx-4 border border-terminal-green">
-      <div className="flex flex-row w-full gap-2 p-2">
+    <div className=" items-center sm:w-1/3 mx-4 border border-terminal-green uppercase">
+      <h4 className="w-full text-center ">Create Adventurer</h4>
+      <hr className="border-terminal-green" />
+      <div className="flex flex-row w-full gap-2 p-4">
         <form
           onSubmit={handleSubmit}
-          className="flex flex-col w-full gap-2 p-1 text-lg sm:text-2xl"
+          className="flex flex-col w-full gap-2 text-lg sm:text-2xl"
         >
           <label className="flex justify-between">
             <span className="self-center">Name:</span>
@@ -182,7 +194,7 @@ export const CreateAdventurer = ({
               type="text"
               name="name"
               onChange={handleChange}
-              className="p-1 m-2 bg-terminal-black border border-slate-500"
+              className="p-1 m-2 bg-terminal-black border border-terminal-green"
               onKeyDown={handleKeyDown}
               maxLength={16}
             />
@@ -221,7 +233,7 @@ export const CreateAdventurer = ({
                 min="1"
                 max="8000"
                 onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black border border-slate-500"
+                className="p-1 m-2 bg-terminal-black border border-terminal-green"
               />
             </span>
           </label>
@@ -239,12 +251,15 @@ export const CreateAdventurer = ({
               <option value="Club">Club</option>
             </select>
           </label>
-          <button
+          <Button
+            variant={'default'}
             type="submit"
-            className="p-2 m-2 border bg-terminal-black border-terminal-green hover:bg-terminal-green/80 hover:animate-pulse hover:text-black"
+            size={'lg'}
+            disabled={!formFilled}
+
           >
-            Spawn
-          </button>
+            {formFilled ? "Spawn" : "Fill details"}
+          </Button>
         </form>
       </div>
     </div>

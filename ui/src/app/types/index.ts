@@ -154,7 +154,6 @@ export type FormData = {
   name: string;
   homeRealmId: string;
   race: string;
-  order: string;
 };
 
 export interface Call {

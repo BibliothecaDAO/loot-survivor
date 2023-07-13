@@ -334,7 +334,7 @@ async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
         },
         {
             "$set": {
-                "equipped": check_exists_int(1),
+                "equipped": True,
                 "lastUpdatedTime": time,
             }
         },
@@ -347,7 +347,7 @@ async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
             "owner": True,
         },
         {
-            "$set": {"equipped": check_exists_int(0), "lastUpdatedTime": time},
+            "$set": {"equipped": False, "lastUpdatedTime": time},
         },
     )
 
@@ -522,7 +522,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "item": check_exists_int(sg.adventurer_state["adventurer"]["weapon"]["id"]),
             "adventurerId": check_exists_int(sg.adventurer_state["adventurer_id"]),
             "owner": True,
-            "equipped": check_exists_int(1),
+            "equipped": True,
             "ownerAddress": check_exists_int(sg.adventurer_state["owner"]),
             "xp": encode_int_as_bytes(0),
             "cost": encode_int_as_bytes(0),
@@ -987,7 +987,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         pi = decode_purchased_item_event.deserialize([felt.to_int(i) for i in data])
         purchased_item_doc = {
             "owner": True,
-            "equipped": check_exists_int(1) if pi.equipped else check_exists_int(0),
+            "equipped": True if pi.equipped else False,
             "ownerAddress": check_exists_int(
                 pi.adventurer_state_with_bag["adventurer_state"]["owner"]
             ),
@@ -997,7 +997,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         }
         # Get the most recently created item so it can be updated
         try:
-            item = info.storage.find(
+            item = await info.storage.find(
                 "items",
                 {
                     "item": check_exists_int(
@@ -1016,11 +1016,15 @@ class LootSurvivorIndexer(StarkNetIndexer):
             await info.storage.find_one_and_update(
                 "items",
                 {
-                    "item": pi.item_id,
-                    "adventurerId": pi.adventurer_state_with_bag["adventurer_state"][
-                        "adventurer_id"
-                    ],
-                    "createdTime": item_document.createdTime,
+                    "item": check_exists_int(
+                        pi.item_id,
+                    ),
+                    "adventurerId": check_exists_int(
+                        pi.adventurer_state_with_bag["adventurer_state"][
+                            "adventurer_id"
+                        ]
+                    ),
+                    "createdTime": item_document["createdTime"],
                 },
                 {"$set": purchased_item_doc},
             )
@@ -1032,7 +1036,14 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
                 pi.adventurer_state_with_bag["bag"],
             )
-            print("- [purchased item]", pi.item_id, "->", pi.cost)
+            print(
+                "- [purchased item]",
+                pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+                "->",
+                pi.item_id,
+                "->",
+                pi.cost,
+            )
         except StopIteration:
             print("No documents found in item")
 
@@ -1228,7 +1239,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "item": check_exists_int(item["item"]["id"]),
                 "adventurerId": check_exists_int(sa.adventurer_state["adventurer_id"]),
                 "owner": False,
-                "equipped": check_exists_int(0),
+                "equipped": False,
                 "ownerAddress": check_exists_int(0),
                 "xp": encode_int_as_bytes(0),
                 "cost": encode_int_as_bytes(item["price"]),

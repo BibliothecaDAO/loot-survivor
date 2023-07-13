@@ -325,7 +325,6 @@ raw_abi = [
         ],
     },
     {
-        "kind": "struct",
         "name": "game::Game::PurchasedItem",
         "type": "event",
         "inputs": [
@@ -335,6 +334,7 @@ raw_abi = [
             },
             {"name": "item_id", "type": "core::integer::u8"},
             {"name": "cost", "type": "core::integer::u16"},
+            {"name": "equipped", "type": "core::bool"},
         ],
     },
     {
