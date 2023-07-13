@@ -2166,7 +2166,6 @@ mod Game {
         adventurer.deduct_health(idle_penalty_damage);
 
         // emit event
-        let in_battle = (adventurer.beast_health > 0);
         __event_IdleDamagePenalty(
             ref self,
             AdventurerState {
@@ -2175,8 +2174,7 @@ mod Game {
                 adventurer: adventurer
             },
             num_blocks,
-            idle_penalty_damage,
-            in_battle,
+            idle_penalty_damage
         );
 
         // if adventurer is dead
@@ -2550,8 +2548,7 @@ mod Game {
     struct IdleDamagePenalty {
         adventurer_state: AdventurerState,
         idle_blocks: u16,
-        damage_taken: u16,
-        in_battle: bool
+        damage_taken: u16
     }
 
     fn __event__StartGame(
@@ -2728,13 +2725,12 @@ mod Game {
         ref self: ContractState,
         adventurer_state: AdventurerState,
         idle_blocks: u16,
-        damage_taken: u16,
-        in_battle: bool
+        damage_taken: u16
     ) {
         self
             .emit(
                 Event::IdleDamagePenalty(
-                    IdleDamagePenalty { adventurer_state, idle_blocks, damage_taken, in_battle }
+                    IdleDamagePenalty { adventurer_state, idle_blocks, damage_taken }
                 )
             );
     }
