@@ -51,76 +51,87 @@ export const TxActivity = () => {
   console.log(queryData?.adventurerByIdQuery);
 
   useEffect(() => {
-    // Check if loading, loadingQuery, and isDataUpdated are truthy
-    if (txAccepted && hash && isLoadingQueryUpdated) {
-      // Handle "Attack" or "Flee" types
-      if (type === "Attack" || type === "Flee") {
-        if (queryData?.battlesByTxHashQuery) {
-          refetch("battlesByTxHashQuery");
-          refetch("adventurerByIdQuery");
-          refetch("battlesByBeastQuery");
-          stopLoading({
-            data: queryData.battlesByTxHashQuery.battles,
-            beast: notificationData.beast,
-          });
-        }
-        setTxAccepted(false);
-        resetDataUpdated(loadingQuery);
-        if ((adventurer?.statUpgrades ?? 0) > 0) {
-          setScreen("upgrade");
-        }
-      }
-
-      // Handle "Explore" type
-      else if (type === "Explore") {
-        if (queryData?.discoveryByTxHashQuery) {
-          refetch("discoveryByTxHashQuery");
-          refetch("latestDiscoveriesQuery");
-          refetch("adventurerByIdQuery");
-          refetch("lastBeastBattleQuery");
-          stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
-          setTxAccepted(false);
-          resetDataUpdated(loadingQuery);
-          if ((adventurer?.statUpgrades ?? 0) > 0) {
-            setScreen("upgrade");
-          }
-        }
-      } else if (type == "Upgrade") {
+    const fetchData = async () => {
+      if (!txAccepted || !hash || !isLoadingQueryUpdated) return;
+  
+      const handleAttackOrFlee = async () => {
+        if (!queryData?.battlesByTxHashQuery) return;
+  
+        await refetch("battlesByTxHashQuery");
+        await refetch("adventurerByIdQuery");
+        await refetch("battlesByBeastQuery");
+        stopLoading({
+          data: queryData.battlesByTxHashQuery.battles,
+          beast: notificationData.beast,
+        });
+      };
+  
+      const handleExplore = async () => {
+        if (!queryData?.discoveryByTxHashQuery) return;
+  
+        await refetch("discoveryByTxHashQuery");
+        await refetch("latestDiscoveriesQuery");
+        await refetch("adventurerByIdQuery");
+        await refetch("lastBeastBattleQuery");
+        stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
+      };
+  
+      const handleUpgrade = async () => {
         stopLoading(notificationData);
-        setTxAccepted(false);
-        resetDataUpdated(loadingQuery);
-        if ((adventurer?.statUpgrades ?? 0) > 0) {
-          setScreen("upgrade");
-        }
-      } else if (
-        type == "Multicall" &&
-        notificationData.some((noti: string) => noti.startsWith("You equipped"))
-      ) {
-        refetch("adventurerByIdQuery");
-        refetch("battlesByBeastQuery");
+      };
+  
+      const handleMulticall = async () => {
+        if (!notificationData.some((noti: string) => noti.startsWith("You equipped"))) return;
+  
+        await refetch("adventurerByIdQuery");
+        await refetch("battlesByBeastQuery");
         stopLoading(notificationData);
-        setTxAccepted(false);
-        resetDataUpdated(loadingQuery);
-        if ((adventurer?.statUpgrades ?? 0) > 0) {
-          setScreen("upgrade");
-        }
-      }
-
-      // Handle other types
-      else {
+      };
+  
+      const handleDefault = async () => {
         stopLoading(notificationData);
+      };
+  
+      const handleDataUpdate = () => {
         setTxAccepted(false);
         resetDataUpdated(loadingQuery);
         if ((adventurer?.statUpgrades ?? 0) > 0) {
           setScreen("upgrade");
         }
+      };
+  
+      try {
+        switch (type) {
+          case "Attack":
+          case "Flee":
+            await handleAttackOrFlee();
+            break;
+          case "Explore":
+            await handleExplore();
+            break;
+          case "Upgrade":
+            await handleUpgrade();
+            break;
+          case "Multicall":
+            await handleMulticall();
+            break;
+          default:
+            await handleDefault();
+            break;
+        }
+      } catch (error) {
+        console.error("An error occurred during fetching:", error);
+        // handle error (e.g., update state to show error message)
       }
-    }
+  
+      handleDataUpdate();
+    };
+  
+    fetchData();
   }, [
     isLoadingQueryUpdated,
     txAccepted,
     hash,
-    isDataUpdated,
     loadingQuery,
     notificationData,
     queryData.battlesByTxHashQuery,
