@@ -10,6 +10,7 @@ import TopInfo from "../adventurer/TopInfo";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { useBlock } from "@starknet-react/core";
 import { NullAdventurer } from "@/app/types";
+import LootIconLoader from "../icons/Loader";
 
 export default function KillAdventurer() {
   const { gameContract } = useContracts();
@@ -21,7 +22,7 @@ export default function KillAdventurer() {
     refetchInterval: false,
     blockIdentifier: "latest",
   });
-  const { data } = useQueriesStore();
+  const { data, isLoading } = useQueriesStore();
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setAdventurerTarget(event.target.value);
@@ -42,7 +43,7 @@ export default function KillAdventurer() {
     "adventurerToSlayQuery",
     getAdventurerById,
     {
-      id: adventurerTarget,
+      id: parseInt(adventurerTarget),
     },
     txAccepted
   );
@@ -64,7 +65,7 @@ export default function KillAdventurer() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h4>Kill Idle Adventurer</h4>
+        <h4 className="text-center">Slay Idle Adventurer</h4>
         <label className="flex justify-between">
           <span className="self-center">Adventurer Id:</span>
 
@@ -83,12 +84,24 @@ export default function KillAdventurer() {
           clickPlay();
         }}
         disabled={
-          idleTime < IDLE_DEATH_PENALTY_BLOCKS || slayAdventurer?.health === 0
+          idleTime < IDLE_DEATH_PENALTY_BLOCKS ||
+          slayAdventurer?.health === 0 ||
+          !slayAdventurer?.id
         }
       >
-        Kill
+        {slayAdventurer?.health === 0
+          ? "Adventurer is dead!"
+          : idleTime < IDLE_DEATH_PENALTY_BLOCKS
+          ? "Adventurer hasn't reached penalty time!"
+          : !slayAdventurer?.id
+          ? "Adventurer not found!"
+          : "Slay"}
       </Button>
-      <TopInfo adventurer={slayAdventurer} />
+      {isLoading.adventurerToSlayQuery ? (
+        <LootIconLoader />
+      ) : (
+        <TopInfo adventurer={slayAdventurer} />
+      )}
     </div>
   );
 }
