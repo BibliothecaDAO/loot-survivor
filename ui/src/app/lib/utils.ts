@@ -262,5 +262,10 @@ export function checkAvailableSlots(ownedItems: Item[]) {
 }
 
 export function getItemPrice(tier: number, charisma: number) {
-  return (6 - tier) * 3 - 2 * charisma;
+  const price = (6 - tier) * 3 - 2 * charisma
+  if (price < 3) {
+    return 3
+  } else {
+    return price
+  }
 }

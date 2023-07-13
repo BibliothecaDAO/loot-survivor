@@ -52,6 +52,7 @@ export interface ItemIndexer {
 }
 
 export interface Item {
+  [key: string]: string | number | undefined | boolean | Date; 
   item?: string; // name
   cost?: number; // purchase cost for the item
   adventurerId?: number; // Adventurer ID

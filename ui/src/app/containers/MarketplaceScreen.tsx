@@ -14,6 +14,8 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import { ItemTemplate } from "../types/templates";
 import useUIStore from "../hooks/useUIStore";
 import { Call, Item } from "../types";
+import { getItemData, getItemPrice, getValueFromKey } from "../lib/utils";
+import { GameData } from "../components/GameData";
 
 /**
  * @container
@@ -53,13 +55,16 @@ export default function MarketplaceScreen() {
 
   const headingToKeyMapping: { [key: string]: string } = {
     Item: "item",
-    Tier: "rank",
+    Tier: "tier",
     Slot: "slot",
     Type: "type",
+    Cost: "cost",
   };
 
   const handleSort = (heading: string) => {
     const mappedField = headingToKeyMapping[heading];
+    if (!mappedField) return;
+
     if (sortField === mappedField) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -68,32 +73,27 @@ export default function MarketplaceScreen() {
     }
   };
 
-  // const sortedMarketLatestItems = useMemo(() => {
-  //   if (!sortField) return marketLatestItems;
-  //   const sortedItems = [...marketLatestItems].sort((a, b) => {
-  //     let aValue = a[sortField];
-  //     let bValue = b[sortField];
+  const sortedMarketLatestItems = useMemo(() => {
+    if (!sortField) return marketLatestItems;
+    const sortedItems = [...marketLatestItems].sort((a, b) => {
+      let aValue = a[sortField];
+      let bValue = b[sortField];
 
-  //     if (aValue instanceof Date) {
-  //       aValue = aValue.getTime();
-  //       bValue = new Date(bValue).getTime();
-  //     } else if (typeof aValue === "string" && !isNaN(Number(aValue))) {
-  //       aValue = Number(aValue);
-  //       bValue = Number(bValue);
-  //     }
+      if (typeof aValue === "string" && !isNaN(Number(aValue))) {
+        aValue = Number(aValue);
+        bValue = Number(bValue);
+      }
 
-  //     if (aValue < bValue) return sortDirection === "asc" ? -1 : 1;
-  //     if (aValue > bValue) return sortDirection === "asc" ? 1 : -1;
-  //     return 0;
-  //   });
-  //   return sortedItems;
-  // }, [marketLatestItems, sortField, sortDirection]);
+      if ((aValue ?? "") < (bValue ?? ""))
+        return sortDirection === "asc" ? -1 : 1;
+      if ((aValue ?? "") > (bValue ?? ""))
+        return sortDirection === "asc" ? 1 : -1;
+      return 0;
+    });
+    return sortedItems;
+  }, [marketLatestItems, sortField, sortDirection]);
 
-  const sortedMarketLatestItems = marketLatestItems;
-
-  // for (var i = 0; i < 20; i++) {
-  //   sortedMarketLatestItems.push(ItemTemplate);
-  // }
+  // const sortedMarketLatestItems = marketLatestItems;
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -139,14 +139,20 @@ export default function MarketplaceScreen() {
     }
   }, [selectedIndex, activeMenu]);
 
-  const headings = ["Item", "Tier", "Slot", "Type", "Price", "Actions"];
+  const headings = ["Item", "Tier", "Slot", "Type", "Cost", "Actions"];
+
+  const gameData = new GameData();
 
   const sum = calls
     .filter((call) => call.entrypoint === "buy_item")
     .reduce((accumulator, current) => {
-      const value = Array.isArray(current.calldata) && current.calldata[4];
+      const value = Array.isArray(current.calldata) && current.calldata[2];
       const parsedValue = value ? parseInt(value.toString(), 10) : 0;
-      return accumulator + (isNaN(parsedValue) ? 0 : parsedValue);
+      const { tier } = getItemData(
+        getValueFromKey(gameData.ITEMS, parsedValue) ?? ""
+      );
+      const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
+      return accumulator + (isNaN(itemPrice) ? 0 : itemPrice);
     }, 0);
 
   const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
@@ -179,7 +185,7 @@ export default function MarketplaceScreen() {
               <p className="text-terminal-yellow">
                 {adventurer?.charisma && adventurer?.charisma * 2}
               </p>
-              <p>{"to prices)"}</p>
+              <p>{" to price) Min item price: 3"}</p>
             </span>
           </div>
           <div className="w-full sm:w-3/4 sm:mx-auto overflow-y-auto border h-[400px] sm:h-[650px] border-terminal-green table-scroll">
