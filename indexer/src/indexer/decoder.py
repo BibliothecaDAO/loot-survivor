@@ -99,6 +99,7 @@ raw_abi = [
         "name": "combat::constants::CombatEnums::Tier",
         "type": "enum",
         "variants": [
+            {"name": "None", "type": "()"},
             {"name": "T1", "type": "()"},
             {"name": "T2", "type": "()"},
             {"name": "T3", "type": "()"},
@@ -110,6 +111,7 @@ raw_abi = [
         "name": "combat::constants::CombatEnums::Slot",
         "type": "enum",
         "variants": [
+            {"name": "None", "type": "()"},
             {"name": "Weapon", "type": "()"},
             {"name": "Chest", "type": "()"},
             {"name": "Head", "type": "()"},
@@ -124,6 +126,7 @@ raw_abi = [
         "name": "combat::constants::CombatEnums::Type",
         "type": "enum",
         "variants": [
+            {"name": "None", "type": "()"},
             {"name": "Magic_or_Cloth", "type": "()"},
             {"name": "Blade_or_Hide", "type": "()"},
             {"name": "Bludgeon_or_Metal", "type": "()"},
@@ -182,7 +185,7 @@ raw_abi = [
     },
     {
         "kind": "struct",
-        "name": "game::Game::DiscoverHealth",
+        "name": "game::Game::DiscoveredHealth",
         "type": "event",
         "inputs": [
             {
@@ -194,7 +197,7 @@ raw_abi = [
     },
     {
         "kind": "struct",
-        "name": "game::Game::DiscoverGold",
+        "name": "game::Game::DiscoveredGold",
         "type": "event",
         "inputs": [
             {
@@ -206,7 +209,7 @@ raw_abi = [
     },
     {
         "kind": "struct",
-        "name": "game::Game::DiscoverXP",
+        "name": "game::Game::DiscoveredXP",
         "type": "event",
         "inputs": [
             {
@@ -218,7 +221,7 @@ raw_abi = [
     },
     {
         "kind": "struct",
-        "name": "game::Game::DiscoverObstacle",
+        "name": "game::Game::DiscoveredObstacle",
         "type": "event",
         "inputs": [
             {
@@ -249,28 +252,7 @@ raw_abi = [
     },
     {
         "kind": "struct",
-        "name": "game::Game::DiscoverBeast",
-        "type": "event",
-        "inputs": [
-            {
-                "name": "adventurer_state",
-                "type": "game::Game::AdventurerState",
-            },
-            {"name": "seed", "type": "core::integer::u128"},
-            {"name": "id", "type": "core::integer::u8"},
-            {"name": "health", "type": "core::integer::u16"},
-            {
-                "name": "beast_specs",
-                "type": "combat::combat::CombatSpec",
-            },
-            {"name": "ambushed", "type": "core::bool"},
-            {"name": "damage_taken", "type": "core::integer::u16"},
-            {"name": "damage_location", "type": "core::integer::u8"},
-        ],
-    },
-    {
-        "kind": "struct",
-        "name": "game::Game::AttackBeast",
+        "name": "game::Game::DiscoveredBeast",
         "type": "event",
         "inputs": [
             {"name": "adventurer_state", "type": "game::Game::AdventurerState"},
@@ -278,9 +260,51 @@ raw_abi = [
             {"name": "id", "type": "core::integer::u8"},
             {"name": "health", "type": "core::integer::u16"},
             {"name": "beast_specs", "type": "combat::combat::CombatSpec"},
-            {"name": "damage_dealt", "type": "core::integer::u16"},
-            {"name": "damage_taken", "type": "core::integer::u16"},
-            {"name": "damage_location", "type": "core::integer::u8"},
+            {"name": "ambushed", "type": "core::bool"},
+        ],
+    },
+    {
+        "kind": "struct",
+        "name": "game::Game::AttackedBeast",
+        "type": "event",
+        "inputs": [
+            {"name": "adventurer_state", "type": "game::Game::AdventurerState"},
+            {"name": "seed", "type": "core::integer::u128"},
+            {"name": "id", "type": "core::integer::u8"},
+            {"name": "beast_specs", "type": "combat::combat::CombatSpec"},
+            {"name": "damage", "type": "core::integer::u16"},
+            {"name": "location", "type": "core::integer::u8"},
+        ],
+    },
+    {
+        "type": "event",
+        "name": "game::Game::AttackedByBeast",
+        "kind": "struct",
+        "inputs": [
+            {
+                "name": "adventurer_state",
+                "type": "game::Game::AdventurerState",
+            },
+            {
+                "name": "seed",
+                "type": "core::integer::u128",
+            },
+            {
+                "name": "id",
+                "type": "core::integer::u8",
+            },
+            {
+                "name": "beast_specs",
+                "type": "combat::combat::CombatSpec",
+            },
+            {
+                "name": "damage",
+                "type": "core::integer::u16",
+            },
+            {
+                "name": "location",
+                "type": "core::integer::u8",
+            },
         ],
     },
     {
@@ -291,7 +315,6 @@ raw_abi = [
             {"name": "adventurer_state", "type": "game::Game::AdventurerState"},
             {"name": "seed", "type": "core::integer::u128"},
             {"name": "id", "type": "core::integer::u8"},
-            {"name": "health", "type": "core::integer::u16"},
             {"name": "beast_specs", "type": "combat::combat::CombatSpec"},
             {"name": "damage_dealt", "type": "core::integer::u16"},
             {"name": "xp_earned_adventurer", "type": "core::integer::u16"},
@@ -300,18 +323,30 @@ raw_abi = [
         ],
     },
     {
-        "kind": "struct",
-        "name": "game::Game::FleeAttempt",
         "type": "event",
+        "name": "game::Game::FleeAttempt",
+        "kind": "struct",
         "inputs": [
-            {"name": "adventurer_state", "type": "game::Game::AdventurerState"},
-            {"name": "seed", "type": "core::integer::u128"},
-            {"name": "id", "type": "core::integer::u8"},
-            {"name": "health", "type": "core::integer::u16"},
-            {"name": "beast_specs", "type": "combat::combat::CombatSpec"},
-            {"name": "fled", "type": "core::bool"},
-            {"name": "damage_taken", "type": "core::integer::u16"},
-            {"name": "damage_location", "type": "core::integer::u8"},
+            {
+                "name": "adventurer_state",
+                "type": "game::Game::AdventurerState",
+            },
+            {
+                "name": "seed",
+                "type": "core::integer::u128",
+            },
+            {
+                "name": "id",
+                "type": "core::integer::u8",
+            },
+            {
+                "name": "beast_specs",
+                "type": "combat::combat::CombatSpec",
+            },
+            {
+                "name": "fled",
+                "type": "core::bool",
+            },
         ],
     },
     {
@@ -341,7 +376,7 @@ raw_abi = [
     },
     {
         "kind": "struct",
-        "name": "game::Game::EquipItem",
+        "name": "game::Game::EquippedItem",
         "type": "event",
         "inputs": [
             {
@@ -479,27 +514,31 @@ decode_stat_upgrade_event = serializer_for_payload(
 )
 
 decode_discover_health_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::DiscoverHealth"].inputs
+    game_contract_abi.events["game::Game::DiscoveredHealth"].inputs
 )
 
 decode_discover_gold_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::DiscoverGold"].inputs
+    game_contract_abi.events["game::Game::DiscoveredGold"].inputs
 )
 
 decode_discover_xp_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::DiscoverXP"].inputs
+    game_contract_abi.events["game::Game::DiscoveredXP"].inputs
 )
 
 decode_discover_obstacle_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::DiscoverObstacle"].inputs
+    game_contract_abi.events["game::Game::DiscoveredObstacle"].inputs
 )
 
 decode_discover_beast_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::DiscoverBeast"].inputs
+    game_contract_abi.events["game::Game::DiscoveredBeast"].inputs
 )
 
 decode_attack_beast_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::AttackBeast"].inputs
+    game_contract_abi.events["game::Game::AttackedBeast"].inputs
+)
+
+decode_attacked_by_beast_event = serializer_for_payload(
+    game_contract_abi.events["game::Game::AttackedByBeast"].inputs
 )
 
 decode_slayed_beast_event = serializer_for_payload(
@@ -515,7 +554,7 @@ decode_purchased_item_event = serializer_for_payload(
 )
 
 decode_equip_item_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::EquipItem"].inputs
+    game_contract_abi.events["game::Game::EquippedItem"].inputs
 )
 
 decode_greatness_increased_event = serializer_for_payload(
