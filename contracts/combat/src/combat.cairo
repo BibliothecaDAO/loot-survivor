@@ -90,10 +90,10 @@ impl ImplCombat of ICombat {
         // that the minimum damage is always done
         if (total_attack > (armor_hp + minimum_damage)) {
             // return total attack
-            return total_attack - armor_hp;
+            total_attack - armor_hp
         } else {
             // otreturn total attack
-            return minimum_damage;
+            minimum_damage
         }
     }
 
@@ -102,20 +102,21 @@ impl ImplCombat of ICombat {
     // @return u16: the attack HP of the weapon
     fn get_attack_hp(weapon: CombatSpec) -> u16 {
         match weapon.tier {
+            Tier::None(()) => 0,
             Tier::T1(()) => {
-                return weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T1;
+                weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T1
             },
             Tier::T2(()) => {
-                return weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T2;
+                weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T2
             },
             Tier::T3(()) => {
-                return weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T3;
+                weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T3
             },
             Tier::T4(()) => {
-                return weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T4;
+                weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T4
             },
             Tier::T5(()) => {
-                return weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T5;
+                weapon.level * WEAPON_TIER_DAMAGE_MULTIPLIER::T5
             }
         }
     }
@@ -125,20 +126,21 @@ impl ImplCombat of ICombat {
     // @return u16: the armor HP of the armor
     fn get_armor_hp(armor: CombatSpec) -> u16 {
         match armor.tier {
+            Tier::None(()) => 0,
             Tier::T1(()) => {
-                return armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T1;
+                armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T1
             },
             Tier::T2(()) => {
-                return armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T2;
+                armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T2
             },
             Tier::T3(()) => {
-                return armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T3;
+                armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T3
             },
             Tier::T4(()) => {
-                return armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T4;
+                armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T4
             },
             Tier::T5(()) => {
-                return armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T5;
+                armor.level * ARMOR_TIER_DAMAGE_MULTIPLIER::T5
             }
         }
     }
@@ -155,17 +157,17 @@ impl ImplCombat of ICombat {
         // adjust base damage based on weapon effectiveness
         match weapon_effectiveness {
             WeaponEffectiveness::Weak(()) => {
-                return damage - elemental_damage_effect;
+                damage - elemental_damage_effect
             },
             WeaponEffectiveness::Fair(()) => {
-                return damage;
+                damage
             },
             WeaponEffectiveness::Strong(()) => {
                 let elemental_adjusted_damage = damage + elemental_damage_effect;
                 if (elemental_adjusted_damage < STRONG_ELEMENTAL_BONUS_MIN) {
-                    return STRONG_ELEMENTAL_BONUS_MIN;
+                    STRONG_ELEMENTAL_BONUS_MIN
                 } else {
-                    return elemental_adjusted_damage;
+                    elemental_adjusted_damage
                 }
             }
         }
@@ -178,77 +180,92 @@ impl ImplCombat of ICombat {
     // @return WeaponEffectiveness: the effectiveness of the weapon against the armor
     fn get_weapon_effectiveness(weapon_type: Type, armor_type: Type) -> WeaponEffectiveness {
         match weapon_type {
+            Type::None(()) => {
+                WeaponEffectiveness::Fair(())
+            },
             // Magic is strong against metal, fair against cloth, and weak against hide
             Type::Magic_or_Cloth(()) => {
                 match armor_type {
+                    // weapon is strong against no armor
+                    Type::None(()) => {
+                        WeaponEffectiveness::Strong(())
+                    },
                     Type::Magic_or_Cloth(()) => {
-                        return WeaponEffectiveness::Fair(());
+                        WeaponEffectiveness::Fair(())
                     },
                     Type::Blade_or_Hide(()) => {
-                        return WeaponEffectiveness::Weak(());
+                        WeaponEffectiveness::Weak(())
                     },
                     Type::Bludgeon_or_Metal(()) => {
-                        return WeaponEffectiveness::Strong(());
+                        WeaponEffectiveness::Strong(())
                     },
                     // should not happen but compiler requires exhaustive match
                     Type::Necklace(()) => {
-                        return WeaponEffectiveness::Fair(());
+                        WeaponEffectiveness::Fair(())
                     },
                     // should not happen but compiler requires exhaustive match
                     Type::Ring(()) => {
-                        return WeaponEffectiveness::Fair(());
+                        WeaponEffectiveness::Fair(())
                     }
                 }
             },
             // Blade is strong against cloth, fair against hide, and weak against metal
             Type::Blade_or_Hide(()) => {
                 match armor_type {
+                    // weapon is strong against no armor
+                    Type::None(()) => {
+                        WeaponEffectiveness::Strong(())
+                    },
                     Type::Magic_or_Cloth(()) => {
-                        return WeaponEffectiveness::Strong(());
+                        WeaponEffectiveness::Strong(())
                     },
                     Type::Blade_or_Hide(()) => {
-                        return WeaponEffectiveness::Fair(());
+                        WeaponEffectiveness::Fair(())
                     },
                     Type::Bludgeon_or_Metal(()) => {
-                        return WeaponEffectiveness::Weak(());
+                        WeaponEffectiveness::Weak(())
                     },
                     // should not happen but compiler requires exhaustive match
                     Type::Necklace(()) => {
-                        return WeaponEffectiveness::Fair(());
+                        WeaponEffectiveness::Fair(())
                     },
                     // should not happen but compiler requires exhaustive match
                     Type::Ring(()) => {
-                        return WeaponEffectiveness::Fair(());
+                        WeaponEffectiveness::Fair(())
                     }
                 }
             },
             // Bludgeon is strong against hide, fair against metal, and weak against cloth
             Type::Bludgeon_or_Metal(()) => {
                 match armor_type {
+                    // weapon is strong against no armor
+                    Type::None(()) => {
+                        WeaponEffectiveness::Strong(())
+                    },
                     Type::Magic_or_Cloth(()) => {
-                        return WeaponEffectiveness::Weak(());
+                        WeaponEffectiveness::Weak(())
                     },
                     Type::Blade_or_Hide(()) => {
-                        return WeaponEffectiveness::Strong(());
+                        WeaponEffectiveness::Strong(())
                     },
                     Type::Bludgeon_or_Metal(()) => {
-                        return WeaponEffectiveness::Fair(());
+                        WeaponEffectiveness::Fair(())
                     },
                     // should not happen but compiler requires exhaustive match
                     Type::Necklace(()) => {
-                        return WeaponEffectiveness::Fair(());
+                        WeaponEffectiveness::Fair(())
                     },
                     // should not happen but compiler requires exhaustive match
                     Type::Ring(()) => {
-                        return WeaponEffectiveness::Fair(());
+                        WeaponEffectiveness::Fair(())
                     }
                 }
             },
             Type::Necklace(()) => {
-                return WeaponEffectiveness::Fair(());
+                WeaponEffectiveness::Fair(())
             },
             Type::Ring(()) => {
-                return WeaponEffectiveness::Fair(());
+                WeaponEffectiveness::Fair(())
             },
         }
     }
@@ -276,10 +293,10 @@ impl ImplCombat of ICombat {
         // if the critical hit random number is 0 (no remainder)
         if (critical_hit_outcome == 0) {
             // return true
-            return true;
+            true
         } else {
             // otherwise return false
-            return false;
+            false
         }
     }
 
@@ -295,7 +312,7 @@ impl ImplCombat of ICombat {
         let damage_multplier = U128TryIntoU16::try_into(entropy % 4).unwrap();
 
         // multiply base damage boost (25% of original damage) by damage multiplier (1-4)
-        return damage_boost_base * (damage_multplier + 1);
+        damage_boost_base * (damage_multplier + 1)
     }
 
     // get_special2_bonus returns the bonus damage done by a weapon as a result of the weapon special2
@@ -307,20 +324,17 @@ impl ImplCombat of ICombat {
     fn get_special2_bonus(
         damage: u16, weapon_prefix1: u8, armor_prefix1: u8, entropy: u128, 
     ) -> u16 {
-        // is the weapon does not have a prefix
-        if (weapon_prefix1 == 0) {
-            // return zero
-            return 0;
-        // if the weapon prefix is the same as the armor prefix
-        } else if (weapon_prefix1 == armor_prefix1) {
+        // is the weapon prefix matches the armor prefix
+        if (weapon_prefix1 == armor_prefix1) {
+            // grant bonus
             let damage_multplier = U128TryIntoU16::try_into(entropy % 4).unwrap();
 
             // result will be base damage * (4-7) which will equate to a 4-7x damage bonus
-            return damage * (damage_multplier + 4);
+            (damage * (damage_multplier + 4))
+        } else {
+            // fall through return zero
+            0
         }
-
-        // fall through return zero
-        0
     }
 
     // get_special3_bonus returns the bonus damage done by a weapon as a result of the weapon special3
@@ -332,12 +346,8 @@ impl ImplCombat of ICombat {
     fn get_special3_bonus(
         base_damage: u16, weapon_prefix2: u8, armor_prefix2: u8, entropy: u128, 
     ) -> u16 {
-        // is the weapon does not have a prefix
-        if (weapon_prefix2 == 0) {
-            // return zero
-            return 0;
-        // if the weapon prefix is the same as the armor prefix
-        } else if (weapon_prefix2 == armor_prefix2) {
+        // is the weapon prefix2 matches the armor prefix2
+        if (weapon_prefix2 == armor_prefix2) {
             // divide base damage by 4 to get 25% of original damage
             let damage_boost_base = base_damage / 4;
 
@@ -345,11 +355,11 @@ impl ImplCombat of ICombat {
             let damage_multplier = U128TryIntoU16::try_into(entropy % 4).unwrap();
 
             // multiply base damage boost (25% of original damage) by damage multiplier (1-4)
-            return damage_boost_base * (damage_multplier + 1);
+            damage_boost_base * (damage_multplier + 1)
+        } else {
+            // fall through return zero
+            0
         }
-
-        // fall through return zero
-        0
     }
 
     // get_special_name_damage_bonus returns the bonus damage for special item
@@ -370,7 +380,7 @@ impl ImplCombat of ICombat {
         );
 
         // return the sum of the name prefix and name suffix bonuses
-        return special2_bonus + special3_bonus;
+        special2_bonus + special3_bonus
     }
 
     // get_adventurer_strength_bonus returns the bonus damage for adventurer strength
@@ -380,10 +390,10 @@ impl ImplCombat of ICombat {
     fn get_strength_bonus(damage: u16, strength: u16) -> u16 {
         if (strength == 0) {
             // if the adventurer has no strength, return zero
-            return 0;
+            0
         } else {
             // each strength stat point is worth 20% of the original damage
-            return (damage * strength * 20) / 100;
+            (damage * strength * 20) / 100
         }
     }
 
@@ -399,28 +409,28 @@ impl ImplCombat of ICombat {
         // If adventurer has not exceeded the difficult cliff level
         if (adventurer_level <= range_increase_interval) {
             // return the adventurer level
-            return adventurer_level;
+            adventurer_level
+        } else {
+            // If adventurer has exceeded the difficult cliff level
+            // the entity level will be randomnly scoped around the adventurer level
+            // the max level of entitys will increase every N levels based on 
+            // the DIFFICULTY_CLIFF setting. The higher this setting, the less frequently the max level will increase
+            let entity_level_multplier = 1 + (adventurer_level / range_increase_interval);
+
+            // maximum range of the entity level will be the above multplier * the entity difficulty
+            let entity_level_range = U8IntoU128::into(entity_level_multplier * level_multiplier);
+
+            // calculate the entity level 
+            let entity_level_boost = entropy % entity_level_range;
+
+            // add the entity level boost to the adventurer level - difficulty cliff
+            // this will produce a level between (adventurer level - difficulty cliff) and entity_level_multplier * entity_constants::Settings::entity_LEVEL_RANGE
+            let entity_level = entity_level_boost
+                + U8IntoU128::into((adventurer_level - entity_level_multplier));
+
+            // return the entity level as a u16
+            U128TryIntoU8::try_into(entity_level).unwrap()
         }
-
-        // If adventurer has exceeded the difficult cliff level
-        // the entity level will be randomnly scoped around the adventurer level
-        // the max level of entitys will increase every N levels based on 
-        // the DIFFICULTY_CLIFF setting. The higher this setting, the less frequently the max level will increase
-        let entity_level_multplier = 1 + (adventurer_level / range_increase_interval);
-
-        // maximum range of the entity level will be the above multplier * the entity difficulty
-        let entity_level_range = U8IntoU128::into(entity_level_multplier * level_multiplier);
-
-        // calculate the entity level 
-        let entity_level_boost = entropy % entity_level_range;
-
-        // add the entity level boost to the adventurer level - difficulty cliff
-        // this will produce a level between (adventurer level - difficulty cliff) and entity_level_multplier * entity_constants::Settings::entity_LEVEL_RANGE
-        let entity_level = entity_level_boost
-            + U8IntoU128::into((adventurer_level - entity_level_multplier));
-
-        // return the entity level as a u16
-        return U128TryIntoU8::try_into(entity_level).unwrap();
     }
 
     // get_enemy_starting_health returns the starting health for an entity
@@ -442,10 +452,10 @@ impl ImplCombat of ICombat {
 
         // the remainder of entropy divided by max_health provides entity health
         // we then add 1 to minimum_health to prevent starting health of zero
-        return U128TryIntoU16::try_into(
+        U128TryIntoU16::try_into(
             U8IntoU128::into(adventurer_level + minimum_health) + (entropy % max_health)
         )
-            .unwrap();
+            .unwrap()
     }
 
 
@@ -454,9 +464,9 @@ impl ImplCombat of ICombat {
     // @return u8: the level for the given xp
     fn get_level_from_xp(xp: u16) -> u8 {
         if (xp > 0) {
-            return u16_sqrt(xp);
+            u16_sqrt(xp)
         } else {
-            return 1;
+            1
         }
     }
 
@@ -465,6 +475,9 @@ impl ImplCombat of ICombat {
     // @return u16: the xp reward for defeating the entity
     fn get_xp_reward(self: CombatSpec) -> u16 {
         match self.tier {
+            Tier::None(()) => {
+                0
+            },
             Tier::T1(()) => {
                 (XP_MULTIPLIER::T1 * self.level) / XP_REWARD_DIVISOR
             },
@@ -487,11 +500,12 @@ impl ImplCombat of ICombat {
         // generate random damage location based on Item Slot which has
         // armor in slots 2-6 inclusive
         let damage_location = 2 + (entropy % 6);
-        return ImplCombat::u8_to_slot(U128TryIntoU8::try_into(damage_location).unwrap());
+        ImplCombat::u8_to_slot(U128TryIntoU8::try_into(damage_location).unwrap())
     }
 
     fn tier_to_u8(tier: Tier) -> u8 {
         match tier {
+            Tier::None(()) => 0,
             Tier::T1(()) => 1,
             Tier::T2(()) => 2,
             Tier::T3(()) => 3,
@@ -501,6 +515,7 @@ impl ImplCombat of ICombat {
     }
     fn type_to_u8(item_type: Type) -> u8 {
         match item_type {
+            Type::None(()) => 0,
             Type::Magic_or_Cloth(()) => 1,
             Type::Blade_or_Hide(()) => 2,
             Type::Bludgeon_or_Metal(()) => 3,
@@ -510,30 +525,37 @@ impl ImplCombat of ICombat {
     }
     fn u8_to_type(item_type: u8) -> Type {
         if (item_type == 1) {
-            return Type::Magic_or_Cloth(());
+            Type::Magic_or_Cloth(())
         } else if (item_type == 2) {
-            return Type::Blade_or_Hide(());
+            Type::Blade_or_Hide(())
         } else if (item_type == 3) {
-            return Type::Bludgeon_or_Metal(());
+            Type::Bludgeon_or_Metal(())
         } else if (item_type == 4) {
-            return Type::Necklace(());
+            Type::Necklace(())
+        } else if (item_type == 5) {
+            Type::Ring(())
+        } else {
+            Type::None(())
         }
-        return Type::Ring(());
     }
     fn u8_to_tier(item_type: u8) -> Tier {
         if (item_type == 1) {
-            return Tier::T1(());
+            Tier::T1(())
         } else if (item_type == 2) {
-            return Tier::T2(());
+            Tier::T2(())
         } else if (item_type == 3) {
-            return Tier::T3(());
+            Tier::T3(())
         } else if (item_type == 4) {
-            return Tier::T4(());
+            Tier::T4(())
+        } else if (item_type == 5) {
+            Tier::T5(())
+        } else {
+            Tier::None(())
         }
-        return Tier::T5(());
     }
     fn slot_to_u8(slot: Slot) -> u8 {
         match slot {
+            Slot::None(()) => 0,
             Slot::Weapon(()) => 1,
             Slot::Chest(()) => 2,
             Slot::Head(()) => 3,
@@ -546,21 +568,23 @@ impl ImplCombat of ICombat {
     }
     fn u8_to_slot(item_type: u8) -> Slot {
         if (item_type == 1) {
-            return Slot::Weapon(());
+            Slot::Weapon(())
         } else if (item_type == 2) {
-            return Slot::Chest(());
+            Slot::Chest(())
         } else if (item_type == 3) {
-            return Slot::Head(());
+            Slot::Head(())
         } else if (item_type == 4) {
-            return Slot::Waist(());
+            Slot::Waist(())
         } else if (item_type == 5) {
-            return Slot::Foot(());
+            Slot::Foot(())
         } else if (item_type == 6) {
-            return Slot::Hand(());
+            Slot::Hand(())
         } else if (item_type == 7) {
-            return Slot::Neck(());
+            Slot::Neck(())
+        } else if (item_type == 8) {
+            Slot::Ring(())
         } else {
-            return Slot::Ring(());
+            Slot::None(())
         }
     }
 
@@ -579,7 +603,7 @@ impl ImplCombat of ICombat {
         // The difficulty cliff serves as a starting cushion for the adventurer before which
         // they can avoid all threats. Once the difficulty cliff has been passed, the adventurer
         // must invest in the proper stats to avoid threats.{Intelligence for obstalce, Wisdom for beast ambushes}
-        return (dice_roll <= (relevant_stat + DIFFICULTY_CLIFF::NORMAL));
+        (dice_roll <= (relevant_stat + DIFFICULTY_CLIFF::NORMAL))
     }
 }
 
@@ -1161,19 +1185,13 @@ fn test_calculate_damage() {
     // initialize weapon
     let weapon_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
     let mut weapon = CombatSpec {
-        item_type: Type::Blade_or_Hide(()),
-        tier: Tier::T5(()),
-        level: 1,
-        specials: weapon_specials
+        item_type: Type::Blade_or_Hide(()), tier: Tier::T5(()), level: 1, specials: weapon_specials
     };
 
     // initialize armor
     let armor_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
     let mut armor = CombatSpec {
-        item_type: Type::Blade_or_Hide(()),
-        tier: Tier::T5(()),
-        level: 1,
-        specials: armor_specials
+        item_type: Type::Blade_or_Hide(()), tier: Tier::T5(()), level: 1, specials: armor_specials
     };
 
     // initialize other combat parameters
