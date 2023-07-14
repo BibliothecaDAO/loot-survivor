@@ -42,17 +42,7 @@ export default function AdventurerScreen() {
     },
     true
   );
-
-  // useCustomQuery(
-  //   "battlesByTxHashQuery",
-  //   getBattleByTxHash,
-  //   {
-  //     txHash: padAddress(hash),
-  //   },
-  //   txAccepted
-  //   // hash !== ""
-  // );
-
+  
   useCustomQuery(
     "adventurersByXPQuery",
     getAdventurerByXP,
