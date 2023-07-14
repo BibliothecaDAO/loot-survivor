@@ -22,6 +22,7 @@ from indexer.decoder import (
     decode_discover_obstacle_event,
     decode_discover_beast_event,
     decode_attack_beast_event,
+    decode_attacked_by_beast_event,
     decode_slayed_beast_event,
     decode_flee_attempt_event,
     decode_purchased_item_event,
@@ -404,16 +405,17 @@ class LootSurvivorIndexer(StarkNetIndexer):
         for survivor_event in [
             "StartGame",
             "StatUpgraded",
-            "DiscoverHealth",
-            "DiscoverGold",
-            "DiscoverXP",
-            "DiscoverObstacle",
-            "DiscoverBeast",
-            "AttackBeast",
+            "DiscoveredHealth",
+            "DiscoveredGold",
+            "DiscoveredXP",
+            "DiscoveredObstacle",
+            "DiscoveredBeast",
+            "AttackedBeast",
+            "AttackedByBeast",
             "SlayedBeast",
             "FleeAttempt",
             "PurchasedItem",
-            "EquipItem",
+            "EquippedItem",
             "GreatnessIncreased",
             "ItemSpecialUnlocked",
             "PurchasedPotion",
@@ -442,16 +444,17 @@ class LootSurvivorIndexer(StarkNetIndexer):
             await {
                 "StartGame": self.start_game,
                 "StatUpgraded": self.stat_upgrade,
-                "DiscoverHealth": self.discover_health,
-                "DiscoverGold": self.discover_gold,
-                "DiscoverXP": self.discover_xp,
-                "DiscoverObstacle": self.discover_obstacle,
-                "DiscoverBeast": self.discover_beast,
-                "AttackBeast": self.attack_beast,
+                "DiscoveredHealth": self.discover_health,
+                "DiscoveredGold": self.discover_gold,
+                "DiscoveredXP": self.discover_xp,
+                "DiscoveredObstacle": self.discover_obstacle,
+                "DiscoveredBeast": self.discover_beast,
+                "AttackedBeast": self.attack_beast,
+                "AttackedByBeast": self.attacked_by_beast,
                 "SlayedBeast": self.slayed_beast,
                 "FleeAttempt": self.flee_attempt,
                 "PurchasedItem": self.purchased_item,
-                "EquipItem": self.equip_item,
+                "EquippedItem": self.equip_item,
                 "GreatnessIncreased": self.greatness_increased,
                 "ItemSpecialUnlocked": self.item_special_unlocked,
                 "PurchasedPotion": self.purchased_potion,
@@ -769,8 +772,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "obstacle": check_exists_int(0),
             "obstacleLevel": check_exists_int(0),
             "dodgedObstacle": encode_int_as_bytes(0),
-            "damageTaken": encode_int_as_bytes(db.damage_taken),
-            "damageLocation": check_exists_int(db.damage_location),
+            "damageTaken": encode_int_as_bytes(0),
+            "damageLocation": check_exists_int(0),
             "xpEarnedAdventurer": check_exists_int(0),
             "xpEarnedItems": check_exists_int(0),
             "entity": check_exists_int(db.id),
@@ -822,7 +825,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             ba.id,
             ba.adventurer_state["adventurer_id"],
             ba.seed,
-            ba.health,
+            ba.adventurer_state["adventurer"]["beast_health"],
             False,
             block_time,
         )
@@ -843,7 +846,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
             attacked_beast_doc = {
                 "txHash": encode_hex_as_bytes(tx_hash),
                 "beast": check_exists_int(ba.id),
-                "beastHealth": encode_int_as_bytes(ba.health),
+                "beastHealth": encode_int_as_bytes(
+                    ba.adventurer_state["adventurer"]["beast_health"]
+                ),
                 "beastLevel": encode_int_as_bytes(ba.beast_specs["level"]),
                 "special1": check_exists_int(ba.beast_specs["specials"]["special1"]),
                 "special2": check_exists_int(ba.beast_specs["specials"]["special2"]),
@@ -852,9 +857,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "adventurerId": check_exists_int(ba.adventurer_state["adventurer_id"]),
                 "attacker": encode_int_as_bytes(1),
                 "fled": check_exists_int(0),
-                "damageDealt": encode_int_as_bytes(ba.damage_dealt),
-                "damageTaken": encode_int_as_bytes(ba.damage_taken),
-                "damageLocation": check_exists_int(ba.damage_location),
+                "damageDealt": encode_int_as_bytes(ba.damage),
+                "damageTaken": encode_int_as_bytes(0),
+                "damageLocation": check_exists_int(ba.location),
                 "xpEarnedAdventurer": encode_int_as_bytes(0),
                 "xpEarnedItems": encode_int_as_bytes(0),
                 "goldEarned": encode_int_as_bytes(0),
@@ -868,6 +873,64 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 ba.id,
                 "->",
                 ba.adventurer_state["adventurer_id"],
+            )
+        except StopIteration:
+            print("No documents found in beast_discovery")
+
+    async def attacked_by_beast(
+        self,
+        info: Info,
+        block_time: datetime,
+        _: FieldElement,
+        tx_hash: str,
+        data: List[FieldElement],
+    ):
+        abb = decode_attacked_by_beast_event.deserialize([felt.to_int(i) for i in data])
+        await update_adventurer_helper(info, abb.adventurer_state)
+        try:
+            beast_discovery = await info.storage.find(
+                "discoveries",
+                {
+                    "entity": check_exists_int(abb.id),
+                    "adventurerId": check_exists_int(
+                        abb.adventurer_state["adventurer_id"]
+                    ),
+                    "seed": encode_int_as_bytes(abb.seed),
+                },
+                sort={"discoveryTime": -1},
+                limit=1,
+            )
+            beast_document = next(beast_discovery)
+            attacked_by_beast_doc = {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "beast": check_exists_int(abb.id),
+                "beastHealth": encode_int_as_bytes(
+                    abb.adventurer_state["adventurer"]["beast_health"]
+                ),
+                "beastLevel": encode_int_as_bytes(abb.beast_specs["level"]),
+                "special1": check_exists_int(abb.beast_specs["specials"]["special1"]),
+                "special2": check_exists_int(abb.beast_specs["specials"]["special2"]),
+                "special3": check_exists_int(abb.beast_specs["specials"]["special3"]),
+                "seed": encode_int_as_bytes(abb.seed),
+                "adventurerId": check_exists_int(abb.adventurer_state["adventurer_id"]),
+                "attacker": encode_int_as_bytes(2),
+                "fled": check_exists_int(0),
+                "damageDealt": encode_int_as_bytes(0),
+                "damageTaken": encode_int_as_bytes(abb.damage),
+                "damageLocation": check_exists_int(abb.location),
+                "xpEarnedAdventurer": encode_int_as_bytes(0),
+                "xpEarnedItems": encode_int_as_bytes(0),
+                "goldEarned": encode_int_as_bytes(0),
+                "discoveryTime": beast_document["discoveryTime"],
+                "blockTime": block_time,
+                "timestamp": datetime.now(),
+            }
+            await info.storage.insert_one("battles", attacked_by_beast_doc)
+            print(
+                "- [attacked by beast]",
+                abb.id,
+                "->",
+                abb.adventurer_state["adventurer_id"],
             )
         except StopIteration:
             print("No documents found in beast_discovery")
@@ -887,7 +950,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             sb.id,
             sb.adventurer_state["adventurer_id"],
             sb.seed,
-            sb.health,
+            sb.adventurer_state["adventurer"]["beast_health"],
             True,
             block_time,
         )
@@ -908,7 +971,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
             slayed_beast_doc = {
                 "txHash": encode_hex_as_bytes(tx_hash),
                 "beast": check_exists_int(sb.id),
-                "beastHealth": encode_int_as_bytes(sb.health),
+                "beastHealth": encode_int_as_bytes(
+                    sb.adventurer_state["adventurer"]["beast_health"]
+                ),
                 "beastLevel": encode_int_as_bytes(sb.beast_specs["level"]),
                 "special1": check_exists_int(sb.beast_specs["specials"]["special1"]),
                 "special2": check_exists_int(sb.beast_specs["specials"]["special2"]),
@@ -967,18 +1032,20 @@ class LootSurvivorIndexer(StarkNetIndexer):
             flee_attempt_doc = {
                 "txHash": encode_hex_as_bytes(tx_hash),
                 "beast": check_exists_int(fa.id),
-                "beastHealth": encode_int_as_bytes(fa.health),
+                "beastHealth": encode_int_as_bytes(
+                    fa.adventurer_state["adventurer"]["beast_health"]
+                ),
                 "beastLevel": encode_int_as_bytes(fa.beast_specs["level"]),
                 "special1": check_exists_int(fa.beast_specs["specials"]["special1"]),
                 "special2": check_exists_int(fa.beast_specs["specials"]["special2"]),
                 "special3": check_exists_int(fa.beast_specs["specials"]["special3"]),
                 "seed": encode_int_as_bytes(fa.seed),
                 "adventurerId": check_exists_int(fa.adventurer_state["adventurer_id"]),
-                "attacker": encode_int_as_bytes(2),
+                "attacker": encode_int_as_bytes(1),
                 "fled": check_exists_int(fa.fled),
                 "damageDealt": encode_int_as_bytes(0),
-                "damageTaken": encode_int_as_bytes(fa.damage_taken),
-                "damageLocation": check_exists_int(fa.damage_location),
+                "damageTaken": encode_int_as_bytes(0),
+                "damageLocation": check_exists_int(0),
                 "xpEarnedAdventurer": encode_int_as_bytes(0),
                 "xpEarnedItems": encode_int_as_bytes(0),
                 "goldEarned": encode_int_as_bytes(0),

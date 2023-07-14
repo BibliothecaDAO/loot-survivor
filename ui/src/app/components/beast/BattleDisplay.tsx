@@ -45,6 +45,7 @@ export const BattleDisplay = ({
   const damageIcon = getAttackLocationIcon(damageLocation);
   const BeastFled = battleData.fled;
   const AdventurerAttack = battleData.attacker === "Adventurer";
+  const BeastAttack = battleData.attacker === "Beast";
   const BeastHealthExists = (battleData.beastHealth ?? 0) > 0;
   const AdventurerHealthExists = (adventurer.health ?? 0) > 0;
   const NoDamageTaken = battleData.damageTaken === 0;
@@ -54,15 +55,15 @@ export const BattleDisplay = ({
     <div className="w-full text-2xl">
       {BeastFled && <p>You fled the {beastName}!</p>}
       {AdventurerAttack && BeastHealthExists && (
-        <div>
-          <div className="flex w-full justify-between">
-            <span className=" text-terminal-yellow flex">
-              {battleData.damageTaken} damage taken at {damageIcon}!{" "}
-            </span>
-          </div>
-          <div className="w-full justify-between">
-            You delt {beastName} <span>{battleData.damageDealt} damage! </span>
-          </div>
+        <div className="w-full justify-between">
+          You delt {beastName} <span>{battleData.damageDealt} damage! </span>
+        </div>
+      )}
+      {BeastAttack && AdventurerHealthExists && (
+        <div className="flex w-full justify-between">
+          <span className=" text-terminal-yellow flex">
+            {battleData.damageTaken} damage taken at {damageIcon}!{" "}
+          </span>
         </div>
       )}
       {AdventurerAttack && !BeastHealthExists && (
