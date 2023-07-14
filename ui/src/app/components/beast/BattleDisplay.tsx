@@ -147,8 +147,8 @@ export const NotificationBattleDisplay = ({
     isArray &&
     type === "Flee" &&
     battleData.length === 1 &&
-    battleData[0]?.attacker === "Beast" &&
-    (battleData[0]?.beastHealth ?? 0) > 0;
+    battleData[1]?.attacker === "Beast" &&
+    (adventurer?.health ?? 0) > 0;
   const KilledTryingToFlee =
     isArray &&
     type === "Flee" &&
@@ -175,7 +175,7 @@ export const NotificationBattleDisplay = ({
       {FailedToFlee && (
         <p>
           You failed to flee the {beastName || ""} and were attacked taking{" "}
-          {battleData[0]?.damageTaken} damage!{" "}
+          {battleData[1]?.damageTaken} damage!{" "}
         </p>
       )}
       {KilledTryingToFlee && (
