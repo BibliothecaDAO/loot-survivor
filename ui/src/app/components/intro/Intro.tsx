@@ -74,15 +74,6 @@ const Intro = () => {
       {screen == 0 ? (
         <div className="flex flex-col w-full h-full p-4 sm:p-8">
           <div className="flex flex-col">
-            <div className="w-full">
-              <Image
-                className="mx-auto animate-pulse"
-                src={"/scenes/scene1.png"}
-                alt="start"
-                width={400}
-                height={400}
-              />
-            </div>
             <div className="sm:p-4 text-xs sm:text-xl leading-loose">
               <TypeAnimation
                 sequence={[
@@ -97,17 +88,41 @@ const Intro = () => {
                 style={{ fontSize: "2em" }}
               />
             </div>
-            <div>
-              <Button onClick={() => setScreen(1)} variant={"outline"}>
-                skip
-              </Button>
+            <div className="w-full">
+              <Image
+                className="mx-auto animate-pulse"
+                src={"/scenes/scene1.png"}
+                alt="start"
+                width={400}
+                height={400}
+              />
             </div>
+          </div>
+          <div>
+            <Button onClick={() => setScreen(1)} variant={"outline"}>
+              skip
+            </Button>
           </div>
         </div>
       ) : screen == 1 ? (
         <div className="flex flex-col w-full h-full p-4 sm:p-8">
           <div className="flex flex-col">
             <div className="w-full">
+              <div className="sm:p-4 text-xs sm:text-xl leading-loose">
+                <TypeAnimation
+                  key={screen.toString()}
+                  sequence={[
+                    chapter1,
+                    () => {
+                      setScreen(2);
+                    },
+                  ]}
+                  wrapper="span"
+                  cursor={true}
+                  speed={50}
+                  style={{ fontSize: "2em" }}
+                />
+              </div>
               <Image
                 className="mx-auto animate-pulse"
                 src={"/scenes/scene2.png"}
@@ -116,21 +131,7 @@ const Intro = () => {
                 height={400}
               />
             </div>
-            <div className="sm:p-4 text-xs sm:text-xl leading-loose">
-              <TypeAnimation
-                key={screen.toString()}
-                sequence={[
-                  chapter1,
-                  () => {
-                    setScreen(2);
-                  },
-                ]}
-                wrapper="span"
-                cursor={true}
-                speed={50}
-                style={{ fontSize: "2em" }}
-              />
-            </div>
+
             <div>
               <Button onClick={() => setScreen(2)} variant={"outline"}>
                 skip

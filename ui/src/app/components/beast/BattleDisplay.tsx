@@ -56,19 +56,19 @@ export const BattleDisplay = ({
       {BeastFled && <p>You fled the {beastName}!</p>}
       {AdventurerAttack && BeastHealthExists && (
         <div className="w-full justify-between">
-          You delt {beastName} <span>{battleData.damageDealt} damage! </span>
+          You dealt {beastName} <span>{battleData?.damageDealt} damage! </span>
         </div>
       )}
       {BeastAttack && AdventurerHealthExists && (
         <div className="flex w-full justify-between">
           <span className=" text-terminal-yellow flex">
-            {battleData.damageTaken} damage taken at {damageIcon}!{" "}
+            {battleData?.damageTaken} damage taken at {damageIcon}!{" "}
           </span>
         </div>
       )}
       {AdventurerAttack && !BeastHealthExists && (
         <p>
-          You slayed the {beastName} after inflicting {battleData.damageDealt}{" "}
+          You slayed the {beastName} after inflicting {battleData?.damageDealt}{" "}
           damage!
         </p>
       )}
@@ -78,13 +78,13 @@ export const BattleDisplay = ({
       {!AdventurerAttack && AdventurerHealthExists && !NoDamageTaken && (
         <p>
           The {beastName} attacked, hitting your {damageIcon} and dealing{" "}
-          {battleData.damageTaken} damage!
+          {battleData?.damageTaken} damage!
         </p>
       )}
       {!AdventurerAttack && !AdventurerHealthExists && (
         <p>
           The {beastName} delivered a final blow, dealing{" "}
-          {battleData.damageTaken} damage to your {damageIcon} and defeating
+          {battleData?.damageTaken} damage to your {damageIcon} and defeating
           you!
         </p>
       )}
