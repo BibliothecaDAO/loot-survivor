@@ -48,7 +48,7 @@ from indexer.utils import (
 # Print apibara logs
 root_logger = logging.getLogger("apibara")
 # change to `logging.DEBUG` to print more information
-root_logger.setLevel(logging.INFO)
+root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(logging.StreamHandler())
 
 
@@ -1265,7 +1265,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         idp = decode_idle_damage_penalty_event.deserialize(
             [felt.to_int(i) for i in data]
         )
-        if idp.adventurer_state["beast_health"] > 0:
+        if idp.adventurer_state["adventurer"]["beast_health"] > 0:
             penalty_battle_doc = {
                 "txHash": encode_hex_as_bytes(tx_hash),
                 "beast": check_exists_int(0),
@@ -1293,7 +1293,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             penalty_discovery_doc = {
                 "txHash": encode_hex_as_bytes(tx_hash),
                 "adventurerId": check_exists_int(idp.adventurer_state["adventurer_id"]),
-                "discoveryType": encode_int_as_bytes(0),
+                "discoveryType": check_exists_int(0),
                 "subDiscoveryType": check_exists_int(0),
                 "outputAmount": encode_int_as_bytes(0),
                 "obstacle": check_exists_int(0),
@@ -1319,7 +1319,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "- [idle damage penalty]",
             idp.adventurer_state["adventurer_id"],
             "->",
-            idp.adventurer_state["health"],
+            idp.adventurer_state["adventurer"]["health"],
         )
 
     async def handle_invalidate(self, _info: Info, _cursor: Cursor):
