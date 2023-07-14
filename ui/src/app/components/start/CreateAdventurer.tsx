@@ -163,7 +163,7 @@ export const CreateAdventurer = ({
 
   useEffect(() => {
     if (adventurers[0] && firstAdventurer) {
-      setScreen("actions");
+      setScreen("play");
       setAdventurer(adventurers[0]);
     }
   }, [adventurers, firstAdventurer, setAdventurer, setScreen]);

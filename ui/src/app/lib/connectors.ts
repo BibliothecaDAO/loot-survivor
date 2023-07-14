@@ -1,6 +1,4 @@
 import { InjectedConnector } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector";
-import { contracts } from "../hooks/useContracts";
 
 // export const controllerConnector = new ControllerConnector([
 //     {
