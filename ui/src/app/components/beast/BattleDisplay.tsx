@@ -9,6 +9,7 @@ import Hand from "../../../../public/icons/loot/hand.svg";
 import Chest from "../../../../public/icons/loot/chest.svg";
 import Waist from "../../../../public/icons/loot/waist.svg";
 import Foot from "../../../../public/icons/loot/foot.svg";
+import { appUrl } from "@/app/lib/constants";
 
 interface BattleDisplayProps {
   adventurer: Adventurer;
@@ -19,7 +20,7 @@ interface BattleDisplayProps {
 const getAttackLocationIcon = (attackLocation: string) => {
   if (!attackLocation) return null;
 
-  if (attackLocation == "Hands")
+  if (attackLocation == "Hand")
     return <Hand className="self-center w-6 h-6 fill-current" />;
   if (attackLocation == "Chest")
     return <Chest className="self-center w-6 h-6 fill-current" />;
@@ -40,42 +41,35 @@ export const BattleDisplay = ({
   battleData,
   beastName,
 }: BattleDisplayProps) => {
+
+
   const damageLocation = battleData?.damageLocation ?? "";
+  const damageIcon = getAttackLocationIcon(damageLocation);
+  const BeastFled = battleData.fled;
+  const AdventurerAttack = battleData.attacker === "Adventurer";
+  const BeastHealthExists = (battleData.beastHealth ?? 0) > 0;
+  const AdventurerHealthExists = (adventurer.health ?? 0) > 0;
+  const NoDamageTaken = battleData.damageTaken === 0;
+
   return (
-    <div>
-      {battleData.fled ? (
-        <p>You fled the {beastName}!</p>
-      ) : battleData.attacker == "Adventurer" ? (
-        battleData.beastHealth ?? 0 > 0 ? (
-          <p>
-            You attacked the {beastName} with a mighty strike and dealt{" "}
-            {battleData.damageDealt} damage!
-          </p>
-        ) : (
-          <p>
-            You slayed the {beastName} after inflicting {battleData.damageDealt}{" "}
-            damage!
-          </p>
-        )
-      ) : (adventurer.health ?? 0) > 0 ? (
-        battleData.damageTaken == 0 ? (
-          <p>
-            The {beastName} attacked your{" "}
-            {getAttackLocationIcon(damageLocation)} but you defended the attack!
-          </p>
-        ) : (
-          <p>
-            The {beastName} attacked {getAttackLocationIcon(damageLocation)}
-            {""} doing
-            {battleData.damageTaken} damage!
-          </p>
-        )
-      ) : (
-        <p>
-          The {beastName} killed you {battleData.damageTaken} damage to your{" "}
-          {getAttackLocationIcon(damageLocation)}!
-        </p>
-      )}
+    <div className="border p-2 border-terminal-green w-full text-2xl">
+
+
+      {BeastFled && <p>You fled the {beastName}!</p>}
+      {AdventurerAttack && BeastHealthExists &&
+        <div>
+          <div className="flex w-full justify-between">
+            <span className=" text-terminal-yellow flex">{battleData.damageTaken} damage taken at {" "} {damageIcon}! </span>
+          </div>
+          <div className="w-full justify-between">
+            You delt {beastName} <span>{battleData.damageDealt} damage! </span>
+          </div>
+        </div>
+      }
+      {AdventurerAttack && !BeastHealthExists && <p>You slayed the {beastName} after inflicting {battleData.damageDealt} damage!</p>}
+      {!AdventurerAttack && AdventurerHealthExists && NoDamageTaken && <p>The {beastName} attacked but you defended the attack!</p>}
+      {!AdventurerAttack && AdventurerHealthExists && !NoDamageTaken && <p>The {beastName} attacked, hitting your {damageIcon} and dealing {battleData.damageTaken} damage!</p>}
+      {!AdventurerAttack && !AdventurerHealthExists && <p>The {beastName} delivered a final blow, dealing {battleData.damageTaken} damage to your {damageIcon} and defeating you!</p>}
     </div>
   );
 };
@@ -90,7 +84,9 @@ export const NotificationBattleDisplay = ({
   type,
 }: NotificationBattleDisplayProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const appUrl = "https://loot-survivor.vercel.app/";
+
+  console.log(battleData)
+  
   const isArray = Array.isArray(battleData);
   const handleBeastInfo = () => {
     if (isArray) {
@@ -125,56 +121,28 @@ export const NotificationBattleDisplay = ({
     data.adventurersByXPQuery?.adventurers ?? []
   );
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
+  const BeastFled = isArray && battleData.some(data => data.fled);
+  const FailedToFlee = isArray && type === "Flee" && battleData.length === 1 && battleData[0]?.attacker === "Beast" && (battleData[0]?.beastHealth ?? 0) > 0;
+  const KilledTryingToFlee = isArray && type === "Flee" && battleData.length === 1 && battleData[0]?.attacker === "Beast" && adventurer?.health === 0;
+  const Attacked = isArray && battleData[0]?.attacker === "Adventurer" && ((battleData[0]?.beastHealth ?? 0) > 0 && (battleData[1]?.beastHealth ?? 0) > 0);
+  const Slayed = isArray && battleData[0]?.attacker === "Adventurer" && battleData[0]?.beastHealth === 0;
+  const Killed = isArray && battleData[0]?.attacker === "Adventurer" && (battleData[1]?.beastHealth ?? 0) > 0;
+
   return (
     <div>
-      {isArray && battleData.some((data) => data.fled) ? (
-        <p>You fled the {beastName ? beastName : ""}!</p>
-      ) : isArray &&
-        type == "Flee" &&
-        battleData.length == 1 &&
-        battleData[0]?.attacker == "Beast" &&
-        (battleData[0]?.beastHealth ?? 0) > 0 ? (
-        <p>
-          You failed to flee the {beastName ? beastName : ""} and were attacked
-          taking {battleData[0]?.damageTaken} damage!{" "}
-        </p>
-      ) : isArray &&
-        type == "Flee" &&
-        battleData.length == 1 &&
-        battleData[0]?.attacker == "Beast" &&
-        adventurer?.health == 0 ? (
-        <p>
-          You were killed trying to flee the {beastName ? beastName : ""}
-          taking {battleData[0]?.damageTaken} damage!{" "}
-        </p>
-      ) : (
-        isArray &&
-        battleData[0]?.attacker == "Adventurer" &&
-        ((battleData[0]?.beastHealth ?? 0) > 0 &&
-        (battleData[1]?.beastHealth ?? 0) > 0 ? (
-          <p>
-            You attacked the {beastName ? beastName : ""} with a mighty strike
-            and dealt {battleData[0]?.damageDealt} damage! They counterattacked
-            for {battleData[1]?.damageTaken} damage!
-          </p>
-        ) : battleData[0]?.attacker == "Adventurer" &&
-          battleData[0]?.beastHealth == 0 ? (
-          <div className="flex flex-col gap-2 items-center justify-center">
-            <p>
-              You slayed the {beastName ? beastName : ""} after inflicting{" "}
-              {battleData[0]?.damageDealt} damage!
-            </p>
-            <TwitterShareButton
-              text={`My adventurer just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
-            />
-          </div>
-        ) : (
-          <p>
-            You were killed by the {beastName ? beastName : ""} taking{" "}
-            {battleData[1]?.damageTaken} damage!
-          </p>
-        ))
+      {BeastFled && <p>You fled the {beastName || ""}!</p>}
+      {FailedToFlee && <p>You failed to flee the {beastName || ""} and were attacked taking {battleData[0]?.damageTaken} damage! </p>}
+      {KilledTryingToFlee && <p>You were killed trying to flee the {beastName || ""} taking {battleData[0]?.damageTaken} damage! </p>}
+      {Attacked && <p>You attacked the {beastName || ""} with a mighty strike and dealt {battleData[0]?.damageDealt} damage! They counterattacked for {battleData[1]?.damageTaken} damage!</p>}
+      {Slayed && (
+        <div className="flex flex-col gap-2 items-center justify-center">
+          <p>You slayed the {beastName || ""} after inflicting {battleData[0]?.damageDealt} damage!</p>
+          <TwitterShareButton
+            text={`My adventurer just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+          />
+        </div>
       )}
+      {Killed && <p>You were killed by the {beastName || ""} taking {battleData[1]?.damageTaken} damage!</p>}
     </div>
   );
 };

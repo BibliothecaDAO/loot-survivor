@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useAccount } from "@starknet-react/core";
-import { getAdventurersByOwner } from "../hooks/graphql/queries";
+// import { getAdventurersByOwner } from "../hooks/graphql/queries";
 import { padAddress } from "../lib/utils";
 import { AdventurersList } from "../components/start/AdventurersList";
 import { CreateAdventurer } from "../components/start/CreateAdventurer";
@@ -9,6 +9,15 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import LootIconLoader from "../components/icons/Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import useLoadingStore from "../hooks/useLoadingStore";
+
+import {
+  getAdventurerById,
+  getBattleByTxHash,
+  getDiscoveryByTxHash,
+  getAdventurerByXP,
+  getAdventurersByOwner
+} from "../hooks/graphql/queries";
+import useAdventurerStore from "../hooks/useAdventurerStore";
 
 /**
  * @container
@@ -20,10 +29,36 @@ export default function AdventurerScreen() {
   const [loading, setLoading] = useState(false);
   const { account } = useAccount();
   const { data } = useQueriesStore();
-
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const hash = useLoadingStore((state) => state.hash);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
 
   const owner = account?.address ? padAddress(account.address) : "";
+  useCustomQuery(
+    "adventurerByIdQuery",
+    getAdventurerById,
+    {
+      id: adventurer?.id ?? 0,
+    },
+    true
+  );
+
+  // useCustomQuery(
+  //   "battlesByTxHashQuery",
+  //   getBattleByTxHash,
+  //   {
+  //     txHash: padAddress(hash),
+  //   },
+  //   txAccepted
+  //   // hash !== ""
+  // );
+
+  useCustomQuery(
+    "adventurersByXPQuery",
+    getAdventurerByXP,
+    undefined,
+    txAccepted
+  );
 
   // TODO: Remove polling
   useCustomQuery(
@@ -32,7 +67,7 @@ export default function AdventurerScreen() {
     {
       owner: owner,
     },
-    true
+    txAccepted
   );
 
   const adventurers = data.adventurersByOwnerQuery

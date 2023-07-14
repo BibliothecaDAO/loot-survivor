@@ -5,6 +5,8 @@ import EfficacyIcon from "../icons/EfficacyIcon";
 import { processBeastName } from "../../lib/utils";
 import { Battle, Beast, Adventurer } from "@/app/types";
 
+import { CountDown } from "../CountDown";
+
 interface BeastDisplayProps {
   beastData: Beast;
   lastBattle: Battle;
@@ -35,7 +37,7 @@ export const BeastDisplay = ({
           >
             <HeartIcon className="self-center w-6 h-6 fill-current" />{" "}
             <p className="self-center text-2xl sm:text-4xl">
-              {beastData?.health}
+              <CountDown health={beastData?.health || 0}/>
             </p>
           </span>
         </div>

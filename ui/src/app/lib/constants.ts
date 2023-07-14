@@ -28,3 +28,5 @@ export const contracts = {
       "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
   },
 };
+
+export const appUrl = "https://survivor.vercel.app/";

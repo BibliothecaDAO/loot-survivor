@@ -10,13 +10,15 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { useState } from "react";
 import useUIStore from "../hooks/useUIStore";
-import { processBeastName } from "../lib/utils";
+import { padAddress, processBeastName } from "../lib/utils";
 import useCustomQuery from "../hooks/useCustomQuery";
 import {
   getBattlesByBeast,
   getBeast,
   getLastBeastDiscovery,
   getLastBattleByAdventurer,
+  getAdventurerById,
+  getBattleByTxHash
 } from "../hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
 import {
@@ -47,9 +49,28 @@ export default function BeastScreen() {
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const onboarded = useUIStore((state) => state.onboarded);
-
+  const hash = useLoadingStore((state) => state.hash);
+  
   const { data } = useQueriesStore();
 
+  useCustomQuery(
+    "battlesByTxHashQuery",
+    getBattleByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    txAccepted
+  );
+
+  useCustomQuery(
+    "adventurerByIdQuery",
+    getAdventurerById,
+    {
+      id: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+  
   useCustomQuery(
     "lastBeastQuery",
     getLastBeastDiscovery,
@@ -83,10 +104,6 @@ export default function BeastScreen() {
     txAccepted
   );
 
-  let beastData = data.beastQuery ? data.beastQuery.beasts[0] : NullBeast;
-
-  console.log(beastData);
-
   useCustomQuery(
     "battlesByBeastQuery",
     getBattlesByBeast,
@@ -97,6 +114,10 @@ export default function BeastScreen() {
     },
     txAccepted
   );
+
+
+  let beastData = data.beastQuery ? data.beastQuery.beasts[0] : NullBeast;
+
 
   const formatBattles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
@@ -267,7 +288,7 @@ export default function BeastScreen() {
                   <div className="text-xl uppercase">
                     Battle log with {beastData?.beast}
                   </div>
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 w-full">
                     {formatBattles.map((battle: Battle, index: number) => (
                       <BattleDisplay
                         key={index}

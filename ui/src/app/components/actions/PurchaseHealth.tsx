@@ -24,8 +24,7 @@ const PurchaseHealth = () =>
       entrypoint: "buy_potion",
       calldata: [
         adventurer?.id?.toString() ?? "",
-        "0",
-        potionAmount.toString(),
+        "0"
       ],
       metadata: `Purchasing ${potionAmount * 10} health`,
     };
@@ -38,7 +37,9 @@ const PurchaseHealth = () =>
       adventurer?.gold && adventurer?.gold >= purchaseGoldAmount ? true : false;
 
     const handlePurchaseHealth = async () => {
-      addToCalls(purchaseHealthTx);
+      for (let i = 0; i < potionAmount; i++) {
+        addToCalls(purchaseHealthTx);
+      }
     };
 
     const handleKeyDown = useCallback(
