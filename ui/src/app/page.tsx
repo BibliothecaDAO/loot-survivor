@@ -259,7 +259,7 @@ export default function Home() {
                 label: "Play",
                 screen: "play",
                 disabled:
-                  hasBeast || statUpgrades > 0 || adventurer.health == 0,
+                  statUpgrades > 0 || adventurer.health == 0,
               },
               {
                 id: isMobile ? 4 : 3,
@@ -267,28 +267,28 @@ export default function Home() {
                 screen: "inventory",
                 disabled: adventurer.health == 0,
               },
-              {
-                id: isMobile ? 5 : 4,
-                label: "Beast",
-                screen: "beast",
-                disabled: statUpgrades > 0 || adventurer.health == 0,
-              },
+              // {
+              //   id: isMobile ? 5 : 4,
+              //   label: "Beast",
+              //   screen: "beast",
+              //   disabled: statUpgrades > 0 || adventurer.health == 0,
+              // },
               {
                 id: isMobile ? 6 : 5,
                 label: statUpgrades > 0 ? <span>Upgrade!</span> : "Upgrade",
                 screen: "upgrade",
                 disabled: !(statUpgrades > 0),
               },
-              {
-                id: isMobile ? 7 : 6,
-                label: "Market",
-                screen: "market",
-                disabled:
-                  !(statUpgrades > 0) ||
-                  hasBeast ||
-                  adventurer.health == 0 ||
-                  purchaseExists(),
-              },
+              // {
+              //   id: isMobile ? 7 : 6,
+              //   label: "Market",
+              //   screen: "market",
+              //   disabled:
+              //     !(statUpgrades > 0) ||
+              //     hasBeast ||
+              //     adventurer.health == 0 ||
+              //     purchaseExists(),
+              // },
             ]
           : []),
         ...(isMobile
@@ -351,7 +351,7 @@ export default function Home() {
     if (!hasAdventurers) {
       createMenu("Start", "start");
     } else if (adventurerExistsAndHasXP) {
-      beastHealth <= 0 ? createMenu("Play", "play") : createMenu("Beast", "beast");
+      beastHealth <= 0 ? createMenu("Play", "play") : createMenu("Play", "play");
     } else if (adventurer?.xp === 10 && beastHealth === 0 && statUpgrades > 0) {
       showTutorialDialog(true);
     } else {
@@ -360,11 +360,11 @@ export default function Home() {
     }
   }, [onboarded, adventurer, account]);
 
-  useEffect(() => {
-    if (statUpgrades > 0 && adventurer?.health !== 0) {
-      setScreen("upgrade");
-    }
-  }, [statUpgrades, adventurer?.health, setScreen]);
+  // useEffect(() => {
+  //   if (statUpgrades > 0 && adventurer?.health !== 0) {
+  //     setScreen("upgrade");
+  //   }
+  // }, [statUpgrades, adventurer?.health, setScreen]);
 
   // fetch adventurers on app start and account switch
   useEffect(() => {

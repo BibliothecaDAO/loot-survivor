@@ -171,7 +171,7 @@ export default function MarketplaceScreen() {
     <>
       {adventurer?.level != 0 ? (
         <div className="w-full">
-          <div className="flex flex-row justify-between m-1 flex-wrap sm:text-xl">
+          <div className="flex flex-row justify-between p-1 flex-wrap sm:text-xl">
             <div className="flex flex-row gap-3">
               <p>Balance:</p>
               <span className="flex text-xl text-terminal-yellow">
@@ -188,7 +188,7 @@ export default function MarketplaceScreen() {
               <p>{" to price) Min item price: 3"}</p>
             </span>
           </div>
-          <div className="w-full sm:w-3/4 sm:mx-auto overflow-y-auto border h-[400px] sm:h-[650px] border-terminal-green table-scroll">
+          <div className="w-full  sm:mx-auto overflow-y-auto border h-[400px] border-terminal-green table-scroll">
             {isLoading.latestMarketItemsQuery && (
               <div className="flex justify-center p-10 text-center">
                 <LootIconLoader />

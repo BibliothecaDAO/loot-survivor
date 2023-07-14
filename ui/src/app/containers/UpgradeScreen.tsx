@@ -23,6 +23,7 @@ import {
   ArrowIcon,
 } from "../components/icons/Icons";
 import PurchaseHealth from "../components/actions/PurchaseHealth";
+import MarketplaceScreen from "./MarketplaceScreen";
 
 /**
  * @container
@@ -141,64 +142,45 @@ export default function UpgradeScreen() {
     });
   };
 
-  const Strength = (): ReactElement => (
+  const Attribute = ({ name, description, buttonText }: any): ReactElement => (
     <div className="flex flex-col gap-3 items-center">
-      <p className="sm:text-[28px] text-center">
-        Strength increases attack damage by 10%
-      </p>
-      <Button onClick={() => handleUpgradeTx("Strength")}>
-        Upgrade Strength
-      </Button>
+      <p className="sm:text-[28px] text-center">{description}</p>
+      <Button onClick={() => handleUpgradeTx(name)}>{buttonText}</Button>
     </div>
   );
-  const Dexterity = (): ReactElement => (
-    <div className="flex flex-col gap-3 items-center">
-      <p className="sm:text-[28px] text-center">
-        Dexterity increases chance of fleeing Beasts
-      </p>
-      <Button onClick={() => handleUpgradeTx("Dexterity")}>
-        Upgrade Dexterity
-      </Button>
-    </div>
-  );
-  const Vitality = (): ReactElement => (
-    <div className="flex flex-col gap-3 items-center">
-      <p className="sm:text-[28px] text-center">
-        Vitality increases current and max health each by 20hp
-      </p>
-      <Button onClick={() => handleUpgradeTx("Vitality")}>
-        Upgrade Vitality
-      </Button>
-    </div>
-  );
-  const Intelligence = (): ReactElement => (
-    <div className="flex flex-col gap-3 items-center">
-      <p className="sm:text-[28px] text-center">
-        Intelligence increases chance of avoiding Obstacles
-      </p>
-      <Button onClick={() => handleUpgradeTx("Intelligence")}>
-        Upgrade Intelligence
-      </Button>
-    </div>
-  );
-  const Wisdom = (): ReactElement => (
-    <div className="flex flex-col gap-3 items-center">
-      <p className="sm:text-[28px] text-center">
-        Wisdom increases chance of avoiding a Beast ambush
-      </p>
-      <Button onClick={() => handleUpgradeTx("Wisdom")}>Upgrade Wisdom</Button>
-    </div>
-  );
-  const Charisma = (): ReactElement => (
-    <div className="flex flex-col gap-3 items-center">
-      <p className="sm:text-[30px] text-center">
-        Charisma provides discounts on the marketplace and potions
-      </p>
-      <Button onClick={() => handleUpgradeTx("Charisma")}>
-        Upgrade Charisma
-      </Button>
-    </div>
-  );
+
+  const attributes = [
+    {
+      name: "Strength",
+      description: "Strength increases attack damage by 10%",
+      buttonText: "Upgrade Strength",
+    },
+    {
+      name: "Dexterity",
+      description: "Dexterity increases chance of fleeing Beasts",
+      buttonText: "Upgrade Dexterity",
+    },
+    {
+      name: "Vitality",
+      description: "Vitality increases current and max health each by 20hp",
+      buttonText: "Upgrade Vitality",
+    },
+    {
+      name: "Intelligence",
+      description: "Intelligence increases chance of avoiding Obstacles",
+      buttonText: "Upgrade Intelligence",
+    },
+    {
+      name: "Wisdom",
+      description: "Wisdom increases chance of avoiding a Beast ambush",
+      buttonText: "Upgrade Wisdom",
+    },
+    {
+      name: "Charisma",
+      description: "Charisma provides discounts on the marketplace and potions",
+      buttonText: "Upgrade Charisma",
+    },
+  ];
 
   useEffect(() => {
     if (statUpgrades == 0) {
@@ -214,38 +196,60 @@ export default function UpgradeScreen() {
 
   const previousLevel = currentLevel - statUpgrades;
 
+  function renderContent() {
+    const attribute = attributes.find(attr => attr.name === selected);
+
+    return (
+      <div className="flex sm:w-2/3 items-center justify-center border p-2 border-terminal-green">
+        {attribute && <Attribute {...attribute} />}
+      </div>
+    );
+  }
+
+  function renderVerticalKeyboardControl() {
+    return (
+      <div className="sm:w-1/3">
+        <VerticalKeyboardControl
+          buttonsData={upgradeMenu}
+          onSelected={setSelected}
+          onEnterAction={true}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col sm:flex-row">
-      <div className="w-1/3 mr-5 hidden sm:block">
+    <div className="flex flex-col sm:flex-row gap-2">
+      <div className="w-1/3 hidden sm:block">
         <Info adventurer={adventurer} />
       </div>
       <div className="w-full sm:w-2/3">
-        <div className="flex flex-col gap-5">
-          <div className="flex flex-col gap-2 p-2 sm:p-10 items-center">
-            <span className="flex flex-col gap-2 text-center text-4xl">
-              <span className="animate-pulse">LEVEL UP!</span>
-              <span className="flex flex-row items-center justify-center gap-2 text-terminal-yellow">
-                {previousLevel}{" "}
+        <div className="flex flex-col gap-2 h-full">
+          <div className="flex flex-col items-center h-full gap-2">
+            <div className="flex flex-col text-center text-4xl p-4 border-terminal-green border w-full">
+              <div className="animate-pulse uppercase">Level up!</div>
+              <div className="flex flex-row items-center justify-center text-terminal-yellow space-x-3">
+                {previousLevel}
                 <span className="w-7 h-7">
-                  <ArrowIcon />
-                </span>{" "}
+                  <ArrowIcon className="w-5" />
+                </span>
                 {currentLevel}
-              </span>
-            </span>
-            <div className="w-full flex flex-col items-center sm:flex-row gap-5">
-              <div className="flex flex-col gap-5 items-center w-full sm:w-1/2">
-                <p className="text-center text-lg sm:text-2xl">
-                  Items are on the market!
+              </div>
+            </div>
+            <div className="w-full flex flex-col items-center sm:flex-row gap-2 h-full">
+              <div className="flex flex-col gap-5 items-center w-full sm:w-2/3 border-terminal-green border h-full  p-4 flex-grow align-center">
+                <MarketplaceScreen/>
+                {/* <p className="text-center text-lg sm:text-2xl">
+                 New items are on the market!
                 </p>
                 <Button
                   className="w-1/4"
                   onClick={() => setScreen("market")}
-                  // disabled={purchasedItem}
                 >
                   Market
-                </Button>
+                </Button> */}
               </div>
-              <div className="w-full sm:w-1/2">
+              <div className="w-full sm:w-1/3 border-terminal-green border p-2 flex-grow h-full ">
                 <p className="text-center text-lg sm:text-2xl">
                   Health shop open!
                 </p>
@@ -253,42 +257,16 @@ export default function UpgradeScreen() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full">
+          <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full border-terminal-green border">
             {isMobileDevice ? (
               <>
-                <div className="flex sm:w-2/3 items-center justify-center border border-terminal-green p-2">
-                  {selected == "Strength" && <Strength />}
-                  {selected == "Dexterity" && <Dexterity />}
-                  {selected == "Vitality" && <Vitality />}
-                  {selected == "Intelligence" && <Intelligence />}
-                  {selected == "Wisdom" && <Wisdom />}
-                  {selected == "Charisma" && <Charisma />}
-                </div>
-                <div className="sm:w-1/3">
-                  <VerticalKeyboardControl
-                    buttonsData={upgradeMenu}
-                    onSelected={setSelected}
-                    onEnterAction={true}
-                  />
-                </div>
+                {renderContent()}
+                {renderVerticalKeyboardControl()}
               </>
             ) : (
               <>
-                <div className="sm:w-1/3">
-                  <VerticalKeyboardControl
-                    buttonsData={upgradeMenu}
-                    onSelected={setSelected}
-                    onEnterAction={true}
-                  />
-                </div>
-                <div className="flex sm:w-2/3 items-center justify-center">
-                  {selected == "Strength" && <Strength />}
-                  {selected == "Dexterity" && <Dexterity />}
-                  {selected == "Vitality" && <Vitality />}
-                  {selected == "Intelligence" && <Intelligence />}
-                  {selected == "Wisdom" && <Wisdom />}
-                  {selected == "Charisma" && <Charisma />}
-                </div>
+                {renderVerticalKeyboardControl()}
+                {renderContent()}
               </>
             )}
           </div>

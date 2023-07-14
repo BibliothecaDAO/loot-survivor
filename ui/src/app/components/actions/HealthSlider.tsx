@@ -21,7 +21,7 @@ const HealthSlider: React.FC<SliderProps> = ({
       max="10"
       value={purchaseAmount}
       onChange={handleChange}
-      className="slider"
+      className="slider bg-terminal-green"
     />
   );
 };

@@ -222,18 +222,11 @@ export default function BeastScreen() {
     beastData?.special3 ?? ""
   );
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   return (
-    <div className="flex flex-col sm:flex-row overflow-hidden flex-wrap">
-      <div className="hidden sm:block sm:w-1/3">
-        <Info adventurer={adventurer} />
-      </div>
-      {isMobileDevice ? (
-        <>
-          <div className="sm:w-1/3">
+    <>
+      {/* {isMobileDevice ? (
+        <> */}
+          <div className="sm:w-1/3 order-1 sm:order-2">
             {(adventurer?.beastHealth ?? 0 > 0) || lastBattle ? (
               <>
                 <BeastDisplay
@@ -251,7 +244,7 @@ export default function BeastScreen() {
             )}
           </div>
 
-          <div className="flex flex-col sm:w-1/3 gap-5 p-4">
+          <div className="flex flex-col sm:w-1/3 gap-5 p-4 order-1">
             {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
 
             {((adventurer?.beastHealth ?? 0 > 0) ||
@@ -275,7 +268,7 @@ export default function BeastScreen() {
               </>
             )}
           </div>
-        </>
+        {/* </>
       ) : (
         <>
           <div className="flex flex-col sm:w-1/3 gap-10 p-4">
@@ -321,7 +314,7 @@ export default function BeastScreen() {
             )}
           </div>
         </>
-      )}
-    </div>
+      )} */}
+    </>
   );
 }

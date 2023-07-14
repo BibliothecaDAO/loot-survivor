@@ -92,7 +92,7 @@ export const AdventurersList = ({
               <div className="flex flex-col w-full sm:w-1/3 sm:h-full overflow-y-auto mx-2 border border-terminal-green">
                 {filteredAdventurers.map((adventurer, index) => (
                   <Button
-                    key={adventurer.id}
+                    key={index}
                     ref={(ref) => (buttonRefs.current[index] = ref)}
                     className={
                       selectedIndex === index && isActive ? "animate-pulse" : ""
@@ -119,18 +119,13 @@ export const AdventurersList = ({
                   </Button>
                 )}
               </div>
-              {/* {filteredAdventurers.length > 0 && (
-                <div className="sm:w-2/12 md:w-6/12 lg:w-2/3 w-full sm:ml-2">
-                  <Info adventurer={filteredAdventurers[selectedIndex]} />
-                </div>
-              )} */}
             </>
           ) : (
             <>
               <div className="flex flex-col w-full sm:w-1/3 h-full overflow-y-auto ml-4">
                 {filteredAdventurers.map((adventurer, index) => (
                   <Button
-                    key={adventurer.id}
+                    key={index}
                     ref={(ref) => (buttonRefs.current[index] = ref)}
                     className={
                       selectedIndex === index && isActive ? "animate-pulse" : ""

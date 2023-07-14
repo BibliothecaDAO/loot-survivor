@@ -75,6 +75,8 @@ export const BeastDisplay = ({
           src={image}
           alt="monsters"
           fill={true}
+          placeholder="blur"
+          blurDataURL={"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAQAAABeK7cBAAAADUlEQVR42mNkrmdgAAABkwCE1XPyYQAAAABJRU5ErkJggg=="}
           style={{
             objectFit: "contain",
           }}

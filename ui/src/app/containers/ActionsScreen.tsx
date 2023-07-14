@@ -5,21 +5,17 @@ import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import VerticalKeyboardControl from "../components/menu/VerticalMenu";
-import PurchaseHealth from "../components/actions/PurchaseHealth";
 import Info from "../components/adventurer/Info";
 import Discovery from "../components/actions/Discovery";
-import useUIStore from "../hooks/useUIStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { getLatestDiscoveries, getDiscoveryByTxHash, getAdventurerById } from "../hooks/graphql/queries";
 import {
   MistIcon,
-  HealthPotionsIcon,
-  TargetIcon,
+
 } from "../components/icons/Icons";
-import { useMediaQuery } from "react-responsive";
-import KillAdventurer from "../components/actions/KillAdventurer";
 import { padAddress } from "../lib/utils";
+import BeastScreen from "./BeastScreen";
 
 /**
  * @container
@@ -39,10 +35,8 @@ export default function ActionsScreen() {
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const onboarded = useUIStore((state) => state.onboarded);
   const hash = useLoadingStore((state) => state.hash);
   const [selected, setSelected] = useState<string>("");
-  const [activeMenu, setActiveMenu] = useState(0);
 
   const { data } = useQueriesStore();
 
@@ -76,8 +70,6 @@ export default function ActionsScreen() {
   const latestDiscoveries = data.latestDiscoveriesQuery
     ? data.latestDiscoveriesQuery.discoveries
     : [];
-
-  console.log(latestDiscoveries);
 
   const exploreTx = {
     contractAddress: gameContract?.address ?? "",
@@ -116,60 +108,38 @@ export default function ActionsScreen() {
       loading: loading,
     },
   ];
-  // if (onboarded) {
-  //   buttonsData.push({
-  //     id: 2,
-  //     label: "Slay Adventurer",
-  //     icon: <TargetIcon />,
-  //     value: "kill adventurer",
-  //     action: async () => setActiveMenu(2),
-  //     disabled: loading,
-  //     loading: loading,
-  //   });
-  // }
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
+  const beast = adventurer?.beastHealth != null && adventurer?.beastHealth > 0;
+
+  console.log(adventurer)
 
   return (
     <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 overflow-hidden flex-wrap">
       <div className="hidden sm:block sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      {isMobileDevice ? (
-        <>
-          <div className="flex flex-col items-center sm:w-1/3 bg-terminal-black">
-            {selected == "explore" && (
-              <Discovery discoveries={latestDiscoveries} />
-            )}
-          </div>
-          <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8">
-            <VerticalKeyboardControl
-              buttonsData={buttonsData}
-              onSelected={(value) => setSelected(value)}
-              onEnterAction={true}
-            />
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8">
-            <VerticalKeyboardControl
-              buttonsData={buttonsData}
-              onSelected={(value) => setSelected(value)}
-              onEnterAction={true}
-            />
-          </div>
 
-          <div className="flex flex-col sm:w-1/3 bg-terminal-black">
+      {beast ? <BeastScreen /> : (
+        <>
+          <div className="flex flex-col items-center sm:w-1/3 bg-terminal-black order-1 sm:order-2">
             {selected == "explore" && (
               <Discovery discoveries={latestDiscoveries} />
             )}
-            {selected == "kill adventurer" && <KillAdventurer />}
           </div>
-        </>
-      )}
+          <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8 sm:order-1">
+            <VerticalKeyboardControl
+              buttonsData={buttonsData}
+              onSelected={(value) => setSelected(value)}
+              onEnterAction={true}
+            />
+          </div>
+        </>)
+      }
+
+
+
+
+
     </div>
   );
 }

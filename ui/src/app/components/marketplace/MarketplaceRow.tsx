@@ -148,7 +148,7 @@ const MarketplaceRow = ({
     <>
       <tr
         className={
-          "border-b border-terminal-green sm:text-2xl hover:bg-terminal-green hover:text-terminal-black" +
+          "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black" +
           (selectedIndex === index + 1 ? " bg-terminal-black" : "")
         }
       >
@@ -156,7 +156,7 @@ const MarketplaceRow = ({
         <td className="text-center">{tier}</td>
         <td className="text-center">
           <div className="flex justify-center items-center ">
-            <LootIcon className="sm:w-8" type={slot} />
+            <LootIcon className="sm:w-4" type={slot} />
           </div>
         </td>
         <td className="text-center">
@@ -174,29 +174,36 @@ const MarketplaceRow = ({
           </div>
         </td>
 
-        <td className="w-64 text-center">
+        <td className="w-32 text-center">
           {!isMobileDevice && showEquipQ ? (
             <div className="flex flex-row items-center justify-center gap-2">
               <p>Equip?</p>
-              <Button
-                onClick={() => {
-                  handlePurchase(item.item ?? "", tier, true);
-                  setShowEquipQ(false);
-                  // setPurchasedItem(true);
-                }}
-              >
-                Yes
-              </Button>
-              <Button
-                onClick={() => {
-                  handlePurchase(item.item ?? "", tier, false);
-                  setShowEquipQ(false);
-                  // setPurchasedItem(true);
-                }}
-              >
-                No
-              </Button>
-              <Button onClick={() => setShowEquipQ(false)}>Cancel</Button>
+              <div className="flex flex-col">
+
+                <Button
+                  size={'xs'}
+                  variant={'ghost'}
+                  onClick={() => {
+                    handlePurchase(item.item ?? "", tier, true);
+                    setShowEquipQ(false);
+                    // setPurchasedItem(true);
+                  }}
+                >
+                  Yes
+                </Button>
+                <Button
+                  size={'xs'}
+                  variant={'ghost'}
+                  onClick={() => {
+                    handlePurchase(item.item ?? "", tier, false);
+                    setShowEquipQ(false);
+                    // setPurchasedItem(true);
+                  }}
+                >
+                  No
+                </Button>              </div>
+
+              <Button size={'xs'} onClick={() => setShowEquipQ(false)}>X</Button>
             </div>
           ) : (
             <Button
@@ -214,9 +221,9 @@ const MarketplaceRow = ({
               className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
             >
               {checkPurchaseBalance() ||
-              checkTransacting(item.item ?? "") ||
-              singlePurchaseExists(item.item ?? "") ||
-              (isMobileDevice && showEquipQ && isActive)
+                checkTransacting(item.item ?? "") ||
+                singlePurchaseExists(item.item ?? "") ||
+                (isMobileDevice && showEquipQ && isActive)
                 ? "In Cart"
                 : "Purchase"}
             </Button>

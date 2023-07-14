@@ -67,12 +67,14 @@ export default function AdventurerScreen() {
     {
       owner: owner,
     },
-    txAccepted
+    true
   );
 
   const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers
     : [];
+
+    console.log(adventurers)
 
   const menu = [
     {
