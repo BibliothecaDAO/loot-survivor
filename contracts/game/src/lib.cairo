@@ -1460,7 +1460,6 @@ mod Game {
                     },
                     seed: beast_seed,
                     id: beast.id,
-                    health: adventurer.beast_health,
                     beast_specs: CombatSpec {
                     tier: beast.combat_spec.tier,
                     item_type: beast.combat_spec.item_type,
@@ -2443,7 +2442,6 @@ mod Game {
         adventurer_state: AdventurerState,
         seed: u128,
         id: u8,
-        health: u16,
         beast_specs: CombatSpec,
         damage: u16,
         location: u8,
