@@ -325,7 +325,7 @@ impl ImplCombat of ICombat {
         damage: u16, weapon_prefix1: u8, armor_prefix1: u8, entropy: u128, 
     ) -> u16 {
         // is the weapon prefix matches the armor prefix
-        if (weapon_prefix1 == armor_prefix1) {
+        if (weapon_prefix1 != 0 && weapon_prefix1 == armor_prefix1) {
             // grant bonus
             let damage_multplier = U128TryIntoU16::try_into(entropy % 4).unwrap();
 
@@ -347,7 +347,7 @@ impl ImplCombat of ICombat {
         base_damage: u16, weapon_prefix2: u8, armor_prefix2: u8, entropy: u128, 
     ) -> u16 {
         // is the weapon prefix2 matches the armor prefix2
-        if (weapon_prefix2 == armor_prefix2) {
+        if (weapon_prefix2 != 0 && weapon_prefix2 == armor_prefix2) {
             // divide base damage by 4 to get 25% of original damage
             let damage_boost_base = base_damage / 4;
 
