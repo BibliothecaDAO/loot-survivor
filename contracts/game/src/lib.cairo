@@ -1029,40 +1029,39 @@ mod Game {
         ref name_storage1: ItemSpecialsStorage,
         ref name_storage2: ItemSpecialsStorage,
         entropy: u128
-    ) -> Adventurer {
-        // https://github.com/starkware-libs/cairo/issues/2942
-        // internal::revoke_ap_tracking();
-        // delegate obstacle encounter to obstacle library
+    ) {
+        // get obstacle from obstacle lib and check if it was dodged
         let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
             adventurer.get_level(), adventurer.stats.intelligence, entropy
         );
 
-        let mut damage_taken: u16 = 0;
-        let mut damage_location: u8 = 0;
+        // get a random attack location for the obstacle
+        let damage_slot = AdventurerUtils::get_random_attack_location(entropy);
+        // get adventurer armor at attack location
+        let damage_location = ImplCombat::slot_to_u8(damage_slot);
+        // get combat spec for the armor
+        let armor_combat_spec = _get_combat_spec(
+            @self, adventurer_id, adventurer.get_item_at_slot(damage_slot)
+        );
+
+        // get the xp reward for the obstacle
+        let xp_reward = obstacle.get_xp_reward();
+
+        // calculate damage from the obstacle
+        let damage_taken = ImplObstacle::get_damage(obstacle, armor_combat_spec, entropy);
+
+        // increase adventurer xp
+        // adventurer gets xp regardless of if they dodge obstacle or not
+        // items only get xp if damage is taken
+        let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_reward);
 
         // if the obstacle was not dodged
         if (!dodged) {
-            // get adventurer armor at the random location the obstacle is dealing damage to
-            let damage_slot = AdventurerUtils::get_random_attack_location(entropy);
-            let damage_location = ImplCombat::slot_to_u8(damage_slot);
-            let armor = adventurer.get_item_at_slot(damage_slot);
-
-            // get combat spec for that item
-            let armor_combat_spec = _get_combat_spec(@self, adventurer_id, armor);
-
-            // calculate damage from the obstacle
-            damage_taken = ImplObstacle::get_damage(obstacle, armor_combat_spec, entropy);
-
             // deduct the health from the adventurer
             adventurer.deduct_health(damage_taken);
 
-            // get the xp reward for the obstacle
-            let xp_reward = obstacle.get_xp_reward();
-
-            // increase adventurer xp
-            let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_reward);
-
             // emit obstacle discover event
+            // items only earn XP when damage is taken
             __event__DiscoveredObstacle(
                 ref self,
                 DiscoveredObstacle {
@@ -1077,45 +1076,66 @@ mod Game {
                     damage_taken: damage_taken,
                     damage_location: damage_location,
                     xp_earned_adventurer: xp_reward,
-                    xp_earned_items: xp_reward * ITEM_XP_MULTIPLIER,
+                    xp_earned_items: xp_reward * ITEM_XP_MULTIPLIER
                 }
             );
 
-            // allocate XP to equipped items
-            _grant_xp_to_equipped_items(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                ref name_storage1,
-                ref name_storage2,
-                xp_reward,
-                entropy
-            );
-
-            if (new_level > previous_level) {
-                _handle_adventurer_level_up(
-                    ref self, ref adventurer, adventurer_id, previous_level, new_level
+            // if obstacle killed adventurer
+            if (adventurer.health == 0) {
+                // emit adventurer died event
+                __event_AdventurerDied(
+                    ref self,
+                    AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    },
+                    killed_by_beast: false,
+                    killed_by_obstacle: true,
+                    killer_id: obstacle.id
+                );
+                // and return so we don't process adventurer level up
+                return;
+            } else {
+                // allocate XP to equipped items
+                _grant_xp_to_equipped_items(
+                    ref self,
+                    adventurer_id,
+                    ref adventurer,
+                    ref name_storage1,
+                    ref name_storage2,
+                    xp_reward,
+                    entropy
                 );
             }
-        }
-
-        // if obstacle killed adventurer
-        if (adventurer.health == 0) {
-            // emit adventurer died event
-            __event_AdventurerDied(
+        } else {
+            // emit obstacle discover event
+            // items do not earn XP from obstacles
+            __event__DiscoveredObstacle(
                 ref self,
-                AdventurerState {
-                    owner: get_caller_address(),
-                    adventurer_id: adventurer_id,
-                    adventurer: adventurer
-                },
-                killed_by_beast: false,
-                killed_by_obstacle: true,
-                killer_id: obstacle.id
+                DiscoveredObstacle {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    },
+                    id: obstacle.id,
+                    level: obstacle.combat_specs.level,
+                    dodged: dodged,
+                    damage_taken: damage_taken,
+                    damage_location: damage_location,
+                    xp_earned_adventurer: xp_reward,
+                    xp_earned_items: 0,
+                }
             );
         }
 
-        return adventurer;
+        // check if adventurer level increased
+        if (new_level > previous_level) {
+            _handle_adventurer_level_up(
+                ref self, ref adventurer, adventurer_id, previous_level, new_level
+            );
+        }
     }
 
     // @title Handle Item Leveling Events
