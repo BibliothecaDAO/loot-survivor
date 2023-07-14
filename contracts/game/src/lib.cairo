@@ -1007,13 +1007,16 @@ mod Game {
                         }
                     },
                     TreasureDiscovery::Health(()) => {
+                        // if adventurer's health is already full
                         if (adventurer.has_full_health()) {
-                            // add gold to ensure adventurer state changes
+                            // add 1 gold to ensure adventurer state changes
                             adventurer.add_gold(1);
+                            __event__DiscoveredGold(ref self, adventurer_id, adventurer, amount);
                         } else {
+                            // otherwise add health
                             adventurer.add_health(amount);
+                            __event__DiscoveredHealth(ref self, adventurer_id, adventurer, amount);
                         }
-                        __event__DiscoveredHealth(ref self, adventurer_id, adventurer, amount);
                     },
                 }
             },
