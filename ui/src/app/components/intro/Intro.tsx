@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "../buttons/Button";
 import WalletSelect from "./WalletSelect";
 import { TypeAnimation } from "react-type-animation";
-import { prologue } from "../../lib/constants";
+import { prologue, chapter1 } from "../../lib/constants";
 import LootIconLoader from "../icons/Loader";
 import Image from "next/image";
 
@@ -55,8 +55,7 @@ const Intro = () => {
   };
 
   return (
-    <>
-      {!initiated ? (
+    /* {!initiated ? (
         <div className="flex flex-wrap justify-center p-20 w-fill">
           <LootIconLoader size="w-8" />
           <div className="flex justify-center w-full mt-10">
@@ -70,78 +69,88 @@ const Intro = () => {
             </Button>
           </div>
         </div>
-      ) : (
-        <>
-          {screen == 0 ? (
-            <div className="flex flex-col w-full h-full p-4 sm:p-8">
-              <div className="flex flex-wrap">
-                <div className="w-full">
-                  <Image
-                    className=" mx-auto p-10 animate-pulse "
-                    src={"/scenes/intro.png"}
-                    alt="start"
-                    width={1200}
-                    height={1200}
-                  />
-                </div>
-
-                <p className="sm:p-4 text-xs sm:text-xl leading-loose">
-                  <TypeAnimation
-                    sequence={[
-                      prologue,
-                      () => {
-                        setIntroComplete(true);
-                      },
-                    ]}
-                    wrapper="span"
-                    cursor={true}
-                    speed={90}
-                    // repeat={Infinity}
-                    style={{ fontSize: "2em" }}
-                  />
-                </p>
-              </div>
-              <div>
-                {!introComplete && (
-                  <Button
-                    onClick={() => setIntroComplete(true)}
-                    variant={"outline"}
-                  >
-                    skip
-                  </Button>
-                )}
-              </div>
-
-              {introComplete && (
-                <div className="flex flex-row gap-10 m-auto">
-                  {/* <Button
-                    onClick={() => setScreen(1)}
-                    className={
-                      "m-auto w-40" + (selectedIndex == 0 ? "animate-pulse" : "")
-                    }
-                    variant={selectedIndex == 0 ? "default" : "ghost"}
-                  >
-                    <p className="text-base whitespace-nowrap">LAUNCH ON DEVNET</p>
-                  </Button> */}
-                  <Button
-                    onClick={() => setScreen(2)}
-                    className={
-                      "m-auto w-40" +
-                      (selectedIndex == 1 ? "animate-pulse" : "")
-                    }
-                    variant={selectedIndex == 1 ? "default" : "ghost"}
-                  >
-                    <p className="text-base whitespace-nowrap">
-                      LAUNCH ON GOERLI
-                    </p>
-                  </Button>
-                </div>
-              )}
+      ) : ( */
+    <>
+      {screen == 0 ? (
+        <div className="flex flex-col w-full h-full p-4 sm:p-8">
+          <div className="flex flex-col">
+            <div className="w-full">
+              <Image
+                className="mx-auto animate-pulse"
+                src={"/scenes/scene1.png"}
+                alt="start"
+                width={400}
+                height={400}
+              />
             </div>
-          ) : (
-            <WalletSelect screen={screen} />
-          )}
-        </>
+            <div className="sm:p-4 text-xs sm:text-xl leading-loose">
+              <TypeAnimation
+                sequence={[
+                  prologue,
+                  () => {
+                    setScreen(1);
+                  },
+                ]}
+                wrapper="span"
+                cursor={true}
+                speed={30}
+                style={{ fontSize: "2em" }}
+              />
+            </div>
+            <div>
+              <Button onClick={() => setScreen(1)} variant={"outline"}>
+                skip
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : screen == 1 ? (
+        <div className="flex flex-col w-full h-full p-4 sm:p-8">
+          <div className="flex flex-col">
+            <div className="w-full">
+              <Image
+                className="mx-auto animate-pulse"
+                src={"/scenes/scene2.png"}
+                alt="second screen"
+                width={400}
+                height={400}
+              />
+            </div>
+            <div className="sm:p-4 text-xs sm:text-xl leading-loose">
+              <TypeAnimation
+                key={screen.toString()}
+                sequence={[
+                  chapter1,
+                  () => {
+                    setScreen(2);
+                  },
+                ]}
+                wrapper="span"
+                cursor={true}
+                speed={30}
+                style={{ fontSize: "2em" }}
+              />
+            </div>
+            <div>
+              <Button onClick={() => setScreen(2)} variant={"outline"}>
+                skip
+              </Button>
+            </div>
+          </div>
+          <div className="flex flex-row gap-10 m-auto">
+            <Button
+              onClick={() => setScreen(2)}
+              className={
+                "m-auto w-40" + (selectedIndex == 1 ? "animate-pulse" : "")
+              }
+              variant={selectedIndex == 1 ? "default" : "ghost"}
+            >
+              <p className="text-base whitespace-nowrap">LAUNCH ON GOERLI</p>
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <WalletSelect screen={screen} />
       )}
     </>
   );
