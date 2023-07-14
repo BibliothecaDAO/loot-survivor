@@ -101,6 +101,12 @@ const processAnimation = (
       }
     } else if (notificationData?.discoveryType == "Item") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
+    } else if (!notificationData.discoveryType) {
+      if (adventurer.health === 0) {
+        return gameData.ADVENTURER_ANIMATIONS["IdleDamagePenaltyDead"];
+      } else {
+        return gameData.ADVENTURER_ANIMATIONS["IdleDamagePenalty"];
+      }
     }
   } else if (type == "Multicall") {
     if ((adventurer.beastHealth ?? 0) > 0) {

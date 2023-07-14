@@ -3,9 +3,9 @@ import { useCountUp } from "react-countup";
 
 export const CountDown = ({health}: any) => {
     const countUpRef = useRef(null);
-    const { start, pauseResume, reset, update } = useCountUp({
+    const { update } = useCountUp({
       ref: countUpRef,
-      start: 0,
+      start: health,
       end: health,
       delay: 1000,
       duration: 5,

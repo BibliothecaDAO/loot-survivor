@@ -1014,6 +1014,8 @@ export class GameData {
       HitByObstacle: "damage",
       Multicall: "discoverItem",
       HitByBeast: "damage",
+      IdleDamagePenalty: "damage",
+      IdleDamagePenaltyDead: "die",
     };
 
     this.ADVENTURER_SOUNDS = {

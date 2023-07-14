@@ -67,7 +67,7 @@ raw_abi = [
             {"name": "neck", "type": "survivor::bag::LootStatistics"},
             {"name": "ring", "type": "survivor::bag::LootStatistics"},
             {"name": "beast_health", "type": "core::integer::u16"},
-            {"name": "stat_upgrade_available", "type": "core::integer::u8"},
+            {"name": "stat_points_available", "type": "core::integer::u8"},
         ],
     },
     {
@@ -439,10 +439,7 @@ raw_abi = [
         "name": "game::Game::AdventurerLeveledUp",
         "type": "event",
         "inputs": [
-            {
-                "name": "adventurer_state",
-                "type": "game::Game::AdventurerState",
-            },
+            {"name": "adventurer_state", "type": "game::Game::AdventurerState"},
             {"name": "previous_level", "type": "core::integer::u8"},
             {"name": "new_level", "type": "core::integer::u8"},
         ],

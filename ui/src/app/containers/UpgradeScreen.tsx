@@ -198,7 +198,6 @@ export default function UpgradeScreen() {
 
   function renderContent() {
     const attribute = attributes.find((attr) => attr.name === selected);
-
     return (
       <div className="flex sm:w-2/3 items-center justify-center border p-2 border-terminal-green">
         {attribute && <Attribute {...attribute} />}
@@ -239,15 +238,6 @@ export default function UpgradeScreen() {
             <div className="w-full flex flex-col items-center sm:flex-row gap-2 h-full">
               <div className="flex flex-col gap-5 items-center w-full sm:w-2/3 border-terminal-green border h-full  p-4 flex-grow align-center">
                 <MarketplaceScreen />
-                {/* <p className="text-center text-lg sm:text-2xl">
-                 New items are on the market!
-                </p>
-                <Button
-                  className="w-1/4"
-                  onClick={() => setScreen("market")}
-                >
-                  Market
-                </Button> */}
               </div>
               <div className="w-full sm:w-1/3 border-terminal-green border p-2 flex-grow h-full ">
                 <p className="text-center text-lg sm:text-2xl">
