@@ -1449,27 +1449,6 @@ mod Game {
                 attack_entropy
             );
 
-        // emit attack beast event
-        __event__AttackedBeast(
-            ref self,
-            AttackedBeast {
-                adventurer_state: AdventurerState {
-                    owner: get_caller_address(),
-                    adventurer_id: adventurer_id,
-                    adventurer: adventurer
-                    },
-                    seed: beast_seed,
-                    id: beast.id,
-                    beast_specs: CombatSpec {
-                    tier: beast.combat_spec.tier,
-                    item_type: beast.combat_spec.item_type,
-                    level: beast.combat_spec.level,
-                    specials: beast.combat_spec.specials
-                },
-                damage: damage_dealt,
-                location: ImplCombat::slot_to_u8(CombatEnums::Slot::None(())),
-            }
-        );
         // if the amount of damage dealt to beast exceeds its health
         if (damage_dealt >= adventurer.beast_health) {
             // the beast is dead so set health to zero
@@ -1494,11 +1473,7 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
-                        },
-                        seed: beast_seed,
-                        id: beast.id,
-                        health: adventurer.beast_health,
-                        beast_specs: CombatSpec {
+                        }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
                         tier: beast.combat_spec.tier,
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
@@ -1534,15 +1509,31 @@ mod Game {
             // deduct adventurer damage from beast health
             adventurer.beast_health = adventurer.beast_health - damage_dealt;
 
-            // get random attack location
-            let attack_location = AdventurerUtils::get_random_attack_location(attack_entropy);
+            // emit attack beast event
+            __event__AttackedBeast(
+                ref self,
+                AttackedBeast {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                        }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                        tier: beast.combat_spec.tier,
+                        item_type: beast.combat_spec.item_type,
+                        level: beast.combat_spec.level,
+                        specials: beast.combat_spec.specials
+                    },
+                    damage: damage_dealt,
+                    location: ImplCombat::slot_to_u8(CombatEnums::Slot::None(())),
+                }
+            );
 
-            // calculate beast attack damage
+            // calculate beast attack damage using random attack location
             _beast_counter_attack(
                 ref self,
                 ref adventurer,
                 adventurer_id,
-                attack_location,
+                AdventurerUtils::get_random_attack_location(attack_entropy),
                 beast,
                 beast_seed,
                 attack_entropy
@@ -1602,11 +1593,7 @@ mod Game {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
-                    },
-                    seed: beast_seed,
-                    id: beast.id,
-                    health: adventurer.beast_health,
-                    beast_specs: CombatSpec {
+                    }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
                     tier: beast.combat_spec.tier,
                     item_type: beast.combat_spec.item_type,
                     level: beast.combat_spec.level,
@@ -1690,11 +1677,7 @@ mod Game {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
-                    },
-                    seed: beast_seed,
-                    id: beast.id,
-                    health: adventurer.beast_health,
-                    beast_specs: CombatSpec {
+                    }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
                     tier: beast.combat_spec.tier,
                     item_type: beast.combat_spec.item_type,
                     level: beast.combat_spec.level,
@@ -2452,7 +2435,6 @@ mod Game {
         adventurer_state: AdventurerState,
         seed: u128,
         id: u8,
-        health: u16,
         beast_specs: CombatSpec,
         damage: u16,
         location: u8,
@@ -2463,7 +2445,6 @@ mod Game {
         adventurer_state: AdventurerState,
         seed: u128,
         id: u8,
-        health: u16,
         beast_specs: CombatSpec,
         damage_dealt: u16,
         xp_earned_adventurer: u16,
@@ -2476,7 +2457,6 @@ mod Game {
         adventurer_state: AdventurerState,
         seed: u128,
         id: u8,
-        health: u16,
         beast_specs: CombatSpec,
         fled: bool
     }
