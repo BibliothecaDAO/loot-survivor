@@ -165,7 +165,7 @@ export function getOrdinalSuffix(n: number): string {
 }
 
 export function calculateLevel(xp: number) {
-  return Math.floor(Math.sqrt(xp)) + 1;
+  return Math.floor(Math.sqrt(xp));
 }
 
 export function processItemName(item: Item) {
