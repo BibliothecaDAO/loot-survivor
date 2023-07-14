@@ -12,7 +12,7 @@ import LeaderboardScreen from "./containers/LeaderboardScreen";
 import EncountersScreen from "./containers/EncountersScreen";
 import GuideScreen from "./containers/GuideScreen";
 import UpgradeScreen from "./containers/UpgradeScreen";
-import { displayAddress, padAddress } from "./lib/utils";
+import { displayAddress } from "./lib/utils";
 import TransactionHistory from "./components/navigation/TransactionHistory";
 import TransactionCart from "./components/navigation/TransactionCart";
 import Intro from "./components/intro/Intro";
@@ -36,13 +36,6 @@ import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
 import { processNotification } from "./components/navigation/NotificationDisplay";
 import { DiscoveryDisplay } from "./components/actions/DiscoveryDisplay";
-import useCustomQuery from "./hooks/useCustomQuery";
-import {
-  getAdventurerById,
-  getBattleByTxHash,
-  getDiscoveryByTxHash,
-  getAdventurerByXP,
-} from "./hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
 import {
   CogIcon,
@@ -70,8 +63,6 @@ export default function Home() {
   const showNotification = useLoadingStore((state) => state.showNotification);
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
-  const hash = useLoadingStore((state) => state.hash);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
@@ -114,10 +105,6 @@ export default function Home() {
   const updatedAdventurer = data.adventurerByIdQuery
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
-
-  const purchaseExists = useCallback(() => {
-    return calls.some((call: Call) => call.entrypoint == "buy_item");
-  }, [calls]);
 
   useEffect(() => {
     if (updatedAdventurer?.id ?? 0 > 0) {
@@ -351,9 +338,7 @@ export default function Home() {
     if (!hasAdventurers) {
       createMenu("Start", "start");
     } else if (adventurerExistsAndHasXP) {
-      beastHealth <= 0 ? createMenu("Play", "play") : createMenu("Play", "play");
-    } else if (adventurer?.xp === 10 && beastHealth === 0 && statUpgrades > 0) {
-      showTutorialDialog(true);
+      createMenu("Play", "play")
     } else {
       handleOnboarded();
       refetch("adventurersByOwnerQuery");
