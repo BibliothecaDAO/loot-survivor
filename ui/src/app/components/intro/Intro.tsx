@@ -93,7 +93,7 @@ const Intro = () => {
                 ]}
                 wrapper="span"
                 cursor={true}
-                speed={30}
+                speed={50}
                 style={{ fontSize: "2em" }}
               />
             </div>
@@ -127,7 +127,7 @@ const Intro = () => {
                 ]}
                 wrapper="span"
                 cursor={true}
-                speed={30}
+                speed={50}
                 style={{ fontSize: "2em" }}
               />
             </div>

@@ -51,7 +51,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
             <p className="text-terminal-green">
               NICE! You discovered{" "}
               <span className="text-terminal-yellow">
-                {discoveryData.outputAmount}
+                {discoveryData?.outputAmount}
               </span>{" "}
             </p>
             <CoinIcon className="self-center w-5 h-5 fill-current" />
@@ -62,7 +62,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       if (discoveryData?.subDiscoveryType === "Health") {
         return (
           <div className="flex self-center">
-            <p>GREAT! You discovered {discoveryData.outputAmount} health! </p>
+            <p>GREAT! You discovered {discoveryData?.outputAmount} health! </p>
             <HeartIcon className="self-center w-5 h-5 fill-current" />
           </div>
         );
