@@ -6,6 +6,7 @@ import {
   SwitchToDevnetButton,
 } from "../archived/DevnetConnectors";
 import useUIStore from "../../hooks/useUIStore";
+import Image from "next/image";
 
 interface WalletSelectProps {
   screen: number;
@@ -16,43 +17,14 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
   const { account } = useAccount();
   const [addedDevnet, setAddedDevnet] = useState<boolean>(false);
   const setConnected = useUIStore((state) => state.setConnected);
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
-
-  // const handleKeyDown = (event: KeyboardEvent) => {
-  //   switch (event.key) {
-  //     case "ArrowDown":
-  //       setSelectedIndex((prev) => {
-  //         const newIndex = Math.min(prev + 1, 1);
-  //         return newIndex;
-  //       });
-  //       break;
-  //     case "ArrowUp":
-  //       setSelectedIndex((prev) => {
-  //         const newIndex = Math.max(prev - 1, 0);
-  //         return newIndex;
-  //       });
-  //       break;
-  //     case "Enter":
-  //       if (screen == 1) {
-  //         setScreen(selectedIndex + 1);
-  //       }
-  //       break;
-  //   }
-  // };
-  // useEffect(() => {
-  //   window.addEventListener("keydown", handleKeyDown);
-  //   return () => {
-  //     window.removeEventListener("keydown", handleKeyDown);
-  //   };
-  // }, [selectedIndex]);
 
   useEffect(() => {
     if (screen == 1) {
       if (
         (account as any)?.baseUrl ==
-          "https://survivor-indexer.bibliothecadao.xyz" ||
+        "https://survivor-indexer.bibliothecadao.xyz" ||
         (account as any)?.provider?.baseUrl ==
-          "https://survivor-indexer.bibliothecadao.xyz"
+        "https://survivor-indexer.bibliothecadao.xyz"
       ) {
         setConnected(true);
       }
@@ -71,7 +43,11 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
   return (
     <div className="flex flex-col p-8">
       <div className="flex flex-col self-center my-auto">
-        <h1 className="mb-10">It&apos;s Time to Survive </h1>
+        <div className="w-full"><Image className=" mx-auto p-10 animate-pulse" src={'/monsters/balrog.png'} alt="start" width={500} height={500} /></div>
+        <div className="w-full text-center">
+          <h1 className="mb-10">The Hour for Survival Has Arrived</h1>
+        </div>
+
         {screen == 2 ? (
           <div className="flex flex-col w-1/2 gap-5 m-auto">
             {connectors.length > 0 ? (

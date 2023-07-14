@@ -119,42 +119,6 @@ export default function Home() {
     return calls.some((call: Call) => call.entrypoint == "buy_item");
   }, [calls]);
 
-  useCustomQuery(
-    "adventurerByIdQuery",
-    getAdventurerById,
-    {
-      id: adventurer?.id ?? 0,
-    },
-    true
-  );
-
-  useCustomQuery(
-    "battlesByTxHashQuery",
-    getBattleByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted
-    // hash !== ""
-  );
-
-  useCustomQuery(
-    "discoveryByTxHashQuery",
-    getDiscoveryByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted
-    // hash !== ""
-  );
-
-  useCustomQuery(
-    "adventurersByXPQuery",
-    getAdventurerByXP,
-    undefined,
-    txAccepted
-  );
-
   useEffect(() => {
     if (updatedAdventurer?.id ?? 0 > 0) {
       setAdventurer(updatedAdventurer);
@@ -363,37 +327,31 @@ export default function Home() {
     }
   }, [adventurer, account, onboarded, hasBeast]);
 
+  const createMenu = (label: string, screen: any) => {
+    const menuData = {
+      id: 1,
+      label: label,
+      screen: screen,
+    };
+
+    setMenu([menuData]);
+    setMobileMenu([menuData]);
+    setScreen(screen);
+    showTutorialDialog(true);
+  };
+
   useEffect(() => {
-    if (onboarded) {
-      return;
-    }
+    if (onboarded) return;
 
     const hasAdventurers = adventurers.length > 0;
     const adventurerExistsAndHasXP = adventurer?.xp === 0;
     const beastHealth = adventurer?.beastHealth ?? 0;
     const statUpgrades = adventurer?.statUpgrades ?? 0;
 
-    const menu = (label: any, screen: any) => {
-      const menuData = {
-        id: 1,
-        label: label,
-        screen: screen,
-      };
-
-      setMenu([menuData]);
-      setMobileMenu([menuData]);
-      setScreen(screen);
-      showTutorialDialog(true);
-    };
-
     if (!hasAdventurers) {
-      menu("Start", "start");
-    } else if (hasAdventurers && adventurerExistsAndHasXP) {
-      if (beastHealth <= 0) {
-        menu("Play", "play");
-      } else if (beastHealth > 0) {
-        menu("Beast", "beast");
-      }
+      createMenu("Start", "start");
+    } else if (adventurerExistsAndHasXP) {
+      beastHealth <= 0 ? createMenu("Play", "play") : createMenu("Beast", "beast");
     } else if (adventurer?.xp === 10 && beastHealth === 0 && statUpgrades > 0) {
       showTutorialDialog(true);
     } else {
@@ -416,8 +374,6 @@ export default function Home() {
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
-
-  console.log(calls);
 
   return (
     // <Maintenance />

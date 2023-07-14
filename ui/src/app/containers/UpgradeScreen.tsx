@@ -53,7 +53,7 @@ export default function UpgradeScreen() {
     {
       id: adventurer?.id ?? 0,
     },
-    txAccepted
+    true
   );
 
   const gameData = new GameData();
@@ -125,7 +125,7 @@ export default function UpgradeScreen() {
       `Upgrading ${selected}`,
       "adventurerByIdQuery",
       adventurer?.id,
-      `You upgraded ${selected}!`
+      `You are upgrading ${selected}!`
     );
     handleSubmitCalls(writeAsync).then((tx: any) => {
       if (tx) {
@@ -202,7 +202,7 @@ export default function UpgradeScreen() {
 
   useEffect(() => {
     if (statUpgrades == 0) {
-      setScreen("actions");
+      setScreen("play");
     }
   }, [statUpgrades, setScreen]);
 

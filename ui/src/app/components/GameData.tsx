@@ -489,6 +489,7 @@ export class GameData {
       75: "Bludgeon",
       76: "Bludgeon",
       78: "Metal",
+      77: "Metal",
       79: "Metal",
       80: "Metal",
       81: "Metal",

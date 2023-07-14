@@ -11,7 +11,7 @@ import Discovery from "../components/actions/Discovery";
 import useUIStore from "../hooks/useUIStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useCustomQuery from "../hooks/useCustomQuery";
-import { getLatestDiscoveries } from "../hooks/graphql/queries";
+import { getLatestDiscoveries, getDiscoveryByTxHash, getAdventurerById } from "../hooks/graphql/queries";
 import {
   MistIcon,
   HealthPotionsIcon,
@@ -19,6 +19,7 @@ import {
 } from "../components/icons/Icons";
 import { useMediaQuery } from "react-responsive";
 import KillAdventurer from "../components/actions/KillAdventurer";
+import { padAddress } from "../lib/utils";
 
 /**
  * @container
@@ -39,11 +40,29 @@ export default function ActionsScreen() {
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const onboarded = useUIStore((state) => state.onboarded);
-
+  const hash = useLoadingStore((state) => state.hash);
   const [selected, setSelected] = useState<string>("");
   const [activeMenu, setActiveMenu] = useState(0);
 
   const { data } = useQueriesStore();
+
+  useCustomQuery(
+    "adventurerByIdQuery",
+    getAdventurerById,
+    {
+      id: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+
+  useCustomQuery(
+    "discoveryByTxHashQuery",
+    getDiscoveryByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    txAccepted
+  );
 
   useCustomQuery(
     "latestDiscoveriesQuery",
@@ -60,6 +79,12 @@ export default function ActionsScreen() {
 
   console.log(latestDiscoveries);
 
+  const exploreTx = {
+    contractAddress: gameContract?.address ?? "",
+    entrypoint: "explore",
+    calldata: [adventurer?.id?.toString() ?? "", "0"],
+  };
+
   const buttonsData = [
     {
       id: 1,
@@ -68,44 +93,40 @@ export default function ActionsScreen() {
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
-        // if (!isMobileDevice) {
-        //   {
-        //     addToCalls(exploreTx);
-        //     startLoading(
-        //       "Explore",
-        //       "Exploring",
-        //       "discoveryByTxHashQuery",
-        //       adventurer?.id
-        //     );
-        //     await handleSubmitCalls(writeAsync).then((tx: any) => {
-        //       if (tx) {
-        //         setTxHash(tx.transaction_hash);
-        //         addTransaction({
-        //           hash: tx.transaction_hash,
-        //           metadata: {
-        //             method: `Explore with ${adventurer?.name}`,
-        //           },
-        //         });
-        //       }
-        //     });
-        //   }
-        // }
+        addToCalls(exploreTx);
+        startLoading(
+          "Explore",
+          "Exploring",
+          "discoveryByTxHashQuery",
+          adventurer?.id
+        );
+        await handleSubmitCalls(writeAsync).then((tx: any) => {
+          if (tx) {
+            setTxHash(tx.transaction_hash);
+            addTransaction({
+              hash: tx.transaction_hash,
+              metadata: {
+                method: `Explore with ${adventurer?.name}`,
+              },
+            });
+          }
+        });
       },
       disabled: (adventurer?.beastHealth ?? 0) > 0 || loading,
       loading: loading,
     },
   ];
-  if (onboarded) {
-    buttonsData.push({
-      id: 2,
-      label: "Slay Adventurer",
-      icon: <TargetIcon />,
-      value: "kill adventurer",
-      action: async () => setActiveMenu(2),
-      disabled: loading,
-      loading: loading,
-    });
-  }
+  // if (onboarded) {
+  //   buttonsData.push({
+  //     id: 2,
+  //     label: "Slay Adventurer",
+  //     icon: <TargetIcon />,
+  //     value: "kill adventurer",
+  //     action: async () => setActiveMenu(2),
+  //     disabled: loading,
+  //     loading: loading,
+  //   });
+  // }
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",

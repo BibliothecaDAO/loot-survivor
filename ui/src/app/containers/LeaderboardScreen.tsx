@@ -13,6 +13,7 @@ import useCustomQuery from "../hooks/useCustomQuery";
 import { AdventurerTemplate } from "../types/templates";
 import { Score, Adventurer } from "../types";
 import { useUiSounds, soundSelector } from "../hooks/useUiSound";
+import KillAdventurer from "../components/actions/KillAdventurer";
 
 /**
  * @container
@@ -167,54 +168,65 @@ export default function LeaderboardScree() {
           No scores submitted yet. Be the first!
         </h3>
       )}
-      <h1 className="text-lg sm:text-2xl">Live Leaderboard</h1>
-      <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
-        <thead className="border border-terminal-green">
-          <tr>
-            <th className="p-1">Rank</th>
-            <th className="p-1">Adventurer</th>
-            <th className="p-1">Gold</th>
-            <th className="p-1">XP</th>
-            <th className="p-1">Health</th>
-          </tr>
-        </thead>
-        <tbody>
-          {displayAdventurers?.map((adventurer: Adventurer, index: number) => {
-            const dead = (adventurer.health ?? 0) <= 0;
-            return (
-              <tr
-                key={index}
-                className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
-                onClick={() => {
-                  handleRowSelected(adventurer.id ?? 0);
-                  clickPlay();
-                }}
-              >
-                <td>{rankGold(adventurer, index)}</td>
-                <td>{`${adventurer.name} - ${adventurer.id}`}</td>
-                <td>
-                  <span className="flex justify-center text-terminal-yellow">
-                    <CoinIcon className="self-center w-4 h-4 sm:w-6 sm:h-6 fill-current" />
-                    {adventurer.gold ? adventurer.gold : 0}
-                  </span>
-                </td>
-                <td>
-                  <span className="flex justify-center">{adventurer.xp}</span>
-                </td>
-                <td>
-                  <span
-                    className={`flex justify-center ${
-                      !dead ? " text-terminal-green" : "text-red-800"
-                    }`}
-                  >
-                    {adventurer.health}
-                  </span>
-                </td>
+      <div className="flex justify-between w-full">
+        <div className="flex flex-col w-full mr-4 flex-grow-1">
+          <h1 className="text-lg sm:text-2xl">Live Leaderboard</h1>
+          <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
+            <thead className="border border-terminal-green">
+              <tr>
+                <th className="p-1">Rank</th>
+                <th className="p-1">Adventurer</th>
+                <th className="p-1">Gold</th>
+                <th className="p-1">XP</th>
+                <th className="p-1">Health</th>
               </tr>
-            );
-          })}
-        </tbody>
-      </table>
+            </thead>
+            <tbody>
+              {displayAdventurers?.map(
+                (adventurer: Adventurer, index: number) => {
+                  const dead = (adventurer.health ?? 0) <= 0;
+                  return (
+                    <tr
+                      key={index}
+                      className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
+                      onClick={() => {
+                        handleRowSelected(adventurer.id ?? 0);
+                        clickPlay();
+                      }}
+                    >
+                      <td>{rankGold(adventurer, index)}</td>
+                      <td>{`${adventurer.name} - ${adventurer.id}`}</td>
+                      <td>
+                        <span className="flex justify-center text-terminal-yellow">
+                          <CoinIcon className="self-center w-4 h-4 sm:w-6 sm:h-6 fill-current" />
+                          {adventurer.gold ? adventurer.gold : 0}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="flex justify-center">
+                          {adventurer.xp}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`flex justify-center ${
+                            !dead ? " text-terminal-green" : "text-red-800"
+                          }`}
+                        >
+                          {adventurer.health}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                }
+              )}
+            </tbody>
+          </table>
+        </div>
+        <div className="flex flex-col w-full flex-grow-1 mx-auto">
+          <KillAdventurer />
+        </div>
+      </div>
       {adventurers?.length > 10 && (
         <div className="flex justify-center mt-8">
           <Button

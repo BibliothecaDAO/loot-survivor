@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { useAccount } from "@starknet-react/core";
-import { getItemsByAdventurer } from "../hooks/graphql/queries";
 import { getKeyFromValue, groupBySlot } from "../lib/utils";
 import { InventoryRow } from "../components/inventory/InventoryRow";
 import Info from "../components/adventurer/Info";
@@ -9,12 +8,11 @@ import { ItemDisplay } from "../components/adventurer/ItemDisplay";
 import { Button } from "../components/buttons/Button";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useLoadingStore from "../hooks/useLoadingStore";
 import LootIcon from "../components/icons/LootIcon";
 import { InfoIcon } from "../components/icons/Icons";
-import { Adventurer, Call, Item, NullAdventurer } from "../types";
+import { Call, Item } from "../types";
 import { GameData } from "../components/GameData";
 
 /**
