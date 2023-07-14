@@ -65,7 +65,9 @@ export default function KillAdventurer() {
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <h4 className="text-center">Slay Idle Adventurer</h4>
+        <h4 className="text-lg sm:text-2xl text-center">
+          Slay Idle Adventurer
+        </h4>
         <label className="flex justify-between">
           <span className="self-center">Adventurer Id:</span>
 

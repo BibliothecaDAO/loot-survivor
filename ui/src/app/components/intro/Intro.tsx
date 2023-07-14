@@ -75,8 +75,16 @@ const Intro = () => {
           {screen == 0 ? (
             <div className="flex flex-col w-full h-full p-4 sm:p-8">
               <div className="flex flex-wrap">
-                <div className="w-full"><Image className=" mx-auto p-10 animate-pulse" src={'/skull2.png'} alt="start" width={300} height={300}/></div>
-                
+                <div className="w-full">
+                  <Image
+                    className=" mx-auto p-10 animate-pulse "
+                    src={"/scenes/intro.png"}
+                    alt="start"
+                    width={1200}
+                    height={1200}
+                  />
+                </div>
+
                 <p className="sm:p-4 text-xs sm:text-xl leading-loose">
                   <TypeAnimation
                     sequence={[

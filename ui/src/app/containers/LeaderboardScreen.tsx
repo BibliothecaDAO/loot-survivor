@@ -169,8 +169,8 @@ export default function LeaderboardScree() {
         </h3>
       )}
       <div className="flex justify-between w-full">
-        <div className="flex flex-col w-full mr-4 flex-grow-1">
-          <h1 className="text-lg sm:text-2xl">Live Leaderboard</h1>
+        <div className="flex flex-col w-full mr-4 flex-grow-2">
+          <h4 className="text-center text-lg sm:text-2xl">Live Leaderboard</h4>
           <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
             <thead className="border border-terminal-green">
               <tr>
@@ -223,7 +223,7 @@ export default function LeaderboardScree() {
             </tbody>
           </table>
         </div>
-        <div className="flex flex-col w-full flex-grow-1 mx-auto">
+        <div className="flex flex-col w-full p-2">
           <KillAdventurer />
         </div>
       </div>

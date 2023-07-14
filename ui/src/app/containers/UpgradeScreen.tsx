@@ -162,7 +162,7 @@ export default function UpgradeScreen() {
     },
     {
       name: "Vitality",
-      description: "Vitality increases current and max health each by 20hp",
+      description: "Vitality increases max health by 20hp",
       buttonText: "Upgrade Vitality",
     },
     {
@@ -197,7 +197,7 @@ export default function UpgradeScreen() {
   const previousLevel = currentLevel - statUpgrades;
 
   function renderContent() {
-    const attribute = attributes.find(attr => attr.name === selected);
+    const attribute = attributes.find((attr) => attr.name === selected);
 
     return (
       <div className="flex sm:w-2/3 items-center justify-center border p-2 border-terminal-green">
@@ -238,7 +238,7 @@ export default function UpgradeScreen() {
             </div>
             <div className="w-full flex flex-col items-center sm:flex-row gap-2 h-full">
               <div className="flex flex-col gap-5 items-center w-full sm:w-2/3 border-terminal-green border h-full  p-4 flex-grow align-center">
-                <MarketplaceScreen/>
+                <MarketplaceScreen />
                 {/* <p className="text-center text-lg sm:text-2xl">
                  New items are on the market!
                 </p>
