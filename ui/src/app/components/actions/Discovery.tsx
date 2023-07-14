@@ -32,18 +32,18 @@ const Discovery = ({ discoveries }: DiscoveryProps) => {
     query: "(max-device-width: 480px)",
   });
 
-  const exploreTx = {
-    contractAddress: gameContract?.address ?? "",
-    entrypoint: "explore",
-    calldata: [adventurer?.id?.toString() ?? "", "0"],
-  };
+  // const exploreTx = {
+  //   contractAddress: gameContract?.address ?? "",
+  //   entrypoint: "explore",
+  //   calldata: [adventurer?.id?.toString() ?? "", "0"],
+  // };
 
   return (
     <div className="flex flex-col gap-5 items-center">
       <div className="flex flex-col items-center justify-center gap-5 m-auto text-xl">
         {discoveries.length > 0 ? (
           <>
-            <Button
+            {/* <Button
               className="w-1/2 text-lg"
               onClick={async () => {
                 addToCalls(exploreTx);
@@ -68,7 +68,7 @@ const Discovery = ({ discoveries }: DiscoveryProps) => {
               disabled={(adventurer?.beastHealth ?? 0) > 0}
             >
               Explore
-            </Button>
+            </Button> */}
             <h3 className="text-center">Your travels</h3>
             {isLoading.discoveryByTxHashQuery && <LootIconLoader />}
             <div className="flex flex-col items-center gap-2 overflow-auto">

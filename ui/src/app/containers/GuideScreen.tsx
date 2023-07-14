@@ -103,6 +103,39 @@ export default function GuideScreen() {
         There are three types of weapons: Blade, Bludgeon, Magic and three types
         of armor materials: Cloth, Hide and Metal. Tier 1 is the highest.
       </p>
+      <div className="overflow-x-auto">
+        <h3 className="text-center text-l mb-2">
+          Efficacy Chart of Weapon and Armor Interactions
+        </h3>
+        <table className="w-1/2 m-auto uppercase whitespace-nowrap border border-terminal-green">
+          <thead>
+            <tr className="text-l tracking-wide text-center border-b border-terminal-green ">
+              <th className="px-4 py-3 border border-terminal-green">Weapon</th>
+              <th className="px-4 py-3 border border-terminal-green">Metal</th>
+              <th className="px-4 py-3 border border-terminal-green">Hide</th>
+              <th className="px-4 py-3 border border-terminal-green">Cloth</th>
+            </tr>
+          </thead>
+          <tbody className="border-terminal-green">
+            {efficacyData.map((row, i) => (
+              <tr key={i} className="text-terminal-green text-center">
+                <td className="px-4 py-3 border border-terminal-green">
+                  {row.weapon}
+                </td>
+                <td className="px-4 py-3 border border-terminal-green">
+                  {row.metal}
+                </td>
+                <td className="px-4 py-3 border border-terminal-green">
+                  {row.hide}
+                </td>
+                <td className="px-4 py-3 border border-terminal-green">
+                  {row.cloth}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <h3 className="mb-2 text-center">The Armory Ranking</h3>
       <div className="overflow-x-auto">
         <table className="w-1/2 m-auto uppercase">
@@ -136,39 +169,7 @@ export default function GuideScreen() {
           </tbody>
         </table>
       </div>
-      <div className="overflow-x-auto">
-        <h4 className="text-center text-l mb-2">
-          Efficacy Chart of Weapon and Armor Interactions
-        </h4>
-        <table className="w-1/2 m-auto uppercase whitespace-nowrap border border-terminal-green">
-          <thead>
-            <tr className="text-l tracking-wide text-center border-b border-terminal-green ">
-              <th className="px-4 py-3 border border-terminal-green">Weapon</th>
-              <th className="px-4 py-3 border border-terminal-green">Metal</th>
-              <th className="px-4 py-3 border border-terminal-green">Hide</th>
-              <th className="px-4 py-3 border border-terminal-green">Cloth</th>
-            </tr>
-          </thead>
-          <tbody className="border-terminal-green">
-            {efficacyData.map((row, i) => (
-              <tr key={i} className="text-terminal-green text-center">
-                <td className="px-4 py-3 border border-terminal-green">
-                  {row.weapon}
-                </td>
-                <td className="px-4 py-3 border border-terminal-green">
-                  {row.metal}
-                </td>
-                <td className="px-4 py-3 border border-terminal-green">
-                  {row.hide}
-                </td>
-                <td className="px-4 py-3 border border-terminal-green">
-                  {row.cloth}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+
       <h3 className="mb-2">The Lore of Items</h3>
       <p>
         Items have prefixes and suffixes assigned to them when they reach

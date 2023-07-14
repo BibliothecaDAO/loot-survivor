@@ -79,6 +79,12 @@ export default function ActionsScreen() {
 
   console.log(latestDiscoveries);
 
+  const exploreTx = {
+    contractAddress: gameContract?.address ?? "",
+    entrypoint: "explore",
+    calldata: [adventurer?.id?.toString() ?? "", "0"],
+  };
+
   const buttonsData = [
     {
       id: 1,
@@ -87,44 +93,40 @@ export default function ActionsScreen() {
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
-        // if (!isMobileDevice) {
-        //   {
-        //     addToCalls(exploreTx);
-        //     startLoading(
-        //       "Explore",
-        //       "Exploring",
-        //       "discoveryByTxHashQuery",
-        //       adventurer?.id
-        //     );
-        //     await handleSubmitCalls(writeAsync).then((tx: any) => {
-        //       if (tx) {
-        //         setTxHash(tx.transaction_hash);
-        //         addTransaction({
-        //           hash: tx.transaction_hash,
-        //           metadata: {
-        //             method: `Explore with ${adventurer?.name}`,
-        //           },
-        //         });
-        //       }
-        //     });
-        //   }
-        // }
+        addToCalls(exploreTx);
+        startLoading(
+          "Explore",
+          "Exploring",
+          "discoveryByTxHashQuery",
+          adventurer?.id
+        );
+        await handleSubmitCalls(writeAsync).then((tx: any) => {
+          if (tx) {
+            setTxHash(tx.transaction_hash);
+            addTransaction({
+              hash: tx.transaction_hash,
+              metadata: {
+                method: `Explore with ${adventurer?.name}`,
+              },
+            });
+          }
+        });
       },
       disabled: (adventurer?.beastHealth ?? 0) > 0 || loading,
       loading: loading,
     },
   ];
-  if (onboarded) {
-    buttonsData.push({
-      id: 2,
-      label: "Slay Adventurer",
-      icon: <TargetIcon />,
-      value: "kill adventurer",
-      action: async () => setActiveMenu(2),
-      disabled: loading,
-      loading: loading,
-    });
-  }
+  // if (onboarded) {
+  //   buttonsData.push({
+  //     id: 2,
+  //     label: "Slay Adventurer",
+  //     icon: <TargetIcon />,
+  //     value: "kill adventurer",
+  //     action: async () => setActiveMenu(2),
+  //     disabled: loading,
+  //     loading: loading,
+  //   });
+  // }
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
