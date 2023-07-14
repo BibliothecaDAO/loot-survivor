@@ -1723,11 +1723,12 @@ mod Game {
 
         // check what item type exists on adventurer
         // if some exists pluck from adventurer and add to bag
-        let mut unequipping_item = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+        let mut unequipped_item_id: u8 = 0;
         if adventurer.is_slot_free(equipping_item) == false {
             let unequipping_item = adventurer
                 .get_item_at_slot(ImplLoot::get_slot(equipping_item.id));
             bag.add_item(unequipping_item);
+            unequipped_item_id = unequipping_item.id;
         }
 
         // equip item
@@ -1755,7 +1756,7 @@ mod Game {
                 }, bag: bag
             },
             item_id,
-            unequipping_item.id,
+            unequipped_item_id,
         );
 
         // remove stats here to prevent boosts from being saved to chain
