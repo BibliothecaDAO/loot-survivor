@@ -935,6 +935,11 @@ mod Game {
                     beast_seed
                 );
 
+                // initialize the beast health. This is the only timeD beast.starting_health should be
+                // used. In subsequent calls to attack the beast, adventurer.beast_health should be used as the persistent
+                // storage of the beast health
+                adventurer.beast_health = beast.starting_health;
+
                 // Emit Discover Beast event
                 __event__DiscoveredBeast(
                     ref self,
@@ -952,19 +957,11 @@ mod Game {
                     }
                 );
 
-                // initialize the beast health. This is the only timeD beast.starting_health should be
-                // used. In subsequent calls to attack the beast, adventurer.beast_health should be used as the persistent
-                // storage of the beast health
-                adventurer.beast_health = beast.starting_health;
-
-                // get random attack location
-                let damage_slot = AdventurerUtils::get_random_attack_location(sub_explore_rnd);
-
-                // initialize damage taken to zero
-                let mut damage_taken = 0;
-
                 // if adventurer was ambushed
                 if (was_ambushed) {
+                    // get random attack location
+                    let damage_slot = AdventurerUtils::get_random_attack_location(sub_explore_rnd);
+
                     // determine damage (adventurer dieing will be handled as part of the counter attack)
                     _beast_counter_attack(
                         ref self,
