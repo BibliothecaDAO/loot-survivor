@@ -1084,12 +1084,6 @@ mod Game {
                 }
             );
 
-            if (new_level > previous_level) {
-                _handle_adventurer_level_up(
-                    ref self, ref adventurer, adventurer_id, previous_level, new_level
-                );
-            }
-
             // allocate XP to equipped items
             _grant_xp_to_equipped_items(
                 ref self,
@@ -1100,6 +1094,12 @@ mod Game {
                 xp_reward,
                 entropy
             );
+
+            if (new_level > previous_level) {
+                _handle_adventurer_level_up(
+                    ref self, ref adventurer, adventurer_id, previous_level, new_level
+                );
+            }
         }
 
         // if obstacle killed adventurer
@@ -1512,13 +1512,6 @@ mod Game {
                 }
             );
 
-            // if adventurers new level is greater than previous level
-            if (new_level > previous_level) {
-                _handle_adventurer_level_up(
-                    ref self, ref adventurer, adventurer_id, previous_level, new_level
-                );
-            }
-
             // grant equipped items xp
             _grant_xp_to_equipped_items(
                 ref self,
@@ -1529,6 +1522,13 @@ mod Game {
                 xp_earned,
                 attack_entropy
             );
+
+            // if adventurers new level is greater than previous level
+            if (new_level > previous_level) {
+                _handle_adventurer_level_up(
+                    ref self, ref adventurer, adventurer_id, previous_level, new_level
+                );
+            }
         } else {
             // handle beast counter attack
 
