@@ -236,6 +236,22 @@ mod tests {
         testing::set_block_number(1006);
         game.explore(ADVENTURER_ID);
 
+        // use stat upgrade
+        game.upgrade_stat(ADVENTURER_ID, 0);
+
+        testing::set_block_number(1007);
+        game.explore(ADVENTURER_ID);
+
+        // use stat upgrade
+        game.upgrade_stat(ADVENTURER_ID, 0);
+
+        testing::set_block_number(1008);
+        game.explore(ADVENTURER_ID);
+        testing::set_block_number(1009);
+        game.explore(ADVENTURER_ID);
+        testing::set_block_number(1010);
+        game.explore(ADVENTURER_ID);
+
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(updated_adventurer.beast_health > 0, 'should have found a beast');
 
