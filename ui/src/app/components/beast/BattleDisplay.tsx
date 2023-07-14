@@ -66,12 +66,7 @@ export const BattleDisplay = ({
           </span>
         </div>
       )}
-      {AdventurerAttack && !BeastHealthExists && (
-        <p>
-          You slayed the {beastName} after inflicting {battleData?.damageDealt}{" "}
-          damage!
-        </p>
-      )}
+
       {!AdventurerAttack && AdventurerHealthExists && NoDamageTaken && (
         <p>The {beastName} attacked but you defended the attack!</p>
       )}

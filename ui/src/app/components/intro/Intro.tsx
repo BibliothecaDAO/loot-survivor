@@ -91,15 +91,15 @@ const Intro = () => {
             <div className="w-full">
               <Image
                 className="mx-auto animate-pulse"
-                src={"/scenes/scene1.png"}
+                src={"/scenes/scene2.png"}
                 alt="start"
-                width={400}
-                height={400}
+                width={500}
+                height={500}
               />
             </div>
           </div>
           <div>
-            <Button onClick={() => setScreen(1)} variant={"outline"}>
+            <Button onClick={() => setScreen(1)} variant={"default"}>
               skip
             </Button>
           </div>
@@ -125,15 +125,15 @@ const Intro = () => {
               </div>
               <Image
                 className="mx-auto animate-pulse"
-                src={"/scenes/scene2.png"}
+                src={"/scenes/scene1.png"}
                 alt="second screen"
-                width={400}
-                height={400}
+                width={500}
+                height={500}
               />
             </div>
 
             <div>
-              <Button onClick={() => setScreen(2)} variant={"outline"}>
+              <Button onClick={() => setScreen(2)} variant={"default"}>
                 skip
               </Button>
             </div>

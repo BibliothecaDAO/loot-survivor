@@ -223,7 +223,7 @@ export default function LeaderboardScree() {
             </tbody>
           </table>
         </div>
-        <div className="flex flex-col w-full p-2">
+        <div className="flex flex-col w-full">
           <KillAdventurer />
         </div>
       </div>

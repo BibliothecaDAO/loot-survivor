@@ -39,7 +39,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     },
     txAccepted
   );
-  
+
   const items = profileExists
     ? data.itemsByProfileQuery
       ? data.itemsByProfileQuery.items
@@ -70,10 +70,10 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   }
                 </span>
               </div>
-              <div className="flex justify-between w-full text-2xl sm:text-4xl font-medium border-b border-terminal-green">
+              <div className="flex justify-between w-full text-2xl sm:text-4xl border-b border-terminal-green">
                 {formatAdventurer.name}
                 <span className="flex text-terminal-yellow">
-                  <CoinIcon className="self-center w-6 h-6 fill-current" />{" "}
+                  <CoinIcon className="self-center w-5 h-5 fill-current" />{" "}
                   {formatAdventurer.gold ? formatAdventurer.gold : 0}
                 </span>
                 <span className="flex text-lg items-center sm:text-3xl">
@@ -81,13 +81,9 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   {`${items.length}/${19}`}
                 </span>
                 <span className="flex ">
-                  <HeartIcon className="self-center w-6 h-6 fill-current" />{" "}
-                  <CountDown health={(formatAdventurer.health ?? 0) || 0}/>
-                  {`/${
-                    100 + (formatAdventurer.vitality ?? 0) * 20
-                  }`}
-
-                  
+                  <HeartIcon className="self-center w-5 h-5 fill-current" />{" "}
+                  <CountDown health={(formatAdventurer.health ?? 0) || 0} />
+                  {`/${100 + (formatAdventurer.vitality ?? 0) * 20}`}
                 </span>
               </div>
 
