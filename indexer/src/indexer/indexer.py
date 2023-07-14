@@ -31,6 +31,7 @@ from indexer.decoder import (
     decode_purchased_potion_event,
     decode_new_high_score_event,
     decode_adventurer_died_event,
+    decode_adventurer_leveled_up_event,
     decode_new_items_available_event,
     decode_idle_damage_penalty_event,
 )
@@ -48,7 +49,7 @@ from indexer.utils import (
 # Print apibara logs
 root_logger = logging.getLogger("apibara")
 # change to `logging.DEBUG` to print more information
-root_logger.setLevel(logging.DEBUG)
+root_logger.setLevel(logging.INFO)
 root_logger.addHandler(logging.StreamHandler())
 
 
@@ -97,7 +98,7 @@ async def update_adventurer_helper(info: Info, adventurer_state):
         "ring": check_exists_int(adventurer_state["adventurer"]["ring"]["id"]),
         "beastHealth": check_exists_int(adventurer_state["adventurer"]["beast_health"]),
         "statUpgrades": check_exists_int(
-            adventurer_state["adventurer"]["stat_upgrade_available"]
+            adventurer_state["adventurer"]["stat_points_available"]
         ),
     }
     await info.storage.find_one_and_update(
@@ -418,6 +419,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "PurchasedPotion",
             "NewHighScore",
             "AdventurerDied",
+            "AdventurerLeveledUp",
             "NewItemsAvailable",
             "IdleDamagePenalty",
         ]:
@@ -455,6 +457,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "PurchasedPotion": self.purchased_potion,
                 "NewHighScore": self.new_high_score,
                 "AdventurerDied": self.adventurer_died,
+                "AdventurerLeveledUp": self.adventurer_leveled_up,
                 "NewItemsAvailable": self.new_items_available,
                 "IdleDamagePenalty": self.idle_damage_penalty,
             }[event_name](
@@ -515,7 +518,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 sg.adventurer_state["adventurer"]["beast_health"]
             ),
             "statUpgrades": check_exists_int(
-                sg.adventurer_state["adventurer"]["stat_upgrade_available"]
+                sg.adventurer_state["adventurer"]["stat_points_available"]
             ),
             "name": check_exists_int(sg.adventurer_meta["name"]),
             "homeRealm": check_exists_int(sg.adventurer_meta["home_realm"]),
@@ -1219,6 +1222,25 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "->",
         )
 
+    async def adventurer_leveled_up(
+        self,
+        info: Info,
+        block_time: datetime,
+        _: FieldElement,
+        tx_hash: str,
+        data: List[FieldElement],
+    ):
+        alu = decode_adventurer_leveled_up_event.deserialize(
+            [felt.to_int(i) for i in data]
+        )
+        await update_adventurer_helper(info, alu.adventurer_state)
+        print(
+            "- [adventurer leveled up]",
+            alu.adventurer_state["adventurer_id"],
+            "->",
+            alu.new_level,
+        )
+
     async def new_items_available(
         self,
         info: Info,
@@ -1265,6 +1287,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         idp = decode_idle_damage_penalty_event.deserialize(
             [felt.to_int(i) for i in data]
         )
+        await update_adventurer_helper(info, idp.adventurer_state)
         if idp.adventurer_state["adventurer"]["beast_health"] > 0:
             penalty_battle_doc = {
                 "txHash": encode_hex_as_bytes(tx_hash),

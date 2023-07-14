@@ -62,12 +62,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
         ? battlesByAdventurerData.battles
         : [];
 
-      const formattedDiscoveries = discoveries.map((discovery: Discovery) => ({
-        ...discovery,
-        timestamp: discovery.discoveryTime,
-      }));
-
-      const combined = [...formattedDiscoveries, ...battles];
+      const combined = [...discoveries, ...battles];
       const sorted = combined.sort((a: any, b: any) => {
         const dateA = new Date(a.timestamp);
         const dateB = new Date(b.timestamp);

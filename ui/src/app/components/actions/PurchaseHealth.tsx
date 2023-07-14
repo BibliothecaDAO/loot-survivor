@@ -21,25 +21,26 @@ const PurchaseHealth = () =>
 
     const purchaseHealthTx = {
       contractAddress: gameContract?.address ?? "",
-      entrypoint: "buy_potion",
+      entrypoint: "buy_potions",
       calldata: [
         adventurer?.id?.toString() ?? "",
-        "0"
+        "0",
+        potionAmount.toString(),
       ],
       metadata: `Purchasing ${potionAmount * 10} health`,
     };
 
-    const purchaseGoldAmount =
+    const purchaseGoldAmount = Math.max(
       potionAmount * (2 * (adventurer?.level ?? 0)) -
-      2 * (adventurer?.charisma ?? 0);
+        2 * (adventurer?.charisma ?? 0),
+      2
+    );
 
     const hasBalance =
       adventurer?.gold && adventurer?.gold >= purchaseGoldAmount ? true : false;
 
     const handlePurchaseHealth = async () => {
-      for (let i = 0; i < potionAmount; i++) {
-        addToCalls(purchaseHealthTx);
-      }
+      addToCalls(purchaseHealthTx);
     };
 
     const handleKeyDown = useCallback(
@@ -65,6 +66,12 @@ const PurchaseHealth = () =>
       [potionAmount]
     );
 
+    const maxHealth = 100 + (adventurer?.vitality ?? 0) * 20;
+
+    const calculatedNewHealth = (adventurer?.health ?? 0) + potionAmount * 10;
+
+    console.log(calculatedNewHealth - maxHealth);
+
     return (
       <div className="flex flex-col gap-5 p-5 sm:p-0 md:p-2">
         <HealthSlider
@@ -84,12 +91,16 @@ const PurchaseHealth = () =>
         </span>
         <p> You can only buy up to Max Health! 1 Potion = 10 Health</p>
         <Button
-          disabled={!hasBalance}
+          disabled={
+            !hasBalance ||
+            adventurer?.health == maxHealth ||
+            calculatedNewHealth - maxHealth > 10
+          }
           onClick={async () => {
             handlePurchaseHealth();
           }}
         >
-          Purchase Health
+          {maxHealth ? "At Max Health" : "Purchase Healt"}
         </Button>
         {!hasBalance && (
           <p className="m-auto text-red-600">Not enough gold to purchase!</p>

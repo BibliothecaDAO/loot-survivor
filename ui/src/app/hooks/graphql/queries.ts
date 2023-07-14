@@ -154,7 +154,7 @@ const getDiscoveries = gql`
     discoveries(
       where: { adventurerId: { eq: $adventurerId } }
       limit: 1000000
-      orderBy: { tiemstamp: { desc: true } }
+      orderBy: { timestamp: { desc: true } }
     ) {
       ...DiscoveryFields
     }

@@ -18,7 +18,7 @@ import {
   getLastBeastDiscovery,
   getLastBattleByAdventurer,
   getAdventurerById,
-  getBattleByTxHash
+  getBattleByTxHash,
 } from "../hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
 import {
@@ -50,7 +50,7 @@ export default function BeastScreen() {
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const onboarded = useUIStore((state) => state.onboarded);
   const hash = useLoadingStore((state) => state.hash);
-  
+
   const { data } = useQueriesStore();
 
   useCustomQuery(
@@ -70,7 +70,7 @@ export default function BeastScreen() {
     },
     txAccepted
   );
-  
+
   useCustomQuery(
     "lastBeastQuery",
     getLastBeastDiscovery,
@@ -115,9 +115,7 @@ export default function BeastScreen() {
     txAccepted
   );
 
-
   let beastData = data.beastQuery ? data.beastQuery.beasts[0] : NullBeast;
-
 
   const formatBattles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
@@ -226,49 +224,50 @@ export default function BeastScreen() {
     <>
       {/* {isMobileDevice ? (
         <> */}
-          <div className="sm:w-1/3 order-1 sm:order-2">
-            {(adventurer?.beastHealth ?? 0 > 0) || lastBattle ? (
-              <>
-                <BeastDisplay
-                  beastData={beastData}
-                  lastBattle={formatBattles[0]}
-                  adventurer={adventurer ?? NullAdventurer}
-                />
-              </>
-            ) : (
-              <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
-                <p className="m-auto text-lg uppercase text-terminal-green">
-                  Beast not yet discovered.
-                </p>
+      <div className="sm:w-1/3 order-1 sm:order-2">
+        {(adventurer?.beastHealth ?? 0 > 0) || lastBattle ? (
+          <>
+            <BeastDisplay
+              beastData={beastData}
+              lastBattle={formatBattles[0]}
+              adventurer={adventurer ?? NullAdventurer}
+            />
+          </>
+        ) : (
+          <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
+            <p className="m-auto text-lg uppercase text-terminal-green">
+              Beast not yet discovered.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex flex-col sm:w-1/3 gap-5 p-4 order-1">
+        {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
+
+        {((adventurer?.beastHealth ?? 0 > 0) || formatBattles.length > 0) && (
+          <>
+            <div className="flex flex-col items-center gap-5 p-2">
+              <div className="text-xl uppercase">
+                Battle log with {beastData?.beast}
               </div>
-            )}
-          </div>
-
-          <div className="flex flex-col sm:w-1/3 gap-5 p-4 order-1">
-            {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
-
-            {((adventurer?.beastHealth ?? 0 > 0) ||
-              formatBattles.length > 0) && (
-              <>
-                <div className="flex flex-col items-center gap-5 p-2">
-                  <div className="text-xl uppercase">
-                    Battle log with {beastData?.beast}
+              <div className="flex flex-col gap-2 text-sm">
+                {formatBattles.map((battle: Battle, index: number) => (
+                  <div className="border p-2 border-terminal-green">
+                    <BattleDisplay
+                      key={index}
+                      battleData={battle}
+                      beastName={beastName}
+                      adventurer={adventurer ?? NullAdventurer}
+                    />
                   </div>
-                  <div className="flex flex-col gap-2 text-sm">
-                    {formatBattles.map((battle: Battle, index: number) => (
-                      <BattleDisplay
-                        key={index}
-                        battleData={battle}
-                        beastName={beastName}
-                        adventurer={adventurer ?? NullAdventurer}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        {/* </>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+      {/* </>
       ) : (
         <>
           <div className="flex flex-col sm:w-1/3 gap-10 p-4">

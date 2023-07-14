@@ -165,7 +165,7 @@ export function getOrdinalSuffix(n: number): string {
 }
 
 export function calculateLevel(xp: number) {
-  return Math.floor(Math.sqrt(xp) / 2) + 1;
+  return Math.floor(Math.sqrt(xp)) + 1;
 }
 
 export function processItemName(item: Item) {
@@ -262,10 +262,10 @@ export function checkAvailableSlots(ownedItems: Item[]) {
 }
 
 export function getItemPrice(tier: number, charisma: number) {
-  const price = (6 - tier) * 3 - 2 * charisma
+  const price = (6 - tier) * 3 - 2 * charisma;
   if (price < 3) {
-    return 3
+    return 3;
   } else {
-    return price
+    return price;
   }
 }
