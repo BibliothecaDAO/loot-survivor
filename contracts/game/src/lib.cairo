@@ -991,6 +991,9 @@ mod Game {
                 let (treasure_type, amount) = adventurer.discover_treasure(sub_explore_rnd);
                 match treasure_type {
                     TreasureDiscovery::Gold(()) => {
+                        // add gold to adventurer
+                        adventurer.add_gold(amount);
+                        // emit discovered gold event
                         __event__DiscoveredGold(ref self, adventurer_id, adventurer, amount);
                     },
                     TreasureDiscovery::XP(()) => {
@@ -1007,6 +1010,12 @@ mod Game {
                         }
                     },
                     TreasureDiscovery::Health(()) => {
+                        if (adventurer.has_full_health()) {
+                            // add gold to ensure adventurer state changes
+                            adventurer.add_gold(1);
+                        } else {
+                            adventurer.add_health(amount);
+                        }
                         __event__DiscoveredHealth(ref self, adventurer_id, adventurer, amount);
                     },
                 }

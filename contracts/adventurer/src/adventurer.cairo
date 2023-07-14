@@ -256,9 +256,7 @@ impl ImplAdventurer of IAdventurer {
     // @return ItemPrimitive: Item at slot
     fn get_item_at_slot(self: Adventurer, slot: Slot) -> ItemPrimitive {
         match slot {
-            Slot::None(()) => ItemPrimitive {
-                id: 0, xp: 0, metadata: 0, 
-            },
+            Slot::None(()) => ItemPrimitive { id: 0, xp: 0, metadata: 0,  },
             Slot::Weapon(()) => self.weapon,
             Slot::Chest(()) => self.chest,
             Slot::Head(()) => self.head,
@@ -339,42 +337,23 @@ impl ImplAdventurer of IAdventurer {
     // @param entropy: Entropy for generating treasure
     // @return TreasureDiscovery: The type of treasure discovered.
     // @return u16: The amount of treasure discovered.
-    fn discover_treasure(ref self: Adventurer, entropy: u128) -> (TreasureDiscovery, u16) {
+    fn discover_treasure(self: Adventurer, entropy: u128) -> (TreasureDiscovery, u16) {
         // generate random item discovery
         let item_type = ExploreUtils::get_random_treasury_discovery(self, entropy);
 
         match item_type {
             TreasureDiscovery::Gold(()) => {
-                // get gold discovery
-                let gold_amount = ExploreUtils::get_gold_discovery(self, entropy);
-                // add it to adventurers gold balance
-                self.add_gold(gold_amount);
-                // no level up possible from gold discovery
-                // so return current level for both previous and new level
-                (TreasureDiscovery::Gold(()), gold_amount)
+                // return discovery type and amount
+                (TreasureDiscovery::Gold(()), ExploreUtils::get_gold_discovery(self, entropy))
             },
             TreasureDiscovery::XP(()) => {
-                // get xp discovery
-                let xp_amount = ExploreUtils::get_xp_discovery(self, entropy);
-                // add it to adventurer's xp 
-                // increase adventurer xp
-                (TreasureDiscovery::XP(()), xp_amount)
+                // return discovery type and amount
+                (TreasureDiscovery::XP(()), ExploreUtils::get_xp_discovery(self, entropy))
             },
             TreasureDiscovery::Health(()) => {
-                // if adventurer's health is already full
-                if (self.has_full_health()) {
-                    // they get 1 gold as a consolation prize
-                    // the primary reason for this is to ensure the adventurers
-                    // state is modified to change the the next explore outcome
-                    self.add_gold(1);
-                    (TreasureDiscovery::Gold(()), 1)
-                } else {
-                    // get health discovery
-                    let health_amount = ExploreUtils::get_health_discovery(self, entropy);
-                    self.add_health(health_amount);
-                    (TreasureDiscovery::Health(()), health_amount)
-                }
-            },
+                // return discovery type and amount
+                (TreasureDiscovery::Health(()), ExploreUtils::get_health_discovery(self, entropy))
+            }
         }
     }
 
@@ -2664,16 +2643,19 @@ fn test_discover_treasure() {
     adventurer.xp = 25;
 
     // disover gold
-    adventurer.discover_treasure(5);
-    assert(adventurer.gold > STARTING_GOLD, 'should have gained gold');
+    let (discovery_type, amount) = adventurer.discover_treasure(5);
+    assert(discovery_type == TreasureDiscovery::Gold(()), 'should have found gold');
+    assert(amount > 0, 'gold should be non-zero');
 
     // discover health
-    adventurer.discover_treasure(6);
-    assert(adventurer.health > STARTING_HEALTH, 'should have gained health');
+    let (discovery_type, amount) = adventurer.discover_treasure(6);
+    assert(discovery_type == TreasureDiscovery::Health(()), 'should have found health');
+    assert(amount > 0, 'health should be non-zero');
 
     // discover xp
-    adventurer.discover_treasure(7);
-    assert(adventurer.xp > 25, 'should have gained xp');
+    let (discovery_type, amount) = adventurer.discover_treasure(7);
+    assert(discovery_type == TreasureDiscovery::XP(()), 'should have found xp');
+    assert(amount > 0, 'xp should be non-zero');
 }
 
 #[test]
