@@ -31,14 +31,14 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         return (
           <p>
             You discovered the {discoveryData?.obstacle} obstacle, it killed you
-            with {discoveryData?.outputAmount} damage!
+            with {discoveryData?.damageTaken} damage!
           </p>
         );
       } else {
         return (
           <p>
             OUCH! You were hit by the {discoveryData?.obstacle} obstacle, it did{" "}
-            {discoveryData?.outputAmount} damage!
+            {discoveryData?.damageTaken} damage!
           </p>
         );
       }

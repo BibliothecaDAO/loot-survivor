@@ -123,9 +123,9 @@ const Intro = () => {
                   style={{ fontSize: "2em" }}
                 />
               </div>
-              <div className="w-full">
+              <div className="w-full pb-5">
                 <Image
-                  className="mx-auto animate-pulse border border-terminal-green pb-4"
+                  className="mx-auto animate-pulse border border-terminal-green"
                   src={"/scenes/scene1.png"}
                   alt="second screen"
                   width={450}
