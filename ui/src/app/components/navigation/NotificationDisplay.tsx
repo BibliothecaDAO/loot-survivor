@@ -30,8 +30,7 @@ const processAnimation = (
     } else if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: Battle) =>
-          data.attacker == "Beast" && (data.beastHealth ?? 0) > 0
+        (data: Battle) => data.attacker == "Beast" && data.fled
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
