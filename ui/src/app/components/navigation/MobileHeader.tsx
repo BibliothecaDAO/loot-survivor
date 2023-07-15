@@ -33,7 +33,7 @@ export default function MobileHeader() {
           </div>
         </Button>
       </div>
-      <div className="absolute left-1/2 right-1/2 flex justify-center top-[8rem]">
+      <div className="absolute left-1/2 right-1/2 flex justify-center top-[7.2rem]">
         <h2 className="text-xl">
           {screen == "player" ? "Profile" : capitalizeFirstLetter(screen ?? "")}
         </h2>
