@@ -74,6 +74,15 @@ const Intro = () => {
       {screen == 0 ? (
         <div className="flex flex-col w-full h-full p-4 sm:p-8">
           <div className="flex flex-col">
+            <div className="w-full ">
+              <Image
+                className="mx-auto animate-pulse border border-terminal-green"
+                src={"/scenes/scene2.png"}
+                alt="start"
+                width={425}
+                height={425}
+              />
+            </div>
             <div className="sm:p-4 text-xs sm:text-xl leading-loose">
               <TypeAnimation
                 sequence={[
@@ -88,26 +97,32 @@ const Intro = () => {
                 style={{ fontSize: "2em" }}
               />
             </div>
-            <div className="w-full ">
-              <Image
-                className="mx-auto animate-pulse border border-terminal-green"
-                src={"/scenes/scene2.png"}
-                alt="start"
-                width={425}
-                height={425}
-              />
-            </div>
           </div>
-          {/* <div>
-            <Button onClick={() => setScreen(1)} variant={"default"}>
-              skip
+          <div className="flex flex-row gap-10 m-auto">
+            <Button
+              onClick={() => setScreen(2)}
+              className={
+                "m-auto w-40" + (selectedIndex == 1 ? "animate-pulse" : "")
+              }
+              variant={selectedIndex == 1 ? "default" : "ghost"}
+            >
+              <p className="text-base whitespace-nowrap">LAUNCH ON GOERLI</p>
             </Button>
-          </div> */}
+          </div>
         </div>
       ) : screen == 1 ? (
         <div className="flex flex-col w-full h-full p-4 sm:p-8">
           <div className="flex flex-col">
             <div className="w-full">
+              <div className="w-full pb-5">
+                <Image
+                  className="mx-auto animate-pulse border border-terminal-green"
+                  src={"/scenes/scene1.png"}
+                  alt="second screen"
+                  width={450}
+                  height={450}
+                />
+              </div>
               <div className="p-2 sm:p-4 text-xs sm:text-xl leading-loose">
                 <TypeAnimation
                   key={screen.toString()}
@@ -121,15 +136,6 @@ const Intro = () => {
                   cursor={true}
                   speed={40}
                   style={{ fontSize: "2em" }}
-                />
-              </div>
-              <div className="w-full pb-5">
-                <Image
-                  className="mx-auto animate-pulse border border-terminal-green"
-                  src={"/scenes/scene1.png"}
-                  alt="second screen"
-                  width={450}
-                  height={450}
                 />
               </div>
             </div>
