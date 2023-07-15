@@ -52,39 +52,41 @@ export const BattleDisplay = ({
   const IdleDamagePenalty = !battleData.beast;
 
   return (
-    <div className="w-full text-2xl">
+    <div className="w-full text-xl">
       {BeastFled && <p>You fled the {beastName}!</p>}
       {AdventurerAttack && BeastHealthExists && (
-        <div className="w-full justify-between">
-          You dealt {beastName} <span>{battleData?.damageDealt} damage! </span>
-        </div>
+        <p className="w-full justify-between">
+          Nice hit! You attacked the {beastName} for {battleData?.damageDealt}{" "}
+          damage!
+        </p>
       )}
       {BeastAttack && AdventurerHealthExists && (
-        <div className="flex w-full justify-between">
-          <span className=" text-terminal-yellow flex">
-            {battleData?.damageTaken} damage taken at {damageIcon}!{" "}
-          </span>
-        </div>
-      )}
-
-      {!AdventurerAttack && AdventurerHealthExists && NoDamageTaken && (
-        <p>The {beastName} attacked but you defended the attack!</p>
-      )}
-      {!AdventurerAttack && AdventurerHealthExists && !NoDamageTaken && (
         <p>
-          The {beastName} attacked, hitting your {damageIcon} and dealing{" "}
+          Ouch! You were hit in the {damageLocation} for{" "}
           {battleData?.damageTaken} damage!
         </p>
       )}
+
+      {!AdventurerAttack && AdventurerHealthExists && NoDamageTaken && (
+        <p>The {beastName} attacked but you defended it well!</p>
+      )}
+      {/* {!AdventurerAttack && AdventurerHealthExists && !NoDamageTaken && (
+        <p>
+          The {beastName} hit your {""}
+          {damageIcon}
+          {""} for {""}
+          {battleData?.damageTaken}
+          {""} damage!
+        </p>
+      )} */}
       {!AdventurerAttack && !AdventurerHealthExists && (
         <p>
-          The {beastName} delivered a final blow, dealing{" "}
-          {battleData?.damageTaken} damage to your {damageIcon} and defeating
-          you!
+          The {beastName} struck you down with a mighty strike dealing{" "}
+          {battleData?.damageTaken} damage to your {damageLocation}!
         </p>
       )}
       {IdleDamagePenalty && (
-        <p>OOPS! You recieved the idle penalty of 80 damage!</p>
+        <p>OOPS you fell asleep! You were hit for 80 damage!</p>
       )}
     </div>
   );
@@ -162,7 +164,7 @@ export const NotificationBattleDisplay = ({
   const Killed =
     isArray &&
     battleData[0]?.attacker === "Adventurer" &&
-    (battleData[1]?.beastHealth ?? 0) > 0;
+    (battleData[0]?.beastHealth ?? 0) > 0;
 
   return (
     <div>
@@ -197,7 +199,7 @@ export const NotificationBattleDisplay = ({
           />
         </div>
       )}
-      {Killed && (
+      {Killed && adventurer?.health === 0 && (
         <p>
           You were killed by the {beastName || ""} taking{" "}
           {battleData[1]?.damageTaken} damage!

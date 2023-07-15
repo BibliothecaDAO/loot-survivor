@@ -232,6 +232,9 @@ export default function UpgradeScreen() {
                 </div>
                 {previousLevel} {" -> "}
                 {currentLevel}
+                <div className="text-center text-xs md:text-l lg:text-xl p-2 animate-pulse">
+                  Shop closes after upgrade
+                </div>
               </div>
 
               <div className="w-2/3 border-terminal-green border p-2">
