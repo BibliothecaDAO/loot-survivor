@@ -168,7 +168,7 @@ export default function LeaderboardScree() {
           No scores submitted yet. Be the first!
         </h3>
       )}
-      <div className="flex flex-col sm:flex-row justify-between w-full">
+      <div className="flex flex-col-reverse sm:flex-row justify-between w-full">
         <div className="flex flex-col w-full mb-4 sm:mb-0 mr-4 flex-grow-2">
           <h4 className="text-center text-lg sm:text-2xl">Live Leaderboard</h4>
           <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
