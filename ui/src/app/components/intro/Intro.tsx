@@ -99,15 +99,16 @@ const Intro = () => {
             </div>
           </div>
           <div className="flex flex-row gap-10 m-auto">
-            <Button
-              onClick={() => setScreen(2)}
-              className={
-                "m-auto w-40" + (selectedIndex == 1 ? "animate-pulse" : "")
-              }
-              variant={selectedIndex == 1 ? "default" : "ghost"}
-            >
-              <p className="text-base whitespace-nowrap">LAUNCH ON GOERLI</p>
-            </Button>
+            <div className="flex justify-center w-full mt-10">
+              <Button
+                className="animate-pulse"
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+                onClick={() => setScreen(2)}
+              >
+                {buttonText}{" "}
+              </Button>
+            </div>
           </div>
         </div>
       ) : screen == 1 ? (

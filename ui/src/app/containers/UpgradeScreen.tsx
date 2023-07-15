@@ -233,7 +233,7 @@ export default function UpgradeScreen() {
                 {previousLevel} {" -> "}
                 {currentLevel}
                 <div className="text-center text-xs md:text-l lg:text-xl p-2 animate-pulse">
-                  Shop closes after upgrade
+                  Fountain stops after upgrade
                 </div>
               </div>
 

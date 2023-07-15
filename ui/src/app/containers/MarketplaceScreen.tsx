@@ -171,7 +171,9 @@ export default function MarketplaceScreen() {
     <>
       {adventurer?.level != 0 ? (
         <div className="w-full">
-          <p className="text-center text-lg sm:text-2xl lg:text-4xl ">Market</p>
+          <p className="text-center text-lg sm:text-2xl lg:text-4xl ">
+            Loot Fountain
+          </p>
           <div className="flex flex-row justify-between p-1 flex-wrap sm:text-xl">
             <div className="flex flex-row gap-3">
               <p>Balance</p>
@@ -186,7 +188,7 @@ export default function MarketplaceScreen() {
               <p className="text-terminal-yellow">
                 {adventurer?.charisma && adventurer?.charisma * 2}
               </p>
-              <p>{" to price) Min item price 3"}</p>
+              <p>{" to price"}</p>
             </span>
           </div>
           <div className="w-full  sm:mx-auto overflow-y-auto border h-[400px] border-terminal-green table-scroll">
@@ -230,7 +232,7 @@ export default function MarketplaceScreen() {
       ) : (
         <div className="flex w-full mt-[200px]">
           <p className="mx-auto items-center text-[50px] animate-pulse">
-            Adventurer must be level 2 or higher to access Market!
+            Adventurer must be level 2 or higher to access Loot Fountain!
           </p>
         </div>
       )}
