@@ -13,7 +13,6 @@ export default function MobileHeader() {
         <Button
           onClick={() => setScreen("player")}
           variant={screen === "player" ? "default" : "ghost"}
-          className="m-2"
         >
           <div className="flex flex-row items-center gap-2">
             <div className="flex items-center w-6 h-6">
@@ -25,7 +24,6 @@ export default function MobileHeader() {
         <Button
           onClick={() => setScreen("leaderboard")}
           variant={screen === "leaderboard" ? "default" : "outline"}
-          className="m-2"
         >
           <div className="flex flex-row items-center gap-2">
             <div className="flex items-center w-6 h-6">
