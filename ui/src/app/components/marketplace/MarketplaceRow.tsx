@@ -63,18 +63,7 @@ const MarketplaceRow = ({
 
   const { tier, type, slot } = getItemData(item.item ?? "");
   const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
-
-  const checkPurchaseBalance = () => {
-    if (adventurer?.gold) {
-      const sum = calls
-        .filter((call) => call.entrypoint == "buy_item")
-        .reduce((accumulator, current) => {
-          return accumulator + (isNaN(itemPrice) ? 0 : itemPrice);
-        }, 0);
-      return sum >= adventurer.gold;
-    }
-    return true;
-  };
+  const enoughGold = calculatedNewGold > itemPrice;
 
   const checkTransacting = (item: string) => {
     if (txData?.status == "RECEIVED" || txData?.status == "PENDING") {
@@ -215,7 +204,7 @@ const MarketplaceRow = ({
               }}
               disabled={
                 itemPrice > (adventurer?.gold ?? 0) ||
-                checkPurchaseBalance() ||
+                !enoughGold ||
                 checkTransacting(item.item ?? "") ||
                 singlePurchaseExists(item.item ?? "") ||
                 item.owner ||
@@ -223,7 +212,7 @@ const MarketplaceRow = ({
               }
               className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
             >
-              {checkPurchaseBalance() || itemPrice > (adventurer?.gold ?? 0)
+              {!enoughGold || itemPrice > (adventurer?.gold ?? 0)
                 ? "Not Enough Gold"
                 : checkTransacting(item.item ?? "") ||
                   singlePurchaseExists(item.item ?? "") ||

@@ -225,6 +225,25 @@ export default function Home() {
                 disabled: false,
               },
             ]),
+              {
+                id: 7,
+                label: "Leaderboard",
+                screen: "leaderboard",
+                disabled: false,
+              },
+              {
+                id: 8,
+                label: "Encounters",
+                screen: "encounters",
+                disabled: false,
+              },
+              {
+                id: 9,
+                label: "Guide",
+                screen: "guide",
+                disabled: false,
+              },
+            ]),
       ];
 
       const newMenu: any = adventurer
@@ -300,7 +319,7 @@ export default function Home() {
               <h1 className="glitch">Loot Survivor</h1>
               <div className="flex flex-row items-center self-end gap-2 flex-wrap">
                 {!isMobileDevice && <TxActivity />}
-                <div
+                {/* <div
                   className="flex flex-row items-center gap-1 p-1 sm:px-2 border border-terminal-green cursor-pointer"
                   onClick={() => setShowDeathCount(!showDeathCount)}
                 >
@@ -320,7 +339,7 @@ export default function Home() {
                       <p className="text-terminal-green sm:text-xl">20</p>
                     </>
                   )}
-                </div>
+                </div> */}
                 <button
                   onClick={() => {
                     setIsMuted(!isMuted);
@@ -442,9 +461,7 @@ export default function Home() {
 
                 {screen === "start" && <AdventurerScreen />}
                 {screen === "play" && <ActionsScreen />}
-                {screen === "market" && <MarketplaceScreen />}
                 {screen === "inventory" && <InventoryScreen />}
-                {screen === "beast" && <BeastScreen />}
                 {screen === "leaderboard" && <LeaderboardScreen />}
                 {screen === "upgrade" && <UpgradeScreen />}
                 {screen === "profile" && <Profile />}
