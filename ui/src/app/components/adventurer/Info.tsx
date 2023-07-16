@@ -3,7 +3,7 @@ import { getItemsByAdventurer } from "../../hooks/graphql/queries";
 import { HeartIcon, CoinIcon, BagIcon } from "../icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
-import { getRealmNameById } from "../../lib/utils";
+import { calculateLevel, getRealmNameById } from "../../lib/utils";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useCustomQuery from "../../hooks/useCustomQuery";
 import useUIStore from "../../hooks/useUIStore";
@@ -48,6 +48,20 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     ? data.itemsByAdventurerQuery.items
     : [];
   console.log(items);
+
+  const neckItem =
+    items.find(
+      (item: Item) => item.item == formatAdventurer.neck && item.equipped
+    ) || NullItem;
+
+  const ringItem =
+    items.find(
+      (item: Item) => item.item == formatAdventurer.ring && item.equipped
+    ) || NullItem;
+
+  const luck =
+    (neckItem.item ? calculateLevel(neckItem.xp ?? 0) : 0) +
+    (ringItem.item ? calculateLevel(ringItem.xp ?? 0) : 0);
 
   return (
     <div className="h-full border border-terminal-green overflow-auto">
@@ -202,7 +216,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     <span className="pl-3">{formatAdventurer.charisma}</span>
                   </div>
                   <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    LUCK <span className="pl-3">{formatAdventurer.luck}</span>
+                    LUCK <span className="pl-3">{luck}</span>
                   </div>
                 </div>
               </div>

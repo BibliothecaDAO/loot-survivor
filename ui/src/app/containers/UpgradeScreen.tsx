@@ -199,7 +199,7 @@ export default function UpgradeScreen() {
   function renderContent() {
     const attribute = attributes.find((attr) => attr.name === selected);
     return (
-      <div className="flex sm:w-2/3 items-center justify-center border p-2 border-terminal-green">
+      <div className="flex sm:w-2/3 items-center justify-center border-l border-terminal-green p-2">
         {attribute && <Attribute {...attribute} />}
       </div>
     );
@@ -224,7 +224,7 @@ export default function UpgradeScreen() {
       </div>
       <div className="w-full sm:w-2/3">
         <div className="flex flex-col gap-2 h-full">
-          <div className="flex flex-col items-center gap-2 border-terminal-green border p-4">
+          <div className="flex flex-col items-center gap-2 border-terminal-green sm:p-4">
             {/* <div className="flex flew row w-full"> */}
             <div className="flex flex-col items-center justify-center text-terminal-green space-x-3">
               <div className="text-center text-lg md:text-xl lg:text-4xl  p-2 animate-pulse">
@@ -239,7 +239,7 @@ export default function UpgradeScreen() {
               </div>
             </div>
 
-            <div className="w-2/3 border-terminal-green border p-2">
+            <div className="w-full sm:w-2/3 border-terminal-green border p-2">
               <p className="text-center text-lg sm:text-2xl lg:text-4xl">
                 Potions
               </p>
@@ -248,7 +248,7 @@ export default function UpgradeScreen() {
             {/* </div> */}
 
             <div className="flex flex-col gap-2 w-full">
-              <div className="w-full border-terminal-green border p-4">
+              <div className="w-full border-terminal-green border sm:p-4">
                 <MarketplaceScreen />
               </div>
             </div>

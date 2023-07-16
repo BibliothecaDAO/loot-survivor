@@ -191,14 +191,14 @@ export default function MarketplaceScreen() {
               <p>{" to price"}</p>
             </span>
           </div>
-          <div className="w-full  sm:mx-auto overflow-y-auto border h-[400px] border-terminal-green table-scroll">
+          <div className="w-full  sm:mx-auto overflow-y-auto sm:border h-[400px] sm:border-terminal-green table-scroll">
             {isLoading.latestMarketItemsQuery && (
               <div className="flex justify-center p-10 text-center">
                 <LootIconLoader />
               </div>
             )}
-            <table className="w-full border border-terminal-green">
-              <thead className="sticky top-0 border z-5 border-terminal-green bg-terminal-black sm:text-xl">
+            <table className="w-full sm:border sm:border-terminal-green">
+              <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
                 <tr className="">
                   {headings.map((heading, index) => (
                     <th
