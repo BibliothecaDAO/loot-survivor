@@ -263,7 +263,7 @@ export default function UpgradeScreen() {
     return accumulator + (isNaN(itemPrice) ? 0 : itemPrice);
   }, 0);
 
-  const calculateCost = getPurchasedGoldSum() + itemsGoldSum;
+  const upgradeTotalCost = getPurchasedGoldSum() + itemsGoldSum;
 
   return (
     <div className="flex flex-col sm:flex-row gap-2">
@@ -288,9 +288,17 @@ export default function UpgradeScreen() {
                 <div className="flex flex-row gap-3">
                   <span className="flex flex-row gap-1  items-center">
                     <p className="uppercase">Cost:</p>
-                    <span className="flex text-xl text-terminal-yellow">
-                      <CoinIcon className="self-center w-5 h-5 fill-current" />
-                      {calculateCost}
+                    <span className="flex text-xl">
+                      <CoinIcon className="self-center w-5 h-5 fill-current text-terminal-yellow" />
+                      <p
+                        className={
+                          upgradeTotalCost > (adventurer?.gold ?? 0)
+                            ? "text-red-600"
+                            : "text-terminal-yellow"
+                        }
+                      >
+                        {upgradeTotalCost}
+                      </p>
                     </span>
                   </span>
                   <span className="flex flex-row gap-1  items-center">
@@ -325,14 +333,14 @@ export default function UpgradeScreen() {
                 <p className="text-center text-lg sm:text-2xl lg:text-4xl">
                   Potions
                 </p>
-                <PurchaseHealth />
+                <PurchaseHealth upgradeTotalCost={upgradeTotalCost} />
               </div>
             )}
 
             {upgradeScreen == 2 && (
               <div className="flex flex-col gap-2 w-full">
                 <div className="w-full border-terminal-green border sm:p-4">
-                  <MarketplaceScreen />
+                  <MarketplaceScreen upgradeTotalCost={upgradeTotalCost} />
                 </div>
               </div>
             )}

@@ -7,11 +7,10 @@ import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { CoinIcon } from "../icons/Icons";
 
 interface PurchaseHealthProps {
-  isActive: boolean;
-  onEscape: () => void;
+  upgradeTotalCost: number;
 }
 
-const PurchaseHealth = () =>
+const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
   // { isActive, onEscape }: PurchaseHealthProps
   {
     const [potionAmount, setHealthAmount] = useState(1);
@@ -37,7 +36,10 @@ const PurchaseHealth = () =>
     );
 
     const hasBalance =
-      adventurer?.gold && adventurer?.gold >= purchaseGoldAmount ? true : false;
+      adventurer?.gold &&
+      adventurer?.gold - upgradeTotalCost >= purchaseGoldAmount
+        ? true
+        : false;
 
     const handlePurchaseHealth = async () => {
       addToCalls(purchaseHealthTx);
