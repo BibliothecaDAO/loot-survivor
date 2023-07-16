@@ -1,5 +1,5 @@
-import { Adventurer } from "../types";
-import { calculateLevel } from "./utils";
+import { Adventurer, Item } from "../types";
+import { calculateLevel, getItemData } from "./utils";
 
 export class AdventurerClass implements Adventurer {
   [key: string]: number | string | Date | undefined;
@@ -97,6 +97,59 @@ export class AdventurerClass implements Adventurer {
     this.statUpgrades = statUpgrades || 0;
     this.gold = gold;
     this.createdTime = createdTime;
+    this.lastUpdatedTime = lastUpdatedTime;
+  }
+}
+
+export class ItemClass implements Item {
+  [key: string]: string | number | undefined | boolean | Date; 
+  item?: string; // name
+  cost?: number; // purchase cost for the item
+  adventurerId?: number; // Adventurer ID
+  ownerAddress?: string; // Hex Address of the Owner
+  owner?: boolean; // Is the item owned by the adventurer?
+  equipped?: boolean; // Is the item equipped by the adventurer?
+  purchasedTime?: Date; // Block time the item was purchased
+  special1?: string; // First special on the item (i.e of Power)
+  special2?: string; // Second special on the item (i.e Grasp)
+  special3?: string; // Third special on the item (i.e Demon)
+  xp?: number; // Experience of the item
+  slot?: string; // Item slot location
+  tier?: number; // Tier of the item
+  type?: string; // Type of the item
+  lastUpdatedTime?: Date; // Block time the item was last updated
+  constructor(items: Item) {
+    const {
+      item,
+      cost,
+      adventurerId,
+      ownerAddress,
+      owner,
+      equipped,
+      purchasedTime,
+      special1,
+      special2,
+      special3,
+      xp,
+      lastUpdatedTime,
+    } = items;
+    
+const { tier, slot, type } = getItemData(item ?? "")
+
+    this.item = item;
+    this.cost = cost;
+    this.adventurerId = adventurerId;
+    this.ownerAddress = ownerAddress;
+    this.owner = owner;
+    this.equipped = equipped;
+    this.purchasedTime = purchasedTime;
+    this.special1 = special1;
+    this.special2 = special2;
+    this.special3 = special3;
+    this.xp = xp;
+    this.slot = slot;
+    this.tier = tier;
+    this.type = type;
     this.lastUpdatedTime = lastUpdatedTime;
   }
 }

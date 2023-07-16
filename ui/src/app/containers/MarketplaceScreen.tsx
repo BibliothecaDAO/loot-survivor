@@ -16,11 +16,16 @@ import useUIStore from "../hooks/useUIStore";
 import { Call, Item } from "../types";
 import { getItemData, getItemPrice, getValueFromKey } from "../lib/utils";
 import { GameData } from "../components/GameData";
+import { ItemClass } from "../lib/classes";
 
+export interface MarketplaceScreenProps {
+  item: ItemClass | undefined;
+}
 /**
  * @container
  * @description Provides the marketplace/purchase screen for the adventurer.
  */
+
 export default function MarketplaceScreen() {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
@@ -53,6 +58,10 @@ export default function MarketplaceScreen() {
     ? data.adventurersInListQuery.adventurers
     : [];
 
+  const headings = ["Item", "Tier", "Slot", "Type", "Cost", "Actions"];
+
+  const gameData = new GameData();
+
   const headingToKeyMapping: { [key: string]: string } = {
     Item: "item",
     Tier: "tier",
@@ -76,8 +85,21 @@ export default function MarketplaceScreen() {
   const sortedMarketLatestItems = useMemo(() => {
     if (!sortField) return marketLatestItems;
     const sortedItems = [...marketLatestItems].sort((a, b) => {
-      let aValue = a[sortField];
-      let bValue = b[sortField];
+      let aItemData = getItemData(a.item ?? ""); // get item data for a
+      let bItemData = getItemData(b.item ?? ""); // get item data for b
+      let aValue, bValue;
+
+      if (
+        sortField === "tier" ||
+        sortField === "type" ||
+        sortField === "slot"
+      ) {
+        aValue = aItemData[sortField];
+        bValue = bItemData[sortField];
+      } else {
+        aValue = a[sortField];
+        bValue = b[sortField];
+      }
 
       if (typeof aValue === "string" && !isNaN(Number(aValue))) {
         aValue = Number(aValue);
@@ -92,8 +114,6 @@ export default function MarketplaceScreen() {
     });
     return sortedItems;
   }, [marketLatestItems, sortField, sortDirection]);
-
-  // const sortedMarketLatestItems = marketLatestItems;
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -138,10 +158,6 @@ export default function MarketplaceScreen() {
       }
     }
   }, [selectedIndex, activeMenu]);
-
-  const headings = ["Item", "Tier", "Slot", "Type", "Cost", "Actions"];
-
-  const gameData = new GameData();
 
   const sum = calls
     .filter((call) => call.entrypoint === "buy_item")
