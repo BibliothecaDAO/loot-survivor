@@ -225,25 +225,6 @@ export default function Home() {
                 disabled: false,
               },
             ]),
-              {
-                id: 7,
-                label: "Leaderboard",
-                screen: "leaderboard",
-                disabled: false,
-              },
-              {
-                id: 8,
-                label: "Encounters",
-                screen: "encounters",
-                disabled: false,
-              },
-              {
-                id: 9,
-                label: "Guide",
-                screen: "guide",
-                disabled: false,
-              },
-            ]),
       ];
 
       const newMenu: any = adventurer
@@ -296,6 +277,12 @@ export default function Home() {
     setScreen,
     showTutorialDialog,
   ]);
+
+  // useEffect(() => {
+  //   if (statUpgrades > 0 && adventurer?.health !== 0) {
+  //     setScreen("upgrade");
+  //   }
+  // }, [statUpgrades, adventurer?.health, setScreen]);
 
   // fetch adventurers on app start and account switch
   useEffect(() => {
