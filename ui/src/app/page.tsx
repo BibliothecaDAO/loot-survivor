@@ -84,6 +84,8 @@ export default function Home() {
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const statUpgrades = adventurer?.statUpgrades ?? 0;
   const [showDeathCount, setShowDeathCount] = useState(true);
+  const [hasBeast, setHasBeast] = useState(false);
+
   const { data, isDataUpdated, refetch } = useQueriesStore();
 
   const [menu, setMenu] = useState<Menu[]>([
@@ -106,13 +108,15 @@ export default function Home() {
     ? data.adventurerByIdQuery.adventurers[0]
     : NullAdventurer;
 
+  const adventurers = data.adventurersByOwnerQuery
+    ? data.adventurersByOwnerQuery.adventurers
+    : [];
+    
   useEffect(() => {
     if (updatedAdventurer?.id ?? 0 > 0) {
       setAdventurer(updatedAdventurer);
     }
   }, [updatedAdventurer, setAdventurer]);
-
-  const [hasBeast, setHasBeast] = useState(false);
 
   useEffect(() => {
     setHasBeast(!!(adventurer?.beastHealth ?? 0 > 0));
@@ -138,15 +142,13 @@ export default function Home() {
     };
   }, [play, stop]);
 
-  const adventurers = data.adventurersByOwnerQuery
-    ? data.adventurersByOwnerQuery.adventurers
-    : [];
 
-  useEffect(() => {
-    if (!adventurer || adventurer?.health == 0) {
-      setScreen(menu[0].screen);
-    }
-  }, [adventurer, menu, setScreen]);
+
+  // useEffect(() => {
+  //   if (!adventurer || adventurer?.health == 0) {
+  //     setScreen(menu[0].screen);
+  //   }
+  // }, [adventurer, menu, setScreen]);
 
   useEffect(() => {
     const { battlesByTxHashQuery, discoveryByTxHashQuery, lastBattleQuery } =
@@ -218,6 +220,12 @@ export default function Home() {
     pendingMessage,
     isDataUpdated,
     adventurer,
+    hasBeast,
+    data,
+    notificationData,
+    setDeathMessage,
+    showDeathDialog,
+    type
   ]);
 
   useEffect(() => {
@@ -241,70 +249,71 @@ export default function Home() {
         },
         ...(adventurer
           ? [
-              {
-                id: isMobile ? 3 : 2,
-                label: "Play",
-                screen: "play",
-                disabled:
-                  statUpgrades > 0 || adventurer.health == 0,
-              },
-              {
-                id: isMobile ? 4 : 3,
-                label: "Inventory",
-                screen: "inventory",
-                disabled: adventurer.health == 0,
-              },
-              // {
-              //   id: isMobile ? 5 : 4,
-              //   label: "Beast",
-              //   screen: "beast",
-              //   disabled: statUpgrades > 0 || adventurer.health == 0,
-              // },
-              {
-                id: isMobile ? 6 : 5,
-                label: statUpgrades > 0 ? <span>Upgrade!</span> : "Upgrade",
-                screen: "upgrade",
-                disabled: !(statUpgrades > 0),
-              },
-              // {
-              //   id: isMobile ? 7 : 6,
-              //   label: "Market",
-              //   screen: "market",
-              //   disabled:
-              //     !(statUpgrades > 0) ||
-              //     hasBeast ||
-              //     adventurer.health == 0 ||
-              //     purchaseExists(),
-              // },
-            ]
+            {
+              id: isMobile ? 3 : 2,
+              label: "Play",
+              screen: "play",
+              disabled:
+                statUpgrades > 0 || adventurer.health == 0,
+            },
+            {
+              id: isMobile ? 4 : 3,
+              label: "Inventory",
+              screen: "inventory",
+              disabled: adventurer.health == 0,
+            },
+            // {
+            //   id: isMobile ? 5 : 4,
+            //   label: "Beast",
+            //   screen: "beast",
+            //   disabled: statUpgrades > 0 || adventurer.health == 0,
+            // },
+            {
+              id: isMobile ? 6 : 5,
+              label: statUpgrades > 0 ? <span>Upgrade!</span> : "Upgrade",
+              screen: "upgrade",
+              disabled: !(statUpgrades > 0),
+            },
+            // {
+            //   id: isMobile ? 7 : 6,
+            //   label: "Market",
+            //   screen: "market",
+            //   disabled:
+            //     !(statUpgrades > 0) ||
+            //     hasBeast ||
+            //     adventurer.health == 0 ||
+            //     purchaseExists(),
+            // },
+          ]
           : []),
         ...(isMobile
           ? []
           : [
-              {
-                id: 7,
-                label: "Leaderboard",
-                screen: "leaderboard",
-                disabled: false,
-              },
-              {
-                id: 8,
-                label: "Encounters",
-                screen: "encounters",
-                disabled: false,
-              },
-              {
-                id: 9,
-                label: "Guide",
-                screen: "guide",
-                disabled: false,
-              },
-            ]),
+            {
+              id: 7,
+              label: "Leaderboard",
+              screen: "leaderboard",
+              disabled: false,
+            },
+            {
+              id: 8,
+              label: "Encounters",
+              screen: "encounters",
+              disabled: false,
+            },
+            {
+              id: 9,
+              label: "Guide",
+              screen: "guide",
+              disabled: false,
+            },
+          ]),
       ];
 
       const newMenu: any = adventurer
         ? commonMenuItems()
         : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+
       const newMobileMenu: any = adventurer
         ? commonMenuItems(true)
         : [{ id: 1, label: "Start", screen: "start", disabled: false }];
@@ -312,23 +321,25 @@ export default function Home() {
       setMenu(newMenu);
       setMobileMenu(newMobileMenu);
     }
-  }, [adventurer, account, onboarded, hasBeast]);
+  }, [adventurer, account, onboarded, hasBeast, statUpgrades]);
 
-  const createMenu = (label: string, screen: any) => {
-    const menuData = {
-      id: 1,
-      label: label,
-      screen: screen,
-    };
 
-    setMenu([menuData]);
-    setMobileMenu([menuData]);
-    setScreen(screen);
-    showTutorialDialog(true);
-  };
 
   useEffect(() => {
     if (onboarded) return;
+
+    const createMenu = (label: string, screen: any) => {
+      const menuData = {
+        id: 1,
+        label: label,
+        screen: screen,
+      };
+
+      setMenu([menuData]);
+      setMobileMenu([menuData]);
+      setScreen(screen);
+      showTutorialDialog(true);
+    };
 
     const hasAdventurers = adventurers.length > 0;
     const adventurerExistsAndHasXP = adventurer?.xp === 0;
@@ -343,7 +354,7 @@ export default function Home() {
       handleOnboarded();
       refetch("adventurersByOwnerQuery");
     }
-  }, [onboarded, adventurer, account]);
+  }, [onboarded, adventurer, account, adventurers.length, handleOnboarded, refetch, setScreen, showTutorialDialog]);
 
   // useEffect(() => {
   //   if (statUpgrades > 0 && adventurer?.health !== 0) {
@@ -454,12 +465,12 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                      <AddDevnetEthButton />
-                    )}
+                        <AddDevnetEthButton />
+                      )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                      <MintEthButton />
-                    )}
+                        <MintEthButton />
+                      )}
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}

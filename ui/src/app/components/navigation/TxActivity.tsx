@@ -150,6 +150,8 @@ export const TxActivity = () => {
     setTxAccepted,
     stopLoading,
     type,
+    adventurer?.statUpgrades,
+    setScreen,
   ]);
 
   // stop loading when an error is caught
