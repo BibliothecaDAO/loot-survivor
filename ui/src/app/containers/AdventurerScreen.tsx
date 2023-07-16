@@ -122,7 +122,9 @@ export default function AdventurerScreen() {
               />
             </div>
 
-            <TutorialDialog />
+            <div className="hidden sm:block">
+              <TutorialDialog />
+            </div>
           </div>
         )}
       </div>

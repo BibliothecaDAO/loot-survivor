@@ -101,7 +101,7 @@ export default function LeaderboardScree() {
   };
 
   return (
-    <div className="flex flex-col items-center sm:w-3/4 mx-auto">
+    <div className="flex flex-col items-center sm:w-3/4 sm:mx-auto">
       <h1 className="text-lg sm:text-2xl">Top 3 Submitted Scores</h1>
       {scores.length > 0 ? (
         <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
@@ -222,72 +222,50 @@ export default function LeaderboardScree() {
               )}
             </tbody>
           </table>
+          {adventurers?.length > 10 && (
+            <div className="flex justify-center mt-8">
+              <Button
+                variant={"outline"}
+                onClick={() => currentPage > 1 && handleClick(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                back
+              </Button>
+
+              <Button
+                variant={"outline"}
+                key={1}
+                onClick={() => handleClick(1)}
+                className={currentPage === 1 ? "animate-pulse" : ""}
+              >
+                {1}
+              </Button>
+
+              <Button
+                variant={"outline"}
+                key={totalPages}
+                onClick={() => handleClick(totalPages)}
+                className={currentPage === totalPages ? "animate-pulse" : ""}
+              >
+                {totalPages}
+              </Button>
+
+              <Button
+                variant={"outline"}
+                onClick={() =>
+                  currentPage < totalPages && handleClick(currentPage + 1)
+                }
+                disabled={currentPage === totalPages}
+              >
+                next
+              </Button>
+            </div>
+          )}
         </div>
-        <div className="flex flex-col w-full">
+        <div className="flex flex-col w-full border border-terminal-green sm:h-1/2 p-2">
           <KillAdventurer />
         </div>
       </div>
-      {adventurers?.length > 10 && (
-        <div className="flex justify-center mt-8">
-          <Button
-            variant={"outline"}
-            onClick={() => currentPage > 1 && handleClick(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            back
-          </Button>
-
-          <Button
-            variant={"outline"}
-            key={1}
-            onClick={() => handleClick(1)}
-            className={currentPage === 1 ? "animate-pulse" : ""}
-          >
-            {1}
-          </Button>
-
-          {/* {currentPage > 3 && "..."}
-
-          {(
-            Array.from({ length: Math.min(5, totalPages - 2) }, (_, i) => {
-              const startPage = Math.max(2, currentPage - 2);
-              const endPage = Math.min(totalPages - 1, currentPage + 2);
-              const pageNum = startPage + i;
-              return pageNum <= endPage ? pageNum : null;
-            }).filter((pageNum) => pageNum !== null) as number[]
-          ).map((pageNum: number) => (
-            <Button
-              variant={"outline"}
-              key={pageNum}
-              onClick={() => handleClick(pageNum)}
-              className={currentPage === pageNum ? "animate-pulse" : ""}
-            >
-              {pageNum}
-            </Button>
-          ))}
-
-          {currentPage < totalPages - 2 && "..."} */}
-
-          <Button
-            variant={"outline"}
-            key={totalPages}
-            onClick={() => handleClick(totalPages)}
-            className={currentPage === totalPages ? "animate-pulse" : ""}
-          >
-            {totalPages}
-          </Button>
-
-          <Button
-            variant={"outline"}
-            onClick={() =>
-              currentPage < totalPages && handleClick(currentPage + 1)
-            }
-            disabled={currentPage === totalPages}
-          >
-            next
-          </Button>
-        </div>
-      )}
     </div>
   );
 }
