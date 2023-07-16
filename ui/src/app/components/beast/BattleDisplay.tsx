@@ -60,6 +60,11 @@ export const BattleDisplay = ({
           damage!
         </p>
       )}
+      {AdventurerAttack && BeastHealthExists && BeastFled && (
+        <p className="w-full justify-between">
+          You could not flee the {beastName}
+        </p>
+      )}
       {BeastAttack && AdventurerHealthExists && (
         <p>
           Ouch! You were hit in the {damageLocation} for{" "}
@@ -144,7 +149,7 @@ export const NotificationBattleDisplay = ({
     isArray &&
     type === "Flee" &&
     battleData.length === 1 &&
-    battleData[1]?.attacker === "Beast" &&
+    battleData[0]?.attacker === "Beast" &&
     (adventurer?.health ?? 0) > 0;
   const KilledTryingToFlee =
     isArray &&
@@ -156,7 +161,7 @@ export const NotificationBattleDisplay = ({
     isArray &&
     battleData[0]?.attacker === "Adventurer" &&
     (battleData[0]?.beastHealth ?? 0) > 0 &&
-    (battleData[1]?.beastHealth ?? 0) > 0;
+    (battleData[0]?.beastHealth ?? 0) > 0;
   const Slayed =
     isArray &&
     battleData[0]?.attacker === "Adventurer" &&

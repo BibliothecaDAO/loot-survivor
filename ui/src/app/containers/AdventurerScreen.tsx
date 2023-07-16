@@ -15,9 +15,10 @@ import {
   getBattleByTxHash,
   getDiscoveryByTxHash,
   getAdventurerByXP,
-  getAdventurersByOwner
+  getAdventurersByOwner,
 } from "../hooks/graphql/queries";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import { TutorialDialog } from "../components/tutorial/TutorialDialog";
 
 /**
  * @container
@@ -42,7 +43,7 @@ export default function AdventurerScreen() {
     },
     true
   );
-  
+
   useCustomQuery(
     "adventurersByXPQuery",
     getAdventurerByXP,
@@ -64,7 +65,7 @@ export default function AdventurerScreen() {
     ? data.adventurersByOwnerQuery.adventurers
     : [];
 
-    console.log(adventurers)
+  console.log(adventurers);
 
   const menu = [
     {
@@ -112,12 +113,16 @@ export default function AdventurerScreen() {
           </div>
         )}
         {selected === "create adventurer" && (
-          <div className="sm:w-8/12 md:w-10/12">
-            <CreateAdventurer
-              isActive={activeMenu == 2}
-              onEscape={() => setActiveMenu(0)}
-              adventurers={adventurers}
-            />
+          <div className="flex flex-col mx-auto sm:justify-center sm:flex-row gap-2 sm:w-8/12 md:w-10/12">
+            <div className="mr-5">
+              <CreateAdventurer
+                isActive={activeMenu == 2}
+                onEscape={() => setActiveMenu(0)}
+                adventurers={adventurers}
+              />
+            </div>
+
+            <TutorialDialog />
           </div>
         )}
       </div>

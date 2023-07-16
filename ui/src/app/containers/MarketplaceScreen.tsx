@@ -183,7 +183,7 @@ export default function MarketplaceScreen() {
               </span>
             </div>
             <span className="flex flex-row gap-1">
-              {`Charisma ${adventurer?.charisma} (-`}
+              {`Charisma ${adventurer?.charisma} -`}
               <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
               <p className="text-terminal-yellow">
                 {adventurer?.charisma && adventurer?.charisma * 2}

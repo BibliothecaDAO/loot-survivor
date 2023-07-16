@@ -126,7 +126,7 @@ export default function UpgradeScreen() {
       `Upgrading ${selected}`,
       "adventurerByIdQuery",
       adventurer?.id,
-      `You are upgrading ${selected}!`
+      `You upgraded ${selected}!`
     );
     handleSubmitCalls(writeAsync).then((tx: any) => {
       if (tx) {
@@ -225,25 +225,25 @@ export default function UpgradeScreen() {
       <div className="w-full sm:w-2/3">
         <div className="flex flex-col gap-2 h-full">
           <div className="flex flex-col items-center gap-2 border-terminal-green border p-4">
-            <div className="flex flew row w-full">
-              <div className="flex flex-col items-center justify-center text-terminal-green space-x-3">
-                <div className="text-center text-lg md:text-xl lg:text-4xl  p-2 animate-pulse">
-                  Adventurer Level up!
-                </div>
-                {previousLevel} {" -> "}
-                {currentLevel}
-                <div className="text-center text-xs md:text-l lg:text-xl p-2 animate-pulse">
-                  Fountain stops after upgrade
-                </div>
+            {/* <div className="flex flew row w-full"> */}
+            <div className="flex flex-col items-center justify-center text-terminal-green space-x-3">
+              <div className="text-center text-lg md:text-xl lg:text-4xl  p-2 animate-pulse">
+                Adventurer Level up!
               </div>
-
-              <div className="w-2/3 border-terminal-green border p-2">
-                <p className="text-center text-lg sm:text-2xl lg:text-4xl">
-                  Potions
-                </p>
-                <PurchaseHealth />
+              {previousLevel} {" -> "}
+              {currentLevel}
+              <div className="text-center text-xs md:text-l lg:text-xl p-2 animate-pulse">
+                Fountain stops after upgrade
               </div>
             </div>
+
+            <div className="w-2/3 border-terminal-green border p-2">
+              <p className="text-center text-lg sm:text-2xl lg:text-4xl">
+                Potions
+              </p>
+              <PurchaseHealth />
+            </div>
+            {/* </div> */}
 
             <div className="flex flex-col gap-2 w-full">
               <div className="w-full border-terminal-green border p-4">
