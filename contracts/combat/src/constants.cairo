@@ -8,6 +8,7 @@ mod CombatEnums {
 
     #[derive(Copy, Drop, PartialEq, Serde)]
     enum Type {
+        None: (),
         Magic_or_Cloth: (),
         Blade_or_Hide: (),
         Bludgeon_or_Metal: (),
@@ -17,6 +18,7 @@ mod CombatEnums {
 
     #[derive(Copy, Drop, PartialEq, Serde)]
     enum Tier {
+        None: (),
         T1: (),
         T2: (),
         T3: (),
@@ -26,6 +28,7 @@ mod CombatEnums {
 
     #[derive(Copy, Drop, PartialEq, Serde)]
     enum Slot {
+        None: (),
         Weapon: (),
         Chest: (),
         Head: (),
