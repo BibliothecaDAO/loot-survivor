@@ -60,7 +60,7 @@ export const BattleDisplay = ({
           OH NO! You could not flee the {beastName}!
         </p>
       )}
-      {AdventurerAttack && BeastHealthExists && (
+      {AdventurerAttack && BeastHealthExists && !NoDamageDealt && (
         <p className="w-full justify-between">
           NICE! You attacked the {beastName} for {battleData?.damageDealt}{" "}
           damage!
