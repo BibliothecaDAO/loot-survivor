@@ -801,29 +801,34 @@ impl ImplAdventurer of IAdventurer {
         // get the new level of the item
         let new_level = self.get_greatness();
 
-        // initialize return bools to false
-        let mut prefix_assigned = false;
-        let mut suffix_assigned = false;
+         // There are five cases to handle when an item recieves XP
+        // 1. The item is the same level as before (no work to do)
+        // 2. The item level increased from below G15 to G19+ and thus needs both name prefixes and item suffix
+        // 3. The item level increased from below G15 to above G15 but below G19. Assign prefixes
+        // 4. The item level increased from below G19 to above G19. Assign suffix
+        // 5. The item level increased 
 
         // if the level is the same
         if (original_level == new_level) {
-            // no additional work required, return false for item changed and empty ItemSpecials
+            // we can return without assigning a prefix or suffix
             return (
-                original_level, new_level, suffix_assigned, prefix_assigned, ItemSpecials {
+                original_level, new_level, false, false, ItemSpecials {
                     special1: 0, special2: 0, special3: 0
                 }
             );
         }
 
-        // If the item leveled up, we need to check if it has reached G15 or G19 and
-        // unlocked a name suffix or prefix
-
-        // if the item was able to level up from below greatness 15 to 19 (unlikely but possible)
         if (original_level < 15 && new_level >= 19) {
-            // set return bools both to true
-            suffix_assigned = true;
-            prefix_assigned = true;
-            // we assign the item it's prefixes and suffix
+            // If the item leveled up, we need to check if it has reached G15 or G19 and
+            // unlocked a name suffix or prefix
+
+            // if the item was able to level up from below greatness 15 to 19 (unlikely but possible)
+
+            // item went from below G15 to G19+
+            // item gets name prefixes and item suffix
+            let suffix_assigned = true;
+            let prefix_assigned = true;
+
             let special_names = ItemSpecials {
                 special1: ImplLoot::get_special1(self.id, entropy),
                 special2: ImplLoot::get_special2(self.id, entropy),
@@ -831,13 +836,13 @@ impl ImplAdventurer of IAdventurer {
             };
 
             ImplItemSpecials::set_loot_special_names(ref name_storage, self, special_names);
-            return (original_level, new_level, suffix_assigned, prefix_assigned, special_names);
+            (original_level, new_level, suffix_assigned, prefix_assigned, special_names)
         } // a more likely scenario is the item was previously below greatness 15 and is now at 15 or above
         // in this case we only need to assign the name suffix (Of Power)
         else if (original_level < 15 && new_level >= 15) {
-            // return bool suffix assigned is now true
-            suffix_assigned = true;
-            // return bool of prefix assigned will remain
+            // item reached G15, grant it an item suffix
+            let suffix_assigned = true;
+            let prefix_assigned = false;
 
             let special_names = ItemSpecials {
                 special1: ImplLoot::get_special1(self.id, entropy), // set item suffix
@@ -846,13 +851,13 @@ impl ImplAdventurer of IAdventurer {
             };
 
             ImplItemSpecials::set_loot_special_names(ref name_storage, self, special_names);
-            return (original_level, new_level, suffix_assigned, prefix_assigned, special_names);
+            (original_level, new_level, suffix_assigned, prefix_assigned, special_names)
         } // lastly, we check for the transition from below G19 to G19 or higher which results
         // in the item receiving a name prefix (Demon Grasp)
         else if (original_level < 19 && new_level >= 19) {
-            // return bool prefix assigned is now true
-            prefix_assigned = true;
-            // return bool suffix will keep default of false
+            // item got a prefix but not already has a suffix
+            let prefix_assigned = true;
+            let suffix_assigned = false;
 
             // When handling the greatness upgrade to G19 we need to ensure we preserve
             // the item name suffix applied at G15.
@@ -865,15 +870,17 @@ impl ImplAdventurer of IAdventurer {
 
             ImplItemSpecials::set_loot_special_names(ref name_storage, self, special_names);
 
-            return (original_level, new_level, suffix_assigned, prefix_assigned, special_names);
+            (original_level, new_level, suffix_assigned, prefix_assigned, special_names)
+        } else {
+            // item leveled up but did not receive prefix or suffix
+            let prefix_assigned = false;
+            let suffix_assigned = false;
+            (
+                original_level, new_level, false, false, ItemSpecials {
+                    special1: 0, special2: 0, special3: 0
+                }
+            )
         }
-
-        // level up should be true here but suffix and prefix assigned false
-        return (
-            original_level, new_level, suffix_assigned, prefix_assigned, ItemSpecials {
-                special1: 0, special2: 0, special3: 0
-            }
-        );
     }
 
     // @notice get_beast_seed provides an entropy source that is fixed during battle

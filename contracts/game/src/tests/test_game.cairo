@@ -402,7 +402,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(62000000)]
+    #[available_gas(65000000)]
     fn test_buy_potions() {
         let mut game = new_adventurer_lvl2_with_idle_penalty();
 
