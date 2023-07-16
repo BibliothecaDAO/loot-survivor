@@ -54,7 +54,6 @@ export default function UpgradeScreen() {
   const setScreen = useUIStore((state) => state.setScreen);
   // const purchasedItem = useUIStore((state) => state.purchasedItem);
   const [selected, setSelected] = useState("");
-  const statUpgrades = adventurer?.statUpgrades ?? 0;
   const [upgradeScreen, setUpgradeScreen] = useState(1);
 
   useCustomQuery(
@@ -191,19 +190,13 @@ export default function UpgradeScreen() {
     },
   ];
 
-  useEffect(() => {
-    if (statUpgrades == 0) {
-      setScreen("play");
-    }
-  }, [statUpgrades, setScreen]);
-
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
 
   const currentLevel = adventurer?.level ?? 0;
 
-  const previousLevel = currentLevel - statUpgrades;
+  const previousLevel = currentLevel - (adventurer?.statUpgrades ?? 0);
 
   function renderContent() {
     const attribute = attributes.find((attr) => attr.name === selected);

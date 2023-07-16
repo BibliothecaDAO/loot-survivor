@@ -78,6 +78,7 @@ export const TxActivity = () => {
 
   console.log(isLoadingQueryUpdated);
   console.log(queryData["battlesByTxHashQuery"]);
+  console.log(hash);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,6 +90,7 @@ export const TxActivity = () => {
         await refetch("battlesByTxHashQuery");
         await refetch("adventurerByIdQuery");
         await refetch("battlesByBeastQuery");
+        console.log("in battle!");
         stopLoading({
           data: queryData.battlesByTxHashQuery.battles,
           beast: notificationData.beast,
@@ -96,7 +98,11 @@ export const TxActivity = () => {
         const killedByBeast = queryData.battlesByTxHashQuery.battles.some(
           (battle) => battle.attacker == "Beast" && adventurer?.health == 0
         );
-        if (killedByBeast) {
+        const killedByPenalty = queryData.battlesByTxHashQuery.battles.some(
+          (battle) => !battle.attacker && adventurer?.health == 0
+        );
+        console.log(killedByBeast || killedByPenalty);
+        if (killedByBeast || killedByPenalty) {
           setDeathNotification(
             type,
             notificationData,
@@ -120,6 +126,7 @@ export const TxActivity = () => {
             "Obstacle" ||
             !queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType) &&
           adventurer?.health == 0;
+        console.log(killedByObstacleOrPenalty);
         if (killedByObstacleOrPenalty) {
           setDeathMessage(
             <DiscoveryDisplay discoveryData={notificationData} />
@@ -130,9 +137,6 @@ export const TxActivity = () => {
 
       const handleUpgrade = async () => {
         await refetch("adventurerByIdQuery");
-        setAdventurer(
-          queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
-        );
         stopLoading(notificationData);
       };
 
@@ -150,6 +154,7 @@ export const TxActivity = () => {
         const killedFromEquipping =
           (pendingMessage as string[]).includes("Equipping") &&
           adventurer?.health == 0;
+        console.log(killedFromEquipping);
         if (killedFromEquipping) {
           setDeathNotification(type, notificationData, [], hasBeast);
         }
@@ -162,6 +167,7 @@ export const TxActivity = () => {
       const handleDataUpdate = () => {
         setTxAccepted(false);
         resetDataUpdated(loadingQuery);
+        console.log("here");
       };
 
       try {
@@ -189,6 +195,7 @@ export const TxActivity = () => {
         console.error("An error occurred during fetching:", error);
         // handle error (e.g., update state to show error message)
       }
+      console.log("here");
 
       handleDataUpdate();
     };

@@ -74,7 +74,6 @@ export default function Home() {
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
-  const statUpgrades = adventurer?.statUpgrades ?? 0;
   const [showDeathCount, setShowDeathCount] = useState(true);
   const hasBeast = (adventurer?.beastHealth ?? 0) > 0;
 
@@ -128,12 +127,14 @@ export default function Home() {
     if (updatedAdventurer?.id ?? 0 > 0) {
       setAdventurer(updatedAdventurer);
     }
-    if ((adventurer?.statUpgrades ?? 0) > 0) {
+    if (adventurer?.statUpgrades) {
       setScreen("upgrade");
     }
+    if (screen == "upgrade" && !adventurer?.statUpgrades) {
+      setScreen("play");
+    }
+    console.log(adventurer?.statUpgrades);
   }, [updatedAdventurer, adventurer?.statUpgrades]);
-
-  console.log(adventurer);
 
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
@@ -166,7 +167,7 @@ export default function Home() {
                 id: isMobile ? 3 : 2,
                 label: "Play",
                 screen: "play",
-                disabled: statUpgrades > 0 || adventurer.health == 0,
+                disabled: adventurer?.statUpgrades || adventurer.health == 0,
               },
               {
                 id: isMobile ? 4 : 3,
@@ -182,9 +183,13 @@ export default function Home() {
               // },
               {
                 id: isMobile ? 6 : 5,
-                label: statUpgrades > 0 ? <span>Upgrade!</span> : "Upgrade",
+                label: adventurer?.statUpgrades ? (
+                  <span>Upgrade!</span>
+                ) : (
+                  "Upgrade"
+                ),
                 screen: "upgrade",
-                disabled: !(statUpgrades > 0),
+                disabled: !adventurer?.statUpgrades,
               },
               // {
               //   id: isMobile ? 7 : 6,
@@ -233,7 +238,7 @@ export default function Home() {
       setMenu(newMenu);
       setMobileMenu(newMobileMenu);
     }
-  }, [adventurer, account, onboarded, hasBeast, statUpgrades]);
+  }, [adventurer, account, onboarded, hasBeast, adventurer?.statUpgrades]);
 
   useEffect(() => {
     if (onboarded) return;
@@ -253,8 +258,6 @@ export default function Home() {
 
     const hasAdventurers = adventurers.length > 0;
     const adventurerExistsAndHasXP = adventurer?.xp === 0;
-    const beastHealth = adventurer?.beastHealth ?? 0;
-    const statUpgrades = adventurer?.statUpgrades ?? 0;
 
     if (!hasAdventurers) {
       createMenu("Start", "start");
@@ -274,12 +277,6 @@ export default function Home() {
     setScreen,
     showTutorialDialog,
   ]);
-
-  // useEffect(() => {
-  //   if (statUpgrades > 0 && adventurer?.health !== 0) {
-  //     setScreen("upgrade");
-  //   }
-  // }, [statUpgrades, adventurer?.health, setScreen]);
 
   // fetch adventurers on app start and account switch
   useEffect(() => {
