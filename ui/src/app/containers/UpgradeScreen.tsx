@@ -55,7 +55,10 @@ export default function UpgradeScreen() {
   // const purchasedItem = useUIStore((state) => state.purchasedItem);
   const [selected, setSelected] = useState("");
   const statUpgrades = adventurer?.statUpgrades ?? 0;
-  const [upgradeScreen, setUpgradeScreen] = useState(1);
+  const maxHealth = 100 + (adventurer?.vitality ?? 0) * 20;
+  const [upgradeScreen, setUpgradeScreen] = useState(
+    adventurer?.health == maxHealth ? 2 : 1
+  );
 
   useCustomQuery(
     "adventurerByIdQuery",
