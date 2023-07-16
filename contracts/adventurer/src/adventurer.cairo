@@ -256,6 +256,7 @@ impl ImplAdventurer of IAdventurer {
     // @return ItemPrimitive: Item at slot
     fn get_item_at_slot(self: Adventurer, slot: Slot) -> ItemPrimitive {
         match slot {
+            Slot::None(()) => ItemPrimitive { id: 0, xp: 0, metadata: 0,  },
             Slot::Weapon(()) => self.weapon,
             Slot::Chest(()) => self.chest,
             Slot::Head(()) => self.head,
@@ -274,6 +275,7 @@ impl ImplAdventurer of IAdventurer {
     fn is_slot_free(self: Adventurer, item: ItemPrimitive) -> bool {
         let slot = ImplLoot::get_slot(item.id);
         match slot {
+            Slot::None(()) => false,
             Slot::Weapon(()) => self.weapon.id == 0,
             Slot::Chest(()) => self.chest.id == 0,
             Slot::Head(()) => self.head.id == 0,
@@ -333,51 +335,25 @@ impl ImplAdventurer of IAdventurer {
     // Possible discoveries include gold, XP, and health.
     // @param self: Adventurer to discover treasure for
     // @param entropy: Entropy for generating treasure
-    fn discover_treasure(ref self: Adventurer, entropy: u128) -> (TreasureDiscovery, u16, u8, u8) {
+    // @return TreasureDiscovery: The type of treasure discovered.
+    // @return u16: The amount of treasure discovered.
+    fn discover_treasure(self: Adventurer, entropy: u128) -> (TreasureDiscovery, u16) {
         // generate random item discovery
         let item_type = ExploreUtils::get_random_treasury_discovery(self, entropy);
 
         match item_type {
             TreasureDiscovery::Gold(()) => {
-                // get gold discovery
-                let gold_amount = ExploreUtils::get_gold_discovery(self, entropy);
-                // add it to adventurers gold balance
-                self.add_gold(gold_amount);
-                // no level up possible from gold discovery
-                // so return current level for both previous and new level
-                return (
-                    TreasureDiscovery::Gold(()), gold_amount, self.get_level(), self.get_level()
-                );
+                // return discovery type and amount
+                (TreasureDiscovery::Gold(()), ExploreUtils::get_gold_discovery(self, entropy))
             },
             TreasureDiscovery::XP(()) => {
-                // get xp discovery
-                let xp_amount = ExploreUtils::get_xp_discovery(self, entropy);
-                // add it to adventurer's xp 
-                let (previous_level, new_level) = self.increase_adventurer_xp(xp_amount);
-                return (TreasureDiscovery::XP(()), xp_amount, previous_level, new_level);
+                // return discovery type and amount
+                (TreasureDiscovery::XP(()), ExploreUtils::get_xp_discovery(self, entropy))
             },
             TreasureDiscovery::Health(()) => {
-                // if adventurer's health is already full
-                if (self.has_full_health()) {
-                    // they get 1 gold as a consolation prize
-                    // the primary reason for this is to ensure the adventurers
-                    // state is modified to change the the next explore outcome
-                    self.add_gold(1);
-                    return (TreasureDiscovery::Gold(()), 1, self.get_level(), self.get_level());
-                } else {
-                    // get health discovery
-                    let health_amount = ExploreUtils::get_health_discovery(self, entropy);
-                    self.add_health(health_amount);
-                    // no level up possible for health discovery
-                    // so return the current level for both previous and new level
-                    return (
-                        TreasureDiscovery::Health(()),
-                        health_amount,
-                        self.get_level(),
-                        self.get_level()
-                    );
-                }
-            },
+                // return discovery type and amount
+                (TreasureDiscovery::Health(()), ExploreUtils::get_health_discovery(self, entropy))
+            }
         }
     }
 
@@ -706,6 +682,7 @@ impl ImplAdventurer of IAdventurer {
     fn add_item(ref self: Adventurer, item: ItemPrimitive) {
         let slot = ImplLoot::get_slot(item.id);
         match slot {
+            Slot::None(()) => (),
             Slot::Weapon(()) => self.equip_weapon(item),
             Slot::Chest(()) => self.equip_chest_armor(item),
             Slot::Head(()) => self.equip_head_armor(item),
@@ -2257,24 +2234,57 @@ fn test_explore_xp_discovery() { // TODO: test xp discovery
 }
 
 #[test]
-#[available_gas(200000)]
+#[available_gas(220000)]
 fn test_increment_stat_valid() {
     let mut adventurer = ImplAdventurer::new(1, 1);
 
     adventurer.increment_stat(StatisticIndex::STRENGTH);
     assert(adventurer.stats.strength == 1, 'strength');
+    assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
+    assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+    assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+    assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
 
     adventurer.increment_stat(StatisticIndex::DEXTERITY);
     assert(adventurer.stats.dexterity == 1, 'dexterity');
+    assert(adventurer.stats.strength == 1, 'strength should be 1');
+    assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
+    assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+    assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
 
     adventurer.increment_stat(StatisticIndex::INTELLIGENCE);
     assert(adventurer.stats.intelligence == 1, 'intelligence');
+    assert(adventurer.stats.strength == 1, 'strength should be 1');
+    assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+    assert(adventurer.stats.vitality == 0, 'vitality should be 0');
+    assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
 
     adventurer.increment_stat(StatisticIndex::VITALITY);
     assert(adventurer.stats.vitality == 1, 'vitality');
+    assert(adventurer.stats.strength == 1, 'strength should be 1');
+    assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+    assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
+    assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
+    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
 
     adventurer.increment_stat(StatisticIndex::WISDOM);
     assert(adventurer.stats.wisdom == 1, 'wisdom');
+    assert(adventurer.stats.strength == 1, 'strength should be 1');
+    assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+    assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
+    assert(adventurer.stats.vitality == 1, 'vitality should be 1');
+    assert(adventurer.stats.charisma == 0, 'charisma should be 0');
+
+    adventurer.increment_stat(StatisticIndex::CHARISMA);
+    assert(adventurer.stats.charisma == 1, 'charisma');
+    assert(adventurer.stats.strength == 1, 'strength should be 1');
+    assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
+    assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
+    assert(adventurer.stats.vitality == 1, 'vitality should be 1');
+    assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
 }
 
 #[test]
@@ -2633,16 +2643,19 @@ fn test_discover_treasure() {
     adventurer.xp = 25;
 
     // disover gold
-    adventurer.discover_treasure(5);
-    assert(adventurer.gold > STARTING_GOLD, 'should have gained gold');
+    let (discovery_type, amount) = adventurer.discover_treasure(5);
+    assert(discovery_type == TreasureDiscovery::Gold(()), 'should have found gold');
+    assert(amount > 0, 'gold should be non-zero');
 
     // discover health
-    adventurer.discover_treasure(6);
-    assert(adventurer.health > STARTING_HEALTH, 'should have gained health');
+    let (discovery_type, amount) = adventurer.discover_treasure(6);
+    assert(discovery_type == TreasureDiscovery::Health(()), 'should have found health');
+    assert(amount > 0, 'health should be non-zero');
 
     // discover xp
-    adventurer.discover_treasure(7);
-    assert(adventurer.xp > 25, 'should have gained xp');
+    let (discovery_type, amount) = adventurer.discover_treasure(7);
+    assert(discovery_type == TreasureDiscovery::XP(()), 'should have found xp');
+    assert(amount > 0, 'xp should be non-zero');
 }
 
 #[test]

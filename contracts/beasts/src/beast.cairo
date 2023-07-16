@@ -78,6 +78,7 @@ impl ImplBeast of IBeast {
         let mut beast_id: u8 = Gnome;
 
         match starter_weapon_type {
+            Type::None(()) => beast_id = Troll,
             // if adventurer starts with a magical weapon, they face a troll as their first beast
             Type::Magic_or_Cloth(()) => beast_id = Troll,
             // if the adventurer starts with a blade or hide weapon, they face a rat as their first beast

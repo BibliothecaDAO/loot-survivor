@@ -38,7 +38,7 @@ impl AdventurerUtils of IAdventurer {
         }
     }
 
-    fn get_random_armor_slot(entropy: u128) -> Slot {
+    fn get_random_attack_location(entropy: u128) -> Slot {
         // project entropy into 0-4 range
         let rnd_slot = entropy % 5;
 
@@ -94,30 +94,30 @@ fn test_get_random_explore() {
 
 #[test]
 #[available_gas(60000)]
-fn test_get_random_armor_slot() {
+fn test_get_random_attack_location() {
     // base cases
     let mut entropy = 0;
-    let mut armor = AdventurerUtils::get_random_armor_slot(entropy);
+    let mut armor = AdventurerUtils::get_random_attack_location(entropy);
     assert(armor == Slot::Chest(()), 'should be chest');
 
     entropy = 1;
-    armor = AdventurerUtils::get_random_armor_slot(entropy);
+    armor = AdventurerUtils::get_random_attack_location(entropy);
     assert(armor == Slot::Head(()), 'should be head');
 
     entropy = 2;
-    armor = AdventurerUtils::get_random_armor_slot(entropy);
+    armor = AdventurerUtils::get_random_attack_location(entropy);
     assert(armor == Slot::Waist(()), 'should be waist');
 
     entropy = 3;
-    armor = AdventurerUtils::get_random_armor_slot(entropy);
+    armor = AdventurerUtils::get_random_attack_location(entropy);
     assert(armor == Slot::Foot(()), 'should be foot');
 
     entropy = 4;
-    armor = AdventurerUtils::get_random_armor_slot(entropy);
+    armor = AdventurerUtils::get_random_attack_location(entropy);
     assert(armor == Slot::Hand(()), 'should be hand');
 
     // rollover and verify armor goes back to chest
     entropy = 5;
-    armor = AdventurerUtils::get_random_armor_slot(entropy);
+    armor = AdventurerUtils::get_random_attack_location(entropy);
     assert(armor == Slot::Chest(()), 'should be chest');
 }

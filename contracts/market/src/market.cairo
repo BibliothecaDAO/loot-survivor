@@ -24,6 +24,7 @@ struct LootWithPrice {
 impl ImplMarket of IMarket {
     fn get_price(tier: Tier) -> u16 {
         match tier {
+            Tier::None(()) => 0,
             Tier::T1(()) => 5 * TIER_PRICE,
             Tier::T2(()) => 4 * TIER_PRICE,
             Tier::T3(()) => 3 * TIER_PRICE,

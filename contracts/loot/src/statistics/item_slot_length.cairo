@@ -6,6 +6,7 @@ use combat::constants::CombatEnums::Slot;
 
 fn get(slot: Slot) -> u8 {
     match slot {
+        Slot::None(()) => 0,
         Slot::Weapon(()) => ItemSlotLength::SlotItemsLengthWeapon,
         Slot::Chest(()) => ItemSlotLength::SlotItemsLengthChest,
         Slot::Head(()) => ItemSlotLength::SlotItemsLengthHead,
