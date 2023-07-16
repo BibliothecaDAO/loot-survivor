@@ -34,8 +34,6 @@ import { Menu, NullAdventurer, Call, Battle } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
-import { processNotification } from "./components/navigation/NotificationDisplay";
-import { DiscoveryDisplay } from "./components/actions/DiscoveryDisplay";
 import { useMediaQuery } from "react-responsive";
 import {
   CogIcon,
@@ -50,7 +48,6 @@ import MobileHeader from "./components/navigation/MobileHeader";
 import Player from "./components/adventurer/Player";
 import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
-import { TutorialDialog } from "./components/tutorial/TutorialDialog";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -58,11 +55,8 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(false);
 
   const type = useLoadingStore((state) => state.type);
-  const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
-  const deathMessage = useLoadingStore((state) => state.deathMessage);
-  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
@@ -73,8 +67,6 @@ export default function Home() {
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const deathDialog = useUIStore((state) => state.deathDialog);
-  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const tutorialDialog = useUIStore((state) => state.tutorialDialog);
   const showTutorialDialog = useUIStore((state) => state.showTutorialDialog);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
@@ -84,7 +76,7 @@ export default function Home() {
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const statUpgrades = adventurer?.statUpgrades ?? 0;
   const [showDeathCount, setShowDeathCount] = useState(true);
-  const [hasBeast, setHasBeast] = useState(false);
+  const hasBeast = (adventurer?.beastHealth ?? 0) > 0;
 
   const playState = useMemo(
     () => ({
@@ -139,95 +131,15 @@ export default function Home() {
     if ((adventurer?.statUpgrades ?? 0) > 0) {
       setScreen("upgrade");
     }
-  }, [updatedAdventurer, setAdventurer, setScreen, adventurer?.statUpgrades]);
+  }, [updatedAdventurer, adventurer?.statUpgrades]);
 
-  useEffect(() => {
-    setHasBeast(!!(adventurer?.beastHealth ?? 0 > 0));
-  }, [adventurer]);
+  console.log(adventurer);
 
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
       setScreen(menu[0].screen);
     }
   }, [adventurer, menu, setScreen]);
-
-  useEffect(() => {
-    const { battlesByTxHashQuery, discoveryByTxHashQuery, lastBattleQuery } =
-      data;
-    const battles = lastBattleQuery ? lastBattleQuery.battles : [];
-
-    const setNotification = (
-      type: any,
-      notificationData: any,
-      hasBeast: any
-    ) => {
-      const notification = processNotification(
-        type,
-        notificationData,
-        battles,
-        hasBeast
-      );
-      if (!deathMessage) {
-        setDeathMessage(notification);
-      }
-      showDeathDialog(true);
-    };
-
-    const checkBattles = () => {
-      if (!battlesByTxHashQuery || !isDataUpdated["battlesByTxHashQuery"]) {
-        return;
-      }
-      const hasBeastAttacker = battlesByTxHashQuery.battles.some(
-        (battle) => battle.attacker == "Beast" && adventurer?.health == 0
-      );
-      if (hasBeastAttacker) {
-        setNotification(type, notificationData, hasBeast);
-      }
-    };
-
-    const checkDiscovery = () => {
-      if (!discoveryByTxHashQuery || !isDataUpdated["discoveryByTxHashQuery"]) {
-        return;
-      }
-      const hasObstacle =
-        discoveryByTxHashQuery.discoveries[0]?.discoveryType == "Obstacle" &&
-        adventurer?.health == 0;
-      if (hasObstacle && !deathMessage) {
-        setDeathMessage(<DiscoveryDisplay discoveryData={notificationData} />);
-        showDeathDialog(true);
-      }
-    };
-
-    const checkEquipping = () => {
-      if (!pendingMessage || !isDataUpdated["adventurerByIdQuery"]) {
-        return;
-      }
-      const isEquipping =
-        (pendingMessage as string[]).includes("Equipping") &&
-        adventurer?.health == 0;
-      if (isEquipping) {
-        setNotification(type, notificationData, hasBeast);
-      }
-    };
-
-    checkBattles();
-    checkDiscovery();
-    checkEquipping();
-  }, [
-    showNotification,
-    data.battlesByTxHashQuery,
-    data.discoveryByTxHashQuery,
-    deathMessage,
-    pendingMessage,
-    isDataUpdated,
-    adventurer,
-    hasBeast,
-    data,
-    notificationData,
-    setDeathMessage,
-    showDeathDialog,
-    type
-  ]);
 
   useEffect(() => {
     if (!account?.address) {
@@ -250,65 +162,64 @@ export default function Home() {
         },
         ...(adventurer
           ? [
-            {
-              id: isMobile ? 3 : 2,
-              label: "Play",
-              screen: "play",
-              disabled:
-                statUpgrades > 0 || adventurer.health == 0,
-            },
-            {
-              id: isMobile ? 4 : 3,
-              label: "Inventory",
-              screen: "inventory",
-              disabled: adventurer.health == 0,
-            },
-            // {
-            //   id: isMobile ? 5 : 4,
-            //   label: "Beast",
-            //   screen: "beast",
-            //   disabled: statUpgrades > 0 || adventurer.health == 0,
-            // },
-            {
-              id: isMobile ? 6 : 5,
-              label: statUpgrades > 0 ? <span>Upgrade!</span> : "Upgrade",
-              screen: "upgrade",
-              disabled: !(statUpgrades > 0),
-            },
-            // {
-            //   id: isMobile ? 7 : 6,
-            //   label: "Market",
-            //   screen: "market",
-            //   disabled:
-            //     !(statUpgrades > 0) ||
-            //     hasBeast ||
-            //     adventurer.health == 0 ||
-            //     purchaseExists(),
-            // },
-          ]
+              {
+                id: isMobile ? 3 : 2,
+                label: "Play",
+                screen: "play",
+                disabled: statUpgrades > 0 || adventurer.health == 0,
+              },
+              {
+                id: isMobile ? 4 : 3,
+                label: "Inventory",
+                screen: "inventory",
+                disabled: adventurer.health == 0,
+              },
+              // {
+              //   id: isMobile ? 5 : 4,
+              //   label: "Beast",
+              //   screen: "beast",
+              //   disabled: statUpgrades > 0 || adventurer.health == 0,
+              // },
+              {
+                id: isMobile ? 6 : 5,
+                label: statUpgrades > 0 ? <span>Upgrade!</span> : "Upgrade",
+                screen: "upgrade",
+                disabled: !(statUpgrades > 0),
+              },
+              // {
+              //   id: isMobile ? 7 : 6,
+              //   label: "Market",
+              //   screen: "market",
+              //   disabled:
+              //     !(statUpgrades > 0) ||
+              //     hasBeast ||
+              //     adventurer.health == 0 ||
+              //     purchaseExists(),
+              // },
+            ]
           : []),
         ...(isMobile
           ? []
           : [
-            {
-              id: 7,
-              label: "Leaderboard",
-              screen: "leaderboard",
-              disabled: false,
-            },
-            {
-              id: 8,
-              label: "Encounters",
-              screen: "encounters",
-              disabled: false,
-            },
-            {
-              id: 9,
-              label: "Guide",
-              screen: "guide",
-              disabled: false,
-            },
-          ]),
+              {
+                id: 7,
+                label: "Leaderboard",
+                screen: "leaderboard",
+                disabled: false,
+              },
+              {
+                id: 8,
+                label: "Encounters",
+                screen: "encounters",
+                disabled: false,
+              },
+              {
+                id: 9,
+                label: "Guide",
+                screen: "guide",
+                disabled: false,
+              },
+            ]),
       ];
 
       const newMenu: any = adventurer
@@ -348,12 +259,21 @@ export default function Home() {
     if (!hasAdventurers) {
       createMenu("Start", "start");
     } else if (adventurerExistsAndHasXP) {
-      createMenu("Play", "play")
+      createMenu("Play", "play");
     } else {
       handleOnboarded();
       refetch("adventurersByOwnerQuery");
     }
-  }, [onboarded, adventurer, account, adventurers.length, handleOnboarded, refetch, setScreen, showTutorialDialog]);
+  }, [
+    onboarded,
+    adventurer,
+    account,
+    adventurers.length,
+    handleOnboarded,
+    refetch,
+    setScreen,
+    showTutorialDialog,
+  ]);
 
   // useEffect(() => {
   //   if (statUpgrades > 0 && adventurer?.health !== 0) {
@@ -464,12 +384,12 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <AddDevnetEthButton />
-                      )}
+                      <AddDevnetEthButton />
+                    )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <MintEthButton />
-                      )}
+                      <MintEthButton />
+                    )}
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}
