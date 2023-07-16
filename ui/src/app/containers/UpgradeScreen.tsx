@@ -284,7 +284,7 @@ export default function UpgradeScreen() {
                 </span>
                 {currentLevel}
               </div>
-              <div className="flex flex-row gap-10 text-sm">
+              <div className="flex flex-row gap-10 text-sm sm:text-base">
                 <div className="flex flex-row gap-3">
                   <span className="flex flex-row gap-1  items-center">
                     <p className="uppercase">Cost:</p>
