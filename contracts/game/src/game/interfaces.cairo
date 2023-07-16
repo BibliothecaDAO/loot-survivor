@@ -34,7 +34,6 @@ trait IGame<TContractState> {
     fn get_xp(self: @TContractState, adventurer_id: u256) -> u16;
     fn get_level(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_gold(self: @TContractState, adventurer_id: u256) -> u16;
-    fn get_beast_health(self: @TContractState, adventurer_id: u256) -> u16;
     fn get_stat_points_available(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_last_action(self: @TContractState, adventurer_id: u256) -> u16;
 
@@ -49,32 +48,34 @@ trait IGame<TContractState> {
     fn get_ring_greatness(self: @TContractState, adventurer_id: u256) -> u8;
 
     // item details
-    fn get_equipped_weapon_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
-    fn get_equipped_chest_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
-    fn get_equipped_head_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
-    fn get_equipped_waist_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
-    fn get_equipped_foot_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
-    fn get_equipped_hand_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
-    fn get_equipped_necklace_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
-    fn get_equipped_ring_names(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_weapon_specials(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_chest_armor_specials(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_head_armor_specials(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_waist_armor_specials(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_foot_armor_specials(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_hand_armor_specials(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_necklace_specials(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
+    fn get_ring_specials(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
 
     // adventurer stats
+    fn get_stats(self: @TContractState, adventurer_id: u256) -> Stats;
+    fn get_strength(self: @TContractState, adventurer_id: u256) -> u8;
+    fn get_dexterity(self: @TContractState, adventurer_id: u256) -> u8;
+    fn get_vitality(self: @TContractState, adventurer_id: u256) -> u8;
+    fn get_intelligence(self: @TContractState, adventurer_id: u256) -> u8;
+    fn get_wisdom(self: @TContractState, adventurer_id: u256) -> u8;
+    fn get_charisma(self: @TContractState, adventurer_id: u256) -> u8;
+
     fn get_base_stats(self: @TContractState, adventurer_id: u256) -> Stats;
-    fn get_boosted_stats(self: @TContractState, adventurer_id: u256) -> Stats;
     fn get_base_strength(self: @TContractState, adventurer_id: u256) -> u8;
-    fn get_boosted_strength(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_base_dexterity(self: @TContractState, adventurer_id: u256) -> u8;
-    fn get_boosted_dexterity(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_base_vitality(self: @TContractState, adventurer_id: u256) -> u8;
-    fn get_boosted_vitality(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_base_intelligence(self: @TContractState, adventurer_id: u256) -> u8;
-    fn get_boosted_intelligence(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_base_wisdom(self: @TContractState, adventurer_id: u256) -> u8;
-    fn get_boosted_wisdom(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_base_charisma(self: @TContractState, adventurer_id: u256) -> u8;
-    fn get_boosted_charisma(self: @TContractState, adventurer_id: u256) -> u8;
 
     // beast details
+    fn get_beast_health(self: @TContractState, adventurer_id: u256) -> u16;
     fn get_beast_type(self: @TContractState, beast_id: u8) -> u8;
     fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;
 

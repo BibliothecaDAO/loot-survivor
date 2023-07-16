@@ -528,35 +528,35 @@ mod Game {
         fn get_bag(self: @ContractState, adventurer_id: u256) -> Bag {
             _bag_unpacked(self, adventurer_id)
         }
-        fn get_equipped_weapon_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_weapon_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.weapon)
         }
-        fn get_equipped_chest_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_chest_armor_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.chest)
         }
-        fn get_equipped_head_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_head_armor_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.head)
         }
-        fn get_equipped_waist_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_waist_armor_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.waist)
         }
-        fn get_equipped_foot_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_foot_armor_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.foot)
         }
-        fn get_equipped_hand_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_hand_armor_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.hand)
         }
-        fn get_equipped_necklace_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_necklace_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.neck)
         }
-        fn get_equipped_ring_names(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_ring_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.ring)
         }
@@ -623,7 +623,7 @@ mod Game {
         fn get_base_stats(self: @ContractState, adventurer_id: u256) -> Stats {
             _unpack_adventurer(self, adventurer_id).stats
         }
-        fn get_boosted_stats(self: @ContractState, adventurer_id: u256) -> Stats {
+        fn get_stats(self: @ContractState, adventurer_id: u256) -> Stats {
             let mut name_storage1 = _loot_special_names_storage_unpacked(
                 self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
             );
@@ -636,7 +636,7 @@ mod Game {
         fn get_base_strength(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.strength
         }
-        fn get_boosted_strength(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_strength(self: @ContractState, adventurer_id: u256) -> u8 {
             let mut name_storage1 = _loot_special_names_storage_unpacked(
                 self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
             );
@@ -650,7 +650,7 @@ mod Game {
         fn get_base_dexterity(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.dexterity
         }
-        fn get_boosted_dexterity(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_dexterity(self: @ContractState, adventurer_id: u256) -> u8 {
             let mut name_storage1 = _loot_special_names_storage_unpacked(
                 self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
             );
@@ -664,7 +664,7 @@ mod Game {
         fn get_base_vitality(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.vitality
         }
-        fn get_boosted_vitality(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_vitality(self: @ContractState, adventurer_id: u256) -> u8 {
             let mut name_storage1 = _loot_special_names_storage_unpacked(
                 self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
             );
@@ -678,7 +678,7 @@ mod Game {
         fn get_base_intelligence(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.intelligence
         }
-        fn get_boosted_intelligence(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_intelligence(self: @ContractState, adventurer_id: u256) -> u8 {
             let mut name_storage1 = _loot_special_names_storage_unpacked(
                 self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
             );
@@ -692,7 +692,7 @@ mod Game {
         fn get_base_wisdom(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.wisdom
         }
-        fn get_boosted_wisdom(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_wisdom(self: @ContractState, adventurer_id: u256) -> u8 {
             let mut name_storage1 = _loot_special_names_storage_unpacked(
                 self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
             );
@@ -706,7 +706,7 @@ mod Game {
         fn get_base_charisma(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.charisma
         }
-        fn get_boosted_charisma(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_charisma(self: @ContractState, adventurer_id: u256) -> u8 {
             let mut name_storage1 = _loot_special_names_storage_unpacked(
                 self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
             );

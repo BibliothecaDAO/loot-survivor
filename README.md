@@ -262,6 +262,6 @@ starknet call --function get_base_charisma --address $CONTRACT_ADDRESS --input $
 
 ##### Get charisma stat including item boosts
 ```bash
-starknet call --function get_boosted_charisma --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+starknet call --function get_charisma --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
 ```
 
