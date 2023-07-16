@@ -30,8 +30,7 @@ const processAnimation = (
     } else if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: Battle) =>
-          data.attacker == "Beast" && (data.beastHealth ?? 0) > 0
+        (data: Battle) => data.attacker == "Beast" && data.fled
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
@@ -78,7 +77,7 @@ const processAnimation = (
       ) {
         return gameData.ADVENTURER_ANIMATIONS["Ambush"];
       } else if (
-        notificationData.data?.some(
+        notificationData?.data?.some(
           (data: Discovery) => data.ambushed && adventurer.health == 0
         )
       ) {
@@ -101,7 +100,7 @@ const processAnimation = (
       }
     } else if (notificationData?.discoveryType == "Item") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
-    } else if (!notificationData.discoveryType) {
+    } else if (!notificationData?.discoveryType) {
       if (adventurer.health === 0) {
         return gameData.ADVENTURER_ANIMATIONS["IdleDamagePenaltyDead"];
       } else {

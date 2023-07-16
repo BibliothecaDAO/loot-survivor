@@ -179,10 +179,9 @@ const MarketplaceRow = ({
             <div className="flex flex-row items-center justify-center gap-2">
               <p>Equip?</p>
               <div className="flex flex-col">
-
                 <Button
-                  size={'xs'}
-                  variant={'ghost'}
+                  size={"xs"}
+                  variant={"ghost"}
                   onClick={() => {
                     handlePurchase(item.item ?? "", tier, true);
                     setShowEquipQ(false);
@@ -192,8 +191,8 @@ const MarketplaceRow = ({
                   Yes
                 </Button>
                 <Button
-                  size={'xs'}
-                  variant={'ghost'}
+                  size={"xs"}
+                  variant={"ghost"}
                   onClick={() => {
                     handlePurchase(item.item ?? "", tier, false);
                     setShowEquipQ(false);
@@ -201,9 +200,12 @@ const MarketplaceRow = ({
                   }}
                 >
                   No
-                </Button>              </div>
+                </Button>{" "}
+              </div>
 
-              <Button size={'xs'} onClick={() => setShowEquipQ(false)}>X</Button>
+              <Button size={"xs"} onClick={() => setShowEquipQ(false)}>
+                X
+              </Button>
             </div>
           ) : (
             <Button
@@ -221,9 +223,9 @@ const MarketplaceRow = ({
               className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
             >
               {checkPurchaseBalance() ||
-                checkTransacting(item.item ?? "") ||
-                singlePurchaseExists(item.item ?? "") ||
-                (isMobileDevice && showEquipQ && isActive)
+              checkTransacting(item.item ?? "") ||
+              singlePurchaseExists(item.item ?? "") ||
+              (isMobileDevice && showEquipQ && isActive)
                 ? "In Cart"
                 : "Purchase"}
             </Button>

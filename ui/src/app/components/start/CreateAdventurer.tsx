@@ -186,7 +186,7 @@ export const CreateAdventurer = ({
   }, [formData]);
 
   return (
-    <div className=" items-center sm:w-1/3 mx-4 border border-terminal-green uppercase">
+    <div className=" items-center sm:w-full mx-4 border border-terminal-green uppercase overflow-hidden">
       <h4 className="w-full text-center ">Create Adventurer</h4>
       <hr className="border-terminal-green" />
       <div className="flex flex-row w-full gap-2 p-4">

@@ -52,44 +52,46 @@ export const BattleDisplay = ({
   const IdleDamagePenalty = !battleData.beast;
 
   return (
-    <div className="w-full text-2xl">
+    <div className="w-full text-xl">
       {BeastFled && <p>You fled the {beastName}!</p>}
       {AdventurerAttack && BeastHealthExists && (
-        <div className="w-full justify-between">
-          You delt {beastName} <span>{battleData.damageDealt} damage! </span>
-        </div>
-      )}
-      {BeastAttack && AdventurerHealthExists && (
-        <div className="flex w-full justify-between">
-          <span className=" text-terminal-yellow flex">
-            {battleData.damageTaken} damage taken at {damageIcon}!{" "}
-          </span>
-        </div>
-      )}
-      {AdventurerAttack && !BeastHealthExists && (
-        <p>
-          You slayed the {beastName} after inflicting {battleData.damageDealt}{" "}
+        <p className="w-full justify-between">
+          Nice hit! You attacked the {beastName} for {battleData?.damageDealt}{" "}
           damage!
         </p>
       )}
-      {!AdventurerAttack && AdventurerHealthExists && NoDamageTaken && (
-        <p>The {beastName} attacked but you defended the attack!</p>
-      )}
-      {!AdventurerAttack && AdventurerHealthExists && !NoDamageTaken && (
-        <p>
-          The {beastName} attacked, hitting your {damageIcon} and dealing{" "}
-          {battleData.damageTaken} damage!
+      {AdventurerAttack && BeastHealthExists && BeastFled && (
+        <p className="w-full justify-between">
+          You could not flee the {beastName}
         </p>
       )}
+      {BeastAttack && AdventurerHealthExists && (
+        <p>
+          Ouch! You were hit in the {damageLocation} for{" "}
+          {battleData?.damageTaken} damage!
+        </p>
+      )}
+
+      {!AdventurerAttack && AdventurerHealthExists && NoDamageTaken && (
+        <p>The {beastName} attacked but you defended it well!</p>
+      )}
+      {/* {!AdventurerAttack && AdventurerHealthExists && !NoDamageTaken && (
+        <p>
+          The {beastName} hit your {""}
+          {damageIcon}
+          {""} for {""}
+          {battleData?.damageTaken}
+          {""} damage!
+        </p>
+      )} */}
       {!AdventurerAttack && !AdventurerHealthExists && (
         <p>
-          The {beastName} delivered a final blow, dealing{" "}
-          {battleData.damageTaken} damage to your {damageIcon} and defeating
-          you!
+          The {beastName} struck you down with a mighty strike dealing{" "}
+          {battleData?.damageTaken} damage to your {damageLocation}!
         </p>
       )}
       {IdleDamagePenalty && (
-        <p>OOPS! You recieved the idle penalty of 80 damage!</p>
+        <p>OOPS you fell asleep! You were hit for 80 damage!</p>
       )}
     </div>
   );
@@ -147,7 +149,7 @@ export const NotificationBattleDisplay = ({
     isArray &&
     type === "Flee" &&
     battleData.length === 1 &&
-    battleData[1]?.attacker === "Beast" &&
+    battleData[0]?.attacker === "Beast" &&
     (adventurer?.health ?? 0) > 0;
   const KilledTryingToFlee =
     isArray &&
@@ -159,7 +161,7 @@ export const NotificationBattleDisplay = ({
     isArray &&
     battleData[0]?.attacker === "Adventurer" &&
     (battleData[0]?.beastHealth ?? 0) > 0 &&
-    (battleData[1]?.beastHealth ?? 0) > 0;
+    (battleData[0]?.beastHealth ?? 0) > 0;
   const Slayed =
     isArray &&
     battleData[0]?.attacker === "Adventurer" &&
@@ -167,7 +169,7 @@ export const NotificationBattleDisplay = ({
   const Killed =
     isArray &&
     battleData[0]?.attacker === "Adventurer" &&
-    (battleData[1]?.beastHealth ?? 0) > 0;
+    (battleData[0]?.beastHealth ?? 0) > 0;
 
   return (
     <div>
@@ -191,7 +193,7 @@ export const NotificationBattleDisplay = ({
           {battleData[1]?.damageTaken} damage!
         </p>
       )}
-      {Slayed && (
+      {/* {Slayed && (
         <div className="flex flex-col gap-2 items-center justify-center">
           <p>
             You slayed the {beastName || ""} after inflicting{" "}
@@ -201,8 +203,8 @@ export const NotificationBattleDisplay = ({
             text={`My adventurer just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
           />
         </div>
-      )}
-      {Killed && (
+      )} */}
+      {Killed && adventurer?.health === 0 && (
         <p>
           You were killed by the {beastName || ""} taking{" "}
           {battleData[1]?.damageTaken} damage!

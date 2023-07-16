@@ -31,14 +31,14 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         return (
           <p>
             You discovered the {discoveryData?.obstacle} obstacle, it killed you
-            with {discoveryData?.outputAmount} damage!
+            with {discoveryData?.damageTaken} damage!
           </p>
         );
       } else {
         return (
           <p>
             OUCH! You were hit by the {discoveryData?.obstacle} obstacle, it did{" "}
-            {discoveryData?.outputAmount} damage!
+            {discoveryData?.damageTaken} damage!
           </p>
         );
       }
@@ -51,7 +51,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
             <p className="text-terminal-green">
               NICE! You discovered{" "}
               <span className="text-terminal-yellow">
-                {discoveryData.outputAmount}
+                {discoveryData?.outputAmount}
               </span>{" "}
             </p>
             <CoinIcon className="self-center w-5 h-5 fill-current" />
@@ -62,7 +62,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       if (discoveryData?.subDiscoveryType === "Health") {
         return (
           <div className="flex self-center">
-            <p>GREAT! You discovered {discoveryData.outputAmount} health! </p>
+            <p>GREAT! You discovered {discoveryData?.outputAmount} health! </p>
             <HeartIcon className="self-center w-5 h-5 fill-current" />
           </div>
         );

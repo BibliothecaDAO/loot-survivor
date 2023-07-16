@@ -88,8 +88,8 @@ export default function GuideScreen() {
 
       <h3 className="mb-2">The Trials</h3>
       <p>
-        During your exploration, you may stumble upon a Beast, an Obstacle, a
-        valuable Item such as Gold, Health or XP.
+        During your exploration, you may stumble upon a Beast, an Obstacle, or
+        Treasure such as Gold, Health or XP.
       </p>
 
       <h3 className="mb-2">Beasts</h3>
@@ -212,12 +212,12 @@ export default function GuideScreen() {
         </table>
       </div>
 
-      <h3 className="mb-2">Market</h3>
+      <h3 className="mb-2">Loot Fountain</h3>
       <p>
-        You can purchase items in the Marketplace on each level up, after you
-        upgrade the Market will be closed. Buy items for each item slots:
-        Weapon, Head, Chest, Hands, Waist, Feet, Neck and Ring. Adventurers can
-        only carry 19 items in total.
+        You can trade your gold at the mystical Loot Fountain on each level up,
+        after you upgrade the Fountain will be close. Obtain items for each item
+        slots: Weapon, Head, Chest, Hands, Waist, Feet, Neck and Ring.
+        Adventurers can only carry 19 items in total.
       </p>
 
       <h3 className="mb-2">Swap Items</h3>
@@ -252,7 +252,7 @@ export default function GuideScreen() {
               <td className="px-4 py-3 border-r border-terminal-green">
                 Vitality
               </td>
-              <td>Increases health by +20hp and max health by +20hp</td>
+              <td>Increases max health by +20hp</td>
             </tr>
             <tr className="py-4 border border-terminal-green">
               <td className="px-4 py-3 border-r border-terminal-green">
@@ -282,7 +282,7 @@ export default function GuideScreen() {
               <td className="px-4 py-3 border-r border-terminal-green">
                 Charisma
               </td>
-              <td>Gives 3 Gold Discount on items and health potions</td>
+              <td>Gives 2 Gold Discount on items and health potions</td>
             </tr>
             <tr className="py-4 border border-terminal-green">
               <td

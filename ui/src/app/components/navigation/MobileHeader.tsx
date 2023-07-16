@@ -12,7 +12,7 @@ export default function MobileHeader() {
       <div className="flex flex-row justify-between items-center">
         <Button
           onClick={() => setScreen("player")}
-          variant={screen === "player" ? "default" : "outline"}
+          variant={screen === "player" ? "default" : "ghost"}
         >
           <div className="flex flex-row items-center gap-2">
             <div className="flex items-center w-6 h-6">
@@ -23,7 +23,7 @@ export default function MobileHeader() {
         </Button>
         <Button
           onClick={() => setScreen("leaderboard")}
-          variant={screen === "leaderboard" ? "default" : "outline"}
+          variant={screen === "leaderboard" ? "default" : "ghost"}
         >
           <div className="flex flex-row items-center gap-2">
             <div className="flex items-center w-6 h-6">
@@ -33,8 +33,8 @@ export default function MobileHeader() {
           </div>
         </Button>
       </div>
-      <div className="absolute left-1/2 right-1/2 top-[7.25rem] flex justify-center">
-        <h2>
+      <div className="absolute left-1/2 right-1/2 flex justify-center top-[7.4rem]">
+        <h2 className="text-xl">
           {screen == "player" ? "Profile" : capitalizeFirstLetter(screen ?? "")}
         </h2>
       </div>
