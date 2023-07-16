@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
-import { useWaitForTransaction, useAccount } from "@starknet-react/core";
+import { useWaitForTransaction } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../../lib/utils";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import LootIconLoader from "../icons/Loader";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import useUIStore from "@/app/hooks/useUIStore";
-import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { useMediaQuery } from "react-responsive";
 
 export interface TxActivityProps {
@@ -25,8 +23,6 @@ export const TxActivity = () => {
   const type = useLoadingStore((state) => state.type);
   const error = useTransactionCartStore((state) => state.error);
   const setError = useTransactionCartStore((state) => state.setError);
-  const setScreen = useUIStore((state) => state.setScreen);
-  const adventurer = useAdventurerStore((state) => state.adventurer);
   const {
     data: queryData,
     isDataUpdated,
@@ -104,9 +100,6 @@ export const TxActivity = () => {
       const handleDataUpdate = () => {
         setTxAccepted(false);
         resetDataUpdated(loadingQuery);
-        if ((adventurer?.statUpgrades ?? 0) > 0) {
-          setScreen("upgrade");
-        }
       };
 
       try {
@@ -149,7 +142,7 @@ export const TxActivity = () => {
     resetDataUpdated,
     setTxAccepted,
     stopLoading,
-    type,
+    type
   ]);
 
   // stop loading when an error is caught
