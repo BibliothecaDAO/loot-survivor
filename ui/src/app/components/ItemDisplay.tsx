@@ -1,25 +1,57 @@
+import { Item } from "../types";
 import LootIcon from "./LootIcon";
+import Efficacyicon from "./EfficacyIcon";
+import { processItemName } from "../lib/utils";
 
-export const ItemDisplay = (item: any) => {
-  const formatItem = item.item;
-  const slot = formatItem ? formatItem.slot : "";
+interface ItemDisplayProps {
+  item: Item;
+  type?: string;
+}
+
+export const ItemDisplay = (item: ItemDisplayProps) => {
+  const Item = item?.item;
+
+  const itemName = processItemName(Item);
+  const slot = Item ? Item.slot : "";
 
   return (
     <div
-      className={`flex-shrink flex gap-2 p-2 border border-terminal-green  ${formatItem ? "bg-terminal-green text-terminal-black" : ""
-        }`}
+      className={`flex-shrink flex gap-2 p-1 sm:p-2 mb-1 text-sm sm:text-base ${
+        Item ? "bg-terminal-green text-terminal-black" : ""
+      }`}
     >
-      <LootIcon type={slot} />
-      <div>
-        <span className="font-semibold whitespace-nowrap">
-          {formatItem ? formatItem.item : "Nothing Equipped"}
-        </span> <br />
-        <span className="whitespace-nowrap">
-          {formatItem &&
-            `[Rank ${formatItem.rank}, Greatness ${formatItem.greatness}, ${formatItem.xp} XP]`}
+      <LootIcon
+        type={
+          item.type == "feet"
+            ? "foot"
+            : item.type == "hands"
+            ? "hand"
+            : item.type
+        }
+      />
+      {Item ? (
+        <span className="flex flex-row justify-between w-full">
+          <div className="w-full overflow-auto whitespace-normal">
+            {" "}
+            {/* Added the CSS classes here */}
+            <span className="flex font-semibold whitespace-nowrap">
+              {itemName} {Item?.level} {Item?.xp} XP
+              {slot == "Neck" || slot == "Ring"
+                ? ` [+${Item?.greatness} Luck]`
+                : ""}
+            </span>
+            <span className="whitespace-nowrap">
+              {Item &&
+                `Tier ${Item?.rank}, Greatness ${Item?.greatness}, ${
+                  Item?.material || "Generic"
+                }`}
+            </span>
+          </div>
+          <Efficacyicon type={item.item?.type} />
         </span>
-      </div>
-
+      ) : (
+        "Nothing Equipped"
+      )}
     </div>
   );
 };

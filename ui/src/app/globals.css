@@ -4,7 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+body,
+input[type="text"] {
   font-family: "VT323", monospace;
   font-weight: 400;
   text-shadow: rgb(39, 168, 115, 0.9) 1px 0 10px;
@@ -49,7 +50,7 @@ body::after {
 }
 
 h1 {
-  @apply mt-6 text-3xl;
+  @apply mt-6 text-2xl;
 }
 
 h2 {

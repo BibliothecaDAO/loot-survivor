@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useRef } from "react";
+import { use, useEffect, useMemo, useRef } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "./useQueryStore";
-import { isEqual } from "lodash";
 
 type Variables = Record<
   string,
@@ -11,16 +10,17 @@ type Variables = Record<
 const useCustomQuery = (
   queryKey: QueryKey,
   query: any,
-  variables?: Variables
+  variables?: Variables,
+  shouldPoll?: boolean
+  // skip?: boolean
 ) => {
   const { updateData } = useQueriesStore();
 
-  const { data, startPolling, stopPolling, loading, refetch } = useQuery(
+  const { data, startPolling, stopPolling, loading, refetch, error } = useQuery(
     query,
     {
       variables: variables,
-      fetchPolicy: "network-only", // To ensure data is fetched from the network and not the cache,
-      pollInterval: 5000,
+      // skip: skip,
     }
   );
 
@@ -33,17 +33,23 @@ const useCustomQuery = (
   };
 
   useEffect(() => {
+    console.log(data, loading, queryKey, variables);
     if (data) {
       updateData(queryKey, data, loading, refetchWrapper);
     }
   }, [data, updateData, loading, queryKey, refetchWrapper, variables]);
 
   useEffect(() => {
-    startPolling(3000);
-    return () => {
+    if (shouldPoll) {
+      startPolling(5000);
+    } else {
       stopPolling();
-    };
-  }, [startPolling, stopPolling]);
+    }
+  }, [shouldPoll, startPolling, stopPolling]);
+
+  // useEffect(() => {
+  //   refetch();
+  // }, []);
 };
 
 export default useCustomQuery;

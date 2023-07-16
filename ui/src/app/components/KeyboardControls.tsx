@@ -1,18 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button } from "./Button";
+import { Button } from "./buttons/Button";
 
 export interface ButtonData {
   id: number;
   label: string;
   action: () => void;
+  mouseEnter?: () => void;
+  mouseLeave?: () => void;
+  disabled: boolean;
+  loading?: boolean;
 }
 
 interface ButtonProps {
   buttonsData: ButtonData[];
-  disabled?: boolean;
 }
 
-const KeyboardControl = ({ buttonsData, disabled }: ButtonProps) => {
+const KeyboardControl = ({ buttonsData }: ButtonProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -41,6 +44,8 @@ const KeyboardControl = ({ buttonsData, disabled }: ButtonProps) => {
     <div className="flex flex-col w-full">
       {buttonsData.map((buttonData, index) => (
         <Button
+          onMouseEnter={buttonData.mouseEnter}
+          onMouseLeave={buttonData.mouseLeave}
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
           className={selectedIndex === index ? "animate-pulse" : ""}
@@ -49,7 +54,8 @@ const KeyboardControl = ({ buttonsData, disabled }: ButtonProps) => {
             buttonData.action();
             setSelectedIndex(index);
           }}
-          disabled={disabled}
+          disabled={buttonData.disabled}
+          loading={buttonData.loading}
         >
           {buttonData.label}
         </Button>

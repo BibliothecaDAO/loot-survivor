@@ -19,7 +19,9 @@ export class GameData {
   STATUS: Dict<string>;
   SLOTS: Dict<string>;
   BEAST_IMAGES: DictString<string>;
+  BEAST_ATTACK_LOCATION: DictString<string>;
   ADVENTURER_ANIMATIONS: DictString<string>;
+  ADVENTURER_SOUNDS: DictString<string>;
 
   constructor() {
     this.CONTRACTS = {
@@ -469,41 +471,82 @@ export class GameData {
     };
 
     this.BEAST_IMAGES = {
-      Phoenix: "/beasts/phoenix.png",
-      Griffin: "/beasts/griffin.png",
-      Minotaur: "/beasts/minotaur.png",
-      Basilisk: "/beasts/basilisk.png",
-      Gnome: "//beastsgnome.png",
-      Wraith: "/beasts/wraith.png",
-      Ghoul: "/beasts/ghoul.png",
-      Goblin: "/beasts/goblin.png",
-      Skeleton: "/beasts/skeleton.png",
-      Golem: "/beasts/golem.png",
-      Giant: "/beasts/giant.png",
-      Yeti: "/beasts/yeti.png",
-      Orc: "/beasts/orc.png",
-      Beserker: "/beasts/beserker.png",
-      Ogre: "/beasts/ogre.png",
-      Dragon: "/beasts/dragon.png",
-      Vampire: "/beasts/vampire.png",
-      Werewolf: "/beasts/werewolf.png",
-      Spider: "/beasts/spider.png",
-      Rat: "/beasts/rat.png",
+      Phoenix: "/monsters/phoenix.png",
+      Griffin: "/monsters/griffin.png",
+      Minotaur: "/monsters/minotaur.png",
+      Basilisk: "/monsters/basilisk.png",
+      Gnome: "/monsters/gnome.png",
+      Wraith: "/monsters/wraith.png",
+      Ghoul: "/monsters/ghoul.png",
+      Goblin: "/monsters/goblin.png",
+      Skeleton: "/monsters/skeleton.png",
+      Golem: "/monsters/golem.png",
+      Giant: "/monsters/giant.png",
+      Yeti: "/monsters/yeti.png",
+      Orc: "/monsters/orc.png",
+      Berserker: "/monsters/berserker.png",
+      Ogre: "/monsters/ogre.png",
+      Dragon: "/monsters/dragon.png",
+      Vampire: "/monsters/vampire.png",
+      Werewolf: "/monsters/werewolf.png",
+      Spider: "/monsters/spider.png",
+      Rat: "/monsters/rat.png",
+    };
+
+    this.BEAST_ATTACK_LOCATION = {
+      Phoenix: "/icons/loot/head.svg",
+      Griffin: "/icons/loot/chest.svg",
+      Minotaur: "/icons/loot/hand.svg",
+      Basilisk: "/icons/loot/waist.svg",
+      Gnome: "/icons/loot/foot.svg",
+      Wraith: "/icons/loot/chest.svg",
+      Ghoul: "/icons/loot/hand.svg",
+      Goblin: "/icons/loot/waist.svg",
+      Skeleton: "/icons/loot/foot.svg",
+      Golem: "/icons/loot/head.svg",
+      Giant: "/icons/loot/hand.svg",
+      Yeti: "/icons/loot/waist.svg",
+      Orc: "/icons/loot/foot.svg",
+      Berserker: "/icons/loot/head.svg",
+      Ogre: "/icons/loot/chest.svg",
+      Dragon: "/icons/loot/waist.svg",
+      Vampire: "/icons/loot/foot.svg",
+      Werewolf: "/icons/loot/head.svg",
+      Spider: "/icons/loot/chest.svg",
+      Rat: "/icons/loot/hand.svg",
     };
 
     this.ADVENTURER_ANIMATIONS = {
       Create: "idle",
       Flee: "run",
       Ambush: "damage",
-      Attack: "attack1",
-      Slayed: "attack2",
+      Attack1: "attack1",
+      Attack2: "attack2",
+      Attack3: "attack3",
       Dead: "die",
       Upgrade: "drawSword",
       DiscoverItem: "discoverItem",
       DiscoverBeast: "drawSword",
-      AvoidObstacle: "jump",
+      AvoidObstacle1: "jump",
+      AvoidObstacle2: "slide",
       HitByObstacle: "damage",
       Multicall: "discoverItem",
+      HitByBeast: "damage",
+    };
+
+    this.ADVENTURER_SOUNDS = {
+      Create: "fight_ui_sound.mp3",
+      Flee: "fight_ui_sound.mp3",
+      Ambush: "fight_ui_sound.mp3",
+      Attack: "fight_ui_sound.mp3",
+      Slayed: "fight_ui_sound.mp3",
+      Dead: "fight_ui_sound.mp3",
+      Upgrade: "fight_ui_sound.mp3",
+      DiscoverItem: "fight_ui_sound.mp3",
+      DiscoverBeast: "fight_ui_sound.mp3",
+      AvoidObstacle: "fight_ui_sound.mp3",
+      HitByObstacle: "fight_ui_sound.mp3",
+      Multicall: "fight_ui_sound.mp3",
     };
   }
 }

@@ -4,26 +4,26 @@ import LootMarketArcade from "../abi/LootMarketArcade.json";
 import Beast from "../abi/Beast.json";
 import Lords_ERC20_Mintable from "../abi/Lords_ERC20_Mintable.json";
 
-const testnet_addr = "http://survivor-indexer.bibliothecadao.xyz:5050";
+const testnet_addr = "https://survivor-indexer.bibliothecadao.xyz";
 
 export const contracts = {
   testnet: {
     adventurer:
-      "0x00473b70f183c27ab4dac4139c39f364244ae89680810ff7f1f8cb6d754b2067",
+      "0x024144ef19ad4c5767e5056fbdca9b6867e8b82d8d45768bbff0498fdedc6ac4",
     lootMarketArcade:
-      "0x043d77e798f65a5284b4fde31051ee3b80f74a73817f607958e65d7504684ea0",
-    beast: "0x0128dc5af5038e745c83c57230a3203cce571f90320042e295744763953c0306",
+      "0x00c664109403c47238859a4e0c8d34424c06c41636fa2167a2528abc95c860f0",
+    beast: "0x02badcca85581480702a9dded0c9fb004743e25246e9fd96fa970027575a339e",
     lords_erc20_mintable:
-      "0x0171f44786f43f8c8ac26595385c3dedf1b9a5b2f10d39afacc40c2576084f0e",
+      "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
   },
   goerli: {
     adventurer:
-      "0x045c00857eba10068c8cc54b438eb769735c679fd7af14815a7bf771f1d81ef6",
+      "0x059daa60c4fbbb2866bbaf55b32916bd55d39243a2f97d78938fdfba79f1a4f2",
     lootMarketArcade:
-      "0x01db417426a5e190e328953e3bc36a2cfe4516743ff02c05c3a904107a1ad180",
-    beast: "0x07c93d30731ebe1cd8d3dd2ee92917205f6c136b24f317b3de87e8c93da45ceb",
+      "0x051f4d360d69a19ff9cc00ebf733d0485e52e2880f0e1e506b041a4770418181",
+    beast: "0x00d4941e7c42c06437cff11b2f50933d38b19ffd6c9a317bbddcc836ca83f113",
     lords_erc20_mintable:
-      "0x0270a44f4bcfa1815015272a56929230c12f64eae91316909b5f9fe945a6332f",
+      "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
   },
 };
 
@@ -32,6 +32,7 @@ export const useContracts = () => {
 
   const { contract: adventurerContract } = useContract({
     address:
+      (account as any)?.provider?.baseUrl == testnet_addr ||
       (account as any)?.baseUrl == testnet_addr
         ? contracts.testnet.adventurer
         : contracts.goerli.adventurer,
@@ -40,6 +41,7 @@ export const useContracts = () => {
 
   const { contract: lootMarketArcadeContract } = useContract({
     address:
+      (account as any)?.provider?.baseUrl == testnet_addr ||
       (account as any)?.baseUrl == testnet_addr
         ? contracts.testnet.lootMarketArcade
         : contracts.goerli.lootMarketArcade,
@@ -48,6 +50,7 @@ export const useContracts = () => {
 
   const { contract: beastContract } = useContract({
     address:
+      (account as any)?.provider?.baseUrl == testnet_addr ||
       (account as any)?.baseUrl == testnet_addr
         ? contracts.testnet.beast
         : contracts.goerli.beast,
@@ -56,6 +59,7 @@ export const useContracts = () => {
 
   const { contract: lordsContract } = useContract({
     address:
+      (account as any)?.provider?.baseUrl == testnet_addr ||
       (account as any)?.baseUrl == testnet_addr
         ? contracts.testnet.lords_erc20_mintable
         : contracts.goerli.lords_erc20_mintable,

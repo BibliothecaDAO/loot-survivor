@@ -1,21 +1,49 @@
-import { InjectedConnector, StarknetConfig } from "@starknet-react/core";
+import { InjectedConnector } from "@starknet-react/core";
 import ControllerConnector from "@cartridge/connector";
 import { contracts } from "../hooks/useContracts";
 
-export const controllerConnector = new ControllerConnector([
-    {
-        target: contracts.goerli.lords_erc20_mintable,
-        method: "mint",
-    },
-    {
-        target: contracts.goerli.lords_erc20_mintable,
-        method: "approve",
-    },
-    {
-        target: contracts.goerli.adventurer,
-        method: "mint_with_starting_weapon",
-    },
-]);
+// export const controllerConnector = new ControllerConnector([
+//     {
+//         target: contracts.goerli.lords_erc20_mintable,
+//         method: "mint",
+//     },
+//     {
+//         target: contracts.goerli.lords_erc20_mintable,
+//         method: "approve",
+//     },
+//     {
+//         target: contracts.goerli.adventurer,
+//         method: "mint_with_starting_weapon",
+//     },
+//     {
+//         target: contracts.goerli.adventurer,
+//         method: "explore"
+//     },
+//     {
+//         target: contracts.goerli.adventurer,
+//         method: "upgrade_stat"
+//     },
+//     {
+//         target: contracts.goerli.lootMarketArcade,
+//         method: "claim_item"
+//     },
+//     {
+//         target: contracts.goerli.lootMarketArcade,
+//         method: "mint_daily_items"
+//     },
+//     {
+//         target: contracts.goerli.lootMarketArcade,
+//         method: "bid_on_item"
+//     },
+//     {
+//         target: contracts.goerli.beast,
+//         method: "attack"
+//     },
+//     {
+//         target: contracts.goerli.beast,
+//         method: "flee"
+//     }
+// ]);
 
 export const argentConnector = new InjectedConnector({
     options: {
@@ -23,4 +51,12 @@ export const argentConnector = new InjectedConnector({
     },
 });
 
-export const connectors = [controllerConnector as any, argentConnector];
+export const braavosConnector = new InjectedConnector({
+    options: {
+        id: "braavos",
+    },
+});
+
+
+// export const connectors = [controllerConnector as any, argentConnector, braavosConnector];
+export const connectors = [argentConnector, braavosConnector]

@@ -1,18 +1,20 @@
 "use client";
 
 import "./globals.css";
-import { InjectedConnector, StarknetConfig } from "@starknet-react/core";
-import ControllerConnector from "@cartridge/connector";
-import { contracts } from "./hooks/useContracts";
+import { StarknetConfig } from "@starknet-react/core";
 import useIndexerStore from "./hooks/useIndexerStore";
-import { ApolloProvider } from "@apollo/client";
+import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
 import { connectors } from "./lib/connectors";
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const client = useIndexerStore((state) => state.client);
+  // const client = useIndexerStore((state) => state.client);
+  const client = new ApolloClient({
+    uri: "https://survivor-indexer.bibliothecadao.xyz:8080/goerli-graphql",
+    cache: new InMemoryCache(),
+  });
 
   return (
     <html lang="en">
@@ -25,7 +27,7 @@ export default function RootLayout({
       >
         <img
           src="/crt_green_mask.png"
-          className="absolute w-full pointer-events-none crt-frame"
+          className="absolute w-full pointer-events-none crt-frame hidden sm:block"
         />
         <StarknetConfig connectors={connectors} autoConnect>
           <ApolloProvider client={client}>{children}</ApolloProvider>

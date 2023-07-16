@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { formatTime } from "../lib/utils";
+import { formatTime as libFormatTime } from "../lib/utils";
 
 export const UTCClock: React.FC = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -15,33 +15,30 @@ export const UTCClock: React.FC = () => {
 
   return (
     <div>
-      <p>{`Time: ${formatTime(currentTime)} UTC`}</p>
+      <p>{`Time: ${libFormatTime(currentTime)} UTC`}</p>
     </div>
   );
 };
 
 interface CountdownProps {
-  endTime: Date;
   countingMessage: string;
   finishedMessage: string;
-  nextMintTime?: Date;
+  targetTime?: Date;
 }
 
 export const Countdown: React.FC<CountdownProps> = ({
-  endTime,
   countingMessage,
   finishedMessage,
-  nextMintTime,
+  targetTime,
 }) => {
   const [seconds, setSeconds] = useState(0);
   const [displayTime, setDisplayTime] = useState("");
 
   useEffect(() => {
-    if (nextMintTime) {
+    if (targetTime) {
       const updateCountdown = () => {
         const currentTime = new Date().getTime();
-        const timeRemaining = nextMintTime.getTime() - currentTime;
-
+        const timeRemaining = targetTime.getTime() - currentTime;
         setSeconds(Math.floor(timeRemaining / 1000));
       };
 
@@ -52,7 +49,7 @@ export const Countdown: React.FC<CountdownProps> = ({
         clearInterval(interval);
       };
     }
-  }, [nextMintTime]);
+  }, [targetTime]);
 
   useEffect(() => {
     if (seconds <= 0) {
@@ -73,7 +70,7 @@ export const Countdown: React.FC<CountdownProps> = ({
 
   return (
     <div>
-      {nextMintTime ? (
+      {targetTime ? (
         <p>{displayTime}</p>
       ) : (
         <p className="loading-ellipsis">Loading</p>

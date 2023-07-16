@@ -1,0 +1,109 @@
+name: Build Scarb project
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:    
+
+env:
+  SCARB_VERSION: 0.5.1
+
+jobs:
+  build-contracts:
+    name: Build Adventurer
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Scarb
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+
+      - name: Scarb build
+        run: |
+          cd contracts/adventurer && scarb build && scarb cairo-test
+
+  build-game:
+    name: Build Game
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Scarb
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+
+      - name: Scarb build
+        run: |
+          cd contracts/game && scarb build && scarb cairo-test
+
+  build-loot:
+    name: Build Loot
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Scarb
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+
+      - name: Scarb build
+        run: |
+          cd contracts/loot && scarb build && scarb cairo-test
+
+  build-market:
+    name: Build Market
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Scarb
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+
+      - name: Scarb build
+        run: |
+          cd contracts/market && scarb build && scarb cairo-test
+
+  build-pack:
+    name: Build Pack
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Scarb
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+
+      - name: Scarb build
+        run: |
+          cd contracts/pack && scarb build && scarb cairo-test   
+
+  build-obstacles:
+    name: Build Obstacles
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Scarb
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+
+      - name: Scarb build
+        run: |
+          cd contracts/obstacles && scarb build && scarb cairo-test         
+
+  build-combat:
+    name: Build Combat
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Scarb
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v ${{ env.SCARB_VERSION }}
+
+      - name: Scarb build
+        run: |
+          cd contracts/combat && scarb build && scarb cairo-test         

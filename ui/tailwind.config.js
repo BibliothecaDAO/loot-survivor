@@ -9,6 +9,9 @@ module.exports = {
         'terminal-green': 'rgba(74, 246, 38, 0.8)', // 50% opacity
         'terminal-yellow': 'rgba(255, 176, 0, 0.8)', // 50% opacity
         'terminal-black': 'rgba(21, 21, 21, 1)', // 50% opacity
+        gold: '#FFD700',
+        silver: '#C0C0C0',
+        bronze: '#CD7F32',
       },
       backgroundImage: {
         conic: 'conic-gradient(var(--tw-gradient-stops))',
@@ -42,6 +45,11 @@ module.exports = {
       },
       fontFamily: {
         mono: ['var(--font-vt323)', ...fontFamily.mono],
+      },
+      inset: {
+        '1/8': '12.5%',
+        '3/8': '37.5%',
+        '1/16': '6.25%',
       },
     },
   },

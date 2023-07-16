@@ -38,7 +38,7 @@ const getAdventurer = gql`
 
 const getBeasts = gql`
   query get_beasts {
-    beasts {
+    beasts(limit: 1000000) {
       adventurerId
       armorType
       attackType
@@ -55,8 +55,46 @@ const getBeasts = gql`
   }
 `;
 
-const getLatestDiscoveries = gql`
+const getBeastsByAdventurer = gql`
+  query get_beasts_by_adventurer($adventurerId: FeltValue) {
+    beasts(where: { adventurerId: { eq: $adventurerId } }, limit: 1000000) {
+      adventurerId
+      armorType
+      attackType
+      attackLocation
+      beast
+      health
+      id
+      level
+      prefix1
+      prefix2
+      rank
+      xp
+    }
+  }
+`;
+
+const getDiscoveries = gql`
   query get_discoveries($adventurerId: FeltValue) {
+    discoveries(
+      where: { adventurerId: { eq: $adventurerId } }
+      limit: 1000000
+      orderBy: { discoveryTime: { desc: true } }
+    ) {
+      adventurerId
+      attackLocation
+      discoveryTime
+      discoveryType
+      entityId
+      outputAmount
+      subDiscoveryType
+      txHash
+    }
+  }
+`;
+
+const getLatestDiscoveries = gql`
+  query get_latest_discoveries($adventurerId: FeltValue) {
     discoveries(
       where: { adventurerId: { eq: $adventurerId } }
       limit: 10
@@ -138,7 +176,9 @@ const getItems = gql`
 
 const getAdventurersByOwner = gql`
   query get_adventurers_by_owner($owner: HexValue) {
-    adventurers(where: { owner: { eq: $owner } }) {
+    adventurers(
+      where: { owner: { eq: $owner } }, limit: 10000000
+      ) {
       beastId
       charisma
       chestId
@@ -149,6 +189,7 @@ const getAdventurersByOwner = gql`
       health
       id
       imageHash1
+      homeRealm
       imageHash2
       intelligence
       level
@@ -174,7 +215,8 @@ const getAdventurersByOwner = gql`
 
 const getAdventurerById = gql`
   query get_adventurer_by_id($id: FeltValue) {
-    adventurers(where: { id: { eq: $id } }) {
+    adventurers(
+      where: { id: { eq: $id } }) {
       beastId
       charisma
       chestId
@@ -185,6 +227,7 @@ const getAdventurerById = gql`
       health
       id
       imageHash1
+      homeRealm
       imageHash2
       intelligence
       level
@@ -220,6 +263,48 @@ const getAdventurersInList = gql`
       headId
       health
       id
+      homeRealm
+      imageHash1
+      imageHash2
+      intelligence
+      level
+      luck
+      name
+      neckId
+      order
+      owner
+      race
+      ringId
+      status
+      strength
+      upgrading
+      vitality
+      waistId
+      weaponId
+      wisdom
+      xp
+      gold
+    }
+  }
+`;
+
+const getAdventurersInListByXp = gql`
+  query get_adventurer_by_id_order_xp($ids: [FeltValue!]) {
+    adventurers(
+      where: { id: { In: $ids } }
+      limit: 10000000
+      orderBy: { xp: { desc: true } }
+    ) {
+      beastId
+      charisma
+      chestId
+      dexterity
+      feetId
+      handsId
+      headId
+      health
+      id
+      homeRealm
       imageHash1
       imageHash2
       intelligence
@@ -284,27 +369,27 @@ const getAdventurerByGold = gql`
 `;
 
 const getAdventurerByXP = gql`
-  query get_adventurer_by_gold {
+  query get_adventurer_by_xp {
     adventurers(orderBy: { xp: { desc: true } }, limit: 10000000) {
-      id
-      name
-      gold
       beastId
       birthdate
       charisma
       chestId
       dexterity
       feetId
+      gold
       handsId
       headId
       health
       homeRealm
+      id
       imageHash1
       imageHash2
       intelligence
       lastUpdated
       level
       luck
+      name
       neckId
       order
       owner
@@ -321,6 +406,46 @@ const getAdventurerByXP = gql`
     }
   }
 `;
+
+const getAdventurersByXPPaginated = gql`
+  query get_adventurer_by_xp_paginated($skip: Int) {
+    adventurers(limit: 10, skip: $skip, orderBy: { xp: { desc: true } }) {
+      beastId
+      birthdate
+      charisma
+      chestId
+      dexterity
+      feetId
+      gold
+      handsId
+      headId
+      health
+      homeRealm
+      id
+      imageHash1
+      imageHash2
+      intelligence
+      lastUpdated
+      level
+      luck
+      name
+      neckId
+      order
+      owner
+      race
+      ringId
+      status
+      strength
+      upgrading
+      vitality
+      waistId
+      weaponId
+      wisdom
+      xp
+    }
+  }
+`;
+
 const getBeastById = gql`
   query get_beast_by_id($id: FeltValue) {
     beasts(where: { id: { eq: $id } }) {
@@ -341,6 +466,25 @@ const getBeastById = gql`
   }
 `;
 
+const getBeastByAdventurerId = gql`
+  query get_beast_by_id($id: FeltValue) {
+    beasts(where: { adventurerId: { eq: $id } }) {
+      adventurerId
+      armorType
+      attackType
+      attackLocation
+      beast
+      health
+      id
+      level
+      prefix1
+      prefix2
+      rank
+      slainOnDate
+      xp
+    }
+  }
+`;
 
 const BATTLE_FIELDS = `
   adventurerId
@@ -363,7 +507,7 @@ const BATTLE_FRAGMENT = `
 `;
 
 const getLatestBattlesByAdventurer = gql`
-${BATTLE_FRAGMENT}
+  ${BATTLE_FRAGMENT}
   query get_latest_battles($adventurerId: FeltValue) {
     battles(
       limit: 10
@@ -375,8 +519,21 @@ ${BATTLE_FRAGMENT}
   }
 `;
 
+const getBattlesByAdventurer = gql`
+  ${BATTLE_FRAGMENT}
+  query get_battles($adventurerId: FeltValue) {
+    battles(
+      limit: 1000000
+      orderBy: { timestamp: { desc: true } }
+      where: { adventurerId: { eq: $adventurerId } }
+    ) {
+      ...BattleFields
+    }
+  }
+`;
+
 const getBattlesByBeast = gql`
-${BATTLE_FRAGMENT}
+  ${BATTLE_FRAGMENT}
   query get_battles_by_beast($adventurerId: FeltValue, $beastId: FeltValue) {
     battles(
       where: { adventurerId: { eq: $adventurerId }, beastId: { eq: $beastId } }
@@ -388,7 +545,7 @@ ${BATTLE_FRAGMENT}
 `;
 
 const getLastBattleByAdventurer = gql`
-${BATTLE_FRAGMENT}
+  ${BATTLE_FRAGMENT}
   query get_latest_battle_by_adventurer($adventurerId: FeltValue) {
     battles(
       limit: 1
@@ -401,7 +558,7 @@ ${BATTLE_FRAGMENT}
 `;
 
 const getBattleByTxHash = gql`
-${BATTLE_FRAGMENT}
+  ${BATTLE_FRAGMENT}
   query get_latest_battle_by_tx($txHash: HexValue) {
     battles(
       where: { txHash: { eq: $txHash } }
@@ -444,9 +601,8 @@ const ITEM_FIELDS = `
   }
 `;
 
-
 const getItemsByTokenId = gql`
-${ITEM_FIELDS}
+  ${ITEM_FIELDS}
   query get_items($id: FeltValue) {
     items(where: { id: { eq: $id } }) {
       ...LatestMarketItemFields
@@ -454,9 +610,8 @@ ${ITEM_FIELDS}
   }
 `;
 
-
 const getLatestMarketItems = gql`
- ${ITEM_FIELDS}
+  ${ITEM_FIELDS}
   query get_latest_market_items($itemsNumber: Int) {
     items(
       where: { marketId: { gt: 0 } }
@@ -469,7 +624,7 @@ const getLatestMarketItems = gql`
 `;
 
 const getItemsByAdventurer = gql`
-${ITEM_FIELDS}
+  ${ITEM_FIELDS}
   query get_items_by_adventurer($adventurer: FeltValue) {
     items(where: { ownerAdventurerId: { eq: $adventurer } }, limit: 10000000) {
       ...LatestMarketItemFields
@@ -478,7 +633,7 @@ ${ITEM_FIELDS}
 `;
 
 const getUnclaimedItemsByAdventurer = gql`
-${ITEM_FIELDS}
+  ${ITEM_FIELDS}
   query get_items_by_adventurer($bidder: FeltValue, $status: StatusValue) {
     items(
       where: { bidder: { eq: $bidder }, status: { eq: $status } }
@@ -490,7 +645,7 @@ ${ITEM_FIELDS}
 `;
 
 const getItemsByOwner = gql`
-${ITEM_FIELDS}
+  ${ITEM_FIELDS}
   query get_items_by_owner($owner: HexValue) {
     items(where: { owner: { eq: $owner } }, limit: 10000000) {
       ...LatestMarketItemFields
@@ -508,20 +663,36 @@ const getLatestMarketItemsNumber = gql`
   }
 `;
 
+const getTopScores = gql`
+  query get_top_scores {
+    scores(orderBy: { xp: { desc: true } }, limit: 10) {
+      address
+      adventurerId
+      scoreTime
+      txHash
+      xp
+    }
+  }
+`;
+
 export {
   getAdventurer,
+  getDiscoveries,
   getLatestDiscoveries,
   getLastDiscovery,
   getDiscoveryByTxHash,
   getAdventurersByOwner,
   getAdventurerById,
   getAdventurersInList,
+  getAdventurersInListByXp,
   getAdventurerByGold,
   getBeasts,
+  getBeastsByAdventurer,
   getBeastById,
   getLatestBattlesByAdventurer,
   getBattlesByBeast,
   getLastBattleByAdventurer,
+  getBattlesByAdventurer,
   getBattleByTxHash,
   getItems,
   getItemsByTokenId,
@@ -530,5 +701,7 @@ export {
   getItemsByAdventurer,
   getLatestMarketItemsNumber,
   getUnclaimedItemsByAdventurer,
-  getAdventurerByXP
+  getAdventurerByXP,
+  getAdventurersByXPPaginated,
+  getTopScores,
 };

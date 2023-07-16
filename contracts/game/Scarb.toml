@@ -1,0 +1,17 @@
+[package]
+name = "game"
+version = "0.1.0"
+
+[dependencies]
+starknet = "2.0.0"
+lootitems = { path = "../loot" }
+survivor = { path = "../adventurer" }
+market = { path = "../market" }
+obstacles = { path = "../obstacles" }
+
+[[target.starknet-contract]]
+allowed-libfuncs-list.name = "experimental"
+allowed-libfuncs = true
+
+
+

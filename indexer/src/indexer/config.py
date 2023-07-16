@@ -11,7 +11,7 @@ class Config:
         else:
             self.STARTING_BLOCK = start_block
         self.BEASTS = {
-            1: "Pheonix",
+            1: "Phoenix",
             2: "Griffin",
             3: "Minotaur",
             4: "Basilisk",
@@ -24,7 +24,7 @@ class Config:
             11: "Giant",
             12: "Yeti",
             13: "Orc",
-            14: "Beserker",
+            14: "Berserker",
             15: "Ogre",
             16: "Dragon",
             17: "Vampire",
@@ -83,7 +83,7 @@ class Config:
             47: "Demon Husk",
             48: "Dragonskin Armor",
             49: "Studded Leather Armor",
-            50: "HardLeather Armor",
+            50: "Hard Leather Armor",
             51: "Leather Armor",
             52: "Demon Crown",
             53: "Dragons Crown",

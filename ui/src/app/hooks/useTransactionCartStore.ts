@@ -8,13 +8,18 @@ interface Call {
 }
 
 type TransactionCartState = {
+  error: boolean;
+  setError: (error: boolean) => void;
   handleSubmitCalls: (writeAsync: () => Promise<any>) => Promise<any>;
   calls: Call[];
   addToCalls: (value: Call) => void;
   removeFromCalls: (value: Call) => void;
+  resetCalls: () => void;
 };
 
-const useTransactionCartStore = create<TransactionCartState>((set, get) => {
+const useTransactionCartStore = create<TransactionCartState>((set) => {
+  const setError = (error: boolean) => set({ error });
+
   const addToCalls = (tx: Call) => {
     set((state) => ({ calls: [...state.calls, tx] }));
   };
@@ -33,19 +38,27 @@ const useTransactionCartStore = create<TransactionCartState>((set, get) => {
   const handleSubmitCalls = async (writeAsync: () => Promise<any>) => {
     try {
       const tx = await writeAsync();
-      set({ calls: [] });
+      set({ calls: [], error: false });
       return tx;
     } catch (error) {
       console.log(error);
-      set({ calls: [] });
+      setError(true);
+      resetCalls();
     }
   };
 
+  const resetCalls = () => {
+    set({ calls: [] });
+  };
+
   return {
+    error: false,
+    setError,
     handleSubmitCalls,
     calls: [],
     addToCalls,
     removeFromCalls,
+    resetCalls,
   };
 });
 
