@@ -664,9 +664,9 @@ class BattlesFilter:
     beast: Optional[BeastFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     beastLevel: Optional[FeltValueFilter] = None
-    special1: Optional[OrderByInput] = None
-    special2: Optional[Special1Filter] = None
-    special3: Optional[Special2Filter] = None
+    special1: Optional[Special1Filter] = None
+    special2: Optional[Special2Filter] = None
+    special3: Optional[Special3Filter] = None
     seed: Optional[HexValueFilter] = None
     attacker: Optional[AttackerFilter] = None
     fled: Optional[BooleanFilter] = None
