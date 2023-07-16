@@ -74,8 +74,8 @@ export const BattleDisplay = ({
       )}
       {BeastAttack && AdventurerHealthExists && (
         <p>
-          OUCH! The {beastName} struck you down with a mighty strike dealing{" "}
-          {battleData?.damageTaken} damage to your {damageLocation}!
+          OUCH! The {beastName} struck you dealing {battleData?.damageTaken}{" "}
+          damage to your {damageLocation}!
         </p>
       )}
       {BeastAttack && !AdventurerHealthExists && (
@@ -198,12 +198,7 @@ export const NotificationBattleDisplay = ({
           />
         </div>
       )}
-      {Killed && (
-        <p>
-          You were killed by the {beastName || ""} taking{" "}
-          {battleData[1]?.damageTaken} damage!
-        </p>
-      )}
+      {Killed && <p>You were killed by the {beastName || ""}</p>}
     </div>
   );
 };

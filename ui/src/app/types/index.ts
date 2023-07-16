@@ -56,7 +56,7 @@ export interface Item {
   item?: string; // name
   cost?: number; // purchase cost for the item
   adventurerId?: number; // Adventurer ID
-  owneAddress?: string; // Hex Address of the Owner
+  ownerAddress?: string; // Hex Address of the Owner
   owner?: boolean; // Is the item owned by the adventurer?
   equipped?: boolean; // Is the item equipped by the adventurer?
   purchasedTime?: Date; // Block time the item was purchased
