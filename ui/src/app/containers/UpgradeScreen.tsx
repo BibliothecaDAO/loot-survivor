@@ -1,6 +1,12 @@
 import { ReactElement, useState, useEffect } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { getKeyFromValue, calculateLevel } from "../lib/utils";
+import {
+  getKeyFromValue,
+  calculateLevel,
+  getItemData,
+  getValueFromKey,
+  getItemPrice,
+} from "../lib/utils";
 import { GameData } from "../components/GameData";
 import VerticalKeyboardControl from "../components/menu/VerticalMenu";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
@@ -16,6 +22,7 @@ import { useMediaQuery } from "react-responsive";
 import {
   ArrowTargetIcon,
   CatIcon,
+  CoinIcon,
   CoinCharismaIcon,
   HeartVitalityIcon,
   LightbulbIcon,
@@ -24,6 +31,7 @@ import {
 } from "../components/icons/Icons";
 import PurchaseHealth from "../components/actions/PurchaseHealth";
 import MarketplaceScreen from "./MarketplaceScreen";
+import { UpgradeNav } from "../components/upgrade/UpgradeNav";
 
 /**
  * @container
@@ -47,6 +55,7 @@ export default function UpgradeScreen() {
   // const purchasedItem = useUIStore((state) => state.purchasedItem);
   const [selected, setSelected] = useState("");
   const statUpgrades = adventurer?.statUpgrades ?? 0;
+  const [upgradeScreen, setUpgradeScreen] = useState(1);
 
   useCustomQuery(
     "adventurerByIdQuery",
@@ -217,6 +226,42 @@ export default function UpgradeScreen() {
     );
   }
 
+  const itemsFilter = calls.filter((call) => call.entrypoint === "buy_item");
+
+  const potionsCall = calls.find((call) => call.entrypoint === "buy_potions");
+
+  const potionsFilter =
+    potionsCall &&
+    Array.isArray(potionsCall.calldata) &&
+    potionsCall.calldata[2];
+
+  const getPurchasedGoldSum = () => {
+    if (potionsCall) {
+      const value = potionsFilter;
+      const parsedValue = value ? parseInt(value.toString(), 10) : 0;
+      const purchaseGoldAmount = Math.max(
+        parsedValue * (2 * (adventurer?.level ?? 0)) -
+          2 * (adventurer?.charisma ?? 0),
+        2
+      );
+      return purchaseGoldAmount;
+    } else {
+      return 0;
+    }
+  };
+
+  const itemsGoldSum = itemsFilter.reduce((accumulator, current) => {
+    const value = Array.isArray(current.calldata) && current.calldata[2];
+    const parsedValue = value ? parseInt(value.toString(), 10) : 0;
+    const { tier } = getItemData(
+      getValueFromKey(gameData.ITEMS, parsedValue) ?? ""
+    );
+    const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
+    return accumulator + (isNaN(itemPrice) ? 0 : itemPrice);
+  }, 0);
+
+  const calculateCost = getPurchasedGoldSum() + itemsGoldSum;
+
   return (
     <div className="flex flex-col sm:flex-row gap-2">
       <div className="w-1/3 hidden sm:block">
@@ -224,47 +269,101 @@ export default function UpgradeScreen() {
       </div>
       <div className="w-full sm:w-2/3">
         <div className="flex flex-col gap-2 h-full">
-          <div className="flex flex-col items-center gap-2 border-terminal-green sm:p-4">
-            {/* <div className="flex flew row w-full"> */}
+          <div className="flex flex-col items-center gap-2 border-terminal-green">
             <div className="flex flex-col items-center justify-center text-terminal-green space-x-3">
-              <div className="text-center text-lg md:text-xl lg:text-4xl  p-2 animate-pulse">
-                Adventurer Level up!
+              <div className="text-center text-lg md:text-xl lg:text-4xl p-2 animate-pulse uppercase">
+                Level up!
               </div>
-              <p className="text-2xl">
-                {previousLevel} {" -> "}
+              <div className="flex flex-row gap-2 text-2xl text-shadow-none">
+                {previousLevel}
+                <span className="w-5">
+                  <ArrowIcon />
+                </span>
                 {currentLevel}
-              </p>
-              <div className="text-center text-xs md:text-l lg:text-xl p-2 animate-pulse">
-                Fountain stops after upgrade
               </div>
+              <div className="flex flex-row gap-10">
+                <div className="flex flex-row gap-3">
+                  <span className="flex flex-row gap-1  items-center">
+                    <p className="uppercase">Cost:</p>
+                    <span className="flex text-xl text-terminal-yellow">
+                      <CoinIcon className="self-center w-5 h-5 fill-current" />
+                      {calculateCost}
+                    </span>
+                  </span>
+                  <span className="flex flex-row gap-1  items-center">
+                    <p className="uppercase">Potions:</p>
+                    <span className="flex text-xl text-terminal-yellow">
+                      {potionsFilter ?? 0}
+                    </span>
+                  </span>
+                  <span className="flex flex-row gap-1 items-center">
+                    <p className="uppercase">Items:</p>
+                    <span className="flex text-xl text-terminal-yellow">
+                      {itemsFilter.length}
+                    </span>
+                  </span>
+                </div>
+                <div>
+                  <span className="flex flex-row gap-1">
+                    {`Charisma: ${adventurer?.charisma} -`}
+                    <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
+                    <p className="text-terminal-yellow">
+                      {adventurer?.charisma && adventurer?.charisma * 2}
+                    </p>
+                    <p>{" to price"}</p>
+                  </span>
+                </div>
+              </div>
+              <UpgradeNav activeSection={upgradeScreen} />
             </div>
 
-            <div className="w-full sm:w-2/3 border-terminal-green border p-2">
-              <p className="text-center text-lg sm:text-2xl lg:text-4xl">
-                Potions
-              </p>
-              <PurchaseHealth />
-            </div>
-            {/* </div> */}
-
-            <div className="flex flex-col gap-2 w-full">
-              <div className="w-full border-terminal-green border sm:p-4">
-                <MarketplaceScreen />
+            {upgradeScreen == 1 && (
+              <div className="w-full sm:w-2/3 border-terminal-green border p-2">
+                <p className="text-center text-lg sm:text-2xl lg:text-4xl">
+                  Potions
+                </p>
+                <PurchaseHealth />
               </div>
-            </div>
-          </div>
-          <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full border-terminal-green border">
-            {isMobileDevice ? (
-              <>
-                {renderContent()}
-                {renderVerticalKeyboardControl()}
-              </>
-            ) : (
-              <>
-                {renderVerticalKeyboardControl()}
-                {renderContent()}
-              </>
             )}
+
+            {upgradeScreen == 2 && (
+              <div className="flex flex-col gap-2 w-full">
+                <div className="w-full border-terminal-green border sm:p-4">
+                  <MarketplaceScreen />
+                </div>
+              </div>
+            )}
+          </div>
+          {upgradeScreen == 3 && (
+            <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full border-terminal-green border">
+              {isMobileDevice ? (
+                <>
+                  {renderContent()}
+                  {renderVerticalKeyboardControl()}
+                </>
+              ) : (
+                <>
+                  {renderVerticalKeyboardControl()}
+                  {renderContent()}
+                </>
+              )}
+            </div>
+          )}
+          <div className="w-1/2 flex flex-row gap-2 mx-auto">
+            <Button
+              className="w-1/2"
+              onClick={() => setUpgradeScreen(upgradeScreen - 1)}
+              disabled={upgradeScreen == 1}
+            >
+              Back
+            </Button>
+            <Button
+              className="w-1/2"
+              onClick={() => setUpgradeScreen(upgradeScreen + 1)}
+              disabled={upgradeScreen == 3}
+            >
+              Next
+            </Button>
           </div>
         </div>
       </div>

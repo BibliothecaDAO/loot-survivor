@@ -9,11 +9,12 @@ import Info from "../components/adventurer/Info";
 import Discovery from "../components/actions/Discovery";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useCustomQuery from "../hooks/useCustomQuery";
-import { getLatestDiscoveries, getDiscoveryByTxHash, getAdventurerById } from "../hooks/graphql/queries";
 import {
-  MistIcon,
-
-} from "../components/icons/Icons";
+  getLatestDiscoveries,
+  getDiscoveryByTxHash,
+  getAdventurerById,
+} from "../hooks/graphql/queries";
+import { MistIcon } from "../components/icons/Icons";
 import { padAddress } from "../lib/utils";
 import BeastScreen from "./BeastScreen";
 
@@ -111,15 +112,15 @@ export default function ActionsScreen() {
 
   const beast = adventurer?.beastHealth != null && adventurer?.beastHealth > 0;
 
-  console.log(adventurer)
-
   return (
     <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 overflow-hidden flex-wrap">
       <div className="hidden sm:block sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
 
-      {beast ? <BeastScreen /> : (
+      {beast ? (
+        <BeastScreen />
+      ) : (
         <>
           <div className="flex flex-col items-center sm:w-1/3 bg-terminal-black order-1 sm:order-2">
             {selected == "explore" && (
@@ -133,13 +134,8 @@ export default function ActionsScreen() {
               onEnterAction={true}
             />
           </div>
-        </>)
-      }
-
-
-
-
-
+        </>
+      )}
     </div>
   );
 }

@@ -47,9 +47,6 @@ export const TxActivity = () => {
     query: "(max-device-width: 480px)",
   });
 
-  console.log(isLoadingQueryUpdated);
-  console.log(queryData?.adventurerByIdQuery);
-
   useEffect(() => {
     const fetchData = async () => {
       if (!txAccepted || !hash || !isLoadingQueryUpdated) return;
@@ -142,7 +139,7 @@ export const TxActivity = () => {
     resetDataUpdated,
     setTxAccepted,
     stopLoading,
-    type
+    type,
   ]);
 
   // stop loading when an error is caught

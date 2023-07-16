@@ -47,7 +47,6 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     : data.itemsByAdventurerQuery
     ? data.itemsByAdventurerQuery.items
     : [];
-  console.log(items);
 
   const neckItem =
     items.find(

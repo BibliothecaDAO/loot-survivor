@@ -70,8 +70,6 @@ const PurchaseHealth = () =>
 
     const calculatedNewHealth = (adventurer?.health ?? 0) + potionAmount * 10;
 
-    console.log(calculatedNewHealth - maxHealth);
-
     return (
       <div className="flex flex-col gap-5 p-5 sm:p-0 md:p-2">
         <HealthSlider

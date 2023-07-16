@@ -83,8 +83,6 @@ export default function LeaderboardScree() {
     currentPage * itemsPerPage
   );
 
-  console.log(displayAdventurers);
-
   let previousGold = -1;
   let currentRank = 0;
   let rankOffset = 0;

@@ -58,7 +58,6 @@ export default function InventoryScreen() {
   const gameData = new GameData();
 
   const singleEquipExists = (item: string) => {
-    console.log(getKeyFromValue(gameData.ITEMS, item)?.toString());
     return calls.some(
       (call: Call) =>
         call.entrypoint == "equip" &&

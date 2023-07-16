@@ -97,8 +97,6 @@ export const CreateAdventurer = ({
       ],
     };
 
-    console.log(stringToFelt(formData.name));
-
     addToCalls(mintAdventurerTx);
     startLoading(
       "Create",

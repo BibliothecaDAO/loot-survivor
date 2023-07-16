@@ -8,7 +8,6 @@ interface LevelBarProps {
 const calculateProgress = (xp: number): number => {
   const currentLevelXP = Math.floor(calculateLevel(xp)) ** 2;
   const nextLevelXP = Math.floor(calculateLevel(xp) + 1) ** 2;
-  console.log(currentLevelXP, nextLevelXP);
 
   return ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
 };

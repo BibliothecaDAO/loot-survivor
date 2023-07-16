@@ -51,8 +51,21 @@ module.exports = {
         '3/8': '37.5%',
         '1/16': '6.25%',
       },
+      textShadow: {
+        'none': 'none',  // This line removes the text shadow
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.text-shadow-none': {
+          textShadow: 'none',
+        },
+        // You can add more custom text shadow utilities here...
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 }
 

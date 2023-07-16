@@ -65,8 +65,6 @@ export default function AdventurerScreen() {
     ? data.adventurersByOwnerQuery.adventurers
     : [];
 
-  console.log(adventurers);
-
   const menu = [
     {
       id: 1,
