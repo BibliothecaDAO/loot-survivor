@@ -22,7 +22,7 @@ Table of contents
 
 - [Game Design](#🕹️-game-design)
 - [Technology](#⛓️-technology)
-- [Infrastructure] (#🖥️-infrastructure)
+- [Infrastructure](#🖥️-infrastructure)
 - [Contributing](#🏗️-contributing)
 
 ---
