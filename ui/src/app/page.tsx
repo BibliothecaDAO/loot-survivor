@@ -86,6 +86,26 @@ export default function Home() {
   const [showDeathCount, setShowDeathCount] = useState(true);
   const [hasBeast, setHasBeast] = useState(false);
 
+  const playState = useMemo(
+    () => ({
+      isInBattle: hasBeast,
+      isDead: false, // set this to true when player is dead
+      isMuted: isMuted,
+    }),
+    [hasBeast, isMuted]
+  );
+
+  const { play, stop } = useMusic(playState, {
+    volume: 0.5,
+    loop: true,
+  });
+
+  useEffect(() => {
+    return () => {
+      stop();
+    };
+  }, [play, stop]);
+
   const { data, isDataUpdated, refetch } = useQueriesStore();
 
   const [menu, setMenu] = useState<Menu[]>([
@@ -111,44 +131,25 @@ export default function Home() {
   const adventurers = data.adventurersByOwnerQuery
     ? data.adventurersByOwnerQuery.adventurers
     : [];
-    
+
   useEffect(() => {
     if (updatedAdventurer?.id ?? 0 > 0) {
       setAdventurer(updatedAdventurer);
     }
-  }, [updatedAdventurer, setAdventurer]);
+    if ((adventurer?.statUpgrades ?? 0) > 0) {
+      setScreen("upgrade");
+    }
+  }, [updatedAdventurer, setAdventurer, setScreen, adventurer?.statUpgrades]);
 
   useEffect(() => {
     setHasBeast(!!(adventurer?.beastHealth ?? 0 > 0));
   }, [adventurer]);
 
-  const playState = useMemo(
-    () => ({
-      isInBattle: hasBeast,
-      isDead: false, // set this to true when player is dead
-      isMuted: isMuted,
-    }),
-    [hasBeast, isMuted]
-  );
-
-  const { play, stop } = useMusic(playState, {
-    volume: 0.5,
-    loop: true,
-  });
-
   useEffect(() => {
-    return () => {
-      stop();
-    };
-  }, [play, stop]);
-
-
-
-  // useEffect(() => {
-  //   if (!adventurer || adventurer?.health == 0) {
-  //     setScreen(menu[0].screen);
-  //   }
-  // }, [adventurer, menu, setScreen]);
+    if (!adventurer || adventurer?.health == 0) {
+      setScreen(menu[0].screen);
+    }
+  }, [adventurer, menu, setScreen]);
 
   useEffect(() => {
     const { battlesByTxHashQuery, discoveryByTxHashQuery, lastBattleQuery } =
@@ -322,8 +323,6 @@ export default function Home() {
       setMobileMenu(newMobileMenu);
     }
   }, [adventurer, account, onboarded, hasBeast, statUpgrades]);
-
-
 
   useEffect(() => {
     if (onboarded) return;
