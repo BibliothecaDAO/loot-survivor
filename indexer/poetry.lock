@@ -158,13 +158,13 @@ trio = ["trio (>=0.16,<0.22)"]
 
 [[package]]
 name = "apibara"
-version = "0.7.0"
+version = "0.7.1"
 description = "Apibara cliend SDK. Stream and transform on-chain data with Python."
 optional = false
 python-versions = ">=3.8,<3.11"
 files = [
-    {file = "apibara-0.7.0-py3-none-any.whl", hash = "sha256:57fc688fa0ab6c91090c87497b81105fc7f32f3b856a65fd7a4ed19be2cf271c"},
-    {file = "apibara-0.7.0.tar.gz", hash = "sha256:816e9cda4857d35b7974fcf316b4013bffd4ff8523ea7f31208561d8b8fa8c43"},
+    {file = "apibara-0.7.1-py3-none-any.whl", hash = "sha256:0916feeba87e3f4857051f11058a05b96470de5360e4b0b9f64f6c9b41f9ad94"},
+    {file = "apibara-0.7.1.tar.gz", hash = "sha256:5dbe398a4af957957d016940d276e84045f278b4d7f9aeccee390748eec46806"},
 ]
 
 [package.dependencies]
@@ -1620,4 +1620,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">3.8,<3.10"
-content-hash = "3e6bb26f38d18b29436287ee6a01801bd9dc27991a54655d5d2c385e3aa5d027"
+content-hash = "91708083e03e96f56059dcb502ea61cab30472dcbed1520fa245ad2ffb6526ed"
