@@ -2066,6 +2066,14 @@ mod Game {
             new_level: new_level
         );
 
+        // emit stat upgrades available event
+        __event_StatUpgradesAvailable(
+            ref self,
+            adventurer_state: AdventurerState {
+                owner: get_caller_address(), adventurer_id, adventurer
+            },
+        );
+
         // emit new items availble with available items
         __event_NewItemsAvailable(
             ref self,
