@@ -100,7 +100,11 @@ const PurchaseHealth = () =>
             handlePurchaseHealth();
           }}
         >
-          {maxHealth ? "Purchase Health" : "Max Health Reached"}
+          {adventurer?.health == maxHealth
+            ? "Max Health Reached"
+            : calculatedNewHealth - maxHealth > 10
+            ? "Purchase Over Max Health"
+            : "Purchase Health"}
         </Button>
         {!hasBalance && (
           <p className="m-auto text-red-600">Not enough gold to purchase!</p>

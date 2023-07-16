@@ -230,8 +230,10 @@ export default function UpgradeScreen() {
               <div className="text-center text-lg md:text-xl lg:text-4xl  p-2 animate-pulse">
                 Adventurer Level up!
               </div>
-              {previousLevel} {" -> "}
-              {currentLevel}
+              <p className="text-2xl">
+                {previousLevel} {" -> "}
+                {currentLevel}
+              </p>
               <div className="text-center text-xs md:text-l lg:text-xl p-2 animate-pulse">
                 Fountain stops after upgrade
               </div>

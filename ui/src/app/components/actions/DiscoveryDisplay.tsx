@@ -74,7 +74,11 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     }
 
     if (!discoveryData?.discoveryType) {
-      return <p>OOPS! You recieved the idle penalty of 80 damage!</p>;
+      if (adventurer?.health === 0) {
+        return <p>OOPS! You were killed by the idle penalty of 80 damage!</p>;
+      } else {
+        return <p>OOPS! You recieved the idle penalty of 80 damage!</p>;
+      }
     }
 
     return null;

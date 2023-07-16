@@ -214,6 +214,7 @@ const MarketplaceRow = ({
                 setActiveMenu(index + 1);
               }}
               disabled={
+                itemPrice > (adventurer?.gold ?? 0) ||
                 checkPurchaseBalance() ||
                 checkTransacting(item.item ?? "") ||
                 singlePurchaseExists(item.item ?? "") ||
@@ -222,11 +223,14 @@ const MarketplaceRow = ({
               }
               className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
             >
-              {checkPurchaseBalance() ||
-              checkTransacting(item.item ?? "") ||
-              singlePurchaseExists(item.item ?? "") ||
-              (isMobileDevice && showEquipQ && isActive)
+              {checkPurchaseBalance() || itemPrice > (adventurer?.gold ?? 0)
+                ? "Not Enough Gold"
+                : checkTransacting(item.item ?? "") ||
+                  singlePurchaseExists(item.item ?? "") ||
+                  (isMobileDevice && showEquipQ && isActive)
                 ? "In Cart"
+                : item.owner
+                ? "Owned"
                 : "Purchase"}
             </Button>
           )}

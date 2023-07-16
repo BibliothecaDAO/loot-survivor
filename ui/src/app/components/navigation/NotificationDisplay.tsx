@@ -86,7 +86,7 @@ const processAnimation = (
         return gameData.ADVENTURER_ANIMATIONS["DiscoverBeast"];
       }
     } else if (notificationData?.discoveryType == "Obstacle") {
-      if (notificationData?.damageTaken > 0) {
+      if (notificationData?.dodgedObstacle == 0) {
         if (adventurer?.health === 0) {
           return gameData.ADVENTURER_ANIMATIONS["Dead"];
         } else {
