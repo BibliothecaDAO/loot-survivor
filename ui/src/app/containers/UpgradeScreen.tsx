@@ -284,7 +284,7 @@ export default function UpgradeScreen() {
                 </span>
                 {currentLevel}
               </div>
-              <div className="flex flex-row gap-10">
+              <div className="flex flex-row gap-10 text-sm">
                 <div className="flex flex-row gap-3">
                   <span className="flex flex-row gap-1  items-center">
                     <p className="uppercase">Cost:</p>
@@ -315,13 +315,13 @@ export default function UpgradeScreen() {
                   </span>
                 </div>
                 <div>
-                  <span className="flex flex-row gap-1">
+                  <span className="flex flex-row sm:gap-1">
                     {`Charisma: ${adventurer?.charisma} -`}
                     <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
                     <p className="text-terminal-yellow">
                       {adventurer?.charisma && adventurer?.charisma * 2}
                     </p>
-                    <p>{" to price"}</p>
+                    <p className="hidden sm:block">{" to price"}</p>
                   </span>
                 </div>
               </div>

@@ -226,7 +226,7 @@ export default function Home() {
     notificationData,
     setDeathMessage,
     showDeathDialog,
-    type
+    type,
   ]);
 
   useEffect(() => {
@@ -250,65 +250,64 @@ export default function Home() {
         },
         ...(adventurer
           ? [
-            {
-              id: isMobile ? 3 : 2,
-              label: "Play",
-              screen: "play",
-              disabled:
-                statUpgrades > 0 || adventurer.health == 0,
-            },
-            {
-              id: isMobile ? 4 : 3,
-              label: "Inventory",
-              screen: "inventory",
-              disabled: adventurer.health == 0,
-            },
-            // {
-            //   id: isMobile ? 5 : 4,
-            //   label: "Beast",
-            //   screen: "beast",
-            //   disabled: statUpgrades > 0 || adventurer.health == 0,
-            // },
-            {
-              id: isMobile ? 6 : 5,
-              label: statUpgrades > 0 ? <span>Upgrade!</span> : "Upgrade",
-              screen: "upgrade",
-              disabled: !(statUpgrades > 0),
-            },
-            // {
-            //   id: isMobile ? 7 : 6,
-            //   label: "Market",
-            //   screen: "market",
-            //   disabled:
-            //     !(statUpgrades > 0) ||
-            //     hasBeast ||
-            //     adventurer.health == 0 ||
-            //     purchaseExists(),
-            // },
-          ]
+              {
+                id: isMobile ? 3 : 2,
+                label: "Play",
+                screen: "play",
+                disabled: statUpgrades > 0 || adventurer.health == 0,
+              },
+              {
+                id: isMobile ? 4 : 3,
+                label: "Inventory",
+                screen: "inventory",
+                disabled: adventurer.health == 0,
+              },
+              // {
+              //   id: isMobile ? 5 : 4,
+              //   label: "Beast",
+              //   screen: "beast",
+              //   disabled: statUpgrades > 0 || adventurer.health == 0,
+              // },
+              {
+                id: isMobile ? 6 : 5,
+                label: statUpgrades > 0 ? <span>Upgrade!</span> : "Upgrade",
+                screen: "upgrade",
+                disabled: !(statUpgrades > 0),
+              },
+              // {
+              //   id: isMobile ? 7 : 6,
+              //   label: "Market",
+              //   screen: "market",
+              //   disabled:
+              //     !(statUpgrades > 0) ||
+              //     hasBeast ||
+              //     adventurer.health == 0 ||
+              //     purchaseExists(),
+              // },
+            ]
           : []),
         ...(isMobile
           ? []
           : [
-            {
-              id: 7,
-              label: "Leaderboard",
-              screen: "leaderboard",
-              disabled: false,
-            },
-            {
-              id: 8,
-              label: "Encounters",
-              screen: "encounters",
-              disabled: false,
-            },
-            {
-              id: 9,
-              label: "Guide",
-              screen: "guide",
-              disabled: false,
-            },
-          ]),
+              {
+                id: 7,
+                label: "Leaderboard",
+                screen: "leaderboard",
+                disabled: false,
+              },
+              {
+                id: 8,
+                label: "Encounters",
+                screen: "encounters",
+                disabled: false,
+              },
+              {
+                id: 9,
+                label: "Guide",
+                screen: "guide",
+                disabled: false,
+              },
+            ]),
       ];
 
       const newMenu: any = adventurer
@@ -348,12 +347,21 @@ export default function Home() {
     if (!hasAdventurers) {
       createMenu("Start", "start");
     } else if (adventurerExistsAndHasXP) {
-      createMenu("Play", "play")
+      createMenu("Play", "play");
     } else {
       handleOnboarded();
       refetch("adventurersByOwnerQuery");
     }
-  }, [onboarded, adventurer, account, adventurers.length, handleOnboarded, refetch, setScreen, showTutorialDialog]);
+  }, [
+    onboarded,
+    adventurer,
+    account,
+    adventurers.length,
+    handleOnboarded,
+    refetch,
+    setScreen,
+    showTutorialDialog,
+  ]);
 
   // useEffect(() => {
   //   if (statUpgrades > 0 && adventurer?.health !== 0) {
@@ -383,7 +391,7 @@ export default function Home() {
               <h1 className="glitch">Loot Survivor</h1>
               <div className="flex flex-row items-center self-end gap-2 flex-wrap">
                 {!isMobileDevice && <TxActivity />}
-                <div
+                {/* <div
                   className="flex flex-row items-center gap-1 p-1 sm:px-2 border border-terminal-green cursor-pointer"
                   onClick={() => setShowDeathCount(!showDeathCount)}
                 >
@@ -403,7 +411,7 @@ export default function Home() {
                       <p className="text-terminal-green sm:text-xl">20</p>
                     </>
                   )}
-                </div>
+                </div> */}
                 <button
                   onClick={() => {
                     setIsMuted(!isMuted);
@@ -464,12 +472,12 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <AddDevnetEthButton />
-                      )}
+                      <AddDevnetEthButton />
+                    )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <MintEthButton />
-                      )}
+                      <MintEthButton />
+                    )}
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}
@@ -525,9 +533,7 @@ export default function Home() {
 
                 {screen === "start" && <AdventurerScreen />}
                 {screen === "play" && <ActionsScreen />}
-                {screen === "market" && <MarketplaceScreen />}
                 {screen === "inventory" && <InventoryScreen />}
-                {screen === "beast" && <BeastScreen />}
                 {screen === "leaderboard" && <LeaderboardScreen />}
                 {screen === "upgrade" && <UpgradeScreen />}
                 {screen === "profile" && <Profile />}

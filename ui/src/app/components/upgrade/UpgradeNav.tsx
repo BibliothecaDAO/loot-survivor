@@ -4,7 +4,7 @@ interface UpgradeNavProps {
 
 export const UpgradeNav = ({ activeSection }: UpgradeNavProps) => {
   return (
-    <div className="flex justify-between items-center w-full text-shadow-none">
+    <div className="flex justify-center items-center w-full text-shadow-none">
       <div
         className={`uppercase ${
           activeSection >= 1 ? "text-terminal-green" : "text-slate-600"
@@ -15,7 +15,7 @@ export const UpgradeNav = ({ activeSection }: UpgradeNavProps) => {
       <div
         className={activeSection > 1 ? "text-terminal-green" : "text-slate-600"}
       >
-        .....
+        ........
       </div>
       <div
         className={`uppercase ${
@@ -27,7 +27,7 @@ export const UpgradeNav = ({ activeSection }: UpgradeNavProps) => {
       <div
         className={activeSection > 2 ? "text-terminal-green" : "text-slate-600"}
       >
-        .....
+        ........
       </div>
       <div
         className={`uppercase ${
