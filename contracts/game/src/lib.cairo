@@ -44,7 +44,10 @@ mod Game {
         adventurer_meta::AdventurerMetadata, exploration::ExploreUtils,
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
-            adventurer_constants::{POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER}
+            adventurer_constants::{
+                POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER, ITEM_MAX_GREATNESS,
+                MAX_GREATNESS_STAT_BONUS
+            }
         },
         item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
         adventurer_utils::AdventurerUtils
@@ -97,6 +100,13 @@ mod Game {
         AdventurerLeveledUp: AdventurerLeveledUp,
         NewItemsAvailable: NewItemsAvailable,
         IdleDamagePenalty: IdleDamagePenalty,
+        StatUpgradesAvailable: StatUpgradesAvailable,
+        StrengthUpgraded: StrengthUpgraded,
+        DexterityUpgraded: DexterityUpgraded,
+        VitalityUpgraded: VitalityUpgraded,
+        IntelligenceUpgraded: IntelligenceUpgraded,
+        WisdomUpgraded: WisdomUpgraded,
+        CharismaUpgraded: CharismaUpgraded
     }
 
     #[constructor]
@@ -1232,7 +1242,7 @@ mod Game {
     ///
     /// The function first retrieves the names of the special items an adventurer may possess. It then calculates the XP increase by applying a multiplier to the provided 'value'.
     /// The function then checks each item slot (weapon, chest, head, waist, foot, hand, neck, ring) of the adventurer to see if an item is equipped (item ID > 0).
-    /// If an item is equipped, it calls `_grant_xp_to_item_and_emit_event` to apply the XP increase to the item and handle any resulting events.
+    /// If an item is equipped, it calls `_add_xp_to_item` to apply the XP increase to the item and handle any resulting events.
     fn _grant_xp_to_equipped_items(
         ref self: ContractState,
         adventurer_id: u256,
@@ -1249,7 +1259,7 @@ mod Game {
         // if weapon is equipped
         if adventurer.weapon.id > 0 {
             // grant xp and handle any resulting events
-            _grant_xp_to_item_and_emit_event(
+            _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1263,7 +1273,7 @@ mod Game {
         // if chest armor is equipped
         if adventurer.chest.id > 0 {
             // grant xp and handle any resulting events
-            _grant_xp_to_item_and_emit_event(
+            _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1277,7 +1287,7 @@ mod Game {
         // if head armor is equipped
         if adventurer.head.id > 0 {
             // grant xp and handle any resulting events
-            _grant_xp_to_item_and_emit_event(
+            _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1291,7 +1301,7 @@ mod Game {
         // if waist armor is equipped
         if adventurer.waist.id > 0 {
             // grant xp and handle any resulting events
-            _grant_xp_to_item_and_emit_event(
+            _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1305,7 +1315,7 @@ mod Game {
         // if foot armor is equipped
         if adventurer.foot.id > 0 {
             // grant xp and handle any resulting events
-            _grant_xp_to_item_and_emit_event(
+            _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1319,7 +1329,7 @@ mod Game {
         // if hand armor is equipped
         if adventurer.hand.id > 0 {
             // grant xp and handle any resulting events
-            _grant_xp_to_item_and_emit_event(
+            _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1333,7 +1343,7 @@ mod Game {
         // if neck armor is equipped
         if adventurer.neck.id > 0 {
             // grant xp and handle any resulting events
-            _grant_xp_to_item_and_emit_event(
+            _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1347,7 +1357,7 @@ mod Game {
         // if ring is equipped
         if adventurer.ring.id > 0 {
             // grant xp and handle any resulting events
-            _grant_xp_to_item_and_emit_event(
+            _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1377,7 +1387,7 @@ mod Game {
     // It then checks the description index of the item. If the index matches with LOOT_NAME_STORAGE_INDEX_1, it uses name_storage1 for the item's special names; otherwise, it uses name_storage2.
     // It then calls `increase_item_xp` on the item to apply the XP increase and retrieve data about the item's original level, new level, and whether a suffix or prefix was assigned, and the item's special names.
     // Lastly, it calls `handle_item_leveling_events` to handle any events resulting from the item leveling up.
-    fn _grant_xp_to_item_and_emit_event(
+    fn _add_xp_to_item(
         ref self: ContractState,
         adventurer_id: u256,
         ref adventurer: Adventurer,
@@ -1390,30 +1400,62 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         internal::revoke_ap_tracking();
 
+        // TODO: Refactor this to reduce code duplication
         if (_get_storage_index(@self, item.metadata) == LOOT_NAME_STORAGE_INDEX_1) {
-            let (original_level, new_level, suffix_assigned, prefix_assigned, special_names) = item
+            let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = item
                 .increase_item_xp(xp_increase, ref name_storage1, entropy);
+
+            if (previous_level != new_level && new_level == ITEM_MAX_GREATNESS) {
+                // adventurer gets stat upgrade points when item reaches max greatness
+                adventurer.add_stat_upgrade_points(MAX_GREATNESS_STAT_BONUS);
+
+                // emit stat upgrades available event
+                __event_StatUpgradesAvailable(
+                    ref self,
+                    AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    }
+                );
+            }
 
             handle_item_leveling_events(
                 ref self,
                 adventurer,
                 adventurer_id,
                 item.id,
-                original_level,
+                previous_level,
                 new_level,
                 suffix_assigned,
                 prefix_assigned,
                 special_names
             );
         } else {
-            let (original_level, new_level, suffix_assigned, prefix_assigned, special_names) = item
+            let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = item
                 .increase_item_xp(xp_increase, ref name_storage2, entropy);
+
+            if (previous_level != new_level && new_level == ITEM_MAX_GREATNESS) {
+                // adventurer gets stat upgrade points when item reaches max greatness
+                adventurer.add_stat_upgrade_points(MAX_GREATNESS_STAT_BONUS);
+
+                // emit stat upgrades available event
+                __event_StatUpgradesAvailable(
+                    ref self,
+                    AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    }
+                );
+            }
+
             handle_item_leveling_events(
                 ref self,
                 adventurer,
                 adventurer_id,
                 item.id,
-                original_level,
+                previous_level,
                 new_level,
                 suffix_assigned,
                 prefix_assigned,
@@ -2024,6 +2066,14 @@ mod Game {
             new_level: new_level
         );
 
+        // emit stat upgrades available event
+        __event_StatUpgradesAvailable(
+            ref self,
+            adventurer_state: AdventurerState {
+                owner: get_caller_address(), adventurer_id, adventurer
+            },
+        );
+
         // emit new items availble with available items
         __event_NewItemsAvailable(
             ref self,
@@ -2560,6 +2610,41 @@ mod Game {
         damage_taken: u16
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct StatUpgradesAvailable {
+        adventurer_state: AdventurerState, 
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct StrengthUpgraded {
+        adventurer_state: AdventurerState, 
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct DexterityUpgraded {
+        adventurer_state: AdventurerState, 
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct VitalityUpgraded {
+        adventurer_state: AdventurerState, 
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct IntelligenceUpgraded {
+        adventurer_state: AdventurerState, 
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct WisdomUpgraded {
+        adventurer_state: AdventurerState, 
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct CharismaUpgraded {
+        adventurer_state: AdventurerState, 
+    }
+
     fn __event__StartGame(
         ref self: ContractState,
         adventurer_state: AdventurerState,
@@ -2779,5 +2864,33 @@ mod Game {
                     IdleDamagePenalty { adventurer_state, idle_blocks, damage_taken }
                 )
             );
+    }
+
+    fn __event_StatUpgradesAvailable(ref self: ContractState, adventurer_state: AdventurerState) {
+        self.emit(Event::StatUpgradesAvailable(StatUpgradesAvailable { adventurer_state }));
+    }
+
+    fn __event_StrengthUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
+        self.emit(Event::StrengthUpgraded(StrengthUpgraded { adventurer_state }));
+    }
+
+    fn __event_DexterityUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
+        self.emit(Event::DexterityUpgraded(DexterityUpgraded { adventurer_state }));
+    }
+
+    fn __event_VitalityUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
+        self.emit(Event::VitalityUpgraded(VitalityUpgraded { adventurer_state }));
+    }
+
+    fn __event_IntelligenceUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
+        self.emit(Event::IntelligenceUpgraded(IntelligenceUpgraded { adventurer_state }));
+    }
+
+    fn __event_WisdomUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
+        self.emit(Event::WisdomUpgraded(WisdomUpgraded { adventurer_state }));
+    }
+
+    fn __event_CharismaUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
+        self.emit(Event::CharismaUpgraded(CharismaUpgraded { adventurer_state }));
     }
 }
