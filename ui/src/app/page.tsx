@@ -1,12 +1,10 @@
 "use client";
 import { useAccount, useConnectors } from "@starknet-react/core";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "./components/buttons/Button";
 import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
 import ActionsScreen from "./containers/ActionsScreen";
-import MarketplaceScreen from "./containers/MarketplaceScreen";
 import AdventurerScreen from "./containers/AdventurerScreen";
-import BeastScreen from "./containers/BeastScreen";
 import InventoryScreen from "./containers/InventoryScreen";
 import LeaderboardScreen from "./containers/LeaderboardScreen";
 import EncountersScreen from "./containers/EncountersScreen";
@@ -39,9 +37,7 @@ import {
   CogIcon,
   MuteIcon,
   VolumeIcon,
-  CartIcon,
-  SkullIcon,
-  SmileIcon,
+  CartIcon
 } from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
@@ -131,7 +127,7 @@ export default function Home() {
       setScreen("upgrade");
     }
     console.log(adventurer?.statUpgrades);
-  }, [updatedAdventurer, adventurer?.statUpgrades]);
+  }, [updatedAdventurer, adventurer?.statUpgrades, setAdventurer, setScreen]);
 
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
@@ -150,136 +146,110 @@ export default function Home() {
   }, [setIndexer]);
 
   useEffect(() => {
-    if (onboarded) {
-      const commonMenuItems = (isMobile = false) => [
-        {
-          id: isMobile ? 2 : 1,
-          label: "Start",
-          screen: "start",
-          disabled: false,
-        },
-        ...(adventurer
-          ? [
-              {
-                id: isMobile ? 3 : 2,
-                label: "Play",
-                screen: "play",
-                disabled: adventurer?.statUpgrades || adventurer.health == 0,
-              },
-              {
-                id: isMobile ? 4 : 3,
-                label: "Inventory",
-                screen: "inventory",
-                disabled: adventurer.health == 0,
-              },
-              // {
-              //   id: isMobile ? 5 : 4,
-              //   label: "Beast",
-              //   screen: "beast",
-              //   disabled: statUpgrades > 0 || adventurer.health == 0,
-              // },
-              {
-                id: isMobile ? 6 : 5,
-                label: adventurer?.statUpgrades ? (
-                  <span>Upgrade!</span>
-                ) : (
-                  "Upgrade"
-                ),
-                screen: "upgrade",
-                disabled: !adventurer?.statUpgrades,
-              },
-              // {
-              //   id: isMobile ? 7 : 6,
-              //   label: "Market",
-              //   screen: "market",
-              //   disabled:
-              //     !(statUpgrades > 0) ||
-              //     hasBeast ||
-              //     adventurer.health == 0 ||
-              //     purchaseExists(),
-              // },
-            ]
-          : []),
-        ...(isMobile
-          ? []
-          : [
-              {
-                id: 7,
-                label: "Leaderboard",
-                screen: "leaderboard",
-                disabled: false,
-              },
-              {
-                id: 8,
-                label: "Encounters",
-                screen: "encounters",
-                disabled: false,
-              },
-              {
-                id: 9,
-                label: "Guide",
-                screen: "guide",
-                disabled: false,
-              },
-            ]),
-      ];
-
-      const newMenu: any = adventurer
-        ? commonMenuItems()
-        : [{ id: 1, label: "Start", screen: "start", disabled: false }];
-
-      const newMobileMenu: any = adventurer
-        ? commonMenuItems(true)
-        : [{ id: 1, label: "Start", screen: "start", disabled: false }];
-
-      setMenu(newMenu);
-      setMobileMenu(newMobileMenu);
-    }
-  }, [adventurer, account, onboarded, hasBeast, adventurer?.statUpgrades]);
-
-  useEffect(() => {
-    if (onboarded) return;
-
+    const commonMenuItems = (isMobile = false) => [
+      {
+        id: isMobile ? 2 : 1,
+        label: "Start",
+        screen: "start",
+        disabled: false,
+      },
+      ...(adventurer
+        ? [
+            {
+              id: isMobile ? 3 : 2,
+              label: "Play",
+              screen: "play",
+              disabled: adventurer?.statUpgrades || adventurer.health == 0,
+            },
+            {
+              id: isMobile ? 4 : 3,
+              label: "Inventory",
+              screen: "inventory",
+              disabled: adventurer.health == 0,
+            },
+            {
+              id: isMobile ? 6 : 5,
+              label: adventurer?.statUpgrades ? (
+                <span>Upgrade!</span>
+              ) : (
+                "Upgrade"
+              ),
+              screen: "upgrade",
+              disabled: !adventurer?.statUpgrades,
+            },
+          ]
+        : []),
+      ...(isMobile
+        ? []
+        : [
+            {
+              id: 7,
+              label: "Leaderboard",
+              screen: "leaderboard",
+              disabled: false,
+            },
+            {
+              id: 8,
+              label: "Encounters",
+              screen: "encounters",
+              disabled: false,
+            },
+            {
+              id: 9,
+              label: "Guide",
+              screen: "guide",
+              disabled: false,
+            },
+          ]),
+    ];
+  
     const createMenu = (label: string, screen: any) => {
       const menuData = {
         id: 1,
         label: label,
         screen: screen,
       };
-
+  
       setMenu([menuData]);
       setMobileMenu([menuData]);
       setScreen(screen);
-      showTutorialDialog(true);
     };
-
-    const hasAdventurers = adventurers.length > 0;
-    const adventurerExistsAndHasXP = adventurer?.xp === 0;
-
-    if (!hasAdventurers) {
-      createMenu("Start", "start");
-    } else if (adventurerExistsAndHasXP) {
-      createMenu("Play", "play");
+  
+    if (onboarded) {
+      const newMenu: any = adventurer
+        ? commonMenuItems()
+        : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+  
+      const newMobileMenu: any = adventurer
+        ? commonMenuItems(true)
+        : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+  
+      setMenu(newMenu);
+      setMobileMenu(newMobileMenu);
     } else {
-      handleOnboarded();
-      refetch("adventurersByOwnerQuery");
+      const hasAdventurers = adventurers.length > 0;
+      const adventurerExistsAndHasXP = adventurer?.xp === 0;
+  
+      if (!hasAdventurers) {
+        createMenu("Start", "start");
+      } else if (adventurerExistsAndHasXP) {
+        createMenu("Play", "play");
+      } else {
+        handleOnboarded();
+        refetch("adventurersByOwnerQuery");
+      }
     }
   }, [
-    onboarded,
     adventurer,
     account,
+    onboarded,
+    hasBeast,
+    adventurer?.statUpgrades,
     adventurers.length,
     handleOnboarded,
     refetch,
-    setScreen,
-    showTutorialDialog,
+    setScreen
   ]);
-
-  // useEffect(() => {
-  //   if (statUpgrades > 0 && adventurer?.health !== 0) {
-  //     setScreen("upgrade");
-  //   }
-  // }, [statUpgrades, adventurer?.health, setScreen]);
 
   // fetch adventurers on app start and account switch
   useEffect(() => {
@@ -384,12 +354,12 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                      <AddDevnetEthButton />
-                    )}
+                        <AddDevnetEthButton />
+                      )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                      <MintEthButton />
-                    )}
+                        <MintEthButton />
+                      )}
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}

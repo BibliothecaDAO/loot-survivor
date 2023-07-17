@@ -10,10 +10,6 @@ const Intro = () => {
   const [screen, setScreen] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
-  const [initiated, setInitiated] = useState<boolean>(false);
-
-  const [introComplete, setIntroComplete] = useState<boolean>(false);
-
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       switch (event.key) {
@@ -55,40 +51,25 @@ const Intro = () => {
   };
 
   return (
-    /* {!initiated ? (
-        <div className="flex flex-wrap justify-center p-20 w-fill">
-          <LootIconLoader size="w-8" />
-          <div className="flex justify-center w-full mt-10">
-            <Button
-              className="animate-pulse"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-              onClick={() => setInitiated(true)}
-            >
-              {buttonText}{" "}
-            </Button>
-          </div>
-        </div>
-      ) : ( */
     <>
       {screen == 0 ? (
-        <div className="flex flex-col w-full h-full p-4 sm:p-8">
-          <div className="flex flex-col">
-            <div className="w-full ">
-              <Image
-                className="mx-auto animate-pulse border border-terminal-green"
-                src={"/scenes/scene2.png"}
-                alt="start"
-                width={425}
-                height={425}
-              />
-            </div>
-            <div className="sm:p-4 text-xs sm:text-xl leading-loose">
+        <div className="flex flex-col w-full h-full">
+          <div className="flex flex-col h-full">
+            <Image
+              className="mx-auto border border-terminal-green absolute object-fill "
+              src={"/scenes/scene2.png"}
+              alt="start"
+              fill
+            />
+            <div className="sm:p-4 text-xs sm:text-xl leading-loose z-10 mt-auto">
               <TypeAnimation
                 sequence={[
                   prologue,
                   () => {
-                    setScreen(1);
+                    setTimeout(() => {
+                      setScreen(1);
+                    }, 2000)
+
                   },
                 ]}
                 wrapper="span"
@@ -112,40 +93,34 @@ const Intro = () => {
           </div>
         </div>
       ) : screen == 1 ? (
-        <div className="flex flex-col w-full h-full p-4 sm:p-8">
+        <div className="flex flex-col w-full h-full">
           <div className="flex flex-col">
-            <div className="w-full">
-              <div className="w-full pb-5">
-                <Image
-                  className="mx-auto animate-pulse border border-terminal-green"
-                  src={"/scenes/scene1.png"}
-                  alt="second screen"
-                  width={450}
-                  height={450}
-                />
-              </div>
-              <div className="p-2 sm:p-4 text-xs sm:text-xl leading-loose">
-                <TypeAnimation
-                  key={screen.toString()}
-                  sequence={[
-                    chapter1,
-                    () => {
-                      setScreen(2);
-                    },
-                  ]}
-                  wrapper="span"
-                  cursor={true}
-                  speed={40}
-                  style={{ fontSize: "2em" }}
-                />
-              </div>
-            </div>
 
-            {/* <div>
-              <Button onClick={() => setScreen(2)} variant={"default"}>
-                skip
-              </Button>
-            </div> */}
+            <Image
+              className="mx-auto border border-terminal-green absolute object-fill "
+              src={"/scenes/scene1.png"}
+              alt="second screen"
+              fill
+            />
+
+            <div className="p-2 sm:p-4 text-xs sm:text-xl leading-loose z-10">
+              <TypeAnimation
+                key={screen.toString()}
+                sequence={[
+                  chapter1,
+                  () => {
+                    setTimeout(() => {
+                      setScreen(2);
+                    }, 3000)
+                  },
+                ]}
+                wrapper="span"
+                cursor={true}
+                speed={40}
+                style={{ fontSize: "2em" }}
+              />
+
+            </div>
           </div>
           <div className="flex flex-row gap-10 m-auto">
             <Button
