@@ -7,7 +7,6 @@ import { getAdventurerById } from "../hooks/graphql/queries";
 import { useState } from "react";
 import EncountersScreen from "./EncountersScreen";
 import { useMediaQuery } from "react-responsive";
-import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
 export default function Profile() {
   const { data } = useQueriesStore();

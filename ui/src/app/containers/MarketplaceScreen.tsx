@@ -1,22 +1,14 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { useContracts } from "../hooks/useContracts";
 import {
-  getLatestMarketItems,
-  getAdventurersInList,
+  getLatestMarketItems
 } from "../hooks/graphql/queries";
 import MarketplaceRow from "../components/marketplace/MarketplaceRow";
 import useAdventurerStore from "../hooks/useAdventurerStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import { CoinIcon } from "../components/icons/Icons";
 import LootIconLoader from "../components/icons/Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import { ItemTemplate } from "../types/templates";
-import useUIStore from "../hooks/useUIStore";
-import { Call, Item } from "../types";
-import { getItemData, getItemPrice, getValueFromKey } from "../lib/utils";
-import { GameData } from "../components/GameData";
-import { ItemClass } from "../lib/classes";
+import {  Item } from "../types";
+import { getItemData } from "../lib/utils";
 
 export interface MarketplaceScreenProps {
   upgradeTotalCost: number;
@@ -30,18 +22,13 @@ export default function MarketplaceScreen({
   upgradeTotalCost,
 }: MarketplaceScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const calls = useTransactionCartStore((state) => state.calls);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const { gameContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
   const [itemsCount, setItemsCount] = useState(0);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const setScreen = useUIStore((state) => state.setScreen);
-  const profile = useUIStore((state) => state.profile);
-  const { data, isLoading, refetch } = useQueriesStore();
+  const { data, isLoading } = useQueriesStore();
 
   useCustomQuery(
     "latestMarketItemsQuery",
@@ -52,17 +39,20 @@ export default function MarketplaceScreen({
     true
   );
 
-  const marketLatestItems = data.latestMarketItemsQuery
-    ? data.latestMarketItemsQuery.items
-    : [];
+  const [marketLatestItems, setMarketLatestItems] = useState<Item[]>([]);
+
+  useEffect(() => {
+    if (data.latestMarketItemsQuery) {
+      setMarketLatestItems(data.latestMarketItemsQuery.items);
+    }
+
+  },[data.latestMarketItemsQuery])
 
   const adventurers = data.adventurersInListQuery
     ? data.adventurersInListQuery.adventurers
     : [];
 
   const headings = ["Item", "Tier", "Slot", "Type", "Cost", "Actions"];
-
-  const gameData = new GameData();
 
   const headingToKeyMapping: { [key: string]: string } = {
     Item: "item",

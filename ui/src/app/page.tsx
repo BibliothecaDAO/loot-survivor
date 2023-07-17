@@ -28,7 +28,7 @@ import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
 import { mainnet_addr, getGraphQLUrl } from "./lib/constants";
-import { Menu, NullAdventurer, Call, Battle } from "./types";
+import { Menu } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
@@ -71,7 +71,10 @@ export default function Home() {
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const [showDeathCount, setShowDeathCount] = useState(true);
-  const hasBeast = (adventurer?.beastHealth ?? 0) > 0;
+  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
+  const hasStatUpgrades = useAdventurerStore((state) => state.computed.hasStatUpgrades);
+  const isAlive = useAdventurerStore((state) => state.computed.isAlive);
+  const hasNoXp = useAdventurerStore((state) => state.computed.hasNoXp);
 
   const playState = useMemo(
     () => ({
@@ -218,23 +221,22 @@ export default function Home() {
       setMobileMenu(newMobileMenu);
   }, [
     adventurer,
-    // onboarded,
     setScreen
   ]);
 
   useEffect(() => {
-    if (adventurer?.xp === 0) {
+    if (hasNoXp) {
       console.log("page", "play");
       setScreen("play");
     }
-    if (adventurer?.statUpgrades ?? 0 > 0) {
+    if (hasStatUpgrades) {
       console.log("page", "upgrade");
       setScreen("upgrade");
     }
-    if (!adventurer || adventurer?.health == 0) {
+    if (!adventurer || !isAlive) {
       setScreen("start");
     }
-  }, [adventurer, setScreen]);
+  }, [adventurer, setScreen, hasStatUpgrades, isAlive, hasNoXp]);
 
   useEffect(() => {
     if (adventurers.length > 0) {

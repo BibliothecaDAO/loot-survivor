@@ -40,6 +40,7 @@ import { UpgradeNav } from "../components/upgrade/UpgradeNav";
 export default function UpgradeScreen() {
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const currentLevel = useAdventurerStore((state) => state.computed.currentLevel);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const loading = useLoadingStore((state) => state.loading);
@@ -68,56 +69,7 @@ export default function UpgradeScreen() {
 
   const gameData = new GameData();
 
-  const upgradeMenu = [
-    {
-      id: 1,
-      label: `Strength - ${adventurer?.strength}`,
-      icon: <ArrowTargetIcon />,
-      value: "Strength",
-      action: async () => setSelected("Strength"),
-      disabled: loading,
-    },
-    {
-      id: 2,
-      label: `Dexterity - ${adventurer?.dexterity}`,
-      icon: <CatIcon />,
-      value: "Dexterity",
-      action: async () => setSelected("Dexterity"),
-      disabled: loading,
-    },
-    {
-      id: 3,
-      label: `Vitality - ${adventurer?.vitality}`,
-      icon: <HeartVitalityIcon />,
-      value: "Vitality",
-      action: async () => setSelected("Vitality"),
-      disabled: loading,
-    },
-    {
-      id: 4,
-      label: `Intelligence - ${adventurer?.intelligence}`,
-      icon: <LightbulbIcon />,
-      value: "Intelligence",
-      action: async () => setSelected("Intelligence"),
-      disabled: loading,
-    },
-    {
-      id: 5,
-      label: `Wisdom - ${adventurer?.wisdom}`,
-      icon: <ScrollIcon />,
-      value: "Wisdom",
-      action: async () => setSelected("Wisdom"),
-      disabled: loading,
-    },
-    {
-      id: 6,
-      label: `Charisma - ${adventurer?.charisma}`,
-      icon: <CoinCharismaIcon />,
-      value: "Charisma",
-      action: async () => setSelected("Charisma"),
-      disabled: loading,
-    },
-  ];
+
 
   const handleUpgradeTx = async (selected: any) => {
     const upgradeTx = {
@@ -195,8 +147,6 @@ export default function UpgradeScreen() {
     query: "(max-device-width: 480px)",
   });
 
-  const currentLevel = adventurer?.level ?? 0;
-
   const previousLevel = currentLevel - (adventurer?.statUpgrades ?? 0);
 
   function renderContent() {
@@ -209,6 +159,56 @@ export default function UpgradeScreen() {
   }
 
   function renderVerticalKeyboardControl() {
+    const upgradeMenu = [
+      {
+        id: 1,
+        label: `Strength - ${adventurer?.strength}`,
+        icon: <ArrowTargetIcon />,
+        value: "Strength",
+        action: async () => setSelected("Strength"),
+        disabled: loading,
+      },
+      {
+        id: 2,
+        label: `Dexterity - ${adventurer?.dexterity}`,
+        icon: <CatIcon />,
+        value: "Dexterity",
+        action: async () => setSelected("Dexterity"),
+        disabled: loading,
+      },
+      {
+        id: 3,
+        label: `Vitality - ${adventurer?.vitality}`,
+        icon: <HeartVitalityIcon />,
+        value: "Vitality",
+        action: async () => setSelected("Vitality"),
+        disabled: loading,
+      },
+      {
+        id: 4,
+        label: `Intelligence - ${adventurer?.intelligence}`,
+        icon: <LightbulbIcon />,
+        value: "Intelligence",
+        action: async () => setSelected("Intelligence"),
+        disabled: loading,
+      },
+      {
+        id: 5,
+        label: `Wisdom - ${adventurer?.wisdom}`,
+        icon: <ScrollIcon />,
+        value: "Wisdom",
+        action: async () => setSelected("Wisdom"),
+        disabled: loading,
+      },
+      {
+        id: 6,
+        label: `Charisma - ${adventurer?.charisma}`,
+        icon: <CoinCharismaIcon />,
+        value: "Charisma",
+        action: async () => setSelected("Charisma"),
+        disabled: loading,
+      },
+    ];
     return (
       <div className="sm:w-1/3">
         <VerticalKeyboardControl
@@ -234,7 +234,7 @@ export default function UpgradeScreen() {
       const value = potionsFilter;
       const parsedValue = value ? parseInt(value.toString(), 10) : 0;
       const purchaseGoldAmount = Math.max(
-        parsedValue * (2 * (adventurer?.level ?? 0)) -
+        parsedValue * (2 * currentLevel) -
           2 * (adventurer?.charisma ?? 0),
         2
       );

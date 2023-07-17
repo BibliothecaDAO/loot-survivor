@@ -1,7 +1,6 @@
 import { useContracts } from "../hooks/useContracts";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import KeyboardControl, { ButtonData } from "../components/KeyboardControls";
-import Info from "../components/adventurer/Info";
 import { BattleDisplay } from "../components/beast/BattleDisplay";
 import { BeastDisplay } from "../components/beast/BeastDisplay";
 import useLoadingStore from "../hooks/useLoadingStore";
@@ -10,25 +9,20 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { useState } from "react";
 import useUIStore from "../hooks/useUIStore";
-import { padAddress, processBeastName } from "../lib/utils";
+import { processBeastName } from "../lib/utils";
 import useCustomQuery from "../hooks/useCustomQuery";
 import {
   getBattlesByBeast,
   getBeast,
   getLastBeastDiscovery,
-  getLastBattleByAdventurer,
-  getAdventurerById,
-  getBattleByTxHash,
+  getLastBattleByAdventurer
 } from "../hooks/graphql/queries";
-import { useMediaQuery } from "react-responsive";
 import {
   NullAdventurer,
-  NullBattle,
   Battle,
   NullDiscovery,
   NullBeast,
 } from "../types";
-import { DiscoveryTemplate, BattleTemplate } from "../types/templates";
 
 /**
  * @container
@@ -50,6 +44,9 @@ export default function BeastScreen() {
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const onboarded = useUIStore((state) => state.onboarded);
   const hash = useLoadingStore((state) => state.hash);
+
+  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
+  const isAlive = useAdventurerStore((state) => state.computed.isAlive);
 
   const { data } = useQueriesStore();
 
@@ -194,7 +191,6 @@ export default function BeastScreen() {
     },
   ];
 
-  const isBeastDead = adventurer?.health == 0;
 
   const beastName = processBeastName(
     beastData?.beast ?? "",
@@ -204,10 +200,8 @@ export default function BeastScreen() {
 
   return (
     <>
-      {/* {isMobileDevice ? (
-        <> */}
       <div className="sm:w-1/3 order-1 sm:order-2">
-        {(adventurer?.beastHealth ?? 0 > 0) || lastBattle ? (
+        {hasBeast || lastBattle ? (
           <>
             <BeastDisplay
               beastData={beastData}
@@ -225,9 +219,9 @@ export default function BeastScreen() {
       </div>
 
       <div className="flex flex-col sm:w-1/3 gap-5 p-4 order-1">
-        {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
+        {isAlive && <KeyboardControl buttonsData={buttonsData} />}
 
-        {((adventurer?.beastHealth ?? 0 > 0) || formatBattles.length > 0) && (
+        {(hasBeast || formatBattles.length > 0) && (
           <>
             <div className="flex flex-col items-center gap-5 p-2">
               <div className="text-xl uppercase">
@@ -248,53 +242,6 @@ export default function BeastScreen() {
           </>
         )}
       </div>
-      {/* </>
-      ) : (
-        <>
-          <div className="flex flex-col sm:w-1/3 gap-10 p-4">
-            {!isBeastDead && <KeyboardControl buttonsData={buttonsData} />}
-
-            {((adventurer?.beastHealth ?? 0 > 0) ||
-              formatBattles.length > 0) && (
-              <>
-                <div className="flex flex-col items-center gap-5 p-2">
-                  <div className="text-xl uppercase">
-                    Battle log with {beastData?.beast}
-                  </div>
-                  <div className="flex flex-col gap-2 w-full">
-                    {formatBattles.map((battle: Battle, index: number) => (
-                      <BattleDisplay
-                        key={index}
-                        battleData={battle}
-                        beastName={beastName}
-                        adventurer={adventurer ?? NullAdventurer}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-
-          <div className="sm:w-1/3">
-            {(adventurer?.beastHealth ?? 0 > 0) || lastBattle ? (
-              <>
-                <BeastDisplay
-                  beastData={beastData}
-                  lastBattle={formatBattles[0]}
-                  adventurer={adventurer ?? NullAdventurer}
-                />
-              </>
-            ) : (
-              <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
-                <p className="m-auto text-lg uppercase text-terminal-green">
-                  Beast not yet discovered.
-                </p>
-              </div>
-            )}
-          </div>
-        </>
-      )} */}
     </>
   );
 }
