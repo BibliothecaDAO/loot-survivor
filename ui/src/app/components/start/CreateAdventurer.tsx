@@ -214,34 +214,38 @@ export const CreateAdventurer = ({
   if (step === 1) {
     return (
       <>
-        <div className="w-full p-8">
+        <div className="w-3/4 sm:w-full p-8">
           <h2 className="uppercase">Choose your weapon</h2>
           <div className="flex flex-row justify-between gap-20">
             {[
               {
                 name: "Book",
                 description: "Magic Weapon",
+                image: "/weapons/Book.png",
                 icon: <MagicIcon />,
               },
               {
                 name: "Wand",
                 description: "Magic Weapon",
+                image: "/weapons/wand.png",
                 icon: <MagicIcon />,
               },
               {
                 name: "Short Sword",
                 description: "Blade Weapon",
+                image: "/weapons/shortsword.png",
                 icon: <BladeIcon />,
               },
               {
                 name: "Club",
                 description: "Bludgeon Weapon",
+                image: "/weapons/club.png",
                 icon: <BludgeonIcon />,
               },
             ].map((weapon) => (
               <div key={weapon.name} className="flex flex-col items-center">
                 <Image
-                  src={`/weapons/${weapon.name}.png`}
+                  src={weapon.image}
                   width={200}
                   height={200}
                   alt={weapon.name}
