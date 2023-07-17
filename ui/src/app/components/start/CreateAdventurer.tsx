@@ -229,7 +229,7 @@ export const CreateAdventurer = ({
                 icon: <MagicIcon />,
               },
               {
-                name: "ShortSword",
+                name: "Short Sword",
                 description: "Blade Weapon",
                 icon: <BladeIcon />,
               },
@@ -289,7 +289,7 @@ export const CreateAdventurer = ({
     return (
       <>
         <div className="w-full items-center uppercase">
-          <h3>Oh no, there's a beast coming! Prepare for attack!</h3>
+          <h3>Oh no, there&apos;s a beast coming! Prepare for attack!</h3>
           <div className="items-center flex flex-col gap-2">
             <Image
               src={`/monsters/starterbeast.png`}
