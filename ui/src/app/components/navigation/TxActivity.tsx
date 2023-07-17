@@ -37,6 +37,7 @@ export const TxActivity = () => {
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const setScreen = useUIStore((state) => state.setScreen);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
@@ -101,10 +102,6 @@ export const TxActivity = () => {
     txAccepted
   );
 
-  console.log(loadingQuery);
-  console.log(queryData[loadingQuery ?? "adventurerByIdQuery"]);
-  console.log(isLoadingQueryUpdated);
-
   useEffect(() => {
     const fetchData = async () => {
       if (!txAccepted || !hash || !isLoadingQueryUpdated) return;
@@ -164,7 +161,9 @@ export const TxActivity = () => {
       };
 
       const handleUpgrade = async () => {
+        await refetch("adventurerByIdQuery");
         stopLoading(notificationData);
+        setScreen("play");
       };
 
       const handleMulticall = async () => {
@@ -194,6 +193,8 @@ export const TxActivity = () => {
         setTxAccepted(false);
         resetDataUpdated(loadingQuery);
       };
+
+      console.log(type);
 
       try {
         switch (type) {

@@ -256,7 +256,6 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
       const warningMessage = `No refetch function found for query key: ${queryKey}`;
       console.warn(warningMessage);
       throw new Error(warningMessage); // This will throw the error to be caught in the component
-
     }
   },
 }));

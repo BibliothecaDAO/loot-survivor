@@ -64,7 +64,7 @@ export default function UpgradeScreen() {
     adventurer?.health == maxHealth ? 2 : 1
   );
 
-  const { data } = useQueriesStore();
+  const { data, resetDataUpdated } = useQueriesStore();
 
   const gameData = new GameData();
 
@@ -77,6 +77,8 @@ export default function UpgradeScreen() {
     txAccepted
   );
 
+  console.log(adventurer?.id ?? 0);
+  console.log(txAccepted);
   console.log(data.adventurerByIdQuery?.adventurers[0]);
 
   useCustomQuery(
@@ -85,7 +87,7 @@ export default function UpgradeScreen() {
     {
       adventurerId: adventurer?.id,
     },
-    true
+    txAccepted
   );
 
   const handleUpgradeTx = async (selected: any) => {
@@ -108,7 +110,7 @@ export default function UpgradeScreen() {
     );
     handleSubmitCalls(writeAsync).then((tx: any) => {
       if (tx) {
-        setTxHash(tx?.transaction_hash);
+        setTxHash(tx.transaction_hash);
         addTransaction({
           hash: tx.transaction_hash,
           metadata: {
@@ -118,6 +120,7 @@ export default function UpgradeScreen() {
         });
       }
     });
+    resetDataUpdated("adventurerByIdQuery");
   };
 
   const Attribute = ({ name, description, buttonText }: any): ReactElement => (

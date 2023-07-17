@@ -82,6 +82,7 @@ export default function Home() {
   const { data, refetch } = useQueriesStore();
 
   const latestAdventurer = data.adventurerByIdQuery?.adventurers[0];
+  console.log(latestAdventurer);
 
   const playState = useMemo(
     () => ({
@@ -127,7 +128,7 @@ export default function Home() {
       console.log("updated");
       setAdventurer(data.adventurerByIdQuery.adventurers[0]);
     }
-  }, [latestAdventurer]);
+  }, [data.adventurerByIdQuery]);
 
   useEffect(() => {
     if (!account?.address) {

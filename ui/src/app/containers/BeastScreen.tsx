@@ -90,6 +90,8 @@ export default function BeastScreen() {
 
   let beastData = data.beastQuery ? data.beastQuery.beasts[0] : NullBeast;
 
+  console.log(txAccepted);
+  console.log(lastBeast?.entity, lastBeast?.seed);
   const formatBattles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
     : [];
