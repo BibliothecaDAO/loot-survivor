@@ -24,7 +24,7 @@ const ItemBar: React.FC<ItemBarProps> = ({ xp }) => {
         <span>Greatness</span>
         <span>{level + 1}</span>
       </div>
-      <div className="w-full h-1 border border-black bg-terminal-green ">
+      <div className="w-full h-1 border border-black bg-terminal-green dark:bg-terminal-green ">
         <div
           className="h-full bg-black"
           style={{ width: `${progress}%` }}

@@ -167,7 +167,7 @@ export default function LeaderboardScree() {
         </h3>
       )}
       <div className="flex flex-col-reverse sm:flex-row justify-between w-full">
-        <div className="flex flex-col w-full mb-4 sm:mb-0 mr-4 flex-grow-2">
+        <div className="flex flex-col w-full mb-4 sm:mb-0 mr-4 flex-grow-2 border border-terminal-green p-2">
           <h4 className="text-center text-lg sm:text-2xl">Live Leaderboard</h4>
           <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
             <thead className="border border-terminal-green">
@@ -260,7 +260,7 @@ export default function LeaderboardScree() {
             </div>
           )}
         </div>
-        <div className="flex flex-col w-full border border-terminal-green sm:h-1/2 p-2">
+        <div className="flex flex-col w-full border border-terminal-green  p-2">
           <KillAdventurer />
         </div>
       </div>
