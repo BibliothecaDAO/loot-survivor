@@ -19,7 +19,7 @@ export interface EncountersProps {
   profile?: number;
 }
 interface FormattedDiscovery extends Discovery {
-  timestamp: string | undefined;
+  timestamp: Date | undefined;
 }
 
 /**
