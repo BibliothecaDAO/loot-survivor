@@ -69,15 +69,6 @@ export default function ActionsScreen() {
     txAccepted
   );
 
-  useCustomQuery(
-    "battlesByTxHashQuery",
-    getBattleByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted
-  );
-
   const latestDiscoveries = data.latestDiscoveriesQuery
     ? data.latestDiscoveriesQuery.discoveries
     : [];

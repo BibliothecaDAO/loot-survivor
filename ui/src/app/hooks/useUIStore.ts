@@ -33,6 +33,8 @@ type State = {
   setDisplayCart: (value: boolean) => void;
   // purchasedItem: boolean;
   // setPurchasedItem: (value: boolean) => void;
+  lastAction: Date | null;
+  setLastAction: (value: Date | null) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -56,6 +58,8 @@ const useUIStore = create<State>((set) => ({
   setDisplayCart: (value) => set({ displayCart: value }),
   // purchasedItem: false,
   // setPurchasedItem: (value) => set({ purchasedItem: value }),
+  lastAction: null,
+  setLastAction: (value) => set({ lastAction: value }),
 }));
 
 export default useUIStore;

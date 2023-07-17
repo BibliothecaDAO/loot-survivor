@@ -11,6 +11,8 @@ import useUIStore from "@/app/hooks/useUIStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
 import { NullAdventurer } from "@/app/types";
+import useCustomQuery from "@/app/hooks/useCustomQuery";
+import { getBattleByTxHash } from "@/app/hooks/graphql/queries";
 
 export interface TxActivityProps {
   hash: string | undefined;
@@ -76,9 +78,14 @@ export const TxActivity = () => {
     showDeathDialog(true);
   };
 
-  console.log(isLoadingQueryUpdated);
-  console.log(queryData["battlesByTxHashQuery"]);
-  console.log(hash);
+  useCustomQuery(
+    "battlesByTxHashQuery",
+    getBattleByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    txAccepted
+  );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,6 +98,9 @@ export const TxActivity = () => {
         await refetch("adventurerByIdQuery");
         await refetch("battlesByBeastQuery");
         console.log("in battle!");
+        setAdventurer(
+          queryData?.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
+        );
         stopLoading({
           data: queryData.battlesByTxHashQuery.battles,
           beast: notificationData.beast,
