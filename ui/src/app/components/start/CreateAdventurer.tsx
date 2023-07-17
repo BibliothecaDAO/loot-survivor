@@ -45,6 +45,7 @@ export const CreateAdventurer = ({
   });
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const setScreen = useUIStore((state) => state.setScreen);
+  const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
 
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -97,13 +98,6 @@ export const CreateAdventurer = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isActive, selectedIndex, handleKeyDown]);
-
-  useEffect(() => {
-    if (adventurers[0] && firstAdventurer) {
-      setScreen("play");
-      setAdventurer(adventurers[0]);
-    }
-  }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -161,25 +155,15 @@ export const CreateAdventurer = ({
             method: `Spawn ${formData.name}`,
           },
         });
+        // setMintAdventurer(true);
       }
     });
-
-    if (!adventurers[0]) {
-      setFirstAdventurer(true);
-    }
   };
-
-  // const realm = getRealmNameById(parseInt(formData.homeRealmId) ?? 0);
 
   const [formFilled, setFormFilled] = useState(false);
 
   useEffect(() => {
-    if (
-      // formData.homeRealmId &&
-      formData.name &&
-      formData.startingWeapon
-      // formData.race
-    ) {
+    if (formData.name && formData.startingWeapon) {
       setFormFilled(true);
     } else {
       setFormFilled(false);

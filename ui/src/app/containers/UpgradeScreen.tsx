@@ -5,12 +5,16 @@ import {
   getItemData,
   getValueFromKey,
   getItemPrice,
+  padAddress,
 } from "../lib/utils";
 import { GameData } from "../components/GameData";
 import VerticalKeyboardControl from "../components/menu/VerticalMenu";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import useCustomQuery from "../hooks/useCustomQuery";
-import { getAdventurerById } from "../hooks/graphql/queries";
+import {
+  getAdventurerById,
+  getLatestMarketItems,
+} from "../hooks/graphql/queries";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
@@ -62,16 +66,27 @@ export default function UpgradeScreen() {
 
   const { data } = useQueriesStore();
 
+  const gameData = new GameData();
+
   useCustomQuery(
     "adventurerByIdQuery",
     getAdventurerById,
     {
       id: adventurer?.id ?? 0,
     },
-    true
+    txAccepted
   );
 
-  const gameData = new GameData();
+  console.log(data.adventurerByIdQuery?.adventurers[0]);
+
+  useCustomQuery(
+    "latestMarketItemsQuery",
+    getLatestMarketItems,
+    {
+      adventurerId: adventurer?.id,
+    },
+    true
+  );
 
   const handleUpgradeTx = async (selected: any) => {
     const upgradeTx = {

@@ -12,13 +12,10 @@ import useLoadingStore from "../hooks/useLoadingStore";
 
 import {
   getAdventurerById,
-  getBattleByTxHash,
-  getDiscoveryByTxHash,
   getAdventurerByXP,
   getAdventurersByOwner,
 } from "../hooks/graphql/queries";
 import useAdventurerStore from "../hooks/useAdventurerStore";
-import { TutorialDialog } from "../components/tutorial/TutorialDialog";
 
 /**
  * @container
@@ -31,17 +28,17 @@ export default function AdventurerScreen() {
   const { account } = useAccount();
   const { data } = useQueriesStore();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const hash = useLoadingStore((state) => state.hash);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
 
   const owner = account?.address ? padAddress(account.address) : "";
+
   useCustomQuery(
     "adventurerByIdQuery",
     getAdventurerById,
     {
       id: adventurer?.id ?? 0,
     },
-    true
+    txAccepted
   );
 
   useCustomQuery(
@@ -103,14 +100,12 @@ export default function AdventurerScreen() {
             <p className="text-center text-2xl sm:hidden uppercase">
               Adventurers
             </p>
-            
-              <AdventurersList
-                isActive={activeMenu == 1}
-                onEscape={() => setActiveMenu(0)}
-                adventurers={adventurers}
-              />
-       
 
+            <AdventurersList
+              isActive={activeMenu == 1}
+              onEscape={() => setActiveMenu(0)}
+              adventurers={adventurers}
+            />
           </div>
         )}
         {selected === "create adventurer" && (

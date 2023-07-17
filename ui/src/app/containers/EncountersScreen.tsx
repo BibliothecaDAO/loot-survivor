@@ -10,16 +10,14 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import {
   getBattlesByAdventurer,
   getDiscoveries,
-  getBeastsByAdventurer,
 } from "../hooks/graphql/queries";
 import { useQuery } from "@apollo/client";
-import { BattleTemplate, DiscoveryTemplate } from "../types/templates";
 
 export interface EncountersProps {
   profile?: number;
 }
 interface FormattedDiscovery extends Discovery {
-  timestamp: string | undefined;
+  timestamp: Date | undefined;
 }
 
 /**

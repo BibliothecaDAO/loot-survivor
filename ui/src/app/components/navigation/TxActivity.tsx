@@ -12,7 +12,11 @@ import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
 import { NullAdventurer } from "@/app/types";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
-import { getBattleByTxHash } from "@/app/hooks/graphql/queries";
+import {
+  getBattleByTxHash,
+  getDiscoveryByTxHash,
+  getAdventurerById,
+} from "@/app/hooks/graphql/queries";
 
 export interface TxActivityProps {
   hash: string | undefined;
@@ -88,6 +92,19 @@ export const TxActivity = () => {
     txAccepted
   );
 
+  useCustomQuery(
+    "discoveryByTxHashQuery",
+    getDiscoveryByTxHash,
+    {
+      txHash: padAddress(hash),
+    },
+    txAccepted
+  );
+
+  console.log(loadingQuery);
+  console.log(queryData[loadingQuery ?? "adventurerByIdQuery"]);
+  console.log(isLoadingQueryUpdated);
+
   useEffect(() => {
     const fetchData = async () => {
       if (!txAccepted || !hash || !isLoadingQueryUpdated) return;
@@ -147,7 +164,6 @@ export const TxActivity = () => {
       };
 
       const handleUpgrade = async () => {
-        await refetch("adventurerByIdQuery");
         stopLoading(notificationData);
       };
 
@@ -177,7 +193,6 @@ export const TxActivity = () => {
       const handleDataUpdate = () => {
         setTxAccepted(false);
         resetDataUpdated(loadingQuery);
-        console.log("here");
       };
 
       try {
@@ -205,7 +220,6 @@ export const TxActivity = () => {
         console.error("An error occurred during fetching:", error);
         // handle error (e.g., update state to show error message)
       }
-      console.log("here");
 
       handleDataUpdate();
     };

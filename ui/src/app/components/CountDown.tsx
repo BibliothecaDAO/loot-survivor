@@ -11,11 +11,11 @@ export const HealthCountDown = ({ health }: any) => {
     end: health,
     delay: 1000,
     duration: 5,
-    onReset: () => console.log("Resetted!"),
-    onUpdate: () => console.log("Updated!"),
-    onPauseResume: () => console.log("Paused or resumed!"),
-    onStart: ({ pauseResume }) => console.log(pauseResume),
-    onEnd: ({ pauseResume }) => console.log(pauseResume),
+    // onReset: () => console.log("Resetted!"),
+    // onUpdate: () => console.log("Updated!"),
+    // onPauseResume: () => console.log("Paused or resumed!"),
+    // onStart: ({ pauseResume }) => console.log(pauseResume),
+    // onEnd: ({ pauseResume }) => console.log(pauseResume),
   });
 
   useEffect(() => {
@@ -32,18 +32,27 @@ export const HealthCountDown = ({ health }: any) => {
   );
 };
 
+export interface PenaltyCountDownProps {
+  lastDiscoveryTime?: Date;
+  lastBattleTime?: Date;
+}
+
 export const PenaltyCountDown = ({
   lastDiscoveryTime,
   lastBattleTime,
-}: any) => {
+}: PenaltyCountDownProps) => {
   const [seconds, setSeconds] = useState(0);
   const [displayTime, setDisplayTime] = useState("");
 
   const finishedMessage = "You have reached idle penalty!";
   const countingMessage = "Time until idle penalty:";
 
+  console.log(lastDiscoveryTime, lastBattleTime);
+
   const lastAction =
-    lastDiscoveryTime > lastBattleTime ? lastDiscoveryTime : lastBattleTime;
+    (lastDiscoveryTime ?? 0) > (lastBattleTime ?? 0)
+      ? lastDiscoveryTime ?? 0
+      : lastBattleTime ?? 0;
 
   const lastTime = new Date(lastAction);
 
