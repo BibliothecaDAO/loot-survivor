@@ -10,7 +10,6 @@ import { processNotification } from "../../components/navigation/NotificationDis
 import useUIStore from "@/app/hooks/useUIStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
-import { NullAdventurer } from "@/app/types";
 
 export interface TxActivityProps {
   hash: string | undefined;
@@ -32,7 +31,8 @@ export const TxActivity = () => {
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
+  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
+  const isAlive = useAdventurerStore((state) => state.computed.isAlive);
   const {
     data: queryData,
     isDataUpdated,
@@ -52,7 +52,6 @@ export const TxActivity = () => {
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
   const isLoadingQueryUpdated = loadingQuery && isDataUpdated[loadingQuery];
-  const hasBeast = (adventurer?.beastHealth ?? 0) > 0;
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
@@ -96,10 +95,10 @@ export const TxActivity = () => {
           beast: notificationData.beast,
         });
         const killedByBeast = queryData.battlesByTxHashQuery.battles.some(
-          (battle) => battle.attacker == "Beast" && adventurer?.health == 0
+          (battle) => battle.attacker == "Beast" && !isAlive
         );
         const killedByPenalty = queryData.battlesByTxHashQuery.battles.some(
-          (battle) => !battle.attacker && adventurer?.health == 0
+          (battle) => !battle.attacker && !isAlive
         );
         console.log(killedByBeast || killedByPenalty);
         if (killedByBeast || killedByPenalty) {
@@ -125,7 +124,7 @@ export const TxActivity = () => {
           (queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
             "Obstacle" ||
             !queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType) &&
-          adventurer?.health == 0;
+          !isAlive;
         console.log(killedByObstacleOrPenalty);
         if (killedByObstacleOrPenalty) {
           setDeathMessage(
@@ -153,7 +152,7 @@ export const TxActivity = () => {
         stopLoading(notificationData);
         const killedFromEquipping =
           (pendingMessage as string[]).includes("Equipping") &&
-          adventurer?.health == 0;
+          !isAlive;
         console.log(killedFromEquipping);
         if (killedFromEquipping) {
           setDeathNotification(type, notificationData, [], hasBeast);
