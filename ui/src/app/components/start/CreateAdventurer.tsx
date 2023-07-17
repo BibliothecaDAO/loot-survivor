@@ -169,17 +169,10 @@ export const CreateAdventurer = ({
     }
   };
 
-  // const realm = getRealmNameById(parseInt(formData.homeRealmId) ?? 0);
-
   const [formFilled, setFormFilled] = useState(false);
 
   useEffect(() => {
-    if (
-      // formData.homeRealmId &&
-      formData.name &&
-      formData.startingWeapon
-      // formData.race
-    ) {
+    if (formData.name && formData.startingWeapon) {
       setFormFilled(true);
     } else {
       setFormFilled(false);
@@ -244,7 +237,7 @@ export const CreateAdventurer = ({
                   alt={weapon.name}
                   className="mb-2"
                 />
-                <div className="flex items-center pb-4">
+                <div className="flex items-center pb-4 text-xs sm:text-md">
                   {weapon.icon}
                   <p className="ml-2">{weapon.description}</p>
                 </div>
