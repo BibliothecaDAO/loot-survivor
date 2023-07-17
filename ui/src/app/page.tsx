@@ -234,6 +234,7 @@ export default function Home() {
       setScreen("upgrade");
     }
     if (!adventurer || !isAlive) {
+      console.log("page", isAlive);
       setScreen("start");
     }
   }, [adventurer, setScreen, hasStatUpgrades, isAlive, hasNoXp]);

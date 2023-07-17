@@ -40,6 +40,8 @@ export default function ActionsScreen() {
   const hash = useLoadingStore((state) => state.hash);
   const [selected, setSelected] = useState<string>("");
 
+  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
+
   const { data } = useQueriesStore();
 
   useCustomQuery(
@@ -92,7 +94,7 @@ export default function ActionsScreen() {
     {
       id: 1,
       label:
-        adventurer?.beastHealth ?? 0 > 0 ? "Beast found!!" : "Into the mist",
+      hasBeast ? "Beast found!!" : "Into the mist",
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
@@ -115,12 +117,10 @@ export default function ActionsScreen() {
           }
         });
       },
-      disabled: (adventurer?.beastHealth ?? 0) > 0 || loading,
+      disabled: hasBeast || loading,
       loading: loading,
     },
   ];
-
-  const beast = adventurer?.beastHealth != null && adventurer?.beastHealth > 0;
 
   return (
     <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 overflow-hidden flex-wrap">
@@ -128,7 +128,7 @@ export default function ActionsScreen() {
         <Info adventurer={adventurer} />
       </div>
 
-      {beast ? (
+      {hasBeast ? (
         <BeastScreen />
       ) : (
         <>
