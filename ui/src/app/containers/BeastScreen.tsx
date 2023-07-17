@@ -15,14 +15,9 @@ import {
   getBattlesByBeast,
   getBeast,
   getLastBeastDiscovery,
-  getLastBattleByAdventurer
+  getLastBattleByAdventurer,
 } from "../hooks/graphql/queries";
-import {
-  NullAdventurer,
-  Battle,
-  NullDiscovery,
-  NullBeast,
-} from "../types";
+import { NullAdventurer, Battle, NullDiscovery, NullBeast } from "../types";
 
 /**
  * @container
@@ -42,7 +37,6 @@ export default function BeastScreen() {
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
-  const onboarded = useUIStore((state) => state.onboarded);
   const hash = useLoadingStore((state) => state.hash);
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
@@ -185,12 +179,10 @@ export default function BeastScreen() {
         adventurer?.beastHealth == undefined ||
         adventurer?.beastHealth == 0 ||
         loading ||
-        !onboarded ||
         beastData?.seed == 0,
       loading: loading,
     },
   ];
-
 
   const beastName = processBeastName(
     beastData?.beast ?? "",
@@ -198,16 +190,14 @@ export default function BeastScreen() {
     beastData?.special3 ?? ""
   );
 
+  console.log(formatBattles);
+
   return (
     <>
       <div className="sm:w-1/3 order-1 sm:order-2">
         {hasBeast || lastBattle ? (
           <>
-            <BeastDisplay
-              beastData={beastData}
-              lastBattle={formatBattles[0]}
-              adventurer={adventurer ?? NullAdventurer}
-            />
+            <BeastDisplay beastData={beastData} lastBattle={formatBattles[0]} />
           </>
         ) : (
           <div className="flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
@@ -227,7 +217,7 @@ export default function BeastScreen() {
               <div className="text-xl uppercase">
                 Battle log with {beastData?.beast}
               </div>
-              <div className="flex flex-col gap-2 text-sm">
+              <div className="flex flex-col gap-2 text-sm overflow-y-auto">
                 {formatBattles.map((battle: Battle, index: number) => (
                   <div className="border p-2 border-terminal-green" key={index}>
                     <BattleDisplay

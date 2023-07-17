@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import {
-  getLatestMarketItems
-} from "../hooks/graphql/queries";
+import { getLatestMarketItems } from "../hooks/graphql/queries";
 import MarketplaceRow from "../components/marketplace/MarketplaceRow";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import LootIconLoader from "../components/icons/Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import {  Item } from "../types";
+import { Item } from "../types";
 import { getItemData } from "../lib/utils";
 
 export interface MarketplaceScreenProps {
@@ -30,23 +28,13 @@ export default function MarketplaceScreen({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const { data, isLoading } = useQueriesStore();
 
-  useCustomQuery(
-    "latestMarketItemsQuery",
-    getLatestMarketItems,
-    {
-      adventurerId: adventurer?.id,
-    },
-    true
-  );
-
   const [marketLatestItems, setMarketLatestItems] = useState<Item[]>([]);
 
   useEffect(() => {
     if (data.latestMarketItemsQuery) {
       setMarketLatestItems(data.latestMarketItemsQuery.items);
     }
-
-  },[data.latestMarketItemsQuery])
+  }, [data.latestMarketItemsQuery]);
 
   const adventurers = data.adventurersInListQuery
     ? data.adventurersInListQuery.adventurers
@@ -156,7 +144,7 @@ export default function MarketplaceScreen({
     : 0;
 
   console.log(calculatedNewGold);
-  
+
   return (
     <>
       {adventurer?.level != 0 ? (

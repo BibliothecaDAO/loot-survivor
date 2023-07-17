@@ -10,14 +10,9 @@ import { HealthCountDown } from "../CountDown";
 interface BeastDisplayProps {
   beastData: Beast;
   lastBattle: Battle;
-  adventurer: Adventurer;
 }
 
-export const BeastDisplay = ({
-  beastData,
-  lastBattle,
-  adventurer,
-}: BeastDisplayProps) => {
+export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
   const beastName = processBeastName(
     beastData?.beast ?? "",
     beastData?.special2 ?? "",

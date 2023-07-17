@@ -59,16 +59,16 @@ export default function Home() {
   const calls = useTransactionCartStore((state) => state.calls);
   const connected = useUIStore((state) => state.connected);
   const setConnected = useUIStore((state) => state.setConnected);
-  const onboarded = useUIStore((state) => state.onboarded);
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const deathDialog = useUIStore((state) => state.deathDialog);
-  const showTutorialDialog = useUIStore((state) => state.showTutorialDialog);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
+  const mintAdventurer = useUIStore((state) => state.mintAdventurer);
+  const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const [showDeathCount, setShowDeathCount] = useState(true);
@@ -78,6 +78,10 @@ export default function Home() {
   );
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
   const hasNoXp = useAdventurerStore((state) => state.computed.hasNoXp);
+
+  const { data, refetch } = useQueriesStore();
+
+  const latestAdventurer = data.adventurerByIdQuery?.adventurers[0];
 
   const playState = useMemo(
     () => ({
@@ -99,8 +103,6 @@ export default function Home() {
     };
   }, [play, stop]);
 
-  const { data, isDataUpdated, refetch } = useQueriesStore();
-
   const [menu, setMenu] = useState<Menu[]>([
     {
       id: 1,
@@ -117,28 +119,30 @@ export default function Home() {
     },
   ]);
 
-  const [adventurers, setAdventurers] = useState<any[]>([]);
-
-  useEffect(() => {
-    if (data.adventurersByOwnerQuery) {
-      setAdventurers(data.adventurersByOwnerQuery.adventurers);
-    }
-  }, [data]);
-
   useEffect(() => {
     if (
       data.adventurerByIdQuery &&
-      (data.adventurerByIdQuery.adventurers[0]?.id ?? 0) > 0
+      data.adventurerByIdQuery.adventurers[0]?.id
     ) {
+      console.log("updated");
       setAdventurer(data.adventurerByIdQuery.adventurers[0]);
     }
-  }, [data.adventurerByIdQuery, setAdventurer]);
+  }, [latestAdventurer]);
 
   useEffect(() => {
     if (!account?.address) {
       setConnected(false);
     }
   }, [account, setConnected]);
+
+  // useEffect(() => {
+  //   if (adventurers[0] && firstAdventurer) {
+  //     setScreen("play");
+  //     setAdventurer(adventurers[0]);
+  //   }
+  // }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
+
+  console.log(adventurer);
 
   useMemo(() => {
     setIndexer(getGraphQLUrl());
@@ -198,18 +202,6 @@ export default function Home() {
           ]),
     ];
 
-    const createMenu = (label: string, screen: any) => {
-      const menuData = {
-        id: 1,
-        label: label,
-        screen: screen,
-      };
-
-      setMenu([menuData]);
-      setMobileMenu([menuData]);
-      setScreen(screen);
-    };
-
     // if (onboarded) {
     const newMenu: any = adventurer
       ? commonMenuItems()
@@ -236,17 +228,18 @@ export default function Home() {
       console.log("page", isAlive);
       setScreen("start");
     }
-  }, [adventurer, setScreen, hasStatUpgrades, isAlive, hasNoXp]);
+  }, [hasStatUpgrades, isAlive, hasNoXp]);
 
-  useEffect(() => {
-    if (adventurers.length > 0) {
-      handleOnboarded();
-    }
-  }, [adventurers, handleOnboarded]);
+  // useEffect(() => {
+  //   if (mintAdventurer) {
+  //     setScreen("play");
+  //     setMintAdventurer(false);
+  //   }
+  // }, [adventurers, mintAdventurer]);
 
   useEffect(() => {
     refetch("adventurersByOwnerQuery");
-  }, [account, refetch]);
+  }, [account]);
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
@@ -265,10 +258,10 @@ export default function Home() {
               <span className="flex flex-row gap-5 items-end">
                 <h1 className="glitch">Loot Survivor</h1>
                 {/* <PenaltyCountDown
-                  lastDiscovery={
-                    data.latestDiscoveriesQuery?.discoveries[0].timestamp ?? 0
+                  lastDiscoveryTime={
+                    data.latestDiscoveriesQuery?.discoveries[0].timestamp
                   }
-                  lastBattle={data.lastBattleQuery?.battles[0].timestamp ?? 0}
+                  lastBattleTime={data.lastBattleQuery?.battles[0].timestamp}
                 /> */}
               </span>
               <div className="flex flex-row items-center self-end gap-2 flex-wrap">

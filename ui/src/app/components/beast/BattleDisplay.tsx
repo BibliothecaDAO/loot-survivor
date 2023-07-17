@@ -178,34 +178,52 @@ export const NotificationBattleDisplay = ({
         (data.beastHealth ?? 0) === 0 &&
         !data.fled
     );
-  const Killed =
+  const KilledByBeast =
     isArray &&
     battleData.some((data) => data.attacker === "Beast") &&
     adventurer?.health === 0;
 
-  return (
-    <div>
-      {BeastFled && <p>You fled the {beastName || ""}!</p>}
-      {FailedToFlee && (
+  const IdleDamagePenalty =
+    isArray &&
+    battleData.some((data) => !data.beast) &&
+    (adventurer?.health ?? 0) > 0;
+
+  const KilledByIdlePenalty =
+    isArray &&
+    battleData.some((data) => !data.beast) &&
+    adventurer?.health === 0;
+
+  const renderBattleNotification = () => {
+    if (BeastFled) {
+      return <p>You fled the {beastName || ""}!</p>;
+    }
+    if (FailedToFlee) {
+      return (
         <p>
           You failed to flee the {beastName || ""} and were attacked taking{" "}
           {battleData[1]?.damageTaken} damage!{" "}
         </p>
-      )}
-      {KilledTryingToFlee && (
+      );
+    }
+    if (KilledTryingToFlee) {
+      return (
         <p>
           You were killed trying to flee the {beastName || ""} taking{" "}
           {battleData[0]?.damageTaken} damage!{" "}
         </p>
-      )}
-      {Attacked && (
+      );
+    }
+    if (Attacked) {
+      return (
         <p>
           You attacked the {beastName || ""} with a mighty strike and dealt{" "}
           {battleData[1]?.damageDealt} damage! They counterattacked for{" "}
           {battleData[0]?.damageTaken} damage!
         </p>
-      )}
-      {Slayed && (
+      );
+    }
+    if (Slayed) {
+      return (
         <div className="flex flex-col gap-2 items-center justify-center">
           <p>
             You slayed the {beastName || ""} after inflicting{" "}
@@ -215,8 +233,17 @@ export const NotificationBattleDisplay = ({
             text={`My adventurer just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
           />
         </div>
-      )}
-      {Killed && <p>You were killed by the {beastName || ""}</p>}
-    </div>
-  );
+      );
+    }
+    if (KilledByBeast) {
+      return <p>You were killed by the {beastName || ""}</p>;
+    }
+    if (IdleDamagePenalty) {
+      return <p>You were hit for 80 damage from idle penalty!</p>;
+    }
+    if (KilledByIdlePenalty) {
+      return <p>You were killed by the idle penalty!</p>;
+    }
+  };
+  return <div>{renderBattleNotification()}</div>;
 };

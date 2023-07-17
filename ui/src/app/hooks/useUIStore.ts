@@ -35,6 +35,8 @@ type State = {
   // setPurchasedItem: (value: boolean) => void;
   lastAction: Date | null;
   setLastAction: (value: Date | null) => void;
+  mintAdventurer: boolean;
+  setMintAdventurer: (value: boolean) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -60,6 +62,8 @@ const useUIStore = create<State>((set) => ({
   // setPurchasedItem: (value) => set({ purchasedItem: value }),
   lastAction: null,
   setLastAction: (value) => set({ lastAction: value }),
+  mintAdventurer: false,
+  setMintAdventurer: (value) => set({ mintAdventurer: value }),
 }));
 
 export default useUIStore;
