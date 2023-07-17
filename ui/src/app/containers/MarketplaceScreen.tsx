@@ -19,14 +19,16 @@ import { GameData } from "../components/GameData";
 import { ItemClass } from "../lib/classes";
 
 export interface MarketplaceScreenProps {
-  item: ItemClass | undefined;
+  upgradeTotalCost: number;
 }
 /**
  * @container
  * @description Provides the marketplace/purchase screen for the adventurer.
  */
 
-export default function MarketplaceScreen() {
+export default function MarketplaceScreen({
+  upgradeTotalCost,
+}: MarketplaceScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -159,19 +161,11 @@ export default function MarketplaceScreen() {
     }
   }, [selectedIndex, activeMenu]);
 
-  const sum = calls
-    .filter((call) => call.entrypoint === "buy_item")
-    .reduce((accumulator, current) => {
-      const value = Array.isArray(current.calldata) && current.calldata[2];
-      const parsedValue = value ? parseInt(value.toString(), 10) : 0;
-      const { tier } = getItemData(
-        getValueFromKey(gameData.ITEMS, parsedValue) ?? ""
-      );
-      const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
-      return accumulator + (isNaN(itemPrice) ? 0 : itemPrice);
-    }, 0);
+  const calculatedNewGold = adventurer?.gold
+    ? adventurer?.gold - upgradeTotalCost
+    : 0;
 
-  const calculatedNewGold = adventurer?.gold ? adventurer?.gold - sum : 0;
+  console.log(calculatedNewGold);
 
   // const purchaseExists = useCallback(() => {
   //   return calls.some((call: Call) => call.entrypoint == "buy_item");

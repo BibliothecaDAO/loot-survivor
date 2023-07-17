@@ -13,6 +13,7 @@ import {
   getLatestDiscoveries,
   getDiscoveryByTxHash,
   getAdventurerById,
+  getBattleByTxHash,
 } from "../hooks/graphql/queries";
 import { MistIcon } from "../components/icons/Icons";
 import { padAddress } from "../lib/utils";
@@ -64,6 +65,15 @@ export default function ActionsScreen() {
     getLatestDiscoveries,
     {
       adventurerId: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+
+  useCustomQuery(
+    "battlesByTxHashQuery",
+    getBattleByTxHash,
+    {
+      txHash: padAddress(hash),
     },
     txAccepted
   );
