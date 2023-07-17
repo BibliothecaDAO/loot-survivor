@@ -130,9 +130,6 @@ export default function Home() {
     if (adventurer?.statUpgrades) {
       setScreen("upgrade");
     }
-    if (screen == "upgrade" && !adventurer?.statUpgrades) {
-      setScreen("play");
-    }
     console.log(adventurer?.statUpgrades);
   }, [updatedAdventurer, adventurer?.statUpgrades]);
 

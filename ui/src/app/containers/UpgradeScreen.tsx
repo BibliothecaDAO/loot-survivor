@@ -247,6 +247,12 @@ export default function UpgradeScreen() {
     }
   };
 
+  useEffect(() => {
+    if (statUpgrades == 0) {
+      setScreen("play");
+    }
+  }, [statUpgrades]);
+
   const itemsGoldSum = itemsFilter.reduce((accumulator, current) => {
     const value = Array.isArray(current.calldata) && current.calldata[2];
     const parsedValue = value ? parseInt(value.toString(), 10) : 0;
