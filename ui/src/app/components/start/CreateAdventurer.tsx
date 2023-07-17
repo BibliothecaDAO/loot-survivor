@@ -21,6 +21,9 @@ import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { FormData, Adventurer } from "@/app/types";
 import { getRealmNameById } from "../../lib/utils";
 import { Button } from "../buttons/Button";
+import Image from "next/image";
+import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
+import WalletSelect from "../intro/WalletSelect";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
@@ -57,69 +60,7 @@ export const CreateAdventurer = ({
   const [selectedIndex, setSelectedIndex] = useState(0);
   const gameData = new GameData();
   const [firstAdventurer, setFirstAdventurer] = useState(false);
-
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const mintLords = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(mintLords);
-
-    const approveLordsTx = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(approveLordsTx);
-
-    const mintAdventurerTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "start",
-      calldata: [
-        "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
-        getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
-        stringToFelt(formData.name).toString(),
-        formData.homeRealmId,
-        getKeyFromValue(gameData.RACES, formData.race)?.toString() ?? "",
-        "1",
-      ],
-    };
-
-    addToCalls(mintAdventurerTx);
-    startLoading(
-      "Create",
-      "Spawning Adventurer",
-      "adventurersByOwnerQuery",
-      undefined,
-      `You have spawned ${formData.name}!`
-    );
-    await handleSubmitCalls(writeAsync).then((tx: any) => {
-      if (tx) {
-        setTxHash(tx.transaction_hash);
-        addTransaction({
-          hash: tx?.transaction_hash,
-          metadata: {
-            method: `Spawn ${formData.name}`,
-          },
-        });
-      }
-    });
-    if (!adventurers[0]) {
-      setFirstAdventurer(true);
-    }
-  };
+  const [step, setStep] = useState(1);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement> | KeyboardEvent) => {
@@ -166,16 +107,81 @@ export const CreateAdventurer = ({
     }
   }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
 
-  const realm = getRealmNameById(parseInt(formData.homeRealmId) ?? 0);
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value.slice(0, 13),
+    });
+  };
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    const mintLords = {
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "mint",
+      calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
+    };
+    addToCalls(mintLords);
+
+    const approveLordsTx = {
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "approve",
+      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
+    };
+    addToCalls(approveLordsTx);
+
+    const mintAdventurerTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "start",
+      calldata: [
+        "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
+        getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
+        stringToFelt(formData.name).toString(),
+        getRandomNumber1To8000().toString(),
+        getRandomNumber1To10().toString(),
+        "1",
+      ],
+    };
+
+    addToCalls(mintAdventurerTx);
+    startLoading(
+      "Create",
+      "Spawning Adventurer",
+      "adventurersByOwnerQuery",
+      undefined,
+      `You have spawned ${formData.name}!`
+    );
+    await handleSubmitCalls(writeAsync).then((tx: any) => {
+      if (tx) {
+        setTxHash(tx.transaction_hash);
+        addTransaction({
+          hash: tx?.transaction_hash,
+          metadata: {
+            method: `Spawn ${formData.name}`,
+          },
+        });
+      }
+    });
+    setScreen("start");
+
+    if (!adventurers[0]) {
+      setFirstAdventurer(true);
+    }
+  };
+
+  // const realm = getRealmNameById(parseInt(formData.homeRealmId) ?? 0);
 
   const [formFilled, setFormFilled] = useState(false);
 
   useEffect(() => {
     if (
-      formData.homeRealmId &&
+      // formData.homeRealmId &&
       formData.name &&
-      formData.startingWeapon &&
-      formData.race
+      formData.startingWeapon
+      // formData.race
     ) {
       setFormFilled(true);
     } else {
@@ -183,18 +189,86 @@ export const CreateAdventurer = ({
     }
   }, [formData]);
 
-  return (
-    <div className=" items-center sm:w-full mx-4 border border-terminal-green uppercase overflow-hidden">
-      <h4 className="w-full text-center ">Create Adventurer</h4>
-      <hr className="border-terminal-green" />
-      <div className="flex flex-row w-full gap-2 p-4">
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col w-full gap-2 text-lg sm:text-2xl"
-        >
-          <label className="flex justify-between">
-            <span className="self-center">Name:</span>
+  const handleWeaponSelection = (weapon: string) => {
+    setFormData({ ...formData, startingWeapon: weapon });
+    setStep(2);
+  };
 
+  const handleNameEntry = (name: string) => {
+    setFormData({ ...formData, name: name });
+    setStep(3);
+  };
+
+  const handleBack = () => {
+    setStep((step) => Math.max(step - 1, 1));
+  };
+
+  const getRandomNumber1To8000 = () => {
+    return Math.floor(Math.random() * 8000) + 1;
+  };
+
+  const getRandomNumber1To10 = () => {
+    return Math.floor(Math.random() * 10) + 1;
+  };
+
+  if (step === 1) {
+    return (
+      <>
+        <div className="w-full p-8">
+          <h2 className="uppercase">Choose your weapon</h2>
+          <div className="flex flex-row justify-between gap-20">
+            {[
+              {
+                name: "Book",
+                description: "Magic Weapon",
+                icon: <MagicIcon />,
+              },
+              {
+                name: "Wand",
+                description: "Magic Weapon",
+                icon: <MagicIcon />,
+              },
+              {
+                name: "ShortSword",
+                description: "Blade Weapon",
+                icon: <BladeIcon />,
+              },
+              {
+                name: "Club",
+                description: "Bludgeon Weapon",
+                icon: <BludgeonIcon />,
+              },
+            ].map((weapon) => (
+              <div key={weapon.name} className="flex flex-col items-center">
+                <Image
+                  src={`/weapons/${weapon.name}.png`}
+                  width={200}
+                  height={200}
+                  alt={weapon.name}
+                  className="mb-2"
+                />
+                <div className="flex items-center pb-4">
+                  {weapon.icon}
+                  <p className="ml-2">{weapon.description}</p>
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={() => handleWeaponSelection(weapon.name)}
+                >
+                  {weapon.name}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  } else if (step === 2) {
+    return (
+      <>
+        <div className="w-full border border-terminal-green p-8 uppercase">
+          <h2>Enter adventurer name</h2>
+          <div className="items-center flex flex-col gap-2">
             <input
               type="text"
               name="name"
@@ -203,69 +277,45 @@ export const CreateAdventurer = ({
               onKeyDown={handleKeyDown}
               maxLength={13}
             />
-          </label>
-          <label className="flex justify-between">
-            <span className="self-center">Race:</span>
-            <select
-              name="race"
-              onChange={handleChange}
-              className="p-1 m-2 bg-terminal-black"
-            >
-              <option value="">Select a race</option>
-              <option value="Elf">Elf</option>
-              <option value="Fox">Fox</option>
-              <option value="Giant">Giant</option>
-              <option value="Human">Human</option>
-              <option value="Orc">Orc</option>
-              <option value="Demon">Demon</option>
-              <option value="Goblin">Goblin</option>
-              <option value="Fish">Fish</option>
-              <option value="Cat">Cat</option>
-              <option value="Frog">Frog</option>
-            </select>
-          </label>
-          <label className="flex justify-between">
-            <span className="self-center">Home Realm:</span>
-            <span>
-              {formData.homeRealmId && (
-                <span className="self-center text-terminal-yellow">
-                  {realm?.properties.name}
-                </span>
-              )}
-              <input
-                type="number"
-                name="homeRealmId"
-                min="1"
-                max="8000"
-                onChange={handleChange}
-                className="p-1 m-2 bg-terminal-black border border-terminal-green"
-              />
-            </span>
-          </label>
-          <label className="flex justify-between">
-            <span className="self-center">Starting Weapon:</span>
-            <select
-              name="startingWeapon"
-              onChange={handleChange}
-              className="p-1 m-2 bg-terminal-black"
-            >
-              <option value="">Select a weapon</option>
-              <option value="Wand">Wand</option>
-              <option value="Book">Book</option>
-              <option value="Short Sword">Short Sword</option>
-              <option value="Club">Club</option>
-            </select>
-          </label>
-          <Button
-            variant={"default"}
-            type="submit"
-            size={"lg"}
-            disabled={!formFilled}
-          >
-            {formFilled ? "Spawn" : "Fill details"}
-          </Button>
-        </form>
-      </div>
-    </div>
-  );
+          </div>
+          <div className="flex flex-row justify-between">
+            <Button onClick={handleBack}>Back</Button>
+            <Button onClick={() => handleNameEntry(formData.name)}>Next</Button>
+          </div>
+        </div>
+      </>
+    );
+  } else if (step === 3) {
+    return (
+      <>
+        <div className="w-full items-center uppercase">
+          <h3>Oh no, there's a beast coming! Prepare for attack!</h3>
+          <div className="items-center flex flex-col gap-2">
+            <Image
+              src={`/monsters/starterbeast.png`}
+              width={300}
+              height={300}
+              alt="adventurer facing beast"
+              className="mb-2 animate-pulse border border-terminal-green"
+            />
+            <form onSubmit={handleSubmit}>
+              <Button
+                variant={"default"}
+                type="submit"
+                size={"lg"}
+                disabled={!formFilled}
+              >
+                {formFilled ? "Spawn" : "Fill details"}
+              </Button>
+            </form>
+          </div>
+          <div>
+            <Button onClick={handleBack}>Back</Button>
+          </div>
+        </div>
+      </>
+    );
+  } else {
+    return null;
+  }
 };

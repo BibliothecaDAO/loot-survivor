@@ -25,7 +25,7 @@ export const AdventurersList = ({
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
 
   const sortedAdventurers = [...adventurers].sort(
-    (a, b) => (b.level ?? 0) - (a.level ?? 0)
+    (a, b) => (a.level ?? 0) - (b.level ?? 0)
   );
 
   const filteredAdventurers = showZeroHealth

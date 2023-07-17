@@ -149,13 +149,12 @@ const Intro = () => {
           </div>
           <div className="flex flex-row gap-10 m-auto">
             <Button
+              className="animate-pulse"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
               onClick={() => setScreen(2)}
-              className={
-                "m-auto w-40" + (selectedIndex == 1 ? "animate-pulse" : "")
-              }
-              variant={selectedIndex == 1 ? "default" : "ghost"}
             >
-              <p className="text-base whitespace-nowrap">LAUNCH ON GOERLI</p>
+              {buttonText}{" "}
             </Button>
           </div>
         </div>

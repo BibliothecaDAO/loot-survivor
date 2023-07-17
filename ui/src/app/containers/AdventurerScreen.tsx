@@ -120,9 +120,9 @@ export default function AdventurerScreen() {
               />
             </div>
 
-            <div className="hidden sm:block">
+            {/* <div className="hidden sm:block">
               <TutorialDialog />
-            </div>
+            </div> */}
           </div>
         )}
       </div>
