@@ -237,7 +237,7 @@ export const CreateAdventurer = ({
                   alt={weapon.name}
                   className="mb-2"
                 />
-                <div className="flex items-center pb-4 text-xs sm:text-md">
+                <div className="flex items-center pb-4 text-s sm:text-md">
                   {weapon.icon}
                   <p className="ml-2">{weapon.description}</p>
                 </div>
