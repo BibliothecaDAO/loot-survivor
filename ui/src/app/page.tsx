@@ -54,6 +54,7 @@ export default function Home() {
   const type = useLoadingStore((state) => state.type);
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
@@ -128,7 +129,7 @@ export default function Home() {
       console.log("updated");
       setAdventurer(data.adventurerByIdQuery.adventurers[0]);
     }
-  }, [data.adventurerByIdQuery]);
+  }, [data.adventurerByIdQuery, txAccepted]);
 
   useEffect(() => {
     if (!account?.address) {
