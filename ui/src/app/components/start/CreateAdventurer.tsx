@@ -221,7 +221,7 @@ export const CreateAdventurer = ({
               {
                 name: "Book",
                 description: "Magic Weapon",
-                image: "/weapons/Book.png",
+                image: "/weapons/book.png",
                 icon: <MagicIcon />,
               },
               {
