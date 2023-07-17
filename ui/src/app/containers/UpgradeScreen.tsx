@@ -194,19 +194,13 @@ export default function UpgradeScreen() {
     },
   ];
 
-  useEffect(() => {
-    if (statUpgrades == 0) {
-      setScreen("play");
-    }
-  }, [statUpgrades, setScreen]);
-
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
 
   const currentLevel = adventurer?.level ?? 0;
 
-  const previousLevel = currentLevel - statUpgrades;
+  const previousLevel = currentLevel - (adventurer?.statUpgrades ?? 0);
 
   function renderContent() {
     const attribute = attributes.find((attr) => attr.name === selected);

@@ -52,46 +52,61 @@ export const BattleDisplay = ({
   const NoDamageTaken = battleData.damageTaken === 0;
   const IdleDamagePenalty = !battleData.beast;
 
-  return (
-    <div className="w-full text-xl">
-      {BeastFled && <p>PHEW! You fled the {beastName}!</p>}
-      {AdventurerAttack && NoDamageDealt && NoDamageTaken && !BeastFled && (
-        <p className="w-full justify-between">
-          OH NO! You could not flee the {beastName}!
-        </p>
-      )}
-      {AdventurerAttack && BeastHealthExists && !NoDamageDealt && (
+  const renderDiscoveryMessage = () => {
+    if (BeastFled) {
+      return <p>PHEW! You fled the {beastName}!</p>;
+    }
+
+    if (AdventurerAttack && NoDamageDealt && NoDamageTaken && !BeastFled) {
+      return <p>OH NO! You could not flee the {beastName}!</p>;
+    }
+
+    if (AdventurerAttack && BeastHealthExists && !NoDamageDealt) {
+      return (
         <p className="w-full justify-between">
           NICE! You attacked the {beastName} for {battleData?.damageDealt}{" "}
           damage!
         </p>
-      )}
-      {AdventurerAttack && !BeastHealthExists && !BeastFled && (
+      );
+    }
+
+    if (AdventurerAttack && !BeastHealthExists && !BeastFled) {
+      return (
         <p className="w-full justify-between">
           GREAT! You defeated the {beastName} with a final blow of{" "}
           {battleData?.damageDealt} damage!
         </p>
-      )}
-      {BeastAttack && AdventurerHealthExists && (
+      );
+    }
+
+    if (BeastAttack && AdventurerHealthExists) {
+      return (
         <p>
           OUCH! The {beastName} struck you dealing {battleData?.damageTaken}{" "}
           damage to your {damageLocation}!
         </p>
-      )}
-      {BeastAttack && !AdventurerHealthExists && (
+      );
+    }
+
+    if (BeastAttack && !AdventurerHealthExists) {
+      return (
         <p>
           YIKES! You were killed by the {beastName} as it dealt{" "}
           {battleData?.damageTaken} damage to your {damageLocation}!
         </p>
-      )}
-      {BeastAttack && AdventurerHealthExists && NoDamageTaken && (
-        <p>PHEW! The {beastName} attacked but you defended it well!</p>
-      )}
-      {IdleDamagePenalty && (
-        <p>OOPS! You were hit for 80 damage from idle penalty!</p>
-      )}
-    </div>
-  );
+      );
+    }
+
+    if (BeastAttack && AdventurerHealthExists && NoDamageTaken) {
+      return <p>PHEW! The {beastName} attacked but you defended it well!</p>;
+    }
+
+    if (IdleDamagePenalty) {
+      return <p>OOPS! You were hit for 80 damage from idle penalty!</p>;
+    }
+  };
+
+  return <div className="w-full text-xl">{renderDiscoveryMessage()}</div>;
 };
 
 interface NotificationBattleDisplayProps {
@@ -158,7 +173,10 @@ export const NotificationBattleDisplay = ({
   const Slayed =
     isArray &&
     battleData.some(
-      (data) => data.attacker === "Adventurer" && (data.beastHealth ?? 0) === 0
+      (data) =>
+        data.attacker === "Adventurer" &&
+        (data.beastHealth ?? 0) === 0 &&
+        !data.fled
     );
   const Killed =
     isArray &&

@@ -54,24 +54,6 @@ export default function BeastScreen() {
   const { data } = useQueriesStore();
 
   useCustomQuery(
-    "battlesByTxHashQuery",
-    getBattleByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted
-  );
-
-  useCustomQuery(
-    "adventurerByIdQuery",
-    getAdventurerById,
-    {
-      id: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
-
-  useCustomQuery(
     "lastBeastQuery",
     getLastBeastDiscovery,
     {

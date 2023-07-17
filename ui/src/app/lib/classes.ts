@@ -29,7 +29,7 @@ export class AdventurerClass implements Adventurer {
   neck?: string; // Necklace of the adventure
   ring?: string; // Ring of the adventure
   beastHealth?: number; // Beast health adventurer is engaging
-  statUpgrades: number | 0; // Stat upgrades adventurer has
+  statUpgrades?: number; // Stat upgrades adventurer has
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
@@ -94,7 +94,7 @@ export class AdventurerClass implements Adventurer {
     this.neck = neck;
     this.ring = ring;
     this.beastHealth = beastHealth;
-    this.statUpgrades = statUpgrades || 0;
+    this.statUpgrades = statUpgrades;
     this.gold = gold;
     this.createdTime = createdTime;
     this.lastUpdatedTime = lastUpdatedTime;
@@ -102,7 +102,7 @@ export class AdventurerClass implements Adventurer {
 }
 
 export class ItemClass implements Item {
-  [key: string]: string | number | undefined | boolean | Date; 
+  [key: string]: string | number | undefined | boolean | Date;
   item?: string; // name
   cost?: number; // purchase cost for the item
   adventurerId?: number; // Adventurer ID
@@ -133,8 +133,8 @@ export class ItemClass implements Item {
       xp,
       lastUpdatedTime,
     } = items;
-    
-const { tier, slot, type } = getItemData(item ?? "")
+
+    const { tier, slot, type } = getItemData(item ?? "");
 
     this.item = item;
     this.cost = cost;

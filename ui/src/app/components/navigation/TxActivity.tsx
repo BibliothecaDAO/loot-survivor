@@ -6,6 +6,11 @@ import useLoadingStore from "../../hooks/useLoadingStore";
 import LootIconLoader from "../icons/Loader";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useMediaQuery } from "react-responsive";
+import { processNotification } from "../../components/navigation/NotificationDisplay";
+import useUIStore from "@/app/hooks/useUIStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
+import { NullAdventurer } from "@/app/types";
 
 export interface TxActivityProps {
   hash: string | undefined;
@@ -23,6 +28,11 @@ export const TxActivity = () => {
   const type = useLoadingStore((state) => state.type);
   const error = useTransactionCartStore((state) => state.error);
   const setError = useTransactionCartStore((state) => state.setError);
+  const deathMessage = useLoadingStore((state) => state.deathMessage);
+  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
+  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const {
     data: queryData,
     isDataUpdated,
@@ -42,10 +52,33 @@ export const TxActivity = () => {
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
   const isLoadingQueryUpdated = loadingQuery && isDataUpdated[loadingQuery];
+  const hasBeast = (adventurer?.beastHealth ?? 0) > 0;
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
+
+  const setDeathNotification = (
+    type: string,
+    notificationData: any,
+    battles: any,
+    hasBeast: boolean
+  ) => {
+    const notification = processNotification(
+      type,
+      notificationData,
+      battles,
+      hasBeast
+    );
+    if (!deathMessage) {
+      setDeathMessage(notification);
+    }
+    showDeathDialog(true);
+  };
+
+  console.log(isLoadingQueryUpdated);
+  console.log(queryData["battlesByTxHashQuery"]);
+  console.log(hash);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -57,10 +90,26 @@ export const TxActivity = () => {
         await refetch("battlesByTxHashQuery");
         await refetch("adventurerByIdQuery");
         await refetch("battlesByBeastQuery");
+        console.log("in battle!");
         stopLoading({
           data: queryData.battlesByTxHashQuery.battles,
           beast: notificationData.beast,
         });
+        const killedByBeast = queryData.battlesByTxHashQuery.battles.some(
+          (battle) => battle.attacker == "Beast" && adventurer?.health == 0
+        );
+        const killedByPenalty = queryData.battlesByTxHashQuery.battles.some(
+          (battle) => !battle.attacker && adventurer?.health == 0
+        );
+        console.log(killedByBeast || killedByPenalty);
+        if (killedByBeast || killedByPenalty) {
+          setDeathNotification(
+            type,
+            notificationData,
+            queryData.battlesByTxHashQuery.battles,
+            hasBeast
+          );
+        }
       };
 
       const handleExplore = async () => {
@@ -70,10 +119,24 @@ export const TxActivity = () => {
         await refetch("latestDiscoveriesQuery");
         await refetch("adventurerByIdQuery");
         await refetch("lastBeastBattleQuery");
+        await refetch("lastBeastQuery");
         stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
+        const killedByObstacleOrPenalty =
+          (queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
+            "Obstacle" ||
+            !queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType) &&
+          adventurer?.health == 0;
+        console.log(killedByObstacleOrPenalty);
+        if (killedByObstacleOrPenalty) {
+          setDeathMessage(
+            <DiscoveryDisplay discoveryData={notificationData} />
+          );
+          showDeathDialog(true);
+        }
       };
 
       const handleUpgrade = async () => {
+        await refetch("adventurerByIdQuery");
         stopLoading(notificationData);
       };
 
@@ -88,6 +151,13 @@ export const TxActivity = () => {
         await refetch("adventurerByIdQuery");
         await refetch("battlesByBeastQuery");
         stopLoading(notificationData);
+        const killedFromEquipping =
+          (pendingMessage as string[]).includes("Equipping") &&
+          adventurer?.health == 0;
+        console.log(killedFromEquipping);
+        if (killedFromEquipping) {
+          setDeathNotification(type, notificationData, [], hasBeast);
+        }
       };
 
       const handleDefault = async () => {
@@ -97,11 +167,14 @@ export const TxActivity = () => {
       const handleDataUpdate = () => {
         setTxAccepted(false);
         resetDataUpdated(loadingQuery);
+        console.log("here");
       };
 
       try {
         switch (type) {
           case "Attack":
+            await handleAttackOrFlee();
+            break;
           case "Flee":
             await handleAttackOrFlee();
             break;
@@ -122,25 +195,13 @@ export const TxActivity = () => {
         console.error("An error occurred during fetching:", error);
         // handle error (e.g., update state to show error message)
       }
+      console.log("here");
 
       handleDataUpdate();
     };
 
     fetchData();
-  }, [
-    isLoadingQueryUpdated,
-    txAccepted,
-    hash,
-    loadingQuery,
-    notificationData,
-    queryData.battlesByTxHashQuery,
-    queryData.discoveryByTxHashQuery,
-    refetch,
-    resetDataUpdated,
-    setTxAccepted,
-    stopLoading,
-    type,
-  ]);
+  }, [isLoadingQueryUpdated, txAccepted, hash, loadingQuery]);
 
   // stop loading when an error is caught
   useEffect(() => {

@@ -34,8 +34,6 @@ import { Menu, NullAdventurer, Call, Battle } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
-import { processNotification } from "./components/navigation/NotificationDisplay";
-import { DiscoveryDisplay } from "./components/actions/DiscoveryDisplay";
 import { useMediaQuery } from "react-responsive";
 import {
   CogIcon,
@@ -50,7 +48,6 @@ import MobileHeader from "./components/navigation/MobileHeader";
 import Player from "./components/adventurer/Player";
 import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
-import { TutorialDialog } from "./components/tutorial/TutorialDialog";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -58,11 +55,8 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(false);
 
   const type = useLoadingStore((state) => state.type);
-  const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
-  const deathMessage = useLoadingStore((state) => state.deathMessage);
-  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
@@ -73,8 +67,6 @@ export default function Home() {
   const setScreen = useUIStore((state) => state.setScreen);
   const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const deathDialog = useUIStore((state) => state.deathDialog);
-  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const tutorialDialog = useUIStore((state) => state.tutorialDialog);
   const showTutorialDialog = useUIStore((state) => state.showTutorialDialog);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
@@ -82,9 +74,8 @@ export default function Home() {
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
-  const statUpgrades = adventurer?.statUpgrades ?? 0;
   const [showDeathCount, setShowDeathCount] = useState(true);
-  const [hasBeast, setHasBeast] = useState(false);
+  const hasBeast = (adventurer?.beastHealth ?? 0) > 0;
 
   const playState = useMemo(
     () => ({
@@ -136,98 +127,20 @@ export default function Home() {
     if (updatedAdventurer?.id ?? 0 > 0) {
       setAdventurer(updatedAdventurer);
     }
-    if ((adventurer?.statUpgrades ?? 0) > 0) {
+    if (adventurer?.statUpgrades) {
       setScreen("upgrade");
     }
-  }, [updatedAdventurer, setAdventurer, setScreen, adventurer?.statUpgrades]);
-
-  useEffect(() => {
-    setHasBeast(!!(adventurer?.beastHealth ?? 0 > 0));
-  }, [adventurer]);
+    if (screen == "upgrade" && !adventurer?.statUpgrades) {
+      setScreen("play");
+    }
+    console.log(adventurer?.statUpgrades);
+  }, [updatedAdventurer, adventurer?.statUpgrades]);
 
   useEffect(() => {
     if (!adventurer || adventurer?.health == 0) {
       setScreen(menu[0].screen);
     }
   }, [adventurer, menu, setScreen]);
-
-  useEffect(() => {
-    const { battlesByTxHashQuery, discoveryByTxHashQuery, lastBattleQuery } =
-      data;
-    const battles = lastBattleQuery ? lastBattleQuery.battles : [];
-
-    const setNotification = (
-      type: any,
-      notificationData: any,
-      hasBeast: any
-    ) => {
-      const notification = processNotification(
-        type,
-        notificationData,
-        battles,
-        hasBeast
-      );
-      if (!deathMessage) {
-        setDeathMessage(notification);
-      }
-      showDeathDialog(true);
-    };
-
-    const checkBattles = () => {
-      if (!battlesByTxHashQuery || !isDataUpdated["battlesByTxHashQuery"]) {
-        return;
-      }
-      const hasBeastAttacker = battlesByTxHashQuery.battles.some(
-        (battle) => battle.attacker == "Beast" && adventurer?.health == 0
-      );
-      if (hasBeastAttacker) {
-        setNotification(type, notificationData, hasBeast);
-      }
-    };
-
-    const checkDiscovery = () => {
-      if (!discoveryByTxHashQuery || !isDataUpdated["discoveryByTxHashQuery"]) {
-        return;
-      }
-      const hasObstacle =
-        discoveryByTxHashQuery.discoveries[0]?.discoveryType == "Obstacle" &&
-        adventurer?.health == 0;
-      if (hasObstacle && !deathMessage) {
-        setDeathMessage(<DiscoveryDisplay discoveryData={notificationData} />);
-        showDeathDialog(true);
-      }
-    };
-
-    const checkEquipping = () => {
-      if (!pendingMessage || !isDataUpdated["adventurerByIdQuery"]) {
-        return;
-      }
-      const isEquipping =
-        (pendingMessage as string[]).includes("Equipping") &&
-        adventurer?.health == 0;
-      if (isEquipping) {
-        setNotification(type, notificationData, hasBeast);
-      }
-    };
-
-    checkBattles();
-    checkDiscovery();
-    checkEquipping();
-  }, [
-    showNotification,
-    data.battlesByTxHashQuery,
-    data.discoveryByTxHashQuery,
-    deathMessage,
-    pendingMessage,
-    isDataUpdated,
-    adventurer,
-    hasBeast,
-    data,
-    notificationData,
-    setDeathMessage,
-    showDeathDialog,
-    type,
-  ]);
 
   useEffect(() => {
     if (!account?.address) {
@@ -254,7 +167,7 @@ export default function Home() {
                 id: isMobile ? 3 : 2,
                 label: "Play",
                 screen: "play",
-                disabled: statUpgrades > 0 || adventurer.health == 0,
+                disabled: adventurer?.statUpgrades || adventurer.health == 0,
               },
               {
                 id: isMobile ? 4 : 3,
@@ -270,9 +183,13 @@ export default function Home() {
               // },
               {
                 id: isMobile ? 6 : 5,
-                label: statUpgrades > 0 ? <span>Upgrade!</span> : "Upgrade",
+                label: adventurer?.statUpgrades ? (
+                  <span>Upgrade!</span>
+                ) : (
+                  "Upgrade"
+                ),
                 screen: "upgrade",
-                disabled: !(statUpgrades > 0),
+                disabled: !adventurer?.statUpgrades,
               },
               // {
               //   id: isMobile ? 7 : 6,
@@ -321,7 +238,7 @@ export default function Home() {
       setMenu(newMenu);
       setMobileMenu(newMobileMenu);
     }
-  }, [adventurer, account, onboarded, hasBeast, statUpgrades]);
+  }, [adventurer, account, onboarded, hasBeast, adventurer?.statUpgrades]);
 
   useEffect(() => {
     if (onboarded) return;
@@ -341,8 +258,6 @@ export default function Home() {
 
     const hasAdventurers = adventurers.length > 0;
     const adventurerExistsAndHasXP = adventurer?.xp === 0;
-    const beastHealth = adventurer?.beastHealth ?? 0;
-    const statUpgrades = adventurer?.statUpgrades ?? 0;
 
     if (!hasAdventurers) {
       createMenu("Start", "start");
