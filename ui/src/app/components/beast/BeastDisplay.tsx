@@ -5,7 +5,7 @@ import EfficacyIcon from "../icons/EfficacyIcon";
 import { processBeastName } from "../../lib/utils";
 import { Battle, Beast, Adventurer } from "@/app/types";
 
-import { CountDown } from "../CountDown";
+import { HealthCountDown } from "../CountDown";
 
 interface BeastDisplayProps {
   beastData: Beast;
@@ -37,7 +37,7 @@ export const BeastDisplay = ({
           >
             <HeartIcon className="self-center w-6 h-6 fill-current" />{" "}
             <p className="self-center text-2xl sm:text-4xl">
-              <CountDown health={beastData?.health || 0}/>
+              <HealthCountDown health={beastData?.health || 0} />
             </p>
           </span>
         </div>
@@ -76,7 +76,9 @@ export const BeastDisplay = ({
           alt="monsters"
           fill={true}
           placeholder="blur"
-          blurDataURL={"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAQAAABeK7cBAAAADUlEQVR42mNkrmdgAAABkwCE1XPyYQAAAABJRU5ErkJggg=="}
+          blurDataURL={
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAQAAABeK7cBAAAADUlEQVR42mNkrmdgAAABkwCE1XPyYQAAAABJRU5ErkJggg=="
+          }
           style={{
             objectFit: "contain",
           }}

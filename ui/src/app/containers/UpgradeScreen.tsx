@@ -1,8 +1,7 @@
-import { ReactElement, useState, useEffect } from "react";
+import { ReactElement, useState } from "react";
 import { useContracts } from "../hooks/useContracts";
 import {
   getKeyFromValue,
-  calculateLevel,
   getItemData,
   getValueFromKey,
   getItemPrice,
@@ -15,7 +14,6 @@ import { getAdventurerById } from "../hooks/graphql/queries";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import useUIStore from "../hooks/useUIStore";
 import Info from "../components/adventurer/Info";
 import { Button } from "../components/buttons/Button";
 import { useMediaQuery } from "react-responsive";
@@ -32,6 +30,7 @@ import {
 import PurchaseHealth from "../components/actions/PurchaseHealth";
 import MarketplaceScreen from "./MarketplaceScreen";
 import { UpgradeNav } from "../components/upgrade/UpgradeNav";
+import { useQueriesStore } from "../hooks/useQueryStore";
 
 /**
  * @container
@@ -40,7 +39,9 @@ import { UpgradeNav } from "../components/upgrade/UpgradeNav";
 export default function UpgradeScreen() {
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const currentLevel = useAdventurerStore((state) => state.computed.currentLevel);
+  const currentLevel = useAdventurerStore(
+    (state) => state.computed.currentLevel
+  );
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const loading = useLoadingStore((state) => state.loading);
@@ -48,6 +49,7 @@ export default function UpgradeScreen() {
   const { addTransaction } = useTransactionManager();
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const hash = useLoadingStore((state) => state.hash);
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
@@ -57,6 +59,8 @@ export default function UpgradeScreen() {
   const [upgradeScreen, setUpgradeScreen] = useState(
     adventurer?.health == maxHealth ? 2 : 1
   );
+
+  const { data } = useQueriesStore();
 
   useCustomQuery(
     "adventurerByIdQuery",
@@ -68,8 +72,6 @@ export default function UpgradeScreen() {
   );
 
   const gameData = new GameData();
-
-
 
   const handleUpgradeTx = async (selected: any) => {
     const upgradeTx = {
@@ -234,8 +236,7 @@ export default function UpgradeScreen() {
       const value = potionsFilter;
       const parsedValue = value ? parseInt(value.toString(), 10) : 0;
       const purchaseGoldAmount = Math.max(
-        parsedValue * (2 * currentLevel) -
-          2 * (adventurer?.charisma ?? 0),
+        parsedValue * (2 * currentLevel) - 2 * (adventurer?.charisma ?? 0),
         2
       );
       return purchaseGoldAmount;

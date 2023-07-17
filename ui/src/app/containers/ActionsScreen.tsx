@@ -13,7 +13,6 @@ import {
   getLatestDiscoveries,
   getDiscoveryByTxHash,
   getAdventurerById,
-  getBattleByTxHash,
 } from "../hooks/graphql/queries";
 import { MistIcon } from "../components/icons/Icons";
 import { padAddress } from "../lib/utils";
@@ -84,8 +83,7 @@ export default function ActionsScreen() {
   const buttonsData = [
     {
       id: 1,
-      label:
-      hasBeast ? "Beast found!!" : "Into the mist",
+      label: hasBeast ? "Beast found!!" : "Into the mist",
       icon: <MistIcon />,
       value: "explore",
       action: async () => {

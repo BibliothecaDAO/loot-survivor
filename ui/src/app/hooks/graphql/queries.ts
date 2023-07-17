@@ -55,6 +55,7 @@ const BATTLE_FIELDS = `
   xpEarnedItems
   goldEarned
   txHash
+  blockTime
   timestamp
 `;
 

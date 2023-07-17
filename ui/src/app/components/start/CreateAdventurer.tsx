@@ -19,11 +19,9 @@ import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import useUIStore from "../../hooks/useUIStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { FormData, Adventurer } from "@/app/types";
-import { getRealmNameById } from "../../lib/utils";
 import { Button } from "../buttons/Button";
 import Image from "next/image";
 import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
-import WalletSelect from "../intro/WalletSelect";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
@@ -165,7 +163,6 @@ export const CreateAdventurer = ({
         });
       }
     });
-    setScreen("start");
 
     if (!adventurers[0]) {
       setFirstAdventurer(true);

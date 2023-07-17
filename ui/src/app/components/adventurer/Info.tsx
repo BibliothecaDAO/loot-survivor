@@ -9,7 +9,7 @@ import useCustomQuery from "../../hooks/useCustomQuery";
 import useUIStore from "../../hooks/useUIStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import { Item } from "@/app/types";
-import { CountDown } from "../CountDown";
+import { HealthCountDown } from "../CountDown";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
@@ -95,7 +95,9 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                 </span>
                 <span className="flex ">
                   <HeartIcon className="self-center w-5 h-5 fill-current" />{" "}
-                  <CountDown health={(formatAdventurer.health ?? 0) || 0} />
+                  <HealthCountDown
+                    health={(formatAdventurer.health ?? 0) || 0}
+                  />
                   {`/${100 + (formatAdventurer.vitality ?? 0) * 20}`}
                 </span>
               </div>

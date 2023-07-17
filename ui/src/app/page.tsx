@@ -37,13 +37,14 @@ import {
   CogIcon,
   MuteIcon,
   VolumeIcon,
-  CartIcon
+  CartIcon,
 } from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
 import Player from "./components/adventurer/Player";
 import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
+import { PenaltyCountDown } from "./components/CountDown";
 
 export default function Home() {
   const { disconnect } = useConnectors();
@@ -72,7 +73,9 @@ export default function Home() {
   const setIndexer = useIndexerStore((state) => state.setIndexer);
   const [showDeathCount, setShowDeathCount] = useState(true);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
-  const hasStatUpgrades = useAdventurerStore((state) => state.computed.hasStatUpgrades);
+  const hasStatUpgrades = useAdventurerStore(
+    (state) => state.computed.hasStatUpgrades
+  );
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
   const hasNoXp = useAdventurerStore((state) => state.computed.hasNoXp);
 
@@ -117,13 +120,16 @@ export default function Home() {
   const [adventurers, setAdventurers] = useState<any[]>([]);
 
   useEffect(() => {
-    if(data.adventurersByOwnerQuery){
-      setAdventurers(data.adventurersByOwnerQuery.adventurers)
+    if (data.adventurersByOwnerQuery) {
+      setAdventurers(data.adventurersByOwnerQuery.adventurers);
     }
-  },[data]) 
+  }, [data]);
 
   useEffect(() => {
-    if (data.adventurerByIdQuery && (data.adventurerByIdQuery.adventurers[0]?.id ?? 0) > 0) {
+    if (
+      data.adventurerByIdQuery &&
+      (data.adventurerByIdQuery.adventurers[0]?.id ?? 0) > 0
+    ) {
       setAdventurer(data.adventurerByIdQuery.adventurers[0]);
     }
   }, [data.adventurerByIdQuery, setAdventurer]);
@@ -152,7 +158,7 @@ export default function Home() {
               id: isMobile ? 3 : 2,
               label: "Play",
               screen: "play",
-              disabled: adventurer?.statUpgrades || adventurer.health == 0,
+              disabled: hasStatUpgrades || adventurer.health == 0,
             },
             {
               id: isMobile ? 4 : 3,
@@ -162,13 +168,9 @@ export default function Home() {
             },
             {
               id: isMobile ? 6 : 5,
-              label: adventurer?.statUpgrades ? (
-                <span>Upgrade!</span>
-              ) : (
-                "Upgrade"
-              ),
+              label: hasStatUpgrades ? <span>Upgrade!</span> : "Upgrade",
               screen: "upgrade",
-              disabled: !adventurer?.statUpgrades,
+              disabled: !hasStatUpgrades,
             },
           ]
         : []),
@@ -195,34 +197,31 @@ export default function Home() {
             },
           ]),
     ];
-  
+
     const createMenu = (label: string, screen: any) => {
       const menuData = {
         id: 1,
         label: label,
         screen: screen,
       };
-  
+
       setMenu([menuData]);
       setMobileMenu([menuData]);
       setScreen(screen);
     };
-  
+
     // if (onboarded) {
-      const newMenu: any = adventurer
-        ? commonMenuItems()
-        : [{ id: 1, label: "Start", screen: "start", disabled: false }];
-  
-      const newMobileMenu: any = adventurer
-        ? commonMenuItems(true)
-        : [{ id: 1, label: "Start", screen: "start", disabled: false }];
-  
-      setMenu(newMenu);
-      setMobileMenu(newMobileMenu);
-  }, [
-    adventurer,
-    setScreen
-  ]);
+    const newMenu: any = adventurer
+      ? commonMenuItems()
+      : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+
+    const newMobileMenu: any = adventurer
+      ? commonMenuItems(true)
+      : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+
+    setMenu(newMenu);
+    setMobileMenu(newMobileMenu);
+  }, [adventurer, setScreen]);
 
   useEffect(() => {
     if (hasNoXp) {
@@ -243,7 +242,7 @@ export default function Home() {
     if (adventurers.length > 0) {
       handleOnboarded();
     }
-  }, [adventurers, handleOnboarded])
+  }, [adventurers, handleOnboarded]);
 
   useEffect(() => {
     refetch("adventurersByOwnerQuery");
@@ -263,7 +262,15 @@ export default function Home() {
           <div className="flex flex-col w-full">
             {isMobileDevice && <TxActivity />}
             <div className="flex flex-row justify-between">
-              <h1 className="glitch">Loot Survivor</h1>
+              <span className="flex flex-row gap-5 items-end">
+                <h1 className="glitch">Loot Survivor</h1>
+                {/* <PenaltyCountDown
+                  lastDiscovery={
+                    data.latestDiscoveriesQuery?.discoveries[0].timestamp ?? 0
+                  }
+                  lastBattle={data.lastBattleQuery?.battles[0].timestamp ?? 0}
+                /> */}
+              </span>
               <div className="flex flex-row items-center self-end gap-2 flex-wrap">
                 {!isMobileDevice && <TxActivity />}
                 {/* <div
@@ -347,12 +354,12 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <AddDevnetEthButton />
-                      )}
+                      <AddDevnetEthButton />
+                    )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <MintEthButton />
-                      )}
+                      <MintEthButton />
+                    )}
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}

@@ -34,6 +34,7 @@ export interface Adventurer {
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
+  timestamp?: Date; // Indexer timestamp of event process
 }
 
 export interface ItemIndexer {
@@ -49,10 +50,11 @@ export interface ItemIndexer {
   special3?: string; // Third special on the item (i.e Demon)
   xp?: number; // Experience of the item
   lastUpdatedTime: Date; // Block time the item was last updated
+  timestamp?: Date; // Indexer timestamp of event process
 }
 
 export interface Item {
-  [key: string]: string | number | undefined | boolean | Date; 
+  [key: string]: string | number | undefined | boolean | Date;
   item?: string; // name
   cost?: number; // purchase cost for the item
   adventurerId?: number; // Adventurer ID
@@ -68,6 +70,7 @@ export interface Item {
   tier?: number; // Tier of the item
   type?: string; // Type of the item
   lastUpdatedTime?: Date; // Block time the item was last updated
+  timestamp?: Date; // Indexer timestamp of event process
 }
 export interface Battle {
   adventurerId?: number; // Adventurer ID
@@ -87,7 +90,8 @@ export interface Battle {
   xpEarnedItems?: number; // Experience earned by the items
   goldEarned?: number; // Gold earned by the adventurer
   txHash?: string; // Transaction hash
-  timestamp?: Date; // Block time of the battle
+  blockTime?: Date; // Block time of the battle
+  timestamp?: Date; // Indexer timestamp of event process
 }
 
 export interface Discovery {
@@ -112,6 +116,7 @@ export interface Discovery {
   ambushed?: boolean; // Did the adventurer ambush the entity?
   discoveryTime?: Date; // Block time of the discovery
   txHash?: string; // Transaction hash
+  timestamp?: Date; // Indexer timestamp of event process
 }
 
 export interface Beast {
@@ -126,6 +131,7 @@ export interface Beast {
   slainOnTime?: Date; // Block time of the beast being slayed
   createdTime?: Date; // Block time of when the beast was discovered
   lastUpdatedTime?: Date; // Block time of when the beast was last updated
+  timestamp?: Date; // Indexer timestamp of event process
 }
 
 export interface Score {
@@ -135,6 +141,7 @@ export interface Score {
   xp: number; // Experience points of the adventurer
   txHash: string; // Hex of the transaction hash
   scoreTime: Date; // Time of the score
+  timestamp?: Date; // Indexer timestamp of event process
 }
 
 export interface Metadata {
