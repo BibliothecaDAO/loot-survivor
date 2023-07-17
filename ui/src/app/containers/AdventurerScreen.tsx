@@ -103,11 +103,14 @@ export default function AdventurerScreen() {
             <p className="text-center text-2xl sm:hidden uppercase">
               Adventurers
             </p>
-            <AdventurersList
-              isActive={activeMenu == 1}
-              onEscape={() => setActiveMenu(0)}
-              adventurers={adventurers}
-            />
+            
+              <AdventurersList
+                isActive={activeMenu == 1}
+                onEscape={() => setActiveMenu(0)}
+                adventurers={adventurers}
+              />
+       
+
           </div>
         )}
         {selected === "create adventurer" && (

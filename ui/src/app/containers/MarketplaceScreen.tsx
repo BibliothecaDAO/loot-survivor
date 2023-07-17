@@ -166,17 +166,7 @@ export default function MarketplaceScreen({
     : 0;
 
   console.log(calculatedNewGold);
-
-  // const purchaseExists = useCallback(() => {
-  //   return calls.some((call: Call) => call.entrypoint == "buy_item");
-  // }, [calls]);
-
-  // useEffect(() => {
-  //   if (purchaseExists()) {
-  //     setScreen("upgrade");
-  //   }
-  // }, [purchaseExists, setScreen]);
-
+  
   return (
     <>
       {adventurer?.level != 0 ? (

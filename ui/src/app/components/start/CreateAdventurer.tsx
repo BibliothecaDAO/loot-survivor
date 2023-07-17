@@ -140,8 +140,8 @@ export const CreateAdventurer = ({
         "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name).toString(),
-        getRandomNumber1To8000().toString(),
-        getRandomNumber1To10().toString(),
+        getRandomNumber(8000),
+        getRandomNumber(10),
         "1",
       ],
     };
@@ -203,12 +203,8 @@ export const CreateAdventurer = ({
     setStep((step) => Math.max(step - 1, 1));
   };
 
-  const getRandomNumber1To8000 = () => {
-    return Math.floor(Math.random() * 8000) + 1;
-  };
-
-  const getRandomNumber1To10 = () => {
-    return Math.floor(Math.random() * 10) + 1;
+  const getRandomNumber = (to: number) => {
+    return (Math.floor(Math.random() * to) + 1).toString();
   };
 
   if (step === 1) {

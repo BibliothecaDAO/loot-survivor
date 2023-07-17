@@ -111,29 +111,19 @@ export default function Home() {
     },
   ]);
 
-  const updatedAdventurer = data.adventurerByIdQuery
-    ? data.adventurerByIdQuery.adventurers[0]
-    : NullAdventurer;
-
-  const adventurers = data.adventurersByOwnerQuery
-    ? data.adventurersByOwnerQuery.adventurers
-    : [];
+  const [adventurers, setAdventurers] = useState<any[]>([]);
 
   useEffect(() => {
-    if (updatedAdventurer?.id ?? 0 > 0) {
-      setAdventurer(updatedAdventurer);
+    if(data.adventurersByOwnerQuery){
+      setAdventurers(data.adventurersByOwnerQuery.adventurers)
     }
-    if (adventurer?.statUpgrades) {
-      setScreen("upgrade");
-    }
-    console.log(adventurer?.statUpgrades);
-  }, [updatedAdventurer, adventurer?.statUpgrades, setAdventurer, setScreen]);
+  },[data]) 
 
   useEffect(() => {
-    if (!adventurer || adventurer?.health == 0) {
-      setScreen(menu[0].screen);
+    if (data.adventurerByIdQuery && (data.adventurerByIdQuery.adventurers[0]?.id ?? 0) > 0) {
+      setAdventurer(data.adventurerByIdQuery.adventurers[0]);
     }
-  }, [adventurer, menu, setScreen]);
+  }, [data.adventurerByIdQuery, setAdventurer]);
 
   useEffect(() => {
     if (!account?.address) {
@@ -145,7 +135,7 @@ export default function Home() {
     setIndexer(getGraphQLUrl());
   }, [setIndexer]);
 
-  useEffect(() => {
+  useMemo(() => {
     const commonMenuItems = (isMobile = false) => [
       {
         id: isMobile ? 2 : 1,
@@ -215,7 +205,7 @@ export default function Home() {
       setScreen(screen);
     };
   
-    if (onboarded) {
+    // if (onboarded) {
       const newMenu: any = adventurer
         ? commonMenuItems()
         : [{ id: 1, label: "Start", screen: "start", disabled: false }];
@@ -226,32 +216,32 @@ export default function Home() {
   
       setMenu(newMenu);
       setMobileMenu(newMobileMenu);
-    } else {
-      const hasAdventurers = adventurers.length > 0;
-      const adventurerExistsAndHasXP = adventurer?.xp === 0;
-  
-      if (!hasAdventurers) {
-        createMenu("Start", "start");
-      } else if (adventurerExistsAndHasXP) {
-        createMenu("Play", "play");
-      } else {
-        handleOnboarded();
-        refetch("adventurersByOwnerQuery");
-      }
-    }
   }, [
     adventurer,
-    account,
-    onboarded,
-    hasBeast,
-    adventurer?.statUpgrades,
-    adventurers.length,
-    handleOnboarded,
-    refetch,
+    // onboarded,
     setScreen
   ]);
 
-  // fetch adventurers on app start and account switch
+  useEffect(() => {
+    if (adventurer?.xp === 0) {
+      console.log("page", "play");
+      setScreen("play");
+    }
+    if (adventurer?.statUpgrades ?? 0 > 0) {
+      console.log("page", "upgrade");
+      setScreen("upgrade");
+    }
+    if (!adventurer || adventurer?.health == 0) {
+      setScreen("start");
+    }
+  }, [adventurer, setScreen]);
+
+  useEffect(() => {
+    if (adventurers.length > 0) {
+      handleOnboarded();
+    }
+  }, [adventurers, handleOnboarded])
+
   useEffect(() => {
     refetch("adventurersByOwnerQuery");
   }, [account, refetch]);

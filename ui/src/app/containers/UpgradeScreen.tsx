@@ -51,10 +51,7 @@ export default function UpgradeScreen() {
     (state) => state.handleSubmitCalls
   );
   const { writeAsync } = useContractWrite({ calls });
-  const setScreen = useUIStore((state) => state.setScreen);
-  // const purchasedItem = useUIStore((state) => state.purchasedItem);
   const [selected, setSelected] = useState("");
-  const statUpgrades = adventurer?.statUpgrades ?? 0;
   const maxHealth = 100 + (adventurer?.vitality ?? 0) * 20;
   const [upgradeScreen, setUpgradeScreen] = useState(
     adventurer?.health == maxHealth ? 2 : 1
@@ -246,12 +243,6 @@ export default function UpgradeScreen() {
       return 0;
     }
   };
-
-  useEffect(() => {
-    if (statUpgrades == 0) {
-      setScreen("play");
-    }
-  }, [statUpgrades]);
 
   const itemsGoldSum = itemsFilter.reduce((accumulator, current) => {
     const value = Array.isArray(current.calldata) && current.calldata[2];
