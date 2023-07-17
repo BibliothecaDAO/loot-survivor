@@ -21,6 +21,7 @@ export class GameData {
   ITEM_NAME_PREFIXES: Dict<string>;
   ITEM_NAME_SUFFIXES: Dict<string>;
   ITEM_SUFFIXES: Dict<string>;
+  ITEM_SUFFIX_BOOST: Dict<string>;
   STATUS: Dict<string>;
   SLOTS: Dict<string>;
   BEAST_IMAGES: DictString<string>;
@@ -905,6 +906,25 @@ export class GameData {
       14: "Of Detection",
       15: "Of Reflection",
       16: "Of The Twins",
+    };
+
+    this.ITEM_SUFFIX_BOOST = {
+      1: "STR +3",
+      2: "VIT +3",
+      3: "STR +2 CHA +1",
+      4: "DEX +3",
+      5: "STR +1 DEX +1 VIT +1",
+      6: "INT +3",
+      7: "WIS +3",
+      8: "VIT +2 DEX +1",
+      9: "STR +2 DEX +1",
+      10: "WIS +1 STR +1 CHA +1",
+      11: "VIT +1 CHA +1 INT +1",
+      12: "INT +2 WIS +1",
+      13: "DEX +2 CHA +1",
+      14: "WIS +2 DEX +1",
+      15: "WIS +2 INT +1",
+      16: "CHA +3",
     };
 
     this.STATUS = { 0: "Closed", 1: "Open" };

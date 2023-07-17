@@ -2,6 +2,9 @@ import { Item } from "../../types";
 import LootIcon from "../icons/LootIcon";
 import Efficacyicon from "../icons/EfficacyIcon";
 import { processItemName, calculateLevel, getItemData } from "../../lib/utils";
+import ItemBar from "./ItemBar";
+import { GameData } from "../GameData";
+import { getKeyFromValue, getValueFromKey } from "../../lib/utils";
 
 interface ItemDisplayProps {
   item: Item;
@@ -12,6 +15,12 @@ export const ItemDisplay = ({ item }: ItemDisplayProps) => {
 
   const itemName = processItemName(item);
   const { tier, type, slot } = getItemData(itemType ?? "");
+  const gameData = new GameData();
+
+  const itemSuffix = parseInt(
+    getKeyFromValue(gameData.ITEM_SUFFIXES, item.special1 ?? "") ?? ""
+  );
+  const boost = getValueFromKey(gameData.ITEM_SUFFIX_BOOST, itemSuffix ?? 0);
 
   return (
     <div
@@ -24,21 +33,27 @@ export const ItemDisplay = ({ item }: ItemDisplayProps) => {
         <span className="flex flex-row justify-between w-full">
           <div className="w-full overflow-auto whitespace-normal">
             {" "}
-            {/* Added the CSS classes here */}
-            <span className="flex font-semibold whitespace-nowrap">
-              {itemName} {item?.xp} XP
-              {slot == "Neck" || slot == "Ring"
-                ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
-                : ""}
-            </span>
-            <span className="whitespace-nowrap">
-              {item &&
-                `Tier ${tier ?? 0}, Greatness ${
-                  calculateLevel(item?.xp ?? 0) ?? 0
-                }
+            <div className="flex flex-col">
+              <span className="flex font-semibold whitespace-nowrap">
+                {itemName}
+                {slot == "Neck" || slot == "Ring"
+                  ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
+                  : ""}
+              </span>
+              <div className="flex flex-row justify-between">
+                <span className="text-xs sm:text-sm">
+                  {item &&
+                    `Tier ${tier ?? 0}
                 `}
+                </span>
+                <span className="text-xs sm:text-sm">{boost}</span>
+              </div>
+            </div>
+            <span className="whitespace-nowrap">
+              <ItemBar xp={item.xp ?? 0} />
             </span>
           </div>
+
           <Efficacyicon type={type} />
         </span>
       ) : (
