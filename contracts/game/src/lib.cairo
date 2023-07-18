@@ -1054,7 +1054,7 @@ mod Game {
                                 item_type: beast.combat_spec.item_type,
                                 level: beast.combat_spec.level,
                                 specials: beast.combat_spec.specials
-                            }, ambushed: was_ambushed, health: beast.starting_health,
+                            }
                         }
                     );
                 }
@@ -1693,30 +1693,6 @@ mod Game {
         // process beast counter attack
         let damage = beast.counter_attack(armor_combat_spec, entropy);
 
-        // if the damage taken is greater than or equal to adventurers health
-        // the adventurer is dead
-        let adventurer_died = (damage >= adventurer.health);
-        if (adventurer_died) {
-            // set their health to 0
-            adventurer.health = 0;
-            __event_AdventurerDied(
-                ref self,
-                AdventurerState {
-                    owner: get_caller_address(),
-                    adventurer_id: adventurer_id,
-                    adventurer: adventurer
-                },
-                killed_by_beast: true,
-                killed_by_obstacle: false,
-                killer_id: beast.id
-            );
-        // TODO: Check for Top score
-        } else {
-            // if the adventurer is not dead
-            // deduct the damage dealt
-            adventurer.deduct_health(damage);
-        }
-
         // if counter attack was result of an ambush
         // emit ambushed by beast event
         if (ambushed) {
@@ -1753,6 +1729,30 @@ mod Game {
                     }, damage: damage, location: ImplCombat::slot_to_u8(attack_location),
                 }
             );
+        }
+
+        // if the damage taken is greater than or equal to adventurers health
+        // the adventurer is dead
+        let adventurer_died = (damage >= adventurer.health);
+        if (adventurer_died) {
+            // set their health to 0
+            adventurer.health = 0;
+            __event_AdventurerDied(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                killed_by_beast: true,
+                killed_by_obstacle: false,
+                killer_id: beast.id
+            );
+        // TODO: Check for Top score
+        } else {
+            // if the adventurer is not dead
+            // deduct the damage dealt
+            adventurer.deduct_health(damage);
         }
     }
 
@@ -2667,13 +2667,21 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
+    struct AmbushedByBeast {
+        adventurer_state: AdventurerState,
+        seed: u128,
+        id: u8,
+        beast_specs: CombatSpec,
+        damage: u16,
+        location: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
     struct DiscoveredBeast {
         adventurer_state: AdventurerState,
         seed: u128,
         id: u8,
-        health: u16,
         beast_specs: CombatSpec,
-        ambushed: bool
     }
 
     #[derive(Drop, starknet::Event)]
@@ -2688,16 +2696,6 @@ mod Game {
 
     #[derive(Drop, starknet::Event)]
     struct AttackedByBeast {
-        adventurer_state: AdventurerState,
-        seed: u128,
-        id: u8,
-        beast_specs: CombatSpec,
-        damage: u16,
-        location: u8,
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct AmbushedByBeast {
         adventurer_state: AdventurerState,
         seed: u128,
         id: u8,
