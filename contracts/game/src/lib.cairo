@@ -1236,7 +1236,7 @@ mod Game {
     // The function first checks if the item's new level is higher than its previous level. If it is, it generates a 'ItemLeveledUp' event.
     // The function then checks if a suffix was assigned to the item when it leveled up. If it was, it generates an 'ItemSpecialUnlocked' event.
     // Lastly, the function checks if a prefix was assigned to the item when it leveled up. If it was, it generates an 'ItemSpecialUnlocked' event.
-    fn handle_item_leveling_events(
+    fn _handle_item_leveling_events(
         ref self: ContractState,
         adventurer: Adventurer,
         adventurer_id: u256,
@@ -1247,8 +1247,6 @@ mod Game {
         prefixes_assigned: bool,
         special_names: ItemSpecials
     ) {
-        // https://github.com/starkware-libs/cairo/issues/2942
-        // internal::revoke_ap_tracking();
         // if the new level is higher than the previous level
         if (new_level > previous_level) {
             // generate greatness increased event
@@ -1324,10 +1322,16 @@ mod Game {
         // internal::revoke_ap_tracking();
         let xp_increase = value * ITEM_XP_MULTIPLIER;
 
+        // TODO LH: Consider including a modified bool on the 
+        // ItemSpecialsStorage struct so that we can more easily
+        // flag the storage as modified when it happens.
+        let mut name_storage1_modified = false;
+        let mut name_storage2_modified = false;
+
         // if weapon is equipped
         if adventurer.weapon.id > 0 {
             // grant xp and handle any resulting events
-            _add_xp_to_item(
+            let specials_assigned = _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1337,11 +1341,21 @@ mod Game {
                 ref name_storage2,
                 entropy
             );
+
+            if (specials_assigned) {
+                if (_get_storage_index(
+                    @self, adventurer.weapon.metadata
+                ) == LOOT_NAME_STORAGE_INDEX_1) {
+                    name_storage1_modified = true;
+                } else {
+                    name_storage2_modified = true;
+                }
+            }
         }
         // if chest armor is equipped
         if adventurer.chest.id > 0 {
             // grant xp and handle any resulting events
-            _add_xp_to_item(
+            let specials_assigned = _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1351,11 +1365,21 @@ mod Game {
                 ref name_storage2,
                 entropy
             );
+
+            if (specials_assigned) {
+                if (_get_storage_index(
+                    @self, adventurer.chest.metadata
+                ) == LOOT_NAME_STORAGE_INDEX_1) {
+                    name_storage1_modified = true;
+                } else {
+                    name_storage2_modified = true;
+                }
+            }
         }
         // if head armor is equipped
         if adventurer.head.id > 0 {
             // grant xp and handle any resulting events
-            _add_xp_to_item(
+            let specials_assigned = _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1365,11 +1389,22 @@ mod Game {
                 ref name_storage2,
                 entropy
             );
+
+            if (specials_assigned) {
+                if (_get_storage_index(
+                    @self, adventurer.head.metadata
+                ) == LOOT_NAME_STORAGE_INDEX_1) {
+                    name_storage1_modified = true;
+                } else {
+                    name_storage2_modified = true;
+                }
+            }
         }
+
         // if waist armor is equipped
         if adventurer.waist.id > 0 {
             // grant xp and handle any resulting events
-            _add_xp_to_item(
+            let specials_assigned = _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1379,11 +1414,20 @@ mod Game {
                 ref name_storage2,
                 entropy
             );
+            if (specials_assigned) {
+                if (_get_storage_index(
+                    @self, adventurer.waist.metadata
+                ) == LOOT_NAME_STORAGE_INDEX_1) {
+                    name_storage1_modified = true;
+                } else {
+                    name_storage2_modified = true;
+                }
+            }
         }
         // if foot armor is equipped
         if adventurer.foot.id > 0 {
             // grant xp and handle any resulting events
-            _add_xp_to_item(
+            let specials_assigned = _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1393,11 +1437,20 @@ mod Game {
                 ref name_storage2,
                 entropy
             );
+            if (specials_assigned) {
+                if (_get_storage_index(
+                    @self, adventurer.foot.metadata
+                ) == LOOT_NAME_STORAGE_INDEX_1) {
+                    name_storage1_modified = true;
+                } else {
+                    name_storage2_modified = true;
+                }
+            }
         }
         // if hand armor is equipped
         if adventurer.hand.id > 0 {
             // grant xp and handle any resulting events
-            _add_xp_to_item(
+            let specials_assigned = _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1407,11 +1460,20 @@ mod Game {
                 ref name_storage2,
                 entropy
             );
+            if (specials_assigned) {
+                if (_get_storage_index(
+                    @self, adventurer.hand.metadata
+                ) == LOOT_NAME_STORAGE_INDEX_1) {
+                    name_storage1_modified = true;
+                } else {
+                    name_storage2_modified = true;
+                }
+            }
         }
         // if neck armor is equipped
         if adventurer.neck.id > 0 {
             // grant xp and handle any resulting events
-            _add_xp_to_item(
+            let specials_assigned = _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1421,11 +1483,20 @@ mod Game {
                 ref name_storage2,
                 entropy
             );
+            if (specials_assigned) {
+                if (_get_storage_index(
+                    @self, adventurer.neck.metadata
+                ) == LOOT_NAME_STORAGE_INDEX_1) {
+                    name_storage1_modified = true;
+                } else {
+                    name_storage2_modified = true;
+                }
+            }
         }
         // if ring is equipped
         if adventurer.ring.id > 0 {
             // grant xp and handle any resulting events
-            _add_xp_to_item(
+            let specials_assigned = _add_xp_to_item(
                 ref self,
                 adventurer_id,
                 ref adventurer,
@@ -1434,6 +1505,25 @@ mod Game {
                 ref name_storage1,
                 ref name_storage2,
                 entropy
+            );
+            if (specials_assigned) {
+                if (_get_storage_index(
+                    @self, adventurer.ring.metadata
+                ) == LOOT_NAME_STORAGE_INDEX_1) {
+                    name_storage1_modified = true;
+                } else {
+                    name_storage2_modified = true;
+                }
+            }
+        }
+        if (name_storage1_modified) {
+            _pack_loot_special_names_storage(
+                ref self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1, name_storage1
+            );
+        }
+        if (name_storage2_modified) {
+            _pack_loot_special_names_storage(
+                ref self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2, name_storage2
             );
         }
     }
@@ -1454,7 +1544,8 @@ mod Game {
     // The function first calculates the XP increase by applying a multiplier to the provided 'amount'.
     // It then checks the description index of the item. If the index matches with LOOT_NAME_STORAGE_INDEX_1, it uses name_storage1 for the item's special names; otherwise, it uses name_storage2.
     // It then calls `increase_item_xp` on the item to apply the XP increase and retrieve data about the item's original level, new level, and whether a suffix or prefix was assigned, and the item's special names.
-    // Lastly, it calls `handle_item_leveling_events` to handle any events resulting from the item leveling up.
+    // Lastly, it calls `_handle_item_leveling_events` to handle any events resulting from the item leveling up.
+    // @return A boolean indicating whether a suffix or prefix was assigned to the item when it leveled up.
     fn _add_xp_to_item(
         ref self: ContractState,
         adventurer_id: u256,
@@ -1464,7 +1555,7 @@ mod Game {
         ref name_storage1: ItemSpecialsStorage,
         ref name_storage2: ItemSpecialsStorage,
         entropy: u128
-    ) {
+    ) -> bool {
         // https://github.com/starkware-libs/cairo/issues/2942
         internal::revoke_ap_tracking();
 
@@ -1488,7 +1579,7 @@ mod Game {
                 );
             }
 
-            handle_item_leveling_events(
+            _handle_item_leveling_events(
                 ref self,
                 adventurer,
                 adventurer_id,
@@ -1499,6 +1590,8 @@ mod Game {
                 prefix_assigned,
                 special_names
             );
+
+            (suffix_assigned == true || prefix_assigned == true)
         } else {
             let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = item
                 .increase_item_xp(xp_increase, ref name_storage2, entropy);
@@ -1518,7 +1611,7 @@ mod Game {
                 );
             }
 
-            handle_item_leveling_events(
+            _handle_item_leveling_events(
                 ref self,
                 adventurer,
                 adventurer_id,
@@ -1529,9 +1622,10 @@ mod Game {
                 prefix_assigned,
                 special_names
             );
+
+            (suffix_assigned == true || prefix_assigned == true)
         }
     }
-
 
     fn _attack(
         ref self: ContractState,

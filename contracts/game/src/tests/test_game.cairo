@@ -333,7 +333,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(32000000)]
+    #[available_gas(34000000)]
     fn test_no_explore_during_battle() {
         let mut game = new_adventurer();
 
