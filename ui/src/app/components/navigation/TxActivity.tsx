@@ -113,9 +113,6 @@ export const TxActivity = () => {
         await refetch("adventurerByIdQuery");
         await refetch("battlesByBeastQuery");
         console.log("in battle!");
-        setAdventurer(
-          queryData?.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
-        );
         stopLoading({
           data: queryData.battlesByTxHashQuery.battles,
           beast: notificationData.beast,
