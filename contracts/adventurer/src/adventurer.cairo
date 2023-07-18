@@ -1359,12 +1359,12 @@ fn test_charisma_adjusted_potion_price() {
     // but since potion cost cannot be 0, it should be minimum price
     adventurer.stats.charisma = 2;
     let potion_price = adventurer.charisma_adjusted_potion_price();
-    assert(potion_price == MINIMUM_ITEM_PRICE, 'potion should be minimum price');
+    assert(potion_price == MINIMUM_POTION_PRICE, 'potion should be minimum price');
 
     // give adventurer 31 charisma which would result in an underflow
     adventurer.stats.charisma = 31;
     let potion_price = adventurer.charisma_adjusted_potion_price();
-    assert(potion_price == MINIMUM_ITEM_PRICE, 'potion should be minimum price');
+    assert(potion_price == MINIMUM_POTION_PRICE, 'potion should be minimum price');
 }
 
 #[test]
