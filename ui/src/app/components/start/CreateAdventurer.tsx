@@ -155,9 +155,9 @@ export const CreateAdventurer = ({
             method: `Spawn ${formData.name}`,
           },
         });
-        // setMintAdventurer(true);
       }
     });
+    setMintAdventurer(true);
   };
 
   const [formFilled, setFormFilled] = useState(false);
@@ -193,7 +193,7 @@ export const CreateAdventurer = ({
       <>
         <div className="w-3/4 sm:w-full p-8">
           <h2 className="uppercase">Choose your weapon</h2>
-          <div className="flex flex-row justify-between gap-20">
+          <div className="flex flex-col sm:flex-row justify-between gap-20">
             {[
               {
                 name: "Book",

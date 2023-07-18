@@ -96,8 +96,7 @@ export default function Home() {
   const [menu, setMenu] = useState<Menu[]>(allMenuItems);
   const [mobileMenu, setMobileMenu] = useState<Menu[]>(allMenuItems);
 
-  const latestAdventurer = data.adventurerByIdQuery?.adventurers[0];
-  console.log(latestAdventurer);
+  const adventurers = useAdventurerStore((state) => state.computed.isAlive);
 
   const playState = useMemo(
     () => ({
@@ -119,8 +118,6 @@ export default function Home() {
     };
   }, [play, stop]);
 
-
-
   useEffect(() => {
     if (
       data.adventurerByIdQuery &&
@@ -131,18 +128,20 @@ export default function Home() {
     }
   }, [data.adventurerByIdQuery]);
 
+  //   useEffect(() => {
+  //   if (adventurers[0] && firstAdventurer) {
+  //     setScreen("play");
+  //     setAdventurer(adventurers[0]);
+  //   }
+  // }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
+
   useEffect(() => {
     if (!account?.address) {
       setConnected(false);
     }
   }, [account, setConnected]);
 
-  // useEffect(() => {
-  //   if (adventurers[0] && firstAdventurer) {
-  //     setScreen("play");
-  //     setAdventurer(adventurers[0]);
-  //   }
-  // }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
+
 
   console.log(adventurer);
 
@@ -217,25 +216,22 @@ export default function Home() {
   //   setMobileMenu(newMobileMenu);
   // }, [adventurer, hasStatUpgrades, isAlive]);
 
-  // useEffect(() => {
-  //   if (hasNoXp) {
-  //     console.log("page", "play");
-  //     setScreen("play");
-  //   } else if (hasStatUpgrades) {
-  //     console.log("page", "upgrade");
-  //     setScreen("upgrade");
-  //   } else if (!adventurer || !isAlive) {
-  //     console.log("page", isAlive);
-  //     setScreen("start");
-  //   }
-  // }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
+  useEffect(() => {
+    if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
+      setScreen("play");
+    } else if (hasStatUpgrades) {
+      setScreen("upgrade");
+    } else if (!adventurer || !isAlive) {
+      setScreen("start");
+    }
+  }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
 
   // useEffect(() => {
   //   if (mintAdventurer) {
   //     setScreen("play");
   //     setMintAdventurer(false);
   //   }
-  // }, [adventurers, mintAdventurer]);
+  // }, [mintAdventurer]);
 
   useEffect(() => {
     refetch("adventurersByOwnerQuery");
