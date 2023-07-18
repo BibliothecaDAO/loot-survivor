@@ -56,3 +56,5 @@ mod WEEK_8 {
     const SECOND_PLACE: u256 = 4; // 4
     const THIRD_PLACE: u256 = 2; // 2
 }
+
+const STARTER_BEAST_ATTACK_DAMAGE: u16 = 10;

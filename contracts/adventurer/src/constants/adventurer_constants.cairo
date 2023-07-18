@@ -15,6 +15,7 @@ const CHARISMA_POTION_DISCOUNT: u16 = 2;
 const CHARISMA_ITEM_DISCOUNT: u16 = 2;
 const MINIMUM_ITEM_PRICE: u16 = 2;
 const ITEM_MAX_GREATNESS: u8 = 20;
+const ITEM_MAX_XP: u16 = 400;
 const MAX_GREATNESS_STAT_BONUS: u8 = 1;
 
 // Stat Settings
@@ -36,3 +37,5 @@ mod StatisticIndex {
     const WISDOM: u8 = 4;
     const CHARISMA: u8 = 5;
 }
+
+const U128_MAX: u128 = 340282366920938463463374607431768211455;

@@ -13,7 +13,7 @@ use super::{
             STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
             MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, ITEM_XP_MULTIPLIER, VITALITY_HEALTH_INCREASE,
             MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS,
-            ITEM_MAX_GREATNESS, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT
+            ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
     }
@@ -218,17 +218,17 @@ impl ImplAdventurer of IAdventurer {
     fn increment_stat(ref self: Adventurer, value: u8) {
         assert(value < 6, 'Valid stat range is 0-5');
         if (value == StatisticIndex::STRENGTH) {
-            self.add_strength(1)
+            self.increase_strength(1)
         } else if (value == StatisticIndex::DEXTERITY) {
-            self.add_dexterity(1)
+            self.increase_dexterity(1)
         } else if (value == StatisticIndex::VITALITY) {
-            self.add_vitality(1)
+            self.increase_vitality(1)
         } else if (value == StatisticIndex::INTELLIGENCE) {
-            self.add_intelligence(1)
+            self.increase_intelligence(1)
         } else if (value == StatisticIndex::WISDOM) {
-            self.add_wisdom(1)
+            self.increase_wisdom(1)
         } else {
-            self.add_charisma(1)
+            self.increase_charisma(1)
         }
     }
 
@@ -548,7 +548,7 @@ impl ImplAdventurer of IAdventurer {
     // @notice Increase the Adventurer's strength stat.
     // @dev The function will add the specified amount to the strength stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the strength stat.
-    fn add_strength(ref self: Adventurer, amount: u8) {
+    fn increase_strength(ref self: Adventurer, amount: u8) {
         self
             .stats
             .strength =
@@ -558,7 +558,7 @@ impl ImplAdventurer of IAdventurer {
     // @notice Increase the Adventurer's dexterity stat.
     // @dev The function will add the specified amount to the dexterity stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the dexterity stat.
-    fn add_dexterity(ref self: Adventurer, amount: u8) {
+    fn increase_dexterity(ref self: Adventurer, amount: u8) {
         self
             .stats
             .dexterity =
@@ -568,7 +568,7 @@ impl ImplAdventurer of IAdventurer {
     // @notice Increase the Adventurer's vitality stat.
     // @dev The function will add the specified amount to the vitality stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the vitality stat.
-    fn add_vitality(ref self: Adventurer, amount: u8) {
+    fn increase_vitality(ref self: Adventurer, amount: u8) {
         self
             .stats
             .vitality =
@@ -578,7 +578,7 @@ impl ImplAdventurer of IAdventurer {
     // @notice Increase the Adventurer's intelligence stat.
     // @dev The function will add the specified amount to the intelligence stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the intelligence stat.
-    fn add_intelligence(ref self: Adventurer, amount: u8) {
+    fn increase_intelligence(ref self: Adventurer, amount: u8) {
         self
             .stats
             .intelligence =
@@ -588,7 +588,7 @@ impl ImplAdventurer of IAdventurer {
     // @notice Increase the Adventurer's wisdom stat.
     // @dev The function will add the specified amount to the wisdom stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the wisdom stat.
-    fn add_wisdom(ref self: Adventurer, amount: u8) {
+    fn increase_wisdom(ref self: Adventurer, amount: u8) {
         self
             .stats
             .wisdom = AdventurerUtils::overflow_protected_stat_increase(self.stats.wisdom, amount);
@@ -597,7 +597,7 @@ impl ImplAdventurer of IAdventurer {
     // @notice Increase the Adventurer's charisma stat.
     // @dev The function will add the specified amount to the charisma stat up to the maximum limit of MAX_STAT_VALUE.
     // @param amount The amount to be added to the charisma stat.
-    fn add_charisma(ref self: Adventurer, amount: u8) {
+    fn increase_charisma(ref self: Adventurer, amount: u8) {
         self
             .stats
             .charisma =
@@ -792,16 +792,25 @@ impl ImplAdventurer of IAdventurer {
         // get the previous level of the item
         let original_level = self.get_greatness();
 
+        // check to ensure adding value to XP does not overflow u16
         if (u16_overflowing_add(self.xp, value).is_ok()) {
-            self.xp += value;
+            // if it does not, check if the new XP is less than or equal to the max XP
+            if (self.xp + value <= ITEM_MAX_XP) {
+                // if it is, add it to the item
+                self.xp += value;
+            } else {
+                // if the new XP exceeds the max XP, set the XP to the max XP 
+                self.xp = ITEM_MAX_XP;
+            }
         } else {
-            self.xp = 65535;
+            // if we overflow a u16, set the XP to the max XP
+            self.xp = ITEM_MAX_XP;
         }
 
         // get the new level of the item
         let new_level = self.get_greatness();
 
-         // There are five cases to handle when an item recieves XP
+        // There are five cases to handle when an item recieves XP
         // 1. The item is the same level as before (no work to do)
         // 2. The item level increased from below G15 to G19+ and thus needs both name prefixes and item suffix
         // 3. The item level increased from below G15 to above G15 but below G19. Assign prefixes
@@ -929,50 +938,50 @@ impl ImplAdventurer of IAdventurer {
     // @param suffix A u8 value representing the suffix tied to the attribute enhancement.
     fn add_suffix_boost(ref self: Adventurer, suffix: u8, ) {
         if (suffix == ItemSuffix::of_Power) {
-            self.add_strength(3);
+            self.increase_strength(3);
         } else if (suffix == ItemSuffix::of_Giant) {
-            self.add_vitality(3);
+            self.increase_vitality(3);
         } else if (suffix == ItemSuffix::of_Titans) {
-            self.add_strength(2);
-            self.add_charisma(1);
+            self.increase_strength(2);
+            self.increase_charisma(1);
         } else if (suffix == ItemSuffix::of_Skill) {
-            self.add_dexterity(3);
+            self.increase_dexterity(3);
         } else if (suffix == ItemSuffix::of_Perfection) {
-            self.add_strength(1);
-            self.add_dexterity(1);
-            self.add_vitality(1);
+            self.increase_strength(1);
+            self.increase_dexterity(1);
+            self.increase_vitality(1);
         } else if (suffix == ItemSuffix::of_Brilliance) {
-            self.add_intelligence(3);
+            self.increase_intelligence(3);
         } else if (suffix == ItemSuffix::of_Enlightenment) {
-            self.add_wisdom(3);
+            self.increase_wisdom(3);
         } else if (suffix == ItemSuffix::of_Protection) {
-            self.add_vitality(2);
-            self.add_dexterity(1);
+            self.increase_vitality(2);
+            self.increase_dexterity(1);
         } else if (suffix == ItemSuffix::of_Anger) {
-            self.add_strength(2);
-            self.add_dexterity(1);
+            self.increase_strength(2);
+            self.increase_dexterity(1);
         } else if (suffix == ItemSuffix::of_Rage) {
-            self.add_strength(1);
-            self.add_charisma(1);
-            self.add_wisdom(1);
+            self.increase_strength(1);
+            self.increase_charisma(1);
+            self.increase_wisdom(1);
         } else if (suffix == ItemSuffix::of_Fury) {
-            self.add_vitality(1);
-            self.add_charisma(1);
-            self.add_intelligence(1);
+            self.increase_vitality(1);
+            self.increase_charisma(1);
+            self.increase_intelligence(1);
         } else if (suffix == ItemSuffix::of_Vitriol) {
-            self.add_intelligence(2);
-            self.add_wisdom(1);
+            self.increase_intelligence(2);
+            self.increase_wisdom(1);
         } else if (suffix == ItemSuffix::of_the_Fox) {
-            self.add_dexterity(2);
-            self.add_charisma(1);
+            self.increase_dexterity(2);
+            self.increase_charisma(1);
         } else if (suffix == ItemSuffix::of_Detection) {
-            self.add_wisdom(2);
-            self.add_dexterity(1);
+            self.increase_wisdom(2);
+            self.increase_dexterity(1);
         } else if (suffix == ItemSuffix::of_Reflection) {
-            self.add_intelligence(1);
-            self.add_wisdom(2);
+            self.increase_intelligence(1);
+            self.increase_wisdom(2);
         } else if (suffix == ItemSuffix::of_the_Twins) {
-            self.add_charisma(3);
+            self.increase_charisma(3);
         }
     }
 
@@ -1629,10 +1638,10 @@ fn test_add_stat_upgrade_points() {
 fn test_add_strength() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_strength(1);
+    adventurer.increase_strength(1);
     assert(adventurer.stats.strength == 1, 'strength should be 1');
     // overflow case
-    adventurer.add_strength(255);
+    adventurer.increase_strength(255);
     assert(adventurer.stats.strength == MAX_STAT_VALUE, 'strength should be max');
 }
 
@@ -1641,10 +1650,10 @@ fn test_add_strength() {
 fn test_add_dexterity() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_dexterity(1);
+    adventurer.increase_dexterity(1);
     assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
     // overflow case
-    adventurer.add_dexterity(255);
+    adventurer.increase_dexterity(255);
     assert(adventurer.stats.dexterity == MAX_STAT_VALUE, 'dexterity should be max');
 }
 
@@ -1653,10 +1662,10 @@ fn test_add_dexterity() {
 fn test_add_vitality() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_vitality(1);
+    adventurer.increase_vitality(1);
     assert(adventurer.stats.vitality == 1, 'vitality should be 1');
     // overflow case
-    adventurer.add_vitality(255);
+    adventurer.increase_vitality(255);
     assert(adventurer.stats.vitality == MAX_STAT_VALUE, 'vitality should be max');
 }
 
@@ -1665,10 +1674,10 @@ fn test_add_vitality() {
 fn test_add_intelligence() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_intelligence(1);
+    adventurer.increase_intelligence(1);
     assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
     // overflow case
-    adventurer.add_intelligence(255);
+    adventurer.increase_intelligence(255);
     assert(adventurer.stats.intelligence == MAX_STAT_VALUE, 'intelligence should be max');
 }
 
@@ -1677,10 +1686,10 @@ fn test_add_intelligence() {
 fn test_add_wisdom() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_wisdom(1);
+    adventurer.increase_wisdom(1);
     assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
     // overflow case
-    adventurer.add_wisdom(255);
+    adventurer.increase_wisdom(255);
     assert(adventurer.stats.wisdom == MAX_STAT_VALUE, 'wisdom should be max');
 }
 
@@ -1689,10 +1698,10 @@ fn test_add_wisdom() {
 fn test_add_charisma() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_charisma(1);
+    adventurer.increase_charisma(1);
     assert(adventurer.stats.charisma == 1, 'charisma should be 1');
     // overflow case
-    adventurer.add_charisma(255);
+    adventurer.increase_charisma(255);
     assert(adventurer.stats.charisma == MAX_STAT_VALUE, 'charisma should be max');
 }
 
@@ -1701,11 +1710,11 @@ fn test_add_charisma() {
 fn test_deduct_strength() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_strength(2);
+    adventurer.increase_strength(2);
     adventurer.deduct_strength(1);
     assert(adventurer.stats.strength == 1, 'strength should be 1');
     // underflow case
-    adventurer.add_strength(5);
+    adventurer.increase_strength(5);
     adventurer.deduct_strength(255);
     assert(adventurer.stats.strength == 0, 'strength should be 0');
 }
@@ -1715,11 +1724,11 @@ fn test_deduct_strength() {
 fn test_deduct_dexterity() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_dexterity(2);
+    adventurer.increase_dexterity(2);
     adventurer.deduct_dexterity(1);
     assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');
     // underflow case
-    adventurer.add_dexterity(5);
+    adventurer.increase_dexterity(5);
     adventurer.deduct_dexterity(255);
     assert(adventurer.stats.dexterity == 0, 'dexterity should be 0');
 }
@@ -1729,11 +1738,11 @@ fn test_deduct_dexterity() {
 fn test_deduct_vitality() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_vitality(2);
+    adventurer.increase_vitality(2);
     adventurer.deduct_vitality(1);
     assert(adventurer.stats.vitality == 1, 'vitality should be 1');
     // underflow case
-    adventurer.add_vitality(5);
+    adventurer.increase_vitality(5);
     adventurer.deduct_vitality(255);
     assert(adventurer.stats.vitality == 0, 'vitality should be 0');
 }
@@ -1743,11 +1752,11 @@ fn test_deduct_vitality() {
 fn test_deduct_intelligence() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_intelligence(2);
+    adventurer.increase_intelligence(2);
     adventurer.deduct_intelligence(1);
     assert(adventurer.stats.intelligence == 1, 'intelligence should be 1');
     // underflow case
-    adventurer.add_intelligence(5);
+    adventurer.increase_intelligence(5);
     adventurer.deduct_intelligence(255);
     assert(adventurer.stats.intelligence == 0, 'intelligence should be 0');
 }
@@ -1757,11 +1766,11 @@ fn test_deduct_intelligence() {
 fn test_deduct_wisdom() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_wisdom(2);
+    adventurer.increase_wisdom(2);
     adventurer.deduct_wisdom(1);
     assert(adventurer.stats.wisdom == 1, 'wisdom should be 1');
     // underflow case
-    adventurer.add_wisdom(5);
+    adventurer.increase_wisdom(5);
     adventurer.deduct_wisdom(255);
     assert(adventurer.stats.wisdom == 0, 'wisdom should be 0');
 }
@@ -1771,12 +1780,12 @@ fn test_deduct_wisdom() {
 fn test_deduct_charisma() {
     let mut adventurer = ImplAdventurer::new(1, 1);
     // basic case
-    adventurer.add_charisma(2);
+    adventurer.increase_charisma(2);
     adventurer.deduct_charisma(1);
     assert(adventurer.stats.charisma == 1, 'charisma should be 1');
 
     // underflow case
-    adventurer.add_charisma(5);
+    adventurer.increase_charisma(5);
     adventurer.deduct_charisma(255);
     assert(adventurer.stats.charisma == 0, 'charisma should be 0');
 }
@@ -2113,6 +2122,7 @@ fn test_increase_item_xp() {
     let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
         .weapon
         .increase_item_xp(39, ref loot_item_name_storage, 1);
+
     assert(adventurer.weapon.xp == 400, 'weapon should have 400');
     assert(previous_level == 19, 'weapon prev level should be 19');
     assert(new_level == 20, 'weapon new level should be 20');
@@ -2134,7 +2144,7 @@ fn test_increase_item_xp() {
     let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
         .weapon
         .increase_item_xp(65535, ref loot_item_name_storage, 1);
-    assert(adventurer.weapon.xp == 65535, 'weapon should have 400');
+    assert(adventurer.weapon.xp == 400, 'max item xp is 400');
     assert(previous_level == 20, 'weapon prev level should be 20');
     assert(new_level == ITEM_MAX_GREATNESS, 'weapon new lvl should be max');
     assert(suffix_assigned == false, 'weapon should not recv suffix');
@@ -2170,7 +2180,7 @@ fn test_increase_item_xp() {
     let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = adventurer
         .chest
         .increase_item_xp(65535, ref loot_item_name_storage, 1);
-    assert(adventurer.chest.xp == 65535, 'divine robe should have 65535xp');
+    assert(adventurer.chest.xp == 400, 'max item xp is 400');
     assert(previous_level == divine_robe_starting_level, 'DR prev level should be 1');
     assert(new_level == ITEM_MAX_GREATNESS, 'DR new level should be MAX');
     assert(suffix_assigned == true, 'DR should have recv suffix');
