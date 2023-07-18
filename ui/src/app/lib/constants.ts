@@ -4,8 +4,7 @@ export const prologue =
   "In a sunless world teetering on the brink of destruction, humanity clings to an ancient prophecy of a chosen one bringing balance.";
 export const chapter1 =
   "In the chilling embrace of the cave, an adventurer stirs awake. Confused, disoriented, their eyes dart across the darkness, searching. The echo of water dripping and the chilling wind fill the air.";
-  export const battle =
-  "Oh no, there's a beast coming! Prepare for attack!";
+export const battle = "Oh no, there's a beast coming! Prepare for attack!";
 
 export const mainnet_addr = "https://alpha-mainnet.starknet.io";
 
@@ -27,7 +26,7 @@ export const contracts = {
       "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
   },
   goerli: {
-    game: "0x07477c3fdd5c49bd330d48aefc8a4b88a1ceded18627f2abbd2a4d32571510f5",
+    game: "0x07ff0fc337315610cd82588b1fb7be5598b7621a7a3a9277949ab38d1f8f81f0",
     lords_erc20_mintable:
       "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
   },

@@ -98,6 +98,7 @@ export default function UpgradeScreen() {
         adventurer?.id?.toString() ?? "",
         "0",
         getKeyFromValue(gameData.STATS, selected) ?? "",
+        "1",
       ],
     };
     addToCalls(upgradeTx);
