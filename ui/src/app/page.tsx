@@ -46,6 +46,16 @@ import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
 import { PenaltyCountDown } from "./components/CountDown";
 
+const allMenuItems: Menu[] = [
+  { id: 1, label: "Start", screen: "start", disabled: false },
+  { id: 2, label: "Play", screen: "play", disabled: false },
+  { id: 3, label: "Inventory", screen: "inventory", disabled: false },
+  { id: 4, label: "Upgrade", screen: "upgrade", disabled: false },
+  { id: 5, label: "Leaderboard", screen: "leaderboard", disabled: false },
+  { id: 6, label: "Encounters", screen: "encounters", disabled: false },
+  { id: 7, label: "Guide", screen: "guide", disabled: false },
+];
+
 export default function Home() {
   const { disconnect } = useConnectors();
   const { account } = useAccount();
@@ -82,8 +92,8 @@ export default function Home() {
 
   const { data, refetch } = useQueriesStore();
 
-  const latestAdventurer = data.adventurerByIdQuery?.adventurers[0];
-  console.log(latestAdventurer);
+  const [menu, setMenu] = useState<Menu[]>(allMenuItems);
+  const [mobileMenu, setMobileMenu] = useState<Menu[]>(allMenuItems);
 
   const playState = useMemo(
     () => ({
@@ -105,22 +115,6 @@ export default function Home() {
     };
   }, [play, stop]);
 
-  const [menu, setMenu] = useState<Menu[]>([
-    {
-      id: 1,
-      label: "Start",
-      screen: "start",
-    },
-  ]);
-
-  const [mobileMenu, setMobileMenu] = useState<Menu[]>([
-    {
-      id: 1,
-      label: "Start",
-      screen: "start",
-    },
-  ]);
-
   useEffect(() => {
     if (
       data.adventurerByIdQuery &&
@@ -129,7 +123,14 @@ export default function Home() {
       console.log("updated");
       setAdventurer(data.adventurerByIdQuery.adventurers[0]);
     }
-  }, [data.adventurerByIdQuery, txAccepted]);
+  }, [data.adventurerByIdQuery?.adventurers[0].timestamp]);
+
+  //   useEffect(() => {
+  //   if (adventurers[0] && firstAdventurer) {
+  //     setScreen("play");
+  //     setAdventurer(adventurers[0]);
+  //   }
+  // }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
 
   useEffect(() => {
     if (!account?.address) {
@@ -137,107 +138,95 @@ export default function Home() {
     }
   }, [account, setConnected]);
 
-  // useEffect(() => {
-  //   if (adventurers[0] && firstAdventurer) {
-  //     setScreen("play");
-  //     setAdventurer(adventurers[0]);
-  //   }
-  // }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
-
   console.log(adventurer);
 
   useMemo(() => {
     setIndexer(getGraphQLUrl());
   }, [setIndexer]);
 
-  useMemo(() => {
-    const commonMenuItems = (isMobile = false) => [
-      {
-        id: isMobile ? 2 : 1,
-        label: "Start",
-        screen: "start",
-        disabled: false,
-      },
-      ...(adventurer
-        ? [
-            {
-              id: isMobile ? 3 : 2,
-              label: "Play",
-              screen: "play",
-              disabled: hasStatUpgrades || adventurer.health == 0,
-            },
-            {
-              id: isMobile ? 4 : 3,
-              label: "Inventory",
-              screen: "inventory",
-              disabled: adventurer.health == 0,
-            },
-            {
-              id: isMobile ? 6 : 5,
-              label: hasStatUpgrades ? <span>Upgrade!</span> : "Upgrade",
-              screen: "upgrade",
-              disabled: !hasStatUpgrades,
-            },
-          ]
-        : []),
-      ...(isMobile
-        ? []
-        : [
-            {
-              id: 7,
-              label: "Leaderboard",
-              screen: "leaderboard",
-              disabled: false,
-            },
-            {
-              id: 8,
-              label: "Encounters",
-              screen: "encounters",
-              disabled: false,
-            },
-            {
-              id: 9,
-              label: "Guide",
-              screen: "guide",
-              disabled: false,
-            },
-          ]),
-    ];
+  // useMemo(() => {
+  //   const commonMenuItems = (isMobile = false) => [
+  //     {
+  //       id: isMobile ? 2 : 1,
+  //       label: "Start",
+  //       screen: "start",
+  //       disabled: false,
+  //     },
+  //     ...(adventurer
+  //       ? [
+  //         {
+  //           id: isMobile ? 3 : 2,
+  //           label: "Play",
+  //           screen: "play",
+  //           disabled: hasStatUpgrades || !isAlive,
+  //         },
+  //         {
+  //           id: isMobile ? 4 : 3,
+  //           label: "Inventory",
+  //           screen: "inventory",
+  //           disabled: !isAlive,
+  //         },
+  //         {
+  //           id: isMobile ? 6 : 5,
+  //           label: hasStatUpgrades ? <span>Upgrade!</span> : "Upgrade",
+  //           screen: "upgrade",
+  //           disabled: !hasStatUpgrades,
+  //         },
+  //       ]
+  //       : []),
+  //     ...(isMobile
+  //       ? []
+  //       : [
+  //         {
+  //           id: 7,
+  //           label: "Leaderboard",
+  //           screen: "leaderboard",
+  //           disabled: false,
+  //         },
+  //         {
+  //           id: 8,
+  //           label: "Encounters",
+  //           screen: "encounters",
+  //           disabled: false,
+  //         },
+  //         {
+  //           id: 9,
+  //           label: "Guide",
+  //           screen: "guide",
+  //           disabled: false,
+  //         },
+  //       ]),
+  //   ];
 
-    // if (onboarded) {
-    const newMenu: any = adventurer
-      ? commonMenuItems()
-      : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+  //   // if (onboarded) {
+  //   const newMenu: any = adventurer
+  //     ? commonMenuItems()
+  //     : [{ id: 1, label: "Start", screen: "start", disabled: false }];
 
-    const newMobileMenu: any = adventurer
-      ? commonMenuItems(true)
-      : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+  //   const newMobileMenu: any = adventurer
+  //     ? commonMenuItems(true)
+  //     : [{ id: 1, label: "Start", screen: "start", disabled: false }];
 
-    setMenu(newMenu);
-    setMobileMenu(newMobileMenu);
-  }, [adventurer, setScreen]);
+  //   setMenu(newMenu);
+  //   setMobileMenu(newMobileMenu);
+  // }, [adventurer, hasStatUpgrades, isAlive]);
 
   useEffect(() => {
-    if (hasNoXp) {
-      console.log("page", "play");
+    if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
       setScreen("play");
-    }
-    if (hasStatUpgrades) {
-      console.log("page", "upgrade");
+    } else if (hasStatUpgrades) {
       setScreen("upgrade");
-    }
-    if (!adventurer || !isAlive) {
-      console.log("page", isAlive);
+    } else if (!adventurer || !isAlive) {
       setScreen("start");
     }
-  }, [hasStatUpgrades, isAlive, hasNoXp]);
+  }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
 
   // useEffect(() => {
   //   if (mintAdventurer) {
   //     setScreen("play");
   //     setMintAdventurer(false);
   //   }
-  // }, [adventurers, mintAdventurer]);
+  // }, [data.adventurerByIdQuery?.adventurers, mintAdventurer]);
 
   useEffect(() => {
     refetch("adventurersByOwnerQuery");
@@ -250,7 +239,7 @@ export default function Home() {
   return (
     // <Maintenance />
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-4 sm:p-10 overflow-hidden`}
+      className={`min-h-screen container mx-auto flex flex-col p-4 sm:p-10 `}
     >
       {connected ? (
         <>

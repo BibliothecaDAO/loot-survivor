@@ -21,7 +21,7 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
   const { tier, attack, armor, image } = getBeastData(beastData?.beast ?? "");
 
   return (
-    <div className="relative flex flex-col items-center h-full overflow-hidden border-2 border-terminal-green">
+    <div className="relative flex flex-col items-center h-full  border-2 border-terminal-green">
       <div className="flex flex-col w-full h-full p-3 uppercase">
         <div className="flex justify-between py-3 text-2xl sm:text-4xl border-b border-terminal-green">
           {beastName}

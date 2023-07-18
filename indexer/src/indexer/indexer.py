@@ -63,7 +63,7 @@ def encode_hex_as_bytes(value):
     return bytes.fromhex(value.replace("0x", ""))
 
 
-async def update_adventurer_helper(info: Info, adventurer_state):
+async def update_adventurer_helper(info: Info, adventurer_state, time):
     update_adventurer_doc = {
         "id": check_exists_int(adventurer_state["adventurer_id"]),
         "owner": check_exists_int(adventurer_state["owner"]),
@@ -101,6 +101,8 @@ async def update_adventurer_helper(info: Info, adventurer_state):
         "statUpgrades": check_exists_int(
             adventurer_state["adventurer"]["stat_points_available"]
         ),
+        "lastUpdatedTime": time,
+        "timestamp": datetime.now(),
     }
     await info.storage.find_one_and_update(
         "adventurers",
@@ -565,7 +567,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data,
     ):
         su = decode_stat_upgrade_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, su.adventurer_state)
+        await update_adventurer_helper(info, su.adventurer_state, block_time)
         stat_upgrade_doc = {
             "stat_id": check_exists_int(su.stat_id),
             "blockTime": block_time,
@@ -587,7 +589,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data,
     ):
         dh = decode_discover_health_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, dh.adventurer_state)
+        await update_adventurer_helper(info, dh.adventurer_state, block_time)
         # subDiscoveries - 1: health, 2: gold, 3: xp
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
@@ -630,7 +632,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data,
     ):
         dg = decode_discover_gold_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, dg.adventurer_state)
+        await update_adventurer_helper(info, dg.adventurer_state, block_time)
         # subDiscoveries - 1: health, 2: gold, 3: xp
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
@@ -673,7 +675,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data,
     ):
         dx = decode_discover_xp_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, dx.adventurer_state)
+        await update_adventurer_helper(info, dx.adventurer_state, block_time)
         # subDiscoveries - 1: health, 2: gold, 3: xp
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
@@ -716,7 +718,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data,
     ):
         do = decode_discover_obstacle_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, do.adventurer_state)
+        await update_adventurer_helper(info, do.adventurer_state, block_time)
         # subDiscoveries - 1: health, 2: gold, 3: xp
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
@@ -762,7 +764,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data,
     ):
         db = decode_discover_beast_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, db.adventurer_state)
+        await update_adventurer_helper(info, db.adventurer_state, block_time)
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": check_exists_int(db.adventurer_state["adventurer_id"]),
@@ -819,7 +821,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data: List[FieldElement],
     ):
         ba = decode_attack_beast_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, ba.adventurer_state)
+        await update_adventurer_helper(info, ba.adventurer_state, block_time)
         await update_beast_health(
             info,
             ba.id,
@@ -886,7 +888,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data: List[FieldElement],
     ):
         abb = decode_attacked_by_beast_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, abb.adventurer_state)
+        await update_adventurer_helper(info, abb.adventurer_state, block_time)
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
@@ -944,7 +946,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data: List[FieldElement],
     ):
         sb = decode_slayed_beast_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, sb.adventurer_state)
+        await update_adventurer_helper(info, sb.adventurer_state, block_time)
         await update_beast_health(
             info,
             sb.id,
@@ -1014,7 +1016,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data: List[FieldElement],
     ):
         fa = decode_flee_attempt_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, fa.adventurer_state)
+        await update_adventurer_helper(info, fa.adventurer_state, block_time)
         try:
             beast_discovery = await info.storage.find(
                 "discoveries",
@@ -1117,7 +1119,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 {"$set": purchased_item_doc},
             )
             await update_adventurer_helper(
-                info, pi.adventurer_state_with_bag["adventurer_state"]
+                info, pi.adventurer_state_with_bag["adventurer_state"], block_time
             )
             await update_adventurer_bag(
                 info,
@@ -1153,7 +1155,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
     ):
         ei = decode_equip_item_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(
-            info, ei.adventurer_state_with_bag["adventurer_state"]
+            info, ei.adventurer_state_with_bag["adventurer_state"], block_time
         )
         await swap_item(
             info,
@@ -1175,7 +1177,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         gi = decode_greatness_increased_event.deserialize(
             [felt.to_int(i) for i in data]
         )
-        await update_adventurer_helper(info, gi.adventurer_state)
+        await update_adventurer_helper(info, gi.adventurer_state, block_time)
         print(
             "- [greatness increased]",
             gi.adventurer_state["adventurer_id"],
@@ -1194,7 +1196,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         isu = decode_item_special_unlocked_event.deserialize(
             [felt.to_int(i) for i in data]
         )
-        await update_adventurer_helper(info, isu.adventurer_state)
+        await update_adventurer_helper(info, isu.adventurer_state, block_time)
         if check_exists_int(isu.specials["special2"]):
             item_special_doc = {
                 "special2": check_exists_int(isu.specials["special2"]),
@@ -1231,7 +1233,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data: List[FieldElement],
     ):
         pp = decode_purchased_potion_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, pp.adventurer_state)
+        await update_adventurer_helper(info, pp.adventurer_state, block_time)
         purchase_doc = {
             "txHash": tx_hash,
             "adventurerId": check_exists_int(pp.adventurer_state["adventurer_id"]),
@@ -1278,7 +1280,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         data: List[FieldElement],
     ):
         ad = decode_adventurer_died_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, ad.adventurer_state)
+        await update_adventurer_helper(info, ad.adventurer_state, block_time)
         adventurer_died_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": encode_int_as_bytes(ad.adventurer_state["adventurer_id"]),
@@ -1305,7 +1307,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         alu = decode_adventurer_leveled_up_event.deserialize(
             [felt.to_int(i) for i in data]
         )
-        await update_adventurer_helper(info, alu.adventurer_state)
+        await update_adventurer_helper(info, alu.adventurer_state, block_time)
         print(
             "- [adventurer leveled up]",
             alu.adventurer_state["adventurer_id"],
@@ -1359,7 +1361,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         idp = decode_idle_damage_penalty_event.deserialize(
             [felt.to_int(i) for i in data]
         )
-        await update_adventurer_helper(info, idp.adventurer_state)
+        await update_adventurer_helper(info, idp.adventurer_state, block_time)
         if idp.adventurer_state["adventurer"]["beast_health"] > 0:
             penalty_battle_doc = {
                 "txHash": encode_hex_as_bytes(tx_hash),

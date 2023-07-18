@@ -26,9 +26,12 @@ export default function AdventurerScreen() {
   const [selected, setSelected] = useState<String>("");
   const [loading, setLoading] = useState(false);
   const { account } = useAccount();
-  const { data } = useQueriesStore();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
+
+  const adventurers = useQueriesStore((state) => state.data.adventurersByOwnerQuery
+    ? state.data.adventurersByOwnerQuery.adventurers
+    : []);
 
   const owner = account?.address ? padAddress(account.address) : "";
 
@@ -57,10 +60,6 @@ export default function AdventurerScreen() {
     },
     true
   );
-
-  const adventurers = data.adventurersByOwnerQuery
-    ? data.adventurersByOwnerQuery.adventurers
-    : [];
 
   const menu = [
     {

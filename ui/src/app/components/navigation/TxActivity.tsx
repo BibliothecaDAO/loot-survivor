@@ -163,7 +163,7 @@ export const TxActivity = () => {
       const handleUpgrade = async () => {
         await refetch("adventurerByIdQuery");
         stopLoading(notificationData);
-        setScreen("play");
+        // setScreen("play");
       };
 
       const handleMulticall = async () => {
