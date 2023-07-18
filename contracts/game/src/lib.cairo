@@ -100,7 +100,6 @@ mod Game {
         AttackedBeast: AttackedBeast,
         AttackedByBeast: AttackedByBeast,
         SlayedBeast: SlayedBeast,
-        FleeAttempt: FleeAttempt,
         FleeFailed: FleeFailed,
         FleeSucceeded: FleeSucceeded,
         PurchasedItem: PurchasedItem,
@@ -2717,15 +2716,6 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct FleeAttempt {
-        adventurer_state: AdventurerState,
-        seed: u128,
-        id: u8,
-        beast_specs: CombatSpec,
-        fled: bool
-    }
-
-    #[derive(Drop, starknet::Event)]
     struct FleeFailed {
         adventurer_state: AdventurerState, 
     }
@@ -2945,10 +2935,6 @@ mod Game {
 
     fn __event__SlayedBeast(ref self: ContractState, slayed_beast: SlayedBeast, ) {
         self.emit(Event::SlayedBeast(slayed_beast));
-    }
-
-    fn __event__FleeAttempt(ref self: ContractState, flee_attempt: FleeAttempt) {
-        self.emit(Event::FleeAttempt(flee_attempt));
     }
 
     fn __event__FleeFailed(ref self: ContractState, flee_failed: FleeFailed) {
