@@ -188,155 +188,95 @@ async def get_item(info, item_id, adventurer_id):
     return item
 
 
-async def update_item_xp(info, item, adventurer_id, xp, createdTime):
+async def update_items_xp(info, adventurer_id, adventurer):
     await info.storage.find_one_and_update(
         "items",
         {
-            "item": check_exists_int(item),
-            "adventurerId": check_exists_int(adventurer_id),
-            "createdTime": createdTime,
-        },
-        {
-            "$set": {"xp": encode_int_as_bytes(xp)},
-        },
-    )
-
-
-async def update_items_xp(info, adventurer_id, xp_increase):
-    adventurer = await info.storage.find_one(
-        "adventurers",
-        {
-            "id": check_exists_int(adventurer_id),
-        },
-    )
-    weapon_item = await info.storage.find_one(
-        "items",
-        {
-            "item": adventurer["weapon"],
+            "item": check_exists_int(adventurer["weapon"]["id"]),
             "adventurerId": check_exists_int(adventurer_id),
             "owner": True,
         },
+        {
+            "$set": {"xp": encode_int_as_bytes(adventurer["weapon"]["xp"])},
+        },
     )
-    chest_item = await info.storage.find_one(
+    await info.storage.find_one_and_update(
         "items",
         {
-            "item": adventurer["chest"],
+            "item": check_exists_int(adventurer["chest"]["id"]),
             "adventurerId": check_exists_int(adventurer_id),
             "owner": True,
         },
+        {
+            "$set": {"xp": encode_int_as_bytes(adventurer["chest"]["xp"])},
+        },
     )
-    head_item = await info.storage.find_one(
+    await info.storage.find_one_and_update(
         "items",
         {
-            "item": adventurer["head"],
+            "item": check_exists_int(adventurer["head"]["id"]),
             "adventurerId": check_exists_int(adventurer_id),
             "owner": True,
         },
+        {
+            "$set": {"xp": encode_int_as_bytes(adventurer["head"]["xp"])},
+        },
     )
-    waist_item = await info.storage.find_one(
+    await info.storage.find_one_and_update(
         "items",
         {
-            "item": adventurer["waist"],
+            "item": check_exists_int(adventurer["waist"]["id"]),
             "adventurerId": check_exists_int(adventurer_id),
             "owner": True,
         },
+        {
+            "$set": {"xp": encode_int_as_bytes(adventurer["waist"]["xp"])},
+        },
     )
-    foot_item = await info.storage.find_one(
+    await info.storage.find_one_and_update(
         "items",
         {
-            "item": adventurer["foot"],
+            "item": check_exists_int(adventurer["foot"]["id"]),
             "adventurerId": check_exists_int(adventurer_id),
             "owner": True,
         },
+        {
+            "$set": {"xp": encode_int_as_bytes(adventurer["foot"]["xp"])},
+        },
     )
-    hand_item = await info.storage.find_one(
+    await info.storage.find_one_and_update(
         "items",
         {
-            "item": adventurer["hand"],
+            "item": check_exists_int(adventurer["hand"]["id"]),
             "adventurerId": check_exists_int(adventurer_id),
             "owner": True,
         },
+        {
+            "$set": {"xp": encode_int_as_bytes(adventurer["hand"]["xp"])},
+        },
     )
-    neck_item = await info.storage.find_one(
+    await info.storage.find_one_and_update(
         "items",
         {
-            "item": adventurer["neck"],
+            "item": check_exists_int(adventurer["neck"]["id"]),
             "adventurerId": check_exists_int(adventurer_id),
             "owner": True,
         },
+        {
+            "$set": {"xp": encode_int_as_bytes(adventurer["neck"]["xp"])},
+        },
     )
-    ring_item = await info.storage.find_one(
+    await info.storage.find_one_and_update(
         "items",
         {
-            "item": adventurer["ring"],
+            "item": check_exists_int(adventurer["ring"]["id"]),
             "adventurerId": check_exists_int(adventurer_id),
             "owner": True,
         },
+        {
+            "$set": {"xp": encode_int_as_bytes(adventurer["ring"]["xp"])},
+        },
     )
-    if weapon_item:
-        await update_item_xp(
-            info,
-            decode_bytes_as_int(weapon_item["item"]),
-            adventurer_id,
-            decode_bytes_as_int(weapon_item["xp"]) + xp_increase,
-            weapon_item["createdTime"],
-        )
-    if chest_item:
-        await update_item_xp(
-            info,
-            decode_bytes_as_int(chest_item["item"]),
-            adventurer_id,
-            decode_bytes_as_int(chest_item["xp"]) + xp_increase,
-            chest_item["createdTime"],
-        )
-    if head_item:
-        await update_item_xp(
-            info,
-            decode_bytes_as_int(head_item["item"]),
-            adventurer_id,
-            decode_bytes_as_int(head_item["xp"]) + xp_increase,
-            head_item["createdTime"],
-        )
-    if waist_item:
-        await update_item_xp(
-            info,
-            decode_bytes_as_int(waist_item["item"]),
-            adventurer_id,
-            decode_bytes_as_int(waist_item["xp"]) + xp_increase,
-            waist_item["createdTime"],
-        )
-    if foot_item:
-        await update_item_xp(
-            info,
-            decode_bytes_as_int(foot_item["item"]),
-            adventurer_id,
-            decode_bytes_as_int(foot_item["xp"]) + xp_increase,
-            foot_item["createdTime"],
-        )
-    if hand_item:
-        await update_item_xp(
-            info,
-            decode_bytes_as_int(hand_item["item"]),
-            adventurer_id,
-            decode_bytes_as_int(hand_item["xp"]) + xp_increase,
-            hand_item["createdTime"],
-        )
-    if neck_item:
-        await update_item_xp(
-            info,
-            decode_bytes_as_int(neck_item["item"]),
-            adventurer_id,
-            decode_bytes_as_int(neck_item["xp"]) + xp_increase,
-            neck_item["createdTime"],
-        )
-    if ring_item:
-        await update_item_xp(
-            info,
-            decode_bytes_as_int(ring_item["item"]),
-            adventurer_id,
-            decode_bytes_as_int(ring_item["xp"]) + xp_increase,
-            ring_item["createdTime"],
-        )
 
 
 async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
@@ -762,7 +702,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         await update_items_xp(
-            info, do.adventurer_state["adventurer_id"], do.xp_earned_items
+            info,
+            do.adventurer_state["adventurer_id"],
+            do.adventurer_state["adventurer"],
         )
         print(
             "- [dodged obstacle]",
@@ -808,7 +750,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
         }
         await info.storage.insert_one("discoveries", discovery_doc)
         await update_items_xp(
-            info, do.adventurer_state["adventurer_id"], do.xp_earned_items
+            info,
+            do.adventurer_state["adventurer_id"],
+            do.adventurer_state["adventurer"],
         )
         print(
             "- [hit by obstacle]",
@@ -1148,7 +1092,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
             }
             await info.storage.insert_one("battles", slayed_beast_doc)
             await update_items_xp(
-                info, sb.adventurer_state["adventurer_id"], sb.xp_earned_items
+                info,
+                sb.adventurer_state["adventurer_id"],
+                sb.adventurer_state["adventurer"],
             )
             print(
                 "- [slayed beast]",
