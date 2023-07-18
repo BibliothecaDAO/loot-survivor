@@ -56,7 +56,6 @@ const allMenuItems: Menu[] = [
   { id: 7, label: "Guide", screen: "guide", disabled: false },
 ];
 
-
 export default function Home() {
   const { disconnect } = useConnectors();
   const { account } = useAccount();
@@ -126,7 +125,7 @@ export default function Home() {
       console.log("updated");
       setAdventurer(data.adventurerByIdQuery.adventurers[0]);
     }
-  }, [data.adventurerByIdQuery]);
+  }, [data.adventurerByIdQuery?.adventurers[0].lastUpdatedTime]);
 
   //   useEffect(() => {
   //   if (adventurers[0] && firstAdventurer) {
@@ -140,8 +139,6 @@ export default function Home() {
       setConnected(false);
     }
   }, [account, setConnected]);
-
-
 
   console.log(adventurer);
 
@@ -343,12 +340,12 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <AddDevnetEthButton />
-                      )}
+                      <AddDevnetEthButton />
+                    )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <MintEthButton />
-                      )}
+                      <MintEthButton />
+                    )}
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}
