@@ -95,8 +95,6 @@ export default function Home() {
   const [menu, setMenu] = useState<Menu[]>(allMenuItems);
   const [mobileMenu, setMobileMenu] = useState<Menu[]>(allMenuItems);
 
-  const adventurers = useAdventurerStore((state) => state.computed.isAlive);
-
   const playState = useMemo(
     () => ({
       isInBattle: hasBeast,
@@ -125,7 +123,7 @@ export default function Home() {
       console.log("updated");
       setAdventurer(data.adventurerByIdQuery.adventurers[0]);
     }
-  }, [data.adventurerByIdQuery?.adventurers[0].lastUpdatedTime]);
+  }, [data.adventurerByIdQuery?.adventurers[0].timestamp]);
 
   //   useEffect(() => {
   //   if (adventurers[0] && firstAdventurer) {
@@ -228,7 +226,7 @@ export default function Home() {
   //     setScreen("play");
   //     setMintAdventurer(false);
   //   }
-  // }, [mintAdventurer]);
+  // }, [data.adventurerByIdQuery?.adventurers, mintAdventurer]);
 
   useEffect(() => {
     refetch("adventurersByOwnerQuery");

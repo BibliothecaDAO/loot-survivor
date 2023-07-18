@@ -33,6 +33,7 @@ export class AdventurerClass implements Adventurer {
   gold?: number; // Gold adventurer has
   createdTime?: Date; // Block time the adventurer was created
   lastUpdatedTime?: Date; // Block time the adventurer was last updated
+  timestamp?: Date; // Indexer timestamp of event process
   constructor(adventurer: Adventurer) {
     const {
       id,
@@ -64,6 +65,7 @@ export class AdventurerClass implements Adventurer {
       gold,
       createdTime,
       lastUpdatedTime,
+      timestamp,
     } = adventurer;
 
     this.id = id;
@@ -98,6 +100,7 @@ export class AdventurerClass implements Adventurer {
     this.gold = gold;
     this.createdTime = createdTime;
     this.lastUpdatedTime = lastUpdatedTime;
+    this.timestamp = timestamp;
   }
 }
 
