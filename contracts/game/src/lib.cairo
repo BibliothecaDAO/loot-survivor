@@ -968,6 +968,7 @@ mod Game {
                     specials: starter_beast.combat_spec.specials
                 },
                 damage: STARTER_BEAST_ATTACK_DAMAGE,
+                critical_hit: false,
                 location: ImplCombat::slot_to_u8(Slot::Foot(())),
             }
         );
@@ -1693,7 +1694,7 @@ mod Game {
         );
 
         // get the damage dealt to the beast
-        let damage_dealt = beast
+        let (damage_dealt, critical_hit) = beast
             .attack(
                 _get_combat_spec(@self, adventurer_id, adventurer.weapon),
                 adventurer.get_luck(),
@@ -1732,6 +1733,7 @@ mod Game {
                         specials: beast.combat_spec.specials
                     },
                     damage_dealt: damage_dealt,
+                    critical_hit: critical_hit,
                     xp_earned_adventurer: xp_earned,
                     xp_earned_items: xp_earned * ITEM_XP_MULTIPLIER,
                     gold_earned: gold_reward
@@ -1774,7 +1776,7 @@ mod Game {
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
                         specials: beast.combat_spec.specials
-                    }, damage: damage_dealt, location: ImplCombat::slot_to_u8(Slot::None(())),
+                    }, damage: damage_dealt, critical_hit: critical_hit, location: ImplCombat::slot_to_u8(Slot::None(())),
                 }
             );
 
@@ -1811,7 +1813,7 @@ mod Game {
         let armor_combat_spec = _get_combat_spec(@self, adventurer_id, armor);
 
         // process beast counter attack
-        let damage = beast.counter_attack(armor_combat_spec, entropy);
+        let (damage, critical_hit) = beast.counter_attack(armor_combat_spec, entropy);
 
         // if counter attack was result of an ambush
         // emit ambushed by beast event
@@ -1829,7 +1831,7 @@ mod Game {
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
                         specials: beast.combat_spec.specials
-                    }, damage: damage, location: ImplCombat::slot_to_u8(attack_location),
+                    }, damage: damage, critical_hit: critical_hit, location: ImplCombat::slot_to_u8(attack_location),
                 }
             );
         } else {
@@ -1846,7 +1848,7 @@ mod Game {
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
                         specials: beast.combat_spec.specials
-                    }, damage: damage, location: ImplCombat::slot_to_u8(attack_location),
+                    }, damage: damage, critical_hit: critical_hit, location: ImplCombat::slot_to_u8(attack_location),
                 }
             );
         }
@@ -2812,21 +2814,22 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
+    struct DiscoveredBeast {
+        adventurer_state: AdventurerState,
+        seed: u128,
+        id: u8,
+        beast_specs: CombatSpec,
+    }
+
+    #[derive(Drop, starknet::Event)]
     struct AmbushedByBeast {
         adventurer_state: AdventurerState,
         seed: u128,
         id: u8,
         beast_specs: CombatSpec,
         damage: u16,
+        critical_hit: bool,
         location: u8,
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct DiscoveredBeast {
-        adventurer_state: AdventurerState,
-        seed: u128,
-        id: u8,
-        beast_specs: CombatSpec,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -2836,6 +2839,7 @@ mod Game {
         id: u8,
         beast_specs: CombatSpec,
         damage: u16,
+        critical_hit: bool,
         location: u8,
     }
 
@@ -2846,6 +2850,7 @@ mod Game {
         id: u8,
         beast_specs: CombatSpec,
         damage: u16,
+        critical_hit: bool,
         location: u8,
     }
 
@@ -2856,6 +2861,7 @@ mod Game {
         id: u8,
         beast_specs: CombatSpec,
         damage_dealt: u16,
+        critical_hit: bool,
         xp_earned_adventurer: u16,
         xp_earned_items: u16,
         gold_earned: u16,

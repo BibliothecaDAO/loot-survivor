@@ -194,22 +194,22 @@ impl ImplBeast of IBeast {
     // @param weapon: the weapon of the adventurer
     // @param beast: the beast being attacked
     // @param entropy: the entropy used to generate the random number
-    // @return: the damage dealt to the beast
+    // @return: the damage dealt to the beast and whether or not the attack was a critical hit
     fn attack(
         self: Beast, weapon: CombatSpec, adventurer_luck: u8, adventurer_strength: u8, entropy: u128
-    ) -> u16 {
+    ) -> (u16, bool) {
         // check if the attack is a critical hit
         let is_critical_hit = ImplCombat::is_critical_hit(adventurer_luck, entropy);
 
         // delegate damage calculation to combat system
-        return ImplCombat::calculate_damage(
+        (ImplCombat::calculate_damage(
             weapon,
             self.combat_spec,
             MINIMUM_DAMAGE,
             U8IntoU16::into(adventurer_strength),
             is_critical_hit,
             entropy
-        );
+        ), is_critical_hit)
     }
 
     // counter_attack is used to calculate the damage dealt to an adventurer when a beast counter attacks
@@ -217,14 +217,14 @@ impl ImplBeast of IBeast {
     // @param armor: the armor of the adventurer
     // @param entropy: the entropy used to generate the random number
     // @return: the damage dealt to the adventurer
-    fn counter_attack(self: Beast, armor: CombatSpec, entropy: u128) -> u16 {
+    fn counter_attack(self: Beast, armor: CombatSpec, entropy: u128) -> (u16, bool) {
         // beast have a fixed 1/6 chance of critical hit
         let is_critical_hit = (entropy % 6) == 0;
 
         // delegate damage calculation to combat system
-        return ImplCombat::calculate_damage(
+        (ImplCombat::calculate_damage(
             self.combat_spec, armor, MINIMUM_DAMAGE, STRENGTH_BONUS, is_critical_hit, entropy
-        );
+        ), is_critical_hit)
     }
 
     // ambush is used to determine if an adventurer avoided a beast ambush
@@ -605,7 +605,7 @@ fn test_counter_attack() {
 
     let entropy = 0;
 
-    let damage = beast.counter_attack(armor, entropy);
+    let (damage, critical_hit) = beast.counter_attack(armor, entropy);
     assert(damage == 42, 'warlock wrecks scrub brute');
 }
 
@@ -636,18 +636,18 @@ fn test_attack() {
         }
     };
 
-    let damage = beast.attack(weapon, adventurer_luck, adventurer_strength, entropy);
+    let (damage, critical_hit) = beast.attack(weapon, adventurer_luck, adventurer_strength, entropy);
     assert(damage == 140, 'g20 katana ruins lvl5 goblin');
 
     // bump adventurer strength by 1 which gives a +20% on base attack damage
     // T1 G20 is 100 base HP so they gain an extra 20HP for their strength stat
     adventurer_strength = 1;
-    let damage = beast.attack(weapon, adventurer_luck, adventurer_strength, entropy);
+    let (damage, critical_hit) = beast.attack(weapon, adventurer_luck, adventurer_strength, entropy);
     assert(damage == 160, 'strength gives extra damage');
 
     // boost luck to generate a critical hit (sorry gobblin)
     adventurer_luck = 40;
-    let damage = beast.attack(weapon, adventurer_luck, adventurer_strength, entropy);
+    let (damage, critical_hit) = beast.attack(weapon, adventurer_luck, adventurer_strength, entropy);
     assert(damage == 235, 'critical hit gives extra damage');
 }
 
