@@ -463,6 +463,18 @@ mod Game {
             // upgrade adventurer's stat
             _upgrade_stat(ref self, adventurer_id, ref adventurer, stat, amount);
 
+            // if adventurer has more stats available
+            if (adventurer.stat_points_available > 0) {
+                // emit new market items
+                __event_NewItemsAvailable(
+                    ref self,
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(), adventurer_id, adventurer
+                    },
+                    items: _get_items_on_market(@self, adventurer_id, adventurer)
+                );
+            }
+
             // pack and save (stat boosts weren't applied so no need to remove)
             _pack_adventurer(ref self, adventurer_id, adventurer);
         }
@@ -1577,6 +1589,14 @@ mod Game {
                         adventurer: adventurer
                     }
                 );
+
+                __event_NewItemsAvailable(
+                    ref self,
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(), adventurer_id, adventurer
+                    },
+                    items: _get_items_on_market(@self, adventurer_id, adventurer)
+                );
             }
 
             _handle_item_leveling_events(
@@ -1608,6 +1628,14 @@ mod Game {
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
                     }
+                );
+
+                __event_NewItemsAvailable(
+                    ref self,
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(), adventurer_id, adventurer
+                    },
+                    items: _get_items_on_market(@self, adventurer_id, adventurer)
                 );
             }
 
