@@ -47,17 +47,18 @@ trait BagActions {
 impl BagPacking of Packing<Bag> {
     fn pack(self: Bag) -> felt252 {
         (self.item_1.pack().into()
-         + self.item_2.pack().into() * pow::TWO_POW_21
-         + self.item_3.pack().into() * pow::TWO_POW_42
-         + self.item_4.pack().into() * pow::TWO_POW_63
-         + self.item_5.pack().into() * pow::TWO_POW_84
-         + self.item_6.pack().into() * pow::TWO_POW_105
-         + self.item_7.pack().into() * pow::TWO_POW_126
-         + self.item_8.pack().into() * pow::TWO_POW_147
-         + self.item_9.pack().into() * pow::TWO_POW_168
-         + self.item_10.pack().into() * pow::TWO_POW_189
-         + self.item_11.pack().into() * pow::TWO_POW_210
-        ).try_into().expect('pack Bag')
+            + self.item_2.pack().into() * pow::TWO_POW_21
+            + self.item_3.pack().into() * pow::TWO_POW_42
+            + self.item_4.pack().into() * pow::TWO_POW_63
+            + self.item_5.pack().into() * pow::TWO_POW_84
+            + self.item_6.pack().into() * pow::TWO_POW_105
+            + self.item_7.pack().into() * pow::TWO_POW_126
+            + self.item_8.pack().into() * pow::TWO_POW_147
+            + self.item_9.pack().into() * pow::TWO_POW_168
+            + self.item_10.pack().into() * pow::TWO_POW_189
+            + self.item_11.pack().into() * pow::TWO_POW_210)
+            .try_into()
+            .expect('pack Bag')
     }
 
     fn unpack(packed: felt252) -> Bag {
@@ -87,6 +88,11 @@ impl BagPacking of Packing<Bag> {
             item_10: Packing::unpack(item_10.try_into().expect('unpack Bag item_10')),
             item_11: Packing::unpack(item_11.try_into().expect('unpack Bag item_11')),
         }
+    }
+
+    // TODO: add overflow pack protection
+    fn overflow_pack_protection(self: Bag) -> Bag {
+        self
     }
 }
 impl ImplBagActions of BagActions {
@@ -257,7 +263,7 @@ fn test_pack_bag() {
             id: 127, xp: 511, metadata: 31
             }, item_11: ItemPrimitive {
             id: 127, xp: 511, metadata: 31
-            }
+        }
     };
 
     let packed_bag: Bag = Packing::unpack(bag.pack());
@@ -333,7 +339,7 @@ fn test_add_item() {
             id: 0, xp: 0, metadata: 0
             }, item_11: ItemPrimitive {
             id: 0, xp: 0, metadata: 0
-            },
+        },
     };
 
     let item = ItemPrimitive { id: 23, xp: 1, metadata: 5 };
@@ -369,7 +375,7 @@ fn test_is_full() {
             id: 13, xp: 0, metadata: 0
             }, item_11: ItemPrimitive {
             id: 14, xp: 0, metadata: 0
-            },
+        },
     };
 
     assert(bag.is_full() == true, 'Bag should be full');
@@ -400,7 +406,7 @@ fn remove_item() {
             id: 13, xp: 0, metadata: 0
             }, item_11: ItemPrimitive {
             id: 14, xp: 0, metadata: 0
-            },
+        },
     };
 
     bag.remove_item(8);

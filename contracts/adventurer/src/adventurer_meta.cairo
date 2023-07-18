@@ -35,6 +35,11 @@ impl PackingAdventurerMetadata of Packing<AdventurerMetadata> {
             entropy: entropy.try_into().expect('unpack AdvMetadata entropy')
         }
     }
+
+    // TODO: add overflow pack protection
+    fn overflow_pack_protection(self: AdventurerMetadata) -> AdventurerMetadata {
+        self
+    }
 }
 
 #[cfg(test)]

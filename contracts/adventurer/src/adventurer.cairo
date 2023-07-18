@@ -107,6 +107,11 @@ impl AdventurerPacking of Packing<Adventurer> {
                 .expect('unpack Adventurer stat_upgrade')
         }
     }
+
+    // TODO: add overflow pack protection
+    fn overflow_pack_protection(self: Adventurer) -> Adventurer {
+        self
+    }
 }
 
 #[generate_trait]
@@ -1043,7 +1048,7 @@ impl ImplAdventurer of IAdventurer {
     // @param self The instance of the Adventurer struct which contains the adventurer's stats and items.
     // @param name_storage1 The first storage of special item names.
     // @param name_storage2 The second storage of special item names.
-    fn apply_item_stat_boosts(
+    fn add_stat_boosts(
         ref self: Adventurer, name_storage1: ItemSpecialsStorage, name_storage2: ItemSpecialsStorage
     ) {
         if (self.weapon.get_greatness() >= 15) {
@@ -1134,14 +1139,20 @@ impl ImplAdventurer of IAdventurer {
                 self.add_suffix_boost(ring_names.special1);
             }
         }
+
+        // check to ensure adventurer doesn't have more health
+        // than the max provided by vitality stat
+        if self.health > self.get_max_health() {
+            self.health = self.get_max_health();
+        }
     }
 
-    // @notice The `remove_item_stat_boosts` function takes a reference to an Adventurer and two ItemSpecialsStorages 
+    // @notice The `remove_stat_boosts` function takes a reference to an Adventurer and two ItemSpecialsStorages 
     // and removes the item stat boosts from the Adventurer's equipment.
     // @param self A reference to the Adventurer instance.
     // @param name_storage1 The first ItemSpecialsStorage instance.
     // @param name_storage2 The second ItemSpecialsStorage instance.
-    fn remove_item_stat_boosts(
+    fn remove_stat_boosts(
         ref self: Adventurer, name_storage1: ItemSpecialsStorage, name_storage2: ItemSpecialsStorage
     ) {
         if (self.weapon.get_greatness() >= 15) {
@@ -1437,6 +1448,53 @@ fn test_packing_and_unpacking_adventurer() {
     assert(
         adventurer.stat_points_available == unpacked.stat_points_available, 'stat_points_available'
     );
+}
+
+#[test]
+#[available_gas(3000000)]
+fn test_packing_stat_overflow_protection() {
+    // create an adventurer with stats at max u8
+    let adventurer = Adventurer {
+        last_action: 511, health: 511, xp: 8191, stats: Stats {
+            strength: 255,
+            dexterity: 255,
+            vitality: 255,
+            intelligence: 255,
+            wisdom: 255,
+            charisma: 255,
+            }, gold: 511, weapon: ItemPrimitive {
+            id: 127, xp: 511, metadata: 31, 
+            }, chest: ItemPrimitive {
+            id: 1, xp: 0, metadata: 0, 
+            }, head: ItemPrimitive {
+            id: 127, xp: 511, metadata: 31, 
+            }, waist: ItemPrimitive {
+            id: 87, xp: 511, metadata: 4, 
+            }, foot: ItemPrimitive {
+            id: 78, xp: 511, metadata: 5, 
+            }, hand: ItemPrimitive {
+            id: 34, xp: 511, metadata: 6, 
+            }, neck: ItemPrimitive {
+            id: 32, xp: 511, metadata: 7, 
+            }, ring: ItemPrimitive {
+            id: 1, xp: 511, metadata: 8, 
+        }, beast_health: 511, stat_points_available: 7,
+    };
+
+    // pack adventurer
+    let packed = adventurer.pack();
+
+    // unpack adventurer
+    let unpacked: Adventurer = Packing::unpack(packed);
+
+    // verify packing function didn't overflow stats
+    // but instead set values to max
+    assert(unpacked.stats.strength == MAX_STAT_VALUE, 'strength');
+    assert(unpacked.stats.dexterity == MAX_STAT_VALUE, 'dexterity');
+    assert(unpacked.stats.vitality == MAX_STAT_VALUE, 'vitality');
+    assert(unpacked.stats.intelligence == MAX_STAT_VALUE, 'intelligence');
+    assert(unpacked.stats.wisdom == MAX_STAT_VALUE, 'wisdom');
+    assert(unpacked.stats.charisma == MAX_STAT_VALUE, 'charisma');
 }
 
 #[test]
@@ -2536,7 +2594,7 @@ fn test_remove_suffix_boost() {
 
 #[test]
 #[available_gas(700000)]
-fn test_apply_item_stat_boosts() {
+fn test_add_stat_boosts() {
     let mut adventurer = Adventurer {
         last_action: 511, health: 100, xp: 1, stats: Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, 
@@ -2598,9 +2656,7 @@ fn test_apply_item_stat_boosts() {
         item_10: item10_names,
     };
 
-    let boost_stats = ImplAdventurer::apply_item_stat_boosts(
-        ref adventurer, name_storage1, name_storage2
-    );
+    let boost_stats = ImplAdventurer::add_stat_boosts(ref adventurer, name_storage1, name_storage2);
     assert(adventurer.stats.strength == 5, 'strength should be 5');
     assert(adventurer.stats.vitality == 5, 'vitality should be 5');
     assert(adventurer.stats.dexterity == 1, 'dexterity should be 1');

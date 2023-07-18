@@ -12,20 +12,22 @@ use pack::pack::{rshift_split};
 
 #[generate_trait]
 impl AdventurerUtils of IAdventurer {
+
+    // @dev Provides overflow protected stat increase.
+    //      This function protects against u8 overflow but allows stat
+    //      to exceed MAX_STAT_VALUE as adventurers live stats are expected
+    //      to exceed MAX_STAT_VALUE. Ensuring a stat does not overflow adventurer packing
+    //      code is the responsibility of the adventurer packing code
+    // @param current_stat The current value of the stat.
+    // @param increase_amount The amount by which to increase the stat.
+    // @return The increased stat value, or `MAX_STAT_VALUE` if an increase would cause an overflow.
     fn overflow_protected_stat_increase(current_stat: u8, increase_amount: u8) -> u8 {
         // u8 overflow check
         if (u8_overflowing_add(current_stat, increase_amount).is_ok()) {
-            // if the strength plus the amount is less than or equal to the max stat value
-            if (current_stat + increase_amount <= MAX_STAT_VALUE) {
-                // add the amount to the strength
-                return current_stat + increase_amount;
-            }
+            current_stat + increase_amount
+        } else {
+            MAX_STAT_VALUE
         }
-
-        // otherwise set the strength to the max stat value
-        // this will happen either in u8 overflow case
-        // or if the strength plus the amount is greater than the max stat value
-        MAX_STAT_VALUE
     }
 
     // get_random_explore returns a random number between 0 and 3 based on provided entropy
@@ -76,12 +78,6 @@ fn test_overflow_protected_stat_increase() {
     // base case
     assert(
         AdventurerUtils::overflow_protected_stat_increase(1, 1) == 2, 'stat should increase by 1'
-    );
-
-    // max stat value case
-    assert(
-        AdventurerUtils::overflow_protected_stat_increase(MAX_STAT_VALUE, 1) == MAX_STAT_VALUE,
-        'stat should not increase'
     );
 
     // u8 overflow case
