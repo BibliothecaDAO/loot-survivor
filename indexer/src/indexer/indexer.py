@@ -1268,7 +1268,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                             "adventurer_id"
                         ]
                     ),
-                    "createdTime": item_document["createdTime"],
+                    "lastUpdatedTime": item_document["lastUpdatedTime"],
                 },
                 {"$set": purchased_item_doc},
             )
