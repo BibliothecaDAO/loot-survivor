@@ -34,7 +34,7 @@ const TransactionHistory = () => {
         transactions ? (
           <div
             ref={wrapperRef}
-            className="absolute m-auto right-8 sm:right-16 top-20 sm:top-32 z-10 w-[300px] sm:w-[650px] h-[250px] p-4 bg-terminal-black border border-terminal-green overflow-x-auto table-scroll"
+            className="absolute m-auto right-8 sm:right-16 top-20 sm:top-32 z-10 w-[300px] sm:w-[650px] h-[250px] p-4 bg-terminal-black border border-terminal-green  table-scroll"
           >
             <div className="flex flex-row justify-between">
               <p className="text-2xl">Ledger</p>

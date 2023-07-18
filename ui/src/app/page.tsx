@@ -46,6 +46,17 @@ import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
 import { PenaltyCountDown } from "./components/CountDown";
 
+const allMenuItems: Menu[] = [
+  { id: 1, label: "Start", screen: "start", disabled: false },
+  { id: 2, label: "Play", screen: "play", disabled: false },
+  { id: 3, label: "Inventory", screen: "inventory", disabled: false },
+  { id: 4, label: "Upgrade", screen: "upgrade", disabled: false },
+  { id: 5, label: "Leaderboard", screen: "leaderboard", disabled: false },
+  { id: 6, label: "Encounters", screen: "encounters", disabled: false },
+  { id: 7, label: "Guide", screen: "guide", disabled: false },
+];
+
+
 export default function Home() {
   const { disconnect } = useConnectors();
   const { account } = useAccount();
@@ -82,6 +93,9 @@ export default function Home() {
 
   const { data, refetch } = useQueriesStore();
 
+  const [menu, setMenu] = useState<Menu[]>(allMenuItems);
+  const [mobileMenu, setMobileMenu] = useState<Menu[]>(allMenuItems);
+
   const latestAdventurer = data.adventurerByIdQuery?.adventurers[0];
   console.log(latestAdventurer);
 
@@ -105,21 +119,7 @@ export default function Home() {
     };
   }, [play, stop]);
 
-  const [menu, setMenu] = useState<Menu[]>([
-    {
-      id: 1,
-      label: "Start",
-      screen: "start",
-    },
-  ]);
 
-  const [mobileMenu, setMobileMenu] = useState<Menu[]>([
-    {
-      id: 1,
-      label: "Start",
-      screen: "start",
-    },
-  ]);
 
   useEffect(() => {
     if (
@@ -129,7 +129,7 @@ export default function Home() {
       console.log("updated");
       setAdventurer(data.adventurerByIdQuery.adventurers[0]);
     }
-  }, [data.adventurerByIdQuery, txAccepted]);
+  }, [data.adventurerByIdQuery]);
 
   useEffect(() => {
     if (!account?.address) {
@@ -150,87 +150,85 @@ export default function Home() {
     setIndexer(getGraphQLUrl());
   }, [setIndexer]);
 
-  useMemo(() => {
-    const commonMenuItems = (isMobile = false) => [
-      {
-        id: isMobile ? 2 : 1,
-        label: "Start",
-        screen: "start",
-        disabled: false,
-      },
-      ...(adventurer
-        ? [
-            {
-              id: isMobile ? 3 : 2,
-              label: "Play",
-              screen: "play",
-              disabled: hasStatUpgrades || adventurer.health == 0,
-            },
-            {
-              id: isMobile ? 4 : 3,
-              label: "Inventory",
-              screen: "inventory",
-              disabled: adventurer.health == 0,
-            },
-            {
-              id: isMobile ? 6 : 5,
-              label: hasStatUpgrades ? <span>Upgrade!</span> : "Upgrade",
-              screen: "upgrade",
-              disabled: !hasStatUpgrades,
-            },
-          ]
-        : []),
-      ...(isMobile
-        ? []
-        : [
-            {
-              id: 7,
-              label: "Leaderboard",
-              screen: "leaderboard",
-              disabled: false,
-            },
-            {
-              id: 8,
-              label: "Encounters",
-              screen: "encounters",
-              disabled: false,
-            },
-            {
-              id: 9,
-              label: "Guide",
-              screen: "guide",
-              disabled: false,
-            },
-          ]),
-    ];
+  // useMemo(() => {
+  //   const commonMenuItems = (isMobile = false) => [
+  //     {
+  //       id: isMobile ? 2 : 1,
+  //       label: "Start",
+  //       screen: "start",
+  //       disabled: false,
+  //     },
+  //     ...(adventurer
+  //       ? [
+  //         {
+  //           id: isMobile ? 3 : 2,
+  //           label: "Play",
+  //           screen: "play",
+  //           disabled: hasStatUpgrades || !isAlive,
+  //         },
+  //         {
+  //           id: isMobile ? 4 : 3,
+  //           label: "Inventory",
+  //           screen: "inventory",
+  //           disabled: !isAlive,
+  //         },
+  //         {
+  //           id: isMobile ? 6 : 5,
+  //           label: hasStatUpgrades ? <span>Upgrade!</span> : "Upgrade",
+  //           screen: "upgrade",
+  //           disabled: !hasStatUpgrades,
+  //         },
+  //       ]
+  //       : []),
+  //     ...(isMobile
+  //       ? []
+  //       : [
+  //         {
+  //           id: 7,
+  //           label: "Leaderboard",
+  //           screen: "leaderboard",
+  //           disabled: false,
+  //         },
+  //         {
+  //           id: 8,
+  //           label: "Encounters",
+  //           screen: "encounters",
+  //           disabled: false,
+  //         },
+  //         {
+  //           id: 9,
+  //           label: "Guide",
+  //           screen: "guide",
+  //           disabled: false,
+  //         },
+  //       ]),
+  //   ];
 
-    // if (onboarded) {
-    const newMenu: any = adventurer
-      ? commonMenuItems()
-      : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+  //   // if (onboarded) {
+  //   const newMenu: any = adventurer
+  //     ? commonMenuItems()
+  //     : [{ id: 1, label: "Start", screen: "start", disabled: false }];
 
-    const newMobileMenu: any = adventurer
-      ? commonMenuItems(true)
-      : [{ id: 1, label: "Start", screen: "start", disabled: false }];
+  //   const newMobileMenu: any = adventurer
+  //     ? commonMenuItems(true)
+  //     : [{ id: 1, label: "Start", screen: "start", disabled: false }];
 
-    setMenu(newMenu);
-    setMobileMenu(newMobileMenu);
-  }, [adventurer, setScreen]);
+  //   setMenu(newMenu);
+  //   setMobileMenu(newMobileMenu);
+  // }, [adventurer, hasStatUpgrades, isAlive]);
 
-  useEffect(() => {
-    if (hasNoXp) {
-      console.log("page", "play");
-      setScreen("play");
-    }
-    if (hasStatUpgrades) {
-      console.log("page", "upgrade");
-      setScreen("upgrade");
-    }
-    if (!adventurer || !isAlive) {
-      console.log("page", isAlive);
-      setScreen("start");
-    }
-  }, [hasStatUpgrades, isAlive, hasNoXp]);
+  // useEffect(() => {
+  //   if (hasNoXp) {
+  //     console.log("page", "play");
+  //     setScreen("play");
+  //   } else if (hasStatUpgrades) {
+  //     console.log("page", "upgrade");
+  //     setScreen("upgrade");
+  //   } else if (!adventurer || !isAlive) {
+  //     console.log("page", isAlive);
+  //     setScreen("start");
+  //   }
+  // }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
 
   // useEffect(() => {
   //   if (mintAdventurer) {
@@ -250,7 +248,7 @@ export default function Home() {
   return (
     // <Maintenance />
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-4 sm:p-10 overflow-hidden`}
+      className={`min-h-screen container mx-auto flex flex-col p-4 sm:p-10 `}
     >
       {connected ? (
         <>
@@ -349,12 +347,12 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                      <AddDevnetEthButton />
-                    )}
+                        <AddDevnetEthButton />
+                      )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                      <MintEthButton />
-                    )}
+                        <MintEthButton />
+                      )}
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}

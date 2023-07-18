@@ -41,7 +41,9 @@ export default function ActionsScreen() {
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
 
-  const { data } = useQueriesStore();
+  const latestDiscoveries = useQueriesStore((state) => state.data.latestDiscoveriesQuery
+    ? state.data.latestDiscoveriesQuery.discoveries
+    : []);
 
   useCustomQuery(
     "adventurerByIdQuery",
@@ -69,10 +71,6 @@ export default function ActionsScreen() {
     },
     txAccepted
   );
-
-  const latestDiscoveries = data.latestDiscoveriesQuery
-    ? data.latestDiscoveriesQuery.discoveries
-    : [];
 
   const exploreTx = {
     contractAddress: gameContract?.address ?? "",
@@ -112,7 +110,7 @@ export default function ActionsScreen() {
   ];
 
   return (
-    <div className="flex flex-col sm:flex-row gap-5 sm:gap-0 overflow-hidden flex-wrap">
+    <div className="flex flex-col sm:flex-row gap-5 sm:gap-0  flex-wrap">
       <div className="hidden sm:block sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>

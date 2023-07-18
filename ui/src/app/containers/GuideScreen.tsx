@@ -103,7 +103,7 @@ export default function GuideScreen() {
         There are three types of weapons: Blade, Bludgeon, Magic and three types
         of armor materials: Cloth, Hide and Metal. Tier 1 is the highest.
       </p>
-      <div className="overflow-x-auto">
+      <div className="">
         <h3 className="text-center text-l mb-2">
           Efficacy Chart of Weapon and Armor Interactions
         </h3>
@@ -137,7 +137,7 @@ export default function GuideScreen() {
         </table>
       </div>
       <h3 className="mb-2 text-center">The Armory Ranking</h3>
-      <div className="overflow-x-auto">
+      <div className="">
         <table className="w-1/2 m-auto uppercase">
           <thead>
             <tr>
@@ -185,7 +185,7 @@ export default function GuideScreen() {
         and prefix of your item, special hits can be achieved!
       </p>
       <h4 className="mb-2 text-center">Item Suffixes and Their Attributes</h4>
-      <div className="overflow-x-auto">
+      <div className="">
         <table className="w-1/2 m-auto uppercase">
           <thead>
             <tr>

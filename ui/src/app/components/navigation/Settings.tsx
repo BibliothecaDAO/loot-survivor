@@ -48,7 +48,7 @@ export default function Settings() {
     },
   ];
   return (
-    <div className="flex flex-row overflow-hidden flex-wrap">
+    <div className="flex flex-row  flex-wrap">
       <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8">
         <VerticalKeyboardControl
           buttonsData={buttonsData}
