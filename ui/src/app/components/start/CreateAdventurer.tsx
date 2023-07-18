@@ -24,6 +24,7 @@ import Image from "next/image";
 import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
 import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
+import { TxActivity } from "../navigation/TxActivity";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
@@ -290,6 +291,7 @@ export const CreateAdventurer = ({
               />
             </div>
             <div className="absolute top-1/2 left-0 right-0 flex flex-col items-center gap-4 z-10">
+              <TxActivity />
               <form onSubmit={handleSubmit}>
                 <Button type="submit" size={"xl"} disabled={!formFilled}>
                   {formFilled ? "Spawn" : "Fill details"}

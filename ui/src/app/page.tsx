@@ -123,7 +123,7 @@ export default function Home() {
       console.log("updated");
       setAdventurer(data.adventurerByIdQuery.adventurers[0]);
     }
-  }, [data.adventurerByIdQuery?.adventurers[0].timestamp]);
+  }, [data.adventurerByIdQuery?.adventurers[0]?.timestamp]);
 
   //   useEffect(() => {
   //   if (adventurers[0] && firstAdventurer) {
