@@ -1805,7 +1805,7 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
-                    }
+                    }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
                 }
             );
 
@@ -1824,7 +1824,7 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
-                    }
+                    }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
                 }
             );
 
@@ -2717,12 +2717,18 @@ mod Game {
 
     #[derive(Drop, starknet::Event)]
     struct FleeFailed {
-        adventurer_state: AdventurerState, 
+        adventurer_state: AdventurerState,
+        seed: u128,
+        id: u8,
+        beast_specs: CombatSpec,
     }
 
     #[derive(Drop, starknet::Event)]
     struct FleeSucceeded {
-        adventurer_state: AdventurerState, 
+        adventurer_state: AdventurerState,
+        seed: u128,
+        id: u8,
+        beast_specs: CombatSpec,
     }
 
     #[derive(Drop, starknet::Event)]
