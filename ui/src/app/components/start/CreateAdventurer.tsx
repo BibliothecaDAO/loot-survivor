@@ -22,6 +22,8 @@ import { FormData, Adventurer } from "@/app/types";
 import { Button } from "../buttons/Button";
 import Image from "next/image";
 import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
+import { TypeAnimation } from "react-type-animation";
+import { battle } from "@/app/lib/constants";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
@@ -269,29 +271,37 @@ export const CreateAdventurer = ({
   } else if (step === 3) {
     return (
       <>
-        <div className="w-full items-center uppercase">
-          <h3>Oh no, there&apos;s a beast coming! Prepare for attack!</h3>
-          <div className="items-center flex flex-col gap-2">
+        <div className="flex flex-col w-full h-full justify-center">
+          <div className="flex flex-col h-full">
             <Image
-              src={`/monsters/starterbeast.png`}
-              width={300}
-              height={300}
+              className="mx-auto border border-terminal-green absolute object-fill"
+              src={"/monsters/starterbeast.png"}
               alt="adventurer facing beast"
-              className="mb-2 animate-pulse border border-terminal-green"
+              fill
             />
-            <form onSubmit={handleSubmit}>
-              <Button
-                variant={"default"}
-                type="submit"
-                size={"lg"}
-                disabled={!formFilled}
-              >
-                {formFilled ? "Spawn" : "Fill details"}
+
+            <div className="absolute top-6 left-0 right-0 sm:p-4 text-xs sm:text-xl leading-loose z-10 text-center">
+              <TypeAnimation
+                sequence={[battle]}
+                wrapper="span"
+                cursor={true}
+                speed={40}
+                style={{ fontSize: "2em" }}
+              />
+            </div>
+            <div className="absolute top-1/2 left-0 right-0 flex flex-col items-center gap-4 z-10">
+              <form onSubmit={handleSubmit}>
+                <Button type="submit" size={"xl"} disabled={!formFilled}>
+                  {formFilled ? "Spawn" : "Fill details"}
+                </Button>
+              </form>
+            </div>
+
+            <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">
+              <Button variant={"default"} onClick={handleBack}>
+                Back
               </Button>
-            </form>
-          </div>
-          <div>
-            <Button onClick={handleBack}>Back</Button>
+            </div>
           </div>
         </div>
       </>

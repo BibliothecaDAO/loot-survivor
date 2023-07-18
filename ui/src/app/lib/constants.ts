@@ -4,6 +4,8 @@ export const prologue =
   "In a sunless world teetering on the brink of destruction, humanity clings to an ancient prophecy of a chosen one bringing balance.";
 export const chapter1 =
   "In the chilling embrace of the cave, an adventurer stirs awake. Confused, disoriented, their eyes dart across the darkness, searching. The echo of water dripping and the chilling wind fill the air.";
+  export const battle =
+  "Oh no, there's a beast coming! Prepare for attack!";
 
 export const mainnet_addr = "https://alpha-mainnet.starknet.io";
 
