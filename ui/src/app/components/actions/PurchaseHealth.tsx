@@ -30,8 +30,7 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
     };
 
     const purchaseGoldAmount = Math.max(
-      potionAmount * (2 * (adventurer?.level ?? 0)) -
-        2 * (adventurer?.charisma ?? 0),
+      potionAmount * (adventurer?.level ?? 0) - 2 * (adventurer?.charisma ?? 0),
       2
     );
 

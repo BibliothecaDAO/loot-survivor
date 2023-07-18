@@ -255,7 +255,7 @@ export default function UpgradeScreen() {
       const value = potionsFilter;
       const parsedValue = value ? parseInt(value.toString(), 10) : 0;
       const purchaseGoldAmount = Math.max(
-        parsedValue * (2 * currentLevel) - 2 * (adventurer?.charisma ?? 0),
+        parsedValue * currentLevel - 2 * (adventurer?.charisma ?? 0),
         2
       );
       return purchaseGoldAmount;
