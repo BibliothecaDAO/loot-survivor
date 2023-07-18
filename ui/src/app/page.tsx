@@ -221,12 +221,14 @@ export default function Home() {
     }
   }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
 
-  // useEffect(() => {
-  //   if (mintAdventurer) {
-  //     setScreen("play");
-  //     setMintAdventurer(false);
-  //   }
-  // }, [data.adventurerByIdQuery?.adventurers, mintAdventurer]);
+  useEffect(() => {
+    if (mintAdventurer && data.adventurersByOwnerQuery) {
+      const adventurers = data.adventurersByOwnerQuery.adventurers;
+      setAdventurer(adventurers[adventurers.length - 1]);
+      setScreen("play");
+      setMintAdventurer(false);
+    }
+  }, [data.adventurersByOwnerQuery?.adventurers.length]);
 
   useEffect(() => {
     refetch("adventurersByOwnerQuery");

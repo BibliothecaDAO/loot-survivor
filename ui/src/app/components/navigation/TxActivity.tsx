@@ -185,6 +185,11 @@ export const TxActivity = () => {
         }
       };
 
+      const handleCreate = async () => {
+        await refetch("adventurersByOwnerQuery");
+        stopLoading(notificationData);
+      };
+
       const handleDefault = async () => {
         stopLoading(notificationData);
       };
@@ -212,6 +217,9 @@ export const TxActivity = () => {
             break;
           case "Multicall":
             await handleMulticall();
+            break;
+          case "Create":
+            await handleCreate();
             break;
           default:
             await handleDefault();
