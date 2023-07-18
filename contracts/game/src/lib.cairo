@@ -198,9 +198,7 @@ mod Game {
                 .unwrap();
 
             // write the resulting adventurer to storage
-            _pack_adventurer_remove_stat_boost(
-                ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
-            );
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
         }
         fn attack(ref self: ContractState, adventurer_id: u256) {
             // assert caller owns adventurer
@@ -246,9 +244,7 @@ mod Game {
                 .unwrap();
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(
-                ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
-            );
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
         }
         fn flee(ref self: ContractState, adventurer_id: u256) {
             // assert caller owns adventurer
@@ -295,9 +291,7 @@ mod Game {
                 .unwrap();
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(
-                ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
-            );
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
         }
         fn equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
             // assert caller owns adventurer
@@ -359,9 +353,7 @@ mod Game {
             _buy_item(ref self, adventurer_id, ref adventurer, item_id, equip);
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(
-                ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
-            );
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
         }
 
         fn buy_potion(ref self: ContractState, adventurer_id: u256) {
@@ -404,9 +396,7 @@ mod Game {
             );
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(
-                ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
-            );
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
         }
 
         fn buy_potions(ref self: ContractState, adventurer_id: u256, amount: u8) {
@@ -456,9 +446,7 @@ mod Game {
             );
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(
-                ref self, adventurer_id, ref adventurer, name_storage1, name_storage2
-            );
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
         }
 
         fn upgrade_stat(ref self: ContractState, adventurer_id: u256, stat: u8, amount: u8) {
@@ -1906,15 +1894,15 @@ mod Game {
         adventurer.add_item(equipping_item);
 
         // get item names from storage
-        let mut name_storage1 = _loot_special_names_storage_unpacked(
+        let name_storage1 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
         );
-        let mut name_storage2 = _loot_special_names_storage_unpacked(
+        let name_storage2 = _loot_special_names_storage_unpacked(
             @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
         );
 
         // apply stat boosts so the event has the correct stats
-        _apply_stat_boots(@self, adventurer_id, ref adventurer, name_storage1, name_storage2);
+        _apply_stat_boosts(@self, adventurer_id, ref adventurer, name_storage1, name_storage2);
 
         // emit equipped item event
         __event_EquippedItem(
@@ -1931,7 +1919,7 @@ mod Game {
         );
 
         // remove stats here to prevent boosts from being saved to chain
-        _remove_stat_boots(@self, adventurer_id, ref adventurer, name_storage1, name_storage2);
+        _remove_stat_boosts(@self, adventurer_id, ref adventurer, name_storage1, name_storage2);
     }
 
     // @loaf
@@ -2112,41 +2100,35 @@ mod Game {
         // unpack adventurer
         let mut adventurer: Adventurer = Packing::unpack(self._adventurer.read(adventurer_id));
         // apply stat boosts
-        _apply_stat_boots(self, adventurer_id, ref adventurer, name_storage1, name_storage2)
+        _apply_stat_boosts(self, adventurer_id, ref adventurer, name_storage1, name_storage2);
+        // return adventurer
+        adventurer
     }
 
     fn _pack_adventurer_remove_stat_boost(
-        ref self: ContractState,
-        adventurer_id: u256,
-        ref adventurer: Adventurer,
-        name_storage1: ItemSpecialsStorage,
-        name_storage2: ItemSpecialsStorage
+        ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer
     ) {
+        // we get names from storage instead of
+        // using the live ones because we want to ensure
+        // we remove the same stats that we applied when we
+        // unpacked the adventurer. The live names may
+        // have changed by for example by an item leveling up which
+        // would result in us removing stats that have not been applied
+        let name_storage1 = _loot_special_names_storage_unpacked(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+        );
+        let name_storage2 = _loot_special_names_storage_unpacked(
+            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+        );
+
         // remove stat boosts
-        _remove_stat_boots(@self, adventurer_id, ref adventurer, name_storage1, name_storage2);
+        _remove_stat_boosts(@self, adventurer_id, ref adventurer, name_storage1, name_storage2);
+
         // pack and save
         self._adventurer.write(adventurer_id, adventurer.pack());
     }
 
-    fn _apply_stat_boots(
-        self: @ContractState,
-        adventurer_id: u256,
-        ref adventurer: Adventurer,
-        name_storage1: ItemSpecialsStorage,
-        name_storage2: ItemSpecialsStorage
-    ) -> Adventurer {
-        // apply stat boosts to adventurer from item names
-        adventurer.apply_item_stat_boosts(name_storage1, name_storage2);
-
-        // check if adventurer is over max health
-        // this could happen if they unequipped a vitality stat boosting item
-        if adventurer.health > adventurer.get_max_health() {
-            adventurer.health = adventurer.get_max_health();
-        }
-        adventurer
-    }
-
-    fn _remove_stat_boots(
+    fn _apply_stat_boosts(
         self: @ContractState,
         adventurer_id: u256,
         ref adventurer: Adventurer,
@@ -2154,7 +2136,18 @@ mod Game {
         name_storage2: ItemSpecialsStorage
     ) {
         // apply stat boosts to adventurer from item names
-        adventurer.apply_item_stat_boosts(name_storage1, name_storage2);
+        adventurer.add_stat_boosts(name_storage1, name_storage2);
+    }
+
+    fn _remove_stat_boosts(
+        self: @ContractState,
+        adventurer_id: u256,
+        ref adventurer: Adventurer,
+        name_storage1: ItemSpecialsStorage,
+        name_storage2: ItemSpecialsStorage
+    ) {
+        // apply stat boosts to adventurer from item names
+        adventurer.remove_stat_boosts(name_storage1, name_storage2);
     }
 
     // @title Adventurer Level Up Handler

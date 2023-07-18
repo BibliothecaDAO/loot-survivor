@@ -12,10 +12,9 @@ struct ItemPrimitive {
 
 impl ItemPrimitivePacking of Packing<ItemPrimitive> {
     fn pack(self: ItemPrimitive) -> felt252 {
-        (self.id.into()
-         + self.xp.into() * pow::TWO_POW_7
-         + self.metadata.into() * pow::TWO_POW_16
-        ).try_into().expect('pack ItemPrimitive')
+        (self.id.into() + self.xp.into() * pow::TWO_POW_7 + self.metadata.into() * pow::TWO_POW_16)
+            .try_into()
+            .expect('pack ItemPrimitive')
     }
 
     fn unpack(packed: felt252) -> ItemPrimitive {
@@ -30,16 +29,17 @@ impl ItemPrimitivePacking of Packing<ItemPrimitive> {
             metadata: metadata.try_into().expect('unpack ItemPrimitive metadata')
         }
     }
+
+    // TODO: add overflow pack protection
+    fn overflow_pack_protection(self: ItemPrimitive) -> ItemPrimitive {
+        self
+    }
 }
 
 #[test]
 #[available_gas(500000)]
 fn test_item_primitive_packing() {
-    let item = ItemPrimitive {
-        id: 1,
-        xp: 2,
-        metadata: 3
-    };
+    let item = ItemPrimitive { id: 1, xp: 2, metadata: 3 };
 
     let packed = item.pack();
     let unpacked = ItemPrimitivePacking::unpack(packed);
@@ -49,11 +49,7 @@ fn test_item_primitive_packing() {
     assert(item.metadata == unpacked.metadata, 'metadata should be the same');
 
     // max value case
-    let item = ItemPrimitive {
-        id: 127,
-        xp: 511,
-        metadata: 31
-    };
+    let item = ItemPrimitive { id: 127, xp: 511, metadata: 31 };
 
     let packed = item.pack();
     let unpacked = ItemPrimitivePacking::unpack(packed);
@@ -62,11 +58,7 @@ fn test_item_primitive_packing() {
     assert(item.metadata == unpacked.metadata, 'metadata should be the same');
 
     // overflow case
-    let item = ItemPrimitive {
-        id: 128,
-        xp: 512,
-        metadata: 32
-    };
+    let item = ItemPrimitive { id: 128, xp: 512, metadata: 32 };
     let packed = item.pack();
     let unpacked = ItemPrimitivePacking::unpack(packed);
     assert(unpacked.id == 0, 'id should overflow to 0');
