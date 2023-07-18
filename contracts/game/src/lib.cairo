@@ -27,11 +27,11 @@ mod Game {
     use array::ArrayTrait;
     use poseidon::poseidon_hash_span;
 
-    use game::game::{
+    use super::game::{
         interfaces::{IGame, IERC20Dispatcher, IERC20DispatcherTrait, IERC20LibraryDispatcher},
         constants::{
             messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
-            U128_MAX
+            U128_MAX, STARTER_BEAST_ATTACK_DAMAGE
         }
     };
     use lootitems::{
@@ -46,7 +46,7 @@ mod Game {
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
             adventurer_constants::{
                 POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER, ITEM_MAX_GREATNESS,
-                MAX_GREATNESS_STAT_BONUS
+                MAX_GREATNESS_STAT_BONUS, StatisticIndex
             }
         },
         item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
@@ -54,7 +54,9 @@ mod Game {
     };
     use market::market::{ImplMarket, LootWithPrice};
     use obstacles::obstacle::{ImplObstacle, IObstacle};
-    use combat::{combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums};
+    use combat::{
+        combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums::{Slot, Tier}
+    };
     use beasts::beast::{Beast, IBeast, ImplBeast};
 
     #[storage]
@@ -80,16 +82,27 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     enum Event {
         StartGame: StartGame,
+        StatUpgradesAvailable: StatUpgradesAvailable,
         StatUpgraded: StatUpgraded,
+        StrengthIncreased: StrengthIncreased,
+        DexterityIncreased: DexterityIncreased,
+        VitalityIncreased: VitalityIncreased,
+        IntelligenceIncreased: IntelligenceIncreased,
+        WisdomIncreased: WisdomIncreased,
+        CharismaIncreased: CharismaIncreased,
         DiscoveredHealth: DiscoveredHealth,
         DiscoveredGold: DiscoveredGold,
         DiscoveredXP: DiscoveredXP,
-        DiscoveredObstacle: DiscoveredObstacle,
+        DodgedObstacle: DodgedObstacle,
+        HitByObstacle: HitByObstacle,
+        AmbushedByBeast: AmbushedByBeast,
         DiscoveredBeast: DiscoveredBeast,
         AttackedBeast: AttackedBeast,
         AttackedByBeast: AttackedByBeast,
         SlayedBeast: SlayedBeast,
         FleeAttempt: FleeAttempt,
+        FleeFailed: FleeFailed,
+        FleeSucceeded: FleeSucceeded,
         PurchasedItem: PurchasedItem,
         EquippedItem: EquippedItem,
         ItemLeveledUp: ItemLeveledUp,
@@ -100,13 +113,6 @@ mod Game {
         AdventurerLeveledUp: AdventurerLeveledUp,
         NewItemsAvailable: NewItemsAvailable,
         IdleDamagePenalty: IdleDamagePenalty,
-        StatUpgradesAvailable: StatUpgradesAvailable,
-        StrengthUpgraded: StrengthUpgraded,
-        DexterityUpgraded: DexterityUpgraded,
-        VitalityUpgraded: VitalityUpgraded,
-        IntelligenceUpgraded: IntelligenceUpgraded,
-        WisdomUpgraded: WisdomUpgraded,
-        CharismaUpgraded: CharismaUpgraded
     }
 
     #[constructor]
@@ -455,7 +461,7 @@ mod Game {
             );
         }
 
-        fn upgrade_stat(ref self: ContractState, adventurer_id: u256, stat: u8) {
+        fn upgrade_stat(ref self: ContractState, adventurer_id: u256, stat: u8, amount: u8) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
@@ -466,10 +472,10 @@ mod Game {
             _assert_not_dead(@self, adventurer);
 
             // assert adventurer has stat StatUpgradesAvailable available
-            _assert_has_stat_upgrades_available(@self, adventurer);
+            _assert_has_required_stat_points(@self, adventurer, amount);
 
             // upgrade adventurer's stat
-            _upgrade_stat(ref self, adventurer_id, ref adventurer, stat);
+            _upgrade_stat(ref self, adventurer_id, ref adventurer, stat, amount);
 
             // pack and save (stat boosts weren't applied so no need to remove)
             _pack_adventurer(ref self, adventurer_id, adventurer);
@@ -516,8 +522,11 @@ mod Game {
             let mut name_storage2 = _loot_special_names_storage_unpacked(
                 self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
-            // get adventurer (stat boosts automatically applied during unpacking)
-            // _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+            // get adventurer with item stat boosts
+            _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
+        }
+
+        fn get_adventurer_no_boosts(self: @ContractState, adventurer_id: u256) -> Adventurer {
             _unpack_adventurer(self, adventurer_id)
         }
 
@@ -532,23 +541,23 @@ mod Game {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.weapon)
         }
-        fn get_chest_armor_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_chest_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.chest)
         }
-        fn get_head_armor_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_head_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.head)
         }
-        fn get_waist_armor_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_waist_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.waist)
         }
-        fn get_foot_armor_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_foot_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.foot)
         }
-        fn get_hand_armor_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_hand_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_special_names(self, adventurer_id, adventurer.hand)
         }
@@ -561,9 +570,87 @@ mod Game {
             _get_special_names(self, adventurer_id, adventurer.ring)
         }
         fn get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<LootWithPrice> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
             _get_items_on_market(self, adventurer_id, _unpack_adventurer(self, adventurer_id))
         }
-
+        fn get_weapons_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_slot(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Slot::Weapon(())
+            )
+        }
+        fn get_chest_armor_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_slot(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Slot::Chest(())
+            )
+        }
+        fn get_head_armor_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_slot(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Slot::Head(())
+            )
+        }
+        fn get_waist_armor_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_slot(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Slot::Waist(())
+            )
+        }
+        fn get_foot_armor_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_slot(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Slot::Foot(())
+            )
+        }
+        fn get_hand_armor_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_slot(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Slot::Hand(())
+            )
+        }
+        fn get_necklaces_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_slot(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Slot::Neck(())
+            )
+        }
+        fn get_rings_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_slot(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Slot::Ring(())
+            )
+        }
+        fn get_t1_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_tier(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Tier::T1(())
+            )
+        }
+        fn get_t2_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_tier(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Tier::T2(())
+            )
+        }
+        fn get_t3_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_tier(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Tier::T3(())
+            )
+        }
+        fn get_t4_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_tier(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Tier::T4(())
+            )
+        }
+        fn get_t5_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+            _assert_market_is_open(self, _unpack_adventurer(self, adventurer_id));
+            _get_market_items_by_tier(
+                self, adventurer_id, _unpack_adventurer(self, adventurer_id), Tier::T5(())
+            )
+        }
         fn get_potion_price(self: @ContractState, adventurer_id: u256) -> u16 {
             _get_potion_price(self, adventurer_id)
         }
@@ -590,7 +677,7 @@ mod Game {
         fn get_beast_health(self: @ContractState, adventurer_id: u256) -> u16 {
             _unpack_adventurer(self, adventurer_id).beast_health
         }
-        fn get_stat_points_available(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_stat_upgrades_available(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stat_points_available
         }
         fn get_last_action(self: @ContractState, adventurer_id: u256) -> u16 {
@@ -599,19 +686,19 @@ mod Game {
         fn get_weapon_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).weapon.get_greatness()
         }
-        fn get_chest_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_chest_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).chest.get_greatness()
         }
-        fn get_head_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_head_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).head.get_greatness()
         }
-        fn get_waist_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_waist_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).waist.get_greatness()
         }
-        fn get_foot_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_foot_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).foot.get_greatness()
         }
-        fn get_hand_armor_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_hand_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).hand.get_greatness()
         }
         fn get_necklace_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
@@ -838,41 +925,40 @@ mod Game {
         starting_weapon: u8,
         adventurer_meta: AdventurerMetadata
     ) {
-        // and the current block number as start time
-        let new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, block_number);
-
-        // get the current adventurer id - start at 1
+        // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._counter.read() + 1;
 
-        let mut hash_span = ArrayTrait::<felt252>::new();
-        hash_span.append(block_number.into());
-        hash_span.append(adventurer_id.try_into().unwrap());
+        // generate a new adventurer using the provided started weapon and current block number
+        let mut new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, block_number);
 
-        let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
-        // let entropy: u256 = (poseidon.into() % U128_MAX.into());
-
-        let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
-
-        // build meta
+        // generate meta data for adventurer
+        // this will get packed and stored seaprate from adventurer as this data
+        // we never change.
         let adventurer_meta = AdventurerMetadata {
             name: adventurer_meta.name,
             home_realm: adventurer_meta.home_realm,
             race: adventurer_meta.race,
-            entropy: r.try_into().unwrap()
+            entropy: AdventurerUtils::generate_adventurer_entropy(block_number, adventurer_id)
         };
 
-        // emit the StartGame
+        // emit a StartGame event 
         __event__StartGame(
             ref self,
             AdventurerState { owner: caller, adventurer_id, adventurer: new_adventurer },
             adventurer_meta
         );
 
-        // emit BeastDiscovered
+        // generate starter beast which will have weak armor against the adventurers starter weapon
         let starter_beast = ImplBeast::get_starter_beast(ImplLoot::get_type(starting_weapon));
-        __event__DiscoveredBeast(
+
+        // simulate an attack by the beast on the adventurer
+        // (no need to waste gas calling combat moudle)
+        new_adventurer.deduct_health(STARTER_BEAST_ATTACK_DAMAGE);
+
+        // emit AmbushedByBeast event
+        __event__AmbushedByBeast(
             ref self,
-            DiscoveredBeast {
+            AmbushedByBeast {
                 adventurer_state: AdventurerState {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
@@ -882,17 +968,17 @@ mod Game {
                     item_type: starter_beast.combat_spec.item_type,
                     level: starter_beast.combat_spec.level,
                     specials: starter_beast.combat_spec.specials
-                }, health: starter_beast.starting_health, ambushed: false
+                },
+                damage: STARTER_BEAST_ATTACK_DAMAGE,
+                location: ImplCombat::slot_to_u8(Slot::Foot(())),
             }
         );
 
-        // write the new adventurer to storage
+        // pack and save new adventurer and metadata
         _pack_adventurer(ref self, adventurer_id, new_adventurer);
-
-        // pack metadata with entropy seed
         _pack_adventurer_meta(ref self, adventurer_id, adventurer_meta);
 
-        // increment the adventurer counter
+        // increment the adventurer id counter
         self._counter.write(adventurer_id);
 
         // set caller as owner
@@ -950,23 +1036,6 @@ mod Game {
                 // storage of the beast health
                 adventurer.beast_health = beast.starting_health;
 
-                // Emit Discover Beast event
-                __event__DiscoveredBeast(
-                    ref self,
-                    DiscoveredBeast {
-                        adventurer_state: AdventurerState {
-                            owner: get_caller_address(),
-                            adventurer_id: adventurer_id,
-                            adventurer: adventurer
-                            }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
-                            tier: beast.combat_spec.tier,
-                            item_type: beast.combat_spec.item_type,
-                            level: beast.combat_spec.level,
-                            specials: beast.combat_spec.specials
-                        }, ambushed: was_ambushed, health: beast.starting_health,
-                    }
-                );
-
                 // if adventurer was ambushed
                 if (was_ambushed) {
                     // get random attack location
@@ -980,7 +1049,25 @@ mod Game {
                         damage_slot,
                         beast,
                         beast_seed,
-                        sub_explore_rnd
+                        sub_explore_rnd,
+                        true
+                    );
+                } else {
+                    // Emit Discover Beast event
+                    __event__DiscoveredBeast(
+                        ref self,
+                        DiscoveredBeast {
+                            adventurer_state: AdventurerState {
+                                owner: get_caller_address(),
+                                adventurer_id: adventurer_id,
+                                adventurer: adventurer
+                                }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                                tier: beast.combat_spec.tier,
+                                item_type: beast.combat_spec.item_type,
+                                level: beast.combat_spec.level,
+                                specials: beast.combat_spec.specials
+                            }, ambushed: was_ambushed, health: beast.starting_health,
+                        }
                     );
                 }
             },
@@ -1063,11 +1150,6 @@ mod Game {
         // calculate damage from the obstacle
         let damage_taken = ImplObstacle::get_damage(obstacle, armor_combat_spec, entropy);
 
-        // increase adventurer xp
-        // adventurer gets xp regardless of if they dodge obstacle or not
-        // items only get xp if damage is taken
-        let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_reward);
-
         // if the obstacle was not dodged
         if (!dodged) {
             // deduct the health from the adventurer
@@ -1075,9 +1157,9 @@ mod Game {
 
             // emit obstacle discover event
             // items only earn XP when damage is taken
-            __event__DiscoveredObstacle(
+            __event__HitByObstacle(
                 ref self,
-                DiscoveredObstacle {
+                HitByObstacle {
                     adventurer_state: AdventurerState {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
@@ -1085,7 +1167,6 @@ mod Game {
                     },
                     id: obstacle.id,
                     level: obstacle.combat_specs.level,
-                    dodged: dodged,
                     damage_taken: damage_taken,
                     damage_location: damage_location,
                     xp_earned_adventurer: xp_reward,
@@ -1109,24 +1190,13 @@ mod Game {
                 );
                 // and return so we don't process adventurer level up
                 return;
-            } else {
-                // allocate XP to equipped items
-                _grant_xp_to_equipped_items(
-                    ref self,
-                    adventurer_id,
-                    ref adventurer,
-                    ref name_storage1,
-                    ref name_storage2,
-                    xp_reward,
-                    entropy
-                );
             }
         } else {
             // emit obstacle discover event
             // items do not earn XP from obstacles
-            __event__DiscoveredObstacle(
+            __event__DodgedObstacle(
                 ref self,
-                DiscoveredObstacle {
+                DodgedObstacle {
                     adventurer_state: AdventurerState {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
@@ -1134,17 +1204,29 @@ mod Game {
                     },
                     id: obstacle.id,
                     level: obstacle.combat_specs.level,
-                    dodged: dodged,
                     damage_taken: damage_taken,
                     damage_location: damage_location,
                     xp_earned_adventurer: xp_reward,
-                    xp_earned_items: 0,
+                    xp_earned_items: xp_reward * ITEM_XP_MULTIPLIER
                 }
             );
         }
 
-        // check if adventurer level increased
+        // grant XP to equipped items
+        _grant_xp_to_equipped_items(
+            ref self,
+            adventurer_id,
+            ref adventurer,
+            ref name_storage1,
+            ref name_storage2,
+            xp_reward,
+            entropy
+        );
+
+        // increase adventurer xp and check for level up
+        let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_reward);
         if (new_level > previous_level) {
+            // if adventurer leveled up, process level up
             _handle_adventurer_level_up(
                 ref self, ref adventurer, adventurer_id, previous_level, new_level
             );
@@ -1498,9 +1580,9 @@ mod Game {
         // When generating the beast, we need to ensure entropy remains fixed for the battle
         // for attacking however, we should change the entropy during battle so we use adventurer and beast health
         // to accomplish this
-        let attack_entropy = game_entropy
-            + adventurer_entropy
-            + U16IntoU128::into(adventurer.health + adventurer.beast_health);
+        let (attack_rnd_1, attack_rnd_2) = _get_live_entropy(
+            adventurer_entropy, game_entropy, adventurer
+        );
 
         // get the damage dealt to the beast
         let damage_dealt = beast
@@ -1508,7 +1590,7 @@ mod Game {
                 _get_combat_spec(@self, adventurer_id, adventurer.weapon),
                 adventurer.get_luck(),
                 adventurer.stats.strength,
-                attack_entropy
+                attack_rnd_1
             );
 
         // if the amount of damage dealt to beast exceeds its health
@@ -1556,7 +1638,7 @@ mod Game {
                 ref name_storage1,
                 ref name_storage2,
                 xp_earned,
-                attack_entropy
+                attack_rnd_2
             );
 
             // if adventurers new level is greater than previous level
@@ -1584,21 +1666,20 @@ mod Game {
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
                         specials: beast.combat_spec.specials
-                    },
-                    damage: damage_dealt,
-                    location: ImplCombat::slot_to_u8(CombatEnums::Slot::None(())),
+                    }, damage: damage_dealt, location: ImplCombat::slot_to_u8(Slot::None(())),
                 }
             );
 
-            // calculate beast attack damage using random attack location
+            // starter beast ambushes the adventurer
             _beast_counter_attack(
                 ref self,
                 ref adventurer,
                 adventurer_id,
-                AdventurerUtils::get_random_attack_location(attack_entropy),
+                AdventurerUtils::get_random_attack_location(attack_rnd_1),
                 beast,
                 beast_seed,
-                attack_entropy
+                attack_rnd_2,
+                true
             );
         }
     }
@@ -1607,10 +1688,11 @@ mod Game {
         ref self: ContractState,
         ref adventurer: Adventurer,
         adventurer_id: u256,
-        attack_location: CombatEnums::Slot,
+        attack_location: Slot,
         beast: Beast,
         beast_seed: u128,
-        entropy: u128
+        entropy: u128,
+        ambushed: bool
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
@@ -1647,22 +1729,43 @@ mod Game {
             adventurer.deduct_health(damage);
         }
 
-        // emit attack by beast event
-        __event__AttackedByBeast(
-            ref self,
-            AttackedByBeast {
-                adventurer_state: AdventurerState {
-                    owner: get_caller_address(),
-                    adventurer_id: adventurer_id,
-                    adventurer: adventurer
-                    }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
-                    tier: beast.combat_spec.tier,
-                    item_type: beast.combat_spec.item_type,
-                    level: beast.combat_spec.level,
-                    specials: beast.combat_spec.specials
-                }, damage: damage, location: ImplCombat::slot_to_u8(attack_location),
-            }
-        );
+        // if counter attack was result of an ambush
+        // emit ambushed by beast event
+        if (ambushed) {
+            // emit attack by beast event
+            __event__AmbushedByBeast(
+                ref self,
+                AmbushedByBeast {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                        }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                        tier: beast.combat_spec.tier,
+                        item_type: beast.combat_spec.item_type,
+                        level: beast.combat_spec.level,
+                        specials: beast.combat_spec.specials
+                    }, damage: damage, location: ImplCombat::slot_to_u8(attack_location),
+                }
+            );
+        } else {
+            // else emit attacked by beast event
+            __event__AttackedByBeast(
+                ref self,
+                AttackedByBeast {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                        }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                        tier: beast.combat_spec.tier,
+                        item_type: beast.combat_spec.item_type,
+                        level: beast.combat_spec.level,
+                        specials: beast.combat_spec.specials
+                    }, damage: damage, location: ImplCombat::slot_to_u8(attack_location),
+                }
+            );
+        }
     }
 
     fn _flee(ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256) {
@@ -1703,19 +1806,41 @@ mod Game {
             // set beast health to zero to denote adventurer is no longer in battle
             adventurer.beast_health = 0;
 
-            // to prevent game looping between game entroy changes
-            // we need to ensure the resulting adventurer state
-            // is different than the original, otherwise the next
-            // time the adventurer explores, they will discover the same beast
+            // each adventurer xp by one to prevent entropy loops resulting
+            // from the adventurer state being same
+            let (previous_level, new_level) = adventurer.increase_adventurer_xp(1);
 
-            // as a simple and low-impact way to achieve this
-            // we either add or subtract 1 gold from the adventurer
-            if (adventurer.gold > 0) {
-                adventurer.deduct_gold(1);
-            } else {
-                adventurer.add_gold(1);
+            // emit flee attempt event
+            __event__FleeSucceeded(
+                ref self,
+                FleeSucceeded {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    }
+                }
+            );
+
+            // check for adventurer level up
+            if (new_level > previous_level) {
+                _handle_adventurer_level_up(
+                    ref self, ref adventurer, adventurer_id, previous_level, new_level
+                );
             }
         } else {
+            // emit flee attempt event
+            __event__FleeFailed(
+                ref self,
+                FleeFailed {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    }
+                }
+            );
+
             // if flee attempt was unsuccessful the beast counter attacks
             // adventurer death will be handled as part of counter attack
             let attack_slot = AdventurerUtils::get_random_attack_location(ambush_entropy);
@@ -1727,26 +1852,10 @@ mod Game {
                 attack_slot,
                 beast,
                 beast_seed,
-                ambush_entropy
+                ambush_entropy,
+                false
             );
         }
-
-        // emit flee attempt event
-        __event__FleeAttempt(
-            ref self,
-            flee_attempt: FleeAttempt {
-                adventurer_state: AdventurerState {
-                    owner: get_caller_address(),
-                    adventurer_id: adventurer_id,
-                    adventurer: adventurer
-                    }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
-                    tier: beast.combat_spec.tier,
-                    item_type: beast.combat_spec.item_type,
-                    level: beast.combat_spec.level,
-                    specials: beast.combat_spec.specials
-                }, fled
-            }
-        );
 
         // if adventurer died trying to flee
         if (adventurer.health == 0) {
@@ -1910,28 +2019,41 @@ mod Game {
         );
     }
 
-
     fn _upgrade_stat(
-        ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer, stat_id: u8
+        ref self: ContractState,
+        adventurer_id: u256,
+        ref adventurer: Adventurer,
+        stat_id: u8,
+        amount: u8
     ) {
-        // https://github.com/starkware-libs/cairo/issues/2942
-        // internal::revoke_ap_tracking();
-        _assert_ownership(@self, adventurer_id);
+        //deduct upgrades from adventurer available stat points
+        adventurer.stat_points_available -= amount;
 
-        assert(adventurer.stat_points_available > 0, 'no stat points available');
+        // instantiate adventurer state for event
+        let adventurer_state = AdventurerState {
+            owner: get_caller_address(), adventurer_id, adventurer: adventurer
+        };
 
-        // add stat to adventuer
-        adventurer.increment_stat(stat_id);
-
-        //deduct one from the adventurers available stat upgrades
-        adventurer.stat_points_available -= 1;
-
-        // emit stat upgraded event
-        __event__StatUpgraded(
-            ref self,
-            AdventurerState { owner: get_caller_address(), adventurer_id, adventurer: adventurer },
-            stat_id
-        );
+        // increase relevant stat and emit stat specific event
+        if (stat_id == StatisticIndex::STRENGTH) {
+            adventurer.increase_strength(amount);
+            __event__StrengthIncreased(ref self, adventurer_state, amount);
+        } else if (stat_id == StatisticIndex::DEXTERITY) {
+            adventurer.increase_dexterity(amount);
+            __event__DexterityIncreased(ref self, adventurer_state, amount);
+        } else if (stat_id == StatisticIndex::VITALITY) {
+            adventurer.increase_vitality(amount);
+            __event__VitalityIncreased(ref self, adventurer_state, amount);
+        } else if (stat_id == StatisticIndex::INTELLIGENCE) {
+            adventurer.increase_intelligence(amount);
+            __event__IntelligenceIncreased(ref self, adventurer_state, amount);
+        } else if (stat_id == StatisticIndex::WISDOM) {
+            adventurer.increase_wisdom(amount);
+            __event__WisdomIncreased(ref self, adventurer_state, amount);
+        } else if (stat_id == StatisticIndex::CHARISMA) {
+            adventurer.increase_charisma(amount);
+            __event__CharismaIncreased(ref self, adventurer_state, amount);
+        }
     }
 
     fn _buy_potion(ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer) {
@@ -2186,8 +2308,8 @@ mod Game {
             .unwrap();
         assert(adventurer.last_action != current_block, messages::ONE_EXPLORE_PER_BLOCK);
     }
-    fn _assert_has_stat_upgrades_available(self: @ContractState, adventurer: Adventurer) {
-        assert(adventurer.stat_points_available > 0, messages::NO_STAT_UPGRADES_AVAILABLE);
+    fn _assert_has_required_stat_points(self: @ContractState, adventurer: Adventurer, amount: u8) {
+        assert(adventurer.stat_points_available >= amount, messages::NO_STAT_UPGRADES_AVAILABLE);
     }
     fn _assert_fatally_idle(self: @ContractState, adventurer: Adventurer) {
         let idle_blocks = adventurer
@@ -2268,6 +2390,30 @@ mod Game {
 
         ImplMarket::get_all_items_with_price(
             adventurer.get_market_seed(adventurer_id, adventurer_entropy).into()
+        )
+    }
+
+    fn _get_market_items_by_slot(
+        self: @ContractState, adventurer_id: u256, adventurer: Adventurer, slot: Slot
+    ) -> Array<u8> {
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
+            .entropy
+            .into();
+
+        ImplMarket::get_items_by_slot(
+            adventurer.get_market_seed(adventurer_id, adventurer_entropy).into(), slot
+        )
+    }
+
+    fn _get_market_items_by_tier(
+        self: @ContractState, adventurer_id: u256, adventurer: Adventurer, tier: Tier
+    ) -> Array<u8> {
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
+            .entropy
+            .into();
+
+        ImplMarket::get_items_by_tier(
+            adventurer.get_market_seed(adventurer_id, adventurer_entropy).into(), tier
         )
     }
 
@@ -2452,6 +2598,42 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
+    struct StrengthIncreased {
+        adventurer_state: AdventurerState,
+        amount: u8
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct DexterityIncreased {
+        adventurer_state: AdventurerState,
+        amount: u8
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct VitalityIncreased {
+        adventurer_state: AdventurerState,
+        amount: u8
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct IntelligenceIncreased {
+        adventurer_state: AdventurerState,
+        amount: u8
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct WisdomIncreased {
+        adventurer_state: AdventurerState,
+        amount: u8
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct CharismaIncreased {
+        adventurer_state: AdventurerState,
+        amount: u8
+    }
+
+    #[derive(Drop, starknet::Event)]
     struct DiscoveredHealth {
         adventurer_state: AdventurerState,
         health_amount: u16
@@ -2470,11 +2652,21 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct DiscoveredObstacle {
+    struct DodgedObstacle {
         adventurer_state: AdventurerState,
         id: u8,
         level: u16,
-        dodged: bool,
+        damage_taken: u16,
+        damage_location: u8,
+        xp_earned_adventurer: u16,
+        xp_earned_items: u16,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct HitByObstacle {
+        adventurer_state: AdventurerState,
+        id: u8,
+        level: u16,
         damage_taken: u16,
         damage_location: u8,
         xp_earned_adventurer: u16,
@@ -2512,6 +2704,16 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
+    struct AmbushedByBeast {
+        adventurer_state: AdventurerState,
+        seed: u128,
+        id: u8,
+        beast_specs: CombatSpec,
+        damage: u16,
+        location: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
     struct SlayedBeast {
         adventurer_state: AdventurerState,
         seed: u128,
@@ -2530,6 +2732,16 @@ mod Game {
         id: u8,
         beast_specs: CombatSpec,
         fled: bool
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct FleeFailed {
+        adventurer_state: AdventurerState, 
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct FleeSucceeded {
+        adventurer_state: AdventurerState, 
     }
 
     #[derive(Drop, starknet::Event)]
@@ -2615,36 +2827,6 @@ mod Game {
         adventurer_state: AdventurerState, 
     }
 
-    #[derive(Drop, starknet::Event)]
-    struct StrengthUpgraded {
-        adventurer_state: AdventurerState, 
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct DexterityUpgraded {
-        adventurer_state: AdventurerState, 
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct VitalityUpgraded {
-        adventurer_state: AdventurerState, 
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct IntelligenceUpgraded {
-        adventurer_state: AdventurerState, 
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct WisdomUpgraded {
-        adventurer_state: AdventurerState, 
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct CharismaUpgraded {
-        adventurer_state: AdventurerState, 
-    }
-
     fn __event__StartGame(
         ref self: ContractState,
         adventurer_state: AdventurerState,
@@ -2657,6 +2839,42 @@ mod Game {
         ref self: ContractState, adventurer_state: AdventurerState, stat_id: u8
     ) {
         self.emit(Event::StatUpgraded(StatUpgraded { adventurer_state, stat_id }));
+    }
+
+    fn __event__StrengthIncreased(
+        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
+    ) {
+        self.emit(Event::StrengthIncreased(StrengthIncreased { adventurer_state, amount }));
+    }
+
+    fn __event__DexterityIncreased(
+        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
+    ) {
+        self.emit(Event::DexterityIncreased(DexterityIncreased { adventurer_state, amount }));
+    }
+
+    fn __event__VitalityIncreased(
+        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
+    ) {
+        self.emit(Event::VitalityIncreased(VitalityIncreased { adventurer_state, amount }));
+    }
+
+    fn __event__IntelligenceIncreased(
+        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
+    ) {
+        self.emit(Event::IntelligenceIncreased(IntelligenceIncreased { adventurer_state, amount }));
+    }
+
+    fn __event__WisdomIncreased(
+        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
+    ) {
+        self.emit(Event::WisdomIncreased(WisdomIncreased { adventurer_state, amount }));
+    }
+
+    fn __event__CharismaIncreased(
+        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
+    ) {
+        self.emit(Event::CharismaIncreased(CharismaIncreased { adventurer_state, amount }));
     }
 
     fn __event__DiscoveredHealth(
@@ -2710,10 +2928,12 @@ mod Game {
             );
     }
 
-    fn __event__DiscoveredObstacle(
-        ref self: ContractState, disover_obstacle_event: DiscoveredObstacle
-    ) {
-        self.emit(Event::DiscoveredObstacle(disover_obstacle_event));
+    fn __event__DodgedObstacle(ref self: ContractState, dodged_obstacle: DodgedObstacle) {
+        self.emit(Event::DodgedObstacle(dodged_obstacle));
+    }
+
+    fn __event__HitByObstacle(ref self: ContractState, hit_by_obstacle: HitByObstacle) {
+        self.emit(Event::HitByObstacle(hit_by_obstacle));
     }
 
     fn __event__DiscoveredBeast(ref self: ContractState, discover_beast_event: DiscoveredBeast, ) {
@@ -2728,12 +2948,24 @@ mod Game {
         self.emit(Event::AttackedByBeast(attack_by_beast));
     }
 
+    fn __event__AmbushedByBeast(ref self: ContractState, ambushed_by_beast: AmbushedByBeast, ) {
+        self.emit(Event::AmbushedByBeast(ambushed_by_beast));
+    }
+
     fn __event__SlayedBeast(ref self: ContractState, slayed_beast: SlayedBeast, ) {
         self.emit(Event::SlayedBeast(slayed_beast));
     }
 
     fn __event__FleeAttempt(ref self: ContractState, flee_attempt: FleeAttempt) {
         self.emit(Event::FleeAttempt(flee_attempt));
+    }
+
+    fn __event__FleeFailed(ref self: ContractState, flee_failed: FleeFailed) {
+        self.emit(Event::FleeFailed(flee_failed));
+    }
+
+    fn __event__FleeSucceeded(ref self: ContractState, flee_succeeded: FleeSucceeded) {
+        self.emit(Event::FleeSucceeded(flee_succeeded));
     }
 
     fn __event_PurchasedItem(
@@ -2868,29 +3100,5 @@ mod Game {
 
     fn __event_StatUpgradesAvailable(ref self: ContractState, adventurer_state: AdventurerState) {
         self.emit(Event::StatUpgradesAvailable(StatUpgradesAvailable { adventurer_state }));
-    }
-
-    fn __event_StrengthUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
-        self.emit(Event::StrengthUpgraded(StrengthUpgraded { adventurer_state }));
-    }
-
-    fn __event_DexterityUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
-        self.emit(Event::DexterityUpgraded(DexterityUpgraded { adventurer_state }));
-    }
-
-    fn __event_VitalityUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
-        self.emit(Event::VitalityUpgraded(VitalityUpgraded { adventurer_state }));
-    }
-
-    fn __event_IntelligenceUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
-        self.emit(Event::IntelligenceUpgraded(IntelligenceUpgraded { adventurer_state }));
-    }
-
-    fn __event_WisdomUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
-        self.emit(Event::WisdomUpgraded(WisdomUpgraded { adventurer_state }));
-    }
-
-    fn __event_CharismaUpgraded(ref self: ContractState, adventurer_state: AdventurerState) {
-        self.emit(Event::CharismaUpgraded(CharismaUpgraded { adventurer_state }));
     }
 }

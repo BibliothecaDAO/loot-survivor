@@ -8,7 +8,7 @@ use lootitems::statistics::constants::ItemId;
 use lootitems::loot::{Loot, ILoot, ImplLoot};
 use lootitems::statistics::item_tier;
 
-use combat::constants::CombatEnums::{Tier};
+use combat::constants::CombatEnums::{Tier, Slot};
 
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET, TIER_PRICE};
 
@@ -42,7 +42,6 @@ impl ImplMarket of IMarket {
                 break ();
             }
 
-            // TODO: We need to move this to fetch from state - it's too gassy...
             all_items.append(ImplLoot::get_item(ImplMarket::get_id(seed + i)));
             i += OFFSET;
         };
@@ -60,23 +59,57 @@ impl ImplMarket of IMarket {
             }
 
             let id = ImplMarket::get_id(seed + i);
-
-            // id.print();
-
-            // TODO: We need to move this to fetch from state - it's too gassy...
             all_items
                 .append(
                     LootWithPrice {
                         item: ImplLoot::get_item(id),
-                        price: ImplMarket::get_price(
-                            ImplLoot::get_tier(id)
-                        )
+                        price: ImplMarket::get_price(ImplLoot::get_tier(id))
                     }
                 );
             i += OFFSET;
         };
 
         all_items
+    }
+
+    fn get_items_by_slot(seed: u256, slot: Slot) -> Array<u8> {
+        let mut return_ids = ArrayTrait::<u8>::new();
+
+        let mut i: u256 = 0;
+        loop {
+            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+                break ();
+            }
+
+            let id = ImplMarket::get_id(seed + i);
+            if (ImplLoot::get_slot(id) == slot) {
+                return_ids.append(id);
+            }
+
+            i += OFFSET;
+        };
+
+        return_ids
+    }
+
+    fn get_items_by_tier(seed: u256, tier: Tier) -> Array<u8> {
+        let mut return_ids = ArrayTrait::<u8>::new();
+
+        let mut i: u256 = 0;
+        loop {
+            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+                break ();
+            }
+
+            let id = ImplMarket::get_id(seed + i);
+            if (ImplLoot::get_tier(id) == tier) {
+                return_ids.append(id);
+            }
+
+            i += OFFSET;
+        };
+
+        return_ids
     }
 
     fn get_id(seed: u256) -> u8 {

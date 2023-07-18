@@ -252,7 +252,7 @@ starknet call --function get_xp --address $CONTRACT_ADDRESS --input $ADVENTURER_
 
 ##### Get upgradable stat points
 ```bash
-starknet call --function get_stat_points_available --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
+starknet call --function get_stat_upgrades_available --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
 ```
 
 ##### Get base charisma stat (doesn't include boost from items)

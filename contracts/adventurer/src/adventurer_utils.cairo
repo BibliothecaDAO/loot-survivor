@@ -1,10 +1,14 @@
-use core::result::ResultTrait;
-use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub};
+use core::{result::ResultTrait, traits::{TryInto, Into}};
+use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub, U128IntoU256};
 use super::constants::{
-    adventurer_constants::{MAX_STAT_VALUE},
+    adventurer_constants::{MAX_STAT_VALUE, U128_MAX},
     discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
 };
 use combat::constants::CombatEnums::{Type, Tier, Slot};
+use poseidon::poseidon_hash_span;
+use option::OptionTrait;
+use array::ArrayTrait;
+use pack::pack::{rshift_split};
 
 #[generate_trait]
 impl AdventurerUtils of IAdventurer {
@@ -55,19 +59,36 @@ impl AdventurerUtils of IAdventurer {
             return Slot::Hand(());
         }
     }
+
+    fn generate_adventurer_entropy(block_number: u64, adventurer_id: u256) -> u128 {
+        let mut hash_span = ArrayTrait::<felt252>::new();
+        hash_span.append(block_number.into());
+        hash_span.append(adventurer_id.try_into().unwrap());
+        let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
+        let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
+        r.try_into().unwrap()
+    }
 }
 
 #[test]
 #[available_gas(30000)]
 fn test_overflow_protected_stat_increase() {
     // base case
-    assert(AdventurerUtils::overflow_protected_stat_increase(1, 1) == 2, 'stat should increase by 1');
+    assert(
+        AdventurerUtils::overflow_protected_stat_increase(1, 1) == 2, 'stat should increase by 1'
+    );
 
     // max stat value case
-    assert(AdventurerUtils::overflow_protected_stat_increase(MAX_STAT_VALUE, 1) == MAX_STAT_VALUE, 'stat should not increase');
+    assert(
+        AdventurerUtils::overflow_protected_stat_increase(MAX_STAT_VALUE, 1) == MAX_STAT_VALUE,
+        'stat should not increase'
+    );
 
     // u8 overflow case
-    assert(AdventurerUtils::overflow_protected_stat_increase(MAX_STAT_VALUE, 255) == MAX_STAT_VALUE, 'stat should not overflow');
+    assert(
+        AdventurerUtils::overflow_protected_stat_increase(MAX_STAT_VALUE, 255) == MAX_STAT_VALUE,
+        'stat should not overflow'
+    );
 }
 
 #[test]
