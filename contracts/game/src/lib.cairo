@@ -83,7 +83,6 @@ mod Game {
     enum Event {
         StartGame: StartGame,
         StatUpgradesAvailable: StatUpgradesAvailable,
-        StatUpgraded: StatUpgraded,
         StrengthIncreased: StrengthIncreased,
         DexterityIncreased: DexterityIncreased,
         VitalityIncreased: VitalityIncreased,
@@ -2016,30 +2015,61 @@ mod Game {
         //deduct upgrades from adventurer available stat points
         adventurer.stat_points_available -= amount;
 
-        // instantiate adventurer state for event
-        let adventurer_state = AdventurerState {
-            owner: get_caller_address(), adventurer_id, adventurer: adventurer
-        };
-
         // increase relevant stat and emit stat specific event
         if (stat_id == StatisticIndex::STRENGTH) {
             adventurer.increase_strength(amount);
-            __event__StrengthIncreased(ref self, adventurer_state, amount);
+            __event__StrengthIncreased(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(), adventurer_id, adventurer: adventurer
+                },
+                amount
+            );
         } else if (stat_id == StatisticIndex::DEXTERITY) {
             adventurer.increase_dexterity(amount);
-            __event__DexterityIncreased(ref self, adventurer_state, amount);
+            __event__DexterityIncreased(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(), adventurer_id, adventurer: adventurer
+                },
+                amount
+            );
         } else if (stat_id == StatisticIndex::VITALITY) {
             adventurer.increase_vitality(amount);
-            __event__VitalityIncreased(ref self, adventurer_state, amount);
+            __event__VitalityIncreased(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(), adventurer_id, adventurer: adventurer
+                },
+                amount
+            );
         } else if (stat_id == StatisticIndex::INTELLIGENCE) {
             adventurer.increase_intelligence(amount);
-            __event__IntelligenceIncreased(ref self, adventurer_state, amount);
+            __event__IntelligenceIncreased(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(), adventurer_id, adventurer: adventurer
+                },
+                amount
+            );
         } else if (stat_id == StatisticIndex::WISDOM) {
             adventurer.increase_wisdom(amount);
-            __event__WisdomIncreased(ref self, adventurer_state, amount);
+            __event__WisdomIncreased(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(), adventurer_id, adventurer: adventurer
+                },
+                amount
+            );
         } else if (stat_id == StatisticIndex::CHARISMA) {
             adventurer.increase_charisma(amount);
-            __event__CharismaIncreased(ref self, adventurer_state, amount);
+            __event__CharismaIncreased(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(), adventurer_id, adventurer: adventurer
+                },
+                amount
+            );
         }
     }
 
@@ -2584,12 +2614,6 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct StatUpgraded {
-        adventurer_state: AdventurerState,
-        stat_id: u8
-    }
-
-    #[derive(Drop, starknet::Event)]
     struct StrengthIncreased {
         adventurer_state: AdventurerState,
         amount: u8
@@ -2820,12 +2844,6 @@ mod Game {
         adventurer_meta: AdventurerMetadata
     ) {
         self.emit(Event::StartGame(StartGame { adventurer_state, adventurer_meta }));
-    }
-
-    fn __event__StatUpgraded(
-        ref self: ContractState, adventurer_state: AdventurerState, stat_id: u8
-    ) {
-        self.emit(Event::StatUpgraded(StatUpgraded { adventurer_state, stat_id }));
     }
 
     fn __event__StrengthIncreased(
