@@ -110,7 +110,11 @@ export const AdventurersList = ({
           </div>
           <div>
             {hasDeadAdventurers && (
-              <Button className="w-full" size={'xs'} onClick={() => setShowZeroHealth(!showZeroHealth)}>
+              <Button
+                className="w-full h-full"
+                size={"xs"}
+                onClick={() => setShowZeroHealth(!showZeroHealth)}
+              >
                 {showZeroHealth ? "Hide" : "Show"} dead
               </Button>
             )}
