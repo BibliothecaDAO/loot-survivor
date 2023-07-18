@@ -6,9 +6,9 @@ const STARTING_HEALTH: u16 = 100;
 const MAX_ADVENTURER_HEALTH: u16 = 511; // 2^9 - 1
 
 // Potion Settings
-const POTION_PRICE: u16 = 2;
+const POTION_PRICE: u16 = 1;
 const POTION_HEALTH_AMOUNT: u16 = 10;
-const MINIMUM_POTION_PRICE: u16 = 2;
+const MINIMUM_POTION_PRICE: u16 = 1;
 const CHARISMA_POTION_DISCOUNT: u16 = 2;
 
 // Item Settings
