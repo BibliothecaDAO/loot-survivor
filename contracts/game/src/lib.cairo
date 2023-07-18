@@ -2667,13 +2667,22 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
+    struct AmbushedByBeast {
+        adventurer_state: AdventurerState,
+        seed: u128,
+        id: u8,
+        beast_specs: CombatSpec,
+        damage: u16,
+        location: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
     struct DiscoveredBeast {
         adventurer_state: AdventurerState,
         seed: u128,
         id: u8,
         health: u16,
         beast_specs: CombatSpec,
-        ambushed: bool
     }
 
     #[derive(Drop, starknet::Event)]
@@ -2688,16 +2697,6 @@ mod Game {
 
     #[derive(Drop, starknet::Event)]
     struct AttackedByBeast {
-        adventurer_state: AdventurerState,
-        seed: u128,
-        id: u8,
-        beast_specs: CombatSpec,
-        damage: u16,
-        location: u8,
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct AmbushedByBeast {
         adventurer_state: AdventurerState,
         seed: u128,
         id: u8,
