@@ -671,6 +671,7 @@ class BattlesFilter:
     attacker: Optional[AttackerFilter] = None
     fled: Optional[BooleanFilter] = None
     damageDealt: Optional[FeltValueFilter] = None
+    criticalHit: Optional[BooleanFilter] = None
     damageTaken: Optional[FeltValueFilter] = None
     damageLocation: Optional[SlotFilter] = None
     xpEarnedAdventurer: Optional[FeltValueFilter] = None
@@ -798,6 +799,7 @@ class BattlesOrderByInput:
     attacker: Optional[OrderByInput] = None
     fled: Optional[OrderByInput] = None
     damageDealt: Optional[OrderByInput] = None
+    criticalHit: Optional[OrderByInput] = None
     damageTaken: Optional[OrderByInput] = None
     damageLocation: Optional[OrderByInput] = None
     xpEarnedAdventurer: Optional[OrderByInput] = None
@@ -1014,6 +1016,7 @@ class Battle:
     attacker: Optional[AttackerValue]
     fled: Optional[BooleanValue]
     damageDealt: Optional[FeltValue]
+    criticalHit: Optional[bool]
     damageTaken: Optional[FeltValue]
     damageLocation: Optional[SlotValue]
     xpEarnedAdventurer: Optional[FeltValue]
@@ -1038,6 +1041,7 @@ class Battle:
             attacker=data["attacker"],
             fled=data["fled"],
             damageDealt=data["damageDealt"],
+            criticalHit=data["criticalHit"],
             damageTaken=data["damageTaken"],
             damageLocation=data["damageLocation"],
             xpEarnedAdventurer=data["xpEarnedAdventurer"],
