@@ -293,12 +293,13 @@ export default function UpgradeScreen() {
                   <div className="text-center text-lg md:text-xl lg:text-4xl p-2 animate-pulse uppercase">
                     Level up!
                   </div>
+                  <span className="w-5">
+                    <ArrowIcon />
+                  </span>
                   <div className="flex flex-row gap-2 text-2xl text-shadow-none">
-                    {previousLevel}
-                    <span className="w-5">
-                      <ArrowIcon />
+                    <span>
+                      Stat Upgrades Available {adventurer?.statUpgrades}
                     </span>
-                    {currentLevel}
                   </div>
                   <div className="flex flex-row gap-10 text-sm sm:text-base">
                     <div className="flex flex-row gap-3">

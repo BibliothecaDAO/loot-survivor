@@ -142,7 +142,7 @@ const TransactionCart: React.FC = () => {
         <div className="absolute right-[50px] w-[300px] h-[400px] sm:right-[280px] top-20 sm:top-32 z-10 sm:w-[400px] sm:h-[400px] p-3 bg-terminal-black border border-terminal-green">
           <p className="text-2xl">TRANSACTIONS</p>
           <div className="w-full border border-terminal-green "></div>
-          <div className="flex flex-col h-[200px] overflow-auto">
+          <div className="flex flex-col h-full overflow-auto">
             {calls.map((call: Call, i: number) => (
               <div key={i}>
                 <div className="flex flex-col gap-2">
