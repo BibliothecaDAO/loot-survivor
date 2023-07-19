@@ -71,7 +71,7 @@ const TransactionCart: React.FC = () => {
       const itemName = processItemName(item ?? NullItem);
       setNotification((notifications) => [
         ...notifications,
-        `You equipped ${item?.item && itemName}!`,
+        `You equipped ${itemName}!`,
       ]);
       setLoadingQuery("adventurerByIdQuery");
       setLoadingMessage((messages) => [...messages, "Equipping"]);
@@ -148,7 +148,7 @@ const TransactionCart: React.FC = () => {
                 <div className="flex flex-col gap-2">
                   {call && (
                     <div className="flex items-center justify-between text-xs sm:text-base">
-                      <p>{call.entrypoint}</p>
+                      <p className="uppercase">{call.entrypoint}</p>
                       {/* <p>{call.calldata}</p> */}
                       <p>{call.metadata}</p>
                       <button
