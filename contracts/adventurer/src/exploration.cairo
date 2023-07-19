@@ -14,7 +14,7 @@ impl ExploreUtils of Explore {
     // get_random_treasury_discovery returns a random number between 0 and 3 based on provided entropy
     // @param adventurer: Adventurer
     // @param adventurer_entropy: The adventurer specific entropy seed
-    // @param game_entropy: The global game entropy seed
+    // @param global_entropy: The global game entropy seed
     // @return u64: A random number between 0 and 3 denoting the outcome of the explore
     fn get_random_treasury_discovery(adventurer: Adventurer, entropy: u128) -> TreasureDiscovery {
         let discovery_type = (entropy + adventurer.xp.into()) % 3;
@@ -30,7 +30,7 @@ impl ExploreUtils of Explore {
     // get_level_adjusted_discovery_amount generates a random discovery amount based on adventurer level and provided entropy
     // @param adventurer: Adventurer
     // @param adventurer_entropy: The adventurer specific entropy seed
-    // @param game_entropy: The global game entropy seed
+    // @param global_entropy: The global game entropy seed
     // @return u16: the amount of gold discovered
     fn get_level_adjusted_discovery_amount(adventurer: Adventurer, entropy: u128) -> u16 {
         // get adventurer's level
@@ -52,7 +52,7 @@ impl ExploreUtils of Explore {
     // get_gold_discovery generates a random gold discovery based on adventurer level and provided entropy
     // @param adventurer: Adventurer
     // @param adventurer_entropy: The adventurer specific entropy seed
-    // @param game_entropy: The global game entropy seed
+    // @param global_entropy: The global game entropy seed
     // @return u16: the amount of gold discovered
     // @dev splitting up the discovery types into their own functions to provide option to adjust discovery amounts by type
     //      for example by making gold discovery amount higher than health discovery amounts.
@@ -64,7 +64,7 @@ impl ExploreUtils of Explore {
     // get_health_discovery generates a random health discovery based on adventurer level and provided entropy
     // @param adventurer: Adventurer
     // @param adventurer_entropy: The adventurer specific entropy seed
-    // @param game_entropy: The global game entropy seed
+    // @param global_entropy: The global game entropy seed
     // @return u16: the amount of health discovered
     // @dev splitting up the discovery types into their own functions to provide option to adjust discovery amounts by type
     //      for example by making gold discovery amount higher than health discovery amounts.
@@ -75,7 +75,7 @@ impl ExploreUtils of Explore {
     // get_xp_discovery generates a random xp discovery based on adventurer level and provided entropy
     // @param adventurer: Adventurer
     // @param adventurer_entropy: The adventurer specific entropy seed
-    // @param game_entropy: The global game entropy seed
+    // @param global_entropy: The global game entropy seed
     // @return u16: the amount of xp discovered
     // @dev splitting up the discovery types into their own functions to provide option to adjust discovery amounts by type
     //      for example by making gold discovery amount higher than xp discovery amounts.

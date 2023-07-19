@@ -172,27 +172,30 @@ impl ImplBagActions of BagActions {
     }
     fn get_item(self: Bag, item_id: u8) -> ItemPrimitive {
         if self.item_1.id == item_id {
-            return self.item_1;
+            self.item_1
         } else if self.item_2.id == item_id {
-            return self.item_2;
+            self.item_2
         } else if self.item_3.id == item_id {
-            return self.item_3;
+            self.item_3
         } else if self.item_4.id == item_id {
-            return self.item_4;
+            self.item_4
         } else if self.item_5.id == item_id {
-            return self.item_5;
+            self.item_5
         } else if self.item_6.id == item_id {
-            return self.item_6;
+            self.item_6
         } else if self.item_7.id == item_id {
-            return self.item_7;
+            self.item_7
         } else if self.item_8.id == item_id {
-            return self.item_8;
+            self.item_8
         } else if self.item_9.id == item_id {
-            return self.item_9;
+            self.item_9
         } else if self.item_10.id == item_id {
-            return self.item_10;
+            self.item_10
+        } else if self.item_11.id == item_id {
+            self.item_11
         } else {
-            return self.item_11;
+            panic_with_felt252('Item not in bag');
+            ItemPrimitive { id: 0, xp: 0, metadata: 0 }
         }
     }
     fn remove_item(ref self: Bag, item_id: u8) -> Bag {
@@ -350,9 +353,9 @@ fn test_add_item() {
 }
 
 #[test]
-#[available_gas(5000000)]
+#[available_gas(6000)]
 fn test_is_full() {
-    let mut bag = Bag {
+    let bag = Bag {
         item_1: ItemPrimitive {
             id: 1, xp: 0, metadata: 0
             }, item_2: ItemPrimitive {
@@ -380,9 +383,113 @@ fn test_is_full() {
 
     assert(bag.is_full() == true, 'Bag should be full');
 }
+
 #[test]
-#[available_gas(5000000)]
-fn remove_item() {
+#[should_panic(expected: ('Item not in bag', ))]
+#[available_gas(15000)]
+fn test_get_item_not_in_bag() {
+
+    let item_1 = ItemPrimitive { id: 11, xp: 0, metadata: 0 };
+    let item_2 = ItemPrimitive { id: 12, xp: 0, metadata: 0 };
+    let item_3 = ItemPrimitive { id: 13, xp: 0, metadata: 0 };
+    let item_4 = ItemPrimitive { id: 14, xp: 0, metadata: 0 };
+    let item_5 = ItemPrimitive { id: 15, xp: 0, metadata: 0 };
+    let item_6 = ItemPrimitive { id: 16, xp: 0, metadata: 0 };
+    let item_7 = ItemPrimitive { id: 17, xp: 0, metadata: 0 };
+    let item_8 = ItemPrimitive { id: 18, xp: 0, metadata: 0 };
+    let item_9 = ItemPrimitive { id: 19, xp: 0, metadata: 0 };
+    let item_10 = ItemPrimitive { id: 20, xp: 0, metadata: 0 };
+    let item_11 = ItemPrimitive { id: 21, xp: 0, metadata: 0 };
+
+    let bag = Bag {
+        item_1: item_1,
+        item_2: item_2,
+        item_3: item_3,
+        item_4: item_4,
+        item_5: item_5,
+        item_6: item_6,
+        item_7: item_7,
+        item_8: item_8,
+        item_9: item_9,
+        item_10: item_10,
+        item_11: item_11,
+    };
+
+    // try to get an item that is not in bag
+    // should panic with 'Item not in bag'
+    // this test is annotated to expect this panic
+    // and will fail if it not thrown
+    bag.get_item(8);
+}
+
+#[test]
+#[available_gas(150000)]
+fn test_get_item() {
+
+    let item_1 = ItemPrimitive { id: 11, xp: 0, metadata: 0 };
+    let item_2 = ItemPrimitive { id: 12, xp: 0, metadata: 0 };
+    let item_3 = ItemPrimitive { id: 13, xp: 0, metadata: 0 };
+    let item_4 = ItemPrimitive { id: 14, xp: 0, metadata: 0 };
+    let item_5 = ItemPrimitive { id: 15, xp: 0, metadata: 0 };
+    let item_6 = ItemPrimitive { id: 16, xp: 0, metadata: 0 };
+    let item_7 = ItemPrimitive { id: 17, xp: 0, metadata: 0 };
+    let item_8 = ItemPrimitive { id: 18, xp: 0, metadata: 0 };
+    let item_9 = ItemPrimitive { id: 19, xp: 0, metadata: 0 };
+    let item_10 = ItemPrimitive { id: 20, xp: 0, metadata: 0 };
+    let item_11 = ItemPrimitive { id: 21, xp: 0, metadata: 0 };
+
+    let bag = Bag {
+        item_1: item_1,
+        item_2: item_2,
+        item_3: item_3,
+        item_4: item_4,
+        item_5: item_5,
+        item_6: item_6,
+        item_7: item_7,
+        item_8: item_8,
+        item_9: item_9,
+        item_10: item_10,
+        item_11: item_11,
+    };
+
+    let item1_from_bag = bag.get_item(11);
+    assert (item1_from_bag.id == item_1.id, 'Item id should be 11');
+
+    let item2_from_bag = bag.get_item(12);
+    assert (item2_from_bag.id == item_2.id, 'Item id should be 12');
+
+    let item3_from_bag = bag.get_item(13);
+    assert (item3_from_bag.id == item_3.id, 'Item id should be 13');
+
+    let item4_from_bag = bag.get_item(14);
+    assert (item4_from_bag.id == item_4.id, 'Item id should be 14');
+
+    let item5_from_bag = bag.get_item(15);
+    assert (item5_from_bag.id == item_5.id, 'Item id should be 15');
+
+    let item6_from_bag = bag.get_item(16);
+    assert (item6_from_bag.id == item_6.id, 'Item id should be 16');
+
+    let item7_from_bag = bag.get_item(17);
+    assert (item7_from_bag.id == item_7.id, 'Item id should be 17');
+
+    let item8_from_bag = bag.get_item(18);
+    assert (item8_from_bag.id == item_8.id, 'Item id should be 18');
+
+    let item9_from_bag = bag.get_item(19);
+    assert (item9_from_bag.id == item_9.id, 'Item id should be 19');
+
+    let item10_from_bag = bag.get_item(20);
+    assert (item10_from_bag.id == item_10.id, 'Item id should be 20');
+
+    let item11_from_bag = bag.get_item(21);
+    assert (item11_from_bag.id == item_11.id, 'Item id should be 21');
+}
+
+
+#[test]
+#[available_gas(20000)]
+fn test_remove_item() {
     let mut bag = Bag {
         item_1: ItemPrimitive {
             id: 1, xp: 0, metadata: 0

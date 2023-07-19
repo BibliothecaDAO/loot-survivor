@@ -898,7 +898,7 @@ impl ImplAdventurer of IAdventurer {
     }
 
     // @notice get_beast_seed provides an entropy source that is fixed during battle
-    // it intentionally does not use game_entropy as that could change during battle and this
+    // it intentionally does not use global_entropy as that could change during battle and this
     // entropy allows us to simulate a persistent battle without having to store beast
     // details on-chain.
     // @param self A reference to the Adventurer object which represents the adventurer.
