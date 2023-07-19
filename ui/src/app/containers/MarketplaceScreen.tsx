@@ -27,6 +27,9 @@ export default function MarketplaceScreen({
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const { data, isLoading } = useQueriesStore();
+  const hasStatUpgrades = useAdventurerStore(
+    (state) => state.computed.hasStatUpgrades
+  );
 
   const [marketLatestItems, setMarketLatestItems] = useState<Item[]>([]);
 
@@ -143,11 +146,9 @@ export default function MarketplaceScreen({
     ? adventurer?.gold - upgradeTotalCost
     : 0;
 
-  console.log(calculatedNewGold);
-
   return (
     <>
-      {adventurer?.level != 0 ? (
+      {hasStatUpgrades ? (
         <div className="w-full">
           <p className="text-center text-lg sm:text-2xl lg:text-4xl ">
             Loot Fountain
@@ -193,7 +194,7 @@ export default function MarketplaceScreen({
       ) : (
         <div className="flex w-full mt-[200px]">
           <p className="mx-auto items-center text-[50px] animate-pulse">
-            Adventurer must be level 2 or higher to access Loot Fountain!
+            No upgrades available!
           </p>
         </div>
       )}
