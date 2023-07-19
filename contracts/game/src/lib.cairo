@@ -61,8 +61,8 @@ mod Game {
 
     #[storage]
     struct Storage {
-        _game_entropy: u64,
-        _last_game_entropy_block: felt252,
+        _global_entropy: u64,
+        _last_global_entropy_block: felt252,
         _adventurer: LegacyMap::<u256, felt252>,
         _owner: LegacyMap::<u256, ContractAddress>,
         _adventurer_meta: LegacyMap::<u256, felt252>,
@@ -295,8 +295,18 @@ mod Game {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
+            // get item names from storage
+            let name_storage1 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let name_storage2 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+
             // unpack adventurer from storage (no need to apply stat boosts)
-            let mut adventurer = _unpack_adventurer(@self, adventurer_id);
+            let mut adventurer = _unpack_adventurer_apply_stat_boost(
+                @self, adventurer_id, name_storage1, name_storage2
+            );
 
             // assert adventurer is not dead
             _assert_not_dead(@self, adventurer);
@@ -307,8 +317,43 @@ mod Game {
             // equip item
             _equip(ref self, adventurer_id, ref adventurer, item_id, ref bag);
 
+            // TODO: Currently this is causing a Got 'Offset overflow' error while moving [159]
+            // which is being discussed via https://github.com/starkware-libs/cairo/issues/2942
+            // I tried adding internal::revoke_ap_tracking() in a number of places
+            // but was unable to resolve the issue. Until this bug is fixed, changing gear during battle
+            // will not result in the beast counter attacking
+            //
+            // if the adventurer is equipping an item during battle
+            // if (adventurer.in_battle()) {
+            //     // get beast from seed
+            //     let (beast, beast_seed) = _get_beast(@self, adventurer, 0);
+
+            //     let (adventurer_entropy, global_entropy) = _get_adventurer_and_global_entropy(
+            //         @self, adventurer_id
+            //     );
+
+            //     // get two random numbers
+            //     // first is used for attack location
+            //     // second is used for determining critical hit (instead _beast_counter_attack)
+            //     let (attack_rnd_1, attack_rnd_2) = _get_live_entropy(
+            //         adventurer_entropy, global_entropy.into(), adventurer
+            //     );
+
+            //     // beast counter attacks
+            //     _beast_counter_attack(
+            //         ref self,
+            //         ref adventurer,
+            //         adventurer_id,
+            //         AdventurerUtils::get_random_attack_location(attack_rnd_1),
+            //         beast,
+            //         beast_seed,
+            //         attack_rnd_2,
+            //         false
+            //     );
+            // }
+
             // pack and save (stat boosts weren't applied so no need to remove)
-            _pack_adventurer(ref self, adventurer_id, adventurer);
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
             _pack_bag(ref self, adventurer_id, bag);
         }
 
@@ -350,7 +395,7 @@ mod Game {
             // buy item
             _buy_item(ref self, adventurer_id, ref adventurer, item_id, equip);
 
-            // pack and save adventurer
+            // remove stat boosts, pack, and save adventurer
             _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
         }
 
@@ -451,8 +496,18 @@ mod Game {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
-            // unpack adventurer from storage (no need to apply stat boosts)
-            let mut adventurer = _unpack_adventurer(@self, adventurer_id);
+            // get item names from storage
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+
+            // unpack adventurer from storage (stat boosts applied on unpacking)
+            let mut adventurer = _unpack_adventurer_apply_stat_boost(
+                @self, adventurer_id, name_storage1, name_storage2
+            );
 
             // assert adventurer is not dead
             _assert_not_dead(@self, adventurer);
@@ -475,14 +530,26 @@ mod Game {
                 );
             }
 
-            // pack and save (stat boosts weren't applied so no need to remove)
-            _pack_adventurer(ref self, adventurer_id, adventurer);
+            // remove stat boosts, pack, and save adventurer
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
         }
 
         fn slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
             // anyone can call this function so we intentinoally don't _assert_ownership
             // unpack adventurer from storage (stat boosts applied on unpacking)
-            let mut adventurer = _unpack_adventurer(@self, adventurer_id);
+
+            // get item names from storage
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+
+            // unpack adventurer from storage (stat boosts applied on unpacking)
+            let mut adventurer = _unpack_adventurer_apply_stat_boost(
+                @self, adventurer_id, name_storage1, name_storage2
+            );
 
             // assert adventurer is not dead
             _assert_not_dead(@self, adventurer);
@@ -507,8 +574,8 @@ mod Game {
                 killer_id: 0
             );
 
-            // pack and save adventurer
-            _pack_adventurer(ref self, adventurer_id, adventurer);
+            // remove stat boosts, pack, and save adventurer
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
         }
 
         // view functions
@@ -819,7 +886,7 @@ mod Game {
         }
 
         fn get_entropy(self: @ContractState) -> u64 {
-            _get_entropy(self)
+            _get_global_entropy(self)
         }
 
         fn set_entropy(ref self: ContractState) {
@@ -1004,11 +1071,11 @@ mod Game {
             .into();
 
         // get global game entropy
-        let game_entropy = _get_entropy(@self).into();
+        let global_entropy = _get_global_entropy(@self).into();
 
         // use entropy sources to generate random exploration
         let (main_explore_rnd, sub_explore_rnd) = _get_live_entropy(
-            adventurer_entropy, game_entropy, adventurer
+            adventurer_entropy, global_entropy, adventurer
         );
 
         // get a random explore result
@@ -1144,7 +1211,8 @@ mod Game {
         );
 
         // get the xp reward for the obstacle
-        let xp_reward = obstacle.get_xp_reward();
+        let adventurer_xp_reward = obstacle.get_xp_reward();
+        let item_xp_reward = adventurer_xp_reward * ITEM_XP_MULTIPLIER;
 
         // calculate damage from the obstacle
         let damage_taken = ImplObstacle::get_damage(obstacle, armor_combat_spec, entropy);
@@ -1168,8 +1236,8 @@ mod Game {
                     level: obstacle.combat_specs.level,
                     damage_taken: damage_taken,
                     damage_location: damage_location,
-                    xp_earned_adventurer: xp_reward,
-                    xp_earned_items: xp_reward * ITEM_XP_MULTIPLIER
+                    xp_earned_adventurer: adventurer_xp_reward,
+                    xp_earned_items: item_xp_reward
                 }
             );
 
@@ -1205,8 +1273,8 @@ mod Game {
                     level: obstacle.combat_specs.level,
                     damage_taken: damage_taken,
                     damage_location: damage_location,
-                    xp_earned_adventurer: xp_reward,
-                    xp_earned_items: xp_reward * ITEM_XP_MULTIPLIER
+                    xp_earned_adventurer: adventurer_xp_reward,
+                    xp_earned_items: item_xp_reward
                 }
             );
         }
@@ -1218,12 +1286,12 @@ mod Game {
             ref adventurer,
             ref name_storage1,
             ref name_storage2,
-            xp_reward,
+            item_xp_reward,
             entropy
         );
 
         // increase adventurer xp and check for level up
-        let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_reward);
+        let (previous_level, new_level) = adventurer.increase_adventurer_xp(adventurer_xp_reward);
         if (new_level > previous_level) {
             // if adventurer leveled up, process level up
             _handle_adventurer_level_up(
@@ -1656,6 +1724,29 @@ mod Game {
         }
     }
 
+    fn _get_beast(
+        self: @ContractState, adventurer: Adventurer, adventurer_entropy: u128
+    ) -> (Beast, u128) {
+        // get beast seed based on adventurer state and adventurer entropy
+        let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
+
+        // get and return beast using beast seed
+        (
+            ImplBeast::get_beast(
+                adventurer.get_level(),
+                ImplBeast::get_special_names(
+                    adventurer.get_level(),
+                    beast_seed,
+                    NamePrefixLength.into(),
+                    NameSuffixLength.into()
+                ),
+                beast_seed,
+                ImplLoot::get_type(adventurer.weapon.id)
+            ),
+            beast_seed
+        )
+    }
+
     fn _attack(
         ref self: ContractState,
         ref adventurer: Adventurer,
@@ -1684,13 +1775,13 @@ mod Game {
         );
 
         // get game entropy from storage
-        let game_entropy: u128 = _get_entropy(@self).into();
+        let global_entropy: u128 = _get_global_entropy(@self).into();
 
         // When generating the beast, we need to ensure entropy remains fixed for the battle
         // for attacking however, we should change the entropy during battle so we use adventurer and beast health
         // to accomplish this
         let (attack_rnd_1, attack_rnd_2) = _get_live_entropy(
-            adventurer_entropy, game_entropy, adventurer
+            adventurer_entropy, global_entropy, adventurer
         );
 
         // get the damage dealt to the beast
@@ -1792,11 +1883,17 @@ mod Game {
                 beast,
                 beast_seed,
                 attack_rnd_2,
-                true
+                false
             );
         }
     }
 
+    // TODO LH: Pull more functionality into this function
+    // such as:
+    // 1. getting beast
+    // 2. determining attack location
+    // those two should significantly reduce the amount of inputs into this function and
+    // reduce code duplication in areas that call this function (they all need to fetch beast, etc)
     fn _beast_counter_attack(
         ref self: ContractState,
         ref adventurer: Adventurer,
@@ -1892,11 +1989,11 @@ mod Game {
             .into();
 
         // get game entropy from storage
-        let game_entropy: u128 = _get_entropy(@self).into();
+        let global_entropy: u128 = _get_global_entropy(@self).into();
 
         // generate live entropy from fixed entropy sources and live adventurer stats
         let (flee_entropy, ambush_entropy) = _get_live_entropy(
-            adventurer_entropy, game_entropy, adventurer
+            adventurer_entropy, global_entropy, adventurer
         );
 
         let fled = ImplBeast::attempt_flee(
@@ -1999,37 +2096,29 @@ mod Game {
         // https://github.com/starkware-libs/cairo/issues/2942
         internal::revoke_ap_tracking();
         // get item the adventurer is equipping
+        // if item does not exist, lib will throw 'Item not in bag'
         let equipping_item = bag.get_item(item_id);
 
         // remove item from bag
         bag.remove_item(equipping_item.id);
 
-        // TODO: could be moved to lib
-        assert(equipping_item.id > 0, messages::ITEM_NOT_IN_BAG);
-
-        // check what item type exists on adventurer
-        // if some exists pluck from adventurer and add to bag
+        // check if adventurer has an item already
+        // equipped to that slot
         let mut unequipped_item_id: u8 = 0;
         if adventurer.is_slot_free(equipping_item) == false {
+            // if they do get the item
             let unequipping_item = adventurer
                 .get_item_at_slot(ImplLoot::get_slot(equipping_item.id));
+
+            // put it in adventurer's bag
             bag.add_item(unequipping_item);
+
+            // and save the item id for events
             unequipped_item_id = unequipping_item.id;
         }
 
         // equip item
         adventurer.add_item(equipping_item);
-
-        // get item names from storage
-        let name_storage1 = _loot_special_names_storage_unpacked(
-            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
-        );
-        let name_storage2 = _loot_special_names_storage_unpacked(
-            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
-        );
-
-        // apply stat boosts so the event has the correct stats
-        _apply_stat_boosts(@self, adventurer_id, ref adventurer, name_storage1, name_storage2);
 
         // emit equipped item event
         __event_EquippedItem(
@@ -2044,9 +2133,6 @@ mod Game {
             item_id,
             unequipped_item_id,
         );
-
-        // remove stats here to prevent boosts from being saved to chain
-        _remove_stat_boosts(@self, adventurer_id, ref adventurer, name_storage1, name_storage2);
     }
 
     // @loaf
@@ -2223,14 +2309,14 @@ mod Game {
 
     // _get_live_entropy generates entropy for exploration
     // @param adventurer_entropy - entropy from adventurer
-    // @param game_entropy - entropy from game
+    // @param global_entropy - entropy from game
     // @param adventurer - the adventurer
     // @return u128 - entropy to be used for exploration
     // TODOs:
     // 1. Move this to Adventurer lib
     // 2. Consider using cairo hashing algorithm
     fn _get_live_entropy(
-        adventurer_entropy: u128, game_entropy: u128, adventurer: Adventurer
+        adventurer_entropy: u128, global_entropy: u128, adventurer: Adventurer
     ) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(adventurer.xp.into());
@@ -2238,7 +2324,7 @@ mod Game {
         hash_span.append(adventurer.health.into());
         hash_span.append(adventurer_entropy.into());
         hash_span.append(adventurer.last_action.into());
-        hash_span.append(game_entropy.into());
+        hash_span.append(global_entropy.into());
 
         let poseidon = poseidon_hash_span(hash_span.span());
         let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
@@ -2372,10 +2458,6 @@ mod Game {
 
     fn _pack_bag(ref self: ContractState, adventurer_id: u256, bag: Bag) {
         self._bag.write(adventurer_id, bag.pack());
-    }
-
-    fn _adventurer_meta_unpacked(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
-        Packing::unpack(self._adventurer_meta.read(adventurer_id))
     }
 
     fn _pack_adventurer_meta(
@@ -2664,7 +2746,7 @@ mod Game {
         let timestamp: u64 = starknet::get_block_info().unbox().block_timestamp.into();
 
         assert(
-            blocknumber >= (self._last_game_entropy_block.read().try_into().unwrap()
+            blocknumber >= (self._last_global_entropy_block.read().try_into().unwrap()
                 + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()),
             messages::BLOCK_NUMBER_ERROR
         );
@@ -2676,12 +2758,30 @@ mod Game {
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
         let (d, r) = rshift_split(poseidon.into(), U64_MAX.into());
 
-        self._game_entropy.write(r.try_into().unwrap());
-        self._last_game_entropy_block.write(blocknumber.into());
+        self._global_entropy.write(r.try_into().unwrap());
+        self._last_global_entropy_block.write(blocknumber.into());
     }
 
-    fn _get_entropy(self: @ContractState) -> u64 {
-        self._game_entropy.read()
+    fn _get_global_entropy(self: @ContractState) -> u64 {
+        self._global_entropy.read()
+    }
+
+    fn _get_adventurer_entropy(self: @ContractState, adventurer_id: u256) -> u128 {
+        _adventurer_meta_unpacked(self, adventurer_id).entropy.into()
+    }
+
+    // @notice _get_adventurer_and_global_entropy returns the adventurer entropy and global entropy
+    // @param self - read-only reference to the contract state
+    // @param adventurer_id - the id of the adventurer
+    // @return (u128, u64) - adventurer entropy and global entropy
+    fn _get_adventurer_and_global_entropy(
+        self: @ContractState, adventurer_id: u256
+    ) -> (u128, u64) {
+        (_get_adventurer_entropy(self, adventurer_id), _get_global_entropy(self))
+    }
+
+    fn _adventurer_meta_unpacked(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
+        Packing::unpack(self._adventurer_meta.read(adventurer_id))
     }
 
     fn _get_score_for_adventurer(self: @ContractState, adventurer_id: u256) -> u256 {
@@ -2723,14 +2823,14 @@ mod Game {
 
     // EVENTS ------------------------------------ //
 
-    #[derive(Drop, Serde, starknet::Event)]
+    #[derive(Copy, Drop, Serde, starknet::Event)]
     struct AdventurerState {
         owner: ContractAddress,
         adventurer_id: u256,
         adventurer: Adventurer
     }
 
-    #[derive(Drop, Serde, starknet::Event)]
+    #[derive(Copy, Drop, Serde, starknet::Event)]
     struct AdventurerStateWithBag {
         adventurer_state: AdventurerState,
         bag: Bag
@@ -2897,7 +2997,7 @@ mod Game {
         unequipped_item_id: u8
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Copy, Drop, starknet::Event)]
     struct EquippedItem {
         adventurer_state_with_bag: AdventurerStateWithBag,
         equipped_item_id: u8,
