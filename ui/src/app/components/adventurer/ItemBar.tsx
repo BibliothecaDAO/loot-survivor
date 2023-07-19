@@ -15,27 +15,26 @@ const calculateProgress = (xp: number): number => {
 
 const ItemBar: React.FC<ItemBarProps> = ({ xp }) => {
   const level = calculateLevel(xp);
-  let progress;
-
-  if (level >= 20) {
-    progress = 100;
-  } else {
-    progress = calculateProgress(xp);
-  }
 
   return (
     <div className="w-full text-black">
-      <div className="flex justify-between text-xs sm:text-sm">
-        <span>{level}</span>
-        <span>Greatness</span>
-        <span>{level >= 20 ? "MAX" : level + 1}</span>
-      </div>
-      <div className="w-full h-1 border border-black bg-terminal-green dark:bg-terminal-green ">
-        <div
-          className="h-full bg-black"
-          style={{ width: `${progress}%` }}
-        ></div>
-      </div>
+      {level >= 20 ? (
+        <div>Max Greatness 20</div>
+      ) : (
+        <>
+          <div className="flex justify-between text-xs sm:text-sm">
+            <span>{level}</span>
+            <span>Greatness</span>
+            <span>{level + 1}</span>
+          </div>
+          <div className="w-full h-1 border border-black bg-terminal-green dark:bg-terminal-green ">
+            <div
+              className="h-full bg-black"
+              style={{ width: `${calculateProgress(xp)}%` }}
+            ></div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
