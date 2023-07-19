@@ -5,15 +5,15 @@ interface ItemBarProps {
   xp: number;
 }
 
-const ItemBar: React.FC<ItemBarProps> = ({ xp }) => {
-  const calculateProgress = (xp: number): number => {
-    const currentLevelXP =
-      calculateLevel(xp) > 1 ? Math.floor(calculateLevel(xp)) ** 2 : 0;
-    const nextLevelXP = Math.floor(calculateLevel(xp) + 1) ** 2;
+const calculateProgress = (xp: number): number => {
+  const currentLevelXP =
+    calculateLevel(xp) > 1 ? Math.floor(calculateLevel(xp)) ** 2 : 0;
+  const nextLevelXP = Math.floor(calculateLevel(xp) + 1) ** 2;
 
-    return ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
-  };
-  let progress;
+  return ((xp - currentLevelXP) / (nextLevelXP - currentLevelXP)) * 100;
+};
+
+const ItemBar: React.FC<ItemBarProps> = ({ xp }) => {
   const level = calculateLevel(xp);
 
   return (
@@ -30,7 +30,7 @@ const ItemBar: React.FC<ItemBarProps> = ({ xp }) => {
           <div className="w-full h-1 border border-black bg-terminal-green dark:bg-terminal-green ">
             <div
               className="h-full bg-black"
-              style={{ width: `${progress}%` }}
+              style={{ width: `${calculateProgress(xp)}%` }}
             ></div>
           </div>
         </>
