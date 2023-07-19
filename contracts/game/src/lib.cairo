@@ -1213,15 +1213,49 @@ mod Game {
         // get the xp reward for the obstacle
         let adventurer_xp_reward = obstacle.get_xp_reward();
         let item_xp_reward = adventurer_xp_reward * ITEM_XP_MULTIPLIER;
+        // increase adventurer xp and check for level up
+        let (previous_level, new_level) = adventurer.increase_adventurer_xp(adventurer_xp_reward);
 
         // calculate damage from the obstacle
         let damage_taken = ImplObstacle::get_damage(obstacle, armor_combat_spec, entropy);
 
-        // if the obstacle was not dodged
+        // if the obstalce was not dodged
         if (!dodged) {
-            // deduct the health from the adventurer
+            // adventurer takes this damage
             adventurer.deduct_health(damage_taken);
 
+            // if obstacle killed adventurer
+            if (adventurer.health == 0) {
+                // emit adventurer died event
+                __event_AdventurerDied(
+                    ref self,
+                    AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    },
+                    killed_by_beast: false,
+                    killed_by_obstacle: true,
+                    killer_id: obstacle.id
+                );
+                // and return as game is now over
+                return;
+            }
+        }
+
+        // grant XP to equipped items
+        _grant_xp_to_equipped_items(
+            ref self,
+            adventurer_id,
+            ref adventurer,
+            ref name_storage1,
+            ref name_storage2,
+            item_xp_reward,
+            entropy
+        );
+
+        // if the obstacle was not dodged
+        if (!dodged) {
             // emit obstacle discover event
             // items only earn XP when damage is taken
             __event__HitByObstacle(
@@ -1240,24 +1274,6 @@ mod Game {
                     xp_earned_items: item_xp_reward
                 }
             );
-
-            // if obstacle killed adventurer
-            if (adventurer.health == 0) {
-                // emit adventurer died event
-                __event_AdventurerDied(
-                    ref self,
-                    AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    },
-                    killed_by_beast: false,
-                    killed_by_obstacle: true,
-                    killer_id: obstacle.id
-                );
-                // and return so we don't process adventurer level up
-                return;
-            }
         } else {
             // emit obstacle discover event
             // items do not earn XP from obstacles
@@ -1279,19 +1295,6 @@ mod Game {
             );
         }
 
-        // grant XP to equipped items
-        _grant_xp_to_equipped_items(
-            ref self,
-            adventurer_id,
-            ref adventurer,
-            ref name_storage1,
-            ref name_storage2,
-            item_xp_reward,
-            entropy
-        );
-
-        // increase adventurer xp and check for level up
-        let (previous_level, new_level) = adventurer.increase_adventurer_xp(adventurer_xp_reward);
         if (new_level > previous_level) {
             // if adventurer leveled up, process level up
             _handle_adventurer_level_up(
@@ -1809,6 +1812,17 @@ mod Game {
             // grant adventuer xp
             let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_earned);
 
+            // grant equipped items xp
+            _grant_xp_to_equipped_items(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                ref name_storage1,
+                ref name_storage2,
+                xp_earned,
+                attack_rnd_2
+            );
+
             // emit slayed beast event
             __event__SlayedBeast(
                 ref self,
@@ -1831,17 +1845,6 @@ mod Game {
                 }
             );
 
-            // grant equipped items xp
-            _grant_xp_to_equipped_items(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                ref name_storage1,
-                ref name_storage2,
-                xp_earned,
-                attack_rnd_2
-            );
-
             // if adventurers new level is greater than previous level
             if (new_level > previous_level) {
                 _handle_adventurer_level_up(
@@ -1852,7 +1855,7 @@ mod Game {
             // handle beast counter attack
 
             // deduct adventurer damage from beast health
-            adventurer.beast_health = adventurer.beast_health - damage_dealt;
+            adventurer.beast_health -= damage_dealt;
 
             // emit attack beast event
             __event__AttackedBeast(
