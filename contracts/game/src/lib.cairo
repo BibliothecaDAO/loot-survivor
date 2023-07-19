@@ -1776,7 +1776,10 @@ mod Game {
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
                         specials: beast.combat_spec.specials
-                    }, damage: damage_dealt, critical_hit: critical_hit, location: ImplCombat::slot_to_u8(Slot::None(())),
+                    },
+                    damage: damage_dealt,
+                    critical_hit: critical_hit,
+                    location: ImplCombat::slot_to_u8(Slot::None(())),
                 }
             );
 
@@ -1815,6 +1818,9 @@ mod Game {
         // process beast counter attack
         let (damage, critical_hit) = beast.counter_attack(armor_combat_spec, entropy);
 
+        // deduct the damage dealt
+        adventurer.deduct_health(damage);
+
         // if counter attack was result of an ambush
         // emit ambushed by beast event
         if (ambushed) {
@@ -1831,7 +1837,10 @@ mod Game {
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
                         specials: beast.combat_spec.specials
-                    }, damage: damage, critical_hit: critical_hit, location: ImplCombat::slot_to_u8(attack_location),
+                    },
+                    damage: damage,
+                    critical_hit: critical_hit,
+                    location: ImplCombat::slot_to_u8(attack_location),
                 }
             );
         } else {
@@ -1848,17 +1857,17 @@ mod Game {
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
                         specials: beast.combat_spec.specials
-                    }, damage: damage, critical_hit: critical_hit, location: ImplCombat::slot_to_u8(attack_location),
+                    },
+                    damage: damage,
+                    critical_hit: critical_hit,
+                    location: ImplCombat::slot_to_u8(attack_location),
                 }
             );
         }
 
-        // if the damage taken is greater than or equal to adventurers health
         // the adventurer is dead
-        let adventurer_died = (damage >= adventurer.health);
-        if (adventurer_died) {
-            // set their health to 0
-            adventurer.health = 0;
+        if (adventurer.health == 0) {
+            // emit adventurer died event
             __event_AdventurerDied(
                 ref self,
                 AdventurerState {
@@ -1871,10 +1880,6 @@ mod Game {
                 killer_id: beast.id
             );
         // TODO: Check for Top score
-        } else {
-            // if the adventurer is not dead
-            // deduct the damage dealt
-            adventurer.deduct_health(damage);
         }
     }
 
