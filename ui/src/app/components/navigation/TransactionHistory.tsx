@@ -34,7 +34,7 @@ const TransactionHistory = () => {
         transactions ? (
           <div
             ref={wrapperRef}
-            className="absolute m-auto right-8 sm:right-16 top-20 sm:top-32 z-10 w-[300px] sm:w-[650px] h-[250px] p-4 bg-terminal-black border border-terminal-green  table-scroll"
+            className="absolute m-auto z-10 right-8 sm:right-16 top-20 sm:top-32 w-1/4 sm:w-[650px] h-3/4 p-4 bg-terminal-black border border-terminal-green overflow-y-auto"
           >
             <div className="flex flex-row justify-between">
               <p className="text-2xl">Ledger</p>
@@ -49,57 +49,59 @@ const TransactionHistory = () => {
               </button>
             </div>
             <div className="w-full border border-terminal-green" />
-            <ul>
-              {transactions
-                .slice()
-                .reverse()
-                .map((tx, i) => {
-                  const response = history.find(
-                    (response) => response.hash == tx.hash
-                  );
-                  let notification: React.ReactNode = null;
-                  const battles = queryData.battlesByBeastQuery
-                    ? queryData.battlesByBeastQuery.battles
-                    : [];
-                  if (response) {
-                    notification = processNotification(
-                      response.type,
-                      response.notificationData,
-                      battles,
-                      !!(adventurer?.beastHealth ?? 0 > 0)
+            <div className="overflow-y-auto">
+              <ul>
+                {transactions
+                  .slice()
+                  .reverse()
+                  .map((tx, i) => {
+                    const response = history.find(
+                      (response) => response.hash == tx.hash
                     );
-                  }
-                  return (
-                    <li
-                      key={i}
-                      className="p-1 m-1 border border-terminal-green"
-                    >
-                      <div className="flex flex-col">
-                        <div className="flex flex-row justify-between border-b border-terminal-green">
-                          {/* <div className="flex flex-wrap gap-1"> */}
-                          <p className="text-xs sm:text-lg text-terminal-yellow">
-                            {method}
-                          </p>
-                          {/* </div> */}
-                          <div className="mr-4 text-xs sm:text-lg">
-                            Hash:{" "}
-                            <a
-                              href={`https://testnet.starkscan.co/tx/${padAddress(
-                                tx.hash
-                              )}`}
-                              target="_blank"
-                            >
-                              {shortenHex(tx.hash)}
-                            </a>
+                    let notification: React.ReactNode = null;
+                    const battles = queryData.battlesByBeastQuery
+                      ? queryData.battlesByBeastQuery.battles
+                      : [];
+                    if (response) {
+                      notification = processNotification(
+                        response.type,
+                        response.notificationData,
+                        battles,
+                        !!(adventurer?.beastHealth ?? 0 > 0)
+                      );
+                    }
+                    return (
+                      <li
+                        key={i}
+                        className="p-1 m-1 border border-terminal-green"
+                      >
+                        <div className="flex flex-col">
+                          <div className="flex flex-row justify-between border-b border-terminal-green">
+                            {/* <div className="flex flex-wrap gap-1"> */}
+                            <p className="text-xs sm:text-lg text-terminal-yellow">
+                              {method}
+                            </p>
+                            {/* </div> */}
+                            <div className="mr-4 text-xs sm:text-lg">
+                              Hash:{" "}
+                              <a
+                                href={`https://testnet.starkscan.co/tx/${padAddress(
+                                  tx.hash
+                                )}`}
+                                target="_blank"
+                              >
+                                {shortenHex(tx.hash)}
+                              </a>
+                            </div>
+                            <TxStatus hash={tx.hash} />
                           </div>
-                          <TxStatus hash={tx.hash} />
+                          {response && notification}
                         </div>
-                        {response && notification}
-                      </div>
-                    </li>
-                  );
-                })}
-            </ul>
+                      </li>
+                    );
+                  })}
+              </ul>
+            </div>
           </div>
         ) : (
           <div className="absolute right-0 z-10 border top-10 w-96 h-96 bg-terminal-black border-terminal-green">
