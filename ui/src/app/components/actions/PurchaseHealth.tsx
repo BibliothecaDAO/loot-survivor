@@ -18,19 +18,8 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
     const adventurer = useAdventurerStore((state) => state.adventurer);
     const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
-    const purchaseHealthTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "buy_potions",
-      calldata: [
-        adventurer?.id?.toString() ?? "",
-        "0",
-        potionAmount.toString(),
-      ],
-      metadata: `Purchasing ${potionAmount * 10} health`,
-    };
-
     const purchaseGoldAmount = Math.max(
-      potionAmount * (adventurer?.level ?? 0) - 1 * (adventurer?.charisma ?? 0),
+      potionAmount * (adventurer?.level ?? 0) - 2 * (adventurer?.charisma ?? 0),
       1
     );
 
@@ -39,6 +28,19 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
       adventurer?.gold - upgradeTotalCost >= purchaseGoldAmount
         ? true
         : false;
+
+    const purchaseHealthTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "buy_potions",
+      calldata: [
+        adventurer?.id?.toString() ?? "",
+        "0",
+        potionAmount.toString(),
+      ],
+      metadata: `Purchasing ${
+        potionAmount * 10
+      } health for ${purchaseGoldAmount} gold`,
+    };
 
     const handlePurchaseHealth = async () => {
       addToCalls(purchaseHealthTx);
