@@ -180,7 +180,9 @@ export const CreateAdventurer = ({
 
   const handleNameEntry = (name: string) => {
     setFormData({ ...formData, name: name });
-    setStep(3);
+    setTimeout(() => {
+      setStep(3);
+    }, 1000);
   };
 
   const handleBack = () => {

@@ -157,9 +157,10 @@ export const NotificationBattleDisplay = ({
   const BeastFled = isArray && battleData.some((data) => data.fled);
   const FailedToFlee =
     isArray &&
-    battleData.length == 1 &&
-    battleData[0]?.attacker === "Beast" &&
-    (adventurer?.health ?? 0) > 0;
+    battleData.some(
+      (data) =>
+        data.attacker === "Beast" && data.fled && (adventurer?.health ?? 0) > 0
+    );
   const KilledTryingToFlee =
     isArray &&
     battleData.length == 1 &&
@@ -172,12 +173,10 @@ export const NotificationBattleDisplay = ({
     );
   const Slayed =
     isArray &&
-    battleData.some(
-      (data) =>
-        data.attacker === "Adventurer" &&
-        (data.beastHealth ?? 0) === 0 &&
-        !data.fled
-    );
+    battleData.length == 1 &&
+    battleData[0]?.attacker === "Adventurer" &&
+    (battleData[0]?.beastHealth ?? 0) === 0 &&
+    (adventurer?.health ?? 0) > 0;
   const KilledByBeast =
     isArray &&
     battleData.some((data) => data.attacker === "Beast") &&
