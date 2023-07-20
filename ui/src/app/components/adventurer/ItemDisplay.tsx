@@ -8,7 +8,7 @@ import { getKeyFromValue, getValueFromKey } from "../../lib/utils";
 
 interface ItemDisplayProps {
   item: Item;
-  itemSlot: string;
+  itemSlot?: string;
 }
 
 export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
@@ -29,7 +29,7 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
         item.item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >
-      <LootIcon type={itemSlot} />
+      <LootIcon type={itemSlot ? itemSlot : slot} />
       {item.item ? (
         <span className="flex flex-row justify-between w-full">
           <div className="w-full overflow-auto whitespace-normal">
