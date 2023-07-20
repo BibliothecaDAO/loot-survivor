@@ -78,16 +78,13 @@ export default function UpgradeScreen() {
     txAccepted
   );
 
-  console.log(adventurer?.id ?? 0);
-  console.log(txAccepted);
-  console.log(data.adventurerByIdQuery?.adventurers[0]);
-
   useCustomQuery(
     "latestMarketItemsQuery",
     getLatestMarketItems,
     {
       adventurerId: adventurer?.id,
-      limit: 20 * (adventurer?.statUpgrades ?? 0),
+      // limit: 20 * (adventurer?.statUpgrades ?? 0),
+      limit: 20,
     },
     txAccepted
   );
