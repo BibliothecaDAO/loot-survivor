@@ -1499,13 +1499,16 @@ fn test_add_health() {
     adventurer.add_health(5);
     assert(adventurer.health == 105, 'health should be 105');
 
-    // verify max health is 120
+    // verify max health is starting health + vitality boost
     adventurer.add_health(50);
-    assert(adventurer.health == 120, 'max health with 1 vit is 120');
+    assert(
+        adventurer.health == STARTING_HEALTH + VITALITY_MAX_HEALTH_INCREASE.into(),
+        'max health error'
+    );
 
     // check overflow
     adventurer.add_health(65535);
-    assert(adventurer.health == 120, 'health should be 120');
+    assert(adventurer.health == STARTING_HEALTH + VITALITY_MAX_HEALTH_INCREASE.into(), 'health should be 120');
 }
 
 #[test]
