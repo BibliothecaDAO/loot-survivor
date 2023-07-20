@@ -164,7 +164,27 @@ impl ImplBagActions of BagActions {
         }
     }
     fn is_full(self: Bag) -> bool {
-        if self.item_11.id == 0 {
+        if self.item_1.id == 0 {
+            return false;
+        } else if self.item_2.id == 0 {
+            return false;
+        } else if self.item_3.id == 0 {
+            return false;
+        } else if self.item_4.id == 0 {
+            return false;
+        } else if self.item_5.id == 0 {
+            return false;
+        } else if self.item_6.id == 0 {
+            return false;
+        } else if self.item_7.id == 0 {
+            return false;
+        } else if self.item_8.id == 0 {
+            return false;
+        } else if self.item_9.id == 0 {
+            return false;
+        } else if self.item_10.id == 0 {
+            return false;
+        } else if self.item_11.id == 0 {
             return false;
         } else {
             return true;
@@ -353,9 +373,9 @@ fn test_add_item() {
 }
 
 #[test]
-#[available_gas(6000)]
+#[available_gas(30000)]
 fn test_is_full() {
-    let bag = Bag {
+    let mut bag = Bag {
         item_1: ItemPrimitive {
             id: 1, xp: 0, metadata: 0
             }, item_2: ItemPrimitive {
@@ -382,13 +402,16 @@ fn test_is_full() {
     };
 
     assert(bag.is_full() == true, 'Bag should be full');
+
+    bag.remove_item(1);
+
+    assert(bag.is_full() == false, 'Bag should be not full');
 }
 
 #[test]
 #[should_panic(expected: ('Item not in bag', ))]
 #[available_gas(15000)]
 fn test_get_item_not_in_bag() {
-
     let item_1 = ItemPrimitive { id: 11, xp: 0, metadata: 0 };
     let item_2 = ItemPrimitive { id: 12, xp: 0, metadata: 0 };
     let item_3 = ItemPrimitive { id: 13, xp: 0, metadata: 0 };
@@ -425,7 +448,6 @@ fn test_get_item_not_in_bag() {
 #[test]
 #[available_gas(150000)]
 fn test_get_item() {
-
     let item_1 = ItemPrimitive { id: 11, xp: 0, metadata: 0 };
     let item_2 = ItemPrimitive { id: 12, xp: 0, metadata: 0 };
     let item_3 = ItemPrimitive { id: 13, xp: 0, metadata: 0 };
@@ -453,37 +475,37 @@ fn test_get_item() {
     };
 
     let item1_from_bag = bag.get_item(11);
-    assert (item1_from_bag.id == item_1.id, 'Item id should be 11');
+    assert(item1_from_bag.id == item_1.id, 'Item id should be 11');
 
     let item2_from_bag = bag.get_item(12);
-    assert (item2_from_bag.id == item_2.id, 'Item id should be 12');
+    assert(item2_from_bag.id == item_2.id, 'Item id should be 12');
 
     let item3_from_bag = bag.get_item(13);
-    assert (item3_from_bag.id == item_3.id, 'Item id should be 13');
+    assert(item3_from_bag.id == item_3.id, 'Item id should be 13');
 
     let item4_from_bag = bag.get_item(14);
-    assert (item4_from_bag.id == item_4.id, 'Item id should be 14');
+    assert(item4_from_bag.id == item_4.id, 'Item id should be 14');
 
     let item5_from_bag = bag.get_item(15);
-    assert (item5_from_bag.id == item_5.id, 'Item id should be 15');
+    assert(item5_from_bag.id == item_5.id, 'Item id should be 15');
 
     let item6_from_bag = bag.get_item(16);
-    assert (item6_from_bag.id == item_6.id, 'Item id should be 16');
+    assert(item6_from_bag.id == item_6.id, 'Item id should be 16');
 
     let item7_from_bag = bag.get_item(17);
-    assert (item7_from_bag.id == item_7.id, 'Item id should be 17');
+    assert(item7_from_bag.id == item_7.id, 'Item id should be 17');
 
     let item8_from_bag = bag.get_item(18);
-    assert (item8_from_bag.id == item_8.id, 'Item id should be 18');
+    assert(item8_from_bag.id == item_8.id, 'Item id should be 18');
 
     let item9_from_bag = bag.get_item(19);
-    assert (item9_from_bag.id == item_9.id, 'Item id should be 19');
+    assert(item9_from_bag.id == item_9.id, 'Item id should be 19');
 
     let item10_from_bag = bag.get_item(20);
-    assert (item10_from_bag.id == item_10.id, 'Item id should be 20');
+    assert(item10_from_bag.id == item_10.id, 'Item id should be 20');
 
     let item11_from_bag = bag.get_item(21);
-    assert (item11_from_bag.id == item_11.id, 'Item id should be 21');
+    assert(item11_from_bag.id == item_11.id, 'Item id should be 21');
 }
 
 
