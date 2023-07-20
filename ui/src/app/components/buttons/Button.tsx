@@ -59,6 +59,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         <Link
           className={cn(buttonVariants({ variant, size, className }))}
           href={href}
+          target="_blank"
+          rel="noopener noreferrer"
         >
           {children}
         </Link>

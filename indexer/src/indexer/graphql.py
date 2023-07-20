@@ -619,6 +619,7 @@ class ScoresFilter:
 @strawberry.input
 class DiscoveriesFilter:
     adventurerId: Optional[FeltValueFilter] = None
+    adventurerHealth: Optional[FeltValueFilter] = None
     disoveryType: Optional[StringFilter] = None
     subDiscoveryType: Optional[StringFilter] = None
     outputAmount: Optional[FeltValueFilter] = None
@@ -661,6 +662,7 @@ class BeastsFilter:
 @strawberry.input
 class BattlesFilter:
     adventurerId: Optional[FeltValueFilter] = None
+    adventurerHealth: Optional[FeltValueFilter] = None
     beast: Optional[BeastFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     beastLevel: Optional[FeltValueFilter] = None
@@ -747,6 +749,7 @@ class ScoresOrderByInput:
 @strawberry.input
 class DiscoveriesOrderByInput:
     adventurerId: Optional[OrderByInput] = None
+    adventurerHealth: Optional[OrderByInput] = None
     disoveryType: Optional[OrderByInput] = None
     subDiscoveryType: Optional[OrderByInput] = None
     outputAmount: Optional[OrderByInput] = None
@@ -789,6 +792,7 @@ class BeastsOrderByInput:
 @strawberry.input
 class BattlesOrderByInput:
     adventurerId: Optional[OrderByInput] = None
+    adventurerHealth: Optional[OrderByInput] = None
     beast: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     beastLevel: Optional[OrderByInput] = None
@@ -920,6 +924,7 @@ class Score:
 @strawberry.type
 class Discovery:
     adventurerId: Optional[FeltValue]
+    adventurerHealth: Optional[FeltValue]
     discoveryType: Optional[DiscoveryValue]
     subDiscoveryType: Optional[SubDiscoveryValue]
     outputAmount: Optional[FeltValue]
@@ -946,6 +951,7 @@ class Discovery:
     def from_mongo(cls, data):
         return cls(
             adventurerId=data["adventurerId"],
+            adventurerHealth=data["adventurerHealth"],
             discoveryType=data["discoveryType"],
             subDiscoveryType=data["subDiscoveryType"],
             outputAmount=data["outputAmount"],
@@ -1006,6 +1012,7 @@ class Beast:
 @strawberry.type
 class Battle:
     adventurerId: Optional[FeltValue]
+    adventurerHealth: Optional[FeltValue]
     beast: Optional[BeastValue]
     beastHealth: Optional[FeltValue]
     beastLevel: Optional[FeltValue]
@@ -1031,6 +1038,7 @@ class Battle:
     def from_mongo(cls, data):
         return cls(
             adventurerId=data["adventurerId"],
+            adventurerHealth=data["adventurerHealth"],
             beast=data["beast"],
             beastHealth=data["beastHealth"],
             beastLevel=data["beastLevel"],

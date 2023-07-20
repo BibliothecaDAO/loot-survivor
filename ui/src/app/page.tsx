@@ -38,7 +38,7 @@ import {
   MuteIcon,
   VolumeIcon,
   CartIcon,
-  GithubIcon
+  GithubIcon,
 } from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
@@ -111,7 +111,7 @@ export default function Home() {
   });
 
   // const toggleMenuItem = (id: number) => {
-  //   setMenu(menu.map(item => 
+  //   setMenu(menu.map(item =>
   //     item.id === id ? {...item, disabled: !item.disabled} : item
   //   ));
   // };
@@ -146,11 +146,9 @@ export default function Home() {
     if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
       // toggleMenuItem(4);
       setScreen("play");
-      
     } else if (hasStatUpgrades) {
       // toggleMenuItem(2);
       setScreen("upgrade");
-      
     } else if (!adventurer || !isAlive) {
       setScreen("start");
     }
@@ -266,7 +264,7 @@ export default function Home() {
                       </Button>
                     )}
                     <Button href="https://github.com/BibliothecaDAO/loot-survivor">
-                        <GithubIcon className="w-6"/>
+                      <GithubIcon className="w-6" />
                     </Button>
                   </>
                 )}
@@ -294,7 +292,6 @@ export default function Home() {
                 type={type}
                 notificationData={notificationData}
                 hasBeast={hasBeast}
-                
               />
             </div>
           </CSSTransition>
@@ -312,7 +309,15 @@ export default function Home() {
                     onButtonClick={(value) => {
                       setScreen(value);
                     }}
-                    disabled={[false, hasStatUpgrades, false, !hasStatUpgrades, false, false, false]}
+                    disabled={[
+                      false,
+                      hasStatUpgrades,
+                      false,
+                      !hasStatUpgrades,
+                      false,
+                      false,
+                      false,
+                    ]}
                   />
                 </div>
 

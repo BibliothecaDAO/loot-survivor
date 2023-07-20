@@ -269,3 +269,7 @@ export function getItemPrice(tier: number, charisma: number) {
     return price;
   }
 }
+
+export function isFirstElement<T>(arr: T[], element: T): boolean {
+  return arr[0] === element;
+}

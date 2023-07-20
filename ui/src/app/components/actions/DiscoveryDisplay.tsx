@@ -8,12 +8,13 @@ interface DiscoveryProps {
 }
 
 export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
-  const { adventurer } = useAdventurerStore();
   const beastName = processBeastName(
     discoveryData?.entity ?? "",
     discoveryData?.special2 ?? "",
     discoveryData?.special3 ?? ""
   );
+
+  const AdventurerHealthExists = (discoveryData?.adventurerHealth ?? 0) > 0;
 
   const renderDiscoveryMessage = () => {
     if (discoveryData?.discoveryType === "Beast") {
@@ -27,7 +28,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     if (discoveryData?.discoveryType === "Obstacle") {
       if (discoveryData?.dodgedObstacle) {
         return <p>PHEW! You avoided the {discoveryData?.obstacle} obstacle!</p>;
-      } else if (adventurer?.health === 0) {
+      } else if (!AdventurerHealthExists) {
         return (
           <p>
             You discovered the {discoveryData?.obstacle} obstacle, it killed you
@@ -74,7 +75,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     }
 
     if (!discoveryData?.discoveryType) {
-      if (adventurer?.health === 0) {
+      if (!AdventurerHealthExists) {
         return <p>OOPS! You were killed by the idle penalty of 80 damage!</p>;
       } else {
         return <p>OOPS! You recieved the idle penalty of 80 damage!</p>;

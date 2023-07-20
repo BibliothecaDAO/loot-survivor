@@ -90,8 +90,6 @@ export default function BeastScreen() {
 
   let beastData = data.beastQuery ? data.beastQuery.beasts[0] : NullBeast;
 
-  console.log(txAccepted);
-  console.log(lastBeast?.entity, lastBeast?.seed);
   const formatBattles = data.battlesByBeastQuery
     ? data.battlesByBeastQuery.battles
     : [];
@@ -192,8 +190,6 @@ export default function BeastScreen() {
     beastData?.special3 ?? ""
   );
 
-  console.log(formatBattles);
-
   return (
     <>
       <div className="sm:w-1/3 order-1 sm:order-2">
@@ -222,13 +218,7 @@ export default function BeastScreen() {
               <div className="flex flex-col gap-2 text-sm overflow-y-auto">
                 {formatBattles.map((battle: Battle, index: number) => (
                   <div className="border p-2 border-terminal-green" key={index}>
-                    <BattleDisplay
-                      battleData={battle}
-                      battles={formatBattles}
-                      beastName={beastName}
-                      adventurer={adventurer ?? NullAdventurer}
-                      discoveryData={lastBeast}
-                    />
+                    <BattleDisplay battleData={battle} beastName={beastName} />
                   </div>
                 ))}
               </div>

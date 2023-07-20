@@ -550,6 +550,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": check_exists_int(dh.adventurer_state["adventurer_id"]),
+            "adventurerHealth": encode_int_as_bytes(
+                dh.adventurer_state["adventurer"]["health"]
+            ),
             "discoveryType": encode_int_as_bytes(3),
             "subDiscoveryType": check_exists_int(1),
             "outputAmount": encode_int_as_bytes(dh.health_amount),
@@ -593,6 +596,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": check_exists_int(dg.adventurer_state["adventurer_id"]),
+            "adventurerHealth": encode_int_as_bytes(
+                dg.adventurer_state["adventurer"]["health"]
+            ),
             "discoveryType": encode_int_as_bytes(3),
             "subDiscoveryType": check_exists_int(2),
             "outputAmount": encode_int_as_bytes(dg.gold_amount),
@@ -636,6 +642,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": check_exists_int(dx.adventurer_state["adventurer_id"]),
+            "adventurerHealth": encode_int_as_bytes(
+                dx.adventurer_state["adventurer"]["health"]
+            ),
             "discoveryType": encode_int_as_bytes(3),
             "subDiscoveryType": check_exists_int(3),
             "outputAmount": encode_int_as_bytes(dx.xp_amount),
@@ -679,6 +688,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": check_exists_int(do.adventurer_state["adventurer_id"]),
+            "adventurerHealth": encode_int_as_bytes(
+                do.adventurer_state["adventurer"]["health"]
+            ),
             "discoveryType": encode_int_as_bytes(2),
             "subDiscoveryType": check_exists_int(0),
             "outputAmount": encode_int_as_bytes(0),
@@ -727,6 +739,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": check_exists_int(do.adventurer_state["adventurer_id"]),
+            "adventurerHealth": encode_int_as_bytes(
+                do.adventurer_state["adventurer"]["health"]
+            ),
             "discoveryType": encode_int_as_bytes(2),
             "subDiscoveryType": check_exists_int(0),
             "outputAmount": encode_int_as_bytes(0),
@@ -774,6 +789,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": check_exists_int(db.adventurer_state["adventurer_id"]),
+            "adventurerHealth": encode_int_as_bytes(
+                db.adventurer_state["adventurer"]["health"]
+            ),
             "discoveryType": encode_int_as_bytes(1),
             "subDiscoveryType": check_exists_int(0),
             "outputAmount": encode_int_as_bytes(0),
@@ -835,6 +853,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
         discovery_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": check_exists_int(abb.adventurer_state["adventurer_id"]),
+            "adventurerHealth": encode_int_as_bytes(
+                abb.adventurer_state["adventurer"]["health"]
+            ),
             "discoveryType": encode_int_as_bytes(1),
             "subDiscoveryType": check_exists_int(0),
             "outputAmount": encode_int_as_bytes(0),
@@ -871,6 +892,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "special3": check_exists_int(abb.beast_specs["specials"]["special3"]),
             "seed": encode_int_as_bytes(abb.seed),
             "adventurerId": check_exists_int(abb.adventurer_state["adventurer_id"]),
+            "adventurerHealth": encode_int_as_bytes(
+                abb.adventurer_state["adventurer"]["health"]
+            ),
             "attacker": check_exists_int(2),
             "fled": check_exists_int(0),
             "damageDealt": encode_int_as_bytes(0),
@@ -954,6 +978,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "special3": check_exists_int(ba.beast_specs["specials"]["special3"]),
                 "seed": encode_int_as_bytes(ba.seed),
                 "adventurerId": check_exists_int(ba.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    ba.adventurer_state["adventurer"]["health"]
+                ),
                 "attacker": check_exists_int(1),
                 "fled": check_exists_int(0),
                 "damageDealt": encode_int_as_bytes(ba.damage),
@@ -1013,6 +1040,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "special3": check_exists_int(abb.beast_specs["specials"]["special3"]),
                 "seed": encode_int_as_bytes(abb.seed),
                 "adventurerId": check_exists_int(abb.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    abb.adventurer_state["adventurer"]["health"]
+                ),
                 "attacker": check_exists_int(2),
                 "fled": check_exists_int(0),
                 "damageDealt": encode_int_as_bytes(0),
@@ -1081,6 +1111,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "special3": check_exists_int(sb.beast_specs["specials"]["special3"]),
                 "seed": encode_int_as_bytes(sb.seed),
                 "adventurerId": check_exists_int(sb.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    sb.adventurer_state["adventurer"]["health"]
+                ),
                 "attacker": check_exists_int(1),
                 "fled": check_exists_int(0),
                 "damageDealt": encode_int_as_bytes(sb.damage_dealt),
@@ -1145,6 +1178,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "special3": check_exists_int(fa.beast_specs["specials"]["special3"]),
                 "seed": encode_int_as_bytes(fa.seed),
                 "adventurerId": check_exists_int(fa.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    fa.adventurer_state["adventurer"]["health"]
+                ),
                 "attacker": check_exists_int(1),
                 "fled": check_exists_int(0),
                 "damageDealt": encode_int_as_bytes(0),
@@ -1204,6 +1240,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "special3": check_exists_int(fa.beast_specs["specials"]["special3"]),
                 "seed": encode_int_as_bytes(fa.seed),
                 "adventurerId": check_exists_int(fa.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    fa.adventurer_state["adventurer"]["health"]
+                ),
                 "attacker": check_exists_int(1),
                 "fled": check_exists_int(1),
                 "damageDealt": encode_int_as_bytes(0),
@@ -1533,6 +1572,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "special3": check_exists_int(0),
                 "seed": encode_int_as_bytes(0),
                 "adventurerId": check_exists_int(idp.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    idp.adventurer_state["adventurer"]["health"]
+                ),
                 "attacker": check_exists_int(0),
                 "fled": check_exists_int(0),
                 "damageDealt": encode_int_as_bytes(0),
@@ -1551,6 +1593,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
             penalty_discovery_doc = {
                 "txHash": encode_hex_as_bytes(tx_hash),
                 "adventurerId": check_exists_int(idp.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    idp.adventurer_state["adventurer"]["health"]
+                ),
                 "discoveryType": check_exists_int(0),
                 "subDiscoveryType": check_exists_int(0),
                 "outputAmount": encode_int_as_bytes(0),
