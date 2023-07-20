@@ -2166,10 +2166,11 @@ mod Game {
         // unpack Loot bag from storage
         let mut bag = _bag_unpacked(@self, adventurer_id);
 
-        // get item and determine metadata slot
-        let item = ImplItemSpecials::get_special_name_storage_slot(
-            adventurer, bag, ImplBagActions::new_item(item_id)
-        );
+        // get item from id
+        let mut item = ImplBagActions::new_item(item_id);
+
+        // assign metadata id to item
+        item.set_metadata_id(adventurer, bag);
 
         // deduct gold
         adventurer.deduct_gold(charisma_adjusted_price);
@@ -2490,7 +2491,7 @@ mod Game {
     fn _get_special_names(
         self: @ContractState, adventurer_id: u256, item: ItemPrimitive
     ) -> ItemSpecials {
-        ImplItemSpecials::get_loot_special_names(
+        ImplItemSpecials::get_specials(
             _loot_special_names_storage_unpacked(
                 self, adventurer_id, _get_storage_index(self, item.metadata)
             ),
@@ -2722,7 +2723,7 @@ mod Game {
             };
         } else {
             // if it's above 15, fetch the special names
-            let item_details = ImplItemSpecials::get_loot_special_names(
+            let item_details = ImplItemSpecials::get_specials(
                 _loot_special_names_storage_unpacked(
                     self, adventurer_id, _get_storage_index(self, item.metadata)
                 ),
