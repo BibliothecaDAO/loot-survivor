@@ -29,7 +29,7 @@ Table of contents
 
 ## 🕹️ Game Design
 
-Loot Survivor is a onchain Arcade machine game. You add some tokens, try get the highscore and live for eternity onchain.
+Loot Survivor is an onchain Arcade machine game. You add some tokens, try to get the highscore and live for eternity onchain.
 
 Each play through will be different and there is no end to the game. Every level just gets progressively harder.
 
@@ -124,7 +124,7 @@ The game is a work in progress and contributions are greatly appreciated.
 ## ⛓️ Technology
 
 
-Loot Survivor is a onchain game, designed to be immutable and permanently hosted on Starknet. We use advanced gas optimization to reduce costs on Starknet. A players gamestate exists primarily in a single felt252, every action the player takes only updates a single storage slot.
+Loot Survivor is an onchain game, designed to be immutable and permanently hosted on Starknet. We use advanced gas optimization to reduce costs on Starknet. A player's gamestate exists primarily in a single felt252, every action the player takes only updates a single storage slot.
 
 
 - Client: Nextjs
@@ -185,7 +185,7 @@ scarb build
 starknet declare --contract target/dev/game_Game.sierra.json --account $ACCOUNT_NAME
 
 # deploy
-# <classhash> will be in the the output of the previous command
+# <classhash> will be in the output of the previous command
 starknet deploy --class_hash 0x2958304935054101c0aeab16cf6507adda1c98b4d977af40d59c2ae75f05767 --max_fee 100000000000000000 --input $LORDS_ADDRESS $DAO_ADDRESS --account $ACCOUNT_NAME
 ```
 
