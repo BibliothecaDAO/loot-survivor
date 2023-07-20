@@ -18,11 +18,11 @@ mod tests {
     use game::{Game};
     use survivor::adventurer_meta::AdventurerMetadata;
     use survivor::constants::adventurer_constants::{
-        STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH
+        STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH,
     };
     use survivor::adventurer::{Adventurer, ImplAdventurer, IAdventurer};
 
-    use game::game::constants::messages::{STAT_UPGRADES_AVAILABLE};
+    use game::game::constants::{messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE};
     use beasts::constants::{BeastSettings, BeastId};
 
     fn INTERFACE_ID() -> ContractAddress {
@@ -64,23 +64,253 @@ mod tests {
 
         game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta);
 
-        game
-    }
+        let original_adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(original_adventurer.xp == 0, 'wrong starting xp');
+        assert(
+            original_adventurer.health == STARTING_HEALTH - STARTER_BEAST_ATTACK_DAMAGE,
+            'wrong starting health'
+        );
+        assert(original_adventurer.weapon.id == ItemId::Wand, 'wrong starting weapon');
+        assert(
+            original_adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
+            'wrong starter beast health '
+        );
 
-    fn new_adventurer_lvl2() -> IGameDispatcher {
-        let mut game = new_adventurer();
-        game.attack(ADVENTURER_ID);
         game
     }
 
     fn new_adventurer_lvl2_with_idle_penalty() -> IGameDispatcher {
+        // start game on block number 1
         testing::set_block_number(1);
         let mut game = new_adventurer();
-        testing::set_block_number(200);
+
+        // fast forward chain to block number 400
+        testing::set_block_number(400);
+
+        // double attack beast
+        // this will trigger idle penalty which will deal extra
+        // damage to adventurer
         game.attack(ADVENTURER_ID);
         game.attack(ADVENTURER_ID);
+
+        // assert starter beast is dead
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.beast_health == 0, 'should not be in battle');
+
+        // return game
         game
     }
+
+    fn new_adventurer_lvl2() -> IGameDispatcher {
+        // start game
+        let mut game = new_adventurer();
+
+        // attack starter beast
+        game.attack(ADVENTURER_ID);
+
+        // assert starter beast is dead
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.beast_health == 0, 'should not be in battle');
+        assert(adventurer.get_level() == 2, 'should be level 2');
+        assert(adventurer.stat_points_available == 1, 'should have 1 stat available');
+
+        // return game
+        game
+    }
+
+    fn new_adventurer_lvl3(stat: u8) -> IGameDispatcher {
+        // start game on lvl 2
+        let mut game = new_adventurer_lvl2();
+
+        // upgrade charisma
+        game.upgrade_stat(ADVENTURER_ID, stat, 1);
+
+        // go explore
+        game.explore(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.get_level() == 3, 'adventurer should be lvl 3');
+
+        // return game
+        game
+    }
+
+    fn new_adventurer_lvl4(stat: u8) -> IGameDispatcher {
+        // start game on lvl 2
+        let mut game = new_adventurer_lvl3(stat);
+
+        // upgrade charisma
+        game.upgrade_stat(ADVENTURER_ID, stat, 1);
+
+        // go explore
+        game.explore(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.get_level() == 4, 'adventurer should be lvl 4');
+
+        // return game
+        game
+    }
+
+    fn new_adventurer_lvl5(stat: u8) -> IGameDispatcher {
+        // start game on lvl 2
+        let mut game = new_adventurer_lvl4(stat);
+
+        // upgrade charisma
+        game.upgrade_stat(ADVENTURER_ID, stat, 1);
+
+        // go explore
+        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.get_level() == 5, 'adventurer should be lvl 5');
+
+        // return game
+        game
+    }
+
+    fn new_adventurer_lvl6_equipped(stat: u8) -> IGameDispatcher {
+        let mut game = new_adventurer_lvl5(stat);
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        let weapon_inventory = @game.get_weapons_on_market(ADVENTURER_ID);
+        let chest_inventory = @game.get_chest_armor_on_market(ADVENTURER_ID);
+        let head_inventory = @game.get_head_armor_on_market(ADVENTURER_ID);
+        let waist_inventory = @game.get_waist_armor_on_market(ADVENTURER_ID);
+        let foot_inventory = @game.get_foot_armor_on_market(ADVENTURER_ID);
+        let hand_inventory = @game.get_hand_armor_on_market(ADVENTURER_ID);
+
+        let purchase_weapon_id = *weapon_inventory.at(0);
+        let purchase_chest_id = *chest_inventory.at(2);
+        let purchase_head_id = *head_inventory.at(2);
+        let purchase_waist_id = *waist_inventory.at(0);
+        let purchase_foot_id = *foot_inventory.at(0);
+        let purchase_hand_id = *hand_inventory.at(0);
+
+        game.buy_item(ADVENTURER_ID, purchase_weapon_id, true);
+        game.buy_item(ADVENTURER_ID, purchase_chest_id, true);
+        game.buy_item(ADVENTURER_ID, purchase_head_id, true);
+        game.buy_item(ADVENTURER_ID, purchase_waist_id, true);
+        game.buy_item(ADVENTURER_ID, purchase_foot_id, true);
+        game.buy_item(ADVENTURER_ID, purchase_hand_id, true);
+
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        assert(adventurer.weapon.id == purchase_weapon_id, 'new weapon should be equipped');
+        assert(adventurer.chest.id == purchase_chest_id, 'new chest should be equipped');
+        assert(adventurer.head.id == purchase_head_id, 'new head should be equipped');
+        assert(adventurer.waist.id == purchase_waist_id, 'new waist should be equipped');
+        assert(adventurer.foot.id == purchase_foot_id, 'new foot should be equipped');
+        assert(adventurer.hand.id == purchase_hand_id, 'new hand should be equipped');
+        assert(adventurer.gold < STARTING_GOLD, 'items should not be free');
+
+        // upgrade charisma
+        game.upgrade_stat(ADVENTURER_ID, stat, 1);
+
+        // go explore
+        game.explore(ADVENTURER_ID);
+
+        // verify adventurer is now level 6
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.get_level() == 6, 'adventurer should be lvl 6');
+
+        game
+    }
+
+    fn new_adventurer_lvl7_equipped(stat: u8) -> IGameDispatcher {
+        let mut game = new_adventurer_lvl6_equipped(stat);
+        let STRENGTH: u8 = 0;
+        game.upgrade_stat(ADVENTURER_ID, STRENGTH, 1);
+
+        // go explore
+        game.explore(ADVENTURER_ID);
+
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.get_level() == 7, 'adventurer should be lvl 7');
+
+        game
+    }
+
+    fn new_adventurer_lvl8_equipped(stat: u8) -> IGameDispatcher {
+        let mut game = new_adventurer_lvl7_equipped(stat);
+        let STRENGTH: u8 = 0;
+        game.upgrade_stat(ADVENTURER_ID, STRENGTH, 1);
+
+        // go explore
+        game.explore(ADVENTURER_ID);
+
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.get_level() == 8, 'adventurer should be lvl 8');
+
+        game
+    }
+
+    fn new_adventurer_lvl9_equipped(stat: u8) -> IGameDispatcher {
+        let mut game = new_adventurer_lvl8_equipped(stat);
+        let STRENGTH: u8 = 0;
+        game.upgrade_stat(ADVENTURER_ID, STRENGTH, 1);
+
+        // go explore
+        game.explore(ADVENTURER_ID);
+
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.get_level() == 9, 'adventurer should be lvl 9');
+
+        game
+    }
+
+    fn new_adventurer_lvl10_equipped(stat: u8) -> IGameDispatcher {
+        let mut game = new_adventurer_lvl9_equipped(stat);
+        let STRENGTH: u8 = 0;
+        game.upgrade_stat(ADVENTURER_ID, STRENGTH, 1);
+
+        // go explore
+        game.explore(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.get_level() == 10, 'adventurer should be lvl 10');
+
+        game
+    }
+
+    fn new_adventurer_lvl11_equipped(stat: u8) -> IGameDispatcher {
+        let mut game = new_adventurer_lvl10_equipped(stat);
+        let STRENGTH: u8 = 0;
+        game.upgrade_stat(ADVENTURER_ID, STRENGTH, 1);
+
+        // go explore
+        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID);
+
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.get_level() == 11, 'adventurer should be lvl 11');
+
+        game
+    }
+
+    // TODO: need to figure out how to make this more durable
+    // #[test]
+    // #[available_gas(3000000000000)]
+    // fn test_full_game() {
+    //     let mut game = new_adventurer_lvl11_equipped(5);
+    // }
 
     #[test]
     #[available_gas(3000000000000)]
@@ -104,17 +334,9 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(30000000)]
+    #[available_gas(37000000)]
     fn test_no_explore_during_battle() {
         let mut game = new_adventurer();
-        let original_adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(original_adventurer.xp == 0, 'should start with 0 xp');
-        assert(original_adventurer.health == 100, 'should start with 100hp');
-        assert(original_adventurer.weapon.id == ItemId::Wand, 'adventurer should have a wand');
-        assert(
-            original_adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
-            'adventurer should have a wand'
-        );
 
         // try to explore before defeating start beast
         // should result in a panic 'In battle cannot explore' which
@@ -124,7 +346,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    #[available_gas(700000)]
+    #[available_gas(900000)]
     fn test_attack() {
         let mut game = new_adventurer();
 
@@ -186,7 +408,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Cant flee starter beast', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(15000000)]
+    #[available_gas(23000000)]
     fn test_cant_flee_starter_beast() {
         // start new game
         let mut game = new_adventurer();
@@ -204,12 +426,6 @@ mod tests {
         // start adventuer and advance to level 2
         let mut game = new_adventurer_lvl2();
 
-        // get adventurer state
-        let adventurer = game.get_adventurer(0);
-
-        // assert adventurer is not in a battle
-        assert(adventurer.beast_health == 0, 'should not be in battle');
-
         // attempt to flee despite not being in a battle
         // this should trigger a panic 'Not in battle' which is
         // annotated in the test
@@ -225,31 +441,11 @@ mod tests {
         assert(updated_adventurer.beast_health == 0, 'beast should be dead');
 
         // use stat upgrade
-        game.upgrade_stat(ADVENTURER_ID, 0);
+        game.upgrade_stat(ADVENTURER_ID, 0, 1);
 
         // explore till we find a beast
         // TODO: use cheat codes to make this less fragile
         testing::set_block_number(1004);
-        game.explore(ADVENTURER_ID);
-        testing::set_block_number(1005);
-        game.explore(ADVENTURER_ID);
-        testing::set_block_number(1006);
-        game.explore(ADVENTURER_ID);
-
-        // use stat upgrade
-        game.upgrade_stat(ADVENTURER_ID, 0);
-
-        testing::set_block_number(1007);
-        game.explore(ADVENTURER_ID);
-
-        // use stat upgrade
-        game.upgrade_stat(ADVENTURER_ID, 0);
-
-        testing::set_block_number(1008);
-        game.explore(ADVENTURER_ID);
-        testing::set_block_number(1009);
-        game.explore(ADVENTURER_ID);
-        testing::set_block_number(1010);
         game.explore(ADVENTURER_ID);
 
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -283,7 +479,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
+    #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
     #[available_gas(1800000000)]
     fn test_cant_buy_items_during_battle() {
         // mint new adventurer (will start in battle with starter beast)
@@ -307,7 +503,7 @@ mod tests {
         let mut game = new_adventurer_lvl2();
 
         // use the adventurers available stat
-        game.upgrade_stat(ADVENTURER_ID, 1);
+        game.upgrade_stat(ADVENTURER_ID, 1, 1);
 
         // get valid item from market
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -329,7 +525,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(70000000)]
+    #[available_gas(72000000)]
     fn test_buy_and_equip_item() {
         let mut game = new_adventurer_lvl2();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -343,7 +539,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(65000000)]
+    #[available_gas(68000000)]
     fn test_buy_and_bag_item() {
         let mut game = new_adventurer_lvl2();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -402,7 +598,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(62000000)]
+    #[available_gas(96000000)]
     fn test_buy_potions() {
         let mut game = new_adventurer_lvl2_with_idle_penalty();
 
@@ -436,38 +632,50 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Health already full', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(40000000)]
+    // we don't care about gas for this test so setting it high so this test
+    // is more resilient to changes in game settings like starting health, potion health amount, etc
+    #[available_gas(100000000)]
     fn test_buy_potion_exceed_max_health() {
         let mut game = new_adventurer_lvl2();
-
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
-        // assert adventurer has full health
-        assert(adventurer.health == STARTING_HEALTH, 'advntr should have full health');
+        // get number of potions required to reach full health
+        let potions_to_full_health = POTION_HEALTH_AMOUNT
+            / (adventurer.get_max_health() - adventurer.health);
 
-        // attempt to buy a potion
-        // this should result in a panic 'Health already full'
-        // this test is annotated to expect that panic
-        game.buy_potion(ADVENTURER_ID);
+        let mut i: u16 = 0;
+        loop {
+            // buy one more health than is required to reach full health
+            // this should throw a panic 'Health already full'
+            // this test is annotated to expect that panic
+            if i > potions_to_full_health {
+                break;
+            }
+            game.buy_potion(ADVENTURER_ID);
+            i += 1;
+        }
     }
 
     #[test]
     #[should_panic(expected: ('Health already full', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(40000000)]
+    #[available_gas(450000000)]
     fn test_buy_potions_exceed_max_health() {
         let mut game = new_adventurer_lvl2();
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
-        // assert adventurer has full health
-        assert(adventurer.health == STARTING_HEALTH, 'advntr should have full health');
+        // get number of potions required to reach full health
+        let potions_to_full_health: u8 = (POTION_HEALTH_AMOUNT
+            / (adventurer.get_max_health() - adventurer.health))
+            .try_into()
+            .unwrap();
 
-        // attempt to buy a potion
+        // attempt to buy one more potion than is required to reach full health
         // this should result in a panic 'Health already full'
         // this test is annotated to expect that panic
-        game.buy_potions(ADVENTURER_ID, 1);
+        game.buy_potions(ADVENTURER_ID, (potions_to_full_health + 1))
     }
 
     #[test]
@@ -478,7 +686,7 @@ mod tests {
         let mut game = new_adventurer_lvl2();
 
         // use stat upgrade
-        game.upgrade_stat(ADVENTURER_ID, 0);
+        game.upgrade_stat(ADVENTURER_ID, 0, 1);
 
         // attempt to buy potion
         // should panic with 'Market is closed'
@@ -576,7 +784,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(50000000)]
+    #[available_gas(60000000)]
     // @dev since we only store 511 blocks, there are two cases for the idle adventurer
     // the first is when the adventurer last action block number is less than the
     // (current_block_number % 511) and the other is when it is greater
@@ -630,7 +838,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(50000000)]
+    #[available_gas(70000000)]
     // @dev since we only store 511 blocks, there are two cases for the idle adventurer
     // the first is when the adventurer last action block number is less than the
     // (current_block_number % 511) and the other is when it is greater
@@ -687,7 +895,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(300000000)]
+    #[available_gas(20000000)]
     fn test_entropy() {
         let mut game = new_adventurer();
 
@@ -695,7 +903,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(300000000)]
+    #[available_gas(100000000)]
     fn test_get_potion_price() {
         let mut game = new_adventurer();
         let potion_price = game.get_potion_price(ADVENTURER_ID);
@@ -709,7 +917,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(800000000)]
+    #[available_gas(20000000)]
     fn test_get_attacking_beast() {
         let mut game = new_adventurer();
         let beast = game.get_attacking_beast(ADVENTURER_ID);
@@ -718,7 +926,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(800000000)]
+    #[available_gas(20000000)]
     fn test_get_health() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -726,28 +934,28 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(800000000)]
+    #[available_gas(20000000)]
     fn test_get_xp() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.xp == game.get_xp(ADVENTURER_ID), 'wrong adventurer xp');
     }
     #[test]
-    #[available_gas(800000000)]
+    #[available_gas(20000000)]
     fn test_get_level() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.get_level() == game.get_level(ADVENTURER_ID), 'wrong adventurer level');
     }
     #[test]
-    #[available_gas(800000000)]
+    #[available_gas(20000000)]
     fn test_get_gold() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.gold == game.get_gold(ADVENTURER_ID), 'wrong gold bal');
     }
     #[test]
-    #[available_gas(800000000)]
+    #[available_gas(20000000)]
     fn test_get_beast_health() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -756,24 +964,24 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(800000000)]
-    fn test_get_stat_points_available() {
+    #[available_gas(20000000)]
+    fn test_get_stat_upgrades_available() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.stat_points_available == game.get_stat_points_available(ADVENTURER_ID),
+            adventurer.stat_points_available == game.get_stat_upgrades_available(ADVENTURER_ID),
             'wrong stat points avail'
         );
     }
     #[test]
-    #[available_gas(800000000)]
+    #[available_gas(20000000)]
     fn test_get_last_action() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.last_action == game.get_last_action(ADVENTURER_ID), 'wrong last action');
     }
     #[test]
-    #[available_gas(800000000)]
+    #[available_gas(20000000)]
     fn test_get_weapon_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -783,57 +991,57 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(800000000)]
-    fn test_get_chest_armor_greatness() {
+    #[available_gas(20000000)]
+    fn test_get_chest_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.chest.get_greatness() == game.get_chest_armor_greatness(ADVENTURER_ID),
+            adventurer.chest.get_greatness() == game.get_chest_greatness(ADVENTURER_ID),
             'wrong chest greatness'
         );
     }
     #[test]
-    #[available_gas(800000000)]
-    fn test_get_head_armor_greatness() {
+    #[available_gas(20000000)]
+    fn test_get_head_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.head.get_greatness() == game.get_head_armor_greatness(ADVENTURER_ID),
+            adventurer.head.get_greatness() == game.get_head_greatness(ADVENTURER_ID),
             'wrong head greatness'
         );
     }
     #[test]
-    #[available_gas(800000000)]
-    fn test_get_waist_armor_greatness() {
+    #[available_gas(20000000)]
+    fn test_get_waist_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.waist.get_greatness() == game.get_waist_armor_greatness(ADVENTURER_ID),
+            adventurer.waist.get_greatness() == game.get_waist_greatness(ADVENTURER_ID),
             'wrong waist greatness'
         );
     }
     #[test]
-    #[available_gas(800000000)]
-    fn test_get_foot_armor_greatness() {
+    #[available_gas(20000000)]
+    fn test_get_foot_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.foot.get_greatness() == game.get_foot_armor_greatness(ADVENTURER_ID),
+            adventurer.foot.get_greatness() == game.get_foot_greatness(ADVENTURER_ID),
             'wrong foot greatness'
         );
     }
     #[test]
-    #[available_gas(800000000)]
-    fn test_get_hand_armor_greatness() {
+    #[available_gas(20000000)]
+    fn test_get_hand_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(
-            adventurer.hand.get_greatness() == game.get_hand_armor_greatness(ADVENTURER_ID),
+            adventurer.hand.get_greatness() == game.get_hand_greatness(ADVENTURER_ID),
             'wrong hand greatness'
         );
     }
     #[test]
-    #[available_gas(800000000)]
+    #[available_gas(20000000)]
     fn test_get_necklace_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -843,7 +1051,7 @@ mod tests {
         );
     }
     #[test]
-    #[available_gas(800000000)]
+    #[available_gas(20000000)]
     fn test_get_ring_greatness() {
         let mut game = new_adventurer();
         let adventurer = game.get_adventurer(ADVENTURER_ID);

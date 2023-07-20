@@ -6,15 +6,17 @@ const STARTING_HEALTH: u16 = 100;
 const MAX_ADVENTURER_HEALTH: u16 = 511; // 2^9 - 1
 
 // Potion Settings
-const POTION_PRICE: u16 = 2;
+const POTION_PRICE: u16 = 1;
 const POTION_HEALTH_AMOUNT: u16 = 10;
-const MINIMUM_POTION_PRICE: u16 = 2;
+const MINIMUM_POTION_PRICE: u16 = 1;
 const CHARISMA_POTION_DISCOUNT: u16 = 2;
 
 // Item Settings
 const CHARISMA_ITEM_DISCOUNT: u16 = 2;
 const MINIMUM_ITEM_PRICE: u16 = 2;
 const ITEM_MAX_GREATNESS: u8 = 20;
+const ITEM_MAX_XP: u16 = 400;
+const MAX_GREATNESS_STAT_BONUS: u8 = 1;
 
 // Stat Settings
 const MAX_STAT_VALUE: u8 = 31; // 2^5 - 1
@@ -35,3 +37,5 @@ mod StatisticIndex {
     const WISDOM: u8 = 4;
     const CHARISMA: u8 = 5;
 }
+
+const U128_MAX: u128 = 340282366920938463463374607431768211455;

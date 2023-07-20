@@ -64,6 +64,10 @@ impl ItemSpecialsPacking of Packing<ItemSpecials> {
             special1: special1.try_into().expect('unpack LISN special1')
         }
     }
+    // TODO: add overflow pack protection
+    fn overflow_pack_protection(self: ItemSpecials) -> ItemSpecials {
+        self
+    }
 }
 
 impl ItemSpecialsStoragePacking of Packing<ItemSpecialsStorage> {
@@ -107,6 +111,11 @@ impl ItemSpecialsStoragePacking of Packing<ItemSpecialsStorage> {
             item_9: Packing::unpack(item_9.try_into().expect('unpack LISNS item_9')),
             item_10: Packing::unpack(item_10.try_into().expect('unpack LISNS item_10'))
         }
+    }
+
+    // TODO: add overflow pack protection
+    fn overflow_pack_protection(self: ItemSpecialsStorage) -> ItemSpecialsStorage {
+        self
     }
 }
 
@@ -388,9 +397,7 @@ fn test_set_item_metadata_slot() {
 
     let loot_statistics_1 = ItemPrimitive { id: 102, xp: 0, metadata: 1 };
 
-    let loot_special_names_2 = ItemSpecials {
-        special2: 12, special3: 11, special1: 13
-    };
+    let loot_special_names_2 = ItemSpecials { special2: 12, special3: 11, special1: 13 };
 
     item_meta_storage.set_loot_special_names(loot_statistics_1, loot_special_names_2);
 
@@ -400,9 +407,7 @@ fn test_set_item_metadata_slot() {
 
     let loot_statistics_2 = ItemPrimitive { id: 102, xp: 0, metadata: 2 };
 
-    let loot_special_names_2 = ItemSpecials {
-        special2: 12, special3: 11, special1: 13
-    };
+    let loot_special_names_2 = ItemSpecials { special2: 12, special3: 11, special1: 13 };
 
     item_meta_storage.set_loot_special_names(loot_statistics_2, loot_special_names_2);
     assert(item_meta_storage.item_2.special2 == 12, 'should be 12');
