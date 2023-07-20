@@ -289,20 +289,19 @@ export default function UpgradeScreen() {
           </div>
           <div className="w-full sm:w-2/3">
             <div className="flex flex-col gap-2 h-full">
-              <div className="flex flex-col items-center gap-2 border-terminal-green">
-                <div className="flex flex-col items-center justify-center text-terminal-green space-x-3">
+              <div className=" items-center gap-2">
+                <div className="justify-center text-terminal-green space-x-3">
                   <div className="text-center text-lg md:text-xl lg:text-4xl p-2 animate-pulse uppercase">
+                    <p>Loot Fountain</p>
                     Level up!
                   </div>
-                  <span className="w-5">
-                    <ArrowIcon />
-                  </span>
-                  <div className="flex flex-row gap-2 text-2xl text-shadow-none">
+                  <div className="flex flex-row gap-2 justify-center text-2xl text-shadow-none">
                     <span>
                       Stat Upgrades Available {adventurer?.statUpgrades}
                     </span>
                   </div>
-                  <div className="flex flex-row gap-10 text-sm sm:text-base">
+                  <UpgradeNav activeSection={upgradeScreen} />
+                  <div className="flex flex-row gap-3 text-sm sm:text-base justify-center">
                     <div className="flex flex-row gap-3">
                       <span className="flex flex-row gap-1  items-center">
                         <p className="uppercase">Cost:</p>
@@ -332,7 +331,7 @@ export default function UpgradeScreen() {
                         </span>
                       </span>
                     </div>
-                    <div>
+                    <div className="flex flex-row gap-3">
                       <span className="flex flex-row sm:gap-1">
                         {`Charisma: ${adventurer?.charisma} -`}
                         <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
@@ -343,12 +342,11 @@ export default function UpgradeScreen() {
                       </span>
                     </div>
                   </div>
-                  <UpgradeNav activeSection={upgradeScreen} />
                 </div>
 
                 {upgradeScreen == 1 && (
-                  <div className="flex flex-col gap-2 w-full">
-                    <div className="w-full border-terminal-green border sm:p-4">
+                  <div className="flex flex-col w-full">
+                    <div className="w-full ">
                       <MarketplaceScreen upgradeTotalCost={upgradeTotalCost} />
                     </div>
                   </div>
