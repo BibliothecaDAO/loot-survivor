@@ -525,7 +525,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(72000000)]
+    #[available_gas(75000000)]
     fn test_buy_and_equip_item() {
         let mut game = new_adventurer_lvl2();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
