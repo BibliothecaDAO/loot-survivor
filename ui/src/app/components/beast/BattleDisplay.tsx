@@ -13,9 +13,7 @@ import { appUrl } from "@/app/lib/constants";
 
 interface BattleDisplayProps {
   battleData: Battle;
-  battles: Battle[];
   beastName: string;
-  discoveryData: Discovery;
 }
 
 const getAttackLocationIcon = (attackLocation: string) => {
@@ -39,9 +37,7 @@ const getAttackLocationIcon = (attackLocation: string) => {
  */
 export const BattleDisplay = ({
   battleData,
-  battles,
   beastName,
-  discoveryData,
 }: BattleDisplayProps) => {
   const damageLocation = battleData?.damageLocation ?? "";
   const damageIcon = getAttackLocationIcon(damageLocation);
@@ -53,20 +49,10 @@ export const BattleDisplay = ({
   const NoDamageDealt = battleData.damageDealt === 0;
   const NoDamageTaken = battleData.damageTaken === 0;
   const IdleDamagePenalty = !battleData.beast;
-  const Ambushed = discoveryData?.ambushed;
 
   const renderDiscoveryMessage = () => {
     if (BeastFled) {
       return <p>PHEW! You fled the {beastName}!</p>;
-    }
-
-    if (Ambushed && battles.length == 1) {
-      return (
-        <p>
-          YIKES! You were ambushed by a {beastName} for{" "}
-          {battleData?.damageTaken} damage!
-        </p>
-      );
     }
 
     if (AdventurerAttack && NoDamageDealt && NoDamageTaken && !BeastFled) {

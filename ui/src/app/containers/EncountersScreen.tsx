@@ -34,27 +34,9 @@ export default function EncountersScreen({ profile }: EncountersProps) {
   const { data, isLoading } = useQueriesStore();
   const encountersPerPage = 10;
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
   const [loadingData, setLoadingData] = useState(true);
   const [sortedCombined, setSortedCombined] = useState<Battle[] | Discovery[]>(
     []
-  );
-
-  let lastBeast = data.lastBeastQuery
-    ? data.lastBeastQuery.discoveries[0]
-    : NullDiscovery;
-
-  const formatBattles = data.battlesByBeastQuery
-    ? data.battlesByBeastQuery.battles
-    : [];
-
-  useCustomQuery(
-    "adventurerByIdQuery",
-    getAdventurerById,
-    {
-      id: profile ? profile : adventurer?.id ?? 0,
-    },
-    txAccepted
   );
 
   const { data: discoveriesByAdventurerData } = useQuery(getDiscoveries, {
@@ -136,13 +118,11 @@ export default function EncountersScreen({ profile }: EncountersProps) {
                   ) : (
                     <BattleDisplay
                       battleData={encounter}
-                      battles={formatBattles}
                       beastName={processBeastName(
                         encounter?.beast,
                         encounter?.special2,
                         encounter?.special3
                       )}
-                      discoveryData={lastBeast}
                     />
                   )}
                 </div>
