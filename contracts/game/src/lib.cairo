@@ -1223,24 +1223,6 @@ mod Game {
         if (!dodged) {
             // adventurer takes this damage
             adventurer.deduct_health(damage_taken);
-
-            // if obstacle killed adventurer
-            if (adventurer.health == 0) {
-                // emit adventurer died event
-                __event_AdventurerDied(
-                    ref self,
-                    AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    },
-                    killed_by_beast: false,
-                    killed_by_obstacle: true,
-                    killer_id: obstacle.id
-                );
-                // and return as game is now over
-                return;
-            }
         }
 
         // grant XP to equipped items
@@ -1293,6 +1275,24 @@ mod Game {
                     xp_earned_items: item_xp_reward
                 }
             );
+        }
+
+        // if obstacle killed adventurer
+        if (adventurer.health == 0) {
+            // emit adventurer died event
+            __event_AdventurerDied(
+                ref self,
+                AdventurerState {
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                killed_by_beast: false,
+                killed_by_obstacle: true,
+                killer_id: obstacle.id
+            );
+            // and return as game is now over
+            return;
         }
 
         if (new_level > previous_level) {
