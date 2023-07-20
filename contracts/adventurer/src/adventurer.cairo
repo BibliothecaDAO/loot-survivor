@@ -11,9 +11,10 @@ use super::{
     constants::{
         adventurer_constants::{
             STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
-            MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, ITEM_XP_MULTIPLIER, VITALITY_HEALTH_INCREASE,
-            MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS,
-            ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT
+            MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, ITEM_XP_MULTIPLIER,
+            VITALITY_MAX_HEALTH_INCREASE, MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP,
+            MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH,
+            CHARISMA_ITEM_DISCOUNT
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
     }
@@ -445,7 +446,8 @@ impl ImplAdventurer of IAdventurer {
     //         then this value is capped to MAX_ADVENTURER_HEALTH.
     fn get_max_health(self: Adventurer) -> u16 {
         // Calculate vitality boost, casting to u16 to prevent overflow during multiplication
-        let vitality_boost: u16 = (self.stats.vitality.into() * VITALITY_HEALTH_INCREASE.into());
+        let vitality_boost: u16 = (self.stats.vitality.into()
+            * VITALITY_MAX_HEALTH_INCREASE.into());
 
         // Check if health calculation would result in overflow
         if (u16_overflowing_add(STARTING_HEALTH, vitality_boost).is_ok()) {
@@ -1053,27 +1055,19 @@ impl ImplAdventurer of IAdventurer {
     ) {
         if (self.weapon.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.weapon.metadata) == 0) {
-                let weapon_names = ImplItemSpecials::get_specials(
-                    name_storage1, self.weapon
-                );
+                let weapon_names = ImplItemSpecials::get_specials(name_storage1, self.weapon);
                 self.add_suffix_boost(weapon_names.special1);
             } else {
-                let weapon_names = ImplItemSpecials::get_specials(
-                    name_storage2, self.weapon
-                );
+                let weapon_names = ImplItemSpecials::get_specials(name_storage2, self.weapon);
                 self.add_suffix_boost(weapon_names.special1);
             }
         }
         if (self.chest.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.chest.metadata) == 0) {
-                let chest_names = ImplItemSpecials::get_specials(
-                    name_storage1, self.chest
-                );
+                let chest_names = ImplItemSpecials::get_specials(name_storage1, self.chest);
                 self.add_suffix_boost(chest_names.special1);
             } else {
-                let chest_names = ImplItemSpecials::get_specials(
-                    name_storage2, self.chest
-                );
+                let chest_names = ImplItemSpecials::get_specials(name_storage2, self.chest);
                 self.add_suffix_boost(chest_names.special1);
             }
         }
@@ -1088,14 +1082,10 @@ impl ImplAdventurer of IAdventurer {
         }
         if (self.waist.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.waist.metadata) == 0) {
-                let waist_names = ImplItemSpecials::get_specials(
-                    name_storage1, self.waist
-                );
+                let waist_names = ImplItemSpecials::get_specials(name_storage1, self.waist);
                 self.add_suffix_boost(waist_names.special1);
             } else {
-                let waist_names = ImplItemSpecials::get_specials(
-                    name_storage2, self.waist
-                );
+                let waist_names = ImplItemSpecials::get_specials(name_storage2, self.waist);
                 self.add_suffix_boost(waist_names.special1);
             }
         }
@@ -1157,27 +1147,19 @@ impl ImplAdventurer of IAdventurer {
     ) {
         if (self.weapon.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.weapon.metadata) == 0) {
-                let weapon_names = ImplItemSpecials::get_specials(
-                    name_storage1, self.weapon
-                );
+                let weapon_names = ImplItemSpecials::get_specials(name_storage1, self.weapon);
                 self.remove_suffix_boost(weapon_names.special1, );
             } else {
-                let weapon_names = ImplItemSpecials::get_specials(
-                    name_storage2, self.weapon
-                );
+                let weapon_names = ImplItemSpecials::get_specials(name_storage2, self.weapon);
                 self.remove_suffix_boost(weapon_names.special1, );
             }
         }
         if (self.chest.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.chest.metadata) == 0) {
-                let chest_names = ImplItemSpecials::get_specials(
-                    name_storage1, self.chest
-                );
+                let chest_names = ImplItemSpecials::get_specials(name_storage1, self.chest);
                 self.remove_suffix_boost(chest_names.special1, );
             } else {
-                let chest_names = ImplItemSpecials::get_specials(
-                    name_storage2, self.chest
-                );
+                let chest_names = ImplItemSpecials::get_specials(name_storage2, self.chest);
                 self.remove_suffix_boost(chest_names.special1, );
             }
         }
@@ -1192,14 +1174,10 @@ impl ImplAdventurer of IAdventurer {
         }
         if (self.waist.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.waist.metadata) == 0) {
-                let waist_names = ImplItemSpecials::get_specials(
-                    name_storage1, self.waist
-                );
+                let waist_names = ImplItemSpecials::get_specials(name_storage1, self.waist);
                 self.remove_suffix_boost(waist_names.special1, );
             } else {
-                let waist_names = ImplItemSpecials::get_specials(
-                    name_storage2, self.waist
-                );
+                let waist_names = ImplItemSpecials::get_specials(name_storage2, self.waist);
                 self.remove_suffix_boost(waist_names.special1, );
             }
         }
@@ -1542,7 +1520,7 @@ fn test_get_max_health() {
     adventurer.stats.vitality = 1;
     // assert max health is starting health + single vitality increase
     assert(
-        adventurer.get_max_health() == STARTING_HEALTH + VITALITY_HEALTH_INCREASE.into(),
+        adventurer.get_max_health() == STARTING_HEALTH + VITALITY_MAX_HEALTH_INCREASE.into(),
         'max health shuld be 120'
     );
 
