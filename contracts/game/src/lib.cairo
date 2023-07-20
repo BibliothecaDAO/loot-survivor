@@ -46,7 +46,7 @@ mod Game {
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
             adventurer_constants::{
                 POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER, ITEM_MAX_GREATNESS,
-                MAX_GREATNESS_STAT_BONUS, StatisticIndex
+                MAX_GREATNESS_STAT_BONUS, StatisticIndex, VITALITY_INSTANT_HEALTH_BONUS
             }
         },
         item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
@@ -2255,6 +2255,7 @@ mod Game {
             );
         } else if (stat_id == StatisticIndex::VITALITY) {
             adventurer.increase_vitality(amount);
+            adventurer.add_health(VITALITY_INSTANT_HEALTH_BONUS);
             __event__VitalityIncreased(
                 ref self,
                 AdventurerState {
