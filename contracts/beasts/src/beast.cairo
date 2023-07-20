@@ -65,7 +65,7 @@ impl ImplBeast of IBeast {
         } else {
             // if the adventurer has not passed the starter beast level threshold
             // generate a starter beast
-            ImplBeast::get_starter_beast(weapon_type)
+            ImplBeast::get_starter_beast(weapon_type, seed)
         }
     }
 
@@ -74,17 +74,26 @@ impl ImplBeast of IBeast {
     // the beast is chosen to be weak against the weapon type
     // @param starter_weapon_type: the type of weapon the adventurer starts with
     // @return: a beast that is weak against the weapon type
-    fn get_starter_beast(starter_weapon_type: Type) -> Beast {
+    fn get_starter_beast(starter_weapon_type: Type, entropy: u128) -> Beast {
         let mut beast_id: u8 = Gnome;
 
         match starter_weapon_type {
             Type::None(()) => beast_id = Troll,
-            // if adventurer starts with a magical weapon, they face a troll as their first beast
-            Type::Magic_or_Cloth(()) => beast_id = Troll,
-            // if the adventurer starts with a blade or hide weapon, they face a rat as their first beast
-            Type::Blade_or_Hide(()) => beast_id = Gnome,
-            // if the adventurer starts with a bludgeon or metal weapon, they face a troll as their first beast
-            Type::Bludgeon_or_Metal(()) => beast_id = Rat,
+            // if adventurer starts with a magical weapon, they start against T5 brute
+            Type::Magic_or_Cloth(()) => {
+                let rnd_brute: u8 = (entropy % 5).try_into().unwrap() + Troll;
+                beast_id = rnd_brute
+            },
+            // if the adventurer starts with a bladed weapon, they start against T5 magical
+            Type::Blade_or_Hide(()) => {
+                let rnd_magical: u8 = (entropy % 5).try_into().unwrap() + Fairy;
+                beast_id = rnd_magical
+            },
+            // if the adventurer starts with a bludgeon weapon, they start against T5 hunter
+            Type::Bludgeon_or_Metal(()) => {
+                let rnd_hunter: u8 = (entropy % 5).try_into().unwrap() + Bear;
+                beast_id = rnd_hunter
+            },
             // starter weapon should never be a necklace or ring
             // but cairo needs us to define all cases so just default to troll
             Type::Necklace(()) => beast_id = Troll,

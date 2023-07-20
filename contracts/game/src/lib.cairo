@@ -996,6 +996,8 @@ mod Game {
         // generate a new adventurer using the provided started weapon and current block number
         let mut new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, block_number);
 
+        let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(block_number, adventurer_id);
+
         // generate meta data for adventurer
         // this will get packed and stored seaprate from adventurer as this data
         // we never change.
@@ -1003,7 +1005,7 @@ mod Game {
             name: adventurer_meta.name,
             home_realm: adventurer_meta.home_realm,
             race: adventurer_meta.race,
-            entropy: AdventurerUtils::generate_adventurer_entropy(block_number, adventurer_id)
+            entropy: adventurer_entropy
         };
 
         // emit a StartGame event 
@@ -1014,7 +1016,7 @@ mod Game {
         );
 
         // generate starter beast which will have weak armor against the adventurers starter weapon
-        let starter_beast = ImplBeast::get_starter_beast(ImplLoot::get_type(starting_weapon));
+        let starter_beast = ImplBeast::get_starter_beast(ImplLoot::get_type(starting_weapon), adventurer_entropy);
 
         // simulate an attack by the beast on the adventurer
         // (no need to waste gas calling combat moudle)
