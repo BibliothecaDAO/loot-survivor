@@ -8,10 +8,13 @@ import { Battle, Discovery, NullAdventurer } from "../types";
 import { processBeastName } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import {
+  getAdventurerById,
   getBattlesByAdventurer,
   getDiscoveries,
 } from "../hooks/graphql/queries";
 import { useQuery } from "@apollo/client";
+import useCustomQuery from "../hooks/useCustomQuery";
+import useLoadingStore from "../hooks/useLoadingStore";
 
 export interface EncountersProps {
   profile?: number;
@@ -30,10 +33,19 @@ export default function EncountersScreen({ profile }: EncountersProps) {
   const { data, isLoading } = useQueriesStore();
   const encountersPerPage = 10;
   const [currentPage, setCurrentPage] = useState<number>(1);
-
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
   const [loadingData, setLoadingData] = useState(true);
   const [sortedCombined, setSortedCombined] = useState<Battle[] | Discovery[]>(
     []
+  );
+
+  useCustomQuery(
+    "adventurerByIdQuery",
+    getAdventurerById,
+    {
+      id: profile ? profile : adventurer?.id ?? 0,
+    },
+    txAccepted
   );
 
   const { data: discoveriesByAdventurerData } = useQuery(getDiscoveries, {
@@ -120,7 +132,6 @@ export default function EncountersScreen({ profile }: EncountersProps) {
                         encounter?.special2,
                         encounter?.special3
                       )}
-                      adventurer={adventurer ?? NullAdventurer}
                     />
                   )}
                 </div>

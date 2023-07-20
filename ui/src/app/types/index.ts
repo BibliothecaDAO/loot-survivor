@@ -74,6 +74,7 @@ export interface Item {
 }
 export interface Battle {
   adventurerId?: number; // Adventurer ID
+  adventurerHealth?: number; // Health of the adventurer
   beast?: string; // Beast adventurer is engaging
   beastHealth?: number; // Beast health adventurer is engaging
   beastLevel?: number; // Beast level adventurer is engaging
@@ -86,6 +87,7 @@ export interface Battle {
   damageDealt?: number; // Damage dealt to the beast
   damageTaken?: number; // Damage taken from the beast
   damageLocation?: string; // Location of the damage taken
+  criticalHit?: boolean; // Was the hit critical
   xpEarnedAdventurer?: number; // Experience earned by the adventurer
   xpEarnedItems?: number; // Experience earned by the items
   goldEarned?: number; // Gold earned by the adventurer
@@ -96,6 +98,7 @@ export interface Battle {
 
 export interface Discovery {
   adventurerId?: number; // Adventurer ID
+  adventurerHealth?: number; // Health of the adventurer
   discoveryType?: string; // Type of discovery
   subDiscoveryType?: string; // Sub type of discovery
   outputAmount?: number; // Amount of the discovery finding

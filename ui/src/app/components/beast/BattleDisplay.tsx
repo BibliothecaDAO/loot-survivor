@@ -12,7 +12,6 @@ import Foot from "../../../../public/icons/loot/foot.svg";
 import { appUrl } from "@/app/lib/constants";
 
 interface BattleDisplayProps {
-  adventurer: Adventurer;
   battleData: Battle;
   beastName: string;
 }
@@ -37,7 +36,6 @@ const getAttackLocationIcon = (attackLocation: string) => {
  * @description Displays the battle results.
  */
 export const BattleDisplay = ({
-  adventurer,
   battleData,
   beastName,
 }: BattleDisplayProps) => {
@@ -47,7 +45,7 @@ export const BattleDisplay = ({
   const AdventurerAttack = battleData.attacker === "Adventurer";
   const BeastAttack = battleData.attacker === "Beast";
   const BeastHealthExists = (battleData.beastHealth ?? 0) > 0;
-  const AdventurerHealthExists = (adventurer.health ?? 0) > 0;
+  const AdventurerHealthExists = (battleData.adventurerHealth ?? 0) > 0;
   const NoDamageDealt = battleData.damageDealt === 0;
   const NoDamageTaken = battleData.damageTaken === 0;
   const IdleDamagePenalty = !battleData.beast;

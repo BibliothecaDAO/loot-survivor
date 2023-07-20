@@ -39,6 +39,7 @@ const ADVENTURERS_FRAGMENT = `
 
 const BATTLE_FIELDS = `
   adventurerId
+  adventurerHealth
   beast
   beastHealth
   beastLevel
@@ -50,6 +51,7 @@ const BATTLE_FIELDS = `
   fled
   damageDealt
   damageTaken
+  criticalHit
   damageLocation
   xpEarnedAdventurer
   xpEarnedItems
@@ -90,6 +92,7 @@ const ITEMS_FRAGMENT = `
 
 const DISCOVERY_FIELDS = `
   adventurerId
+  adventurerHealth
   discoveryType
   subDiscoveryType
   outputAmount

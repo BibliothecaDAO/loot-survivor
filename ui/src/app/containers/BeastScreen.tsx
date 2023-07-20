@@ -222,11 +222,7 @@ export default function BeastScreen() {
               <div className="flex flex-col gap-2 text-sm overflow-y-auto">
                 {formatBattles.map((battle: Battle, index: number) => (
                   <div className="border p-2 border-terminal-green" key={index}>
-                    <BattleDisplay
-                      battleData={battle}
-                      beastName={beastName}
-                      adventurer={adventurer ?? NullAdventurer}
-                    />
+                    <BattleDisplay battleData={battle} beastName={beastName} />
                   </div>
                 ))}
               </div>
