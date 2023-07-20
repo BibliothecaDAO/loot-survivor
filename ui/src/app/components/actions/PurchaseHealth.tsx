@@ -74,14 +74,14 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
     const calculatedNewHealth = (adventurer?.health ?? 0) + potionAmount * 10;
 
     return (
-      <div className="flex flex-col sm:p-0 md:p-2 items-center">
+      <div className="flex flex-row sm:p-2 md:p-4 items-center">
         <HealthSlider
           purchaseAmount={potionAmount}
           setPurchaseAmount={setHealthAmount}
         />
-        <div className="flex flex-row items-center">
+        <div className="flex flex-row items-center p-4">
           <div className="flex flex-col">
-            <span className="flex flex-row text-lg mr-1">
+            <span className="flex flex-row text-lg">
               <p>
                 Purchasing{" "}
                 <strong className="text-terminal-yellow">{potionAmount}</strong>{" "}
@@ -92,7 +92,7 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
                 <p className="text-terminal-yellow">{purchaseGoldAmount}</p>
               </span>
             </span>
-            <p className="pr-2">
+            <p className="pr-4">
               {" "}
               You can only buy up to Max Health! 1 Potion = 10 Health
             </p>

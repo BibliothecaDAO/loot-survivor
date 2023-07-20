@@ -24,11 +24,19 @@ const HealthSlider: React.FC<SliderProps> = ({
 
   return (
     <div>
-      <Button size={"xs"} onClick={handleDecrement}>
+      <Button
+        size={"xs"}
+        onClick={handleDecrement}
+        disabled={purchaseAmount <= 1}
+      >
         -
       </Button>
       <span className="text-xl p-2">{purchaseAmount}</span>
-      <Button size={"xs"} onClick={handleIncrement}>
+      <Button
+        size={"xs"}
+        onClick={handleIncrement}
+        disabled={purchaseAmount >= 10}
+      >
         +
       </Button>
     </div>
