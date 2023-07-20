@@ -142,7 +142,6 @@ export default function EncountersScreen({ profile }: EncountersProps) {
                         encounter?.special2,
                         encounter?.special3
                       )}
-                      adventurer={adventurer ?? NullAdventurer}
                       discoveryData={lastBeast}
                     />
                   )}

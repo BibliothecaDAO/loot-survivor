@@ -226,7 +226,6 @@ export default function BeastScreen() {
                       battleData={battle}
                       battles={formatBattles}
                       beastName={beastName}
-                      adventurer={adventurer ?? NullAdventurer}
                       discoveryData={lastBeast}
                     />
                   </div>
