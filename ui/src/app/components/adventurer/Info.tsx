@@ -85,20 +85,23 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
               </div>
               <div className="flex justify-between w-full text-2xl sm:text-4xl border-b border-terminal-green">
                 {formatAdventurer.name}
-                <span className="flex text-terminal-yellow">
-                  <CoinIcon className="self-center w-5 h-5 fill-current" />{" "}
+                <span className="flex items-center text-terminal-yellow">
+                  <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
                   {formatAdventurer.gold ? formatAdventurer.gold : 0}
                 </span>
                 <span className="flex text-lg items-center sm:text-3xl">
                   <BagIcon className="self-center w-4 h-4 fill-current" />{" "}
                   {`${items.length}/${19}`}
                 </span>
-                <span className="flex ">
-                  <HeartIcon className="self-center w-5 h-5 fill-current" />{" "}
+                <span className="flex items-center ">
+                  <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
                   <HealthCountDown
                     health={(formatAdventurer.health ?? 0) || 0}
                   />
-                  {`/${100 + (formatAdventurer.vitality ?? 0) * 20}`}
+                  {`/${Math.min(
+                    100 + (formatAdventurer.vitality ?? 0) * 20,
+                    511
+                  )}`}
                 </span>
               </div>
 
@@ -117,6 +120,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                             item.equipped
                         ) || NullItem
                       }
+                      itemSlot="Weapon"
                     />
                   </div>
                   <div className="">
@@ -127,6 +131,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                             item.item == formatAdventurer.head && item.equipped
                         ) || NullItem
                       }
+                      itemSlot="Head"
                     />
                   </div>
                   <div className="">
@@ -137,6 +142,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                             item.item == formatAdventurer.chest && item.equipped
                         ) || NullItem
                       }
+                      itemSlot="Chest"
                     />
                   </div>
                   <div className="">
@@ -147,6 +153,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                             item.item == formatAdventurer.hand && item.equipped
                         ) || NullItem
                       }
+                      itemSlot="Hand"
                     />
                   </div>
                   <div className="">
@@ -157,6 +164,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                             item.item == formatAdventurer.waist && item.equipped
                         ) || NullItem
                       }
+                      itemSlot="Waist"
                     />
                   </div>
                   <div className="">
@@ -167,6 +175,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                             item.item == formatAdventurer.foot && item.equipped
                         ) || NullItem
                       }
+                      itemSlot="Foot"
                     />
                   </div>
                   <div className="">
@@ -177,6 +186,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                             item.item == formatAdventurer.neck && item.equipped
                         ) || NullItem
                       }
+                      itemSlot="Neck"
                     />
                   </div>
                   <div className="">
@@ -187,6 +197,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                             item.item == formatAdventurer.ring && item.equipped
                         ) || NullItem
                       }
+                      itemSlot="Ring"
                     />
                   </div>
                 </div>

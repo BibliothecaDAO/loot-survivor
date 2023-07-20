@@ -3,7 +3,7 @@ import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
 import { processBeastName, getBeastData } from "../../lib/utils";
-import { Adventurer, Battle } from "@/app/types";
+import { Adventurer, Battle, Discovery } from "@/app/types";
 import Head from "../../../../public/icons/loot/head.svg";
 import Hand from "../../../../public/icons/loot/hand.svg";
 import Chest from "../../../../public/icons/loot/chest.svg";
@@ -14,7 +14,9 @@ import { appUrl } from "@/app/lib/constants";
 interface BattleDisplayProps {
   adventurer: Adventurer;
   battleData: Battle;
+  battles: Battle[];
   beastName: string;
+  discoveryData: Discovery;
 }
 
 const getAttackLocationIcon = (attackLocation: string) => {
@@ -39,7 +41,9 @@ const getAttackLocationIcon = (attackLocation: string) => {
 export const BattleDisplay = ({
   adventurer,
   battleData,
+  battles,
   beastName,
+  discoveryData,
 }: BattleDisplayProps) => {
   const damageLocation = battleData?.damageLocation ?? "";
   const damageIcon = getAttackLocationIcon(damageLocation);
@@ -51,10 +55,20 @@ export const BattleDisplay = ({
   const NoDamageDealt = battleData.damageDealt === 0;
   const NoDamageTaken = battleData.damageTaken === 0;
   const IdleDamagePenalty = !battleData.beast;
+  const Ambushed = discoveryData?.ambushed;
 
   const renderDiscoveryMessage = () => {
     if (BeastFled) {
       return <p>PHEW! You fled the {beastName}!</p>;
+    }
+
+    if (Ambushed && battles.length == 1) {
+      return (
+        <p>
+          YIKES! You were ambushed by a {beastName} for{" "}
+          {battleData?.damageTaken} damage!
+        </p>
+      );
     }
 
     if (AdventurerAttack && NoDamageDealt && NoDamageTaken && !BeastFled) {

@@ -224,8 +224,10 @@ export default function BeastScreen() {
                   <div className="border p-2 border-terminal-green" key={index}>
                     <BattleDisplay
                       battleData={battle}
+                      battles={formatBattles}
                       beastName={beastName}
                       adventurer={adventurer ?? NullAdventurer}
+                      discoveryData={lastBeast}
                     />
                   </div>
                 ))}

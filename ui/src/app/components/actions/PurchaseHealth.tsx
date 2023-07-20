@@ -74,42 +74,49 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
     const calculatedNewHealth = (adventurer?.health ?? 0) + potionAmount * 10;
 
     return (
-      <div className="flex flex-col gap-5 p-5 sm:p-0 md:p-2">
+      <div className="flex flex-col sm:p-0 md:p-2 items-center">
         <HealthSlider
           purchaseAmount={potionAmount}
           setPurchaseAmount={setHealthAmount}
         />
-        <span className="flex flex-row gap-2 text-lg">
-          <p>
-            Purchasing{" "}
-            <strong className="text-terminal-yellow">{potionAmount}</strong>{" "}
-            potion(s) for{" "}
-          </p>
-          <span className="flex flex-row">
-            <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
-            <p className="text-terminal-yellow">{purchaseGoldAmount}</p>
-          </span>
-        </span>
-        <p> You can only buy up to Max Health! 1 Potion = 10 Health</p>
-        <Button
-          disabled={
-            !hasBalance ||
-            adventurer?.health == maxHealth ||
-            calculatedNewHealth - maxHealth > 10
-          }
-          onClick={async () => {
-            handlePurchaseHealth();
-          }}
-        >
-          {adventurer?.health == maxHealth
-            ? "Max Health Reached"
-            : calculatedNewHealth - maxHealth > 10
-            ? "Purchase Over Max Health"
-            : "Purchase Health"}
-        </Button>
-        {!hasBalance && (
-          <p className="m-auto text-red-600">Not enough gold to purchase!</p>
-        )}
+        <div className="flex flex-row items-center">
+          <div className="flex flex-col">
+            <span className="flex flex-row text-lg mr-1">
+              <p>
+                Purchasing{" "}
+                <strong className="text-terminal-yellow">{potionAmount}</strong>{" "}
+                potion(s) for{" "}
+              </p>
+              <span className="flex flex-row">
+                <CoinIcon className="mt-1 w-5 h-5 fill-current text-terminal-yellow" />
+                <p className="text-terminal-yellow">{purchaseGoldAmount}</p>
+              </span>
+            </span>
+            <p className="pr-2">
+              {" "}
+              You can only buy up to Max Health! 1 Potion = 10 Health
+            </p>
+          </div>
+          <Button
+            disabled={
+              !hasBalance ||
+              adventurer?.health == maxHealth ||
+              calculatedNewHealth - maxHealth > 10
+            }
+            onClick={async () => {
+              handlePurchaseHealth();
+            }}
+          >
+            {adventurer?.health == maxHealth
+              ? "Max Health Reached"
+              : calculatedNewHealth - maxHealth > 10
+              ? "Purchase Over Max Health"
+              : "Purchase Health"}
+          </Button>
+          {!hasBalance && (
+            <p className="m-auto text-red-600">Not enough gold to purchase!</p>
+          )}
+        </div>
       </div>
     );
   };

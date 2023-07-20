@@ -89,6 +89,7 @@ export default function UpgradeScreen() {
     getLatestMarketItems,
     {
       adventurerId: adventurer?.id,
+      limit: 20 * (adventurer?.statUpgrades ?? 0),
     },
     txAccepted
   );
@@ -346,15 +347,6 @@ export default function UpgradeScreen() {
                 </div>
 
                 {upgradeScreen == 1 && (
-                  <div className="w-full sm:w-2/3 border-terminal-green border p-2">
-                    <p className="text-center text-lg sm:text-2xl lg:text-4xl">
-                      Potions
-                    </p>
-                    <PurchaseHealth upgradeTotalCost={upgradeTotalCost} />
-                  </div>
-                )}
-
-                {upgradeScreen == 2 && (
                   <div className="flex flex-col gap-2 w-full">
                     <div className="w-full border-terminal-green border sm:p-4">
                       <MarketplaceScreen upgradeTotalCost={upgradeTotalCost} />
@@ -362,7 +354,7 @@ export default function UpgradeScreen() {
                   </div>
                 )}
               </div>
-              {upgradeScreen == 3 && (
+              {upgradeScreen == 2 && (
                 <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full border-terminal-green border">
                   {isMobileDevice ? (
                     <>
@@ -388,7 +380,7 @@ export default function UpgradeScreen() {
                 <Button
                   className="w-1/2"
                   onClick={() => setUpgradeScreen(upgradeScreen + 1)}
-                  disabled={upgradeScreen == 3}
+                  disabled={upgradeScreen == 2}
                 >
                   Next
                 </Button>

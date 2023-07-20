@@ -10,7 +10,7 @@ export const UpgradeNav = ({ activeSection }: UpgradeNavProps) => {
           activeSection >= 1 ? "text-terminal-green" : "text-slate-600"
         }`}
       >
-        <p>Buy Potions</p>
+        Loot Fountain
       </div>
       <div
         className={activeSection > 1 ? "text-terminal-green" : "text-slate-600"}
@@ -20,18 +20,6 @@ export const UpgradeNav = ({ activeSection }: UpgradeNavProps) => {
       <div
         className={`uppercase ${
           activeSection >= 2 ? "text-terminal-green" : "text-slate-600"
-        }`}
-      >
-        Loot Fountain
-      </div>
-      <div
-        className={activeSection > 2 ? "text-terminal-green" : "text-slate-600"}
-      >
-        ........
-      </div>
-      <div
-        className={`uppercase ${
-          activeSection >= 3 ? "text-terminal-green" : "text-slate-600"
         }`}
       >
         Upgrade Stat

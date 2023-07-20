@@ -1,4 +1,5 @@
 import React from "react";
+import { Button } from "../buttons/Button";
 
 interface SliderProps {
   purchaseAmount: number;
@@ -9,20 +10,28 @@ const HealthSlider: React.FC<SliderProps> = ({
   purchaseAmount,
   setPurchaseAmount,
 }) => {
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(event.target.value, 10);
-    setPurchaseAmount(value);
+  const handleIncrement = () => {
+    if (purchaseAmount < 10) {
+      setPurchaseAmount(purchaseAmount + 1);
+    }
+  };
+
+  const handleDecrement = () => {
+    if (purchaseAmount > 1) {
+      setPurchaseAmount(purchaseAmount - 1);
+    }
   };
 
   return (
-    <input
-      type="range"
-      min="1"
-      max="10"
-      value={purchaseAmount}
-      onChange={handleChange}
-      className="slider bg-terminal-green"
-    />
+    <div>
+      <Button size={"xs"} onClick={handleDecrement}>
+        -
+      </Button>
+      <span className="text-xl p-2">{purchaseAmount}</span>
+      <Button size={"xs"} onClick={handleIncrement}>
+        +
+      </Button>
+    </div>
   );
 };
 

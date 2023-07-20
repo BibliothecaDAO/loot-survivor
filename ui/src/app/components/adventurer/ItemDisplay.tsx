@@ -8,9 +8,10 @@ import { getKeyFromValue, getValueFromKey } from "../../lib/utils";
 
 interface ItemDisplayProps {
   item: Item;
+  itemSlot: string;
 }
 
-export const ItemDisplay = ({ item }: ItemDisplayProps) => {
+export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
   const itemType = item?.item;
 
   const itemName = processItemName(item);
@@ -28,7 +29,7 @@ export const ItemDisplay = ({ item }: ItemDisplayProps) => {
         item.item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >
-      <LootIcon type={slot} />
+      <LootIcon type={itemSlot} />
       {item.item ? (
         <span className="flex flex-row justify-between w-full">
           <div className="w-full overflow-auto whitespace-normal">
@@ -57,7 +58,11 @@ export const ItemDisplay = ({ item }: ItemDisplayProps) => {
           <Efficacyicon type={type} />
         </span>
       ) : (
-        "Nothing Equipped"
+        <div
+          className={`flex-shrink flex gap-2 p-1 sm:p-2 mb-1 text-sm sm:text-base text-terminal-green"}`}
+        >
+          <p>None Equipped</p>
+        </div>
       )}
     </div>
   );

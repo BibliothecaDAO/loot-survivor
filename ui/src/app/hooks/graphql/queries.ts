@@ -396,10 +396,10 @@ const getItemsByTokenId = gql`
 
 const getLatestMarketItems = gql`
   ${ITEMS_FRAGMENT}
-  query get_latest_market_items($adventurerId: FeltValue) {
+  query get_latest_market_items($adventurerId: FeltValue, $limit: Int) {
     items(
       where: { adventurerId: { eq: $adventurerId } }
-      limit: 20
+      limit: $limit
       orderBy: { createdTime: { desc: true } }
     ) {
       ...ItemFields

@@ -4,12 +4,13 @@ import { DiscoveryDisplay } from "../components/actions/DiscoveryDisplay";
 import { BattleDisplay } from "../components/beast/BattleDisplay";
 import LootIconLoader from "../components/icons/Loader";
 import { Button } from "../components/buttons/Button";
-import { Battle, Discovery, NullAdventurer } from "../types";
+import { Battle, Discovery, NullAdventurer, NullDiscovery } from "../types";
 import { processBeastName } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import {
   getBattlesByAdventurer,
   getDiscoveries,
+  getLastBeastDiscovery,
 } from "../hooks/graphql/queries";
 import { useQuery } from "@apollo/client";
 
@@ -35,6 +36,14 @@ export default function EncountersScreen({ profile }: EncountersProps) {
   const [sortedCombined, setSortedCombined] = useState<Battle[] | Discovery[]>(
     []
   );
+
+  let lastBeast = data.lastBeastQuery
+    ? data.lastBeastQuery.discoveries[0]
+    : NullDiscovery;
+
+  const formatBattles = data.battlesByBeastQuery
+    ? data.battlesByBeastQuery.battles
+    : [];
 
   const { data: discoveriesByAdventurerData } = useQuery(getDiscoveries, {
     variables: {
@@ -115,12 +124,14 @@ export default function EncountersScreen({ profile }: EncountersProps) {
                   ) : (
                     <BattleDisplay
                       battleData={encounter}
+                      battles={formatBattles}
                       beastName={processBeastName(
                         encounter?.beast,
                         encounter?.special2,
                         encounter?.special3
                       )}
                       adventurer={adventurer ?? NullAdventurer}
+                      discoveryData={lastBeast}
                     />
                   )}
                 </div>

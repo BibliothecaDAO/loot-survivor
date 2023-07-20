@@ -7,6 +7,7 @@ import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { Item } from "../types";
 import { getItemData } from "../lib/utils";
+import PurchaseHealth from "../components/actions/PurchaseHealth";
 
 export interface MarketplaceScreenProps {
   upgradeTotalCost: number;
@@ -153,12 +154,15 @@ export default function MarketplaceScreen({
           <p className="text-center text-lg sm:text-2xl lg:text-4xl ">
             Loot Fountain
           </p>
-          <div className="w-full  sm:mx-auto overflow-y-auto sm:border h-[400px] sm:border-terminal-green table-scroll">
+          <p className="text-center text-sm sm:text-xl lg:text-2xl">Potions</p>
+          <PurchaseHealth upgradeTotalCost={upgradeTotalCost} />
+          <div className="w-full sm:mx-auto overflow-y-auto sm:border h-[400px] sm:border-terminal-green table-scroll">
             {isLoading.latestMarketItemsQuery && (
               <div className="flex justify-center p-10 text-center">
                 <LootIconLoader />
               </div>
             )}
+
             <table className="w-full sm:border sm:border-terminal-green">
               <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
                 <tr className="">
@@ -174,7 +178,7 @@ export default function MarketplaceScreen({
                 </tr>
               </thead>
               <tbody className="">
-                {!isLoading.latestMarketItemsQuery ?
+                {!isLoading.latestMarketItemsQuery ? (
                   sortedMarketLatestItems.map((item: Item, index: number) => (
                     <MarketplaceRow
                       item={item}
@@ -186,10 +190,13 @@ export default function MarketplaceScreen({
                       calculatedNewGold={calculatedNewGold}
                       key={index}
                     />
-                  )) : <div className="h-full w-full flex justify-center p-10 align-center">Generating Loot {" "}<LootIconLoader
-                    className="self-center ml-3"
-                    size={"w-4"}
-                  /></div>}
+                  ))
+                ) : (
+                  <div className="h-full w-full flex justify-center p-10 align-center">
+                    Generating Loot{" "}
+                    <LootIconLoader className="self-center ml-3" size={"w-4"} />
+                  </div>
+                )}
               </tbody>
             </table>
           </div>
