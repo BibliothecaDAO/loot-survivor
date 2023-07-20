@@ -92,8 +92,8 @@ export default function Home() {
 
   const { data, refetch } = useQueriesStore();
 
-  const [menu, setMenu] = useState<Menu[]>(allMenuItems);
-  const [mobileMenu, setMobileMenu] = useState<Menu[]>(allMenuItems);
+  // const [menu, setMenu] = useState<Menu[]>(allMenuItems);
+  // const [mobileMenu, setMobileMenu] = useState<Menu[]>(allMenuItems);
 
   const playState = useMemo(
     () => ({
@@ -108,6 +108,12 @@ export default function Home() {
     volume: 0.5,
     loop: true,
   });
+
+  // const toggleMenuItem = (id: number) => {
+  //   setMenu(menu.map(item => 
+  //     item.id === id ? {...item, disabled: !item.disabled} : item
+  //   ));
+  // };
 
   useEffect(() => {
     return () => {
@@ -125,97 +131,25 @@ export default function Home() {
     }
   }, [data.adventurerByIdQuery?.adventurers[0]?.timestamp]);
 
-  //   useEffect(() => {
-  //   if (adventurers[0] && firstAdventurer) {
-  //     setScreen("play");
-  //     setAdventurer(adventurers[0]);
-  //   }
-  // }, [adventurers, firstAdventurer, setAdventurer, setScreen]);
-
   useEffect(() => {
     if (!account?.address) {
       setConnected(false);
     }
   }, [account, setConnected]);
 
-  console.log(adventurer);
-
   useMemo(() => {
     setIndexer(getGraphQLUrl());
   }, [setIndexer]);
 
-  // useMemo(() => {
-  //   const commonMenuItems = (isMobile = false) => [
-  //     {
-  //       id: isMobile ? 2 : 1,
-  //       label: "Start",
-  //       screen: "start",
-  //       disabled: false,
-  //     },
-  //     ...(adventurer
-  //       ? [
-  //         {
-  //           id: isMobile ? 3 : 2,
-  //           label: "Play",
-  //           screen: "play",
-  //           disabled: hasStatUpgrades || !isAlive,
-  //         },
-  //         {
-  //           id: isMobile ? 4 : 3,
-  //           label: "Inventory",
-  //           screen: "inventory",
-  //           disabled: !isAlive,
-  //         },
-  //         {
-  //           id: isMobile ? 6 : 5,
-  //           label: hasStatUpgrades ? <span>Upgrade!</span> : "Upgrade",
-  //           screen: "upgrade",
-  //           disabled: !hasStatUpgrades,
-  //         },
-  //       ]
-  //       : []),
-  //     ...(isMobile
-  //       ? []
-  //       : [
-  //         {
-  //           id: 7,
-  //           label: "Leaderboard",
-  //           screen: "leaderboard",
-  //           disabled: false,
-  //         },
-  //         {
-  //           id: 8,
-  //           label: "Encounters",
-  //           screen: "encounters",
-  //           disabled: false,
-  //         },
-  //         {
-  //           id: 9,
-  //           label: "Guide",
-  //           screen: "guide",
-  //           disabled: false,
-  //         },
-  //       ]),
-  //   ];
-
-  //   // if (onboarded) {
-  //   const newMenu: any = adventurer
-  //     ? commonMenuItems()
-  //     : [{ id: 1, label: "Start", screen: "start", disabled: false }];
-
-  //   const newMobileMenu: any = adventurer
-  //     ? commonMenuItems(true)
-  //     : [{ id: 1, label: "Start", screen: "start", disabled: false }];
-
-  //   setMenu(newMenu);
-  //   setMobileMenu(newMobileMenu);
-  // }, [adventurer, hasStatUpgrades, isAlive]);
-
   useEffect(() => {
     if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
+      // toggleMenuItem(4);
       setScreen("play");
+      
     } else if (hasStatUpgrades) {
+      // toggleMenuItem(2);
       setScreen("upgrade");
+      
     } else if (!adventurer || !isAlive) {
       setScreen("start");
     }
@@ -259,27 +193,6 @@ export default function Home() {
               </span>
               <div className="flex flex-row items-center self-end gap-2 flex-wrap">
                 {!isMobileDevice && <TxActivity />}
-                {/* <div
-                  className="flex flex-row items-center gap-1 p-1 sm:px-2 border border-terminal-green cursor-pointer"
-                  onClick={() => setShowDeathCount(!showDeathCount)}
-                >
-                  {showDeathCount && (
-                    <>
-                      <div className="flex items-center w-4 h-4 sm:w-5">
-                        <SkullIcon />
-                      </div>
-                      <p className="text-red-500 sm:text-xl">20</p>
-                    </>
-                  )}
-                  {!showDeathCount && (
-                    <>
-                      <div className="flex items-center w-4 h-4 sm:w-5">
-                        <SmileIcon />
-                      </div>
-                      <p className="text-terminal-green sm:text-xl">20</p>
-                    </>
-                  )}
-                </div> */}
                 <button
                   onClick={() => {
                     setIsMuted(!isMuted);
@@ -377,6 +290,7 @@ export default function Home() {
                 type={type}
                 notificationData={notificationData}
                 hasBeast={hasBeast}
+                
               />
             </div>
           </CSSTransition>
@@ -390,10 +304,11 @@ export default function Home() {
               <>
                 <div className="flex justify-center sm:justify-normal sm:pb-2">
                   <HorizontalKeyboardControl
-                    buttonsData={isMobileDevice ? mobileMenu : menu}
+                    buttonsData={allMenuItems}
                     onButtonClick={(value) => {
                       setScreen(value);
                     }}
+                    disabled={[false, hasStatUpgrades, false, !hasStatUpgrades, false, false, false]}
                   />
                 </div>
 

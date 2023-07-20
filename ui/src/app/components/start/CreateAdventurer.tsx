@@ -197,7 +197,7 @@ export const CreateAdventurer = ({
     return (
       <>
         <div className="w-3/4 sm:w-full p-8">
-          <h2 className="uppercase">Choose your weapon</h2>
+          <h3 className="uppercase text-center">Choose your weapon</h3>
           <div className="flex flex-col sm:flex-row justify-between gap-20">
             {[
               {

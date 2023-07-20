@@ -4,6 +4,8 @@ use option::OptionTrait;
 use integer::{U256TryIntoU32, U256TryIntoU16, U256TryIntoU8};
 use pack::pack::{Packing, rshift_split};
 use pack::constants::pow;
+use core::debug::PrintTrait;
+use lootitems::statistics::constants::ItemId;
 
 use super::{adventurer::{Adventurer, IAdventurer, ImplAdventurer}, item_primitive::ItemPrimitive};
 use super::bag::{Bag, BagActions};
@@ -143,7 +145,8 @@ impl ImplItemSpecials of IItemSpecials {
     ) -> ItemPrimitive {
         // check slots
 
-        let mut slot = 0;
+        // slot 1 is always taken by the adventurer on start
+        let mut slot = 1;
 
         if adventurer.weapon.metadata >= slot {
             slot = adventurer.weapon.metadata;
@@ -204,12 +207,7 @@ impl ImplItemSpecials of IItemSpecials {
             slot = bag.item_11.metadata;
         }
 
-        // if no slots -> return first index which is 0
-        if slot == 1 {
-            ItemPrimitive { id: loot_statistics.id, xp: loot_statistics.xp, metadata: 1 }
-        } else {
-            ItemPrimitive { id: loot_statistics.id, xp: loot_statistics.xp, metadata: slot + 1 }
-        }
+        ItemPrimitive { id: loot_statistics.id, xp: loot_statistics.xp, metadata: slot + 1 }
     }
     fn set_loot_special_names(
         ref self: ItemSpecialsStorage,
@@ -311,38 +309,145 @@ fn test_item_meta_packing() {
 }
 
 #[test]
-#[available_gas(5000000)]
+#[available_gas(50000000)]
 fn test_get_item_metadata_slot() {
     let mut adventurer = ImplAdventurer::new(1, 1);
-
-    // add test items
-    let item_pendant = ItemPrimitive { id: 1, xp: 1, metadata: 3 };
-    let item_silver_ring = ItemPrimitive { id: 4, xp: 1, metadata: 4 };
-    let item_ghost_wand = ItemPrimitive { id: 9, xp: 1, metadata: 5 };
-    let item_silk_robe = ItemPrimitive { id: 18, xp: 1, metadata: 6 };
-
-    adventurer.add_item(item_pendant);
-    adventurer.add_item(item_silver_ring);
-    adventurer.add_item(item_ghost_wand);
-    adventurer.add_item(item_silk_robe);
-
     let bag = Bag {
         item_1: ItemPrimitive {
-            id: 1, xp: 0, metadata: 4, 
+            id: 1, xp: 0, metadata: 0, 
             }, item_2: ItemPrimitive {
-            id: 2, xp: 0, metadata: 5, 
+            id: 2, xp: 0, metadata: 0, 
             }, item_3: ItemPrimitive {
-            id: 3, xp: 0, metadata: 6, 
+            id: 3, xp: 0, metadata: 0, 
             }, item_4: ItemPrimitive {
-            id: 4, xp: 0, metadata: 7, 
+            id: 4, xp: 0, metadata: 0, 
             }, item_5: ItemPrimitive {
-            id: 5, xp: 0, metadata: 8, 
+            id: 5, xp: 0, metadata: 0, 
             }, item_6: ItemPrimitive {
-            id: 6, xp: 0, metadata: 11, 
+            id: 6, xp: 0, metadata: 0, 
             }, item_7: ItemPrimitive {
             id: 7, xp: 0, metadata: 0, 
             }, item_8: ItemPrimitive {
-            id: 8, xp: 0, metadata: 12, 
+            id: 8, xp: 0, metadata: 0, 
+            }, item_9: ItemPrimitive {
+            id: 9, xp: 0, metadata: 0, 
+            }, item_10: ItemPrimitive {
+            id: 10, xp: 0, metadata: 0, 
+            }, item_11: ItemPrimitive {
+            id: 11, xp: 0, metadata: 0, 
+        },
+    };
+
+    let mut pendant = ItemPrimitive { id: ItemId::Pendant, xp: 1, metadata: 0 };
+    let mut silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1, metadata: 0 };
+    let mut ghost_wand = ItemPrimitive { id: ItemId::GhostWand, xp: 1, metadata: 0 };
+    let mut silk_robe = ItemPrimitive { id: ItemId::SilkRobe, xp: 1, metadata: 0 };
+    let mut katana = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 0 };
+    let mut falchion = ItemPrimitive { id: ItemId::Falchion, xp: 1, metadata: 0 };
+    let mut want = ItemPrimitive { id: ItemId::Wand, xp: 1, metadata: 0 };
+    let mut bond = ItemPrimitive { id: ItemId::BoneWand, xp: 1, metadata: 0 };
+    let mut ghost = ItemPrimitive { id: ItemId::GhostWand, xp: 1, metadata: 0 };
+    let mut book = ItemPrimitive { id: ItemId::Book, xp: 1, metadata: 0 };
+
+
+    let item = IItemSpecials::get_special_name_storage_slot(adventurer, bag, pendant);
+
+    adventurer.add_item(item);
+    assert(item.metadata == 2, 'ItemPrimitive');
+
+    let item_2 = IItemSpecials::get_special_name_storage_slot(adventurer, bag, silver_ring);
+
+    adventurer.add_item(item_2);
+    assert(item_2.metadata == 3, 'ItemPrimitive');
+
+    let item_3 = IItemSpecials::get_special_name_storage_slot(adventurer, bag, ghost_wand);
+
+    adventurer.add_item(item_3);
+    assert(item_3.metadata == 4, 'ItemPrimitive');
+
+    let item_4 = IItemSpecials::get_special_name_storage_slot(adventurer, bag, silk_robe);
+
+    adventurer.add_item(item_4);
+    assert(item_4.metadata == 5, 'ItemPrimitive');
+
+    let item_5 = IItemSpecials::get_special_name_storage_slot(adventurer, bag, katana);
+
+    adventurer.add_item(item_5);
+    assert(item_5.metadata == 6, 'ItemPrimitive');
+
+    let item_6 = IItemSpecials::get_special_name_storage_slot(adventurer, bag, falchion);
+
+    adventurer.add_item(item_6);
+    assert(item_6.metadata == 7, 'ItemPrimitive');
+
+    let item_7 = IItemSpecials::get_special_name_storage_slot(adventurer, bag, want);
+
+    adventurer.add_item(item_7);
+    assert(item_7.metadata == 8, 'ItemPrimitive');
+
+    let item_8 = IItemSpecials::get_special_name_storage_slot(adventurer, bag, bond);
+
+    adventurer.add_item(item_8);
+    assert(item_8.metadata == 9, 'ItemPrimitive');
+
+    let item_9 = IItemSpecials::get_special_name_storage_slot(adventurer, bag, ghost);
+
+    adventurer.add_item(item_9);
+    assert(item_9.metadata == 10, 'ItemPrimitive');
+
+    let item_10 = IItemSpecials::get_special_name_storage_slot(adventurer, bag, book);
+
+    adventurer.add_item(item_10);
+    assert(item_10.metadata == 11, 'ItemPrimitive');
+
+    let bag = Bag {
+        item_1: ItemPrimitive {
+            id: 1, xp: 0, metadata: 12, 
+            }, item_2: ItemPrimitive {
+            id: 2, xp: 0, metadata: 0, 
+            }, item_3: ItemPrimitive {
+            id: 3, xp: 0, metadata: 0, 
+            }, item_4: ItemPrimitive {
+            id: 4, xp: 0, metadata: 0, 
+            }, item_5: ItemPrimitive {
+            id: 5, xp: 0, metadata: 0, 
+            }, item_6: ItemPrimitive {
+            id: 6, xp: 0, metadata: 0, 
+            }, item_7: ItemPrimitive {
+            id: 7, xp: 0, metadata: 0, 
+            }, item_8: ItemPrimitive {
+            id: 8, xp: 0, metadata: 0, 
+            }, item_9: ItemPrimitive {
+            id: 9, xp: 0, metadata: 0, 
+            }, item_10: ItemPrimitive {
+            id: 10, xp: 0, metadata: 0, 
+            }, item_11: ItemPrimitive {
+            id: 11, xp: 0, metadata: 0, 
+        },
+    };
+
+    let item_10 = IItemSpecials::get_special_name_storage_slot(adventurer, bag, book);
+
+    adventurer.add_item(item_10);
+    assert(item_10.metadata == 13, 'ItemPrimitive');
+
+    let bag = Bag {
+        item_1: ItemPrimitive {
+            id: 1, xp: 0, metadata: 12, 
+            }, item_2: ItemPrimitive {
+            id: 2, xp: 0, metadata: 0, 
+            }, item_3: ItemPrimitive {
+            id: 3, xp: 0, metadata: 0, 
+            }, item_4: ItemPrimitive {
+            id: 4, xp: 0, metadata: 0, 
+            }, item_5: ItemPrimitive {
+            id: 5, xp: 0, metadata: 0, 
+            }, item_6: ItemPrimitive {
+            id: 6, xp: 0, metadata: 0, 
+            }, item_7: ItemPrimitive {
+            id: 7, xp: 0, metadata: 0, 
+            }, item_8: ItemPrimitive {
+            id: 8, xp: 0, metadata: 0, 
             }, item_9: ItemPrimitive {
             id: 9, xp: 0, metadata: 0, 
             }, item_10: ItemPrimitive {
@@ -352,11 +457,11 @@ fn test_get_item_metadata_slot() {
         },
     };
 
-    let new_item = ItemPrimitive { id: 1, xp: 1, metadata: 0 };
+    let item_10 = IItemSpecials::get_special_name_storage_slot(adventurer, bag, book);
 
-    let item = IItemSpecials::get_special_name_storage_slot(adventurer, bag, new_item);
-
-    assert(item.metadata == 19, 'ItemPrimitive');
+    adventurer.add_item(item_10);
+    assert(item_10.metadata == 19, 'ItemPrimitive');
+    
 }
 
 #[test]
@@ -388,9 +493,7 @@ fn test_set_item_metadata_slot() {
 
     let loot_statistics_1 = ItemPrimitive { id: 102, xp: 0, metadata: 1 };
 
-    let loot_special_names_2 = ItemSpecials {
-        special2: 12, special3: 11, special1: 13
-    };
+    let loot_special_names_2 = ItemSpecials { special2: 12, special3: 11, special1: 13 };
 
     item_meta_storage.set_loot_special_names(loot_statistics_1, loot_special_names_2);
 
@@ -400,9 +503,7 @@ fn test_set_item_metadata_slot() {
 
     let loot_statistics_2 = ItemPrimitive { id: 102, xp: 0, metadata: 2 };
 
-    let loot_special_names_2 = ItemSpecials {
-        special2: 12, special3: 11, special1: 13
-    };
+    let loot_special_names_2 = ItemSpecials { special2: 12, special3: 11, special1: 13 };
 
     item_meta_storage.set_loot_special_names(loot_statistics_2, loot_special_names_2);
     assert(item_meta_storage.item_2.special2 == 12, 'should be 12');

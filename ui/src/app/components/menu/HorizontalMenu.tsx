@@ -13,12 +13,14 @@ export interface ButtonData {
 
 interface HorizontalKeyboardControlProps {
   buttonsData: Menu[];
+  disabled? : boolean[];
   onButtonClick: (value: any) => void;
 }
 
 const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
   buttonsData,
   onButtonClick,
+  disabled
 }) => {
   const { play } = useUiSounds(soundSelector.click);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -84,7 +86,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
             setSelectedIndex(index);
             onButtonClick(buttonData.screen);
           }}
-          disabled={buttonData.disabled}
+          disabled={disabled ? disabled[index] : false}
         >
           {buttonData.label}
         </Button>
