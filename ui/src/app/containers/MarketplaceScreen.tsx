@@ -155,7 +155,7 @@ export default function MarketplaceScreen({
             <p className="text-sm sm:text-xl lg:text-2xl">Potions</p>
             <PurchaseHealth upgradeTotalCost={upgradeTotalCost} />
           </div>
-          <div className="w-full sm:mx-auto overflow-y-auto h-[400px] table-scroll">
+          <div className="w-full sm:mx-auto overflow-y-auto h-[400px] border border-terminal-green table-scroll">
             {isLoading.latestMarketItemsQuery && (
               <div className="flex justify-center p-10 text-center">
                 <LootIconLoader />

@@ -99,7 +99,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     health={(formatAdventurer.health ?? 0) || 0}
                   />
                   {`/${Math.min(
-                    100 + (formatAdventurer.vitality ?? 0) * 20,
+                    100 + (formatAdventurer.vitality ?? 0) * 10,
                     511
                   )}`}
                 </span>

@@ -63,9 +63,7 @@ export default function UpgradeScreen() {
   const { writeAsync } = useContractWrite({ calls });
   const [selected, setSelected] = useState("");
   const maxHealth = 100 + (adventurer?.vitality ?? 0) * 20;
-  const [upgradeScreen, setUpgradeScreen] = useState(
-    adventurer?.health == maxHealth ? 2 : 1
-  );
+  const [upgradeScreen, setUpgradeScreen] = useState(1);
 
   const { data, resetDataUpdated } = useQueriesStore();
 
@@ -148,7 +146,7 @@ export default function UpgradeScreen() {
     },
     {
       name: "Vitality",
-      description: "Vitality increases max health by 20hp",
+      description: "Vitality gives 10hp and increases max health by 10hp",
       buttonText: "Upgrade Vitality",
     },
     {
