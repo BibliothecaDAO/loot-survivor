@@ -70,6 +70,15 @@ impl AdventurerUtils of IAdventurer {
         let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
         r.try_into().unwrap()
     }
+
+    fn generate_item_special_entropy(entropy: u128, item_id: u8) -> (u128, u128) {
+        let mut hash_span = ArrayTrait::<felt252>::new();
+        hash_span.append(entropy.into());
+        hash_span.append(item_id.into());
+        let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
+        let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
+        (r.try_into().unwrap(), d.try_into().unwrap())
+    }
 }
 
 #[test]
