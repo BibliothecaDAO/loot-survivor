@@ -845,10 +845,16 @@ impl ImplAdventurer of IAdventurer {
             let suffix_assigned = true;
             let prefix_assigned = true;
 
+            // generate hash using provided entropy and the item id to ensure that even if a group of items
+            // unlocks specials at the same time, the names are still unique
+            let (specials_rnd1, special_rnd2) = AdventurerUtils::generate_item_special_entropy(
+                entropy, self.id
+            );
+
             let special_names = ItemSpecials {
-                special1: ImplLoot::get_special1(self.id, entropy),
-                special2: ImplLoot::get_special2(self.id, entropy),
-                special3: ImplLoot::get_special3(self.id, entropy)
+                special1: ImplLoot::get_special1(self.id, specials_rnd1),
+                special2: ImplLoot::get_special2(self.id, special_rnd2),
+                special3: ImplLoot::get_special3(self.id, specials_rnd1)
             };
 
             ImplItemSpecials::set_specials(ref name_storage, self, special_names);
@@ -860,8 +866,14 @@ impl ImplAdventurer of IAdventurer {
             let suffix_assigned = true;
             let prefix_assigned = false;
 
+            // generate hash using provided entropy and the item id to ensure that even if a group of items
+            // unlocks specials at the same time, the names are still unique
+            let (specials_rnd1, _) = AdventurerUtils::generate_item_special_entropy(
+                entropy, self.id
+            );
+
             let special_names = ItemSpecials {
-                special1: ImplLoot::get_special1(self.id, entropy), // set item suffix
+                special1: ImplLoot::get_special1(self.id, specials_rnd1), // set item suffix
                 special2: 0,
                 special3: 0,
             };
@@ -875,13 +887,19 @@ impl ImplAdventurer of IAdventurer {
             let prefix_assigned = true;
             let suffix_assigned = false;
 
+            // generate hash using provided entropy and the item id to ensure that even if a group of items
+            // unlocks specials at the same time, the names are still unique
+            let (specials_rnd1, specials_rnd2) = AdventurerUtils::generate_item_special_entropy(
+                entropy, self.id
+            );
+
             // When handling the greatness upgrade to G19 we need to ensure we preserve
             // the item name suffix applied at G15.
             let special_names = ItemSpecials {
-                special2: ImplLoot::get_special2(self.id, entropy),
-                special3: ImplLoot::get_special3(self.id, entropy),
-                special1: ImplItemSpecials::get_specials(name_storage, self)
-                    .special1, // preserve previous item suffix from G15
+                // preserve previous item suffix from G15
+                special1: ImplItemSpecials::get_specials(name_storage, self).special1,
+                special2: ImplLoot::get_special2(self.id, specials_rnd1),
+                special3: ImplLoot::get_special3(self.id, specials_rnd2),
             };
 
             ImplItemSpecials::set_specials(ref name_storage, self, special_names);
@@ -1508,7 +1526,10 @@ fn test_add_health() {
 
     // check overflow
     adventurer.add_health(65535);
-    assert(adventurer.health == STARTING_HEALTH + VITALITY_MAX_HEALTH_INCREASE.into(), 'health should be 120');
+    assert(
+        adventurer.health == STARTING_HEALTH + VITALITY_MAX_HEALTH_INCREASE.into(),
+        'health should be 120'
+    );
 }
 
 #[test]
@@ -2238,7 +2259,7 @@ fn test_increase_item_xp() {
         'storage prefix1 should be set'
     );
     assert(
-        special_names.special3 == loot_item_name_storage.item_2.special1,
+        special_names.special3 == loot_item_name_storage.item_2.special3,
         'storage prefix2 should be set'
     );
 }
@@ -2794,7 +2815,7 @@ fn test_add_item() {
 }
 
 #[test]
-#[available_gas(1500000)]
+#[available_gas(2000000)]
 fn test_grant_xp_and_check_for_greatness_increase() {
     let mut adventurer = ImplAdventurer::new(12, 1);
 
