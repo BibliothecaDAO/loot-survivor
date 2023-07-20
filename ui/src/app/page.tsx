@@ -38,6 +38,7 @@ import {
   MuteIcon,
   VolumeIcon,
   CartIcon,
+  GithubIcon
 } from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
@@ -191,7 +192,7 @@ export default function Home() {
                   lastBattleTime={data.lastBattleQuery?.battles[0].timestamp}
                 /> */}
               </span>
-              <div className="flex flex-row items-center self-end gap-2 flex-wrap">
+              <div className="flex flex-row items-center self-end gap-1 flex-wrap">
                 {!isMobileDevice && <TxActivity />}
                 <button
                   onClick={() => {
@@ -264,6 +265,9 @@ export default function Home() {
                         {displayAddress(account.address)}
                       </Button>
                     )}
+                    <Button href="https://github.com/BibliothecaDAO/loot-survivor">
+                        <GithubIcon className="w-6"/>
+                    </Button>
                   </>
                 )}
                 {account && displayHistory && <TransactionHistory />}

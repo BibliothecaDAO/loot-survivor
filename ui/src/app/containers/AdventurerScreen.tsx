@@ -95,7 +95,7 @@ export default function AdventurerScreen() {
         </div>
 
         {selected === "choose adventurer" && (
-          <div className="flex flex-col gap-2 sm:w-5/6">
+          <div className="flex flex-col sm:w-5/6">
             <p className="text-center text-2xl sm:hidden uppercase">
               Adventurers
             </p>
@@ -116,10 +116,6 @@ export default function AdventurerScreen() {
                 adventurers={adventurers}
               />
             </div>
-
-            {/* <div className="hidden sm:block">
-              <TutorialDialog />
-            </div> */}
           </div>
         )}
       </div>

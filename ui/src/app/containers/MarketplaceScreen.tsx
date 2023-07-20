@@ -174,7 +174,7 @@ export default function MarketplaceScreen({
                 </tr>
               </thead>
               <tbody className="">
-                {!isLoading.latestMarketItemsQuery &&
+                {!isLoading.latestMarketItemsQuery ?
                   sortedMarketLatestItems.map((item: Item, index: number) => (
                     <MarketplaceRow
                       item={item}
@@ -186,7 +186,10 @@ export default function MarketplaceScreen({
                       calculatedNewGold={calculatedNewGold}
                       key={index}
                     />
-                  ))}
+                  )) : <div className="h-full w-full flex justify-center p-10 align-center">Generating Loot {" "}<LootIconLoader
+                    className="self-center ml-3"
+                    size={"w-4"}
+                  /></div>}
               </tbody>
             </table>
           </div>
