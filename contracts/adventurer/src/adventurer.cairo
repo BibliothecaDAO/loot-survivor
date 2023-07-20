@@ -849,7 +849,7 @@ impl ImplAdventurer of IAdventurer {
                 special3: ImplLoot::get_special3(self.id, entropy)
             };
 
-            ImplItemSpecials::set_loot_special_names(ref name_storage, self, special_names);
+            ImplItemSpecials::set_specials(ref name_storage, self, special_names);
             (original_level, new_level, suffix_assigned, prefix_assigned, special_names)
         } // a more likely scenario is the item was previously below greatness 15 and is now at 15 or above
         // in this case we only need to assign the name suffix (Of Power)
@@ -864,7 +864,7 @@ impl ImplAdventurer of IAdventurer {
                 special3: 0,
             };
 
-            ImplItemSpecials::set_loot_special_names(ref name_storage, self, special_names);
+            ImplItemSpecials::set_specials(ref name_storage, self, special_names);
             (original_level, new_level, suffix_assigned, prefix_assigned, special_names)
         } // lastly, we check for the transition from below G19 to G19 or higher which results
         // in the item receiving a name prefix (Demon Grasp)
@@ -878,11 +878,11 @@ impl ImplAdventurer of IAdventurer {
             let special_names = ItemSpecials {
                 special2: ImplLoot::get_special2(self.id, entropy),
                 special3: ImplLoot::get_special3(self.id, entropy),
-                special1: ImplItemSpecials::get_loot_special_names(name_storage, self)
+                special1: ImplItemSpecials::get_specials(name_storage, self)
                     .special1, // preserve previous item suffix from G15
             };
 
-            ImplItemSpecials::set_loot_special_names(ref name_storage, self, special_names);
+            ImplItemSpecials::set_specials(ref name_storage, self, special_names);
 
             (original_level, new_level, suffix_assigned, prefix_assigned, special_names)
         } else {
@@ -1053,12 +1053,12 @@ impl ImplAdventurer of IAdventurer {
     ) {
         if (self.weapon.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.weapon.metadata) == 0) {
-                let weapon_names = ImplItemSpecials::get_loot_special_names(
+                let weapon_names = ImplItemSpecials::get_specials(
                     name_storage1, self.weapon
                 );
                 self.add_suffix_boost(weapon_names.special1);
             } else {
-                let weapon_names = ImplItemSpecials::get_loot_special_names(
+                let weapon_names = ImplItemSpecials::get_specials(
                     name_storage2, self.weapon
                 );
                 self.add_suffix_boost(weapon_names.special1);
@@ -1066,12 +1066,12 @@ impl ImplAdventurer of IAdventurer {
         }
         if (self.chest.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.chest.metadata) == 0) {
-                let chest_names = ImplItemSpecials::get_loot_special_names(
+                let chest_names = ImplItemSpecials::get_specials(
                     name_storage1, self.chest
                 );
                 self.add_suffix_boost(chest_names.special1);
             } else {
-                let chest_names = ImplItemSpecials::get_loot_special_names(
+                let chest_names = ImplItemSpecials::get_specials(
                     name_storage2, self.chest
                 );
                 self.add_suffix_boost(chest_names.special1);
@@ -1079,21 +1079,21 @@ impl ImplAdventurer of IAdventurer {
         }
         if (self.head.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.head.metadata) == 0) {
-                let head_names = ImplItemSpecials::get_loot_special_names(name_storage1, self.head);
+                let head_names = ImplItemSpecials::get_specials(name_storage1, self.head);
                 self.add_suffix_boost(head_names.special1);
             } else {
-                let head_names = ImplItemSpecials::get_loot_special_names(name_storage2, self.head);
+                let head_names = ImplItemSpecials::get_specials(name_storage2, self.head);
                 self.add_suffix_boost(head_names.special1);
             }
         }
         if (self.waist.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.waist.metadata) == 0) {
-                let waist_names = ImplItemSpecials::get_loot_special_names(
+                let waist_names = ImplItemSpecials::get_specials(
                     name_storage1, self.waist
                 );
                 self.add_suffix_boost(waist_names.special1);
             } else {
-                let waist_names = ImplItemSpecials::get_loot_special_names(
+                let waist_names = ImplItemSpecials::get_specials(
                     name_storage2, self.waist
                 );
                 self.add_suffix_boost(waist_names.special1);
@@ -1102,40 +1102,40 @@ impl ImplAdventurer of IAdventurer {
 
         if (self.foot.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.foot.metadata) == 0) {
-                let foot_names = ImplItemSpecials::get_loot_special_names(name_storage1, self.foot);
+                let foot_names = ImplItemSpecials::get_specials(name_storage1, self.foot);
                 self.add_suffix_boost(foot_names.special1);
             } else {
-                let foot_names = ImplItemSpecials::get_loot_special_names(name_storage2, self.foot);
+                let foot_names = ImplItemSpecials::get_specials(name_storage2, self.foot);
                 self.add_suffix_boost(foot_names.special1);
             }
         }
 
         if (self.hand.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.hand.metadata) == 0) {
-                let hand_names = ImplItemSpecials::get_loot_special_names(name_storage1, self.hand);
+                let hand_names = ImplItemSpecials::get_specials(name_storage1, self.hand);
                 self.add_suffix_boost(hand_names.special1);
             } else {
-                let hand_names = ImplItemSpecials::get_loot_special_names(name_storage2, self.hand);
+                let hand_names = ImplItemSpecials::get_specials(name_storage2, self.hand);
                 self.add_suffix_boost(hand_names.special1);
             }
         }
 
         if (self.neck.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.neck.metadata) == 0) {
-                let neck_names = ImplItemSpecials::get_loot_special_names(name_storage1, self.neck);
+                let neck_names = ImplItemSpecials::get_specials(name_storage1, self.neck);
                 self.add_suffix_boost(neck_names.special1);
             } else {
-                let neck_names = ImplItemSpecials::get_loot_special_names(name_storage2, self.neck);
+                let neck_names = ImplItemSpecials::get_specials(name_storage2, self.neck);
                 self.add_suffix_boost(neck_names.special1);
             }
         }
 
         if (self.ring.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.ring.metadata) == 0) {
-                let ring_names = ImplItemSpecials::get_loot_special_names(name_storage1, self.ring);
+                let ring_names = ImplItemSpecials::get_specials(name_storage1, self.ring);
                 self.add_suffix_boost(ring_names.special1);
             } else {
-                let ring_names = ImplItemSpecials::get_loot_special_names(name_storage2, self.ring);
+                let ring_names = ImplItemSpecials::get_specials(name_storage2, self.ring);
                 self.add_suffix_boost(ring_names.special1);
             }
         }
@@ -1157,12 +1157,12 @@ impl ImplAdventurer of IAdventurer {
     ) {
         if (self.weapon.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.weapon.metadata) == 0) {
-                let weapon_names = ImplItemSpecials::get_loot_special_names(
+                let weapon_names = ImplItemSpecials::get_specials(
                     name_storage1, self.weapon
                 );
                 self.remove_suffix_boost(weapon_names.special1, );
             } else {
-                let weapon_names = ImplItemSpecials::get_loot_special_names(
+                let weapon_names = ImplItemSpecials::get_specials(
                     name_storage2, self.weapon
                 );
                 self.remove_suffix_boost(weapon_names.special1, );
@@ -1170,12 +1170,12 @@ impl ImplAdventurer of IAdventurer {
         }
         if (self.chest.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.chest.metadata) == 0) {
-                let chest_names = ImplItemSpecials::get_loot_special_names(
+                let chest_names = ImplItemSpecials::get_specials(
                     name_storage1, self.chest
                 );
                 self.remove_suffix_boost(chest_names.special1, );
             } else {
-                let chest_names = ImplItemSpecials::get_loot_special_names(
+                let chest_names = ImplItemSpecials::get_specials(
                     name_storage2, self.chest
                 );
                 self.remove_suffix_boost(chest_names.special1, );
@@ -1183,21 +1183,21 @@ impl ImplAdventurer of IAdventurer {
         }
         if (self.head.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.head.metadata) == 0) {
-                let head_names = ImplItemSpecials::get_loot_special_names(name_storage1, self.head);
+                let head_names = ImplItemSpecials::get_specials(name_storage1, self.head);
                 self.remove_suffix_boost(head_names.special1, );
             } else {
-                let head_names = ImplItemSpecials::get_loot_special_names(name_storage2, self.head);
+                let head_names = ImplItemSpecials::get_specials(name_storage2, self.head);
                 self.remove_suffix_boost(head_names.special1, );
             }
         }
         if (self.waist.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.waist.metadata) == 0) {
-                let waist_names = ImplItemSpecials::get_loot_special_names(
+                let waist_names = ImplItemSpecials::get_specials(
                     name_storage1, self.waist
                 );
                 self.remove_suffix_boost(waist_names.special1, );
             } else {
-                let waist_names = ImplItemSpecials::get_loot_special_names(
+                let waist_names = ImplItemSpecials::get_specials(
                     name_storage2, self.waist
                 );
                 self.remove_suffix_boost(waist_names.special1, );
@@ -1206,30 +1206,30 @@ impl ImplAdventurer of IAdventurer {
 
         if (self.foot.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.foot.metadata) == 0) {
-                let foot_names = ImplItemSpecials::get_loot_special_names(name_storage1, self.foot);
+                let foot_names = ImplItemSpecials::get_specials(name_storage1, self.foot);
                 self.remove_suffix_boost(foot_names.special1, );
             } else {
-                let foot_names = ImplItemSpecials::get_loot_special_names(name_storage2, self.foot);
+                let foot_names = ImplItemSpecials::get_specials(name_storage2, self.foot);
                 self.remove_suffix_boost(foot_names.special1, );
             }
         }
 
         if (self.hand.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.hand.metadata) == 0) {
-                let hand_names = ImplItemSpecials::get_loot_special_names(name_storage1, self.hand);
+                let hand_names = ImplItemSpecials::get_specials(name_storage1, self.hand);
                 self.remove_suffix_boost(hand_names.special1, );
             } else {
-                let hand_names = ImplItemSpecials::get_loot_special_names(name_storage2, self.hand);
+                let hand_names = ImplItemSpecials::get_specials(name_storage2, self.hand);
                 self.remove_suffix_boost(hand_names.special1, );
             }
         }
 
         if (self.neck.get_greatness() >= 15) {
             if (ImplAdventurer::get_storage_index(self.neck.metadata) == 0) {
-                let neck_names = ImplItemSpecials::get_loot_special_names(name_storage1, self.neck);
+                let neck_names = ImplItemSpecials::get_specials(name_storage1, self.neck);
                 self.remove_suffix_boost(neck_names.special1, );
             } else {
-                let neck_names = ImplItemSpecials::get_loot_special_names(name_storage2, self.neck);
+                let neck_names = ImplItemSpecials::get_specials(name_storage2, self.neck);
                 self.remove_suffix_boost(neck_names.special1, );
             }
         }
@@ -1238,11 +1238,11 @@ impl ImplAdventurer of IAdventurer {
             // we need to get the suffix which is in one of the two meta data storages
             if (ImplAdventurer::get_storage_index(self.ring.metadata) == 0) {
                 // it's in storage slot 1
-                let ring_names = ImplItemSpecials::get_loot_special_names(name_storage1, self.ring);
+                let ring_names = ImplItemSpecials::get_specials(name_storage1, self.ring);
                 self.remove_suffix_boost(ring_names.special1, );
             } else {
                 // it's in storage slot 2
-                let ring_names = ImplItemSpecials::get_loot_special_names(name_storage2, self.ring);
+                let ring_names = ImplItemSpecials::get_specials(name_storage2, self.ring);
                 self.remove_suffix_boost(ring_names.special1, );
             }
         }
@@ -2593,7 +2593,7 @@ fn test_remove_suffix_boost() {
 }
 
 #[test]
-#[available_gas(700000)]
+#[available_gas(800000)]
 fn test_add_stat_boosts() {
     let mut adventurer = Adventurer {
         last_action: 511, health: 100, xp: 1, stats: Stats {

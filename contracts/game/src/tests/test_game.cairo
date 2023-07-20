@@ -334,7 +334,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(37000000)]
+    #[available_gas(38000000)]
     fn test_no_explore_during_battle() {
         let mut game = new_adventurer();
 
@@ -539,7 +539,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(68000000)]
+    #[available_gas(70000000)]
     fn test_buy_and_bag_item() {
         let mut game = new_adventurer_lvl2();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -598,7 +598,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(96000000)]
+    #[available_gas(100000000)]
     fn test_buy_potions() {
         let mut game = new_adventurer_lvl2_with_idle_penalty();
 
