@@ -161,6 +161,11 @@ mod Game {
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
 
+            // store the unmodified storages so we can use these
+            // to remove the same stat boosts when we pack and save the adventurer
+            let original_name_storage1 = name_storage1;
+            let original_name_storage2 = name_storage2;
+
             // get adventurer from storage and unpack
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
                 @self, adventurer_id, name_storage1, name_storage2
@@ -196,7 +201,7 @@ mod Game {
                 .unwrap();
 
             // write the resulting adventurer to storage
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
         }
         fn attack(ref self: ContractState, adventurer_id: u256) {
             // assert caller owns adventurer
@@ -209,6 +214,17 @@ mod Game {
             let mut name_storage2 = _loot_special_names_storage_unpacked(
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
+
+            // store the unmodified storages so we can use these
+            // to remove the same stat boosts when we pack and save the adventurer
+            // TODO: If we add a modified flag to the storages, we can
+            // check if they have been modified and if they have
+            // we can grab a fresh copy of the storages from storage
+            // to remove the special stat boosts before overwriting specials storage
+            // this will remove the need for these lines of code in all the 
+            // external functions. 
+            let original_name_storage1 = name_storage1;
+            let original_name_storage2 = name_storage2;
 
             // get adventurer from storage and unpack
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
@@ -242,7 +258,7 @@ mod Game {
                 .unwrap();
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
         }
         fn flee(ref self: ContractState, adventurer_id: u256) {
             // assert caller owns adventurer
@@ -255,6 +271,12 @@ mod Game {
             let mut name_storage2 = _loot_special_names_storage_unpacked(
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
+
+            // store the unmodified storages so we can use these
+            // to remove the same stat boosts when we pack and save the adventurer
+            let original_name_storage1 = name_storage1;
+            let original_name_storage2 = name_storage2;
+
 
             // get adventurer from storage and unpack
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
@@ -289,7 +311,7 @@ mod Game {
                 .unwrap();
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
         }
         fn equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
             // assert caller owns adventurer
@@ -302,6 +324,11 @@ mod Game {
             let name_storage2 = _loot_special_names_storage_unpacked(
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
+
+            // store the unmodified storages so we can use these
+            // to remove the same stat boosts when we pack and save the adventurer
+            let original_name_storage1 = name_storage1;
+            let original_name_storage2 = name_storage2;
 
             // unpack adventurer from storage (no need to apply stat boosts)
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
@@ -353,7 +380,7 @@ mod Game {
             // }
 
             // pack and save (stat boosts weren't applied so no need to remove)
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
             _pack_bag(ref self, adventurer_id, bag);
         }
 
@@ -368,6 +395,11 @@ mod Game {
             let mut name_storage2 = _loot_special_names_storage_unpacked(
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
+
+            // store the unmodified storages so we can use these
+            // to remove the same stat boosts when we pack and save the adventurer
+            let orginal_name_storage1 = name_storage1;
+            let orginal_name_storage2 = name_storage2;
 
             // unpack adventurer from storage
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
@@ -396,7 +428,7 @@ mod Game {
             _buy_item(ref self, adventurer_id, ref adventurer, item_id, equip);
 
             // remove stat boosts, pack, and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, orginal_name_storage1, orginal_name_storage2);
         }
 
         fn buy_potion(ref self: ContractState, adventurer_id: u256) {
@@ -410,6 +442,9 @@ mod Game {
             let mut name_storage2 = _loot_special_names_storage_unpacked(
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
+
+            let orginal_name_storage1 = name_storage1;
+            let orginal_name_storage2 = name_storage2;
 
             // unpack adventurer from storage (stat boosts applied on unpacking)
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
@@ -439,7 +474,7 @@ mod Game {
             );
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, orginal_name_storage1, orginal_name_storage2);
         }
 
         fn buy_potions(ref self: ContractState, adventurer_id: u256, amount: u8) {
@@ -453,6 +488,9 @@ mod Game {
             let mut name_storage2 = _loot_special_names_storage_unpacked(
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
+
+            let orginal_name_storage1 = name_storage1;
+            let orginal_name_storage2 = name_storage2;
 
             // unpack adventurer from storage (stat boosts applied on unpacking)
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
@@ -489,7 +527,7 @@ mod Game {
             );
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, orginal_name_storage1, orginal_name_storage2);
         }
 
         fn upgrade_stat(ref self: ContractState, adventurer_id: u256, stat: u8, amount: u8) {
@@ -503,6 +541,9 @@ mod Game {
             let mut name_storage2 = _loot_special_names_storage_unpacked(
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
+
+            let original_name_storage1 = name_storage1;
+            let original_name_storage2 = name_storage2;
 
             // unpack adventurer from storage (stat boosts applied on unpacking)
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
@@ -531,7 +572,7 @@ mod Game {
             }
 
             // remove stat boosts, pack, and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
         }
 
         fn slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
@@ -545,6 +586,9 @@ mod Game {
             let mut name_storage2 = _loot_special_names_storage_unpacked(
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
+
+            let original_name_storage1 = name_storage1;
+            let original_name_storage2 = name_storage2;
 
             // unpack adventurer from storage (stat boosts applied on unpacking)
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
@@ -575,7 +619,7 @@ mod Game {
             );
 
             // remove stat boosts, pack, and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer);
+            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
         }
 
         // view functions
@@ -996,7 +1040,9 @@ mod Game {
         // generate a new adventurer using the provided started weapon and current block number
         let mut new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, block_number);
 
-        let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(block_number, adventurer_id);
+        let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
+            block_number, adventurer_id
+        );
 
         // generate meta data for adventurer
         // this will get packed and stored seaprate from adventurer as this data
@@ -1016,7 +1062,9 @@ mod Game {
         );
 
         // generate starter beast which will have weak armor against the adventurers starter weapon
-        let starter_beast = ImplBeast::get_starter_beast(ImplLoot::get_type(starting_weapon), adventurer_entropy);
+        let starter_beast = ImplBeast::get_starter_beast(
+            ImplLoot::get_type(starting_weapon), adventurer_entropy
+        );
 
         // simulate an attack by the beast on the adventurer
         // (no need to waste gas calling combat moudle)
@@ -2342,6 +2390,11 @@ mod Game {
     // ------------ Helper Functions ------------ //
     // ------------------------------------------ //
 
+    // @dev Unpacks an adventurer's data, applies stat boosts, and returns the modified adventurer.
+    // @param adventurer_id The ID of the adventurer to be modified.
+    // @param name_storage1 The storage for the first set of item specials.
+    // @param name_storage2 The storage for the second set of item specials.
+    // @return The modified adventurer with applied stat boosts.
     fn _unpack_adventurer_apply_stat_boost(
         self: @ContractState,
         adventurer_id: u256,
@@ -2356,22 +2409,18 @@ mod Game {
         adventurer
     }
 
+    // @dev Packs and saves an adventurer after removing stat boosts.
+    // @param adventurer_id The ID of the adventurer to be modified.
+    // @param adventurer The adventurer to be modified.
+    // @param name_storage1 The storage for the first set of item specials.
+    // @param name_storage2 The storage for the second set of item specials.
     fn _pack_adventurer_remove_stat_boost(
-        ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer
+        ref self: ContractState,
+        adventurer_id: u256,
+        ref adventurer: Adventurer,
+        name_storage1: ItemSpecialsStorage,
+        name_storage2: ItemSpecialsStorage
     ) {
-        // we get names from storage instead of
-        // using the live ones because we want to ensure
-        // we remove the same stats that we applied when we
-        // unpacked the adventurer. The live names may
-        // have changed by for example by an item leveling up which
-        // would result in us removing stats that have not been applied
-        let name_storage1 = _loot_special_names_storage_unpacked(
-            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
-        );
-        let name_storage2 = _loot_special_names_storage_unpacked(
-            @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
-        );
-
         // remove stat boosts
         _remove_stat_boosts(@self, adventurer_id, ref adventurer, name_storage1, name_storage2);
 
@@ -2379,6 +2428,11 @@ mod Game {
         self._adventurer.write(adventurer_id, adventurer.pack());
     }
 
+    // @dev Applies stat boosts to the adventurer from item names.
+    // @param adventurer_id The ID of the adventurer to be modified.
+    // @param adventurer The adventurer to be modified.
+    // @param name_storage1 The storage for the first set of item specials.
+    // @param name_storage2 The storage for the second set of item specials.
     fn _apply_stat_boosts(
         self: @ContractState,
         adventurer_id: u256,
@@ -2390,6 +2444,11 @@ mod Game {
         adventurer.add_stat_boosts(name_storage1, name_storage2);
     }
 
+    // @dev Removes stat boosts from the adventurer based on item names.
+    // @param adventurer_id The ID of the adventurer to be modified.
+    // @param adventurer The adventurer to be modified.
+    // @param name_storage1 The storage for the first set of item specials.
+    // @param name_storage2 The storage for the second set of item specials.
     fn _remove_stat_boosts(
         self: @ContractState,
         adventurer_id: u256,
