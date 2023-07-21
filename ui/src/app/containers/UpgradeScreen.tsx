@@ -109,18 +109,20 @@ export default function UpgradeScreen() {
       adventurer?.id,
       `You upgraded ${selected}!`
     );
-    handleSubmitCalls(writeAsync).then((tx: any) => {
-      if (tx) {
-        setTxHash(tx.transaction_hash);
-        addTransaction({
-          hash: tx.transaction_hash,
-          metadata: {
-            method: "Upgrade Stat",
-            description: `Upgrading ${selected}`,
-          },
-        });
-      }
-    }).then(() => setScreen('play'));
+    handleSubmitCalls(writeAsync)
+      .then((tx: any) => {
+        if (tx) {
+          setTxHash(tx.transaction_hash);
+          addTransaction({
+            hash: tx.transaction_hash,
+            metadata: {
+              method: "Upgrade Stat",
+              description: `Upgrading ${selected}`,
+            },
+          });
+        }
+      })
+      .then(() => setScreen("play"));
     resetDataUpdated("adventurerByIdQuery");
   };
 
@@ -256,7 +258,7 @@ export default function UpgradeScreen() {
       const parsedValue = value ? parseInt(value.toString(), 10) : 0;
       const purchaseGoldAmount = Math.max(
         parsedValue * currentLevel - 2 * (adventurer?.charisma ?? 0),
-        2
+        1
       );
       return purchaseGoldAmount;
     } else {
