@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "../buttons/Button";
 import WalletSelect from "./WalletSelect";
 import { TypeAnimation } from "react-type-animation";
-import { prologue, chapter1 } from "../../lib/constants";
+import { prologue, chapter1, chapter2, chapter3 } from "../../lib/constants";
 import LootIconLoader from "../icons/Loader";
 import Image from "next/image";
 
@@ -68,8 +68,7 @@ const Intro = () => {
                   () => {
                     setTimeout(() => {
                       setScreen(1);
-                    }, 2000)
-
+                    }, 2000);
                   },
                 ]}
                 wrapper="span"
@@ -85,7 +84,7 @@ const Intro = () => {
                 className="animate-pulse"
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
-                onClick={() => setScreen(2)}
+                onClick={() => setScreen(4)}
               >
                 {buttonText}{" "}
               </Button>
@@ -95,7 +94,6 @@ const Intro = () => {
       ) : screen == 1 ? (
         <div className="flex flex-col w-full h-full">
           <div className="flex flex-col">
-
             <Image
               className="mx-auto border border-terminal-green absolute object-fill "
               src={"/scenes/scene1.png"}
@@ -111,7 +109,7 @@ const Intro = () => {
                   () => {
                     setTimeout(() => {
                       setScreen(2);
-                    }, 3000)
+                    }, 3000);
                   },
                 ]}
                 wrapper="span"
@@ -119,7 +117,6 @@ const Intro = () => {
                 speed={40}
                 style={{ fontSize: "2em" }}
               />
-
             </div>
           </div>
           <div className="flex flex-row gap-10 m-auto">
@@ -127,7 +124,85 @@ const Intro = () => {
               className="animate-pulse"
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
-              onClick={() => setScreen(2)}
+              onClick={() => setScreen(4)}
+            >
+              {buttonText}{" "}
+            </Button>
+          </div>
+        </div>
+      ) : screen == 2 ? (
+        <div className="flex flex-col w-full h-full">
+          <div className="flex flex-col">
+            <Image
+              className="mx-auto border border-terminal-green absolute object-fill"
+              src={"/scenes/cave.png"}
+              alt="cave"
+              fill
+            />
+
+            <div className="p-2 sm:p-4 text-xs sm:text-xl leading-loose z-10">
+              <TypeAnimation
+                key={screen.toString()}
+                sequence={[
+                  chapter2,
+                  () => {
+                    setTimeout(() => {
+                      setScreen(3);
+                    }, 3000);
+                  },
+                ]}
+                wrapper="span"
+                cursor={true}
+                speed={40}
+                style={{ fontSize: "2em" }}
+              />
+            </div>
+          </div>
+          <div className="flex flex-row gap-10 m-auto">
+            <Button
+              className="animate-pulse"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onClick={() => setScreen(4)}
+            >
+              {buttonText}{" "}
+            </Button>
+          </div>
+        </div>
+      ) : screen == 3 ? (
+        <div className="flex flex-col w-full h-full">
+          <div className="flex flex-col">
+            <Image
+              className="mx-auto border border-terminal-green absolute object-fill"
+              src={"/scenes/fountain.png"}
+              alt="fountain"
+              fill
+            />
+
+            <div className="p-2 sm:p-4 text-xs sm:text-xl leading-loose z-10">
+              <TypeAnimation
+                key={screen.toString()}
+                sequence={[
+                  chapter3,
+                  () => {
+                    setTimeout(() => {
+                      setScreen(4);
+                    }, 3000);
+                  },
+                ]}
+                wrapper="span"
+                cursor={true}
+                speed={40}
+                style={{ fontSize: "2em" }}
+              />
+            </div>
+          </div>
+          <div className="flex flex-row gap-10 m-auto">
+            <Button
+              className="animate-pulse"
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              onClick={() => setScreen(4)}
             >
               {buttonText}{" "}
             </Button>

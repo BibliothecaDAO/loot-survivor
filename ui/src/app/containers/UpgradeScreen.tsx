@@ -62,7 +62,7 @@ export default function UpgradeScreen() {
   );
   const { writeAsync } = useContractWrite({ calls });
   const [selected, setSelected] = useState("");
-  const maxHealth = 100 + (adventurer?.vitality ?? 0) * 20;
+  const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
   const [upgradeScreen, setUpgradeScreen] = useState(1);
 
   const { data, resetDataUpdated } = useQueriesStore();

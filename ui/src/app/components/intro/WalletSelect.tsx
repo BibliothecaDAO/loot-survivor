@@ -22,15 +22,15 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     if (screen == 1) {
       if (
         (account as any)?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz" ||
+          "https://survivor-indexer.bibliothecadao.xyz" ||
         (account as any)?.provider?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz"
+          "https://survivor-indexer.bibliothecadao.xyz"
       ) {
         setConnected(true);
       }
     }
 
-    if (screen == 2) {
+    if (screen == 4) {
       if (
         (account as any)?.baseUrl == "https://alpha4.starknet.io" ||
         (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io"
@@ -43,12 +43,20 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
   return (
     <div className="flex flex-col p-8">
       <div className="flex flex-col self-center my-auto">
-        <div className="w-full"><Image className=" mx-auto p-10 animate-pulse" src={'/monsters/balrog.png'} alt="start" width={500} height={500} /></div>
+        <div className="w-full">
+          <Image
+            className=" mx-auto p-10 animate-pulse"
+            src={"/monsters/balrog.png"}
+            alt="start"
+            width={500}
+            height={500}
+          />
+        </div>
         <div className="w-full text-center">
           <h1 className="mb-10">The Hour for Survival Has Arrived</h1>
         </div>
 
-        {screen == 2 ? (
+        {screen == 4 ? (
           <div className="flex flex-col w-1/2 gap-5 m-auto">
             {connectors.length > 0 ? (
               connectors.map((connector, index) => (
