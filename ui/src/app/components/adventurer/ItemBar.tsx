@@ -19,7 +19,7 @@ const ItemBar: React.FC<ItemBarProps> = ({ xp }) => {
   return (
     <div className="w-full text-black">
       {level >= 20 ? (
-        <div>Max Greatness 20</div>
+        <div className="text-bold">Max Greatness 20</div>
       ) : (
         <>
           <div className="flex justify-between text-xs sm:text-sm">
