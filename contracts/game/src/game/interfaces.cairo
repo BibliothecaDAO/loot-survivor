@@ -1,7 +1,7 @@
 use starknet::ContractAddress;
 use survivor::{
     bag::Bag, adventurer::{Adventurer, Stats}, adventurer_meta::AdventurerMetadata,
-    item_meta::ItemSpecials
+    item_meta::{ItemSpecials, ItemSpecialsStorage}
 };
 use lootitems::loot::{Loot};
 use market::market::LootWithPrice;
@@ -39,6 +39,15 @@ trait IGame<TContractState> {
     fn get_stat_upgrades_available(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_last_action(self: @TContractState, adventurer_id: u256) -> u16;
 
+    // adventurer stats (includes boost)
+    fn get_stats(self: @TContractState, adventurer_id: u256) -> Stats;
+    fn get_strength(self: @TContractState, adventurer_id: u256) -> u8;
+    fn get_dexterity(self: @TContractState, adventurer_id: u256) -> u8;
+    fn get_vitality(self: @TContractState, adventurer_id: u256) -> u8;
+    fn get_intelligence(self: @TContractState, adventurer_id: u256) -> u8;
+    fn get_wisdom(self: @TContractState, adventurer_id: u256) -> u8;
+    fn get_charisma(self: @TContractState, adventurer_id: u256) -> u8;
+
     // item stats
     // TODO: get_equipped_items(self: @TContractState, adventurer_id: u256) -> Array<u8>;
     fn get_weapon_greatness(self: @TContractState, adventurer_id: u256) -> u8;
@@ -49,7 +58,12 @@ trait IGame<TContractState> {
     fn get_hand_greatness(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_necklace_greatness(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_ring_greatness(self: @TContractState, adventurer_id: u256) -> u8;
+
+    // bag and specials
     fn get_bag(self: @TContractState, adventurer_id: u256) -> Bag;
+    fn get_special_storage(
+        self: @TContractState, adventurer_id: u256, storage_index: u256
+    ) -> ItemSpecialsStorage;
 
     // item details
     fn get_weapon_specials(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
@@ -78,15 +92,6 @@ trait IGame<TContractState> {
     fn get_t5_items_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
     fn get_potion_price(self: @TContractState, adventurer_id: u256) -> u16;
     fn get_attacking_beast(self: @TContractState, adventurer_id: u256) -> Beast;
-
-    // adventurer stats (includes boost)
-    fn get_stats(self: @TContractState, adventurer_id: u256) -> Stats;
-    fn get_strength(self: @TContractState, adventurer_id: u256) -> u8;
-    fn get_dexterity(self: @TContractState, adventurer_id: u256) -> u8;
-    fn get_vitality(self: @TContractState, adventurer_id: u256) -> u8;
-    fn get_intelligence(self: @TContractState, adventurer_id: u256) -> u8;
-    fn get_wisdom(self: @TContractState, adventurer_id: u256) -> u8;
-    fn get_charisma(self: @TContractState, adventurer_id: u256) -> u8;
 
     // adventurer stats (no boosts)
     fn get_base_stats(self: @TContractState, adventurer_id: u256) -> Stats;
