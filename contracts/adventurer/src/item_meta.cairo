@@ -7,7 +7,7 @@ use pack::constants::pow;
 use lootitems::statistics::constants::{ItemId, ItemSuffix};
 
 use super::{adventurer::{Adventurer, IAdventurer, ImplAdventurer}, item_primitive::ItemPrimitive};
-use super::bag::{Bag, BagActions};
+use super::bag::{Bag, IBag};
 
 mod STORAGE {
     // First 10 indexes are stored in storage 1
