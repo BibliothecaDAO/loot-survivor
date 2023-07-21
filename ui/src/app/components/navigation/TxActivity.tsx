@@ -112,6 +112,7 @@ export const TxActivity = () => {
         await refetch("battlesByTxHashQuery");
         await refetch("adventurerByIdQuery");
         await refetch("battlesByBeastQuery");
+        await refetch("latestMarketItemsQuery");
         console.log("in battle!");
         stopLoading({
           data: queryData.battlesByTxHashQuery.battles,
@@ -142,6 +143,7 @@ export const TxActivity = () => {
         await refetch("adventurerByIdQuery");
         await refetch("lastBeastBattleQuery");
         await refetch("lastBeastQuery");
+        await refetch("latestMarketItemsQuery");
         stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
         const killedByObstacleOrPenalty =
           (queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
