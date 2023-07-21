@@ -201,7 +201,13 @@ mod Game {
                 .unwrap();
 
             // write the resulting adventurer to storage
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                original_name_storage1,
+                original_name_storage2
+            );
         }
         fn attack(ref self: ContractState, adventurer_id: u256) {
             // assert caller owns adventurer
@@ -258,7 +264,13 @@ mod Game {
                 .unwrap();
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                original_name_storage1,
+                original_name_storage2
+            );
         }
         fn flee(ref self: ContractState, adventurer_id: u256) {
             // assert caller owns adventurer
@@ -276,7 +288,6 @@ mod Game {
             // to remove the same stat boosts when we pack and save the adventurer
             let original_name_storage1 = name_storage1;
             let original_name_storage2 = name_storage2;
-
 
             // get adventurer from storage and unpack
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
@@ -311,7 +322,13 @@ mod Game {
                 .unwrap();
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                original_name_storage1,
+                original_name_storage2
+            );
         }
         fn equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
             // assert caller owns adventurer
@@ -380,7 +397,13 @@ mod Game {
             // }
 
             // pack and save (stat boosts weren't applied so no need to remove)
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                original_name_storage1,
+                original_name_storage2
+            );
             _pack_bag(ref self, adventurer_id, bag);
         }
 
@@ -428,7 +451,13 @@ mod Game {
             _buy_item(ref self, adventurer_id, ref adventurer, item_id, equip);
 
             // remove stat boosts, pack, and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, orginal_name_storage1, orginal_name_storage2);
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                orginal_name_storage1,
+                orginal_name_storage2
+            );
         }
 
         fn buy_potion(ref self: ContractState, adventurer_id: u256) {
@@ -474,7 +503,13 @@ mod Game {
             );
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, orginal_name_storage1, orginal_name_storage2);
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                orginal_name_storage1,
+                orginal_name_storage2
+            );
         }
 
         fn buy_potions(ref self: ContractState, adventurer_id: u256, amount: u8) {
@@ -527,7 +562,13 @@ mod Game {
             );
 
             // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, orginal_name_storage1, orginal_name_storage2);
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                orginal_name_storage1,
+                orginal_name_storage2
+            );
         }
 
         fn upgrade_stat(ref self: ContractState, adventurer_id: u256, stat: u8, amount: u8) {
@@ -572,7 +613,13 @@ mod Game {
             }
 
             // remove stat boosts, pack, and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                original_name_storage1,
+                original_name_storage2
+            );
         }
 
         fn slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
@@ -619,7 +666,13 @@ mod Game {
             );
 
             // remove stat boosts, pack, and save adventurer
-            _pack_adventurer_remove_stat_boost(ref self, adventurer_id, ref adventurer, original_name_storage1, original_name_storage2);
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                original_name_storage1,
+                original_name_storage2
+            );
         }
 
         // view functions
@@ -912,6 +965,11 @@ mod Game {
             _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
                 .stats
                 .charisma
+        }
+        fn get_special_storage(
+            self: @ContractState, adventurer_id: u256, storage_index: u256
+        ) -> ItemSpecialsStorage {
+            Packing::unpack(self._loot_special_names.read((adventurer_id, storage_index)))
         }
         fn get_beast_type(self: @ContractState, beast_id: u8) -> u8 {
             ImplCombat::type_to_u8(ImplBeast::get_type(beast_id))
