@@ -80,8 +80,8 @@ export const BattleDisplay = ({
     if (BeastAttack && AdventurerHealthExists) {
       return (
         <p>
-          OUCH! The {beastName} struck you dealing {battleData?.damageTaken}{" "}
-          damage to your {damageLocation}!
+          OUCH! The {beastName} attacked your {damageLocation}, dealing{" "}
+          {battleData?.damageTaken} damage!
         </p>
       );
     }
