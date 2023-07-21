@@ -35,7 +35,7 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
           <div className="w-full overflow-auto whitespace-normal">
             {" "}
             <div className="flex flex-col">
-              <span className="flex font-semibold whitespace-nowrap">
+              <span className="flex font-semibold whitespace-nowrap text-lg">
                 {itemName}
                 {slot == "Neck" || slot == "Ring"
                   ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
