@@ -10,7 +10,7 @@ export const chapter3 =
   "Curiosity piqued, the adventurer approaches, their silhouette reflecting in the hypnotizing water. A mystical fountain with four peculiar items resting on the bottom - a wand, a book, a club, and a sword. They reach in, pulling out a weapon. The remaining items appear to dissolve into the water, leaving behind an unsettling silence.";
 export const chapter4 =
   "The adventurer notices they have something in their pocket, reaches in and pulls out a handful of golden coins that shimmer even in the dim light. An unexpected surprise. A mystery.";
-export const battle = "Oh no, there's a beast coming! Prepare for attack!";
+export const battle = "A beast approaches, prepare for battle!";
 
 export const mainnet_addr = "https://alpha-mainnet.starknet.io";
 
