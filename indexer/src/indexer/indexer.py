@@ -1396,17 +1396,12 @@ class LootSurvivorIndexer(StarkNetIndexer):
             [felt.to_int(i) for i in data]
         )
         await update_adventurer_helper(info, isu.adventurer_state, block_time)
-        if check_exists_int(isu.specials["special2"]):
-            item_special_doc = {
-                "special2": check_exists_int(isu.specials["special2"]),
-                "special3": encode_int_as_bytes(isu.specials["special3"]),
-                "timestamp": block_time,
-            }
-        else:
-            item_special_doc = {
-                "special1": check_exists_int(isu.specials["special1"]),
-                "timestamp": datetime.now(),
-            }
+        item_special_doc = {
+            "special1": check_exists_int(isu.specials["special1"]),
+            "special2": check_exists_int(isu.specials["special2"]),
+            "special3": check_exists_int(isu.specials["special3"]),
+            "timestamp": datetime.now(),
+        }
         await info.storage.find_one_and_update(
             "items",
             {

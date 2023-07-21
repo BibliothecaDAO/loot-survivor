@@ -45,8 +45,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
       ? data.itemsByProfileQuery.items
       : []
     : data.itemsByAdventurerQuery
-    ? data.itemsByAdventurerQuery.items
-    : [];
+      ? data.itemsByAdventurerQuery.items
+      : [];
 
   const neckItem =
     items.find(
@@ -62,6 +62,15 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     (neckItem.item ? calculateLevel(neckItem.xp ?? 0) : 0) +
     (ringItem.item ? calculateLevel(ringItem.xp ?? 0) : 0);
 
+  const attributes = [
+    { key: "STR", value: formatAdventurer.strength },
+    { key: "DEX", value: formatAdventurer.dexterity },
+    { key: "INT", value: formatAdventurer.intelligence },
+    { key: "VIT", value: formatAdventurer.vitality },
+    { key: "WIS", value: formatAdventurer.wisdom },
+    { key: "CHA", value: formatAdventurer.charisma },
+    { key: "LUCK", value: luck },
+  ];
   return (
     <div className="h-full border border-terminal-green overflow-auto">
       {!isLoading.itemsByAdventurerQuery ? (
@@ -109,9 +118,17 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                 <LevelBar xp={formatAdventurer.xp ?? 0} />
               </div>
 
-              <div className="flex flex-row justify-between">
-                <div className="flex flex-col">
-                  <div className="">
+              <div className="flex flex-row justify-between flex-wrap">
+                <div className="flex flex-row w-full font-semibold">
+                  {attributes.map((attribute) => (
+                    <div key={attribute.key} className="flex justify-between px-1 bg-terminal-green text-terminal-black w-full border border-terminal-black mb-2">
+                      {attribute.key}
+                      <span className="pl-3">{attribute.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-col w-full">
+                  <div className="w-full">
                     <ItemDisplay
                       item={
                         items.find(
@@ -201,36 +218,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     />
                   </div>
                 </div>
-                <div className="flex flex-col space-y-1 text-sm sm:text-xl">
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    STR{" "}
-                    <span className="pl-3">{formatAdventurer.strength}</span>
-                  </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    DEX{" "}
-                    <span className="pl-3">{formatAdventurer.dexterity}</span>
-                  </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    INT{" "}
-                    <span className="pl-3">
-                      {formatAdventurer.intelligence}
-                    </span>
-                  </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    VIT{" "}
-                    <span className="pl-3">{formatAdventurer.vitality}</span>
-                  </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    WIS <span className="pl-3">{formatAdventurer.wisdom}</span>
-                  </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    CHA
-                    <span className="pl-3">{formatAdventurer.charisma}</span>
-                  </div>
-                  <div className="flex justify-between px-3 bg-terminal-green text-terminal-black">
-                    LUCK <span className="pl-3">{luck}</span>
-                  </div>
-                </div>
+
               </div>
             </div>
           </div>

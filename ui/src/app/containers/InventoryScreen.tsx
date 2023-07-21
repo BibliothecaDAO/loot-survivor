@@ -14,6 +14,8 @@ import LootIcon from "../components/icons/LootIcon";
 import { InfoIcon } from "../components/icons/Icons";
 import { Call, Item } from "../types";
 import { GameData } from "../components/GameData";
+import useCustomQuery from "../hooks/useCustomQuery";
+import { getAdventurerById } from "../hooks/graphql/queries";
 
 /**
  * @container
@@ -37,7 +39,14 @@ export default function InventoryScreen() {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  // const items: any[] = [];
+  useCustomQuery(
+    "adventurerByIdQuery",
+    getAdventurerById,
+    {
+      id: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
 
   const handleAddEquipItem = (item: string) => {
     if (gameContract && formatAddress) {

@@ -35,6 +35,7 @@ import PurchaseHealth from "../components/actions/PurchaseHealth";
 import MarketplaceScreen from "./MarketplaceScreen";
 import { UpgradeNav } from "../components/upgrade/UpgradeNav";
 import { useQueriesStore } from "../hooks/useQueryStore";
+import useUIStore from "../hooks/useUIStore";
 
 /**
  * @container
@@ -53,7 +54,6 @@ export default function UpgradeScreen() {
   const { addTransaction } = useTransactionManager();
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const hash = useLoadingStore((state) => state.hash);
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
@@ -64,8 +64,9 @@ export default function UpgradeScreen() {
   const [selected, setSelected] = useState("");
   const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
   const [upgradeScreen, setUpgradeScreen] = useState(1);
+  const setScreen = useUIStore((state) => state.setScreen);
 
-  const { data, resetDataUpdated } = useQueriesStore();
+  const { resetDataUpdated } = useQueriesStore();
 
   const gameData = new GameData();
 
@@ -119,7 +120,7 @@ export default function UpgradeScreen() {
           },
         });
       }
-    });
+    }).then(() => setScreen('play'));
     resetDataUpdated("adventurerByIdQuery");
   };
 

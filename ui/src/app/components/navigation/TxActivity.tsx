@@ -112,6 +112,7 @@ export const TxActivity = () => {
         await refetch("battlesByTxHashQuery");
         await refetch("adventurerByIdQuery");
         await refetch("battlesByBeastQuery");
+        await refetch("latestMarketItemsQuery");
         console.log("in battle!");
         stopLoading({
           data: queryData.battlesByTxHashQuery.battles,
@@ -142,6 +143,7 @@ export const TxActivity = () => {
         await refetch("adventurerByIdQuery");
         await refetch("lastBeastBattleQuery");
         await refetch("lastBeastQuery");
+        await refetch("latestMarketItemsQuery");
         stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
         const killedByObstacleOrPenalty =
           (queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
@@ -164,14 +166,8 @@ export const TxActivity = () => {
       };
 
       const handleMulticall = async () => {
-        if (
-          !notificationData.some((noti: string) =>
-            noti.startsWith("You equipped")
-          )
-        )
-          return;
-
         await refetch("adventurerByIdQuery");
+        await refetch("itemsByAdventurerQuery");
         await refetch("battlesByBeastQuery");
         stopLoading(notificationData);
         const killedFromEquipping =
