@@ -204,7 +204,7 @@ starknet invoke --function approve --address $LORDS_ADDRESS --input $CONTRACT_AD
 
 #### Start
 ```bash
-starknet invoke --function start --address $CONTRACT_ADDRESS --input 12 123 0 0 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
+starknet invoke --function start --address $CONTRACT_ADDRESS --input 0x020b96923a9e60f63a1829d440a03cf680768cadbc8fe737f71380258817d85b 12 123 0 0 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
 #### Explore
@@ -222,9 +222,9 @@ starknet invoke --function attack --address $CONTRACT_ADDRESS --input $ADVENTURE
 starknet invoke --function flee --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
-#### Upgrade Stat (Charisma)
+#### Upgrade Stat (Charisma x 1)
 ```bash
-starknet invoke --function upgrade_stat --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 $CHARISMA --max_fee 10000000000000000 --account $ACCOUNT_NAME
+starknet invoke --function upgrade_stat --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 $CHARISMA 1 --max_fee 10000000000000000 --account $ACCOUNT_NAME
 ```
 
 
