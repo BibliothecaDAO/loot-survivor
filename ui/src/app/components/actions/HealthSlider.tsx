@@ -25,7 +25,7 @@ const HealthSlider: React.FC<SliderProps> = ({
   return (
     <div>
       <Button
-        size={"xs"}
+        size={"lg"}
         onClick={handleDecrement}
         disabled={purchaseAmount <= 1}
       >
@@ -33,7 +33,7 @@ const HealthSlider: React.FC<SliderProps> = ({
       </Button>
       <span className="text-xl p-2">{purchaseAmount}</span>
       <Button
-        size={"xs"}
+        size={"lg"}
         onClick={handleIncrement}
         disabled={purchaseAmount >= 10}
       >
