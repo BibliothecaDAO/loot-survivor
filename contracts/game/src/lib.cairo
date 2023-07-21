@@ -40,7 +40,7 @@ mod Game {
     use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, adventurer_stats::Stats,
-        item_primitive::ItemPrimitive, bag::{Bag, BagActions, ImplBagActions},
+        item_primitive::ItemPrimitive, bag::{Bag, IBag, ImplBag},
         adventurer_meta::AdventurerMetadata, exploration::ExploreUtils,
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
@@ -2169,7 +2169,7 @@ mod Game {
         let mut bag = _bag_unpacked(@self, adventurer_id);
 
         // get item from id
-        let mut item = ImplBagActions::new_item(item_id);
+        let mut item = ImplBag::new_item(item_id);
 
         // assign metadata id to item
         item.set_metadata_id(adventurer, bag);
