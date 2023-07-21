@@ -11,6 +11,8 @@ import useUIStore from "../../hooks/useUIStore";
 import { useUiSounds } from "../../hooks/useUiSound";
 import { soundSelector } from "../../hooks/useUiSound";
 import { Item, NullItem, Call, NullAdventurer } from "../../types";
+import { GameData } from "../GameData";
+import { getKeyFromValue } from "../../lib/utils";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -41,6 +43,8 @@ const TransactionCart: React.FC = () => {
     ? data.itemsByAdventurerQuery.items
     : [];
 
+  const gameData = new GameData();
+
   const handleBuyItem = useCallback(
     (call: any) => {
       const item = items.find(
@@ -64,11 +68,13 @@ const TransactionCart: React.FC = () => {
 
   const handleEquipItem = useCallback(
     (call: any) => {
-      const item = ownedItems.find(
-        (item: Item) =>
-          item.item === (Array.isArray(call.calldata) && call.calldata[2])
-      );
-      const itemName = processItemName(item ?? NullItem);
+      const item =
+        ownedItems.find(
+          (item: Item) =>
+            getKeyFromValue(gameData.ITEMS, item.item ?? "")?.toString() ===
+            (Array.isArray(call.calldata) && call.calldata[2])
+        ) ?? NullItem;
+      const itemName = processItemName(item);
       setNotification((notifications) => [
         ...notifications,
         `You equipped ${itemName}!`,
@@ -111,7 +117,7 @@ const TransactionCart: React.FC = () => {
         case "buy_item":
           handleBuyItem(call);
           break;
-        case "equip_item":
+        case "equip":
           handleEquipItem(call);
           break;
         case "purchase_health":

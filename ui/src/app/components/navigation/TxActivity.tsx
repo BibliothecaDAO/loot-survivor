@@ -164,14 +164,8 @@ export const TxActivity = () => {
       };
 
       const handleMulticall = async () => {
-        if (
-          !notificationData.some((noti: string) =>
-            noti.startsWith("You equipped")
-          )
-        )
-          return;
-
         await refetch("adventurerByIdQuery");
+        await refetch("itemsByAdventurerQuery");
         await refetch("battlesByBeastQuery");
         stopLoading(notificationData);
         const killedFromEquipping =
