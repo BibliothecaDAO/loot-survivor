@@ -19,7 +19,8 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
     const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
     const purchaseGoldAmount = Math.max(
-      potionAmount * (adventurer?.level ?? 0) - 2 * (adventurer?.charisma ?? 0),
+      potionAmount *
+        ((adventurer?.level ?? 0) - 2 * (adventurer?.charisma ?? 0)),
       1
     );
 
