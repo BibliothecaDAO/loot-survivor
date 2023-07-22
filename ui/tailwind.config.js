@@ -6,8 +6,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'terminal-green': 'rgba(74, 246, 38, 0.8)', // 50% opacity
-        'terminal-yellow': 'rgba(255, 176, 0, 0.8)', // 50% opacity
+        'terminal-green': 'rgba(74, 246, 38, 1)', // 50% opacity
+        'terminal-yellow': 'rgba(255, 176, 0, 1)', // 50% opacity
         'terminal-black': 'rgba(21, 21, 21, 1)', // 50% opacity
         gold: '#FFD700',
         silver: '#C0C0C0',

@@ -25,27 +25,29 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
 
   return (
     <div
-      className={`flex-shrink flex gap-2 mb-1 text-sm sm:text-base ${item.item ? "bg-terminal-green text-terminal-black" : ""
+      className={`flex-shrink flex mb-1 text-sm sm:text-base ${item.item ? "bg-terminal-green text-terminal-black" : ""
         }`}
     >
-      <div className="flex flex-col justify-center border-r-2 border-terminal-black p-2 gap-6">
+      <div className="flex flex-col justify-center border-r-2 border-terminal-black p-2 gap-2">
         <LootIcon type={itemSlot ? itemSlot : slot} />
         <Efficacyicon type={type} />
-
       </div>
 
       {item.item ? (
-        <div className="flex flex-row justify-between w-full p-1 sm:p-2 ">
+        <div className="flex flex-row justify-between w-full px-2 self-center">
           <div className="w-full overflow-auto whitespace-normal">
             {" "}
-            <div className="flex flex-col">
-              <div className="flex flex-row justify-between font-semibold">
-                <span className="text-xs sm:text-sm">
+            <div className="flex flex-col text-xs sm:text-sm space-between">
+              <div className="flex flex-row justify-between font-semibold space-x-3">
+                <span className=" self-center">
                   {item &&
                     `Tier ${tier ?? 0}
                 `}
                 </span>
-                <span className="text-xs sm:text-sm">{boost}</span>
+                <span className="whitespace-nowrap w-1/2">
+                  <ItemBar xp={item.xp ?? 0} />
+                </span>
+                <span className="">{boost}</span>
               </div>
               <span className="flex font-semibold whitespace-nowrap text-lg">
                 {itemName}
@@ -55,9 +57,7 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
               </span>
 
             </div>
-            <span className="whitespace-nowrap">
-              <ItemBar xp={item.xp ?? 0} />
-            </span>
+
           </div>
 
 

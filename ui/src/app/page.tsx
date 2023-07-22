@@ -181,7 +181,7 @@ export default function Home() {
           <div className="flex flex-col w-full">
             {isMobileDevice && <TxActivity />}
             <div className="flex flex-row justify-between">
-              <span className="flex flex-row gap-5 items-end">
+              <span className="flex flex-row gap-5 items-end">  
                 <h1 className="glitch">Loot Survivor</h1>
                 {/* <PenaltyCountDown
                   lastDiscoveryTime={

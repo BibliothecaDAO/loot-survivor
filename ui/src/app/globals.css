@@ -22,8 +22,8 @@ body::after {
   overflow: hidden;
   height  : 100vh;
   background: repeating-linear-gradient(0deg,
-      rgba(0, 0, 0, 0.70),
-      rgba(0, 0, 0, 0.15) 1px,
+      rgba(0, 0, 0, 0.45),
+      rgba(0, 0, 0, 0.45) 1px,
       transparent 1px,
       transparent 2px);
 }
