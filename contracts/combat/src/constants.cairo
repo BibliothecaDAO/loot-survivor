@@ -69,8 +69,8 @@ mod CombatSettings {
     // Controls how much the range of levels increases
     // with each range increase
     mod LEVEL_MULTIPLIER {
-        const EASY: u8 = 2; // increase level range by 2x each range increase
-        const NORMAL: u8 = 4; // increase level range by 4x each range increase
+        const EASY: u8 = 4; // increase level range by 2x each range increase
+        const NORMAL: u8 = 6; // increase level range by 4x each range increase
         const HARD: u8 = 8; // increase level range by 8x each range increase
     }
 
