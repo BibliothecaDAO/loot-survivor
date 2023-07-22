@@ -161,6 +161,7 @@ export const TxActivity = () => {
 
       const handleUpgrade = async () => {
         await refetch("adventurerByIdQuery");
+        await refetch("latestMarketItemsQuery");
         stopLoading(notificationData);
         // setScreen("play");
       };
@@ -169,6 +170,7 @@ export const TxActivity = () => {
         await refetch("adventurerByIdQuery");
         await refetch("itemsByAdventurerQuery");
         await refetch("battlesByBeastQuery");
+        await refetch("latestMarketItemsQuery");
         stopLoading(notificationData);
         const killedFromEquipping =
           (pendingMessage as string[]).includes("Equipping") && !isAlive;
