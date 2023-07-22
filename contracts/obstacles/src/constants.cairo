@@ -27,7 +27,5 @@ mod ObstacleId {
     const HiddenArrow: u8 = 15;
 
     // If you add obstacle, make sure to update MAX_ID below
-    // making this u128 as it's commonly used to select a random obstacle based
-    // on entropy variables which are u128 based
-    const MAX_ID: u128 = 15;
+    const MAX_ID: u8 = 15;
 }

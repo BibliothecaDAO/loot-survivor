@@ -418,7 +418,7 @@ impl ImplCombat of ICombat {
             let entity_level_multplier = 1 + (adventurer_level / range_increase_interval);
 
             // maximum range of the entity level will be the above multplier * the entity difficulty
-            let entity_level_range = U8IntoU128::into(entity_level_multplier * level_multiplier);
+            let entity_level_range: u128 = entity_level_multplier.into() * level_multiplier.into();
 
             // calculate the entity level 
             let entity_level_boost = entropy % entity_level_range;
@@ -426,36 +426,35 @@ impl ImplCombat of ICombat {
             // add the entity level boost to the adventurer level - difficulty cliff
             // this will produce a level between (adventurer level - difficulty cliff) and entity_level_multplier * entity_constants::Settings::entity_LEVEL_RANGE
             let entity_level = entity_level_boost
-                + U8IntoU128::into((adventurer_level - entity_level_multplier));
+                + (adventurer_level - entity_level_multplier).into();
 
             // return the entity level as a u16
             U128TryIntoU8::try_into(entity_level).unwrap()
         }
     }
 
-    // get_enemy_starting_health returns the starting health for an entity
-    // @param 
+
     fn get_enemy_starting_health(
         adventurer_level: u8,
         minimum_health: u8,
-        entropy: u128,
-        range_increase_interval: u8,
-        level_multiplier: u8
+        increase_interval: u8,
+        level_multiplier: u8,
+        entropy: u128
     ) -> u16 {
-        // enemy starting health increases every N adventurer levels
-        let health_multiplier = adventurer_level / range_increase_interval;
+        assert(increase_interval > 0, 'increase interval must be > 0');
+
+        // enemy max starting health increases every N adventurer levels
+        let health_multiplier = (adventurer_level / increase_interval) + 1;
 
         // max health is based on adventurer level and the level multplier
-        // if the range_increase_interval is 5 for example and the adventurer is on
+        // if the increase_interval is 5 for example and the adventurer is on
         // level 20, the max enemy health will be 5 * (level multiplier)
-        let max_health = U8IntoU128::into((1 + health_multiplier) * level_multiplier);
+        let max_health: u128 = health_multiplier.into() * level_multiplier.into();
 
         // the remainder of entropy divided by max_health provides entity health
         // we then add 1 to minimum_health to prevent starting health of zero
-        U128TryIntoU16::try_into(
-            U8IntoU128::into(adventurer_level + minimum_health) + (entropy % max_health)
-        )
-            .unwrap()
+        (adventurer_level.into() + minimum_health.into())
+            + U128TryIntoU16::try_into(entropy % max_health).unwrap()
     }
 
 
@@ -606,6 +605,90 @@ impl ImplCombat of ICombat {
         (dice_roll <= (relevant_stat + DIFFICULTY_CLIFF::NORMAL))
     }
 }
+
+#[test]
+#[should_panic(expected: ('increase interval must be > 0', ))]
+#[available_gas(30000)]
+fn test_get_enemy_starting_health_zero_fail() {
+    // test zero case which should panic with message
+    // increase interval must be > 0
+    // test is annotated to expect this panic
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(0, 0, 0, 0, 0);
+}
+
+#[test]
+#[available_gas(50000)]
+fn test_get_enemy_starting_health_max_values() {
+    // test max value case
+    // no need to assert result just make sure it doesn't panic
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+        255, 255, 255, 255, 340282366920938463463374607431768211455
+    );
+}
+
+#[test]
+#[available_gas(500000)]
+fn test_get_enemy_starting_health() {
+    // test normal cases
+    let mut adventurer_level = 1;
+    let minimum_health = 5;
+    let increase_interval = 5;
+    let level_multiplier = 5;
+    let entropy = 9812734980;
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+        adventurer_level, minimum_health, increase_interval, level_multiplier, entropy
+    );
+    assert(enemy_starting_health == 6, 'starting health should be 6');
+
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+        adventurer_level, minimum_health, increase_interval, level_multiplier, entropy + 1
+    );
+    assert(enemy_starting_health == 7, 'starting health should be 7');
+
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+        adventurer_level, minimum_health, increase_interval, level_multiplier, entropy + 2
+    );
+    assert(enemy_starting_health == 8, 'starting health should be 8');
+
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+        adventurer_level, minimum_health, increase_interval, level_multiplier, entropy + 3
+    );
+    assert(enemy_starting_health == 9, 'starting health should be 9');
+
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+        adventurer_level, minimum_health, increase_interval, level_multiplier, entropy + 4
+    );
+    assert(enemy_starting_health == 10, 'starting health should be 10');
+
+    // rollover back to low end of health range
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+        adventurer_level, minimum_health, increase_interval, level_multiplier, entropy + 5
+    );
+    assert(enemy_starting_health == 6, 'starting health should be 6');
+
+    // increase adventurer level to 20
+    adventurer_level = 20;
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+        adventurer_level, minimum_health, increase_interval, level_multiplier, entropy
+    );
+    // lower range is now 30HP
+    assert(enemy_starting_health == 30, 'starting health should be 30');
+
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+        adventurer_level, minimum_health, increase_interval, level_multiplier, entropy + 19
+    );
+    // upper range is now 49HP
+    assert(enemy_starting_health == 49, 'starting health should be 49');
+}
+
+
+// get_enemy_starting_health(
+//         adventurer_level: u8,
+//         minimum_health: u8,
+//         entropy: u128,
+//         range_increase_interval: u8,
+//         level_multiplier: u8
+//     ) -> u16 {
 
 #[test]
 #[available_gas(170000)]

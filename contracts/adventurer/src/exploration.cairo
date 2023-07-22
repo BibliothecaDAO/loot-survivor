@@ -40,13 +40,13 @@ impl ExploreUtils of Explore {
         let discovery_multiplier = adventurer_level / 5;
 
         // add 1 to the whole number, multiply by 3, and convert to u64
-        let discovery_range = U8IntoU128::into((discovery_multiplier + 1) * 3);
+        let discovery_range: u128 = (discovery_multiplier.into() + 1) * 3;
 
         // divide rnd by discovery_range and store the remainder as discovery amount
         let discovery_amount = 1 + (entropy % discovery_range);
 
         // return discovery amount as a u16
-        return U128TryIntoU16::try_into(discovery_amount).unwrap();
+        U128TryIntoU16::try_into(discovery_amount).unwrap()
     }
 
     // get_gold_discovery generates a random gold discovery based on adventurer level and provided entropy
