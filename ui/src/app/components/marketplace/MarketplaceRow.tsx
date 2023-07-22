@@ -63,7 +63,7 @@ const MarketplaceRow = ({
 
   const { tier, type, slot } = getItemData(item.item ?? "");
   const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
-  const enoughGold = calculatedNewGold > itemPrice;
+  const enoughGold = calculatedNewGold >= itemPrice;
 
   const checkTransacting = (item: string) => {
     if (txData?.status == "RECEIVED" || txData?.status == "PENDING") {
