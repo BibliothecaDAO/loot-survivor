@@ -27,22 +27,14 @@ export default function MarketplaceScreen({
   const [itemsCount, setItemsCount] = useState(0);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const { data, isLoading } = useQueriesStore();
+  const { isLoading } = useQueriesStore();
+
+  const marketLatestItems = useQueriesStore(state => state.data.latestMarketItemsQuery?.items || []);
+  const adventurers = useQueriesStore(state => state.data.adventurersInListQuery?.adventurers || []);
+
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
   );
-
-  const [marketLatestItems, setMarketLatestItems] = useState<Item[]>([]);
-
-  useEffect(() => {
-    if (data.latestMarketItemsQuery) {
-      setMarketLatestItems(data.latestMarketItemsQuery.items);
-    }
-  }, [data.latestMarketItemsQuery]);
-
-  const adventurers = data.adventurersInListQuery
-    ? data.adventurersInListQuery.adventurers
-    : [];
 
   const headings = ["Item", "Tier", "Slot", "Type", "Cost", "Actions"];
 

@@ -202,3 +202,20 @@ body::-webkit-scrollbar-thumb,
   transform : translateY(-1rem);
   transition: opacity 500ms, transform 500ms;
 }
+
+@keyframes flash {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.flash {
+  @apply bg-terminal-green;
+  animation: flash 0.5s;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 100;
+}

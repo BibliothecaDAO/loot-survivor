@@ -71,6 +71,11 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     { key: "CHA", value: formatAdventurer.charisma },
     { key: "LUCK", value: luck },
   ];
+
+  const bodyParts = [
+    'Weapon', 'Head', 'Chest', 'Hand', 'Waist', 'Foot', 'Neck', 'Ring'
+  ];
+  
   return (
     <div className="h-full border border-terminal-green overflow-auto">
       {!isLoading.itemsByAdventurerQuery ? (
@@ -128,95 +133,19 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   ))}
                 </div>
                 <div className="flex flex-col w-full">
-                  <div className="w-full">
-                    <ItemDisplay
-                      item={
-                        items.find(
-                          (item: Item) =>
-                            item.item == formatAdventurer.weapon &&
-                            item.equipped
-                        ) || NullItem
-                      }
-                      itemSlot="Weapon"
-                    />
-                  </div>
-                  <div className="">
-                    <ItemDisplay
-                      item={
-                        items.find(
-                          (item: Item) =>
-                            item.item == formatAdventurer.head && item.equipped
-                        ) || NullItem
-                      }
-                      itemSlot="Head"
-                    />
-                  </div>
-                  <div className="">
-                    <ItemDisplay
-                      item={
-                        items.find(
-                          (item: Item) =>
-                            item.item == formatAdventurer.chest && item.equipped
-                        ) || NullItem
-                      }
-                      itemSlot="Chest"
-                    />
-                  </div>
-                  <div className="">
-                    <ItemDisplay
-                      item={
-                        items.find(
-                          (item: Item) =>
-                            item.item == formatAdventurer.hand && item.equipped
-                        ) || NullItem
-                      }
-                      itemSlot="Hand"
-                    />
-                  </div>
-                  <div className="">
-                    <ItemDisplay
-                      item={
-                        items.find(
-                          (item: Item) =>
-                            item.item == formatAdventurer.waist && item.equipped
-                        ) || NullItem
-                      }
-                      itemSlot="Waist"
-                    />
-                  </div>
-                  <div className="">
-                    <ItemDisplay
-                      item={
-                        items.find(
-                          (item: Item) =>
-                            item.item == formatAdventurer.foot && item.equipped
-                        ) || NullItem
-                      }
-                      itemSlot="Foot"
-                    />
-                  </div>
-                  <div className="">
-                    <ItemDisplay
-                      item={
-                        items.find(
-                          (item: Item) =>
-                            item.item == formatAdventurer.neck && item.equipped
-                        ) || NullItem
-                      }
-                      itemSlot="Neck"
-                    />
-                  </div>
-                  <div className="">
-                    <ItemDisplay
-                      item={
-                        items.find(
-                          (item: Item) =>
-                            item.item == formatAdventurer.ring && item.equipped
-                        ) || NullItem
-                      }
-                      itemSlot="Ring"
-                    />
-                  </div>
+                  {bodyParts.map(part => (
+                    <div key={part} className="w-full">
+                      <ItemDisplay
+                        item={
+                          items.find(
+                            (item: Item) =>
+                              item.item === formatAdventurer[part.toLowerCase()] && item.equipped
+                          ) || NullItem
+                        }
+                        itemSlot={part}
+                      />
+                    </div>
+                  ))}
                 </div>
 
               </div>
