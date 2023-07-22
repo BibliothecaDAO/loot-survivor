@@ -1403,13 +1403,8 @@ fn test_get_random_level() {
     // entity level should still be the same as adventurer level
     assert(entity_level == adventurer_level, 'lvl should eql advr lvl');
 
-    // test above difficult cliff (we should start to see a range of levels now based on entropy)
-    // using defualts, adventurer will now be level 5
-    // entropy 0 will generate the minimum entity level which will be:
-    // 1 + (adventurer level - difficulty cliff)
-    // min_level: 1 + (5 - 3) = 3
-    // the max level will be: adventurer_level + (1 + (LEVEL_MULTIPLIER * number of level increases))
-    // for current settings that will be: 5 + (1 + (4*1) = 10
+    // test above the difficult cliff
+    // now entity level will span a range defined 
     adventurer_level = DIFFICULTY_CLIFF::NORMAL + 1;
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 0, range_level_increase, level_multiplier
@@ -1451,9 +1446,29 @@ fn test_get_random_level() {
     );
     assert(entity_level == 10, 'entity lvl should be 10');
 
-    // verify we roll over back to entity level 1
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 8, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 11, 'entity lvl should be 11');
+
+    let entity_level = ImplCombat::get_random_level(
+        adventurer_level, 9, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 12, 'entity lvl should be 12');
+
+    let entity_level = ImplCombat::get_random_level(
+        adventurer_level, 10, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 13, 'entity lvl should be 13');
+
+    let entity_level = ImplCombat::get_random_level(
+        adventurer_level, 11, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 14, 'entity lvl should be 14');
+
+    // rollover back to minimum level for current level
+    let entity_level = ImplCombat::get_random_level(
+        adventurer_level, 12, range_level_increase, level_multiplier
     );
     assert(entity_level == 3, 'entity lvl should be 3');
 

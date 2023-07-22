@@ -45,8 +45,9 @@ mod Game {
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
             adventurer_constants::{
-                POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER, ITEM_MAX_GREATNESS,
-                MAX_GREATNESS_STAT_BONUS, StatisticIndex, VITALITY_INSTANT_HEALTH_BONUS
+                POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER_BEASTS, ITEM_XP_MULTIPLIER_OBSTACLES,
+                ITEM_MAX_GREATNESS, MAX_GREATNESS_STAT_BONUS, StatisticIndex,
+                VITALITY_INSTANT_HEALTH_BONUS
             }
         },
         item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
@@ -1320,7 +1321,7 @@ mod Game {
 
         // get the xp reward for the obstacle
         let adventurer_xp_reward = obstacle.get_xp_reward();
-        let item_xp_reward = adventurer_xp_reward * ITEM_XP_MULTIPLIER;
+        let item_xp_reward = adventurer_xp_reward * ITEM_XP_MULTIPLIER_OBSTACLES;
         // increase adventurer xp and check for level up
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(adventurer_xp_reward);
 
@@ -1512,7 +1513,7 @@ mod Game {
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
-        let xp_increase = value * ITEM_XP_MULTIPLIER;
+        let xp_increase = value * ITEM_XP_MULTIPLIER_BEASTS;
 
         // TODO LH: Consider including a modified bool on the 
         // ItemSpecialsStorage struct so that we can more easily
@@ -1948,7 +1949,7 @@ mod Game {
                     damage_dealt: damage_dealt,
                     critical_hit: critical_hit,
                     xp_earned_adventurer: xp_earned,
-                    xp_earned_items: xp_earned * ITEM_XP_MULTIPLIER,
+                    xp_earned_items: xp_earned * ITEM_XP_MULTIPLIER_BEASTS,
                     gold_earned: gold_reward
                 }
             );
