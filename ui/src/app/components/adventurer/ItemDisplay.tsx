@@ -25,23 +25,21 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
 
   return (
     <div
-      className={`flex-shrink flex gap-2 p-1 sm:p-2 mb-1 text-sm sm:text-base ${
-        item.item ? "bg-terminal-green text-terminal-black" : ""
-      }`}
+      className={`flex-shrink flex gap-2 mb-1 text-sm sm:text-base ${item.item ? "bg-terminal-green text-terminal-black" : ""
+        }`}
     >
-      <LootIcon type={itemSlot ? itemSlot : slot} />
+      <div className="flex flex-col justify-center border-r-2 border-terminal-black p-2 gap-6">
+        <LootIcon type={itemSlot ? itemSlot : slot} />
+        <Efficacyicon type={type} />
+
+      </div>
+
       {item.item ? (
-        <span className="flex flex-row justify-between w-full">
+        <div className="flex flex-row justify-between w-full p-1 sm:p-2 ">
           <div className="w-full overflow-auto whitespace-normal">
             {" "}
             <div className="flex flex-col">
-              <span className="flex font-semibold whitespace-nowrap text-lg">
-                {itemName}
-                {slot == "Neck" || slot == "Ring"
-                  ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
-                  : ""}
-              </span>
-              <div className="flex flex-row justify-between">
+              <div className="flex flex-row justify-between font-semibold">
                 <span className="text-xs sm:text-sm">
                   {item &&
                     `Tier ${tier ?? 0}
@@ -49,14 +47,21 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
                 </span>
                 <span className="text-xs sm:text-sm">{boost}</span>
               </div>
+              <span className="flex font-semibold whitespace-nowrap text-lg">
+                {itemName}
+                {slot == "Neck" || slot == "Ring"
+                  ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
+                  : ""}
+              </span>
+
             </div>
             <span className="whitespace-nowrap">
               <ItemBar xp={item.xp ?? 0} />
             </span>
           </div>
 
-          <Efficacyicon type={type} />
-        </span>
+
+        </div>
       ) : (
         <div
           className={`flex-shrink flex gap-2 p-1 sm:p-2 mb-1 text-sm sm:text-base text-terminal-green"}`}
