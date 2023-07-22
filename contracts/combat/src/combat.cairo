@@ -1,3 +1,4 @@
+use debug::PrintTrait;
 use core::option::OptionTrait;
 use integer::{
     U8IntoU16, U16IntoU64, U8IntoU64, U64TryIntoU16, U64TryIntoU8, U8IntoU128, U128TryIntoU8,
@@ -1382,7 +1383,7 @@ fn test_calculate_damage() {
 }
 
 #[test]
-#[available_gas(550000)]
+#[available_gas(750000)]
 fn test_get_random_level() {
     let mut adventurer_level = 1;
 
@@ -1409,68 +1410,78 @@ fn test_get_random_level() {
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 0, range_level_increase, level_multiplier
     );
-    assert(entity_level == 3, 'entity lvl should be 3');
+    assert(entity_level == 2, 'entity lvl should be 2');
 
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 1, range_level_increase, level_multiplier
     );
-    assert(entity_level == 4, 'entity lvl should be 4');
+    assert(entity_level == 3, 'entity lvl should be 3');
 
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 2, range_level_increase, level_multiplier
     );
-    assert(entity_level == 5, 'entity lvl should be 5');
+    assert(entity_level == 4, 'entity lvl should be 4');
 
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 3, range_level_increase, level_multiplier
     );
-    assert(entity_level == 6, 'entity lvl should be 6');
+    assert(entity_level == 5, 'entity lvl should be 5');
 
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 4, range_level_increase, level_multiplier
     );
-    assert(entity_level == 7, 'entity lvl should be 7');
+    assert(entity_level == 6, 'entity lvl should be 6');
 
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 5, range_level_increase, level_multiplier
     );
-    assert(entity_level == 8, 'entity lvl should be 8');
+    assert(entity_level == 7, 'entity lvl should be 7');
 
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 6, range_level_increase, level_multiplier
     );
-    assert(entity_level == 9, 'entity lvl should be 9');
+    assert(entity_level == 8, 'entity lvl should be 8');
 
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 7, range_level_increase, level_multiplier
     );
-    assert(entity_level == 10, 'entity lvl should be 10');
+    assert(entity_level == 9, 'entity lvl should be 9');
 
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 8, range_level_increase, level_multiplier
     );
-    assert(entity_level == 11, 'entity lvl should be 11');
+    assert(entity_level == 10, 'entity lvl should be 10');
 
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 9, range_level_increase, level_multiplier
     );
-    assert(entity_level == 12, 'entity lvl should be 12');
+    assert(entity_level == 11, 'entity lvl should be 11');
 
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 10, range_level_increase, level_multiplier
     );
-    assert(entity_level == 13, 'entity lvl should be 13');
+    assert(entity_level == 12, 'entity lvl should be 12');
 
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 11, range_level_increase, level_multiplier
     );
-    assert(entity_level == 14, 'entity lvl should be 14');
+    assert(entity_level == 13, 'entity lvl should be 13');
 
-    // rollover back to minimum level for current level
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 12, range_level_increase, level_multiplier
     );
-    assert(entity_level == 3, 'entity lvl should be 3');
+    assert(entity_level == 14, 'entity lvl should be 14');
+
+    let entity_level = ImplCombat::get_random_level(
+        adventurer_level, 13, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 15, 'entity lvl should be 15');
+
+    // rollover back to minimum level for current level
+    let entity_level = ImplCombat::get_random_level(
+        adventurer_level, 14, range_level_increase, level_multiplier
+    );
+    assert(entity_level == 2, 'entity lvl should be 2');
 
     // test 6 * the difficulty cliff for mid-late game
     // difficulty cliff default is 4 so adventurer_level here would be 24
@@ -1478,12 +1489,12 @@ fn test_get_random_level() {
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 0, range_level_increase, level_multiplier
     );
-    // at this stage, the minimum entity level is 17
-    assert(entity_level == 17, 'entity lvl should be 17');
+    // at this stage, the minimum entity level is 11
+    assert(entity_level == 11, 'entity lvl should be 11');
 
-    // but we'll have 27 levels of range so top end should be 52
+    // and the top is level 59
     let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 27, range_level_increase, level_multiplier
+        adventurer_level, 48, range_level_increase, level_multiplier
     );
-    assert(entity_level == 44, 'entity lvl should be 44');
+    assert(entity_level == 59, 'entity lvl should be 59');
 }
