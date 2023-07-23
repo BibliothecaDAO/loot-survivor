@@ -17,7 +17,7 @@ import {
   getLastBeastDiscovery,
   getLastBattleByAdventurer,
 } from "../hooks/graphql/queries";
-import { NullAdventurer, Battle, NullDiscovery, NullBeast } from "../types";
+import { Battle, NullDiscovery, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
 import { useMediaQuery } from "react-responsive";
 
@@ -45,7 +45,30 @@ export default function BeastScreen() {
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
 
-  const { data } = useQueriesStore();
+  const lastBeast = useQueriesStore(
+    (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
+  );
+  const beastData = useQueriesStore(
+    (state) => state.data.beastQuery?.beasts[0] || NullBeast
+  );
+  const formatBattles = useQueriesStore(
+    (state) => state.data.battlesByBeastQuery?.battles || []
+  );
+  const lastBattle = useQueriesStore(
+    (state) => state.data.lastBattleQuery?.battles[0]
+  );
+
+  // let lastBeast = data.lastBeastQuery
+  //   ? data.lastBeastQuery.discoveries[0]
+  //   : NullDiscovery;
+
+  // let beastData = data.beastQuery ? data.beastQuery.beasts[0] : NullBeast;
+
+  // const formatBattles = data.battlesByBeastQuery
+  //   ? data.battlesByBeastQuery.battles
+  //   : [];
+
+  // const lastBattle = data.lastBattleQuery?.battles[0];
 
   useCustomQuery(
     "lastBeastQuery",
@@ -64,10 +87,6 @@ export default function BeastScreen() {
     },
     txAccepted
   );
-
-  let lastBeast = data.lastBeastQuery
-    ? data.lastBeastQuery.discoveries[0]
-    : NullDiscovery;
 
   useCustomQuery(
     "beastQuery",
@@ -90,14 +109,6 @@ export default function BeastScreen() {
     },
     txAccepted
   );
-
-  let beastData = data.beastQuery ? data.beastQuery.beasts[0] : NullBeast;
-
-  const formatBattles = data.battlesByBeastQuery
-    ? data.battlesByBeastQuery.battles
-    : [];
-
-  const lastBattle = data.lastBattleQuery?.battles[0];
 
   const attackTx = {
     contractAddress: gameContract?.address ?? "",
