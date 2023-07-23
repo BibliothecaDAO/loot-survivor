@@ -189,7 +189,7 @@ export default function UpgradeScreen() {
         icon: <ArrowTargetIcon />,
         value: "Strength",
         action: async () => setSelected("Strength"),
-        disabled: loading,
+        disabled: false,
       },
       {
         id: 2,
@@ -197,7 +197,7 @@ export default function UpgradeScreen() {
         icon: <CatIcon />,
         value: "Dexterity",
         action: async () => setSelected("Dexterity"),
-        disabled: loading,
+        disabled: false,
       },
       {
         id: 3,
@@ -205,7 +205,7 @@ export default function UpgradeScreen() {
         icon: <HeartVitalityIcon />,
         value: "Vitality",
         action: async () => setSelected("Vitality"),
-        disabled: loading,
+        disabled: false,
       },
       {
         id: 4,
@@ -213,7 +213,7 @@ export default function UpgradeScreen() {
         icon: <LightbulbIcon />,
         value: "Intelligence",
         action: async () => setSelected("Intelligence"),
-        disabled: loading,
+        disabled: false,
       },
       {
         id: 5,
@@ -221,7 +221,7 @@ export default function UpgradeScreen() {
         icon: <ScrollIcon />,
         value: "Wisdom",
         action: async () => setSelected("Wisdom"),
-        disabled: loading,
+        disabled: false,
       },
       {
         id: 6,
@@ -229,7 +229,7 @@ export default function UpgradeScreen() {
         icon: <CoinCharismaIcon />,
         value: "Charisma",
         action: async () => setSelected("Charisma"),
-        disabled: loading,
+        disabled: false,
       },
     ];
     return (

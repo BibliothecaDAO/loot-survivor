@@ -61,7 +61,7 @@ export const BattleDisplay = ({
 
     if (AdventurerAttack && BeastHealthExists && !NoDamageDealt) {
       return (
-        <p className="w-full justify-between">
+        <p className="w-full justify-between text-terminal-yellow">
           NICE! You attacked the {beastName} for {battleData?.damageDealt}{" "}
           damage!
         </p>
@@ -243,5 +243,5 @@ export const NotificationBattleDisplay = ({
       return <p>You were killed by the idle penalty!</p>;
     }
   };
-  return <div>{renderBattleNotification()}</div>;
+  return <div >{renderBattleNotification()}</div>;
 };

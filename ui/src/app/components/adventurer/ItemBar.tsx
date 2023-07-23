@@ -27,7 +27,7 @@ const ItemBar: React.FC<ItemBarProps> = ({ xp }) => {
             <span>{level}</span>
             <div className="w-full h-1 border border-black bg-terminal-green dark:bg-terminal-green self-center">
               <div className="flex justify-between text-xs sm:text-sm text-center absolute top-0 bg-terminal-green px-4 left-[30%]">
-                <span>Greatness</span>
+                {/* <span>Greatness</span> */}
               </div>
               <div
                 className="h-full bg-black flex-grow  w-full"
