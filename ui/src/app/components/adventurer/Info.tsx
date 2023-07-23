@@ -74,8 +74,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
 
   const bodyParts = [
     "Weapon",
-    "Head",
     "Chest",
+    "Head",
     "Hand",
     "Waist",
     "Foot",

@@ -35,7 +35,6 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
   const setInventorySelected = useUIStore(
     (state) => state.setInventorySelected
   );
-  const profile = useUIStore((state) => state.profile);
 
   return (
     <div
@@ -84,7 +83,7 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
                       setInventorySelected(
                         parseInt(
                           getKeyFromValue(gameData.SLOTS, slot ?? "") ?? ""
-                        ) + 1 ?? 0
+                        ) ?? 0
                       );
                     }}
                   >

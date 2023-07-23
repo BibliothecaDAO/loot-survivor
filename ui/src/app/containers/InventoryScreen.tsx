@@ -113,8 +113,8 @@ export default function InventoryScreen() {
   enum Menu {
     All = "All",
     Weapon = "Weapon",
-    Head = "Head",
     Chest = "Chest",
+    Head = "Head",
     Hand = "Hand",
     Waist = "Waist",
     Foot = "Foot",
@@ -163,29 +163,29 @@ export default function InventoryScreen() {
           icon={<LootIcon type="weapon" />}
         />
         <InventoryRow
-          title={"Head Armour"}
-          items={groupedItems["Head"]}
+          title={"Chest Armor"}
+          items={groupedItems["Chest"]}
           menuIndex={2}
           isActive={activeMenu == 2}
           setActiveMenu={setActiveMenu}
           isSelected={inventorySelected == 2}
           setSelected={setInventorySelected}
-          equippedItem={adventurer?.head}
-          icon={<LootIcon type="head" />}
+          equippedItem={adventurer?.chest}
+          icon={<LootIcon type="chest" />}
         />
         <InventoryRow
-          title={"Chest Armour"}
-          items={groupedItems["Chest"]}
+          title={"Head Armor"}
+          items={groupedItems["Head"]}
           menuIndex={3}
           isActive={activeMenu == 3}
           setActiveMenu={setActiveMenu}
           isSelected={inventorySelected == 3}
           setSelected={setInventorySelected}
-          equippedItem={adventurer?.chest}
-          icon={<LootIcon type="chest" />}
+          equippedItem={adventurer?.head}
+          icon={<LootIcon type="head" />}
         />
         <InventoryRow
-          title={"Hands Armour"}
+          title={"Hand Armor"}
           items={groupedItems["Hand"]}
           menuIndex={4}
           isActive={activeMenu == 4}
@@ -196,7 +196,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="hand" />}
         />
         <InventoryRow
-          title={"Waist Armour"}
+          title={"Waist Armor"}
           items={groupedItems["Waist"]}
           menuIndex={5}
           isActive={activeMenu == 5}
@@ -207,7 +207,7 @@ export default function InventoryScreen() {
           icon={<LootIcon type="waist" />}
         />
         <InventoryRow
-          title={"Feet Armour"}
+          title={"Foot Armor"}
           items={groupedItems["Foot"]}
           menuIndex={6}
           isActive={activeMenu == 6}
