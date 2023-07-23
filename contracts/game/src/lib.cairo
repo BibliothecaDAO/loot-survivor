@@ -1097,7 +1097,9 @@ mod Game {
         let adventurer_id = self._counter.read() + 1;
 
         // generate a new adventurer using the provided started weapon and current block number
-        let mut new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, adventurer_meta.class, block_number);
+        let mut new_adventurer: Adventurer = ImplAdventurer::new(
+            starting_weapon, adventurer_meta.class, block_number
+        );
 
         let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
             block_number, adventurer_id
@@ -1118,9 +1120,11 @@ mod Game {
             adventurer_meta
         );
 
+        let beast_seed: u128 = new_adventurer.get_beast_seed(adventurer_entropy);
+
         // generate starter beast which will have weak armor against the adventurers starter weapon
         let starter_beast = ImplBeast::get_starter_beast(
-            ImplLoot::get_type(starting_weapon), adventurer_entropy
+            ImplLoot::get_type(starting_weapon), beast_seed
         );
 
         // spoof a beast ambush by deducting health from the adventurer
@@ -1134,7 +1138,7 @@ mod Game {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
                     adventurer: new_adventurer
-                    }, seed: 0, id: starter_beast.id, beast_specs: CombatSpec {
+                    }, seed: beast_seed, id: starter_beast.id, beast_specs: CombatSpec {
                     tier: starter_beast.combat_spec.tier,
                     item_type: starter_beast.combat_spec.item_type,
                     level: starter_beast.combat_spec.level,
