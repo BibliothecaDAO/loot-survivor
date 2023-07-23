@@ -29,9 +29,7 @@ export default function AdventurerScreen() {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
 
-  const adventurers = useQueriesStore((state) => state.data.adventurersByOwnerQuery
-    ? state.data.adventurersByOwnerQuery.adventurers
-    : []);
+  const adventurers = useQueriesStore((state) => state.data.adventurersByOwnerQuery?.adventurers || []);
 
   const owner = account?.address ? padAddress(account.address) : "";
 
