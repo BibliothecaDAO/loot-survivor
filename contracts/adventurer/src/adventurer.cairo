@@ -449,7 +449,7 @@ impl ImplAdventurer of IAdventurer {
     // Adds a specified amount of health to the adventurer, preventing overflow and capping at max health.
     // @param self: Adventurer to add health to
     // @param amount: Amount of health to add to the adventurer
-    fn add_health(ref self: Adventurer, amount: u16) {
+    fn increase_health(ref self: Adventurer, amount: u16) {
         // check for u16 overflow
         if (u16_overflowing_add(self.health, amount).is_ok()) {
             // if overflow is ok
@@ -1580,27 +1580,27 @@ fn test_new_warrior() {
 
 #[test]
 #[available_gas(200000)]
-fn test_add_health() {
+fn test_increase_health() {
     let mut adventurer = ImplAdventurer::new(1, AdventurerClass::None(()), 1);
 
     // test stock max health is 100
-    adventurer.add_health(5);
+    adventurer.increase_health(5);
     assert(adventurer.health == 100, 'max health with 0 vit is 100');
 
     // increase max health via vitality boost
     adventurer.stats.vitality = 1;
-    adventurer.add_health(5);
+    adventurer.increase_health(5);
     assert(adventurer.health == 105, 'health should be 105');
 
     // verify max health is starting health + vitality boost
-    adventurer.add_health(50);
+    adventurer.increase_health(50);
     assert(
         adventurer.health == STARTING_HEALTH + VITALITY_HEALTH_CAP_INCREASE.into(),
         'max health error'
     );
 
     // check overflow
-    adventurer.add_health(65535);
+    adventurer.increase_health(65535);
     assert(
         adventurer.health == STARTING_HEALTH + VITALITY_HEALTH_CAP_INCREASE.into(),
         'health should be 120'
@@ -1642,7 +1642,7 @@ fn test_has_full_health() {
     assert(adventurer.has_full_health() == false, 'vitality increased max');
 
     // fill up health
-    adventurer.add_health(100);
+    adventurer.increase_health(100);
     assert(adventurer.has_full_health() == true, 'health should be full');
 
     // deduct 1 health
