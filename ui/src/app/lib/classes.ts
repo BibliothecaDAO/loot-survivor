@@ -6,7 +6,7 @@ export class AdventurerClass implements Adventurer {
   id?: number; // Adventurer ID
   lastAction?: number; // Block number from last action
   owner?: string; // Hex address of the owner
-  race?: string; // Race of the adventurer
+  classType?: string; // Class of the adventurer
   homeRealm?: number; // Home Realm of the adventurer
   name?: string; // Name of the adventurer
   order?: string; // Order of the adventurer
@@ -39,7 +39,7 @@ export class AdventurerClass implements Adventurer {
       id,
       lastAction,
       owner,
-      race,
+      classType,
       homeRealm,
       name,
       order,
@@ -71,7 +71,7 @@ export class AdventurerClass implements Adventurer {
     this.id = id;
     this.lastAction = lastAction;
     this.owner = owner;
-    this.race = race;
+    this.classType = classType;
     this.homeRealm = homeRealm;
     this.name = name;
     this.order = order;

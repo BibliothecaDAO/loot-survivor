@@ -7,7 +7,7 @@ export interface Adventurer {
   id?: number; // Adventurer ID
   lastAction?: number; // Block number from last action
   owner?: string; // Hex address of the owner
-  race?: string; // Race of the adventurer
+  classType?: string; // Class of the adventurer
   homeRealm?: number; // Home Realm of the adventurer
   name?: string; // Name of the adventurer
   order?: string; // Order of the adventurer
@@ -164,7 +164,7 @@ export type FormData = {
   startingWeapon: string;
   name: string;
   homeRealmId: string;
-  race: string;
+  class: string;
 };
 
 export interface Call {
@@ -265,7 +265,7 @@ export const NullAdventurer: Adventurer = {
   id: undefined,
   lastAction: undefined,
   owner: undefined,
-  race: undefined,
+  classType: undefined,
   homeRealm: undefined,
   name: undefined,
   order: undefined,

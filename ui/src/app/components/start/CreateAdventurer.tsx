@@ -44,7 +44,7 @@ export const CreateAdventurer = ({
     startingWeapon: "",
     name: "",
     homeRealmId: "",
-    race: "",
+    class: "",
   });
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const setScreen = useUIStore((state) => state.setScreen);
@@ -102,6 +102,10 @@ export const CreateAdventurer = ({
     };
   }, [isActive, selectedIndex, handleKeyDown]);
 
+  const getRandomNumber = (to: number) => {
+    return (Math.floor(Math.random() * to) + 1).toString();
+  };
+
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -136,7 +140,7 @@ export const CreateAdventurer = ({
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name).toString(),
         getRandomNumber(8000),
-        getRandomNumber(10),
+        getKeyFromValue(gameData.CLASSES, formData.class) ?? "",
         "1",
       ],
     };
@@ -166,22 +170,27 @@ export const CreateAdventurer = ({
   const [formFilled, setFormFilled] = useState(false);
 
   useEffect(() => {
-    if (formData.name && formData.startingWeapon) {
+    if (formData.class && formData.name && formData.startingWeapon) {
       setFormFilled(true);
     } else {
       setFormFilled(false);
     }
   }, [formData]);
 
+  const handleClassSelection = (classType: string) => {
+    setFormData({ ...formData, class: classType });
+    setStep(step + 1);
+  };
+
   const handleWeaponSelection = (weapon: string) => {
     setFormData({ ...formData, startingWeapon: weapon });
-    setStep(2);
+    setStep(step + 1);
   };
 
   const handleNameEntry = (name: string) => {
     setFormData({ ...formData, name: name });
     setTimeout(() => {
-      setStep(3);
+      setStep(step + 1);
     }, 1000);
   };
 
@@ -189,11 +198,65 @@ export const CreateAdventurer = ({
     setStep((step) => Math.max(step - 1, 1));
   };
 
-  const getRandomNumber = (to: number) => {
-    return (Math.floor(Math.random() * to) + 1).toString();
-  };
-
   if (step === 1) {
+    return (
+      <>
+        <div className="w-full sm:p-8">
+          <h3 className="uppercase text-center">Choose your character</h3>
+          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:justify-between gap-5 sm:gap-20">
+            {[
+              {
+                name: "Cleric",
+                description: "Boost: +3 Charisma +3 Vitality",
+                image: "/characters/cleric.png",
+              },
+              {
+                name: "Scout",
+                description: "Boost: +2 Intelligence +2 Wisdom +3 Dexterity",
+                image: "/characters/scout.png",
+              },
+              {
+                name: "Hunter",
+                description: "Boost: +3 Strength +3 Intelligence",
+                image: "/characters/hunter.png",
+              },
+              {
+                name: "Warrior",
+                description:
+                  "+1 Strength +1 Dexterity +1 Vitality +1 Intelligence +1 Wisdom +1 Charisma",
+                image: "/characters/warrior.png",
+              },
+            ].map((classType) => (
+              <div
+                key={classType.name}
+                className="flex flex-col items-center h-full justify-between"
+              >
+                <div className="relative w-24 h-24 sm:w-56 sm:h-56">
+                  <Image
+                    src={classType.image}
+                    fill={true}
+                    alt={classType.name}
+                    style={{
+                      objectFit: "contain",
+                    }}
+                  />
+                </div>
+                <div className="flex items-center pb-2 sm:pb-4 text-sm sm:text-md">
+                  <p className="ml-2">{classType.description}</p>
+                </div>
+                <Button
+                  className="w-full"
+                  onClick={() => handleClassSelection(classType.name)}
+                >
+                  {classType.name}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </>
+    );
+  } else if (step === 2) {
     return (
       <>
         <div className="w-full sm:p-8">
@@ -252,7 +315,7 @@ export const CreateAdventurer = ({
         </div>
       </>
     );
-  } else if (step === 2) {
+  } else if (step === 3) {
     return (
       <>
         <div className="w-full border border-terminal-green p-8 uppercase">
@@ -274,7 +337,7 @@ export const CreateAdventurer = ({
         </div>
       </>
     );
-  } else if (step === 3) {
+  } else if (step === 4) {
     return (
       <>
         <div className="flex flex-col w-full h-full justify-center">
