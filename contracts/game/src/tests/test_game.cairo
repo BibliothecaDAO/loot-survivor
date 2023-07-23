@@ -447,6 +447,10 @@ mod tests {
         // TODO: use cheat codes to make this less fragile
         testing::set_block_number(1004);
         game.explore(ADVENTURER_ID);
+        // use stat upgrade
+        game.upgrade_stat(ADVENTURER_ID, 0, 1);
+        testing::set_block_number(1005);
+        game.explore(ADVENTURER_ID);
 
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(updated_adventurer.beast_health > 0, 'should have found a beast');

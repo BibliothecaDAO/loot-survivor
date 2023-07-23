@@ -1,5 +1,5 @@
 // Starting Setting
-const STARTING_GOLD: u16 = 40;
+const STARTING_GOLD: u16 = 25;
 const MAX_GOLD: u16 = 511; // 2^9 - 1
 
 const STARTING_HEALTH: u16 = 100;
