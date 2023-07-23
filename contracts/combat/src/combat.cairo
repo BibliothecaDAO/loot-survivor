@@ -595,16 +595,14 @@ impl ImplCombat of ICombat {
     fn ability_based_avoid_threat(adventurer_level: u8, relevant_stat: u8, entropy: u128) -> bool {
         // number of sides of the die will be based on adventurer_level
         // so the higher the adventurer level, the more sides the die has
-        let dice_roll = 1 + U128TryIntoU8::try_into(entropy % adventurer_level.into()).unwrap();
+        let dice_roll = U128TryIntoU8::try_into(entropy % adventurer_level.into()).unwrap();
 
         // in order to avoid the threat, the adventurer's stat must be higher than the dice roll
-        // The dice roll will be 1 - adventurer's level. As an example, if the adventurer is on
-        // level 3 with 3 points of dexterity, the dice roll will produce a number between
-        // 1 - 3 which means the adventurer will have a 100% chance of fleeing beast. 
-        // If the adventurer doesn't invest in their dexterity for the next 3 levels and is now
-        // level 6 with 3 dexterity, the dice roll will now be 1-6 and they need a 1,2, or 3
-        // to flee which means they have a 50% chance of fleeing.
-        // At level 12 with 3 dexterity, they have a 3/12 (25%) chance of fleeing.
+        //  As an example, if the adventurer is on level 2 with no dexterity, the
+        // dice roll will be either 0 or 1. To flee they'll need a 0 (50/50 chance)
+        // If aventurer has 1 dexterity on level 2, they will have 100% chance of fleeing
+        // If adventurer is level 20 with 10 dexterity, the dice roll will be 0 - 19
+        // and adventurer will need a 0-9 to flee (50/50) chance
         relevant_stat >= dice_roll
     }
 }
