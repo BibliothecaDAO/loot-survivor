@@ -1289,7 +1289,7 @@ mod Game {
                             __event__DiscoveredGold(ref self, adventurer_id, adventurer, amount);
                         } else {
                             // otherwise add health
-                            adventurer.add_health(amount);
+                            adventurer.increase_health(amount);
                             __event__DiscoveredHealth(ref self, adventurer_id, adventurer, amount);
                         }
                     },
@@ -1781,6 +1781,16 @@ mod Game {
                     },
                     items: _get_items_on_market(@self, adventurer_id, adventurer)
                 );
+            }
+
+            // if item received a suffix as part of the level up
+            if (suffix_assigned) {
+                // adventurer gets a health boost from items that boost vitality
+                adventurer
+                    .increase_health(
+                        AdventurerUtils::get_vitality_item_boost(special_names.special1).into()
+                            * VITALITY_INSTANT_HEALTH_BONUS
+                    );
             }
 
             _handle_item_leveling_events(
@@ -2367,7 +2377,7 @@ mod Game {
             );
         } else if (stat_id == StatisticIndex::VITALITY) {
             adventurer.increase_vitality(amount);
-            adventurer.add_health(VITALITY_INSTANT_HEALTH_BONUS);
+            adventurer.increase_health(VITALITY_INSTANT_HEALTH_BONUS);
             __event__VitalityIncreased(
                 ref self,
                 AdventurerState {
@@ -2421,7 +2431,7 @@ mod Game {
         adventurer.deduct_gold(adventurer.charisma_adjusted_potion_price());
 
         // add health to adventurer
-        adventurer.add_health(POTION_HEALTH_AMOUNT);
+        adventurer.increase_health(POTION_HEALTH_AMOUNT);
     }
 
     // _get_live_entropy generates entropy for exploration

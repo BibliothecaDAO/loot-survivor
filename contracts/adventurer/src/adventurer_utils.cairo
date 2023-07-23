@@ -1,17 +1,17 @@
 use core::{result::ResultTrait, traits::{TryInto, Into}};
+use poseidon::poseidon_hash_span;
+use option::OptionTrait;
+use array::ArrayTrait;
 use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub, U128IntoU256};
 use super::{
     constants::{
         adventurer_constants::{MAX_STAT_VALUE, U128_MAX, ClassStatBoosts},
         discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
     },
-    adventurer_meta::AdventurerClass,
-    adventurer_stats::Stats
+    adventurer_meta::AdventurerClass, adventurer_stats::Stats
 };
+use lootitems::statistics::constants::ItemSuffix::{of_Power, of_Giant, of_Titans, of_Skill, of_Perfection, of_Brilliance, of_Enlightenment, of_Protection, of_Anger, of_Rage, of_Fury, of_Vitriol, of_the_Fox, of_Detection, of_Reflection, of_the_Twins};
 use combat::constants::CombatEnums::{Type, Tier, Slot};
-use poseidon::poseidon_hash_span;
-use option::OptionTrait;
-use array::ArrayTrait;
 use pack::pack::{rshift_split};
 
 #[generate_trait]
@@ -101,12 +101,7 @@ impl AdventurerUtils of IAdventurer {
         match adventurer_class {
             AdventurerClass::None(()) => {
                 Stats {
-                    strength: 0,
-                    dexterity: 0,
-                    vitality: 0,
-                    intelligence: 0,
-                    wisdom: 0,
-                    charisma: 0
+                    strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0
                 }
             },
             AdventurerClass::Cleric(()) => {
@@ -149,6 +144,47 @@ impl AdventurerUtils of IAdventurer {
                     charisma: ClassStatBoosts::Warrior::VITALITY
                 }
             },
+        }
+    }
+
+    // TODO: Need to refactor this and add_suffix_boost to ensure they
+    // stay insync. I think the design used for AdventurerClass in adventurer_meta
+    // is good. 
+    fn get_vitality_item_boost(suffix: u8) -> u8 {
+        if (suffix == of_Power) {
+            0
+        } else if (suffix == of_Giant) {
+            3
+        } else if (suffix == of_Titans) {
+            0
+        } else if (suffix == of_Skill) {
+            0
+        } else if (suffix == of_Perfection) {
+            1
+        } else if (suffix == of_Brilliance) {
+            0
+        } else if (suffix == of_Enlightenment) {
+            0
+        } else if (suffix == of_Protection) {
+            2
+        } else if (suffix == of_Anger) {
+            0
+        } else if (suffix == of_Rage) {
+            0
+        } else if (suffix == of_Fury) {
+            1
+        } else if (suffix == of_Vitriol) {
+            0
+        } else if (suffix == of_the_Fox) {
+            0
+        } else if (suffix == of_Detection) {
+            0
+        } else if (suffix == of_Reflection) {
+            0
+        } else if (suffix == of_the_Twins) {
+            0
+        } else {
+            0
         }
     }
 }
