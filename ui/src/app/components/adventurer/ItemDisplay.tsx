@@ -35,6 +35,7 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
   const setInventorySelected = useUIStore(
     (state) => state.setInventorySelected
   );
+  const profile = useUIStore((state) => state.profile);
 
   return (
     <div
@@ -73,7 +74,7 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
                     ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
                     : ""}
                 </span>
-                {screen != "inventory" && (
+                {screen != "inventory" && screen != "profile" && (
                   <Button
                     variant={"contrast"}
                     size={"xs"}
