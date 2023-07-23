@@ -1125,11 +1125,10 @@ mod Game {
             ImplLoot::get_type(starting_weapon), adventurer_entropy
         );
 
-        // simulate an attack by the beast on the adventurer
-        // (no need to waste gas calling combat moudle)
+        // spoof a beast ambush by deducting health from the adventurer
         new_adventurer.deduct_health(STARTER_BEAST_ATTACK_DAMAGE);
 
-        // emit AmbushedByBeast event
+        // and emitting an AmbushedByBeast event
         __event__AmbushedByBeast(
             ref self,
             AmbushedByBeast {
@@ -1145,7 +1144,9 @@ mod Game {
                 },
                 damage: STARTER_BEAST_ATTACK_DAMAGE,
                 critical_hit: false,
-                location: ImplCombat::slot_to_u8(Slot::Foot(())),
+                location: ImplCombat::slot_to_u8(
+                    AdventurerUtils::get_random_attack_location(adventurer_entropy)
+                ),
             }
         );
 
