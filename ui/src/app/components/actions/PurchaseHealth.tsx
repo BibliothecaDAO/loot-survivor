@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import HealthSlider from "./HealthSlider";
+import HealthButtons from "./HealthButtons";
 import { Button } from "../buttons/Button";
 import { useContracts } from "../../hooks/useContracts";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
@@ -74,15 +74,21 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
 
     const calculatedNewHealth = (adventurer?.health ?? 0) + potionAmount * 10;
 
+    const disabled =
+      !hasBalance ||
+      adventurer?.health == maxHealth ||
+      calculatedNewHealth - maxHealth >= 10;
+
     return (
-      <div className="flex flex-row sm:p-2 md:p-4 items-center">
-        <HealthSlider
+      <div className="flex flex-col sm:flex-row sm:p-2 md:p-4 items-center">
+        <HealthButtons
           purchaseAmount={potionAmount}
           setPurchaseAmount={setHealthAmount}
+          disabled={disabled}
         />
-        <div className="flex flex-row items-center p-4">
-          <div className="flex flex-col">
-            <span className="flex flex-row text-lg">
+        <div className="flex flex-col gap-2 sm:flex-row items-center p-4">
+          <div className="flex flex-col text-sm text-center items-center">
+            <span className="flex flex-row gap-1 sm:text-lg">
               <p>
                 Purchasing{" "}
                 <strong className="text-terminal-yellow">{potionAmount}</strong>{" "}
@@ -99,18 +105,15 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
             </p>
           </div>
           <Button
-            disabled={
-              !hasBalance ||
-              adventurer?.health == maxHealth ||
-              calculatedNewHealth - maxHealth > 10
-            }
+            disabled={disabled}
             onClick={async () => {
               handlePurchaseHealth();
             }}
+            size={"lg"}
           >
             {adventurer?.health == maxHealth
               ? "Max Health Reached"
-              : calculatedNewHealth - maxHealth > 10
+              : calculatedNewHealth - maxHealth >= 10
               ? "Purchase Over Max Health"
               : "Purchase Health"}
           </Button>

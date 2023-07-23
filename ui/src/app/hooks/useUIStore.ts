@@ -37,6 +37,8 @@ type State = {
   setLastAction: (value: Date | null) => void;
   mintAdventurer: boolean;
   setMintAdventurer: (value: boolean) => void;
+  inventorySelected: number | null;
+  setInventorySelected: (value: number) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -64,6 +66,8 @@ const useUIStore = create<State>((set) => ({
   setLastAction: (value) => set({ lastAction: value }),
   mintAdventurer: false,
   setMintAdventurer: (value) => set({ mintAdventurer: value }),
+  inventorySelected: null,
+  setInventorySelected: (value) => set({ inventorySelected: value }),
 }));
 
 export default useUIStore;

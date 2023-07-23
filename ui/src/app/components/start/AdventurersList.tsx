@@ -99,11 +99,13 @@ export const AdventurersList = ({
                   setSelectedIndex(index);
                 }}
               >
-                <div className="flex flex-row gap-5">
+                <div className="flex flex-row text-center gap-5">
                   <p>{`${adventurer.name} - ${adventurer.id}`}</p>
-                  <div className="w-4">
-                    {adventurer?.health === 0 ? <SkullIcon /> : null}
-                  </div>
+                  {adventurer?.health === 0 && (
+                    <div className="w-4">
+                      <SkullIcon />
+                    </div>
+                  )}
                 </div>
               </Button>
             ))}

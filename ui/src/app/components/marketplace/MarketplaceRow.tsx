@@ -144,8 +144,8 @@ const MarketplaceRow = ({
         <td className="text-center">{item.item}</td>
         <td className="text-center">{tier}</td>
         <td className="text-center">
-          <div className="flex justify-center items-center ">
-            <LootIcon className="sm:w-4" type={slot} />
+          <div className="flex justify-center items-center">
+            <LootIcon size={isMobileDevice ? "w-4" : "w-5"} type={slot} />
           </div>
         </td>
         <td className="text-center">
@@ -163,7 +163,7 @@ const MarketplaceRow = ({
           </div>
         </td>
 
-        <td className="w-32 text-center">
+        <td className="w-20 sm:w-32 text-center">
           {!isMobileDevice && showEquipQ ? (
             <div className="flex flex-row items-center justify-center gap-2">
               <p>Equip?</p>
@@ -226,7 +226,7 @@ const MarketplaceRow = ({
         </td>
       </tr>
       {isMobileDevice && showEquipQ && isActive && (
-        <div className="fixed bottom-40 left-25 flex flex-row items-center justify-center gap-2">
+        <div className="absolute bottom-5 w-full flex flex-row items-center justify-center gap-2">
           <p>{`Equip ${item.item} ?`}</p>
           <Button
             onClick={() => {

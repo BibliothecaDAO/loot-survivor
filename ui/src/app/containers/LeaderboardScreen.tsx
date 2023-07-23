@@ -10,10 +10,10 @@ import LootIconLoader from "../components/icons/Loader";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
 import useCustomQuery from "../hooks/useCustomQuery";
-import { AdventurerTemplate } from "../types/templates";
 import { Score, Adventurer } from "../types";
 import { useUiSounds, soundSelector } from "../hooks/useUiSound";
 import KillAdventurer from "../components/actions/KillAdventurer";
+import { useMediaQuery } from "react-responsive";
 
 /**
  * @container
@@ -21,6 +21,7 @@ import KillAdventurer from "../components/actions/KillAdventurer";
  */
 export default function LeaderboardScree() {
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [showKill, setShowKill] = useState(false);
   const itemsPerPage = 10;
   const [loading, setLoading] = useState(false);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
@@ -58,6 +59,10 @@ export default function LeaderboardScree() {
     : [];
 
   useCustomQuery("topScoresQuery", getTopScores, undefined, false);
+
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
 
   if (isLoading.adventurersByXPQuery || loading)
     return (
@@ -168,103 +173,114 @@ export default function LeaderboardScree() {
           </h3>
         )}
       </div>
-      <div className="flex flex-col-reverse sm:flex-row justify-between w-full">
-        <div className="flex flex-col w-full sm:mb-4 sm:mb-0 sm:mr-4 flex-grow-2 sm:border sm:border-terminal-green p-2">
-          <h4 className="text-center text-lg sm:text-2xl">Live Leaderboard</h4>
-          <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
-            <thead className="border border-terminal-green">
-              <tr>
-                <th className="p-1">Rank</th>
-                <th className="p-1">Adventurer</th>
-                <th className="p-1">Gold</th>
-                <th className="p-1">XP</th>
-                <th className="p-1">Health</th>
-              </tr>
-            </thead>
-            <tbody>
-              {displayAdventurers?.map(
-                (adventurer: Adventurer, index: number) => {
-                  const dead = (adventurer.health ?? 0) <= 0;
-                  return (
-                    <tr
-                      key={index}
-                      className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
-                      onClick={() => {
-                        handleRowSelected(adventurer.id ?? 0);
-                        clickPlay();
-                      }}
-                    >
-                      <td>{rankGold(adventurer, index)}</td>
-                      <td>{`${adventurer.name} - ${adventurer.id}`}</td>
-                      <td>
-                        <span className="flex justify-center text-terminal-yellow">
-                          <CoinIcon className="self-center w-4 h-4 sm:w-6 sm:h-6 fill-current" />
-                          {adventurer.gold ? adventurer.gold : 0}
-                        </span>
-                      </td>
-                      <td>
-                        <span className="flex justify-center">
-                          {adventurer.xp}
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          className={`flex justify-center ${
-                            !dead ? " text-terminal-green" : "text-red-800"
-                          }`}
-                        >
-                          {adventurer.health}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                }
-              )}
-            </tbody>
-          </table>
-          {adventurers?.length > 10 && (
-            <div className="flex justify-center mt-8">
-              <Button
-                variant={"outline"}
-                onClick={() => currentPage > 1 && handleClick(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                back
-              </Button>
+      <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row justify-between w-full">
+        {!showKill && (
+          <div className="flex flex-col w-full sm:mb-4 sm:mb-0 sm:mr-4 flex-grow-2 sm:border sm:border-terminal-green p-2">
+            <h4 className="text-center text-lg sm:text-2xl m-0">
+              Live Leaderboard
+            </h4>
+            <table className="w-full text-sm sm:text-xl border border-terminal-green">
+              <thead className="border border-terminal-green">
+                <tr>
+                  <th className="p-1">Rank</th>
+                  <th className="p-1">Adventurer</th>
+                  <th className="p-1">Gold</th>
+                  <th className="p-1">XP</th>
+                  <th className="p-1">Health</th>
+                </tr>
+              </thead>
+              <tbody>
+                {displayAdventurers?.map(
+                  (adventurer: Adventurer, index: number) => {
+                    const dead = (adventurer.health ?? 0) <= 0;
+                    return (
+                      <tr
+                        key={index}
+                        className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
+                        onClick={() => {
+                          handleRowSelected(adventurer.id ?? 0);
+                          clickPlay();
+                        }}
+                      >
+                        <td>{rankGold(adventurer, index)}</td>
+                        <td>{`${adventurer.name} - ${adventurer.id}`}</td>
+                        <td>
+                          <span className="flex justify-center text-terminal-yellow">
+                            <CoinIcon className="self-center w-4 h-4 sm:w-6 sm:h-6 fill-current" />
+                            {adventurer.gold ? adventurer.gold : 0}
+                          </span>
+                        </td>
+                        <td>
+                          <span className="flex justify-center">
+                            {adventurer.xp}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className={`flex justify-center ${
+                              !dead ? " text-terminal-green" : "text-red-800"
+                            }`}
+                          >
+                            {adventurer.health}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  }
+                )}
+              </tbody>
+            </table>
+            {adventurers?.length > 10 && (
+              <div className="flex justify-center sm:mt-8">
+                <Button
+                  variant={"outline"}
+                  onClick={() =>
+                    currentPage > 1 && handleClick(currentPage - 1)
+                  }
+                  disabled={currentPage === 1}
+                >
+                  back
+                </Button>
 
-              <Button
-                variant={"outline"}
-                key={1}
-                onClick={() => handleClick(1)}
-                className={currentPage === 1 ? "animate-pulse" : ""}
-              >
-                {1}
-              </Button>
+                <Button
+                  variant={"outline"}
+                  key={1}
+                  onClick={() => handleClick(1)}
+                  className={currentPage === 1 ? "animate-pulse" : ""}
+                >
+                  {1}
+                </Button>
 
-              <Button
-                variant={"outline"}
-                key={totalPages}
-                onClick={() => handleClick(totalPages)}
-                className={currentPage === totalPages ? "animate-pulse" : ""}
-              >
-                {totalPages}
-              </Button>
+                <Button
+                  variant={"outline"}
+                  key={totalPages}
+                  onClick={() => handleClick(totalPages)}
+                  className={currentPage === totalPages ? "animate-pulse" : ""}
+                >
+                  {totalPages}
+                </Button>
 
-              <Button
-                variant={"outline"}
-                onClick={() =>
-                  currentPage < totalPages && handleClick(currentPage + 1)
-                }
-                disabled={currentPage === totalPages}
-              >
-                next
-              </Button>
-            </div>
-          )}
-        </div>
-        <div className="hidden sm:block flex flex-col w-full border border-terminal-green  p-2">
-          <KillAdventurer />
-        </div>
+                <Button
+                  variant={"outline"}
+                  onClick={() =>
+                    currentPage < totalPages && handleClick(currentPage + 1)
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  next
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
+        <Button className="sm:hidden" onClick={() => setShowKill(!showKill)}>
+          {showKill ? "Show Leaderboard" : "Slay Idle Adventurer"}
+        </Button>
+        {((isMobileDevice && showKill) || !isMobileDevice) && (
+          <div className="w-full border border-terminal-green p-2">
+            <KillAdventurer />
+          </div>
+        )}
       </div>
     </div>
   );

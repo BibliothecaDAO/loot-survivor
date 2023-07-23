@@ -78,7 +78,7 @@ export function getKeyFromValue(
 
 export function groupBySlot(items: Item[]) {
   const groups: Dictionary = {};
-
+  groups["All"] = [];
   items.forEach((item) => {
     const { slot } = getItemData(item.item ?? "");
     if (slot) {
@@ -88,6 +88,7 @@ export function groupBySlot(items: Item[]) {
 
       groups[slot].push(item);
     }
+    groups["All"].push(item);
   });
 
   return groups;

@@ -4,6 +4,8 @@ import { GiAnvil } from "react-icons/gi";
 import { GiCurvyKnife } from "react-icons/gi";
 import { GiWoodClub } from "react-icons/gi";
 import { BsMagic } from "react-icons/bs";
+import { IoMdSwap } from "react-icons/io";
+import { GiSwapBag } from "react-icons/gi";
 import HealthPotions from "../../../../public/icons/health-potions.svg";
 import Twitter from "../../../../public/icons/twitter.svg";
 import Volume from "../../../../public/icons/volume.svg";
@@ -42,6 +44,8 @@ const MetalIcon = GiAnvil;
 const BladeIcon = GiCurvyKnife;
 const BludgeonIcon = GiWoodClub;
 const MagicIcon = BsMagic;
+const SwapIcon = IoMdSwap;
+const LootBagIcon = GiSwapBag;
 const HealthPotionsIcon = HealthPotions;
 const TwitterIcon = Twitter;
 const VolumeIcon = Volume;
@@ -82,6 +86,8 @@ export {
   BladeIcon,
   BludgeonIcon,
   MagicIcon,
+  SwapIcon,
+  LootBagIcon,
   HealthPotionsIcon,
   TwitterIcon,
   VolumeIcon,
@@ -112,5 +118,5 @@ export {
   SmileIcon,
   DoubleArrowIcon,
   ArrowIcon,
-  GithubIcon
+  GithubIcon,
 };

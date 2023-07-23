@@ -7,6 +7,7 @@ import Waist from "../../../../public/icons/loot/waist.svg";
 import Foot from "../../../../public/icons/loot/foot.svg";
 import Neck from "../../../../public/icons/loot/neck.svg";
 import Ring from "../../../../public/icons/loot/ring.svg";
+import { LootBagIcon } from "./Icons";
 
 // export type ItemType = "chest" | "weapon" | "head" | "hand" | "waist" | "foot" | "neck" | "ring";
 export type IconSize = "w-4" | "w-5" | "w-6" | "w-7" | "w-8" | "w-10";
@@ -28,6 +29,7 @@ const ItemDisplay = ({ type, size = "w-5", className }: ItemDisplayProps) => {
     foot: <Foot className={classes} />,
     neck: <Neck className={classes} />,
     ring: <Ring className={classes} />,
+    bag: <LootBagIcon className={classes} />,
   };
 
   return Components[type?.toLowerCase()];

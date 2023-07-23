@@ -63,12 +63,12 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
     (ringItem.item ? calculateLevel(ringItem.xp ?? 0) : 0);
 
   const attributes = [
-    { key: "STR", value: formatAdventurer.strength },
+    { key: "STR", value: formatAdventurer.strength ?? 0 },
     { key: "DEX", value: formatAdventurer.dexterity },
-    { key: "INT", value: formatAdventurer.intelligence },
-    { key: "VIT", value: formatAdventurer.vitality },
-    { key: "WIS", value: formatAdventurer.wisdom },
-    { key: "CHA", value: formatAdventurer.charisma },
+    { key: "INT", value: formatAdventurer.intelligence ?? 0 },
+    { key: "VIT", value: formatAdventurer.vitality ?? 0 },
+    { key: "WIS", value: formatAdventurer.wisdom ?? 0 },
+    { key: "CHA", value: formatAdventurer.charisma ?? 0 },
     { key: "LUCK", value: luck },
   ];
 
@@ -89,21 +89,27 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
         <>
           <div className="flex flex-row flex-wrap gap-2 p-1">
             <div className="flex flex-col w-full sm:p-2 uppercase">
-              <div className="flex justify-between w-full text-sm sm:text-base">
-                {formatAdventurer.race}{" "}
-                <span>
-                  {
-                    getRealmNameById(formatAdventurer.homeRealm ?? 0)
-                      ?.properties.name
-                  }
+              {adventurer?.id ? (
+                <div className="flex justify-between w-full text-sm sm:text-base">
+                  {formatAdventurer.race}{" "}
+                  <span>
+                    {
+                      getRealmNameById(formatAdventurer.homeRealm ?? 0)
+                        ?.properties.name
+                    }
+                  </span>
+                  <span>
+                    {
+                      getRealmNameById(formatAdventurer.homeRealm ?? 0)
+                        ?.properties.order
+                    }
+                  </span>
+                </div>
+              ) : (
+                <span className="text-center text-lg text-terminal-yellow">
+                  No Adventurer Selected
                 </span>
-                <span>
-                  {
-                    getRealmNameById(formatAdventurer.homeRealm ?? 0)
-                      ?.properties.order
-                  }
-                </span>
-              </div>
+              )}
               <div className="flex justify-between w-full text-xl sm:text-4xl border-b border-terminal-green">
                 {formatAdventurer.name}
                 <span className="flex items-center text-terminal-yellow">

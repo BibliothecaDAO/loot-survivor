@@ -6,6 +6,9 @@ import ItemBar from "./ItemBar";
 import { GameData } from "../GameData";
 import { getKeyFromValue, getValueFromKey } from "../../lib/utils";
 import { useMediaQuery } from "react-responsive";
+import { SwapIcon } from "../icons/Icons";
+import { Button } from "../buttons/Button";
+import useUIStore from "@/app/hooks/useUIStore";
 
 interface ItemDisplayProps {
   item: Item;
@@ -27,6 +30,11 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
+  const screen = useUIStore((state) => state.screen);
+  const setScreen = useUIStore((state) => state.setScreen);
+  const setInventorySelected = useUIStore(
+    (state) => state.setInventorySelected
+  );
 
   return (
     <div
@@ -58,11 +66,30 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
                 </span>
                 <span className="">{boost}</span>
               </div>
-              <span className="flex font-semibold whitespace-nowrap text-sm sm:text-lg">
-                {itemName}
-                {slot == "Neck" || slot == "Ring"
-                  ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
-                  : ""}
+              <span className="flex flex-row justify-between">
+                <span className="flex font-semibold whitespace-nowrap text-sm sm:text-lg">
+                  {itemName}
+                  {slot == "Neck" || slot == "Ring"
+                    ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
+                    : ""}
+                </span>
+                {screen != "inventory" && (
+                  <Button
+                    variant={"contrast"}
+                    size={"xs"}
+                    className="p-1"
+                    onClick={() => {
+                      setScreen("inventory");
+                      setInventorySelected(
+                        parseInt(
+                          getKeyFromValue(gameData.SLOTS, slot ?? "") ?? ""
+                        ) + 1 ?? 0
+                      );
+                    }}
+                  >
+                    <SwapIcon className="w-4 h-4" />
+                  </Button>
+                )}
               </span>
             </div>
           </div>

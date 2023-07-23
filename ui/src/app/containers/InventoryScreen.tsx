@@ -11,11 +11,12 @@ import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useLoadingStore from "../hooks/useLoadingStore";
 import LootIcon from "../components/icons/LootIcon";
-import { InfoIcon } from "../components/icons/Icons";
+import { InfoIcon, BagIcon } from "../components/icons/Icons";
 import { Call, Item } from "../types";
 import { GameData } from "../components/GameData";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { getAdventurerById } from "../hooks/graphql/queries";
+import useUIStore from "../hooks/useUIStore";
 
 /**
  * @container
@@ -28,10 +29,13 @@ export default function InventoryScreen() {
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const [selectedIndex, setSelectedIndex] = useState(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const loading = useLoadingStore((state) => state.loading);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
+  const inventorySelected = useUIStore((state) => state.inventorySelected);
+  const setInventorySelected = useUIStore(
+    (state) => state.setInventorySelected
+  );
 
   const { data } = useQueriesStore();
 
@@ -79,17 +83,17 @@ export default function InventoryScreen() {
     (event: KeyboardEvent) => {
       switch (event.key) {
         case "ArrowUp":
-          setSelectedIndex((prev) => Math.max(prev - 1, 0));
+          setInventorySelected(Math.max((inventorySelected ?? 0) - 1, 0));
           break;
         case "ArrowDown":
-          setSelectedIndex((prev) => Math.min(prev + 1, 8 - 1));
+          setInventorySelected(Math.min((inventorySelected ?? 0) + 1, 8 - 1));
           break;
         case "Enter":
-          setActiveMenu(selectedIndex);
+          setActiveMenu(inventorySelected ?? 0);
           break;
       }
     },
-    [setSelectedIndex, setActiveMenu, selectedIndex]
+    [setInventorySelected, setActiveMenu, inventorySelected]
   );
 
   useEffect(() => {
@@ -104,11 +108,10 @@ export default function InventoryScreen() {
     };
   }, [activeMenu, handleKeyDown]);
 
-  const unequippedItems = items.filter((item: Item) => !item.equipped);
-
-  const groupedItems = groupBySlot(unequippedItems);
+  const groupedItems = groupBySlot(items);
 
   enum Menu {
+    All = "All",
     Weapon = "Weapon",
     Head = "Head",
     Chest = "Chest",
@@ -127,144 +130,159 @@ export default function InventoryScreen() {
     return values[index];
   }
 
-  const selected = getValueByIndex(Menu, selectedIndex);
+  const selected = getValueByIndex(Menu, inventorySelected ?? 0);
 
   const selectedItems = groupedItems[selected || "Weapon"] || [];
 
   return (
-    <div className="flex flex-row gap-5 sm:gap-5 sm:space-x-4 py-2 sm:p-0 flex-wrap">
+    <div className="flex flex-row gap-5 sm:gap-5 py-2 sm:p-0 flex-wrap">
       <div className="hidden sm:block sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col sm:w-1/6">
         <InventoryRow
-          title={"Weapon"}
-          items={groupedItems["Weapon"]}
+          title={"All"}
+          items={groupedItems["All"]}
           menuIndex={0}
           isActive={activeMenu == 0}
           setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 0}
-          setSelected={setSelectedIndex}
+          isSelected={inventorySelected == 0}
+          setSelected={setInventorySelected}
+          equippedItem={adventurer?.weapon}
+          icon={<LootIcon type="bag" />}
+        />
+        <InventoryRow
+          title={"Weapon"}
+          items={groupedItems["Weapon"]}
+          menuIndex={1}
+          isActive={activeMenu == 1}
+          setActiveMenu={setActiveMenu}
+          isSelected={inventorySelected == 1}
+          setSelected={setInventorySelected}
           equippedItem={adventurer?.weapon}
           icon={<LootIcon type="weapon" />}
         />
         <InventoryRow
           title={"Head Armour"}
           items={groupedItems["Head"]}
-          menuIndex={1}
-          isActive={activeMenu == 1}
+          menuIndex={2}
+          isActive={activeMenu == 2}
           setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 1}
-          setSelected={setSelectedIndex}
+          isSelected={inventorySelected == 2}
+          setSelected={setInventorySelected}
           equippedItem={adventurer?.head}
           icon={<LootIcon type="head" />}
         />
         <InventoryRow
           title={"Chest Armour"}
           items={groupedItems["Chest"]}
-          menuIndex={2}
-          isActive={activeMenu == 2}
+          menuIndex={3}
+          isActive={activeMenu == 3}
           setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 2}
-          setSelected={setSelectedIndex}
+          isSelected={inventorySelected == 3}
+          setSelected={setInventorySelected}
           equippedItem={adventurer?.chest}
           icon={<LootIcon type="chest" />}
         />
         <InventoryRow
           title={"Hands Armour"}
           items={groupedItems["Hand"]}
-          menuIndex={3}
-          isActive={activeMenu == 3}
+          menuIndex={4}
+          isActive={activeMenu == 4}
           setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 3}
-          setSelected={setSelectedIndex}
+          isSelected={inventorySelected == 4}
+          setSelected={setInventorySelected}
           equippedItem={adventurer?.hand}
           icon={<LootIcon type="hand" />}
         />
         <InventoryRow
           title={"Waist Armour"}
           items={groupedItems["Waist"]}
-          menuIndex={4}
-          isActive={activeMenu == 4}
+          menuIndex={5}
+          isActive={activeMenu == 5}
           setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 4}
-          setSelected={setSelectedIndex}
+          isSelected={inventorySelected == 5}
+          setSelected={setInventorySelected}
           equippedItem={adventurer?.waist}
           icon={<LootIcon type="waist" />}
         />
         <InventoryRow
           title={"Feet Armour"}
           items={groupedItems["Foot"]}
-          menuIndex={5}
-          isActive={activeMenu == 5}
+          menuIndex={6}
+          isActive={activeMenu == 6}
           setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 5}
-          setSelected={setSelectedIndex}
+          isSelected={inventorySelected == 6}
+          setSelected={setInventorySelected}
           equippedItem={adventurer?.foot}
           icon={<LootIcon type="foot" />}
         />
         <InventoryRow
           title={"Neck Jewelry"}
           items={groupedItems["Neck"]}
-          menuIndex={6}
-          isActive={activeMenu == 6}
+          menuIndex={7}
+          isActive={activeMenu == 7}
           setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 6}
-          setSelected={setSelectedIndex}
+          isSelected={inventorySelected == 7}
+          setSelected={setInventorySelected}
           equippedItem={adventurer?.neck}
           icon={<LootIcon type="neck" />}
         />
         <InventoryRow
           title={"Ring Jewelry"}
           items={groupedItems["Ring"]}
-          menuIndex={7}
-          isActive={activeMenu == 7}
+          menuIndex={8}
+          isActive={activeMenu == 8}
           setActiveMenu={setActiveMenu}
-          isSelected={selectedIndex == 7}
-          setSelected={setSelectedIndex}
+          isSelected={inventorySelected == 8}
+          setSelected={setInventorySelected}
           equippedItem={adventurer?.ring}
           icon={<LootIcon type="ring" />}
         />
       </div>
-      <div className="w-2/3 sm:w-1/3">
-        <h4>Loot</h4>
-        <div className="flex flex-col gap-5">
-          <div className="flex-row items-center gap-5 p-2 border border-terminal-green hidden sm:flex">
-            <div className="w-10">
-              <InfoIcon />
-            </div>
-            <p className="leading-5">
-              Items of Tier 1 carry the highest prestige and quality, whereas
-              items of Tier 5 offer the most basic value.
-            </p>
-          </div>
-          <div className="flex flex-col space-y-1">
-            {selectedItems.length ? (
-              selectedItems.map((item: any, index: number) => (
-                <div
-                  className="flex flex-row gap-2 w-full items-center justify-between"
-                  key={item.id}
-                >
-                  <div className="w-full">
-                    <ItemDisplay item={item} />
-                  </div>
-                  <Button
-                    onClick={() => handleAddEquipItem(item.item)}
-                    disabled={singleEquipExists(item.item)}
-                    loading={loading}
-                  >
-                    equip
-                  </Button>
-                </div>
-              ))
-            ) : (
-              <p className="sm:text-xl">
-                You have no unequipped {selected} Loot
+      {adventurer?.id ? (
+        <div className="w-2/3 sm:w-2/6">
+          <h4>{selected} Loot</h4>
+          <div className="flex flex-col gap-5">
+            <div className="flex-row items-center gap-5 p-2 border border-terminal-green hidden sm:flex">
+              <div className="w-10">
+                <InfoIcon />
+              </div>
+              <p className="leading-5">
+                Items of Tier 1 carry the highest prestige and quality, whereas
+                items of Tier 5 offer the most basic value.
               </p>
-            )}
+            </div>
+            <div className="flex flex-col space-y-1 overflow-y-auto h-[500px]">
+              {selectedItems.length ? (
+                selectedItems.map((item: Item, index: number) => (
+                  <div
+                    className="flex flex-row gap-2 w-full items-center justify-between"
+                    key={index}
+                  >
+                    <div className="w-full">
+                      <ItemDisplay item={item} />
+                    </div>
+                    <Button
+                      onClick={() => handleAddEquipItem(item.item ?? "")}
+                      disabled={
+                        singleEquipExists(item.item ?? "") || item.equipped
+                      }
+                      loading={loading}
+                    >
+                      {item.equipped ? "Eqipped" : "Equip"}
+                    </Button>
+                  </div>
+                ))
+              ) : (
+                <p className="sm:text-xl">You have no {selected} Loot</p>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <p className="text-xl text-center">Please Select an Adventurer</p>
+      )}
     </div>
   );
 }
