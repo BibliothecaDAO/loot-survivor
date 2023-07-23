@@ -73,7 +73,7 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
                     ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
                     : ""}
                 </span>
-                {screen != "inventory" && screen != "profile" && (
+                {screen == "play" && (
                   <Button
                     variant={"contrast"}
                     size={"xs"}
