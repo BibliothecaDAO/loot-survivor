@@ -6,13 +6,13 @@ import useUIStore from "../../hooks/useUIStore";
 import Image from "next/image";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
+import { appUrl } from "@/app/lib/constants";
 
 export const DeathDialog = () => {
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const appUrl = "https://loot-survivor.vercel.app/";
   const { data } = useQueriesStore();
 
   const rank = getRankFromList(
