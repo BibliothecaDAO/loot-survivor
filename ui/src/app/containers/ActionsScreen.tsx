@@ -137,6 +137,7 @@ export default function ActionsScreen() {
               buttonsData={buttonsData}
               onSelected={(value) => setSelected(value)}
               onEnterAction={true}
+              size="lg"
             />
           </div>
         </>
