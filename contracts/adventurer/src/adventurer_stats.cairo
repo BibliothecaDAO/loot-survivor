@@ -6,13 +6,13 @@ use survivor::constants::adventurer_constants::MAX_STAT_VALUE;
 #[derive(Drop, Copy, Serde)]
 struct Stats { // 5 bits each
     // Physical
-    strength: u8, // increases attack damage
-    dexterity: u8, // increases flee chance
-    vitality: u8, // increases health
+    strength: u8, // 5 bits
+    dexterity: u8, // 5 bits
+    vitality: u8, // 5 bits
     // Mental
-    intelligence: u8, // increases obstacle avoidance
-    wisdom: u8, // increase ambush avoidance
-    charisma: u8, // provides shop discount
+    intelligence: u8, // 5 bits
+    wisdom: u8, // 5 bits
+    charisma: u8 // 5 bits
 }
 
 impl StatsPacking of Packing<Stats> {

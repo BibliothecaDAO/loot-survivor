@@ -41,4 +41,40 @@ mod StatisticIndex {
     const CHARISMA: u8 = 5;
 }
 
+mod ClassStatBoosts {
+    mod Cleric {
+        const STRENGTH: u8 = 0;
+        const DEXTERITY: u8 = 0;
+        const VITALITY: u8 = 3;
+        const INTELLIGENCE: u8 = 0;
+        const WISDOM: u8 = 0;
+        const CHARISMA: u8 = 3;
+    }
+    mod Scout {
+        const STRENGTH: u8 = 0;
+        const DEXTERITY: u8 = 2;
+        const VITALITY: u8 = 0;
+        const INTELLIGENCE: u8 = 2;
+        const WISDOM: u8 = 2;
+        const CHARISMA: u8 = 0;
+    }
+    mod Hunter {
+        const STRENGTH: u8 = 3;
+        const DEXTERITY: u8 = 0;
+        const VITALITY: u8 = 0;
+        const INTELLIGENCE: u8 = 3;
+        const WISDOM: u8 = 0;
+        const CHARISMA: u8 = 0;
+    }
+    mod Warrior {
+        const STRENGTH: u8 = 1;
+        const DEXTERITY: u8 = 1;
+        const VITALITY: u8 = 1;
+        const INTELLIGENCE: u8 = 1;
+        const WISDOM: u8 = 1;
+        const CHARISMA: u8 = 1;
+    }
+
+}
+
 const U128_MAX: u128 = 340282366920938463463374607431768211455;

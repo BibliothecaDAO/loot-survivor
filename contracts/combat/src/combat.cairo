@@ -1,4 +1,3 @@
-use debug::PrintTrait;
 use core::option::OptionTrait;
 use integer::{
     U8IntoU16, U16IntoU64, U8IntoU64, U64TryIntoU16, U64TryIntoU8, U8IntoU128, U128TryIntoU8,
@@ -8,7 +7,7 @@ use core::traits::{TryInto, Into, DivEq};
 use super::constants::{
     CombatEnums::{Tier, Type, Slot, WeaponEffectiveness},
     CombatSettings::{
-        XP_MULTIPLIER, DIFFICULTY_CLIFF, XP_REWARD_DIVISOR, WEAPON_TIER_DAMAGE_MULTIPLIER,
+        XP_MULTIPLIER, DIFFICULTY_INCREASE_RATE, XP_REWARD_DIVISOR, WEAPON_TIER_DAMAGE_MULTIPLIER,
         ARMOR_TIER_DAMAGE_MULTIPLIER, ELEMENTAL_DAMAGE_BONUS, STRONG_ELEMENTAL_BONUS_MIN,
         MAX_CRITICAL_HIT_LUCK, LEVEL_MULTIPLIER
     }
@@ -415,7 +414,7 @@ impl ImplCombat of ICombat {
             // If adventurer has exceeded the difficult cliff level
             // the entity level will be randomnly scoped around the adventurer level
             // the max level of entitys will increase every N levels based on 
-            // the DIFFICULTY_CLIFF setting. The higher this setting, the less frequently the max level will increase
+            // the DIFFICULTY_INCREASE_RATE setting. The higher this setting, the less frequently the max level will increase
             let entity_level_multplier = 1 + (adventurer_level / range_increase_interval);
 
             // maximum range of the entity level will be the above multplier * the entity difficulty
@@ -596,14 +595,17 @@ impl ImplCombat of ICombat {
     fn ability_based_avoid_threat(adventurer_level: u8, relevant_stat: u8, entropy: u128) -> bool {
         // number of sides of the die will be based on adventurer_level
         // so the higher the adventurer level, the more sides the die has
-        let dice_roll = 1 + (U128TryIntoU8::try_into(entropy % adventurer_level.into()).unwrap());
+        let dice_roll = 1 + U128TryIntoU8::try_into(entropy % adventurer_level.into()).unwrap();
 
-        // in order to avoid the threat, the adventurer must roll a number less than or equal
-        // to the the relevant stat + difficulty cliff.
-        // The difficulty cliff serves as a starting cushion for the adventurer before which
-        // they can avoid all threats. Once the difficulty cliff has been passed, the adventurer
-        // must invest in the proper stats to avoid threats.{Intelligence for obstalce, Wisdom for beast ambushes}
-        (dice_roll <= (relevant_stat + DIFFICULTY_CLIFF::NORMAL))
+        // in order to avoid the threat, the adventurer's stat must be higher than the dice roll
+        // The dice roll will be 1 - adventurer's level. As an example, if the adventurer is on
+        // level 3 with 3 points of dexterity, the dice roll will produce a number between
+        // 1 - 3 which means the adventurer will have a 100% chance of fleeing beast. 
+        // If the adventurer doesn't invest in their dexterity for the next 3 levels and is now
+        // level 6 with 3 dexterity, the dice roll will now be 1-6 and they need a 1,2, or 3
+        // to flee which means they have a 50% chance of fleeing.
+        // At level 12 with 3 dexterity, they have a 3/12 (25%) chance of fleeing.
+        relevant_stat >= dice_roll
     }
 }
 
@@ -1387,7 +1389,7 @@ fn test_calculate_damage() {
 fn test_get_random_level() {
     let mut adventurer_level = 1;
 
-    let range_level_increase = DIFFICULTY_CLIFF::NORMAL;
+    let range_level_increase = DIFFICULTY_INCREASE_RATE::NORMAL;
     let level_multiplier = LEVEL_MULTIPLIER::NORMAL;
 
     // entity level and adventurer level will be equivalent up to the difficulty cliff
@@ -1397,7 +1399,7 @@ fn test_get_random_level() {
     assert(entity_level == adventurer_level, 'lvl should eql advr lvl');
 
     // test at just before the difficult level cliff
-    adventurer_level = DIFFICULTY_CLIFF::NORMAL - 1;
+    adventurer_level = DIFFICULTY_INCREASE_RATE::NORMAL - 1;
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 0, range_level_increase, level_multiplier
     );
@@ -1406,7 +1408,7 @@ fn test_get_random_level() {
 
     // test above the difficult cliff
     // now entity level will span a range defined 
-    adventurer_level = DIFFICULTY_CLIFF::NORMAL + 1;
+    adventurer_level = DIFFICULTY_INCREASE_RATE::NORMAL + 1;
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 0, range_level_increase, level_multiplier
     );
@@ -1467,34 +1469,24 @@ fn test_get_random_level() {
     );
     assert(entity_level == 13, 'entity lvl should be 13');
 
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 12, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 14, 'entity lvl should be 14');
-
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 13, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 15, 'entity lvl should be 15');
-
     // rollover back to minimum level for current level
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 14, range_level_increase, level_multiplier
     );
-    assert(entity_level == 2, 'entity lvl should be 2');
+    assert(entity_level == 4, 'entity lvl should be 4');
 
     // test 6 * the difficulty cliff for mid-late game
     // difficulty cliff default is 4 so adventurer_level here would be 24
-    adventurer_level = DIFFICULTY_CLIFF::NORMAL * 6;
+    adventurer_level = DIFFICULTY_INCREASE_RATE::NORMAL * 6;
     let entity_level = ImplCombat::get_random_level(
         adventurer_level, 0, range_level_increase, level_multiplier
     );
     // at this stage, the minimum entity level is 11
     assert(entity_level == 11, 'entity lvl should be 11');
 
-    // and the top is level 59
+    // and the top is level 52
     let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 48, range_level_increase, level_multiplier
+        adventurer_level, 41, range_level_increase, level_multiplier
     );
-    assert(entity_level == 59, 'entity lvl should be 59');
+    assert(entity_level == 52, 'entity lvl should be 52');
 }

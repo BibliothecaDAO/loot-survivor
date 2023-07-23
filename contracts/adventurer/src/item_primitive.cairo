@@ -6,7 +6,6 @@ use pack::{pack::{Packing, rshift_split}, constants::pow};
 struct ItemPrimitive {
     id: u8, // 7 bits
     xp: u16, // 9 bits
-    // this is set as the items are found/purchased
     metadata: u8, // 5 bits
 }
 

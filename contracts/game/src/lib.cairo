@@ -1097,19 +1097,17 @@ mod Game {
         let adventurer_id = self._counter.read() + 1;
 
         // generate a new adventurer using the provided started weapon and current block number
-        let mut new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, block_number);
+        let mut new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, adventurer_meta.class, block_number);
 
         let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
             block_number, adventurer_id
         );
 
-        // generate meta data for adventurer
-        // this will get packed and stored seaprate from adventurer as this data
-        // we never change.
+        // set entropy on adventurer metadata
         let adventurer_meta = AdventurerMetadata {
             name: adventurer_meta.name,
             home_realm: adventurer_meta.home_realm,
-            race: adventurer_meta.race,
+            class: adventurer_meta.class,
             entropy: adventurer_entropy
         };
 
@@ -1282,7 +1280,7 @@ mod Game {
                     TreasureDiscovery::Health(()) => {
                         // if adventurer's health is already full
                         if (adventurer.has_full_health()) {
-                            // play gets gold instead of health
+                            // play gets gold instead of health 
                             adventurer.add_gold(amount);
                             __event__DiscoveredGold(ref self, adventurer_id, adventurer, amount);
                         } else {

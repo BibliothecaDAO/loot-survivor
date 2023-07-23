@@ -160,7 +160,7 @@ impl ImplBeast of IBeast {
         let beast_health = ImplCombat::get_enemy_starting_health(
             adventurer_level,
             MINIMUM_HEALTH,
-            CombatSettings::DIFFICULTY_CLIFF::NORMAL,
+            CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL,
             CombatSettings::HEALTH_MULTIPLIER::NORMAL,
             entropy
         );
@@ -200,7 +200,7 @@ impl ImplBeast of IBeast {
         ImplCombat::get_random_level(
             adventurer_level,
             seed,
-            CombatSettings::DIFFICULTY_CLIFF::NORMAL,
+            CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL,
             CombatSettings::LEVEL_MULTIPLIER::NORMAL,
         )
     }
@@ -547,7 +547,7 @@ fn test_get_type() {
 #[available_gas(200000)]
 fn test_ambush() {
     // verify that below difficulty cliff, adventurers are immune to ambushes
-    let mut adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL - 1;
+    let mut adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL - 1;
     let mut adventurer_wisdom = 0;
     let mut entropy = 1;
     assert(
@@ -576,7 +576,7 @@ fn test_ambush() {
     );
 
     // go above difficulty cliff
-    adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL + 1;
+    adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL + 1;
     // worst entropy is one less than adventurer_level
     // since this adventurer has no wisdom, this will result in them getting ambushed
     entropy = U8IntoU128::into(adventurer_level) - 1;
@@ -700,7 +700,7 @@ fn test_attack() {
 #[available_gas(500000)]
 fn test_get_level() {
     let mut adventurer_level = 1;
-    let range_level_increase = CombatSettings::DIFFICULTY_CLIFF::NORMAL;
+    let range_level_increase = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL;
     let level_multiplier = CombatSettings::LEVEL_MULTIPLIER::NORMAL;
 
     // beast level and adventurer level will be same up to the difficulty cliff
@@ -708,14 +708,14 @@ fn test_get_level() {
     assert(entity_level == adventurer_level, 'lvl should eql advr lvl');
 
     // test at just before the difficult level cliff
-    adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL - 1;
+    adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL - 1;
     let entity_level = ImplBeast::get_level(adventurer_level, 0);
     // entity level should still be the same as adventurer level
     assert(entity_level == adventurer_level, 'lvl should eql advr lvl');
 
     // As we exceed difficult cliff, beast level will start to range
     // based on entropy
-    adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL + 1;
+    adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL + 1;
     let entity_level = ImplBeast::get_level(adventurer_level, 0);
     assert(entity_level == 3, 'beast lvl should be 3');
 
@@ -758,7 +758,7 @@ fn test_get_starting_health() {
     // with adventurer at 4x difficulty cliff
     // beast health will start to increase
     // entropy 0 gives us lower end
-    adventurer_level = CombatSettings::DIFFICULTY_CLIFF::NORMAL * 4;
+    adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL * 4;
     let starting_health = ImplBeast::get_starting_health(adventurer_level, entropy);
     assert(starting_health == 21, 'beast health should be 21');
 

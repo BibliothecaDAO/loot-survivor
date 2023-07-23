@@ -67,7 +67,7 @@ impl ImplObstacle of IObstacle {
         ImplCombat::get_random_level(
             adventurer_level,
             entropy,
-            CombatSettings::DIFFICULTY_CLIFF::NORMAL,
+            CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL,
             CombatSettings::LEVEL_MULTIPLIER::NORMAL,
         )
     }
