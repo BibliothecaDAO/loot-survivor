@@ -106,7 +106,7 @@ export default function ActionsScreen() {
           }
         });
       },
-      disabled: hasBeast || loading,
+      disabled: hasBeast || loading || !adventurer?.id,
       loading: loading,
     },
   ];
@@ -121,12 +121,18 @@ export default function ActionsScreen() {
         <BeastScreen />
       ) : (
         <>
-          <div className="flex flex-col items-center sm:w-1/3 bg-terminal-black order-1 sm:order-2">
-            {selected == "explore" && (
-              <Discovery discoveries={latestDiscoveries} />
-            )}
-          </div>
-          <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8 sm:order-1">
+          {adventurer?.id ? (
+            <div className="flex flex-col items-center sm:w-1/3 bg-terminal-black order-1 sm:order-2">
+              {selected == "explore" && (
+                <Discovery discoveries={latestDiscoveries} />
+              )}
+            </div>
+          ) : (
+            <p className="text-xl text-center order-1 sm:order-2">
+              Please Select an Adventurer
+            </p>
+          )}
+          <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
             <VerticalKeyboardControl
               buttonsData={buttonsData}
               onSelected={(value) => setSelected(value)}

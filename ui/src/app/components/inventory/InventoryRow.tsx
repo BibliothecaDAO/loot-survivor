@@ -100,13 +100,16 @@ export const InventoryRow = ({
     <>
       <div className="flex flex-row w-full gap-3 sm:gap-1 align-center">
         <Button
-          className={isSelected && !isActive ? "animate-pulse h-14" : "h-14"}
+          className={`h-16 w-full ${
+            isSelected && !isActive ? "animate-pulse" : ""
+          }`}
           variant={isSelected ? "default" : "ghost"}
           size={isMobileDevice ? "sm" : "lg"}
           onClick={() => {
             setSelected(menuIndex);
             setActiveMenu(menuIndex);
           }}
+          disabled={!adventurer?.id}
         >
           {isMobileDevice ? (
             <div className="flex items-center justify-center w-10 h-10 sm:hidden">
@@ -117,7 +120,7 @@ export const InventoryRow = ({
               <div className="flex items-center justify-center w-10 h-10">
                 {icon}
               </div>
-              <p className="w-40 text-xl whitespace-nowrap hidden sm:block">
+              <p className="text-xl whitespace-nowrap hidden sm:block">
                 {title}
               </p>
             </>

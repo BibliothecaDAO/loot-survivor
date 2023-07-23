@@ -126,8 +126,14 @@ export default function UpgradeScreen() {
     resetDataUpdated("adventurerByIdQuery");
   };
 
-  const Attribute = ({ name, description, buttonText }: any): ReactElement => (
+  const Attribute = ({
+    name,
+    icon,
+    description,
+    buttonText,
+  }: any): ReactElement => (
     <div className="flex flex-col gap-3 items-center">
+      <span className="hidden sm:block w-10 h-10">{icon}</span>
       <p className="sm:text-[28px] text-center">{description}</p>
       <Button onClick={() => handleUpgradeTx(name)}>{buttonText}</Button>
     </div>
@@ -136,31 +142,37 @@ export default function UpgradeScreen() {
   const attributes = [
     {
       name: "Strength",
+      icon: <ArrowTargetIcon />,
       description: "Strength increases attack damage by 10%",
       buttonText: "Upgrade Strength",
     },
     {
       name: "Dexterity",
+      icon: <CatIcon />,
       description: "Dexterity increases chance of fleeing Beasts",
       buttonText: "Upgrade Dexterity",
     },
     {
       name: "Vitality",
+      icon: <HeartVitalityIcon />,
       description: "Vitality gives 10hp and increases max health by 10hp",
       buttonText: "Upgrade Vitality",
     },
     {
       name: "Intelligence",
+      icon: <LightbulbIcon />,
       description: "Intelligence increases chance of avoiding Obstacles",
       buttonText: "Upgrade Intelligence",
     },
     {
       name: "Wisdom",
+      icon: <ScrollIcon />,
       description: "Wisdom increases chance of avoiding a Beast ambush",
       buttonText: "Upgrade Wisdom",
     },
     {
       name: "Charisma",
+      icon: <CoinCharismaIcon />,
       description: "Charisma provides discounts on the marketplace and potions",
       buttonText: "Upgrade Charisma",
     },
@@ -289,11 +301,10 @@ export default function UpgradeScreen() {
             <div className="flex flex-col gap-2 h-full">
               <div className=" items-center gap-2">
                 <div className="justify-center text-terminal-green space-x-3">
-                  <div className="text-center text-lg md:text-xl lg:text-4xl p-2 animate-pulse uppercase">
-                    <p>Loot Fountain</p>
+                  <div className="text-center text-2xl md:text-xl lg:text-4xl sm:p-2 animate-pulse uppercase">
                     Level up!
                   </div>
-                  <div className="flex flex-row gap-2 justify-center text-2xl text-shadow-none">
+                  <div className="flex flex-row gap-2 justify-center text-lg sm:text-2xl text-shadow-none">
                     <span>
                       Stat Upgrades Available {adventurer?.statUpgrades}
                     </span>
@@ -342,7 +353,15 @@ export default function UpgradeScreen() {
                   </div>
                 </div>
 
-                {upgradeScreen == 1 && (
+                {upgradeScreen === 1 && (
+                  <div className="flex flex-col gap-5 sm:flex-row items-center justify-center flex-wrap">
+                    <p className="text-xl lg:text-2xl">Potions</p>
+                    <PurchaseHealth upgradeTotalCost={upgradeTotalCost} />
+                  </div>
+                )}
+
+                {((!isMobileDevice && upgradeScreen === 1) ||
+                  (isMobileDevice && upgradeScreen === 2)) && (
                   <div className="flex flex-col w-full">
                     <div className="w-full ">
                       <MarketplaceScreen upgradeTotalCost={upgradeTotalCost} />
@@ -350,7 +369,8 @@ export default function UpgradeScreen() {
                   </div>
                 )}
               </div>
-              {upgradeScreen == 2 && (
+              {((!isMobileDevice && upgradeScreen === 2) ||
+                (isMobileDevice && upgradeScreen === 3)) && (
                 <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full border-terminal-green border">
                   {isMobileDevice ? (
                     <>
@@ -376,7 +396,9 @@ export default function UpgradeScreen() {
                 <Button
                   className="w-1/2"
                   onClick={() => setUpgradeScreen(upgradeScreen + 1)}
-                  disabled={upgradeScreen == 2}
+                  disabled={
+                    isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2
+                  }
                 >
                   Next
                 </Button>

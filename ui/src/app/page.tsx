@@ -102,9 +102,6 @@ export default function Home() {
 
   const { data, refetch } = useQueriesStore();
 
-  // const [menu, setMenu] = useState<Menu[]>(allMenuItems);
-  // const [mobileMenu, setMobileMenu] = useState<Menu[]>(allMenuItems);
-
   const playState = useMemo(
     () => ({
       isInBattle: hasBeast,
@@ -118,12 +115,6 @@ export default function Home() {
     volume: 0.5,
     loop: true,
   });
-
-  // const toggleMenuItem = (id: number) => {
-  //   setMenu(menu.map(item =>
-  //     item.id === id ? {...item, disabled: !item.disabled} : item
-  //   ));
-  // };
 
   useEffect(() => {
     return () => {
@@ -153,10 +144,8 @@ export default function Home() {
 
   useEffect(() => {
     if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
-      // toggleMenuItem(4);
       setScreen("play");
     } else if (hasStatUpgrades) {
-      // toggleMenuItem(2);
       setScreen("upgrade");
     } else if (!adventurer || !isAlive) {
       setScreen("start");

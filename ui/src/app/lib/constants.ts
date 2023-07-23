@@ -39,7 +39,7 @@ export const contracts = {
   },
 };
 
-export const appUrl = "https://survivor.vercel.app/";
+export const appUrl = "https://beta-survivor.realms.world/";
 
 // Penalty time is 3 blocks, where each block is ~ 3 minutes
 export const penaltyTime = 3 * (3 * 60);

@@ -11,7 +11,7 @@ raw_abi = [
         "members": [
             {"name": "name", "type": "core::integer::u128"},
             {"name": "home_realm", "type": "core::integer::u16"},
-            {"name": "race", "type": "core::integer::u8"},
+            {"name": "class", "type": "core::integer::u8"},
             {"name": "entropy", "type": "core::integer::u128"},
         ],
     },

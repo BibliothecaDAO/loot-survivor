@@ -29,8 +29,12 @@ export default function MarketplaceScreen({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const { isLoading } = useQueriesStore();
 
-  const marketLatestItems = useQueriesStore(state => state.data.latestMarketItemsQuery?.items || []);
-  const adventurers = useQueriesStore(state => state.data.adventurersInListQuery?.adventurers || []);
+  const marketLatestItems = useQueriesStore(
+    (state) => state.data.latestMarketItemsQuery?.items || []
+  );
+  const adventurers = useQueriesStore(
+    (state) => state.data.adventurersInListQuery?.adventurers || []
+  );
 
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
@@ -143,11 +147,7 @@ export default function MarketplaceScreen({
     <>
       {hasStatUpgrades ? (
         <div className="w-full">
-          <div className="flex flex-row items-center justify-center flex-wrap">
-            <p className="text-sm sm:text-xl lg:text-2xl">Potions</p>
-            <PurchaseHealth upgradeTotalCost={upgradeTotalCost} />
-          </div>
-          <div className="w-full sm:mx-auto overflow-y-auto h-[400px] border border-terminal-green table-scroll">
+          <div className="w-full sm:mx-auto overflow-y-auto h-[300px] sm:h-[400px] border border-terminal-green table-scroll">
             {isLoading.latestMarketItemsQuery && (
               <div className="flex justify-center p-10 text-center">
                 <LootIconLoader />
@@ -168,7 +168,7 @@ export default function MarketplaceScreen({
                   ))}
                 </tr>
               </thead>
-              <tbody className="">
+              <tbody className="text-xs sm:text-base">
                 {!isLoading.latestMarketItemsQuery ? (
                   sortedMarketLatestItems.map((item: Item, index: number) => (
                     <MarketplaceRow
