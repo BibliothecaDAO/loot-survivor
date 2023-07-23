@@ -202,22 +202,22 @@ export const CreateAdventurer = ({
     return (
       <>
         <div className="w-full sm:p-8">
-          <h3 className="uppercase text-center">Choose your character</h3>
-          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:justify-between gap-5 sm:gap-20">
+          <h3 className="uppercase text-center">Choose your class</h3>
+          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:items-center sm:justify-between gap-5 sm:gap-20">
             {[
               {
                 name: "Cleric",
-                description: "Boost: +3 Charisma +3 Vitality",
+                description: "+3 Charisma +3 Vitality",
                 image: "/characters/cleric.png",
               },
               {
                 name: "Scout",
-                description: "Boost: +2 Intelligence +2 Wisdom +3 Dexterity",
+                description: "+2 Intelligence +2 Wisdom +3 Dexterity",
                 image: "/characters/scout.png",
               },
               {
                 name: "Hunter",
-                description: "Boost: +3 Strength +3 Intelligence",
+                description: "+3 Strength +3 Intelligence",
                 image: "/characters/hunter.png",
               },
               {
@@ -231,7 +231,7 @@ export const CreateAdventurer = ({
                 key={classType.name}
                 className="flex flex-col items-center h-full justify-between"
               >
-                <div className="relative w-24 h-24 sm:w-56 sm:h-56">
+                <div className="relative w-28 h-28 sm:w-56 sm:h-56">
                   <Image
                     src={classType.image}
                     fill={true}
@@ -241,7 +241,7 @@ export const CreateAdventurer = ({
                     }}
                   />
                 </div>
-                <div className="flex items-center pb-2 sm:pb-4 text-sm sm:text-md">
+                <div className="flex items-center p-2 sm:pb-4 h-20 text-center">
                   <p className="ml-2">{classType.description}</p>
                 </div>
                 <Button
@@ -289,7 +289,7 @@ export const CreateAdventurer = ({
               },
             ].map((weapon) => (
               <div key={weapon.name} className="flex flex-col items-center">
-                <div className="relative w-28 h-28 sm:w-64 sm:h-64">
+                <div className="relative w-28 h-28 sm:w-56 sm:h-56">
                   <Image
                     src={weapon.image}
                     fill={true}
@@ -299,7 +299,7 @@ export const CreateAdventurer = ({
                     }}
                   />
                 </div>
-                <div className="flex items-center pb-2 sm:pb-4 text-sm sm:text-md">
+                <div className="flex items-center pb-2 sm:pb-4 text-base sm:text-md">
                   {weapon.icon}
                   <p className="ml-2">{weapon.description}</p>
                 </div>
@@ -312,6 +312,9 @@ export const CreateAdventurer = ({
               </div>
             ))}
           </div>
+          <Button className="my-2" onClick={handleBack}>
+            Back
+          </Button>
         </div>
       </>
     );
