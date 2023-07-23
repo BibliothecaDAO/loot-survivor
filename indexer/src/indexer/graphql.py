@@ -42,14 +42,14 @@ def serialize_string(value):
     return value.decode("utf-8").replace("\u0000", "")
 
 
-def parse_race(value):
-    felt = get_key_by_value(value, config.RACES)
+def parse_class(value):
+    felt = get_key_by_value(value, config.CLASSES)
     return felt.to_bytes(32, "big")
 
 
-def serialize_race(value):
+def serialize_class(value):
     felt = int.from_bytes(value, "big")
-    return config.RACES.get(felt)
+    return config.CLASSES.get(felt)
 
 
 def parse_beast(value):
@@ -221,8 +221,8 @@ BooleanValue = strawberry.scalar(
     NewType("BooleanValue", bytes), parse_value=parse_felt, serialize=serialize_felt
 )
 
-RaceValue = strawberry.scalar(
-    NewType("RaceValue", bytes), parse_value=parse_race, serialize=serialize_race
+ClassValue = strawberry.scalar(
+    NewType("ClassValue", bytes), parse_value=parse_class, serialize=serialize_class
 )
 
 BeastValue = strawberry.scalar(
@@ -367,17 +367,17 @@ class BooleanFilter:
 
 
 @strawberry.input
-class RaceFilter:
-    eq: Optional[RaceValue] = None
-    _in: Optional[List[RaceValue]] = None
-    notIn: Optional[RaceValue] = None
-    lt: Optional[RaceValue] = None
-    lte: Optional[RaceValue] = None
-    gt: Optional[RaceValue] = None
-    gte: Optional[RaceValue] = None
-    contains: Optional[RaceValue] = None
-    startsWith: Optional[RaceValue] = None
-    endsWith: Optional[RaceValue] = None
+class ClassFilter:
+    eq: Optional[ClassValue] = None
+    _in: Optional[List[ClassValue]] = None
+    notIn: Optional[ClassValue] = None
+    lt: Optional[ClassValue] = None
+    lte: Optional[ClassValue] = None
+    gt: Optional[ClassValue] = None
+    gte: Optional[ClassValue] = None
+    contains: Optional[ClassValue] = None
+    startsWith: Optional[ClassValue] = None
+    endsWith: Optional[ClassValue] = None
 
 
 @strawberry.input
@@ -578,7 +578,7 @@ class AdventurersFilter:
     id: Optional[FeltValueFilter] = None
     lastAction: Optional[FeltValueFilter] = None
     owner: Optional[HexValueFilter] = None
-    race: Optional[RaceFilter] = None
+    classType: Optional[ClassFilter] = None
     homeRealm: Optional[FeltValueFilter] = None
     name: Optional[StringFilter] = None
     health: Optional[FeltValueFilter] = None
@@ -707,7 +707,7 @@ class AdventurersOrderByInput:
     id: Optional[OrderByInput] = None
     lastAction: Optional[OrderByInput] = None
     owner: Optional[OrderByInput] = None
-    race: Optional[OrderByInput] = None
+    classType: Optional[OrderByInput] = None
     homeRealm: Optional[OrderByInput] = None
     name: Optional[OrderByInput] = None
     health: Optional[OrderByInput] = None
@@ -838,7 +838,7 @@ class Adventurer:
     id: Optional[FeltValue]
     lastAction: Optional[FeltValue]
     owner: Optional[HexValue]
-    race: Optional[RaceValue]
+    classType: Optional[ClassValue]
     homeRealm: Optional[FeltValue]
     name: Optional[StringValue]
     health: Optional[FeltValue]
@@ -870,7 +870,7 @@ class Adventurer:
             id=data["id"],
             lastAction=data["lastAction"],
             owner=data["owner"],
-            race=data["race"],
+            classType=data["classType"],
             homeRealm=data["homeRealm"],
             name=data["name"],
             health=data["health"],
@@ -1217,7 +1217,7 @@ def get_adventurers(
         for key, value in processed_filters.items():
             if (
                 isinstance(value, StringFilter)
-                | isinstance(value, RaceFilter)
+                | isinstance(value, ClassFilter)
                 | isinstance(value, AdventurerStatusFilter)
             ):
                 filter[key] = get_str_filters(value)
