@@ -196,9 +196,9 @@ export const CreateAdventurer = ({
   if (step === 1) {
     return (
       <>
-        <div className="w-3/4 sm:w-full p-8">
+        <div className="w-full sm:p-8">
           <h3 className="uppercase text-center">Choose your weapon</h3>
-          <div className="flex flex-col sm:flex-row justify-between gap-20">
+          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:justify-between gap-5 sm:gap-20">
             {[
               {
                 name: "Book",
@@ -226,14 +226,17 @@ export const CreateAdventurer = ({
               },
             ].map((weapon) => (
               <div key={weapon.name} className="flex flex-col items-center">
-                <Image
-                  src={weapon.image}
-                  width={200}
-                  height={200}
-                  alt={weapon.name}
-                  className="mb-2"
-                />
-                <div className="flex items-center pb-4 text-s sm:text-md">
+                <div className="relative w-28 h-28 sm:w-64 sm:h-64">
+                  <Image
+                    src={weapon.image}
+                    fill={true}
+                    alt={weapon.name}
+                    style={{
+                      objectFit: "contain",
+                    }}
+                  />
+                </div>
+                <div className="flex items-center pb-2 sm:pb-4 text-sm sm:text-md">
                   {weapon.icon}
                   <p className="ml-2">{weapon.description}</p>
                 </div>
@@ -293,7 +296,9 @@ export const CreateAdventurer = ({
               />
             </div>
             <div className="absolute top-1/2 left-0 right-0 flex flex-col items-center gap-4 z-10">
-              <TxActivity />
+              <div className="mb-10 sm:m-0">
+                <TxActivity />
+              </div>
               <form onSubmit={handleSubmit}>
                 <Button type="submit" size={"xl"} disabled={!formFilled}>
                   {formFilled ? "Spawn" : "Fill details"}

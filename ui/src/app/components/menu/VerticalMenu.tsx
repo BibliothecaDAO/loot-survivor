@@ -15,6 +15,7 @@ interface VerticalKeyboardControlProps {
   onEnterAction?: boolean;
   isActive?: boolean;
   setActiveMenu?: (value: number) => void;
+  size?: "default" | "xs" | "sm" | "lg" | "xl";
 }
 
 const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
@@ -23,6 +24,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
   onEnterAction,
   isActive = true,
   setActiveMenu,
+  size,
 }) => {
   const { play } = useUiSounds(soundSelector.click);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -88,7 +90,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
               ? "default"
               : "outline"
           }
-          size={"lg"}
+          size={size}
           onClick={() => {
             setSelectedIndex(index);
             buttonData.action();

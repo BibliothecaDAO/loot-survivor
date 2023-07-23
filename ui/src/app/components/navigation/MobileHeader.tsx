@@ -21,6 +21,13 @@ export default function MobileHeader() {
             <p>Profile</p>
           </div>
         </Button>
+        <div className="absolute left-1/2 right-1/2 flex justify-center">
+          <h2 className="text-xl m-0">
+            {screen == "player"
+              ? "Profile"
+              : capitalizeFirstLetter(screen ?? "")}
+          </h2>
+        </div>
         <Button
           onClick={() => setScreen("leaderboard")}
           variant={screen === "leaderboard" ? "default" : "ghost"}
@@ -32,11 +39,6 @@ export default function MobileHeader() {
             <p>Leaderboard</p>
           </div>
         </Button>
-      </div>
-      <div className="absolute left-1/2 right-1/2 flex justify-center top-[7.4rem]">
-        <h2 className="text-xl">
-          {screen == "player" ? "Profile" : capitalizeFirstLetter(screen ?? "")}
-        </h2>
       </div>
     </>
   );

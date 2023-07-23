@@ -100,7 +100,7 @@ export const InventoryRow = ({
     <>
       <div className="flex flex-row w-full gap-3 sm:gap-1 align-center">
         <Button
-          className={isSelected && !isActive ? "animate-pulse" : ""}
+          className={isSelected && !isActive ? "animate-pulse h-14" : "h-14"}
           variant={isSelected ? "default" : "ghost"}
           size={isMobileDevice ? "sm" : "lg"}
           onClick={() => {

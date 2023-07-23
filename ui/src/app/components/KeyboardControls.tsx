@@ -13,9 +13,10 @@ export interface ButtonData {
 
 interface ButtonProps {
   buttonsData: ButtonData[];
+  size?: "default" | "xs" | "sm" | "lg" | "xl";
 }
 
-const KeyboardControl = ({ buttonsData }: ButtonProps) => {
+const KeyboardControl = ({ buttonsData, size }: ButtonProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -61,6 +62,7 @@ const KeyboardControl = ({ buttonsData }: ButtonProps) => {
           }}
           disabled={buttonData.disabled}
           loading={buttonData.loading}
+          size={size}
         >
           {buttonData.label}
         </Button>

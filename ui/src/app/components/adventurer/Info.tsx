@@ -45,8 +45,8 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
       ? data.itemsByProfileQuery.items
       : []
     : data.itemsByAdventurerQuery
-      ? data.itemsByAdventurerQuery.items
-      : [];
+    ? data.itemsByAdventurerQuery.items
+    : [];
 
   const neckItem =
     items.find(
@@ -73,16 +73,23 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
   ];
 
   const bodyParts = [
-    'Weapon', 'Head', 'Chest', 'Hand', 'Waist', 'Foot', 'Neck', 'Ring'
+    "Weapon",
+    "Head",
+    "Chest",
+    "Hand",
+    "Waist",
+    "Foot",
+    "Neck",
+    "Ring",
   ];
-  
+
   return (
     <div className="h-full border border-terminal-green overflow-auto">
       {!isLoading.itemsByAdventurerQuery ? (
         <>
           <div className="flex flex-row flex-wrap gap-2 p-1">
             <div className="flex flex-col w-full sm:p-2 uppercase">
-              <div className="flex justify-between w-full">
+              <div className="flex justify-between w-full text-sm sm:text-base">
                 {formatAdventurer.race}{" "}
                 <span>
                   {
@@ -97,7 +104,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                   }
                 </span>
               </div>
-              <div className="flex justify-between w-full text-2xl sm:text-4xl border-b border-terminal-green">
+              <div className="flex justify-between w-full text-xl sm:text-4xl border-b border-terminal-green">
                 {formatAdventurer.name}
                 <span className="flex items-center text-terminal-yellow">
                   <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
@@ -119,27 +126,32 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                 </span>
               </div>
 
-              <div className="flex justify-between w-full text-lg sm:text-2xl">
+              <div className="flex justify-between w-full mb-1 sm:text-2xl">
                 <LevelBar xp={formatAdventurer.xp ?? 0} />
               </div>
 
-              <div className="flex flex-row justify-between flex-wrap">
-                <div className="flex flex-row w-full font-semibold">
+              <div className="flex flex-col justify-between flex-wrap">
+                <div className="flex flex-row w-full font-semibold text-sm sm:text-base">
                   {attributes.map((attribute) => (
-                    <div key={attribute.key} className="flex justify-between px-1 bg-terminal-green text-terminal-black w-full border border-terminal-black mb-2">
+                    <div
+                      key={attribute.key}
+                      className="flex justify-between px-1 bg-terminal-green text-terminal-black w-full border border-terminal-black mb-2"
+                    >
                       {attribute.key}
                       <span className="pl-3">{attribute.value}</span>
                     </div>
                   ))}
                 </div>
                 <div className="flex flex-col w-full">
-                  {bodyParts.map(part => (
+                  {bodyParts.map((part) => (
                     <div key={part} className="w-full">
                       <ItemDisplay
                         item={
                           items.find(
                             (item: Item) =>
-                              item.item === formatAdventurer[part.toLowerCase()] && item.equipped
+                              item.item ===
+                                formatAdventurer[part.toLowerCase()] &&
+                              item.equipped
                           ) || NullItem
                         }
                         itemSlot={part}
@@ -147,7 +159,6 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                     </div>
                   ))}
                 </div>
-
               </div>
             </div>
           </div>

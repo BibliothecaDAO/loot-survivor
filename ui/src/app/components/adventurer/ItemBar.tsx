@@ -22,21 +22,19 @@ const ItemBar: React.FC<ItemBarProps> = ({ xp }) => {
         <div className="text-bold">Max Greatness 20</div>
       ) : (
         <>
-
-          <div className="flex space-x-2 relative">
+          <div className="flex flex-row h-1 items-center gap-2 relative mt-2">
             <span>{level}</span>
-            <div className="w-full h-1 border border-black bg-terminal-green dark:bg-terminal-green self-center">
-              <div className="flex justify-between text-xs sm:text-sm text-center absolute top-0 bg-terminal-green px-4 left-[30%]">
-                {/* <span>Greatness</span> */}
+            <span className="w-full flex flex-col self-center mb-2">
+              <span className="text-xs text-center">{xp} XP</span>
+              <div className="w-full h-1 border border-black bg-terminal-green dark:bg-terminal-green">
+                <div
+                  className="h-full bg-black flex-grow w-full"
+                  style={{ width: `${calculateProgress(xp)}%` }}
+                />
               </div>
-              <div
-                className="h-full bg-black flex-grow  w-full"
-                style={{ width: `${calculateProgress(xp)}%` }}
-              ></div>
-            </div>
+            </span>
             <span>{level + 1}</span>
           </div>
-
         </>
       )}
     </div>

@@ -99,75 +99,77 @@ export default function LeaderboardScree() {
   };
 
   return (
-    <div className="flex flex-col items-center sm:w-3/4 sm:mx-auto">
-      <h1 className="text-lg sm:text-2xl">Top 3 Submitted Scores</h1>
-      {scores.length > 0 ? (
-        <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
-          <thead className="border border-terminal-green">
-            <tr>
-              <th className="p-1">Rank</th>
-              <th className="p-1">Adventurer</th>
-              <th className="p-1">XP</th>
-              <th className="p-1">
-                Prize <span className="text-sm">(per mint)</span>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {scores.map((adventurer: Adventurer, index: number) => {
-              if (index > 2) {
-                return null;
-              } else {
-                return (
-                  <tr
-                    key={index}
-                    className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
-                    onClick={() => {
-                      handleRowSelected(adventurer.id ?? 0);
-                      clickPlay();
-                    }}
-                  >
-                    <td>{index + 1}</td>
-                    <td>{`${adventurer.name} - ${adventurer.id}`}</td>
-                    <td>{adventurer.xp}</td>
-                    <td>
-                      <div className="flex flex-row items-center justify-center gap-2">
-                        <span
-                          className={` ${
-                            index == 0
-                              ? "text-gold"
+    <div className="flex flex-col items-cente justify-between sm:w-3/4 sm:mx-auto">
+      <div className="flex flex-col items-center py-2">
+        <h1 className="text-lg sm:text-2xl m-0">Top 3 Submitted Scores</h1>
+        {scores.length > 0 ? (
+          <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
+            <thead className="border border-terminal-green">
+              <tr>
+                <th className="p-1">Rank</th>
+                <th className="p-1">Adventurer</th>
+                <th className="p-1">XP</th>
+                <th className="p-1">
+                  Prize <span className="text-sm">(per mint)</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {scores.map((adventurer: Adventurer, index: number) => {
+                if (index > 2) {
+                  return null;
+                } else {
+                  return (
+                    <tr
+                      key={index}
+                      className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
+                      onClick={() => {
+                        handleRowSelected(adventurer.id ?? 0);
+                        clickPlay();
+                      }}
+                    >
+                      <td>{index + 1}</td>
+                      <td>{`${adventurer.name} - ${adventurer.id}`}</td>
+                      <td>{adventurer.xp}</td>
+                      <td>
+                        <div className="flex flex-row items-center justify-center gap-2">
+                          <span
+                            className={` ${
+                              index == 0
+                                ? "text-gold"
+                                : index == 1
+                                ? "text-silver"
+                                : index == 2
+                                ? "text-bronze"
+                                : ""
+                            }`}
+                          >
+                            {index == 0
+                              ? 10
                               : index == 1
-                              ? "text-silver"
+                              ? 3
                               : index == 2
-                              ? "text-bronze"
-                              : ""
-                          }`}
-                        >
-                          {index == 0
-                            ? 10
-                            : index == 1
-                            ? 3
-                            : index == 2
-                            ? 2
-                            : ""}
-                        </span>
+                              ? 2
+                              : ""}
+                          </span>
 
-                        <Lords className="self-center w-6 h-6 ml-4 fill-current" />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              }
-            })}
-          </tbody>
-        </table>
-      ) : (
-        <h3 className="text-lg sm:text-2xl">
-          No scores submitted yet. Be the first!
-        </h3>
-      )}
+                          <Lords className="self-center w-6 h-6 ml-4 fill-current" />
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                }
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <h3 className="text-lg sm:text-2xl py-4">
+            No scores submitted yet. Be the first!
+          </h3>
+        )}
+      </div>
       <div className="flex flex-col-reverse sm:flex-row justify-between w-full">
-        <div className="flex flex-col w-full mb-4 sm:mb-0 mr-4 flex-grow-2 border border-terminal-green p-2">
+        <div className="flex flex-col w-full sm:mb-4 sm:mb-0 sm:mr-4 flex-grow-2 sm:border sm:border-terminal-green p-2">
           <h4 className="text-center text-lg sm:text-2xl">Live Leaderboard</h4>
           <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
             <thead className="border border-terminal-green">
@@ -260,7 +262,7 @@ export default function LeaderboardScree() {
             </div>
           )}
         </div>
-        <div className="flex flex-col w-full border border-terminal-green  p-2">
+        <div className="hidden sm:block flex flex-col w-full border border-terminal-green  p-2">
           <KillAdventurer />
         </div>
       </div>

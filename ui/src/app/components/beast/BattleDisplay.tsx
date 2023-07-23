@@ -104,7 +104,9 @@ export const BattleDisplay = ({
     }
   };
 
-  return <div className="w-full text-xl">{renderDiscoveryMessage()}</div>;
+  return (
+    <div className="w-full text-sm sm:text-xl">{renderDiscoveryMessage()}</div>
+  );
 };
 
 interface NotificationBattleDisplayProps {
@@ -243,5 +245,5 @@ export const NotificationBattleDisplay = ({
       return <p>You were killed by the idle penalty!</p>;
     }
   };
-  return <div >{renderBattleNotification()}</div>;
+  return <div>{renderBattleNotification()}</div>;
 };

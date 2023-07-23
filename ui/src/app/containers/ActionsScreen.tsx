@@ -41,9 +41,11 @@ export default function ActionsScreen() {
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
 
-  const latestDiscoveries = useQueriesStore((state) => state.data.latestDiscoveriesQuery
-    ? state.data.latestDiscoveriesQuery.discoveries
-    : []);
+  const latestDiscoveries = useQueriesStore((state) =>
+    state.data.latestDiscoveriesQuery
+      ? state.data.latestDiscoveriesQuery.discoveries
+      : []
+  );
 
   useCustomQuery(
     "adventurerByIdQuery",
@@ -110,7 +112,7 @@ export default function ActionsScreen() {
   ];
 
   return (
-    <div className="flex flex-col sm:flex-row gap-5 sm:gap-0  flex-wrap">
+    <div className="flex flex-col sm:flex-row flex-wrap">
       <div className="hidden sm:block sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>

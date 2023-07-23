@@ -131,7 +131,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
           </div>
         </>
       ) : (
-        <p>You have not yet made any encounters!</p>
+        <p className="text-lg">You have not yet made any encounters!</p>
       )}
       {sortedCombined.length > 10 && (
         <div className="flex justify-center mt-8">

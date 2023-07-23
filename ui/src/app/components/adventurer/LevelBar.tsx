@@ -18,13 +18,13 @@ const LevelBar: React.FC<LevelBarProps> = ({ xp }) => {
   const level = calculateLevel(xp);
 
   return (
-    <div className="w-full py-2 text-terminal-green">
+    <div className="w-full sm:py-2 text-terminal-green">
       <div className="flex justify-between">
         <span>Lvl {level}</span>
         <span>XP {xp}</span>
         <span>Lvl {level + 1}</span>
       </div>
-      <div className="w-full h-2 mt-1 border border-terminal-green bg-terminal-black ">
+      <div className="w-full h-2 sm:mt-1 border border-terminal-green bg-terminal-black ">
         <div
           className="h-full bg-terminal-green"
           style={{ width: `${progress}%` }}

@@ -57,6 +57,15 @@ const allMenuItems: Menu[] = [
   { id: 7, label: "Guide", screen: "guide", disabled: false },
 ];
 
+const mobileMenuItems: Menu[] = [
+  { id: 1, label: "Start", screen: "start", disabled: false },
+  { id: 2, label: "Play", screen: "play", disabled: false },
+  { id: 3, label: "Inventory", screen: "inventory", disabled: false },
+  { id: 4, label: "Upgrade", screen: "upgrade", disabled: false },
+  { id: 5, label: "Encounters", screen: "encounters", disabled: false },
+  { id: 6, label: "Guide", screen: "guide", disabled: false },
+];
+
 export default function Home() {
   const { disconnect } = useConnectors();
   const { account } = useAccount();
@@ -171,6 +180,25 @@ export default function Home() {
     query: "(max-device-width: 480px)",
   });
 
+  const mobileMenuDisabled = [
+    false,
+    hasStatUpgrades,
+    false,
+    !hasStatUpgrades,
+    false,
+    false,
+  ];
+
+  const allMenuDisabled = [
+    false,
+    hasStatUpgrades,
+    false,
+    !hasStatUpgrades,
+    false,
+    false,
+    false,
+  ];
+
   return (
     // <Maintenance />
     <main
@@ -181,7 +209,7 @@ export default function Home() {
           <div className="flex flex-col w-full">
             {isMobileDevice && <TxActivity />}
             <div className="flex flex-row justify-between">
-              <span className="flex flex-row gap-5 items-end">  
+              <span className="flex flex-row gap-5 items-end">
                 <h1 className="glitch">Loot Survivor</h1>
                 {/* <PenaltyCountDown
                   lastDiscoveryTime={
@@ -305,19 +333,15 @@ export default function Home() {
               <>
                 <div className="flex justify-center sm:justify-normal sm:pb-2">
                   <HorizontalKeyboardControl
-                    buttonsData={allMenuItems}
+                    buttonsData={
+                      isMobileDevice ? mobileMenuItems : allMenuItems
+                    }
                     onButtonClick={(value) => {
                       setScreen(value);
                     }}
-                    disabled={[
-                      false,
-                      hasStatUpgrades,
-                      false,
-                      !hasStatUpgrades,
-                      false,
-                      false,
-                      false,
-                    ]}
+                    disabled={
+                      isMobileDevice ? mobileMenuDisabled : allMenuDisabled
+                    }
                   />
                 </div>
 

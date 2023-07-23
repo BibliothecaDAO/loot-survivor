@@ -5,6 +5,7 @@ import { processItemName, calculateLevel, getItemData } from "../../lib/utils";
 import ItemBar from "./ItemBar";
 import { GameData } from "../GameData";
 import { getKeyFromValue, getValueFromKey } from "../../lib/utils";
+import { useMediaQuery } from "react-responsive";
 
 interface ItemDisplayProps {
   item: Item;
@@ -23,14 +24,22 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
   );
   const boost = getValueFromKey(gameData.ITEM_SUFFIX_BOOST, itemSuffix ?? 0);
 
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
+
   return (
     <div
-      className={`flex-shrink flex mb-1 text-sm sm:text-base ${item.item ? "bg-terminal-green text-terminal-black" : ""
-        }`}
+      className={`flex-shrink flex mb-1 text-sm sm:text-base ${
+        item.item ? "bg-terminal-green text-terminal-black" : ""
+      }`}
     >
-      <div className="flex flex-col justify-center border-r-2 border-terminal-black p-2 gap-2">
-        <LootIcon type={itemSlot ? itemSlot : slot} />
-        <Efficacyicon type={type} />
+      <div className="flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
+        <LootIcon
+          size={isMobileDevice ? "w-4" : "w-5"}
+          type={itemSlot ? itemSlot : slot}
+        />
+        <Efficacyicon size={isMobileDevice ? "w-4" : "w-5"} type={type} />
       </div>
 
       {item.item ? (
@@ -38,7 +47,7 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
           <div className="w-full overflow-auto whitespace-normal">
             {" "}
             <div className="flex flex-col text-xs sm:text-sm space-between">
-              <div className="flex flex-row justify-between font-semibold space-x-3">
+              <div className="flex flex-row font-semibold space-x-3">
                 <span className=" self-center">
                   {item &&
                     `Tier ${tier ?? 0}
@@ -49,18 +58,14 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
                 </span>
                 <span className="">{boost}</span>
               </div>
-              <span className="flex font-semibold whitespace-nowrap text-lg">
+              <span className="flex font-semibold whitespace-nowrap text-sm sm:text-lg">
                 {itemName}
                 {slot == "Neck" || slot == "Ring"
                   ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
                   : ""}
               </span>
-
             </div>
-
           </div>
-
-
         </div>
       ) : (
         <div

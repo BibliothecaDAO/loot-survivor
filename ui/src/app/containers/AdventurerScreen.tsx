@@ -16,6 +16,7 @@ import {
   getAdventurersByOwner,
 } from "../hooks/graphql/queries";
 import useAdventurerStore from "../hooks/useAdventurerStore";
+import { useMediaQuery } from "react-responsive";
 
 /**
  * @container
@@ -29,7 +30,9 @@ export default function AdventurerScreen() {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
 
-  const adventurers = useQueriesStore((state) => state.data.adventurersByOwnerQuery?.adventurers || []);
+  const adventurers = useQueriesStore(
+    (state) => state.data.adventurersByOwnerQuery?.adventurers || []
+  );
 
   const owner = account?.address ? padAddress(account.address) : "";
 
@@ -76,6 +79,10 @@ export default function AdventurerScreen() {
     },
   ];
 
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
+
   if (loading) {
     return <LootIconLoader />;
   }
@@ -89,6 +96,7 @@ export default function AdventurerScreen() {
             onSelected={(value) => setSelected(value)}
             isActive={activeMenu == 0}
             setActiveMenu={setActiveMenu}
+            size={isMobileDevice ? "sm" : "lg"}
           />
         </div>
 
@@ -106,8 +114,8 @@ export default function AdventurerScreen() {
           </div>
         )}
         {selected === "create adventurer" && (
-          <div className="flex flex-col mx-auto sm:justify-center sm:flex-row gap-2 sm:w-8/12 md:w-10/12">
-            <div className="mr-5">
+          <div className="flex flex-col sm:mx-auto sm:justify-center sm:flex-row gap-2 sm:w-8/12 md:w-10/12">
+            <div className="sm:mr-5">
               <CreateAdventurer
                 isActive={activeMenu == 2}
                 onEscape={() => setActiveMenu(0)}
