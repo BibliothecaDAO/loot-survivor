@@ -9,7 +9,7 @@ import Hand from "../../../../public/icons/loot/hand.svg";
 import Chest from "../../../../public/icons/loot/chest.svg";
 import Waist from "../../../../public/icons/loot/waist.svg";
 import Foot from "../../../../public/icons/loot/foot.svg";
-import { appUrl } from "@/app/lib/constants";
+import { appUrl, battle } from "@/app/lib/constants";
 
 interface BattleDisplayProps {
   battleData: Battle;
@@ -49,6 +49,7 @@ export const BattleDisplay = ({
   const NoDamageDealt = battleData.damageDealt === 0;
   const NoDamageTaken = battleData.damageTaken === 0;
   const IdleDamagePenalty = !battleData.beast;
+  const CriticalHit = battleData.criticalHit;
 
   const renderDiscoveryMessage = () => {
     if (BeastFled) {
@@ -63,7 +64,7 @@ export const BattleDisplay = ({
       return (
         <p className="w-full justify-between text-terminal-yellow">
           NICE! You attacked the {beastName} for {battleData?.damageDealt}{" "}
-          damage!
+          damage{CriticalHit && ", a critical hit"}!
         </p>
       );
     }
@@ -72,7 +73,7 @@ export const BattleDisplay = ({
       return (
         <p className="w-full justify-between">
           GREAT! You defeated the {beastName} with a final blow of{" "}
-          {battleData?.damageDealt} damage!
+          {battleData?.damageDealt} damage{CriticalHit && ", a critical hit"}!
         </p>
       );
     }
@@ -81,7 +82,7 @@ export const BattleDisplay = ({
       return (
         <p>
           OUCH! The {beastName} attacked your {damageLocation}, dealing{" "}
-          {battleData?.damageTaken} damage!
+          {battleData?.damageTaken} damage{CriticalHit && ", a critical hit"}!
         </p>
       );
     }
@@ -90,7 +91,8 @@ export const BattleDisplay = ({
       return (
         <p>
           YIKES! You were killed by the {beastName} as it dealt{" "}
-          {battleData?.damageTaken} damage to your {damageLocation}!
+          {battleData?.damageTaken} damage to your {damageLocation}
+          {CriticalHit && ", a critical hit"}!
         </p>
       );
     }
