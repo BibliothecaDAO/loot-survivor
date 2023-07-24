@@ -17,7 +17,7 @@ export default function TopInfo({ adventurer }: InfoProps) {
           <div className="flex flex-row flex-wrap gap-2 p-1">
             <div className="flex flex-col w-full sm:p-2 uppercase">
               <div className="flex justify-between w-full">
-                {formatAdventurer.race}{" "}
+                {formatAdventurer.classType ?? 0}{" "}
                 <span>
                   {
                     getRealmNameById(formatAdventurer.homeRealm ?? 0)
