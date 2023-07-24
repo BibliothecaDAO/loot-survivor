@@ -8,6 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { processBeastName, getRandomElement } from "../../lib/utils";
 import { Adventurer, Battle, Discovery, NullAdventurer } from "@/app/types";
+import { useMediaQuery } from "react-responsive";
 
 interface NotificationDisplayProps {
   type: string;
@@ -140,7 +141,7 @@ export const processNotification = (
     return <DiscoveryDisplay discoveryData={notificationData} />;
   } else if (notificationData == "Rejected") {
     return (
-      <p className="text-lg">
+      <p>
         OH NO! The transaction was rejected! Please refresh and try again incase
         of wallet issues.
       </p>
@@ -156,7 +157,7 @@ export const processNotification = (
               battles[0]?.beastHealth == 0
             ) {
               return (
-                <p key={index} className="text-lg">
+                <p key={index}>
                   You were slaughtered by the beast after trying to equip an
                   item!
                 </p>
@@ -168,7 +169,7 @@ export const processNotification = (
               (battles[0]?.beastHealth ?? 0) > 0
             ) {
               return (
-                <p key={index} className="text-lg">
+                <p key={index}>
                   OUCH! You were attacked by the {beastName} after equipping an
                   item taking {battles[0].damageTaken}!
                 </p>
@@ -180,23 +181,19 @@ export const processNotification = (
               (battles[0]?.beastHealth ?? 0) == 0
             ) {
               return (
-                <p key={index} className="text-lg">
+                <p key={index}>
                   You were attacked by the {beastName} after equipping an item
                   but defended it!
                 </p>
               );
             }
           }
-          return (
-            <p key={index} className="text-lg">
-              {noti}
-            </p>
-          );
+          return <p key={index}>{noti}</p>;
         })}
       </div>
     );
   } else {
-    return <p className="text-lg">{notificationData?.toString()}</p>;
+    return <p>{notificationData?.toString()}</p>;
   }
 };
 
@@ -224,6 +221,10 @@ export const NotificationDisplay = ({
     battles,
     hasBeast
   );
+
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
 
   const [setSound, setSoundState] = useState(soundSelector.click);
 
@@ -254,8 +255,8 @@ export const NotificationDisplay = ({
     <div className="z-10 flex flex-row w-full gap-5 sm:p-2">
       <div className="w-1/6 sm:w-1/4">
         <SpriteAnimation
-          frameWidth={100}
-          frameHeight={100}
+          frameWidth={isMobileDevice ? 80 : 100}
+          frameHeight={isMobileDevice ? 80 : 100}
           columns={7}
           rows={16}
           frameRate={5}
@@ -275,7 +276,9 @@ export const NotificationDisplay = ({
           currentAnimation={animation ?? ""}
         />
       </div>
-      <div className="w-5/6 sm:w-3/4 m-auto">{notification}</div>
+      <div className="w-5/6 sm:w-3/4 m-auto text-sm sm:text-lg">
+        {notification}
+      </div>
     </div>
   );
 };
