@@ -18,11 +18,9 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
     const adventurer = useAdventurerStore((state) => state.adventurer);
     const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
-    const purchaseGoldAmount = Math.max(
+    const purchaseGoldAmount =
       potionAmount *
-        ((adventurer?.level ?? 0) - 2 * (adventurer?.charisma ?? 0)),
-      1
-    );
+      Math.max((adventurer?.level ?? 0) - 2 * (adventurer?.charisma ?? 0), 1);
 
     const hasBalance =
       adventurer?.gold &&

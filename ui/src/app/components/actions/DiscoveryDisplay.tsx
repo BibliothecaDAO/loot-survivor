@@ -48,14 +48,14 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     if (discoveryData?.discoveryType === "Item") {
       if (discoveryData?.subDiscoveryType === "Gold") {
         return (
-          <div className="flex self-center text-terminal-yellow">
-            <p className="text-terminal-green">
-              NICE! You discovered{" "}
+          <div className="flex flex-row gap-1 self-center items-center text-terminal-yellow">
+            <p className="text-terminal-green">NICE! You discovered </p>
+            <span className="flex flex-row items-center">
+              <CoinIcon className="mt-1 self-center w-5 h-5 fill-current" />
               <span className="text-terminal-yellow">
                 {discoveryData?.outputAmount}
               </span>{" "}
-            </p>
-            <CoinIcon className="mt-1 self-center w-5 h-5 fill-current" />
+            </span>
           </div>
         );
       }

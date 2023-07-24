@@ -9,7 +9,6 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import LootIconLoader from "../components/icons/Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import useLoadingStore from "../hooks/useLoadingStore";
-
 import {
   getAdventurerById,
   getAdventurerByXP,
@@ -33,6 +32,7 @@ export default function AdventurerScreen() {
   const adventurers = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers || []
   );
+  const resetData = useQueriesStore((state) => state.resetData);
 
   const owner = account?.address ? padAddress(account.address) : "";
 
@@ -88,43 +88,41 @@ export default function AdventurerScreen() {
   }
 
   return (
-    <>
-      <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap">
-        <div className="w-full sm:w-2/12">
-          <VerticalKeyboardControl
-            buttonsData={menu}
-            onSelected={(value) => setSelected(value)}
-            isActive={activeMenu == 0}
-            setActiveMenu={setActiveMenu}
-            size={isMobileDevice ? "sm" : "lg"}
+    <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap">
+      <div className="w-full sm:w-2/12">
+        <VerticalKeyboardControl
+          buttonsData={menu}
+          onSelected={(value) => setSelected(value)}
+          isActive={activeMenu == 0}
+          setActiveMenu={setActiveMenu}
+          size={isMobileDevice ? "sm" : "lg"}
+        />
+      </div>
+
+      {selected === "choose adventurer" && (
+        <div className="flex flex-col sm:w-5/6">
+          <p className="text-center text-2xl sm:hidden uppercase">
+            Adventurers
+          </p>
+
+          <AdventurersList
+            isActive={activeMenu == 1}
+            onEscape={() => setActiveMenu(0)}
+            adventurers={adventurers}
           />
         </div>
-
-        {selected === "choose adventurer" && (
-          <div className="flex flex-col sm:w-5/6">
-            <p className="text-center text-2xl sm:hidden uppercase">
-              Adventurers
-            </p>
-
-            <AdventurersList
-              isActive={activeMenu == 1}
+      )}
+      {selected === "create adventurer" && (
+        <div className="flex flex-col sm:mx-auto sm:justify-center sm:flex-row gap-2 sm:w-8/12 md:w-10/12">
+          <div className="sm:mr-5">
+            <CreateAdventurer
+              isActive={activeMenu == 2}
               onEscape={() => setActiveMenu(0)}
               adventurers={adventurers}
             />
           </div>
-        )}
-        {selected === "create adventurer" && (
-          <div className="flex flex-col sm:mx-auto sm:justify-center sm:flex-row gap-2 sm:w-8/12 md:w-10/12">
-            <div className="sm:mr-5">
-              <CreateAdventurer
-                isActive={activeMenu == 2}
-                onEscape={() => setActiveMenu(0)}
-                adventurers={adventurers}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 }

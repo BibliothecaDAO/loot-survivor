@@ -20,8 +20,8 @@ interface MarketplaceRowProps {
   index: number;
   selectedIndex: number;
   adventurers: Adventurer[];
-  isActive: boolean;
-  setActiveMenu: (value: number) => void;
+  activeMenu: number | null;
+  setActiveMenu: (value: number | null) => void;
   calculatedNewGold: number;
 }
 
@@ -30,14 +30,13 @@ const MarketplaceRow = ({
   index,
   selectedIndex,
   adventurers,
-  isActive,
+  activeMenu,
   setActiveMenu,
   calculatedNewGold,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const [showEquipQ, setShowEquipQ] = useState(false);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { hashes, transactions } = useTransactionManager();
@@ -99,6 +98,8 @@ const MarketplaceRow = ({
     [selectedButton, setActiveMenu]
   );
 
+  const isActive = activeMenu == index;
+
   useEffect(() => {
     if (isActive) {
       window.addEventListener("keydown", handleKeyDown);
@@ -134,122 +135,95 @@ const MarketplaceRow = ({
   });
 
   return (
-    <>
-      <tr
-        className={
-          "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black" +
-          (selectedIndex === index + 1 ? " bg-terminal-black" : "")
-        }
-      >
-        <td className="text-center">{item.item}</td>
-        <td className="text-center">{tier}</td>
-        <td className="text-center">
-          <div className="flex justify-center items-center">
-            <LootIcon size={isMobileDevice ? "w-4" : "w-5"} type={slot} />
-          </div>
-        </td>
-        <td className="text-center">
-          <div className="flex flex-row items-center justify-center gap-2">
-            <p className="hidden sm:block">{type}</p>
-            <EfficacyDisplay className="sm:w-8" type={type} />
-          </div>
-        </td>
-        <td className="text-center">
-          <div className="flex flex-row items-center justify-center">
-            <CoinIcon className="w-4 h-4 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
-            <p className="text-terminal-yellow">
-              {getItemPrice(tier, adventurer?.charisma ?? 0)}
-            </p>
-          </div>
-        </td>
-
-        <td className="w-20 sm:w-32 text-center">
-          {!isMobileDevice && showEquipQ ? (
-            <div className="flex flex-row items-center justify-center gap-2">
-              <p>Equip?</p>
-              <div className="flex flex-col">
-                <Button
-                  size={"xs"}
-                  variant={"ghost"}
-                  onClick={() => {
-                    handlePurchase(item.item ?? "", tier, true);
-                    setShowEquipQ(false);
-                    // setPurchasedItem(true);
-                  }}
-                >
-                  Yes
-                </Button>
-                <Button
-                  size={"xs"}
-                  variant={"ghost"}
-                  onClick={() => {
-                    handlePurchase(item.item ?? "", tier, false);
-                    setShowEquipQ(false);
-                    // setPurchasedItem(true);
-                  }}
-                >
-                  No
-                </Button>{" "}
-              </div>
-
-              <Button size={"xs"} onClick={() => setShowEquipQ(false)}>
-                X
-              </Button>
-            </div>
-          ) : (
-            <Button
-              onClick={() => {
-                setShowEquipQ(true);
-                setActiveMenu(index + 1);
-              }}
-              disabled={
-                itemPrice > (adventurer?.gold ?? 0) ||
-                !enoughGold ||
-                checkTransacting(item.item ?? "") ||
-                singlePurchaseExists(item.item ?? "") ||
-                item.owner ||
-                (isMobileDevice && showEquipQ && isActive)
-              }
-              className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
-            >
-              {!enoughGold || itemPrice > (adventurer?.gold ?? 0)
-                ? "Not Enough Gold"
-                : checkTransacting(item.item ?? "") ||
-                  singlePurchaseExists(item.item ?? "") ||
-                  (isMobileDevice && showEquipQ && isActive)
-                ? "In Cart"
-                : item.owner
-                ? "Owned"
-                : "Purchase"}
-            </Button>
-          )}
-        </td>
-      </tr>
-      {isMobileDevice && showEquipQ && isActive && (
-        <div className="absolute bottom-5 w-full flex flex-row items-center justify-center gap-2">
-          <p>{`Equip ${item.item} ?`}</p>
-          <Button
-            onClick={() => {
-              handlePurchase(item.item ?? "", tier, true);
-              setShowEquipQ(false);
-              // setPurchasedItem(true);
-            }}
-          >
-            Yes
-          </Button>
-          <Button
-            onClick={() => {
-              handlePurchase(item.item ?? "", tier, false);
-              setShowEquipQ(false);
-              // setPurchasedItem(true);
-            }}
-          >
-            No
-          </Button>
-          <Button onClick={() => setShowEquipQ(false)}>Cancel</Button>
+    <tr
+      className={
+        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black" +
+        (selectedIndex === index + 1 ? " bg-terminal-black" : "")
+      }
+    >
+      <td className="text-center">{item.item}</td>
+      <td className="text-center">{tier}</td>
+      <td className="text-center">
+        <div className="flex justify-center items-center">
+          <LootIcon size={isMobileDevice ? "w-4" : "w-5"} type={slot} />
         </div>
-      )}
-    </>
+      </td>
+      <td className="text-center">
+        <div className="flex flex-row items-center justify-center gap-2">
+          <p className="hidden sm:block">{type}</p>
+          <EfficacyDisplay className="sm:w-8" type={type} />
+        </div>
+      </td>
+      <td className="text-center">
+        <div className="flex flex-row items-center justify-center">
+          <CoinIcon className="w-4 h-4 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
+          <p className="text-terminal-yellow">
+            {getItemPrice(tier, adventurer?.charisma ?? 0)}
+          </p>
+        </div>
+      </td>
+
+      <td className="w-20 sm:w-32 text-center">
+        {!isMobileDevice && activeMenu === index ? (
+          <div className="flex flex-row items-center justify-center gap-2">
+            <p>Equip?</p>
+            <div className="flex flex-col">
+              <Button
+                size={"xs"}
+                variant={"ghost"}
+                onClick={() => {
+                  handlePurchase(item.item ?? "", tier, true);
+                  setActiveMenu(null);
+                  // setPurchasedItem(true);
+                }}
+              >
+                Yes
+              </Button>
+              <Button
+                size={"xs"}
+                variant={"ghost"}
+                onClick={() => {
+                  handlePurchase(item.item ?? "", tier, false);
+                  setActiveMenu(null);
+                  // setPurchasedItem(true);
+                }}
+              >
+                No
+              </Button>{" "}
+            </div>
+
+            <Button size={"xs"} onClick={() => setActiveMenu(null)}>
+              X
+            </Button>
+          </div>
+        ) : (
+          <Button
+            onClick={() => {
+              setActiveMenu(index);
+            }}
+            disabled={
+              itemPrice > (adventurer?.gold ?? 0) ||
+              !enoughGold ||
+              checkTransacting(item.item ?? "") ||
+              singlePurchaseExists(item.item ?? "") ||
+              item.owner ||
+              (isMobileDevice && activeMenu === index && isActive)
+            }
+            className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
+          >
+            {!enoughGold || itemPrice > (adventurer?.gold ?? 0)
+              ? "Not Enough Gold"
+              : checkTransacting(item.item ?? "") ||
+                singlePurchaseExists(item.item ?? "") ||
+                (isMobileDevice && activeMenu === index && isActive)
+              ? "In Cart"
+              : item.owner
+              ? "Owned"
+              : "Purchase"}
+          </Button>
+        )}
+      </td>
+    </tr>
   );
 };
 
