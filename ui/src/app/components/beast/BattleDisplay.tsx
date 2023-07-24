@@ -156,7 +156,7 @@ export const NotificationBattleDisplay = ({
     data.adventurersByXPQuery?.adventurers ?? []
   );
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
-  console.log(battleData);
+
   const BeastFled = isArray && battleData.some((data) => data.fled);
   const FailedToFlee =
     isArray &&

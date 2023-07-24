@@ -5,6 +5,7 @@ import { GiCurvyKnife } from "react-icons/gi";
 import { GiWoodClub } from "react-icons/gi";
 import { BsMagic } from "react-icons/bs";
 import { IoMdSwap } from "react-icons/io";
+import { IoMdRefresh } from "react-icons/io";
 import { GiSwapBag } from "react-icons/gi";
 import HealthPotions from "../../../../public/icons/health-potions.svg";
 import Twitter from "../../../../public/icons/twitter.svg";
@@ -45,6 +46,7 @@ const BladeIcon = GiCurvyKnife;
 const BludgeonIcon = GiWoodClub;
 const MagicIcon = BsMagic;
 const SwapIcon = IoMdSwap;
+const RefreshIcon = IoMdRefresh;
 const LootBagIcon = GiSwapBag;
 const HealthPotionsIcon = HealthPotions;
 const TwitterIcon = Twitter;
@@ -87,6 +89,7 @@ export {
   BludgeonIcon,
   MagicIcon,
   SwapIcon,
+  RefreshIcon,
   LootBagIcon,
   HealthPotionsIcon,
   TwitterIcon,

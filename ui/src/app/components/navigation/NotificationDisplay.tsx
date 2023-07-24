@@ -214,7 +214,7 @@ export const NotificationDisplay = ({
     notificationData,
     adventurer ?? NullAdventurer
   );
-  // const animation = "attack2";
+  console.log(notificationData);
   const notification = processNotification(
     type,
     notificationData,

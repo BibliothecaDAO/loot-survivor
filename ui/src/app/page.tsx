@@ -39,6 +39,7 @@ import {
   VolumeIcon,
   CartIcon,
   GithubIcon,
+  RefreshIcon,
 } from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
@@ -225,6 +226,9 @@ export default function Home() {
                     </div>
                   )}
                 </button>
+                <Button onClick={async () => await refetch()}>
+                  <RefreshIcon className="w-5 h-5" />
+                </Button>
                 {account && calls.length > 0 && (
                   <>
                     <button

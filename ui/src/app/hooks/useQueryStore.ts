@@ -86,7 +86,7 @@ type QueriesState = {
     loading: boolean,
     refetch: () => Promise<void>
   ) => void;
-  refetch: (queryKey: QueryKey) => Promise<void>;
+  refetch: (queryKey?: QueryKey) => Promise<void>;
   resetData: (queryKey?: QueryKey) => void;
   resetDataUpdated: (queryKey?: QueryKey) => void;
 };
@@ -238,8 +238,6 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
       set((state) => ({
         data: { ...state.data, [queryKey]: null },
       }));
-      const { data } = get();
-      console.log(data);
     } else {
       set({ data: initialData });
     }
@@ -253,21 +251,34 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
       set({ isDataUpdated: initialIsDataUpdated });
     }
   },
-  refetch: async (queryKey: QueryKey) => {
+  refetch: async (queryKey) => {
     const { refetchFunctions } = get();
-    const refetch = refetchFunctions[queryKey];
+    if (queryKey) {
+      const refetch = refetchFunctions[queryKey];
 
-    if (refetch) {
-      try {
-        await refetch();
-      } catch (error) {
-        console.error(`Error refetching ${queryKey}:`, error);
-        throw error;
+      if (refetch) {
+        try {
+          await refetch();
+        } catch (error) {
+          console.error(`Error refetching ${queryKey}:`, error);
+          throw error;
+        }
+      } else {
+        const warningMessage = `No refetch function found for query key: ${queryKey}`;
+        console.warn(warningMessage);
+        throw new Error(warningMessage); // This will throw the error to be caught in the component
       }
     } else {
-      const warningMessage = `No refetch function found for query key: ${queryKey}`;
-      console.warn(warningMessage);
-      throw new Error(warningMessage); // This will throw the error to be caught in the component
+      // If no queryKey is supplied, refetch all queries
+      const allKeys = Object.keys(refetchFunctions);
+      for (let key of allKeys) {
+        const refetch = refetchFunctions[key as QueryKey];
+        try {
+          await refetch();
+        } catch (error) {
+          console.error(`Error refetching ${key}:`, error);
+        }
+      }
     }
   },
 }));
