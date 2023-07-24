@@ -16,6 +16,7 @@ import {
 } from "../hooks/graphql/queries";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useMediaQuery } from "react-responsive";
+import { NullAdventurer } from "../types";
 
 /**
  * @container
@@ -27,10 +28,15 @@ export default function AdventurerScreen() {
   const [loading, setLoading] = useState(false);
   const { account } = useAccount();
   const adventurer = useAdventurerStore((state) => state.adventurer);
+
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
 
   const adventurers = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers || []
+  );
+  const queryAdventurer = useQueriesStore(
+    (state) => state.data.adventurerByIdQuery?.adventurers[0] || NullAdventurer
   );
   const resetData = useQueriesStore((state) => state.resetData);
 
@@ -74,7 +80,11 @@ export default function AdventurerScreen() {
       id: 2,
       label: "Create Adventurer",
       value: "create adventurer",
-      action: () => setSelected("create adventurer"),
+      action: () => {
+        setSelected("create adventurer");
+        setAdventurer(NullAdventurer);
+        resetData("adventurerByIdQuery");
+      },
       disabled: false,
     },
   ];

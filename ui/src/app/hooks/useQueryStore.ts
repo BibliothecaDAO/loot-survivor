@@ -238,6 +238,8 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
       set((state) => ({
         data: { ...state.data, [queryKey]: null },
       }));
+      const { data } = get();
+      console.log(data);
     } else {
       set({ data: initialData });
     }
