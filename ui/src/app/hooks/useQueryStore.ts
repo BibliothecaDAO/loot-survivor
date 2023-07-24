@@ -87,6 +87,7 @@ type QueriesState = {
     refetch: () => Promise<void>
   ) => void;
   refetch: (queryKey: QueryKey) => Promise<void>;
+  resetData: (queryKey?: QueryKey) => void;
   resetDataUpdated: (queryKey?: QueryKey) => void;
 };
 
@@ -231,6 +232,15 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
       }
       return state;
     });
+  },
+  resetData: (queryKey) => {
+    if (queryKey) {
+      set((state) => ({
+        data: { ...state.data, [queryKey]: null },
+      }));
+    } else {
+      set({ data: initialData });
+    }
   },
   resetDataUpdated: (queryKey) => {
     if (queryKey) {
