@@ -69,14 +69,16 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
               <span className="flex flex-row justify-between">
                 <span className="flex font-semibold whitespace-nowrap text-sm sm:text-lg">
                   {itemName}
-                  {slot == "Neck" || slot == "Ring"
-                    ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
-                    : ""}
+                  <span className="text-xs sm:text-sm">
+                    {slot == "Neck" || slot == "Ring"
+                      ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
+                      : ""}
+                  </span>
                 </span>
                 {screen == "play" && (
                   <Button
                     variant={"contrast"}
-                    size={"xs"}
+                    size={"xxs"}
                     className="p-1"
                     onClick={() => {
                       setScreen("inventory");

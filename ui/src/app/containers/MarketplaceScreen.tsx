@@ -43,9 +43,11 @@ export default function MarketplaceScreen({
   const adventurers = useQueriesStore(
     (state) => state.data.adventurersInListQuery?.adventurers || []
   );
-
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
+  );
+  const adventurerItems = useQueriesStore(
+    (state) => state.data.itemsByAdventurerQuery?.items || []
   );
 
   const headings = ["Item", "Tier", "Slot", "Type", "Cost", "Actions"];
@@ -176,9 +178,11 @@ export default function MarketplaceScreen({
     query: "(max-device-width: 480px)",
   });
 
+  const underMaxItems = adventurerItems.length < 19;
+
   return (
     <>
-      {hasStatUpgrades ? (
+      {underMaxItems ? (
         <div className="w-full">
           <div className="w-full sm:mx-auto overflow-y-auto h-[300px] sm:h-[400px] border border-terminal-green table-scroll">
             {isLoading.latestMarketItemsQuery && (
@@ -212,6 +216,7 @@ export default function MarketplaceScreen({
                         activeMenu={showEquipQ}
                         setActiveMenu={setShowEquipQ}
                         calculatedNewGold={calculatedNewGold}
+                        ownedItems={adventurerItems}
                         key={index}
                       />
                     ))
@@ -268,9 +273,9 @@ export default function MarketplaceScreen({
           </div>
         </div>
       ) : (
-        <div className="flex w-full mt-[200px]">
-          <p className="mx-auto items-center text-[50px] animate-pulse">
-            No upgrades available!
+        <div className="flex w-full h-64">
+          <p className="m-auto items-center text-2xl sm:text-4xl animate-pulse">
+            You have a full inventory!
           </p>
         </div>
       )}

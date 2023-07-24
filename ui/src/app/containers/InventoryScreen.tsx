@@ -1,6 +1,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useAccount } from "@starknet-react/core";
+import {
+  useAccount,
+  useWaitForTransaction,
+  useTransactionManager,
+} from "@starknet-react/core";
 import { getKeyFromValue, groupBySlot } from "../lib/utils";
 import { InventoryRow } from "../components/inventory/InventoryRow";
 import Info from "../components/adventurer/Info";
@@ -12,7 +16,7 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import useLoadingStore from "../hooks/useLoadingStore";
 import LootIcon from "../components/icons/LootIcon";
 import { InfoIcon, BagIcon } from "../components/icons/Icons";
-import { Call, Item } from "../types";
+import { Call, Item, Metadata } from "../types";
 import { GameData } from "../components/GameData";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { getAdventurerById } from "../hooks/graphql/queries";
@@ -36,6 +40,9 @@ export default function InventoryScreen() {
   const setInventorySelected = useUIStore(
     (state) => state.setInventorySelected
   );
+  const { hashes, transactions } = useTransactionManager();
+  const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
+  const transactingItemIds = (transactions[0]?.metadata as Metadata)?.items;
 
   const { data } = useQueriesStore();
 
@@ -77,6 +84,14 @@ export default function InventoryScreen() {
         Array.isArray(call.calldata) &&
         call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
     );
+  };
+
+  const checkTransacting = (item: string) => {
+    if (txData?.status == "RECEIVED" || txData?.status == "PENDING") {
+      return transactingItemIds?.includes(item);
+    } else {
+      return false;
+    }
   };
 
   const handleKeyDown = useCallback(
@@ -266,7 +281,9 @@ export default function InventoryScreen() {
                     <Button
                       onClick={() => handleAddEquipItem(item.item ?? "")}
                       disabled={
-                        singleEquipExists(item.item ?? "") || item.equipped
+                        singleEquipExists(item.item ?? "") ||
+                        item.equipped ||
+                        checkTransacting(item.item ?? "")
                       }
                       loading={loading}
                     >

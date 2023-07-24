@@ -14,9 +14,14 @@ import { HealthCountDown } from "../CountDown";
 interface InfoProps {
   adventurer: Adventurer | undefined;
   profileExists?: boolean;
+  upgradeCost?: number;
 }
 
-export default function Info({ adventurer, profileExists }: InfoProps) {
+export default function Info({
+  adventurer,
+  profileExists,
+  upgradeCost,
+}: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
   const profile = useUIStore((state) => state.profile);
   const { data, isLoading } = useQueriesStore();
@@ -114,7 +119,9 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
                 {formatAdventurer.name}
                 <span className="flex items-center text-terminal-yellow">
                   <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
-                  {formatAdventurer.gold ? formatAdventurer.gold : 0}
+                  {formatAdventurer.gold
+                    ? formatAdventurer.gold - (upgradeCost ?? 0)
+                    : 0}
                 </span>
                 <span className="flex text-lg items-center sm:text-3xl">
                   <BagIcon className="self-center w-4 h-4 fill-current" />{" "}

@@ -23,6 +23,7 @@ interface MarketplaceRowProps {
   activeMenu: number | null;
   setActiveMenu: (value: number | null) => void;
   calculatedNewGold: number;
+  ownedItems: Item[];
 }
 
 const MarketplaceRow = ({
@@ -33,6 +34,7 @@ const MarketplaceRow = ({
   activeMenu,
   setActiveMenu,
   calculatedNewGold,
+  ownedItems,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
   const { gameContract } = useContracts();
@@ -70,6 +72,10 @@ const MarketplaceRow = ({
     } else {
       return false;
     }
+  };
+
+  const checkOwned = (item: string) => {
+    return ownedItems.some((ownedItem) => ownedItem.item == item);
   };
 
   const handleKeyDown = useCallback(
@@ -207,7 +213,8 @@ const MarketplaceRow = ({
               checkTransacting(item.item ?? "") ||
               singlePurchaseExists(item.item ?? "") ||
               item.owner ||
-              (isMobileDevice && activeMenu === index && isActive)
+              (isMobileDevice && activeMenu === index && isActive) ||
+              checkOwned(item.item ?? "")
             }
             className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
           >
@@ -217,7 +224,7 @@ const MarketplaceRow = ({
                 singlePurchaseExists(item.item ?? "") ||
                 (isMobileDevice && activeMenu === index && isActive)
               ? "In Cart"
-              : item.owner
+              : checkOwned(item.item ?? "")
               ? "Owned"
               : "Purchase"}
           </Button>

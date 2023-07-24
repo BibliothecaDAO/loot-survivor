@@ -4,7 +4,7 @@ import { Button } from "../buttons/Button";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useMediaQuery } from "react-responsive";
-import { Item, Menu } from "@/app/types";
+import { Item, Menu, Metadata } from "@/app/types";
 import { GameData } from "../GameData";
 import { getKeyFromValue } from "@/app/lib/utils";
 

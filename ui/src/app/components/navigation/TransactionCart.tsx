@@ -187,6 +187,11 @@ const TransactionCart: React.FC = () => {
                       items.push(dict.calldata[0]?.toString() ?? "");
                     }
                   }
+                  if (dict["entrypoint"] === "equip") {
+                    if (Array.isArray(dict.calldata)) {
+                      items.push(dict.calldata[2]?.toString() ?? "");
+                    }
+                  }
                 }
                 startLoading(
                   "Multicall",
