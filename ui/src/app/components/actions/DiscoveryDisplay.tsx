@@ -45,6 +45,14 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       }
     }
 
+    if (!discoveryData?.discoveryType) {
+      if (!AdventurerHealthExists) {
+        return <p>OOPS! You were killed by the idle penalty of 80 damage!</p>;
+      } else {
+        return <p>OOPS! You recieved the idle penalty of 80 damage!</p>;
+      }
+    }
+
     if (discoveryData?.discoveryType === "Item") {
       if (discoveryData?.subDiscoveryType === "Gold") {
         return (
@@ -71,14 +79,6 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
 
       if (discoveryData?.subDiscoveryType === "XP") {
         return <p>NICE! You discovered {discoveryData.outputAmount} xp!</p>;
-      }
-    }
-
-    if (!discoveryData?.discoveryType) {
-      if (!AdventurerHealthExists) {
-        return <p>OOPS! You were killed by the idle penalty of 80 damage!</p>;
-      } else {
-        return <p>OOPS! You recieved the idle penalty of 80 damage!</p>;
       }
     }
 

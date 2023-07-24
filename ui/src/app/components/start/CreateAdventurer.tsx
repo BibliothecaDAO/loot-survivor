@@ -212,7 +212,7 @@ export const CreateAdventurer = ({
               },
               {
                 name: "Scout",
-                description: "+2 Intelligence +2 Wisdom +3 Dexterity",
+                description: "+2 Intelligence +2 Wisdom +2 Dexterity",
                 image: "/characters/scout.png",
               },
               {
