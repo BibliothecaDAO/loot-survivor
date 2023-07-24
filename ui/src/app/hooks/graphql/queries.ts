@@ -4,7 +4,7 @@ const ADVENTURER_FIELDS = `
   id
   lastAction
   owner
-  race
+  classType
   homeRealm
   name
   health

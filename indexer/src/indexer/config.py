@@ -272,17 +272,11 @@ class Config:
             101: "Heavy Gloves",
         }
 
-        self.RACES = {
-            1: "Elf",
-            2: "Fox",
-            3: "Giant",
-            4: "Human",
-            5: "Orc",
-            6: "Demon",
-            7: "Goblin",
-            8: "Fish",
-            9: "Cat",
-            10: "Frog",
+        self.CLASSES = {
+            1: "Cleric",
+            2: "Scout",
+            3: "Hunter",
+            4: "Warrior",
         }
 
         self.STATS = {
