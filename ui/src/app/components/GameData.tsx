@@ -9,7 +9,7 @@ export class GameData {
   BEAST_ATTACK_TYPES: DictString<string>;
   BEAST_ARMOR_TYPES: DictString<string>;
   ITEMS: Dict<string>;
-  RACES: Dict<string>;
+  CLASSES: Dict<string>;
   ORDERS: Dict<string>;
   STATS: Dict<string>;
   OBSTACLES: Dict<string>;
@@ -724,17 +724,11 @@ export class GameData {
       HeavyGloves: "Hand",
     };
 
-    this.RACES = {
-      1: "Elf",
-      2: "Fox",
-      3: "Giant",
-      4: "Human",
-      5: "Orc",
-      6: "Demon",
-      7: "Goblin",
-      8: "Fish",
-      9: "Cat",
-      10: "Frog",
+    this.CLASSES = {
+      1: "Cleric",
+      2: "Scout",
+      3: "Hunter",
+      4: "Warrior",
     };
 
     this.ORDERS = {

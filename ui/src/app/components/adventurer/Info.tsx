@@ -91,7 +91,7 @@ export default function Info({ adventurer, profileExists }: InfoProps) {
             <div className="flex flex-col w-full sm:p-2 uppercase">
               {adventurer?.id ? (
                 <div className="flex justify-between w-full text-sm sm:text-base">
-                  {formatAdventurer.race}{" "}
+                  {formatAdventurer.classType}{" "}
                   <span>
                     {
                       getRealmNameById(formatAdventurer.homeRealm ?? 0)
