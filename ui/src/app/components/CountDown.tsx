@@ -86,7 +86,7 @@ export const PenaltyCountDown = ({
   };
 
   return (
-    <div>
+    <div className="hidden sm:block">
       {targetTime ? (
         seconds > 0 ? (
           <span className="flex flex-row gap-1 items-center">
