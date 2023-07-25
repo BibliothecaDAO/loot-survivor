@@ -42,7 +42,7 @@ export const DeathDialog = () => {
               </span>
               <p className="sm:text-2xl">
                 {adventurer?.name} has died level {adventurer?.level} with{" "}
-                {adventurer?.xp} xp, a valiant effort!
+                {adventurer?.xp} XP, a valiant effort!
               </p>
               <p className="hidden sm:block sm:text-xl">
                 Make sure to share your score. Continue the journey with another

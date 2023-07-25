@@ -44,8 +44,8 @@ export const PenaltyCountDown = ({
 }: PenaltyCountDownProps) => {
   const [seconds, setSeconds] = useState(0);
 
-  const finishedMessage = "You have reached idle penalty!";
-  const countingMessage = "Idle Penalty Countdown:";
+  const finishedMessage = "Penalty Reached!";
+  const countingMessage = "Penalty:";
 
   const formatDiscoveryTime = new Date(lastDiscoveryTime ?? 0).getTime();
   const formatBattleTime = new Date(lastBattleTime ?? 0).getTime();
@@ -86,12 +86,12 @@ export const PenaltyCountDown = ({
   };
 
   return (
-    <div className="hidden sm:block">
+    <div className="text-xs sm:text-lg">
       {targetTime ? (
         seconds > 0 ? (
           <span className="flex flex-row gap-1 items-center">
-            <p className="text-lg">{countingMessage}</p>
-            <p className="animate-pulse text-xl">{formatTime(seconds)}</p>
+            <p>{countingMessage}</p>
+            <p className="animate-pulse">{formatTime(seconds)}</p>
           </span>
         ) : (
           <p>{finishedMessage}</p>

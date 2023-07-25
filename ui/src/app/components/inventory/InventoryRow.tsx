@@ -97,36 +97,32 @@ export const InventoryRow = ({
   });
 
   return (
-    <>
-      <div className="flex flex-row w-full gap-3 sm:gap-1 align-center">
-        <Button
-          className={`h-16 w-full ${
-            isSelected && !isActive ? "animate-pulse" : ""
-          }`}
-          variant={isSelected ? "default" : "ghost"}
-          size={isMobileDevice ? "sm" : "lg"}
-          onClick={() => {
-            setSelected(menuIndex);
-            setActiveMenu(menuIndex);
-          }}
-          disabled={!adventurer?.id}
-        >
-          {isMobileDevice ? (
-            <div className="flex items-center justify-center w-10 h-10 sm:hidden">
+    <div className="flex flex-row w-full gap-3 sm:gap-1 align-center">
+      <Button
+        className={`h-14 w-12 sm:w-full ${
+          isSelected && !isActive ? "animate-pulse" : ""
+        }`}
+        variant={isSelected ? "default" : "ghost"}
+        size={isMobileDevice ? "sm" : "lg"}
+        onClick={() => {
+          setSelected(menuIndex);
+          setActiveMenu(menuIndex);
+        }}
+        disabled={!adventurer?.id}
+      >
+        {isMobileDevice ? (
+          <div className="flex items-center justify-center w-10 h-10 sm:hidden">
+            {icon}
+          </div>
+        ) : (
+          <div className="flex flex-row gap-1 items-center">
+            <div className="flex items-center justify-center w-10 h-10">
               {icon}
             </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-center w-10 h-10">
-                {icon}
-              </div>
-              <p className="text-xl whitespace-nowrap hidden sm:block">
-                {title}
-              </p>
-            </>
-          )}
-        </Button>
-      </div>
-    </>
+            <p className="text-xl whitespace-nowrap hidden sm:block">{title}</p>
+          </div>
+        )}
+      </Button>
+    </div>
   );
 };

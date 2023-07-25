@@ -40,6 +40,7 @@ import {
   CartIcon,
   GithubIcon,
   RefreshIcon,
+  CartIconSimple,
 } from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
@@ -192,20 +193,20 @@ export default function Home() {
   return (
     // <Maintenance />
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-4 sm:p-10 `}
+      className={`min-h-screen container mx-auto flex flex-col p-4 sm:p-10 mt-4 `}
     >
       {connected ? (
         <>
           <div className="flex flex-col w-full">
             {isMobileDevice && <TxActivity />}
             <div className="flex flex-row justify-between">
-              <span className="flex flex-row gap-5 items-end">
-                <h1 className="glitch">Loot Survivor</h1>
+              <span className="flex flex-row items-center gap-2 sm:gap-5 items-end">
+                <h1 className="glitch m-0">Loot Survivor</h1>
                 <PenaltyCountDown
                   lastDiscoveryTime={
-                    data.latestDiscoveriesQuery?.discoveries[0].timestamp
+                    data.latestDiscoveriesQuery?.discoveries[0]?.timestamp
                   }
-                  lastBattleTime={data.lastBattleQuery?.battles[0].timestamp}
+                  lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
                 />
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
@@ -218,34 +219,32 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-center">
                     {isMuted ? (
-                      <MuteIcon className="w-6 h-6" />
+                      <MuteIcon className="w-4 h-4 sm:w-6 sm:h-6" />
                     ) : (
-                      <VolumeIcon className="w-6 h-6" />
+                      <VolumeIcon className="w-4 h-4 sm:w-6 sm:h-6" />
                     )}
                   </div>
                 </Button>
                 <Button onClick={async () => await refetch()}>
-                  <RefreshIcon className="w-6 h-6" />
+                  <RefreshIcon className="w-4 h-4 sm:w-6 sm:h-6" />
                 </Button>
-                {account && calls.length > 0 && (
-                  <>
-                    <button
-                      onClick={() => {
-                        setDisplayCart(!displayCart);
-                        clickPlay();
-                      }}
-                      className="relative flex flex-row items-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base"
-                    >
-                      <div className="w-4 h-4">
-                        <CartIcon />
-                      </div>
-                      <p className="hidden sm:block">
-                        {displayCart ? "Hide Cart" : "Show Cart"}
-                      </p>
-                    </button>
-                    {displayCart && <TransactionCart />}
-                  </>
+                {!isMobileDevice && account && calls.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setDisplayCart(!displayCart);
+                      clickPlay();
+                    }}
+                    className="relative flex flex-row items-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base"
+                  >
+                    <div className="w-4 h-4">
+                      <CartIconSimple />
+                    </div>
+                    <p className="hidden sm:block">
+                      {displayCart ? "Hide Cart" : "Show Cart"}
+                    </p>
+                  </button>
                 )}
+                {displayCart && <TransactionCart />}
                 {isMobileDevice ? (
                   <>
                     <button
@@ -320,7 +319,7 @@ export default function Home() {
           {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
 
           {account ? (
-            <div className="flex flex-col flex-grow w-full">
+            <div className="flex flex-col w-full">
               <>
                 <div className="flex justify-center sm:justify-normal sm:pb-2">
                   <HorizontalKeyboardControl

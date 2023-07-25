@@ -33,6 +33,7 @@ const TransactionCart: React.FC = () => {
   const [loadingQuery, setLoadingQuery] = useState("");
   const { data } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
+  const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
 
   const items = data.latestMarketItemsQuery
@@ -146,7 +147,18 @@ const TransactionCart: React.FC = () => {
     <>
       {displayCart ? (
         <div className="absolute right-[50px] w-[300px] h-[400px] sm:right-[280px] top-20 sm:top-32 z-10 sm:w-[400px] sm:h-[400px] p-3 bg-terminal-black border border-terminal-green">
-          <p className="text-2xl">TRANSACTIONS</p>
+          <div className="flex flex-row justify-between">
+            <p className="text-2xl">TRANSACTIONS</p>
+            <button
+              onClick={() => {
+                setDisplayCart(false);
+                clickPlay();
+              }}
+              className="text-red-500 hover:text-red-700"
+            >
+              <MdClose size={40} />
+            </button>
+          </div>
           <div className="w-full border border-terminal-green "></div>
           <div className="flex flex-col h-full overflow-auto">
             {calls.map((call: Call, i: number) => (

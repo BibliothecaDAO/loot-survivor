@@ -150,11 +150,11 @@ export default function InventoryScreen() {
   const selectedItems = groupedItems[selected || "Weapon"] || [];
 
   return (
-    <div className="flex flex-row gap-5 sm:gap-5 py-2 sm:p-0 flex-wrap">
+    <div className="flex flex-row sm:gap-5">
       <div className="hidden sm:block sm:w-1/3">
         <Info adventurer={adventurer} />
       </div>
-      <div className="flex flex-col sm:w-1/6">
+      <div className="flex flex-col w-1/6">
         <InventoryRow
           title={"All"}
           items={groupedItems["All"]}
@@ -256,9 +256,9 @@ export default function InventoryScreen() {
         />
       </div>
       {adventurer?.id ? (
-        <div className="w-2/3 sm:w-2/6">
-          <h4>{selected} Loot</h4>
-          <div className="flex flex-col gap-5">
+        <div className="w-5/6 sm:w-1/2">
+          <div className="flex flex-col sm:gap-5">
+            <h4 className="m-0">{selected} Loot</h4>
             <div className="flex-row items-center gap-5 p-2 border border-terminal-green hidden sm:flex">
               <div className="w-10">
                 <InfoIcon />
@@ -268,17 +268,22 @@ export default function InventoryScreen() {
                 items of Tier 5 offer the most basic value.
               </p>
             </div>
-            <div className="flex flex-col space-y-1 overflow-y-auto h-[500px]">
+            <div className="flex flex-col overflow-y-auto h-[450px] sm:h-[550px]">
               {selectedItems.length ? (
                 selectedItems.map((item: Item, index: number) => (
-                  <div
-                    className="flex flex-row gap-2 w-full items-center justify-between"
-                    key={index}
-                  >
-                    <div className="w-full">
-                      <ItemDisplay item={item} />
-                    </div>
-                    <Button
+                  <div className="w-full" key={index}>
+                    <ItemDisplay
+                      item={item}
+                      inventory={true}
+                      equip={() => handleAddEquipItem(item.item ?? "")}
+                      equipped={item.equipped}
+                      disabled={
+                        singleEquipExists(item.item ?? "") ||
+                        item.equipped ||
+                        checkTransacting(item.item ?? "")
+                      }
+                    />
+                    {/* <Button
                       onClick={() => handleAddEquipItem(item.item ?? "")}
                       disabled={
                         singleEquipExists(item.item ?? "") ||
@@ -288,7 +293,7 @@ export default function InventoryScreen() {
                       loading={loading}
                     >
                       {item.equipped ? "Eqipped" : "Equip"}
-                    </Button>
+                    </Button> */}
                   </div>
                 ))
               ) : (

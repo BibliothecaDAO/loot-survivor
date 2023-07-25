@@ -82,7 +82,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       }
 
       if (discoveryData?.subDiscoveryType === "XP") {
-        return <p>NICE! You discovered {discoveryData.outputAmount} xp!</p>;
+        return <p>NICE! You discovered {discoveryData.outputAmount} XP!</p>;
       }
     }
 

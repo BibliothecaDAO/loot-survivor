@@ -111,9 +111,7 @@ export default function AdventurerScreen() {
 
       {selected === "choose adventurer" && (
         <div className="flex flex-col sm:w-5/6">
-          <p className="text-center text-2xl sm:hidden uppercase">
-            Adventurers
-          </p>
+          <p className="text-center text-xl sm:hidden uppercase">Adventurers</p>
 
           <AdventurersList
             isActive={activeMenu == 1}

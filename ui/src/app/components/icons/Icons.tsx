@@ -20,10 +20,10 @@ import { GiSandsOfTime } from "react-icons/gi";
 import { GiFootTrip } from "react-icons/gi";
 import { GiBrute } from "react-icons/gi";
 import { GiBattleGear } from "react-icons/gi";
+import { GiPowderBag } from "react-icons/gi";
+import { RiShoppingCartFill } from "react-icons/ri";
 import HealthPotions from "../../../../public/icons/health-potions.svg";
 import Twitter from "../../../../public/icons/twitter.svg";
-import Volume from "../../../../public/icons/volume.svg";
-import Mute from "../../../../public/icons/mute.svg";
 import Trophy from "../../../../public/icons/trophy.svg";
 import Mist from "../../../../public/icons/mist.svg";
 import Cog from "../../../../public/icons/cog.svg";
@@ -74,6 +74,8 @@ const GiSandsOfTimeIcon = GiSandsOfTime;
 const GiFootTripIcon = GiFootTrip;
 const GiBruteIcon = GiBrute;
 const GiBattleGearIcon = GiBattleGear;
+const PowderBagIcon = GiPowderBag;
+const CartIconSimple = RiShoppingCartFill;
 const HealthPotionsIcon = HealthPotions;
 const TwitterIcon = Twitter;
 const TrophyIcon = Trophy;
@@ -126,6 +128,8 @@ export {
   GiFootTripIcon,
   GiBruteIcon,
   GiBattleGearIcon,
+  PowderBagIcon,
+  CartIconSimple,
   HealthPotionsIcon,
   TwitterIcon,
   VolumeIcon,

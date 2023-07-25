@@ -13,9 +13,20 @@ import useUIStore from "@/app/hooks/useUIStore";
 interface ItemDisplayProps {
   item: Item;
   itemSlot?: string;
+  inventory?: boolean;
+  equip?: () => void;
+  equipped?: boolean;
+  disabled?: boolean;
 }
 
-export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
+export const ItemDisplay = ({
+  item,
+  itemSlot,
+  inventory,
+  equip,
+  equipped,
+  disabled,
+}: ItemDisplayProps) => {
   const itemType = item?.item;
 
   const itemName = processItemName(item);
@@ -38,7 +49,7 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
 
   return (
     <div
-      className={`flex-shrink flex mb-1 text-sm sm:text-base ${
+      className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-14 ${
         item.item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >
@@ -52,10 +63,10 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
 
       {item.item ? (
         <div className="flex flex-row justify-between w-full px-2 self-center">
-          <div className="w-full overflow-auto whitespace-normal">
+          <div className="w-full whitespace-normal">
             {" "}
             <div className="flex flex-col text-xs sm:text-sm space-between">
-              <div className="flex flex-row font-semibold space-x-3">
+              <div className="flex flex-row font-semibold text-xs space-x-3">
                 <span className=" self-center">
                   {item &&
                     `Tier ${tier ?? 0}
@@ -64,18 +75,20 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
                 <span className="whitespace-nowrap w-1/2">
                   <ItemBar xp={item.xp ?? 0} />
                 </span>
-                <span className="">{boost}</span>
+                <span className="text-xxs sm:text-sm">{boost}</span>
               </div>
               <span className="flex flex-row justify-between">
-                <span className="flex font-semibold whitespace-nowrap text-sm sm:text-lg">
-                  {itemName}
-                  <span className="text-xs sm:text-sm">
+                <span className="flex font-semibold whitespace-nowrap text-[0.6rem] sm:text-lg">
+                  <p>{itemName}</p>
+                  <span className="text-xxs sm:text-sm">
                     {slot == "Neck" || slot == "Ring"
                       ? ` [+${calculateLevel(item?.xp ?? 0)} Luck]`
                       : ""}
                   </span>
                 </span>
-                {screen == "play" && (
+                {(screen == "play" ||
+                  screen == "upgrade" ||
+                  screen == "player") && (
                   <Button
                     variant={"contrast"}
                     size={"xxs"}
@@ -90,6 +103,19 @@ export const ItemDisplay = ({ item, itemSlot }: ItemDisplayProps) => {
                     }}
                   >
                     <SwapIcon className="w-4 h-4" />
+                  </Button>
+                )}
+                {inventory && (
+                  <Button
+                    className="sm:h-6 sm:p-2"
+                    variant={"contrast"}
+                    size={isMobileDevice ? "xxs" : "sm"}
+                    onClick={equip}
+                    disabled={disabled}
+                  >
+                    <p className="text-xxs sm:text-sm">
+                      {equipped ? "Equipped" : "Equip"}
+                    </p>
                   </Button>
                 )}
               </span>

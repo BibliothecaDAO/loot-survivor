@@ -1,5 +1,10 @@
 import VerticalKeyboardControl from "../menu//VerticalMenu";
-import { EncountersIcon, LedgerIcon } from "../icons/Icons";
+import {
+  CartIcon,
+  CartIconSimple,
+  EncountersIcon,
+  LedgerIcon,
+} from "../icons/Icons";
 import { GuideIcon } from "../icons/Icons";
 import { ChatIcon } from "../icons/Icons";
 import useUIStore from "../../hooks/useUIStore";
@@ -12,6 +17,8 @@ export default function Settings() {
   const setScreen = useUIStore((state) => state.setScreen);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
+  const displayCart = useUIStore((state) => state.displayCart);
+  const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { disconnect } = useConnectors();
   const { account } = useAccount();
 
@@ -22,17 +29,23 @@ export default function Settings() {
       icon: <LedgerIcon />,
       action: () => setDisplayHistory(!displayHistory),
     },
-    {
-      id: 2,
-      label: "Encounters",
-      icon: <EncountersIcon />,
-      action: () => setScreen("encounters"),
-    },
+    // {
+    //   id: 2,
+    //   label: "Encounters",
+    //   icon: <EncountersIcon />,
+    //   action: () => setScreen("encounters"),
+    // },
+    // {
+    //   id: 3,
+    //   label: "Guide",
+    //   icon: <GuideIcon />,
+    //   action: () => setScreen("guide"),
+    // },
     {
       id: 3,
-      label: "Guide",
-      icon: <GuideIcon />,
-      action: () => setScreen("guide"),
+      label: "Cart",
+      icon: <CartIconSimple className="w-6 h-6" />,
+      action: () => setDisplayCart(!displayCart),
     },
     {
       id: 4,
@@ -47,6 +60,7 @@ export default function Settings() {
       variant: "default",
     },
   ];
+
   return (
     <div className="flex flex-row  flex-wrap">
       <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8">
