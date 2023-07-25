@@ -86,7 +86,7 @@ export const PenaltyCountDown = ({
   };
 
   return (
-    <div className="text-xs sm:text-lg">
+    <div className="text-xs sm:text-lg mt-2 sm:mt-4">
       {targetTime ? (
         seconds > 0 ? (
           <span className="flex flex-row gap-1 items-center">
