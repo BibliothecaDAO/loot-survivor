@@ -242,7 +242,7 @@ export const NotificationBattleDisplay = ({
         <div className="flex flex-col gap-2 items-center justify-center">
           <p>
             You slayed the {beastName || ""} after inflicting{" "}
-            {battleData[0]?.criticalHit && "a critical hit of"}
+            {battleData[0]?.criticalHit && "a critical hit of "}
             {battleData[0]?.damageDealt} damage!
           </p>
           <TwitterShareButton
