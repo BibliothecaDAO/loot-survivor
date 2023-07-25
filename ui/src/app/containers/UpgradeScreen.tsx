@@ -109,20 +109,18 @@ export default function UpgradeScreen() {
       adventurer?.id,
       `You upgraded ${selected}!`
     );
-    handleSubmitCalls(writeAsync)
-      .then((tx: any) => {
-        if (tx) {
-          setTxHash(tx.transaction_hash);
-          addTransaction({
-            hash: tx.transaction_hash,
-            metadata: {
-              method: "Upgrade Stat",
-              description: `Upgrading ${selected}`,
-            },
-          });
-        }
-      })
-      .then(() => setScreen("play"));
+    handleSubmitCalls(writeAsync).then((tx: any) => {
+      if (tx) {
+        setTxHash(tx.transaction_hash);
+        addTransaction({
+          hash: tx.transaction_hash,
+          metadata: {
+            method: "Upgrade Stat",
+            description: `Upgrading ${selected}`,
+          },
+        });
+      }
+    });
     resetDataUpdated("adventurerByIdQuery");
   };
 

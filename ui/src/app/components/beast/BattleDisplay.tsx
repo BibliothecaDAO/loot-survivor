@@ -149,6 +149,8 @@ export const NotificationBattleDisplay = ({
     }
   };
 
+  console.log(battleData);
+
   const { beastName, beastLevel, tier } = handleBeastInfo();
   const { data } = useQueriesStore();
   const rank = getRankFromList(
@@ -161,74 +163,86 @@ export const NotificationBattleDisplay = ({
   const FailedToFlee =
     isArray &&
     battleData.some(
-      (data) =>
-        data.attacker === "Beast" && data.fled && (adventurer?.health ?? 0) > 0
-    );
+      (data) => data.attacker === "Adventurer" && data.damageDealt == 0
+    ) &&
+    (battleData[0]?.adventurerHealth ?? 0) > 0;
   const KilledTryingToFlee =
     isArray &&
-    battleData.length == 1 &&
-    battleData[0]?.attacker === "Beast" &&
-    adventurer?.health === 0;
+    battleData.some(
+      (data) => data.attacker === "Adventurer" && data.damageDealt == 0
+    ) &&
+    (battleData[0]?.adventurerHealth ?? 0) == 0;
   const Attacked =
     isArray &&
     battleData.some(
-      (data) => data.attacker === "Adventurer" && (data.beastHealth ?? 0) > 0
+      (data) => data.attacker === "Beast" && (data.adventurerHealth ?? 0) > 0
     );
   const Slayed =
     isArray &&
     battleData.length == 1 &&
     battleData[0]?.attacker === "Adventurer" &&
-    (battleData[0]?.beastHealth ?? 0) === 0 &&
-    (adventurer?.health ?? 0) > 0;
+    (battleData[0]?.beastHealth ?? 0) == 0;
   const KilledByBeast =
     isArray &&
     battleData.some((data) => data.attacker === "Beast") &&
     adventurer?.health === 0;
-
   const IdleDamagePenalty =
     isArray &&
-    battleData.some((data) => !data.beast) &&
-    (adventurer?.health ?? 0) > 0;
+    battleData.length == 1 &&
+    !battleData[0].beast &&
+    (battleData[0].adventurerHealth ?? 0) > 0;
 
   const KilledByIdlePenalty =
     isArray &&
-    battleData.some((data) => !data.beast) &&
-    adventurer?.health === 0;
+    battleData.length == 1 &&
+    !battleData[0].beast &&
+    (battleData[0].adventurerHealth ?? 0) == 0;
 
   const renderBattleNotification = () => {
     if (BeastFled) {
       return <p>You fled the {beastName || ""}!</p>;
-    }
-    if (FailedToFlee) {
+    } else if (FailedToFlee) {
       return (
         <p>
           You failed to flee the {beastName || ""} and were attacked taking{" "}
-          {battleData[1]?.damageTaken} damage!{" "}
+          {battleData[0]?.damageTaken} damage
+          {battleData[0]?.criticalHit && ", a critical hit"}!
         </p>
       );
-    }
-    if (KilledTryingToFlee) {
+    } else if (KilledTryingToFlee) {
       return (
         <p>
           You were killed trying to flee the {beastName || ""} taking{" "}
-          {battleData[0]?.damageTaken} damage!{" "}
+          {battleData[0]?.damageTaken} damage
+          {battleData[0]?.criticalHit && ", a critical hit"}!
         </p>
       );
-    }
-    if (Attacked) {
+    } else if (Attacked) {
       return (
         <p>
-          You attacked the {beastName || ""} with a mighty strike and dealt{" "}
+          You attacked the {beastName || ""} with{" "}
+          {battleData[1]?.criticalHit && "a critical hit"} and dealt{" "}
           {battleData[1]?.damageDealt} damage! They counterattacked for{" "}
-          {battleData[0]?.damageTaken} damage!
+          {battleData[0]?.damageTaken} damage
+          {battleData[0]?.criticalHit && ", a critical hit"}!
         </p>
       );
-    }
-    if (Slayed) {
+    } else if (KilledByBeast) {
+      return (
+        <p>
+          With a last breath you strike the {beastName || ""} with{" "}
+          {battleData[1]?.criticalHit && "a critical hit of "}
+          {battleData[1]?.damageDealt} damage! However, they finish you with{" "}
+          {battleData[0]?.damageTaken} damage
+          {battleData[0]?.criticalHit && ", a critical hit"}!
+        </p>
+      );
+    } else if (Slayed) {
       return (
         <div className="flex flex-col gap-2 items-center justify-center">
           <p>
             You slayed the {beastName || ""} after inflicting{" "}
+            {battleData[0]?.criticalHit && "a critical hit of"}
             {battleData[0]?.damageDealt} damage!
           </p>
           <TwitterShareButton
@@ -236,15 +250,10 @@ export const NotificationBattleDisplay = ({
           />
         </div>
       );
-    }
-    if (KilledByBeast) {
-      return <p>You were killed by the {beastName || ""}</p>;
-    }
-    if (IdleDamagePenalty) {
+    } else if (IdleDamagePenalty) {
       return <p>You were hit for 80 damage from idle penalty!</p>;
-    }
-    if (KilledByIdlePenalty) {
-      return <p>You were killed by the idle penalty!</p>;
+    } else if (KilledByIdlePenalty) {
+      return <p>You were killed from 80 damage by the idle penalty!</p>;
     }
   };
   return <div>{renderBattleNotification()}</div>;

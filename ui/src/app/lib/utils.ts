@@ -125,7 +125,7 @@ export function shortenHex(hexString: string, numDigits = 6) {
   return `${firstHalf}...${secondHalf}`;
 }
 
-export function convertTime(time: string) {
+export function convertTime(time: number) {
   const dateTime = new Date(time);
 
   // Convert the offset to milliseconds

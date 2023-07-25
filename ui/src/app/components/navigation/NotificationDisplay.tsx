@@ -31,23 +31,24 @@ const processAnimation = (
     } else if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: Battle) => data.attacker == "Beast" && data.fled
-      )
-    ) {
-      return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
-    } else if (
-      Array.isArray(notificationData?.data) &&
-      notificationData.data.some(
-        (data: Battle) => data.attacker == "Beast" && data.beastHealth == 0
+        (data: Battle) => data.attacker == "Beast" && data.adventurerHealth == 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
+    } else if (
+      Array.isArray(notificationData?.data) &&
+      notificationData.data.some(
+        (data: Battle) =>
+          data.attacker == "Beast" && (data.adventurerHealth ?? 0) > 0
+      )
+    ) {
+      return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
     }
   } else if (type == "Attack") {
     if (
       Array.isArray(notificationData?.data) &&
       notificationData.data.some(
-        (data: Battle) => data.attacker == "Beast" && data.beastHealth == 0
+        (data: Battle) => data.attacker == "Beast" && data.adventurerHealth == 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
@@ -154,7 +155,7 @@ export const processNotification = (
             if (
               noti.startsWith("You equipped") &&
               battles[0]?.attacker == "Beast" &&
-              battles[0]?.beastHealth == 0
+              battles[0]?.adventurerHealth == 0
             ) {
               return (
                 <p key={index}>

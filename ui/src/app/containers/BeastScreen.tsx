@@ -179,6 +179,7 @@ export default function BeastScreen() {
         );
         await handleSubmitCalls(writeAsync).then((tx: any) => {
           if (tx) {
+            console.log(tx.transaction_hash);
             setTxHash(tx.transaction_hash);
             addTransaction({
               hash: tx.transaction_hash,

@@ -20,12 +20,13 @@ export const DeathDialog = () => {
     data.adventurersByXPQuery?.adventurers ?? []
   );
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
+  console.log(deathMessage);
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
       <div className="fixed text-center top-1/8 left-1/8 sm:left-1/4 w-3/4 sm:w-1/2 h-3/4 rounded-lg border border-red-500 bg-terminal-black z-50">
-        <div className="flex flex-col gap-10 h-full items-center justify-center	p-5">
-          <div className="relative w-full h-1/2">
+        <div className="flex flex-col items-center justify-center	p-5 w-full h-full">
+          <div className="relative w-1/2 h-1/2">
             <Image
               src={"/crying-skull.png"}
               alt="skull"
@@ -33,29 +34,31 @@ export const DeathDialog = () => {
               style={{ objectFit: "contain" }}
             />
           </div>
-          <div className="flex flex-col gap-2 items-center justify-center">
-            <p className="text-2xl sm:text-4xl text-red-500">GAME OVER!</p>
-            {deathMessage}
-            <p className="text-lg sm:text-2xl">
-              {adventurer?.name} has died level {adventurer?.level} with{" "}
-              {adventurer?.xp} xp, a valiant effort!
-            </p>
-            <p className="text-sm sm:text-xl">
-              Make sure to share your score. Continue the journey with another
-              adventurer:{" "}
-            </p>
+          <div className="flex flex-col gap-10 items-center h-1/2">
+            <div className="flex flex-col gap-2 items-center justify-center">
+              <p className="text-2xl sm:text-4xl text-red-500">GAME OVER!</p>
+              {deathMessage}
+              <p className="text-lg sm:text-2xl">
+                {adventurer?.name} has died level {adventurer?.level} with{" "}
+                {adventurer?.xp} xp, a valiant effort!
+              </p>
+              <p className="text-sm sm:text-xl">
+                Make sure to share your score. Continue the journey with another
+                adventurer:{" "}
+              </p>
+            </div>
+            <TwitterShareButton
+              text={`RIP ${adventurer?.name}, who died at ${ordinalRank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+            />
+            <Button
+              onClick={() => {
+                showDeathDialog(false);
+                setDeathMessage(null);
+              }}
+            >
+              Play Again
+            </Button>
           </div>
-          <TwitterShareButton
-            text={`RIP ${adventurer?.name}, who died at ${ordinalRank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
-          />
-          <Button
-            onClick={() => {
-              showDeathDialog(false);
-              setDeathMessage(null);
-            }}
-          >
-            Play Again
-          </Button>
         </div>
       </div>
     </>

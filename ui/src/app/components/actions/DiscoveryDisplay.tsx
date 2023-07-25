@@ -19,7 +19,13 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
   const renderDiscoveryMessage = () => {
     if (discoveryData?.discoveryType === "Beast") {
       if (discoveryData?.ambushed) {
-        return <p>YIKES! You were ambushed by a {beastName}</p>;
+        if (AdventurerHealthExists) {
+          return <p>YIKES! You were ambushed by a {beastName}</p>;
+        } else {
+          return (
+            <p>YIKES! You were killed from an ambushed by a {beastName}</p>
+          );
+        }
       } else {
         return <p>OH NO! You discovered a {beastName}!</p>;
       }

@@ -39,6 +39,9 @@ export const TxActivity = () => {
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const setScreen = useUIStore((state) => state.setScreen);
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const hasStatUpgrades = useAdventurerStore(
+    (state) => state.computed.hasStatUpgrades
+  );
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
@@ -47,6 +50,7 @@ export const TxActivity = () => {
     isDataUpdated,
     refetch,
     resetDataUpdated,
+    resetData,
   } = useQueriesStore();
   const { data } = useWaitForTransaction({
     hash,
@@ -78,9 +82,7 @@ export const TxActivity = () => {
       battles,
       hasBeast
     );
-    if (!deathMessage) {
-      setDeathMessage(notification);
-    }
+    setDeathMessage(notification);
     showDeathDialog(true);
   };
 
@@ -104,20 +106,16 @@ export const TxActivity = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      console.log(txAccepted, hash, isLoadingQueryUpdated);
       if (!txAccepted || !hash || !isLoadingQueryUpdated) return;
 
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
-
         await refetch("battlesByTxHashQuery");
         await refetch("adventurerByIdQuery");
         await refetch("battlesByBeastQuery");
         await refetch("latestMarketItemsQuery");
-        console.log("in battle!");
-        stopLoading({
-          data: queryData.battlesByTxHashQuery.battles,
-          beast: notificationData.beast,
-        });
+        console.log("in battle");
         const killedByBeast = queryData.battlesByTxHashQuery.battles.some(
           (battle) => battle.attacker == "Beast" && !isAlive
         );
@@ -126,13 +124,33 @@ export const TxActivity = () => {
         );
         console.log(killedByBeast || killedByPenalty);
         if (killedByBeast || killedByPenalty) {
-          setDeathNotification(
-            type,
-            notificationData,
-            queryData.battlesByTxHashQuery.battles,
-            hasBeast
-          );
+          if (killedByBeast) {
+            setDeathNotification(
+              type,
+              {
+                data: queryData.battlesByTxHashQuery.battles,
+                beast: notificationData.beast,
+              },
+              queryData.battlesByTxHashQuery.battles,
+              hasBeast
+            );
+          }
+          if (killedByPenalty) {
+            setDeathNotification(
+              type,
+              {
+                data: queryData.battlesByTxHashQuery.battles,
+                beast: notificationData.beast,
+              },
+              queryData.battlesByTxHashQuery.battles,
+              hasBeast
+            );
+          }
         }
+        stopLoading({
+          data: queryData.battlesByTxHashQuery.battles,
+          beast: notificationData.beast,
+        });
       };
 
       const handleExplore = async () => {
@@ -144,25 +162,33 @@ export const TxActivity = () => {
         await refetch("lastBeastBattleQuery");
         await refetch("lastBeastQuery");
         await refetch("latestMarketItemsQuery");
-        stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
-        const killedByObstacleOrPenalty =
-          (queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
-            "Obstacle" ||
-            !queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType) &&
+        const killedByObstacle =
+          queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
+            "Obstacle" && !isAlive;
+        const killedByPenalty =
+          !queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType &&
           !isAlive;
-        console.log(killedByObstacleOrPenalty);
-        if (killedByObstacleOrPenalty) {
+        const killedByAmbush =
+          queryData.discoveryByTxHashQuery.discoveries[0]?.ambushed && !isAlive;
+        console.log(killedByObstacle, killedByPenalty, killedByAmbush);
+        if (killedByObstacle || killedByPenalty || killedByAmbush) {
           setDeathMessage(
-            <DiscoveryDisplay discoveryData={notificationData} />
+            <DiscoveryDisplay
+              discoveryData={queryData.discoveryByTxHashQuery.discoveries[0]}
+            />
           );
           showDeathDialog(true);
         }
+        stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
       };
 
       const handleUpgrade = async () => {
         await refetch("adventurerByIdQuery");
         await refetch("latestMarketItemsQuery");
         stopLoading(notificationData);
+        if (!hasStatUpgrades) {
+          setScreen("play");
+        }
       };
 
       const handleMulticall = async () => {
@@ -170,13 +196,12 @@ export const TxActivity = () => {
         await refetch("itemsByAdventurerQuery");
         await refetch("battlesByBeastQuery");
         await refetch("latestMarketItemsQuery");
-        stopLoading(notificationData);
         const killedFromEquipping =
           (pendingMessage as string[]).includes("Equipping") && !isAlive;
-        console.log(killedFromEquipping);
         if (killedFromEquipping) {
-          setDeathNotification(type, notificationData, [], hasBeast);
+          setDeathNotification(type, notificationData, [], true);
         }
+        stopLoading(notificationData);
       };
 
       const handleCreate = async () => {

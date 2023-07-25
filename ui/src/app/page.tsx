@@ -201,33 +201,31 @@ export default function Home() {
             <div className="flex flex-row justify-between">
               <span className="flex flex-row gap-5 items-end">
                 <h1 className="glitch">Loot Survivor</h1>
-                {/* <PenaltyCountDown
+                <PenaltyCountDown
                   lastDiscoveryTime={
                     data.latestDiscoveriesQuery?.discoveries[0].timestamp
                   }
                   lastBattleTime={data.lastBattleQuery?.battles[0].timestamp}
-                /> */}
+                />
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
                 {!isMobileDevice && <TxActivity />}
-                <button
+                <Button
                   onClick={() => {
                     setIsMuted(!isMuted);
                     clickPlay();
                   }}
                 >
-                  {isMuted ? (
-                    <div className="flex items-center w-6 h-6">
-                      <MuteIcon />
-                    </div>
-                  ) : (
-                    <div className="flex items-center w-6 h-6">
-                      <VolumeIcon />
-                    </div>
-                  )}
-                </button>
+                  <div className="flex items-center justify-center">
+                    {isMuted ? (
+                      <MuteIcon className="w-6 h-6" />
+                    ) : (
+                      <VolumeIcon className="w-6 h-6" />
+                    )}
+                  </div>
+                </Button>
                 <Button onClick={async () => await refetch()}>
-                  <RefreshIcon className="w-5 h-5" />
+                  <RefreshIcon className="w-6 h-6" />
                 </Button>
                 {account && calls.length > 0 && (
                   <>

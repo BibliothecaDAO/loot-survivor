@@ -56,6 +56,8 @@ export default function ActionsScreen() {
     txAccepted
   );
 
+  console.log(adventurer);
+
   useCustomQuery(
     "discoveryByTxHashQuery",
     getDiscoveryByTxHash,

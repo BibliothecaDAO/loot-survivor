@@ -6,7 +6,20 @@ import { GiWoodClub } from "react-icons/gi";
 import { BsMagic } from "react-icons/bs";
 import { IoMdSwap } from "react-icons/io";
 import { IoMdRefresh } from "react-icons/io";
+import { ImVolumeHigh } from "react-icons/im";
+import { ImVolumeMute2 } from "react-icons/im";
 import { GiSwapBag } from "react-icons/gi";
+import { GiSpikedWall } from "react-icons/gi";
+import { GiSkullCrossedBones } from "react-icons/gi";
+import { GiHealthPotion } from "react-icons/gi";
+import { GiTwoCoins } from "react-icons/gi";
+import { GiStarsStack } from "react-icons/gi";
+import { GiWalkingBoot } from "react-icons/gi";
+import { GiSpikedHalo } from "react-icons/gi";
+import { GiSandsOfTime } from "react-icons/gi";
+import { GiFootTrip } from "react-icons/gi";
+import { GiBrute } from "react-icons/gi";
+import { GiBattleGear } from "react-icons/gi";
 import HealthPotions from "../../../../public/icons/health-potions.svg";
 import Twitter from "../../../../public/icons/twitter.svg";
 import Volume from "../../../../public/icons/volume.svg";
@@ -47,11 +60,22 @@ const BludgeonIcon = GiWoodClub;
 const MagicIcon = BsMagic;
 const SwapIcon = IoMdSwap;
 const RefreshIcon = IoMdRefresh;
+const VolumeIcon = ImVolumeHigh;
+const MuteIcon = ImVolumeMute2;
 const LootBagIcon = GiSwapBag;
+const SpikedWallIcon = GiSpikedWall;
+const SkullCrossedBonesIcon = GiSkullCrossedBones;
+const HealthPotionIcon = GiHealthPotion;
+const TwoCoinIcon = GiTwoCoins;
+const GiStarsStackIcon = GiStarsStack;
+const GiWalkingBootIcon = GiWalkingBoot;
+const SpikedHaloIcon = GiSpikedHalo;
+const GiSandsOfTimeIcon = GiSandsOfTime;
+const GiFootTripIcon = GiFootTrip;
+const GiBruteIcon = GiBrute;
+const GiBattleGearIcon = GiBattleGear;
 const HealthPotionsIcon = HealthPotions;
 const TwitterIcon = Twitter;
-const VolumeIcon = Volume;
-const MuteIcon = Mute;
 const TrophyIcon = Trophy;
 const MistIcon = Mist;
 const CogIcon = Cog;
@@ -91,6 +115,17 @@ export {
   SwapIcon,
   RefreshIcon,
   LootBagIcon,
+  SpikedWallIcon,
+  SkullCrossedBonesIcon,
+  HealthPotionIcon,
+  TwoCoinIcon,
+  GiStarsStackIcon,
+  GiWalkingBootIcon,
+  SpikedHaloIcon,
+  GiSandsOfTimeIcon,
+  GiFootTripIcon,
+  GiBruteIcon,
+  GiBattleGearIcon,
   HealthPotionsIcon,
   TwitterIcon,
   VolumeIcon,

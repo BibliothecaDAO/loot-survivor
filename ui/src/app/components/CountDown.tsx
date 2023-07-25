@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useCountUp } from "react-countup";
 import { useState } from "react";
 import { penaltyTime } from "../lib/constants";
+import { convertTime } from "../lib/utils";
 
 export const HealthCountDown = ({ health }: any) => {
   const countUpRef = useRef(null);
@@ -42,26 +43,21 @@ export const PenaltyCountDown = ({
   lastBattleTime,
 }: PenaltyCountDownProps) => {
   const [seconds, setSeconds] = useState(0);
-  const [displayTime, setDisplayTime] = useState("");
 
   const finishedMessage = "You have reached idle penalty!";
-  const countingMessage = "Time until idle penalty:";
+  const countingMessage = "Idle Penalty Countdown:";
 
-  console.log(lastDiscoveryTime, lastBattleTime);
+  const formatDiscoveryTime = new Date(lastDiscoveryTime ?? 0).getTime();
+  const formatBattleTime = new Date(lastBattleTime ?? 0).getTime();
 
+  // Need to adjust this time from UTC to timezone
   const lastAction =
-    (lastDiscoveryTime ?? 0) > (lastBattleTime ?? 0)
-      ? lastDiscoveryTime ?? 0
-      : lastBattleTime ?? 0;
+    formatDiscoveryTime > formatBattleTime
+      ? formatDiscoveryTime
+      : formatBattleTime;
 
-  const lastTime = new Date(lastAction);
-
-  const targetTime = lastTime.getTime() + penaltyTime * 1000;
-
-  const currentTime = new Date().getTime();
-
-  console.log(lastAction);
-  console.log(targetTime - currentTime);
+  const formatLastAction = convertTime(lastAction);
+  const targetTime = formatLastAction + penaltyTime * 1000;
 
   useEffect(() => {
     if (targetTime) {
@@ -80,14 +76,6 @@ export const PenaltyCountDown = ({
     }
   }, [targetTime]);
 
-  useEffect(() => {
-    if (seconds <= 0) {
-      setDisplayTime(finishedMessage);
-    } else {
-      setDisplayTime(`${countingMessage} ${formatTime(seconds)}`);
-    }
-  }, [seconds, countingMessage, finishedMessage]);
-
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds - hours * 3600) / 60);
@@ -100,7 +88,14 @@ export const PenaltyCountDown = ({
   return (
     <div>
       {targetTime ? (
-        <p>{displayTime}</p>
+        seconds > 0 ? (
+          <span className="flex flex-row gap-1 items-center">
+            <p className="text-lg">{countingMessage}</p>
+            <p className="animate-pulse text-xl">{formatTime(seconds)}</p>
+          </span>
+        ) : (
+          <p>{finishedMessage}</p>
+        )
       ) : (
         <p className="loading-ellipsis">Loading</p>
       )}
