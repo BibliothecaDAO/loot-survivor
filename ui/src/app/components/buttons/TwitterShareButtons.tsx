@@ -12,9 +12,9 @@ const TwitterShareButton: React.FC<Props> = ({ text }) => {
   )}`;
 
   return (
-    <Button className="flex flex-row gap-5 items-center animate-pulse">
+    <Button className="flex flex-row gap-0 sm:gap-5 items-center animate-pulse h-6 sm:h-10">
       <div className="w-10 h-10 flex items-center justify-center">
-        <TwitterIcon />
+        <TwitterIcon className="h-5 sm:h-7" />
       </div>
       <a href={tweetUrl} target="_blank" rel="noopener noreferrer">
         Share to Twitter

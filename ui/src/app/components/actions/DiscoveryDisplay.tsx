@@ -22,9 +22,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         if (AdventurerHealthExists) {
           return <p>YIKES! You were ambushed by a {beastName}</p>;
         } else {
-          return (
-            <p>YIKES! You were killed from an ambushed by a {beastName}</p>
-          );
+          return <p>YIKES! You were killed from an ambush by a {beastName}</p>;
         }
       } else {
         return <p>OH NO! You discovered a {beastName}!</p>;

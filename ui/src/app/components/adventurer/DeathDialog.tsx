@@ -25,8 +25,8 @@ export const DeathDialog = () => {
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
       <div className="fixed text-center top-1/8 left-1/8 sm:left-1/4 w-3/4 sm:w-1/2 h-3/4 rounded-lg border border-red-500 bg-terminal-black z-50">
-        <div className="flex flex-col items-center justify-center	p-5 w-full h-full">
-          <div className="relative w-1/2 h-1/2">
+        <div className="flex flex-col items-center justify-center	p-1 sm:p-5 w-full h-full">
+          <div className="relative w-full h-1/2">
             <Image
               src={"/crying-skull.png"}
               alt="skull"
@@ -34,15 +34,17 @@ export const DeathDialog = () => {
               style={{ objectFit: "contain" }}
             />
           </div>
-          <div className="flex flex-col gap-10 items-center h-1/2">
+          <div className="flex flex-col gap-4 sm:gap-10 items-center h-1/2">
             <div className="flex flex-col gap-2 items-center justify-center">
               <p className="text-2xl sm:text-4xl text-red-500">GAME OVER!</p>
-              {deathMessage}
-              <p className="text-lg sm:text-2xl">
+              <span className="text-lg sm:text-2xl text-terminal-yellow">
+                {deathMessage}
+              </span>
+              <p className="sm:text-2xl">
                 {adventurer?.name} has died level {adventurer?.level} with{" "}
                 {adventurer?.xp} xp, a valiant effort!
               </p>
-              <p className="text-sm sm:text-xl">
+              <p className="hidden sm:block sm:text-xl">
                 Make sure to share your score. Continue the journey with another
                 adventurer:{" "}
               </p>
