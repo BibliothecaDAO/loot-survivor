@@ -1574,4 +1574,57 @@ mod tests {
         // this test is annotated to expect that panic
         game.drop(ADVENTURER_ID, drop_list.span());
     }
+
+    #[test]
+    #[available_gas(70000000)]
+    fn test_upgrade_stats() {
+        // deploy and start new game
+        let mut game = new_adventurer_lvl2();
+        let CHARISMA_STAT = 5;
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let original_charisma = adventurer.stats.charisma;
+
+        // create an array with stat upgrades
+        let mut stat_upgrades = ArrayTrait::<u8>::new();
+        stat_upgrades.append(CHARISMA_STAT);
+
+        // call upgrade_stats with stat upgrades
+        // TODO: test with more than one which is challenging
+        // because we need a multi-level or G20 stat unlocks
+        game.upgrade_stats(ADVENTURER_ID, stat_upgrades.span());
+
+        // get update adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // assert charisma was increased
+        assert(adventurer.stats.charisma == original_charisma + 1, 'charisma not increased');
+        // assert stat point was used
+        assert(adventurer.stat_points_available == 0, 'should have used stat point');
+    }
+
+    #[test]
+    #[should_panic(expected: ('insufficient stat upgrades', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(70000000)]
+    fn test_upgrade_stats_not_enough_points() {
+        // deploy and start new game
+        let mut game = new_adventurer_lvl2();
+        let CHARISMA_STAT = 5;
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let original_charisma = adventurer.stats.charisma;
+
+        // create an array with stat upgrades
+        let mut stat_upgrades = ArrayTrait::<u8>::new();
+
+        // add more points then the adventurer has available
+        stat_upgrades.append(CHARISMA_STAT);
+        stat_upgrades.append(CHARISMA_STAT);
+
+        // call upgrade_stats
+        // this should panic
+        game.upgrade_stats(ADVENTURER_ID, stat_upgrades.span());
+    }
 }

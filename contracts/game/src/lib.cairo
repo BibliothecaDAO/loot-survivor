@@ -821,6 +821,67 @@ mod Game {
             );
         }
 
+        // @dev Function to upgrade the stats of an adventurer.
+        // @param adventurer_id The unique identifier for the adventurer to be upgraded.
+        // @param stats Span of integers representing the stats to be upgraded.
+        fn upgrade_stats(ref self: ContractState, adventurer_id: u256, stats: Span<u8>) {
+            // assert caller owns adventurer
+            _assert_ownership(@self, adventurer_id);
+
+            // get item names from storage
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+
+            let original_name_storage1 = name_storage1;
+            let original_name_storage2 = name_storage2;
+
+            // unpack adventurer from storage (stat boosts applied on unpacking)
+            let mut adventurer = _unpack_adventurer_apply_stat_boost(
+                @self, adventurer_id, name_storage1, name_storage2
+            );
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // assert adventurer has the required stat upgrades
+            _assert_has_required_stat_points(@self, adventurer, stats.len().try_into().unwrap());
+
+            // upgrade adventurer's stat
+            let mut i: u32 = 0;
+            loop {
+                if i >= stats.len() {
+                    break ();
+                }
+                _upgrade_stat(ref self, adventurer_id, ref adventurer, *stats.at(i), 1);
+                i += 1;
+            };
+
+            // if adventurer still has more stats available
+            if (adventurer.stat_points_available > 0) {
+                // emit new market items
+                __event_NewItemsAvailable(
+                    ref self,
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(), adventurer_id, adventurer
+                    },
+                    items: _get_items_on_market(@self, adventurer_id, adventurer)
+                );
+            }
+
+            // remove stat boosts, pack, and save adventurer
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                original_name_storage1,
+                original_name_storage2
+            );
+        }
+
         // @dev Anyone can call this function, so we intentionally don't assert ownership.
         // @param adventurer_id The unique identifier for the adventurer to be slayed.
         fn slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
