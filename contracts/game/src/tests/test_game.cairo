@@ -1,15 +1,16 @@
 #[cfg(test)]
 mod tests {
+    use core::array::SpanTrait;
     use array::ArrayTrait;
-    use core::result::ResultTrait;
-    use core::traits::Into;
+    use core::{result::ResultTrait, traits::Into};
     use option::OptionTrait;
-    use starknet::syscalls::deploy_syscall;
-    use starknet::testing;
+    use starknet::{
+        syscalls::deploy_syscall, testing, ContractAddress, ContractAddressIntoFelt252,
+        contract_address_const
+    };
     use traits::TryInto;
     use core::serde::Serde;
     use box::BoxTrait;
-    use starknet::{ContractAddress, ContractAddressIntoFelt252, contract_address_const};
 
     use market::market::{ImplMarket, LootWithPrice};
     use lootitems::{loot::{Loot, ImplLoot, ILoot}, statistics::constants::{ItemId}};
@@ -18,17 +19,17 @@ mod tests {
         game::{
             interfaces::{IGameDispatcherTrait, IGameDispatcher},
             constants::{messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE}
-        },
+        }
     };
-
+    use combat::constants::CombatEnums::{Slot, Tier};
     use survivor::{
         adventurer_meta::{AdventurerMetadata, AdventurerClass},
         constants::adventurer_constants::{
             STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, ClassStatBoosts
         },
-        adventurer::{Adventurer, ImplAdventurer, IAdventurer}
+        adventurer::{Adventurer, ImplAdventurer, IAdventurer}, item_primitive::ItemPrimitive,
+        bag::{Bag, IBag}
     };
-
     use beasts::constants::{BeastSettings, BeastId};
 
     fn INTERFACE_ID() -> ContractAddress {
@@ -103,6 +104,23 @@ mod tests {
                 }
             );
 
+        game
+    }
+
+    fn new_adventurer_cleric_level2() -> IGameDispatcher {
+        // start game
+        let mut game = new_adventurer_cleric();
+
+        // attack starter beast
+        game.attack(ADVENTURER_ID);
+
+        // assert starter beast is dead
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(adventurer.beast_health == 0, 'should not be in battle');
+        assert(adventurer.get_level() == 2, 'should be level 2');
+        assert(adventurer.stat_points_available == 1, 'should have 1 stat available');
+
+        // return game
         game
     }
 
@@ -640,7 +658,7 @@ mod tests {
 
     #[test]
     #[available_gas(75000000)]
-    fn test_buy_and_equip_item() {
+    fn test_buy_and_equip() {
         let mut game = new_adventurer_lvl2();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
         let item_id = *market_items.at(0).item.id;
@@ -666,21 +684,179 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(4000000000)]
-    fn test_equip_item_from_bag() {
-        let mut game = new_adventurer_lvl2();
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+    #[should_panic(expected: ('Item not in bag', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(20000000)]
+    fn test_equip_not_in_bag() {
+        // start new game
+        let mut game = new_adventurer();
 
-        market_items.at(0).item.id;
+        // initialize an array of items to equip that contains an item not in bag
+        let mut items_to_equip = ArrayTrait::<u8>::new();
+        items_to_equip.append(1);
 
-        game.buy_item(ADVENTURER_ID, *market_items.at(0).item.id, false);
-
-        let bag = game.get_bag(ADVENTURER_ID);
-        assert(bag.item_1.id == *market_items.at(0).item.id, 'in bag');
+        // try to equip the item which is not in bag
+        // this should result in a panic 'Item not in bag' which is
+        // annotated in the test
+        game.equip(ADVENTURER_ID, items_to_equip.span());
     }
 
     #[test]
-    #[available_gas(110000000)]
+    #[should_panic(expected: ('Too many items', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(20000000)]
+    fn test_equip_too_many_items() {
+        // start new game
+        let mut game = new_adventurer();
+
+        // initialize an array of 9 items (too many to equip)
+        let mut items_to_equip = ArrayTrait::<u8>::new();
+        items_to_equip.append(1);
+        items_to_equip.append(2);
+        items_to_equip.append(3);
+        items_to_equip.append(4);
+        items_to_equip.append(5);
+        items_to_equip.append(6);
+        items_to_equip.append(7);
+        items_to_equip.append(8);
+        items_to_equip.append(9);
+
+        // try to equip the 9 items
+        // this should result in a panic 'Too many items' which is
+        // annotated in the test
+        game.equip(ADVENTURER_ID, items_to_equip.span());
+    }
+
+    #[test]
+    #[available_gas(100000000)]
+    fn test_equip() {
+        // start game on level 2 so we have access to the market
+        let mut game = new_adventurer_cleric_level2();
+
+        // get items from market
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+
+        // get first item on the market
+        let item_id = *market_items.at(0).item.id;
+
+        let mut purchased_weapon: u8 = 0;
+        let mut purchased_chest: u8 = 0;
+        let mut purchased_head: u8 = 0;
+        let mut purchased_waist: u8 = 0;
+        let mut purchased_foot: u8 = 0;
+        let mut purchased_hand: u8 = 0;
+        let mut purchased_ring: u8 = 0;
+        let mut purchased_necklace: u8 = 0;
+        let mut purchased_items = ArrayTrait::<Loot>::new();
+
+        let mut i: u32 = 0;
+        loop {
+            if i >= market_items.len() {
+                break ();
+            }
+            let market_item = *market_items.at(i).item;
+
+            // if the item is a weapon and we haven't purchased a weapon yet
+            // and the item is a tier 4 or 5 item
+            // repeat this for everything
+            if (market_item.slot == Slot::Weapon(())
+                && purchased_weapon == 0
+                && (market_item.tier == Tier::T5(()))
+                && market_item.id != 12) {
+                purchased_items.append(market_item);
+                game.buy_item(ADVENTURER_ID, market_item.id, false);
+                purchased_weapon = market_item.id;
+            } else if (market_item.slot == Slot::Chest(())
+                && purchased_chest == 0
+                && market_item.tier == Tier::T5(())) {
+                purchased_items.append(market_item);
+                game.buy_item(ADVENTURER_ID, market_item.id, false);
+                purchased_chest = market_item.id;
+            } else if (market_item.slot == Slot::Head(())
+                && purchased_head == 0
+                && market_item.tier == Tier::T5(())) {
+                purchased_items.append(market_item);
+                game.buy_item(ADVENTURER_ID, market_item.id, false);
+                purchased_head = market_item.id;
+            } else if (market_item.slot == Slot::Waist(())
+                && purchased_waist == 0
+                && market_item.tier == Tier::T5(())) {
+                purchased_items.append(market_item);
+                game.buy_item(ADVENTURER_ID, market_item.id, false);
+                purchased_waist = market_item.id;
+            } else if (market_item.slot == Slot::Foot(())
+                && purchased_foot == 0
+                && market_item.tier == Tier::T5(())) {
+                purchased_items.append(market_item);
+                game.buy_item(ADVENTURER_ID, market_item.id, false);
+                purchased_foot = market_item.id;
+            } else if (market_item.slot == Slot::Hand(())
+                && purchased_hand == 0
+                && market_item.tier == Tier::T5(())) {
+                purchased_items.append(market_item);
+                game.buy_item(ADVENTURER_ID, market_item.id, false);
+                purchased_hand = market_item.id;
+            } else if (market_item.slot == Slot::Ring(())
+                && purchased_ring == 0
+                && market_item.tier == Tier::T3(())) {
+                purchased_items.append(market_item);
+                purchased_ring = market_item.id;
+            } else if (market_item.slot == Slot::Neck(()) && purchased_necklace == 0) {
+                purchased_items.append(market_item);
+                game.buy_item(ADVENTURER_ID, market_item.id, false);
+                purchased_necklace = market_item.id;
+            }
+            i += 1;
+        };
+
+        let purchased_items_span = purchased_items.span();
+
+        // verify we were able to buy at least 2 items
+        assert(purchased_items_span.len() > 1, 'need more items to equip');
+
+        // get bag from storage
+        let bag = game.get_bag(ADVENTURER_ID);
+
+        let mut items_to_equip = ArrayTrait::<u8>::new();
+        // iterate over the items we bought
+        let mut i: u32 = 0;
+        loop {
+            if i >= purchased_items_span.len() {
+                break ();
+            }
+            // verify they are all in our bag
+            assert(bag.is_item_in_bag(*purchased_items_span.at(i).id), 'item should be in bag');
+            items_to_equip.append(*purchased_items_span.at(i).id);
+            i += 1;
+        };
+
+        let items_to_equip_span = items_to_equip.span();
+
+        // equip all of the items we bought
+        game.equip(ADVENTURER_ID, items_to_equip_span);
+
+        // get update bag from storage
+        let bag = game.get_bag(ADVENTURER_ID);
+
+        /// get updated adventurer
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // iterate over the items we equipped
+        let mut i: u32 = 0;
+        loop {
+            if i >= items_to_equip_span.len() {
+                break ();
+            }
+            // verify they are no longer in bag
+            assert(!bag.is_item_in_bag(*items_to_equip_span.at(i)), 'item should not be in bag');
+            // and equipped on the adventurer
+            assert(
+                adventurer.is_equipped(*purchased_items_span.at(i).id), 'item should be equipped'
+            );
+            i += 1;
+        };
+    }
+
+    #[test]
+    #[available_gas(100000000)]
     fn test_buy_potion() {
         let mut game = new_adventurer_lvl2_with_idle_penalty();
 

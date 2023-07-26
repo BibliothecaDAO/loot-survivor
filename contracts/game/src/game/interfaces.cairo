@@ -19,7 +19,7 @@ trait IGame<TContractState> {
     fn explore(ref self: TContractState, adventurer_id: u256);
     fn attack(ref self: TContractState, adventurer_id: u256);
     fn flee(ref self: TContractState, adventurer_id: u256);
-    fn equip(ref self: TContractState, adventurer_id: u256, item_id: u8);
+    fn equip(ref self: TContractState, adventurer_id: u256, items: Span<u8>);
     fn buy_item(ref self: TContractState, adventurer_id: u256, item_id: u8, equip: bool);
     fn buy_potion(ref self: TContractState, adventurer_id: u256);
     fn buy_potions(ref self: TContractState, adventurer_id: u256, amount: u8);

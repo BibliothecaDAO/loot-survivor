@@ -117,34 +117,41 @@ impl ImplBag of IBag {
     // @param self The instance of the Bag
     // @param item The item to be added to the bag
     fn add_item(ref self: Bag, item: ItemPrimitive) {
+        // assert bag is not full
         assert(self.is_full() == false, 'Bag is full');
 
-        let slot = self.get_open_slot();
+        // assert item id is not 0
+        assert(item.id != 0, 'Item ID cannot be 0');
 
-        if slot == 1 {
+        // get next open slot in bag
+        let open_slot = self.get_open_slot();
+        
+        // assert the slot is within expected range
+        assert(open_slot > 0 && open_slot <= 11, 'slot out of bounds');
+
+        // add item to bag
+        if open_slot == 1 {
             self.item_1 = item;
-        } else if slot == 2 {
+        } else if open_slot == 2 {
             self.item_2 = item;
-        } else if slot == 3 {
+        } else if open_slot == 3 {
             self.item_3 = item;
-        } else if slot == 4 {
+        } else if open_slot == 4 {
             self.item_4 = item;
-        } else if slot == 5 {
+        } else if open_slot == 5 {
             self.item_5 = item;
-        } else if slot == 6 {
+        } else if open_slot == 6 {
             self.item_6 = item;
-        } else if slot == 7 {
+        } else if open_slot == 7 {
             self.item_7 = item;
-        } else if slot == 8 {
+        } else if open_slot == 8 {
             self.item_8 = item;
-        } else if slot == 9 {
+        } else if open_slot == 9 {
             self.item_9 = item;
-        } else if slot == 10 {
+        } else if open_slot == 10 {
             self.item_10 = item;
-        } else if slot == 11 {
+        } else if open_slot == 11 {
             self.item_11 = item;
-        } else {
-            panic_with_felt252('Bag is full backup');
         }
     }
 
@@ -183,10 +190,8 @@ impl ImplBag of IBag {
     // @notice Gets an open slot in the bag
     // @dev If the bag is full, it throws an error
     // @param self The instance of the Bag
-    // @return The index of an open slot in the bag
+    // @return The index of an open slot in the bag or 0 if no slot is available
     fn get_open_slot(self: Bag) -> u8 {
-        assert(self.is_full() == false, 'Bag is full');
-
         if self.item_1.id == 0 {
             1
         } else if self.item_2.id == 0 {
@@ -210,7 +215,7 @@ impl ImplBag of IBag {
         } else if self.item_11.id == 0 {
             11
         } else {
-            panic_with_felt252('bag is full backup')
+            0
         }
     }
 
@@ -247,6 +252,81 @@ impl ImplBag of IBag {
             true
         }
     }
+
+    // @notice Checks if a specific item exists in the bag
+    // @param self The Bag object in which to search for the item
+    // @param item The id of the item to search for
+    // @return A bool indicating whether the item is present in the bag
+    fn is_item_in_bag(self: Bag, item: u8) -> bool {
+        if self.item_1.id == item {
+            true
+        } else if self.item_2.id == item {
+            true
+        } else if self.item_3.id == item {
+            true
+        } else if self.item_4.id == item {
+            true
+        } else if self.item_5.id == item {
+            true
+        } else if self.item_6.id == item {
+            true
+        } else if self.item_7.id == item {
+            true
+        } else if self.item_8.id == item {
+            true
+        } else if self.item_9.id == item {
+            true
+        } else if self.item_10.id == item {
+            true
+        } else if self.item_11.id == item {
+            true
+        } else {
+            false
+        }
+    }
+}
+
+#[test]
+#[available_gas(200000)]
+fn test_is_item_in_bag() {
+    let bag = Bag {
+        item_1: ItemPrimitive {
+            id: 0, xp: 511, metadata: 1
+            }, item_2: ItemPrimitive {
+            id: 2, xp: 511, metadata: 2
+            }, item_3: ItemPrimitive {
+            id: 3, xp: 511, metadata: 3
+            }, item_4: ItemPrimitive {
+            id: 4, xp: 511, metadata: 4
+            }, item_5: ItemPrimitive {
+            id: 5, xp: 511, metadata: 5
+            }, item_6: ItemPrimitive {
+            id: 6, xp: 511, metadata: 6
+            }, item_7: ItemPrimitive {
+            id: 7, xp: 511, metadata: 7
+            }, item_8: ItemPrimitive {
+            id: 8, xp: 511, metadata: 8
+            }, item_9: ItemPrimitive {
+            id: 9, xp: 511, metadata: 9
+            }, item_10: ItemPrimitive {
+            id: 10, xp: 511, metadata: 10
+            }, item_11: ItemPrimitive {
+            id: 255, xp: 511, metadata: 11
+        }
+    };
+
+    assert(bag.is_item_in_bag(0) == true, 'Item 0 should be in bag');
+    assert(bag.is_item_in_bag(2) == true, 'Item 2 should be in bag');
+    assert(bag.is_item_in_bag(3) == true, 'Item 3 should be in bag');
+    assert(bag.is_item_in_bag(4) == true, 'Item 4 should be in bag');
+    assert(bag.is_item_in_bag(5) == true, 'Item 5 should be in bag');
+    assert(bag.is_item_in_bag(6) == true, 'Item 6 should be in bag');
+    assert(bag.is_item_in_bag(7) == true, 'Item 7 should be in bag');
+    assert(bag.is_item_in_bag(8) == true, 'Item 8 should be in bag');
+    assert(bag.is_item_in_bag(9) == true, 'Item 9 should be in bag');
+    assert(bag.is_item_in_bag(10) == true, 'Item 10 should be in bag');
+    assert(bag.is_item_in_bag(255) == true, 'Item 255 should be in bag');
+    assert(bag.is_item_in_bag(100) == false, 'Item 100 not in bag');
 }
 
 #[test]
@@ -326,6 +406,80 @@ fn test_pack_bag() {
 }
 
 #[test]
+#[should_panic(expected: ('Item ID cannot be 0', ))]
+#[available_gas(1500000)]
+fn test_add_item_blank_item() {
+    // start with full bag
+    let mut bag = Bag {
+        item_1: ItemPrimitive {
+            id: 1, xp: 1, metadata: 1
+            }, item_2: ItemPrimitive {
+            id: 2, xp: 1, metadata: 2
+            }, item_3: ItemPrimitive {
+            id: 3, xp: 1, metadata: 3
+            }, item_4: ItemPrimitive {
+            id: 4, xp: 1, metadata: 4
+            }, item_5: ItemPrimitive {
+            id: 5, xp: 1, metadata: 5
+            }, item_6: ItemPrimitive {
+            id: 6, xp: 1, metadata: 6
+            }, item_7: ItemPrimitive {
+            id: 7, xp: 1, metadata: 7
+            }, item_8: ItemPrimitive {
+            id: 8, xp: 1, metadata: 8
+            }, item_9: ItemPrimitive {
+            id: 9, xp: 1, metadata: 9
+            }, item_10: ItemPrimitive {
+            id: 10, xp: 1, metadata: 10
+            }, item_11: ItemPrimitive {
+            id: 0, xp: 0, metadata: 0
+        },
+    };
+
+    // try adding an empty item to the bag
+    // this should panic with 'Item ID cannot be 0'
+    // which this test is annotated to expect
+    bag.add_item(ItemPrimitive { id: 0, xp: 0, metadata: 0 });
+}
+
+#[test]
+#[should_panic(expected: ('Bag is full', ))]
+#[available_gas(1500000)]
+fn test_add_item_full_bag() {
+    // start with full bag
+    let mut bag = Bag {
+        item_1: ItemPrimitive {
+            id: 1, xp: 1, metadata: 1
+            }, item_2: ItemPrimitive {
+            id: 2, xp: 1, metadata: 2
+            }, item_3: ItemPrimitive {
+            id: 3, xp: 1, metadata: 3
+            }, item_4: ItemPrimitive {
+            id: 4, xp: 1, metadata: 4
+            }, item_5: ItemPrimitive {
+            id: 5, xp: 1, metadata: 5
+            }, item_6: ItemPrimitive {
+            id: 6, xp: 1, metadata: 6
+            }, item_7: ItemPrimitive {
+            id: 7, xp: 1, metadata: 7
+            }, item_8: ItemPrimitive {
+            id: 8, xp: 1, metadata: 8
+            }, item_9: ItemPrimitive {
+            id: 9, xp: 1, metadata: 9
+            }, item_10: ItemPrimitive {
+            id: 10, xp: 1, metadata: 10
+            }, item_11: ItemPrimitive {
+            id: 11, xp: 1, metadata: 11
+        },
+    };
+
+    // try adding an item to a full bag
+    // this should panic with 'Bag is full'
+    // which this test is annotated to expect
+    bag.add_item(ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 });
+}
+
+#[test]
 #[available_gas(1500000)]
 fn test_add_item() {
     // start with empty bag
@@ -356,17 +510,17 @@ fn test_add_item() {
     };
 
     // initialize items
-    let mut katana = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
-    let mut demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 2 };
-    let mut silk_robe = ItemPrimitive { id: ItemId::SilkRobe, xp: 1, metadata: 3 };
-    let mut silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1, metadata: 4 };
-    let mut ghost_wand = ItemPrimitive { id: ItemId::GhostWand, xp: 1, metadata: 5 };
-    let mut leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
-    let mut silk_gloves = ItemPrimitive { id: ItemId::SilkGloves, xp: 1, metadata: 7 };
-    let mut linen_gloves = ItemPrimitive { id: ItemId::LinenGloves, xp: 1, metadata: 8 };
-    let mut crown = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 9 };
-    let mut divine_slippers = ItemPrimitive { id: ItemId::DivineSlippers, xp: 1, metadata: 10 };
-    let mut warhammer = ItemPrimitive { id: ItemId::Warhammer, xp: 1, metadata: 11 };
+    let katana = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
+    let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 2 };
+    let silk_robe = ItemPrimitive { id: ItemId::SilkRobe, xp: 1, metadata: 3 };
+    let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1, metadata: 4 };
+    let ghost_wand = ItemPrimitive { id: ItemId::GhostWand, xp: 1, metadata: 5 };
+    let leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
+    let silk_gloves = ItemPrimitive { id: ItemId::SilkGloves, xp: 1, metadata: 7 };
+    let linen_gloves = ItemPrimitive { id: ItemId::LinenGloves, xp: 1, metadata: 8 };
+    let crown = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 9 };
+    let divine_slippers = ItemPrimitive { id: ItemId::DivineSlippers, xp: 1, metadata: 10 };
+    let warhammer = ItemPrimitive { id: ItemId::Warhammer, xp: 1, metadata: 11 };
 
     // add items to bag
     bag.add_item(katana);
