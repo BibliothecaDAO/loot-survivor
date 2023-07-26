@@ -105,6 +105,7 @@ mod Game {
         FleeSucceeded: FleeSucceeded,
         PurchasedItem: PurchasedItem,
         EquippedItem: EquippedItem,
+        DroppedItem: DroppedItem,
         ItemLeveledUp: ItemLeveledUp,
         ItemSpecialUnlocked: ItemSpecialUnlocked,
         PurchasedPotion: PurchasedPotion,
@@ -332,6 +333,7 @@ mod Game {
                 original_name_storage2
             );
         }
+
         fn equip(ref self: ContractState, adventurer_id: u256, items: Span<u8>) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -417,6 +419,82 @@ mod Game {
                 original_name_storage2
             );
             _pack_bag(ref self, adventurer_id, bag);
+        }
+
+
+        // @dev This function allows the owner of an adventurer to drop multiple items.
+        // @param adventurer_id The ID of the adventurer dropping the items.
+        // @param items A span of item IDs to be dropped. The length of this span must be less than or equal to the maximum item capacity.
+        // @notice This function does not handle adding dropped items to any form of external inventory or the ground. This must be handled separately. It does however emit an event for each dropped item.
+        fn drop(ref self: ContractState, adventurer_id: u256, items: Span<u8>) {
+            // assert caller owns adventurer
+            _assert_ownership(@self, adventurer_id);
+
+            // assert items length is less than or equal to max item capacity
+            assert(items.len() <= 19, messages::TOO_MANY_ITEMS);
+
+            // get item names from storage
+            let name_storage1 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let name_storage2 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+
+            // store the unmodified storages so we can use these
+            // to remove the same stat boosts when we pack and save the adventurer
+            let original_name_storage1 = name_storage1;
+            let original_name_storage2 = name_storage2;
+
+            // unpack adventurer from storage (no need to apply stat boosts)
+            let mut adventurer = _unpack_adventurer_apply_stat_boost(
+                @self, adventurer_id, name_storage1, name_storage2
+            );
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // get adventurers bag
+            let mut bag = _bag_unpacked(@self, adventurer_id);
+
+            // init variables for tracking if bag or adventurer was mutated
+            let mut adventurer_mutated = false;
+            let mut bag_mutated = false;
+
+            // iterate over the items and equip them
+            let mut i: u32 = 0;
+            loop {
+                if i >= items.len() {
+                    break ();
+                }
+                // drop the item and track if bag or adventurer was mutated
+                let (_adventurer_mutated, _bag_mutated) = _drop(
+                    ref self, ref adventurer, ref bag, adventurer_id, *items.at(i)
+                );
+
+                // update mutated variables
+                adventurer_mutated = _adventurer_mutated || adventurer_mutated;
+                bag_mutated = _bag_mutated || bag_mutated;
+                i += 1;
+            };
+
+            // if the adventurer was mutated
+            if (adventurer_mutated) {
+                // pack and save it
+                _pack_adventurer_remove_stat_boost(
+                    ref self,
+                    adventurer_id,
+                    ref adventurer,
+                    original_name_storage1,
+                    original_name_storage2
+                );
+            }
+
+            // if the bag was mutated
+            if (bag_mutated) {
+                // pack and save it
+                _pack_bag(ref self, adventurer_id, bag);
+            }
         }
 
         fn buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
@@ -2285,6 +2363,59 @@ mod Game {
         );
     }
 
+    // @dev This function performs the action of dropping a single item for an adventurer.
+    // @notice It removes the item from the adventurer's equipment or bag and then emits a DroppedItem event. It returns a tuple of two booleans indicating if the adventurer's equipment and bag were mutated.
+    // @notice The function asserts if the adventurer does not own the item.
+    // @param adventurer The adventurer dropping the item. The function may modify the adventurer's equipment.
+    // @param bag The bag of the adventurer. The function may modify the bag by removing the item.
+    // @param adventurer_id The ID of the adventurer.
+    // @param item_id The ID of the item to be dropped.
+    // @return A tuple of two booleans. The first boolean indicates if the adventurer's equipment was mutated (i.e., the item was removed from the equipment). The second boolean indicates if the bag was mutated (i.e., the item was removed from the bag).
+    fn _drop(
+        ref self: ContractState,
+        ref adventurer: Adventurer,
+        ref bag: Bag,
+        adventurer_id: u256,
+        item_id: u8,
+    ) -> (bool, bool) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        internal::revoke_ap_tracking();
+        // get item the adventurer is equipping
+        // if item does not exist, lib will throw 'Item not in bag'
+
+        // assert the adventurer owns the item
+        _assert_adventurer_owns_item(@self, adventurer, bag, item_id);
+
+        let mut bag_mutated = false;
+        let mut adventurer_mutated = false;
+
+        // if the item is in the adventurers bag
+        if bag.contains(item_id) {
+            // remove it
+            bag.remove_item(item_id);
+            bag_mutated = true;
+        } else {
+            // otherwise, it must be equipped on adventurer
+            adventurer.drop_item(item_id);
+            adventurer_mutated = true;
+        }
+
+        // emit equipped item event
+        __event_DroppedItem(
+            ref self,
+            AdventurerStateWithBag {
+                adventurer_state: AdventurerState {
+                    owner: get_caller_address(),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                }, bag: bag
+            },
+            item_id
+        );
+
+        (adventurer_mutated, bag_mutated)
+    }
+
     // @dev This function allows the adventurer to purchase an item from the market.
     // @notice The item price is adjusted based on the adventurer's charisma. The function also manages the adventurer's inventory based on whether they equip the item or not. It emits an event whenever an item is purchased.
     // @param adventurer The adventurer buying the item. The function modifies the adventurer's gold and equipment.
@@ -2666,7 +2797,7 @@ mod Game {
     }
 
     fn _assert_item_in_bag(self: @ContractState, bag: Bag, item_id: u8) {
-        assert(bag.is_item_in_bag(item_id), messages::ITEM_NOT_IN_BAG);
+        assert(bag.contains(item_id), messages::ITEM_NOT_IN_BAG);
     }
     fn _assert_ownership(self: @ContractState, adventurer_id: u256) {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
@@ -2683,8 +2814,17 @@ mod Game {
     fn _assert_item_not_owned(self: @ContractState, adventurer: Adventurer, bag: Bag, item_id: u8) {
         // assert item is not equipped and not in bag
         assert(
-            adventurer.is_equipped(item_id) == false && bag.is_item_in_bag(item_id) == false,
+            adventurer.is_equipped(item_id) == false && bag.contains(item_id) == false,
             messages::ITEM_ALREADY_OWNED
+        );
+    }
+    fn _assert_adventurer_owns_item(
+        self: @ContractState, adventurer: Adventurer, bag: Bag, item_id: u8
+    ) {
+        // assert item is equipped or in bag
+        assert(
+            adventurer.is_equipped(item_id) == true || bag.contains(item_id) == true,
+            messages::ADVENTURER_DOESNT_OWN_ITEM
         );
     }
     fn _assert_item_is_available(
@@ -3180,6 +3320,12 @@ mod Game {
         unequipped_item_id: u8,
     }
 
+    #[derive(Copy, Drop, starknet::Event)]
+    struct DroppedItem {
+        adventurer_state_with_bag: AdventurerStateWithBag,
+        item_id: u8,
+    }
+
     #[derive(Drop, starknet::Event)]
     struct ItemLeveledUp {
         adventurer_state: AdventurerState,
@@ -3410,6 +3556,11 @@ mod Game {
             );
     }
 
+    fn __event_DroppedItem(
+        ref self: ContractState, adventurer_state_with_bag: AdventurerStateWithBag, item_id: u8, 
+    ) {
+        self.emit(Event::DroppedItem(DroppedItem { adventurer_state_with_bag, item_id }));
+    }
 
     fn __event_ItemLeveledUp(
         ref self: ContractState,
