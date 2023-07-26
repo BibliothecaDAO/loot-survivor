@@ -193,7 +193,7 @@ export default function Home() {
   return (
     // <Maintenance />
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-4 sm:p-10 mt-4 `}
+      className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-10 `}
     >
       {connected ? (
         <>

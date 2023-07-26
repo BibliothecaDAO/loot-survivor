@@ -130,9 +130,9 @@ export default function UpgradeScreen() {
     description,
     buttonText,
   }: any): ReactElement => (
-    <div className="flex flex-col gap-3 items-center">
+    <div className="flex flex-col gap-1 sm:gap-3 items-center">
       <span className="hidden sm:block w-10 h-10">{icon}</span>
-      <p className="sm:text-[28px] text-center">{description}</p>
+      <p className="sm:text-[28px] text-center h-2/3">{description}</p>
       <Button onClick={() => handleUpgradeTx(name)}>{buttonText}</Button>
     </div>
   );
@@ -185,7 +185,7 @@ export default function UpgradeScreen() {
   function renderContent() {
     const attribute = attributes.find((attr) => attr.name === selected);
     return (
-      <div className="flex sm:w-2/3 items-center justify-center border-l border-terminal-green p-2">
+      <div className="flex sm:w-2/3 h-24 sm:h-full items-center justify-center border-l border-terminal-green p-2">
         {attribute && <Attribute {...attribute} />}
       </div>
     );
@@ -296,62 +296,62 @@ export default function UpgradeScreen() {
           </div>
           <div className="w-full sm:w-2/3">
             <div className="flex flex-col gap-2 h-full">
-              <div className=" items-center gap-2">
-                <div className="justify-center text-terminal-green space-x-3">
-                  <div className="text-center text-2xl md:text-xl lg:text-4xl sm:p-2 animate-pulse uppercase">
-                    Level up!
-                  </div>
-                  <div className="flex flex-row gap-2 justify-center text-lg sm:text-2xl text-shadow-none">
-                    <span>
-                      Stat Upgrades Available {adventurer?.statUpgrades}
+              <div className="justify-center text-terminal-green space-x-3">
+                <div className="text-center text-2xl md:text-xl lg:text-4xl sm:p-2 animate-pulse uppercase">
+                  Level up!
+                </div>
+                <div className="flex flex-row gap-2 justify-center text-lg sm:text-2xl text-shadow-none">
+                  <span>
+                    Stat Upgrades Available {adventurer?.statUpgrades}
+                  </span>
+                </div>
+                <UpgradeNav activeSection={upgradeScreen} />
+                <div className="flex flex-row gap-3 text-sm sm:text-base justify-center">
+                  <div className="flex flex-row gap-3">
+                    <span className="flex flex-row gap-1  items-center">
+                      <p className="uppercase">Cost:</p>
+                      <span className="flex text-xl">
+                        <CoinIcon className="self-center w-5 h-5 fill-current text-terminal-yellow" />
+                        <p
+                          className={
+                            upgradeTotalCost > (adventurer?.gold ?? 0)
+                              ? "text-red-600"
+                              : "text-terminal-yellow"
+                          }
+                        >
+                          {upgradeTotalCost}
+                        </p>
+                      </span>
+                    </span>
+                    <span className="flex flex-row gap-1  items-center">
+                      <p className="uppercase">Potions:</p>
+                      <span className="flex text-xl text-terminal-yellow">
+                        {potionsFilter ?? 0}
+                      </span>
+                    </span>
+                    <span className="flex flex-row gap-1 items-center">
+                      <p className="uppercase">Items:</p>
+                      <span className="flex text-xl text-terminal-yellow">
+                        {itemsFilter.length}
+                      </span>
                     </span>
                   </div>
-                  <UpgradeNav activeSection={upgradeScreen} />
-                  <div className="flex flex-row gap-3 text-sm sm:text-base justify-center">
-                    <div className="flex flex-row gap-3">
-                      <span className="flex flex-row gap-1  items-center">
-                        <p className="uppercase">Cost:</p>
-                        <span className="flex text-xl">
-                          <CoinIcon className="self-center w-5 h-5 fill-current text-terminal-yellow" />
-                          <p
-                            className={
-                              upgradeTotalCost > (adventurer?.gold ?? 0)
-                                ? "text-red-600"
-                                : "text-terminal-yellow"
-                            }
-                          >
-                            {upgradeTotalCost}
-                          </p>
-                        </span>
-                      </span>
-                      <span className="flex flex-row gap-1  items-center">
-                        <p className="uppercase">Potions:</p>
-                        <span className="flex text-xl text-terminal-yellow">
-                          {potionsFilter ?? 0}
-                        </span>
-                      </span>
-                      <span className="flex flex-row gap-1 items-center">
-                        <p className="uppercase">Items:</p>
-                        <span className="flex text-xl text-terminal-yellow">
-                          {itemsFilter.length}
-                        </span>
-                      </span>
-                    </div>
-                    <div className="flex flex-row gap-3">
-                      <span className="flex flex-row sm:gap-1">
-                        {`Charisma: ${adventurer?.charisma} -`}
-                        <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
-                        <p className="text-terminal-yellow">
-                          {adventurer?.charisma && adventurer?.charisma * 2}
-                        </p>
-                        <p className="hidden sm:block">{" to price"}</p>
-                      </span>
-                    </div>
+                  <div className="flex flex-row items-center gap-3">
+                    <span className="flex flex-row sm:gap-1">
+                      {`Charisma: ${adventurer?.charisma} -`}
+                      <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
+                      <p className="text-terminal-yellow">
+                        {adventurer?.charisma && adventurer?.charisma * 2}
+                      </p>
+                      <p className="hidden sm:block">{" to price"}</p>
+                    </span>
                   </div>
                 </div>
+              </div>
 
+              <div className="flex flex-col gap-2">
                 {upgradeScreen === 1 && (
-                  <div className="flex flex-col gap-5 sm:flex-row items-center justify-center flex-wrap">
+                  <div className="flex flex-col gap-5 sm:gap-2 sm:flex-row items-center justify-center flex-wrap">
                     <p className="text-xl lg:text-2xl">Potions</p>
                     <PurchaseHealth upgradeTotalCost={upgradeTotalCost} />
                   </div>
@@ -359,46 +359,52 @@ export default function UpgradeScreen() {
 
                 {((!isMobileDevice && upgradeScreen === 1) ||
                   (isMobileDevice && upgradeScreen === 2)) && (
-                  <div className="flex flex-col w-full">
-                    <div className="w-full ">
-                      <MarketplaceScreen upgradeTotalCost={upgradeTotalCost} />
+                  <div className="flex flex-col items-center sm:gap-2 w-full">
+                    <p className="text-xl lg:text-2xl sm:hidden">
+                      Loot Fountain
+                    </p>
+                    <MarketplaceScreen upgradeTotalCost={upgradeTotalCost} />
+                  </div>
+                )}
+                {((!isMobileDevice && upgradeScreen === 2) ||
+                  (isMobileDevice && upgradeScreen === 3)) && (
+                  <div className="flex flex-col sm:gap-2 items-center w-full">
+                    <p className="text-xl lg:text-2xl sm:hidden">
+                      Stat Upgrades
+                    </p>
+                    <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border">
+                      {isMobileDevice ? (
+                        <>
+                          {renderContent()}
+                          {renderVerticalKeyboardControl()}
+                        </>
+                      ) : (
+                        <>
+                          {renderVerticalKeyboardControl()}
+                          {renderContent()}
+                        </>
+                      )}
                     </div>
                   </div>
                 )}
-              </div>
-              {((!isMobileDevice && upgradeScreen === 2) ||
-                (isMobileDevice && upgradeScreen === 3)) && (
-                <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row w-full border-terminal-green border">
-                  {isMobileDevice ? (
-                    <>
-                      {renderContent()}
-                      {renderVerticalKeyboardControl()}
-                    </>
-                  ) : (
-                    <>
-                      {renderVerticalKeyboardControl()}
-                      {renderContent()}
-                    </>
-                  )}
+                <div className="w-1/2 flex flex-row gap-2 mx-auto">
+                  <Button
+                    className="w-1/2"
+                    onClick={() => setUpgradeScreen(upgradeScreen - 1)}
+                    disabled={upgradeScreen == 1}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    className="w-1/2"
+                    onClick={() => setUpgradeScreen(upgradeScreen + 1)}
+                    disabled={
+                      isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2
+                    }
+                  >
+                    Next
+                  </Button>
                 </div>
-              )}
-              <div className="w-1/2 flex flex-row gap-2 mx-auto">
-                <Button
-                  className="w-1/2"
-                  onClick={() => setUpgradeScreen(upgradeScreen - 1)}
-                  disabled={upgradeScreen == 1}
-                >
-                  Back
-                </Button>
-                <Button
-                  className="w-1/2"
-                  onClick={() => setUpgradeScreen(upgradeScreen + 1)}
-                  disabled={
-                    isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2
-                  }
-                >
-                  Next
-                </Button>
               </div>
             </div>
           </div>

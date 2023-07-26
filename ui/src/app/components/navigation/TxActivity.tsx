@@ -277,7 +277,7 @@ export const TxActivity = () => {
   return (
     <>
       {loading ? (
-        <div className="flex flex-row absolute top-5 sm:top-0 sm:relative items-center gap-5 justify-between text-xs sm:text-base">
+        <div className="flex flex-row absolute top-3 sm:top-0 sm:relative items-center gap-5 justify-between text-xs sm:text-base">
           <div className="flex flex-row items-center w-40 sm:w-48 loading-ellipsis">
             <LootIconLoader
               className="self-center mr-3"

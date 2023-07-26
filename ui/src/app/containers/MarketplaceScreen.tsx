@@ -183,94 +183,89 @@ export default function MarketplaceScreen({
   return (
     <>
       {underMaxItems ? (
-        <div className="w-full">
-          <div className="w-full sm:mx-auto overflow-y-auto h-[300px] sm:h-[400px] border border-terminal-green table-scroll">
-            {isLoading.latestMarketItemsQuery && (
-              <div className="flex justify-center p-10 text-center">
-                <LootIconLoader />
-              </div>
-            )}
-            {!isMobileDevice || (isMobileDevice && showEquipQ === null) ? (
-              <table className="w-full sm:border sm:border-terminal-green">
-                <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
-                  <tr className="">
-                    {headings.map((heading, index) => (
-                      <th
-                        key={index}
-                        className="px-2.5 sm:px-3 cursor-pointer"
-                        onClick={() => handleSort(heading)}
-                      >
-                        {heading}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="text-xs sm:text-base">
-                  {!isLoading.latestMarketItemsQuery ? (
-                    sortedMarketLatestItems.map((item: Item, index: number) => (
-                      <MarketplaceRow
-                        item={item}
-                        index={index}
-                        selectedIndex={selectedIndex}
-                        adventurers={adventurers}
-                        activeMenu={showEquipQ}
-                        setActiveMenu={setShowEquipQ}
-                        calculatedNewGold={calculatedNewGold}
-                        ownedItems={adventurerItems}
-                        key={index}
-                      />
-                    ))
-                  ) : (
-                    <div className="h-full w-full flex justify-center p-10 align-center">
-                      Generating Loot{" "}
-                      <LootIconLoader
-                        className="self-center ml-3"
-                        size={"w-4"}
-                      />
-                    </div>
-                  )}
-                </tbody>
-              </table>
-            ) : (
-              <>
-                {(() => {
-                  const item = sortedMarketLatestItems[showEquipQ ?? 0];
-                  const { tier, type, slot } = getItemData(item.item ?? "");
-                  return (
-                    <div className="w-full m-auto h-full flex flex-row items-center justify-center gap-2">
-                      <p>{`Equip ${item.item} ?`}</p>
-                      <Button
-                        onClick={() => {
-                          handlePurchase(item.item ?? "", tier, true);
-                          setShowEquipQ(null);
-                          setActiveMenu(0);
-                        }}
-                      >
-                        Yes
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          handlePurchase(item.item ?? "", tier, false);
-                          setShowEquipQ(null);
-                          setActiveMenu(0);
-                        }}
-                      >
-                        No
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setShowEquipQ(null);
-                          setActiveMenu(0);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  );
-                })()}
-              </>
-            )}
-          </div>
+        <div className="w-full sm:mx-auto overflow-y-auto h-[300px] sm:h-[400px] border border-terminal-green table-scroll">
+          {isLoading.latestMarketItemsQuery && (
+            <div className="flex justify-center p-10 text-center">
+              <LootIconLoader />
+            </div>
+          )}
+          {!isMobileDevice || (isMobileDevice && showEquipQ === null) ? (
+            <table className="w-full sm:border sm:border-terminal-green">
+              <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
+                <tr className="">
+                  {headings.map((heading, index) => (
+                    <th
+                      key={index}
+                      className="px-2.5 sm:px-3 cursor-pointer"
+                      onClick={() => handleSort(heading)}
+                    >
+                      {heading}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="text-xs sm:text-base">
+                {!isLoading.latestMarketItemsQuery ? (
+                  sortedMarketLatestItems.map((item: Item, index: number) => (
+                    <MarketplaceRow
+                      item={item}
+                      index={index}
+                      selectedIndex={selectedIndex}
+                      adventurers={adventurers}
+                      activeMenu={showEquipQ}
+                      setActiveMenu={setShowEquipQ}
+                      calculatedNewGold={calculatedNewGold}
+                      ownedItems={adventurerItems}
+                      key={index}
+                    />
+                  ))
+                ) : (
+                  <div className="h-full w-full flex justify-center p-10 align-center">
+                    Generating Loot{" "}
+                    <LootIconLoader className="self-center ml-3" size={"w-4"} />
+                  </div>
+                )}
+              </tbody>
+            </table>
+          ) : (
+            <>
+              {(() => {
+                const item = sortedMarketLatestItems[showEquipQ ?? 0];
+                const { tier, type, slot } = getItemData(item.item ?? "");
+                return (
+                  <div className="w-full m-auto h-full flex flex-row items-center justify-center gap-2">
+                    <p>{`Equip ${item.item} ?`}</p>
+                    <Button
+                      onClick={() => {
+                        handlePurchase(item.item ?? "", tier, true);
+                        setShowEquipQ(null);
+                        setActiveMenu(0);
+                      }}
+                    >
+                      Yes
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        handlePurchase(item.item ?? "", tier, false);
+                        setShowEquipQ(null);
+                        setActiveMenu(0);
+                      }}
+                    >
+                      No
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        setShowEquipQ(null);
+                        setActiveMenu(0);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                );
+              })()}
+            </>
+          )}
         </div>
       ) : (
         <div className="flex w-full h-64">

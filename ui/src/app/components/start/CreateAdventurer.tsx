@@ -241,7 +241,7 @@ export const CreateAdventurer = ({
                     }}
                   />
                 </div>
-                <div className="flex items-center p-2 sm:pb-4 h-20 text-center text-sm sm:text-base">
+                <div className="flex items-center p-2 sm:pb-4 h-10 sm:h-20 text-center text-xxs sm:text-base">
                   <p className="ml-2">{classType.description}</p>
                 </div>
                 <Button
