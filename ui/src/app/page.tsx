@@ -48,6 +48,8 @@ import Player from "./components/adventurer/Player";
 import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
 import { PenaltyCountDown } from "./components/CountDown";
+import useCustomQuery from "./hooks/useCustomQuery";
+import { getAdventurerById } from "./hooks/graphql/queries";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -118,21 +120,20 @@ export default function Home() {
     loop: true,
   });
 
+  useCustomQuery(
+    "adventurerByIdQuery",
+    getAdventurerById,
+    {
+      id: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+
   useEffect(() => {
     return () => {
       stop();
     };
   }, [play, stop]);
-
-  useEffect(() => {
-    if (
-      data.adventurerByIdQuery &&
-      data.adventurerByIdQuery.adventurers[0]?.id
-    ) {
-      console.log("updated");
-      setAdventurer(data.adventurerByIdQuery.adventurers[0]);
-    }
-  }, [data.adventurerByIdQuery?.adventurers[0]?.timestamp]);
 
   useEffect(() => {
     if (!account?.address) {
@@ -193,7 +194,7 @@ export default function Home() {
   return (
     // <Maintenance />
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-4 sm:p-10 mt-4 `}
+      className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-10 `}
     >
       {connected ? (
         <>
@@ -210,7 +211,7 @@ export default function Home() {
                 />
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
-                {!isMobileDevice && <TxActivity />}
+                
                 <Button
                   onClick={() => {
                     setIsMuted(!isMuted);
@@ -290,7 +291,9 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green" />
+          <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4" >
+          {!isMobileDevice && <TxActivity />}
+          </div>
           <CSSTransition
             in={
               showNotification &&

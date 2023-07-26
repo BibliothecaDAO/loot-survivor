@@ -50,14 +50,14 @@ export default function InventoryScreen() {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  useCustomQuery(
-    "adventurerByIdQuery",
-    getAdventurerById,
-    {
-      id: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  // useCustomQuery(
+  //   "adventurerByIdQuery",
+  //   getAdventurerById,
+  //   {
+  //     id: adventurer?.id ?? 0,
+  //   },
+  //   txAccepted
+  // );
 
   const handleAddEquipItem = (item: string) => {
     if (gameContract && formatAddress) {
