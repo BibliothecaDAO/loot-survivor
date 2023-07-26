@@ -48,6 +48,8 @@ import Player from "./components/adventurer/Player";
 import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
 import { PenaltyCountDown } from "./components/CountDown";
+import useCustomQuery from "./hooks/useCustomQuery";
+import { getAdventurerById } from "./hooks/graphql/queries";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -118,21 +120,20 @@ export default function Home() {
     loop: true,
   });
 
+  useCustomQuery(
+    "adventurerByIdQuery",
+    getAdventurerById,
+    {
+      id: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+
   useEffect(() => {
     return () => {
       stop();
     };
   }, [play, stop]);
-
-  useEffect(() => {
-    if (
-      data.adventurerByIdQuery &&
-      data.adventurerByIdQuery.adventurers[0]?.id
-    ) {
-      console.log("updated");
-      setAdventurer(data.adventurerByIdQuery.adventurers[0]);
-    }
-  }, [data.adventurerByIdQuery?.adventurers[0]?.timestamp]);
 
   useEffect(() => {
     if (!account?.address) {

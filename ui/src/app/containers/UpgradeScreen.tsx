@@ -70,14 +70,14 @@ export default function UpgradeScreen() {
 
   const gameData = new GameData();
 
-  useCustomQuery(
-    "adventurerByIdQuery",
-    getAdventurerById,
-    {
-      id: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  // useCustomQuery(
+  //   "adventurerByIdQuery",
+  //   getAdventurerById,
+  //   {
+  //     id: adventurer?.id ?? 0,
+  //   },
+  //   txAccepted
+  // );
 
   useCustomQuery(
     "latestMarketItemsQuery",

@@ -42,14 +42,14 @@ export default function AdventurerScreen() {
 
   const owner = account?.address ? padAddress(account.address) : "";
 
-  useCustomQuery(
-    "adventurerByIdQuery",
-    getAdventurerById,
-    {
-      id: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  // useCustomQuery(
+  //   "adventurerByIdQuery",
+  //   getAdventurerById,
+  //   {
+  //     id: adventurer?.id ?? 0,
+  //   },
+  //   txAccepted
+  // );
 
   useCustomQuery(
     "adventurersByXPQuery",

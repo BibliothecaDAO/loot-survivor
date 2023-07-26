@@ -47,14 +47,14 @@ export default function ActionsScreen() {
       : []
   );
 
-  useCustomQuery(
-    "adventurerByIdQuery",
-    getAdventurerById,
-    {
-      id: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  // useCustomQuery(
+  //   "adventurerByIdQuery",
+  //   getAdventurerById,
+  //   {
+  //     id: adventurer?.id ?? 0,
+  //   },
+  //   txAccepted
+  // );
 
   console.log(adventurer);
 
