@@ -17,6 +17,7 @@ mod messages {
     const ONE_EXPLORE_PER_BLOCK: felt252 = 'One explore per block';
     const NO_STAT_UPGRADES_AVAILABLE: felt252 = 'No stat upgrades available';
     const TOO_MANY_ITEMS: felt252 = 'Too many items';
+    const ITEM_ALREADY_OWNED: felt252 = 'Item already owned';
 }
 
 const BLOCKS_IN_A_WEEK: u64 = 3360;

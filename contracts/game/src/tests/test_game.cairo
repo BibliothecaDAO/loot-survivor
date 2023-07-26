@@ -613,7 +613,7 @@ mod tests {
     #[test]
     #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
     #[available_gas(1800000000)]
-    fn test_cant_buy_items_during_battle() {
+    fn test_buy_items_during_battle() {
         // mint new adventurer (will start in battle with starter beast)
         let mut game = new_adventurer();
 
@@ -630,7 +630,7 @@ mod tests {
     #[test]
     #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
     #[available_gas(65000000)]
-    fn test_cant_buy_items_without_stat_upgrade() {
+    fn test_buy_items_without_stat_upgrade() {
         // mint adventurer and advance to level 2
         let mut game = new_adventurer_lvl2();
 
@@ -641,17 +641,58 @@ mod tests {
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
         let item_id = *market_items.at(0).item.id;
 
-        // attempt to buy item
+        // attempt to buy item butince we have already used our stat upgrade 
+        // the market should be closed resulting in a 'Market is closed' panic
+        // this test is annotated to expect that specific panic so if it doesn't, this test will fail
         game.buy_item(ADVENTURER_ID, item_id, true);
-    // Since we have already used our stat upgrade the market should be closed
-    // resulting in a 'Market is closed' panic
-    // this test is annotated to expect that specific panic so if it doesn't, this test will fail
+    }
+
+    #[test]
+    #[should_panic(expected: ('Item already owned', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(80000000)]
+    fn test_buy_duplicate_item_equipped() {
+        // start new game on level 2 so we have access to the market
+        let mut game = new_adventurer_lvl2();
+
+        // get items from market
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+
+        // get first item on the market
+        let item_id = *market_items.at(0).item.id;
+
+        // buy first item on market and equip it
+        game.buy_item(ADVENTURER_ID, item_id, true);
+
+        // try to buy the same item again which should result in a panic
+        // 'Item already owned' which is annotated in the test
+        game.buy_item(ADVENTURER_ID, item_id, true);
+    }
+
+    #[test]
+    #[should_panic(expected: ('Item already owned', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(80000000)]
+    fn test_buy_duplicate_item_bagged() {
+        // start new game on level 2 so we have access to the market
+        let mut game = new_adventurer_lvl2();
+
+        // get items from market
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+
+        // get first item on the market
+        let item_id = *market_items.at(0).item.id;
+
+        // buy first item on market and put it into bag
+        game.buy_item(ADVENTURER_ID, item_id, false);
+
+        // try to buy the same item again which should result in a panic
+        // 'Item already owned' which is annotated in the test
+        game.buy_item(ADVENTURER_ID, item_id, true);
     }
 
     #[test]
     #[should_panic(expected: ('Market item does not exist', 'ENTRYPOINT_FAILED'))]
     #[available_gas(65000000)]
-    fn test_buy_unavailable_item() {
+    fn test_buy_item_not_on_market() {
         let mut game = new_adventurer_lvl2();
         game.buy_item(ADVENTURER_ID, 200, true);
     }
