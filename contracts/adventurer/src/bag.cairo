@@ -125,7 +125,7 @@ impl ImplBag of IBag {
 
         // get next open slot in bag
         let open_slot = self.get_open_slot();
-        
+
         // assert the slot is within expected range
         assert(open_slot > 0 && open_slot <= 11, 'slot out of bounds');
 
@@ -160,28 +160,32 @@ impl ImplBag of IBag {
     // @param self The instance of the Bag
     // @param item_id The id of the item to be removed
     fn remove_item(ref self: Bag, item_id: u8) {
+        assert(self.contains(item_id), 'item not in bag');
+
+        // create blank empty
+        let blank_item = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
         if self.item_1.id == item_id {
-            self.item_1 = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+            self.item_1 = blank_item;
         } else if self.item_2.id == item_id {
-            self.item_2 = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+            self.item_2 = blank_item;
         } else if self.item_3.id == item_id {
-            self.item_3 = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+            self.item_3 = blank_item;
         } else if self.item_4.id == item_id {
-            self.item_4 = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+            self.item_4 = blank_item;
         } else if self.item_5.id == item_id {
-            self.item_5 = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+            self.item_5 = blank_item;
         } else if self.item_6.id == item_id {
-            self.item_6 = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+            self.item_6 = blank_item;
         } else if self.item_7.id == item_id {
-            self.item_7 = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+            self.item_7 = blank_item;
         } else if self.item_8.id == item_id {
-            self.item_8 = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+            self.item_8 = blank_item;
         } else if self.item_9.id == item_id {
-            self.item_9 = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+            self.item_9 = blank_item;
         } else if self.item_10.id == item_id {
-            self.item_10 = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+            self.item_10 = blank_item;
         } else if self.item_11.id == item_id {
-            self.item_11 = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+            self.item_11 = blank_item;
         } else {
             panic_with_felt252('item not in bag')
         }
@@ -257,7 +261,7 @@ impl ImplBag of IBag {
     // @param self The Bag object in which to search for the item
     // @param item The id of the item to search for
     // @return A bool indicating whether the item is present in the bag
-    fn is_item_in_bag(self: Bag, item: u8) -> bool {
+    fn contains(self: Bag, item: u8) -> bool {
         if self.item_1.id == item {
             true
         } else if self.item_2.id == item {
@@ -288,7 +292,7 @@ impl ImplBag of IBag {
 
 #[test]
 #[available_gas(200000)]
-fn test_is_item_in_bag() {
+fn test_contains() {
     let bag = Bag {
         item_1: ItemPrimitive {
             id: 0, xp: 511, metadata: 1
@@ -315,18 +319,18 @@ fn test_is_item_in_bag() {
         }
     };
 
-    assert(bag.is_item_in_bag(0) == true, 'Item 0 should be in bag');
-    assert(bag.is_item_in_bag(2) == true, 'Item 2 should be in bag');
-    assert(bag.is_item_in_bag(3) == true, 'Item 3 should be in bag');
-    assert(bag.is_item_in_bag(4) == true, 'Item 4 should be in bag');
-    assert(bag.is_item_in_bag(5) == true, 'Item 5 should be in bag');
-    assert(bag.is_item_in_bag(6) == true, 'Item 6 should be in bag');
-    assert(bag.is_item_in_bag(7) == true, 'Item 7 should be in bag');
-    assert(bag.is_item_in_bag(8) == true, 'Item 8 should be in bag');
-    assert(bag.is_item_in_bag(9) == true, 'Item 9 should be in bag');
-    assert(bag.is_item_in_bag(10) == true, 'Item 10 should be in bag');
-    assert(bag.is_item_in_bag(255) == true, 'Item 255 should be in bag');
-    assert(bag.is_item_in_bag(100) == false, 'Item 100 not in bag');
+    assert(bag.contains(0) == true, 'Item 0 should be in bag');
+    assert(bag.contains(2) == true, 'Item 2 should be in bag');
+    assert(bag.contains(3) == true, 'Item 3 should be in bag');
+    assert(bag.contains(4) == true, 'Item 4 should be in bag');
+    assert(bag.contains(5) == true, 'Item 5 should be in bag');
+    assert(bag.contains(6) == true, 'Item 6 should be in bag');
+    assert(bag.contains(7) == true, 'Item 7 should be in bag');
+    assert(bag.contains(8) == true, 'Item 8 should be in bag');
+    assert(bag.contains(9) == true, 'Item 9 should be in bag');
+    assert(bag.contains(10) == true, 'Item 10 should be in bag');
+    assert(bag.contains(255) == true, 'Item 255 should be in bag');
+    assert(bag.contains(100) == false, 'Item 100 not in bag');
 }
 
 #[test]
@@ -696,9 +700,8 @@ fn test_get_item() {
     assert(item11_from_bag.id == item_11.id, 'Item id should be 21');
 }
 
-
 #[test]
-#[available_gas(20000)]
+#[available_gas(35000)]
 fn test_remove_item() {
     let mut bag = Bag {
         item_1: ItemPrimitive {
@@ -712,28 +715,34 @@ fn test_remove_item() {
             }, item_5: ItemPrimitive {
             id: 5, xp: 0, metadata: 0
             }, item_6: ItemPrimitive {
-            id: 8, xp: 0, metadata: 0
+            id: 6, xp: 0, metadata: 0
             }, item_7: ItemPrimitive {
-            id: 9, xp: 0, metadata: 0
+            id: 7, xp: 0, metadata: 0
             }, item_8: ItemPrimitive {
-            id: 11, xp: 0, metadata: 0
+            id: 8, xp: 1, metadata: 1
             }, item_9: ItemPrimitive {
-            id: 12, xp: 0, metadata: 0
+            id: 9, xp: 0, metadata: 0
             }, item_10: ItemPrimitive {
-            id: 13, xp: 0, metadata: 0
+            id: 10, xp: 0, metadata: 0
             }, item_11: ItemPrimitive {
-            id: 14, xp: 0, metadata: 0
+            id: 11, xp: 0, metadata: 0
         },
     };
 
-    bag.remove_item(8);
+    // remove item from bag
+    bag.remove_item(6);
 
-    assert(bag.item_6.id == 0, 'Loot id should be 0');
+    // verify it has been removed
+    assert(bag.item_6.id == 0, 'id should be 0');
+    assert(bag.item_6.xp == 0, 'xp should be 0');
+    assert(bag.item_6.metadata == 0, 'metadata should be 0');
 }
 
 #[test]
-#[available_gas(20000)]
+#[should_panic(expected: ('item not in bag', ))]
+#[available_gas(35000)]
 fn test_remove_item_not_in_bag() {
+    // initialize bag
     let mut bag = Bag {
         item_1: ItemPrimitive {
             id: 1, xp: 0, metadata: 0
@@ -760,7 +769,8 @@ fn test_remove_item_not_in_bag() {
         },
     };
 
-    bag.remove_item(8);
-
-    assert(bag.item_6.id == 0, 'Loot id should be 0');
+    // try to remove an item not in the bag
+    // this should panic with 'item not in bag'
+    // which this test is annotated to expect
+    bag.remove_item(255);
 }

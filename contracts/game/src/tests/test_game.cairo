@@ -864,7 +864,7 @@ mod tests {
                 break ();
             }
             // verify they are all in our bag
-            assert(bag.is_item_in_bag(*purchased_items_span.at(i).id), 'item should be in bag');
+            assert(bag.contains(*purchased_items_span.at(i).id), 'item should be in bag');
             items_to_equip.append(*purchased_items_span.at(i).id);
             i += 1;
         };
@@ -887,7 +887,7 @@ mod tests {
                 break ();
             }
             // verify they are no longer in bag
-            assert(!bag.is_item_in_bag(*items_to_equip_span.at(i)), 'item should not be in bag');
+            assert(!bag.contains(*items_to_equip_span.at(i)), 'item should not be in bag');
             // and equipped on the adventurer
             assert(
                 adventurer.is_equipped(*purchased_items_span.at(i).id), 'item should be equipped'
@@ -1390,5 +1390,88 @@ mod tests {
             adventurer.ring.get_greatness() == game.get_ring_greatness(ADVENTURER_ID),
             'wrong ring greatness'
         );
+    }
+
+    #[test]
+    #[available_gas(90000000)]
+    fn test_drop_item() {
+        // start new game on level 2 so we have access to the market
+        let mut game = new_adventurer_lvl2();
+
+        // get items from market
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+
+        // get first item on the market
+        let purchased_item_id = *market_items.at(0).item.id;
+
+        // buy first item on market and bag it
+        game.buy_item(ADVENTURER_ID, purchased_item_id, false);
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        // get bag state
+        let bag = game.get_bag(ADVENTURER_ID);
+
+        // assert adventurer has starting weapon equipped
+        assert(adventurer.weapon.id != 0, 'adventurer should have weapon');
+        // assert bag has the purchased item
+        assert(bag.contains(purchased_item_id), 'item should be in bag');
+
+        // create drop list consisting of adventurers equipped weapon and purchased item that is in bag
+        let mut drop_list = ArrayTrait::<u8>::new();
+        drop_list.append(adventurer.weapon.id);
+        drop_list.append(purchased_item_id);
+
+        // call contract drop
+        game.drop(ADVENTURER_ID, drop_list.span());
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        // get bag state
+        let bag = game.get_bag(ADVENTURER_ID);
+
+        // assert adventurer has no weapon equipped
+        assert(adventurer.weapon.id == 0, 'weapon id should be 0');
+        assert(adventurer.weapon.xp == 0, 'weapon should have no xp');
+        assert(adventurer.weapon.metadata == 0, 'weapon should have no metadata');
+
+        // assert bag does not have the purchased item
+        assert(!bag.contains(purchased_item_id), 'item should not be in bag');
+    }
+
+    #[test]
+    #[should_panic(expected: ('Too many items', 'ENTRYPOINT_FAILED'))]
+    #[available_gas(90000000)]
+    fn test_drop_item_too_many_items() {
+        // start new game on level 2 so we have access to the market
+        let mut game = new_adventurer_lvl2();
+
+        // intialize an array with 20 items in it
+        let mut drop_list = ArrayTrait::<u8>::new();
+        drop_list.append(1);
+        drop_list.append(2);
+        drop_list.append(3);
+        drop_list.append(4);
+        drop_list.append(5);
+        drop_list.append(6);
+        drop_list.append(7);
+        drop_list.append(8);
+        drop_list.append(9);
+        drop_list.append(10);
+        drop_list.append(11);
+        drop_list.append(12);
+        drop_list.append(13);
+        drop_list.append(14);
+        drop_list.append(15);
+        drop_list.append(16);
+        drop_list.append(17);
+        drop_list.append(18);
+        drop_list.append(19);
+        drop_list.append(20);
+
+        // try to drop 20 items (max number of items is currently 19)
+        // this should result in a panic 'Too many items'
+        // this test is annotated to expect that panic
+        game.drop(ADVENTURER_ID, drop_list.span());
     }
 }

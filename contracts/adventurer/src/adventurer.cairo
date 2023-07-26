@@ -729,6 +729,34 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
+    // @dev This function allows an adventurer to drop an item they have equipped.
+    // @notice The function only works if the item is currently equipped by the adventurer. It removes the item from the adventurer's equipment and replaces it with a blank item.
+    // @param item_id The ID of the item to be dropped. The function will assert if the item is not currently equipped.
+    // @notice The function does not handle adding the dropped item to the adventurer's bag or any other inventory system. This must be handled separately.
+    fn drop_item(ref self: Adventurer, item_id: u8) {
+        // assert the item is equipped
+        assert(self.is_equipped(item_id), 'item is not equipped');
+
+        // get the slot it's equipped to
+        let slot = ImplLoot::get_slot(item_id);
+
+        // instantiate a blank item
+        let blank_item = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
+
+        // set the item slot to the blank item
+        match slot {
+            Slot::None(()) => (),
+            Slot::Weapon(()) => self.weapon = blank_item,
+            Slot::Chest(()) => self.chest = blank_item,
+            Slot::Head(()) => self.head = blank_item,
+            Slot::Waist(()) => self.waist = blank_item,
+            Slot::Foot(()) => self.foot = blank_item,
+            Slot::Hand(()) => self.hand = blank_item,
+            Slot::Neck(()) => self.neck = blank_item,
+            Slot::Ring(()) => self.ring = blank_item,
+        }
+    }
+
     // @dev This function checks if the adventurer has a given item equipped
     // @param item_id The id of the item to check
     // @return A boolean indicating if the item is equipped by the adventurer. Returns true if the item is equipped, false otherwise.
@@ -3187,7 +3215,7 @@ fn test_is_equipped() {
     assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
     assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
     assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
-    
+
     // equip gold ring and verify is_equipped returns true for katana, divine robe, crown, demonhide belt, leather boots, leather gloves, amulet, and gold ring and false everything else
     adventurer.equip_item(gold_ring);
     assert(adventurer.is_equipped(gold_ring.id) == true, 'gold ring is equipped');
@@ -3198,4 +3226,109 @@ fn test_is_equipped() {
     assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
     assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
     assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
+}
+
+#[test]
+#[should_panic(expected: ('item is not equipped', ))]
+#[available_gas(1100000)]
+fn test_drop_item_not_equipped() {
+    // instantiate adventurer
+    let mut adventurer = ImplAdventurer::new(12, AdventurerClass::None(()), 1);
+    // try to drop an item that isn't equipped
+    // this should panic with 'item is not equipped'
+    // the test is annotated to expect this panic
+    adventurer.drop_item(constants::ItemId::Crown);
+}
+
+#[test]
+#[available_gas(1100000)]
+fn test_drop_item() {
+    let mut adventurer = ImplAdventurer::new(12, AdventurerClass::None(()), 1);
+
+    // assert starting conditions
+    assert(adventurer.weapon.id == constants::ItemId::Wand, 'weapon should be wand');
+    assert(adventurer.chest.id == 0, 'chest should be 0');
+    assert(adventurer.head.id == 0, 'head should be 0');
+    assert(adventurer.waist.id == 0, 'waist should be 0');
+    assert(adventurer.foot.id == 0, 'foot should be 0');
+    assert(adventurer.hand.id == 0, 'hand should be 0');
+    assert(adventurer.neck.id == 0, 'neck should be 0');
+    assert(adventurer.ring.id == 0, 'ring should be 0');
+
+    // drop equipped wand
+    adventurer.drop_item(constants::ItemId::Wand);
+    assert(adventurer.weapon.id == 0, 'weapon should be 0');
+    assert(adventurer.weapon.xp == 0, 'weapon xp should be 0');
+    assert(adventurer.weapon.metadata == 0, 'weapon metadata should be 0');
+
+    // instantiate additional items
+    let weapon = ItemPrimitive { id: constants::ItemId::Katana, xp: 1, metadata: 1 };
+    let chest = ItemPrimitive { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
+    let head = ItemPrimitive { id: constants::ItemId::Crown, xp: 1, metadata: 3 };
+    let waist = ItemPrimitive { id: constants::ItemId::DemonhideBelt, xp: 1, metadata: 4 };
+    let foot = ItemPrimitive { id: constants::ItemId::LeatherBoots, xp: 1, metadata: 5 };
+    let hand = ItemPrimitive { id: constants::ItemId::LeatherGloves, xp: 1, metadata: 6 };
+    let neck = ItemPrimitive { id: constants::ItemId::Amulet, xp: 1, metadata: 7 };
+    let ring = ItemPrimitive { id: constants::ItemId::GoldRing, xp: 1, metadata: 8 };
+
+    // equip item
+    adventurer.equip_item(weapon);
+    adventurer.equip_item(chest);
+    adventurer.equip_item(head);
+    adventurer.equip_item(waist);
+    adventurer.equip_item(foot);
+    adventurer.equip_item(hand);
+    adventurer.equip_item(neck);
+    adventurer.equip_item(ring);
+
+    // assert items were equipped
+    assert(adventurer.weapon.id == weapon.id, 'weapon should be equipped');
+    assert(adventurer.chest.id == chest.id, 'chest should be equipped');
+    assert(adventurer.head.id == head.id, 'head should be equipped');
+    assert(adventurer.waist.id == waist.id, 'waist should be equipped');
+    assert(adventurer.foot.id == foot.id, 'foot should be equipped');
+    assert(adventurer.hand.id == hand.id, 'hand should be equipped');
+    assert(adventurer.neck.id == neck.id, 'neck should be equipped');
+    assert(adventurer.ring.id == ring.id, 'ring should be equipped');
+
+    // drop equipped items one by one and assert they get dropped
+    adventurer.drop_item(weapon.id);
+    assert(adventurer.weapon.id == 0, 'weapon should be 0');
+    assert(adventurer.weapon.xp == 0, 'weapon xp should be 0');
+    assert(adventurer.weapon.metadata == 0, 'weapon metadata should be 0');
+
+    adventurer.drop_item(chest.id);
+    assert(adventurer.chest.id == 0, 'chest should be 0');
+    assert(adventurer.chest.xp == 0, 'chest xp should be 0');
+    assert(adventurer.chest.metadata == 0, 'chest metadata should be 0');
+
+    adventurer.drop_item(head.id);
+    assert(adventurer.head.id == 0, 'head should be 0');
+    assert(adventurer.head.xp == 0, 'head xp should be 0');
+    assert(adventurer.head.metadata == 0, 'head metadata should be 0');
+
+    adventurer.drop_item(waist.id);
+    assert(adventurer.waist.id == 0, 'waist should be 0');
+    assert(adventurer.waist.xp == 0, 'waist xp should be 0');
+    assert(adventurer.waist.metadata == 0, 'waist metadata should be 0');
+
+    adventurer.drop_item(foot.id);
+    assert(adventurer.foot.id == 0, 'foot should be 0');
+    assert(adventurer.foot.xp == 0, 'foot xp should be 0');
+    assert(adventurer.foot.metadata == 0, 'foot metadata should be 0');
+
+    adventurer.drop_item(hand.id);
+    assert(adventurer.hand.id == 0, 'hand should be 0');
+    assert(adventurer.hand.xp == 0, 'hand xp should be 0');
+    assert(adventurer.hand.metadata == 0, 'hand metadata should be 0');
+
+    adventurer.drop_item(neck.id);
+    assert(adventurer.neck.id == 0, 'neck should be 0');
+    assert(adventurer.neck.xp == 0, 'neck xp should be 0');
+    assert(adventurer.neck.metadata == 0, 'neck metadata should be 0');
+
+    adventurer.drop_item(ring.id);
+    assert(adventurer.ring.id == 0, 'ring should be 0');
+    assert(adventurer.ring.xp == 0, 'ring xp should be 0');
+    assert(adventurer.ring.metadata == 0, 'ring metadata should be 0');
 }
