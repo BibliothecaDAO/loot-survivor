@@ -211,7 +211,7 @@ export default function Home() {
                 />
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
-                {!isMobileDevice && <TxActivity />}
+                
                 <Button
                   onClick={() => {
                     setIsMuted(!isMuted);
@@ -291,7 +291,9 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green" />
+          <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4" >
+          {!isMobileDevice && <TxActivity />}
+          </div>
           <CSSTransition
             in={
               showNotification &&
