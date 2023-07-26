@@ -514,86 +514,86 @@ fn test_set_metadata_id() {
     // get next available specials storage slot
     // this should result is the meta data is incrementing for each item
     katana.set_metadata_id(adventurer, bag);
-    adventurer.add_item(katana);
+    adventurer.equip_item(katana);
     assert(katana.metadata == 2, 'wrong katana metadata');
 
     demon_crown.set_metadata_id(adventurer, bag);
-    adventurer.add_item(demon_crown);
+    adventurer.equip_item(demon_crown);
     assert(demon_crown.metadata == 3, 'wrong demon crown metadata');
 
     silk_robe.set_metadata_id(adventurer, bag);
-    adventurer.add_item(silk_robe);
+    adventurer.equip_item(silk_robe);
     assert(silk_robe.metadata == 4, 'wrong silk robe metadata');
 
     silver_ring.set_metadata_id(adventurer, bag);
-    adventurer.add_item(silver_ring);
+    adventurer.equip_item(silver_ring);
     assert(silver_ring.metadata == 5, 'wrong silver ring metadata');
 
     ghost_wand.set_metadata_id(adventurer, bag);
     bag.add_item(katana);
-    adventurer.add_item(ghost_wand);
+    adventurer.equip_item(ghost_wand);
     assert(ghost_wand.metadata == 6, 'wrong ghost wand metadata');
 
     leather_gloves.set_metadata_id(adventurer, bag);
-    adventurer.add_item(leather_gloves);
+    adventurer.equip_item(leather_gloves);
     assert(leather_gloves.metadata == 7, 'wrong leather gloves metadata');
 
     silk_gloves.set_metadata_id(adventurer, bag);
     bag.add_item(leather_gloves);
-    adventurer.add_item(silk_gloves);
+    adventurer.equip_item(silk_gloves);
     assert(silk_gloves.metadata == 8, 'wrong silk gloves metadata');
 
     linen_gloves.set_metadata_id(adventurer, bag);
     bag.add_item(silk_gloves);
-    adventurer.add_item(linen_gloves);
+    adventurer.equip_item(linen_gloves);
     assert(linen_gloves.metadata == 9, 'wrong linen gloves metadata');
 
     crown.set_metadata_id(adventurer, bag);
     bag.add_item(demon_crown);
-    adventurer.add_item(crown);
+    adventurer.equip_item(crown);
     assert(crown.metadata == 10, 'wrong crown metadata');
 
     divine_slippers.set_metadata_id(adventurer, bag);
-    adventurer.add_item(divine_slippers);
+    adventurer.equip_item(divine_slippers);
     assert(divine_slippers.metadata == 11, 'wrong divine slippers metadata');
 
     warhammer.set_metadata_id(adventurer, bag);
     bag.add_item(ghost_wand);
-    adventurer.add_item(warhammer);
+    adventurer.equip_item(warhammer);
     assert(warhammer.metadata == 12, 'wrong warhammer metadata');
 
     ancient_helm.set_metadata_id(adventurer, bag);
     bag.add_item(crown);
-    adventurer.add_item(ancient_helm);
+    adventurer.equip_item(ancient_helm);
     assert(ancient_helm.metadata == 13, 'wrong ancient helm metadata');
 
     divine_robe.set_metadata_id(adventurer, bag);
     bag.add_item(silk_robe);
-    adventurer.add_item(divine_robe);
+    adventurer.equip_item(divine_robe);
     assert(divine_robe.metadata == 14, 'wrong divine robe metadata');
 
     holy_chestplate.set_metadata_id(adventurer, bag);
     bag.add_item(divine_robe);
-    adventurer.add_item(holy_chestplate);
+    adventurer.equip_item(holy_chestplate);
     assert(holy_chestplate.metadata == 15, 'wrong holy chestplate metadata');
 
     holy_greaves.set_metadata_id(adventurer, bag);
     bag.add_item(divine_slippers);
-    adventurer.add_item(holy_greaves);
+    adventurer.equip_item(holy_greaves);
     assert(holy_greaves.metadata == 16, 'wrong holy greaves metadata');
 
     demonhide_boots.set_metadata_id(adventurer, bag);
     bag.add_item(holy_greaves);
-    adventurer.add_item(demonhide_boots);
+    adventurer.equip_item(demonhide_boots);
     assert(demonhide_boots.metadata == 17, 'wrong demonhide boots metadata');
 
     holy_gauntlets.set_metadata_id(adventurer, bag);
     bag.add_item(linen_gloves);
-    adventurer.add_item(holy_gauntlets);
+    adventurer.equip_item(holy_gauntlets);
     assert(holy_gauntlets.metadata == 18, 'wrong holy gauntlets metadata');
 
     demonhide_belt.set_metadata_id(adventurer, bag);
-    adventurer.add_item(demonhide_belt);
+    adventurer.equip_item(demonhide_belt);
     assert(demonhide_belt.metadata == 19, 'wrong demonhide belts metadata');
 
     // do one final pass to make sure none of the meta data got

@@ -16,6 +16,7 @@ mod Game {
 
     use option::OptionTrait;
     use box::BoxTrait;
+    use core::array::SpanTrait;
     use starknet::{
         get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const
     };
@@ -331,9 +332,12 @@ mod Game {
                 original_name_storage2
             );
         }
-        fn equip(ref self: ContractState, adventurer_id: u256, item_id: u8) {
+        fn equip(ref self: ContractState, adventurer_id: u256, items: Span<u8>) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
+
+            // assert items length is less than or equal to 8
+            assert(items.len() <= 8, messages::TOO_MANY_ITEMS);
 
             // get item names from storage
             let name_storage1 = _loot_special_names_storage_unpacked(
@@ -359,8 +363,15 @@ mod Game {
             // get adventurers bag
             let mut bag = _bag_unpacked(@self, adventurer_id);
 
-            // equip item
-            _equip(ref self, adventurer_id, ref adventurer, item_id, ref bag);
+            // iterate over the items and equip them
+            let mut i: u32 = 0;
+            loop {
+                if i >= items.len() {
+                    break ();
+                }
+                _equip(ref self, ref adventurer, ref bag, adventurer_id, *items.at(i));
+                i += 1;
+            };
 
             // TODO: Currently this is causing a Got 'Offset overflow' error while moving [159]
             // which is being discussed via https://github.com/starkware-libs/cairo/issues/2942
@@ -439,17 +450,29 @@ mod Game {
             // assert market is open
             _assert_market_is_open(@self, adventurer);
 
+            // get adventurer entropy
             let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
                 .entropy
                 .into();
 
-            // check item is available in market
+            // check item is available on market
             _assert_item_is_available(
                 @self, adventurer, adventurer_id, adventurer_entropy, item_id
             );
 
+            // unpack Loot bag from storage
+            let mut bag = _bag_unpacked(@self, adventurer_id);
+
             // buy item
-            _buy_item(ref self, adventurer_id, ref adventurer, item_id, equip);
+            let bag_mutated = _buy_item(
+                ref self, ref adventurer, ref bag, adventurer_id, item_id, equip
+            );
+
+            // if buying item mutated bag
+            if (bag_mutated) {
+                // pack and save updated bag
+                _pack_bag(ref self, adventurer_id, bag);
+            }
 
             // remove stat boosts, pack, and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -2213,37 +2236,37 @@ mod Game {
 
     fn _equip(
         ref self: ContractState,
-        adventurer_id: u256,
         ref adventurer: Adventurer,
+        ref bag: Bag,
+        adventurer_id: u256,
         item_id: u8,
-        ref bag: Bag
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
         internal::revoke_ap_tracking();
         // get item the adventurer is equipping
         // if item does not exist, lib will throw 'Item not in bag'
+
+        // assert the item is in the bag
+        _assert_item_in_bag(@self, bag, item_id);
+
+        // get the item from the bag
         let equipping_item = bag.get_item(item_id);
 
-        // remove item from bag
+        // then remove it from the bag
         bag.remove_item(equipping_item.id);
 
-        // check if adventurer has an item already
-        // equipped to that slot
-        let mut unequipped_item_id: u8 = 0;
-        if adventurer.is_slot_free(equipping_item) == false {
-            // if they do get the item
-            let unequipping_item = adventurer
-                .get_item_at_slot(ImplLoot::get_slot(equipping_item.id));
+        // get the item the adventurer currently has equipped in that slot (if any)
+        // we do this here to prevent having to use a mutable variable
+        let unequipping_item = adventurer.get_item_at_slot(ImplLoot::get_slot(equipping_item.id));
 
+        // check if there is an item equipped to that slot
+        if adventurer.is_slot_free(equipping_item) == false {
             // put it in adventurer's bag
             bag.add_item(unequipping_item);
-
-            // and save the item id for events
-            unequipped_item_id = unequipping_item.id;
         }
 
         // equip item
-        adventurer.add_item(equipping_item);
+        adventurer.equip_item(equipping_item);
 
         // emit equipped item event
         __event_EquippedItem(
@@ -2256,22 +2279,27 @@ mod Game {
                 }, bag: bag
             },
             item_id,
-            unequipped_item_id,
+            unequipping_item.id,
         );
     }
 
-    // @loaf
-    // checks item exists on market according to the adventurers entropy
-    // checks adventurer has enough gold
-    // equips item if equip is true
-    // stashes item in bag if equip is false
+    // @dev This function allows the adventurer to purchase an item from the market.
+    // @notice The item price is adjusted based on the adventurer's charisma. The function also manages the adventurer's inventory based on whether they equip the item or not. It emits an event whenever an item is purchased.
+    // @param adventurer The adventurer buying the item. The function modifies the adventurer's gold and equipment.
+    // @param bag The bag of the adventurer. The function may add items to the bag if the adventurer unequips an item or opts not to equip a purchased item.
+    // @param adventurer_id The ID of the adventurer.
+    // @param item_id The ID of the item to be purchased.
+    // @param equip A boolean indicating if the adventurer should equip the item immediately upon purchasing it. If it is set to false, the item will be added to the adventurer's bag.
+    // @return A boolean indicating if the adventurer's bag was mutated (i.e., items were added or removed) during the execution of this function.
+    // @notice If the adventurer's bag is mutated, the function does not update the bag's state in the contract's storage. This must be done separately.
     fn _buy_item(
         ref self: ContractState,
-        adventurer_id: u256,
         ref adventurer: Adventurer,
+        ref bag: Bag,
+        adventurer_id: u256,
         item_id: u8,
         equip: bool
-    ) {
+    ) -> bool {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
         // TODO: Remove after testing
@@ -2285,45 +2313,41 @@ mod Game {
         // check adventurer has enough gold
         assert(adventurer.check_gold(charisma_adjusted_price) == true, messages::NOT_ENOUGH_GOLD);
 
-        // unpack Loot bag from storage
-        let mut bag = _bag_unpacked(@self, adventurer_id);
-
         // get item from id
         let mut item = ImplItemPrimitive::new_item(item_id);
 
         // assign metadata id to item
         item.set_metadata_id(adventurer, bag);
 
-        // deduct gold
+        // deduct charisma adjusted cost of item from adventurer's gold balance
         adventurer.deduct_gold(charisma_adjusted_price);
 
-        let mut unequipped_item_id: u8 = 0;
+        // get the item the adventurer currently has equipped in that slot (if any)
+        let unequipping_item = adventurer.get_item_at_slot(ImplLoot::get_slot(item.id));
 
+        // variable for tracking if bag was mutated
+        let mut bag_mutated = false;
+
+        // if the item was purchased with equip set to true
         if equip == true {
-            // get the item the adventurer currently has equipped in that slot
-            let unequipping_item = adventurer.get_item_at_slot(ImplLoot::get_slot(item.id));
-
-            // add new item to adventurer
-            adventurer.add_item(item);
-
-            // if the unequipped item is not empty
+            // check if there is an item equipped to that slot
             if unequipping_item.id > 0 {
-                // add item to the adventurer's bag
+                // if so, add it to the adventurer's bag
                 bag.add_item(unequipping_item);
 
-                // get the item id of the item being unequipped
-                unequipped_item_id = unequipping_item.id;
-
-                // pack and save bag
-                _pack_bag(ref self, adventurer_id, bag);
+                // and flag bag as mutated
+                bag_mutated = true;
             }
+
+            // then equip new item to adventurer
+            adventurer.equip_item(item);
         } else {
-            // if adventurers didn't opt to equip the newly purchased item
-            // put it in their bag
+            // if adventurer did not opt to equip the item
+            // add it to their bag
             bag.add_item(item);
 
-            // pack and save bag
-            _pack_bag(ref self, adventurer_id, bag);
+            // flag bag as mutated
+            bag_mutated = true;
         }
 
         // if the adventurer opted to equip their item
@@ -2342,8 +2366,10 @@ mod Game {
             item_id,
             charisma_adjusted_price,
             equip,
-            unequipped_item_id,
+            unequipping_item.id,
         );
+
+        bag_mutated
     }
 
     fn _upgrade_stat(
@@ -2637,6 +2663,9 @@ mod Game {
         self._owner.read(adventurer_id)
     }
 
+    fn _assert_item_in_bag(self: @ContractState, bag: Bag, item_id: u8) {
+        assert(bag.is_item_in_bag(item_id), messages::ITEM_NOT_IN_BAG);
+    }
     fn _assert_ownership(self: @ContractState, adventurer_id: u256) {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
     }

@@ -714,7 +714,7 @@ impl ImplAdventurer of IAdventurer {
     // @notice Adds an item to the adventurer's equipment.
     // @dev The type of the item determines which equipment slot it goes into.
     // @param item The item to be added to the adventurer's equipment.
-    fn add_item(ref self: Adventurer, item: ItemPrimitive) {
+    fn equip_item(ref self: Adventurer, item: ItemPrimitive) {
         let slot = ImplLoot::get_slot(item.id);
         match slot {
             Slot::None(()) => (),
@@ -726,6 +726,24 @@ impl ImplAdventurer of IAdventurer {
             Slot::Hand(()) => self.equip_hand_armor(item),
             Slot::Neck(()) => self.equip_necklace(item),
             Slot::Ring(()) => self.equip_ring(item),
+        }
+    }
+
+    // @dev This function checks if the adventurer has a given item equipped
+    // @param item_id The id of the item to check
+    // @return A boolean indicating if the item is equipped by the adventurer. Returns true if the item is equipped, false otherwise.
+    fn is_equipped(self: Adventurer, item_id: u8) -> bool {
+        let slot = ImplLoot::get_slot(item_id);
+        match slot {
+            Slot::None(()) => false,
+            Slot::Weapon(()) => self.weapon.id == item_id,
+            Slot::Chest(()) => self.chest.id == item_id,
+            Slot::Head(()) => self.head.id == item_id,
+            Slot::Waist(()) => self.waist.id == item_id,
+            Slot::Foot(()) => self.foot.id == item_id,
+            Slot::Hand(()) => self.hand.id == item_id,
+            Slot::Neck(()) => self.neck.id == item_id,
+            Slot::Ring(()) => self.ring.id == item_id,
         }
     }
 
@@ -1535,46 +1553,100 @@ fn test_new_adventurer() {
 #[available_gas(2000000)]
 fn test_new_cleric() {
     let new_adventurer = ImplAdventurer::new(1, AdventurerClass::Cleric(()), 1);
-    assert(new_adventurer.stats.strength == ClassStatBoosts::Cleric::STRENGTH, 'wrong cleric strength');
-    assert(new_adventurer.stats.dexterity == ClassStatBoosts::Cleric::DEXTERITY, 'wrong cleric dexterity');
-    assert(new_adventurer.stats.vitality == ClassStatBoosts::Cleric::VITALITY, 'wrong cleric vitality');
-    assert(new_adventurer.stats.intelligence == ClassStatBoosts::Cleric::INTELLIGENCE, 'wrong cleric intelligence');
+    assert(
+        new_adventurer.stats.strength == ClassStatBoosts::Cleric::STRENGTH, 'wrong cleric strength'
+    );
+    assert(
+        new_adventurer.stats.dexterity == ClassStatBoosts::Cleric::DEXTERITY,
+        'wrong cleric dexterity'
+    );
+    assert(
+        new_adventurer.stats.vitality == ClassStatBoosts::Cleric::VITALITY, 'wrong cleric vitality'
+    );
+    assert(
+        new_adventurer.stats.intelligence == ClassStatBoosts::Cleric::INTELLIGENCE,
+        'wrong cleric intelligence'
+    );
     assert(new_adventurer.stats.wisdom == ClassStatBoosts::Cleric::WISDOM, 'wrong cleric wisdom');
-    assert(new_adventurer.stats.charisma == ClassStatBoosts::Cleric::CHARISMA, 'wrong cleric charisma');
-    assert(new_adventurer.health == STARTING_HEALTH + (new_adventurer.stats.vitality.into() * VITALITY_HEALTH_CAP_INCREASE.into()), 'wrong cleric health');
+    assert(
+        new_adventurer.stats.charisma == ClassStatBoosts::Cleric::CHARISMA, 'wrong cleric charisma'
+    );
+    assert(
+        new_adventurer.health == STARTING_HEALTH
+            + (new_adventurer.stats.vitality.into() * VITALITY_HEALTH_CAP_INCREASE.into()),
+        'wrong cleric health'
+    );
 }
 #[test]
 #[available_gas(2000000)]
 fn test_new_scout() {
     let new_adventurer = ImplAdventurer::new(1, AdventurerClass::Scout(()), 1);
-    assert(new_adventurer.stats.strength == ClassStatBoosts::Scout::STRENGTH, 'wrong scout strength');
-    assert(new_adventurer.stats.dexterity == ClassStatBoosts::Scout::DEXTERITY, 'wrong scout dexterity');
-    assert(new_adventurer.stats.vitality == ClassStatBoosts::Scout::VITALITY, 'wrong scout vitality');
-    assert(new_adventurer.stats.intelligence == ClassStatBoosts::Scout::INTELLIGENCE, 'wrong scout intelligence');
+    assert(
+        new_adventurer.stats.strength == ClassStatBoosts::Scout::STRENGTH, 'wrong scout strength'
+    );
+    assert(
+        new_adventurer.stats.dexterity == ClassStatBoosts::Scout::DEXTERITY, 'wrong scout dexterity'
+    );
+    assert(
+        new_adventurer.stats.vitality == ClassStatBoosts::Scout::VITALITY, 'wrong scout vitality'
+    );
+    assert(
+        new_adventurer.stats.intelligence == ClassStatBoosts::Scout::INTELLIGENCE,
+        'wrong scout intelligence'
+    );
     assert(new_adventurer.stats.wisdom == ClassStatBoosts::Scout::WISDOM, 'wrong scout wisdom');
-    assert(new_adventurer.stats.charisma == ClassStatBoosts::Scout::CHARISMA, 'wrong scout charisma');
+    assert(
+        new_adventurer.stats.charisma == ClassStatBoosts::Scout::CHARISMA, 'wrong scout charisma'
+    );
 }
 #[test]
 #[available_gas(2000000)]
 fn test_new_hunter() {
     let new_adventurer = ImplAdventurer::new(1, AdventurerClass::Hunter(()), 1);
-    assert(new_adventurer.stats.strength == ClassStatBoosts::Hunter::STRENGTH, 'wrong hunter strength');
-    assert(new_adventurer.stats.dexterity == ClassStatBoosts::Hunter::DEXTERITY, 'wrong hunter dexterity');
-    assert(new_adventurer.stats.vitality == ClassStatBoosts::Hunter::VITALITY, 'wrong hunter vitality');
-    assert(new_adventurer.stats.intelligence == ClassStatBoosts::Hunter::INTELLIGENCE, 'wrong hunter intelligence');
+    assert(
+        new_adventurer.stats.strength == ClassStatBoosts::Hunter::STRENGTH, 'wrong hunter strength'
+    );
+    assert(
+        new_adventurer.stats.dexterity == ClassStatBoosts::Hunter::DEXTERITY,
+        'wrong hunter dexterity'
+    );
+    assert(
+        new_adventurer.stats.vitality == ClassStatBoosts::Hunter::VITALITY, 'wrong hunter vitality'
+    );
+    assert(
+        new_adventurer.stats.intelligence == ClassStatBoosts::Hunter::INTELLIGENCE,
+        'wrong hunter intelligence'
+    );
     assert(new_adventurer.stats.wisdom == ClassStatBoosts::Hunter::WISDOM, 'wrong hunter wisdom');
-    assert(new_adventurer.stats.charisma == ClassStatBoosts::Hunter::CHARISMA, 'wrong hunter charisma');
+    assert(
+        new_adventurer.stats.charisma == ClassStatBoosts::Hunter::CHARISMA, 'wrong hunter charisma'
+    );
 }
 #[test]
 #[available_gas(2000000)]
 fn test_new_warrior() {
     let new_adventurer = ImplAdventurer::new(1, AdventurerClass::Warrior(()), 1);
-    assert(new_adventurer.stats.strength == ClassStatBoosts::Warrior::STRENGTH, 'wrong warrior strength');
-    assert(new_adventurer.stats.dexterity == ClassStatBoosts::Warrior::DEXTERITY, 'wrong warrior dexterity');
-    assert(new_adventurer.stats.vitality == ClassStatBoosts::Warrior::VITALITY, 'wrong warrior vitality');
-    assert(new_adventurer.stats.intelligence == ClassStatBoosts::Warrior::INTELLIGENCE, 'wrong warrior intelligence');
+    assert(
+        new_adventurer.stats.strength == ClassStatBoosts::Warrior::STRENGTH,
+        'wrong warrior strength'
+    );
+    assert(
+        new_adventurer.stats.dexterity == ClassStatBoosts::Warrior::DEXTERITY,
+        'wrong warrior dexterity'
+    );
+    assert(
+        new_adventurer.stats.vitality == ClassStatBoosts::Warrior::VITALITY,
+        'wrong warrior vitality'
+    );
+    assert(
+        new_adventurer.stats.intelligence == ClassStatBoosts::Warrior::INTELLIGENCE,
+        'wrong warrior intelligence'
+    );
     assert(new_adventurer.stats.wisdom == ClassStatBoosts::Warrior::WISDOM, 'wrong warrior wisdom');
-    assert(new_adventurer.stats.charisma == ClassStatBoosts::Warrior::CHARISMA, 'wrong warrior charisma');
+    assert(
+        new_adventurer.stats.charisma == ClassStatBoosts::Warrior::CHARISMA,
+        'wrong warrior charisma'
+    );
 }
 
 
@@ -2150,7 +2222,7 @@ fn test_increase_item_xp() {
     let mut adventurer = ImplAdventurer::new(1, AdventurerClass::None(()), 1);
     let entropy = 1;
     let item_ghost_wand = ItemPrimitive { id: constants::ItemId::GhostWand, xp: 1, metadata: 1 };
-    adventurer.add_item(item_ghost_wand);
+    adventurer.equip_item(item_ghost_wand);
 
     let blank_special_name = ItemSpecials { special2: 0, special3: 0, special1: 0 };
 
@@ -2302,7 +2374,7 @@ fn test_increase_item_xp() {
 
     // to test this lets create a new item
     let divine_robe = ItemPrimitive { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
-    adventurer.add_item(divine_robe);
+    adventurer.equip_item(divine_robe);
 
     // verify starting state
     assert(adventurer.chest.id == constants::ItemId::DivineRobe, 'advntr should have divine robe');
@@ -2846,7 +2918,7 @@ fn test_in_battle() {
 
 #[test]
 #[available_gas(900000)]
-fn test_add_item() {
+fn test_equip_item() {
     let mut adventurer = ImplAdventurer::new(12, AdventurerClass::None(()), 1);
 
     // assert starting conditions
@@ -2869,14 +2941,14 @@ fn test_add_item() {
     let neck = ItemPrimitive { id: constants::ItemId::Amulet, xp: 1, metadata: 7 };
     let ring = ItemPrimitive { id: constants::ItemId::GoldRing, xp: 1, metadata: 8 };
 
-    adventurer.add_item(weapon);
-    adventurer.add_item(chest);
-    adventurer.add_item(head);
-    adventurer.add_item(waist);
-    adventurer.add_item(foot);
-    adventurer.add_item(hand);
-    adventurer.add_item(neck);
-    adventurer.add_item(ring);
+    adventurer.equip_item(weapon);
+    adventurer.equip_item(chest);
+    adventurer.equip_item(head);
+    adventurer.equip_item(waist);
+    adventurer.equip_item(foot);
+    adventurer.equip_item(hand);
+    adventurer.equip_item(neck);
+    adventurer.equip_item(ring);
 
     // assert items were added
     assert(adventurer.weapon.id == weapon.id, 'weapon should be equipped');
@@ -3005,4 +3077,125 @@ fn test_grant_xp_and_check_for_greatness_increase() {
         special_name_storage.item_2.special1 == special_names.special1,
         'suffix should be in storage'
     );
+}
+
+#[test]
+#[available_gas(2300000)]
+fn test_is_equipped() {
+    let wand = ItemPrimitive { id: constants::ItemId::Wand, xp: 1, metadata: 1 };
+    let demon_crown = ItemPrimitive { id: constants::ItemId::DemonCrown, xp: 1, metadata: 2 };
+    let mut adventurer = ImplAdventurer::new(wand.id, AdventurerClass::None(()), 1);
+
+    // assert starting state
+    assert(adventurer.weapon.id == wand.id, 'weapon should be wand');
+    assert(adventurer.chest.id == 0, 'chest should be 0');
+    assert(adventurer.head.id == 0, 'head should be 0');
+    assert(adventurer.waist.id == 0, 'waist should be 0');
+    assert(adventurer.foot.id == 0, 'foot should be 0');
+    assert(adventurer.hand.id == 0, 'hand should be 0');
+    assert(adventurer.neck.id == 0, 'neck should be 0');
+    assert(adventurer.ring.id == 0, 'ring should be 0');
+
+    // assert base case for is_equipped
+    assert(adventurer.is_equipped(wand.id) == true, 'wand should be equipped');
+    assert(adventurer.is_equipped(demon_crown.id) == false, 'demon crown is not equipped');
+
+    // stage items
+    let katana = ItemPrimitive { id: constants::ItemId::Katana, xp: 1, metadata: 1 };
+    let divine_robe = ItemPrimitive { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
+    let crown = ItemPrimitive { id: constants::ItemId::Crown, xp: 1, metadata: 3 };
+    let demonhide_belt = ItemPrimitive { id: constants::ItemId::DemonhideBelt, xp: 1, metadata: 4 };
+    let leather_boots = ItemPrimitive { id: constants::ItemId::LeatherBoots, xp: 1, metadata: 5 };
+    let leather_gloves = ItemPrimitive { id: constants::ItemId::LeatherGloves, xp: 1, metadata: 6 };
+    let amulet = ItemPrimitive { id: constants::ItemId::Amulet, xp: 1, metadata: 7 };
+    let gold_ring = ItemPrimitive { id: constants::ItemId::GoldRing, xp: 1, metadata: 8 };
+
+    // Equip a katana and verify is_equipped returns true for katana and false everything else
+    adventurer.equip_item(katana);
+    assert(adventurer.is_equipped(katana.id) == true, 'weapon should be equipped');
+    assert(adventurer.is_equipped(wand.id) == false, 'wand should not be equipped');
+    assert(adventurer.is_equipped(crown.id) == false, 'crown should not be equipped');
+    assert(adventurer.is_equipped(divine_robe.id) == false, 'divine robe is not equipped');
+    assert(adventurer.is_equipped(demonhide_belt.id) == false, 'demonhide belt is not equipped');
+    assert(adventurer.is_equipped(leather_boots.id) == false, 'leather boots is not equipped');
+    assert(adventurer.is_equipped(leather_gloves.id) == false, 'leather gloves is not equipped');
+    assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
+    assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
+
+    // equip a divine robe and verify is_equipped returns true for katana and divine robe and false everything else
+    adventurer.equip_item(divine_robe);
+    assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
+    assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
+    assert(adventurer.is_equipped(crown.id) == false, 'crown should not be equipped');
+    assert(adventurer.is_equipped(demonhide_belt.id) == false, 'demonhide belt is not equipped');
+    assert(adventurer.is_equipped(leather_boots.id) == false, 'leather boots is not equipped');
+    assert(adventurer.is_equipped(leather_gloves.id) == false, 'leather gloves is not equipped');
+    assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
+    assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
+
+    // equip a crown and verify is_equipped returns true for katana, divine robe, and crown and false everything else
+    adventurer.equip_item(crown);
+    assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
+    assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
+    assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
+    assert(adventurer.is_equipped(demonhide_belt.id) == false, 'demonhide belt is not equipped');
+    assert(adventurer.is_equipped(leather_boots.id) == false, 'leather boots is not equipped');
+    assert(adventurer.is_equipped(leather_gloves.id) == false, 'leather gloves is not equipped');
+    assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
+    assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
+
+    // equip a demonhide belt and verify is_equipped returns true for katana, divine robe, crown, and demonhide belt and false everything else
+    adventurer.equip_item(demonhide_belt);
+    assert(adventurer.is_equipped(demonhide_belt.id) == true, 'demonhide belt is equipped');
+    assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
+    assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
+    assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
+    assert(adventurer.is_equipped(leather_boots.id) == false, 'leather boots is not equipped');
+    assert(adventurer.is_equipped(leather_gloves.id) == false, 'leather gloves is not equipped');
+    assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
+    assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
+
+    // equip leather boots and verify is_equipped returns true for katana, divine robe, crown, demonhide belt, and leather boots and false everything else
+    adventurer.equip_item(leather_boots);
+    assert(adventurer.is_equipped(leather_boots.id) == true, 'leather boots is equipped');
+    assert(adventurer.is_equipped(demonhide_belt.id) == true, 'demonhide belt is equipped');
+    assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
+    assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
+    assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
+    assert(adventurer.is_equipped(leather_gloves.id) == false, 'leather gloves is not equipped');
+    assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
+    assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
+
+    // equip leather gloves and verify is_equipped returns true for katana, divine robe, crown, demonhide belt, leather boots, and leather gloves and false everything else
+    adventurer.equip_item(leather_gloves);
+    assert(adventurer.is_equipped(leather_gloves.id) == true, 'leather gloves is equipped');
+    assert(adventurer.is_equipped(leather_boots.id) == true, 'leather boots is equipped');
+    assert(adventurer.is_equipped(demonhide_belt.id) == true, 'demonhide belt is equipped');
+    assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
+    assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
+    assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
+    assert(adventurer.is_equipped(amulet.id) == false, 'amulet is not equipped');
+    assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
+
+    // equip amulet and verify is_equipped returns true for katana, divine robe, crown, demonhide belt, leather boots, leather gloves, and amulet and false everything else
+    adventurer.equip_item(amulet);
+    assert(adventurer.is_equipped(amulet.id) == true, 'amulet is equipped');
+    assert(adventurer.is_equipped(leather_gloves.id) == true, 'leather gloves is equipped');
+    assert(adventurer.is_equipped(leather_boots.id) == true, 'leather boots is equipped');
+    assert(adventurer.is_equipped(demonhide_belt.id) == true, 'demonhide belt is equipped');
+    assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
+    assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
+    assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
+    assert(adventurer.is_equipped(gold_ring.id) == false, 'gold ring is not equipped');
+    
+    // equip gold ring and verify is_equipped returns true for katana, divine robe, crown, demonhide belt, leather boots, leather gloves, amulet, and gold ring and false everything else
+    adventurer.equip_item(gold_ring);
+    assert(adventurer.is_equipped(gold_ring.id) == true, 'gold ring is equipped');
+    assert(adventurer.is_equipped(amulet.id) == true, 'amulet is equipped');
+    assert(adventurer.is_equipped(leather_gloves.id) == true, 'leather gloves is equipped');
+    assert(adventurer.is_equipped(leather_boots.id) == true, 'leather boots is equipped');
+    assert(adventurer.is_equipped(demonhide_belt.id) == true, 'demonhide belt is equipped');
+    assert(adventurer.is_equipped(crown.id) == true, 'crown should be equipped');
+    assert(adventurer.is_equipped(divine_robe.id) == true, 'divine robe should be equipped');
+    assert(adventurer.is_equipped(katana.id) == true, 'katana still equipped');
 }

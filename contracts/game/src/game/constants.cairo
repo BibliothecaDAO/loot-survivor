@@ -16,6 +16,7 @@ mod messages {
     const ADVENTURER_NOT_IDLE: felt252 = 'Adventurer is not idle';
     const ONE_EXPLORE_PER_BLOCK: felt252 = 'One explore per block';
     const NO_STAT_UPGRADES_AVAILABLE: felt252 = 'No stat upgrades available';
+    const TOO_MANY_ITEMS: felt252 = 'Too many items';
 }
 
 const BLOCKS_IN_A_WEEK: u64 = 3360;
