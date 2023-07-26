@@ -440,12 +440,17 @@ mod Game {
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
                 @self, adventurer_id, name_storage1, name_storage2
             );
+            // unpack Loot bag from storage
+            let mut bag = _bag_unpacked(@self, adventurer_id);
 
             // assert adventurer is not dead
             _assert_not_dead(@self, adventurer);
 
             // assert adventurer is not in battle
             _assert_not_in_battle(@self, adventurer);
+
+            // assert adventurer does not already own the item
+            _assert_item_not_owned(@self, adventurer, bag, item_id);
 
             // assert market is open
             _assert_market_is_open(@self, adventurer);
@@ -459,9 +464,6 @@ mod Game {
             _assert_item_is_available(
                 @self, adventurer, adventurer_id, adventurer_entropy, item_id
             );
-
-            // unpack Loot bag from storage
-            let mut bag = _bag_unpacked(@self, adventurer_id);
 
             // buy item
             let bag_mutated = _buy_item(
@@ -2677,6 +2679,13 @@ mod Game {
     }
     fn _assert_market_is_open(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.stat_points_available > 0, messages::MARKET_CLOSED);
+    }
+    fn _assert_item_not_owned(self: @ContractState, adventurer: Adventurer, bag: Bag, item_id: u8) {
+        // assert item is not equipped and not in bag
+        assert(
+            adventurer.is_equipped(item_id) == false && bag.is_item_in_bag(item_id) == false,
+            messages::ITEM_ALREADY_OWNED
+        );
     }
     fn _assert_item_is_available(
         self: @ContractState,
