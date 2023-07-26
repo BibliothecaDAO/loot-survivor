@@ -13,7 +13,7 @@ const HealthSlider: React.FC<ButtonProps> = ({
   disabled,
 }) => {
   const handleIncrement = () => {
-    if (purchaseAmount < 10) {
+    if (purchaseAmount < 100) {
       setPurchaseAmount(purchaseAmount + 1);
     }
   };
@@ -36,7 +36,7 @@ const HealthSlider: React.FC<ButtonProps> = ({
       </Button>
       <span className="text-xl p-2">{purchaseAmount}</span>
       <Button
-        className="text-base text-2xl"
+        className="text-2xl mr-1"
         size={"sm"}
         onClick={handleIncrement}
         disabled={disabled}

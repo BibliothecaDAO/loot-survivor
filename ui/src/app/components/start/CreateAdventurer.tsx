@@ -208,23 +208,23 @@ export const CreateAdventurer = ({
               {
                 name: "Cleric",
                 description: "+3 Charisma +3 Vitality",
-                image: "/classes/cleric.png",
+                image: "/classes/cleric2.png",
               },
               {
                 name: "Scout",
                 description: "+2 Intelligence +2 Wisdom +2 Dexterity",
-                image: "/classes/scout.png",
+                image: "/classes/scout2.png",
               },
               {
                 name: "Hunter",
                 description: "+3 Strength +3 Intelligence",
-                image: "/classes/hunter.png",
+                image: "/classes/hunter2.png",
               },
               {
                 name: "Warrior",
                 description:
                   "+1 Strength +1 Dexterity +1 Vitality +1 Intelligence +1 Wisdom +1 Charisma",
-                image: "/classes/warrior.png",
+                image: "/classes/warrior2.png",
               },
             ].map((classType) => (
               <div
