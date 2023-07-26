@@ -4,7 +4,7 @@ use survivor::{
     item_meta::{ItemSpecials, ItemSpecialsStorage}
 };
 use lootitems::loot::{Loot};
-use market::market::LootWithPrice;
+use market::market::{LootWithPrice, ItemPurchase};
 use beasts::beast::Beast;
 
 #[starknet::interface]
@@ -21,6 +21,7 @@ trait IGame<TContractState> {
     fn flee(ref self: TContractState, adventurer_id: u256);
     fn equip(ref self: TContractState, adventurer_id: u256, items: Span<u8>);
     fn drop(ref self: TContractState, adventurer_id: u256, items: Span<u8>);
+    fn buy_items(ref self: TContractState, adventurer_id: u256, items: Span<ItemPurchase>);
     fn buy_item(ref self: TContractState, adventurer_id: u256, item_id: u8, equip: bool);
     fn buy_potion(ref self: TContractState, adventurer_id: u256);
     fn buy_potions(ref self: TContractState, adventurer_id: u256, amount: u8);

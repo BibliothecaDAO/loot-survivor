@@ -20,6 +20,12 @@ struct LootWithPrice {
     price: u16,
 }
 
+#[derive(Copy, Drop, Serde)]
+struct ItemPurchase {
+    item_id: u8,
+    equip: bool,
+}
+
 #[generate_trait]
 impl ImplMarket of IMarket {
     fn get_price(tier: Tier) -> u16 {

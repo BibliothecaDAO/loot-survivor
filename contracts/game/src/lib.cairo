@@ -54,7 +54,7 @@ mod Game {
         item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
         adventurer_utils::AdventurerUtils
     };
-    use market::market::{ImplMarket, LootWithPrice};
+    use market::market::{ImplMarket, LootWithPrice, ItemPurchase};
     use obstacles::obstacle::{ImplObstacle, IObstacle};
     use combat::{
         combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums::{Slot, Tier}
@@ -497,6 +497,97 @@ mod Game {
             }
         }
 
+        // @notice This function allows an adventurer to purchase multiple items from the market.
+        // @param adventurer_id The unique identifier of the adventurer.
+        // @param items An array of structs representing the items to be purchased. Each struct contains an item ID and a boolean to represent whether the item is to be equipped or not.
+        fn buy_items(ref self: ContractState, adventurer_id: u256, items: Span<ItemPurchase>) {
+            // assert caller owns adventurer
+            _assert_ownership(@self, adventurer_id);
+
+            // get item names from storage
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+
+            // store the unmodified storages so we can use these
+            // to remove the same stat boosts when we pack and save the adventurer
+            let orginal_name_storage1 = name_storage1;
+            let orginal_name_storage2 = name_storage2;
+
+            // unpack adventurer from storage
+            let mut adventurer = _unpack_adventurer_apply_stat_boost(
+                @self, adventurer_id, name_storage1, name_storage2
+            );
+            // unpack Loot bag from storage
+            let mut bag = _bag_unpacked(@self, adventurer_id);
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // assert adventurer is not in battle
+            _assert_not_in_battle(@self, adventurer);
+
+            // assert market is open
+            _assert_market_is_open(@self, adventurer);
+
+            // get adventurer entropy
+            let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+                .entropy
+                .into();
+
+            let mut bag_mutated = false;
+
+            // buy items
+            let mut i: u32 = 0;
+            loop {
+                if i >= items.len() {
+                    break ();
+                }
+
+                // buy item
+                let item = *items.at(i);
+                let inner_bag_mutated = _buy_item(
+                    ref self,
+                    ref adventurer,
+                    ref bag,
+                    adventurer_id,
+                    adventurer_entropy,
+                    item.item_id,
+                    item.equip
+                );
+
+                // maintain bag mutated variable so we don't
+                // waste a waste a write on bag if it didn't change
+                bag_mutated = bag_mutated || inner_bag_mutated;
+
+                // increment counter
+                i += 1;
+            };
+
+            // if buying item mutated bag
+            if (bag_mutated) {
+                // pack and save updated bag
+                _pack_bag(ref self, adventurer_id, bag);
+            }
+
+            // remove stat boosts, pack, and save adventurer
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                orginal_name_storage1,
+                orginal_name_storage2
+            );
+        }
+
+        // @notice This function allows an adventurer to purchase a single item from the market.
+        // @dev This function assumes that the adventurer is alive, not in battle, and that the market is open.
+        // @param adventurer_id The unique identifier of the adventurer.
+        // @param item_id The identifier of the item to be purchased.
+        // @param equip Boolean representing whether the item is to be equipped or not.
         fn buy_item(ref self: ContractState, adventurer_id: u256, item_id: u8, equip: bool) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -527,9 +618,6 @@ mod Game {
             // assert adventurer is not in battle
             _assert_not_in_battle(@self, adventurer);
 
-            // assert adventurer does not already own the item
-            _assert_item_not_owned(@self, adventurer, bag, item_id);
-
             // assert market is open
             _assert_market_is_open(@self, adventurer);
 
@@ -538,14 +626,9 @@ mod Game {
                 .entropy
                 .into();
 
-            // check item is available on market
-            _assert_item_is_available(
-                @self, adventurer, adventurer_id, adventurer_entropy, item_id
-            );
-
             // buy item
             let bag_mutated = _buy_item(
-                ref self, ref adventurer, ref bag, adventurer_id, item_id, equip
+                ref self, ref adventurer, ref bag, adventurer_id, adventurer_entropy, item_id, equip
             );
 
             // if buying item mutated bag
@@ -564,6 +647,9 @@ mod Game {
             );
         }
 
+        // @notice This function allows an adventurer to purchase a health potion.
+        // @dev This function assumes that the adventurer is alive, not in battle, and that the market is open.
+        // @param adventurer_id The unique identifier of the adventurer.
         fn buy_potion(ref self: ContractState, adventurer_id: u256) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -616,6 +702,10 @@ mod Game {
             );
         }
 
+        // @notice This function allows an adventurer to purchase a number of health potions.
+        // @dev This function assumes that the adventurer is alive, not in battle, and that the market is open.
+        // @param adventurer_id The unique identifier of the adventurer.
+        // @param amount The amount of potions to be purchased.
         fn buy_potions(ref self: ContractState, adventurer_id: u256, amount: u8) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -675,6 +765,11 @@ mod Game {
             );
         }
 
+        // @notice This function allows an adventurer to upgrade their stats.
+        // @dev This function assumes that the adventurer is alive and has enough stat points available.
+        // @param adventurer_id The unique identifier of the adventurer.
+        // @param stat The stat to be upgraded.
+        // @param amount The amount to upgrade the stat by.
         fn upgrade_stat(ref self: ContractState, adventurer_id: u256, stat: u8, amount: u8) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -726,10 +821,9 @@ mod Game {
             );
         }
 
+        // @dev Anyone can call this function, so we intentionally don't assert ownership.
+        // @param adventurer_id The unique identifier for the adventurer to be slayed.
         fn slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
-            // anyone can call this function so we intentinoally don't _assert_ownership
-            // unpack adventurer from storage (stat boosts applied on unpacking)
-
             // get item names from storage
             let mut name_storage1 = _loot_special_names_storage_unpacked(
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
@@ -2430,12 +2524,19 @@ mod Game {
         ref adventurer: Adventurer,
         ref bag: Bag,
         adventurer_id: u256,
+        adventurer_entropy: u128,
         item_id: u8,
         equip: bool
     ) -> bool {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
         // TODO: Remove after testing
+
+        // assert adventurer does not already own the item
+        _assert_item_not_owned(@self, adventurer, bag, item_id);
+
+        // check item is available on market
+        _assert_item_is_available(@self, adventurer, adventurer_id, adventurer_entropy, item_id);
 
         // get item price
         let base_item_price = ImplMarket::get_price(ImplLoot::get_tier(item_id));

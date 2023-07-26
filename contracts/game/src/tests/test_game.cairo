@@ -12,7 +12,7 @@ mod tests {
     use core::serde::Serde;
     use box::BoxTrait;
 
-    use market::market::{ImplMarket, LootWithPrice};
+    use market::market::{ImplMarket, LootWithPrice, ItemPurchase};
     use lootitems::{loot::{Loot, ImplLoot, ILoot}, statistics::constants::{ItemId}};
     use game::{
         Game,
@@ -722,6 +722,106 @@ mod tests {
         let bag = game.get_bag(ADVENTURER_ID);
 
         assert(bag.item_1.id == *market_items.at(0).item.id, 'sash in bag');
+    }
+
+    #[test]
+    #[available_gas(80000000)]
+    fn test_buy_items() {
+        // start game on level 2 so we have access to the market
+        let mut game = new_adventurer_cleric_level2();
+
+        // get items from market
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+
+        // get first item on the market
+        let item_id = *market_items.at(0).item.id;
+
+        let mut purchased_weapon: u8 = 0;
+        let mut purchased_chest: u8 = 0;
+        let mut purchased_head: u8 = 0;
+        let mut purchased_waist: u8 = 0;
+        let mut purchased_foot: u8 = 0;
+        let mut purchased_hand: u8 = 0;
+        let mut purchased_ring: u8 = 0;
+        let mut purchased_necklace: u8 = 0;
+        let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
+
+        let mut i: u32 = 0;
+        loop {
+            if i >= market_items.len() {
+                break ();
+            }
+            let market_item = *market_items.at(i).item;
+
+            if (market_item.tier != Tier::T5(()) && market_item.tier != Tier::T4(())) {
+                i += 1;
+                continue;
+            }
+
+            // if the item is a weapon and we haven't purchased a weapon yet
+            // and the item is a tier 4 or 5 item
+            // repeat this for everything
+            if (market_item.slot == Slot::Weapon(())
+                && purchased_weapon == 0
+                && market_item.id != 12) {
+                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
+                purchased_weapon = market_item.id;
+            } else if (market_item.slot == Slot::Chest(()) && purchased_chest == 0) {
+                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
+                purchased_chest = market_item.id;
+            } else if (market_item.slot == Slot::Head(()) && purchased_head == 0) {
+                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
+                purchased_head = market_item.id;
+            } else if (market_item.slot == Slot::Waist(()) && purchased_waist == 0) {
+                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
+                purchased_waist = market_item.id;
+            } else if (market_item.slot == Slot::Foot(()) && purchased_foot == 0) {
+                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
+                purchased_foot = market_item.id;
+            } else if (market_item.slot == Slot::Hand(()) && purchased_hand == 0) {
+                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
+                purchased_hand = market_item.id;
+            }
+            i += 1;
+        };
+
+        // verify we have at least two items in shopping cart
+        assert(shopping_cart.len() > 1, 'need more items to equip');
+
+        // buy items in shopping cart
+        game.buy_items(ADVENTURER_ID, shopping_cart.span());
+
+        // get updated adventurer and bag state
+        let bag = game.get_bag(ADVENTURER_ID);
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        let mut buy_and_equip_tested = false;
+        let mut buy_and_bagged_tested = false;
+
+        let mut items_to_equip = ArrayTrait::<u8>::new();
+        // iterate over the items we bought
+        let mut i: u32 = 0;
+        loop {
+            if i >= shopping_cart.len() {
+                break ();
+            }
+            let item_purchase = *shopping_cart.at(i);
+
+            // if the item was purchased with equip flag set to true
+            if item_purchase.equip {
+                // assert it's equipped
+                assert(adventurer.is_equipped(item_purchase.item_id), 'item not equipped');
+                buy_and_equip_tested = true;
+            } else {
+                // if equip was false, verify item is in bag
+                assert(bag.contains(item_purchase.item_id), 'item not in bag');
+                buy_and_bagged_tested = true;
+            }
+            i += 1;
+        };
+
+        assert(buy_and_equip_tested, 'did not test buy and equip');
+        assert(buy_and_bagged_tested, 'did not test buy and bag');
     }
 
     #[test]
