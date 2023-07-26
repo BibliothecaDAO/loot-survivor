@@ -85,9 +85,65 @@ export default function ActionsScreen() {
   const buttonsData = [
     {
       id: 1,
-      label: hasBeast ? "Beast found!!" : "Into the mist",
+      label: hasBeast ? "Beast found!!" : "Single",
       icon: <MistIcon />,
       value: "explore",
+      action: async () => {
+        addToCalls(exploreTx);
+        startLoading(
+          "Explore",
+          "Exploring",
+          "discoveryByTxHashQuery",
+          adventurer?.id
+        );
+        await handleSubmitCalls(writeAsync).then((tx: any) => {
+          if (tx) {
+            setTxHash(tx.transaction_hash);
+            addTransaction({
+              hash: tx.transaction_hash,
+              metadata: {
+                method: `Explore with ${adventurer?.name}`,
+              },
+            });
+          }
+        });
+      },
+      disabled: hasBeast || loading || !adventurer?.id,
+      loading: loading,
+    },
+    {
+      id: 2,
+      label: hasBeast ? "Beast found!!" : "Till Damage",
+      icon: <MistIcon />,
+      value: "explore_till_damage",
+      action: async () => {
+        addToCalls(exploreTx);
+        startLoading(
+          "Explore",
+          "Exploring",
+          "discoveryByTxHashQuery",
+          adventurer?.id
+        );
+        await handleSubmitCalls(writeAsync).then((tx: any) => {
+          if (tx) {
+            setTxHash(tx.transaction_hash);
+            addTransaction({
+              hash: tx.transaction_hash,
+              metadata: {
+                method: `Explore with ${adventurer?.name}`,
+              },
+            });
+          }
+        });
+      },
+      disabled: hasBeast || loading || !adventurer?.id,
+      loading: loading,
+    },
+    {
+      id: 3,
+      label: hasBeast ? "Beast found!!" : "Till Beast",
+      icon: <MistIcon />,
+      value: "explore_till_beast",
       action: async () => {
         addToCalls(exploreTx);
         startLoading(
@@ -139,7 +195,7 @@ export default function ActionsScreen() {
               buttonsData={buttonsData}
               onSelected={(value) => setSelected(value)}
               onEnterAction={true}
-              size="lg"
+              size="sm"
             />
           </div>
         </>

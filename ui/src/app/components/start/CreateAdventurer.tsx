@@ -200,147 +200,149 @@ export const CreateAdventurer = ({
 
   if (step === 1) {
     return (
-      <>
-        <div className="w-full sm:p-8">
-          <h3 className="uppercase text-center">Choose your class</h3>
-          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:items-center sm:justify-between gap-5 sm:gap-20">
-            {[
-              {
-                name: "Cleric",
-                description: "+3 Charisma +3 Vitality",
-                image: "/classes/cleric.png",
-              },
-              {
-                name: "Scout",
-                description: "+2 Intelligence +2 Wisdom +2 Dexterity",
-                image: "/classes/scout.png",
-              },
-              {
-                name: "Hunter",
-                description: "+3 Strength +3 Intelligence",
-                image: "/classes/hunter.png",
-              },
-              {
-                name: "Warrior",
-                description:
-                  "+1 Strength +1 Dexterity +1 Vitality +1 Intelligence +1 Wisdom +1 Charisma",
-                image: "/classes/warrior.png",
-              },
-            ].map((classType) => (
-              <div
-                key={classType.name}
-                className="flex flex-col items-center h-full justify-between"
-              >
-                <div className="relative w-28 h-28 sm:w-56 sm:h-56">
-                  <Image
-                    src={classType.image}
-                    fill={true}
-                    alt={classType.name}
-                    style={{
-                      objectFit: "contain",
-                    }}
-                  />
-                </div>
-                <div className="flex items-center p-2 sm:pb-4 h-10 sm:h-20 text-center text-xxs sm:text-base">
-                  <p className="ml-2">{classType.description}</p>
-                </div>
-                <Button
-                  className="w-full"
-                  onClick={() => handleClassSelection(classType.name)}
-                >
-                  {classType.name}
-                </Button>
+      <div className="flex flex-col sm:gap-20 sm:p-8">
+        <h3 className="uppercase text-center sm:text-5xl">Choose your class</h3>
+        <div className="grid grid-cols-2 h-4/5 sm:flex sm:flex-row sm:items-center sm:justify-between gap-5 sm:gap-20">
+          {[
+            {
+              name: "Cleric",
+              description: "+3 Charisma +3 Vitality",
+              image: "/classes/cleric.png",
+            },
+            {
+              name: "Scout",
+              description: "+2 Intelligence +2 Wisdom +2 Dexterity",
+              image: "/classes/scout.png",
+            },
+            {
+              name: "Hunter",
+              description: "+3 Strength +3 Intelligence",
+              image: "/classes/hunter.png",
+            },
+            {
+              name: "Warrior",
+              description:
+                "+1 Strength +1 Dexterity +1 Vitality +1 Intelligence +1 Wisdom +1 Charisma",
+              image: "/classes/warrior.png",
+            },
+          ].map((classType) => (
+            <div
+              key={classType.name}
+              className="flex flex-col items-center h-full justify-between"
+            >
+              <div className="relative w-28 h-28 sm:w-56 sm:h-56">
+                <Image
+                  src={classType.image}
+                  fill={true}
+                  alt={classType.name}
+                  style={{
+                    objectFit: "contain",
+                  }}
+                />
               </div>
-            ))}
-          </div>
+              <div className="flex items-center p-2 sm:pb-4 h-10 sm:h-20 text-center text-xxs sm:text-base">
+                <p className="ml-2">{classType.description}</p>
+              </div>
+              <Button
+                className="w-full"
+                onClick={() => handleClassSelection(classType.name)}
+              >
+                {classType.name}
+              </Button>
+            </div>
+          ))}
         </div>
-      </>
+      </div>
     );
   } else if (step === 2) {
     return (
-      <>
-        <div className="w-full sm:p-8">
-          <h3 className="uppercase text-center">Choose your weapon</h3>
-          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:justify-between gap-5 sm:gap-20">
-            {[
-              {
-                name: "Book",
-                description: "Magic Weapon",
-                image: "/weapons/book.png",
-                icon: <MagicIcon />,
-              },
-              {
-                name: "Wand",
-                description: "Magic Weapon",
-                image: "/weapons/wand.png",
-                icon: <MagicIcon />,
-              },
-              {
-                name: "Short Sword",
-                description: "Blade Weapon",
-                image: "/weapons/shortsword.png",
-                icon: <BladeIcon />,
-              },
-              {
-                name: "Club",
-                description: "Bludgeon Weapon",
-                image: "/weapons/club.png",
-                icon: <BludgeonIcon />,
-              },
-            ].map((weapon) => (
-              <div key={weapon.name} className="flex flex-col items-center">
-                <div className="relative w-28 h-28 sm:w-56 sm:h-56">
-                  <Image
-                    src={weapon.image}
-                    fill={true}
-                    alt={weapon.name}
-                    style={{
-                      objectFit: "contain",
-                    }}
-                  />
-                </div>
-                <div className="flex items-center pb-2 sm:pb-4 text-base sm:text-md">
-                  {weapon.icon}
-                  <p className="ml-2">{weapon.description}</p>
-                </div>
-                <Button
-                  className="w-full"
-                  onClick={() => handleWeaponSelection(weapon.name)}
-                >
-                  {weapon.name}
-                </Button>
+      <div className="flex flex-col sm:gap-20 sm:p-8">
+        <h3 className="uppercase text-center sm:text-5xl">
+          Choose your weapon
+        </h3>
+        <div className="grid grid-cols-2 sm:flex sm:flex-row sm:justify-between gap-5 sm:gap-20">
+          {[
+            {
+              name: "Book",
+              description: "Magic Weapon",
+              image: "/weapons/book.png",
+              icon: <MagicIcon />,
+            },
+            {
+              name: "Wand",
+              description: "Magic Weapon",
+              image: "/weapons/wand.png",
+              icon: <MagicIcon />,
+            },
+            {
+              name: "Short Sword",
+              description: "Blade Weapon",
+              image: "/weapons/shortsword.png",
+              icon: <BladeIcon />,
+            },
+            {
+              name: "Club",
+              description: "Bludgeon Weapon",
+              image: "/weapons/club.png",
+              icon: <BludgeonIcon />,
+            },
+          ].map((weapon) => (
+            <div key={weapon.name} className="flex flex-col items-center">
+              <div className="relative w-28 h-28 sm:w-56 sm:h-56">
+                <Image
+                  src={weapon.image}
+                  fill={true}
+                  alt={weapon.name}
+                  style={{
+                    objectFit: "contain",
+                  }}
+                />
               </div>
-            ))}
-          </div>
-          <div className="flex flex-col items-center">
-            <Button className="my-2" onClick={handleBack}>
-              Back
-            </Button>
-          </div>
+              <div className="flex items-center pb-2 sm:pb-4 text-base sm:text-md">
+                {weapon.icon}
+                <p className="ml-2">{weapon.description}</p>
+              </div>
+              <Button
+                className="w-full"
+                onClick={() => handleWeaponSelection(weapon.name)}
+              >
+                {weapon.name}
+              </Button>
+            </div>
+          ))}
         </div>
-      </>
+        <div className="flex flex-col items-center">
+          <Button className="my-2" onClick={handleBack}>
+            Back to Classes
+          </Button>
+        </div>
+      </div>
     );
   } else if (step === 3) {
     return (
-      <>
-        <div className="w-full border border-terminal-green p-8 uppercase">
-          <h2>Enter adventurer name</h2>
-          <div className="items-center flex flex-col gap-2">
-            <input
-              type="text"
-              name="name"
-              onChange={handleChange}
-              className="p-1 m-2 bg-terminal-black border border-terminal-green"
-              onKeyDown={handleKeyDown}
-              maxLength={13}
-            />
-          </div>
-          <div className="flex flex-row justify-between">
-            <Button onClick={handleBack}>Back</Button>
-            <Button onClick={() => handleNameEntry(formData.name)}>Next</Button>
-          </div>
+      <div className="flex flex-col gap-5 m-auto items-center px-8 py-32 uppercase">
+        <h2>Enter adventurer name</h2>
+        <input
+          type="text"
+          name="name"
+          onChange={handleChange}
+          className="w-full text-4xl p-1 m-2 bg-terminal-black border border-terminal-green"
+          onKeyDown={handleKeyDown}
+          maxLength={13}
+        />
+        <div className="flex flex-row w-full justify-between">
+          <Button onClick={handleBack} size="lg">
+            Back to Weapon
+          </Button>
+          <Button
+            onClick={() => handleNameEntry(formData.name)}
+            disabled={!formData.name}
+            size="lg"
+          >
+            Create
+          </Button>
         </div>
-      </>
+      </div>
     );
   } else if (step === 4) {
     return (

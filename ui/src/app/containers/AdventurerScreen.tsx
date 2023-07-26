@@ -122,13 +122,11 @@ export default function AdventurerScreen() {
       )}
       {selected === "create adventurer" && (
         <div className="flex flex-col sm:mx-auto sm:justify-center sm:flex-row gap-2 sm:w-8/12 md:w-10/12">
-          <div className="sm:mr-5">
-            <CreateAdventurer
-              isActive={activeMenu == 2}
-              onEscape={() => setActiveMenu(0)}
-              adventurers={adventurers}
-            />
-          </div>
+          <CreateAdventurer
+            isActive={activeMenu == 2}
+            onEscape={() => setActiveMenu(0)}
+            adventurers={adventurers}
+          />
         </div>
       )}
     </div>

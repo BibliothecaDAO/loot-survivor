@@ -116,9 +116,21 @@ export default function BeastScreen() {
     calldata: [adventurer?.id?.toString() ?? "", "0"],
   };
 
+  const attackTillDeathTx = {
+    contractAddress: gameContract?.address ?? "",
+    entrypoint: "attack_till_death",
+    calldata: [adventurer?.id?.toString() ?? "", "0"],
+  };
+
   const fleeTx = {
     contractAddress: gameContract?.address ?? "",
     entrypoint: "flee",
+    calldata: [adventurer?.id?.toString() ?? "", "0"],
+  };
+
+  const fleeTillDeathTx = {
+    contractAddress: gameContract?.address ?? "",
+    entrypoint: "flee_till_death",
     calldata: [adventurer?.id?.toString() ?? "", "0"],
   };
 
@@ -132,10 +144,10 @@ export default function BeastScreen() {
     setButtonText("Flee!");
   };
 
-  const buttonsData: ButtonData[] = [
+  const attackButtonsData: ButtonData[] = [
     {
       id: 1,
-      label: "ATTACK BEAST!",
+      label: "SINGLE",
       action: async () => {
         addToCalls(attackTx);
         startLoading(
@@ -165,7 +177,74 @@ export default function BeastScreen() {
     },
     {
       id: 2,
-      label: buttonText,
+      label: "TILL DEATH",
+      mouseEnter: handleMouseEnter,
+      mouseLeave: handleMouseLeave,
+      action: async () => {
+        addToCalls(attackTillDeathTx);
+        startLoading(
+          "Attack",
+          "Attacking",
+          "battlesByTxHashQuery",
+          adventurer?.id,
+          { beast: beastData }
+        );
+        await handleSubmitCalls(writeAsync).then((tx: any) => {
+          if (tx) {
+            console.log(tx.transaction_hash);
+            setTxHash(tx.transaction_hash);
+            addTransaction({
+              hash: tx.transaction_hash,
+              metadata: {
+                method: `Flee ${beastData.beast}`,
+              },
+            });
+          }
+        });
+      },
+      disabled:
+        adventurer?.beastHealth == undefined ||
+        adventurer?.beastHealth == 0 ||
+        loading,
+      loading: loading,
+    },
+  ];
+
+  const fleeButtonsData: ButtonData[] = [
+    {
+      id: 1,
+      label: "SINGLE",
+      action: async () => {
+        addToCalls(attackTx);
+        startLoading(
+          "Attack",
+          "Attacking",
+          "battlesByTxHashQuery",
+          adventurer?.id,
+          { beast: beastData }
+        );
+        await handleSubmitCalls(writeAsync).then((tx: any) => {
+          if (tx) {
+            setTxHash(tx.transaction_hash);
+            addTransaction({
+              hash: tx.transaction_hash,
+              metadata: {
+                method: `Attack ${beastData.beast}`,
+              },
+            });
+          }
+        });
+      },
+      disabled:
+        adventurer?.beastHealth == undefined ||
+        adventurer?.beastHealth == 0 ||
+        loading ||
+        beastData?.level == 1,
+      loading: loading,
+    },
+    {
+      id: 2,
+      label: "TILL DEATH",
       mouseEnter: handleMouseEnter,
       mouseLeave: handleMouseLeave,
       action: async () => {
@@ -237,7 +316,7 @@ export default function BeastScreen() {
   }
 
   return (
-    <div className="sm:w-2/3 flex flex-col sm:flex-row gap-2 sm:gap-0">
+    <div className="sm:w-2/3 flex flex-col sm:flex-row">
       <div className="sm:w-1/2 order-1 sm:order-2">
         {hasBeast || lastBattle ? (
           <>
@@ -252,12 +331,26 @@ export default function BeastScreen() {
         )}
       </div>
 
-      <div className="flex flex-col sm:w-1/2 sm:gap-5 sm:p-4 order-1 text-lg">
+      <div className="flex flex-col gap-1 sm:gap-0 items-center sm:w-1/2 sm:gap-5 sm:p-4 order-1 text-lg">
         {isAlive && (
-          <KeyboardControl
-            buttonsData={buttonsData}
-            size={isMobileDevice ? "sm" : "lg"}
-          />
+          <div className="flex flex-row gap-2 sm:flex-col items-center">
+            <div className="flex flex-col items-center">
+              <p className="sm:text-2xl">Attack</p>
+              <KeyboardControl
+                buttonsData={attackButtonsData}
+                size={isMobileDevice ? "sm" : "xl"}
+                direction="row"
+              />
+            </div>
+            <div className="flex flex-col items-center">
+              <p className="sm:text-2xl">Flee</p>
+              <KeyboardControl
+                buttonsData={fleeButtonsData}
+                size={isMobileDevice ? "sm" : "lg"}
+                direction="row"
+              />
+            </div>
+          </div>
         )}
 
         <div className="hidden sm:block">
