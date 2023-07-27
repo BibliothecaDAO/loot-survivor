@@ -50,6 +50,7 @@ import { soundSelector } from "./hooks/useUiSound";
 import { PenaltyCountDown } from "./components/CountDown";
 import useCustomQuery from "./hooks/useCustomQuery";
 import { getAdventurerById } from "./hooks/graphql/queries";
+import { useBurner } from "./lib/burner";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -71,6 +72,8 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Home() {
+
+  const {create} = useBurner()
   const { disconnect } = useConnectors();
   const { account } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
@@ -201,7 +204,7 @@ export default function Home() {
           <div className="flex flex-col w-full">
             {isMobileDevice && <TxActivity />}
             <div className="flex flex-row justify-between">
-              <span className="flex flex-row items-center gap-2 sm:gap-5 items-end">
+              <span className="flex flex-row items-center gap-2 sm:gap-5">
                 <h1 className="glitch m-0">Loot Survivor</h1>
                 <PenaltyCountDown
                   lastDiscoveryTime={
@@ -209,9 +212,12 @@ export default function Home() {
                   }
                   lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
                 />
+                <Button onClick={() => create()}>
+                  create arcade account
+                </Button>
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
-                
+
                 <Button
                   onClick={() => {
                     setIsMuted(!isMuted);
@@ -271,12 +277,12 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                      <AddDevnetEthButton />
-                    )}
+                        <AddDevnetEthButton />
+                      )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                      <MintEthButton />
-                    )}
+                        <MintEthButton />
+                      )}
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}
@@ -292,7 +298,7 @@ export default function Home() {
             </div>
           </div>
           <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4" >
-          {!isMobileDevice && <TxActivity />}
+            {!isMobileDevice && <TxActivity />}
           </div>
           <CSSTransition
             in={

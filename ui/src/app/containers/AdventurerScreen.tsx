@@ -89,9 +89,9 @@ export default function AdventurerScreen() {
     },
   ];
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
+  // const isMobileDevice = useMediaQuery({
+  //   query: "(max-device-width: 480px)",
+  // });
 
   if (loading) {
     return <LootIconLoader />;
@@ -105,7 +105,7 @@ export default function AdventurerScreen() {
           onSelected={(value) => setSelected(value)}
           isActive={activeMenu == 0}
           setActiveMenu={setActiveMenu}
-          size={isMobileDevice ? "sm" : "lg"}
+          size={"lg"}
         />
       </div>
 
