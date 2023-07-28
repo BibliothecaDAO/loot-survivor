@@ -34,8 +34,6 @@ export const useBurner = () => {
     const [account, setAccount] = useState<Account>();
     const [isDeploying, setIsDeploying] = useState(false);
 
-    console.log(walletAccount)
-
     // init
     useEffect(() => {
         const storage: BurnerStorage = Storage.get("burners");

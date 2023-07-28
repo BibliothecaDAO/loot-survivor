@@ -24,9 +24,7 @@ export default function RootLayout({
   const arcadeAccounts = () => {
     const arcadeAccounts = [];
     const burners = list();
-
-    console.log("arcadeAccounts", burners);
-
+    
     for (const burner of burners) {
       const arcadeConnector = new ArcadeConnector({
         options: {

@@ -41,6 +41,7 @@ import {
   GithubIcon,
   RefreshIcon,
   CartIconSimple,
+  ArcadeIcon
 } from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
@@ -51,6 +52,7 @@ import { PenaltyCountDown } from "./components/CountDown";
 import useCustomQuery from "./hooks/useCustomQuery";
 import { getAdventurerById } from "./hooks/graphql/queries";
 import { useBurner } from "./lib/burner";
+import { ArcadeDialog } from "./components/ArcadeDialog";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -106,6 +108,9 @@ export default function Home() {
   );
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
   const hasNoXp = useAdventurerStore((state) => state.computed.hasNoXp);
+
+  const arcadeDialog = useUIStore((state) => state.arcadeDialog);
+  const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
 
   const { data, refetch } = useQueriesStore();
 
@@ -212,12 +217,14 @@ export default function Home() {
                   }
                   lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
                 />
-                <Button onClick={() => create()}>
+                {/* <Button onClick={() => create()}>
                   create arcade account
-                </Button>
+                </Button> */}
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
-
+                <Button onClick={() => showArcadeDialog(!arcadeDialog)}> 
+                  <ArcadeIcon className="w-8 justify-center" />
+                </Button>
                 <Button
                   onClick={() => {
                     setIsMuted(!isMuted);
@@ -300,7 +307,7 @@ export default function Home() {
           <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4" >
             {!isMobileDevice && <TxActivity />}
           </div>
-          <CSSTransition
+          {/* <CSSTransition
             in={
               showNotification &&
               Boolean(notificationData) &&
@@ -321,9 +328,11 @@ export default function Home() {
                 hasBeast={hasBeast}
               />
             </div>
-          </CSSTransition>
+          </CSSTransition> */}
 
           {deathDialog && <DeathDialog />}
+
+          {arcadeDialog && <ArcadeDialog />}
 
           {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
 

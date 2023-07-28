@@ -22,7 +22,6 @@ export class ArcadeConnector extends Connector {
     }
 
     async connect(): Promise<AccountInterface> {
-        console.log(this._account)
         if (!this._account) {
             throw new Error("account not found");
         }

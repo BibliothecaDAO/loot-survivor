@@ -58,18 +58,6 @@ export default function BeastScreen() {
     (state) => state.data.lastBattleQuery?.battles[0]
   );
 
-  // let lastBeast = data.lastBeastQuery
-  //   ? data.lastBeastQuery.discoveries[0]
-  //   : NullDiscovery;
-
-  // let beastData = data.beastQuery ? data.beastQuery.beasts[0] : NullBeast;
-
-  // const formatBattles = data.battlesByBeastQuery
-  //   ? data.battlesByBeastQuery.battles
-  //   : [];
-
-  // const lastBattle = data.lastBattleQuery?.battles[0];
-
   useCustomQuery(
     "lastBeastQuery",
     getLastBeastDiscovery,

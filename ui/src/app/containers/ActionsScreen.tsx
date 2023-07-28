@@ -11,8 +11,7 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import useCustomQuery from "../hooks/useCustomQuery";
 import {
   getLatestDiscoveries,
-  getDiscoveryByTxHash,
-  getAdventurerById,
+  getDiscoveryByTxHash
 } from "../hooks/graphql/queries";
 import { MistIcon } from "../components/icons/Icons";
 import { padAddress } from "../lib/utils";
@@ -46,17 +45,6 @@ export default function ActionsScreen() {
       ? state.data.latestDiscoveriesQuery.discoveries
       : []
   );
-
-  // useCustomQuery(
-  //   "adventurerByIdQuery",
-  //   getAdventurerById,
-  //   {
-  //     id: adventurer?.id ?? 0,
-  //   },
-  //   txAccepted
-  // );
-
-  console.log(adventurer);
 
   useCustomQuery(
     "discoveryByTxHashQuery",

@@ -51,6 +51,7 @@ import Smile from "../../../../public/icons/smile.svg";
 import DoubleArrow from "../../../../public/icons/double-arrow.svg";
 import Arrow from "../../../../public/icons/arrow.svg";
 import Github from "../../../../public/icons/github.svg";
+import Arcade from "../../../../public/icons/arcade.svg";
 
 const ClothIcon = GiRolledCloth;
 const HideIcon = GiAnimalHide;
@@ -106,6 +107,7 @@ const DoubleArrowIcon = DoubleArrow;
 const ArrowIcon = Arrow;
 
 const GithubIcon = Github;
+const ArcadeIcon = Arcade;
 
 export {
   ClothIcon,
@@ -161,4 +163,5 @@ export {
   DoubleArrowIcon,
   ArrowIcon,
   GithubIcon,
+  ArcadeIcon,
 };

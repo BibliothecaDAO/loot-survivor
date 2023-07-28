@@ -25,16 +25,16 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
       <div className="flex flex-col w-full h-full p-1 sm:p-3 uppercase">
         <div className="flex justify-between py-1 sm:py-3 text-xl sm:text-4xl border-b border-terminal-green">
           {beastName}
-          <span
+          <div
             className={`text-4xl flex ${
               beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
             }`}
           >
             <HeartIcon className="self-center w-6 h-6 fill-current" />{" "}
-            <p className="self-center text-xl sm:text-4xl">
+            <div className="self-center text-xl sm:text-4xl">
               <HealthCountDown health={beastData?.health || 0} />
-            </p>
-          </span>
+            </div>
+          </div>
         </div>
         <div className="flex justify-between w-full sm:py-2 ">
           <p className="text-xl sm:text-3xl text-terminal-yellow">

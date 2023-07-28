@@ -27,6 +27,8 @@ const useCustomQuery = (
     }
   );
 
+  console.log("useCustomQuery", queryKey, data, loading, error, variables)
+
   const refetchWrapper = useCallback(async () => {
     try {
       await refetch();

@@ -39,6 +39,8 @@ type State = {
   setMintAdventurer: (value: boolean) => void;
   inventorySelected: number | null;
   setInventorySelected: (value: number) => void;
+  arcadeDialog: boolean;
+  showArcadeDialog: (value: boolean) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -68,6 +70,8 @@ const useUIStore = create<State>((set) => ({
   setMintAdventurer: (value) => set({ mintAdventurer: value }),
   inventorySelected: null,
   setInventorySelected: (value) => set({ inventorySelected: value }),
+  arcadeDialog: false,
+  showArcadeDialog: (value) => set({ arcadeDialog: value }),
 }));
 
 export default useUIStore;
