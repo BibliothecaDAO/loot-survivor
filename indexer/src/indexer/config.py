@@ -1,37 +1,172 @@
 class Config:
-    def __init__(
-        self, network=None, adventurer=None, beast=None, loot=None, start_block=None
-    ):
+    def __init__(self, network=None, game=None, start_block=None):
         self.network = network
-        self.ADVENTURER_CONTRACT = adventurer
-        self.BEAST_CONTRACT = beast
-        self.LOOT_CONTRACT = loot
+        self.GAME_CONTRACT = game
         if start_block:
             self.STARTING_BLOCK = int(start_block)
         else:
             self.STARTING_BLOCK = start_block
+
         self.BEASTS = {
-            1: "Phoenix",
-            2: "Griffin",
-            3: "Minotaur",
-            4: "Basilisk",
-            5: "Gnome",
-            6: "Wraith",
-            7: "Ghoul",
-            8: "Goblin",
-            9: "Skeleton",
-            10: "Golem",
-            11: "Giant",
-            12: "Yeti",
-            13: "Orc",
-            14: "Berserker",
-            15: "Ogre",
-            16: "Dragon",
-            17: "Vampire",
-            18: "Werewolf",
-            19: "Spider",
-            20: "Rat",
+            1: "Warlock",
+            2: "Typhon",
+            3: "Jiangshi",
+            4: "Anansi",
+            5: "Basilisk",
+            6: "Gorgon",
+            7: "Kitsune",
+            8: "Lich",
+            9: "Chimera",
+            10: "Wendigo",
+            11: "Rakshasa",
+            12: "Werewolf",
+            13: "Banshee",
+            14: "Draugr",
+            15: "Vampire",
+            16: "Goblin",
+            17: "Ghoul",
+            18: "Wraith",
+            19: "Sprite",
+            20: "Kappa",
+            21: "Fairy",
+            22: "Leprechaun",
+            23: "Kelpie",
+            24: "Pixie",
+            25: "Gnome",
+            26: "Griffin",
+            27: "Manticore",
+            28: "Phoenix",
+            29: "Dragon",
+            30: "Minotaur",
+            31: "Qilin",
+            32: "Ammit",
+            33: "Nue",
+            34: "Skinwalker",
+            35: "Chupacabra",
+            36: "Weretiger",
+            37: "Wyvern",
+            38: "Roc",
+            39: "Harpy",
+            40: "Pegasus",
+            41: "Hippogriff",
+            42: "Fenrir",
+            43: "Jaguar",
+            44: "Satori",
+            45: "DireWolf",
+            46: "Bear",
+            47: "Wolf",
+            48: "Mantis",
+            49: "Spider",
+            50: "Rat",
+            51: "Kraken",
+            52: "Colossus",
+            53: "Balrog",
+            54: "Leviathan",
+            55: "Tarrasque",
+            56: "Titan",
+            57: "Nephilim",
+            58: "Behemoth",
+            59: "Hydra",
+            60: "Juggernaut",
+            61: "Oni",
+            62: "Jotunn",
+            63: "Ettin",
+            64: "Cyclops",
+            65: "Giant",
+            66: "NemeanLion",
+            67: "Berserker",
+            68: "Yeti",
+            69: "Golem",
+            70: "Ent",
+            71: "Troll",
+            72: "Bigfoot",
+            73: "Ogre",
+            74: "Orc",
+            75: "Skeleton",
         }
+
+        self.BEAST_TYPES = {
+            # Magical Beasts
+            1: 1,
+            2: 1,
+            3: 1,
+            4: 1,
+            5: 1,
+            6: 1,
+            7: 1,
+            8: 1,
+            9: 1,
+            10: 1,
+            11: 1,
+            12: 1,
+            13: 1,
+            14: 1,
+            15: 1,
+            16: 1,
+            17: 1,
+            18: 1,
+            19: 1,
+            20: 1,
+            21: 1,
+            22: 1,
+            23: 1,
+            24: 1,
+            25: 1,
+            # Hunter Beasts
+            26: 2,
+            27: 2,
+            28: 2,
+            29: 2,
+            30: 2,
+            31: 2,
+            32: 2,
+            33: 2,
+            34: 2,
+            35: 2,
+            36: 2,
+            37: 2,
+            38: 2,
+            39: 2,
+            40: 2,
+            41: 2,
+            42: 2,
+            43: 2,
+            44: 2,
+            45: 2,
+            46: 2,
+            47: 2,
+            48: 2,
+            49: 2,
+            50: 2,
+            # Brute Beasts
+            51: 3,
+            52: 3,
+            53: 3,
+            54: 3,
+            55: 3,
+            56: 3,
+            57: 3,
+            58: 3,
+            59: 3,
+            60: 3,
+            61: 3,
+            62: 3,
+            63: 3,
+            64: 3,
+            65: 3,
+            66: 3,
+            67: 3,
+            68: 3,
+            69: 3,
+            70: 3,
+            71: 3,
+            72: 3,
+            73: 3,
+            74: 3,
+            75: 3,
+        }
+
+        self.BEAST_ATTACK_TYPES = {1: "Magic", 2: "Blade", 3: "Bludgeon"}
 
         self.ITEMS = {
             1: "Pendant",
@@ -137,36 +272,11 @@ class Config:
             101: "Heavy Gloves",
         }
 
-        self.RACES = {
-            1: "Elf",
-            2: "Fox",
-            3: "Giant",
-            4: "Human",
-            5: "Orc",
-            6: "Demon",
-            7: "Goblin",
-            8: "Fish",
-            9: "Cat",
-            10: "Frog",
-        }
-
-        self.ORDERS = {
-            1: "Power",
-            2: "Giants",
-            3: "Titans",
-            4: "Skill",
-            5: "Perfection",
-            6: "Brilliance",
-            7: "Enlightenment",
-            8: "Protection",
-            9: "Twins",
-            10: "Reflection",
-            11: "Detection",
-            12: "Fox",
-            13: "Vitriol",
-            14: "Fury",
-            15: "Rage",
-            16: "Anger",
+        self.CLASSES = {
+            1: "Cleric",
+            2: "Scout",
+            3: "Hunter",
+            4: "Warrior",
         }
 
         self.STATS = {
@@ -192,9 +302,27 @@ class Config:
             10: "Swinging Logs",
             11: "Pendulum Blades",
             12: "Flame Jet",
-            13: "Poision Dart",
+            13: "Poison Dart",
             14: "Spiked Pit",
             15: "Hidden Arrow",
+        }
+
+        self.OBSTACLE_TIERS = {
+            1: 1,
+            2: 2,
+            3: 3,
+            4: 4,
+            5: 5,
+            6: 1,
+            7: 2,
+            8: 3,
+            9: 4,
+            10: 5,
+            11: 1,
+            12: 2,
+            13: 3,
+            14: 4,
+            15: 5,
         }
 
         self.ADVENTURER_STATUS = {
@@ -206,49 +334,12 @@ class Config:
         }
 
         self.DISCOVERY_TYPES = {
-            0: "Nothing",
             1: "Beast",
             2: "Obstacle",
             3: "Item",
-            4: "Adventurer",
         }
 
-        self.ITEM_DISCOVERY_TYPES = {0: "Gold", 1: "Loot", 2: "Health"}
-
-        self.SUB_DISCOVERY_TYPES = {
-            1: "Demonic Alter",
-            2: "Curse",
-            3: "Hex",
-            4: "Magic Lock",
-            5: "Dark Mist",
-            6: "Collapsing Ceiling",
-            7: "Crushing Walls",
-            8: "Rockslide",
-            9: "Tumbling Boulders",
-            10: "Swinging Logs",
-            11: "Pendulum Blades",
-            12: "Flame Jet",
-            13: "Poision Dart",
-            14: "Spiked Pit",
-            15: "Hidden Arrow",
-            16: "Gold",
-            17: "Loot",
-            18: "Health",
-        }
-
-        self.ITEM_TYPES = {
-            0: "Generic",
-            100: "Generic Weapon",
-            101: "Bludgeon Weapon",
-            102: "Blade Weapon",
-            103: "Magic Weapon",
-            200: "Generic Armor",
-            201: "Metal Armor",
-            202: "Hide Armor",
-            203: "Cloth Armor",
-            300: "Ring Jewelry",
-            400: "Necklace Jewelry",
-        }
+        self.SUB_DISCOVERY_TYPES = {1: "Health", 2: "Gold", 3: "XP"}
 
         self.MATERIALS = {
             0: "Generic",
@@ -453,8 +544,6 @@ class Config:
             16: "Of The Twins",
         }
 
-        self.ITEM_STATUS = {0: "Closed", 1: "Open"}
-
         self.SLOTS = {
             1: "Weapon",
             2: "Chest",
@@ -467,44 +556,3 @@ class Config:
         }
 
         self.ATTACKERS = {1: "Adventurer", 2: "Beast"}
-
-        self.BEAST_ATTACK_LOCATIONS = {
-            1: 3,
-            2: 2,
-            3: 6,
-            4: 4,
-            5: 5,
-            6: 2,
-            7: 6,
-            8: 4,
-            9: 5,
-            10: 3,
-            11: 6,
-            12: 4,
-            13: 5,
-            14: 3,
-            15: 2,
-            16: 4,
-            17: 5,
-            18: 3,
-            19: 2,
-            20: 6,
-        }
-
-        self.OBSTACLE_ATTACK_LOCATIONS = {
-            1: 2,
-            2: 3,
-            3: 6,
-            4: 4,
-            5: 5,
-            6: 3,
-            7: 2,
-            8: 4,
-            9: 5,
-            10: 6,
-            11: 4,
-            12: 5,
-            13: 6,
-            14: 2,
-            15: 3,
-        }

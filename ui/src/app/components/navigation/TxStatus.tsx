@@ -1,7 +1,7 @@
 import { useWaitForTransaction } from "@starknet-react/core";
 
 interface TxStatusProps {
-  hash: any;
+  hash: string;
 }
 
 export const TxStatus = ({ hash }: TxStatusProps) => {

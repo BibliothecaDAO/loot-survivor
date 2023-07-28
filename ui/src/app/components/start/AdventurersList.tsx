@@ -1,15 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Button } from "../buttons/Button";
-import Info from "../Info";
+import Info from "../adventurer/Info";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { ButtonData } from "../KeyboardControls";
-import { useQueriesStore } from "../../hooks/useQueryStore";
+import { Adventurer } from "@/app/types";
 import { useMediaQuery } from "react-responsive";
+import { SkullIcon } from "../icons/Icons";
 
 export interface AdventurerListProps {
   isActive: boolean;
   onEscape: () => void;
-  adventurers: any[];
+  adventurers: Adventurer[];
 }
 
 export const AdventurersList = ({
@@ -23,15 +24,13 @@ export const AdventurersList = ({
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
 
-  const sortedAdventurers = [...adventurers].sort((a, b) => b.level - a.level);
+  const sortedAdventurers = [...adventurers].sort(
+    (a, b) => (a.level ?? 0) - (b.level ?? 0)
+  );
 
   const filteredAdventurers = showZeroHealth
     ? sortedAdventurers
     : sortedAdventurers.filter((adventurer) => adventurer.health !== 0);
-
-  const DeadIcon = (
-    <img className="w-5 h-5" src="/pixel_skull.png" alt="Dead Adventurer" />
-  );
 
   const hasDeadAdventurers = sortedAdventurers.some(
     (adventurer) => adventurer.health === 0
@@ -80,94 +79,56 @@ export const AdventurersList = ({
     };
   }, [isActive, handleKeyDown]);
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   return (
-    <div className="flex flex-col h-screen overflow-hidden ">
+    <div className="flex flex-col ">
       {sortedAdventurers.length > 0 ? (
-        <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row w-full h-full items-center sm:items-start">
-          {isMobileDevice ? (
-            <>
-              <div className="flex flex-col w-full sm:w-1/3 sm:h-full overflow-y-auto mx-2">
-                {filteredAdventurers.map((adventurer, index) => (
-                  <Button
-                    key={adventurer.id}
-                    ref={(ref) => (buttonRefs.current[index] = ref)}
-                    className={
-                      selectedIndex === index && isActive ? "animate-pulse" : ""
-                    }
-                    variant={
-                      selectedIndex === index && isActive ? "default" : "ghost"
-                    }
-                    onClick={() => {
-                      setAdventurer(adventurer);
-                      setSelectedIndex(index);
-                    }}
-                  >
-                    <div className="flex-grow">{`${adventurer.name} - ${adventurer.id}`}</div>
-                    <div className="w-5 text-right">
-                      {adventurer.health === 0 ? DeadIcon : null}
+        <div className="flex flex-col gap-2 sm:flex-row w-full h-full items-center sm:items-start">
+          <div className="flex flex-col w-full sm:w-1/3 overflow-y-auto mx-2 border border-terminal-green sm:border-none h-[350px] sm:h-[625px] p-1">
+            {filteredAdventurers.map((adventurer, index) => (
+              <Button
+                key={index}
+                ref={(ref) => (buttonRefs.current[index] = ref)}
+                className={
+                  selectedIndex === index && isActive ? "animate-pulse" : ""
+                }
+                variant={
+                  selectedIndex === index && isActive ? "default" : "ghost"
+                }
+                onClick={() => {
+                  setAdventurer(adventurer);
+                  setSelectedIndex(index);
+                }}
+              >
+                <div className="flex flex-row text-center gap-5">
+                  <p>{`${adventurer.name} - ${adventurer.id}`}</p>
+                  {adventurer?.health === 0 && (
+                    <div className="w-4">
+                      <SkullIcon />
                     </div>
-                  </Button>
-                ))}
-              </div>
-              <div>
-                {hasDeadAdventurers && (
-                  <Button onClick={() => setShowZeroHealth(!showZeroHealth)}>
-                    {showZeroHealth ? "Hide" : "Show"} dead
-                  </Button>
-                )}
-              </div>
-              {filteredAdventurers.length > 0 && (
-                <div className="sm:w-2/12 md:w-6/12 lg:w-2/3 w-full sm:ml-2">
-                  <Info adventurer={filteredAdventurers[selectedIndex]} />
+                  )}
                 </div>
-              )}
-            </>
-          ) : (
-            <>
-              <div className="flex flex-col w-full sm:w-1/3 h-full overflow-y-auto mx-2">
-                {filteredAdventurers.map((adventurer, index) => (
-                  <Button
-                    key={adventurer.id}
-                    ref={(ref) => (buttonRefs.current[index] = ref)}
-                    className={
-                      selectedIndex === index && isActive ? "animate-pulse" : ""
-                    }
-                    variant={
-                      selectedIndex === index && isActive ? "default" : "ghost"
-                    }
-                    onClick={() => {
-                      setAdventurer(adventurer);
-                      setSelectedIndex(index);
-                    }}
-                  >
-                    <div className="flex-grow">{`${adventurer.name} - ${adventurer.id}`}</div>
-                    <div className="w-5 text-right">
-                      {adventurer.health === 0 ? DeadIcon : null}
-                    </div>
-                  </Button>
-                ))}
-              </div>
-              <div>
-                {hasDeadAdventurers && (
-                  <Button onClick={() => setShowZeroHealth(!showZeroHealth)}>
-                    {showZeroHealth ? "Hide" : "Show"} dead
-                  </Button>
-                )}
-              </div>
-              {filteredAdventurers.length > 0 && (
-                <div className="sm:w-2/12 md:w-6/12 lg:w-2/3 w-full ml-2">
-                  <Info adventurer={filteredAdventurers[selectedIndex]} />
-                </div>
-              )}
-            </>
+              </Button>
+            ))}
+          </div>
+          <div>
+            {hasDeadAdventurers && (
+              <Button
+                className="w-full h-full"
+                size={"xs"}
+                onClick={() => setShowZeroHealth(!showZeroHealth)}
+              >
+                {showZeroHealth ? "Hide" : "Show"} dead
+              </Button>
+            )}
+          </div>
+          {filteredAdventurers.length > 0 && (
+            <div className="hidden sm:block sm:w-2/12 md:w-6/12 lg:w-2/3 w-full">
+              <Info adventurer={filteredAdventurers[selectedIndex]} />
+            </div>
           )}
         </div>
       ) : (
-        <p className="text-lg">You do not have any adventurers!</p>
+        <p className="text-lg uppercase">You do not have any adventurers!</p>
       )}
     </div>
   );

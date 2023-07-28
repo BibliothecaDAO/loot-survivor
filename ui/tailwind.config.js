@@ -6,8 +6,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        'terminal-green': 'rgba(74, 246, 38, 0.8)', // 50% opacity
-        'terminal-yellow': 'rgba(255, 176, 0, 0.8)', // 50% opacity
+        'terminal-green': 'rgba(74, 246, 38, 1)', // 50% opacity
+        'terminal-yellow': 'rgba(255, 176, 0, 1)', // 50% opacity
         'terminal-black': 'rgba(21, 21, 21, 1)', // 50% opacity
         gold: '#FFD700',
         silver: '#C0C0C0',
@@ -46,13 +46,29 @@ module.exports = {
       fontFamily: {
         mono: ['var(--font-vt323)', ...fontFamily.mono],
       },
+      fontSize: {
+        xxs: '0.5rem',
+      },
       inset: {
         '1/8': '12.5%',
         '3/8': '37.5%',
         '1/16': '6.25%',
       },
+      textShadow: {
+        'none': 'none',  // This line removes the text shadow
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.text-shadow-none': {
+          textShadow: 'none',
+        },
+        // You can add more custom text shadow utilities here...
+      }
+      addUtilities(newUtilities)
+    }
+  ],
 }
 

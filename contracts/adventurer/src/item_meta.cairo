@@ -477,7 +477,7 @@ fn test_set_metadata_id() {
             }, item_5: ItemPrimitive {
             id: 0, xp: 0, metadata: 0, 
             }, item_6: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
+            id: 0, xp: 0, metadata: 0,
             }, item_7: ItemPrimitive {
             id: 0, xp: 0, metadata: 0, 
             }, item_8: ItemPrimitive {

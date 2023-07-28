@@ -1,243 +1,372 @@
-import { AdventurerProps } from "../hooks/useAdventurerStore";
+import { RawArgs } from "starknet";
 import { ScreenPage } from "../hooks/useUIStore";
+import { ReactElement } from "react";
 
 export interface Adventurer {
-  // static stats
-  id: number;
-  owner: string;
-  race: string;
-  name: string;
-  order: string;
-  imageHash1: string;
-  imageHash2: string;
+  [key: string]: number | string | Date | undefined;
+  id?: number; // Adventurer ID
+  lastAction?: number; // Block number from last action
+  owner?: string; // Hex address of the owner
+  classType?: string; // Class of the adventurer
+  homeRealm?: number; // Home Realm of the adventurer
+  name?: string; // Name of the adventurer
+  order?: string; // Order of the adventurer
+  health?: number; // Health of the adventurer
+  level?: number; // Level of the adventurer
+  strength?: number; // Strength of the adventurer
+  dexterity?: number; // Dexterity of the adventurer
+  vitality?: number; // Vitality of the adventurer
+  intelligence?: number; // Intelligence of the adventurer
+  wisdom?: number; // Wisdom of the adventurer
+  charisma?: number; // Charisma of the adventurer
+  luck?: number; // Luck of the adventurer
+  xp?: number; // Experience of the adventurer
+  weapon?: string; // Weapon of the adventurer
+  chest?: string; // Chest armor of the adventurer
+  head?: string; // Head armor of the adventurer
+  waist?: string; // Waist armor of the adventurer
+  foot?: string; // Feet armor of the adventurer
+  hand?: string; // Hands armor of the adventurer
+  neck?: string; // Necklace of the adventure
+  ring?: string; // Ring of the adventure
+  beastHealth?: number; // Beast health adventurer is engaging
+  statUpgrades?: number; // Stat upgrades adventurer has
+  gold?: number; // Gold adventurer has
+  createdTime?: Date; // Block time the adventurer was created
+  lastUpdatedTime?: Date; // Block time the adventurer was last updated
+  timestamp?: Date; // Indexer timestamp of event process
+}
 
-  // evolving stats
-  health: number;
-  level: number;
-
-  // Physical
-  strength: number;
-  dexterity: number;
-  vitality: number;
-
-  // Mental
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
-
-  // Meta Physical
-  luck: number;
-
-  // XP
-  xp: number;
-
-  // store item NFT id when equipped
-  // Packed Stats p2
-  weaponId: number;
-  chestId: number;
-  headId: number;
-  waistId: number;
-
-  // Packed Stats p3
-  feetId: number;
-  handsId: number;
-  neckId: number;
-  ringId: number;
-
-  status: string;
-  beastId: number;
-  upgrading: boolean;
-  gold: number;
-
-  homeRealm: number;
-
-  isIdle: boolean | undefined;
+export interface ItemIndexer {
+  item?: string; // name
+  cost?: number; // purchase cost for the item
+  adventurerId: number; // Adventurer ID
+  owneAddress?: string; // Hex Address of the Owner
+  owner?: boolean; // Is the item owned by the adventurer?
+  equipped?: boolean; // Is the item equipped by the adventurer?
+  purchasedTime: Date; // Block time the item was purchased
+  special1?: string; // First special on the item (i.e of Power)
+  special2?: string; // Second special on the item (i.e Grasp)
+  special3?: string; // Third special on the item (i.e Demon)
+  xp?: number; // Experience of the item
+  lastUpdatedTime: Date; // Block time the item was last updated
+  timestamp?: Date; // Indexer timestamp of event process
 }
 
 export interface Item {
-  id?: number; // item id 1 - 100
+  [key: string]: string | number | undefined | boolean | Date;
   item?: string; // name
-  slot?: string; // weapon, head, chest, etc
-  type?: string; // weapon.blade, armor.metal, jewelry.ring
-  material?: number; // the material of the item
-  rank?: number; // 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
-  prefix1?: number; // First part of the name prefix (i.e Demon)
-  prefix2?: number; // Second part of the name prefix (i.e Grasp)
-  suffix?: number; // Stored value if item has a Suffix (i.e of Power)
-  greatness: number; // Item greatness
-  createdBlock?: number; // Timestamp of when item was created
+  cost?: number; // purchase cost for the item
+  adventurerId?: number; // Adventurer ID
+  ownerAddress?: string; // Hex Address of the Owner
+  owner?: boolean; // Is the item owned by the adventurer?
+  equipped?: boolean; // Is the item equipped by the adventurer?
+  purchasedTime?: Date; // Block time the item was purchased
+  special1?: string; // First special on the item (i.e of Power)
+  special2?: string; // Second special on the item (i.e Grasp)
+  special3?: string; // Third special on the item (i.e Demon)
   xp?: number; // Experience of the item
-  adventurerId?: number; // Adventurer ID IF equipped
-  bag?: number; // Bag ID IF bagged
-  claimedTime?: Date;
-  bidder?: number;
-  expiry?: Date;
-  status?: string;
-  price?: number;
-  owner?: string;
-  marketId?: number;
-  level?: number;
+  slot?: string; // Item slot location
+  tier?: number; // Tier of the item
+  type?: string; // Type of the item
+  lastUpdatedTime?: Date; // Block time the item was last updated
+  timestamp?: Date; // Indexer timestamp of event process
+}
+export interface Battle {
+  adventurerId?: number; // Adventurer ID
+  adventurerHealth?: number; // Health of the adventurer
+  beast?: string; // Beast adventurer is engaging
+  beastHealth?: number; // Beast health adventurer is engaging
+  beastLevel?: number; // Beast level adventurer is engaging
+  special1?: string; // First special on the beast (i.e Demon)
+  special2?: string; // Second special on the beast (i.e Demon)
+  special3?: string; // Third special on the beast (i.e Grasp)
+  seed?: number; // Seed to generate beast
+  attacker?: string; // Attacker in the battle (Adventurer or Beast)
+  fled?: boolean; // Did the adventurer flee?
+  damageDealt?: number; // Damage dealt to the beast
+  damageTaken?: number; // Damage taken from the beast
+  damageLocation?: string; // Location of the damage taken
+  criticalHit?: boolean; // Was the hit critical
+  xpEarnedAdventurer?: number; // Experience earned by the adventurer
+  xpEarnedItems?: number; // Experience earned by the items
+  goldEarned?: number; // Gold earned by the adventurer
+  txHash?: string; // Transaction hash
+  blockTime?: Date; // Block time of the battle
+  timestamp?: Date; // Indexer timestamp of event process
 }
 
-export interface MarketItem {
-  id?: number; // item id 1 - 100
-  item?: string; // name
-  slot?: string; // weapon, head, chest, etc
-  type?: number; // weapon.blade, armor.metal, jewelry.ring
-  material?: number; // the material of the item
-  rank?: number; // 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
-  prefix1?: number; // First part of the name prefix (i.e Demon)
-  prefix2?: number; // Second part of the name prefix (i.e Grasp)
-  suffix?: number; // Stored value if item has a Suffix (i.e of Power)
-  greatness?: number; // Item greatness
-  createdBlock?: number; // Timestamp of when item was created
-  xp?: number; // Experience of the item
-  adventurerId?: number; // Adventurer ID IF equipped
-  bag?: number; // Bag ID IF bagged
-  claimedTime?: Date;
-  bidder?: number;
-  expiry?: Date;
-  status?: string;
-  price?: number;
-  owner?: string;
-  marketId?: number;
-  level?: number;
+export interface Discovery {
+  adventurerId?: number; // Adventurer ID
+  adventurerHealth?: number; // Health of the adventurer
+  discoveryType?: string; // Type of discovery
+  subDiscoveryType?: string; // Sub type of discovery
+  outputAmount?: number; // Amount of the discovery finding
+  obstacle?: string; // Obstacle discovered
+  obstacleLevel?: number; // Obstacle level discovered
+  dodgedObstacle?: boolean; // Did the adventurer dodge the obstacle?
+  damageTaken?: number; // Damage taken from the obstacle
+  damageLocation?: string; // Location of the damage taken
+  xpEarnedAdventurer?: number; // Experience earned by the adventurer
+  xpEarnedItems?: number; // Experience earned by the items
+  entity?: string; // Entity discovered
+  entityLevel?: number; // Entity level discovered
+  entityHealth?: number; // Entity health discovered
+  special1?: string; // First special on the beast (i.e Demon)
+  special2?: string; // Second special on the beast (i.e Demon)
+  special3?: string; // Third special on the beast (i.e Grasp)
+  seed?: number; // Seed to generate beast
+  ambushed?: boolean; // Did the adventurer ambush the entity?
+  discoveryTime?: Date; // Block time of the discovery
+  txHash?: string; // Transaction hash
+  timestamp?: Date; // Indexer timestamp of event process
 }
 
 export interface Beast {
-  adventurerId: number;
-  armorType: string;
-  attackType: string;
-  beast: string;
-  health: number;
-  id: number;
-  level: number;
-  prefix1: string;
-  prefix2: string;
-  rank: number;
-  slainOnDate: Date;
-  xp: number;
+  beast?: string; // Beast type
+  adventurerId?: number; // Adventurer ID
+  seed?: number; // Seed to generate beast
+  special1?: string; // First special on the beast (i.e Demon)
+  special2?: string; // Second special on the beast (i.e Demon)
+  special3?: string; // Third special on the beast (i.e Grasp)
+  health?: number; // Beast health
+  level?: number; // Beast level
+  slainOnTime?: Date; // Block time of the beast being slayed
+  createdTime?: Date; // Block time of when the beast was discovered
+  lastUpdatedTime?: Date; // Block time of when the beast was last updated
+  timestamp?: Date; // Indexer timestamp of event process
 }
 
-export interface Discoveries {
-  adventurerId: number;
-  discoveryTime: Date;
-  discoveryType: string;
-  entityId: number;
-  outputAmount: number;
-  subDiscoveryType: string;
+export interface Score {
+  adventurerId: number; // Adventurer ID
+  address: string; // Hex Address of the adventurer owner
+  rank: number; // Rank of the score
+  xp: number; // Experience points of the adventurer
+  txHash: string; // Hex of the transaction hash
+  scoreTime: Date; // Time of the score
+  timestamp?: Date; // Indexer timestamp of event process
 }
 
 export interface Metadata {
-  method?: string;
-  description?: string;
-  marketIds?: any[];
+  method?: string; // Method of the transaction
+  description?: string; // Description of the transaction
+  items?: string[]; // Items in the transaction
 }
-
-export const NullAdventurer: Adventurer = {
-  id: 0,
-  owner: "",
-  race: "",
-  name: "",
-  order: "",
-  imageHash1: "",
-  imageHash2: "",
-  health: 0,
-  level: 0,
-  strength: 0,
-  dexterity: 0,
-  vitality: 0,
-  intelligence: 0,
-  wisdom: 0,
-  charisma: 0,
-  luck: 0,
-  xp: 0,
-  weaponId: 0,
-  chestId: 0,
-  headId: 0,
-  waistId: 0,
-  feetId: 0,
-  handsId: 0,
-  neckId: 0,
-  ringId: 0,
-  status: "",
-  beastId: 0,
-  upgrading: false,
-  gold: 0,
-  homeRealm: 0,
-  isIdle: false,
-};
-
-export const NullAdventurerProps: AdventurerProps = {
-  adventurer: NullAdventurer,
-  image: "",
-};
-
-export const NullBeast = {
-  adventurerId: 0,
-  armorType: "",
-  attackType: "",
-  beast: "",
-  health: 0,
-  id: 0,
-  level: 0,
-  prefix1: "",
-  prefix2: "",
-  rank: 0,
-  slainOnDate: 0,
-  xp: 0,
-};
-
-export const NullBattle = {
-  adventurerId: 0,
-  ambushed: undefined,
-  attacker: "",
-  beastId: 0,
-  damage: 0,
-  fled: undefined,
-  goldEarned: undefined,
-  targetHealth: undefined,
-  timestamp: undefined,
-  txHash: undefined,
-  xpEarned: undefined,
-};
-
-export const NullDiscovery = {
-  adventurerId: 0,
-  discoveryTime: 0,
-  discoveryType: "",
-  entityId: 0,
-  outputAmount: 0,
-  subDiscoveryType: "",
-};
-
-export const NullItem = {
-  id: 0, // item id 1 - 100
-  item: "",
-  slot: 0, // weapon, head, chest, etc
-  type: 0, // weapon.blade, armor.metal, jewelry.ring
-  material: 0, // the material of the item
-  rank: 0, // 1 is best (Divine Robe = 1, Silk Robe = 2, Linen Robe = 3, Robe = 4, Shirt = 5)
-  prefix1: 0, // First part of the name prefix (i.e Demon)
-  prefix2: 0, // Second part of the name prefix (i.e Grasp)
-  suffix: 0, // Stored value if item has a Suffix (i.e of Power)
-  greatness: 0, // Item greatness
-  createdBlock: 0, // Timestamp of when item was created
-  xp: 0, // Experience of the item
-  adventurerId: 0, // Adventurer ID IF equipped
-  bag: 0, // Bag ID IF bagged
-  claimedTime: 0,
-  bidder: 0,
-  expiry: 0,
-  status: "",
-  price: 0,
-  owner: "",
-  marketId: 0,
-};
 
 export type Menu = {
   id: number;
-  label: string;
+  label: string | ReactElement;
   screen: ScreenPage;
   disabled?: boolean;
+};
+
+export type FormData = {
+  startingWeapon: string;
+  name: string;
+  homeRealmId: string;
+  class: string;
+};
+
+export interface Call {
+  contractAddress: string;
+  entrypoint: string;
+  calldata: RawArgs;
+  metadata?: string;
+}
+
+export interface ButtonData {
+  id: number;
+  label: string;
+  icon?: ReactElement;
+  value?: string;
+  action: () => void;
+  disabled?: boolean;
+  variant?: "default" | "outline";
+}
+
+export type BeastType =
+  | "Basilisk"
+  | "Kitsune"
+  | "Jiangshi"
+  | "Rakshasa"
+  | "Warlock"
+  | "Minotaur"
+  | "Dragon"
+  | "Phoenix"
+  | "Manticore"
+  | "Griffin"
+  | "Cyclops"
+  | "Titan"
+  | "Yeti"
+  | "Colossus"
+  | "Balrog"
+  | "Gorgon"
+  | "Anansi"
+  | "Lich"
+  | "Chimera"
+  | "Wendigo"
+  | "Harpy"
+  | "Arachne"
+  | "Nue"
+  | "Skinwalker"
+  | "Chupacabra"
+  | "Oni"
+  | "Ogre"
+  | "Juggernaut"
+  | "Bigfoot"
+  | "Orc"
+  | "Cerberus"
+  | "Werewolf"
+  | "Banshee"
+  | "Draugr"
+  | "Vampire"
+  | "Weretiger"
+  | "Wyvern"
+  | "Roc"
+  | "Qilin"
+  | "Pegasus"
+  | "Behemoth"
+  | "Ent"
+  | "Giant"
+  | "Kraken"
+  | "Leviathan"
+  | "Golem"
+  | "Goblin"
+  | "Ghoul"
+  | "Pixie"
+  | "Sprite"
+  | "Kappa"
+  | "Hippogriff"
+  | "Fenrir"
+  | "Jaguar"
+  | "Ammit"
+  | "DireWolf"
+  | "Skeleton"
+  | "Nephilim"
+  | "Tarrasque"
+  | "Berserker"
+  | "Fairy"
+  | "Leprechaun"
+  | "Kelpie"
+  | "Wraith"
+  | "Gnome"
+  | "Bear"
+  | "Wolf"
+  | "Scorpion"
+  | "Spider"
+  | "Rat"
+  | "Ettin"
+  | "Jotunn"
+  | "Hydra"
+  | "NemeanLion"
+  | "Troll";
+
+export const NullAdventurer: Adventurer = {
+  id: undefined,
+  lastAction: undefined,
+  owner: undefined,
+  classType: undefined,
+  homeRealm: undefined,
+  name: undefined,
+  order: undefined,
+  health: undefined,
+  level: undefined,
+  strength: undefined,
+  dexterity: undefined,
+  vitality: undefined,
+  intelligence: undefined,
+  wisdom: undefined,
+  charisma: undefined,
+  luck: undefined,
+  xp: undefined,
+  weapon: undefined,
+  chest: undefined,
+  head: undefined,
+  waist: undefined,
+  feet: undefined,
+  hands: undefined,
+  neck: undefined,
+  ring: undefined,
+  beastHealth: undefined,
+  statUpgrades: undefined,
+  gold: undefined,
+  createdTime: undefined,
+  lastUpdatedTime: undefined,
+};
+
+export const NullBattle: Battle = {
+  adventurerId: undefined,
+  beast: undefined,
+  beastHealth: undefined,
+  beastLevel: undefined,
+  special1: undefined,
+  special2: undefined,
+  special3: undefined,
+  seed: undefined,
+  attacker: undefined,
+  fled: undefined,
+  damageDealt: undefined,
+  damageTaken: undefined,
+  damageLocation: undefined,
+  xpEarnedAdventurer: undefined,
+  xpEarnedItems: undefined,
+  goldEarned: undefined,
+  txHash: undefined,
+  timestamp: undefined,
+};
+
+export const NullDiscovery: Discovery = {
+  adventurerId: undefined,
+  discoveryType: undefined,
+  subDiscoveryType: undefined,
+  outputAmount: undefined,
+  obstacle: undefined,
+  obstacleLevel: undefined,
+  dodgedObstacle: undefined,
+  damageTaken: undefined,
+  damageLocation: undefined,
+  xpEarnedAdventurer: undefined,
+  xpEarnedItems: undefined,
+  entity: undefined,
+  entityLevel: undefined,
+  entityHealth: undefined,
+  special1: undefined,
+  special2: undefined,
+  special3: undefined,
+  seed: undefined,
+  ambushed: undefined,
+  discoveryTime: undefined,
+  txHash: undefined,
+};
+
+export const NullBeast: Beast = {
+  beast: undefined,
+  adventurerId: undefined,
+  seed: undefined,
+  special1: undefined,
+  special2: undefined,
+  special3: undefined,
+  health: undefined,
+  level: undefined,
+  slainOnTime: undefined,
+  createdTime: undefined,
+  lastUpdatedTime: undefined,
+};
+
+export const NullItem: Item = {
+  item: undefined,
+  cost: undefined,
+  adventurerId: undefined,
+  owneAddress: undefined,
+  owner: undefined,
+  equipped: undefined,
+  purchasedTime: undefined,
+  special1: undefined,
+  special2: undefined,
+  special3: undefined,
+  xp: undefined,
+  slot: undefined,
+  tier: undefined,
+  type: undefined,
+  lastUpdatedTime: undefined,
 };

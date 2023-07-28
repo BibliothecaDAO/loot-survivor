@@ -26,9 +26,9 @@ export const useMusic = (
 
   const start = useCallback(() => {
     play();
-  }, []);
+  }, [play]);
 
-  const trackArray = [musicSelector.battle, musicSelector.battle2]
+  const trackArray = [musicSelector.battle, musicSelector.battle2];
 
   useEffect(() => {
     if (stopRef.current) {
@@ -44,7 +44,7 @@ export const useMusic = (
       setMusic(musicSelector.backgroundMusic);
     }
     start();
-  }, [playState.isInBattle, playState.isDead]);
+  }, [playState.isInBattle, playState.isDead, start, stop]);
 
   useEffect(() => {
     if (playState.isMuted) {

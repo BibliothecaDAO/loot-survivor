@@ -1,43 +1,43 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "../buttons/Button";
 import WalletSelect from "./WalletSelect";
 import { TypeAnimation } from "react-type-animation";
-import { prologue } from "../../lib/constants";
-import LootIconLoader from "../Loader";
+import { prologue, chapter1, chapter2, chapter3 } from "../../lib/constants";
+import Image from "next/image";
 
 const Intro = () => {
   const [screen, setScreen] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
-  const [initiated, setInitiated] = useState<boolean>(false);
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowRight":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.min(prev + 1, 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowLeft":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+          break;
+        case "Enter":
+          setScreen(selectedIndex + 1);
+          break;
+      }
+    },
+    [selectedIndex]
+  );
 
-  const [introComplete, setIntroComplete] = useState<boolean>(false);
-
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowRight":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.min(prev + 1, 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowLeft":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-        break;
-      case "Enter":
-        setScreen(selectedIndex + 1);
-        break;
-    }
-  };
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedIndex]);
+  }, [selectedIndex, handleKeyDown]);
 
   const [buttonText, setButtonText] = useState("do you dare?");
 
@@ -49,85 +49,59 @@ const Intro = () => {
     setButtonText("do you dare?");
   };
 
+  const [flash, setFlash] = useState(false);
+
+  useEffect(() => {
+    setFlash(true);
+    const timer = setTimeout(() => {
+      setFlash(false);
+    }, 500); // 500ms corresponds to the animation duration
+    return () => clearTimeout(timer); // clean up on unmount or when the screen changes
+  }, [screen]);
+
+  const renderScreen = (src: string, alt: string, sequence: any) => (
+    <div className="flex flex-col w-full h-full justify-between">
+
+      <div className="flex flex-col h-full">
+        <Image
+          className="mx-auto border border-terminal-green absolute object-cover"
+          src={src}
+          alt={alt}
+          fill
+        />
+
+        <div className="p-2 pt-20 text-xs sm:text-xl leading-loose z-10">
+          <TypeAnimation
+            key={screen.toString()}
+            sequence={sequence}
+            wrapper="span"
+            cursor={true}
+            speed={40}
+            style={{ fontSize: "2em" }}
+          />
+        </div>
+      </div>
+      <div className="flex flex-row gap-10 mt-auto">
+        <Button
+          className="animate-pulse"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          onClick={() => setScreen(4)}
+        >
+          [skip]
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <>
-      {!initiated ? (
-        <div className="flex flex-wrap justify-center p-20 w-fill">
-          <LootIconLoader size="w-8" />
-          <div className="flex justify-center w-full mt-10">
-            <Button
-              className="animate-pulse"
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-              onClick={() => setInitiated(true)}
-            >
-              {buttonText}{" "}
-            </Button>
-          </div>
-        </div>
-      ) : (
-        <>
-          {screen == 0 ? (
-            <div className="flex flex-col w-full h-full p-4 sm:p-8">
-              <div className="flex">
-                <p className="sm:p-4 text-xs sm:text-xl leading-tight">
-                  <TypeAnimation
-                    sequence={[
-                      prologue,
-                      () => {
-                        setIntroComplete(true);
-                      },
-                    ]}
-                    wrapper="span"
-                    cursor={true}
-                    speed={45}
-                    // repeat={Infinity}
-                    style={{ fontSize: "2em" }}
-                  />
-                </p>
-              </div>
-              <div>
-                {!introComplete && (
-                  <Button
-                    onClick={() => setIntroComplete(true)}
-                    variant={"outline"}
-                  >
-                    skip
-                  </Button>
-                )}
-              </div>
-
-              {introComplete && (
-                <div className="flex flex-row gap-10 m-auto">
-                  {/* <Button
-                    onClick={() => setScreen(1)}
-                    className={
-                      "m-auto w-40" + (selectedIndex == 0 ? "animate-pulse" : "")
-                    }
-                    variant={selectedIndex == 0 ? "default" : "ghost"}
-                  >
-                    <p className="text-base whitespace-nowrap">LAUNCH ON DEVNET</p>
-                  </Button> */}
-                  <Button
-                    onClick={() => setScreen(2)}
-                    className={
-                      "m-auto w-40" +
-                      (selectedIndex == 1 ? "animate-pulse" : "")
-                    }
-                    variant={selectedIndex == 1 ? "default" : "ghost"}
-                  >
-                    <p className="text-base whitespace-nowrap">
-                      LAUNCH ON GOERLI
-                    </p>
-                  </Button>
-                </div>
-              )}
-            </div>
-          ) : (
-            <WalletSelect screen={screen} />
-          )}
-        </>
-      )}
+      {flash && <div className="flash" />}
+      {screen == 0 && renderScreen("/scenes/scene2.png", "start", [prologue, () => setTimeout(() => setScreen(1), 2000)])}
+      {screen == 1 && renderScreen("/scenes/scene1.png", "second screen", [chapter1, () => setTimeout(() => setScreen(2), 3000)])}
+      {screen == 2 && renderScreen("/scenes/cave.png", "cave", [chapter2, () => setTimeout(() => setScreen(3), 3000)])}
+      {screen == 3 && renderScreen("/scenes/fountain.png", "fountain", [chapter3, () => setTimeout(() => setScreen(4), 3000)])}
+      {screen >= 4 && <WalletSelect screen={screen} />}
     </>
   );
 };

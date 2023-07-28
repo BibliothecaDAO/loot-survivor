@@ -1,20 +1,23 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, ReactElement, useCallback } from "react";
 import { useContracts } from "../../hooks/useContracts";
 import { Button } from "../buttons/Button";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useMediaQuery } from "react-responsive";
+import { Item, Menu, Metadata } from "@/app/types";
+import { GameData } from "../GameData";
+import { getKeyFromValue } from "@/app/lib/utils";
 
 interface InventoryRowProps {
   title: string;
-  items: any[];
+  items: Item[];
   menuIndex: number;
   isActive: boolean;
-  setActiveMenu: (value: any) => void;
+  setActiveMenu: (value: number | undefined) => void;
   isSelected: boolean;
-  setSelected: (value: any) => void;
-  equippedItemId: number | undefined;
-  icon?: any;
+  setSelected: (value: number) => void;
+  equippedItem: string | undefined;
+  icon?: ReactElement;
 }
 
 export const InventoryRow = ({
@@ -25,50 +28,58 @@ export const InventoryRow = ({
   setActiveMenu,
   isSelected,
   setSelected,
-  equippedItemId,
+  equippedItem,
   icon,
 }: InventoryRowProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const { adventurerContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
-  const handleAddEquipItem = (itemId: any) => {
-    if (adventurerContract) {
-      const equipItem = {
-        contractAddress: adventurerContract?.address,
-        entrypoint: "equip_item",
-        calldata: [adventurer?.id, "0", itemId, "0"],
-        metadata: `Equipping ${itemId}!`,
+  const handleAddEquipItem = (item: string) => {
+    if (gameContract) {
+      const gameData = new GameData();
+      const equipItemTx = {
+        contractAddress: gameContract?.address,
+        entrypoint: "equip",
+        calldata: [
+          adventurer?.id?.toString() ?? "",
+          "0",
+          getKeyFromValue(gameData.ITEMS, item) ?? "",
+        ],
+        metadata: `Equipping ${item}!`,
       };
-      addToCalls(equipItem);
+      addToCalls(equipItemTx);
     }
   };
 
-  const unequippedItems = items?.filter((item) => item.id != equippedItemId);
+  const unequippedItems = items?.filter((item) => item.item != equippedItem);
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowDown":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.min(prev + 1, unequippedItems?.length - 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowUp":
-        setSelectedIndex((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-        break;
-      case "Enter":
-        handleAddEquipItem(unequippedItems[selectedIndex]?.id);
-        break;
-      case "Escape":
-        setActiveMenu(undefined);
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowDown":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.min(prev + 1, unequippedItems?.length - 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowUp":
+          setSelectedIndex((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+          break;
+        case "Enter":
+          handleAddEquipItem(unequippedItems[selectedIndex]?.item ?? "");
+          break;
+        case "Escape":
+          setActiveMenu(undefined);
+          break;
+      }
+    },
+    [selectedIndex, handleAddEquipItem, setActiveMenu, unequippedItems]
+  );
 
   useEffect(() => {
     if (isActive) {
@@ -79,40 +90,39 @@ export const InventoryRow = ({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isActive, selectedIndex]);
+  }, [isActive, selectedIndex, handleKeyDown]);
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
 
   return (
-    <>
-      <div className="flex flex-row w-full gap-3 sm:gap-1 align-center">
-        <Button
-          className={isSelected && !isActive ? "animate-pulse" : ""}
-          variant={isSelected ? "default" : "ghost"}
-          size={isMobileDevice ? "sm" : "lg"}
-          onClick={() => {
-            setSelected(menuIndex);
-            setActiveMenu(menuIndex);
-          }}
-        >
-          {isMobileDevice ? (
-            <div className="flex items-center justify-center w-10 h-10 sm:hidden">
+    <div className="flex flex-row w-full gap-3 sm:gap-1 align-center">
+      <Button
+        className={`h-14 w-12 sm:w-full ${
+          isSelected && !isActive ? "animate-pulse" : ""
+        }`}
+        variant={isSelected ? "default" : "ghost"}
+        size={isMobileDevice ? "sm" : "lg"}
+        onClick={() => {
+          setSelected(menuIndex);
+          setActiveMenu(menuIndex);
+        }}
+        disabled={!adventurer?.id}
+      >
+        {isMobileDevice ? (
+          <div className="flex items-center justify-center w-10 h-10 sm:hidden">
+            {icon}
+          </div>
+        ) : (
+          <div className="flex flex-row gap-1 items-center">
+            <div className="flex items-center justify-center w-10 h-10">
               {icon}
             </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-center w-10 h-10">
-                {icon}
-              </div>
-              <p className="w-40 text-xl whitespace-nowrap hidden sm:block">
-                {title}
-              </p>
-            </>
-          )}
-        </Button>
-      </div>
-    </>
+            <p className="text-xl whitespace-nowrap hidden sm:block">{title}</p>
+          </div>
+        )}
+      </Button>
+    </div>
   );
 };

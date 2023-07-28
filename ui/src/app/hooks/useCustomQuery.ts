@@ -1,11 +1,14 @@
-import { use, useEffect, useMemo, useRef } from "react";
+import { use, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "./useQueryStore";
+import { AdventurerQuery, BattleQuery, ItemQuery } from "./graphql/types";
 
 type Variables = Record<
   string,
-  string | number | number[] | boolean | null | undefined
+  string | number | number[] | boolean | null | undefined | Date
 >;
+
+// type Queries = | AdventurerQuery | BattleQuery
 
 const useCustomQuery = (
   queryKey: QueryKey,
@@ -20,20 +23,20 @@ const useCustomQuery = (
     query,
     {
       variables: variables,
-      // skip: skip,
+      // skip: !variables?.owner,
     }
   );
 
-  const refetchWrapper = async () => {
+  const refetchWrapper = useCallback(async () => {
     try {
       await refetch();
     } catch (error) {
       console.error("Error refetching:", error);
+      throw error;
     }
-  };
+  }, [refetch]);
 
   useEffect(() => {
-    console.log(data, loading, queryKey, variables);
     if (data) {
       updateData(queryKey, data, loading, refetchWrapper);
     }
@@ -46,10 +49,6 @@ const useCustomQuery = (
       stopPolling();
     }
   }, [shouldPoll, startPolling, stopPolling]);
-
-  // useEffect(() => {
-  //   refetch();
-  // }, []);
 };
 
 export default useCustomQuery;

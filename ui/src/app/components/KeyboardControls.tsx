@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "./buttons/Button";
 
 export interface ButtonData {
@@ -13,32 +13,38 @@ export interface ButtonData {
 
 interface ButtonProps {
   buttonsData: ButtonData[];
+  size?: "default" | "xs" | "sm" | "lg" | "xl";
 }
 
-const KeyboardControl = ({ buttonsData }: ButtonProps) => {
+const KeyboardControl = ({ buttonsData, size }: ButtonProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowUp":
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-        break;
-      case "ArrowDown":
-        setSelectedIndex((prev) => Math.min(prev + 1, buttonsData.length - 1));
-        break;
-      case "Enter":
-        buttonsData[selectedIndex].action();
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowUp":
+          setSelectedIndex((prev) => Math.max(prev - 1, 0));
+          break;
+        case "ArrowDown":
+          setSelectedIndex((prev) =>
+            Math.min(prev + 1, buttonsData.length - 1)
+          );
+          break;
+        case "Enter":
+          buttonsData[selectedIndex].action();
+          break;
+      }
+    },
+    [selectedIndex, buttonsData]
+  );
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectedIndex]);
+  }, [selectedIndex, handleKeyDown]);
 
   return (
     <div className="flex flex-col w-full">
@@ -56,6 +62,7 @@ const KeyboardControl = ({ buttonsData }: ButtonProps) => {
           }}
           disabled={buttonData.disabled}
           loading={buttonData.loading}
+          size={size}
         >
           {buttonData.label}
         </Button>

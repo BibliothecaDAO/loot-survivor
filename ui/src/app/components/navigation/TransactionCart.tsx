@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
-import { Metadata } from "../../types";
 import { Button } from "../buttons/Button";
 import { MdClose } from "react-icons/md";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useQueriesStore } from "../../hooks/useQueryStore";
-import { processItemName } from "../../lib/utils";
+import { processItemName, getItemPrice, getItemData } from "../../lib/utils";
 import useUIStore from "../../hooks/useUIStore";
 import { useUiSounds } from "../../hooks/useUiSound";
 import { soundSelector } from "../../hooks/useUiSound";
+import { Item, NullItem, Call, NullAdventurer } from "../../types";
+import { GameData } from "../GameData";
+import { getKeyFromValue } from "../../lib/utils";
 
 const TransactionCart: React.FC = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -24,11 +26,7 @@ const TransactionCart: React.FC = () => {
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const {
-    hashes,
-    transactions: queuedTransactions,
-    addTransaction,
-  } = useTransactionManager();
+  const { addTransaction } = useTransactionManager();
   const { writeAsync } = useContractWrite({ calls });
   const [notification, setNotification] = useState<string[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
@@ -38,7 +36,7 @@ const TransactionCart: React.FC = () => {
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
 
-  const marketItems = data.latestMarketItemsQuery
+  const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
     : [];
 
@@ -46,62 +44,100 @@ const TransactionCart: React.FC = () => {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  // const reorderCards = useCallback((dragIndex: number, hoverIndex: number) => {
-  //   txQueue.reorderQueue(dragIndex, hoverIndex);
-  // }, []);
+  const gameData = new GameData();
 
-  const handleLoadData = () => {
+  const handleBuyItem = useCallback(
+    (call: any) => {
+      const item = items.find(
+        (item: Item) =>
+          item.item === (Array.isArray(call.calldata) && call.calldata[0])
+      );
+      const itemName = processItemName(item ?? NullItem);
+      const { tier } = getItemData(item?.item ?? "");
+      setNotification((notifications) => [
+        ...notifications,
+        `You purchased ${item?.item && itemName} for ${getItemPrice(
+          tier,
+          adventurer?.charisma ?? 0
+        )} gold`,
+      ]);
+      setLoadingQuery("latestMarketItemsQuery");
+      setLoadingMessage((messages) => [...messages, "Purchasing"]);
+    },
+    [items]
+  );
+
+  const handleEquipItem = useCallback(
+    (call: any) => {
+      const item =
+        ownedItems.find(
+          (item: Item) =>
+            getKeyFromValue(gameData.ITEMS, item.item ?? "")?.toString() ===
+            (Array.isArray(call.calldata) && call.calldata[2])
+        ) ?? NullItem;
+      const itemName = processItemName(item);
+      setNotification((notifications) => [
+        ...notifications,
+        `You equipped ${itemName}!`,
+      ]);
+      setLoadingQuery("adventurerByIdQuery");
+      setLoadingMessage((messages) => [...messages, "Equipping"]);
+    },
+    [ownedItems]
+  );
+
+  const handlePurchaseHealth = useCallback((call: any) => {
+    setNotification((notifications) => [
+      ...notifications,
+      `You purchased ${
+        Array.isArray(call.calldata) &&
+        call.calldata[2] &&
+        parseInt(call.calldata[2].toString()) * 10
+      } health!`,
+    ]);
+    setLoadingQuery("adventurerByIdQuery");
+    setLoadingMessage((messages) => [...messages, "Purchasing Health"]);
+  }, []);
+
+  const handleSlayIdleAdventurer = useCallback((call: any) => {
+    setNotification((notifications) => [
+      ...notifications,
+      `You slayed ${
+        Array.isArray(call.calldata) &&
+        call.calldata[0] &&
+        parseInt(call.calldata[0].toString())
+      }`,
+    ]);
+    setLoadingQuery("adventurerByIdQuery");
+    setLoadingMessage((messages) => [...messages, "Slaying Adventurer"]);
+  }, []);
+
+  const handleLoadData = useCallback(() => {
     for (let call of calls) {
-      if (call.entrypoint === "mint_daily_items") {
-        setNotification([...notification, "New items minted!"]);
-        setLoadingQuery("latestMarketItemsQuery");
-        setLoadingMessage([...loadingMessage, "Minting Items"]);
-      } else if (call.entrypoint === "bid_on_item") {
-        const item = marketItems.find(
-          (item: any) => item.marketId == call.calldata[0]
-        );
-        const itemName = processItemName(item);
-        setNotification([
-          ...notification,
-          `You bid ${call.calldata[4]} gold on ${item?.item && itemName}`,
-        ]);
-        setLoadingQuery("latestMarketItemsQuery");
-        setLoadingMessage([...loadingMessage, "Bidding"]);
-      } else if (call.entrypoint === "claim_item") {
-        const item = marketItems.find(
-          (item: any) => item.marketId == call.calldata[0]
-        );
-        const itemName = processItemName(item);
-        setNotification([
-          ...notification,
-          `You claimed ${item?.item && itemName}!`,
-        ]);
-        setLoadingQuery("latestMarketItemsQuery");
-        setLoadingMessage([...loadingMessage, "Claiming"]);
-      } else if (call.entrypoint === "equip_item") {
-        const item = ownedItems.find(
-          (item: any) => item.id == call.calldata[2]
-        );
-        const itemName = processItemName(item);
-        setNotification([
-          ...notification,
-          `You equipped ${item?.item && itemName}!`,
-        ]);
-        setLoadingQuery("adventurerByIdQuery");
-        setLoadingMessage([...loadingMessage, "Equipping"]);
-      } else if (call.entrypoint === "purchase_health") {
-        setNotification([
-          ...notification,
-          `You purchased ${
-            call.calldata[2] && parseInt(call.calldata[2].toString()) * 10
-          } health!`,
-          // `You purchased ${parseInt(call.calldata[2].toString()) * 10} health!`,
-        ]);
-        setLoadingQuery("adventurerByIdQuery");
-        setLoadingMessage([...loadingMessage, "Purchasing Health"]);
+      switch (call.entrypoint) {
+        case "buy_item":
+          handleBuyItem(call);
+          break;
+        case "equip":
+          handleEquipItem(call);
+          break;
+        case "purchase_health":
+          handlePurchaseHealth(call);
+          break;
+        case "slay_idle_adventurer":
+          handleSlayIdleAdventurer(call);
+          break;
+        default:
+          break;
       }
     }
-  };
+  }, [
+    calls,
+    handleBuyItem,
+    handleEquipItem,
+    handlePurchaseHealth,
+    handleSlayIdleAdventurer,
+  ]);
 
   useEffect(() => {
     handleLoadData();
@@ -111,15 +147,26 @@ const TransactionCart: React.FC = () => {
     <>
       {displayCart ? (
         <div className="absolute right-[50px] w-[300px] h-[400px] sm:right-[280px] top-20 sm:top-32 z-10 sm:w-[400px] sm:h-[400px] p-3 bg-terminal-black border border-terminal-green">
-          <p className="text-2xl">TRANSACTIONS</p>
+          <div className="flex flex-row justify-between">
+            <p className="text-2xl">TRANSACTIONS</p>
+            <button
+              onClick={() => {
+                setDisplayCart(false);
+                clickPlay();
+              }}
+              className="text-red-500 hover:text-red-700"
+            >
+              <MdClose size={40} />
+            </button>
+          </div>
           <div className="w-full border border-terminal-green "></div>
-          <div className="flex flex-col h-[200px] overflow-auto">
-            {calls.map((call: any, i: number) => (
+          <div className="flex flex-col h-full overflow-auto">
+            {calls.map((call: Call, i: number) => (
               <div key={i}>
                 <div className="flex flex-col gap-2">
                   {call && (
                     <div className="flex items-center justify-between text-xs sm:text-base">
-                      <p>{call.entrypoint}</p>
+                      <p className="uppercase">{call.entrypoint}</p>
                       {/* <p>{call.calldata}</p> */}
                       <p>{call.metadata}</p>
                       <button
@@ -140,7 +187,7 @@ const TransactionCart: React.FC = () => {
           <div className="flex flex-row gap-2 absolute bottom-4">
             <Button
               onClick={async () => {
-                const marketIds: any[] = [];
+                const items: string[] = [];
 
                 for (const dict of calls) {
                   if (
@@ -148,7 +195,14 @@ const TransactionCart: React.FC = () => {
                     (dict["entrypoint"] === "bid_on_item" ||
                       dict["entrypoint"] === "claim_item")
                   ) {
-                    marketIds.push(dict.calldata[0]);
+                    if (Array.isArray(dict.calldata)) {
+                      items.push(dict.calldata[0]?.toString() ?? "");
+                    }
+                  }
+                  if (dict["entrypoint"] === "equip") {
+                    if (Array.isArray(dict.calldata)) {
+                      items.push(dict.calldata[2]?.toString() ?? "");
+                    }
                   }
                 }
                 startLoading(
@@ -166,7 +220,7 @@ const TransactionCart: React.FC = () => {
                       hash: tx.transaction_hash,
                       metadata: {
                         method: "Multicall",
-                        marketIds: marketIds,
+                        marketIds: items,
                       },
                     });
                   }

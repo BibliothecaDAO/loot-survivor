@@ -1,11 +1,5 @@
 import { create } from "zustand";
-
-interface Call {
-  contractAddress: string;
-  entrypoint: string;
-  calldata: Array<string | number | undefined>;
-  metadata?: any;
-}
+import { Call } from "../types";
 
 type TransactionCartState = {
   error: boolean;
@@ -27,7 +21,7 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
   const removeFromCalls = (tx: Call) => {
     set((state) => ({
       calls: state.calls.filter(
-        (call: any) =>
+        (call: Call) =>
           call.entrypoint !== tx.entrypoint ||
           call.calldata !== tx.calldata ||
           call.metadata !== tx.metadata
@@ -41,7 +35,6 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
       set({ calls: [], error: false });
       return tx;
     } catch (error) {
-      console.log(error);
       setError(true);
       resetCalls();
     }

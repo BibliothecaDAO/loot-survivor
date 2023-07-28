@@ -1,27 +1,29 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "../buttons/Button";
-import { BidBox } from "./Bid";
 import { useContracts } from "../../hooks/useContracts";
-import { formatTime } from "../../lib/utils";
-import { convertTime } from "../../lib/utils";
-import { Countdown } from "../Clock";
+import { getItemData, getItemPrice, getKeyFromValue } from "../../lib/utils";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import LootIcon from "../LootIcon";
+import LootIcon from "../icons/LootIcon";
 import {
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
-import { Metadata } from "../../types";
+import { Metadata, Item, Adventurer, Call } from "../../types";
+import { CoinIcon } from "../icons/Icons";
+import EfficacyDisplay from "../icons/EfficacyIcon";
+import { GameData } from "../GameData";
+import { useMediaQuery } from "react-responsive";
 
 interface MarketplaceRowProps {
-  item: any;
+  item: Item;
   index: number;
   selectedIndex: number;
-  adventurers: any[];
-  isActive: boolean;
-  setActiveMenu: (value: any) => void;
+  adventurers: Adventurer[];
+  activeMenu: number | null;
+  setActiveMenu: (value: number | null) => void;
   calculatedNewGold: number;
+  ownedItems: Item[];
 }
 
 const MarketplaceRow = ({
@@ -29,86 +31,80 @@ const MarketplaceRow = ({
   index,
   selectedIndex,
   adventurers,
-  isActive,
+  activeMenu,
   setActiveMenu,
   calculatedNewGold,
+  ownedItems,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
-  const { lootMarketArcadeContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const [showBidBox, setShowBidBox] = useState(-1);
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { hashes, transactions } = useTransactionManager();
   const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
+  // const setPurchasedItem = useUIStore((state) => state.setPurchasedItem);
 
-  const transactingMarketIds = (transactions[0]?.metadata as Metadata)
-    ?.marketIds;
+  const transactingMarketIds = (transactions[0]?.metadata as Metadata)?.items;
 
-  const currentTime = new Date().getTime();
+  const gameData = new GameData();
 
-  const bidExists = (marketId: number) => {
+  const singlePurchaseExists = (item: string) => {
     return calls.some(
-      (call: any) =>
-        call.entrypoint == "bid_on_item" && call.calldata[0] == marketId
+      (call: Call) =>
+        call.entrypoint == "buy_item" &&
+        Array.isArray(call.calldata) &&
+        call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
     );
   };
 
-  const claimExists = (marketId: number) => {
-    return calls.some(
-      (call: any) =>
-        call.entrypoint == "claim_item" && call.calldata[0] == marketId
-    );
+  const purchaseExists = () => {
+    return calls.some((call: Call) => call.entrypoint == "buy_item");
   };
 
-  const checkBidBalance = () => {
-    if (adventurer?.gold) {
-      const sum = calls
-        .filter((call) => call.entrypoint == "bid_on_item")
-        .reduce((accumulator, current) => {
-          const value = current.calldata[4];
-          const parsedValue = value ? parseInt(value.toString(), 10) : 0;
-          return accumulator + (isNaN(parsedValue) ? 0 : parsedValue);
-        }, 0);
-      return sum >= adventurer.gold;
-    }
-    return true;
-  };
+  const { tier, type, slot } = getItemData(item.item ?? "");
+  const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
+  const enoughGold = calculatedNewGold >= itemPrice;
 
-  const checkTransacting = (marketId: number) => {
+  const checkTransacting = (item: string) => {
     if (txData?.status == "RECEIVED" || txData?.status == "PENDING") {
-      return transactingMarketIds?.includes(marketId);
+      return transactingMarketIds?.includes(item);
     } else {
       return false;
     }
   };
 
-  const checkBidder = (bidder: number) => {
-    return adventurer?.id === bidder;
+  const checkOwned = (item: string) => {
+    return ownedItems.some((ownedItem) => ownedItem.item == item);
   };
 
-  const handleKeyDown = (event: KeyboardEvent) => {
-    switch (event.key) {
-      case "ArrowDown":
-        setSelectedButton((prev) => {
-          const newIndex = Math.min(prev + 1, 1);
-          return newIndex;
-        });
-        break;
-      case "ArrowUp":
-        setSelectedButton((prev) => {
-          const newIndex = Math.max(prev - 1, 0);
-          return newIndex;
-        });
-        break;
-      case "Enter":
-        setActiveMenu(0);
-        break;
-      case "Escape":
-        setActiveMenu(0);
-        break;
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      switch (event.key) {
+        case "ArrowDown":
+          setSelectedButton((prev) => {
+            const newIndex = Math.min(prev + 1, 1);
+            return newIndex;
+          });
+          break;
+        case "ArrowUp":
+          setSelectedButton((prev) => {
+            const newIndex = Math.max(prev - 1, 0);
+            return newIndex;
+          });
+          break;
+        case "Enter":
+          setActiveMenu(0);
+          break;
+        case "Escape":
+          setActiveMenu(0);
+          break;
+      }
+    },
+    [selectedButton, setActiveMenu]
+  );
+
+  const isActive = activeMenu == index;
 
   useEffect(() => {
     if (isActive) {
@@ -117,26 +113,32 @@ const MarketplaceRow = ({
         window.removeEventListener("keydown", handleKeyDown);
       };
     }
-  }, [isActive]);
+  }, [isActive, handleKeyDown]);
 
-  const checkExpired = () => {
-    const currentDate = new Date();
-    const itemExpiryDate = new Date(convertTime(item.expiry));
-
-    return itemExpiryDate < currentDate;
-  };
-
-  const status = () => {
-    if (item.status == "Closed" && item.expiry == null) {
-      return "No bids";
-    } else if (item.expiry == null) {
-      return "Open";
-    } else if (checkExpired()) {
-      return "Closed";
-    } else {
-      return "Bids";
+  const handlePurchase = (item: string, tier: number, equip: boolean) => {
+    if (gameContract) {
+      const gameData = new GameData();
+      const PurchaseTx = {
+        contractAddress: gameContract?.address,
+        entrypoint: "buy_item",
+        calldata: [
+          adventurer?.id?.toString() ?? "",
+          "0",
+          getKeyFromValue(gameData.ITEMS, item)?.toString() ?? "",
+          equip ? "1" : "0",
+        ],
+        metadata: `Purchasing ${item} for ${getItemPrice(
+          tier,
+          adventurer?.charisma ?? 0
+        )} gold`,
+      };
+      addToCalls(PurchaseTx);
     }
   };
+
+  const isMobileDevice = useMediaQuery({
+    query: "(max-device-width: 480px)",
+  });
 
   return (
     <tr
@@ -145,92 +147,87 @@ const MarketplaceRow = ({
         (selectedIndex === index + 1 ? " bg-terminal-black" : "")
       }
     >
-      <td className="text-center">{item.marketId}</td>
       <td className="text-center">{item.item}</td>
-      <td className="text-center">{item.rank}</td>
-      <td className="flex justify-center space-x-1 text-center ">
-        {" "}
-        <LootIcon className="self-center pt-3" type={item.slot} />{" "}
-      </td>
-      <td className="text-center">{item.type}</td>
-      <td className="text-center">{item?.material || "Generic"}</td>
-      <td className="text-center">{item.greatness}</td>
-      <td className="text-center">{item.xp}</td>
-      <td className="text-center">{item.price}</td>
+      <td className="text-center">{tier}</td>
       <td className="text-center">
-        {item.bidder
-          ? `${
-              adventurers.find(
-                (adventurer: any) => adventurer.id == item.bidder
-              )?.name
-            } - ${item.bidder}`
-          : ""}
+        <div className="flex justify-center items-center">
+          <LootIcon size={isMobileDevice ? "w-4" : "w-5"} type={slot} />
+        </div>
       </td>
       <td className="text-center">
-        {item.expiry ? (
-          <Countdown
-            countingMessage=""
-            finishedMessage="Expired"
-            targetTime={new Date(convertTime(item.expiry))}
-          />
-        ) : (
-          ""
-        )}
+        <div className="flex flex-row items-center justify-center gap-2">
+          <p className="hidden sm:block">{type}</p>
+          <EfficacyDisplay className="sm:w-8" type={type} />
+        </div>
+      </td>
+      <td className="text-center">
+        <div className="flex flex-row items-center justify-center">
+          <CoinIcon className="w-4 h-4 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
+          <p className="text-terminal-yellow">
+            {getItemPrice(tier, adventurer?.charisma ?? 0)}
+          </p>
+        </div>
       </td>
 
-      <td className="text-center">{status()}</td>
-      <td className="text-center">
-        {item.claimedTime
-          ? formatTime(new Date(convertTime(item.claimedTime)))
-          : ""}
-      </td>
-      <td className="w-64 text-center">
-        {showBidBox == index ? (
-          <BidBox
-            close={() => setShowBidBox(-1)}
-            marketId={item.marketId}
-            item={item}
-            calculatedNewGold={calculatedNewGold}
-          />
-        ) : (
-          <div>
-            <Button
-              onClick={() => setShowBidBox(index)}
-              disabled={
-                checkBidBalance() ||
-                item.claimedTime ||
-                (item.expiry && checkExpired()) ||
-                bidExists(item.marketId) ||
-                checkTransacting(item.marketId)
-                // checkBidder(item.bidder)
-              }
-              className={bidExists(item.marketId) ? "bg-white" : ""}
-            >
-              bid
-            </Button>
-            <Button
-              onClick={async () => {
-                const claimItemTx = {
-                  contractAddress: lootMarketArcadeContract?.address ?? "",
-                  entrypoint: "claim_item",
-                  calldata: [item.marketId, "0", adventurer?.id, "0"],
-                  metadata: `Claiming ${item.item}`,
-                };
-                addToCalls(claimItemTx);
-              }}
-              disabled={
-                item.claimedTime ||
-                claimExists(item.marketId) ||
-                !item.expiry ||
-                convertTime(item.expiry) > currentTime ||
-                adventurer?.id != item.bidder ||
-                checkTransacting(item.marketId)
-              }
-              className={claimExists(item.marketId) ? "" : ""}
-            >
-              claim
+      <td className="w-20 sm:w-32 text-center">
+        {!isMobileDevice && activeMenu === index ? (
+          <div className="flex flex-row items-center justify-center gap-2">
+            <p>Equip?</p>
+            <div className="flex flex-col">
+              <Button
+                size={"xs"}
+                variant={"ghost"}
+                onClick={() => {
+                  handlePurchase(item.item ?? "", tier, true);
+                  setActiveMenu(null);
+                  // setPurchasedItem(true);
+                }}
+              >
+                Yes
+              </Button>
+              <Button
+                size={"xs"}
+                variant={"ghost"}
+                onClick={() => {
+                  handlePurchase(item.item ?? "", tier, false);
+                  setActiveMenu(null);
+                  // setPurchasedItem(true);
+                }}
+              >
+                No
+              </Button>{" "}
+            </div>
+
+            <Button size={"xs"} onClick={() => setActiveMenu(null)}>
+              X
             </Button>
           </div>
+        ) : (
+          <Button
+            onClick={() => {
+              setActiveMenu(index);
+            }}
+            disabled={
+              itemPrice > (adventurer?.gold ?? 0) ||
+              !enoughGold ||
+              checkTransacting(item.item ?? "") ||
+              singlePurchaseExists(item.item ?? "") ||
+              item.owner ||
+              (isMobileDevice && activeMenu === index && isActive) ||
+              checkOwned(item.item ?? "")
+            }
+            className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
+          >
+            {!enoughGold || itemPrice > (adventurer?.gold ?? 0)
+              ? "Not Enough Gold"
+              : checkTransacting(item.item ?? "") ||
+                singlePurchaseExists(item.item ?? "") ||
+                (isMobileDevice && activeMenu === index && isActive)
+              ? "In Cart"
+              : checkOwned(item.item ?? "")
+              ? "Owned"
+              : "Purchase"}
+          </Button>
         )}
       </td>
     </tr>
