@@ -114,7 +114,7 @@ export const TxActivity = () => {
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
         await refetch("battlesByTxHashQuery");
-        await refetch("adventurerByIdQuery");
+        // await refetch("adventurerByIdQuery");
         await refetch("battlesByBeastQuery");
         await refetch("latestMarketItemsQuery");
         console.log("in battle");
@@ -160,9 +160,10 @@ export const TxActivity = () => {
 
         await refetch("discoveryByTxHashQuery");
         await refetch("latestDiscoveriesQuery");
-        await refetch("adventurerByIdQuery");
+        // await refetch("adventurerByIdQuery");
         await refetch("lastBeastBattleQuery");
         await refetch("lastBeastQuery");
+        await refetch("beastQuery");
         await refetch("latestMarketItemsQuery");
         const killedByObstacle =
           queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
@@ -199,7 +200,7 @@ export const TxActivity = () => {
       };
 
       const handleMulticall = async () => {
-        await refetch("adventurerByIdQuery");
+        // await refetch("adventurerByIdQuery");
         await refetch("itemsByAdventurerQuery");
         await refetch("battlesByBeastQuery");
         await refetch("latestMarketItemsQuery");
@@ -218,7 +219,6 @@ export const TxActivity = () => {
       };
 
       const handleDefault = async () => {
-        
         stopLoading(notificationData);
       };
 

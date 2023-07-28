@@ -57,6 +57,7 @@ export default function BeastScreen() {
   const lastBattle = useQueriesStore(
     (state) => state.data.lastBattleQuery?.battles[0]
   );
+  const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
 
   useCustomQuery(
     "lastBeastQuery",
@@ -144,6 +145,7 @@ export default function BeastScreen() {
             });
           }
         });
+        resetDataUpdated("discoveryByTxHashQuery");
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -177,6 +179,7 @@ export default function BeastScreen() {
             });
           }
         });
+        resetDataUpdated("battlesByTxHashQuery");
       },
       disabled:
         adventurer?.beastHealth == undefined ||
