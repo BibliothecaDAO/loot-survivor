@@ -178,7 +178,7 @@ mod Game {
             _assert_not_dead(@self, adventurer);
 
             // assert adventurer does not have stat upgrades available
-            _assert_no_stat_upgrades_available(@self, adventurer);
+            _assert_INSUFFICIENT_STAT_UPGRADES(@self, adventurer);
 
             // assert adventurer is not in battle
             _assert_not_in_battle(@self, adventurer);
@@ -514,8 +514,8 @@ mod Game {
 
             // store the unmodified storages so we can use these
             // to remove the same stat boosts when we pack and save the adventurer
-            let orginal_name_storage1 = name_storage1;
-            let orginal_name_storage2 = name_storage2;
+            let original_name_storage1 = name_storage1;
+            let original_name_storage2 = name_storage2;
 
             // unpack adventurer from storage
             let mut adventurer = _unpack_adventurer_apply_stat_boost(
@@ -533,41 +533,10 @@ mod Game {
             // assert market is open
             _assert_market_is_open(@self, adventurer);
 
-            // get adventurer entropy
-            let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
-                .entropy
-                .into();
+            // buy the provided items
+            let bag_mutated = _buy_items(ref self, ref adventurer, ref bag, adventurer_id, items);
 
-            let mut bag_mutated = false;
-
-            // buy items
-            let mut i: u32 = 0;
-            loop {
-                if i >= items.len() {
-                    break ();
-                }
-
-                // buy item
-                let item = *items.at(i);
-                let inner_bag_mutated = _buy_item(
-                    ref self,
-                    ref adventurer,
-                    ref bag,
-                    adventurer_id,
-                    adventurer_entropy,
-                    item.item_id,
-                    item.equip
-                );
-
-                // maintain bag mutated variable so we don't
-                // waste a waste a write on bag if it didn't change
-                bag_mutated = bag_mutated || inner_bag_mutated;
-
-                // increment counter
-                i += 1;
-            };
-
-            // if buying item mutated bag
+            // if the purchases mutated the adventurer's bag
             if (bag_mutated) {
                 // pack and save updated bag
                 _pack_bag(ref self, adventurer_id, bag);
@@ -578,8 +547,8 @@ mod Game {
                 ref self,
                 adventurer_id,
                 ref adventurer,
-                orginal_name_storage1,
-                orginal_name_storage2
+                original_name_storage1,
+                original_name_storage2
             );
         }
 
@@ -625,6 +594,11 @@ mod Game {
             let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
                 .entropy
                 .into();
+
+            // check item is available on market
+            _assert_item_is_available(
+                @self, adventurer, adventurer_id, adventurer_entropy, item_id
+            );
 
             // buy item
             let bag_mutated = _buy_item(
@@ -736,24 +710,7 @@ mod Game {
             _assert_market_is_open(@self, adventurer);
 
             // buy potions
-            let mut i: u8 = 0;
-            loop {
-                if i >= amount {
-                    break ();
-                }
-                _buy_potion(ref self, adventurer_id, ref adventurer);
-                i += 1;
-            };
-
-            // emit purchase potion event
-            __event_PurchasedPotion(
-                ref self,
-                AdventurerState {
-                    owner: get_caller_address(), adventurer_id, adventurer: adventurer
-                },
-                amount,
-                POTION_HEALTH_AMOUNT * amount.into(),
-            );
+            _buy_potions(ref self, ref adventurer, adventurer_id, amount);
 
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -782,6 +739,8 @@ mod Game {
                 @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
             );
 
+            // maintain copy of originals so we can remove same stats
+            // when we pack and save the adventurer
             let original_name_storage1 = name_storage1;
             let original_name_storage2 = name_storage2;
 
@@ -792,9 +751,6 @@ mod Game {
 
             // assert adventurer is not dead
             _assert_not_dead(@self, adventurer);
-
-            // assert adventurer has stat StatUpgradesAvailable available
-            _assert_has_required_stat_points(@self, adventurer, amount);
 
             // upgrade adventurer's stat
             _upgrade_stat(ref self, adventurer_id, ref adventurer, stat, amount);
@@ -809,6 +765,69 @@ mod Game {
                     },
                     items: _get_items_on_market(@self, adventurer_id, adventurer)
                 );
+            }
+
+            // remove stat boosts, pack, and save adventurer
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                original_name_storage1,
+                original_name_storage2
+            );
+        }
+
+        fn buy_items_and_upgrade_stats(
+            ref self: ContractState,
+            adventurer_id: u256,
+            potion_quantity: u8,
+            items: Span<ItemPurchase>,
+            stats: Span<u8>
+        ) {
+            // assert caller owns adventurer
+            _assert_ownership(@self, adventurer_id);
+
+            // get item names from storage
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+
+            let original_name_storage1 = name_storage1;
+            let original_name_storage2 = name_storage2;
+
+            // unpack adventurer from storage (stat boosts applied on unpacking)
+            let mut adventurer = _unpack_adventurer_apply_stat_boost(
+                @self, adventurer_id, name_storage1, name_storage2
+            );
+
+            // unpack Loot bag from storage
+            let mut bag = _bag_unpacked(@self, adventurer_id);
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // assert adventurer is not in battle
+            _assert_not_in_battle(@self, adventurer);
+
+            // assert market is open
+            _assert_market_is_open(@self, adventurer);
+
+            // upgrade stats
+            _upgrade_stats(ref self, ref adventurer, adventurer_id, stats);
+
+            // buy potions
+            _buy_potions(ref self, ref adventurer, adventurer_id, potion_quantity);
+
+            // buy items
+            let bag_mutated = _buy_items(ref self, ref adventurer, ref bag, adventurer_id, items);
+
+            // if the purchases mutated the adventurer's bag
+            if (bag_mutated) {
+                // pack and save updated bag
+                _pack_bag(ref self, adventurer_id, bag);
             }
 
             // remove stat boosts, pack, and save adventurer
@@ -847,30 +866,8 @@ mod Game {
             // assert adventurer is not dead
             _assert_not_dead(@self, adventurer);
 
-            // assert adventurer has the required stat upgrades
-            _assert_has_required_stat_points(@self, adventurer, stats.len().try_into().unwrap());
-
             // upgrade adventurer's stat
-            let mut i: u32 = 0;
-            loop {
-                if i >= stats.len() {
-                    break ();
-                }
-                _upgrade_stat(ref self, adventurer_id, ref adventurer, *stats.at(i), 1);
-                i += 1;
-            };
-
-            // if adventurer still has more stats available
-            if (adventurer.stat_points_available > 0) {
-                // emit new market items
-                __event_NewItemsAvailable(
-                    ref self,
-                    adventurer_state: AdventurerState {
-                        owner: get_caller_address(), adventurer_id, adventurer
-                    },
-                    items: _get_items_on_market(@self, adventurer_id, adventurer)
-                );
-            }
+            _upgrade_stats(ref self, ref adventurer, adventurer_id, stats);
 
             // remove stat boosts, pack, and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -2571,6 +2568,110 @@ mod Game {
         (adventurer_mutated, bag_mutated)
     }
 
+    // @dev Function to facilitate the purchase of multiple items.
+    // @param adventurer The Adventurer struct instance representing the adventurer buying items.
+    // @param bag The Bag struct instance representing the adventurer's current bag of items.
+    // @param adventurer_id The unique identifier for the adventurer.
+    // @param adventurer_entropy The entropy of the adventurer used for randomness.
+    // @param items The span of ItemPurchase instances representing items to be purchased.
+    // @return bag_mutated A boolean value indicating whether the adventurer's bag was modified during the function execution.
+    fn _buy_items(
+        ref self: ContractState,
+        ref adventurer: Adventurer,
+        ref bag: Bag,
+        adventurer_id: u256,
+        items: Span<ItemPurchase>
+    ) -> bool {
+        // get adventurer entropy
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+            .entropy
+            .into();
+
+        // init variable for tracking bag mutations
+        let mut bag_mutated = false;
+
+        // loop over the items
+        let mut i: u32 = 0;
+        loop {
+            if i >= items.len() {
+                break ();
+            }
+
+            // buy each item
+            let item = *items.at(i);
+            let inner_bag_mutated = _buy_item(
+                ref self,
+                ref adventurer,
+                ref bag,
+                adventurer_id,
+                adventurer_entropy,
+                item.item_id,
+                item.equip
+            );
+
+            // maintain bag mutated variable so we don't
+            // waste a storage update on the bag if it didn't change
+            bag_mutated = bag_mutated || inner_bag_mutated;
+
+            // increment counter
+            i += 1;
+        };
+
+        // return bool representing whether or not the bag was mutated as part of this function
+        bag_mutated
+    }
+
+    fn _buy_potions(
+        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, amount: u8
+    ) {
+        // buy potions
+        let mut i: u8 = 0;
+        loop {
+            if i >= amount {
+                break ();
+            }
+            _buy_potion(ref self, adventurer_id, ref adventurer);
+            i += 1;
+        };
+
+        // emit purchase potion event
+        __event_PurchasedPotion(
+            ref self,
+            AdventurerState { owner: get_caller_address(), adventurer_id, adventurer: adventurer },
+            amount,
+            POTION_HEALTH_AMOUNT * amount.into(),
+        );
+    }
+
+    fn _upgrade_stats(
+        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, stats: Span<u8>
+    ) {
+        // assert adventurer has the required stat upgrades
+        _assert_has_required_stat_points(@self, adventurer, stats.len().try_into().unwrap());
+
+        // upgrade adventurer's stat
+        let mut i: u32 = 0;
+        loop {
+            if i >= stats.len() {
+                break ();
+            }
+            _upgrade_stat(ref self, adventurer_id, ref adventurer, *stats.at(i), 1);
+            i += 1;
+        };
+
+        // if adventurer still has more stats available
+        if (adventurer.stat_points_available > 0) {
+            // emit new market items
+            __event_NewItemsAvailable(
+                ref self,
+                adventurer_state: AdventurerState {
+                    owner: get_caller_address(), adventurer_id, adventurer
+                },
+                items: _get_items_on_market(@self, adventurer_id, adventurer)
+            );
+        }
+    }
+
     // @dev This function allows the adventurer to purchase an item from the market.
     // @notice The item price is adjusted based on the adventurer's charisma. The function also manages the adventurer's inventory based on whether they equip the item or not. It emits an event whenever an item is purchased.
     // @param adventurer The adventurer buying the item. The function modifies the adventurer's gold and equipment.
@@ -2595,9 +2696,6 @@ mod Game {
 
         // assert adventurer does not already own the item
         _assert_item_not_owned(@self, adventurer, bag, item_id);
-
-        // check item is available on market
-        _assert_item_is_available(@self, adventurer, adventurer_id, adventurer_entropy, item_id);
 
         // get item price
         let base_item_price = ImplMarket::get_price(ImplLoot::get_tier(item_id));
@@ -2674,6 +2772,9 @@ mod Game {
         stat_id: u8,
         amount: u8
     ) {
+        // assert adventurer has stat StatUpgradesAvailable available
+        _assert_has_required_stat_points(@self, adventurer, amount);
+
         //deduct upgrades from adventurer available stat points
         adventurer.stat_points_available -= amount;
 
@@ -2996,17 +3097,16 @@ mod Game {
         adventurer_entropy: u128,
         item_id: u8
     ) {
+        let (seeds, offsets) = adventurer.get_market_seeds(adventurer_id, adventurer_entropy);
         assert(
-            ImplMarket::is_item_available(
-                adventurer.get_market_seed(adventurer_id, adventurer_entropy).into(), item_id
-            ) == true,
+            ImplMarket::is_item_available(seeds, offsets, item_id) == true,
             messages::ITEM_DOES_NOT_EXIST
         );
     }
     fn _assert_not_starter_beast(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.get_level() > 1, messages::CANT_FLEE_STARTER_BEAST);
     }
-    fn _assert_no_stat_upgrades_available(self: @ContractState, adventurer: Adventurer) {
+    fn _assert_INSUFFICIENT_STAT_UPGRADES(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.stat_points_available == 0, messages::STAT_UPGRADES_AVAILABLE);
     }
     fn _assert_not_dead(self: @ContractState, adventurer: Adventurer) {
@@ -3020,7 +3120,7 @@ mod Game {
         assert(adventurer.last_action != current_block, messages::ONE_EXPLORE_PER_BLOCK);
     }
     fn _assert_has_required_stat_points(self: @ContractState, adventurer: Adventurer, amount: u8) {
-        assert(adventurer.stat_points_available >= amount, messages::NO_STAT_UPGRADES_AVAILABLE);
+        assert(adventurer.stat_points_available >= amount, messages::INSUFFICIENT_STAT_UPGRADES);
     }
     fn _assert_fatally_idle(self: @ContractState, adventurer: Adventurer) {
         let idle_blocks = adventurer
@@ -3099,9 +3199,8 @@ mod Game {
             .entropy
             .into();
 
-        ImplMarket::get_all_items_with_price(
-            adventurer.get_market_seed(adventurer_id, adventurer_entropy).into()
-        )
+        let (seeds, offsets) = adventurer.get_market_seeds(adventurer_id, adventurer_entropy);
+        ImplMarket::get_all_items_with_price(seeds, offsets)
     }
 
     fn _get_market_items_by_slot(
@@ -3111,9 +3210,8 @@ mod Game {
             .entropy
             .into();
 
-        ImplMarket::get_items_by_slot(
-            adventurer.get_market_seed(adventurer_id, adventurer_entropy).into(), slot
-        )
+        let (seeds, offsets) = adventurer.get_market_seeds(adventurer_id, adventurer_entropy);
+        ImplMarket::get_items_by_slot(seeds, offsets, slot)
     }
 
     fn _get_market_items_by_tier(
@@ -3123,9 +3221,9 @@ mod Game {
             .entropy
             .into();
 
-        ImplMarket::get_items_by_tier(
-            adventurer.get_market_seed(adventurer_id, adventurer_entropy).into(), tier
-        )
+        let (seeds, offsets) = adventurer.get_market_seeds(adventurer_id, adventurer_entropy);
+
+        ImplMarket::get_items_by_tier(seeds, offsets, tier)
     }
 
     fn _get_potion_price(self: @ContractState, adventurer_id: u256) -> u16 {
