@@ -265,7 +265,7 @@ fn test_get_price() {
 }
 
 #[test]
-#[available_gas(10000000)]
+#[available_gas(14000000)]
 fn test_get_all_items() {
     let mut market_seeds = ArrayTrait::<u128>::new();
     market_seeds.append(1);
@@ -277,11 +277,14 @@ fn test_get_all_items() {
     assert(items.len().into() == NUMBER_OF_ITEMS_PER_LEVEL, 'incorrect number of items');
 
     market_seeds.append(2);
+    offset.append(5);
     let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
     assert(items.len().into() == NUMBER_OF_ITEMS_PER_LEVEL * 2, 'incorrect number of items');
 
     market_seeds.append(3);
     market_seeds.append(4);
+    offset.append(51);
+    offset.append(101);
     let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
     assert(items.len().into() == NUMBER_OF_ITEMS_PER_LEVEL * 4, 'incorrect number of items');
 }
