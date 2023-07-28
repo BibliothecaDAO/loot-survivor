@@ -13,8 +13,8 @@ use super::{
         }
     },
     utils::NameUtils::{
-        is_special3_set1, is_special3_set2, is_special3_set3, is_special1_set1,
-        is_special1_set2, is_special2_set1, is_special2_set2, is_special2_set3
+        is_special3_set1, is_special3_set2, is_special3_set3, is_special1_set1, is_special1_set2,
+        is_special2_set1, is_special2_set2, is_special2_set3
     }
 };
 
@@ -133,10 +133,11 @@ impl PackingLoot of Packing<Loot> {
         let item_slot = ImplCombat::slot_to_u8(self.slot);
 
         (self.id.into()
-         + item_tier.into() * pow::TWO_POW_8
-         + item_type.into() * pow::TWO_POW_16
-         + item_slot.into() * pow::TWO_POW_24
-        ).try_into().expect('pack Loot')
+            + item_tier.into() * pow::TWO_POW_8
+            + item_type.into() * pow::TWO_POW_16
+            + item_slot.into() * pow::TWO_POW_24)
+            .try_into()
+            .expect('pack Loot')
     }
 
     // unpack an item from storage
@@ -155,6 +156,11 @@ impl PackingLoot of Packing<Loot> {
             item_type: ImplCombat::u8_to_type(item_type.try_into().expect('unpack Loot item type')),
             slot: ImplCombat::u8_to_slot(item_slot.try_into().expect('unpack Loot slot'))
         }
+    }
+
+    // TODO: add overflow pack protection
+    fn overflow_pack_protection(self: Loot) -> Loot {
+        self
     }
 }
 
@@ -230,17 +236,13 @@ fn test_item_special3() {
         //
         // Katanas are always 'X Grasp'
         assert(
-            ImplLoot::get_special3(
-                ItemId::Katana, U32IntoU128::into(i)
-            ) == ItemNameSuffix::Grasp,
+            ImplLoot::get_special3(ItemId::Katana, U32IntoU128::into(i)) == ItemNameSuffix::Grasp,
             'katana should be grasp'
         );
 
         // Warhammers are always 'X Bane'
         assert(
-            ImplLoot::get_special3(
-                ItemId::Warhammer, U32IntoU128::into(i)
-            ) == ItemNameSuffix::Bane,
+            ImplLoot::get_special3(ItemId::Warhammer, U32IntoU128::into(i)) == ItemNameSuffix::Bane,
             'warhammer should be bane'
         );
 
@@ -254,9 +256,7 @@ fn test_item_special3() {
         //
         // Divine Robes are always {X Bane, X Song, X Instrument, X Shadow, X Growl, X Form} (set 1)
         assert(
-            is_special3_set1(
-                ImplLoot::get_special3(ItemId::DivineRobe, U32IntoU128::into(i))
-            ),
+            is_special3_set1(ImplLoot::get_special3(ItemId::DivineRobe, U32IntoU128::into(i))),
             'invalid divine robe name suffix'
         );
 
@@ -277,9 +277,7 @@ fn test_item_special3() {
         //
         // Ancient Helms use name suffix set 1
         assert(
-            is_special3_set1(
-                ImplLoot::get_special3(ItemId::AncientHelm, U32IntoU128::into(i))
-            ),
+            is_special3_set1(ImplLoot::get_special3(ItemId::AncientHelm, U32IntoU128::into(i))),
             'invalid war cap name suffix'
         );
 
@@ -291,9 +289,7 @@ fn test_item_special3() {
 
         // Divine Hood uses name suffix set 3
         assert(
-            is_special3_set3(
-                ImplLoot::get_special3(ItemId::DivineHood, U32IntoU128::into(i))
-            ),
+            is_special3_set3(ImplLoot::get_special3(ItemId::DivineHood, U32IntoU128::into(i))),
             'invalid divine hood name suffix'
         );
 
@@ -302,25 +298,19 @@ fn test_item_special3() {
         //
         // Ornate Belt uses name suffix set 1
         assert(
-            is_special3_set1(
-                ImplLoot::get_special3(ItemId::OrnateBelt, U32IntoU128::into(i))
-            ),
+            is_special3_set1(ImplLoot::get_special3(ItemId::OrnateBelt, U32IntoU128::into(i))),
             'invalid ornate belt suffix'
         );
 
         // Brightsilk Sash uses name suffix set 2
         assert(
-            is_special3_set2(
-                ImplLoot::get_special3(ItemId::BrightsilkSash, U32IntoU128::into(i))
-            ),
+            is_special3_set2(ImplLoot::get_special3(ItemId::BrightsilkSash, U32IntoU128::into(i))),
             'invalid brightsilk sash suffix'
         );
 
         // Hard Leather Belt uses name set 3
         assert(
-            is_special3_set3(
-                ImplLoot::get_special3(ItemId::HardLeatherBelt, U32IntoU128::into(i))
-            ),
+            is_special3_set3(ImplLoot::get_special3(ItemId::HardLeatherBelt, U32IntoU128::into(i))),
             'wrong hard leather belt suffix'
         );
 
@@ -329,25 +319,19 @@ fn test_item_special3() {
         //
         // Holy Graves uses name suffix set 1
         assert(
-            is_special3_set1(
-                ImplLoot::get_special3(ItemId::HolyGreaves, U32IntoU128::into(i))
-            ),
+            is_special3_set1(ImplLoot::get_special3(ItemId::HolyGreaves, U32IntoU128::into(i))),
             'invalid holy greaves suffix'
         );
 
         // Heavy Boots use name suffix set 2
         assert(
-            is_special3_set2(
-                ImplLoot::get_special3(ItemId::HeavyBoots, U32IntoU128::into(i))
-            ),
+            is_special3_set2(ImplLoot::get_special3(ItemId::HeavyBoots, U32IntoU128::into(i))),
             'invalid heavy boots suffix'
         );
 
         // Silk Slippers use name suffix set 3
         assert(
-            is_special3_set3(
-                ImplLoot::get_special3(ItemId::SilkSlippers, U32IntoU128::into(i))
-            ),
+            is_special3_set3(ImplLoot::get_special3(ItemId::SilkSlippers, U32IntoU128::into(i))),
             'invalid silk slippers suffix'
         );
 
@@ -356,17 +340,13 @@ fn test_item_special3() {
         //
         // Holy Gauntlets use name suffix set 1
         assert(
-            is_special3_set1(
-                ImplLoot::get_special3(ItemId::HolyGauntlets, U32IntoU128::into(i))
-            ),
+            is_special3_set1(ImplLoot::get_special3(ItemId::HolyGauntlets, U32IntoU128::into(i))),
             'invalid holy gauntlets suffix'
         );
 
         // Linen Gloves use name suffix set 2
         assert(
-            is_special3_set2(
-                ImplLoot::get_special3(ItemId::LinenGloves, U32IntoU128::into(i))
-            ),
+            is_special3_set2(ImplLoot::get_special3(ItemId::LinenGloves, U32IntoU128::into(i))),
             'invalid linen gloves suffix'
         );
 
@@ -424,9 +404,7 @@ fn test_item_prefix() {
         }
 
         // divine robe uses name prefix set 1
-        let divine_robe_prefix = ImplLoot::get_special2(
-            ItemId::DivineRobe, U32IntoU128::into(i)
-        );
+        let divine_robe_prefix = ImplLoot::get_special2(ItemId::DivineRobe, U32IntoU128::into(i));
         let divine_robe_prefix_valid = is_special2_set1(divine_robe_prefix);
         assert(divine_robe_prefix_valid, 'invalid divine robe belt prefix');
 
