@@ -27,6 +27,13 @@ trait IGame<TContractState> {
     fn buy_potions(ref self: TContractState, adventurer_id: u256, amount: u8);
     fn upgrade_stat(ref self: TContractState, adventurer_id: u256, stat: u8, amount: u8);
     fn upgrade_stats(ref self: TContractState, adventurer_id: u256, stats: Span<u8>);
+    fn buy_items_and_upgrade_stats(
+        ref self: TContractState,
+        adventurer_id: u256,
+        potion_quantity: u8,
+        items: Span<ItemPurchase>,
+        stats: Span<u8>
+    );
     fn slay_idle_adventurer(ref self: TContractState, adventurer_id: u256);
 
     // --------- view functions ---------

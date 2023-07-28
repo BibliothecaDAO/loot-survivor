@@ -867,7 +867,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(100000000)]
+    #[available_gas(130000000)]
     fn test_equip() {
         // start game on level 2 so we have access to the market
         let mut game = new_adventurer_cleric_level2();
@@ -1626,5 +1626,53 @@ mod tests {
         // call upgrade_stats
         // this should panic
         game.upgrade_stats(ADVENTURER_ID, stat_upgrades.span());
+    }
+
+    #[test]
+    #[available_gas(100000000)]
+    fn test_buy_items_and_upgrade_stats() {
+        // deploy and start new game
+        let mut game = new_adventurer_lvl2();
+
+        // get original adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let original_charisma = adventurer.stats.charisma;
+        let original_health = adventurer.health;
+
+        // potions
+        let potion_quantity = 1;
+
+        // items to purchase
+        let market_items = @game.get_items_on_market(ADVENTURER_ID);
+        let item_1 = *market_items.at(0).item.id;
+        let item_2 = *market_items.at(1).item.id;
+        let mut items_to_purchase = ArrayTrait::<ItemPurchase>::new();
+        items_to_purchase.append(ItemPurchase { item_id: item_1, equip: true });
+        items_to_purchase.append(ItemPurchase { item_id: item_2, equip: true });
+
+        // stat upgrade (Charisma)
+        let mut stat_upgrades = ArrayTrait::<u8>::new();
+        stat_upgrades.append(5);
+
+        // purchase potions, items, and upgrade stat in single call
+        game
+            .buy_items_and_upgrade_stats(
+                ADVENTURER_ID, potion_quantity, items_to_purchase.span(), stat_upgrades.span()
+            );
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // assert health was increased by one potion
+        assert(adventurer.health == original_health + POTION_HEALTH_AMOUNT, 'health not increased');
+
+        // assert charisma was increased
+        assert(adventurer.stats.charisma == original_charisma + 1, 'charisma not increased');
+        // assert stat point was used
+        assert(adventurer.stat_points_available == 0, 'should have used stat point');
+
+        // assert adventurer has the purchased items
+        assert(adventurer.is_equipped(item_1), 'item should be equipped');
+        assert(adventurer.is_equipped(item_2), 'item should be equipped');
     }
 }

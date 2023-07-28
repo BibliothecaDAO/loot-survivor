@@ -179,26 +179,52 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    // Calculates and returns the market entropy for a given adventurer.
+
+    // @notice Generates market seeds and offsets for an adventurer based on their stat points, 
+    // adventurer id, and entropy.
     //
-    // @param self The instance of the Adventurer struct which contains the adventurer's stats, XP, and available stat points.
-    // @param adventurer_id The unique identifier for the adventurer.
-    // @param adventurer_entropy An additional entropy input for the adventurer.
+    // Each market seed and offset pair corresponds to a stat point. The pairs are generated using
+    // the function AdventurerUtils::get_market_seed_and_offset. The process ends when all stat points 
+    // have been assigned a market seed and offset pair.
     //
-    // @return u256 The calculated market entropy for the given adventurer.
-    fn get_market_seed(self: Adventurer, adventurer_id: u256, adventurer_entropy: u128) -> u128 {
-        let mut hash_span = ArrayTrait::new();
+    // @param adventurer_id Unique identifier for the adventurer.
+    // @param adventurer_entropy A numerical value representing the randomness for the adventurer.
+    //
+    // @return Span<u128> The array of market seeds for the adventurer.
+    // @return Span<u8> The corresponding offsets for the market seeds.
+    //
+    // @dev The function uses the internal value of stat_points_available for determining the number of seeds 
+    // and offsets to generate. The function iteratively decreases the stat points until no more are left, 
+    // and appends the market seed and offset pair generated in each iteration to the respective arrays.
+    fn get_market_seeds(
+        self: Adventurer, adventurer_id: u256, adventurer_entropy: u128
+    ) -> (Span<u128>, Span<u8>) {
+        let mut seeds = ArrayTrait::new();
+        let mut offsets = ArrayTrait::new();
 
-        hash_span.append(self.xp.into());
-        hash_span.append(self.stat_points_available.into());
-        hash_span.append(adventurer_entropy.into());
-        hash_span.append(adventurer_id.try_into().unwrap());
+        // for each stat point available
+        let mut stat_count: u8 = self.stat_points_available;
+        loop {
+            // stop if we have no more stat points
+            if stat_count == 0 {
+                break ();
+            }
 
-        let poseidon = poseidon_hash_span(hash_span.span());
+            // generate a unique market seed and offset
+            let (seed, offset) = AdventurerUtils::get_market_seed_and_offset(
+                adventurer_id, adventurer_entropy, self.xp, stat_count
+            );
 
-        let (d, r) = rshift_split(poseidon.into(), 340282366920938463463374607431768211455);
+            // add to our seeds and offsets arrays
+            seeds.append(seed);
+            offsets.append(offset);
 
-        r.try_into().unwrap()
+            // decrement stat count
+            stat_count -= 1;
+        };
+
+        // return seeds and offsets
+        (seeds.span(), offsets.span())
     }
 
     // @notice Calculates the charisma potion discount for the adventurer based on their charisma stat.
@@ -2844,7 +2870,7 @@ fn test_add_stat_boosts() {
 
 
 #[test]
-#[available_gas(200000)]
+#[available_gas(1100000)]
 fn test_get_market_entropy() {
     // test zero case
     let mut adventurer = Adventurer {
@@ -2866,12 +2892,12 @@ fn test_get_market_entropy() {
             id: 7, xp: 1, metadata: 7, 
             }, ring: ItemPrimitive {
             id: 8, xp: 1, metadata: 8, 
-        }, beast_health: 20, stat_points_available: 0,
+        }, beast_health: 20, stat_points_available: 1,
     };
 
     // assert get_market_seed doesn't fail with zero case
     // result isn't important, just that it doesn't fail
-    let market_entropy = adventurer.get_market_seed(1, 1);
+    let market_entropy = adventurer.get_market_seeds(1, 1);
 
     // test extreme/overflow case
     adventurer.xp = 8191; // max value for 13 bits
@@ -2879,7 +2905,7 @@ fn test_get_market_entropy() {
     let max_adventurer_id: u256 = 340282366920938463463374607431768211455; // max value for 256 bits
     let max_adventurer_entropy: u128 =
         340282366920938463463374607431768211455; // max value for 128 bits
-    let market_entropy = adventurer.get_market_seed(max_adventurer_id, max_adventurer_entropy);
+    let market_entropy = adventurer.get_market_seeds(max_adventurer_id, max_adventurer_entropy);
 // result isn't important, just that it doesn't fail via overflow
 }
 

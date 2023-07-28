@@ -1,18 +1,12 @@
-// a randomised deterministic marketplace for loot items
+// a randomised deterministic marketplace
 use traits::{TryInto, Into};
 use core::clone::Clone;
-use array::ArrayTrait;
+use array::{ArrayTrait, SpanTrait};
 use option::OptionTrait;
 
-use lootitems::statistics::constants::ItemId;
-use lootitems::loot::{Loot, ILoot, ImplLoot};
-use lootitems::statistics::item_tier;
-
+use lootitems::{loot::{Loot, ILoot, ImplLoot}, statistics::{item_tier, constants::ItemId}};
 use combat::constants::CombatEnums::{Tier, Slot};
-
-use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, OFFSET, TIER_PRICE};
-
-const MARKET_SEED: u256 = 515;
+use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE};
 
 #[derive(Drop, Serde)]
 struct LootWithPrice {
@@ -28,6 +22,10 @@ struct ItemPurchase {
 
 #[generate_trait]
 impl ImplMarket of IMarket {
+    // @notice Retrieves the price associated with a particular tier.
+    // @param tier - A Tier enum indicating the item tier.
+    // @return The price as an unsigned 16-bit integer.
+    // @dev This function matches the tier enum to a respective price calculation.
     fn get_price(tier: Tier) -> u16 {
         match tier {
             Tier::None(()) => 0,
@@ -39,106 +37,213 @@ impl ImplMarket of IMarket {
         }
     }
 
-    fn get_all_items(seed: u256) -> Array<Loot> {
+    /// @notice Retrieves all items associated with an array of seeds and offsets.
+    /// @param seeds - A Span of 128-bit unsigned integers representing unique identifiers for the seeds.
+    /// @param offsets - A Span of 8-bit unsigned integers representing offset values for the seeds.
+    /// @return An Array of Loot.
+    fn get_all_items(seeds: Span<u128>, offsets: Span<u8>) -> Array<Loot> {
         let mut all_items = ArrayTrait::<Loot>::new();
 
-        let mut i: u256 = 0;
+        // iterate over our array of seeds
+        let mut seed_index: u32 = 0;
         loop {
-            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
-                break ();
+            // if we checked all seeds, return false
+            if seed_index >= seeds.len() {
+                break;
             }
+            let seed = *seeds.at(seed_index);
+            let offset = *offsets.at(seed_index);
 
-            all_items.append(ImplLoot::get_item(ImplMarket::get_id(seed + i)));
-            i += OFFSET;
+            let mut item_offset: u128 = 0;
+            loop {
+                if item_offset >= offset.into() * NUMBER_OF_ITEMS_PER_LEVEL {
+                    break;
+                }
+
+                all_items.append(ImplLoot::get_item(ImplMarket::get_id(seed + item_offset)));
+                item_offset += offset.into();
+            };
+
+            // otherwise continue to the next seed
+            seed_index += 1;
         };
 
         all_items
     }
 
-    fn get_all_items_with_price(seed: u256) -> Array<LootWithPrice> {
+    // Retrieves all items with their associated prices for an array of seeds and offsets.
+    // @param seeds - A Span of 128-bit unsigned integers representing unique identifiers for the seeds.
+    // @param offsets - A Span of 8-bit unsigned integers representing offset values for the seeds.
+    // @return An Array of LootWithPrice.
+    fn get_all_items_with_price(seeds: Span<u128>, offsets: Span<u8>) -> Array<LootWithPrice> {
         let mut all_items = ArrayTrait::<LootWithPrice>::new();
 
-        let mut i: u256 = 0;
+        // iterate over our array of seeds
+        let mut seed_index: u32 = 0;
         loop {
-            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
-                break ();
+            // if we checked all seeds, return false
+            if seed_index >= seeds.len() {
+                break;
             }
+            let seed = *seeds.at(seed_index);
+            let offset = *offsets.at(seed_index);
 
-            let id = ImplMarket::get_id(seed + i);
-            all_items
-                .append(
-                    LootWithPrice {
-                        item: ImplLoot::get_item(id),
-                        price: ImplMarket::get_price(ImplLoot::get_tier(id))
-                    }
-                );
-            i += OFFSET;
+            let mut item_offset: u128 = 0;
+            loop {
+                if item_offset >= offset.into() * NUMBER_OF_ITEMS_PER_LEVEL {
+                    break ();
+                }
+
+                let id = ImplMarket::get_id(seed + item_offset);
+                all_items
+                    .append(
+                        LootWithPrice {
+                            item: ImplLoot::get_item(id),
+                            price: ImplMarket::get_price(ImplLoot::get_tier(id))
+                        }
+                    );
+                item_offset += offset.into();
+            };
+            // otherwise continue to the next seed
+            seed_index += 1;
         };
 
         all_items
     }
 
-    fn get_items_by_slot(seed: u256, slot: Slot) -> Array<u8> {
+    // @notice Retrieves item IDs by specific slot for an array of seeds and offsets.
+    // @param seeds - A Span of 128-bit unsigned integers representing unique identifiers for the seeds.
+    // @param offsets - A Span of 8-bit unsigned integers representing offset values for the seeds.
+    // @param slot - A Slot enum indicating the specific slot to filter by.
+    // @return An Array of 8-bit unsigned integers representing item IDs.
+    fn get_items_by_slot(seeds: Span<u128>, offsets: Span<u8>, slot: Slot) -> Array<u8> {
         let mut return_ids = ArrayTrait::<u8>::new();
 
-        let mut i: u256 = 0;
+        // iterate over our array of seeds
+        let mut seed_index: u32 = 0;
         loop {
-            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
-                break ();
+            // if we checked all seeds, return false
+            if seed_index >= seeds.len() {
+                break;
             }
+            let seed = *seeds.at(seed_index);
+            let offset = *offsets.at(seed_index);
+            let mut item_offset: u128 = 0;
+            loop {
+                if item_offset >= offset.into() * NUMBER_OF_ITEMS_PER_LEVEL {
+                    break ();
+                }
+                let id = ImplMarket::get_id(seed + item_offset);
+                if (ImplLoot::get_slot(id) == slot) {
+                    return_ids.append(id);
+                }
 
-            let id = ImplMarket::get_id(seed + i);
-            if (ImplLoot::get_slot(id) == slot) {
-                return_ids.append(id);
-            }
-
-            i += OFFSET;
+                item_offset += offset.into();
+            };
+            seed_index += 1;
         };
 
         return_ids
     }
 
-    fn get_items_by_tier(seed: u256, tier: Tier) -> Array<u8> {
+    // @notice Retrieves item IDs by specific tier for an array of seeds and offsets.
+    // @param seeds - A Span of 128-bit unsigned integers representing unique identifiers for the seeds.
+    // @param offsets - A Span of 8-bit unsigned integers representing offset values for the seeds.
+    // @param tier - A Tier enum indicating the specific tier to filter by.
+    // @return An Array of 8-bit unsigned integers representing item IDs.
+    fn get_items_by_tier(seeds: Span<u128>, offsets: Span<u8>, tier: Tier) -> Array<u8> {
         let mut return_ids = ArrayTrait::<u8>::new();
 
-        let mut i: u256 = 0;
+        // iterate over our array of seeds
+        let mut seed_index: u32 = 0;
         loop {
-            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
-                break ();
+            // if we checked all seeds, return false
+            if seed_index >= seeds.len() {
+                break;
             }
+            let seed = *seeds.at(seed_index);
+            let offset = *offsets.at(seed_index);
 
-            let id = ImplMarket::get_id(seed + i);
-            if (ImplLoot::get_tier(id) == tier) {
-                return_ids.append(id);
-            }
+            let mut item_offset: u128 = 0;
+            loop {
+                if item_offset >= offset.into() * NUMBER_OF_ITEMS_PER_LEVEL {
+                    break ();
+                }
+                let id = ImplMarket::get_id(seed + item_offset);
+                if (ImplLoot::get_tier(id) == tier) {
+                    return_ids.append(id);
+                }
 
-            i += OFFSET;
+                item_offset += offset.into();
+            };
+            // otherwise continue to the next seed
+            seed_index += 1;
         };
 
         return_ids
     }
 
-    fn get_id(seed: u256) -> u8 {
-        let cast_seed: u128 = seed.try_into().unwrap();
-        (1 + (cast_seed % NUM_LOOT_ITEMS.into())).try_into().unwrap()
+    // @notice Gets a u8 item id from a u128 seed
+    // @param seed a 128-bit unsigned integer representing a unique identifier for the seed.
+    // @return a u8 representing the item ID.
+    fn get_id(seed: u128) -> u8 {
+        (1 + (seed % NUM_LOOT_ITEMS.into())).try_into().unwrap()
     }
 
-    fn is_item_available(seed: u256, item_id: u8) -> bool {
-        let mut i: u256 = 0;
-
+    // @notice This function checks if an item is available within the provided seeds and offsets.
+    // @dev The function iterates over seeds and offsets. For each seed, it checks 
+    //      whether the item is available. If the item is not found in any of the seeds, 
+    //      the function returns false. If the item is found, the function returns true.
+    // @param seeds An array of seed values of type `u128`.
+    // @param offsets An array of offset values of type `u8`.
+    // @param item_id The ID of the item to be checked, of type `u8`.
+    // @return A boolean value indicating whether the item is available within the seeds and offsets.
+    fn is_item_available(seeds: Span<u128>, offsets: Span<u8>, item_id: u8) -> bool {
+        // iterate over our array of seeds
+        let mut seed_index: u32 = 0;
         loop {
-            if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+            // if we checked all seeds, return false
+            if seed_index >= seeds.len() {
                 break false;
             }
+            let seed = *seeds.at(seed_index);
+            let offset = *offsets.at(seed_index);
 
-            if item_id == ImplMarket::get_id(seed + i) {
+            // for each seed check if the item is available
+            let mut item_available_for_seed = false;
+            let mut item_offset: u128 = 0;
+            loop {
+                // if we checked all items for this seed, return false
+
+                if item_offset >= offset.into() * NUMBER_OF_ITEMS_PER_LEVEL {
+                    break;
+                }
+
+                // if we found the item in this seed
+                if item_id == ImplMarket::get_id(seed.into() + item_offset) {
+                    // capture that we found the item
+                    item_available_for_seed = true;
+                    // and break out of this loop
+                    break;
+                }
+                item_offset += offset.into();
+            };
+
+            // if we found the item in this seed, return true
+            if item_available_for_seed == true {
                 break true;
             }
 
-            i += OFFSET;
+            // otherwise continue to the next seed
+            seed_index += 1;
         }
     }
 }
+
+// Tests
+
+const TEST_MARKET_SEED: u128 = 515;
+const TEST_OFFSET: u8 = 3;
 
 #[test]
 #[available_gas(9000000)]
@@ -159,76 +264,110 @@ fn test_get_price() {
     assert(t5_price == (6 - 5) * TIER_PRICE, 't5 price');
 }
 
-// TODO: This needs to be optimised - it's too gassy....
 #[test]
 #[available_gas(10000000)]
 fn test_get_all_items() {
-    let items = ImplMarket::get_all_items(1);
+    let mut market_seeds = ArrayTrait::<u128>::new();
+    market_seeds.append(1);
 
-    let len: u256 = items.len().into();
+    let mut offset = ArrayTrait::<u8>::new();
+    offset.append(3);
 
-    assert(len == NUMBER_OF_ITEMS_PER_LEVEL, 'too many items');
+    let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
+    assert(items.len().into() == NUMBER_OF_ITEMS_PER_LEVEL, 'incorrect number of items');
+
+    market_seeds.append(2);
+    let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
+    assert(items.len().into() == NUMBER_OF_ITEMS_PER_LEVEL * 2, 'incorrect number of items');
+
+    market_seeds.append(3);
+    market_seeds.append(4);
+    let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
+    assert(items.len().into() == NUMBER_OF_ITEMS_PER_LEVEL * 4, 'incorrect number of items');
 }
 
 #[test]
 #[available_gas(9000000)]
 fn test_is_item_available() {
-    let mut i: u256 = 0;
+    let mut i: u128 = 0;
+    let OFFSET: u8 = 3;
     loop {
-        if i > OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+        if i > OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL {
             break ();
         }
 
-        let id = ImplMarket::get_id(MARKET_SEED + i);
+        let id = ImplMarket::get_id(TEST_MARKET_SEED + i);
+        let mut seeds = ArrayTrait::<u128>::new();
+        seeds.append(TEST_MARKET_SEED + i);
+        let mut offsets = ArrayTrait::<u8>::new();
+        offsets.append(OFFSET);
 
-        let result = ImplMarket::is_item_available(MARKET_SEED + i, id);
+        let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
 
         assert(result == true, 'item not available');
 
-        i += OFFSET;
+        i += OFFSET.into();
     };
 }
 
 #[test]
 #[available_gas(90000000)]
 fn test_fake_check_ownership() {
-    let mut i: u256 = 0;
+    let mut i: u128 = 0;
+    let OFFSET: u8 = 3;
+
     loop {
-        if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+        if i >= OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL {
             break ();
         }
 
-        let id = ImplMarket::get_id(MARKET_SEED + i + 2);
+        let id = ImplMarket::get_id(TEST_MARKET_SEED + i + 2);
+        let mut seeds = ArrayTrait::<u128>::new();
+        seeds.append(TEST_MARKET_SEED + i);
+        let mut offsets = ArrayTrait::<u8>::new();
+        offsets.append(OFFSET);
 
-        let result = ImplMarket::is_item_available(MARKET_SEED + i, id);
+        let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
 
         assert(result == false, 'item');
 
-        i += OFFSET;
+        i += OFFSET.into();
     };
 }
 
 #[test]
 #[available_gas(9000000)]
 fn test_get_all_items_ownership() {
-    let items = @ImplMarket::get_all_items(MARKET_SEED);
+    let mut market_seeds = ArrayTrait::<u128>::new();
+    market_seeds.append(TEST_MARKET_SEED);
 
-    let mut i: u256 = 0;
+    let OFFSET: u8 = 3;
+    let mut offset = ArrayTrait::<u8>::new();
+    offset.append(OFFSET);
+
+    let items = @ImplMarket::get_all_items(market_seeds.span(), offset.span());
+
+    let mut i: u128 = 0;
     let mut item_index: usize = 0;
 
     loop {
-        if i >= OFFSET * NUMBER_OF_ITEMS_PER_LEVEL {
+        if i >= OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL {
             break ();
         }
 
         let id = *items.at(item_index).id;
         assert(id != 0, 'item id should not be 0');
 
-        let result = ImplMarket::is_item_available(MARKET_SEED + i, id);
+        let mut seeds = ArrayTrait::<u128>::new();
+        seeds.append(TEST_MARKET_SEED + i);
+        let mut offsets = ArrayTrait::<u8>::new();
+        offsets.append(OFFSET);
+
+        let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
 
         assert(result == true, 'item');
 
-        i += OFFSET;
+        i += OFFSET.into();
         item_index += 1;
     };
 }

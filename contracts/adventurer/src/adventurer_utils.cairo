@@ -10,7 +10,14 @@ use super::{
     },
     adventurer_meta::AdventurerClass, adventurer_stats::Stats
 };
-use lootitems::statistics::constants::ItemSuffix::{of_Power, of_Giant, of_Titans, of_Skill, of_Perfection, of_Brilliance, of_Enlightenment, of_Protection, of_Anger, of_Rage, of_Fury, of_Vitriol, of_the_Fox, of_Detection, of_Reflection, of_the_Twins};
+use lootitems::statistics::constants::{
+    NUM_ITEMS,
+    ItemSuffix::{
+        of_Power, of_Giant, of_Titans, of_Skill, of_Perfection, of_Brilliance, of_Enlightenment,
+        of_Protection, of_Anger, of_Rage, of_Fury, of_Vitriol, of_the_Fox, of_Detection,
+        of_Reflection, of_the_Twins
+    }
+};
 use combat::constants::CombatEnums::{Type, Tier, Slot};
 use pack::pack::{rshift_split};
 
@@ -187,6 +194,102 @@ impl AdventurerUtils of IAdventurer {
             0
         }
     }
+
+    // @dev Function to generate a unique hash for the market based on the adventurer's id, entropy, xp and stat points available.
+    // @param adventurer_id The unique identifier for the adventurer.
+    // @param adventurer_entropy The entropy of the adventurer used for randomness.
+    // @param xp The experience points of the adventurer.
+    // @param stats_points_available The available stat points that can be used for upgrades.
+    // @return A unique hash in the form of a 128-bit unsigned integer.
+    fn get_market_seed_and_offset(
+        adventurer_id: u256, adventurer_entropy: u128, xp: u16, stats_points_available: u8
+    ) -> (u128, u8) {
+        let mut hash_span = ArrayTrait::new();
+        hash_span.append(adventurer_id.try_into().unwrap());
+        hash_span.append(adventurer_entropy.into());
+        hash_span.append(xp.into());
+        hash_span.append(stats_points_available.into());
+        AdventurerUtils::split_hash_into_seed_and_offset(poseidon_hash_span(hash_span.span()))
+    }
+
+    fn split_hash_into_seed_and_offset(poseidon_hash: felt252) -> (u128, u8) {
+        let (market_offset, market_seed) = rshift_split(
+            poseidon_hash.into(), 170141183460469231731687303715884105727
+        );
+        (
+            market_seed.try_into().unwrap(),
+            (1 + (market_offset % NUM_ITEMS.into()).try_into().unwrap())
+        )
+    }
+}
+
+#[test]
+#[available_gas(500000)]
+fn test_get_market_seed_and_offset() {
+    // test get_market_seed_and_offset function
+    let adventurer_id: u256 = 1;
+    let adventurer_entropy: u128 = 2;
+    let xp: u16 = 3;
+    let stats_points_available: u8 = 4;
+    let (market_seed, market_offset) = AdventurerUtils::get_market_seed_and_offset(
+        adventurer_id, adventurer_entropy, xp, stats_points_available
+    );
+    assert(market_seed == 8653894592905011222407811648701776700, 'wrong seed');
+    assert(market_offset == 74, 'wrong offset');
+
+    let stats_points_available: u8 = 3;
+    let (market_seed, market_offset) = AdventurerUtils::get_market_seed_and_offset(
+        adventurer_id, adventurer_entropy, xp, stats_points_available
+    );
+    assert(market_seed == 88279057010784366245946951591011804619, 'wrong seed');
+    assert(market_offset == 73, 'wrong offset');
+
+    let stats_points_available: u8 = 2;
+    let (market_seed, market_offset) = AdventurerUtils::get_market_seed_and_offset(
+        adventurer_id, adventurer_entropy, xp, stats_points_available
+    );
+    assert(market_seed == 149615908700113160033263432132807492851, 'wrong seed');
+    assert(market_offset == 82, 'wrong offset');
+
+    let stats_points_available: u8 = 1;
+    let (market_seed, market_offset) = AdventurerUtils::get_market_seed_and_offset(
+        adventurer_id, adventurer_entropy, xp, stats_points_available
+    );
+    assert(market_seed == 50575806029835951894834837822879558346, 'wrong seed');
+    assert(market_offset == 36, 'wrong offset');
+}
+
+#[test]
+#[available_gas(500000)]
+fn test_split_hash_into_seed_and_offset() {
+    // test the split_hash_into_seed_and_offset function
+    let poseidon_hash: felt252 = 170141183460469231731687303715884105727.into();
+    let (market_seed, market_offset) = AdventurerUtils::split_hash_into_seed_and_offset(
+        poseidon_hash
+    );
+    assert(market_seed == 0, 'market seed should be 0');
+    assert(market_offset == 2, 'market offset should be 2');
+
+    let poseidon_hash: felt252 = 170141183460469231731687303715884105728.into();
+    let (market_seed, market_offset) = AdventurerUtils::split_hash_into_seed_and_offset(
+        poseidon_hash
+    );
+    assert(market_seed == 1, 'market seed should be 1');
+    assert(market_offset == 2, 'market offset should be 2');
+
+    let poseidon_hash: felt252 = 170141103715884105728.into();
+    let (market_seed, market_offset) = AdventurerUtils::split_hash_into_seed_and_offset(
+        poseidon_hash
+    );
+    assert(market_seed == 170141103715884105728, 'wrong market seed');
+    assert(market_offset == 1, 'market offset should be 2');
+
+    let poseidon_hash: felt252 = 170141183460469712313168730371588410572712312.into();
+    let (market_seed, market_offset) = AdventurerUtils::split_hash_into_seed_and_offset(
+        poseidon_hash
+    );
+    assert(market_seed == 480581481426655704304845712312, 'wrong market seed');
+    assert(market_offset == 101, 'market offset should be 2');
 }
 
 #[test]

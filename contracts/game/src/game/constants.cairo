@@ -15,7 +15,7 @@ mod messages {
     const HEALTH_FULL: felt252 = 'Health already full';
     const ADVENTURER_NOT_IDLE: felt252 = 'Adventurer is not idle';
     const ONE_EXPLORE_PER_BLOCK: felt252 = 'One explore per block';
-    const NO_STAT_UPGRADES_AVAILABLE: felt252 = 'insufficient stat upgrades';
+    const INSUFFICIENT_STAT_UPGRADES: felt252 = 'insufficient stat upgrades';
     const TOO_MANY_ITEMS: felt252 = 'Too many items';
     const ITEM_ALREADY_OWNED: felt252 = 'Item already owned';
     const ADVENTURER_DOESNT_OWN_ITEM: felt252 = 'Adventurer doesnt own item';
