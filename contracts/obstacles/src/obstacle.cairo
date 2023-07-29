@@ -1,8 +1,11 @@
-use combat::combat::ICombat;
 use option::OptionTrait;
+use core::traits::Into;
 use integer::{U8IntoU16, U128TryIntoU8};
 use super::constants::{ObstacleId, ObstacleSettings};
-use combat::{combat::{ImplCombat, CombatSpec, SpecialPowers}, constants::{CombatSettings, CombatEnums::{Type, Tier, Slot}}};
+use combat::{
+    combat::{ICombat, ImplCombat, CombatSpec, SpecialPowers},
+    constants::{CombatSettings, CombatEnums::{Type, Tier, Slot}}
+};
 
 #[derive(Drop, Copy)]
 struct Obstacle {
@@ -34,7 +37,7 @@ impl ImplObstacle of IObstacle {
     // @return u8 - the obstacle id
     fn obstacle_encounter_id(entropy: u128) -> u8 {
         // select an obstacle between 1 and max obstacle id (inclusive)
-        let obstacle_id = (entropy % ObstacleId::MAX_ID) + 1;
+        let obstacle_id = (entropy % ObstacleId::MAX_ID.into()) + 1;
 
         // return obstacle id as a u8
         return U128TryIntoU8::try_into(obstacle_id).unwrap();
@@ -53,7 +56,7 @@ impl ImplObstacle of IObstacle {
             }
         };
 
-        Obstacle {id: id, combat_specs: combat_specs}
+        Obstacle { id: id, combat_specs: combat_specs }
     }
 
     // get_level uses the combat lib to generate a random level scoped for the adventurer level
@@ -64,7 +67,7 @@ impl ImplObstacle of IObstacle {
         ImplCombat::get_random_level(
             adventurer_level,
             entropy,
-            CombatSettings::DIFFICULTY_CLIFF::NORMAL,
+            CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL,
             CombatSettings::LEVEL_MULTIPLIER::NORMAL,
         )
     }
@@ -148,7 +151,7 @@ impl ImplObstacle of IObstacle {
             return Type::Blade_or_Hide(());
         }
     }
-    
+
     // get_damage returns the damage of the obstacle based on the provided obstacle id
     fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, entropy: u128) -> u16 {
         // no critical hits for obstacles

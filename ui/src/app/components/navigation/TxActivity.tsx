@@ -228,7 +228,7 @@ export const TxActivity = () => {
       console.log(type);
 
       resetData();
-      refetch();
+      await refetch();
       try {
         switch (type) {
           case "Attack":

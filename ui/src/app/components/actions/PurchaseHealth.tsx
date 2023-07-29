@@ -28,6 +28,25 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
         ? true
         : false;
 
+    const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
+
+    const potionsToMaxHealth = Math.floor(
+      (maxHealth - (adventurer?.health ?? 0)) / 10
+    );
+
+    const fillToMax = () => {
+      if (hasBalance) {
+        setHealthAmount(potionsToMaxHealth);
+      }
+    };
+
+    const calculatedNewHealth = (adventurer?.health ?? 0) + potionAmount * 10;
+
+    const disabled =
+      !hasBalance ||
+      adventurer?.health == maxHealth ||
+      calculatedNewHealth - maxHealth >= 10;
+
     const purchaseHealthTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "buy_potions",
@@ -68,15 +87,6 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
       [potionAmount]
     );
 
-    const maxHealth = 100 + (adventurer?.vitality ?? 0) * 20;
-
-    const calculatedNewHealth = (adventurer?.health ?? 0) + potionAmount * 10;
-
-    const disabled =
-      !hasBalance ||
-      adventurer?.health == maxHealth ||
-      calculatedNewHealth - maxHealth >= 10;
-
     return (
       <div className="flex flex-col sm:flex-row sm:p-2 md:p-4 items-center">
         <HealthButtons
@@ -84,6 +94,14 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
           setPurchaseAmount={setHealthAmount}
           disabled={disabled}
         />
+        <Button
+          disabled={!hasBalance || adventurer?.health === maxHealth}
+          onClick={fillToMax}
+          size={"sm"}
+          className="m-auto"
+        >
+          Fill to Max
+        </Button>
         <div className="flex flex-col gap-2 sm:flex-row items-center p-4">
           <div className="flex flex-col text-sm text-center items-center">
             <span className="flex flex-row gap-1 sm:text-lg">

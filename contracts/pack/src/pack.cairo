@@ -3,6 +3,7 @@ use traits::{Into, TryInto};
 
 trait Packing<T> {
     fn pack(self: T) -> felt252;
+    fn overflow_pack_protection(self: T) -> T;
     fn unpack(packed: felt252) -> T;
 }
 
