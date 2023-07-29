@@ -1,6 +1,7 @@
 import { AccountChangeEventHandler } from 'get-starknet-core'
 import { AccountInterface, Account } from 'starknet'
 import { Connector } from '@starknet-react/core'  // Assuming Connector is defined in './connector'
+import { padAddress, shortenHex } from './utils';
 
 export class ArcadeConnector extends Connector {
     private _account: AccountInterface | Account | null;
@@ -46,7 +47,7 @@ export class ArcadeConnector extends Connector {
 
     get id(): string {
         // Implement your logic here.
-        return 'ArcadeAccount';
+        return shortenHex(this._account?.address.toString()!) || 'ArcadeAccount';
     }
 
     get name(): string {

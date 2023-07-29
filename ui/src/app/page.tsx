@@ -75,9 +75,8 @@ const mobileMenuItems: Menu[] = [
 
 export default function Home() {
 
-  const {create} = useBurner()
   const { disconnect } = useConnectors();
-  const { account } = useAccount();
+  const { account, status } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
 
   const type = useLoadingStore((state) => state.type);
@@ -202,7 +201,7 @@ export default function Home() {
   return (
     // <Maintenance />
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-10 `}
+      className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-20 `}
     >
       {connected ? (
         <>
@@ -217,9 +216,7 @@ export default function Home() {
                   }
                   lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
                 />
-                {/* <Button onClick={() => create()}>
-                  create arcade account
-                </Button> */}
+
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
                 <Button onClick={() => showArcadeDialog(!arcadeDialog)}> 
@@ -332,7 +329,7 @@ export default function Home() {
 
           {deathDialog && <DeathDialog />}
 
-          {arcadeDialog && <ArcadeDialog />}
+          {status == 'connected' && arcadeDialog && <ArcadeDialog />}
 
           {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
 

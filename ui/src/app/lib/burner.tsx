@@ -29,8 +29,10 @@ type BurnerStorage = {
     };
 };
 
+
 export const useBurner = () => {
     const { account: walletAccount } = useAccount();
+
     const [account, setAccount] = useState<Account>();
     const [isDeploying, setIsDeploying] = useState(false);
 
@@ -69,7 +71,7 @@ export const useBurner = () => {
                 active: storage[address].active,
             };
         });
-    }, []);
+    }, [walletAccount]);
 
     const select = useCallback((address: string) => {
         let storage = Storage.get("burners") || {};
@@ -85,7 +87,7 @@ export const useBurner = () => {
         Storage.set("burners", storage);
         const burner = new Account(provider, address, storage[address].privateKey);
         setAccount(burner);
-    }, []);
+    }, [walletAccount]);
 
     const get = useCallback((address: string) => {
         let storage = Storage.get("burners") || {};
@@ -95,7 +97,7 @@ export const useBurner = () => {
 
         return new Account(provider, address, storage[address].privateKey);
 
-    }, []);
+    }, [walletAccount]);
 
     const create = useCallback(async () => {
         setIsDeploying(true);
@@ -107,6 +109,8 @@ export const useBurner = () => {
             CallData.compile({ publicKey }),
             0,
         );
+
+        console.log(walletAccount)
 
         if (!walletAccount) {
             throw new Error("wallet account not found");
@@ -144,7 +148,7 @@ export const useBurner = () => {
         console.log("burner created: ", address);
 
         return burner;
-    }, []);
+    }, [walletAccount]);
 
     return {
         get,
