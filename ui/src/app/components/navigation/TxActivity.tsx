@@ -34,6 +34,10 @@ export const TxActivity = () => {
   const type = useLoadingStore((state) => state.type);
   const error = useTransactionCartStore((state) => state.error);
   const setError = useTransactionCartStore((state) => state.setError);
+  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
+  const isAlive = useAdventurerStore((state) => state.computed.isAlive);
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
@@ -41,10 +45,6 @@ export const TxActivity = () => {
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
   );
-  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
-  const isAlive = useAdventurerStore((state) => state.computed.isAlive);
-  const adventurer = useAdventurerStore((state) => state.adventurer);
-  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const {
     data: queryData,
     isDataUpdated,
@@ -64,7 +64,7 @@ export const TxActivity = () => {
   });
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
-  const isLoadingQueryUpdated = loadingQuery && isDataUpdated[loadingQuery];
+  const isLoadingQueryUpdated = isDataUpdated[loadingQuery!];
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
@@ -113,10 +113,10 @@ export const TxActivity = () => {
 
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
-        // await refetch("battlesByTxHashQuery");
+        await refetch("battlesByTxHashQuery");
         // await refetch("adventurerByIdQuery");
-        // await refetch("battlesByBeastQuery");
-        // await refetch("latestMarketItemsQuery");
+        await refetch("battlesByBeastQuery");
+        await refetch("latestMarketItemsQuery");
         console.log("in battle");
         const killedByBeast = queryData.battlesByTxHashQuery.battles.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
@@ -158,12 +158,13 @@ export const TxActivity = () => {
       const handleExplore = async () => {
         if (!queryData?.discoveryByTxHashQuery) return;
 
-        // await refetch("discoveryByTxHashQuery");
-        // await refetch("latestDiscoveriesQuery");
+        await refetch("discoveryByTxHashQuery");
+        await refetch("latestDiscoveriesQuery");
         // await refetch("adventurerByIdQuery");
-        // await refetch("lastBeastBattleQuery");
-        // await refetch("lastBeastQuery");
-        // await refetch("latestMarketItemsQuery");
+        await refetch("lastBeastBattleQuery");
+        await refetch("lastBeastQuery");
+        await refetch("beastQuery");
+        await refetch("latestMarketItemsQuery");
         const killedByObstacle =
           queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
             "Obstacle" &&
@@ -190,8 +191,8 @@ export const TxActivity = () => {
       };
 
       const handleUpgrade = async () => {
-        // await refetch("adventurerByIdQuery");
-        // await refetch("latestMarketItemsQuery");
+        await refetch("adventurerByIdQuery");
+        await refetch("latestMarketItemsQuery");
         stopLoading(notificationData);
         if (!hasStatUpgrades) {
           setScreen("play");
@@ -200,9 +201,9 @@ export const TxActivity = () => {
 
       const handleMulticall = async () => {
         // await refetch("adventurerByIdQuery");
-        // await refetch("itemsByAdventurerQuery");
-        // await refetch("battlesByBeastQuery");
-        // await refetch("latestMarketItemsQuery");
+        await refetch("itemsByAdventurerQuery");
+        await refetch("battlesByBeastQuery");
+        await refetch("latestMarketItemsQuery");
         const killedFromEquipping =
           (pendingMessage as string[]).includes("Equipping") && !isAlive;
         if (killedFromEquipping) {
@@ -212,6 +213,7 @@ export const TxActivity = () => {
       };
 
       const handleCreate = async () => {
+        console.log("in create");
         await refetch("adventurersByOwnerQuery");
         stopLoading(notificationData);
       };
@@ -222,13 +224,13 @@ export const TxActivity = () => {
 
       const handleDataUpdate = () => {
         setTxAccepted(false);
-        resetDataUpdated(loadingQuery);
+        resetDataUpdated(loadingQuery!);
       };
 
       console.log(type);
 
-      resetData();
-      await refetch();
+      // resetData();
+      // await refetch();
       try {
         switch (type) {
           case "Attack":
@@ -262,7 +264,7 @@ export const TxActivity = () => {
     };
 
     fetchData();
-  }, [isLoadingQueryUpdated, txAccepted, hash, loadingQuery]);
+  }, [isLoadingQueryUpdated]);
 
   useEffect(() => {
     if (

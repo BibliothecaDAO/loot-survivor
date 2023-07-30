@@ -25,6 +25,7 @@ import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
 import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
@@ -63,6 +64,8 @@ export const CreateAdventurer = ({
   const gameData = new GameData();
   const [firstAdventurer, setFirstAdventurer] = useState(false);
   const [step, setStep] = useState(1);
+
+  const { resetDataUpdated } = useQueriesStore();
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement> | KeyboardEvent) => {
@@ -165,6 +168,7 @@ export const CreateAdventurer = ({
       }
     });
     setMintAdventurer(true);
+    resetDataUpdated("adventurersByOwnerQuery");
   };
 
   const [formFilled, setFormFilled] = useState(false);

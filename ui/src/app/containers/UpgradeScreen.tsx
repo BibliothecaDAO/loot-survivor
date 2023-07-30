@@ -287,6 +287,8 @@ export default function UpgradeScreen() {
 
   const upgradeTotalCost = getPurchasedGoldSum() + itemsGoldSum;
 
+  console.log(potionsFilter?.toString() ?? 0);
+
   return (
     <>
       {hasStatUpgrades ? (
@@ -326,7 +328,7 @@ export default function UpgradeScreen() {
                     <span className="flex flex-row gap-1  items-center">
                       <p className="uppercase">Potions:</p>
                       <span className="flex text-xl text-terminal-yellow">
-                        {potionsFilter ?? 0}
+                        {potionsFilter?.toString() ?? 0}
                       </span>
                     </span>
                     <span className="flex flex-row gap-1 items-center">
