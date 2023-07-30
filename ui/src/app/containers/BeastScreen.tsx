@@ -239,7 +239,8 @@ export default function BeastScreen() {
         adventurer?.beastHealth == undefined ||
         adventurer?.beastHealth == 0 ||
         loading ||
-        beastData?.level == 1,
+        beastData?.level == 1 ||
+        adventurer.dexterity === 0,
       loading: loading,
     },
     {
@@ -273,7 +274,8 @@ export default function BeastScreen() {
         adventurer?.beastHealth == undefined ||
         adventurer?.beastHealth == 0 ||
         loading ||
-        beastData?.level == 1,
+        beastData?.level == 1 ||
+        adventurer.dexterity === 0,
       loading: loading,
     },
   ];

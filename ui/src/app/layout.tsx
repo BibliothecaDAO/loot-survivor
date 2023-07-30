@@ -11,8 +11,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   const client = new ApolloClient({
-    // uri: getGraphQLUrl,
-    uri: "http://localhost:8080/goerli-graphql",
+    uri: getGraphQLUrl,
     cache: new InMemoryCache(),
   });
 

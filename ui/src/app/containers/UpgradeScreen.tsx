@@ -32,6 +32,7 @@ import MarketplaceScreen from "./MarketplaceScreen";
 import { UpgradeNav } from "../components/upgrade/UpgradeNav";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { StatAttribute } from "../components/upgrade/StatAttribute";
+import { ItemPurchase } from "../types";
 
 /**
  * @container
@@ -60,7 +61,7 @@ export default function UpgradeScreen() {
   const [upgradeScreen, setUpgradeScreen] = useState(1);
   const [upgrades, setUpgrades] = useState<any[]>([]);
   const [potionAmount, setPotionAmount] = useState(0);
-  const [purchaseItems, setPurchaseItems] = useState<string[]>([]);
+  const [purchaseItems, setPurchaseItems] = useState<ItemPurchase[]>([]);
 
   const { resetDataUpdated } = useQueriesStore();
 
@@ -203,7 +204,7 @@ export default function UpgradeScreen() {
 
   const itemsGoldSum = purchaseItems.reduce((accumulator, current) => {
     const { tier } = getItemData(
-      getValueFromKey(gameData.ITEMS, parseInt(current)) ?? ""
+      getValueFromKey(gameData.ITEMS, parseInt(current.item)) ?? ""
     );
     const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
     return accumulator + (isNaN(itemPrice) ? 0 : itemPrice);
@@ -219,9 +220,12 @@ export default function UpgradeScreen() {
         adventurer?.id?.toString() ?? "",
         "0",
         potionAmount,
-        ...purchaseItems,
+        purchaseItems.length.toString(),
+        ...purchaseItems.flatMap(Object.values),
+        upgrades.length.toString(),
         ...upgrades,
       ],
+      // calldata: [adventurer?.id?.toString() ?? "", "0", "0", "0", "0"],
     };
     addToCalls(buyItemsAndUpgradeTx);
     startLoading(

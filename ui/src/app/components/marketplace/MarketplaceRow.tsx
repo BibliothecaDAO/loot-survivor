@@ -9,7 +9,7 @@ import {
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
-import { Metadata, Item, Adventurer, Call } from "../../types";
+import { Metadata, Item, Adventurer, Call, ItemPurchase } from "../../types";
 import { CoinIcon } from "../icons/Icons";
 import EfficacyDisplay from "../icons/EfficacyIcon";
 import { GameData } from "../GameData";
@@ -24,8 +24,8 @@ interface MarketplaceRowProps {
   setActiveMenu: (value: number | null) => void;
   calculatedNewGold: number;
   ownedItems: Item[];
-  purchaseItems: string[];
-  setPurchaseItems: (value: string[]) => void;
+  purchaseItems: ItemPurchase[];
+  setPurchaseItems: (value: ItemPurchase[]) => void;
 }
 
 const MarketplaceRow = ({
@@ -61,7 +61,7 @@ const MarketplaceRow = ({
     //     call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
     // );
     return purchaseItems.some(
-      (purchasingItem: string) => purchasingItem == item
+      (purchasingItem: ItemPurchase) => purchasingItem.item == item
     );
   };
 
@@ -160,7 +160,15 @@ const MarketplaceRow = ({
                 size={"xs"}
                 variant={"ghost"}
                 onClick={() => {
-                  setPurchaseItems([...purchaseItems, item?.item ?? ""]);
+                  setPurchaseItems([
+                    ...purchaseItems,
+                    {
+                      item:
+                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
+                        "0",
+                      equip: "1",
+                    },
+                  ]);
                   setActiveMenu(null);
                 }}
               >
@@ -170,7 +178,15 @@ const MarketplaceRow = ({
                 size={"xs"}
                 variant={"ghost"}
                 onClick={() => {
-                  setPurchaseItems([...purchaseItems, item?.item ?? ""]);
+                  setPurchaseItems([
+                    ...purchaseItems,
+                    {
+                      item:
+                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
+                        "0",
+                      equip: "0",
+                    },
+                  ]);
                   setActiveMenu(null);
                 }}
               >

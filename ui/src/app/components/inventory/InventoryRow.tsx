@@ -18,6 +18,8 @@ interface InventoryRowProps {
   setSelected: (value: number) => void;
   equippedItem: string | undefined;
   icon?: ReactElement;
+  equipItems: string[];
+  setEquipItems: (value: string[]) => void;
 }
 
 export const InventoryRow = ({
@@ -30,22 +32,28 @@ export const InventoryRow = ({
   setSelected,
   equippedItem,
   icon,
+  equipItems,
+  setEquipItems,
 }: InventoryRowProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
 
-  const handleAddEquipItem = (item: string) => {
+  const gameData = new GameData();
+
+  const handleEquipItems = (item: string) => {
+    setEquipItems([...equipItems, getKeyFromValue(gameData.ITEMS, item) ?? ""]);
     if (gameContract) {
-      const gameData = new GameData();
       const equipItemTx = {
         contractAddress: gameContract?.address,
         entrypoint: "equip",
         calldata: [
           adventurer?.id?.toString() ?? "",
           "0",
-          getKeyFromValue(gameData.ITEMS, item) ?? "",
+          equipItems.length,
+          ...equipItems,
+          // getKeyFromValue(gameData.ITEMS, item) ?? "",
         ],
         metadata: `Equipping ${item}!`,
       };
@@ -71,14 +79,14 @@ export const InventoryRow = ({
           });
           break;
         case "Enter":
-          handleAddEquipItem(unequippedItems[selectedIndex]?.item ?? "");
+          handleEquipItems(unequippedItems[selectedIndex]?.item ?? "");
           break;
         case "Escape":
           setActiveMenu(undefined);
           break;
       }
     },
-    [selectedIndex, handleAddEquipItem, setActiveMenu, unequippedItems]
+    [selectedIndex, handleEquipItems, setActiveMenu, unequippedItems]
   );
 
   useEffect(() => {

@@ -34,8 +34,6 @@ export default function InventoryScreen() {
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
-  const loading = useLoadingStore((state) => state.loading);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
   const inventorySelected = useUIStore((state) => state.inventorySelected);
   const setInventorySelected = useUIStore(
     (state) => state.setInventorySelected
@@ -43,6 +41,7 @@ export default function InventoryScreen() {
   const { hashes, transactions } = useTransactionManager();
   const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
   const transactingItemIds = (transactions[0]?.metadata as Metadata)?.items;
+  const [equipItems, setEquipItems] = useState<string[]>([]);
 
   const { data } = useQueriesStore();
 
@@ -50,16 +49,8 @@ export default function InventoryScreen() {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  // useCustomQuery(
-  //   "adventurerByIdQuery",
-  //   getAdventurerById,
-  //   {
-  //     id: adventurer?.id ?? 0,
-  //   },
-  //   txAccepted
-  // );
-
-  const handleAddEquipItem = (item: string) => {
+  const handleEquipItems = (item: string) => {
+    setEquipItems([...equipItems, getKeyFromValue(gameData.ITEMS, item) ?? ""]);
     if (gameContract && formatAddress) {
       const equipItemTx = {
         contractAddress: gameContract?.address,
@@ -67,7 +58,8 @@ export default function InventoryScreen() {
         calldata: [
           adventurer?.id?.toString() ?? "",
           "0",
-          getKeyFromValue(gameData.ITEMS, item) ?? "",
+          equipItems.length,
+          ...equipItems,
         ],
         metadata: `Equipping ${item}!`,
       };
@@ -165,6 +157,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.weapon}
           icon={<LootIcon type="bag" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Weapon"}
@@ -176,6 +170,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.weapon}
           icon={<LootIcon type="weapon" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Chest Armor"}
@@ -187,6 +183,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.chest}
           icon={<LootIcon type="chest" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Head Armor"}
@@ -198,6 +196,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.head}
           icon={<LootIcon type="head" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Hand Armor"}
@@ -209,6 +209,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.hand}
           icon={<LootIcon type="hand" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Waist Armor"}
@@ -220,6 +222,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.waist}
           icon={<LootIcon type="waist" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Foot Armor"}
@@ -231,6 +235,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.foot}
           icon={<LootIcon type="foot" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Neck Jewelry"}
@@ -242,6 +248,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.neck}
           icon={<LootIcon type="neck" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Ring Jewelry"}
@@ -253,6 +261,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.ring}
           icon={<LootIcon type="ring" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
       </div>
       {adventurer?.id ? (
@@ -275,7 +285,7 @@ export default function InventoryScreen() {
                     <ItemDisplay
                       item={item}
                       inventory={true}
-                      equip={() => handleAddEquipItem(item.item ?? "")}
+                      equip={() => handleEquipItems(item.item ?? "")}
                       equipped={item.equipped}
                       disabled={
                         singleEquipExists(item.item ?? "") ||

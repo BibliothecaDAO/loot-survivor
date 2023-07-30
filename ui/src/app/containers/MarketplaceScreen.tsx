@@ -5,7 +5,7 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import LootIconLoader from "../components/icons/Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import { Item, NullItem } from "../types";
+import { Item, ItemPurchase, NullItem } from "../types";
 import { getItemData, getItemPrice, getKeyFromValue } from "../lib/utils";
 import PurchaseHealth from "../components/actions/PurchaseHealth";
 import { useMediaQuery } from "react-responsive";
@@ -16,8 +16,8 @@ import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 export interface MarketplaceScreenProps {
   upgradeTotalCost: number;
-  purchaseItems: string[];
-  setPurchaseItems: (value: string[]) => void;
+  purchaseItems: ItemPurchase[];
+  setPurchaseItems: (value: ItemPurchase[]) => void;
 }
 /**
  * @container
@@ -38,6 +38,8 @@ export default function MarketplaceScreen({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const { isLoading } = useQueriesStore();
   const [showEquipQ, setShowEquipQ] = useState<number | null>(null);
+
+  const gameData = new GameData();
 
   const marketLatestItems = useQueriesStore(
     (state) => state.data.latestMarketItemsQuery?.items || []
@@ -222,8 +224,14 @@ export default function MarketplaceScreen({
                       onClick={() => {
                         setPurchaseItems([
                           ...purchaseItems,
-                          item.item ?? "",
-                          "1",
+                          {
+                            item:
+                              getKeyFromValue(
+                                gameData.ITEMS,
+                                item?.item ?? ""
+                              ) ?? "0",
+                            equip: "1",
+                          },
                         ]);
                         setShowEquipQ(null);
                         setActiveMenu(0);
@@ -235,8 +243,14 @@ export default function MarketplaceScreen({
                       onClick={() => {
                         setPurchaseItems([
                           ...purchaseItems,
-                          item.item ?? "",
-                          "0",
+                          {
+                            item:
+                              getKeyFromValue(
+                                gameData.ITEMS,
+                                item?.item ?? ""
+                              ) ?? "0",
+                            equip: "0",
+                          },
                         ]);
                         setShowEquipQ(null);
                         setActiveMenu(0);

@@ -190,6 +190,11 @@ export interface ButtonData {
   variant?: "default" | "outline";
 }
 
+export interface ItemPurchase {
+  item: string;
+  equip: string;
+}
+
 export type BeastType =
   | "Basilisk"
   | "Kitsune"
