@@ -1522,6 +1522,14 @@ mod Game {
                         adventurer.add_gold(amount);
                         // emit discovered gold event
                         __event__DiscoveredGold(ref self, adventurer_id, adventurer, amount);
+                        // Keep exploring
+                        _explore(
+                            ref self,
+                            ref adventurer,
+                            adventurer_id,
+                            ref name_storage1,
+                            ref name_storage2
+                        );
                     },
                     TreasureDiscovery::XP(()) => {
                         // apply XP to adventurer
@@ -1533,6 +1541,15 @@ mod Game {
                             // process level up
                             _handle_adventurer_level_up(
                                 ref self, ref adventurer, adventurer_id, previous_level, new_level
+                            );
+                        } else {
+                            // Keep exploring
+                            _explore(
+                                ref self,
+                                ref adventurer,
+                                adventurer_id,
+                                ref name_storage1,
+                                ref name_storage2
                             );
                         }
                     },
@@ -1547,9 +1564,18 @@ mod Game {
                             adventurer.increase_health(amount);
                             __event__DiscoveredHealth(ref self, adventurer_id, adventurer, amount);
                         }
-                    },
+
+                        // Keep exploring
+                        _explore(
+                            ref self,
+                            ref adventurer,
+                            adventurer_id,
+                            ref name_storage1,
+                            ref name_storage2
+                        );
+                    }
                 }
-            },
+            }
         }
     }
 
