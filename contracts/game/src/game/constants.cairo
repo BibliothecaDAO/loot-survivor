@@ -19,10 +19,13 @@ mod messages {
     const TOO_MANY_ITEMS: felt252 = 'Too many items';
     const ITEM_ALREADY_OWNED: felt252 = 'Item already owned';
     const ADVENTURER_DOESNT_OWN_ITEM: felt252 = 'Adventurer doesnt own item';
+    const ZERO_DEXTERITY: felt252 = 'Cant flee, no dexterity';
+    const WRONG_STARTING_STATS: felt252 = 'Wrong starting stat count';
 }
 
 const BLOCKS_IN_A_WEEK: u64 = 3360;
 const COST_TO_PLAY: u256 = 25;
+const STARTING_STATS: u8 = 6;
 
 const U64_MAX: u64 = 18446744073709551615;
 const U128_MAX: u128 = 340282366920938463463374607431768211455;

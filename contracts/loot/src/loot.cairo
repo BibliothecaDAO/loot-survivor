@@ -36,7 +36,7 @@ impl ImplLoot of ILoot {
     // @param entropy The entropy.
     // @return The naming seed.
     fn generate_naming_seed(item_id: u8, entropy: u128) -> u128 {
-        let rnd = entropy % NUM_ITEMS;
+        let rnd = entropy % NUM_ITEMS.into();
         rnd * item_slot_length::get(ImplLoot::get_slot(item_id)).into()
             + item_index::get(item_id).into()
     }

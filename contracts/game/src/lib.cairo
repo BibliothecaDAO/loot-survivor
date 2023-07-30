@@ -32,7 +32,7 @@ mod Game {
         interfaces::{IGame, IERC20Dispatcher, IERC20DispatcherTrait, IERC20LibraryDispatcher},
         constants::{
             messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
-            U128_MAX, STARTER_BEAST_ATTACK_DAMAGE
+            U128_MAX, STARTER_BEAST_ATTACK_DAMAGE, STARTING_STATS
         }
     };
     use lootitems::{
@@ -42,7 +42,7 @@ mod Game {
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, adventurer_stats::Stats,
         item_primitive::{ImplItemPrimitive, ItemPrimitive}, bag::{Bag, IBag, ImplBag},
-        adventurer_meta::AdventurerMetadata, exploration::ExploreUtils,
+        adventurer_meta::{AdventurerMetadata}, exploration::ExploreUtils,
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
             adventurer_constants::{
@@ -138,18 +138,44 @@ mod Game {
             ref self: ContractState,
             interface_id: ContractAddress,
             starting_weapon: u8,
-            adventurer_meta: AdventurerMetadata
+            adventurer_meta: AdventurerMetadata,
+            starting_strength: u8,
+            starting_dexterity: u8,
+            starting_vitality: u8,
+            starting_intelligence: u8,
+            starting_wisdom: u8,
+            starting_charsima: u8
         ) {
-            // assert starting_weapon is a valid starting weapon
-            assert(
-                ImplLoot::is_starting_weapon(starting_weapon) == true,
-                messages::INVALID_STARTING_WEAPON
+            // assert weapon is valid starter weapon (wand, book, club, short sword)
+            _assert_valid_starter_weapon(@self, starting_weapon);
+
+            // assert correct number of starting stats
+            _assert_starting_stat_count(
+                @self,
+                starting_strength
+                    + starting_dexterity
+                    + starting_vitality
+                    + starting_intelligence
+                    + starting_wisdom
+                    + starting_charsima
             );
 
             let caller = get_caller_address();
             let block_number = starknet::get_block_info().unbox().block_number;
 
-            _start(ref self, block_number, caller, starting_weapon, adventurer_meta);
+            _start(
+                ref self,
+                block_number,
+                caller,
+                starting_weapon,
+                adventurer_meta,
+                starting_strength,
+                starting_dexterity,
+                starting_vitality,
+                starting_intelligence,
+                starting_wisdom,
+                starting_charsima
+            );
             _payout(ref self, caller, block_number, interface_id);
         }
         fn explore(ref self: ContractState, adventurer_id: u256) {
@@ -212,6 +238,72 @@ mod Game {
                 original_name_storage2
             );
         }
+
+        // TODO: Pull out common code between this and attack()
+        fn attack_till_death(ref self: ContractState, adventurer_id: u256) {
+            // assert caller owns adventurer
+            _assert_ownership(@self, adventurer_id);
+
+            // get item names from storage
+            let mut name_storage1 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
+            );
+            let mut name_storage2 = _loot_special_names_storage_unpacked(
+                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
+            );
+
+            // store the unmodified storages so we can use these
+            // to remove the same stat boosts when we pack and save the adventurer
+            // TODO: If we add a modified flag to the storages, we can
+            // check if they have been modified and if they have
+            // we can grab a fresh copy of the storages from storage
+            // to remove the special stat boosts before overwriting specials storage
+            // this will remove the need for these lines of code in all the 
+            // external functions. 
+            let original_name_storage1 = name_storage1;
+            let original_name_storage2 = name_storage2;
+
+            // get adventurer from storage and unpack
+            let mut adventurer = _unpack_adventurer_apply_stat_boost(
+                @self, adventurer_id, name_storage1, name_storage2
+            );
+
+            // assert adventurer is not dead
+            _assert_not_dead(@self, adventurer);
+
+            // assert adventurer has a beast to attack
+            _assert_in_battle(@self, adventurer);
+
+            // if the adventurer has exceeded the idle penalty threshold
+            let (is_idle, num_blocks) = _idle_longer_than_penalty_threshold(@self, adventurer);
+            if (is_idle) {
+                // apply idle penalty
+                _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
+            } else {
+                // otherwise process their attack
+                _attack_till_death(
+                    ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2
+                );
+            }
+
+            // update players last action block number
+            adventurer
+                .last_action =
+                    U64TryIntoU16::try_into(
+                        starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
+                    )
+                .unwrap();
+
+            // pack and save adventurer
+            _pack_adventurer_remove_stat_boost(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                original_name_storage1,
+                original_name_storage2
+            );
+        }
+
         fn attack(ref self: ContractState, adventurer_id: u256) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -305,6 +397,9 @@ mod Game {
 
             // assert adventurer has a beast to attack
             _assert_in_battle(@self, adventurer);
+
+            // assert dexterity is not zero
+            _assert_dexterity_not_zero(@self, adventurer);
 
             // if the adventurer has exceeded the idle penalty threshold
             let (is_idle, num_blocks) = _idle_longer_than_penalty_threshold(@self, adventurer);
@@ -1346,14 +1441,27 @@ mod Game {
         block_number: u64,
         caller: ContractAddress,
         starting_weapon: u8,
-        adventurer_meta: AdventurerMetadata
+        adventurer_meta: AdventurerMetadata,
+        starting_strength: u8,
+        starting_dexterity: u8,
+        starting_vitality: u8,
+        starting_intelligence: u8,
+        starting_wisdom: u8,
+        starting_charsima: u8
     ) {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._counter.read() + 1;
 
         // generate a new adventurer using the provided started weapon and current block number
         let mut new_adventurer: Adventurer = ImplAdventurer::new(
-            starting_weapon, adventurer_meta.class, block_number
+            starting_weapon,
+            block_number,
+            starting_strength,
+            starting_dexterity,
+            starting_vitality,
+            starting_intelligence,
+            starting_wisdom,
+            starting_charsima
         );
 
         let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
@@ -1522,6 +1630,14 @@ mod Game {
                         adventurer.add_gold(amount);
                         // emit discovered gold event
                         __event__DiscoveredGold(ref self, adventurer_id, adventurer, amount);
+                        // Keep exploring
+                        _explore(
+                            ref self,
+                            ref adventurer,
+                            adventurer_id,
+                            ref name_storage1,
+                            ref name_storage2
+                        );
                     },
                     TreasureDiscovery::XP(()) => {
                         // apply XP to adventurer
@@ -1533,6 +1649,15 @@ mod Game {
                             // process level up
                             _handle_adventurer_level_up(
                                 ref self, ref adventurer, adventurer_id, previous_level, new_level
+                            );
+                        } else {
+                            // Keep exploring
+                            _explore(
+                                ref self,
+                                ref adventurer,
+                                adventurer_id,
+                                ref name_storage1,
+                                ref name_storage2
                             );
                         }
                     },
@@ -1547,9 +1672,18 @@ mod Game {
                             adventurer.increase_health(amount);
                             __event__DiscoveredHealth(ref self, adventurer_id, adventurer, amount);
                         }
-                    },
+
+                        // Keep exploring
+                        _explore(
+                            ref self,
+                            ref adventurer,
+                            adventurer_id,
+                            ref name_storage1,
+                            ref name_storage2
+                        );
+                    }
                 }
-            },
+            }
         }
     }
 
@@ -2127,6 +2261,156 @@ mod Game {
         )
     }
 
+    // TODO: Pull out common code between this and _attack()
+    fn _attack_till_death(
+        ref self: ContractState,
+        ref adventurer: Adventurer,
+        adventurer_id: u256,
+        ref name_storage1: ItemSpecialsStorage,
+        ref name_storage2: ItemSpecialsStorage
+    ) {
+        // https://github.com/starkware-libs/cairo/issues/2942
+        // internal::revoke_ap_tracking();
+        // get adventurer entropy from storage
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+            .entropy
+            .into();
+
+        // get beast seed based on adventurer state and adventurer entropy
+        let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
+
+        // regenerate beast from seed
+        let beast = ImplBeast::get_beast(
+            adventurer.get_level(),
+            ImplBeast::get_special_names(
+                adventurer.get_level(), beast_seed, NamePrefixLength.into(), NameSuffixLength.into()
+            ),
+            beast_seed,
+            ImplLoot::get_type(adventurer.weapon.id)
+        );
+
+        // get game entropy from storage
+        let global_entropy: u128 = _get_global_entropy(@self).into();
+
+        // When generating the beast, we need to ensure entropy remains fixed for the battle
+        // for attacking however, we should change the entropy during battle so we use adventurer and beast health
+        // to accomplish this
+        let (attack_rnd_1, attack_rnd_2) = _get_live_entropy(
+            adventurer_entropy, global_entropy, adventurer
+        );
+
+        // get the damage dealt to the beast
+        let (damage_dealt, critical_hit) = beast
+            .attack(
+                _get_combat_spec(@self, adventurer_id, adventurer.weapon),
+                adventurer.get_luck(),
+                adventurer.stats.strength,
+                attack_rnd_1
+            );
+
+        // if the amount of damage dealt to beast exceeds its health
+        if (damage_dealt >= adventurer.beast_health) {
+            // the beast is dead so set health to zero
+            adventurer.beast_health = 0;
+
+            // grant equipped items and adventurer xp for the encounter
+            let xp_earned = beast.get_xp_reward();
+
+            // grant adventurer gold reward. We use battle fixed entropy
+            // to fix this result at the start of the battle, mitigating simulate-and-wait strategies
+            let gold_reward = beast.get_gold_reward(beast_seed);
+            adventurer.add_gold(gold_reward);
+
+            // grant adventuer xp
+            let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_earned);
+
+            // grant equipped items xp
+            _grant_xp_to_equipped_items(
+                ref self,
+                adventurer_id,
+                ref adventurer,
+                ref name_storage1,
+                ref name_storage2,
+                xp_earned,
+                attack_rnd_2
+            );
+
+            // emit slayed beast event
+            __event__SlayedBeast(
+                ref self,
+                SlayedBeast {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                        }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                        tier: beast.combat_spec.tier,
+                        item_type: beast.combat_spec.item_type,
+                        level: beast.combat_spec.level,
+                        specials: beast.combat_spec.specials
+                    },
+                    damage_dealt: damage_dealt,
+                    critical_hit: critical_hit,
+                    xp_earned_adventurer: xp_earned,
+                    xp_earned_items: xp_earned * ITEM_XP_MULTIPLIER_BEASTS,
+                    gold_earned: gold_reward
+                }
+            );
+
+            // if adventurers new level is greater than previous level
+            if (new_level > previous_level) {
+                _handle_adventurer_level_up(
+                    ref self, ref adventurer, adventurer_id, previous_level, new_level
+                );
+            }
+        } else {
+            // handle beast counter attack
+
+            // deduct adventurer damage from beast health
+            adventurer.beast_health -= damage_dealt;
+
+            // emit attack beast event
+            __event__AttackedBeast(
+                ref self,
+                AttackedBeast {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                        }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                        tier: beast.combat_spec.tier,
+                        item_type: beast.combat_spec.item_type,
+                        level: beast.combat_spec.level,
+                        specials: beast.combat_spec.specials
+                    },
+                    damage: damage_dealt,
+                    critical_hit: critical_hit,
+                    location: ImplCombat::slot_to_u8(Slot::None(())),
+                }
+            );
+
+            // starter beast ambushes the adventurer
+            let adventurer_died = _beast_counter_attack(
+                ref self,
+                ref adventurer,
+                adventurer_id,
+                AdventurerUtils::get_random_attack_location(attack_rnd_1),
+                beast,
+                beast_seed,
+                attack_rnd_2,
+                false
+            );
+
+            // if beast and adventurer are still alived
+            if (adventurer_died == false) {
+                // attack again
+                _attack_till_death(
+                    ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2
+                );
+            }
+        }
+    }
+
     fn _attack(
         ref self: ContractState,
         ref adventurer: Adventurer,
@@ -2283,7 +2567,7 @@ mod Game {
         beast_seed: u128,
         entropy: u128,
         ambushed: bool
-    ) {
+    ) -> bool {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
         // generate a random attack slot for the beast and get the armor the adventurer has at that slot
@@ -2356,7 +2640,12 @@ mod Game {
                 killed_by_obstacle: false,
                 killer_id: beast.id
             );
+            // return true to indicate adventurer died
+            true
         // TODO: Check for Top score
+        } else {
+            // return false to indicate adventurer is still alive
+            false
         }
     }
 
@@ -3068,6 +3357,9 @@ mod Game {
     fn _assert_in_battle(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.beast_health > 0, messages::NOT_IN_BATTLE);
     }
+    fn _assert_dexterity_not_zero(self: @ContractState, adventurer: Adventurer) {
+        assert(adventurer.stats.dexterity > 0, messages::ZERO_DEXTERITY);
+    }
     fn _assert_not_in_battle(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.beast_health == 0, messages::ACTION_NOT_ALLOWED_DURING_BATTLE);
     }
@@ -3111,6 +3403,14 @@ mod Game {
     }
     fn _assert_not_dead(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.health > 0, messages::DEAD_ADVENTURER);
+    }
+    fn _assert_valid_starter_weapon(self: @ContractState, starting_weapon: u8) {
+        assert(
+            ImplLoot::is_starting_weapon(starting_weapon) == true, messages::INVALID_STARTING_WEAPON
+        );
+    }
+    fn _assert_starting_stat_count(self: @ContractState, amount: u8) {
+        assert(amount == STARTING_STATS, messages::WRONG_STARTING_STATS);
     }
     fn _assert_one_explore_per_block(self: @ContractState, adventurer: Adventurer) {
         let current_block: u16 = U64TryIntoU16::try_into(

@@ -44,13 +44,13 @@ impl ImplObstacle of IObstacle {
     }
     // get_obstacle returns an obstacle based on the provided obstacle id and level
     // @param id: u8 - the obstacle id
-    // @param level: u8 - the obstacle level
+    // @param level: u16 - the obstacle level
     // @return Obstacle - the obstacle
-    fn get_obstacle(id: u8, level: u8) -> Obstacle {
+    fn get_obstacle(id: u8, _level: u16) -> Obstacle {
         let combat_specs = CombatSpec {
             tier: ImplObstacle::get_tier(id),
             item_type: ImplObstacle::get_type(id),
-            level: U8IntoU16::into(level),
+            level: _level,
             specials: SpecialPowers {
                 special1: 0, special2: 0, special3: 0, 
             }
@@ -63,13 +63,8 @@ impl ImplObstacle of IObstacle {
     // @param adventurer_level: the level of adventurer ()
     // @param entropy: entropy for random level generation
     // @return u8 - the obstacle level
-    fn get_random_level(adventurer_level: u8, entropy: u128) -> u8 {
-        ImplCombat::get_random_level(
-            adventurer_level,
-            entropy,
-            CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL,
-            CombatSettings::LEVEL_MULTIPLIER::NORMAL,
-        )
+    fn get_random_level(adventurer_level: u8, entropy: u128) -> u16 {
+        ImplCombat::get_random_level(adventurer_level, entropy)
     }
 
     // get_tier returns the tier of the obstacle based on the provided obstacle id

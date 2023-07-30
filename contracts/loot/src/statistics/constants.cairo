@@ -1,4 +1,4 @@
-const NUM_ITEMS: u128 = 101;
+const NUM_ITEMS: u8 = 101;
 
 mod ItemId {
     const Pendant: u8 = 1;
