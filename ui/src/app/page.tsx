@@ -211,7 +211,6 @@ export default function Home() {
                 />
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
-                {!isMobileDevice && <TxActivity />}
                 <Button
                   onClick={() => {
                     setIsMuted(!isMuted);

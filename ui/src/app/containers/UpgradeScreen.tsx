@@ -11,10 +11,7 @@ import { GameData } from "../components/GameData";
 import VerticalKeyboardControl from "../components/menu/VerticalMenu";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import useCustomQuery from "../hooks/useCustomQuery";
-import {
-  getAdventurerById,
-  getLatestMarketItems,
-} from "../hooks/graphql/queries";
+import { getLatestMarketItems } from "../hooks/graphql/queries";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
@@ -29,13 +26,12 @@ import {
   HeartVitalityIcon,
   LightbulbIcon,
   ScrollIcon,
-  ArrowIcon,
 } from "../components/icons/Icons";
 import PurchaseHealth from "../components/actions/PurchaseHealth";
 import MarketplaceScreen from "./MarketplaceScreen";
 import { UpgradeNav } from "../components/upgrade/UpgradeNav";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import useUIStore from "../hooks/useUIStore";
+import { StatAttribute } from "../components/upgrade/StatAttribute";
 
 /**
  * @container
@@ -49,7 +45,6 @@ export default function UpgradeScreen() {
   );
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const loading = useLoadingStore((state) => state.loading);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const { addTransaction } = useTransactionManager();
   const calls = useTransactionCartStore((state) => state.calls);
@@ -62,22 +57,14 @@ export default function UpgradeScreen() {
   );
   const { writeAsync } = useContractWrite({ calls });
   const [selected, setSelected] = useState("");
-  const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
   const [upgradeScreen, setUpgradeScreen] = useState(1);
-  const setScreen = useUIStore((state) => state.setScreen);
+  const [upgrades, setUpgrades] = useState<any[]>([]);
+  const [potionAmount, setPotionAmount] = useState(0);
+  const [purchaseItems, setPurchaseItems] = useState<string[]>([]);
 
   const { resetDataUpdated } = useQueriesStore();
 
   const gameData = new GameData();
-
-  // useCustomQuery(
-  //   "adventurerByIdQuery",
-  //   getAdventurerById,
-  //   {
-  //     id: adventurer?.id ?? 0,
-  //   },
-  //   txAccepted
-  // );
 
   useCustomQuery(
     "latestMarketItemsQuery",
@@ -88,53 +75,6 @@ export default function UpgradeScreen() {
       limit: 20,
     },
     txAccepted
-  );
-
-  const handleUpgradeTx = async (selected: any) => {
-    const upgradeTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "upgrade_stat",
-      calldata: [
-        adventurer?.id?.toString() ?? "",
-        "0",
-        getKeyFromValue(gameData.STATS, selected) ?? "",
-        "1",
-      ],
-    };
-    addToCalls(upgradeTx);
-    startLoading(
-      "Upgrade",
-      `Upgrading ${selected}`,
-      "adventurerByIdQuery",
-      adventurer?.id,
-      `You upgraded ${selected}!`
-    );
-    handleSubmitCalls(writeAsync).then((tx: any) => {
-      if (tx) {
-        setTxHash(tx.transaction_hash);
-        addTransaction({
-          hash: tx.transaction_hash,
-          metadata: {
-            method: "Upgrade Stat",
-            description: `Upgrading ${selected}`,
-          },
-        });
-      }
-    });
-    resetDataUpdated("adventurerByIdQuery");
-  };
-
-  const Attribute = ({
-    name,
-    icon,
-    description,
-    buttonText,
-  }: any): ReactElement => (
-    <div className="flex flex-col gap-1 sm:gap-3 items-center">
-      <span className="hidden sm:block w-10 h-10">{icon}</span>
-      <p className="sm:text-[28px] text-center h-2/3">{description}</p>
-      <Button onClick={() => handleUpgradeTx(name)}>{buttonText}</Button>
-    </div>
   );
 
   const attributes = [
@@ -152,6 +92,7 @@ export default function UpgradeScreen() {
     },
     {
       name: "Vitality",
+      id: 3,
       icon: <HeartVitalityIcon />,
       description: "Vitality gives 10hp and increases max health by 10hp",
       buttonText: "Upgrade Vitality",
@@ -180,13 +121,17 @@ export default function UpgradeScreen() {
     query: "(max-device-width: 480px)",
   });
 
-  const previousLevel = currentLevel - (adventurer?.statUpgrades ?? 0);
-
   function renderContent() {
     const attribute = attributes.find((attr) => attr.name === selected);
     return (
       <div className="flex sm:w-2/3 h-24 sm:h-full items-center justify-center border-l border-terminal-green p-2">
-        {attribute && <Attribute {...attribute} />}
+        {attribute && (
+          <StatAttribute
+            upgrades={upgrades}
+            setUpgrades={setUpgrades}
+            {...attribute}
+          />
+        )}
       </div>
     );
   }
@@ -253,39 +198,56 @@ export default function UpgradeScreen() {
     );
   }
 
-  const itemsFilter = calls.filter((call) => call.entrypoint === "buy_item");
+  const purchaseGoldAmount =
+    potionAmount * Math.max(currentLevel - 2 * (adventurer?.charisma ?? 0), 1);
 
-  const potionsCall = calls.find((call) => call.entrypoint === "buy_potions");
-
-  const potionsFilter =
-    potionsCall &&
-    Array.isArray(potionsCall.calldata) &&
-    potionsCall.calldata[2];
-
-  const getPurchasedGoldSum = () => {
-    if (potionsCall) {
-      const value = potionsFilter;
-      const parsedValue = value ? parseInt(value.toString(), 10) : 0;
-      const purchaseGoldAmount =
-        parsedValue *
-        Math.max(currentLevel - 2 * (adventurer?.charisma ?? 0), 1);
-      return purchaseGoldAmount;
-    } else {
-      return 0;
-    }
-  };
-
-  const itemsGoldSum = itemsFilter.reduce((accumulator, current) => {
-    const value = Array.isArray(current.calldata) && current.calldata[2];
-    const parsedValue = value ? parseInt(value.toString(), 10) : 0;
+  const itemsGoldSum = purchaseItems.reduce((accumulator, current) => {
     const { tier } = getItemData(
-      getValueFromKey(gameData.ITEMS, parsedValue) ?? ""
+      getValueFromKey(gameData.ITEMS, parseInt(current)) ?? ""
     );
     const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
     return accumulator + (isNaN(itemPrice) ? 0 : itemPrice);
   }, 0);
 
-  const upgradeTotalCost = getPurchasedGoldSum() + itemsGoldSum;
+  const upgradeTotalCost = purchaseGoldAmount + itemsGoldSum;
+
+  const handleBuyItemsAndUpgradeTx = async () => {
+    const buyItemsAndUpgradeTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "buy_items_and_upgrade_stats",
+      calldata: [
+        adventurer?.id?.toString() ?? "",
+        "0",
+        potionAmount,
+        ...purchaseItems,
+        ...upgrades,
+      ],
+    };
+    addToCalls(buyItemsAndUpgradeTx);
+    startLoading(
+      "Upgrade",
+      `Upgrading ${selected}`,
+      "adventurerByIdQuery",
+      adventurer?.id,
+      `You upgraded ${selected}!`
+    );
+    handleSubmitCalls(writeAsync).then((tx: any) => {
+      if (tx) {
+        setTxHash(tx.transaction_hash);
+        addTransaction({
+          hash: tx.transaction_hash,
+          metadata: {
+            method: "Upgrade Stat",
+            description: `Upgrading ${selected}`,
+          },
+        });
+      }
+    });
+  };
+
+  const lastPage = isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2;
+
+  const nextDisabled = upgrades.length === 0;
 
   return (
     <>
@@ -326,13 +288,13 @@ export default function UpgradeScreen() {
                     <span className="flex flex-row gap-1  items-center">
                       <p className="uppercase">Potions:</p>
                       <span className="flex text-xl text-terminal-yellow">
-                        {potionsFilter ?? 0}
+                        {potionAmount?.toString() ?? 0}
                       </span>
                     </span>
                     <span className="flex flex-row gap-1 items-center">
                       <p className="uppercase">Items:</p>
                       <span className="flex text-xl text-terminal-yellow">
-                        {itemsFilter.length}
+                        {purchaseItems?.length}
                       </span>
                     </span>
                   </div>
@@ -351,23 +313,6 @@ export default function UpgradeScreen() {
 
               <div className="flex flex-col gap-2">
                 {upgradeScreen === 1 && (
-                  <div className="flex flex-col gap-5 sm:gap-2 sm:flex-row items-center justify-center flex-wrap">
-                    <p className="text-xl lg:text-2xl">Potions</p>
-                    <PurchaseHealth upgradeTotalCost={upgradeTotalCost} />
-                  </div>
-                )}
-
-                {((!isMobileDevice && upgradeScreen === 1) ||
-                  (isMobileDevice && upgradeScreen === 2)) && (
-                  <div className="flex flex-col items-center sm:gap-2 w-full">
-                    <p className="text-xl lg:text-2xl sm:hidden">
-                      Loot Fountain
-                    </p>
-                    <MarketplaceScreen upgradeTotalCost={upgradeTotalCost} />
-                  </div>
-                )}
-                {((!isMobileDevice && upgradeScreen === 2) ||
-                  (isMobileDevice && upgradeScreen === 3)) && (
                   <div className="flex flex-col sm:gap-2 items-center w-full">
                     <p className="text-xl lg:text-2xl sm:hidden">
                       Stat Upgrades
@@ -387,6 +332,31 @@ export default function UpgradeScreen() {
                     </div>
                   </div>
                 )}
+
+                {upgradeScreen === 2 && (
+                  <div className="flex flex-col gap-5 sm:gap-2 sm:flex-row items-center justify-center flex-wrap">
+                    <p className="text-xl lg:text-2xl">Potions</p>
+                    <PurchaseHealth
+                      upgradeTotalCost={upgradeTotalCost}
+                      potionAmount={potionAmount}
+                      setPotionAmount={setPotionAmount}
+                    />
+                  </div>
+                )}
+
+                {((!isMobileDevice && upgradeScreen === 2) ||
+                  (isMobileDevice && upgradeScreen === 3)) && (
+                  <div className="flex flex-col items-center sm:gap-2 w-full">
+                    <p className="text-xl lg:text-2xl sm:hidden">
+                      Loot Fountain
+                    </p>
+                    <MarketplaceScreen
+                      upgradeTotalCost={upgradeTotalCost}
+                      purchaseItems={purchaseItems}
+                      setPurchaseItems={setPurchaseItems}
+                    />
+                  </div>
+                )}
                 <div className="w-1/2 flex flex-row gap-2 mx-auto">
                   <Button
                     className="w-1/2"
@@ -397,12 +367,19 @@ export default function UpgradeScreen() {
                   </Button>
                   <Button
                     className="w-1/2"
-                    onClick={() => setUpgradeScreen(upgradeScreen + 1)}
-                    disabled={
-                      isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2
-                    }
+                    onClick={() => {
+                      if (
+                        isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2
+                      ) {
+                        handleBuyItemsAndUpgradeTx();
+                        resetDataUpdated("adventurerByIdQuery");
+                      } else {
+                        setUpgradeScreen(upgradeScreen + 1);
+                      }
+                    }}
+                    disabled={nextDisabled}
                   >
-                    Next
+                    {lastPage ? "Upgrade" : "Next"}
                   </Button>
                 </div>
               </div>

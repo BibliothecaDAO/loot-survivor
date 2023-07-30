@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import HealthButtons from "./HealthButtons";
+import QuantityButtons from "../buttons/QuantityButtons";
 import { Button } from "../buttons/Button";
 import { useContracts } from "../../hooks/useContracts";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
@@ -8,12 +8,17 @@ import { CoinIcon } from "../icons/Icons";
 
 interface PurchaseHealthProps {
   upgradeTotalCost: number;
+  potionAmount: number;
+  setPotionAmount: (value: number) => void;
 }
 
-const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
+const PurchaseHealth = ({
+  upgradeTotalCost,
+  potionAmount,
+  setPotionAmount,
+}: PurchaseHealthProps) =>
   // { isActive, onEscape }: PurchaseHealthProps
   {
-    const [potionAmount, setHealthAmount] = useState(1);
     const { gameContract } = useContracts();
     const adventurer = useAdventurerStore((state) => state.adventurer);
     const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -36,7 +41,7 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
 
     const fillToMax = () => {
       if (hasBalance) {
-        setHealthAmount(potionsToMaxHealth);
+        setPotionAmount(potionsToMaxHealth);
       }
     };
 
@@ -47,52 +52,43 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
       adventurer?.health == maxHealth ||
       calculatedNewHealth - maxHealth >= 10;
 
-    const purchaseHealthTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "buy_potions",
-      calldata: [
-        adventurer?.id?.toString() ?? "",
-        "0",
-        potionAmount.toString(),
-      ],
-      metadata: `Purchasing ${
-        potionAmount * 10
-      } health for ${purchaseGoldAmount} gold`,
-    };
+    const currentLevel = adventurer?.level ?? 0;
 
-    const handlePurchaseHealth = async () => {
-      addToCalls(purchaseHealthTx);
-    };
-
-    const handleKeyDown = useCallback(
-      (event: KeyboardEvent) => {
-        switch (event.key) {
-          case "ArrowRight":
-            setHealthAmount((prev) => {
-              const newAmount = Math.min(prev + 1, 10);
-              return newAmount;
-            });
-            break;
-          case "ArrowLeft":
-            setHealthAmount((prev) => {
-              const newAmount = Math.max(prev - 1, 1);
-              return newAmount;
-            });
-            break;
-          case "Enter":
-            handlePurchaseHealth();
-            break;
-        }
-      },
-      [potionAmount]
+    const max = Math.min(
+      Math.floor((maxHealth - (adventurer?.health ?? 0)) / 10),
+      Math.floor(adventurer?.gold! / upgradeTotalCost)
     );
+
+    // const handleKeyDown = useCallback(
+    //   (event: KeyboardEvent) => {
+    //     switch (event.key) {
+    //       case "ArrowRight":
+    //         setPotionAmount((prev) => {
+    //           const newAmount = Math.min(prev + 1, 10);
+    //           return newAmount;
+    //         });
+    //         break;
+    //       case "ArrowLeft":
+    //         setPotionAmount((prev) => {
+    //           const newAmount = Math.max(prev - 1, 1);
+    //           return newAmount;
+    //         });
+    //         break;
+    //       case "Enter":
+    //         handlePurchaseHealth();
+    //         break;
+    //     }
+    //   },
+    //   [potionAmount]
+    // );
 
     return (
       <div className="flex flex-col sm:flex-row sm:p-2 md:p-4 items-center">
-        <HealthButtons
-          purchaseAmount={potionAmount}
-          setPurchaseAmount={setHealthAmount}
-          disabled={disabled}
+        <QuantityButtons
+          amount={potionAmount}
+          min={0}
+          max={max}
+          setAmount={setPotionAmount}
         />
         <Button
           disabled={!hasBalance || adventurer?.health === maxHealth}
@@ -120,7 +116,7 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
               You can only buy up to Max Health! 1 Potion = 10 Health
             </p>
           </div>
-          <Button
+          {/* <Button
             disabled={disabled}
             onClick={async () => {
               handlePurchaseHealth();
@@ -132,7 +128,7 @@ const PurchaseHealth = ({ upgradeTotalCost }: PurchaseHealthProps) =>
               : calculatedNewHealth - maxHealth >= 10
               ? "Purchase Over Max Health"
               : "Purchase Health"}
-          </Button>
+          </Button> */}
           {!hasBalance && (
             <p className="m-auto text-red-600">Not enough gold to purchase!</p>
           )}

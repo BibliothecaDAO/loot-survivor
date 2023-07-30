@@ -1,26 +1,28 @@
 import React from "react";
-import { Button } from "../buttons/Button";
+import { Button } from "./Button";
 
 interface ButtonProps {
-  purchaseAmount: number;
-  setPurchaseAmount: (health: number) => void;
-  disabled: boolean;
+  amount: number;
+  max: number;
+  min: number;
+  setAmount: (value: number) => void;
 }
 
 const HealthSlider: React.FC<ButtonProps> = ({
-  purchaseAmount,
-  setPurchaseAmount,
-  disabled,
+  amount,
+  max,
+  min,
+  setAmount,
 }) => {
   const handleIncrement = () => {
-    if (purchaseAmount < 100) {
-      setPurchaseAmount(purchaseAmount + 1);
+    if (amount < max) {
+      setAmount(amount + 1);
     }
   };
 
   const handleDecrement = () => {
-    if (purchaseAmount > 1) {
-      setPurchaseAmount(purchaseAmount - 1);
+    if (amount > min) {
+      setAmount(amount - 1);
     }
   };
 
@@ -30,16 +32,16 @@ const HealthSlider: React.FC<ButtonProps> = ({
         className="text-base sm:text-2xl"
         size={"sm"}
         onClick={handleDecrement}
-        disabled={purchaseAmount <= 1}
+        disabled={amount <= min}
       >
         -
       </Button>
-      <span className="text-xl p-2">{purchaseAmount}</span>
+      <span className="text-xl p-2">{amount}</span>
       <Button
         className="text-2xl mr-1"
         size={"sm"}
         onClick={handleIncrement}
-        disabled={disabled}
+        disabled={amount === max}
       >
         +
       </Button>

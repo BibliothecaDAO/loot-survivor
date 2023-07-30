@@ -70,8 +70,6 @@ export const TxActivity = () => {
     query: "(max-device-width: 480px)",
   });
 
-  console.log(queryData.adventurerByIdQuery?.adventurers[0]);
-
   const setDeathNotification = (
     type: string,
     notificationData: any,

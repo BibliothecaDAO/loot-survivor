@@ -24,6 +24,8 @@ interface MarketplaceRowProps {
   setActiveMenu: (value: number | null) => void;
   calculatedNewGold: number;
   ownedItems: Item[];
+  purchaseItems: string[];
+  setPurchaseItems: (value: string[]) => void;
 }
 
 const MarketplaceRow = ({
@@ -35,6 +37,8 @@ const MarketplaceRow = ({
   setActiveMenu,
   calculatedNewGold,
   ownedItems,
+  purchaseItems,
+  setPurchaseItems,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
   const { gameContract } = useContracts();
@@ -50,16 +54,15 @@ const MarketplaceRow = ({
   const gameData = new GameData();
 
   const singlePurchaseExists = (item: string) => {
-    return calls.some(
-      (call: Call) =>
-        call.entrypoint == "buy_item" &&
-        Array.isArray(call.calldata) &&
-        call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
+    // return calls.some(
+    //   (call: Call) =>
+    //     call.entrypoint == "buy_items_and_upgrade_stats" &&
+    //     Array.isArray(call.calldata) &&
+    //     call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
+    // );
+    return purchaseItems.some(
+      (purchasingItem: string) => purchasingItem == item
     );
-  };
-
-  const purchaseExists = () => {
-    return calls.some((call: Call) => call.entrypoint == "buy_item");
   };
 
   const { tier, type, slot } = getItemData(item.item ?? "");
@@ -115,27 +118,6 @@ const MarketplaceRow = ({
     }
   }, [isActive, handleKeyDown]);
 
-  const handlePurchase = (item: string, tier: number, equip: boolean) => {
-    if (gameContract) {
-      const gameData = new GameData();
-      const PurchaseTx = {
-        contractAddress: gameContract?.address,
-        entrypoint: "buy_item",
-        calldata: [
-          adventurer?.id?.toString() ?? "",
-          "0",
-          getKeyFromValue(gameData.ITEMS, item)?.toString() ?? "",
-          equip ? "1" : "0",
-        ],
-        metadata: `Purchasing ${item} for ${getItemPrice(
-          tier,
-          adventurer?.charisma ?? 0
-        )} gold`,
-      };
-      addToCalls(PurchaseTx);
-    }
-  };
-
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
@@ -178,9 +160,8 @@ const MarketplaceRow = ({
                 size={"xs"}
                 variant={"ghost"}
                 onClick={() => {
-                  handlePurchase(item.item ?? "", tier, true);
+                  setPurchaseItems([...purchaseItems, item?.item ?? ""]);
                   setActiveMenu(null);
-                  // setPurchasedItem(true);
                 }}
               >
                 Yes
@@ -189,9 +170,8 @@ const MarketplaceRow = ({
                 size={"xs"}
                 variant={"ghost"}
                 onClick={() => {
-                  handlePurchase(item.item ?? "", tier, false);
+                  setPurchaseItems([...purchaseItems, item?.item ?? ""]);
                   setActiveMenu(null);
-                  // setPurchasedItem(true);
                 }}
               >
                 No
