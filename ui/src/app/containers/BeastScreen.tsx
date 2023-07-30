@@ -146,7 +146,7 @@ export default function BeastScreen() {
             });
           }
         });
-        resetDataUpdated("discoveryByTxHashQuery");
+        resetDataUpdated("battlesByTxHashQuery");
       },
       disabled:
         adventurer?.beastHealth == undefined ||
