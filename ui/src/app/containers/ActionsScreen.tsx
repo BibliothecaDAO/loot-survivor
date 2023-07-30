@@ -46,6 +46,7 @@ export default function ActionsScreen() {
       : []
   );
   const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
+  const resetData = useQueriesStore((state) => state.resetData);
 
   useCustomQuery(
     "discoveryByTxHashQuery",
@@ -74,7 +75,7 @@ export default function ActionsScreen() {
   const buttonsData = [
     {
       id: 1,
-      label: hasBeast ? "Beast found!!" : "Into the mist",
+      label: hasBeast ? "Beast found!!" : "Into The Mist",
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
@@ -97,6 +98,8 @@ export default function ActionsScreen() {
             });
           }
         });
+        resetData("lastBeastQuery");
+        resetData("beastQuery");
         resetDataUpdated("discoveryByTxHashQuery");
         resetDataUpdated("beastQuery");
         resetDataUpdated("lastBeastQuery");
