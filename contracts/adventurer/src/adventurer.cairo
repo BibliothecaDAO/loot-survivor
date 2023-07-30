@@ -198,7 +198,7 @@ impl ImplAdventurer of IAdventurer {
     // and appends the market seed and offset pair generated in each iteration to the respective arrays.
     fn get_market_seeds(
         self: Adventurer, adventurer_id: u256, adventurer_entropy: u128
-    ) -> (Span<u128>, Span<u8>) {
+    ) -> (Span<u256>, Span<u8>) {
         let mut seeds = ArrayTrait::new();
         let mut offsets = ArrayTrait::new();
 
@@ -2902,11 +2902,15 @@ fn test_get_market_entropy() {
     // test extreme/overflow case
     adventurer.xp = 8191; // max value for 13 bits
     adventurer.stat_points_available = 7; // max value for 3 bits
-    let max_adventurer_id: u256 = 340282366920938463463374607431768211455; // max value for 256 bits
-    let max_adventurer_entropy: u128 =
-        340282366920938463463374607431768211455; // max value for 128 bits
+
+    // // max value for 256 bits
+    let max_adventurer_id: u256 = 340282366920938463463374607431768211455;
+
+    // max value for 128 bits
+    let max_adventurer_entropy: u128 = 340282366920938463463374607431768211455;
+
+    // result isn't important, just that it doesn't fail via overflow
     let market_entropy = adventurer.get_market_seeds(max_adventurer_id, max_adventurer_entropy);
-// result isn't important, just that it doesn't fail via overflow
 }
 
 #[test]
