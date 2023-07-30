@@ -2,9 +2,6 @@ import Image from "next/image";
 import { getBeastData } from "../../lib/utils";
 import { HeartIcon } from "../icons/Icons";
 import EfficacyIcon from "../icons/EfficacyIcon";
-import { getBeastData } from "../../lib/utils";
-import { HeartIcon } from "../icons/Icons";
-import EfficacyIcon from "../icons/EfficacyIcon";
 import { processBeastName } from "../../lib/utils";
 import { Battle, Beast, Adventurer } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
@@ -27,9 +24,6 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
     <div className="relative flex flex-col items-center h-full  border-2 border-terminal-green">
       <div className="flex flex-col w-full h-full p-1 sm:p-3 uppercase">
         <div className="flex justify-between py-1 sm:py-3 text-xl sm:text-4xl border-b border-terminal-green">
-    <div className="relative flex flex-col items-center h-full  border-2 border-terminal-green">
-      <div className="flex flex-col w-full h-full p-1 sm:p-3 uppercase">
-        <div className="flex justify-between py-1 sm:py-3 text-xl sm:text-4xl border-b border-terminal-green">
           {beastName}
           <div
             className={`text-4xl flex ${
@@ -43,17 +37,14 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
           </div>
         </div>
         <div className="flex justify-between w-full sm:py-2 ">
-        <div className="flex justify-between w-full sm:py-2 ">
           <p className="text-xl sm:text-3xl text-terminal-yellow">
             Level {beastData?.level}
           </p>
           {/* <p className="text-3xl text-terminal-yellow">XP {beastData?.xp}</p> */}
           <p className="text-xl sm:text-3xl text-terminal-yellow">
             Tier {tier}
-            Tier {tier}
           </p>
         </div>
-        <div className="flex flex-row justify-center gap-4 items-center w-full py-1 sm:py-4 space-x-2">
         <div className="flex flex-row justify-center gap-4 items-center w-full py-1 sm:py-4 space-x-2">
           <div className="flex flex-row gap-2 items-center ml-5">
             <EfficacyIcon
@@ -65,7 +56,6 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
           </div>
           <div className="flex flex-row gap-2 items-center">
             <EfficacyIcon
-              type={armor}
               type={armor}
               size="w-6"
               className="self-center h-4 w-4 sm:w-6 sm:h-6"

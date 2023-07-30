@@ -5,10 +5,6 @@ import {
   AddDevnetButton,
   SwitchToDevnetButton,
 } from "../archived/DevnetConnectors";
-import {
-  AddDevnetButton,
-  SwitchToDevnetButton,
-} from "../archived/DevnetConnectors";
 import useUIStore from "../../hooks/useUIStore";
 import Image from "next/image";
 
@@ -20,7 +16,7 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
   const { connectors, connect } = useConnectors();
   const { account } = useAccount();
 
-  console.log(account)
+  console.log(account);
   const [addedDevnet, setAddedDevnet] = useState<boolean>(false);
   const setConnected = useUIStore((state) => state.setConnected);
 
@@ -28,9 +24,9 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     if (screen == 1) {
       if (
         (account as any)?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz" ||
+          "https://survivor-indexer.bibliothecadao.xyz" ||
         (account as any)?.provider?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz"
+          "https://survivor-indexer.bibliothecadao.xyz"
       ) {
         setConnected(true);
       }
