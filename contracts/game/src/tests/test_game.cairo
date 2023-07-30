@@ -23,7 +23,7 @@ mod tests {
     };
     use combat::constants::CombatEnums::{Slot, Tier};
     use survivor::{
-        adventurer_meta::{AdventurerMetadata, AdventurerClass},
+        adventurer_meta::{AdventurerMetadata},
         constants::adventurer_constants::{
             STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, ClassStatBoosts
         },
@@ -66,13 +66,10 @@ mod tests {
         let mut game = setup();
 
         let adventurer_meta = AdventurerMetadata {
-            name: 'Loaf'.try_into().unwrap(),
-            home_realm: 1,
-            class: AdventurerClass::Scout(()),
-            entropy: 1
+            name: 'Loaf'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
         };
 
-        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta);
+        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta, 0, 2, 0, 2, 2, 0);
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -97,11 +94,14 @@ mod tests {
                 INTERFACE_ID(),
                 ItemId::Wand,
                 AdventurerMetadata {
-                    name: 'loothero'.try_into().unwrap(),
-                    home_realm: 1,
-                    class: AdventurerClass::Cleric(()),
-                    entropy: 1
-                }
+                    name: 'loothero'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
+                },
+                0,
+                1,
+                0,
+                1,
+                1,
+                3,
             );
 
         game
@@ -121,60 +121,6 @@ mod tests {
         assert(adventurer.stat_points_available == 1, 'should have 1 stat available');
 
         // return game
-        game
-    }
-
-    fn new_adventurer_scout() -> IGameDispatcher {
-        let mut game = setup();
-
-        game
-            .start(
-                INTERFACE_ID(),
-                ItemId::Wand,
-                AdventurerMetadata {
-                    name: 'spag'.try_into().unwrap(),
-                    home_realm: 1,
-                    class: AdventurerClass::Scout(()),
-                    entropy: 1
-                }
-            );
-
-        game
-    }
-
-    fn new_adventurer_hunter() -> IGameDispatcher {
-        let mut game = setup();
-
-        game
-            .start(
-                INTERFACE_ID(),
-                ItemId::Wand,
-                AdventurerMetadata {
-                    name: 'dev'.try_into().unwrap(),
-                    home_realm: 1,
-                    class: AdventurerClass::Hunter(()),
-                    entropy: 1
-                }
-            );
-
-        game
-    }
-
-    fn new_adventurer_warrior() -> IGameDispatcher {
-        let mut game = setup();
-
-        game
-            .start(
-                INTERFACE_ID(),
-                ItemId::Wand,
-                AdventurerMetadata {
-                    name: 'ethereum'.try_into().unwrap(),
-                    home_realm: 1,
-                    class: AdventurerClass::Warrior(()),
-                    entropy: 1
-                }
-            );
-
         game
     }
 
@@ -426,38 +372,9 @@ mod tests {
         // check meta
         assert(adventurer_meta_1.name == 'Loaf', 'name');
         assert(adventurer_meta_1.home_realm == 1, 'home_realm');
-        assert(adventurer_meta_1.class == AdventurerClass::Scout(()), 'class');
+        assert(adventurer_meta_1.class == 1, 'class');
 
         adventurer_meta_1.entropy;
-    }
-
-    #[test]
-    #[available_gas(3000000000000)]
-    fn test_start_cleric() {
-        let mut game = new_adventurer_cleric();
-
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        let adventurer_meta = game.get_adventurer_meta(ADVENTURER_ID);
-
-        // check adventurer
-        assert(
-            adventurer.stats.strength == ClassStatBoosts::Cleric::STRENGTH, 'wrong cleric strength'
-        );
-        assert(
-            adventurer.stats.dexterity == ClassStatBoosts::Cleric::DEXTERITY,
-            'wrong cleric dexterity'
-        );
-        assert(
-            adventurer.stats.vitality == ClassStatBoosts::Cleric::VITALITY, 'wrong cleric vitality'
-        );
-        assert(
-            adventurer.stats.intelligence == ClassStatBoosts::Cleric::INTELLIGENCE,
-            'wrong cleric intelligence'
-        );
-        assert(adventurer.stats.wisdom == ClassStatBoosts::Cleric::WISDOM, 'wrong cleric wisdom');
-        assert(
-            adventurer.stats.charisma == ClassStatBoosts::Cleric::CHARISMA, 'wrong cleric charisma'
-        );
     }
 
     #[test]
@@ -573,11 +490,11 @@ mod tests {
 
         // explore till we find a beast
         // TODO: use cheat codes to make this less fragile
-        testing::set_block_number(1004);
+        testing::set_block_number(1006);
         game.explore(ADVENTURER_ID);
         // use stat upgrade
         game.upgrade_stat(ADVENTURER_ID, 1, 1);
-        testing::set_block_number(1005);
+        testing::set_block_number(1007);
         game.explore(ADVENTURER_ID);
 
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);

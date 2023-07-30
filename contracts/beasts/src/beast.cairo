@@ -56,7 +56,7 @@ impl ImplBeast of IBeast {
                 combat_spec: CombatSpec {
                     tier: ImplBeast::get_tier(beast_id),
                     item_type: ImplBeast::get_type(beast_id),
-                    level: U8IntoU16::into(ImplBeast::get_level(adventurer_level, seed)),
+                    level: ImplBeast::get_level(adventurer_level, seed),
                     specials: special_names
                 }
             }
@@ -157,13 +157,7 @@ impl ImplBeast of IBeast {
     fn get_starting_health(adventurer_level: u8, entropy: u128, ) -> u16 {
         // Delete this function to combat system but pass in difficulty parameters
         // which control when and how quickly beasts health increases
-        let beast_health = ImplCombat::get_enemy_starting_health(
-            adventurer_level,
-            MINIMUM_HEALTH,
-            CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL,
-            CombatSettings::HEALTH_MULTIPLIER::NORMAL,
-            entropy
-        );
+        let beast_health = ImplCombat::get_enemy_starting_health(adventurer_level, entropy);
 
         // if the beast health provdied by combat library
         // is higher than the max allowed for a beast
@@ -192,17 +186,12 @@ impl ImplBeast of IBeast {
             }
         }
     }
-    fn get_level(adventurer_level: u8, seed: u128) -> u8 {
+    fn get_level(adventurer_level: u8, seed: u128) -> u16 {
         // Delegate level generation to combat system but pass in difficulty parameters
         // which control when and how quickly beasts level increases
         // For the purposes of beasts, we pass in a seed instead of entropy which will
         // result in deterministic beasts
-        ImplCombat::get_random_level(
-            adventurer_level,
-            seed,
-            CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL,
-            CombatSettings::LEVEL_MULTIPLIER::NORMAL,
-        )
+        ImplCombat::get_random_level(adventurer_level, seed)
     }
 
     // attack is used to calculate the damage dealt to a beast
@@ -705,16 +694,8 @@ fn test_get_level() {
 
     // beast level and adventurer level will be same up to the difficulty cliff
     let entity_level = ImplBeast::get_level(adventurer_level, 0);
-    assert(entity_level == adventurer_level, 'lvl should eql advr lvl');
+    assert(entity_level == adventurer_level.into(), 'lvl should eql advr lvl');
 
-    // test at just before the difficult level cliff
-    adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL - 1;
-    let entity_level = ImplBeast::get_level(adventurer_level, 0);
-    // entity level should still be the same as adventurer level
-    assert(entity_level == adventurer_level, 'lvl should eql advr lvl');
-
-    // As we exceed difficult cliff, beast level will start to range
-    // based on entropy
     adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL + 1;
     let entity_level = ImplBeast::get_level(adventurer_level, 0);
     assert(entity_level == 3, 'beast lvl should be 3');
