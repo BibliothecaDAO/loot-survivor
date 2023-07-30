@@ -7,7 +7,7 @@ use core::traits::{TryInto, Into, DivEq};
 use super::constants::{
     CombatEnums::{Tier, Type, Slot, WeaponEffectiveness},
     CombatSettings::{
-        XP_MULTIPLIER, DIFFICULTY_CLIFF, XP_REWARD_DIVISOR, WEAPON_TIER_DAMAGE_MULTIPLIER,
+        XP_MULTIPLIER, DIFFICULTY_INCREASE_RATE, XP_REWARD_DIVISOR, WEAPON_TIER_DAMAGE_MULTIPLIER,
         ARMOR_TIER_DAMAGE_MULTIPLIER, ELEMENTAL_DAMAGE_BONUS, STRONG_ELEMENTAL_BONUS_MIN,
         MAX_CRITICAL_HIT_LUCK, LEVEL_MULTIPLIER
     }
@@ -397,67 +397,42 @@ impl ImplCombat of ICombat {
         }
     }
 
-    // get_random_level returns a random level scoped for the adventurere Level
-    // @param adventurer_level: the level of the adventurer
-    // @param entropy: entropy for randomizing entity level
-    // @param range_increase_interval: the interval at which the max level of entitys will increase
-    // @param level_multiplier: the multiplier for the entity level
-    // @return u8: the random level scoped for the adventurer level
-    fn get_random_level(
-        adventurer_level: u8, entropy: u128, range_increase_interval: u8, level_multiplier: u8
-    ) -> u8 {
-        // If adventurer has not exceeded the difficult cliff level
-        if (adventurer_level <= range_increase_interval) {
-            // return the adventurer level
-            adventurer_level
+    fn get_random_level(adventurer_level: u8, entropy: u128) -> u16 {
+        // TODO: Abstract this into game settings that can be passed into this function
+        let level = 1 + (entropy % (adventurer_level.into() * 2)).try_into().unwrap();
+        if (adventurer_level >= 50) {
+            level + 80
+        } else if (adventurer_level >= 40) {
+            level + 40
+        } else if (adventurer_level >= 30) {
+            level + 20
+        } else if (adventurer_level >= 20) {
+            level + 10
         } else {
-            // If adventurer has exceeded the difficult cliff level
-            // the entity level will be randomnly scoped around the adventurer level
-            // the max level of entitys will increase every N levels based on 
-            // the DIFFICULTY_CLIFF setting. The higher this setting, the less frequently the max level will increase
-            let entity_level_multplier = 1 + (adventurer_level / range_increase_interval);
-
-            // maximum range of the entity level will be the above multplier * the entity difficulty
-            let entity_level_range = U8IntoU128::into(entity_level_multplier * level_multiplier);
-
-            // calculate the entity level 
-            let entity_level_boost = entropy % entity_level_range;
-
-            // add the entity level boost to the adventurer level - difficulty cliff
-            // this will produce a level between (adventurer level - difficulty cliff) and entity_level_multplier * entity_constants::Settings::entity_LEVEL_RANGE
-            let entity_level = entity_level_boost
-                + U8IntoU128::into((adventurer_level - entity_level_multplier));
-
-            // return the entity level as a u16
-            U128TryIntoU8::try_into(entity_level).unwrap()
+            level
         }
     }
 
-    // get_enemy_starting_health returns the starting health for an entity
-    // @param 
-    fn get_enemy_starting_health(
-        adventurer_level: u8,
-        minimum_health: u8,
-        entropy: u128,
-        range_increase_interval: u8,
-        level_multiplier: u8
-    ) -> u16 {
-        // enemy starting health increases every N adventurer levels
-        let health_multiplier = adventurer_level / range_increase_interval;
-
-        // max health is based on adventurer level and the level multplier
-        // if the range_increase_interval is 5 for example and the adventurer is on
-        // level 20, the max enemy health will be 5 * (level multiplier)
-        let max_health = U8IntoU128::into((1 + health_multiplier) * level_multiplier);
-
-        // the remainder of entropy divided by max_health provides entity health
-        // we then add 1 to minimum_health to prevent starting health of zero
-        U128TryIntoU16::try_into(
-            U8IntoU128::into(adventurer_level + minimum_health) + (entropy % max_health)
-        )
-            .unwrap()
+    fn get_enemy_starting_health(adventurer_level: u8, entropy: u128) -> u16 {
+        // TODO: Abstract this into game settings that can be passed into this function
+        let health = 1 + (entropy % (adventurer_level.into() * 15)).try_into().unwrap();
+        if (adventurer_level >= 50) {
+            // when adventurer reaches level 50, the beast health is always max
+            health + 500
+        } else if (adventurer_level >= 40) {
+            // when adventurer reaches level 40, the minimum health is 300
+            health + 400
+        } else if (adventurer_level >= 30) {
+            // when adventurer reaches level 30, the minimum health is 200
+            health + 200
+        } else if (adventurer_level >= 20) {
+            // when adventurer reaches level 20, the minimum health is 100
+            health + 100
+        } else {
+            // minimum health is 10
+            health + 10
+        }
     }
-
 
     // get_level_from_xp returns the level for a given xp
     // @param xp: the xp to get the level for
@@ -596,16 +571,101 @@ impl ImplCombat of ICombat {
     fn ability_based_avoid_threat(adventurer_level: u8, relevant_stat: u8, entropy: u128) -> bool {
         // number of sides of the die will be based on adventurer_level
         // so the higher the adventurer level, the more sides the die has
-        let dice_roll = 1 + (U128TryIntoU8::try_into(entropy % adventurer_level.into()).unwrap());
+        let dice_roll = U128TryIntoU8::try_into(entropy % adventurer_level.into()).unwrap();
 
-        // in order to avoid the threat, the adventurer must roll a number less than or equal
-        // to the the relevant stat + difficulty cliff.
-        // The difficulty cliff serves as a starting cushion for the adventurer before which
-        // they can avoid all threats. Once the difficulty cliff has been passed, the adventurer
-        // must invest in the proper stats to avoid threats.{Intelligence for obstalce, Wisdom for beast ambushes}
-        (dice_roll <= (relevant_stat + DIFFICULTY_CLIFF::NORMAL))
+        // in order to avoid the threat, the adventurer's stat must be higher than the dice roll
+        //  As an example, if the adventurer is on level 2 with no dexterity, the
+        // dice roll will be either 0 or 1. To flee they'll need a 0 (50/50 chance)
+        // If aventurer has 1 dexterity on level 2, they will have 100% chance of fleeing
+        // If adventurer is level 20 with 10 dexterity, the dice roll will be 0 - 19
+        // and adventurer will need a 0-9 to flee (50/50) chance
+        relevant_stat > dice_roll
     }
 }
+
+#[test]
+#[available_gas(50000)]
+fn test_get_enemy_starting_health_max_values() {
+    // test max value case
+    // no need to assert result just make sure it doesn't panic
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+        255, 340282366920938463463374607431768211455
+    );
+}
+
+#[test]
+#[available_gas(500000)]
+fn test_get_enemy_starting_health_new() {
+    let enemy_starting_health = ImplCombat::get_enemy_starting_health(1, 0);
+    assert(enemy_starting_health == 11, 'lvl1, min beast heatlh is 11');
+}
+
+#[test]
+#[available_gas(500000)]
+fn test_get_enemy_starting_health() {
+    let mut adventurer_level = 2;
+    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 29);
+    assert(min_beast_level == 11, 'lvl2, min beast heatlh is 11');
+    assert(max_beast_level == 40, 'lvl2, max beast lvl is 40');
+
+    adventurer_level = 3;
+    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 44);
+    assert(min_beast_level == 11, 'lvl3, min beast heatlh is 11');
+    assert(max_beast_level == 55, 'lvl3, max beast lvl is 55');
+
+    adventurer_level = 4;
+    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 59);
+    assert(min_beast_level == 11, 'lvl4, min beast heatlh is 11');
+    assert(max_beast_level == 70, 'lvl4, max beast lvl is 70');
+
+    adventurer_level = 5;
+    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 74);
+    assert(min_beast_level == 11, 'lvl5, min beast heatlh is 11');
+    assert(max_beast_level == 85, 'lvl5, max beast lvl is 85');
+
+    adventurer_level = 19;
+    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 284);
+    assert(min_beast_level == 11, 'lvl19, min beast heatlh is 11');
+    assert(max_beast_level == 295, 'lvl19, max beast lvl is 295');
+
+    adventurer_level = 20;
+    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 299);
+    assert(min_beast_level == 101, 'lvl20, min beast heatlh is 101');
+    assert(max_beast_level == 400, 'lvl20, max beast lvl is 310');
+
+    adventurer_level = 29;
+    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 434);
+    assert(min_beast_level == 101, 'lvl29, min beast heatlh is 101');
+    // combat module will return higher health than LS beasts can handle
+    // this is fine as Beast module will cap the health at 511
+    assert(max_beast_level == 535, 'lvl29, max beast lvl is 535');
+
+    adventurer_level = 30;
+    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 449);
+    assert(min_beast_level == 201, 'lvl30, min beast heatlh is 201');
+    assert(max_beast_level == 650, 'lvl30, max beast lvl is 650');
+
+    adventurer_level = 40;
+    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 599);
+    assert(min_beast_level == 401, 'lvl40, min beast heatlh is 401');
+    assert(max_beast_level == 1000, 'lvl40, max beast lvl is 1000');
+
+    adventurer_level = 50;
+    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 749);
+    assert(min_beast_level == 501, 'lvl50, min beast heatlh is 501');
+    assert(max_beast_level == 1250, 'lvl50, max beast lvl is 1250');
+}
+
 
 #[test]
 #[available_gas(170000)]
@@ -1298,94 +1358,57 @@ fn test_calculate_damage() {
     assert(damage == 130, 'T1 G20 vs T3 G30: 130hp');
 }
 
+
+// level 1: max beast 1
+// level 2: max beast 4
+// level 20: max beast 40
 #[test]
-#[available_gas(550000)]
+#[available_gas(750000)]
 fn test_get_random_level() {
     let mut adventurer_level = 1;
-
-    let range_level_increase = DIFFICULTY_CLIFF::NORMAL;
+    let range_level_increase = DIFFICULTY_INCREASE_RATE::NORMAL;
     let level_multiplier = LEVEL_MULTIPLIER::NORMAL;
+    let beast_level = ImplCombat::get_random_level(adventurer_level, 0);
 
-    // entity level and adventurer level will be equivalent up to the difficulty cliff
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 0, range_level_increase, level_multiplier
-    );
-    assert(entity_level == adventurer_level, 'lvl should eql advr lvl');
+    adventurer_level = 2;
+    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 3);
+    assert(min_beast_level == 1, 'on lvl2, min beast lvl is 1');
+    assert(max_beast_level == 4, 'on lvl2, max beast lvl is 4');
 
-    // test at just before the difficult level cliff
-    adventurer_level = DIFFICULTY_CLIFF::NORMAL - 1;
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 0, range_level_increase, level_multiplier
-    );
-    // entity level should still be the same as adventurer level
-    assert(entity_level == adventurer_level, 'lvl should eql advr lvl');
+    adventurer_level = 3;
+    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 5);
+    assert(min_beast_level == 1, 'on lvl3, min beast lvl is 1');
+    assert(max_beast_level == 6, 'on lvl3, max beast lvl is 6');
 
-    // test above difficult cliff (we should start to see a range of levels now based on entropy)
-    // using defualts, adventurer will now be level 5
-    // entropy 0 will generate the minimum entity level which will be:
-    // 1 + (adventurer level - difficulty cliff)
-    // min_level: 1 + (5 - 3) = 3
-    // the max level will be: adventurer_level + (1 + (LEVEL_MULTIPLIER * number of level increases))
-    // for current settings that will be: 5 + (1 + (4*1) = 10
-    adventurer_level = DIFFICULTY_CLIFF::NORMAL + 1;
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 0, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 3, 'entity lvl should be 3');
+    adventurer_level = 19;
+    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 37);
+    assert(min_beast_level == 1, 'on lvl19, min beast lvl is 1');
+    assert(max_beast_level == 38, 'on lvl19, max beast lvl is 38');
 
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 1, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 4, 'entity lvl should be 4');
+    adventurer_level = 20;
+    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 39);
+    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+    assert(min_beast_level == 11, 'on lvl20, min beast lvl is 11');
+    assert(max_beast_level == 50, 'on lvl20, max beast lvl is 50');
 
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 2, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 5, 'entity lvl should be 5');
+    adventurer_level = 30;
+    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 59);
+    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+    assert(min_beast_level == 21, 'on lvl30, min beast lvl is 21');
+    assert(max_beast_level == 80, 'on lvl30, max beast lvl is 80');
 
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 3, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 6, 'entity lvl should be 6');
+    adventurer_level = 40;
+    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 79);
+    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+    assert(min_beast_level == 41, 'on lvl40, min beast lvl is 31');
+    assert(max_beast_level == 120, 'on lvl40, max beast lvl is 120');
 
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 4, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 7, 'entity lvl should be 7');
-
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 5, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 8, 'entity lvl should be 8');
-
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 6, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 9, 'entity lvl should be 9');
-
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 7, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 10, 'entity lvl should be 10');
-
-    // verify we roll over back to entity level 1
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 8, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 3, 'entity lvl should be 3');
-
-    // test 6 * the difficulty cliff for mid-late game
-    // difficulty cliff default is 4 so adventurer_level here would be 24
-    adventurer_level = DIFFICULTY_CLIFF::NORMAL * 6;
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 0, range_level_increase, level_multiplier
-    );
-    // at this stage, the minimum entity level is 17
-    assert(entity_level == 17, 'entity lvl should be 17');
-
-    // but we'll have 27 levels of range so top end should be 52
-    let entity_level = ImplCombat::get_random_level(
-        adventurer_level, 27, range_level_increase, level_multiplier
-    );
-    assert(entity_level == 44, 'entity lvl should be 44');
+    adventurer_level = 50;
+    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 99);
+    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+    assert(min_beast_level == 81, 'on lvl50, min beast lvl is 51');
+    assert(max_beast_level == 180, 'on lvl50, max beast lvl is 180');
 }

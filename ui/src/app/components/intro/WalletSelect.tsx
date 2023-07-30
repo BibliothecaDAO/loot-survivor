@@ -5,6 +5,10 @@ import {
   AddDevnetButton,
   SwitchToDevnetButton,
 } from "../archived/DevnetConnectors";
+import {
+  AddDevnetButton,
+  SwitchToDevnetButton,
+} from "../archived/DevnetConnectors";
 import useUIStore from "../../hooks/useUIStore";
 import Image from "next/image";
 

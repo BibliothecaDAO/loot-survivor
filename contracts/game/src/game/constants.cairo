@@ -15,11 +15,17 @@ mod messages {
     const HEALTH_FULL: felt252 = 'Health already full';
     const ADVENTURER_NOT_IDLE: felt252 = 'Adventurer is not idle';
     const ONE_EXPLORE_PER_BLOCK: felt252 = 'One explore per block';
-    const NO_STAT_UPGRADES_AVAILABLE: felt252 = 'No stat upgrades available';
+    const INSUFFICIENT_STAT_UPGRADES: felt252 = 'insufficient stat upgrades';
+    const TOO_MANY_ITEMS: felt252 = 'Too many items';
+    const ITEM_ALREADY_OWNED: felt252 = 'Item already owned';
+    const ADVENTURER_DOESNT_OWN_ITEM: felt252 = 'Adventurer doesnt own item';
+    const ZERO_DEXTERITY: felt252 = 'Cant flee, no dexterity';
+    const WRONG_STARTING_STATS: felt252 = 'Wrong starting stat count';
 }
 
 const BLOCKS_IN_A_WEEK: u64 = 3360;
 const COST_TO_PLAY: u256 = 25;
+const STARTING_STATS: u8 = 6;
 
 const U64_MAX: u64 = 18446744073709551615;
 const U128_MAX: u128 = 340282366920938463463374607431768211455;
@@ -56,3 +62,5 @@ mod WEEK_8 {
     const SECOND_PLACE: u256 = 4; // 4
     const THIRD_PLACE: u256 = 2; // 2
 }
+
+const STARTER_BEAST_ATTACK_DAMAGE: u16 = 10;

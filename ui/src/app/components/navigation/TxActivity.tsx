@@ -1,10 +1,24 @@
 import { useEffect, useState } from "react";
 import { useWaitForTransaction } from "@starknet-react/core";
+import { useWaitForTransaction } from "@starknet-react/core";
 import { displayAddress, padAddress } from "../../lib/utils";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import LootIconLoader from "../icons/Loader";
+import LootIconLoader from "../icons/Loader";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import { useMediaQuery } from "react-responsive";
+import { processNotification } from "../../components/navigation/NotificationDisplay";
+import useUIStore from "@/app/hooks/useUIStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
+import { NullAdventurer } from "@/app/types";
+import useCustomQuery from "@/app/hooks/useCustomQuery";
+import {
+  getBattleByTxHash,
+  getDiscoveryByTxHash,
+  getAdventurerById,
+} from "@/app/hooks/graphql/queries";
 import { useMediaQuery } from "react-responsive";
 import { processNotification } from "../../components/navigation/NotificationDisplay";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -45,11 +59,23 @@ export const TxActivity = () => {
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
+  const deathMessage = useLoadingStore((state) => state.deathMessage);
+  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
+  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const setScreen = useUIStore((state) => state.setScreen);
+  const hasStatUpgrades = useAdventurerStore(
+    (state) => state.computed.hasStatUpgrades
+  );
+  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
+  const isAlive = useAdventurerStore((state) => state.computed.isAlive);
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const {
     data: queryData,
     isDataUpdated,
     refetch,
     resetDataUpdated,
+    resetData,
     resetData,
   } = useQueriesStore();
   const { data } = useWaitForTransaction({
@@ -217,9 +243,14 @@ export const TxActivity = () => {
         await refetch("adventurersByOwnerQuery");
         stopLoading(notificationData);
       };
+      };
 
       const handleDefault = async () => {
+      const handleDefault = async () => {
         stopLoading(notificationData);
+      };
+
+      const handleDataUpdate = () => {
       };
 
       const handleDataUpdate = () => {
@@ -275,6 +306,7 @@ export const TxActivity = () => {
       setAdventurer(queryData.adventurerByIdQuery.adventurers[0]);
     }
   }, [queryData.adventurerByIdQuery?.adventurers[0]?.timestamp]);
+  }, [queryData.adventurerByIdQuery?.adventurers[0]?.timestamp]);
 
   // stop loading when an error is caught
   useEffect(() => {
@@ -292,10 +324,17 @@ export const TxActivity = () => {
       return () => clearInterval(interval); // This is important, it will clear the interval when the component is unmounted.
     }
   }, [pendingMessage, messageIndex, pendingArray]);
+  }, [pendingMessage, messageIndex, pendingArray]);
 
   return (
     <>
       {loading ? (
+        <div className="flex flex-row absolute top-3 sm:top-0 sm:relative items-center gap-5 justify-between text-xs sm:text-base">
+          <div className="flex flex-row items-center w-40 sm:w-48 loading-ellipsis">
+            <LootIconLoader
+              className="self-center mr-3"
+              size={isMobileDevice ? "w-4" : "w-5"}
+            />
         <div className="flex flex-row absolute top-3 sm:top-0 sm:relative items-center gap-5 justify-between text-xs sm:text-base">
           <div className="flex flex-row items-center w-40 sm:w-48 loading-ellipsis">
             <LootIconLoader
@@ -311,6 +350,7 @@ export const TxActivity = () => {
           {hash && (
             <div className="flex flex-row gap-2">
               {!isMobileDevice && "Hash:"}
+              {!isMobileDevice && "Hash:"}
               <a
                 href={`https://testnet.starkscan.co/tx/${padAddress(hash)}`}
                 target="_blank"
@@ -318,6 +358,11 @@ export const TxActivity = () => {
               >
                 {displayAddress(hash)}
               </a>
+            </div>
+          )}
+          {data && hash && (
+            <div>
+              {!isMobileDevice && "Status:"} {data.status}
             </div>
           )}
           {data && hash && (

@@ -18,6 +18,7 @@ import {
   AddDevnetEthButton,
   MintEthButton,
 } from "./components/archived/DevnetConnectors";
+} from "./components/archived/DevnetConnectors";
 import { TxActivity } from "./components/navigation/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
 import useAdventurerStore from "./hooks/useAdventurerStore";
@@ -26,7 +27,10 @@ import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
+import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
+import { mainnet_addr, getGraphQLUrl } from "./lib/constants";
+import { Menu } from "./types";
 import { mainnet_addr, getGraphQLUrl } from "./lib/constants";
 import { Menu } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
@@ -100,8 +104,14 @@ export default function Home() {
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const mintAdventurer = useUIStore((state) => state.mintAdventurer);
   const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
+  const mintAdventurer = useUIStore((state) => state.mintAdventurer);
+  const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const setIndexer = useIndexerStore((state) => state.setIndexer);
+  const [showDeathCount, setShowDeathCount] = useState(true);
+  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
+  const hasStatUpgrades = useAdventurerStore(
+    (state) => state.computed.hasStatUpgrades
   const [showDeathCount, setShowDeathCount] = useState(true);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const hasStatUpgrades = useAdventurerStore(
@@ -159,8 +169,11 @@ export default function Home() {
       setConnected(false);
     }
   }, [account, setConnected]);
+  }, [account, setConnected]);
 
   useMemo(() => {
+    setIndexer(getGraphQLUrl());
+  }, [setIndexer]);
     setIndexer(getGraphQLUrl());
   }, [setIndexer]);
 
@@ -171,7 +184,14 @@ export default function Home() {
       setScreen("upgrade");
     } else if (!adventurer || !isAlive) {
       setScreen("start");
+    if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
+      setScreen("play");
+    } else if (hasStatUpgrades) {
+      setScreen("upgrade");
+    } else if (!adventurer || !isAlive) {
+      setScreen("start");
     }
+  }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
   }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
 
   useEffect(() => {
@@ -180,7 +200,13 @@ export default function Home() {
       setAdventurer(adventurers[adventurers.length - 1]);
       setScreen("play");
       setMintAdventurer(false);
+    if (mintAdventurer && data.adventurersByOwnerQuery) {
+      const adventurers = data.adventurersByOwnerQuery.adventurers;
+      setAdventurer(adventurers[adventurers.length - 1]);
+      setScreen("play");
+      setMintAdventurer(false);
     }
+  }, [data.adventurersByOwnerQuery?.adventurers.length]);
   }, [data.adventurersByOwnerQuery?.adventurers.length]);
 
   useEffect(() => {
@@ -190,6 +216,25 @@ export default function Home() {
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
+
+  const mobileMenuDisabled = [
+    false,
+    hasStatUpgrades,
+    false,
+    !hasStatUpgrades,
+    false,
+    false,
+  ];
+
+  const allMenuDisabled = [
+    false,
+    hasStatUpgrades,
+    false,
+    !hasStatUpgrades,
+    false,
+    false,
+    false,
+  ];
 
   const mobileMenuDisabled = [
     false,
@@ -262,10 +307,36 @@ export default function Home() {
                       <CartIconSimple />
                     </div>
                     <p className="hidden sm:block">
+                  <div className="flex items-center justify-center">
+                    {isMuted ? (
+                      <MuteIcon className="w-4 h-4 sm:w-6 sm:h-6" />
+                    ) : (
+                      <VolumeIcon className="w-4 h-4 sm:w-6 sm:h-6" />
+                    )}
+                  </div>
+                </Button>
+                <Button onClick={async () => await refetch()}>
+                  <RefreshIcon className="w-4 h-4 sm:w-6 sm:h-6" />
+                </Button>
+                {!isMobileDevice && account && calls.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setDisplayCart(!displayCart);
+                      clickPlay();
+                    }}
+                    className="relative flex flex-row items-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base"
+                  >
+                    <div className="w-4 h-4">
+                      <CartIconSimple />
+                    </div>
+                    <p className="hidden sm:block">
                       {displayCart ? "Hide Cart" : "Show Cart"}
                     </p>
                   </button>
+                    </p>
+                  </button>
                 )}
+                {displayCart && <TransactionCart />}
                 {displayCart && <TransactionCart />}
                 {isMobileDevice ? (
                   <>
@@ -292,12 +363,24 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
+                    {((account as any)?.provider?.baseUrl == mainnet_addr ||
+                      (account as any)?.baseUrl == mainnet_addr) && (
                       <AddDevnetEthButton />
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
+                    {((account as any)?.provider?.baseUrl == mainnet_addr ||
+                      (account as any)?.baseUrl == mainnet_addr) && (
                       <MintEthButton />
                     )}
+                    {account && (
+                      <Button onClick={() => disconnect()}>
+                        {displayAddress(account.address)}
+                      </Button>
+                    )}
+                    <Button href="https://github.com/BibliothecaDAO/loot-survivor">
+                      <GithubIcon className="w-6" />
+                    </Button>
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}
@@ -330,6 +413,7 @@ export default function Home() {
             unmountOnExit
           >
             <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
+            <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}
@@ -341,6 +425,8 @@ export default function Home() {
           {deathDialog && <DeathDialog />}
 
           {status == "connected" && arcadeDialog && <ArcadeDialog />}
+
+          {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
 
           {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
 
@@ -358,6 +444,9 @@ export default function Home() {
                     disabled={
                       isMobileDevice ? mobileMenuDisabled : allMenuDisabled
                     }
+                    disabled={
+                      isMobileDevice ? mobileMenuDisabled : allMenuDisabled
+                    }
                   />
                 </div>
 
@@ -369,6 +458,8 @@ export default function Home() {
                 {screen === "leaderboard" && <LeaderboardScreen />}
                 {screen === "upgrade" && <UpgradeScreen />}
                 {screen === "profile" && <Profile />}
+                {screen === "encounters" && <EncountersScreen />}
+                {screen === "guide" && <GuideScreen />}
                 {screen === "encounters" && <EncountersScreen />}
                 {screen === "guide" && <GuideScreen />}
                 {screen === "settings" && <Settings />}

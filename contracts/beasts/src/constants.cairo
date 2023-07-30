@@ -206,7 +206,5 @@ mod BeastId {
         75; // A mythical creature portrayed in Classical times with the head and tail of a bull and the body of a man
 
     // If you add beasts, make sure to update MAX_ID below
-    // making this u128 as it's commonly used to select a random beast based
-    // on entropy variables which are u128 based
-    const MAX_ID: u128 = 75;
+    const MAX_ID: u8 = 75;
 }

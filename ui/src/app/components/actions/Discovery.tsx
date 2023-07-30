@@ -5,6 +5,7 @@ import { Discovery } from "@/app/types";
 
 interface DiscoveryProps {
   discoveries: Discovery[];
+  discoveries: Discovery[];
 }
 
 const Discovery = ({ discoveries }: DiscoveryProps) => {
