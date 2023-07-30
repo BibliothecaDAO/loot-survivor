@@ -20,6 +20,7 @@ import {
 import { Battle, NullDiscovery, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
 import { useMediaQuery } from "react-responsive";
+import LootIconLoader from "../components/icons/Loader";
 
 /**
  * @container
@@ -232,7 +233,7 @@ export default function BeastScreen() {
       <div className="sm:w-1/2 order-1 sm:order-2">
         {hasBeast || lastBattle ? (
           <>
-            <BeastDisplay beastData={beastData} lastBattle={formatBattles[0]} />
+            <BeastDisplay beastData={beastData} />
           </>
         ) : (
           <div className="flex flex-col items-center h-full  border-2 border-terminal-green">
