@@ -15,6 +15,8 @@ interface WalletSelectProps {
 const WalletSelect = ({ screen }: WalletSelectProps) => {
   const { connectors, connect } = useConnectors();
   const { account } = useAccount();
+
+  console.log(account);
   const [addedDevnet, setAddedDevnet] = useState<boolean>(false);
   const setConnected = useUIStore((state) => state.setConnected);
 
@@ -30,13 +32,8 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
       }
     }
 
-    if (screen == 4) {
-      if (
-        (account as any)?.baseUrl == "https://alpha4.starknet.io" ||
-        (account as any)?.provider?.baseUrl == "https://alpha4.starknet.io"
-      ) {
-        setConnected(true);
-      }
+    if (screen == 4 && account) {
+      setConnected(true);
     }
   }, [account, screen, setConnected]);
 

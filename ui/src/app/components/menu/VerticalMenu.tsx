@@ -32,7 +32,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
 
   useEffect(() => {
     onSelected(buttonsData[selectedIndex].value ?? "");
-  }, [selectedIndex, buttonsData, onSelected]);
+  }, [selectedIndex]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -41,6 +41,7 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
           play();
           setSelectedIndex((prev) => {
             const newIndex = Math.min(prev + 1, buttonsData.length - 1);
+            onSelected(buttonsData[newIndex].value ?? "");
             return newIndex;
           });
           break;
@@ -48,29 +49,39 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
           play();
           setSelectedIndex((prev) => {
             const newIndex = Math.max(prev - 1, 0);
+            onSelected(buttonsData[newIndex].value ?? "");
             return newIndex;
           });
           break;
         case "Enter":
           play();
-          setActiveMenu && setActiveMenu(buttonsData[selectedIndex].id);
-          onEnterAction && buttonsData[selectedIndex].action();
+          setSelectedIndex((prev) => {
+            setActiveMenu && setActiveMenu(buttonsData[prev].id);
+            onEnterAction && buttonsData[prev].action();
+            return prev;
+          });
           break;
       }
     },
-    [selectedIndex, buttonsData, onEnterAction, setActiveMenu, play]
+    [onEnterAction, setActiveMenu, play, onSelected, buttonsData]
   );
 
   useEffect(() => {
     if (isActive) {
       window.addEventListener("keydown", handleKeyDown);
-    } else {
-      window.removeEventListener("keydown", handleKeyDown);
     }
+  
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isActive, selectedIndex, handleKeyDown]);
+  }, [isActive]);
+  
+  // Clean up when selectedIndex or handleKeyDown changes
+  useEffect(() => {
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [selectedIndex, handleKeyDown]);
 
   return (
     <div className="flex flex-col w-full">

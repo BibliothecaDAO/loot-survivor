@@ -1380,16 +1380,13 @@
     get-starknet-core "^2.0.0"
     immutable "^4.0.0"
 
-"@starknet-react/core@^1.0.2":
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/@starknet-react/core/-/core-1.0.2.tgz#893c6cec6676d96b25a00ff3c8d233884e258922"
-  integrity sha512-nJzr6mYdj5WF/MoYCfuIZY37Q7ai8fPePUsHQicbLm0H52EwN/KvT/nmXdzX+IVg5umwkxaioPQWejfoChL9pA==
+"@starknet-react/core@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@starknet-react/core/-/core-1.0.3.tgz#61d812c1117bd375745cd13cd633bbce399af041"
+  integrity sha512-ZbSe56INmCqqAC+6HEtjYBPP+inBvZb8ce1dCAP+ymZ+YbGCZff1QwGqg2qmWn7VzDjZf0vLEzEuvMMuAUnUqA==
   dependencies:
     "@tanstack/react-query" "^4.29.12"
-    get-starknet-core "^3.0.1"
     immutable "^4.3.0"
-    react "^18.2.0"
-    starknet "5.12.0"
     zod "^3.21.4"
 
 "@svgr/babel-plugin-add-jsx-attribute@^7.0.0":
@@ -1522,6 +1519,14 @@
     "@tanstack/query-core" "4.29.19"
     use-sync-external-store "^1.2.0"
 
+"@tanstack/react-query@^4.29.12":
+  version "4.29.19"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.29.19.tgz#6ba187f2d0ea36ae83ff1f67068f53c88ce7b228"
+  integrity sha512-XiTIOHHQ5Cw1WUlHaD4fmVUMhoWjuNJlAeJGq7eM4BraI5z7y8WkZO+NR8PSuRnQGblpuVdjClQbDFtwxTtTUw==
+  dependencies:
+    "@tanstack/query-core" "4.29.19"
+    use-sync-external-store "^1.2.0"
+
 "@tanstack/react-query@^4.3.4":
   version "4.29.5"
   resolved "https://registry.npmjs.org/@tanstack/react-query/-/react-query-4.29.5.tgz"
@@ -1546,6 +1551,11 @@
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-1.0.1.tgz#aa22750962f3bf0e79d753d3cc067f010c95f194"
   integrity sha512-LG4opVs2ANWZ1TJoKc937iMmNstM/d0ae1vNbnBvBhqCSezgVUOzcLCqbI5elV8Vy6WKwKjaqR+zO9VKirBBCA==
+
+"@types/js-cookie@^3.0.3":
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/@types/js-cookie/-/js-cookie-3.0.3.tgz#d6bfbbdd0c187354ca555213d1962f6d0691ff4e"
+  integrity sha512-Xe7IImK09HP1sv2M/aI+48a20VX+TdRJucfq4vfRVy6nWN8PYPOEnlMRSgxJAgYQIXJVL8dZ4/ilAM7dWNaOww==
 
 "@types/json5@^0.0.29":
   version "0.0.29"
@@ -2853,7 +2863,7 @@ get-starknet-core@^2.0.0:
   resolved "https://registry.npmjs.org/get-starknet-core/-/get-starknet-core-2.1.0.tgz"
   integrity sha512-sT9fxIiM3maEqz1cVggiB/jGn+nUCavhhhJRnU/G1zKMmJFYORjRNohEZ1xXgRt6MFVUNPnAzxQrhI1F645VNA==
 
-get-starknet-core@^3.0.1:
+get-starknet-core@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/get-starknet-core/-/get-starknet-core-3.1.0.tgz#adc29ba2c29c2b72cc73a46bfadee531efa1d324"
   integrity sha512-SPeYnzqKRXuukNoEr5aobxBmvhUSt4uWs6kFhMXl+3fG2R43u2D2DreDkA1n6T5DF10x5zLogldiHqn/jGlxEA==
@@ -3350,6 +3360,11 @@ jiti@^1.18.2:
   version "1.18.2"
   resolved "https://registry.npmjs.org/jiti/-/jiti-1.18.2.tgz"
   integrity sha512-QAdOptna2NYiSSpv0O/BwoHBSmz4YhpzJHyi+fnMRTXFjp7B8i/YG5Z8IfusxB1ufjcD2Sre1F3R+nX3fvy7gg==
+
+js-cookie@^3.0.5:
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/js-cookie/-/js-cookie-3.0.5.tgz#0b7e2fd0c01552c58ba86e0841f94dc2557dcdbc"
+  integrity sha512-cEiJEAEoIbWfCZYKWhVwFuvPX1gETRYPw6LlaTKoxD3s2AkXzkCjnp6h0V77ozyqj0jakteJ4YqDJT830+lVGw==
 
 js-sdsl@^4.1.4:
   version "4.4.0"
@@ -4032,7 +4047,7 @@ react-type-animation@^3.0.1:
   resolved "https://registry.npmjs.org/react-type-animation/-/react-type-animation-3.0.1.tgz"
   integrity sha512-n6erVzng071lN8A0UbNT9Q7m5D6puaa9OE1lakwu5UKxMkEnUbjs2MLT3jN/SUjuxNtKmDP2GqJKb3uQ5wZNkQ==
 
-react@18.2.0, react@^18.2.0:
+react@18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
@@ -4243,18 +4258,6 @@ split-on-first@^1.0.0:
   resolved "https://registry.npmjs.org/split-on-first/-/split-on-first-1.1.0.tgz"
   integrity sha512-43ZssAJaMusuKWL8sKUBQXHWOpq8d6CfN/u1p4gUzfJkM05C8rxTmYrkIPTXapZpORA6LkkzcUulJ8FqA7Uudw==
 
-starknet@5.12.0:
-  version "5.12.0"
-  resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.12.0.tgz#cc23d1f02053cd926226083ca11907af4699df8e"
-  integrity sha512-GKx+RdwOfk9rK/lJMQhQmjbc5BIhzX1kOA3HX21uRuu6UXovgWpTOgUzZXKGyRDA9SS4lAsMoLK99ARpC0bUww==
-  dependencies:
-    "@noble/curves" "~1.0.0"
-    isomorphic-fetch "^3.0.0"
-    lossless-json "^2.0.8"
-    micro-starknet "~0.2.1"
-    pako "^2.0.4"
-    url-join "^4.0.1"
-
 starknet@^4.17.1, starknet@^4.22.0:
   version "4.22.0"
   resolved "https://registry.npmjs.org/starknet/-/starknet-4.22.0.tgz"
@@ -4270,6 +4273,18 @@ starknet@^4.17.1, starknet@^4.22.0:
     minimalistic-assert "^1.0.1"
     pako "^2.0.4"
     ts-custom-error "^3.3.1"
+    url-join "^4.0.1"
+
+starknet@^5.14.1:
+  version "5.14.1"
+  resolved "https://registry.yarnpkg.com/starknet/-/starknet-5.14.1.tgz#97fa5f99c4c24e42ffa315cfda525461d09d6087"
+  integrity sha512-EtJwQ6RmFsqSLGuMP+PRp4DwNsMYXy63HDnd1plLCdQKl3FMYajqNKf5RbDl03uGU0uE5ctGp+OW3firHuv6IA==
+  dependencies:
+    "@noble/curves" "~1.0.0"
+    isomorphic-fetch "^3.0.0"
+    lossless-json "^2.0.8"
+    micro-starknet "~0.2.1"
+    pako "^2.0.4"
     url-join "^4.0.1"
 
 stop-iteration-iterator@^1.0.0:

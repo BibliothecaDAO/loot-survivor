@@ -20,6 +20,7 @@ import {
 import { Battle, NullDiscovery, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
 import { useMediaQuery } from "react-responsive";
+import LootIconLoader from "../components/icons/Loader";
 
 /**
  * @container
@@ -57,18 +58,7 @@ export default function BeastScreen() {
   const lastBattle = useQueriesStore(
     (state) => state.data.lastBattleQuery?.battles[0]
   );
-
-  // let lastBeast = data.lastBeastQuery
-  //   ? data.lastBeastQuery.discoveries[0]
-  //   : NullDiscovery;
-
-  // let beastData = data.beastQuery ? data.beastQuery.beasts[0] : NullBeast;
-
-  // const formatBattles = data.battlesByBeastQuery
-  //   ? data.battlesByBeastQuery.battles
-  //   : [];
-
-  // const lastBattle = data.lastBattleQuery?.battles[0];
+  const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
 
   useCustomQuery(
     "lastBeastQuery",
@@ -168,6 +158,7 @@ export default function BeastScreen() {
             });
           }
         });
+        resetDataUpdated("battlesByTxHashQuery");
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -269,6 +260,7 @@ export default function BeastScreen() {
             });
           }
         });
+        resetDataUpdated("battlesByTxHashQuery");
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -322,7 +314,7 @@ export default function BeastScreen() {
       <div className="sm:w-1/2 order-1 sm:order-2">
         {hasBeast || lastBattle ? (
           <>
-            <BeastDisplay beastData={beastData} lastBattle={formatBattles[0]} />
+            <BeastDisplay beastData={beastData} />
           </>
         ) : (
           <div className="flex flex-col items-center h-full  border-2 border-terminal-green">

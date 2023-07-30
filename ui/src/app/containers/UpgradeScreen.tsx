@@ -253,6 +253,8 @@ export default function UpgradeScreen() {
 
   const nextDisabled = upgrades.length === 0;
 
+  console.log(potionsFilter?.toString() ?? 0);
+
   return (
     <>
       {hasStatUpgrades ? (

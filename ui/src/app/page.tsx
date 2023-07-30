@@ -10,7 +10,7 @@ import LeaderboardScreen from "./containers/LeaderboardScreen";
 import EncountersScreen from "./containers/EncountersScreen";
 import GuideScreen from "./containers/GuideScreen";
 import UpgradeScreen from "./containers/UpgradeScreen";
-import { displayAddress } from "./lib/utils";
+import { displayAddress, padAddress } from "./lib/utils";
 import TransactionHistory from "./components/navigation/TransactionHistory";
 import TransactionCart from "./components/navigation/TransactionCart";
 import Intro from "./components/intro/Intro";
@@ -41,6 +41,7 @@ import {
   GithubIcon,
   RefreshIcon,
   CartIconSimple,
+  ArcadeIcon,
 } from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
@@ -49,7 +50,12 @@ import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
 import { PenaltyCountDown } from "./components/CountDown";
 import useCustomQuery from "./hooks/useCustomQuery";
-import { getAdventurerById } from "./hooks/graphql/queries";
+import {
+  getAdventurerById,
+  getAdventurersByOwner,
+} from "./hooks/graphql/queries";
+import { useBurner } from "./lib/burner";
+import { ArcadeDialog } from "./components/ArcadeDialog";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -72,7 +78,7 @@ const mobileMenuItems: Menu[] = [
 
 export default function Home() {
   const { disconnect } = useConnectors();
-  const { account } = useAccount();
+  const { account, status } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
 
   const type = useLoadingStore((state) => state.type);
@@ -103,6 +109,10 @@ export default function Home() {
   );
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
   const hasNoXp = useAdventurerStore((state) => state.computed.hasNoXp);
+  const owner = account?.address ? padAddress(account.address) : "";
+
+  const arcadeDialog = useUIStore((state) => state.arcadeDialog);
+  const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
 
   const { data, refetch } = useQueriesStore();
 
@@ -125,6 +135,15 @@ export default function Home() {
     getAdventurerById,
     {
       id: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+
+  useCustomQuery(
+    "adventurersByOwnerQuery",
+    getAdventurersByOwner,
+    {
+      owner: owner,
     },
     txAccepted
   );
@@ -194,14 +213,14 @@ export default function Home() {
   return (
     // <Maintenance />
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-10 `}
+      className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-20 `}
     >
       {connected ? (
         <>
           <div className="flex flex-col w-full">
             {isMobileDevice && <TxActivity />}
             <div className="flex flex-row justify-between">
-              <span className="flex flex-row items-center gap-2 sm:gap-5 items-end">
+              <span className="flex flex-row items-center gap-2 sm:gap-5">
                 <h1 className="glitch m-0">Loot Survivor</h1>
                 <PenaltyCountDown
                   lastDiscoveryTime={
@@ -211,6 +230,9 @@ export default function Home() {
                 />
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
+                <Button onClick={() => showArcadeDialog(!arcadeDialog)}>
+                  <ArcadeIcon className="w-8 justify-center" />
+                </Button>
                 <Button
                   onClick={() => {
                     setIsMuted(!isMuted);
@@ -293,7 +315,7 @@ export default function Home() {
           <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4">
             {!isMobileDevice && <TxActivity />}
           </div>
-          <CSSTransition
+          {/* <CSSTransition
             in={
               showNotification &&
               Boolean(notificationData) &&
@@ -308,15 +330,18 @@ export default function Home() {
             unmountOnExit
           >
             <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
+            <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
               <NotificationDisplay
                 type={type}
                 notificationData={notificationData}
                 hasBeast={hasBeast}
               />
             </div>
-          </CSSTransition>
+          </CSSTransition> */}
 
           {deathDialog && <DeathDialog />}
+
+          {status == "connected" && arcadeDialog && <ArcadeDialog />}
 
           {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
 

@@ -4,15 +4,15 @@ import { HeartIcon } from "../icons/Icons";
 import EfficacyIcon from "../icons/EfficacyIcon";
 import { processBeastName } from "../../lib/utils";
 import { Battle, Beast, Adventurer } from "@/app/types";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
 
 import { HealthCountDown } from "../CountDown";
 
 interface BeastDisplayProps {
   beastData: Beast;
-  lastBattle: Battle;
 }
 
-export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
+export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
   const beastName = processBeastName(
     beastData?.beast ?? "",
     beastData?.special2 ?? "",
@@ -25,16 +25,16 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
       <div className="flex flex-col w-full h-full p-1 sm:p-3 uppercase">
         <div className="flex justify-between py-1 sm:py-3 text-xl sm:text-4xl border-b border-terminal-green">
           {beastName}
-          <span
+          <div
             className={`text-4xl flex ${
               beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
             }`}
           >
             <HeartIcon className="self-center w-6 h-6 fill-current" />{" "}
-            <p className="self-center text-xl sm:text-4xl">
+            <div className="self-center text-xl sm:text-4xl">
               <HealthCountDown health={beastData?.health || 0} />
-            </p>
-          </span>
+            </div>
+          </div>
         </div>
         <div className="flex justify-between w-full sm:py-2 ">
           <p className="text-xl sm:text-3xl text-terminal-yellow">
@@ -79,24 +79,6 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
           }}
         />
       </div>
-      {beastData?.health === 0 && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ backdropFilter: "blur(1px)" }}
-        >
-          <p className="text-6xl font-bold text-red-600 uppercase">DEFEATED</p>
-        </div>
-      )}
-      {lastBattle?.fled && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ backdropFilter: "blur(1px)" }}
-        >
-          <p className="text-6xl font-bold text-terminal-yellow uppercase">
-            FLED
-          </p>
-        </div>
-      )}
     </div>
   );
 };

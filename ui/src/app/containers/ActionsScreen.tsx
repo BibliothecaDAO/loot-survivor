@@ -12,7 +12,6 @@ import useCustomQuery from "../hooks/useCustomQuery";
 import {
   getLatestDiscoveries,
   getDiscoveryByTxHash,
-  getAdventurerById,
 } from "../hooks/graphql/queries";
 import { MistIcon } from "../components/icons/Icons";
 import { padAddress } from "../lib/utils";
@@ -46,17 +45,7 @@ export default function ActionsScreen() {
       ? state.data.latestDiscoveriesQuery.discoveries
       : []
   );
-
-  // useCustomQuery(
-  //   "adventurerByIdQuery",
-  //   getAdventurerById,
-  //   {
-  //     id: adventurer?.id ?? 0,
-  //   },
-  //   txAccepted
-  // );
-
-  console.log(adventurer);
+  const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
 
   useCustomQuery(
     "discoveryByTxHashQuery",
@@ -96,6 +85,7 @@ export default function ActionsScreen() {
           "discoveryByTxHashQuery",
           adventurer?.id
         );
+        console.log("exploring");
         await handleSubmitCalls(writeAsync).then((tx: any) => {
           if (tx) {
             setTxHash(tx.transaction_hash);
@@ -107,6 +97,9 @@ export default function ActionsScreen() {
             });
           }
         });
+        resetDataUpdated("discoveryByTxHashQuery");
+        resetDataUpdated("beastQuery");
+        resetDataUpdated("lastBeastQuery");
       },
       disabled: hasBeast || loading || !adventurer?.id,
       loading: loading,
