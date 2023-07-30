@@ -10,7 +10,7 @@ import LeaderboardScreen from "./containers/LeaderboardScreen";
 import EncountersScreen from "./containers/EncountersScreen";
 import GuideScreen from "./containers/GuideScreen";
 import UpgradeScreen from "./containers/UpgradeScreen";
-import { displayAddress } from "./lib/utils";
+import { displayAddress, padAddress } from "./lib/utils";
 import TransactionHistory from "./components/navigation/TransactionHistory";
 import TransactionCart from "./components/navigation/TransactionCart";
 import Intro from "./components/intro/Intro";
@@ -41,7 +41,7 @@ import {
   GithubIcon,
   RefreshIcon,
   CartIconSimple,
-  ArcadeIcon
+  ArcadeIcon,
 } from "./components/icons/Icons";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
@@ -50,7 +50,10 @@ import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
 import { PenaltyCountDown } from "./components/CountDown";
 import useCustomQuery from "./hooks/useCustomQuery";
-import { getAdventurerById } from "./hooks/graphql/queries";
+import {
+  getAdventurerById,
+  getAdventurersByOwner,
+} from "./hooks/graphql/queries";
 import { useBurner } from "./lib/burner";
 import { ArcadeDialog } from "./components/ArcadeDialog";
 
@@ -74,7 +77,6 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Home() {
-
   const { disconnect } = useConnectors();
   const { account, status } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
@@ -107,6 +109,7 @@ export default function Home() {
   );
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
   const hasNoXp = useAdventurerStore((state) => state.computed.hasNoXp);
+  const owner = account?.address ? padAddress(account.address) : "";
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
@@ -132,6 +135,15 @@ export default function Home() {
     getAdventurerById,
     {
       id: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+
+  useCustomQuery(
+    "adventurersByOwnerQuery",
+    getAdventurersByOwner,
+    {
+      owner: owner,
     },
     txAccepted
   );
@@ -216,10 +228,9 @@ export default function Home() {
                   }
                   lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
                 />
-
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
-                <Button onClick={() => showArcadeDialog(!arcadeDialog)}> 
+                <Button onClick={() => showArcadeDialog(!arcadeDialog)}>
                   <ArcadeIcon className="w-8 justify-center" />
                 </Button>
                 <Button
@@ -281,12 +292,12 @@ export default function Home() {
                     )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <AddDevnetEthButton />
-                      )}
+                      <AddDevnetEthButton />
+                    )}
                     {((account as any)?.provider?.baseUrl == mainnet_addr ||
                       (account as any)?.baseUrl == mainnet_addr) && (
-                        <MintEthButton />
-                      )}
+                      <MintEthButton />
+                    )}
                     {account && (
                       <Button onClick={() => disconnect()}>
                         {displayAddress(account.address)}
@@ -301,7 +312,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4" >
+          <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4">
             {!isMobileDevice && <TxActivity />}
           </div>
           {/* <CSSTransition
@@ -329,7 +340,7 @@ export default function Home() {
 
           {deathDialog && <DeathDialog />}
 
-          {status == 'connected' && arcadeDialog && <ArcadeDialog />}
+          {status == "connected" && arcadeDialog && <ArcadeDialog />}
 
           {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
 
