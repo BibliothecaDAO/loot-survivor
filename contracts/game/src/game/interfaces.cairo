@@ -14,7 +14,13 @@ trait IGame<TContractState> {
         ref self: TContractState,
         interface_id: ContractAddress,
         starting_weapon: u8,
-        adventurer_meta: AdventurerMetadata
+        adventurer_meta: AdventurerMetadata,
+        starting_strength: u8,
+        starting_dexterity: u8,
+        starting_vitality: u8,
+        starting_intelligence: u8,
+        starting_wisdom: u8,
+        starting_charsima: u8
     );
     fn explore(ref self: TContractState, adventurer_id: u256);
     fn attack(ref self: TContractState, adventurer_id: u256);

@@ -32,7 +32,7 @@ mod Game {
         interfaces::{IGame, IERC20Dispatcher, IERC20DispatcherTrait, IERC20LibraryDispatcher},
         constants::{
             messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
-            U128_MAX, STARTER_BEAST_ATTACK_DAMAGE
+            U128_MAX, STARTER_BEAST_ATTACK_DAMAGE, STARTING_STATS
         }
     };
     use lootitems::{
@@ -42,7 +42,7 @@ mod Game {
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, adventurer_stats::Stats,
         item_primitive::{ImplItemPrimitive, ItemPrimitive}, bag::{Bag, IBag, ImplBag},
-        adventurer_meta::AdventurerMetadata, exploration::ExploreUtils,
+        adventurer_meta::{AdventurerMetadata}, exploration::ExploreUtils,
         constants::{
             discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery},
             adventurer_constants::{
@@ -138,18 +138,44 @@ mod Game {
             ref self: ContractState,
             interface_id: ContractAddress,
             starting_weapon: u8,
-            adventurer_meta: AdventurerMetadata
+            adventurer_meta: AdventurerMetadata,
+            starting_strength: u8,
+            starting_dexterity: u8,
+            starting_vitality: u8,
+            starting_intelligence: u8,
+            starting_wisdom: u8,
+            starting_charsima: u8
         ) {
-            // assert starting_weapon is a valid starting weapon
-            assert(
-                ImplLoot::is_starting_weapon(starting_weapon) == true,
-                messages::INVALID_STARTING_WEAPON
+            // assert weapon is valid starter weapon (wand, book, club, short sword)
+            _assert_valid_starter_weapon(@self, starting_weapon);
+
+            // assert correct number of starting stats
+            _assert_starting_stat_count(
+                @self,
+                starting_strength
+                    + starting_dexterity
+                    + starting_vitality
+                    + starting_intelligence
+                    + starting_wisdom
+                    + starting_charsima
             );
 
             let caller = get_caller_address();
             let block_number = starknet::get_block_info().unbox().block_number;
 
-            _start(ref self, block_number, caller, starting_weapon, adventurer_meta);
+            _start(
+                ref self,
+                block_number,
+                caller,
+                starting_weapon,
+                adventurer_meta,
+                starting_strength,
+                starting_dexterity,
+                starting_vitality,
+                starting_intelligence,
+                starting_wisdom,
+                starting_charsima
+            );
             _payout(ref self, caller, block_number, interface_id);
         }
         fn explore(ref self: ContractState, adventurer_id: u256) {
@@ -305,6 +331,9 @@ mod Game {
 
             // assert adventurer has a beast to attack
             _assert_in_battle(@self, adventurer);
+
+            // assert dexterity is not zero
+            _assert_dexterity_not_zero(@self, adventurer);
 
             // if the adventurer has exceeded the idle penalty threshold
             let (is_idle, num_blocks) = _idle_longer_than_penalty_threshold(@self, adventurer);
@@ -1346,14 +1375,27 @@ mod Game {
         block_number: u64,
         caller: ContractAddress,
         starting_weapon: u8,
-        adventurer_meta: AdventurerMetadata
+        adventurer_meta: AdventurerMetadata,
+        starting_strength: u8,
+        starting_dexterity: u8,
+        starting_vitality: u8,
+        starting_intelligence: u8,
+        starting_wisdom: u8,
+        starting_charsima: u8
     ) {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._counter.read() + 1;
 
         // generate a new adventurer using the provided started weapon and current block number
         let mut new_adventurer: Adventurer = ImplAdventurer::new(
-            starting_weapon, adventurer_meta.class, block_number
+            starting_weapon,
+            block_number,
+            starting_strength,
+            starting_dexterity,
+            starting_vitality,
+            starting_intelligence,
+            starting_wisdom,
+            starting_charsima
         );
 
         let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
@@ -3094,6 +3136,9 @@ mod Game {
     fn _assert_in_battle(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.beast_health > 0, messages::NOT_IN_BATTLE);
     }
+    fn _assert_dexterity_not_zero(self: @ContractState, adventurer: Adventurer) {
+        assert(adventurer.stats.dexterity > 0, messages::ZERO_DEXTERITY);
+    }
     fn _assert_not_in_battle(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.beast_health == 0, messages::ACTION_NOT_ALLOWED_DURING_BATTLE);
     }
@@ -3137,6 +3182,14 @@ mod Game {
     }
     fn _assert_not_dead(self: @ContractState, adventurer: Adventurer) {
         assert(adventurer.health > 0, messages::DEAD_ADVENTURER);
+    }
+    fn _assert_valid_starter_weapon(self: @ContractState, starting_weapon: u8) {
+        assert(
+            ImplLoot::is_starting_weapon(starting_weapon) == true, messages::INVALID_STARTING_WEAPON
+        );
+    }
+    fn _assert_starting_stat_count(self: @ContractState, amount: u8) {
+        assert(amount == STARTING_STATS, messages::WRONG_STARTING_STATS);
     }
     fn _assert_one_explore_per_block(self: @ContractState, adventurer: Adventurer) {
         let current_block: u16 = U64TryIntoU16::try_into(

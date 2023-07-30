@@ -9,7 +9,7 @@ use super::{
         adventurer_constants::{MAX_STAT_VALUE, U128_MAX, ClassStatBoosts},
         discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
     },
-    adventurer_meta::AdventurerClass, adventurer_stats::Stats
+    adventurer_stats::Stats
 };
 use lootitems::statistics::constants::{
     NUM_ITEMS,
@@ -100,59 +100,6 @@ impl AdventurerUtils of IAdventurer {
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
         let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
         (r.try_into().unwrap(), d.try_into().unwrap())
-    }
-
-    // @notice Retrieves the stats for an adventurer class
-    // @param adventurer_class The class of the adventurer to retrieve the stats for
-    // @return A Stats object which represents the stats of the given adventurer class
-    fn get_class_stats(adventurer_class: AdventurerClass) -> Stats {
-        match adventurer_class {
-            AdventurerClass::None(()) => {
-                Stats {
-                    strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0
-                }
-            },
-            AdventurerClass::Cleric(()) => {
-                Stats {
-                    strength: ClassStatBoosts::Cleric::STRENGTH,
-                    dexterity: ClassStatBoosts::Cleric::DEXTERITY,
-                    vitality: ClassStatBoosts::Cleric::VITALITY,
-                    intelligence: ClassStatBoosts::Cleric::INTELLIGENCE,
-                    wisdom: ClassStatBoosts::Cleric::WISDOM,
-                    charisma: ClassStatBoosts::Cleric::VITALITY
-                }
-            },
-            AdventurerClass::Scout(()) => {
-                Stats {
-                    strength: ClassStatBoosts::Scout::STRENGTH,
-                    dexterity: ClassStatBoosts::Scout::DEXTERITY,
-                    vitality: ClassStatBoosts::Scout::VITALITY,
-                    intelligence: ClassStatBoosts::Scout::INTELLIGENCE,
-                    wisdom: ClassStatBoosts::Scout::WISDOM,
-                    charisma: ClassStatBoosts::Scout::VITALITY
-                }
-            },
-            AdventurerClass::Hunter(()) => {
-                Stats {
-                    strength: ClassStatBoosts::Hunter::STRENGTH,
-                    dexterity: ClassStatBoosts::Hunter::DEXTERITY,
-                    vitality: ClassStatBoosts::Hunter::VITALITY,
-                    intelligence: ClassStatBoosts::Hunter::INTELLIGENCE,
-                    wisdom: ClassStatBoosts::Hunter::WISDOM,
-                    charisma: ClassStatBoosts::Hunter::VITALITY
-                }
-            },
-            AdventurerClass::Warrior(()) => {
-                Stats {
-                    strength: ClassStatBoosts::Warrior::STRENGTH,
-                    dexterity: ClassStatBoosts::Warrior::DEXTERITY,
-                    vitality: ClassStatBoosts::Warrior::VITALITY,
-                    intelligence: ClassStatBoosts::Warrior::INTELLIGENCE,
-                    wisdom: ClassStatBoosts::Warrior::WISDOM,
-                    charisma: ClassStatBoosts::Warrior::VITALITY
-                }
-            },
-        }
     }
 
     // TODO: Need to refactor this and add_suffix_boost to ensure they
