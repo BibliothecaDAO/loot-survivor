@@ -12,7 +12,7 @@ export default function RootLayout({
 }) {
   const client = new ApolloClient({
     // uri: getGraphQLUrl,
-    uri: "http://localhost:8080/graphql",
+    uri: "http://localhost:8080/goerli-graphql",
     cache: new InMemoryCache(),
   });
 
