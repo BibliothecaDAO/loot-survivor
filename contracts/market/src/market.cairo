@@ -4,9 +4,14 @@ use core::clone::Clone;
 use array::{ArrayTrait, SpanTrait};
 use option::OptionTrait;
 
-use lootitems::{loot::{Loot, ILoot, ImplLoot}, statistics::{item_tier, constants::ItemId}};
+use lootitems::{
+    loot::{Loot, ILoot, ImplLoot}, statistics::{item_tier, constants::{ItemId, NUM_ITEMS}}
+};
+
 use combat::constants::CombatEnums::{Tier, Slot};
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE};
+use pack::pack::{rshift_split};
+
 
 #[derive(Drop, Serde)]
 struct LootWithPrice {
@@ -184,10 +189,11 @@ impl ImplMarket of IMarket {
     }
 
     // @notice Gets a u8 item id from a u256 seed
-    // @param seed a 128-bit unsigned integer representing a unique identifier for the seed.
+    // @param seed a 256-bit unsigned integer representing a unique identifier for the seed.
     // @return a u8 representing the item ID.
     fn get_id(seed: u256) -> u8 {
-        (1 + (seed % NUM_LOOT_ITEMS.into())).try_into().unwrap()
+        let (_, item_id) = rshift_split(seed, NUM_ITEMS.into() - 1);
+        1 + item_id.try_into().unwrap()
     }
 
     // @notice This function checks if an item is available within the provided seeds and offsets.
@@ -246,6 +252,36 @@ const TEST_MARKET_SEED: u256 = 515;
 const TEST_OFFSET: u8 = 3;
 
 #[test]
+#[available_gas(50000000)]
+fn test_get_id() {
+    // test bottom end of u256
+    let mut i: u256 = 0;
+    loop {
+        if (i >= 500) {
+            break;
+        }
+        // get market item id
+        let item_id = ImplMarket::get_id(i);
+        // assert item id is within range of items
+        assert(item_id > 0 && item_id < NUM_ITEMS, 'offset out of bounds');
+        i += 1;
+    };
+
+    // test upper end of u256
+    let mut i: u256 = 115792089237316195423570985008687907853269984665640564039457584007913129639735;
+    loop {
+        if (i >= 115792089237316195423570985008687907853269984665640564039457584007913129639935) {
+            break;
+        }
+        // get market item id
+        let item_id = ImplMarket::get_id(i);
+        // assert item id is within range of items
+        assert(item_id > 0 && item_id < NUM_ITEMS, 'offset out of bounds');
+        i += 1;
+    };
+}
+
+#[test]
 #[available_gas(9000000)]
 fn test_get_price() {
     let t1_price = ImplMarket::get_price(Tier::T1(()));
@@ -265,7 +301,7 @@ fn test_get_price() {
 }
 
 #[test]
-#[available_gas(19000000)]
+#[available_gas(22000000)]
 fn test_get_all_items() {
     let mut market_seeds = ArrayTrait::<u256>::new();
     market_seeds.append(1);
