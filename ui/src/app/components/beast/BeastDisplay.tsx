@@ -4,15 +4,15 @@ import { HeartIcon } from "../icons/Icons";
 import EfficacyIcon from "../icons/EfficacyIcon";
 import { processBeastName } from "../../lib/utils";
 import { Battle, Beast, Adventurer } from "@/app/types";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
 
 import { HealthCountDown } from "../CountDown";
 
 interface BeastDisplayProps {
   beastData: Beast;
-  lastBattle: Battle;
 }
 
-export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
+export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
   const beastName = processBeastName(
     beastData?.beast ?? "",
     beastData?.special2 ?? "",
@@ -79,24 +79,6 @@ export const BeastDisplay = ({ beastData, lastBattle }: BeastDisplayProps) => {
           }}
         />
       </div>
-      {beastData?.health === 0 && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ backdropFilter: "blur(1px)" }}
-        >
-          <p className="text-6xl font-bold text-red-600 uppercase">DEFEATED</p>
-        </div>
-      )}
-      {lastBattle?.fled && (
-        <div
-          className="absolute inset-0 flex items-center justify-center"
-          style={{ backdropFilter: "blur(1px)" }}
-        >
-          <p className="text-6xl font-bold text-terminal-yellow uppercase">
-            FLED
-          </p>
-        </div>
-      )}
     </div>
   );
 };

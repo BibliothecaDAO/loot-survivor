@@ -1,27 +1,30 @@
 use option::OptionTrait;
 use traits::{TryInto, Into};
 use pack::{pack::{Packing, rshift_split}, constants::pow};
+use survivor::constants::adventurer_constants::MAX_STAT_VALUE;
 
 #[derive(Drop, Copy, Serde)]
 struct Stats { // 5 bits each
     // Physical
-    strength: u8, // increases attack damage
-    dexterity: u8, // increases flee chance
-    vitality: u8, // increases health
+    strength: u8, // 5 bits
+    dexterity: u8, // 5 bits
+    vitality: u8, // 5 bits
     // Mental
-    intelligence: u8, // increases obstacle avoidance
-    wisdom: u8, // increase ambush avoidance
-    charisma: u8, // provides shop discount
+    intelligence: u8, // 5 bits
+    wisdom: u8, // 5 bits
+    charisma: u8 // 5 bits
 }
 
 impl StatsPacking of Packing<Stats> {
     fn pack(self: Stats) -> felt252 {
-        (self.strength.into()
-            + self.dexterity.into() * pow::TWO_POW_5
-            + self.vitality.into() * pow::TWO_POW_10
-            + self.intelligence.into() * pow::TWO_POW_15
-            + self.wisdom.into() * pow::TWO_POW_20
-            + self.charisma.into() * pow::TWO_POW_25)
+        let overflow_protected = self.overflow_pack_protection();
+
+        (overflow_protected.strength.into()
+            + overflow_protected.dexterity.into() * pow::TWO_POW_5
+            + overflow_protected.vitality.into() * pow::TWO_POW_10
+            + overflow_protected.intelligence.into() * pow::TWO_POW_15
+            + overflow_protected.wisdom.into() * pow::TWO_POW_20
+            + overflow_protected.charisma.into() * pow::TWO_POW_25)
             .try_into()
             .expect('pack Stats')
     }
@@ -44,80 +47,77 @@ impl StatsPacking of Packing<Stats> {
             charisma: charisma.try_into().expect('unpack Stats charisma')
         }
     }
+
+    fn overflow_pack_protection(self: Stats) -> Stats {
+        let mut overflow_protected_stats = self;
+
+        if self.strength > MAX_STAT_VALUE {
+            overflow_protected_stats.strength = MAX_STAT_VALUE;
+        };
+        if self.dexterity > MAX_STAT_VALUE {
+            overflow_protected_stats.dexterity = MAX_STAT_VALUE;
+        }
+        if self.vitality > MAX_STAT_VALUE {
+            overflow_protected_stats.vitality = MAX_STAT_VALUE;
+        }
+        if self.intelligence > MAX_STAT_VALUE {
+            overflow_protected_stats.intelligence = MAX_STAT_VALUE;
+        }
+        if self.wisdom > MAX_STAT_VALUE {
+            overflow_protected_stats.wisdom = MAX_STAT_VALUE;
+        }
+        if self.charisma > MAX_STAT_VALUE {
+            overflow_protected_stats.charisma = MAX_STAT_VALUE;
+        }
+
+        overflow_protected_stats
+    }
 }
 
 #[test]
 #[available_gas(1500000)]
 fn test_stats_packing() {
-
     // zero case
     let stats = Stats {
-        strength: 0,
-        dexterity: 0,
-        vitality: 0,
-        intelligence: 0,
-        wisdom: 0,
-        charisma: 0
+        strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0
     };
 
     let packed = stats.pack();
     let unpacked = StatsPacking::unpack(packed);
-    
-    assert(stats.strength ==  unpacked.strength, 'strength should be the same');
-    assert(stats.dexterity ==  unpacked.dexterity, 'dexterity should be the same');
-    assert(stats.vitality ==  unpacked.vitality, 'vitality should be the same');
-    assert(stats.intelligence ==  unpacked.intelligence, 'intelligence should be the same');
-    assert(stats.wisdom ==  unpacked.wisdom, 'wisdom should be the same');
-    assert(stats.charisma ==  unpacked.charisma, 'charisma should be the same');
+    assert(stats.strength == unpacked.strength, 'strength zero case');
+    assert(stats.dexterity == unpacked.dexterity, 'dexterity zero case');
+    assert(stats.vitality == unpacked.vitality, 'vitality zero case');
+    assert(stats.intelligence == unpacked.intelligence, 'intelligence zero case');
+    assert(stats.wisdom == unpacked.wisdom, 'wisdom zero case');
+    assert(stats.charisma == unpacked.charisma, 'charisma zero case');
 
-    // max stat case (2^5 - 1 = 31)
+    // storage limit test (2^5 - 1 = 31)
     let stats = Stats {
-        strength: 31,
-        dexterity: 31,
-        vitality: 31,
-        intelligence: 31,
-        wisdom: 31,
-        charisma: 31
+        strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 31
     };
 
     let packed = stats.pack();
     let unpacked = StatsPacking::unpack(packed);
+    assert(stats.strength == unpacked.strength, 'strength storage limit');
+    assert(stats.dexterity == unpacked.dexterity, 'dexterity storage limit');
+    assert(stats.vitality == unpacked.vitality, 'vitality storage limit');
+    assert(stats.intelligence == unpacked.intelligence, 'intelligence storage limit');
+    assert(stats.wisdom == unpacked.wisdom, 'wisdom storage limit');
+    assert(stats.charisma == unpacked.charisma, 'charisma storage limit');
 
-    assert(stats.strength ==  unpacked.strength, 'strength should be the same');
-    assert(stats.dexterity ==  unpacked.dexterity, 'dexterity should be the same');
-    assert(stats.vitality ==  unpacked.vitality, 'vitality should be the same');
-    assert(stats.intelligence ==  unpacked.intelligence, 'intelligence should be the same');
-    assert(stats.wisdom ==  unpacked.wisdom, 'wisdom should be the same');
-    assert(stats.charisma ==  unpacked.charisma, 'charisma should be the same');
-
-    //overflow case - should overflow back to 0
+    // overflow storage limit using max u8
     let stats = Stats {
-        strength: 32,
-        dexterity: 32,
-        vitality: 32,
-        intelligence: 32,
-        wisdom: 32,
-        charisma: 32
+        strength: 255, dexterity: 255, vitality: 255, intelligence: 255, wisdom: 255, charisma: 255
     };
 
     let packed = stats.pack();
     let unpacked = StatsPacking::unpack(packed);
 
-    // strength will overflow to zero
-    assert(unpacked.strength == 0, 'strength should overflow to 0');
-
-    // strength will overflow 1 into dexterity
-    assert(unpacked.dexterity == 1, 'dexterity should overflow to 1');
-
-    // dexterity will overflow 1 into vitality
-    assert(unpacked.vitality == 1, 'vitality should overflow to 1');
-
-    // vitality will overflow 1 into intelligence
-    assert(unpacked.intelligence == 1, 'intelligence should ovrflw to 1');
-
-    // intelligence will overflow 1 into wisdom
-    assert(unpacked.wisdom == 1, 'wisdom should overflow to 1');
-
-    // wisdom will overflow 1 into charisma
-    assert(unpacked.charisma == 1, 'charisma should overflow to 1');
+    // assert packing function prevented overflow
+    assert(unpacked.strength == MAX_STAT_VALUE, 'strength pack overflow');
+    assert(unpacked.dexterity == MAX_STAT_VALUE, 'dexterity pack overflow');
+    assert(unpacked.vitality == MAX_STAT_VALUE, 'vitality pack overflow');
+    assert(unpacked.intelligence == MAX_STAT_VALUE, 'intelligence pack overflow');
+    assert(unpacked.wisdom == MAX_STAT_VALUE, 'wisdom pack overflow');
+    assert(unpacked.charisma == MAX_STAT_VALUE, 'charisma pack overflow');
 }

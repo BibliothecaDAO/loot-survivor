@@ -8,7 +8,6 @@ interface DiscoveryProps {
 }
 
 const Discovery = ({ discoveries }: DiscoveryProps) => {
-
   const isLoading = useQueriesStore((state) => state.isLoading);
 
   return (

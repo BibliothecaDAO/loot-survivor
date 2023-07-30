@@ -34,6 +34,10 @@ export const TxActivity = () => {
   const type = useLoadingStore((state) => state.type);
   const error = useTransactionCartStore((state) => state.error);
   const setError = useTransactionCartStore((state) => state.setError);
+  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
+  const isAlive = useAdventurerStore((state) => state.computed.isAlive);
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
@@ -41,10 +45,6 @@ export const TxActivity = () => {
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
   );
-  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
-  const isAlive = useAdventurerStore((state) => state.computed.isAlive);
-  const adventurer = useAdventurerStore((state) => state.adventurer);
-  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const {
     data: queryData,
     isDataUpdated,

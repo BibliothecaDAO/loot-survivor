@@ -59,14 +59,14 @@ export default function AdventurerScreen() {
   );
 
   // TODO: Remove polling
-  useCustomQuery(
-    "adventurersByOwnerQuery",
-    getAdventurersByOwner,
-    {
-      owner: owner,
-    },
-    true
-  );
+  // useCustomQuery(
+  //   "adventurersByOwnerQuery",
+  //   getAdventurersByOwner,
+  //   {
+  //     owner: owner,
+  //   },
+  //   txAccepted
+  // );
 
   const menu = [
     {

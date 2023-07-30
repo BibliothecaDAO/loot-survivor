@@ -3,6 +3,7 @@ import { create } from "zustand";
 export type ScreenPage =
   | "start"
   | "play"
+  | "play"
   | "market"
   | "inventory"
   | "beast"

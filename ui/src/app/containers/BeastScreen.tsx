@@ -15,11 +15,11 @@ import {
   getBattlesByBeast,
   getBeast,
   getLastBeastDiscovery,
-  getLastBattleByAdventurer,
 } from "../hooks/graphql/queries";
 import { Battle, NullDiscovery, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
 import { useMediaQuery } from "react-responsive";
+import LootIconLoader from "../components/icons/Loader";
 
 /**
  * @container
@@ -54,23 +54,11 @@ export default function BeastScreen() {
   const formatBattles = useQueriesStore(
     (state) => state.data.battlesByBeastQuery?.battles || []
   );
-  const lastBattle = useQueriesStore(
-    (state) => state.data.lastBattleQuery?.battles[0]
-  );
   const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
 
   useCustomQuery(
     "lastBeastQuery",
     getLastBeastDiscovery,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
-
-  useCustomQuery(
-    "lastBattleQuery",
-    getLastBattleByAdventurer,
     {
       adventurerId: adventurer?.id ?? 0,
     },
@@ -145,7 +133,7 @@ export default function BeastScreen() {
             });
           }
         });
-        resetDataUpdated("discoveryByTxHashQuery");
+        resetDataUpdated("battlesByTxHashQuery");
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -230,9 +218,9 @@ export default function BeastScreen() {
   return (
     <div className="sm:w-2/3 flex flex-col sm:flex-row gap-2 sm:gap-0">
       <div className="sm:w-1/2 order-1 sm:order-2">
-        {hasBeast || lastBattle ? (
+        {hasBeast ? (
           <>
-            <BeastDisplay beastData={beastData} lastBattle={formatBattles[0]} />
+            <BeastDisplay beastData={beastData} />
           </>
         ) : (
           <div className="flex flex-col items-center h-full  border-2 border-terminal-green">
