@@ -345,8 +345,6 @@ export default function Home() {
 
           {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
 
-          {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
-
           {account ? (
             <div className="flex flex-col w-full">
               <>
@@ -372,8 +370,6 @@ export default function Home() {
                 {screen === "leaderboard" && <LeaderboardScreen />}
                 {screen === "upgrade" && <UpgradeScreen />}
                 {screen === "profile" && <Profile />}
-                {screen === "encounters" && <EncountersScreen />}
-                {screen === "guide" && <GuideScreen />}
                 {screen === "encounters" && <EncountersScreen />}
                 {screen === "guide" && <GuideScreen />}
                 {screen === "settings" && <Settings />}

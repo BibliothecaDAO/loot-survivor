@@ -28,10 +28,6 @@ type State = {
   showDeathDialog: (value: boolean) => void;
   tutorialDialog: boolean;
   showTutorialDialog: (value: boolean) => void;
-  deathDialog: boolean;
-  showDeathDialog: (value: boolean) => void;
-  tutorialDialog: boolean;
-  showTutorialDialog: (value: boolean) => void;
   displayHistory: boolean;
   setDisplayHistory: (value: boolean) => void;
   displayCart: boolean;
@@ -59,10 +55,6 @@ const useUIStore = create<State>((set) => ({
   setScreen: (value) => set({ screen: value }),
   profile: 0,
   setProfile: (value) => set({ profile: value }),
-  deathDialog: false,
-  showDeathDialog: (value) => set({ deathDialog: value }),
-  tutorialDialog: false,
-  showTutorialDialog: (value) => set({ tutorialDialog: value }),
   deathDialog: false,
   showDeathDialog: (value) => set({ deathDialog: value }),
   tutorialDialog: false,

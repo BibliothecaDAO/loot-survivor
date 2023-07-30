@@ -5,11 +5,9 @@ import { Discovery } from "@/app/types";
 
 interface DiscoveryProps {
   discoveries: Discovery[];
-  discoveries: Discovery[];
 }
 
 const Discovery = ({ discoveries }: DiscoveryProps) => {
-
   const isLoading = useQueriesStore((state) => state.isLoading);
 
   return (
