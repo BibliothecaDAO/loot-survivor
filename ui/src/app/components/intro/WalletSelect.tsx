@@ -30,8 +30,12 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
     }
   }, [account, screen, setConnected]);
 
-  const arcadeConnectors = () => connectors.filter((connector) => connector.name.includes("0x"));
-  const walletConnectors = () => connectors.filter((connector) => !connector.name.includes("0x"));
+  console.log(connectors);
+
+  const arcadeConnectors = () =>
+    connectors.filter((connector) => connector.id.includes("0x"));
+  const walletConnectors = () =>
+    connectors.filter((connector) => !connector.id.includes("0x"));
 
   return (
     <div className="flex flex-col p-8">
@@ -49,27 +53,26 @@ const WalletSelect = ({ screen }: WalletSelectProps) => {
           <h1 className="mb-10">The Hour for Survival Has Arrived</h1>
         </div>
 
-
         <div className="flex flex-col w-1/2 gap-5 m-auto">
           {walletConnectors().map((connector, index) => (
-              <Button
-                onClick={() => connect(connector)}
-                key={index}
-                className="w-full"
-              >
-                Connect {connector.id}
-              </Button>
-            ))}
-        <h5 className="text-center">Arcade Accounts</h5>
+            <Button
+              onClick={() => connect(connector)}
+              key={index}
+              className="w-full"
+            >
+              Connect {connector.id}
+            </Button>
+          ))}
+          <h5 className="text-center">Arcade Accounts</h5>
           {arcadeConnectors().map((connector, index) => (
-              <Button
-                onClick={() => connect(connector)}
-                key={index}
-                className="w-full"
-              >
-                Connect {connector.id}
-              </Button>
-            ))}
+            <Button
+              onClick={() => connect(connector)}
+              key={index}
+              className="w-full"
+            >
+              Connect {connector.id}
+            </Button>
+          ))}
         </div>
       </div>
     </div>
