@@ -11,6 +11,7 @@ import {
 } from "starknet";
 import Storage from "./storage";
 import { useAccount } from "@starknet-react/core";
+import { ArcadeConnector } from "./arcade";
 
 const PREFUND_AMOUNT = "0x2386f26fc10000"; // 0.001ETH
 
@@ -35,6 +36,8 @@ export const useBurner = () => {
 
     const [account, setAccount] = useState<Account>();
     const [isDeploying, setIsDeploying] = useState(false);
+
+    const [arcadeAccounts, setArcadeAccounts] = useState<ArcadeConnector[]>([]);
 
     // init
     useEffect(() => {
@@ -116,7 +119,12 @@ export const useBurner = () => {
             throw new Error("wallet account not found");
         }
 
-        await prefundAccount(address, walletAccount);
+        try {
+            await prefundAccount(address, walletAccount);
+        } catch (e) {
+            setIsDeploying(false);
+        }
+
 
         // deploy burner
         const burner = new Account(provider, address, privateKey);
@@ -147,8 +155,29 @@ export const useBurner = () => {
         Storage.set("burners", storage);
         console.log("burner created: ", address);
 
+        window.location.reload();
+
         return burner;
     }, [walletAccount]);
+
+    useEffect(() => {
+        const arcadeAccounts = [];
+        const burners = list();
+
+        for (const burner of burners) {
+            const arcadeConnector = new ArcadeConnector({
+                options: {
+                    id: burner.address,
+                }
+            }, get(burner.address));
+
+            arcadeAccounts.push(arcadeConnector);
+        }
+
+        setArcadeAccounts(arcadeAccounts);
+
+        console.log(arcadeAccounts)
+    }, [account, isDeploying]);
 
     return {
         get,
@@ -157,20 +186,32 @@ export const useBurner = () => {
         create,
         account,
         isDeploying,
+        arcadeAccounts
     };
 };
 
 const prefundAccount = async (address: string, account: AccountInterface) => {
-    const { transaction_hash } = await account.execute({
-        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
-        entrypoint: "transfer",
-        calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
-    });
+    try {
+        const { transaction_hash } = await account.execute({
+            contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+            entrypoint: "transfer",
+            calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
+        });
 
-    console.log(transaction_hash)
+        console.log(transaction_hash);
 
-    return await account.waitForTransaction(transaction_hash, {
-        retryInterval: 1000,
-        successStates: [TransactionStatus.ACCEPTED_ON_L2],
-    });
+        const result = await account.waitForTransaction(transaction_hash, {
+            retryInterval: 1000,
+            successStates: [TransactionStatus.ACCEPTED_ON_L2],
+        });
+
+        if (!result) {
+            throw new Error("Transaction did not complete successfully.");
+        }
+
+        return result;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
 };
