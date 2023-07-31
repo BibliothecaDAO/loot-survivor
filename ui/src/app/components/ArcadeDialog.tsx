@@ -2,15 +2,24 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "./buttons/Button";
 import { useBurner } from "../lib/burner";
 import { useAccount, useConnectors } from "@starknet-react/core";
+import { useEffect } from "react";
 
 export const ArcadeDialog = () => {
-  const { account, address } = useAccount();
+  const { account, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
-  const { connect, connectors } = useConnectors();
+  const { connect, connectors, refresh } = useConnectors();
   const { create, isDeploying } = useBurner()
 
   const arcadeConnectors = () => connectors.filter((connector) => connector.name.includes("0x"));
+
+
+  useEffect(() => {
+    const interval = setInterval(refresh, 5000)
+    return () => clearInterval(interval)
+  }, [refresh])
+
+  console.log(connector)
 
   return (
     <>
@@ -23,17 +32,17 @@ export const ArcadeDialog = () => {
 
         <p className="text-2xl pb-8">Create an Arcade Account here to allow for signature free gameplay!</p>
 
-      <div className="flex justify-center">
-      {((account?.signer as any)?.pk == '0x0') && (
-          <div>
-            <Button onClick={() => create()}>
-              create arcade account
-            </Button>
-            <p className="my-2 text-terminal-yellow p-2 border border-terminal-yellow">Note: This will initiate a 0.01 ETH transaction to the new account. Your page will reload after the Account has been created!</p>
-            
-          </div>
-        )}
-      </div>
+        <div className="flex justify-center">
+          {((connector?.options as any)?.id == "argentX" || (connector?.options as any)?.id == "braavos") && (
+            <div>
+              <Button onClick={() => create()}>
+                create arcade account
+              </Button>
+              <p className="my-2 text-terminal-yellow p-2 border border-terminal-yellow">Note: This will initiate a 0.01 ETH transaction to the new account. Your page will reload after the Account has been created!</p>
+
+            </div>
+          )}
+        </div>
 
 
         <hr className="my-4 border-terminal-green" />
