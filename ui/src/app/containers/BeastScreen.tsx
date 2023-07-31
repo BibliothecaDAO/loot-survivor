@@ -221,42 +221,42 @@ export default function BeastScreen() {
         adventurer.dexterity === 0,
       loading: loading,
     },
-    {
-      id: 2,
-      label: "TILL DEATH",
-      mouseEnter: handleMouseEnter,
-      mouseLeave: handleMouseLeave,
-      action: async () => {
-        addToCalls(fleeTx);
-        startLoading(
-          "Flee",
-          "Fleeing",
-          "battlesByTxHashQuery",
-          adventurer?.id,
-          { beast: beastData }
-        );
-        await handleSubmitCalls(writeAsync).then((tx: any) => {
-          if (tx) {
-            console.log(tx.transaction_hash);
-            setTxHash(tx.transaction_hash);
-            addTransaction({
-              hash: tx.transaction_hash,
-              metadata: {
-                method: `Flee ${beastData.beast}`,
-              },
-            });
-          }
-        });
-        resetDataUpdated("battlesByTxHashQuery");
-      },
-      disabled:
-        adventurer?.beastHealth == undefined ||
-        adventurer?.beastHealth == 0 ||
-        loading ||
-        beastData?.level == 1 ||
-        adventurer.dexterity === 0,
-      loading: loading,
-    },
+    // {
+    //   id: 2,
+    //   label: "TILL DEATH",
+    //   mouseEnter: handleMouseEnter,
+    //   mouseLeave: handleMouseLeave,
+    //   action: async () => {
+    //     addToCalls(fleeTx);
+    //     startLoading(
+    //       "Flee",
+    //       "Fleeing",
+    //       "battlesByTxHashQuery",
+    //       adventurer?.id,
+    //       { beast: beastData }
+    //     );
+    //     await handleSubmitCalls(writeAsync).then((tx: any) => {
+    //       if (tx) {
+    //         console.log(tx.transaction_hash);
+    //         setTxHash(tx.transaction_hash);
+    //         addTransaction({
+    //           hash: tx.transaction_hash,
+    //           metadata: {
+    //             method: `Flee ${beastData.beast}`,
+    //           },
+    //         });
+    //       }
+    //     });
+    //     resetDataUpdated("battlesByTxHashQuery");
+    //   },
+    //   disabled:
+    //     adventurer?.beastHealth == undefined ||
+    //     adventurer?.beastHealth == 0 ||
+    //     loading ||
+    //     beastData?.level == 1 ||
+    //     adventurer.dexterity === 0,
+    //   loading: loading,
+    // },
   ];
 
   const beastName = processBeastName(

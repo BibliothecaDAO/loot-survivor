@@ -268,7 +268,8 @@ export default function UpgradeScreen() {
                 </div>
                 <div className="flex flex-row gap-2 justify-center text-lg sm:text-2xl text-shadow-none">
                   <span>
-                    Stat Upgrades Available {adventurer?.statUpgrades}
+                    Stat Upgrades Available{" "}
+                    {(adventurer?.statUpgrades ?? 0) - upgrades.length}
                   </span>
                 </div>
                 <UpgradeNav activeSection={upgradeScreen} />
