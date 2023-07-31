@@ -9,7 +9,8 @@ import { useEffect, useState } from "react";
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const client = new ApolloClient({
-    uri: getGraphQLUrl,
+    // uri: getGraphQLUrl,
+    uri: "http://localhost:8080/goerli-graphql",
     cache: new InMemoryCache({
       typePolicies: {
         Query: {
@@ -32,6 +33,17 @@ export default function Template({ children }: { children: React.ReactNode }) {
                 );
                 const filteredExisting = existing.filter(
                   (e: any) => !incomingTxHashes.has(e.txHash)
+                );
+                return [...filteredExisting, ...incoming];
+              },
+            },
+            beasts: {
+              merge(existing = [], incoming) {
+                const incomingKeys = new Set(
+                  incoming.map((i: any) => `${i.adventurerId}-${i.seed}`)
+                );
+                const filteredExisting = existing.filter(
+                  (e: any) => !incomingKeys.has(`${e.adventurerId}-${e.seed}`)
                 );
                 return [...filteredExisting, ...incoming];
               },
