@@ -22,6 +22,7 @@ import { GiBrute } from "react-icons/gi";
 import { GiBattleGear } from "react-icons/gi";
 import { GiPowderBag } from "react-icons/gi";
 import { RiShoppingCartFill } from "react-icons/ri";
+import { TbArrowBigRight } from "react-icons/tb";
 import HealthPotions from "../../../../public/icons/health-potions.svg";
 import Twitter from "../../../../public/icons/twitter.svg";
 import Trophy from "../../../../public/icons/trophy.svg";
@@ -77,6 +78,7 @@ const GiBruteIcon = GiBrute;
 const GiBattleGearIcon = GiBattleGear;
 const PowderBagIcon = GiPowderBag;
 const CartIconSimple = RiShoppingCartFill;
+const RightArrowIcon = TbArrowBigRight;
 const HealthPotionsIcon = HealthPotions;
 const TwitterIcon = Twitter;
 const TrophyIcon = Trophy;
@@ -132,6 +134,7 @@ export {
   GiBattleGearIcon,
   PowderBagIcon,
   CartIconSimple,
+  RightArrowIcon,
   HealthPotionsIcon,
   TwitterIcon,
   VolumeIcon,
