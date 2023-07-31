@@ -162,8 +162,8 @@ export const TxActivity = () => {
         await refetch("latestDiscoveriesQuery");
         // await refetch("adventurerByIdQuery");
         await refetch("lastBeastBattleQuery");
-        // await refetch("lastBeastQuery");
-        // await refetch("beastQuery");
+        await refetch("lastBeastQuery");
+        await refetch("beastQuery");
         await refetch("latestMarketItemsQuery");
         const killedByObstacle =
           queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
