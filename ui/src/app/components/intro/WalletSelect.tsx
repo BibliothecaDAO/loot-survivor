@@ -6,7 +6,6 @@ import useUIStore from "../../hooks/useUIStore";
 import Image from "next/image";
 import { TutorialDialog } from "../tutorial/TutorialDialog";
 import { WalletTutorial } from "../tutorial/WalletTutorial";
-import { disconnect } from "process";
 
 interface WalletSelectProps {
   onClose: () => void;
@@ -34,9 +33,9 @@ const WalletSelect: FC<WalletSelectProps> = ({ onClose }) => {
   return (
     <div className="flex flex-col p-8">
       <div className="flex flex-col self-center my-auto">
-        {account && <button onClick={onClose}>BACK</button>}
         {screen === "wallet" ? (
           <>
+            <button onClick={onClose}>Close</button>
             <div className="w-full">
               <Image
                 className="mx-auto p-10 animate-pulse"

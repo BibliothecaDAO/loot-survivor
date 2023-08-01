@@ -453,11 +453,6 @@ export const CreateAdventurer = ({
                           {formFilled ? "Spawn" : "Fill details"}
                         </Button>
                       </form>
-                      <div className="flex flex-col items-center">
-                        <Button className="my-2" onClick={handleBack}>
-                          Back
-                        </Button>
-                      </div>
                     </>
                   )}
                 </div>
