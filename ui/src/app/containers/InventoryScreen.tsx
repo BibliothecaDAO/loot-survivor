@@ -31,6 +31,9 @@ export default function InventoryScreen() {
   const formatAddress = account ? account.address : "0x0";
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
+  );
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
@@ -41,7 +44,8 @@ export default function InventoryScreen() {
   const { hashes, transactions } = useTransactionManager();
   const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
   const transactingItemIds = (transactions[0]?.metadata as Metadata)?.items;
-  const [equipItems, setEquipItems] = useState<string[]>([]);
+  const equipItems = useUIStore((state) => state.equipItems);
+  const setEquipItems = useUIStore((state) => state.setEquipItems);
 
   const { data } = useQueriesStore();
 
@@ -50,7 +54,11 @@ export default function InventoryScreen() {
     : [];
 
   const handleEquipItems = (item: string) => {
-    setEquipItems([...equipItems, getKeyFromValue(gameData.ITEMS, item) ?? ""]);
+    const newEquipItems = [
+      ...equipItems,
+      getKeyFromValue(gameData.ITEMS, item) ?? "",
+    ];
+    setEquipItems(newEquipItems);
     if (gameContract && formatAddress) {
       const equipItemTx = {
         contractAddress: gameContract?.address,
@@ -58,12 +66,14 @@ export default function InventoryScreen() {
         calldata: [
           adventurer?.id?.toString() ?? "",
           "0",
-          equipItems.length,
-          ...equipItems,
+          newEquipItems.length.toString(),
+          ...newEquipItems,
         ],
         metadata: `Equipping ${item}!`,
       };
+      removeEntrypointFromCalls(equipItemTx);
       addToCalls(equipItemTx);
+      console.log(equipItemTx);
     }
   };
 
@@ -280,20 +290,27 @@ export default function InventoryScreen() {
             </div>
             <div className="flex flex-col overflow-y-auto h-[450px] sm:h-[550px]">
               {selectedItems.length ? (
-                selectedItems.map((item: Item, index: number) => (
-                  <div className="w-full" key={index}>
-                    <ItemDisplay
-                      item={item}
-                      inventory={true}
-                      equip={() => handleEquipItems(item.item ?? "")}
-                      equipped={item.equipped}
-                      disabled={
-                        singleEquipExists(item.item ?? "") ||
-                        item.equipped ||
-                        checkTransacting(item.item ?? "")
-                      }
-                    />
-                    {/* <Button
+                selectedItems.map((item: Item, index: number) => {
+                  const itemId =
+                    getKeyFromValue(gameData.ITEMS, item?.item ?? "") ?? "";
+                  return (
+                    <div className="w-full" key={index}>
+                      <ItemDisplay
+                        item={item}
+                        inventory={true}
+                        equip={() => {
+                          setEquipItems([...equipItems, itemId]);
+                          handleEquipItems(item.item ?? "");
+                        }}
+                        equipped={item.equipped}
+                        disabled={
+                          singleEquipExists(item.item ?? "") ||
+                          item.equipped ||
+                          checkTransacting(item.item ?? "") ||
+                          equipItems.includes(itemId)
+                        }
+                      />
+                      {/* <Button
                       onClick={() => handleAddEquipItem(item.item ?? "")}
                       disabled={
                         singleEquipExists(item.item ?? "") ||
@@ -304,8 +321,9 @@ export default function InventoryScreen() {
                     >
                       {item.equipped ? "Eqipped" : "Equip"}
                     </Button> */}
-                  </div>
-                ))
+                    </div>
+                  );
+                })
               ) : (
                 <p className="sm:text-xl">You have no {selected} Loot</p>
               )}

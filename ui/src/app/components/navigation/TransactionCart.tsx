@@ -6,11 +6,22 @@ import { MdClose } from "react-icons/md";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useQueriesStore } from "../../hooks/useQueryStore";
-import { processItemName, getItemPrice, getItemData } from "../../lib/utils";
+import {
+  processItemName,
+  getItemPrice,
+  getItemData,
+  getValueFromKey,
+} from "../../lib/utils";
 import useUIStore from "../../hooks/useUIStore";
 import { useUiSounds } from "../../hooks/useUiSound";
 import { soundSelector } from "../../hooks/useUiSound";
-import { Item, NullItem, Call, NullAdventurer } from "../../types";
+import {
+  Item,
+  NullItem,
+  Call,
+  NullAdventurer,
+  ItemPurchase,
+} from "../../types";
 import { GameData } from "../GameData";
 import { getKeyFromValue } from "../../lib/utils";
 
@@ -35,6 +46,12 @@ const TransactionCart: React.FC = () => {
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
+  const equipItems = useUIStore((state) => state.equipItems);
+  const setEquipItems = useUIStore((state) => state.setEquipItems);
+  const purchaseItems = useUIStore((state) => state.purchaseItems);
+  const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
+  const upgradeStats = useUIStore((state) => state.upgradeStats);
+  const setUpgradeStats = useUIStore((state) => state.setUpgradeStats);
 
   const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
@@ -167,12 +184,104 @@ const TransactionCart: React.FC = () => {
                   {call && (
                     <div className="flex items-center justify-between text-xs sm:text-base">
                       <p className="uppercase">{call.entrypoint}</p>
-                      {/* <p>{call.calldata}</p> */}
-                      <p>{call.metadata}</p>
+                      {call.entrypoint === "equip" ? (
+                        <div className="flex flex-col">
+                          {equipItems.map((item: string, index: number) => (
+                            <div className="flex flex-row" key={index}>
+                              <p>
+                                {getValueFromKey(
+                                  gameData.ITEMS,
+                                  parseInt(item)
+                                )}
+                              </p>
+                              <button
+                                onClick={() => {
+                                  clickPlay();
+                                  const newItems = equipItems.filter(
+                                    (i) => i !== item
+                                  );
+                                  setEquipItems(newItems);
+                                  if (newItems.length === 0) {
+                                    removeFromCalls(call);
+                                  }
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <MdClose size={20} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : call.entrypoint === "buy_items_and_upgrade_stats" ? (
+                        <div className="flex flex-col">
+                          {upgradeStats.map((item: string, index: number) => (
+                            <div className="flex flex-row" key={index}>
+                              <p>
+                                {`Upgrade ${getValueFromKey(
+                                  gameData.STATS,
+                                  parseInt(item)
+                                )}`}
+                              </p>
+                              <button
+                                onClick={() => {
+                                  clickPlay();
+                                  const newStats = upgradeStats.filter(
+                                    (i) => i !== item
+                                  );
+                                  setUpgradeStats(upgradeStats);
+                                  if (newStats.length === 0) {
+                                    removeFromCalls(call);
+                                  }
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <MdClose size={20} />
+                              </button>
+                            </div>
+                          ))}
+                          {purchaseItems.map(
+                            (item: ItemPurchase, index: number) => (
+                              <div className="flex flex-row gap-1" key={index}>
+                                <p>
+                                  {item.equip === "1"
+                                    ? "Buy + Equip"
+                                    : "Buy, Don't Equip"}
+                                </p>
+                                <p>
+                                  {getValueFromKey(
+                                    gameData.ITEMS,
+                                    parseInt(item.item)
+                                  )}
+                                </p>
+                                <button
+                                  onClick={() => {
+                                    clickPlay();
+                                    const newItems = purchaseItems.filter(
+                                      (i) => i.item !== item.item
+                                    );
+                                    setPurchaseItems(newItems);
+                                    if (newItems.length === 0) {
+                                      removeFromCalls(call);
+                                    }
+                                  }}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <MdClose size={20} />
+                                </button>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      ) : (
+                        <p>{call.metadata}</p>
+                      )}
                       <button
                         onClick={() => {
                           removeFromCalls(call);
                           clickPlay();
+                          if (call.entrypoint === "equip") {
+                            setEquipItems([]);
+                          }
                         }}
                         className="text-red-500 hover:text-red-700"
                       >

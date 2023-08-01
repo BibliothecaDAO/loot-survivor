@@ -32,7 +32,7 @@ import MarketplaceScreen from "./MarketplaceScreen";
 import { UpgradeNav } from "../components/upgrade/UpgradeNav";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { StatAttribute } from "../components/upgrade/StatAttribute";
-import { ItemPurchase } from "../types";
+import useUIStore from "../hooks/useUIStore";
 
 /**
  * @container
@@ -59,9 +59,12 @@ export default function UpgradeScreen() {
   const { writeAsync } = useContractWrite({ calls });
   const [selected, setSelected] = useState("");
   const [upgradeScreen, setUpgradeScreen] = useState(1);
-  const [upgrades, setUpgrades] = useState<any[]>([]);
   const [potionAmount, setPotionAmount] = useState(0);
-  const [purchaseItems, setPurchaseItems] = useState<ItemPurchase[]>([]);
+  const upgradeStats = useUIStore((state) => state.upgradeStats);
+  const setUpgradeStats = useUIStore((state) => state.setUpgradeStats);
+  const purchaseItems = useUIStore((state) => state.purchaseItems);
+  const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
+  const [upgrades, setUpgrades] = useState<Record<string, number>>({});
 
   const { resetDataUpdated } = useQueriesStore();
 
@@ -124,12 +127,16 @@ export default function UpgradeScreen() {
 
   function renderContent() {
     const attribute = attributes.find((attr) => attr.name === selected);
+    const amount = attribute ? upgrades[attribute.name] ?? 0 : 0;
     return (
       <div className="flex sm:w-2/3 h-24 sm:h-full items-center justify-center border-l border-terminal-green p-2">
         {attribute && (
           <StatAttribute
-            upgrades={upgrades}
-            setUpgrades={setUpgrades}
+            amount={amount}
+            setAmount={setUpgrades}
+            upgrades={upgradeStats}
+            setUpgrades={setUpgradeStats}
+            upgradeHandler={() => handleAddItemsAndTx()}
             {...attribute}
           />
         )}
@@ -212,7 +219,7 @@ export default function UpgradeScreen() {
 
   const upgradeTotalCost = purchaseGoldAmount + itemsGoldSum;
 
-  const handleBuyItemsAndUpgradeTx = async () => {
+  const handleAddItemsAndTx = () => {
     const buyItemsAndUpgradeTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "buy_items_and_upgrade_stats",
@@ -222,12 +229,15 @@ export default function UpgradeScreen() {
         potionAmount,
         purchaseItems.length.toString(),
         ...purchaseItems.flatMap(Object.values),
-        upgrades.length.toString(),
-        ...upgrades,
+        upgradeStats.length.toString(),
+        ...upgradeStats,
       ],
       // calldata: [adventurer?.id?.toString() ?? "", "0", "0", "0", "0"],
     };
     addToCalls(buyItemsAndUpgradeTx);
+  };
+
+  const handleBuyItemsAndUpgradeTx = async () => {
     startLoading(
       "Upgrade",
       `Upgrading ${selected}`,
@@ -251,7 +261,7 @@ export default function UpgradeScreen() {
 
   const lastPage = isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2;
 
-  const nextDisabled = upgrades.length === 0;
+  const nextDisabled = upgradeStats.length === 0;
 
   return (
     <>
@@ -269,7 +279,7 @@ export default function UpgradeScreen() {
                 <div className="flex flex-row gap-2 justify-center text-lg sm:text-2xl text-shadow-none">
                   <span>
                     Stat Upgrades Available{" "}
-                    {(adventurer?.statUpgrades ?? 0) - upgrades.length}
+                    {(adventurer?.statUpgrades ?? 0) - upgradeStats.length}
                   </span>
                 </div>
                 <UpgradeNav activeSection={upgradeScreen} />
