@@ -25,7 +25,8 @@ mod tests {
     use survivor::{
         adventurer_meta::{AdventurerMetadata},
         constants::adventurer_constants::{
-            STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, ClassStatBoosts
+            STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, ClassStatBoosts,
+            MAX_BLOCK_COUNT
         },
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, item_primitive::ItemPrimitive,
         bag::{Bag, IBag}
@@ -1167,11 +1168,11 @@ mod tests {
         // get current block number
         let current_block_number = starknet::get_block_info().unbox().block_number;
 
-        // verify current block number % MAX_STORAGE_BLOCKS is less than adventurers last action block number
+        // verify current block number % MAX_BLOCK_COUNT is less than adventurers last action block number
         // this is imperative because this test is testing the case where the adventurer last action block number
-        // is less than (current_block_number % MAX_STORAGE_BLOCKS)
+        // is less than (current_block_number % MAX_BLOCK_COUNT)
         assert(
-            (current_block_number % Game::MAX_STORAGE_BLOCKS) < adventurer.last_action.into(),
+            (current_block_number % MAX_BLOCK_COUNT) < adventurer.last_action.into(),
             'last action !> current block'
         );
 
@@ -1224,11 +1225,11 @@ mod tests {
         // get current block number
         let current_block_number = starknet::get_block_info().unbox().block_number;
 
-        // verify current block number % MAX_STORAGE_BLOCKS is greater than adventurers last action block number
+        // verify current block number % MAX_BLOCK_COUNT is greater than adventurers last action block number
         // this is imperative because this test is testing the case where the adventurer last action block number
-        // is greater than the (current_block_number % MAX_STORAGE_BLOCKS)
+        // is greater than the (current_block_number % MAX_BLOCK_COUNT)
         assert(
-            (current_block_number % Game::MAX_STORAGE_BLOCKS) > adventurer.last_action.into(),
+            (current_block_number % MAX_BLOCK_COUNT) > adventurer.last_action.into(),
             'last action !> current block'
         );
 

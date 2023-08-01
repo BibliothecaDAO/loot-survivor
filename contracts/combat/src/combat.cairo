@@ -1,8 +1,5 @@
 use core::option::OptionTrait;
-use integer::{
-    U8IntoU16, U16IntoU64, U8IntoU64, U64TryIntoU16, U64TryIntoU8, U8IntoU128, U128TryIntoU8,
-    U128TryIntoU16, u16_sqrt
-};
+use integer::{u16_sqrt};
 use core::traits::{TryInto, Into, DivEq};
 use super::constants::{
     CombatEnums::{Tier, Type, Slot, WeaponEffectiveness},
@@ -284,11 +281,11 @@ impl ImplCombat of ICombat {
 
         // critical hit chance is whole number of luck / 10
         // so the chance of getting a critical hit increases every 10 luck
-        let mut critical_hit_chance: u8 = effective_luck / 10;
+        let critical_hit_chance: u8 = effective_luck / 10;
 
         // critical hit random number is modulo the max critical hit chance
         // this will result in a number between 0 and 5
-        let critical_hit_outcome = entropy % U8IntoU128::into((6 - critical_hit_chance));
+        let critical_hit_outcome = entropy % (6 - critical_hit_chance).into();
 
         // if the critical hit random number is 0 (no remainder)
         if (critical_hit_outcome == 0) {
@@ -309,7 +306,7 @@ impl ImplCombat of ICombat {
         let damage_boost_base = damage / 4;
 
         // damage multplier is 1-4 which will equate to a 25-100% damage boost
-        let damage_multplier = U128TryIntoU16::try_into(entropy % 4).unwrap();
+        let damage_multplier = (entropy % 4).try_into().unwrap();
 
         // multiply base damage boost (25% of original damage) by damage multiplier (1-4)
         damage_boost_base * (damage_multplier + 1)
@@ -327,7 +324,7 @@ impl ImplCombat of ICombat {
         // is the weapon prefix matches the armor prefix
         if (weapon_prefix1 != 0 && weapon_prefix1 == armor_prefix1) {
             // grant bonus
-            let damage_multplier = U128TryIntoU16::try_into(entropy % 4).unwrap();
+            let damage_multplier = (entropy % 4).try_into().unwrap();
 
             // result will be base damage * (4-7) which will equate to a 4-7x damage bonus
             (damage * (damage_multplier + 4))
@@ -352,7 +349,7 @@ impl ImplCombat of ICombat {
             let damage_boost_base = base_damage / 4;
 
             // damage multplier is 1-4 which will equate to a 25-100% damage boost
-            let damage_multplier = U128TryIntoU16::try_into(entropy % 4).unwrap();
+            let damage_multplier = (entropy % 4).try_into().unwrap();
 
             // multiply base damage boost (25% of original damage) by damage multiplier (1-4)
             damage_boost_base * (damage_multplier + 1)
@@ -474,8 +471,8 @@ impl ImplCombat of ICombat {
     fn get_random_damage_location(entropy: u128, ) -> Slot {
         // generate random damage location based on Item Slot which has
         // armor in slots 2-6 inclusive
-        let damage_location = 2 + (entropy % 6);
-        ImplCombat::u8_to_slot(U128TryIntoU8::try_into(damage_location).unwrap())
+        let damage_location = (2 + (entropy % 6)).try_into().unwrap();
+        ImplCombat::u8_to_slot(damage_location)
     }
 
     fn tier_to_u8(tier: Tier) -> u8 {
@@ -571,7 +568,7 @@ impl ImplCombat of ICombat {
     fn ability_based_avoid_threat(adventurer_level: u8, relevant_stat: u8, entropy: u128) -> bool {
         // number of sides of the die will be based on adventurer_level
         // so the higher the adventurer level, the more sides the die has
-        let dice_roll = U128TryIntoU8::try_into(entropy % adventurer_level.into()).unwrap();
+        let dice_roll = (entropy % adventurer_level.into()).try_into().unwrap();
 
         // in order to avoid the threat, the adventurer's stat must be higher than the dice roll
         //  As an example, if the adventurer is on level 2 with no dexterity, the

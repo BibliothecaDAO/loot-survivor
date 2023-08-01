@@ -1,6 +1,5 @@
 use option::OptionTrait;
-use core::traits::Into;
-use integer::{U8IntoU16, U128TryIntoU8};
+use core::traits::{Into, TryInto};
 use super::constants::{ObstacleId, ObstacleSettings};
 use combat::{
     combat::{ICombat, ImplCombat, CombatSpec, SpecialPowers},
@@ -40,7 +39,7 @@ impl ImplObstacle of IObstacle {
         let obstacle_id = (entropy % ObstacleId::MAX_ID.into()) + 1;
 
         // return obstacle id as a u8
-        return U128TryIntoU8::try_into(obstacle_id).unwrap();
+        obstacle_id.try_into().unwrap()
     }
     // get_obstacle returns an obstacle based on the provided obstacle id and level
     // @param id: u8 - the obstacle id
