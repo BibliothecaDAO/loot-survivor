@@ -315,8 +315,9 @@ export default function Home() {
                       <Button
                         onClick={() => {
                           disconnect();
+                          setScreen("wallet");
                           resetData();
-                          setAdventurer(NullAdventurer);
+                          // setAdventurer(NullAdventurer);
                         }}
                       >
                         {account ? displayAddress(account.address) : "Connect"}
@@ -361,9 +362,7 @@ export default function Home() {
               {screen === "guide" && <GuideScreen />}
               {screen === "settings" && <Settings />}
               {screen === "player" && <Player />}
-              {screen === "wallet" && (
-                <WalletSelect onClose={function (): void {}} />
-              )}
+              {screen === "wallet" && <WalletSelect onClose={() => {}} />}
             </>
           </div>
           {/* <CSSTransition
