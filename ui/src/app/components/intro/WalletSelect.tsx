@@ -1,103 +1,77 @@
+import React, { FC } from "react";
 import { useState, useEffect } from "react";
 import { Button } from "../buttons/Button";
 import { useConnectors, useAccount } from "@starknet-react/core";
-import {
-  AddDevnetButton,
-  SwitchToDevnetButton,
-} from "../archived/DevnetConnectors";
 import useUIStore from "../../hooks/useUIStore";
 import Image from "next/image";
+import { TutorialDialog } from "../tutorial/TutorialDialog";
+import { WalletTutorial } from "../tutorial/WalletTutorial";
 
 interface WalletSelectProps {
-  screen: number;
+  onClose: () => void;
 }
 
-const WalletSelect = ({ screen }: WalletSelectProps) => {
+const WalletSelect: FC<WalletSelectProps> = ({ onClose }) => {
   const { connectors, connect } = useConnectors();
   const { account } = useAccount();
+  const [screen, setScreen] = useState("wallet");
 
   console.log(account);
-  const [addedDevnet, setAddedDevnet] = useState<boolean>(false);
   const setConnected = useUIStore((state) => state.setConnected);
 
   useEffect(() => {
-    if (screen == 1) {
-      if (
-        (account as any)?.baseUrl ==
-          "https://survivor-indexer.bibliothecadao.xyz" ||
-        (account as any)?.provider?.baseUrl ==
-          "https://survivor-indexer.bibliothecadao.xyz"
-      ) {
-        setConnected(true);
-      }
-    }
-
-    if (screen == 4 && account) {
+    if (
+      (account as any)?.baseUrl ==
+        "https://survivor-indexer.bibliothecadao.xyz" ||
+      (account as any)?.provider?.baseUrl ==
+        "https://survivor-indexer.bibliothecadao.xyz"
+    ) {
       setConnected(true);
     }
-  }, [account, screen, setConnected]);
+  }, [account, setConnected]);
 
   return (
     <div className="flex flex-col p-8">
       <div className="flex flex-col self-center my-auto">
-        <div className="w-full">
-          <Image
-            className=" mx-auto p-10 animate-pulse"
-            src={"/monsters/balrog.png"}
-            alt="start"
-            width={500}
-            height={500}
-          />
-        </div>
-        <div className="w-full text-center">
-          <h1 className="mb-10">The Hour for Survival Has Arrived</h1>
-        </div>
+        {screen === "wallet" ? (
+          <>
+            <button onClick={onClose}>Close</button>
+            <div className="w-full">
+              <Image
+                className="mx-auto p-10 animate-pulse"
+                src={"/monsters/balrog.png"}
+                alt="start"
+                width={500}
+                height={500}
+              />
+            </div>
 
-        {screen == 4 ? (
-          <div className="flex flex-col w-1/2 gap-5 m-auto">
-            {connectors.length > 0 ? (
-              connectors.map((connector, index) => (
-                <Button
-                  onClick={() => connect(connector)}
-                  key={index}
-                  className="w-full"
-                >
-                  Connect {connector.id}
-                </Button>
-              ))
-            ) : (
-              <h1>You must have Argent or Braavos installed!</h1>
-            )}
-          </div>
+            <div className="w-full text-center">
+              <h1 className="mb-10">The Hour for Survival Has Arrived</h1>
+            </div>
+            <div className="flex flex-col w-1/2 gap-5 m-auto">
+              <Button onClick={() => setScreen("tutorial")}>
+                I don&apos;t have a wallet
+              </Button>
+              {connectors.length > 0 &&
+                connectors.map((connector, index) => (
+                  <Button
+                    onClick={() => connect(connector)}
+                    key={index}
+                    className="w-full"
+                  >
+                    Connect {connector.id}
+                  </Button>
+                ))}
+            </div>
+          </>
         ) : (
-          <div className="flex flex-col w-1/2 gap-5 m-auto">
-            {connectors.some(
-              (connector: any) => connector.id() == "argentX"
-            ) ? (
-              connectors.map((connector, index) => (
-                <>
-                  {connector.id == "argentX" ? (
-                    <Button
-                      onClick={() => connect(connector)}
-                      key={index}
-                      className="w-full"
-                      disabled={account ? true : false}
-                    >
-                      Connect {connector.id}
-                    </Button>
-                  ) : null}
-                </>
-              ))
-            ) : (
-              <h1>To use devnet you must have an Argent wallet!</h1>
-            )}
-            <AddDevnetButton
-              // isDisabled={!account?.address}
-              isDisabled={addedDevnet}
-              setAddDevnet={setAddedDevnet}
-            />
-            <SwitchToDevnetButton isDisabled={false} />
-          </div>
+          <>
+            <div>
+              <WalletTutorial />
+              <Button onClick={() => setScreen("wallet")}>Back</Button>
+            </div>
+          </>
         )}
       </div>
     </div>

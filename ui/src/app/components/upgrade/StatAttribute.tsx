@@ -23,13 +23,18 @@ export const StatAttribute = ({
   setUpgrades,
 }: StatAttributeProps) => {
   const [amount, setAmount] = useState(0);
+  const [prevAmount, setPrevAmount] = useState(0);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const gameData = new GameData();
 
   useEffect(() => {
-    if (amount > 0) {
-      setUpgrades([...upgrades, getKeyFromValue(gameData.STATS, name) ?? ""]);
+    const key = getKeyFromValue(gameData.STATS, name) ?? "";
+    if (amount > prevAmount) {
+      setUpgrades([...upgrades, key]);
+    } else if (amount < prevAmount) {
+      setUpgrades(upgrades.filter((item) => item !== key));
     }
+    setPrevAmount(amount);
   }, [amount]);
 
   return (
