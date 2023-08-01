@@ -28,7 +28,7 @@ import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
 import { mainnet_addr, getGraphQLUrl } from "./lib/constants";
-import { Menu, NullAdventurer } from "./types";
+import { Menu } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
@@ -56,8 +56,6 @@ import {
 } from "./hooks/graphql/queries";
 import { useBurner } from "./lib/burner";
 import { ArcadeDialog } from "./components/ArcadeDialog";
-import WalletSelect from "./components/intro/WalletSelect";
-import { on } from "events";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -82,7 +80,7 @@ export default function Home() {
   const { disconnect } = useConnectors();
   const { account, status } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
-  const [introComplete, setIntroComplete] = useState(false);
+
   const type = useLoadingStore((state) => state.type);
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
@@ -116,7 +114,7 @@ export default function Home() {
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
 
-  const { data, refetch, resetData } = useQueriesStore();
+  const { data, refetch } = useQueriesStore();
 
   const playState = useMemo(
     () => ({
@@ -131,10 +129,6 @@ export default function Home() {
     volume: 0.5,
     loop: true,
   });
-
-  const handleIntroComplete = () => {
-    setIntroComplete(true);
-  };
 
   useCustomQuery(
     "adventurerByIdQuery",
@@ -193,12 +187,6 @@ export default function Home() {
     refetch("adventurersByOwnerQuery");
   }, [account]);
 
-  useEffect(() => {
-    if (account) {
-      setScreen("start");
-    }
-  }, [account]);
-
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
@@ -224,11 +212,10 @@ export default function Home() {
 
   return (
     // <Maintenance />
-
     <main
       className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-20 `}
     >
-      {introComplete ? (
+      {connected ? (
         <>
           <div className="flex flex-col w-full">
             {isMobileDevice && <TxActivity />}
@@ -311,17 +298,11 @@ export default function Home() {
                       (account as any)?.baseUrl == mainnet_addr) && (
                       <MintEthButton />
                     )}
-                    {!connected ? (
-                      <Button
-                        onClick={() => {
-                          disconnect();
-                          resetData();
-                          setAdventurer(NullAdventurer);
-                        }}
-                      >
-                        {account ? displayAddress(account.address) : "Connect"}
+                    {account && (
+                      <Button onClick={() => disconnect()}>
+                        {displayAddress(account.address)}
                       </Button>
-                    ) : null}
+                    )}
                     <Button href="https://github.com/BibliothecaDAO/loot-survivor">
                       <GithubIcon className="w-6" />
                     </Button>
@@ -333,38 +314,6 @@ export default function Home() {
           </div>
           <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4">
             {!isMobileDevice && <TxActivity />}
-          </div>
-
-          <div className="flex flex-col w-full">
-            <>
-              <div className="flex justify-center sm:justify-normal sm:pb-2">
-                <HorizontalKeyboardControl
-                  buttonsData={isMobileDevice ? mobileMenuItems : allMenuItems}
-                  onButtonClick={(value) => {
-                    setScreen(value);
-                  }}
-                  disabled={
-                    isMobileDevice ? mobileMenuDisabled : allMenuDisabled
-                  }
-                />
-              </div>
-
-              {isMobileDevice && <MobileHeader />}
-
-              {screen === "start" && <AdventurerScreen />}
-              {screen === "play" && <ActionsScreen />}
-              {screen === "inventory" && <InventoryScreen />}
-              {screen === "leaderboard" && <LeaderboardScreen />}
-              {screen === "upgrade" && <UpgradeScreen />}
-              {screen === "profile" && <Profile />}
-              {screen === "encounters" && <EncountersScreen />}
-              {screen === "guide" && <GuideScreen />}
-              {screen === "settings" && <Settings />}
-              {screen === "player" && <Player />}
-              {screen === "wallet" && (
-                <WalletSelect onClose={function (): void {}} />
-              )}
-            </>
           </div>
           {/* <CSSTransition
             in={
@@ -395,9 +344,42 @@ export default function Home() {
           {status == "connected" && arcadeDialog && <ArcadeDialog />}
 
           {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
+
+          {account ? (
+            <div className="flex flex-col w-full">
+              <>
+                <div className="flex justify-center sm:justify-normal sm:pb-2">
+                  <HorizontalKeyboardControl
+                    buttonsData={
+                      isMobileDevice ? mobileMenuItems : allMenuItems
+                    }
+                    onButtonClick={(value) => {
+                      setScreen(value);
+                    }}
+                    disabled={
+                      isMobileDevice ? mobileMenuDisabled : allMenuDisabled
+                    }
+                  />
+                </div>
+
+                {isMobileDevice && <MobileHeader />}
+
+                {screen === "start" && <AdventurerScreen />}
+                {screen === "play" && <ActionsScreen />}
+                {screen === "inventory" && <InventoryScreen />}
+                {screen === "leaderboard" && <LeaderboardScreen />}
+                {screen === "upgrade" && <UpgradeScreen />}
+                {screen === "profile" && <Profile />}
+                {screen === "encounters" && <EncountersScreen />}
+                {screen === "guide" && <GuideScreen />}
+                {screen === "settings" && <Settings />}
+                {screen === "player" && <Player />}
+              </>
+            </div>
+          ) : null}
         </>
       ) : (
-        <Intro onIntroComplete={handleIntroComplete} />
+        <Intro />
       )}
     </main>
   );

@@ -21,13 +21,11 @@ import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { FormData, Adventurer } from "@/app/types";
 import { Button } from "../buttons/Button";
 import Image from "next/image";
-import WalletSelect from "../intro/WalletSelect";
 import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
 import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import { connected } from "process";
 
 export interface CreateAdventurerProps {
   isActive: boolean;
@@ -72,9 +70,6 @@ export const CreateAdventurer = ({
   const gameData = new GameData();
   const [firstAdventurer, setFirstAdventurer] = useState(false);
   const [step, setStep] = useState(1);
-  const [currentPage, setCurrentPage] = useState("CreateAdventurer");
-
-  const [isWalletSelectOpen] = useState(false);
 
   const { resetDataUpdated } = useQueriesStore();
 
@@ -132,7 +127,6 @@ export const CreateAdventurer = ({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
     const mintLords = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "mint",
@@ -400,68 +394,42 @@ export const CreateAdventurer = ({
   } else if (step === 4) {
     return (
       <>
-        {currentPage === "CreateAdventurer" ? (
-          <>
-            <div className="flex flex-col w-full h-full justify-center">
-              <div className="flex flex-col h-full">
-                <Image
-                  className="mx-auto border border-terminal-green absolute object-fill"
-                  src={"/monsters/starterbeast.png"}
-                  alt="adventurer facing beast"
-                  fill
-                />
-                <div className="absolute top-6 left-0 right-0 sm:p-4 text-xs sm:text-xl leading-loose z-10 text-center">
-                  <TypeAnimation
-                    sequence={[battle]}
-                    wrapper="span"
-                    cursor={true}
-                    speed={40}
-                    style={{ fontSize: "2em" }}
-                  />
-                </div>
-                <div className="absolute top-1/2 left-0 right-0 flex flex-col items-center gap-4 z-10">
-                  {!account ? (
-                    <>
-                      <div className="flex flex-col justify-between">
-                        {!isWalletSelectOpen && (
-                          <div className="flex flex-col gap-2">
-                            <Button
-                              onClick={() => setCurrentPage("WalletSelect")}
-                              disabled={!formFilled}
-                            >
-                              Connect Wallet
-                            </Button>
+        <div className="flex flex-col w-full h-full justify-center">
+          <div className="flex flex-col h-full">
+            <Image
+              className="mx-auto border border-terminal-green absolute object-fill"
+              src={"/monsters/starterbeast.png"}
+              alt="adventurer facing beast"
+              fill
+            />
 
-                            <Button size={"xs"} onClick={handleBack}>
-                              Back
-                            </Button>
-                          </div>
-                        )}{" "}
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="mb-10 sm:m-0">
-                        <TxActivity />
-                      </div>
-                      <form onSubmit={handleSubmit}>
-                        <Button
-                          type="submit"
-                          size={"xl"}
-                          disabled={!formFilled || !account}
-                        >
-                          {formFilled ? "Spawn" : "Fill details"}
-                        </Button>
-                      </form>
-                    </>
-                  )}
-                </div>
-              </div>
+            <div className="absolute top-6 left-0 right-0 sm:p-4 text-xs sm:text-xl leading-loose z-10 text-center">
+              <TypeAnimation
+                sequence={[battle]}
+                wrapper="span"
+                cursor={true}
+                speed={40}
+                style={{ fontSize: "2em" }}
+              />
             </div>
-          </>
-        ) : (
-          <WalletSelect onClose={() => setCurrentPage("CreateAdventurer")} />
-        )}
+            <div className="absolute top-1/2 left-0 right-0 flex flex-col items-center gap-4 z-10">
+              <div className="mb-10 sm:m-0">
+                <TxActivity />
+              </div>
+              <form onSubmit={handleSubmit}>
+                <Button type="submit" size={"xl"} disabled={!formFilled}>
+                  {formFilled ? "Spawn" : "Fill details"}
+                </Button>
+              </form>
+            </div>
+
+            <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">
+              <Button variant={"default"} onClick={handleBack}>
+                Back
+              </Button>
+            </div>
+          </div>
+        </div>
       </>
     );
   } else {

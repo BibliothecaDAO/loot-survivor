@@ -3,6 +3,7 @@ import { create } from "zustand";
 export type ScreenPage =
   | "start"
   | "play"
+  | "play"
   | "market"
   | "inventory"
   | "beast"
@@ -12,8 +13,7 @@ export type ScreenPage =
   | "encounters"
   | "guide"
   | "settings"
-  | "player"
-  | "wallet";
+  | "player";
 
 type State = {
   connected: boolean;
