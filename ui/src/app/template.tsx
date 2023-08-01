@@ -53,14 +53,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
     }),
   });
 
-  const { arcadeAccounts, isDeploying } = useBurner();
-
-  const [newAccount, setNewAccount] = useState(false);
-
-  useEffect(() => {
-    console.log("new account created");
-    setNewAccount(!newAccount);
-  }, [isDeploying]);
+  const { arcadeAccounts } = useBurner();
 
   return (
     <StarknetConfig connectors={[...connectors, ...arcadeAccounts]} autoConnect>
