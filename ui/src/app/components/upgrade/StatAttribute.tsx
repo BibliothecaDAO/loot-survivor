@@ -1,9 +1,10 @@
-import { ReactElement, use, useEffect, useState } from "react";
+import { ReactElement, use, useEffect, useState, useRef } from "react";
 import QuantityButtons from "../buttons/QuantityButtons";
 import { Button } from "../buttons/Button";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { getKeyFromValue } from "@/app/lib/utils";
 import { GameData } from "../GameData";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 
 interface StatAttributeProps {
   name: string;
@@ -30,19 +31,47 @@ export const StatAttribute = ({
 }: StatAttributeProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const gameData = new GameData();
+  const [buttonClicked, setButtonClicked] = useState(false);
+  const prevAmountRef = useRef<number | undefined>();
+  const calls = useTransactionCartStore((state) => state.calls);
+  const upgradeCallExists = calls.some(
+    (call) => call.entrypoint === "buy_items_and_upgrade_stats"
+  );
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
+  );
+  const newUpgradeTotal = (adventurer?.statUpgrades ?? 0) - upgrades.length;
 
-  let newUpgrades = [];
+  console.log(buttonClicked, prevAmountRef.current);
 
   useEffect(() => {
-    if (amount > 0) {
-      setAmount((prev: any) => ({ ...prev, [name]: amount }));
-      newUpgrades.push(getKeyFromValue(gameData.STATS, name) ?? "");
-      setUpgrades([...upgrades, getKeyFromValue(gameData.STATS, name) ?? ""]);
-      upgradeHandler();
-    }
-  }, [amount]);
+    if (buttonClicked) {
+      if (prevAmountRef.current !== undefined) {
+        const prevAmount = prevAmountRef.current;
+        if (amount > prevAmount) {
+          setUpgrades([
+            ...upgrades,
+            getKeyFromValue(gameData.STATS, name) ?? "",
+          ]);
+          if (!upgradeCallExists) {
+            upgradeHandler();
+          }
+        } else if (amount < prevAmount) {
+          const newupgrades = upgrades.filter(
+            (i) => i !== getKeyFromValue(gameData.STATS, name) ?? ""
+          );
+          setUpgrades(newupgrades);
+          if (newupgrades.length === 0) {
+            removeEntrypointFromCalls("buy_items_and_upgrade_stats");
+          }
+        }
 
-  console.log(upgrades.length, newUpgrades.length);
+        setButtonClicked(false);
+        // after useEffect has run, update the ref with the new value
+      }
+      prevAmountRef.current = amount;
+    }
+  }, [amount, buttonClicked]);
 
   return (
     <div className="flex flex-col gap-1 sm:gap-3 items-center">
@@ -52,10 +81,11 @@ export const StatAttribute = ({
         <QuantityButtons
           amount={amount}
           min={0}
-          max={(adventurer?.statUpgrades ?? 0) - upgrades.length}
-          setAmount={(value) =>
-            setAmount((prev: any) => ({ ...prev, [name]: value }))
-          }
+          max={newUpgradeTotal}
+          setAmount={(value) => {
+            setAmount((prev: any) => ({ ...prev, [name]: value }));
+            setButtonClicked(true);
+          }}
         />
       </span>
     </div>

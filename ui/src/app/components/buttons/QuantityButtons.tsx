@@ -41,7 +41,7 @@ const HealthSlider: React.FC<ButtonProps> = ({
         className="text-2xl mr-1"
         size={"sm"}
         onClick={handleIncrement}
-        disabled={amount === max}
+        disabled={amount >= max}
       >
         +
       </Button>

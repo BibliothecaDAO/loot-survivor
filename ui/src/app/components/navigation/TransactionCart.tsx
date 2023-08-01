@@ -214,19 +214,19 @@ const TransactionCart: React.FC = () => {
                         </div>
                       ) : call.entrypoint === "buy_items_and_upgrade_stats" ? (
                         <div className="flex flex-col">
-                          {upgradeStats.map((item: string, index: number) => (
+                          {upgradeStats.map((stat: string, index: number) => (
                             <div className="flex flex-row" key={index}>
                               <p>
                                 {`Upgrade ${getValueFromKey(
                                   gameData.STATS,
-                                  parseInt(item)
+                                  parseInt(stat)
                                 )}`}
                               </p>
                               <button
                                 onClick={() => {
                                   clickPlay();
                                   const newStats = upgradeStats.filter(
-                                    (i) => i !== item
+                                    (i) => i !== stat
                                   );
                                   setUpgradeStats(upgradeStats);
                                   if (newStats.length === 0) {

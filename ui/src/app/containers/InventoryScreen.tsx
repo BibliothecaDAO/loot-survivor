@@ -71,7 +71,7 @@ export default function InventoryScreen() {
         ],
         metadata: `Equipping ${item}!`,
       };
-      removeEntrypointFromCalls(equipItemTx);
+      removeEntrypointFromCalls(equipItemTx.entrypoint);
       addToCalls(equipItemTx);
       console.log(equipItemTx);
     }
