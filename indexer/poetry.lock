@@ -158,14 +158,12 @@ trio = ["trio (>=0.16,<0.22)"]
 
 [[package]]
 name = "apibara"
-version = "0.7.2"
+version = "0.7.3a0"
 description = "Apibara cliend SDK. Stream and transform on-chain data with Python."
 optional = false
 python-versions = ">=3.8,<3.11"
-files = [
-    {file = "apibara-0.7.2-py3-none-any.whl", hash = "sha256:2042294087f92dd2ba5b8d92a6ad9e444a6eb72828a2c87d5b0dbcaa7d7c6083"},
-    {file = "apibara-0.7.2.tar.gz", hash = "sha256:2c07287342c07a511f88b071e8174181726698d6aa8a997a71a8ad9877d50db7"},
-]
+files = []
+develop = false
 
 [package.dependencies]
 grpcio = ">=1.50,<2.0"
@@ -173,6 +171,12 @@ protobuf = ">=4.20,<5"
 
 [package.extras]
 indexer = ["pymongo (>=4.3.3,<5.0.0)"]
+
+[package.source]
+type = "git"
+url = "https://github.com/apibara/python-sdk.git"
+reference = "v0.7.3a0"
+resolved_reference = "a2aeb6bdf023398e76d7d01fa36782953a24d44a"
 
 [[package]]
 name = "asgiref"
@@ -1620,4 +1624,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">3.8,<3.10"
-content-hash = "dc230fb35ea2376e5015bf6fc18f7cbe188af75351ab96f80487b5201bd94191"
+content-hash = "01c4788d7704cd2ad157b4b43bf367b88ffdb7594d7dac2192a1009fd1532f05"
