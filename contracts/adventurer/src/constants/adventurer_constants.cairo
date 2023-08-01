@@ -32,6 +32,10 @@ const MAX_ADVENTURER_BLOCKS: u16 = 512; // 2^9
 const ITEM_XP_MULTIPLIER_BEASTS: u16 = 2;
 const ITEM_XP_MULTIPLIER_OBSTACLES: u16 = 1;
 
+// Maximum number of blocks we can keep track of on the Adventurer
+// this is used for calculating idle damage penalty
+const MAX_BLOCK_COUNT: u64 = 512;
+
 mod StatisticIndex {
     const STRENGTH: u8 = 0;
     const DEXTERITY: u8 = 1;
@@ -74,7 +78,6 @@ mod ClassStatBoosts {
         const WISDOM: u8 = 1;
         const CHARISMA: u8 = 1;
     }
-
 }
 
 const U128_MAX: u128 = 340282366920938463463374607431768211455;

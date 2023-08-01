@@ -8,7 +8,6 @@ mod Game {
     const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 8;
     const IDLE_PENALTY_THRESHOLD_BLOCKS: u16 = 8;
     const IDLE_DEATH_PENALTY_BLOCKS: u16 = 300;
-    const MAX_STORAGE_BLOCKS: u64 = 512;
     const TEST_ENTROPY: u64 = 12303548;
     const LOOT_NAME_STORAGE_INDEX_1: u256 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
@@ -19,10 +18,6 @@ mod Game {
     use core::array::SpanTrait;
     use starknet::{
         get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const
-    };
-    use integer::{
-        Felt252TryIntoU64, U8IntoU16, U16IntoU64, U16IntoU128, U64IntoU128, U8IntoU128,
-        U128TryIntoU8, U64IntoFelt252, U64TryIntoU16
     };
     use core::traits::{TryInto, Into};
     use array::ArrayTrait;
@@ -222,12 +217,7 @@ mod Game {
             }
 
             // update players last action block number
-            adventurer
-                .last_action =
-                    U64TryIntoU16::try_into(
-                        starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
-                    )
-                .unwrap();
+            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
 
             // write the resulting adventurer to storage
             _pack_adventurer_remove_stat_boost(
@@ -286,13 +276,8 @@ mod Game {
                 );
             }
 
-            // update players last action block number
-            adventurer
-                .last_action =
-                    U64TryIntoU16::try_into(
-                        starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
-                    )
-                .unwrap();
+            // update players last action block number            
+            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
 
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -351,12 +336,7 @@ mod Game {
             }
 
             // update players last action block number
-            adventurer
-                .last_action =
-                    U64TryIntoU16::try_into(
-                        starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
-                    )
-                .unwrap();
+            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
 
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -412,12 +392,7 @@ mod Game {
             }
 
             // update players last action block number
-            adventurer
-                .last_action =
-                    U64TryIntoU16::try_into(
-                        starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
-                    )
-                .unwrap();
+            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
 
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -3412,13 +3387,6 @@ mod Game {
     fn _assert_starting_stat_count(self: @ContractState, amount: u8) {
         assert(amount == STARTING_STATS, messages::WRONG_STARTING_STATS);
     }
-    fn _assert_one_explore_per_block(self: @ContractState, adventurer: Adventurer) {
-        let current_block: u16 = U64TryIntoU16::try_into(
-            starknet::get_block_info().unbox().block_number % MAX_STORAGE_BLOCKS
-        )
-            .unwrap();
-        assert(adventurer.last_action != current_block, messages::ONE_EXPLORE_PER_BLOCK);
-    }
     fn _assert_has_required_stat_points(self: @ContractState, adventurer: Adventurer, amount: u8) {
         assert(adventurer.stat_points_available >= amount, messages::INSUFFICIENT_STAT_UPGRADES);
     }
@@ -3588,7 +3556,7 @@ mod Game {
             return CombatSpec {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),
-                level: U8IntoU16::into(item.get_greatness()),
+                level: item.get_greatness().into(),
                 specials: SpecialPowers {
                     special1: 0, special2: 0, special3: 0
                 }
@@ -3605,7 +3573,7 @@ mod Game {
             return CombatSpec {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),
-                level: U8IntoU16::into(item.get_greatness()),
+                level: item.get_greatness().into(),
                 specials: SpecialPowers {
                     special1: item_details.special1,
                     special2: item_details.special2,

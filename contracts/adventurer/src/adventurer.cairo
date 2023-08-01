@@ -14,7 +14,8 @@ use super::{
             STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
             MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, VITALITY_HEALTH_CAP_INCREASE, MAX_GOLD,
             MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS,
-            ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, ClassStatBoosts
+            ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, ClassStatBoosts,
+            MAX_BLOCK_COUNT
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
     }
@@ -1385,6 +1386,22 @@ impl ImplAdventurer of IAdventurer {
         } else {
             level
         }
+    }
+
+    // @notice: set_last_action sets the last action on the adventurer to the current block
+    // @dev: we only have 9 bits of storage for block numbers so we need to modulo the current block
+    // @dev: by 512 to ensure we don't overflow the storage
+    // @param self A reference to the Adventurer instance.
+    // @param current_block The current block number.
+
+    fn set_last_action(ref self: Adventurer, current_block: u64) {
+        // adventurer only has 9 bits of storage for block numbers
+        // the last_action on the adventurer is 0-511 which is based on 
+        // the current starknet block % 512. As such, when calculating the number Of
+        // idle blocks, we need to % 512 the current block
+        let current_block_modulo_512: u16 = (current_block % MAX_BLOCK_COUNT).try_into().unwrap();
+
+        self.last_action = current_block_modulo_512;
     }
 }
 
