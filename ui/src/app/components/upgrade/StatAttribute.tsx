@@ -32,11 +32,8 @@ export const StatAttribute = ({
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const gameData = new GameData();
   const [buttonClicked, setButtonClicked] = useState(false);
-  const prevAmountRef = useRef<number | undefined>();
+  const prevAmountRef = useRef<number | undefined>(0);
   const calls = useTransactionCartStore((state) => state.calls);
-  const upgradeCallExists = calls.some(
-    (call) => call.entrypoint === "buy_items_and_upgrade_stats"
-  );
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
@@ -53,17 +50,17 @@ export const StatAttribute = ({
           ];
           setUpgrades(newupgrades);
           upgradeHandler((upgrades = newupgrades));
-        } else if (amount < prevAmount) {
+        } else if (amount <= prevAmount) {
           const newupgrades = upgrades.filter(
             (i) => i !== getKeyFromValue(gameData.STATS, name) ?? ""
           );
           setUpgrades(newupgrades);
           upgradeHandler((upgrades = newupgrades));
+          console.log(newupgrades);
           if (newupgrades.length === 0) {
             removeEntrypointFromCalls("buy_items_and_upgrade_stats");
           }
         }
-
         setButtonClicked(false);
         // after useEffect has run, update the ref with the new value
       }

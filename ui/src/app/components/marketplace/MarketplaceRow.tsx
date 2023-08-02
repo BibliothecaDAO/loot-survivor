@@ -85,6 +85,13 @@ const MarketplaceRow = ({
     return ownedItems.some((ownedItem) => ownedItem.item == item);
   };
 
+  const checkPurchased = (item: string) => {
+    return purchaseItems.some(
+      (purchaseItem) =>
+        purchaseItem.item == getKeyFromValue(gameData.ITEMS, item)
+    );
+  };
+
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       switch (event.key) {
@@ -218,7 +225,8 @@ const MarketplaceRow = ({
               singlePurchaseExists(item.item ?? "") ||
               item.owner ||
               (isMobileDevice && activeMenu === index && isActive) ||
-              checkOwned(item.item ?? "")
+              checkOwned(item.item ?? "") ||
+              checkPurchased(item.item ?? "")
             }
             className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
           >
@@ -226,7 +234,8 @@ const MarketplaceRow = ({
               ? "Not Enough Gold"
               : checkTransacting(item.item ?? "") ||
                 singlePurchaseExists(item.item ?? "") ||
-                (isMobileDevice && activeMenu === index && isActive)
+                (isMobileDevice && activeMenu === index && isActive) ||
+                checkPurchased(item.item ?? "")
               ? "In Cart"
               : checkOwned(item.item ?? "")
               ? "Owned"

@@ -5,7 +5,7 @@ import { Button } from "../buttons/Button";
 import { MdClose } from "react-icons/md";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { useQueriesStore } from "../../hooks/useQueryStore";
+import { useQueriesStore, QueryKey } from "../../hooks/useQueryStore";
 import {
   processItemName,
   getItemPrice,
@@ -41,13 +41,15 @@ const TransactionCart: React.FC = () => {
   const { writeAsync } = useContractWrite({ calls });
   const [notification, setNotification] = useState<string[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
-  const [loadingQuery, setLoadingQuery] = useState("");
+  const [loadingQuery, setLoadingQuery] = useState<QueryKey | null>(null);
   const { data } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const equipItems = useUIStore((state) => state.equipItems);
   const setEquipItems = useUIStore((state) => state.setEquipItems);
+  const dropItems = useUIStore((state) => state.dropItems);
+  const setDropItems = useUIStore((state) => state.setDropItems);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const upgradeStats = useUIStore((state) => state.upgradeStats);
@@ -84,24 +86,23 @@ const TransactionCart: React.FC = () => {
     [items]
   );
 
-  const handleEquipItem = useCallback(
-    (call: any) => {
-      const item =
-        ownedItems.find(
-          (item: Item) =>
-            getKeyFromValue(gameData.ITEMS, item.item ?? "")?.toString() ===
-            (Array.isArray(call.calldata) && call.calldata[2])
-        ) ?? NullItem;
-      const itemName = processItemName(item);
-      setNotification((notifications) => [
-        ...notifications,
-        `You equipped ${itemName}!`,
-      ]);
-      setLoadingQuery("adventurerByIdQuery");
-      setLoadingMessage((messages) => [...messages, "Equipping"]);
-    },
-    [ownedItems]
-  );
+  const handleEquipItem = () => {
+    setNotification((notifications) => [
+      ...notifications,
+      `You equipped ${equipItems.length} items!`,
+    ]);
+    setLoadingQuery("adventurerByIdQuery");
+    setLoadingMessage((messages) => [...messages, "Equipping"]);
+  };
+
+  const handleDropItems = () => {
+    setNotification((notifications) => [
+      ...notifications,
+      `You dropped ${dropItems.length} items!`,
+    ]);
+    setLoadingQuery("itemsByAdventurerQuery");
+    setLoadingMessage((messages) => [...messages, "Dropping"]);
+  };
 
   const handlePurchaseHealth = useCallback((call: any) => {
     setNotification((notifications) => [
@@ -136,7 +137,10 @@ const TransactionCart: React.FC = () => {
           handleBuyItem(call);
           break;
         case "equip":
-          handleEquipItem(call);
+          handleEquipItem();
+          break;
+        case "drop":
+          handleDropItems();
           break;
         case "purchase_health":
           handlePurchaseHealth(call);
@@ -152,6 +156,7 @@ const TransactionCart: React.FC = () => {
     calls,
     handleBuyItem,
     handleEquipItem,
+    handleDropItems,
     handlePurchaseHealth,
     handleSlayIdleAdventurer,
   ]);
@@ -159,6 +164,14 @@ const TransactionCart: React.FC = () => {
   useEffect(() => {
     handleLoadData();
   }, [calls]);
+
+  const handleResetCalls = () => {
+    resetCalls();
+    setEquipItems([]);
+    setDropItems([]);
+    setPurchaseItems([]);
+    setUpgradeStats([]);
+  };
 
   return (
     <>
@@ -216,6 +229,34 @@ const TransactionCart: React.FC = () => {
                             </div>
                           ))}
                         </div>
+                      ) : call.entrypoint === "drop" ? (
+                        <div className="flex flex-col">
+                          {dropItems.map((item: string, index: number) => (
+                            <div className="flex flex-row" key={index}>
+                              <p>
+                                {`Drop ${getValueFromKey(
+                                  gameData.ITEMS,
+                                  parseInt(item)
+                                )}`}
+                              </p>
+                              <button
+                                onClick={() => {
+                                  clickPlay();
+                                  const newItems = dropItems.filter(
+                                    (i) => i !== item
+                                  );
+                                  setDropItems(newItems);
+                                  if (newItems.length === 0) {
+                                    removeFromCalls(call);
+                                  }
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <MdClose size={20} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
                       ) : call.entrypoint === "buy_items_and_upgrade_stats" ? (
                         <div className="flex flex-col">
                           {upgradeStats.map((stat: string, index: number) => (
@@ -232,7 +273,7 @@ const TransactionCart: React.FC = () => {
                                   const newStats = upgradeStats.filter(
                                     (i) => i !== stat
                                   );
-                                  setUpgradeStats(upgradeStats);
+                                  setUpgradeStats(newStats);
                                   if (newStats.length === 0) {
                                     removeFromCalls(call);
                                   }
@@ -264,9 +305,6 @@ const TransactionCart: React.FC = () => {
                                       (i) => i.item !== item.item
                                     );
                                     setPurchaseItems(newItems);
-                                    if (newItems.length === 0) {
-                                      removeFromCalls(call);
-                                    }
                                   }}
                                   className="text-red-500 hover:text-red-700"
                                 >
@@ -285,6 +323,15 @@ const TransactionCart: React.FC = () => {
                           clickPlay();
                           if (call.entrypoint === "equip") {
                             setEquipItems([]);
+                          }
+                          if (call.entrypoint === "drop") {
+                            setDropItems([]);
+                          }
+                          if (
+                            call.entrypoint === "buy_items_and_upgrade_stats"
+                          ) {
+                            setUpgradeStats([]);
+                            setPurchaseItems([]);
                           }
                         }}
                         className="text-red-500 hover:text-red-700"
@@ -342,7 +389,7 @@ const TransactionCart: React.FC = () => {
             >
               Submit all Transactions
             </Button>
-            <Button onClick={() => resetCalls()}>Clear Cart</Button>
+            <Button onClick={() => handleResetCalls()}>Clear Cart</Button>
           </div>
         </div>
       ) : null}

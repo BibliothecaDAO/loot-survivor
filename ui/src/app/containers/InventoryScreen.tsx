@@ -46,6 +46,8 @@ export default function InventoryScreen() {
   const transactingItemIds = (transactions[0]?.metadata as Metadata)?.items;
   const equipItems = useUIStore((state) => state.equipItems);
   const setEquipItems = useUIStore((state) => state.setEquipItems);
+  const dropItems = useUIStore((state) => state.dropItems);
+  const setDropItems = useUIStore((state) => state.setDropItems);
 
   const { data } = useQueriesStore();
 
@@ -74,6 +76,29 @@ export default function InventoryScreen() {
       removeEntrypointFromCalls(equipItemTx.entrypoint);
       addToCalls(equipItemTx);
       console.log(equipItemTx);
+    }
+  };
+
+  const handleDropItems = (item: string) => {
+    const newDropItems = [
+      ...dropItems,
+      getKeyFromValue(gameData.ITEMS, item) ?? "",
+    ];
+    setDropItems(newDropItems);
+    if (gameContract) {
+      const dropItemsTx = {
+        contractAddress: gameContract?.address,
+        entrypoint: "drop",
+        calldata: [
+          adventurer?.id?.toString() ?? "",
+          "0",
+          newDropItems.length.toString(),
+          ...newDropItems,
+        ],
+        metadata: `Dropping ${item}!`,
+      };
+      removeEntrypointFromCalls(dropItemsTx.entrypoint);
+      addToCalls(dropItemsTx);
     }
   };
 
@@ -309,6 +334,7 @@ export default function InventoryScreen() {
                           checkTransacting(item.item ?? "") ||
                           equipItems.includes(itemId)
                         }
+                        handleDrop={handleDropItems}
                       />
                       {/* <Button
                       onClick={() => handleAddEquipItem(item.item ?? "")}

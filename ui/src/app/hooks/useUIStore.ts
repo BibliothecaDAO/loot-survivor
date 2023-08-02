@@ -35,6 +35,8 @@ type State = {
   setDisplayCart: (value: boolean) => void;
   equipItems: string[];
   setEquipItems: (value: string[]) => void;
+  dropItems: string[];
+  setDropItems: (value: string[]) => void;
   purchaseItems: ItemPurchase[];
   setPurchaseItems: (value: ItemPurchase[]) => void;
   upgradeStats: string[];
@@ -70,6 +72,8 @@ const useUIStore = create<State>((set) => ({
   setDisplayCart: (value) => set({ displayCart: value }),
   equipItems: [],
   setEquipItems: (value) => set({ equipItems: value }),
+  dropItems: [],
+  setDropItems: (value) => set({ dropItems: value }),
   purchaseItems: [],
   setPurchaseItems: (value) => set({ purchaseItems: value }),
   upgradeStats: [],

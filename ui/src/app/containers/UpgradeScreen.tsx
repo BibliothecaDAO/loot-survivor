@@ -1,4 +1,4 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { useContracts } from "../hooks/useContracts";
 import {
   getKeyFromValue,
@@ -273,6 +273,12 @@ export default function UpgradeScreen() {
   const selectedCharisma = upgrades["Charisma"] ?? 0;
 
   const totalCharisma = (adventurer?.charisma ?? 0) + selectedCharisma;
+
+  useEffect(() => {
+    if (upgradeStats.length === 0) {
+      setUpgradeScreen(1);
+    }
+  }, [upgradeStats]);
 
   return (
     <>
