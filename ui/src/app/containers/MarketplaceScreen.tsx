@@ -18,6 +18,8 @@ export interface MarketplaceScreenProps {
   upgradeTotalCost: number;
   purchaseItems: ItemPurchase[];
   setPurchaseItems: (value: ItemPurchase[]) => void;
+  upgradeHandler: (upgrades?: any[], purchases?: any[]) => void;
+  totalCharisma: number;
 }
 /**
  * @container
@@ -28,6 +30,8 @@ export default function MarketplaceScreen({
   upgradeTotalCost,
   purchaseItems,
   setPurchaseItems,
+  upgradeHandler,
+  totalCharisma,
 }: MarketplaceScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -201,6 +205,8 @@ export default function MarketplaceScreen({
                       ownedItems={adventurerItems}
                       purchaseItems={purchaseItems}
                       setPurchaseItems={setPurchaseItems}
+                      upgradeHandler={upgradeHandler}
+                      totalCharisma={totalCharisma}
                       key={index}
                     />
                   ))
@@ -222,7 +228,7 @@ export default function MarketplaceScreen({
                     <p>{`Equip ${item.item} ?`}</p>
                     <Button
                       onClick={() => {
-                        setPurchaseItems([
+                        const newPurchases = [
                           ...purchaseItems,
                           {
                             item:
@@ -232,7 +238,9 @@ export default function MarketplaceScreen({
                               ) ?? "0",
                             equip: "1",
                           },
-                        ]);
+                        ];
+                        setPurchaseItems(newPurchases);
+                        upgradeHandler(undefined, newPurchases);
                         setShowEquipQ(null);
                         setActiveMenu(0);
                       }}
@@ -241,7 +249,7 @@ export default function MarketplaceScreen({
                     </Button>
                     <Button
                       onClick={() => {
-                        setPurchaseItems([
+                        const newPurchases = [
                           ...purchaseItems,
                           {
                             item:
@@ -251,7 +259,9 @@ export default function MarketplaceScreen({
                               ) ?? "0",
                             equip: "0",
                           },
-                        ]);
+                        ];
+                        setPurchaseItems(newPurchases);
+                        upgradeHandler(undefined, newPurchases);
                         setShowEquipQ(null);
                         setActiveMenu(0);
                       }}

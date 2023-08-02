@@ -26,6 +26,8 @@ interface MarketplaceRowProps {
   ownedItems: Item[];
   purchaseItems: ItemPurchase[];
   setPurchaseItems: (value: ItemPurchase[]) => void;
+  upgradeHandler: (upgrades?: any[], purchases?: any[]) => void;
+  totalCharisma: number;
 }
 
 const MarketplaceRow = ({
@@ -39,6 +41,8 @@ const MarketplaceRow = ({
   ownedItems,
   purchaseItems,
   setPurchaseItems,
+  upgradeHandler,
+  totalCharisma,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
   const { gameContract } = useContracts();
@@ -66,7 +70,7 @@ const MarketplaceRow = ({
   };
 
   const { tier, type, slot } = getItemData(item.item ?? "");
-  const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
+  const itemPrice = getItemPrice(tier, totalCharisma);
   const enoughGold = calculatedNewGold >= itemPrice;
 
   const checkTransacting = (item: string) => {
@@ -146,7 +150,7 @@ const MarketplaceRow = ({
         <div className="flex flex-row items-center justify-center">
           <CoinIcon className="w-4 h-4 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
           <p className="text-terminal-yellow">
-            {getItemPrice(tier, adventurer?.charisma ?? 0)}
+            {getItemPrice(tier, totalCharisma)}
           </p>
         </div>
       </td>
@@ -160,7 +164,7 @@ const MarketplaceRow = ({
                 size={"xs"}
                 variant={"ghost"}
                 onClick={() => {
-                  setPurchaseItems([
+                  const newPurchases = [
                     ...purchaseItems,
                     {
                       item:
@@ -168,7 +172,9 @@ const MarketplaceRow = ({
                         "0",
                       equip: "1",
                     },
-                  ]);
+                  ];
+                  setPurchaseItems(newPurchases);
+                  upgradeHandler(undefined, newPurchases);
                   setActiveMenu(null);
                 }}
               >
@@ -178,7 +184,7 @@ const MarketplaceRow = ({
                 size={"xs"}
                 variant={"ghost"}
                 onClick={() => {
-                  setPurchaseItems([
+                  const newPurchases = [
                     ...purchaseItems,
                     {
                       item:
@@ -186,7 +192,9 @@ const MarketplaceRow = ({
                         "0",
                       equip: "0",
                     },
-                  ]);
+                  ];
+                  setPurchaseItems(newPurchases);
+                  upgradeHandler(undefined, newPurchases);
                   setActiveMenu(null);
                 }}
               >

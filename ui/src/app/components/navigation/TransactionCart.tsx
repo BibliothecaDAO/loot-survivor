@@ -183,7 +183,11 @@ const TransactionCart: React.FC = () => {
                 <div className="flex flex-col gap-2">
                   {call && (
                     <div className="flex items-center justify-between text-xs sm:text-base">
-                      <p className="uppercase">{call.entrypoint}</p>
+                      <p className="uppercase">
+                        {call.entrypoint === "buy_items_and_upgrade_stats"
+                          ? "Upgrade"
+                          : call.entrypoint}
+                      </p>
                       {call.entrypoint === "equip" ? (
                         <div className="flex flex-col">
                           {equipItems.map((item: string, index: number) => (
@@ -242,12 +246,12 @@ const TransactionCart: React.FC = () => {
                           {purchaseItems.map(
                             (item: ItemPurchase, index: number) => (
                               <div className="flex flex-row gap-1" key={index}>
-                                <p>
+                                <p className="text-sm">
                                   {item.equip === "1"
                                     ? "Buy + Equip"
                                     : "Buy, Don't Equip"}
                                 </p>
-                                <p>
+                                <p className="text-sm">
                                   {getValueFromKey(
                                     gameData.ITEMS,
                                     parseInt(item.item)

@@ -50,6 +50,9 @@ export default function UpgradeScreen() {
   const { addTransaction } = useTransactionManager();
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
+  );
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
@@ -136,7 +139,7 @@ export default function UpgradeScreen() {
             setAmount={setUpgrades}
             upgrades={upgradeStats}
             setUpgrades={setUpgradeStats}
-            upgradeHandler={() => handleAddItemsAndTx()}
+            upgradeHandler={handleAddItemsAndTx}
             {...attribute}
           />
         )}
@@ -219,7 +222,8 @@ export default function UpgradeScreen() {
 
   const upgradeTotalCost = purchaseGoldAmount + itemsGoldSum;
 
-  const handleAddItemsAndTx = () => {
+  const handleAddItemsAndTx = (upgrades?: any[], items?: any[]) => {
+    removeEntrypointFromCalls("buy_items_and_upgrade_stats");
     const buyItemsAndUpgradeTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "buy_items_and_upgrade_stats",
@@ -227,13 +231,16 @@ export default function UpgradeScreen() {
         adventurer?.id?.toString() ?? "",
         "0",
         potionAmount,
-        purchaseItems.length.toString(),
-        ...purchaseItems.flatMap(Object.values),
-        upgradeStats.length.toString(),
-        ...upgradeStats,
+        items ? items.length.toString() : purchaseItems.length.toString(),
+        ...(items
+          ? items.flatMap(Object.values)
+          : purchaseItems.flatMap(Object.values)),
+        upgrades ? upgrades.length.toString() : upgradeStats.length.toString(),
+        ...(upgrades ? upgrades : upgradeStats),
       ],
       // calldata: [adventurer?.id?.toString() ?? "", "0", "0", "0", "0"],
     };
+    console.log(buyItemsAndUpgradeTx);
     addToCalls(buyItemsAndUpgradeTx);
   };
 
@@ -262,6 +269,10 @@ export default function UpgradeScreen() {
   const lastPage = isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2;
 
   const nextDisabled = upgradeStats.length === 0;
+
+  const selectedCharisma = upgrades["Charisma"] ?? 0;
+
+  const totalCharisma = (adventurer?.charisma ?? 0) + selectedCharisma;
 
   return (
     <>
@@ -315,10 +326,10 @@ export default function UpgradeScreen() {
                   </div>
                   <div className="flex flex-row items-center gap-3">
                     <span className="flex flex-row sm:gap-1">
-                      {`Charisma: ${adventurer?.charisma} -`}
+                      {`Charisma: ${totalCharisma} -`}
                       <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
                       <p className="text-terminal-yellow">
-                        {adventurer?.charisma && adventurer?.charisma * 2}
+                        {totalCharisma * 2}
                       </p>
                       <p className="hidden sm:block">{" to price"}</p>
                     </span>
@@ -369,6 +380,8 @@ export default function UpgradeScreen() {
                       upgradeTotalCost={upgradeTotalCost}
                       purchaseItems={purchaseItems}
                       setPurchaseItems={setPurchaseItems}
+                      upgradeHandler={handleAddItemsAndTx}
+                      totalCharisma={totalCharisma}
                     />
                   </div>
                 )}

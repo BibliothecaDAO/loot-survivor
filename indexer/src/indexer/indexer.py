@@ -35,7 +35,8 @@ from indexer.decoder import (
     decode_flee_failed_event,
     decode_flee_succeeded_event,
     decode_purchased_item_event,
-    decode_equip_item_event,
+    decode_equipped_item_event,
+    decode_dropped_item_event,
     decode_greatness_increased_event,
     decode_item_special_unlocked_event,
     decode_purchased_potion_event,
@@ -375,6 +376,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "FleeSucceeded",
             "PurchasedItem",
             "EquippedItem",
+            "DroppedItem",
             "GreatnessIncreased",
             "ItemSpecialUnlocked",
             "PurchasedPotion",
@@ -422,7 +424,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "FleeFailed": self.flee_failed,
                 "FleeSucceeded": self.flee_succeeded,
                 "PurchasedItem": self.purchased_item,
-                "EquippedItem": self.equip_item,
+                "EquippedItem": self.equipped_item,
+                "DroppedItem": self.dropped_item,
                 "GreatnessIncreased": self.greatness_increased,
                 "ItemSpecialUnlocked": self.item_special_unlocked,
                 "PurchasedPotion": self.purchased_potion,
@@ -1344,7 +1347,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         except StopIteration:
             print("No documents found in item")
 
-    async def equip_item(
+    async def equipped_item(
         self,
         info: Info,
         block_time: datetime,
@@ -1352,7 +1355,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         tx_hash: str,
         data: List[FieldElement],
     ):
-        ei = decode_equip_item_event.deserialize([felt.to_int(i) for i in data])
+        ei = decode_equipped_item_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(
             info, ei.adventurer_state_with_bag["adventurer_state"], block_time
         )
@@ -1363,7 +1366,44 @@ class LootSurvivorIndexer(StarkNetIndexer):
             ei.unequipped_item_id,
             block_time,
         )
-        print("- [equip item]", ei.equipped_item_id, "->", ei.unequipped_item_id)
+        print("- [equipped item]", ei.equipped_item_id, "->", ei.unequipped_item_id)
+
+    async def dropped_item(
+        self,
+        info: Info,
+        block_time: datetime,
+        _: FieldElement,
+        tx_hash: str,
+        data: List[FieldElement],
+    ):
+        di = decode_dropped_item_event.deserialize([felt.to_int(i) for i in data])
+        await update_adventurer_helper(
+            info, di.adventurer_state_with_bag["adventurer_state"], block_time
+        )
+        await info.storage.find_one_and_update(
+            "items",
+            {
+                "item": check_exists_int(di.item_id),
+                "adventurerId": check_exists_int(
+                    di.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+                ),
+                "owner": True,
+            },
+            {
+                "$set": {
+                    "equipped": False,
+                    "owner": False,
+                    "lastUpdatedTime": block_time,
+                    "timestamp": datetime.now(),
+                },
+            },
+        )
+        print(
+            "- [dropped item]",
+            di.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+            "->",
+            di.item_id,
+        )
 
     async def greatness_increased(
         self,

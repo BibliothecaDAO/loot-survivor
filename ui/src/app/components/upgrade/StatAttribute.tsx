@@ -15,7 +15,7 @@ interface StatAttributeProps {
   setAmount: (value: any) => void;
   upgrades: string[];
   setUpgrades: (values: string[]) => void;
-  upgradeHandler: () => void;
+  upgradeHandler: (value: any[]) => void;
 }
 
 export const StatAttribute = ({
@@ -42,25 +42,23 @@ export const StatAttribute = ({
   );
   const newUpgradeTotal = (adventurer?.statUpgrades ?? 0) - upgrades.length;
 
-  console.log(buttonClicked, prevAmountRef.current);
-
   useEffect(() => {
     if (buttonClicked) {
       if (prevAmountRef.current !== undefined) {
         const prevAmount = prevAmountRef.current;
         if (amount > prevAmount) {
-          setUpgrades([
+          const newupgrades = [
             ...upgrades,
             getKeyFromValue(gameData.STATS, name) ?? "",
-          ]);
-          if (!upgradeCallExists) {
-            upgradeHandler();
-          }
+          ];
+          setUpgrades(newupgrades);
+          upgradeHandler((upgrades = newupgrades));
         } else if (amount < prevAmount) {
           const newupgrades = upgrades.filter(
             (i) => i !== getKeyFromValue(gameData.STATS, name) ?? ""
           );
           setUpgrades(newupgrades);
+          upgradeHandler((upgrades = newupgrades));
           if (newupgrades.length === 0) {
             removeEntrypointFromCalls("buy_items_and_upgrade_stats");
           }
