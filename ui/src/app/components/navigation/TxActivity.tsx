@@ -198,6 +198,7 @@ export const TxActivity = () => {
       };
 
       const handleMulticall = async () => {
+        console.log(loadingQuery, isLoadingQueryUpdated);
         // await refetch("adventurerByIdQuery");
         await refetch("itemsByAdventurerQuery");
         await refetch("battlesByBeastQuery");

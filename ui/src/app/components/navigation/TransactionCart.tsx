@@ -173,6 +173,8 @@ const TransactionCart: React.FC = () => {
     setUpgradeStats([]);
   };
 
+  console.log(loadingQuery);
+
   return (
     <>
       {displayCart ? (
