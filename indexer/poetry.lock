@@ -158,7 +158,7 @@ trio = ["trio (>=0.16,<0.22)"]
 
 [[package]]
 name = "apibara"
-version = "0.7.3a0"
+version = "0.7.3a1"
 description = "Apibara cliend SDK. Stream and transform on-chain data with Python."
 optional = false
 python-versions = ">=3.8,<3.11"
@@ -175,8 +175,8 @@ indexer = ["pymongo (>=4.3.3,<5.0.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/apibara/python-sdk.git"
-reference = "v0.7.3a0"
-resolved_reference = "a2aeb6bdf023398e76d7d01fa36782953a24d44a"
+reference = "v0.7.3a1"
+resolved_reference = "9c6cdce4566c054d43de6e6f35648c4da0578c2d"
 
 [[package]]
 name = "asgiref"
@@ -1624,4 +1624,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">3.8,<3.10"
-content-hash = "01c4788d7704cd2ad157b4b43bf367b88ffdb7594d7dac2192a1009fd1532f05"
+content-hash = "248c634b75f0b9dc84c7993cbf77041ae9d4e82f3faff01685720177af8e5dbc"
