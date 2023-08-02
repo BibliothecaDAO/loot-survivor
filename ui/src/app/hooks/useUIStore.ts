@@ -13,7 +13,8 @@ export type ScreenPage =
   | "guide"
   | "settings"
   | "player"
-  | "wallet";
+  | "wallet"
+  | "tutorial";
 
 type State = {
   connected: boolean;

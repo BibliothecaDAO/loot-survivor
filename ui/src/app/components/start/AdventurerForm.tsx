@@ -22,12 +22,14 @@ import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { FormData, Adventurer } from "@/app/types";
 import { Button } from "../buttons/Button";
 import Image from "next/image";
+import { WalletTutorial } from "../tutorial/WalletTutorial";
 import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
 import WalletSelect from "../intro/WalletSelect";
 import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { MdClose } from "react-icons/md";
 
 export interface AdventurerFormProps {
   isActive: boolean;
@@ -70,15 +72,7 @@ export const AdventurerForm = ({
   const [step, setStep] = useState(1);
   const connected = useUIStore((state) => state.connected);
   const setConnected = useUIStore((state) => state.setConnected);
-  const [walletError, setWalletError] = useState("");
-
-  const handleConnectWallet = () => {
-    if (!account) {
-      setWalletError("Unable to connect wallet. Please try again.");
-    } else {
-      setWalletError("");
-    }
-  };
+  const [showWalletTutorial, setShowWalletTutorial] = useState(false);
 
   const walletConnectors = () =>
     connectors.filter((connector) => !connector.id.includes("0x"));
@@ -122,6 +116,10 @@ export const AdventurerForm = ({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isActive, selectedIndex, handleKeyDown]);
+
+  const handleButtonClick = () => {
+    setShowWalletTutorial(true);
+  };
 
   const getRandomNumber = (to: number) => {
     return (Math.floor(Math.random() * to) + 1).toString();
@@ -383,6 +381,19 @@ export const AdventurerForm = ({
     return (
       <>
         <div className="flex flex-col w-full h-full justify-center">
+          {showWalletTutorial && (
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-1/2 h-4/5 z-20 bg-terminal-black overflow-y-auto flex flex-col items-center gap-4">
+              {" "}
+              <Button
+                onClick={() => setShowWalletTutorial(false)}
+                className="text-red-500 hover:text-red-700"
+                variant={"ghost"}
+              >
+                <MdClose size={20} />
+              </Button>
+              <WalletTutorial />
+            </div>
+          )}
           <div className="flex flex-col h-full">
             <Image
               className="mx-auto border border-terminal-green absolute  object-fill py-4 px-8"
@@ -415,9 +426,11 @@ export const AdventurerForm = ({
                           Connect {connector.id}
                         </Button>
                       ))}
+                      <Button onClick={handleButtonClick}>
+                        I don&apos;t have a wallet
+                      </Button>
                     </div>
                   </div>
-                  {walletError && <p>{walletError}</p>}
                 </>
               ) : (
                 <>
