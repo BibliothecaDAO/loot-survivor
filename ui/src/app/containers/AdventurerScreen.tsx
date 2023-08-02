@@ -89,10 +89,6 @@ export default function AdventurerScreen() {
     },
   ];
 
-  // const isMobileDevice = useMediaQuery({
-  //   query: "(max-device-width: 480px)",
-  // });
-
   if (loading) {
     return <LootIconLoader />;
   }

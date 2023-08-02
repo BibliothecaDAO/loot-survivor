@@ -278,38 +278,67 @@ export const AdventurerForm = ({
     setStep((step) => Math.max(step - 1, 1));
   };
 
+  const classes = [
+    {
+      name: "Cleric",
+      description: "+3 Charisma +3 Vitality",
+      image: "/classes/cleric2.png",
+    },
+    {
+      name: "Scout",
+      description: "+2 Intelligence +2 Wisdom +2 Dexterity",
+      image: "/classes/scout2.png",
+    },
+    {
+      name: "Hunter",
+      description: "+3 Strength +3 Intelligence",
+      image: "/classes/hunter2.png",
+    },
+    {
+      name: "Warrior",
+      description:
+        "+1 Strength +1 Dexterity +1 Vitality +1 Intelligence +1 Wisdom +1 Charisma",
+      image: "/classes/warrior2.png",
+    },
+  ]
+
+  const weapons = [
+    {
+      name: "Book",
+      description: "Magic Weapon",
+      image: "/weapons/book.png",
+      icon: <MagicIcon />,
+    },
+    {
+      name: "Wand",
+      description: "Magic Weapon",
+      image: "/weapons/wand.png",
+      icon: <MagicIcon />,
+    },
+    {
+      name: "Short Sword",
+      description: "Blade Weapon",
+      image: "/weapons/shortsword.png",
+      icon: <BladeIcon />,
+    },
+    {
+      name: "Club",
+      description: "Bludgeon Weapon",
+      image: "/weapons/club.png",
+      icon: <BludgeonIcon />,
+    },
+  ]
+
   if (step === 1) {
     return (
       <>
         <div className="w-full sm:p-8">
           <h3 className="uppercase text-center">Choose your class</h3>
-          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:items-center sm:justify-between gap-5 sm:gap-20">
-            {[
-              {
-                name: "Cleric",
-                description: "+3 Charisma +3 Vitality",
-                image: "/classes/cleric2.png",
-              },
-              {
-                name: "Scout",
-                description: "+2 Intelligence +2 Wisdom +2 Dexterity",
-                image: "/classes/scout2.png",
-              },
-              {
-                name: "Hunter",
-                description: "+3 Strength +3 Intelligence",
-                image: "/classes/hunter2.png",
-              },
-              {
-                name: "Warrior",
-                description:
-                  "+1 Strength +1 Dexterity +1 Vitality +1 Intelligence +1 Wisdom +1 Charisma",
-                image: "/classes/warrior2.png",
-              },
-            ].map((classType) => (
+          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-5 sm:gap-20">
+            {classes.map((classType) => (
               <div
                 key={classType.name}
-                className="flex flex-col items-center h-full justify-between"
+                className="flex flex-col items-center h-full justify-between border sm:w-56 border-terminal-green"
               >
                 <div className="relative w-28 h-28 sm:w-56 sm:h-56">
                   <Image
@@ -341,34 +370,9 @@ export const AdventurerForm = ({
       <>
         <div className="w-full sm:p-8">
           <h3 className="uppercase text-center">Choose your weapon</h3>
-          <div className="grid grid-cols-2 sm:flex sm:flex-row sm:justify-between gap-5 sm:gap-20">
-            {[
-              {
-                name: "Book",
-                description: "Magic Weapon",
-                image: "/weapons/book.png",
-                icon: <MagicIcon />,
-              },
-              {
-                name: "Wand",
-                description: "Magic Weapon",
-                image: "/weapons/wand.png",
-                icon: <MagicIcon />,
-              },
-              {
-                name: "Short Sword",
-                description: "Blade Weapon",
-                image: "/weapons/shortsword.png",
-                icon: <BladeIcon />,
-              },
-              {
-                name: "Club",
-                description: "Bludgeon Weapon",
-                image: "/weapons/club.png",
-                icon: <BludgeonIcon />,
-              },
-            ].map((weapon) => (
-              <div key={weapon.name} className="flex flex-col items-center">
+          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-5 sm:gap-20">
+            {weapons.map((weapon) => (
+              <div key={weapon.name} className="flex flex-col items-center h-full justify-between border sm:w-56 border-terminal-green">
                 <div className="relative w-28 h-28 sm:w-56 sm:h-56">
                   <Image
                     src={weapon.image}
@@ -403,21 +407,21 @@ export const AdventurerForm = ({
   } else if (step === 3) {
     return (
       <>
-        <div className="w-full border border-terminal-green p-8 uppercase">
-          <h2>Enter adventurer name</h2>
+        <div className="w-full text-center sm:w-96 border border-terminal-green p-4 uppercase">
+          <h4>Enter adventurer name</h4>
           <div className="items-center flex flex-col gap-2">
             <input
               type="text"
               name="name"
               onChange={handleChange}
-              className="p-1 m-2 bg-terminal-black border border-terminal-green"
+              className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform"
               onKeyDown={handleKeyDown}
               maxLength={13}
             />
           </div>
           <div className="flex flex-row justify-between">
-            <Button onClick={handleBack}>Back</Button>
-            <Button onClick={() => handleNameEntry(formData.name)}>Next</Button>
+            <Button size={'xs'} onClick={handleBack}>Back</Button>
+            <Button size={'xs'}  onClick={() => handleNameEntry(formData.name)}>Next</Button>
           </div>
         </div>
       </>
@@ -441,7 +445,7 @@ export const AdventurerForm = ({
           )}
           <div className="flex flex-col h-full">
             <Image
-              className="mx-auto border border-terminal-green absolute  object-fill py-4 px-8"
+              className="mx-auto border border-terminal-green absolute  object-cover py-4 px-8"
               src={"/monsters/starterbeast.png"}
               alt="adventurer facing beast"
               fill
@@ -488,14 +492,14 @@ export const AdventurerForm = ({
                       size={"xl"}
                       disabled={!formFilled || !account}
                     >
-                      {formFilled ? "Spawn" : "Fill details"}
+                      {formFilled ? "Start Game!!" : "Fill details"}
                     </Button>
                   </form>
                 </>
               )}
             </div>
             <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">
-              <Button variant={"default"} onClick={handleBack}>
+              <Button size={'xs'} variant={"default"} onClick={handleBack}>
                 Back
               </Button>
             </div>

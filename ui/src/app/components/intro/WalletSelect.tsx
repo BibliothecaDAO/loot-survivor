@@ -5,9 +5,9 @@ import useUIStore from "../../hooks/useUIStore";
 import Image from "next/image";
 import { WalletTutorial } from "../tutorial/WalletTutorial";
 
-interface WalletSelectProps {}
+interface WalletSelectProps { }
 
-const WalletSelect = ({}: WalletSelectProps) => {
+const WalletSelect = ({ }: WalletSelectProps) => {
   const { connectors, connect } = useConnectors();
   const { account } = useAccount();
   const [screen, setScreen] = useState("wallet");
@@ -16,9 +16,9 @@ const WalletSelect = ({}: WalletSelectProps) => {
   useEffect(() => {
     if (
       (account as any)?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz" ||
+      "https://survivor-indexer.bibliothecadao.xyz" ||
       (account as any)?.provider?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz"
+      "https://survivor-indexer.bibliothecadao.xyz"
     ) {
       setConnected(true);
     }
@@ -29,6 +29,8 @@ const WalletSelect = ({}: WalletSelectProps) => {
   }, [account, setConnected]);
 
   console.log(connectors);
+
+  if (!connectors) return <div></div>;
 
   const arcadeConnectors = () =>
     connectors.filter((connector) => connector.id.includes("0x"));
@@ -45,15 +47,15 @@ const WalletSelect = ({}: WalletSelectProps) => {
                 className=" mx-auto p-10 animate-pulse"
                 src={"/monsters/balrog.png"}
                 alt="start"
-                width={500}
-                height={500}
+                width={200}
+                height={200}
               />
             </div>
             <div className="w-full text-center">
-              <h1 className="mb-10">The Hour for Survival Has Arrived</h1>
+              <h3 className="mb-10">Time to Survive</h3>
             </div>
 
-            <div className="flex flex-col w-1/2 gap-5 m-auto">
+            <div className="flex flex-col gap-5 m-auto">
               <Button onClick={() => setScreen("tutorial")}>
                 I don&apos;t have a wallet
               </Button>
@@ -66,16 +68,19 @@ const WalletSelect = ({}: WalletSelectProps) => {
                   Connect {connector.id}
                 </Button>
               ))}
-              <h5 className="text-center">Arcade Accounts</h5>
-              {arcadeConnectors().map((connector, index) => (
-                <Button
-                  onClick={() => connect(connector)}
-                  key={index}
-                  className="w-full"
-                >
-                  Connect {connector.id}
-                </Button>
-              ))}
+              {arcadeConnectors().length ? (<>
+                <h5 className="text-center">Arcade Accounts</h5>
+                {arcadeConnectors().map((connector, index) => (
+                  <Button
+                    onClick={() => connect(connector)}
+                    key={index}
+                    className="w-full"
+                  >
+                    Connect {connector.id}
+                  </Button>
+                ))}
+              </>): ''}
+
             </div>
           </>
         ) : (
