@@ -52,6 +52,12 @@ export const AdventurerForm = ({
     name: "",
     homeRealmId: "",
     class: "",
+    startingStrength: "0",
+    startingDexterity: "0",
+    startingVitality: "0",
+    startingIntelligence: "0",
+    startingWisdom: "0",
+    startingCharsima: "0",
   });
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const setScreen = useUIStore((state) => state.setScreen);
@@ -176,6 +182,12 @@ export const AdventurerForm = ({
         getRandomNumber(8000),
         getKeyFromValue(gameData.CLASSES, formData.class) ?? "",
         "1",
+        formData.startingStrength,
+        formData.startingDexterity,
+        formData.startingVitality,
+        formData.startingIntelligence,
+        formData.startingWisdom,
+        formData.startingCharsima,
       ],
     };
 
@@ -205,7 +217,7 @@ export const AdventurerForm = ({
   const [formFilled, setFormFilled] = useState(false);
 
   useEffect(() => {
-    if (formData.class && formData.name && formData.startingWeapon) {
+    if (formData.startingStrength && formData.name && formData.startingWeapon) {
       setFormFilled(true);
     } else {
       setFormFilled(false);
@@ -213,7 +225,40 @@ export const AdventurerForm = ({
   }, [formData]);
 
   const handleClassSelection = (classType: string) => {
-    setFormData({ ...formData, class: classType });
+    if (classType === "Warrior") {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingStrength: "1",
+        startingDexterity: "1",
+        startingVitality: "1",
+        startingIntelligence: "1",
+        startingWisdom: "1",
+        startingCharsima: "1",
+      });
+    } else if (classType === "Hunter") {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingStrength: "3",
+        startingIntelligence: "3",
+      });
+    } else if (classType === "Cleric") {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingVitality: "3",
+        startingCharsima: "3",
+      });
+    } else {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingDexterity: "2",
+        startingWisdom: "2",
+        startingIntelligence: "2",
+      });
+    }
     setStep(step + 1);
   };
 

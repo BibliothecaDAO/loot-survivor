@@ -9,7 +9,7 @@ import {
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
-import { Metadata, Item, Adventurer, Call } from "../../types";
+import { Metadata, Item, Adventurer, Call, ItemPurchase } from "../../types";
 import { CoinIcon } from "../icons/Icons";
 import EfficacyDisplay from "../icons/EfficacyIcon";
 import { GameData } from "../GameData";
@@ -24,6 +24,10 @@ interface MarketplaceRowProps {
   setActiveMenu: (value: number | null) => void;
   calculatedNewGold: number;
   ownedItems: Item[];
+  purchaseItems: ItemPurchase[];
+  setPurchaseItems: (value: ItemPurchase[]) => void;
+  upgradeHandler: (upgrades?: any[], purchases?: any[]) => void;
+  totalCharisma: number;
 }
 
 const MarketplaceRow = ({
@@ -35,6 +39,10 @@ const MarketplaceRow = ({
   setActiveMenu,
   calculatedNewGold,
   ownedItems,
+  purchaseItems,
+  setPurchaseItems,
+  upgradeHandler,
+  totalCharisma,
 }: MarketplaceRowProps) => {
   const [selectedButton, setSelectedButton] = useState<number>(0);
   const { gameContract } = useContracts();
@@ -50,20 +58,19 @@ const MarketplaceRow = ({
   const gameData = new GameData();
 
   const singlePurchaseExists = (item: string) => {
-    return calls.some(
-      (call: Call) =>
-        call.entrypoint == "buy_item" &&
-        Array.isArray(call.calldata) &&
-        call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
+    // return calls.some(
+    //   (call: Call) =>
+    //     call.entrypoint == "buy_items_and_upgrade_stats" &&
+    //     Array.isArray(call.calldata) &&
+    //     call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
+    // );
+    return purchaseItems.some(
+      (purchasingItem: ItemPurchase) => purchasingItem.item == item
     );
   };
 
-  const purchaseExists = () => {
-    return calls.some((call: Call) => call.entrypoint == "buy_item");
-  };
-
   const { tier, type, slot } = getItemData(item.item ?? "");
-  const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
+  const itemPrice = getItemPrice(tier, totalCharisma);
   const enoughGold = calculatedNewGold >= itemPrice;
 
   const checkTransacting = (item: string) => {
@@ -76,6 +83,13 @@ const MarketplaceRow = ({
 
   const checkOwned = (item: string) => {
     return ownedItems.some((ownedItem) => ownedItem.item == item);
+  };
+
+  const checkPurchased = (item: string) => {
+    return purchaseItems.some(
+      (purchaseItem) =>
+        purchaseItem.item == getKeyFromValue(gameData.ITEMS, item)
+    );
   };
 
   const handleKeyDown = useCallback(
@@ -115,27 +129,6 @@ const MarketplaceRow = ({
     }
   }, [isActive, handleKeyDown]);
 
-  const handlePurchase = (item: string, tier: number, equip: boolean) => {
-    if (gameContract) {
-      const gameData = new GameData();
-      const PurchaseTx = {
-        contractAddress: gameContract?.address,
-        entrypoint: "buy_item",
-        calldata: [
-          adventurer?.id?.toString() ?? "",
-          "0",
-          getKeyFromValue(gameData.ITEMS, item)?.toString() ?? "",
-          equip ? "1" : "0",
-        ],
-        metadata: `Purchasing ${item} for ${getItemPrice(
-          tier,
-          adventurer?.charisma ?? 0
-        )} gold`,
-      };
-      addToCalls(PurchaseTx);
-    }
-  };
-
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
@@ -164,7 +157,7 @@ const MarketplaceRow = ({
         <div className="flex flex-row items-center justify-center">
           <CoinIcon className="w-4 h-4 sm:w-8 sm:h-8 fill-current text-terminal-yellow" />
           <p className="text-terminal-yellow">
-            {getItemPrice(tier, adventurer?.charisma ?? 0)}
+            {getItemPrice(tier, totalCharisma)}
           </p>
         </div>
       </td>
@@ -178,9 +171,18 @@ const MarketplaceRow = ({
                 size={"xs"}
                 variant={"ghost"}
                 onClick={() => {
-                  handlePurchase(item.item ?? "", tier, true);
+                  const newPurchases = [
+                    ...purchaseItems,
+                    {
+                      item:
+                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
+                        "0",
+                      equip: "1",
+                    },
+                  ];
+                  setPurchaseItems(newPurchases);
+                  upgradeHandler(undefined, newPurchases);
                   setActiveMenu(null);
-                  // setPurchasedItem(true);
                 }}
               >
                 Yes
@@ -189,9 +191,18 @@ const MarketplaceRow = ({
                 size={"xs"}
                 variant={"ghost"}
                 onClick={() => {
-                  handlePurchase(item.item ?? "", tier, false);
+                  const newPurchases = [
+                    ...purchaseItems,
+                    {
+                      item:
+                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
+                        "0",
+                      equip: "0",
+                    },
+                  ];
+                  setPurchaseItems(newPurchases);
+                  upgradeHandler(undefined, newPurchases);
                   setActiveMenu(null);
-                  // setPurchasedItem(true);
                 }}
               >
                 No
@@ -214,7 +225,8 @@ const MarketplaceRow = ({
               singlePurchaseExists(item.item ?? "") ||
               item.owner ||
               (isMobileDevice && activeMenu === index && isActive) ||
-              checkOwned(item.item ?? "")
+              checkOwned(item.item ?? "") ||
+              checkPurchased(item.item ?? "")
             }
             className={checkTransacting(item.item ?? "") ? "bg-white" : ""}
           >
@@ -222,7 +234,8 @@ const MarketplaceRow = ({
               ? "Not Enough Gold"
               : checkTransacting(item.item ?? "") ||
                 singlePurchaseExists(item.item ?? "") ||
-                (isMobileDevice && activeMenu === index && isActive)
+                (isMobileDevice && activeMenu === index && isActive) ||
+                checkPurchased(item.item ?? "")
               ? "In Cart"
               : checkOwned(item.item ?? "")
               ? "Owned"

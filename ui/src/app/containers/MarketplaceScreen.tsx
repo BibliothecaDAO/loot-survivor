@@ -5,7 +5,7 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import LootIconLoader from "../components/icons/Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import { Item, NullItem } from "../types";
+import { Item, ItemPurchase, NullItem } from "../types";
 import { getItemData, getItemPrice, getKeyFromValue } from "../lib/utils";
 import PurchaseHealth from "../components/actions/PurchaseHealth";
 import { useMediaQuery } from "react-responsive";
@@ -16,6 +16,10 @@ import useTransactionCartStore from "../hooks/useTransactionCartStore";
 
 export interface MarketplaceScreenProps {
   upgradeTotalCost: number;
+  purchaseItems: ItemPurchase[];
+  setPurchaseItems: (value: ItemPurchase[]) => void;
+  upgradeHandler: (upgrades?: any[], purchases?: any[]) => void;
+  totalCharisma: number;
 }
 /**
  * @container
@@ -24,10 +28,12 @@ export interface MarketplaceScreenProps {
 
 export default function MarketplaceScreen({
   upgradeTotalCost,
+  purchaseItems,
+  setPurchaseItems,
+  upgradeHandler,
+  totalCharisma,
 }: MarketplaceScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const { gameContract } = useContracts();
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
@@ -36,6 +42,8 @@ export default function MarketplaceScreen({
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const { isLoading } = useQueriesStore();
   const [showEquipQ, setShowEquipQ] = useState<number | null>(null);
+
+  const gameData = new GameData();
 
   const marketLatestItems = useQueriesStore(
     (state) => state.data.latestMarketItemsQuery?.items || []
@@ -153,27 +161,6 @@ export default function MarketplaceScreen({
     ? adventurer?.gold - upgradeTotalCost
     : 0;
 
-  const handlePurchase = (item: string, tier: number, equip: boolean) => {
-    if (gameContract) {
-      const gameData = new GameData();
-      const PurchaseTx = {
-        contractAddress: gameContract?.address,
-        entrypoint: "buy_item",
-        calldata: [
-          adventurer?.id?.toString() ?? "",
-          "0",
-          getKeyFromValue(gameData.ITEMS, item)?.toString() ?? "",
-          equip ? "1" : "0",
-        ],
-        metadata: `Purchasing ${item} for ${getItemPrice(
-          tier,
-          adventurer?.charisma ?? 0
-        )} gold`,
-      };
-      addToCalls(PurchaseTx);
-    }
-  };
-
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
   });
@@ -216,6 +203,10 @@ export default function MarketplaceScreen({
                       setActiveMenu={setShowEquipQ}
                       calculatedNewGold={calculatedNewGold}
                       ownedItems={adventurerItems}
+                      purchaseItems={purchaseItems}
+                      setPurchaseItems={setPurchaseItems}
+                      upgradeHandler={upgradeHandler}
+                      totalCharisma={totalCharisma}
                       key={index}
                     />
                   ))
@@ -237,7 +228,19 @@ export default function MarketplaceScreen({
                     <p>{`Equip ${item.item} ?`}</p>
                     <Button
                       onClick={() => {
-                        handlePurchase(item.item ?? "", tier, true);
+                        const newPurchases = [
+                          ...purchaseItems,
+                          {
+                            item:
+                              getKeyFromValue(
+                                gameData.ITEMS,
+                                item?.item ?? ""
+                              ) ?? "0",
+                            equip: "1",
+                          },
+                        ];
+                        setPurchaseItems(newPurchases);
+                        upgradeHandler(undefined, newPurchases);
                         setShowEquipQ(null);
                         setActiveMenu(0);
                       }}
@@ -246,7 +249,19 @@ export default function MarketplaceScreen({
                     </Button>
                     <Button
                       onClick={() => {
-                        handlePurchase(item.item ?? "", tier, false);
+                        const newPurchases = [
+                          ...purchaseItems,
+                          {
+                            item:
+                              getKeyFromValue(
+                                gameData.ITEMS,
+                                item?.item ?? ""
+                              ) ?? "0",
+                            equip: "0",
+                          },
+                        ];
+                        setPurchaseItems(newPurchases);
+                        upgradeHandler(undefined, newPurchases);
                         setShowEquipQ(null);
                         setActiveMenu(0);
                       }}

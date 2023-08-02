@@ -11,14 +11,14 @@ interface NavItem {
 }
 
 const mainUpgradeNav: NavItem[] = [
-  { label: "Loot Fountain", section: 1 },
-  { label: "Upgrade Stat", section: 2 },
+  { label: "Upgrade Stat", section: 1 },
+  { label: "Loot Fountain", section: 2 },
 ];
 
 const mobileUpgradeNav = [
-  { label: "Potions", section: 1 },
-  { label: "Loot Fountain", section: 2 },
-  { label: "Upgrade Stat", section: 3 },
+  { label: "Upgrade Stat", section: 1 },
+  { label: "Potions", section: 2 },
+  { label: "Loot Fountain", section: 3 },
 ];
 
 export const UpgradeNav = ({ activeSection }: UpgradeNavProps) => {

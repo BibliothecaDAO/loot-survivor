@@ -47,6 +47,20 @@ export default function Template({ children }: { children: React.ReactNode }) {
                 return [...filteredExisting, ...incoming];
               },
             },
+            items: {
+              merge(existing = [], incoming) {
+                const incomingKeys = new Set(
+                  incoming.map(
+                    (i: any) => `${i.adventurerId}-${i.item}-${i.owner}`
+                  )
+                );
+                const filteredExisting = existing.filter(
+                  (e: any) =>
+                    !incomingKeys.has(`${e.adventurerId}-${e.item}-${e.owner}`)
+                );
+                return [...filteredExisting, ...incoming];
+              },
+            },
           },
         },
       },

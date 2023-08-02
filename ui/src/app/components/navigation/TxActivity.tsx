@@ -70,8 +70,6 @@ export const TxActivity = () => {
     query: "(max-device-width: 480px)",
   });
 
-  console.log(queryData.adventurerByIdQuery?.adventurers[0]);
-
   const setDeathNotification = (
     type: string,
     notificationData: any,
@@ -200,6 +198,7 @@ export const TxActivity = () => {
       };
 
       const handleMulticall = async () => {
+        console.log(loadingQuery, isLoadingQueryUpdated);
         // await refetch("adventurerByIdQuery");
         await refetch("itemsByAdventurerQuery");
         await refetch("battlesByBeastQuery");
@@ -229,8 +228,6 @@ export const TxActivity = () => {
 
       console.log(type);
 
-      // resetData();
-      // await refetch();
       try {
         switch (type) {
           case "Attack":
