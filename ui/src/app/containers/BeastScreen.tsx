@@ -164,10 +164,10 @@ export default function BeastScreen() {
       id: 1,
       label: "SINGLE",
       action: async () => {
-        addToCalls(attackTx);
+        addToCalls(fleeTx);
         startLoading(
-          "Attack",
-          "Attacking",
+          "Flee",
+          "Fleeing",
           "battlesByTxHashQuery",
           adventurer?.id,
           { beast: beastData }
@@ -178,11 +178,12 @@ export default function BeastScreen() {
             addTransaction({
               hash: tx.transaction_hash,
               metadata: {
-                method: `Attack ${beastData.beast}`,
+                method: `Flee ${beastData.beast}`,
               },
             });
           }
         });
+        resetDataUpdated("battlesByTxHashQuery");
       },
       disabled:
         adventurer?.beastHealth == undefined ||
