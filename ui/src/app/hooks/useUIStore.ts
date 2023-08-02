@@ -3,7 +3,6 @@ import { create } from "zustand";
 export type ScreenPage =
   | "start"
   | "play"
-  | "play"
   | "market"
   | "inventory"
   | "beast"
@@ -13,7 +12,8 @@ export type ScreenPage =
   | "encounters"
   | "guide"
   | "settings"
-  | "player";
+  | "player"
+  | "wallet";
 
 type State = {
   connected: boolean;
@@ -42,6 +42,7 @@ type State = {
   setInventorySelected: (value: number) => void;
   arcadeDialog: boolean;
   showArcadeDialog: (value: boolean) => void;
+  
 };
 
 const useUIStore = create<State>((set) => ({
