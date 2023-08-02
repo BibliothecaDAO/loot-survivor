@@ -1644,6 +1644,7 @@ async def run_indexer(
             token=AUTH_TOKEN,
         ),
         reset_state=restart,
+        _reconnect_to_avoid_disconnection=5,
     )
 
     config = Config(network, game, start_block)
