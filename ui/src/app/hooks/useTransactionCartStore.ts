@@ -8,6 +8,7 @@ type TransactionCartState = {
   calls: Call[];
   addToCalls: (value: Call) => void;
   removeFromCalls: (value: Call) => void;
+  removeEntrypointFromCalls: (value: string) => void;
   resetCalls: () => void;
 };
 
@@ -26,6 +27,12 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
           call.calldata !== tx.calldata ||
           call.metadata !== tx.metadata
       ),
+    }));
+  };
+
+  const removeEntrypointFromCalls = (entrypoint: string) => {
+    set((state) => ({
+      calls: state.calls.filter((call: Call) => call.entrypoint !== entrypoint),
     }));
   };
 
@@ -51,6 +58,7 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
     calls: [],
     addToCalls,
     removeFromCalls,
+    removeEntrypointFromCalls,
     resetCalls,
   };
 });

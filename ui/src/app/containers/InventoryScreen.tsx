@@ -31,11 +31,12 @@ export default function InventoryScreen() {
   const formatAddress = account ? account.address : "0x0";
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
+  );
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
-  const loading = useLoadingStore((state) => state.loading);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
   const inventorySelected = useUIStore((state) => state.inventorySelected);
   const setInventorySelected = useUIStore(
     (state) => state.setInventorySelected
@@ -43,6 +44,10 @@ export default function InventoryScreen() {
   const { hashes, transactions } = useTransactionManager();
   const { data: txData } = useWaitForTransaction({ hash: hashes[0] });
   const transactingItemIds = (transactions[0]?.metadata as Metadata)?.items;
+  const equipItems = useUIStore((state) => state.equipItems);
+  const setEquipItems = useUIStore((state) => state.setEquipItems);
+  const dropItems = useUIStore((state) => state.dropItems);
+  const setDropItems = useUIStore((state) => state.setDropItems);
 
   const { data } = useQueriesStore();
 
@@ -50,16 +55,12 @@ export default function InventoryScreen() {
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  // useCustomQuery(
-  //   "adventurerByIdQuery",
-  //   getAdventurerById,
-  //   {
-  //     id: adventurer?.id ?? 0,
-  //   },
-  //   txAccepted
-  // );
-
-  const handleAddEquipItem = (item: string) => {
+  const handleEquipItems = (item: string) => {
+    const newEquipItems = [
+      ...equipItems,
+      getKeyFromValue(gameData.ITEMS, item) ?? "",
+    ];
+    setEquipItems(newEquipItems);
     if (gameContract && formatAddress) {
       const equipItemTx = {
         contractAddress: gameContract?.address,
@@ -67,11 +68,37 @@ export default function InventoryScreen() {
         calldata: [
           adventurer?.id?.toString() ?? "",
           "0",
-          getKeyFromValue(gameData.ITEMS, item) ?? "",
+          newEquipItems.length.toString(),
+          ...newEquipItems,
         ],
         metadata: `Equipping ${item}!`,
       };
+      removeEntrypointFromCalls(equipItemTx.entrypoint);
       addToCalls(equipItemTx);
+      console.log(equipItemTx);
+    }
+  };
+
+  const handleDropItems = (item: string) => {
+    const newDropItems = [
+      ...dropItems,
+      getKeyFromValue(gameData.ITEMS, item) ?? "",
+    ];
+    setDropItems(newDropItems);
+    if (gameContract) {
+      const dropItemsTx = {
+        contractAddress: gameContract?.address,
+        entrypoint: "drop",
+        calldata: [
+          adventurer?.id?.toString() ?? "",
+          "0",
+          newDropItems.length.toString(),
+          ...newDropItems,
+        ],
+        metadata: `Dropping ${item}!`,
+      };
+      removeEntrypointFromCalls(dropItemsTx.entrypoint);
+      addToCalls(dropItemsTx);
     }
   };
 
@@ -165,6 +192,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.weapon}
           icon={<LootIcon type="bag" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Weapon"}
@@ -176,6 +205,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.weapon}
           icon={<LootIcon type="weapon" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Chest Armor"}
@@ -187,6 +218,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.chest}
           icon={<LootIcon type="chest" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Head Armor"}
@@ -198,6 +231,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.head}
           icon={<LootIcon type="head" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Hand Armor"}
@@ -209,6 +244,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.hand}
           icon={<LootIcon type="hand" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Waist Armor"}
@@ -220,6 +257,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.waist}
           icon={<LootIcon type="waist" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Foot Armor"}
@@ -231,6 +270,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.foot}
           icon={<LootIcon type="foot" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Neck Jewelry"}
@@ -242,6 +283,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.neck}
           icon={<LootIcon type="neck" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
         <InventoryRow
           title={"Ring Jewelry"}
@@ -253,6 +296,8 @@ export default function InventoryScreen() {
           setSelected={setInventorySelected}
           equippedItem={adventurer?.ring}
           icon={<LootIcon type="ring" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
         />
       </div>
       {adventurer?.id ? (
@@ -270,20 +315,28 @@ export default function InventoryScreen() {
             </div>
             <div className="flex flex-col overflow-y-auto h-[450px] sm:h-[550px]">
               {selectedItems.length ? (
-                selectedItems.map((item: Item, index: number) => (
-                  <div className="w-full" key={index}>
-                    <ItemDisplay
-                      item={item}
-                      inventory={true}
-                      equip={() => handleAddEquipItem(item.item ?? "")}
-                      equipped={item.equipped}
-                      disabled={
-                        singleEquipExists(item.item ?? "") ||
-                        item.equipped ||
-                        checkTransacting(item.item ?? "")
-                      }
-                    />
-                    {/* <Button
+                selectedItems.map((item: Item, index: number) => {
+                  const itemId =
+                    getKeyFromValue(gameData.ITEMS, item?.item ?? "") ?? "";
+                  return (
+                    <div className="w-full" key={index}>
+                      <ItemDisplay
+                        item={item}
+                        inventory={true}
+                        equip={() => {
+                          setEquipItems([...equipItems, itemId]);
+                          handleEquipItems(item.item ?? "");
+                        }}
+                        equipped={item.equipped}
+                        disabled={
+                          singleEquipExists(item.item ?? "") ||
+                          item.equipped ||
+                          checkTransacting(item.item ?? "") ||
+                          equipItems.includes(itemId)
+                        }
+                        handleDrop={handleDropItems}
+                      />
+                      {/* <Button
                       onClick={() => handleAddEquipItem(item.item ?? "")}
                       disabled={
                         singleEquipExists(item.item ?? "") ||
@@ -294,8 +347,9 @@ export default function InventoryScreen() {
                     >
                       {item.equipped ? "Eqipped" : "Equip"}
                     </Button> */}
-                  </div>
-                ))
+                    </div>
+                  );
+                })
               ) : (
                 <p className="sm:text-xl">You have no {selected} Loot</p>
               )}

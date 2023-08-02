@@ -70,8 +70,6 @@ export const TxActivity = () => {
     query: "(max-device-width: 480px)",
   });
 
-  console.log(queryData.adventurerByIdQuery?.adventurers[0]);
-
   const setDeathNotification = (
     type: string,
     notificationData: any,
@@ -167,17 +165,17 @@ export const TxActivity = () => {
         await refetch("latestMarketItemsQuery");
         const killedByObstacle =
           queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
-            "Obstacle" &&
+          "Obstacle" &&
           queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-            0;
+          0;
         const killedByPenalty =
           !queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType &&
           queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-            0;
+          0;
         const killedByAmbush =
           queryData.discoveryByTxHashQuery.discoveries[0]?.ambushed &&
           queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-            0;
+          0;
         console.log(killedByObstacle, killedByPenalty, killedByAmbush);
         if (killedByObstacle || killedByPenalty || killedByAmbush) {
           setDeathMessage(
@@ -200,6 +198,7 @@ export const TxActivity = () => {
       };
 
       const handleMulticall = async () => {
+        console.log(loadingQuery, isLoadingQueryUpdated);
         // await refetch("adventurerByIdQuery");
         await refetch("itemsByAdventurerQuery");
         await refetch("battlesByBeastQuery");
@@ -229,8 +228,6 @@ export const TxActivity = () => {
 
       console.log(type);
 
-      // resetData();
-      // await refetch();
       try {
         switch (type) {
           case "Attack":
@@ -297,17 +294,7 @@ export const TxActivity = () => {
     <>
       {loading ? (
         <div className="flex flex-row absolute top-3 sm:top-0 sm:relative items-center gap-5 justify-between text-xs sm:text-base">
-          <div className="flex flex-row items-center w-40 sm:w-48 loading-ellipsis">
-            <LootIconLoader
-              className="self-center mr-3"
-              size={isMobileDevice ? "w-4" : "w-5"}
-            />
-            {hash
-              ? pendingArray
-                ? (pendingMessage as string[])[messageIndex]
-                : pendingMessage
-              : "Confirming Tx"}
-          </div>
+
           {hash && (
             <div className="flex flex-row gap-2">
               {!isMobileDevice && "Hash:"}
@@ -320,6 +307,17 @@ export const TxActivity = () => {
               </a>
             </div>
           )}
+          <div className="flex flex-row items-center w-40 sm:w-48 loading-ellipsis">
+            <LootIconLoader
+              className="self-center mr-3"
+              size={isMobileDevice ? "w-4" : "w-5"}
+            />
+            {hash
+              ? pendingArray
+                ? (pendingMessage as string[])[messageIndex]
+                : pendingMessage
+              : "Confirming Tx"}
+          </div>
           {data && hash && (
             <div>
               {!isMobileDevice && "Status:"} {data.status}

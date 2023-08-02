@@ -6,7 +6,7 @@ import ItemBar from "./ItemBar";
 import { GameData } from "../GameData";
 import { getKeyFromValue, getValueFromKey } from "../../lib/utils";
 import { useMediaQuery } from "react-responsive";
-import { SwapIcon } from "../icons/Icons";
+import { SwapIcon, DownArrowIcon } from "../icons/Icons";
 import { Button } from "../buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 
@@ -17,6 +17,7 @@ interface ItemDisplayProps {
   equip?: () => void;
   equipped?: boolean;
   disabled?: boolean;
+  handleDrop: (value: string) => void;
 }
 
 export const ItemDisplay = ({
@@ -26,6 +27,7 @@ export const ItemDisplay = ({
   equip,
   equipped,
   disabled,
+  handleDrop,
 }: ItemDisplayProps) => {
   const itemType = item?.item;
 
@@ -46,6 +48,11 @@ export const ItemDisplay = ({
   const setInventorySelected = useUIStore(
     (state) => state.setInventorySelected
   );
+  const dropItems = useUIStore((state) => state.dropItems);
+
+  const checkDropping = (item: string) => {
+    return dropItems.includes(getKeyFromValue(gameData.ITEMS, item) ?? "");
+  };
 
   return (
     <div
@@ -86,38 +93,49 @@ export const ItemDisplay = ({
                       : ""}
                   </span>
                 </span>
-                {(screen == "play" ||
-                  screen == "upgrade" ||
-                  screen == "player") && (
+                <span className="flex flex-row items-center gap-1">
+                  {(screen == "play" ||
+                    screen == "upgrade" ||
+                    screen == "player") && (
+                    <Button
+                      variant={"contrast"}
+                      size={"xxs"}
+                      className="p-1"
+                      onClick={() => {
+                        setScreen("inventory");
+                        setInventorySelected(
+                          parseInt(
+                            getKeyFromValue(gameData.SLOTS, slot ?? "") ?? ""
+                          ) ?? 0
+                        );
+                      }}
+                    >
+                      <SwapIcon className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {inventory && (
+                    <Button
+                      className="sm:h-6 sm:p-2"
+                      variant={"contrast"}
+                      size={isMobileDevice ? "xxs" : "sm"}
+                      onClick={equip}
+                      disabled={disabled}
+                    >
+                      <p className="text-xxs sm:text-sm">
+                        {equipped ? "Equipped" : "Equip"}
+                      </p>
+                    </Button>
+                  )}
                   <Button
                     variant={"contrast"}
                     size={"xxs"}
                     className="p-1"
-                    onClick={() => {
-                      setScreen("inventory");
-                      setInventorySelected(
-                        parseInt(
-                          getKeyFromValue(gameData.SLOTS, slot ?? "") ?? ""
-                        ) ?? 0
-                      );
-                    }}
+                    onClick={() => handleDrop(item.item ?? "")}
+                    disabled={checkDropping(item.item ?? "")}
                   >
-                    <SwapIcon className="w-4 h-4" />
+                    <DownArrowIcon className="w-4 h-4" />
                   </Button>
-                )}
-                {inventory && (
-                  <Button
-                    className="sm:h-6 sm:p-2"
-                    variant={"contrast"}
-                    size={isMobileDevice ? "xxs" : "sm"}
-                    onClick={equip}
-                    disabled={disabled}
-                  >
-                    <p className="text-xxs sm:text-sm">
-                      {equipped ? "Equipped" : "Equip"}
-                    </p>
-                  </Button>
-                )}
+                </span>
               </span>
             </div>
           </div>

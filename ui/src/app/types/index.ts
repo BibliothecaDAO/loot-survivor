@@ -165,6 +165,12 @@ export type FormData = {
   name: string;
   homeRealmId: string;
   class: string;
+  startingStrength: string;
+  startingDexterity: string;
+  startingVitality: string;
+  startingIntelligence: string;
+  startingWisdom: string;
+  startingCharsima: string;
 };
 
 export interface Call {
@@ -182,6 +188,11 @@ export interface ButtonData {
   action: () => void;
   disabled?: boolean;
   variant?: "default" | "outline";
+}
+
+export interface ItemPurchase {
+  item: string;
+  equip: string;
 }
 
 export type BeastType =

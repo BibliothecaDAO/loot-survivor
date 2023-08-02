@@ -483,6 +483,18 @@ raw_abi = [
     },
     {
         "kind": "struct",
+        "name": "game::Game::DroppedItem",
+        "type": "event",
+        "inputs": [
+            {
+                "name": "adventurer_state_with_bag",
+                "type": "game::Game::AdventurerStateWithBag",
+            },
+            {"name": "item_id", "type": "core::integer::u8"},
+        ],
+    },
+    {
+        "kind": "struct",
         "name": "game::Game::GreatnessIncreased",
         "type": "event",
         "inputs": [
@@ -683,8 +695,12 @@ decode_purchased_item_event = serializer_for_payload(
     game_contract_abi.events["game::Game::PurchasedItem"].inputs
 )
 
-decode_equip_item_event = serializer_for_payload(
+decode_equipped_item_event = serializer_for_payload(
     game_contract_abi.events["game::Game::EquippedItem"].inputs
+)
+
+decode_dropped_item_event = serializer_for_payload(
+    game_contract_abi.events["game::Game::DroppedItem"].inputs
 )
 
 decode_greatness_increased_event = serializer_for_payload(

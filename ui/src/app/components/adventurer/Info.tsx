@@ -3,13 +3,20 @@ import { getItemsByAdventurer } from "../../hooks/graphql/queries";
 import { HeartIcon, CoinIcon, BagIcon } from "../icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
-import { calculateLevel, getRealmNameById } from "../../lib/utils";
+import {
+  calculateLevel,
+  getRealmNameById,
+  getKeyFromValue,
+} from "../../lib/utils";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useCustomQuery from "../../hooks/useCustomQuery";
 import useUIStore from "../../hooks/useUIStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import { Item } from "@/app/types";
 import { HealthCountDown } from "../CountDown";
+import { GameData } from "../GameData";
+import { useContracts } from "@/app/hooks/useContracts";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 
 interface InfoProps {
   adventurer: Adventurer | undefined;
@@ -26,6 +33,15 @@ export default function Info({
   const profile = useUIStore((state) => state.profile);
   const { data, isLoading } = useQueriesStore();
   const txAccepted = useLoadingStore((state) => state.txAccepted);
+  const dropItems = useUIStore((state) => state.dropItems);
+  const setDropItems = useUIStore((state) => state.setDropItems);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
+  );
+  const { gameContract } = useContracts();
+
+  const gameData = new GameData();
 
   useCustomQuery(
     "itemsByAdventurerQuery",
@@ -66,6 +82,29 @@ export default function Info({
   const luck =
     (neckItem.item ? calculateLevel(neckItem.xp ?? 0) : 0) +
     (ringItem.item ? calculateLevel(ringItem.xp ?? 0) : 0);
+
+  const handleDropItems = (item: string) => {
+    const newDropItems = [
+      ...dropItems,
+      getKeyFromValue(gameData.ITEMS, item) ?? "",
+    ];
+    setDropItems(newDropItems);
+    if (gameContract) {
+      const dropItemsTx = {
+        contractAddress: gameContract?.address,
+        entrypoint: "drop",
+        calldata: [
+          adventurer?.id?.toString() ?? "",
+          "0",
+          newDropItems.length.toString(),
+          ...newDropItems,
+        ],
+        metadata: `Dropping ${item}!`,
+      };
+      removeEntrypointFromCalls(dropItemsTx.entrypoint);
+      addToCalls(dropItemsTx);
+    }
+  };
 
   const attributes = [
     { key: "STR", value: formatAdventurer.strength ?? 0 },
@@ -165,6 +204,7 @@ export default function Info({
                         ) || NullItem
                       }
                       itemSlot={part}
+                      handleDrop={handleDropItems}
                     />
                   </div>
                 ))}

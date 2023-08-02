@@ -14,9 +14,10 @@ export interface ButtonData {
 interface ButtonProps {
   buttonsData: ButtonData[];
   size?: "default" | "xs" | "sm" | "lg" | "xl";
+  direction?: "row" | "column";
 }
 
-const KeyboardControl = ({ buttonsData, size }: ButtonProps) => {
+const KeyboardControl = ({ buttonsData, size, direction }: ButtonProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -47,7 +48,9 @@ const KeyboardControl = ({ buttonsData, size }: ButtonProps) => {
   }, [selectedIndex, handleKeyDown]);
 
   return (
-    <div className="flex flex-col w-full">
+    <div
+      className={`flex ${direction === "row" ? "flex-row" : "flex-col"} w-full`}
+    >
       {buttonsData.map((buttonData, index) => (
         <Button
           onMouseEnter={buttonData.mouseEnter}

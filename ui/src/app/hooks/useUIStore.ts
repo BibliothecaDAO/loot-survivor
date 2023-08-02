@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { ItemPurchase } from "../types";
 
 export type ScreenPage =
   | "start"
@@ -33,8 +34,14 @@ type State = {
   setDisplayHistory: (value: boolean) => void;
   displayCart: boolean;
   setDisplayCart: (value: boolean) => void;
-  // purchasedItem: boolean;
-  // setPurchasedItem: (value: boolean) => void;
+  equipItems: string[];
+  setEquipItems: (value: string[]) => void;
+  dropItems: string[];
+  setDropItems: (value: string[]) => void;
+  purchaseItems: ItemPurchase[];
+  setPurchaseItems: (value: ItemPurchase[]) => void;
+  upgradeStats: string[];
+  setUpgradeStats: (value: string[]) => void;
   lastAction: Date | null;
   setLastAction: (value: Date | null) => void;
   mintAdventurer: boolean;
@@ -65,8 +72,14 @@ const useUIStore = create<State>((set) => ({
   setDisplayHistory: (value) => set({ displayHistory: value }),
   displayCart: false,
   setDisplayCart: (value) => set({ displayCart: value }),
-  // purchasedItem: false,
-  // setPurchasedItem: (value) => set({ purchasedItem: value }),
+  equipItems: [],
+  setEquipItems: (value) => set({ equipItems: value }),
+  dropItems: [],
+  setDropItems: (value) => set({ dropItems: value }),
+  purchaseItems: [],
+  setPurchaseItems: (value) => set({ purchaseItems: value }),
+  upgradeStats: [],
+  setUpgradeStats: (value) => set({ upgradeStats: value }),
   lastAction: null,
   setLastAction: (value) => set({ lastAction: value }),
   mintAdventurer: false,

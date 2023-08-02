@@ -11,15 +11,10 @@ export const ArcadeDialog = () => {
   const { connect, connectors, refresh } = useConnectors();
   const { create, isDeploying } = useBurner()
 
+
+  if (!connectors) return <div></div>;
+
   const arcadeConnectors = () => connectors.filter((connector) => connector.name.includes("0x"));
-
-
-  useEffect(() => {
-    const interval = setInterval(refresh, 5000)
-    return () => clearInterval(interval)
-  }, [refresh])
-
-  console.log(connector)
 
   return (
     <>
