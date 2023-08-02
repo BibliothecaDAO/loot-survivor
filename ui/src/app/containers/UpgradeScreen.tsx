@@ -78,8 +78,7 @@ export default function UpgradeScreen() {
     getLatestMarketItems,
     {
       adventurerId: adventurer?.id,
-      // limit: 20 * (adventurer?.statUpgrades ?? 0),
-      limit: 20,
+      limit: 20 * (adventurer?.statUpgrades ?? 0),
     },
     txAccepted
   );
