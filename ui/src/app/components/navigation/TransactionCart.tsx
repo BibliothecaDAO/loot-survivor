@@ -42,7 +42,7 @@ const TransactionCart: React.FC = () => {
   const [notification, setNotification] = useState<string[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
   const [loadingQuery, setLoadingQuery] = useState<QueryKey | null>(null);
-  const { data } = useQueriesStore();
+  const { data, resetDataUpdated } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
@@ -166,6 +166,7 @@ const TransactionCart: React.FC = () => {
   }, [calls]);
 
   const handleResetCalls = () => {
+    resetDataUpdated();
     resetCalls();
     setEquipItems([]);
     setDropItems([]);
