@@ -5,9 +5,14 @@ import { TypeAnimation } from "react-type-animation";
 import { prologue, chapter1, chapter2, chapter3 } from "../../lib/constants";
 import Image from "next/image";
 
-const Intro = () => {
+interface IntroProps {
+  onIntroComplete: () => void;
+}
+
+const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
   const [screen, setScreen] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [buttonText, setButtonText] = useState("do you dare?");
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -39,7 +44,11 @@ const Intro = () => {
     };
   }, [selectedIndex, handleKeyDown]);
 
-  const [buttonText, setButtonText] = useState("do you dare?");
+  useEffect(() => {
+    if (screen === 4) {
+      onIntroComplete();
+    }
+  }, [screen, onIntroComplete]);
 
   const handleMouseEnter = () => {
     setButtonText("are you sure?");
@@ -61,7 +70,6 @@ const Intro = () => {
 
   const renderScreen = (src: string, alt: string, sequence: any) => (
     <div className="flex flex-col w-full h-full justify-between">
-
       <div className="flex flex-col h-full">
         <Image
           className="mx-auto border border-terminal-green absolute object-cover"
@@ -97,11 +105,26 @@ const Intro = () => {
   return (
     <>
       {flash && <div className="flash" />}
-      {screen == 0 && renderScreen("/scenes/scene2.png", "start", [prologue, () => setTimeout(() => setScreen(1), 2000)])}
-      {screen == 1 && renderScreen("/scenes/scene1.png", "second screen", [chapter1, () => setTimeout(() => setScreen(2), 3000)])}
-      {screen == 2 && renderScreen("/scenes/cave.png", "cave", [chapter2, () => setTimeout(() => setScreen(3), 3000)])}
-      {screen == 3 && renderScreen("/scenes/fountain.png", "fountain", [chapter3, () => setTimeout(() => setScreen(4), 3000)])}
-      {screen >= 4 && <WalletSelect screen={screen} />}
+      {screen == 0 &&
+        renderScreen("/scenes/scene2.png", "start", [
+          prologue,
+          () => setTimeout(() => setScreen(1), 2000),
+        ])}
+      {screen == 1 &&
+        renderScreen("/scenes/scene1.png", "second screen", [
+          chapter1,
+          () => setTimeout(() => setScreen(2), 3000),
+        ])}
+      {screen == 2 &&
+        renderScreen("/scenes/cave.png", "cave", [
+          chapter2,
+          () => setTimeout(() => setScreen(3), 3000),
+        ])}
+      {screen == 3 &&
+        renderScreen("/scenes/fountain.png", "fountain", [
+          chapter3,
+          () => setTimeout(() => setScreen(4), 3000),
+        ])}
     </>
   );
 };

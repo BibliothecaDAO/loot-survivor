@@ -28,10 +28,11 @@ import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
 import { mainnet_addr, getGraphQLUrl } from "./lib/constants";
-import { Menu } from "./types";
+import { Menu, NullAdventurer } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
+import WalletSelect from "./components/intro/WalletSelect";
 import { useMediaQuery } from "react-responsive";
 import {
   CogIcon,
@@ -78,9 +79,10 @@ const mobileMenuItems: Menu[] = [
 
 export default function Home() {
   const { disconnect } = useConnectors();
+  const [userDisconnect, setUserDisconnect] = useState(false);
   const { account, status } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
-
+  const [introComplete, setIntroComplete] = useState(false);
   const type = useLoadingStore((state) => state.type);
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
@@ -114,7 +116,7 @@ export default function Home() {
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
 
-  const { data, refetch } = useQueriesStore();
+  const { data, refetch, resetData } = useQueriesStore();
 
   const playState = useMemo(
     () => ({
@@ -129,6 +131,10 @@ export default function Home() {
     volume: 0.5,
     loop: true,
   });
+
+  const handleIntroComplete = () => {
+    setIntroComplete(true);
+  };
 
   useCustomQuery(
     "adventurerByIdQuery",
@@ -159,6 +165,12 @@ export default function Home() {
       setConnected(false);
     }
   }, [account, setConnected]);
+
+  useEffect(() => {
+    if (connected) {
+      setUserDisconnect(false);
+    }
+  }, [connected]);
 
   useMemo(() => {
     setIndexer(getGraphQLUrl());
@@ -210,12 +222,16 @@ export default function Home() {
     false,
   ];
 
+  if (userDisconnect) {
+    return <WalletSelect />;
+  }
+
   return (
     // <Maintenance />
     <main
       className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-20 `}
     >
-      {connected ? (
+      {introComplete ? (
         <>
           <div className="flex flex-col w-full">
             {isMobileDevice && <TxActivity />}
@@ -283,26 +299,25 @@ export default function Home() {
                   <>
                     {!isMobileDevice && account && (
                       <>
-                        <Button
+                        {/* <Button
                           onClick={() => setDisplayHistory(!displayHistory)}
                         >
                           {displayHistory ? "Hide Ledger" : "Show Ledger"}
-                        </Button>
+                        </Button> */}
                       </>
                     )}
-                    {((account as any)?.provider?.baseUrl == mainnet_addr ||
-                      (account as any)?.baseUrl == mainnet_addr) && (
-                      <AddDevnetEthButton />
-                    )}
-                    {((account as any)?.provider?.baseUrl == mainnet_addr ||
-                      (account as any)?.baseUrl == mainnet_addr) && (
-                      <MintEthButton />
-                    )}
-                    {account && (
-                      <Button onClick={() => disconnect()}>
-                        {displayAddress(account.address)}
-                      </Button>
-                    )}
+
+                    <Button
+                      onClick={() => {
+                        disconnect();
+                        resetData();
+                        setAdventurer(NullAdventurer);
+                        setUserDisconnect(true);
+                      }}
+                    >
+                      {account ? displayAddress(account.address) : "Connect"}
+                    </Button>
+
                     <Button href="https://github.com/BibliothecaDAO/loot-survivor">
                       <GithubIcon className="w-6" />
                     </Button>
@@ -345,7 +360,7 @@ export default function Home() {
 
           {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
 
-          {account ? (
+          {introComplete ? (
             <div className="flex flex-col w-full">
               <>
                 <div className="flex justify-center sm:justify-normal sm:pb-2">
@@ -374,12 +389,13 @@ export default function Home() {
                 {screen === "guide" && <GuideScreen />}
                 {screen === "settings" && <Settings />}
                 {screen === "player" && <Player />}
+                {screen === "wallet" && <WalletSelect />}
               </>
             </div>
           ) : null}
         </>
       ) : (
-        <Intro />
+        <Intro onIntroComplete={handleIntroComplete} />
       )}
     </main>
   );
