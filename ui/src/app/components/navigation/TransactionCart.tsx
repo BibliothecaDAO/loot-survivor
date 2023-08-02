@@ -166,7 +166,6 @@ const TransactionCart: React.FC = () => {
   }, [calls]);
 
   const handleResetCalls = () => {
-    resetDataUpdated();
     resetCalls();
     setEquipItems([]);
     setDropItems([]);
@@ -388,6 +387,8 @@ const TransactionCart: React.FC = () => {
                     });
                   }
                 });
+                resetDataUpdated();
+                handleResetCalls();
               }}
             >
               Submit all Transactions
