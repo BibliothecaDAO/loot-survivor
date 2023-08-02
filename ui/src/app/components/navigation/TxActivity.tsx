@@ -165,17 +165,17 @@ export const TxActivity = () => {
         await refetch("latestMarketItemsQuery");
         const killedByObstacle =
           queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
-          "Obstacle" &&
+            "Obstacle" &&
           queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-          0;
+            0;
         const killedByPenalty =
           !queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType &&
           queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-          0;
+            0;
         const killedByAmbush =
           queryData.discoveryByTxHashQuery.discoveries[0]?.ambushed &&
           queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-          0;
+            0;
         console.log(killedByObstacle, killedByPenalty, killedByAmbush);
         if (killedByObstacle || killedByPenalty || killedByAmbush) {
           setDeathMessage(
@@ -231,6 +231,9 @@ export const TxActivity = () => {
       try {
         switch (type) {
           case "Attack":
+            await handleAttackOrFlee();
+            break;
+          case "Attack Till Death":
             await handleAttackOrFlee();
             break;
           case "Flee":
@@ -294,7 +297,6 @@ export const TxActivity = () => {
     <>
       {loading ? (
         <div className="flex flex-row absolute top-3 sm:top-0 sm:relative items-center gap-5 justify-between text-xs sm:text-base">
-
           {hash && (
             <div className="flex flex-row gap-2">
               {!isMobileDevice && "Hash:"}
