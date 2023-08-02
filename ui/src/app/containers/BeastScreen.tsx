@@ -132,7 +132,7 @@ export default function BeastScreen() {
       action: async () => {
         addToCalls(attackTillDeathTx);
         startLoading(
-          "Attack",
+          "Attack Till Death",
           "Attacking",
           "battlesByTxHashQuery",
           adventurer?.id,
@@ -140,16 +140,16 @@ export default function BeastScreen() {
         );
         await handleSubmitCalls(writeAsync).then((tx: any) => {
           if (tx) {
-            console.log(tx.transaction_hash);
             setTxHash(tx.transaction_hash);
             addTransaction({
               hash: tx.transaction_hash,
               metadata: {
-                method: `Flee ${beastData.beast}`,
+                method: `Attack ${beastData.beast}`,
               },
             });
           }
         });
+        resetDataUpdated("battlesByTxHashQuery");
       },
       disabled:
         adventurer?.beastHealth == undefined ||
