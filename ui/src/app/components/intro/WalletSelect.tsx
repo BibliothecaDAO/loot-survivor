@@ -28,8 +28,6 @@ const WalletSelect = ({ }: WalletSelectProps) => {
     }
   }, [account, setConnected]);
 
-  console.log(connectors);
-
   if (!connectors) return <div></div>;
 
   const arcadeConnectors = () =>
