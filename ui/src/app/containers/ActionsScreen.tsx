@@ -12,10 +12,14 @@ import useCustomQuery from "../hooks/useCustomQuery";
 import {
   getLatestDiscoveries,
   getDiscoveryByTxHash,
+  getLastBeastDiscovery,
+  getBeast,
+  getBattlesByBeast,
 } from "../hooks/graphql/queries";
 import { MistIcon } from "../components/icons/Icons";
 import { padAddress } from "../lib/utils";
 import BeastScreen from "./BeastScreen";
+import { NullDiscovery } from "../types";
 
 /**
  * @container
@@ -45,7 +49,11 @@ export default function ActionsScreen() {
       ? state.data.latestDiscoveriesQuery.discoveries
       : []
   );
+  const lastBeast = useQueriesStore(
+    (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
+  );
   const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
+  const resetData = useQueriesStore((state) => state.resetData);
 
   useCustomQuery(
     "discoveryByTxHashQuery",
@@ -65,6 +73,37 @@ export default function ActionsScreen() {
     txAccepted
   );
 
+  useCustomQuery(
+    "lastBeastQuery",
+    getLastBeastDiscovery,
+    {
+      adventurerId: adventurer?.id ?? 0,
+    },
+    txAccepted
+  );
+
+  useCustomQuery(
+    "beastQuery",
+    getBeast,
+    {
+      adventurerId: adventurer?.id ?? 0,
+      beast: lastBeast?.entity,
+      seed: lastBeast?.seed,
+    },
+    txAccepted
+  );
+
+  useCustomQuery(
+    "battlesByBeastQuery",
+    getBattlesByBeast,
+    {
+      adventurerId: adventurer?.id ?? 0,
+      beast: lastBeast?.entity,
+      seed: lastBeast?.seed,
+    },
+    txAccepted
+  );
+
   const exploreTx = {
     contractAddress: gameContract?.address ?? "",
     entrypoint: "explore",
@@ -78,6 +117,8 @@ export default function ActionsScreen() {
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
+        resetData("lastBeastQuery");
+        resetData("beastQuery");
         addToCalls(exploreTx);
         startLoading(
           "Explore",

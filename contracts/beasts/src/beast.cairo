@@ -1,7 +1,6 @@
 use core::serde::Serde;
 use traits::{TryInto, Into};
 use option::OptionTrait;
-use integer::{U8IntoU16, U128TryIntoU8, U8IntoU128, U128TryIntoU16, };
 use super::constants::{
     BeastId::{
         Warlock, Typhon, Jiangshi, Anansi, Basilisk, Gorgon, Kitsune, Lich, Chimera, Wendigo,
@@ -150,7 +149,7 @@ impl ImplBeast of IBeast {
         let beast_id = (seed % MAX_ID.into()) + 1;
 
         // return beast id as a u8
-        U128TryIntoU8::try_into(beast_id).unwrap()
+        beast_id.try_into().unwrap()
     }
 
 
@@ -181,8 +180,8 @@ impl ImplBeast of IBeast {
             // special1 is intentionally 0 for now
             SpecialPowers {
                 special1: 0,
-                special2: U128TryIntoU8::try_into(1 + (seed % special2_size)).unwrap(),
-                special3: U128TryIntoU8::try_into(1 + (seed % special3_size)).unwrap()
+                special2: (1 + (seed % special2_size)).try_into().unwrap(),
+                special3: (1 + (seed % special3_size)).try_into().unwrap()
             }
         }
     }
@@ -213,7 +212,7 @@ impl ImplBeast of IBeast {
                 weapon,
                 self.combat_spec,
                 MINIMUM_DAMAGE,
-                U8IntoU16::into(adventurer_strength),
+                adventurer_strength.into(),
                 is_critical_hit,
                 entropy
             ),
@@ -287,9 +286,8 @@ impl ImplBeast of IBeast {
 
         // multiplier will be 0-10 inclusive, providing
         // a maximum gold bonus of 100%
-        let bonus_multiplier = U128TryIntoU16::try_into(
-            entropy % (1 + GOLD_REWARD_BONUS_MAX_MULTPLIER)
-        )
+        let bonus_multiplier = (entropy % (1 + GOLD_REWARD_BONUS_MAX_MULTPLIER))
+            .try_into()
             .unwrap();
 
         // return base reward + bonus
@@ -568,7 +566,7 @@ fn test_ambush() {
     adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL + 1;
     // worst entropy is one less than adventurer_level
     // since this adventurer has no wisdom, this will result in them getting ambushed
-    entropy = U8IntoU128::into(adventurer_level) - 1;
+    entropy = (adventurer_level - 1).into();
     assert(
         ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == true,
         'unwise adventurer gets ambushed'

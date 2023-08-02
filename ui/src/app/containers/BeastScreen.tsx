@@ -44,7 +44,6 @@ export default function BeastScreen() {
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
-
   const lastBeast = useQueriesStore(
     (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
   );
@@ -56,36 +55,8 @@ export default function BeastScreen() {
   );
   const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
 
-  useCustomQuery(
-    "lastBeastQuery",
-    getLastBeastDiscovery,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
-
-  useCustomQuery(
-    "beastQuery",
-    getBeast,
-    {
-      adventurerId: adventurer?.id ?? 0,
-      beast: lastBeast?.entity,
-      seed: lastBeast?.seed,
-    },
-    txAccepted
-  );
-
-  useCustomQuery(
-    "battlesByBeastQuery",
-    getBattlesByBeast,
-    {
-      adventurerId: adventurer?.id ?? 0,
-      beast: lastBeast?.entity,
-      seed: lastBeast?.seed,
-    },
-    txAccepted
-  );
+  console.log(lastBeast);
+  console.log(beastData);
 
   const attackTx = {
     contractAddress: gameContract?.address ?? "",

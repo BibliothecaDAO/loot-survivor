@@ -1,6 +1,5 @@
 use core::option::OptionTrait;
-use core::traits::Into;
-use integer::{U8IntoU128, U128TryIntoU16};
+use core::traits::{Into, TryInto};
 
 use survivor::{
     adventurer::{Adventurer, ImplAdventurer},
@@ -46,7 +45,7 @@ impl ExploreUtils of Explore {
         let discovery_amount = 1 + (entropy % discovery_range);
 
         // return discovery amount as a u16
-        U128TryIntoU16::try_into(discovery_amount).unwrap()
+        discovery_amount.try_into().unwrap()
     }
 
     // get_gold_discovery generates a random gold discovery based on adventurer level and provided entropy

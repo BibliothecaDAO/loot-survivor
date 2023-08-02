@@ -15,7 +15,7 @@ strawberry-graphql = {extras = ["debug-server"], version = "^0.168.1"}
 aiohttp = "^3.8.4"
 aiohttp-cors = "^0.7.0"
 starknet-py = {version = "^0.17.0a0", allow-prereleases = true}
-apibara = "^0.7.1"
+apibara = {git = "https://github.com/apibara/python-sdk.git", rev = "v0.7.3a1"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.6.0"

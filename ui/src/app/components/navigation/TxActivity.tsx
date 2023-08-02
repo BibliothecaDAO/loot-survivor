@@ -189,7 +189,7 @@ export const TxActivity = () => {
       };
 
       const handleUpgrade = async () => {
-        await refetch("adventurerByIdQuery");
+        // await refetch("adventurerByIdQuery");
         await refetch("latestMarketItemsQuery");
         stopLoading(notificationData);
         if (!hasStatUpgrades) {
