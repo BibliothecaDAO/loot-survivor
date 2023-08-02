@@ -44,6 +44,7 @@ export default function UpgradeScreen() {
   const currentLevel = useAdventurerStore(
     (state) => state.computed.currentLevel
   );
+  const loading = useLoadingStore((state) => state.loading);
   const startLoading = useLoadingStore((state) => state.startLoading);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
@@ -393,6 +394,7 @@ export default function UpgradeScreen() {
                 <div className="w-1/2 flex flex-row gap-2 mx-auto">
                   <Button
                     className="w-1/2"
+                    variant={'outline'}
                     onClick={() => setUpgradeScreen(upgradeScreen - 1)}
                     disabled={upgradeScreen == 1}
                   >
@@ -410,9 +412,9 @@ export default function UpgradeScreen() {
                         setUpgradeScreen(upgradeScreen + 1);
                       }
                     }}
-                    disabled={nextDisabled}
+                    disabled={nextDisabled || loading}
                   >
-                    {lastPage ? "Upgrade" : "Next"}
+                    {loading ? "Upgrading..." : (lastPage ? "Upgrade" : "Next")}
                   </Button>
                 </div>
               </div>

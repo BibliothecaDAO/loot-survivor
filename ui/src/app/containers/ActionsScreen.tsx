@@ -113,7 +113,7 @@ export default function ActionsScreen() {
   const buttonsData = [
     {
       id: 1,
-      label: hasBeast ? "Beast found!!" : "Into The Mist",
+      label: loading ? "Exploring..." : (hasBeast ? "Beast found!!" : "Into The Mist"),
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
