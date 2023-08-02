@@ -406,6 +406,8 @@ export default function UpgradeScreen() {
                       ) {
                         handleBuyItemsAndUpgradeTx();
                         resetDataUpdated("adventurerByIdQuery");
+                        setPurchaseItems([]);
+                        setUpgradeStats([]);
                       } else {
                         setUpgradeScreen(upgradeScreen + 1);
                       }
