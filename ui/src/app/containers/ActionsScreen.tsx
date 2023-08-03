@@ -20,6 +20,7 @@ import { MistIcon } from "../components/icons/Icons";
 import { padAddress } from "../lib/utils";
 import BeastScreen from "./BeastScreen";
 import { NullDiscovery } from "../types";
+import useUIStore from "../hooks/useUIStore";
 
 /**
  * @container
@@ -41,6 +42,8 @@ export default function ActionsScreen() {
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const hash = useLoadingStore((state) => state.hash);
   const [selected, setSelected] = useState<string>("");
+  const setEquipItems = useUIStore((state) => state.setEquipItems);
+  const setDropItems = useUIStore((state) => state.setDropItems);
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
 
@@ -113,7 +116,11 @@ export default function ActionsScreen() {
   const buttonsData = [
     {
       id: 1,
-      label: loading ? "Exploring..." : (hasBeast ? "Beast found!!" : "Into The Mist"),
+      label: loading
+        ? "Exploring..."
+        : hasBeast
+        ? "Beast found!!"
+        : "Into The Mist",
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
@@ -141,6 +148,8 @@ export default function ActionsScreen() {
         resetDataUpdated("discoveryByTxHashQuery");
         resetDataUpdated("beastQuery");
         resetDataUpdated("lastBeastQuery");
+        setEquipItems([]);
+        setDropItems([]);
       },
       disabled: hasBeast || loading || !adventurer?.id,
       loading: loading,
