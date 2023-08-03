@@ -126,15 +126,20 @@ export const ItemDisplay = ({
                       </p>
                     </Button>
                   )}
-                  <Button
-                    variant={"contrast"}
-                    size={"xxs"}
-                    className="p-1"
-                    onClick={() => handleDrop(item.item ?? "")}
-                    disabled={checkDropping(item.item ?? "")}
-                  >
-                    <DownArrowIcon className="w-4 h-4" />
-                  </Button>
+                  {(screen == "play" ||
+                    screen == "upgrade" ||
+                    screen == "player" ||
+                    screen == "inventory") && (
+                    <Button
+                      variant={"contrast"}
+                      size={"xxs"}
+                      className="p-1"
+                      onClick={() => handleDrop(item.item ?? "")}
+                      disabled={checkDropping(item.item ?? "")}
+                    >
+                      <DownArrowIcon className="w-4 h-4" />
+                    </Button>
+                  )}
                 </span>
               </span>
             </div>
