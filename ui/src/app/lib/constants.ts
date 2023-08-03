@@ -42,5 +42,5 @@ export const contracts = {
 export const appUrl = "https://beta-survivor.realms.world/";
 
 // ---- CONTRACT PARAMS
-// Penalty time is 3 blocks, where each block is ~ 3 minutes
+// Penalty time is 8 blocks, where each block is ~ 3 minutes
 export const penaltyTime = 8 * (3 * 60);
