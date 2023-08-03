@@ -5,9 +5,9 @@ import useUIStore from "../../hooks/useUIStore";
 import Image from "next/image";
 import { WalletTutorial } from "../tutorial/WalletTutorial";
 
-interface WalletSelectProps { }
+interface WalletSelectProps {}
 
-const WalletSelect = ({ }: WalletSelectProps) => {
+const WalletSelect = ({}: WalletSelectProps) => {
   const { connectors, connect } = useConnectors();
   const { account } = useAccount();
   const [screen, setScreen] = useState("wallet");
@@ -16,9 +16,9 @@ const WalletSelect = ({ }: WalletSelectProps) => {
   useEffect(() => {
     if (
       (account as any)?.baseUrl ==
-      "https://survivor-indexer.bibliothecadao.xyz" ||
+        "https://survivor-indexer.bibliothecadao.xyz" ||
       (account as any)?.provider?.baseUrl ==
-      "https://survivor-indexer.bibliothecadao.xyz"
+        "https://survivor-indexer.bibliothecadao.xyz"
     ) {
       setConnected(true);
     }
@@ -34,6 +34,8 @@ const WalletSelect = ({ }: WalletSelectProps) => {
     connectors.filter((connector) => connector.id.includes("0x"));
   const walletConnectors = () =>
     connectors.filter((connector) => !connector.id.includes("0x"));
+
+  console.log(connectors);
 
   return (
     <div className="flex flex-col p-8">
@@ -66,19 +68,22 @@ const WalletSelect = ({ }: WalletSelectProps) => {
                   Connect {connector.id}
                 </Button>
               ))}
-              {arcadeConnectors().length ? (<>
-                <h5 className="text-center">Arcade Accounts</h5>
-                {arcadeConnectors().map((connector, index) => (
-                  <Button
-                    onClick={() => connect(connector)}
-                    key={index}
-                    className="w-full"
-                  >
-                    Connect {connector.id}
-                  </Button>
-                ))}
-              </>): ''}
-
+              {arcadeConnectors().length ? (
+                <>
+                  <h5 className="text-center">Arcade Accounts</h5>
+                  {arcadeConnectors().map((connector, index) => (
+                    <Button
+                      onClick={() => connect(connector)}
+                      key={index}
+                      className="w-full"
+                    >
+                      Connect {connector.id}
+                    </Button>
+                  ))}
+                </>
+              ) : (
+                ""
+              )}
             </div>
           </>
         ) : (

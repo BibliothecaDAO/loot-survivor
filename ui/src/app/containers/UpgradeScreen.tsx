@@ -394,7 +394,7 @@ export default function UpgradeScreen() {
                 <div className="w-1/2 flex flex-row gap-2 mx-auto">
                   <Button
                     className="w-1/2"
-                    variant={'outline'}
+                    variant={"outline"}
                     onClick={() => setUpgradeScreen(upgradeScreen - 1)}
                     disabled={upgradeScreen == 1}
                   >
@@ -416,7 +416,7 @@ export default function UpgradeScreen() {
                     }}
                     disabled={nextDisabled || loading}
                   >
-                    {loading ? "Upgrading..." : (lastPage ? "Upgrade" : "Next")}
+                    {loading ? "Upgrading..." : lastPage ? "Upgrade" : "Next"}
                   </Button>
                 </div>
               </div>

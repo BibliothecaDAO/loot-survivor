@@ -41,7 +41,7 @@ const PurchaseHealth = ({
 
   const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
 
-  const potionsToMaxHealth = Math.floor(
+  const potionsToMaxHealth = Math.ceil(
     (maxHealth - (adventurer?.health ?? 0)) / 10
   );
 
@@ -99,10 +99,9 @@ const PurchaseHealth = ({
         } else if (potionAmount <= prevAmount) {
           handleAddPotionsTx(potionAmount, undefined, undefined);
         }
-
         setButtonClicked(false);
-        // after useEffect has run, update the ref with the new value
       }
+      // after useEffect has run, update the ref with the new value
       prevAmountRef.current = potionAmount;
     }
   }, [potionAmount, buttonClicked]);

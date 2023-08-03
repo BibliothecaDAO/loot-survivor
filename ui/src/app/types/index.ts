@@ -170,7 +170,7 @@ export type FormData = {
   startingVitality: string;
   startingIntelligence: string;
   startingWisdom: string;
-  startingCharsima: string;
+  startingCharisma: string;
 };
 
 export interface Call {

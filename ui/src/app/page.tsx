@@ -299,11 +299,11 @@ export default function Home() {
                   <>
                     {!isMobileDevice && account && (
                       <>
-                        {/* <Button
+                        <Button
                           onClick={() => setDisplayHistory(!displayHistory)}
                         >
                           {displayHistory ? "Hide Ledger" : "Show Ledger"}
-                        </Button> */}
+                        </Button>
                       </>
                     )}
 

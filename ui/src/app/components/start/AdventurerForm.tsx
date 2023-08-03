@@ -57,7 +57,7 @@ export const AdventurerForm = ({
     startingVitality: "0",
     startingIntelligence: "0",
     startingWisdom: "0",
-    startingCharsima: "0",
+    startingCharisma: "0",
   });
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const setScreen = useUIStore((state) => state.setScreen);
@@ -187,7 +187,7 @@ export const AdventurerForm = ({
         formData.startingVitality,
         formData.startingIntelligence,
         formData.startingWisdom,
-        formData.startingCharsima,
+        formData.startingCharisma,
       ],
     };
 
@@ -234,21 +234,20 @@ export const AdventurerForm = ({
         startingVitality: "1",
         startingIntelligence: "1",
         startingWisdom: "1",
-        startingCharsima: "1",
+        startingCharisma: "1",
       });
-    } else if (classType === "Hunter") {
+    } else if (classType === "Merchant") {
       setFormData({
         ...formData,
         class: classType,
-        startingStrength: "3",
-        startingIntelligence: "3",
+        startingCharisma: "6",
       });
     } else if (classType === "Cleric") {
       setFormData({
         ...formData,
         class: classType,
         startingVitality: "3",
-        startingCharsima: "3",
+        startingCharisma: "3",
       });
     } else {
       setFormData({
@@ -290,8 +289,8 @@ export const AdventurerForm = ({
       image: "/classes/scout2.png",
     },
     {
-      name: "Hunter",
-      description: "+3 Strength +3 Intelligence",
+      name: "Merchant",
+      description: "+6 Charisma",
       image: "/classes/hunter2.png",
     },
     {
@@ -300,7 +299,7 @@ export const AdventurerForm = ({
         "+1 Strength +1 Dexterity +1 Vitality +1 Intelligence +1 Wisdom +1 Charisma",
       image: "/classes/warrior2.png",
     },
-  ]
+  ];
 
   const weapons = [
     {
@@ -327,7 +326,7 @@ export const AdventurerForm = ({
       image: "/weapons/club.png",
       icon: <BludgeonIcon />,
     },
-  ]
+  ];
 
   if (step === 1) {
     return (
@@ -372,7 +371,10 @@ export const AdventurerForm = ({
           <h3 className="uppercase text-center">Choose your weapon</h3>
           <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-5 sm:gap-20">
             {weapons.map((weapon) => (
-              <div key={weapon.name} className="flex flex-col items-center h-full justify-between border sm:w-56 border-terminal-green">
+              <div
+                key={weapon.name}
+                className="flex flex-col items-center h-full justify-between border sm:w-56 border-terminal-green"
+              >
                 <div className="relative w-28 h-28 sm:w-56 sm:h-56">
                   <Image
                     src={weapon.image}
@@ -420,8 +422,12 @@ export const AdventurerForm = ({
             />
           </div>
           <div className="flex flex-row justify-between">
-            <Button size={'xs'} onClick={handleBack}>Back</Button>
-            <Button size={'xs'}  onClick={() => handleNameEntry(formData.name)}>Next</Button>
+            <Button size={"xs"} onClick={handleBack}>
+              Back
+            </Button>
+            <Button size={"xs"} onClick={() => handleNameEntry(formData.name)}>
+              Next
+            </Button>
           </div>
         </div>
       </>
@@ -499,7 +505,7 @@ export const AdventurerForm = ({
               )}
             </div>
             <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">
-              <Button size={'xs'} variant={"default"} onClick={handleBack}>
+              <Button size={"xs"} variant={"default"} onClick={handleBack}>
                 Back
               </Button>
             </div>
