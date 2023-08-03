@@ -404,7 +404,7 @@ mod Game {
             );
         }
 
-        fn equip(ref self: ContractState, adventurer_id: u256, items: Span<u8>) {
+        fn equip(ref self: ContractState, adventurer_id: u256, items: Array<u8>) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
@@ -494,9 +494,9 @@ mod Game {
 
         // @dev This function allows the owner of an adventurer to drop multiple items.
         // @param adventurer_id The ID of the adventurer dropping the items.
-        // @param items A span of item IDs to be dropped. The length of this span must be less than or equal to the maximum item capacity.
+        // @param items A Array of item IDs to be dropped. The length of this Array must be less than or equal to the maximum item capacity.
         // @notice This function does not handle adding dropped items to any form of external inventory or the ground. This must be handled separately. It does however emit an event for each dropped item.
-        fn drop(ref self: ContractState, adventurer_id: u256, items: Span<u8>) {
+        fn drop(ref self: ContractState, adventurer_id: u256, items: Array<u8>) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
@@ -570,7 +570,7 @@ mod Game {
         // @notice This function allows an adventurer to purchase multiple items from the market.
         // @param adventurer_id The unique identifier of the adventurer.
         // @param items An array of structs representing the items to be purchased. Each struct contains an item ID and a boolean to represent whether the item is to be equipped or not.
-        fn buy_items(ref self: ContractState, adventurer_id: u256, items: Span<ItemPurchase>) {
+        fn buy_items(ref self: ContractState, adventurer_id: u256, items: Array<ItemPurchase>) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
@@ -851,8 +851,8 @@ mod Game {
             ref self: ContractState,
             adventurer_id: u256,
             potion_quantity: u8,
-            items: Span<ItemPurchase>,
-            stats: Span<u8>
+            items: Array<ItemPurchase>,
+            stats: Array<u8>
         ) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -912,8 +912,8 @@ mod Game {
 
         // @dev Function to upgrade the stats of an adventurer.
         // @param adventurer_id The unique identifier for the adventurer to be upgraded.
-        // @param stats Span of integers representing the stats to be upgraded.
-        fn upgrade_stats(ref self: ContractState, adventurer_id: u256, stats: Span<u8>) {
+        // @param stats Array of integers representing the stats to be upgraded.
+        fn upgrade_stats(ref self: ContractState, adventurer_id: u256, stats: Array<u8>) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
@@ -2837,14 +2837,14 @@ mod Game {
     // @param bag The Bag struct instance representing the adventurer's current bag of items.
     // @param adventurer_id The unique identifier for the adventurer.
     // @param adventurer_entropy The entropy of the adventurer used for randomness.
-    // @param items The span of ItemPurchase instances representing items to be purchased.
+    // @param items The Array of ItemPurchase instances representing items to be purchased.
     // @return bag_mutated A boolean value indicating whether the adventurer's bag was modified during the function execution.
     fn _buy_items(
         ref self: ContractState,
         ref adventurer: Adventurer,
         ref bag: Bag,
         adventurer_id: u256,
-        items: Span<ItemPurchase>
+        items: Array<ItemPurchase>
     ) -> bool {
         // get adventurer entropy
         let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
@@ -2908,7 +2908,7 @@ mod Game {
     }
 
     fn _upgrade_stats(
-        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, stats: Span<u8>
+        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, stats: Array<u8>
     ) {
         // assert adventurer has the required stat upgrades
         _assert_has_required_stat_points(@self, adventurer, stats.len().try_into().unwrap());
