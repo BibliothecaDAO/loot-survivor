@@ -18,7 +18,7 @@ use super::{
     }
 };
 
-#[derive(Copy, Drop, Clone, Serde)]
+#[derive(Copy, Drop, Serde)]
 struct Loot {
     id: u8,
     tier: Tier,

@@ -1,15 +1,14 @@
+use core::clone::Clone;
 #[cfg(test)]
 mod tests {
-    use core::array::SpanTrait;
     use array::ArrayTrait;
-    use core::{result::ResultTrait, traits::Into};
+    use core::{result::ResultTrait, traits::Into, array::SpanTrait, serde::Serde, clone::Clone};
     use option::OptionTrait;
     use starknet::{
         syscalls::deploy_syscall, testing, ContractAddress, ContractAddressIntoFelt252,
         contract_address_const
     };
     use traits::TryInto;
-    use core::serde::Serde;
     use box::BoxTrait;
 
     use market::market::{ImplMarket, LootWithPrice, ItemPurchase};
@@ -704,10 +703,11 @@ mod tests {
         };
 
         // verify we have at least two items in shopping cart
-        assert(shopping_cart.len() > 1, 'need more items to equip');
+        let shopping_cart_length = shopping_cart.len();
+        assert(shopping_cart_length > 1, 'need more items to equip');
 
         // buy items in shopping cart
-        game.buy_items(ADVENTURER_ID, shopping_cart.span());
+        game.buy_items(ADVENTURER_ID, shopping_cart.clone());
 
         // get updated adventurer and bag state
         let bag = game.get_bag(ADVENTURER_ID);
@@ -756,7 +756,7 @@ mod tests {
         // try to equip the item which is not in bag
         // this should result in a panic 'Item not in bag' which is
         // annotated in the test
-        game.equip(ADVENTURER_ID, items_to_equip.span());
+        game.equip(ADVENTURER_ID, items_to_equip);
     }
 
     #[test]
@@ -781,7 +781,7 @@ mod tests {
         // try to equip the 9 items
         // this should result in a panic 'Too many items' which is
         // annotated in the test
-        game.equip(ADVENTURER_ID, items_to_equip.span());
+        game.equip(ADVENTURER_ID, items_to_equip);
     }
 
     #[test]
@@ -887,10 +887,8 @@ mod tests {
             i += 1;
         };
 
-        let items_to_equip_span = items_to_equip.span();
-
         // equip all of the items we bought
-        game.equip(ADVENTURER_ID, items_to_equip_span);
+        game.equip(ADVENTURER_ID, items_to_equip.clone());
 
         // get update bag from storage
         let bag = game.get_bag(ADVENTURER_ID);
@@ -901,11 +899,11 @@ mod tests {
         // iterate over the items we equipped
         let mut i: u32 = 0;
         loop {
-            if i >= items_to_equip_span.len() {
+            if i >= items_to_equip.len() {
                 break ();
             }
             // verify they are no longer in bag
-            assert(!bag.contains(*items_to_equip_span.at(i)), 'item should not be in bag');
+            assert(!bag.contains(*items_to_equip.at(i)), 'item should not be in bag');
             // and equipped on the adventurer
             assert(
                 adventurer.is_equipped(*purchased_items_span.at(i).id), 'item should be equipped'
@@ -1441,7 +1439,7 @@ mod tests {
         drop_list.append(purchased_item_id);
 
         // call contract drop
-        game.drop(ADVENTURER_ID, drop_list.span());
+        game.drop(ADVENTURER_ID, drop_list);
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1490,7 +1488,7 @@ mod tests {
         // try to drop 20 items (max number of items is currently 19)
         // this should result in a panic 'Too many items'
         // this test is annotated to expect that panic
-        game.drop(ADVENTURER_ID, drop_list.span());
+        game.drop(ADVENTURER_ID, drop_list);
     }
 
     #[test]
@@ -1511,7 +1509,7 @@ mod tests {
         // call upgrade_stats with stat upgrades
         // TODO: test with more than one which is challenging
         // because we need a multi-level or G20 stat unlocks
-        game.upgrade_stats(ADVENTURER_ID, stat_upgrades.span());
+        game.upgrade_stats(ADVENTURER_ID, stat_upgrades);
 
         // get update adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1543,7 +1541,7 @@ mod tests {
 
         // call upgrade_stats
         // this should panic
-        game.upgrade_stats(ADVENTURER_ID, stat_upgrades.span());
+        game.upgrade_stats(ADVENTURER_ID, stat_upgrades);
     }
 
     #[test]
@@ -1575,7 +1573,7 @@ mod tests {
         // purchase potions, items, and upgrade stat in single call
         game
             .buy_items_and_upgrade_stats(
-                ADVENTURER_ID, potion_quantity, items_to_purchase.span(), stat_upgrades.span()
+                ADVENTURER_ID, potion_quantity, items_to_purchase, stat_upgrades
             );
 
         // get updated adventurer state

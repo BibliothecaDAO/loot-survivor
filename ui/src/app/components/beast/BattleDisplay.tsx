@@ -10,6 +10,13 @@ import Chest from "../../../../public/icons/loot/chest.svg";
 import Waist from "../../../../public/icons/loot/waist.svg";
 import Foot from "../../../../public/icons/loot/foot.svg";
 import { appUrl, battle } from "@/app/lib/constants";
+import {
+  GiWalkingBootIcon,
+  GiFootTripIcon,
+  GiBattleGearIcon,
+  SkullCrossedBonesIcon,
+  GiSandsOfTimeIcon,
+} from "../icons/Icons";
 
 interface BattleDisplayProps {
   battleData: Battle;
@@ -53,56 +60,95 @@ export const BattleDisplay = ({
 
   const renderDiscoveryMessage = () => {
     if (BeastFled) {
-      return <p>PHEW! You fled the {beastName}!</p>;
+      return (
+        <span className="flex flex-row items-center justify-between">
+          <p>PHEW! You fled the {beastName}!</p>
+          <GiWalkingBootIcon />
+        </span>
+      );
     }
 
     if (AdventurerAttack && NoDamageDealt && NoDamageTaken && !BeastFled) {
-      return <p>OH NO! You could not flee the {beastName}!</p>;
+      return (
+        <span className="flex flex-row items-center justify-between">
+          <p>OH NO! You could not flee the {beastName}!</p>
+          <GiFootTripIcon />
+        </span>
+      );
     }
 
     if (AdventurerAttack && BeastHealthExists && !NoDamageDealt) {
       return (
-        <p className="w-full justify-between text-terminal-yellow">
-          NICE! You attacked the {beastName} for {battleData?.damageDealt}{" "}
-          damage{CriticalHit && ", a critical hit"}!
-        </p>
+        <span className="flex flex-row items-center justify-between">
+          <p className="w-full justify-between text-terminal-yellow">
+            NICE! You attacked the {beastName} for {battleData?.damageDealt}{" "}
+            damage{CriticalHit && ", a critical hit"}!
+          </p>
+          <GiBattleGearIcon />
+        </span>
       );
     }
 
     if (AdventurerAttack && !BeastHealthExists && !BeastFled) {
       return (
-        <p className="w-full justify-between">
-          GREAT! You defeated the {beastName} with a final blow of{" "}
-          {battleData?.damageDealt} damage{CriticalHit && ", a critical hit"}!
-        </p>
+        <span className="flex flex-row items-center justify-between">
+          <p className="w-full justify-between">
+            GREAT! You defeated the {beastName} with a final blow of{" "}
+            {battleData?.damageDealt} damage{CriticalHit && ", a critical hit"}!
+          </p>
+          <GiBattleGearIcon />
+        </span>
       );
     }
 
     if (BeastAttack && AdventurerHealthExists) {
       return (
-        <p>
-          OUCH! The {beastName} attacked your {damageLocation}, dealing{" "}
-          {battleData?.damageTaken} damage{CriticalHit && ", a critical hit"}!
-        </p>
+        <span className="flex flex-row items-center justify-between">
+          <p>
+            OUCH! The {beastName} attacked your {damageLocation}, dealing{" "}
+            {battleData?.damageTaken} damage{CriticalHit && ", a critical hit"}!
+          </p>
+          <GiBattleGearIcon />
+        </span>
       );
     }
 
     if (BeastAttack && !AdventurerHealthExists) {
       return (
-        <p>
-          YIKES! You were killed by the {beastName} as it dealt{" "}
-          {battleData?.damageTaken} damage to your {damageLocation}
-          {CriticalHit && ", a critical hit"}!
-        </p>
+        <span className="flex flex-row items-center justify-between">
+          <p>
+            YIKES! You were killed by the {beastName} as it dealt{" "}
+            {battleData?.damageTaken} damage to your {damageLocation}
+            {CriticalHit && ", a critical hit"}!
+          </p>
+          <SkullCrossedBonesIcon />
+        </span>
       );
     }
 
     if (BeastAttack && AdventurerHealthExists && NoDamageTaken) {
-      return <p>PHEW! The {beastName} attacked but you defended it well!</p>;
+      return (
+        <span className="flex flex-row items-center justify-between">
+          <p>PHEW! The {beastName} attacked but you defended it well!</p>
+          <GiBattleGearIcon />
+        </span>
+      );
     }
 
     if (IdleDamagePenalty) {
-      return <p>OOPS! You were hit for 80 damage from idle penalty!</p>;
+      if (AdventurerHealthExists) {
+        return (
+          <span className="flex flex-row items-center justify-between">
+            <p>OOPS! You were hit for 80 damage from idle penalty!</p>
+            <GiSandsOfTimeIcon />
+          </span>
+        );
+      } else {
+        <span className="flex flex-row items-center justify-between">
+          <p>OOPS! You were killed by the idle penalty of 80 damage!</p>
+          <SkullCrossedBonesIcon />
+        </span>;
+      }
     }
   };
 

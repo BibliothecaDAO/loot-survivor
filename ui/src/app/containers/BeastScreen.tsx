@@ -41,6 +41,8 @@ export default function BeastScreen() {
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const hash = useLoadingStore((state) => state.hash);
   const [showBattleLog, setShowBattleLog] = useState(false);
+  const setEquipItems = useUIStore((state) => state.setEquipItems);
+  const setDropItems = useUIStore((state) => state.setDropItems);
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
@@ -117,6 +119,8 @@ export default function BeastScreen() {
           }
         });
         resetDataUpdated("battlesByTxHashQuery");
+        setEquipItems([]);
+        setDropItems([]);
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -150,6 +154,8 @@ export default function BeastScreen() {
           }
         });
         resetDataUpdated("battlesByTxHashQuery");
+        setEquipItems([]);
+        setDropItems([]);
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -184,6 +190,8 @@ export default function BeastScreen() {
           }
         });
         resetDataUpdated("battlesByTxHashQuery");
+        setEquipItems([]);
+        setDropItems([]);
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -220,6 +228,8 @@ export default function BeastScreen() {
     //       }
     //     });
     //     resetDataUpdated("battlesByTxHashQuery");
+    //     setEquipItems([])
+    //     setDropItems([])
     //   },
     //   disabled:
     //     adventurer?.beastHealth == undefined ||
