@@ -14,7 +14,7 @@ export const ArcadeDialog = () => {
 
   if (!connectors) return <div></div>;
 
-  const arcadeConnectors = () => connectors.filter((connector) => connector.name.includes("0x"));
+  const arcadeConnectors = () => connectors.filter((connector) => connector.id.includes("0x"));
 
   return (
     <>

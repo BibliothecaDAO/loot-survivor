@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.7.11",
+    "@argent/starknet-react-webwallet-connector": "^6.4.2",
     "@cartridge/connector": "^0.3.18",
     "@cartridge/controller": "^0.3.18",
     "@fontsource/vt323": "^4.5.10",

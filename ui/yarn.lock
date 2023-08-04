@@ -34,6 +34,30 @@
     tslib "^2.3.0"
     zen-observable-ts "^1.2.5"
 
+"@argent/starknet-react-webwallet-connector@^6.4.2":
+  version "6.4.2"
+  resolved "https://registry.yarnpkg.com/@argent/starknet-react-webwallet-connector/-/starknet-react-webwallet-connector-6.4.2.tgz#46baec8d86bcd2f35cd6e13f8d0a7ce15ca1f067"
+  integrity sha512-60B8wxpbKQoKNccawx4DKyZ2WNES9IFbzbKTWwST5ahCQz/GJKIU1Ad2gns7xy0OlxIFEs2aJfcMKSMrE1zlwg==
+  dependencies:
+    "@argent/web-sdk" "^6.4.1"
+    "@argent/x-window" "^6.4.0"
+    "@starknet-react/core" "^0.17.0"
+
+"@argent/web-sdk@^6.4.1":
+  version "6.4.1"
+  resolved "https://registry.yarnpkg.com/@argent/web-sdk/-/web-sdk-6.4.1.tgz#33540a421e4511d2d8892e60b14bc6a8760d4b09"
+  integrity sha512-QDWmxlv0KhJKE6vqyQ1nWhcM3eRXyz0b0poA1u4r/205gnJcD8sy+EvuAAmav4mUdkmHvReEnqSXevDZ2iriuA==
+  dependencies:
+    "@argent/x-window" "^6.4.0"
+    get-starknet-core "^3.0.1"
+    lodash-es "^4.17.21"
+    trpc-browser "^1.3.2"
+
+"@argent/x-window@^6.4.0":
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/@argent/x-window/-/x-window-6.4.0.tgz#60f5fd56567c84588b3c90ab8f66f5f83f4689a9"
+  integrity sha512-fGFUWCrtnH8OJl+OnvUh/EdCdru8cfnftOls6XgzqwZLqhNC7PMQnKEP3WR+xL+C6pzja1K2hlK84qSap+WMYA==
+
 "@babel/code-frame@^7.0.0", "@babel/code-frame@^7.18.6", "@babel/code-frame@^7.21.4":
   version "7.21.4"
   resolved "https://registry.npmjs.org/@babel/code-frame/-/code-frame-7.21.4.tgz"
@@ -1380,6 +1404,17 @@
     get-starknet-core "^2.0.0"
     immutable "^4.0.0"
 
+"@starknet-react/core@^0.17.0":
+  version "0.17.6"
+  resolved "https://registry.yarnpkg.com/@starknet-react/core/-/core-0.17.6.tgz#721f787795ed849132891bc50c0c4e68c7a66989"
+  integrity sha512-VJR7jx62FnYL5bGU3EUEBMp7Ym6eiY29QFjD5aljLagIsEn8SDAyNRxyKBNfHhx3/xi1q0cxuHp5r9EIOT1Yeg==
+  dependencies:
+    "@tanstack/react-query" "^4.29.12"
+    get-starknet-core "^2.1.0"
+    immutable "^4.3.0"
+    react "^18.2.0"
+    starknet "^4.22.0"
+
 "@starknet-react/core@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@starknet-react/core/-/core-1.0.3.tgz#61d812c1117bd375745cd13cd633bbce399af041"
@@ -1510,14 +1545,6 @@
   version "4.29.5"
   resolved "https://registry.npmjs.org/@tanstack/query-core/-/query-core-4.29.5.tgz"
   integrity sha512-xXIiyQ/4r9KfaJ3k6kejqcaqFXXBTzN2aOJ5H1J6aTJE9hl/nbgAdfF6oiIu0CD5xowejJEJ6bBg8TO7BN4NuQ==
-
-"@tanstack/react-query@^4.29.12":
-  version "4.29.19"
-  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-4.29.19.tgz#6ba187f2d0ea36ae83ff1f67068f53c88ce7b228"
-  integrity sha512-XiTIOHHQ5Cw1WUlHaD4fmVUMhoWjuNJlAeJGq7eM4BraI5z7y8WkZO+NR8PSuRnQGblpuVdjClQbDFtwxTtTUw==
-  dependencies:
-    "@tanstack/query-core" "4.29.19"
-    use-sync-external-store "^1.2.0"
 
 "@tanstack/react-query@^4.29.12":
   version "4.29.19"
@@ -2858,12 +2885,12 @@ get-intrinsic@^1.0.2, get-intrinsic@^1.1.1, get-intrinsic@^1.1.3, get-intrinsic@
     has "^1.0.3"
     has-symbols "^1.0.3"
 
-get-starknet-core@^2.0.0:
+get-starknet-core@^2.0.0, get-starknet-core@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/get-starknet-core/-/get-starknet-core-2.1.0.tgz"
   integrity sha512-sT9fxIiM3maEqz1cVggiB/jGn+nUCavhhhJRnU/G1zKMmJFYORjRNohEZ1xXgRt6MFVUNPnAzxQrhI1F645VNA==
 
-get-starknet-core@^3.1.0:
+get-starknet-core@^3.0.1, get-starknet-core@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/get-starknet-core/-/get-starknet-core-3.1.0.tgz#adc29ba2c29c2b72cc73a46bfadee531efa1d324"
   integrity sha512-SPeYnzqKRXuukNoEr5aobxBmvhUSt4uWs6kFhMXl+3fG2R43u2D2DreDkA1n6T5DF10x5zLogldiHqn/jGlxEA==
@@ -3472,6 +3499,11 @@ locate-path@^6.0.0:
   dependencies:
     p-locate "^5.0.0"
 
+lodash-es@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash-es/-/lodash-es-4.17.21.tgz#43e626c46e6591b7750beb2b50117390c609e3ee"
+  integrity sha512-mKnC+QJ9pWVzv+C4/U3rRsHapFfHvQFoFB92e52xeyGMcX6/OlIl78je1u8vePzYZSkkogMPJ2yjxxsb89cxyw==
+
 lodash.debounce@^4.0.8:
   version "4.0.8"
   resolved "https://registry.npmjs.org/lodash.debounce/-/lodash.debounce-4.0.8.tgz"
@@ -4047,7 +4079,7 @@ react-type-animation@^3.0.1:
   resolved "https://registry.npmjs.org/react-type-animation/-/react-type-animation-3.0.1.tgz"
   integrity sha512-n6erVzng071lN8A0UbNT9Q7m5D6puaa9OE1lakwu5UKxMkEnUbjs2MLT3jN/SUjuxNtKmDP2GqJKb3uQ5wZNkQ==
 
-react@18.2.0:
+react@18.2.0, react@^18.2.0:
   version "18.2.0"
   resolved "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
   integrity sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ==
@@ -4515,6 +4547,11 @@ tr46@~0.0.3:
   version "0.0.3"
   resolved "https://registry.npmjs.org/tr46/-/tr46-0.0.3.tgz"
   integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
+
+trpc-browser@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/trpc-browser/-/trpc-browser-1.3.2.tgz#9b17138086ec906a30584c52499b4731c55ca698"
+  integrity sha512-cXrm7kq+WD8yJfVB8B4pmyL8C0W//Dy+tJq7ohl6fKSK5lfmRIXAlKkNQg/cRZl7YVH/0Xo3NBqcEhVggOCC9A==
 
 ts-custom-error@^3.3.1:
   version "3.3.1"
