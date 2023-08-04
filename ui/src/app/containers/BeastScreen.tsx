@@ -198,7 +198,7 @@ export default function BeastScreen() {
         adventurer?.beastHealth == undefined ||
         adventurer?.beastHealth == 0 ||
         loading ||
-        adventurer?.length == 1 ||
+        adventurer?.level == 1 ||
         adventurer.dexterity === 0,
       loading: loading,
     },
@@ -236,7 +236,7 @@ export default function BeastScreen() {
     //     adventurer?.beastHealth == undefined ||
     //     adventurer?.beastHealth == 0 ||
     //     loading ||
-    //     totalBattles.length == 1  ||
+    //     adventurer?.level == 1  ||
     //     adventurer.dexterity === 0,
     //   loading: loading,
     // },
