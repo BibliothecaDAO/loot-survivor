@@ -132,6 +132,27 @@ export default function Info({
       {!isLoading.itemsByAdventurerQuery ? (
         <div className="flex flex-row flex-wrap gap-2 p-1">
           <div className="flex flex-col w-full sm:p-2 uppercase">
+            <div className="flex justify-between w-full text-xl sm:text-3xl border-b border-terminal-green">
+              {formatAdventurer.name}
+              <span className="flex items-center text-terminal-yellow">
+                <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
+                {formatAdventurer.gold
+                  ? formatAdventurer.gold - (upgradeCost ?? 0)
+                  : 0}
+              </span>
+              {/* <span className="flex text-lg items-center sm:text-3xl">
+                <BagIcon className="self-center w-4 h-4 fill-current" />{" "}
+                {`${items.length}/${19}`}
+              </span> */}
+              <span className="flex items-center ">
+                <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
+                <HealthCountDown health={(formatAdventurer.health ?? 0) || 0} />
+                {`/${Math.min(
+                  100 + (formatAdventurer.vitality ?? 0) * 10,
+                  511
+                )}`}
+              </span>
+            </div>
             {adventurer?.id ? (
               <div className="flex justify-between w-full text-sm sm:text-base">
                 {formatAdventurer.classType}{" "}
@@ -153,29 +174,8 @@ export default function Info({
                 No Adventurer Selected
               </span>
             )}
-            <div className="flex justify-between w-full text-xl sm:text-4xl border-b border-terminal-green">
-              {formatAdventurer.name}
-              <span className="flex items-center text-terminal-yellow">
-                <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
-                {formatAdventurer.gold
-                  ? formatAdventurer.gold - (upgradeCost ?? 0)
-                  : 0}
-              </span>
-              <span className="flex text-lg items-center sm:text-3xl">
-                <BagIcon className="self-center w-4 h-4 fill-current" />{" "}
-                {`${items.length}/${19}`}
-              </span>
-              <span className="flex items-center ">
-                <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
-                <HealthCountDown health={(formatAdventurer.health ?? 0) || 0} />
-                {`/${Math.min(
-                  100 + (formatAdventurer.vitality ?? 0) * 10,
-                  511
-                )}`}
-              </span>
-            </div>
-
-            <div className="flex justify-between w-full mb-1 sm:text-2xl">
+            <hr className="border-terminal-green" />
+            <div className="flex justify-between w-full sm:text-xl">
               <LevelBar xp={formatAdventurer.xp ?? 0} />
             </div>
 
