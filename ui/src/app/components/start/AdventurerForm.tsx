@@ -246,7 +246,9 @@ export const AdventurerForm = ({
       setFormData({
         ...formData,
         class: classType,
-        startingVitality: "3",
+        startingDexterity: "1",
+        startingWisdom: "1",
+        startingIntelligence: "1",
         startingCharisma: "3",
       });
     } else {
@@ -280,7 +282,7 @@ export const AdventurerForm = ({
   const classes = [
     {
       name: "Cleric",
-      description: "+3 Charisma +3 Vitality",
+      description: "+1 Intelligence +1 Wisdom +1 Dexterity +3 Charisma",
       image: "/classes/cleric2.png",
     },
     {
