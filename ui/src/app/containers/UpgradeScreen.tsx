@@ -280,7 +280,7 @@ export default function UpgradeScreen() {
 
   const lastPage = isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2;
 
-  const nextDisabled = upgradeStats.length === 0;
+  const nextDisabled = upgradeStats.length !== adventurer?.statUpgrades;
 
   useEffect(() => {
     if (upgradeStats.length === 0) {
@@ -422,6 +422,7 @@ export default function UpgradeScreen() {
                           resetDataUpdated("adventurerByIdQuery");
                           setPurchaseItems([]);
                           setUpgradeStats([]);
+                          setUpgrades({});
                         } else {
                           setUpgradeScreen(upgradeScreen + 1);
                         }

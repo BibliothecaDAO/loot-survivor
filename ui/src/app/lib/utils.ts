@@ -274,3 +274,22 @@ export function getItemPrice(tier: number, charisma: number) {
 export function isFirstElement<T>(arr: T[], element: T): boolean {
   return arr[0] === element;
 }
+
+export function removeElement(arr: string[], value: string) {
+  const index = arr.lastIndexOf(value);
+
+  if (index > -1) {
+    // Check if there's more than one instance of the value
+    if (arr.indexOf(value) !== arr.lastIndexOf(value)) {
+      // If there's more than one instance, just remove the last one
+      arr.splice(index, 1);
+    } else {
+      // If there's only one instance, remove all
+      while (arr.indexOf(value) !== -1) {
+        arr.splice(arr.indexOf(value), 1);
+      }
+    }
+  }
+
+  return arr;
+}

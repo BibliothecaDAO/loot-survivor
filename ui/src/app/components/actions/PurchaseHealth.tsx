@@ -31,8 +31,9 @@ const PurchaseHealth = ({
   const prevAmountRef = useRef<number | undefined>(0);
   const [buttonClicked, setButtonClicked] = useState(false);
 
-  const purchaseGoldAmount =
-    potionAmount * Math.max((adventurer?.level ?? 0) - 2 * totalCharisma, 1);
+  const potionCost = Math.max((adventurer?.level ?? 0) - 2 * totalCharisma, 1);
+
+  const purchaseGoldAmount = potionAmount * potionCost;
 
   const hasBalance = adventurer?.gold && adventurer?.gold >= upgradeTotalCost;
 
@@ -40,7 +41,7 @@ const PurchaseHealth = ({
 
   const max = Math.min(
     Math.ceil((maxHealth - (adventurer?.health ?? 0)) / 10),
-    Math.ceil(adventurer?.gold! / upgradeTotalCost)
+    Math.floor(adventurer?.gold! / potionCost)
   );
 
   const fillToMax = () => {
@@ -57,8 +58,6 @@ const PurchaseHealth = ({
     calculatedNewHealth - maxHealth >= 10;
 
   const currentLevel = adventurer?.level ?? 0;
-
-  console.log(max);
 
   const handleAddPotionsTx = (
     potionAmount?: number,
@@ -124,6 +123,8 @@ const PurchaseHealth = ({
   //   [potionAmount]
   // );
 
+  console.log(potionAmount, max);
+
   return (
     <div className="flex flex-col sm:flex-row sm:p-2 md:p-4 items-center">
       <QuantityButtons
@@ -136,7 +137,11 @@ const PurchaseHealth = ({
         }}
       />
       <Button
-        disabled={!hasBalance || adventurer?.health === maxHealth}
+        disabled={
+          !hasBalance ||
+          adventurer?.health === maxHealth ||
+          potionAmount === max
+        }
         onClick={fillToMax}
         size={"sm"}
         className="m-auto"

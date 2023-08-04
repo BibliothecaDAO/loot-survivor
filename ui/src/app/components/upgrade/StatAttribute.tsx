@@ -1,8 +1,7 @@
 import { ReactElement, use, useEffect, useState, useRef } from "react";
 import QuantityButtons from "../buttons/QuantityButtons";
-import { Button } from "../buttons/Button";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import { getKeyFromValue } from "@/app/lib/utils";
+import { getKeyFromValue, removeElement } from "@/app/lib/utils";
 import { GameData } from "../GameData";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 
@@ -32,17 +31,26 @@ export const StatAttribute = ({
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const gameData = new GameData();
   const [buttonClicked, setButtonClicked] = useState(false);
-  const prevAmountRef = useRef<number | undefined>(0);
-  const calls = useTransactionCartStore((state) => state.calls);
+  const prevAmountRef = useRef<{ [key: string]: number }>({
+    Strength: 0,
+    Dexterity: 0,
+    Vitality: 0,
+    Intelligence: 0,
+    Wisdom: 0,
+    Charisma: 0,
+  });
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
-  const newUpgradeTotal = (adventurer?.statUpgrades ?? 0) - upgrades.length;
+
+  const newUpgradeTotal =
+    amount + ((adventurer?.statUpgrades ?? 0) - upgrades.length);
 
   useEffect(() => {
     if (buttonClicked) {
       if (prevAmountRef.current !== undefined) {
-        const prevAmount = prevAmountRef.current;
+        // Access the previous amount for the specific name
+        const prevAmount = prevAmountRef.current[name];
         if (amount > prevAmount) {
           const newupgrades = [
             ...upgrades,
@@ -51,8 +59,9 @@ export const StatAttribute = ({
           setUpgrades(newupgrades);
           upgradeHandler((upgrades = newupgrades));
         } else if (amount <= prevAmount) {
-          const newupgrades = upgrades.filter(
-            (i) => i !== getKeyFromValue(gameData.STATS, name) ?? ""
+          const newupgrades = removeElement(
+            upgrades,
+            getKeyFromValue(gameData.STATS, name) ?? ""
           );
           setUpgrades(newupgrades);
           upgradeHandler((upgrades = newupgrades));
@@ -64,7 +73,7 @@ export const StatAttribute = ({
         setButtonClicked(false);
         // after useEffect has run, update the ref with the new value
       }
-      prevAmountRef.current = amount;
+      prevAmountRef.current[name] = amount;
     }
   }, [amount, buttonClicked]);
 

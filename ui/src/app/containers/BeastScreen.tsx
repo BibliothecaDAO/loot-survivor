@@ -56,20 +56,8 @@ export default function BeastScreen() {
   const formatBattles = useQueriesStore(
     (state) => state.data.battlesByBeastQuery?.battles || []
   );
-  const totalBattles = useQueriesStore(
-    (state) => state.data.battlesByAdventurerQuery?.battles || []
-  );
   const resetData = useQueriesStore((state) => state.resetData);
   const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
-
-  useCustomQuery(
-    "battlesByAdventurerQuery",
-    getBattlesByAdventurer,
-    {
-      adventurerId: adventurer?.id,
-    },
-    txAccepted
-  );
 
   const attackTx = {
     contractAddress: gameContract?.address ?? "",
@@ -210,7 +198,7 @@ export default function BeastScreen() {
         adventurer?.beastHealth == undefined ||
         adventurer?.beastHealth == 0 ||
         loading ||
-        totalBattles.length == 1 ||
+        adventurer?.length == 1 ||
         adventurer.dexterity === 0,
       loading: loading,
     },
