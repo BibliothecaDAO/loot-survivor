@@ -54,6 +54,36 @@ export const ItemDisplay = ({
     return dropItems.includes(getKeyFromValue(gameData.ITEMS, item) ?? "");
   };
 
+  // const scrollableRef = React.useRef(null);
+
+  // function handleMouseEnter() {
+  //   const el = scrollableRef.current;
+  //   const endPos = el.scrollWidth - el.offsetWidth; // Calculate the width of the overflow
+
+  //   // Use this to control the speed of the scroll
+  //   const duration = 10000; // In milliseconds
+
+  //   const start = performance.now();
+  //   const initialScrollLeft = el.scrollLeft;
+
+  //   requestAnimationFrame(function step(now) {
+  //     const elapsed = now - start;
+  //     const progress = Math.min(elapsed / duration, 1);
+  //     el.scrollLeft = initialScrollLeft + progress * endPos;
+
+  //     if (progress < 1) {
+  //       requestAnimationFrame(step);
+  //     }
+  //   });
+  // }
+
+  // function handleMouseLeave() {
+  //   const el = scrollableRef.current;
+
+  //   // When mouse leaves, smoothly scroll back to the start
+  //   el.scrollLeft = 0;
+  // }
+
   return (
     <div
       className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-14 ${

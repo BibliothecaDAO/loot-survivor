@@ -90,7 +90,8 @@ export default function UpgradeScreen() {
   );
 
   const checkTransacting =
-    pendingMessage && (pendingMessage as string).startsWith("Upgrading");
+    typeof pendingMessage === "string" &&
+    (pendingMessage as string).startsWith("Upgrading");
 
   const attributes = [
     {
