@@ -303,7 +303,13 @@ export default function InventoryScreen() {
       {adventurer?.id ? (
         <div className="w-5/6 sm:w-1/2">
           <div className="flex flex-col sm:gap-5">
-            <h4 className="m-0">{selected} Loot</h4>
+            <span className="flex flex-row justify-between">
+              <h4 className="m-0">{selected} Loot</h4>{" "}
+              <span className="flex text-lg items-center sm:text-3xl">
+                <BagIcon className="self-center w-4 h-4 fill-current" />{" "}
+                {`${items.length}/${19}`}
+              </span>
+            </span>
             <div className="flex-row items-center gap-5 p-2 border border-terminal-green hidden sm:flex">
               <div className="w-10">
                 <InfoIcon />
