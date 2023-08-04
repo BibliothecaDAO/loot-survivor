@@ -11,12 +11,14 @@ interface PurchaseHealthProps {
   upgradeTotalCost: number;
   potionAmount: number;
   setPotionAmount: (value: number) => void;
+  totalCharisma: number;
 }
 
 const PurchaseHealth = ({
   upgradeTotalCost,
   potionAmount,
   setPotionAmount,
+  totalCharisma,
 }: PurchaseHealthProps) => {
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -30,24 +32,20 @@ const PurchaseHealth = ({
   const [buttonClicked, setButtonClicked] = useState(false);
 
   const purchaseGoldAmount =
-    potionAmount *
-    Math.max((adventurer?.level ?? 0) - 2 * (adventurer?.charisma ?? 0), 1);
+    potionAmount * Math.max((adventurer?.level ?? 0) - 2 * totalCharisma, 1);
 
-  const hasBalance =
-    adventurer?.gold &&
-    adventurer?.gold - upgradeTotalCost >= purchaseGoldAmount
-      ? true
-      : false;
+  const hasBalance = adventurer?.gold && adventurer?.gold >= upgradeTotalCost;
 
   const maxHealth = 100 + (adventurer?.vitality ?? 0) * 10;
 
-  const potionsToMaxHealth = Math.ceil(
-    (maxHealth - (adventurer?.health ?? 0)) / 10
+  const max = Math.min(
+    Math.ceil((maxHealth - (adventurer?.health ?? 0)) / 10),
+    Math.ceil(adventurer?.gold! / upgradeTotalCost)
   );
 
   const fillToMax = () => {
     if (hasBalance) {
-      setPotionAmount(potionsToMaxHealth);
+      setPotionAmount(max);
     }
   };
 
@@ -60,10 +58,7 @@ const PurchaseHealth = ({
 
   const currentLevel = adventurer?.level ?? 0;
 
-  const max = Math.min(
-    Math.floor((maxHealth - (adventurer?.health ?? 0)) / 10),
-    Math.floor(adventurer?.gold! / upgradeTotalCost)
-  );
+  console.log(max);
 
   const handleAddPotionsTx = (
     potionAmount?: number,

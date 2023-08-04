@@ -126,6 +126,7 @@ export default function ActionsScreen() {
       action: async () => {
         resetData("lastBeastQuery");
         resetData("beastQuery");
+        resetData("latestMarketItemsQuery");
         addToCalls(exploreTx);
         startLoading(
           "Explore",

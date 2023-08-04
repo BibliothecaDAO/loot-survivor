@@ -15,6 +15,7 @@ import {
   getBattlesByBeast,
   getBeast,
   getLastBeastDiscovery,
+  getBattlesByAdventurer,
 } from "../hooks/graphql/queries";
 import { Battle, NullDiscovery, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
@@ -55,10 +56,20 @@ export default function BeastScreen() {
   const formatBattles = useQueriesStore(
     (state) => state.data.battlesByBeastQuery?.battles || []
   );
+  const totalBattles = useQueriesStore(
+    (state) => state.data.battlesByAdventurerQuery?.battles || []
+  );
+  const resetData = useQueriesStore((state) => state.resetData);
   const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
 
-  console.log(lastBeast);
-  console.log(beastData);
+  useCustomQuery(
+    "battlesByAdventurerQuery",
+    getBattlesByAdventurer,
+    {
+      adventurerId: adventurer?.id,
+    },
+    txAccepted
+  );
 
   const attackTx = {
     contractAddress: gameContract?.address ?? "",
@@ -99,6 +110,7 @@ export default function BeastScreen() {
       id: 1,
       label: "SINGLE",
       action: async () => {
+        resetData("latestMarketItemsQuery");
         addToCalls(attackTx);
         startLoading(
           "Attack",
@@ -134,6 +146,7 @@ export default function BeastScreen() {
       mouseEnter: handleMouseEnter,
       mouseLeave: handleMouseLeave,
       action: async () => {
+        resetData("latestMarketItemsQuery");
         addToCalls(attackTillDeathTx);
         startLoading(
           "Attack Till Death",
@@ -197,7 +210,7 @@ export default function BeastScreen() {
         adventurer?.beastHealth == undefined ||
         adventurer?.beastHealth == 0 ||
         loading ||
-        beastData?.level == 1 ||
+        totalBattles.length == 1 ||
         adventurer.dexterity === 0,
       loading: loading,
     },
@@ -235,7 +248,7 @@ export default function BeastScreen() {
     //     adventurer?.beastHealth == undefined ||
     //     adventurer?.beastHealth == 0 ||
     //     loading ||
-    //     beastData?.level == 1 ||
+    //     totalBattles.length == 1  ||
     //     adventurer.dexterity === 0,
     //   loading: loading,
     // },

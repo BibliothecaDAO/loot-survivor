@@ -9,7 +9,11 @@ import {
 } from "../lib/utils";
 import { GameData } from "../components/GameData";
 import VerticalKeyboardControl from "../components/menu/VerticalMenu";
-import { useTransactionManager, useContractWrite } from "@starknet-react/core";
+import {
+  useTransactionManager,
+  useContractWrite,
+  useWaitForTransaction,
+} from "@starknet-react/core";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { getLatestMarketItems } from "../hooks/graphql/queries";
 import useLoadingStore from "../hooks/useLoadingStore";
@@ -69,6 +73,7 @@ export default function UpgradeScreen() {
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const [upgrades, setUpgrades] = useState<Record<string, number>>({});
+  const pendingMessage = useLoadingStore((state) => state.pendingMessage);
 
   const { resetDataUpdated } = useQueriesStore();
 
@@ -83,6 +88,9 @@ export default function UpgradeScreen() {
     },
     txAccepted
   );
+
+  const checkTransacting =
+    pendingMessage && (pendingMessage as string).startsWith("Upgrading");
 
   const attributes = [
     {
@@ -209,14 +217,18 @@ export default function UpgradeScreen() {
     );
   }
 
+  const selectedCharisma = upgrades["Charisma"] ?? 0;
+
+  const totalCharisma = (adventurer?.charisma ?? 0) + selectedCharisma;
+
   const purchaseGoldAmount =
-    potionAmount * Math.max(currentLevel - 2 * (adventurer?.charisma ?? 0), 1);
+    potionAmount * Math.max(currentLevel - 2 * totalCharisma, 1);
 
   const itemsGoldSum = purchaseItems.reduce((accumulator, current) => {
     const { tier } = getItemData(
       getValueFromKey(gameData.ITEMS, parseInt(current.item)) ?? ""
     );
-    const itemPrice = getItemPrice(tier, adventurer?.charisma ?? 0);
+    const itemPrice = getItemPrice(tier, totalCharisma);
     return accumulator + (isNaN(itemPrice) ? 0 : itemPrice);
   }, 0);
 
@@ -270,10 +282,6 @@ export default function UpgradeScreen() {
 
   const nextDisabled = upgradeStats.length === 0;
 
-  const selectedCharisma = upgrades["Charisma"] ?? 0;
-
-  const totalCharisma = (adventurer?.charisma ?? 0) + selectedCharisma;
-
   useEffect(() => {
     if (upgradeStats.length === 0) {
       setUpgradeScreen(1);
@@ -287,141 +295,148 @@ export default function UpgradeScreen() {
           <div className="w-1/3 hidden sm:block">
             <Info adventurer={adventurer} upgradeCost={upgradeTotalCost} />
           </div>
-          <div className="w-full sm:w-2/3">
-            <div className="flex flex-col gap-2 h-full">
-              <div className="justify-center text-terminal-green space-x-3">
-                <div className="text-center text-2xl md:text-xl lg:text-4xl sm:p-2 animate-pulse uppercase">
-                  Level up!
-                </div>
-                <div className="flex flex-row gap-2 justify-center text-lg sm:text-2xl text-shadow-none">
-                  <span>
-                    Stat Upgrades Available{" "}
-                    {(adventurer?.statUpgrades ?? 0) - upgradeStats.length}
-                  </span>
-                </div>
-                <UpgradeNav activeSection={upgradeScreen} />
-                <div className="flex flex-row gap-3 text-sm sm:text-base justify-center">
-                  <div className="flex flex-row gap-3">
-                    <span className="flex flex-row gap-1  items-center">
-                      <p className="uppercase">Cost:</p>
-                      <span className="flex text-xl">
-                        <CoinIcon className="self-center w-5 h-5 fill-current text-terminal-yellow" />
-                        <p
-                          className={
-                            upgradeTotalCost > (adventurer?.gold ?? 0)
-                              ? "text-red-600"
-                              : "text-terminal-yellow"
-                          }
-                        >
-                          {upgradeTotalCost}
+          {!checkTransacting ? (
+            <div className="w-full sm:w-2/3">
+              <div className="flex flex-col gap-2 h-full">
+                <div className="justify-center text-terminal-green space-x-3">
+                  <div className="text-center text-2xl md:text-xl lg:text-4xl sm:p-2 animate-pulse uppercase">
+                    Level up!
+                  </div>
+                  <div className="flex flex-row gap-2 justify-center text-lg sm:text-2xl text-shadow-none">
+                    <span>
+                      Stat Upgrades Available{" "}
+                      {(adventurer?.statUpgrades ?? 0) - upgradeStats.length}
+                    </span>
+                  </div>
+                  <UpgradeNav activeSection={upgradeScreen} />
+                  <div className="flex flex-row gap-3 text-sm sm:text-base justify-center">
+                    <div className="flex flex-row gap-3">
+                      <span className="flex flex-row gap-1  items-center">
+                        <p className="uppercase">Cost:</p>
+                        <span className="flex text-xl">
+                          <CoinIcon className="self-center w-5 h-5 fill-current text-terminal-yellow" />
+                          <p
+                            className={
+                              upgradeTotalCost > (adventurer?.gold ?? 0)
+                                ? "text-red-600"
+                                : "text-terminal-yellow"
+                            }
+                          >
+                            {upgradeTotalCost}
+                          </p>
+                        </span>
+                      </span>
+                      <span className="flex flex-row gap-1  items-center">
+                        <p className="uppercase">Potions:</p>
+                        <span className="flex text-xl text-terminal-yellow">
+                          {potionAmount?.toString() ?? 0}
+                        </span>
+                      </span>
+                      <span className="flex flex-row gap-1 items-center">
+                        <p className="uppercase">Items:</p>
+                        <span className="flex text-xl text-terminal-yellow">
+                          {purchaseItems?.length}
+                        </span>
+                      </span>
+                    </div>
+                    <div className="flex flex-row items-center gap-3">
+                      <span className="flex flex-row sm:gap-1">
+                        {`Charisma: ${totalCharisma} -`}
+                        <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
+                        <p className="text-terminal-yellow">
+                          {totalCharisma * 2}
                         </p>
+                        <p className="hidden sm:block">{" to price"}</p>
                       </span>
-                    </span>
-                    <span className="flex flex-row gap-1  items-center">
-                      <p className="uppercase">Potions:</p>
-                      <span className="flex text-xl text-terminal-yellow">
-                        {potionAmount?.toString() ?? 0}
-                      </span>
-                    </span>
-                    <span className="flex flex-row gap-1 items-center">
-                      <p className="uppercase">Items:</p>
-                      <span className="flex text-xl text-terminal-yellow">
-                        {purchaseItems?.length}
-                      </span>
-                    </span>
-                  </div>
-                  <div className="flex flex-row items-center gap-3">
-                    <span className="flex flex-row sm:gap-1">
-                      {`Charisma: ${totalCharisma} -`}
-                      <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
-                      <p className="text-terminal-yellow">
-                        {totalCharisma * 2}
-                      </p>
-                      <p className="hidden sm:block">{" to price"}</p>
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                {upgradeScreen === 1 && (
-                  <div className="flex flex-col sm:gap-2 items-center w-full">
-                    <p className="text-xl lg:text-2xl sm:hidden">
-                      Stat Upgrades
-                    </p>
-                    <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border">
-                      {isMobileDevice ? (
-                        <>
-                          {renderContent()}
-                          {renderVerticalKeyboardControl()}
-                        </>
-                      ) : (
-                        <>
-                          {renderVerticalKeyboardControl()}
-                          {renderContent()}
-                        </>
-                      )}
                     </div>
                   </div>
-                )}
+                </div>
 
-                {upgradeScreen === 2 && (
-                  <div className="flex flex-col gap-5 sm:gap-2 sm:flex-row items-center justify-center flex-wrap">
-                    <p className="text-xl lg:text-2xl">Potions</p>
-                    <PurchaseHealth
-                      upgradeTotalCost={upgradeTotalCost}
-                      potionAmount={potionAmount}
-                      setPotionAmount={setPotionAmount}
-                    />
-                  </div>
-                )}
+                <div className="flex flex-col gap-2">
+                  {upgradeScreen === 1 && (
+                    <div className="flex flex-col sm:gap-2 items-center w-full">
+                      <p className="text-xl lg:text-2xl sm:hidden">
+                        Stat Upgrades
+                      </p>
+                      <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border">
+                        {isMobileDevice ? (
+                          <>
+                            {renderContent()}
+                            {renderVerticalKeyboardControl()}
+                          </>
+                        ) : (
+                          <>
+                            {renderVerticalKeyboardControl()}
+                            {renderContent()}
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
-                {((!isMobileDevice && upgradeScreen === 2) ||
-                  (isMobileDevice && upgradeScreen === 3)) && (
-                  <div className="flex flex-col items-center sm:gap-2 w-full">
-                    <p className="text-xl lg:text-2xl sm:hidden">
-                      Loot Fountain
-                    </p>
-                    <MarketplaceScreen
-                      upgradeTotalCost={upgradeTotalCost}
-                      purchaseItems={purchaseItems}
-                      setPurchaseItems={setPurchaseItems}
-                      upgradeHandler={handleAddItemsAndTx}
-                      totalCharisma={totalCharisma}
-                    />
+                  {upgradeScreen === 2 && (
+                    <div className="flex flex-col gap-5 sm:gap-2 sm:flex-row items-center justify-center flex-wrap">
+                      <p className="text-xl lg:text-2xl">Potions</p>
+                      <PurchaseHealth
+                        upgradeTotalCost={upgradeTotalCost}
+                        potionAmount={potionAmount}
+                        setPotionAmount={setPotionAmount}
+                        totalCharisma={totalCharisma}
+                      />
+                    </div>
+                  )}
+
+                  {((!isMobileDevice && upgradeScreen === 2) ||
+                    (isMobileDevice && upgradeScreen === 3)) && (
+                    <div className="flex flex-col items-center sm:gap-2 w-full">
+                      <p className="text-xl lg:text-2xl sm:hidden">
+                        Loot Fountain
+                      </p>
+                      <MarketplaceScreen
+                        upgradeTotalCost={upgradeTotalCost}
+                        purchaseItems={purchaseItems}
+                        setPurchaseItems={setPurchaseItems}
+                        upgradeHandler={handleAddItemsAndTx}
+                        totalCharisma={totalCharisma}
+                      />
+                    </div>
+                  )}
+                  <div className="w-1/2 flex flex-row gap-2 mx-auto">
+                    <Button
+                      className="w-1/2"
+                      variant={"outline"}
+                      onClick={() => setUpgradeScreen(upgradeScreen - 1)}
+                      disabled={upgradeScreen == 1}
+                    >
+                      Back
+                    </Button>
+                    <Button
+                      className="w-1/2"
+                      onClick={() => {
+                        if (
+                          isMobileDevice
+                            ? upgradeScreen == 3
+                            : upgradeScreen == 2
+                        ) {
+                          handleBuyItemsAndUpgradeTx();
+                          resetDataUpdated("adventurerByIdQuery");
+                          setPurchaseItems([]);
+                          setUpgradeStats([]);
+                        } else {
+                          setUpgradeScreen(upgradeScreen + 1);
+                        }
+                      }}
+                      disabled={nextDisabled || loading}
+                    >
+                      {loading ? "Upgrading..." : lastPage ? "Upgrade" : "Next"}
+                    </Button>
                   </div>
-                )}
-                <div className="w-1/2 flex flex-row gap-2 mx-auto">
-                  <Button
-                    className="w-1/2"
-                    variant={"outline"}
-                    onClick={() => setUpgradeScreen(upgradeScreen - 1)}
-                    disabled={upgradeScreen == 1}
-                  >
-                    Back
-                  </Button>
-                  <Button
-                    className="w-1/2"
-                    onClick={() => {
-                      if (
-                        isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2
-                      ) {
-                        handleBuyItemsAndUpgradeTx();
-                        resetDataUpdated("adventurerByIdQuery");
-                        setPurchaseItems([]);
-                        setUpgradeStats([]);
-                      } else {
-                        setUpgradeScreen(upgradeScreen + 1);
-                      }
-                    }}
-                    disabled={nextDisabled || loading}
-                  >
-                    {loading ? "Upgrading..." : lastPage ? "Upgrade" : "Next"}
-                  </Button>
                 </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <h1 className="mx-auto loading-ellipsis">Upgrading</h1>
+          )}
         </div>
       ) : (
         <h1 className="mx-auto">No upgrades available!</h1>

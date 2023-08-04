@@ -8,12 +8,9 @@ import { Battle, Discovery, NullAdventurer, NullDiscovery } from "../types";
 import { processBeastName } from "../lib/utils";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import {
-  getAdventurerById,
   getBattlesByAdventurer,
   getDiscoveries,
-  getLastBeastDiscovery,
 } from "../hooks/graphql/queries";
-import { useQuery } from "@apollo/client";
 import useCustomQuery from "../hooks/useCustomQuery";
 import useLoadingStore from "../hooks/useLoadingStore";
 
@@ -38,29 +35,37 @@ export default function EncountersScreen({ profile }: EncountersProps) {
   const [sortedCombined, setSortedCombined] = useState<Battle[] | Discovery[]>(
     []
   );
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
+  const queryData = useQueriesStore((state) => state.data);
 
-  const { data: discoveriesByAdventurerData } = useQuery(getDiscoveries, {
-    variables: {
+  useCustomQuery(
+    "discoveriesQuery",
+    getDiscoveries,
+    {
       adventurerId: profile ? profile : adventurer?.id ?? 0,
     },
-  });
+    txAccepted
+  );
 
-  const { data: battlesByAdventurerData } = useQuery(getBattlesByAdventurer, {
-    variables: {
+  useCustomQuery(
+    "battlesByAdventurerQuery",
+    getBattlesByAdventurer,
+    {
       adventurerId: profile ? profile : adventurer?.id ?? 0,
     },
-  });
+    txAccepted
+  );
 
   useEffect(() => {
     if (data) {
       setLoadingData(true);
 
-      const discoveries = discoveriesByAdventurerData
-        ? discoveriesByAdventurerData.discoveries
+      const discoveries = queryData.discoveriesQuery
+        ? queryData.discoveriesQuery.discoveries
         : [];
 
-      const battles = battlesByAdventurerData
-        ? battlesByAdventurerData.battles
+      const battles = queryData.battlesByAdventurerQuery
+        ? queryData.battlesByAdventurerQuery.battles
         : [];
 
       const combined = [...discoveries, ...battles];
@@ -73,7 +78,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
       setSortedCombined(sorted);
       setLoadingData(false);
     }
-  }, [discoveriesByAdventurerData, battlesByAdventurerData, data]); // Runs whenever 'data' changes
+  }, [queryData.discoveriesQuery, queryData.battlesByAdventurerQuery, data]); // Runs whenever 'data' changes
 
   const totalPages = Math.ceil(sortedCombined.length / encountersPerPage);
 
