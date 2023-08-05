@@ -31,11 +31,15 @@ const WalletSelect = ({}: WalletSelectProps) => {
   if (!connectors) return <div></div>;
 
   const arcadeConnectors = () =>
-    connectors.filter((connector) => connector.id.includes("0x"));
+    connectors.filter(
+      (connector) =>
+        typeof connector.id === "string" && connector.id.includes("0x")
+    );
   const walletConnectors = () =>
-    connectors.filter((connector) => !connector.id.includes("0x"));
-
-  console.log(connectors);
+    connectors.filter(
+      (connector) =>
+        typeof connector.id !== "string" || !connector.id.includes("0x")
+    );
 
   return (
     <div className="flex flex-col p-8">
@@ -65,7 +69,9 @@ const WalletSelect = ({}: WalletSelectProps) => {
                   key={index}
                   className="w-full"
                 >
-                  Connect {connector.id}
+                  {connector.id === "braavos" || connector.id === "argentX"
+                    ? `Connect ${connector.id}`
+                    : "Login With Email"}
                 </Button>
               ))}
               {arcadeConnectors().length ? (

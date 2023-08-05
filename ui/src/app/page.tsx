@@ -1,6 +1,12 @@
 "use client";
-import { useAccount, useConnectors } from "@starknet-react/core";
-import { useState, useEffect, useMemo } from "react";
+import {
+  useAccount,
+  useConnectors,
+  useNetwork,
+  useProvider,
+} from "@starknet-react/core";
+import { constants } from "starknet";
+import { useState, useEffect, useMemo, use } from "react";
 import { Button } from "./components/buttons/Button";
 import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
 import ActionsScreen from "./containers/ActionsScreen";
@@ -22,7 +28,6 @@ import { TxActivity } from "./components/navigation/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
 import useAdventurerStore from "./hooks/useAdventurerStore";
 import useUIStore from "./hooks/useUIStore";
-import useIndexerStore from "./hooks/useIndexerStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
@@ -57,6 +62,7 @@ import {
 } from "./hooks/graphql/queries";
 import { useBurner } from "./lib/burner";
 import { ArcadeDialog } from "./components/ArcadeDialog";
+import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -78,7 +84,9 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Home() {
-  const { disconnect } = useConnectors();
+  const { disconnect, connectors } = useConnectors();
+  const { chain } = useNetwork();
+  const { provider } = useProvider();
   const [userDisconnect, setUserDisconnect] = useState(false);
   const { account, status } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
@@ -103,7 +111,6 @@ export default function Home() {
   const mintAdventurer = useUIStore((state) => state.mintAdventurer);
   const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
-  const setIndexer = useIndexerStore((state) => state.setIndexer);
   const [showDeathCount, setShowDeathCount] = useState(true);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const hasStatUpgrades = useAdventurerStore(
@@ -112,6 +119,8 @@ export default function Home() {
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
   const hasNoXp = useAdventurerStore((state) => state.computed.hasNoXp);
   const owner = account?.address ? padAddress(account.address) : "";
+  const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
+  const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
@@ -172,9 +181,11 @@ export default function Home() {
     }
   }, [connected]);
 
-  useMemo(() => {
-    setIndexer(getGraphQLUrl());
-  }, [setIndexer]);
+  useEffect(() => {
+    console.log("RUNNING");
+    const isWrongNetwork = chain?.id !== constants.StarknetChainId.SN_GOERLI;
+    setIsWrongNetwork(isWrongNetwork);
+  }, [chain, provider, connected]);
 
   useEffect(() => {
     if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
@@ -234,6 +245,8 @@ export default function Home() {
       {introComplete ? (
         <>
           <div className="flex flex-col w-full">
+            <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
+
             {isMobileDevice && <TxActivity />}
             <div className="flex flex-row justify-between">
               <span className="flex flex-row items-center gap-2 sm:gap-5">
@@ -344,7 +357,6 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
             <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
               <NotificationDisplay
                 type={type}
