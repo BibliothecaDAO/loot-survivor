@@ -16,12 +16,7 @@ from indexer.config import Config
 from indexer.decoder import (
     decode_start_game_event,
     decode_stat_upgrades_available_event,
-    decode_strength_increased_event,
-    decode_dexterity_increased_event,
-    decode_vitality_increased_event,
-    decode_intelligence_increased_event,
-    decode_wisdom_increased_event,
-    decode_charisma_increased_event,
+    decode_adventurer_upgrade_event,
     decode_discover_health_event,
     decode_discover_gold_event,
     decode_discover_xp_event,
@@ -34,7 +29,6 @@ from indexer.decoder import (
     decode_slayed_beast_event,
     decode_flee_failed_event,
     decode_flee_succeeded_event,
-    decode_purchased_item_event,
     decode_equipped_item_event,
     decode_dropped_item_event,
     decode_greatness_increased_event,
@@ -399,12 +393,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
 
         for survivor_event in [
             "StartGame",
-            "StrengthIncreased",
-            "DexterityIncreased",
-            "VitalityIncreased",
-            "IntelligenceIncreased",
-            "WisdomIncreased",
-            "CharismaIncreased",
+            "AdventurerUpgraded",
             "DiscoveredHealth",
             "DiscoveredGold",
             "DiscoveredXP",
@@ -448,12 +437,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
 
             await {
                 "StartGame": self.start_game,
-                "StrengthIncreased": self.stat_upgrade,
-                "DexterityIncreased": self.stat_upgrade,
-                "VitalityIncreased": self.stat_upgrade,
-                "IntelligenceIncreased": self.stat_upgrade,
-                "WisdomIncreased": self.stat_upgrade,
-                "CharismaIncreased": self.stat_upgrade,
+                "AdventurerUpgraded": self.upgrade,
                 "DiscoveredHealth": self.discover_health,
                 "DiscoveredGold": self.discover_gold,
                 "DiscoveredXP": self.discover_xp,
@@ -466,7 +450,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "SlayedBeast": self.slayed_beast,
                 "FleeFailed": self.flee_failed,
                 "FleeSucceeded": self.flee_succeeded,
-                "PurchasedItem": self.purchased_item,
                 "EquippedItem": self.equipped_item,
                 "DroppedItem": self.dropped_item,
                 "GreatnessIncreased": self.greatness_increased,
@@ -556,7 +539,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             hex(sg.adventurer_state["owner"]),
         )
 
-    async def stat_upgrade(
+    async def upgrade(
         self,
         info: Info,
         block_time: datetime,
@@ -564,9 +547,31 @@ class LootSurvivorIndexer(StarkNetIndexer):
         tx_hash: str,
         data,
     ):
-        su = decode_strength_increased_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, su.adventurer_state, block_time)
-        print("- [stat upgrade]", su.adventurer_state["adventurer_id"])
+        u = decode_adventurer_upgrade_event.deserialize([felt.to_int(i) for i in data])
+        await update_adventurer_helper(info, u.adventurer_state, block_time)
+        for item in u.items:
+            await info.storage.find_one_and_update(
+                "items",
+                {
+                    "item": check_exists_int(item["item"]["id"]),
+                    "adventurerId": check_exists_int(
+                        u.adventurer_state["adventurer_id"]
+                    ),
+                    "owner": False,
+                    "equipped": False,
+                    "ownerAddress": check_exists_int(0),
+                    "xp": encode_int_as_bytes(0),
+                    "cost": encode_int_as_bytes(item["price"]),
+                    "special1": check_exists_int(0),
+                    "special2": check_exists_int(0),
+                    "special3": check_exists_int(0),
+                    "createdTime": datetime.now(),
+                    "purchasedTime": check_exists_int(0),
+                    "lastUpdatedTime": block_time,
+                    "timestamp": datetime.now(),
+                },
+            )
+        print("- [stat upgrade]", u.adventurer_state["adventurer_id"])
 
     async def discover_health(
         self,
