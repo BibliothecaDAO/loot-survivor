@@ -15,14 +15,17 @@ export const battle =
 
 export const mainnet_addr = "https://alpha-mainnet.starknet.io";
 
-export function getGraphQLUrl() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
-    case "dev":
+export function getGraphQLUrl(chainId: string) {
+ {
+    if (chainId === "0x534e5f474f45524c49") {
       return "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/goerli-graphql";
-    case "production":
+    }
+    else if (chainId === "0x534e5f4d41494e") {
       return "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/graphql";
-    default:
-      return "http://localhost:8000/graphql";
+    }
+      else {
+        return "http://localhost:8000/graphql";
+      }
   }
 }
 

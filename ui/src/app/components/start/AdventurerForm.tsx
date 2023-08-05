@@ -12,6 +12,7 @@ import {
   useConnectors,
   useTransactionManager,
   useContractWrite,
+  useNetwork,
 } from "@starknet-react/core";
 import { getKeyFromValue } from "../../lib/utils";
 import { GameData } from "../GameData";
@@ -30,6 +31,7 @@ import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { MdClose } from "react-icons/md";
+import NetworkSwitchError from "../navigation/NetworkSwitchError";
 
 export interface AdventurerFormProps {
   isActive: boolean;
@@ -43,6 +45,7 @@ export const AdventurerForm = ({
   adventurers,
 }: AdventurerFormProps) => {
   const { account } = useAccount();
+  const { chain } = useNetwork();
   const { connectors, connect } = useConnectors();
 
   const { addTransaction } = useTransactionManager();
@@ -498,7 +501,11 @@ export const AdventurerForm = ({
                     <Button
                       type="submit"
                       size={"xl"}
-                      disabled={!formFilled || !account}
+                      disabled={
+                        !formFilled ||
+                        !account ||
+                        (account && chain?.id !== "0x534e5f474f45524c49")
+                      }
                     >
                       {formFilled ? "Start Game!!" : "Fill details"}
                     </Button>

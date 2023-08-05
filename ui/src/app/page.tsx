@@ -1,5 +1,5 @@
 "use client";
-import { useAccount, useConnectors } from "@starknet-react/core";
+import { useAccount, useConnectors, useNetwork } from "@starknet-react/core";
 import { useState, useEffect, useMemo } from "react";
 import { Button } from "./components/buttons/Button";
 import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
@@ -57,6 +57,7 @@ import {
 } from "./hooks/graphql/queries";
 import { useBurner } from "./lib/burner";
 import { ArcadeDialog } from "./components/ArcadeDialog";
+import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -79,6 +80,7 @@ const mobileMenuItems: Menu[] = [
 
 export default function Home() {
   const { disconnect } = useConnectors();
+  const { chain } = useNetwork();
   const [userDisconnect, setUserDisconnect] = useState(false);
   const { account, status } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
@@ -173,8 +175,11 @@ export default function Home() {
   }, [connected]);
 
   useMemo(() => {
-    setIndexer(getGraphQLUrl());
+    setIndexer(getGraphQLUrl(chain?.id ?? ""));
   }, [setIndexer]);
+
+  console.log(chain?.id);
+  console.log(getGraphQLUrl(chain?.id ?? ""));
 
   useEffect(() => {
     if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
@@ -234,6 +239,8 @@ export default function Home() {
       {introComplete ? (
         <>
           <div className="flex flex-col w-full">
+            <NetworkSwitchError />
+
             {isMobileDevice && <TxActivity />}
             <div className="flex flex-row justify-between">
               <span className="flex flex-row items-center gap-2 sm:gap-5">
@@ -344,7 +351,6 @@ export default function Home() {
             classNames="notification"
             unmountOnExit
           >
-            <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
             <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
               <NotificationDisplay
                 type={type}
