@@ -71,7 +71,8 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
   return (
     <StarknetConfig
-      connectors={[...connectors, ...arcadeAccounts] as any}
+      connectors={[...connectors] as any}
+      // connectors={[...connectors, ...arcadeAccounts] as any}
       autoConnect
     >
       <ApolloProvider client={client}>{children}</ApolloProvider>
