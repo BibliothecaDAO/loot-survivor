@@ -12,26 +12,22 @@ import {
   useConnectors,
   useTransactionManager,
   useContractWrite,
-  useNetwork,
 } from "@starknet-react/core";
 import { getKeyFromValue } from "../../lib/utils";
 import { GameData } from "../GameData";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import useUIStore from "../../hooks/useUIStore";
-import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { FormData, Adventurer } from "@/app/types";
 import { Button } from "../buttons/Button";
 import Image from "next/image";
 import { WalletTutorial } from "../tutorial/WalletTutorial";
 import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
-import WalletSelect from "../intro/WalletSelect";
 import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { MdClose } from "react-icons/md";
-import NetworkSwitchError from "../navigation/NetworkSwitchError";
 
 export interface AdventurerFormProps {
   isActive: boolean;
@@ -45,7 +41,6 @@ export const AdventurerForm = ({
   adventurers,
 }: AdventurerFormProps) => {
   const { account } = useAccount();
-  const { chain } = useNetwork();
   const { connectors, connect } = useConnectors();
 
   const { addTransaction } = useTransactionManager();
@@ -62,8 +57,6 @@ export const AdventurerForm = ({
     startingWisdom: "0",
     startingCharisma: "0",
   });
-  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
-  const setScreen = useUIStore((state) => state.setScreen);
   const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
 
   const calls = useTransactionCartStore((state) => state.calls);
@@ -77,9 +70,8 @@ export const AdventurerForm = ({
   const { gameContract, lordsContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const gameData = new GameData();
-  const [firstAdventurer, setFirstAdventurer] = useState(false);
   const [step, setStep] = useState(1);
-  const connected = useUIStore((state) => state.connected);
+  const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const setConnected = useUIStore((state) => state.setConnected);
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
 
@@ -462,15 +454,17 @@ export const AdventurerForm = ({
               fill
             />
 
-            <div className="absolute top-6 left-0 right-0 sm:p-4 text-xs sm:text-xl leading-loose z-10 text-center">
-              <TypeAnimation
-                sequence={[battle]}
-                wrapper="span"
-                cursor={true}
-                speed={40}
-                style={{ fontSize: "2em" }}
-              />
-            </div>
+            {!isWrongNetwork && (
+              <div className="absolute top-6 left-0 right-0 sm:p-4 text-xs sm:text-xl leading-loose z-10 text-center">
+                <TypeAnimation
+                  sequence={[battle]}
+                  wrapper="span"
+                  cursor={true}
+                  speed={40}
+                  style={{ fontSize: "2em" }}
+                />
+              </div>
+            )}
             <div className="absolute top-1/2 left-0 right-0 flex flex-col items-center gap-4 z-10">
               {!account ? (
                 <>
@@ -501,11 +495,7 @@ export const AdventurerForm = ({
                     <Button
                       type="submit"
                       size={"xl"}
-                      disabled={
-                        !formFilled ||
-                        !account ||
-                        (account && chain?.id !== "0x534e5f474f45524c49")
-                      }
+                      disabled={!formFilled || !account || isWrongNetwork}
                     >
                       {formFilled ? "Start Game!!" : "Fill details"}
                     </Button>

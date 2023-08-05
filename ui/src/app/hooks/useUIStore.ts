@@ -20,6 +20,8 @@ export type ScreenPage =
 type State = {
   connected: boolean;
   setConnected: (value: boolean) => void;
+  isWrongNetwork: boolean;
+  setIsWrongNetwork: (value: boolean) => void;
   onboarded: boolean;
   handleOnboarded: () => void;
   screen: ScreenPage;
@@ -50,12 +52,13 @@ type State = {
   setInventorySelected: (value: number) => void;
   arcadeDialog: boolean;
   showArcadeDialog: (value: boolean) => void;
-  
 };
 
 const useUIStore = create<State>((set) => ({
   connected: false,
   setConnected: (value) => set({ connected: value }),
+  isWrongNetwork: false,
+  setIsWrongNetwork: (value) => set({ isWrongNetwork: value }),
   onboarded: false,
   handleOnboarded: () => {
     set({ onboarded: true });

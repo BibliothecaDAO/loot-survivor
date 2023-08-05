@@ -14,8 +14,6 @@ export const CreateAdventurer = ({
   onEscape,
   adventurers,
 }: CreateAdventurerProps) => {
-  const { resetDataUpdated } = useQueriesStore();
-
   return (
     <>
       <AdventurerForm

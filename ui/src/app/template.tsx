@@ -1,7 +1,7 @@
 "use client";
 
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
-import { StarknetConfig } from "@starknet-react/core";
+import { StarknetConfig, useNetwork } from "@starknet-react/core";
 import { useBurner } from "./lib/burner";
 import { getGraphQLUrl } from "./lib/constants";
 import { connectors } from "./lib/connectors";
@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const client = new ApolloClient({
-    uri: getGraphQLUrl,
+    uri: getGraphQLUrl(),
     cache: new InMemoryCache({
       typePolicies: {
         Query: {
@@ -70,7 +70,10 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const { arcadeAccounts } = useBurner();
 
   return (
-    <StarknetConfig connectors={[...connectors, ...arcadeAccounts]} autoConnect>
+    <StarknetConfig
+      connectors={[...connectors, ...arcadeAccounts] as any}
+      autoConnect
+    >
       <ApolloProvider client={client}>{children}</ApolloProvider>
     </StarknetConfig>
   );
