@@ -1314,57 +1314,47 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 pi.adventurer_state_with_bag["adventurer_state"]["owner"]
             ),
             "cost": encode_int_as_bytes(pi.cost),
-            "purchasedTime": block_time,
-            "lastUpdatedTime": block_time,
             "timestamp": datetime.now(),
         }
         # Get the most recently created item so it can be updated
-        try:
-            item = await info.storage.find_and_update(
-                "items",
-                {
-                    "item": check_exists_int(
-                        pi.item_id,
-                    ),
-                    "adventurerId": check_exists_int(
-                        pi.adventurer_state_with_bag["adventurer_state"][
-                            "adventurer_id"
-                        ]
-                    ),
-                },
-                {
-                    "$set": {
-                        "equipped": False,
-                        "timestamp": datetime.now(),
-                    },
-                },
-            )
-            await update_adventurer_helper(
-                info, pi.adventurer_state_with_bag["adventurer_state"], block_time
-            )
-            await update_adventurer_bag(
+        await info.storage.find_and_update(
+            "items",
+            {
+                "item": check_exists_int(
+                    pi.item_id,
+                ),
+                "adventurerId": check_exists_int(
+                    pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"]
+                ),
+            },
+            {
+                "$set": purchased_item_doc,
+            },
+        )
+        await update_adventurer_helper(
+            info, pi.adventurer_state_with_bag["adventurer_state"], block_time
+        )
+        await update_adventurer_bag(
+            info,
+            pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+            pi.adventurer_state_with_bag["bag"],
+        )
+        if pi.equipped:
+            await swap_item(
                 info,
                 pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-                pi.adventurer_state_with_bag["bag"],
-            )
-            if pi.equipped:
-                await swap_item(
-                    info,
-                    pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-                    pi.item_id,
-                    pi.unequipped_item_id,
-                    block_time,
-                )
-            print(
-                "- [purchased item]",
-                pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-                "->",
                 pi.item_id,
-                "->",
-                pi.cost,
+                pi.unequipped_item_id,
+                block_time,
             )
-        except StopIteration:
-            print("No documents found in item")
+        print(
+            "- [purchased item]",
+            pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+            "->",
+            pi.item_id,
+            "->",
+            pi.cost,
+        )
 
     async def equipped_item(
         self,
