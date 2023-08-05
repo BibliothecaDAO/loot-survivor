@@ -313,22 +313,65 @@ async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
     )
 
 
-# async def update_beast_health(info, beast_health):
-#     beast = await info.storage.find_one(
-#         "beasts",
-#         {
-#             "item": check_exists_int(item_id),
-#             "adventurerId": check_exists_int(adventurer_id),
-#         },
-#     )
-#     await info.storage.find_one_and_update(
-#         "beasts",
-#         {"id": check_exists_int(unequipped_item)},
-#         {
-#             "$set": {"equippedAdventurerId": check_exists_int(0)},
-#             "lastUpdatedTime": time,
-#         },
-#     )
+async def create_base_items(info, adventurer_state, item_id):
+    for i in range(1, 102):
+        await info.storage.insert_one(
+            "items",
+            {
+                "item": check_exists_int(i),
+                "adventurerId": check_exists_int(adventurer_state["adventurer_id"]),
+                "owner": False,
+                "equipped": False,
+                "ownerAddress": check_exists_int(adventurer_state["owner"]),
+                "xp": encode_int_as_bytes(0),
+                "cost": encode_int_as_bytes(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
+                "isAvailable": False,
+                "timestamp": datetime.now(),
+            },
+        )
+    await info.storage.find_one_and_update(
+        "items",
+        {
+            "item": check_exists_int(item_id),
+            "adventurerId": check_exists_int(adventurer_state["adventurer_id"]),
+        },
+        {
+            "$set": {
+                "item": check_exists_int(item_id),
+                "adventurerId": check_exists_int(adventurer_state["adventurer_id"]),
+                "owner": True,
+                "equipped": True,
+                "ownerAddress": check_exists_int(adventurer_state["owner"]),
+                "xp": encode_int_as_bytes(0),
+                "cost": encode_int_as_bytes(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
+                "isAvailable": False,
+                "timestamp": datetime.now(),
+            }
+        },
+    )
+
+
+async def reset_item_availability(info, adventurer_state):
+    for i in range(1, 102):
+        await info.storage.find_one_and_update(
+            "items",
+            {
+                "item": check_exists_int(i),
+                "adventurerId": check_exists_int(adventurer_state["adventurer_id"]),
+            },
+            {
+                "$set": {
+                    "isAvailable": False,
+                    "timestamp": datetime.now(),
+                }
+            },
+        )
 
 
 class LootSurvivorIndexer(StarkNetIndexer):
@@ -503,23 +546,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "timestamp": datetime.now(),
         }
         await info.storage.insert_one("adventurers", start_game_doc)
-        start_item_doc = {
-            "item": check_exists_int(sg.adventurer_state["adventurer"]["weapon"]["id"]),
-            "adventurerId": check_exists_int(sg.adventurer_state["adventurer_id"]),
-            "owner": True,
-            "equipped": True,
-            "ownerAddress": check_exists_int(sg.adventurer_state["owner"]),
-            "xp": encode_int_as_bytes(0),
-            "cost": encode_int_as_bytes(0),
-            "special1": check_exists_int(0),
-            "special2": check_exists_int(0),
-            "special3": check_exists_int(0),
-            "createdTime": datetime.now(),
-            "purchasedTime": check_exists_int(0),
-            "lastUpdatedTime": block_time,
-            "timestamp": datetime.now(),
-        }
-        await info.storage.insert_one("items", start_item_doc)
+        create_base_items(
+            info, sg.adventurer_state, sg.adventurer_state["adventurer"]["weapon"]["id"]
+        )
         print(
             "- [start game]",
             sg.adventurer_state["adventurer_id"],
@@ -1291,7 +1320,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         }
         # Get the most recently created item so it can be updated
         try:
-            item = await info.storage.find(
+            item = await info.storage.find_and_update(
                 "items",
                 {
                     "item": check_exists_int(
@@ -1303,22 +1332,12 @@ class LootSurvivorIndexer(StarkNetIndexer):
                         ]
                     ),
                 },
-                sort={"createdTime": -1},
-                limit=1,
-            )
-            item_document = next(item)
-            await info.storage.find_one_and_update(
-                "items",
                 {
-                    "item": check_exists_int(pi.item_id),
-                    "adventurerId": check_exists_int(
-                        pi.adventurer_state_with_bag["adventurer_state"][
-                            "adventurer_id"
-                        ]
-                    ),
-                    "lastUpdatedTime": item_document["lastUpdatedTime"],
+                    "$set": {
+                        "equipped": False,
+                        "timestamp": datetime.now(),
+                    },
                 },
-                {"$set": purchased_item_doc},
             )
             await update_adventurer_helper(
                 info, pi.adventurer_state_with_bag["adventurer_state"], block_time
