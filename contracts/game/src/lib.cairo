@@ -223,67 +223,7 @@ mod Game {
             );
         }
 
-        // TODO: Pull out common code between this and attack()
-        fn attack_till_death(ref self: ContractState, adventurer_id: u256) {
-            // assert caller owns adventurer
-            _assert_ownership(@self, adventurer_id);
-
-            // get item names from storage
-            let mut name_storage1 = _loot_special_names_storage_unpacked(
-                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
-            );
-            let mut name_storage2 = _loot_special_names_storage_unpacked(
-                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
-            );
-
-            // store the unmodified storages so we can use these
-            // to remove the same stat boosts when we pack and save the adventurer
-            // TODO: If we add a modified flag to the storages, we can
-            // check if they have been modified and if they have
-            // we can grab a fresh copy of the storages from storage
-            // to remove the special stat boosts before overwriting specials storage
-            // this will remove the need for these lines of code in all the 
-            // external functions. 
-            let original_name_storage1 = name_storage1;
-            let original_name_storage2 = name_storage2;
-
-            // get adventurer from storage and unpack
-            let mut adventurer = _unpack_adventurer_apply_stat_boost(
-                @self, adventurer_id, name_storage1, name_storage2
-            );
-
-            // assert adventurer is not dead
-            _assert_not_dead(@self, adventurer);
-
-            // assert adventurer has a beast to attack
-            _assert_in_battle(@self, adventurer);
-
-            // if the adventurer has exceeded the idle penalty threshold
-            let (is_idle, num_blocks) = _idle_longer_than_penalty_threshold(@self, adventurer);
-            if (is_idle) {
-                // apply idle penalty
-                _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
-            } else {
-                // otherwise process their attack
-                _attack_till_death(
-                    ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2
-                );
-            }
-
-            // update players last action block number            
-            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
-
-            // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                original_name_storage1,
-                original_name_storage2
-            );
-        }
-
-        fn attack(ref self: ContractState, adventurer_id: u256) {
+        fn attack(ref self: ContractState, adventurer_id: u256, to_the_death: bool) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
@@ -325,7 +265,12 @@ mod Game {
             } else {
                 // otherwise process their attack
                 _attack(
-                    ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    ref name_storage1,
+                    ref name_storage2,
+                    to_the_death
                 );
             }
 
@@ -1956,13 +1901,13 @@ mod Game {
         )
     }
 
-    // TODO: Pull out common code between this and _attack()
-    fn _attack_till_death(
+    fn _attack(
         ref self: ContractState,
         ref adventurer: Adventurer,
         adventurer_id: u256,
         ref name_storage1: ItemSpecialsStorage,
-        ref name_storage2: ItemSpecialsStorage
+        ref name_storage2: ItemSpecialsStorage,
+        to_the_death: bool,
     ) {
         // https://github.com/starkware-libs/cairo/issues/2942
         // internal::revoke_ap_tracking();
@@ -2096,154 +2041,13 @@ mod Game {
                 false
             );
 
-            // if beast and adventurer are still alived
-            if (adventurer_died == false) {
+            // if the adventurer is still alive and fighting to the death
+            if (adventurer_died == false && to_the_death) {
                 // attack again
-                _attack_till_death(
-                    ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2
+                _attack(
+                    ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2, true
                 );
             }
-        }
-    }
-
-    fn _attack(
-        ref self: ContractState,
-        ref adventurer: Adventurer,
-        adventurer_id: u256,
-        ref name_storage1: ItemSpecialsStorage,
-        ref name_storage2: ItemSpecialsStorage
-    ) {
-        // https://github.com/starkware-libs/cairo/issues/2942
-        // internal::revoke_ap_tracking();
-        // get adventurer entropy from storage
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
-            .entropy
-            .into();
-
-        // get beast seed based on adventurer state and adventurer entropy
-        let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
-
-        // regenerate beast from seed
-        let beast = ImplBeast::get_beast(
-            adventurer.get_level(),
-            ImplBeast::get_special_names(
-                adventurer.get_level(), beast_seed, NamePrefixLength.into(), NameSuffixLength.into()
-            ),
-            beast_seed,
-            ImplLoot::get_type(adventurer.weapon.id)
-        );
-
-        // get game entropy from storage
-        let global_entropy: u128 = _get_global_entropy(@self).into();
-
-        // When generating the beast, we need to ensure entropy remains fixed for the battle
-        // for attacking however, we should change the entropy during battle so we use adventurer and beast health
-        // to accomplish this
-        let (attack_rnd_1, attack_rnd_2) = _get_live_entropy(
-            adventurer_entropy, global_entropy, adventurer
-        );
-
-        // get the damage dealt to the beast
-        let (damage_dealt, critical_hit) = beast
-            .attack(
-                _get_combat_spec(@self, adventurer_id, adventurer.weapon),
-                adventurer.get_luck(),
-                adventurer.stats.strength,
-                attack_rnd_1
-            );
-
-        // if the amount of damage dealt to beast exceeds its health
-        if (damage_dealt >= adventurer.beast_health) {
-            // the beast is dead so set health to zero
-            adventurer.beast_health = 0;
-
-            // grant equipped items and adventurer xp for the encounter
-            let xp_earned = beast.get_xp_reward();
-
-            // grant adventurer gold reward. We use battle fixed entropy
-            // to fix this result at the start of the battle, mitigating simulate-and-wait strategies
-            let gold_reward = beast.get_gold_reward(beast_seed);
-            adventurer.add_gold(gold_reward);
-
-            // grant adventuer xp
-            let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_earned);
-
-            // grant equipped items xp
-            _grant_xp_to_equipped_items(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                ref name_storage1,
-                ref name_storage2,
-                xp_earned,
-                attack_rnd_2
-            );
-
-            // emit slayed beast event
-            __event__SlayedBeast(
-                ref self,
-                SlayedBeast {
-                    adventurer_state: AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                        }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
-                        tier: beast.combat_spec.tier,
-                        item_type: beast.combat_spec.item_type,
-                        level: beast.combat_spec.level,
-                        specials: beast.combat_spec.specials
-                    },
-                    damage_dealt: damage_dealt,
-                    critical_hit: critical_hit,
-                    xp_earned_adventurer: xp_earned,
-                    xp_earned_items: xp_earned * ITEM_XP_MULTIPLIER_BEASTS,
-                    gold_earned: gold_reward
-                }
-            );
-
-            // if adventurers new level is greater than previous level
-            if (new_level > previous_level) {
-                _handle_adventurer_level_up(
-                    ref self, ref adventurer, adventurer_id, previous_level, new_level
-                );
-            }
-        } else {
-            // handle beast counter attack
-
-            // deduct adventurer damage from beast health
-            adventurer.beast_health -= damage_dealt;
-
-            // emit attack beast event
-            __event__AttackedBeast(
-                ref self,
-                AttackedBeast {
-                    adventurer_state: AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                        }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
-                        tier: beast.combat_spec.tier,
-                        item_type: beast.combat_spec.item_type,
-                        level: beast.combat_spec.level,
-                        specials: beast.combat_spec.specials
-                    },
-                    damage: damage_dealt,
-                    critical_hit: critical_hit,
-                    location: ImplCombat::slot_to_u8(Slot::None(())),
-                }
-            );
-
-            // starter beast ambushes the adventurer
-            _beast_counter_attack(
-                ref self,
-                ref adventurer,
-                adventurer_id,
-                AdventurerUtils::get_random_attack_location(attack_rnd_1),
-                beast,
-                beast_seed,
-                attack_rnd_2,
-                false
-            );
         }
     }
 
