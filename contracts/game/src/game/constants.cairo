@@ -21,6 +21,7 @@ mod messages {
     const ADVENTURER_DOESNT_OWN_ITEM: felt252 = 'Adventurer doesnt own item';
     const ZERO_DEXTERITY: felt252 = 'Cant flee, no dexterity';
     const WRONG_STARTING_STATS: felt252 = 'Wrong starting stat count';
+    const MUST_USE_ALL_STATS: felt252 = 'Must use all stats';
 }
 
 const BLOCKS_IN_A_WEEK: u64 = 3360;
