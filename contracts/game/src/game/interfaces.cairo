@@ -28,15 +28,17 @@ trait IGame<TContractState> {
     fn flee(ref self: TContractState, adventurer_id: u256);
     fn equip(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
     fn drop_items(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
-    fn buy_items(ref self: TContractState, adventurer_id: u256, items: Array<ItemPurchase>);
-    fn buy_potions(ref self: TContractState, adventurer_id: u256, amount: u8);
-    fn upgrade_stats(ref self: TContractState, adventurer_id: u256, stats: Array<u8>);
     fn upgrade_adventurer(
         ref self: TContractState,
         adventurer_id: u256,
-        potion_quantity: u8,
+        potions: u8,
+        strength: u8,
+        dexterity: u8,
+        vitality: u8,
+        intelligence: u8,
+        wisdom: u8,
+        charisma: u8,
         items: Array<ItemPurchase>,
-        stats: Array<u8>
     );
     fn slay_idle_adventurer(ref self: TContractState, adventurer_id: u256);
 

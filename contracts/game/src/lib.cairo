@@ -81,12 +81,6 @@ mod Game {
     enum Event {
         StartGame: StartGame,
         UpgradeAvailable: UpgradeAvailable,
-        StrengthIncreased: StrengthIncreased,
-        DexterityIncreased: DexterityIncreased,
-        VitalityIncreased: VitalityIncreased,
-        IntelligenceIncreased: IntelligenceIncreased,
-        WisdomIncreased: WisdomIncreased,
-        CharismaIncreased: CharismaIncreased,
         DiscoveredHealth: DiscoveredHealth,
         DiscoveredGold: DiscoveredGold,
         DiscoveredXP: DiscoveredXP,
@@ -99,12 +93,10 @@ mod Game {
         SlayedBeast: SlayedBeast,
         FleeFailed: FleeFailed,
         FleeSucceeded: FleeSucceeded,
-        PurchasedItem: PurchasedItem,
         EquippedItem: EquippedItem,
         DroppedItems: DroppedItems,
         ItemLeveledUp: ItemLeveledUp,
         ItemSpecialUnlocked: ItemSpecialUnlocked,
-        PurchasedPotion: PurchasedPotion,
         NewHighScore: NewHighScore,
         AdventurerDied: AdventurerDied,
         AdventurerLeveledUp: AdventurerLeveledUp,
@@ -542,130 +534,17 @@ mod Game {
             );
         }
 
-        // @notice This function allows an adventurer to purchase multiple items from the market.
-        // @param adventurer_id The unique identifier of the adventurer.
-        // @param items An array of structs representing the items to be purchased. Each struct contains an item ID and a boolean to represent whether the item is to be equipped or not.
-        fn buy_items(ref self: ContractState, adventurer_id: u256, items: Array<ItemPurchase>) {
-            // assert caller owns adventurer
-            _assert_ownership(@self, adventurer_id);
-
-            // get item names from storage
-            let mut name_storage1 = _loot_special_names_storage_unpacked(
-                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
-            );
-            let mut name_storage2 = _loot_special_names_storage_unpacked(
-                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
-            );
-
-            // store the unmodified storages so we can use these
-            // to remove the same stat boosts when we pack and save the adventurer
-            let original_name_storage1 = name_storage1;
-            let original_name_storage2 = name_storage2;
-
-            // unpack adventurer from storage
-            let mut adventurer = _unpack_adventurer_apply_stat_boost(
-                @self, adventurer_id, name_storage1, name_storage2
-            );
-            let original_adventurer = adventurer.clone();
-
-            // unpack Loot bag from storage
-            let mut bag = _bag_unpacked(@self, adventurer_id);
-
-            // assert adventurer is not dead
-            _assert_not_dead(@self, original_adventurer);
-
-            // assert adventurer is not in battle
-            _assert_not_in_battle(@self, original_adventurer);
-
-            // assert market is open
-            _assert_market_is_open(@self, original_adventurer);
-
-            // buy the provided items
-            let bag_mutated = _buy_items(
-                ref self, ref adventurer, original_adventurer, ref bag, adventurer_id, items
-            );
-
-            // if the purchases mutated the adventurer's bag
-            if (bag_mutated) {
-                // pack and save updated bag
-                _pack_bag(ref self, adventurer_id, bag);
-            }
-
-            // remove stat boosts, pack, and save adventurer
-            _pack_adventurer_remove_stat_boost(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                original_name_storage1,
-                original_name_storage2
-            );
-        }
-
-        // @notice This function allows an adventurer to purchase a number of health potions.
-        // @dev This function assumes that the adventurer is alive, not in battle, and that the market is open.
-        // @param adventurer_id The unique identifier of the adventurer.
-        // @param amount The amount of potions to be purchased.
-        fn buy_potions(ref self: ContractState, adventurer_id: u256, amount: u8) {
-            // assert caller owns adventurer
-            _assert_ownership(@self, adventurer_id);
-
-            // get item names from storage
-            let mut name_storage1 = _loot_special_names_storage_unpacked(
-                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
-            );
-            let mut name_storage2 = _loot_special_names_storage_unpacked(
-                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
-            );
-
-            let orginal_name_storage1 = name_storage1;
-            let orginal_name_storage2 = name_storage2;
-
-            // unpack adventurer from storage (stat boosts applied on unpacking)
-            let mut adventurer = _unpack_adventurer_apply_stat_boost(
-                @self, adventurer_id, name_storage1, name_storage2
-            );
-
-            // assert adventurer is not dead
-            _assert_not_dead(@self, adventurer);
-
-            // assert adventurer is not in a battle
-            _assert_not_in_battle(@self, adventurer);
-
-            // assert market is open
-            _assert_market_is_open(@self, adventurer);
-
-            // buy potions
-            let (cost, health_increase) = _buy_potions(
-                ref self, ref adventurer, adventurer_id, amount
-            );
-
-            // emit purchase potion event
-            __event_PurchasedPotion(
-                ref self,
-                AdventurerState {
-                    owner: get_caller_address(), adventurer_id, adventurer: adventurer
-                },
-                amount,
-                cost,
-                health_increase,
-            );
-
-            // pack and save adventurer
-            _pack_adventurer_remove_stat_boost(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                orginal_name_storage1,
-                orginal_name_storage2
-            );
-        }
-
         fn upgrade_adventurer(
             ref self: ContractState,
             adventurer_id: u256,
-            potion_quantity: u8,
+            potions: u8,
+            strength: u8,
+            dexterity: u8,
+            vitality: u8,
+            intelligence: u8,
+            wisdom: u8,
+            charisma: u8,
             items: Array<ItemPurchase>,
-            stats: Array<u8>
         ) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -687,9 +566,6 @@ mod Game {
             );
             let original_adventurer = adventurer.clone();
 
-            // assert all available stats are being used
-            _assert_using_all_stats(@self, original_adventurer, stats.len());
-
             // assert adventurer is not dead
             _assert_not_dead(@self, original_adventurer);
 
@@ -699,26 +575,61 @@ mod Game {
             // assert market is open
             _assert_market_is_open(@self, original_adventurer);
 
-            // upgrade stats
-            _upgrade_stats(ref self, ref adventurer, adventurer_id, stats);
+            // assert all available stats are being used
+            let num_stat_upgrades = strength
+                + dexterity
+                + vitality
+                + intelligence
+                + wisdom
+                + charisma;
+            _assert_stat_balance(@self, original_adventurer, num_stat_upgrades.into());
 
-            // buy potions
-            let (potion_cost, health_from_potions) = _buy_potions(
-                ref self, ref adventurer, adventurer_id, potion_quantity
-            );
+            // if stats are being increased as part of the upgrade
+            if num_stat_upgrades > 0 {
+                // upgrade adventurer's stats
+                _upgrade_stats(
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    strength,
+                    dexterity,
+                    vitality,
+                    intelligence,
+                    wisdom,
+                    charisma
+                );
+            }
+
+            // if potions are being purchased as part of the upgrade
+            let mut potion_cost = 0;
+            let mut health_from_potions = 0;
+            if potions > 0 {
+                // buy potions and record the cost and health from potions
+                let (potion_cost, health_from_potions) = _buy_potions(
+                    ref self, ref adventurer, adventurer_id, potions
+                );
+            }
 
             // unpack Loot bag from storage
             let mut bag = _bag_unpacked(@self, adventurer_id);
 
-            // buy items, pass it items clone so we retain ownership for using it in the event
-            let bag_mutated = _buy_items(
-                ref self, ref adventurer, original_adventurer, ref bag, adventurer_id, items.clone()
-            );
+            // if items are being purchased as part of the upgrade
+            if items.len() > 0 {
+                // buy items, passing in a clone of items so we retain ownership of original for the event
+                let bag_mutated = _buy_items(
+                    ref self,
+                    ref adventurer,
+                    original_adventurer,
+                    ref bag,
+                    adventurer_id,
+                    items.clone()
+                );
 
-            // if the purchases mutated the adventurer's bag
-            if (bag_mutated) {
-                // pack and save updated bag
-                _pack_bag(ref self, adventurer_id, bag);
+                // if the purchases mutated the adventurer's bag
+                if (bag_mutated) {
+                    // pack and save updated bag
+                    _pack_bag(ref self, adventurer_id, bag);
+                }
             }
 
             // remove stat boosts, pack, and save adventurer
@@ -750,50 +661,11 @@ mod Game {
                     wisdom_increase: adventurer.stats.wisdom - original_adventurer.stats.wisdom,
                     charisma_increase: adventurer.stats.charisma
                         - original_adventurer.stats.charisma,
-                    potions_purchased: potion_quantity,
+                    potions_purchased: potions,
                     cost_of_potions: potion_cost,
                     health_from_potions: health_from_potions,
                     items_purchased: items
                 }
-            );
-        }
-
-        // @dev Function to upgrade the stats of an adventurer.
-        // @param adventurer_id The unique identifier for the adventurer to be upgraded.
-        // @param stats Array of integers representing the stats to be upgraded.
-        fn upgrade_stats(ref self: ContractState, adventurer_id: u256, stats: Array<u8>) {
-            // assert caller owns adventurer
-            _assert_ownership(@self, adventurer_id);
-
-            // get item names from storage
-            let mut name_storage1 = _loot_special_names_storage_unpacked(
-                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1
-            );
-            let mut name_storage2 = _loot_special_names_storage_unpacked(
-                @self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2
-            );
-
-            let original_name_storage1 = name_storage1;
-            let original_name_storage2 = name_storage2;
-
-            // unpack adventurer from storage (stat boosts applied on unpacking)
-            let mut adventurer = _unpack_adventurer_apply_stat_boost(
-                @self, adventurer_id, name_storage1, name_storage2
-            );
-
-            // assert adventurer is not dead
-            _assert_not_dead(@self, adventurer);
-
-            // upgrade adventurer's stat
-            _upgrade_stats(ref self, ref adventurer, adventurer_id, stats);
-
-            // remove stat boosts, pack, and save adventurer
-            _pack_adventurer_remove_stat_boost(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                original_name_storage1,
-                original_name_storage2
             );
         }
 
@@ -2760,21 +2632,36 @@ mod Game {
     }
 
     fn _upgrade_stats(
-        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, stats: Array<u8>
+        ref self: ContractState,
+        ref adventurer: Adventurer,
+        adventurer_id: u256,
+        strength_increase: u8,
+        dexterity_increase: u8,
+        vitality_increase: u8,
+        intelligence_increase: u8,
+        wisdom_increase: u8,
+        charisma_increase: u8
     ) {
-        internal::revoke_ap_tracking();
-        // assert adventurer has the required stat upgrades
-        _assert_has_required_stat_points(@self, adventurer, stats.len().try_into().unwrap());
-
-        // upgrade adventurer's stat
-        let mut i: u32 = 0;
-        loop {
-            if i >= stats.len() {
-                break ();
-            }
-            _upgrade_stat(ref self, adventurer_id, ref adventurer, *stats.at(i), 1);
-            i += 1;
-        };
+        if strength_increase > 0 {
+            adventurer.increase_strength(strength_increase);
+        }
+        if dexterity_increase > 0 {
+            adventurer.increase_dexterity(dexterity_increase);
+        }
+        if vitality_increase > 0 {
+            adventurer.increase_vitality(vitality_increase);
+            adventurer.increase_health(VITALITY_INSTANT_HEALTH_BONUS);
+        }
+        if intelligence_increase > 0 {
+            adventurer.increase_intelligence(intelligence_increase);
+        }
+        if wisdom_increase > 0 {
+            adventurer.increase_wisdom(wisdom_increase);
+        }
+        if charisma_increase > 0 {
+            adventurer.increase_charisma(charisma_increase);
+        }
+        adventurer.stat_points_available = 0;
     }
 
     // @dev This function allows the adventurer to purchase an item from the market.
@@ -2854,56 +2741,7 @@ mod Game {
             bag_mutated = true;
         }
 
-        // if the adventurer opted to equip their item
-        // and had a 
-        // emit a purchased item event
-        // with the unequipped item id set to 0
-        __event_PurchasedItem(
-            ref self,
-            AdventurerStateWithBag {
-                adventurer_state: AdventurerState {
-                    owner: get_caller_address(),
-                    adventurer_id: adventurer_id,
-                    adventurer: adventurer
-                }, bag: bag
-            },
-            item_id,
-            charisma_adjusted_price,
-            equip,
-            unequipping_item.id,
-        );
-
         bag_mutated
-    }
-
-    fn _upgrade_stat(
-        ref self: ContractState,
-        adventurer_id: u256,
-        ref adventurer: Adventurer,
-        stat_id: u8,
-        amount: u8
-    ) {
-        // assert adventurer has stat UpgradeAvailable available
-        _assert_has_required_stat_points(@self, adventurer, amount);
-
-        //deduct upgrades from adventurer available stat points
-        adventurer.stat_points_available -= amount;
-
-        // increase relevant stat and emit stat specific event
-        if (stat_id == StatisticIndex::STRENGTH) {
-            adventurer.increase_strength(amount);
-        } else if (stat_id == StatisticIndex::DEXTERITY) {
-            adventurer.increase_dexterity(amount);
-        } else if (stat_id == StatisticIndex::VITALITY) {
-            adventurer.increase_vitality(amount);
-            adventurer.increase_health(VITALITY_INSTANT_HEALTH_BONUS);
-        } else if (stat_id == StatisticIndex::INTELLIGENCE) {
-            adventurer.increase_intelligence(amount);
-        } else if (stat_id == StatisticIndex::WISDOM) {
-            adventurer.increase_wisdom(amount);
-        } else if (stat_id == StatisticIndex::CHARISMA) {
-            adventurer.increase_charisma(amount);
-        }
     }
 
     // _get_live_entropy generates entropy for exploration
@@ -3164,9 +3002,6 @@ mod Game {
     fn _assert_starting_stat_count(self: @ContractState, amount: u8) {
         assert(amount == STARTING_STATS, messages::WRONG_STARTING_STATS);
     }
-    fn _assert_has_required_stat_points(self: @ContractState, adventurer: Adventurer, amount: u8) {
-        assert(adventurer.stat_points_available >= amount, messages::INSUFFICIENT_STAT_UPGRADES);
-    }
     fn _assert_fatally_idle(self: @ContractState, adventurer: Adventurer) {
         let idle_blocks = adventurer
             .get_idle_blocks(starknet::get_block_info().unbox().block_number);
@@ -3186,8 +3021,16 @@ mod Game {
             messages::HEALTH_FULL
         );
     }
-    fn _assert_using_all_stats(self: @ContractState, adventurer: Adventurer, stat_count: u32) {
-        assert(adventurer.stat_points_available.into() == stat_count, messages::MUST_USE_ALL_STATS);
+    fn _assert_stat_balance(self: @ContractState, adventurer: Adventurer, stat_count: u32) {
+        // if adventurer has less than the number of stats they are trying to upgrade
+        if adventurer.stat_points_available.into() < stat_count {
+            // panic with insufficient stat upgrades message
+            panic_with_felt252(messages::INSUFFICIENT_STAT_UPGRADES);
+        } else if adventurer.stat_points_available.into() > stat_count {
+            // if the adventurer has more than the number of stats they are trying to upgrade
+            // panic with must use all stats message
+            panic_with_felt252(messages::MUST_USE_ALL_STATS);
+        }
     }
     fn _idle_longer_than_penalty_threshold(
         self: @ContractState, adventurer: Adventurer
@@ -3480,42 +3323,6 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct StrengthIncreased {
-        adventurer_state: AdventurerState,
-        amount: u8
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct DexterityIncreased {
-        adventurer_state: AdventurerState,
-        amount: u8
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct VitalityIncreased {
-        adventurer_state: AdventurerState,
-        amount: u8
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct IntelligenceIncreased {
-        adventurer_state: AdventurerState,
-        amount: u8
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct WisdomIncreased {
-        adventurer_state: AdventurerState,
-        amount: u8
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct CharismaIncreased {
-        adventurer_state: AdventurerState,
-        amount: u8
-    }
-
-    #[derive(Drop, starknet::Event)]
     struct DiscoveredHealth {
         adventurer_state: AdventurerState,
         health_amount: u16
@@ -3664,14 +3471,6 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct PurchasedPotion {
-        adventurer_state: AdventurerState,
-        quantity: u8,
-        cost: u16,
-        health_gained: u16,
-    }
-
-    #[derive(Drop, starknet::Event)]
     struct NewHighScore {
         adventurer_state: AdventurerState,
         rank: u8, // 1-3
@@ -3742,42 +3541,6 @@ mod Game {
         adventurer_meta: AdventurerMetadata
     ) {
         self.emit(Event::StartGame(StartGame { adventurer_state, adventurer_meta }));
-    }
-
-    fn __event__StrengthIncreased(
-        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
-    ) {
-        self.emit(Event::StrengthIncreased(StrengthIncreased { adventurer_state, amount }));
-    }
-
-    fn __event__DexterityIncreased(
-        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
-    ) {
-        self.emit(Event::DexterityIncreased(DexterityIncreased { adventurer_state, amount }));
-    }
-
-    fn __event__VitalityIncreased(
-        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
-    ) {
-        self.emit(Event::VitalityIncreased(VitalityIncreased { adventurer_state, amount }));
-    }
-
-    fn __event__IntelligenceIncreased(
-        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
-    ) {
-        self.emit(Event::IntelligenceIncreased(IntelligenceIncreased { adventurer_state, amount }));
-    }
-
-    fn __event__WisdomIncreased(
-        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
-    ) {
-        self.emit(Event::WisdomIncreased(WisdomIncreased { adventurer_state, amount }));
-    }
-
-    fn __event__CharismaIncreased(
-        ref self: ContractState, adventurer_state: AdventurerState, amount: u8
-    ) {
-        self.emit(Event::CharismaIncreased(CharismaIncreased { adventurer_state, amount }));
     }
 
     fn __event__DiscoveredHealth(
@@ -3867,24 +3630,6 @@ mod Game {
         self.emit(Event::FleeSucceeded(flee_succeeded));
     }
 
-    fn __event_PurchasedItem(
-        ref self: ContractState,
-        adventurer_state_with_bag: AdventurerStateWithBag,
-        item_id: u8,
-        cost: u16,
-        equipped: bool,
-        unequipped_item_id: u8
-    ) {
-        self
-            .emit(
-                Event::PurchasedItem(
-                    PurchasedItem {
-                        adventurer_state_with_bag, item_id, cost, equipped, unequipped_item_id
-                    }
-                )
-            );
-    }
-
     fn __event_EquippedItem(
         ref self: ContractState,
         adventurer_state_with_bag: AdventurerStateWithBag,
@@ -3933,21 +3678,6 @@ mod Game {
             .emit(
                 Event::ItemSpecialUnlocked(
                     ItemSpecialUnlocked { adventurer_state, id, level, specials }
-                )
-            );
-    }
-
-    fn __event_PurchasedPotion(
-        ref self: ContractState,
-        adventurer_state: AdventurerState,
-        quantity: u8,
-        cost: u16,
-        health_gained: u16
-    ) {
-        self
-            .emit(
-                Event::PurchasedPotion(
-                    PurchasedPotion { adventurer_state, quantity, cost, health_gained }
                 )
             );
     }
