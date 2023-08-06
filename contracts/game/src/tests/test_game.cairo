@@ -171,11 +171,11 @@ mod tests {
 
         // go explore
         game.explore(ADVENTURER_ID);
-        game.flee(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID, false);
         game.explore(ADVENTURER_ID);
-        game.flee(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID, false);
         game.explore(ADVENTURER_ID);
-        game.flee(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID, false);
         game.explore(ADVENTURER_ID);
         game.explore(ADVENTURER_ID);
         game.explore(ADVENTURER_ID);
@@ -197,7 +197,7 @@ mod tests {
 
         // go explore
         game.explore(ADVENTURER_ID);
-        game.flee(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID, false);
         game.explore(ADVENTURER_ID);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -218,7 +218,7 @@ mod tests {
         // go explore
         game.explore(ADVENTURER_ID);
         game.explore(ADVENTURER_ID);
-        game.flee(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID, false);
         game.explore(ADVENTURER_ID);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -329,7 +329,7 @@ mod tests {
 
         // go explore
         game.explore(ADVENTURER_ID);
-        game.flee(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID, false);
         game.explore(ADVENTURER_ID);
         game.explore(ADVENTURER_ID);
 
@@ -467,7 +467,7 @@ mod tests {
         // immediately attempt to flee starter beast
         // which is not allowed and should result in a panic 'Cant flee starter beast'
         // which is annotated in the test
-        game.flee(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID, false);
     }
 
     #[test]
@@ -480,7 +480,7 @@ mod tests {
         // attempt to flee despite not being in a battle
         // this should trigger a panic 'Not in battle' which is
         // annotated in the test
-        game.flee(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID, false);
     }
 
     #[test]
@@ -507,7 +507,7 @@ mod tests {
         assert(updated_adventurer.beast_health > 0, 'should have found a beast');
 
         // flee from beast
-        game.flee(ADVENTURER_ID);
+        game.flee(ADVENTURER_ID, false);
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(updated_adventurer.beast_health == 0, 'should have fled beast');
     }

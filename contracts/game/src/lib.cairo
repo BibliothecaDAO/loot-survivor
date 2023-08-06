@@ -286,7 +286,7 @@ mod Game {
                 original_name_storage2
             );
         }
-        fn flee(ref self: ContractState, adventurer_id: u256) {
+        fn flee(ref self: ContractState, adventurer_id: u256, to_the_death: bool) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
@@ -326,8 +326,39 @@ mod Game {
                 // apply idle penalty
                 _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
             } else {
-                // process flee
-                _flee(ref self, ref adventurer, adventurer_id);
+                // get adventurer entropy from storage
+                let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+                    .entropy
+                    .into();
+
+                // get game entropy from storage
+                let global_entropy: u128 = _get_global_entropy(@self).into();
+
+                // get beast seed based on adventurer entropy and adventurer state
+                let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
+                // generate beast without special powers ()
+                let beast = ImplBeast::get_beast(
+                    adventurer.get_level(),
+                    ImplBeast::get_special_names(
+                        adventurer.get_level(),
+                        beast_seed,
+                        NamePrefixLength.into(),
+                        NameSuffixLength.into()
+                    ),
+                    beast_seed,
+                    ImplLoot::get_type(adventurer.weapon.id)
+                );
+
+                _flee(
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    adventurer_entropy,
+                    global_entropy,
+                    beast_seed,
+                    beast,
+                    to_the_death
+                );
             }
 
             // update players last action block number
@@ -2045,7 +2076,12 @@ mod Game {
             if (adventurer_died == false && to_the_death) {
                 // attack again
                 _attack(
-                    ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2, true
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    ref name_storage1,
+                    ref name_storage2,
+                    true
                 );
             }
         }
@@ -2152,7 +2188,7 @@ mod Game {
     // @param self The contract state
     // @param adventurer The adventurer who is attempting to flee
     // @param adventurer_id The identifier of the adventurer
-    fn _flee(ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256) {
+    fn _flee_old(ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256) {
         // https://github.com/starkware-libs/cairo/issues/2942
         internal::revoke_ap_tracking();
         // get adventurer entropy from storage
@@ -2255,6 +2291,111 @@ mod Game {
                 killed_by_obstacle: false,
                 killer_id: beast.id
             );
+        }
+    }
+
+    fn _flee(
+        ref self: ContractState,
+        ref adventurer: Adventurer,
+        adventurer_id: u256,
+        adventurer_entropy: u128,
+        global_entropy: u128,
+        beast_seed: u128,
+        beast: Beast,
+        to_the_death: bool
+    ) {
+        let (flee_entropy, ambush_entropy) = _get_live_entropy(
+            adventurer_entropy, global_entropy, adventurer
+        );
+
+        let fled = ImplBeast::attempt_flee(
+            adventurer.get_level(), adventurer.stats.dexterity, flee_entropy
+        );
+
+        // let mut damage_taken = 0;
+        // let mut attack_location = 0;
+        if (fled) {
+            // set beast health to zero to denote adventurer is no longer in battle
+            adventurer.beast_health = 0;
+
+            // each adventurer xp by one to prevent entropy loops resulting
+            // from the adventurer state being same
+            let (previous_level, new_level) = adventurer.increase_adventurer_xp(1);
+
+            // emit flee attempt event
+            __event__FleeSucceeded(
+                ref self,
+                FleeSucceeded {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
+                }
+            );
+
+            // check for adventurer level up
+            if (new_level > previous_level) {
+                _handle_adventurer_level_up(
+                    ref self, ref adventurer, adventurer_id, previous_level, new_level
+                );
+            }
+        } else {
+            // // emit flee attempt event
+            __event__FleeFailed(
+                ref self,
+                FleeFailed {
+                    adventurer_state: AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
+                }
+            );
+
+            // if flee attempt was unsuccessful the beast counter attacks
+            // adventurer death will be handled as part of counter attack
+            let attack_slot = AdventurerUtils::get_random_attack_location(ambush_entropy);
+            let attack_location = ImplCombat::slot_to_u8(attack_slot);
+            _beast_counter_attack(
+                ref self,
+                ref adventurer,
+                adventurer_id,
+                attack_slot,
+                beast,
+                beast_seed,
+                ambush_entropy,
+                false
+            );
+
+            // if adventurer died trying to flee
+            if (adventurer.health == 0) {
+                // emit adventurer died event
+                __event_AdventurerDied(
+                    ref self,
+                    AdventurerState {
+                        owner: get_caller_address(),
+                        adventurer_id: adventurer_id,
+                        adventurer: adventurer
+                    },
+                    killed_by_beast: true,
+                    killed_by_obstacle: false,
+                    killer_id: beast.id
+                );
+            } else if to_the_death {
+                // if the adventurer is still alive and fleeing till death
+                // attempt to flee again
+                _flee(
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    adventurer_entropy,
+                    global_entropy,
+                    beast_seed,
+                    beast,
+                    to_the_death
+                );
+            }
         }
     }
 

@@ -24,7 +24,7 @@ trait IGame<TContractState> {
     );
     fn explore(ref self: TContractState, adventurer_id: u256);
     fn attack(ref self: TContractState, adventurer_id: u256, to_the_death: bool);
-    fn flee(ref self: TContractState, adventurer_id: u256);
+    fn flee(ref self: TContractState, adventurer_id: u256, to_the_death: bool);
     fn equip(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
     fn drop_items(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
     fn upgrade_adventurer(
