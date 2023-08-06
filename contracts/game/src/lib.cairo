@@ -80,7 +80,7 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     enum Event {
         StartGame: StartGame,
-        StatUpgradesAvailable: StatUpgradesAvailable,
+        UpgradeAvailable: UpgradeAvailable,
         StrengthIncreased: StrengthIncreased,
         DexterityIncreased: DexterityIncreased,
         VitalityIncreased: VitalityIncreased,
@@ -1977,7 +1977,7 @@ mod Game {
                 adventurer.add_stat_upgrade_points(MAX_GREATNESS_STAT_BONUS);
 
                 // emit stat upgrades available event
-                __event_StatUpgradesAvailable(
+                __event_UpgradeAvailable(
                     ref self,
                     AdventurerState {
                         owner: get_caller_address(),
@@ -2027,7 +2027,7 @@ mod Game {
                 adventurer.add_stat_upgrade_points(MAX_GREATNESS_STAT_BONUS);
 
                 // emit stat upgrades available event
-                __event_StatUpgradesAvailable(
+                __event_UpgradeAvailable(
                     ref self,
                     AdventurerState {
                         owner: get_caller_address(),
@@ -2883,7 +2883,7 @@ mod Game {
         stat_id: u8,
         amount: u8
     ) {
-        // assert adventurer has stat StatUpgradesAvailable available
+        // assert adventurer has stat UpgradeAvailable available
         _assert_has_required_stat_points(@self, adventurer, amount);
 
         //deduct upgrades from adventurer available stat points
@@ -3036,7 +3036,7 @@ mod Game {
         );
 
         // emit stat upgrades available event
-        __event_StatUpgradesAvailable(
+        __event_UpgradeAvailable(
             ref self,
             adventurer_state: AdventurerState {
                 owner: get_caller_address(), adventurer_id, adventurer
@@ -3711,7 +3711,7 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct StatUpgradesAvailable {
+    struct UpgradeAvailable {
         adventurer_state: AdventurerState, 
     }
 
@@ -4008,7 +4008,7 @@ mod Game {
             );
     }
 
-    fn __event_StatUpgradesAvailable(ref self: ContractState, adventurer_state: AdventurerState) {
-        self.emit(Event::StatUpgradesAvailable(StatUpgradesAvailable { adventurer_state }));
+    fn __event_UpgradeAvailable(ref self: ContractState, adventurer_state: AdventurerState) {
+        self.emit(Event::UpgradeAvailable(UpgradeAvailable { adventurer_state }));
     }
 }
