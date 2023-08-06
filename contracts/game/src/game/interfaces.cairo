@@ -23,8 +23,7 @@ trait IGame<TContractState> {
         starting_charsima: u8
     );
     fn explore(ref self: TContractState, adventurer_id: u256);
-    fn attack(ref self: TContractState, adventurer_id: u256);
-    fn attack_till_death(ref self: TContractState, adventurer_id: u256);
+    fn attack(ref self: TContractState, adventurer_id: u256, to_the_death: bool);
     fn flee(ref self: TContractState, adventurer_id: u256);
     fn equip(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
     fn drop_items(ref self: TContractState, adventurer_id: u256, items: Array<u8>);

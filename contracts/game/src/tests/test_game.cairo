@@ -111,7 +111,7 @@ mod tests {
         let mut game = new_adventurer_cleric();
 
         // attack starter beast
-        game.attack(ADVENTURER_ID);
+        game.attack(ADVENTURER_ID, false);
 
         // assert starter beast is dead
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -134,8 +134,8 @@ mod tests {
         // double attack beast
         // this will trigger idle penalty which will deal extra
         // damage to adventurer
-        game.attack(ADVENTURER_ID);
-        game.attack(ADVENTURER_ID);
+        game.attack(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
 
         // assert starter beast is dead
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -150,7 +150,7 @@ mod tests {
         let mut game = new_adventurer();
 
         // attack starter beast
-        game.attack(ADVENTURER_ID);
+        game.attack(ADVENTURER_ID, false);
 
         // assert starter beast is dead
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -414,7 +414,7 @@ mod tests {
         );
 
         // attack beast
-        game.attack(ADVENTURER_ID);
+        game.attack(ADVENTURER_ID, false);
 
         // verify beast and adventurer took damage
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -434,7 +434,7 @@ mod tests {
             // attack again after the beast is dead which should
             // result in a panic. This test is annotated to expect a panic
             // so if it doesn't, this test will fail
-            game.attack(ADVENTURER_ID);
+            game.attack(ADVENTURER_ID, false);
         } // if the beast was not killed in one hit
         else {
             assert(updated_adventurer.xp == adventurer_start.xp, 'should have same xp');
@@ -442,7 +442,7 @@ mod tests {
             assert(updated_adventurer.health != 100, 'should have taken dmg');
 
             // attack again (will take out starter beast with current settings regardless of critical hit)
-            game.attack(ADVENTURER_ID);
+            game.attack(ADVENTURER_ID, false);
 
             // recheck adventurer stats
             let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -453,7 +453,7 @@ mod tests {
             // attack again after the beast is dead which should
             // result in a panic. This test is annotated to expect a panic
             // so if it doesn't, this test will fail
-            game.attack(ADVENTURER_ID);
+            game.attack(ADVENTURER_ID, false);
         }
     }
 
@@ -519,7 +519,7 @@ mod tests {
         let mut game = new_adventurer();
 
         // take out starter beast
-        game.attack(ADVENTURER_ID);
+        game.attack(ADVENTURER_ID, false);
 
         // get updated adventurer
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -564,7 +564,7 @@ mod tests {
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
         let item_id = *market_items.at(0).item.id;
         let mut shoppping_cart = ArrayTrait::<ItemPurchase>::new();
-        
+
         shoppping_cart.append(ItemPurchase { item_id: item_id, equip: true });
 
         // upgrade adventurer and don't buy anything
@@ -1032,7 +1032,7 @@ mod tests {
         testing::set_block_number(STARTING_BLOCK_NUMBER);
 
         // attack starter beast, resulting in adventurer last action block number being 1
-        game.attack(ADVENTURER_ID);
+        game.attack(ADVENTURER_ID, false);
 
         // assert adventurers last action is expected value
         assert(
@@ -1070,7 +1070,7 @@ mod tests {
         testing::set_block_number(STARTING_BLOCK_NUMBER);
 
         // attack beast to set adventurer last action block number
-        game.attack(ADVENTURER_ID);
+        game.attack(ADVENTURER_ID, false);
 
         // assert adventurers last action is expected value
         assert(
@@ -1110,7 +1110,7 @@ mod tests {
         testing::set_block_number(STARTING_BLOCK_NUMBER);
 
         // attack starter beast, resulting in adventurer last action block number being 510
-        game.attack(ADVENTURER_ID);
+        game.attack(ADVENTURER_ID, false);
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1167,7 +1167,7 @@ mod tests {
         testing::set_block_number(STARTING_BLOCK_NUMBER);
 
         // attack starter beast, resulting in adventurer last action block number being 1
-        game.attack(ADVENTURER_ID);
+        game.attack(ADVENTURER_ID, false);
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1580,7 +1580,7 @@ mod tests {
         // TODO: test with more than one which is challenging
         // because we need a multi-level or G20 stat unlocks
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
-        game.upgrade_adventurer(ADVENTURER_ID,0,0,0,0,0,0,1,shopping_cart);
+        game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
 
         // get update adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1605,7 +1605,7 @@ mod tests {
 
         // try to upgrade charisma x2 with only 1 stat available
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
-        game.upgrade_adventurer(ADVENTURER_ID,0,0,0,0,0,0,2,shopping_cart);
+        game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 2, shopping_cart);
     }
 
     #[test]
