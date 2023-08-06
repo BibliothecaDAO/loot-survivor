@@ -219,7 +219,9 @@ export default function UpgradeScreen() {
   }
 
   const selectedCharisma = upgrades["Charisma"] ?? 0;
+  const selectedVitality = upgrades["Vitality"] ?? 0;
 
+  const totalVitality = (adventurer?.vitality ?? 0) + selectedVitality;
   const totalCharisma = (adventurer?.charisma ?? 0) + selectedCharisma;
 
   const purchaseGoldAmount =

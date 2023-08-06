@@ -2,12 +2,12 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "./buttons/Button";
 import { useBurner } from "../lib/burner";
 import { useAccount, useConnectors } from "@starknet-react/core";
-import { useEffect } from "react";
 
 export const ArcadeDialog = () => {
   const { account, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
+  const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const { connect, connectors, refresh } = useConnectors();
   const { create, isDeploying } = useBurner();
 
@@ -35,7 +35,9 @@ export const ArcadeDialog = () => {
           {((connector?.options as any)?.id == "argentX" ||
             (connector?.options as any)?.id == "braavos") && (
             <div>
-              <Button onClick={() => create()}>create arcade account</Button>
+              <Button onClick={() => create()} disabled={isWrongNetwork}>
+                create arcade account
+              </Button>
               <p className="my-2 text-terminal-yellow p-2 border border-terminal-yellow">
                 Note: This will initiate a 0.01 ETH transaction to the new
                 account. Your page will reload after the Account has been
