@@ -259,7 +259,10 @@ export default function Home() {
                 />
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
-                <Button onClick={() => showArcadeDialog(!arcadeDialog)}>
+                <Button
+                  onClick={() => showArcadeDialog(!arcadeDialog)}
+                  disabled={isWrongNetwork}
+                >
                   <ArcadeIcon className="w-8 justify-center" />
                 </Button>
                 <Button
