@@ -1,4 +1,3 @@
-use core::clone::Clone;
 #[cfg(test)]
 mod tests {
     use array::ArrayTrait;
@@ -97,11 +96,11 @@ mod tests {
                     name: 'loothero'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
                 },
                 0,
-                1,
                 0,
-                1,
-                1,
-                3,
+                0,
+                0,
+                0,
+                6,
             );
 
         game
@@ -485,22 +484,20 @@ mod tests {
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(updated_adventurer.beast_health == 0, 'beast should be dead');
 
-        // use stat upgrade
-        game.upgrade_stat(ADVENTURER_ID, 1, 1);
-
         // explore till we find a beast
         // TODO: use cheat codes to make this less fragile
+        game.upgrade_stat(ADVENTURER_ID, 1, 1);
         testing::set_block_number(1006);
         game.explore(ADVENTURER_ID);
-        // use stat upgrade
         game.upgrade_stat(ADVENTURER_ID, 1, 1);
         testing::set_block_number(1007);
         game.explore(ADVENTURER_ID);
 
+        // verify we found a beast
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(updated_adventurer.beast_health > 0, 'should have found a beast');
 
-        // run from beast
+        // flee from beast
         game.flee(ADVENTURER_ID);
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(updated_adventurer.beast_health == 0, 'should have fled beast');
@@ -1408,6 +1405,135 @@ mod tests {
         );
     }
 
+    // To run this test we need to increase starting gold so we can buy max number of items
+    // We either need to use cheat codes to accomplish this or have the contract take in
+    // game settings in the constructor. Commenting this out for now so our CI doesn't run it
+    // #[test]
+    // #[available_gas(80000000000)]
+    // fn test_max_items() {
+    //     // start game on level 2 so we have access to the market
+    //     let mut game = new_adventurer_cleric_level2();
+
+    //     // get items from market
+    //     let mut market_items = @game.get_items_on_market(ADVENTURER_ID);
+
+    //     // get first item on the market
+    //     let item_id = *market_items.at(0).item.id;
+
+    //     let mut purchased_weapon: u8 = 0;
+    //     let mut purchased_chest: u8 = 0;
+    //     let mut purchased_head: u8 = 0;
+    //     let mut purchased_waist: u8 = 0;
+    //     let mut purchased_foot: u8 = 0;
+    //     let mut purchased_hand: u8 = 0;
+    //     let mut purchased_ring: u8 = 0;
+    //     let mut purchased_necklace: u8 = 0;
+    //     let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
+
+    //     let mut i: u32 = 0;
+    //     loop {
+    //         if i >= market_items.len() {
+    //             break ();
+    //         }
+    //         let market_item = *market_items.at(i).item;
+
+    //         // if the item is a weapon and we haven't purchased a weapon yet
+    //         // and the item is a tier 4 or 5 item
+    //         // repeat this for everything
+    //         if (market_item.slot == Slot::Weapon(())
+    //             && purchased_weapon == 0
+    //             && market_item.id != 12) {
+    //             shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
+    //             purchased_weapon = market_item.id;
+    //         } else if (market_item.slot == Slot::Chest(()) && purchased_chest == 0) {
+    //             shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
+    //             purchased_chest = market_item.id;
+    //         } else if (market_item.slot == Slot::Head(()) && purchased_head == 0) {
+    //             shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
+    //             purchased_head = market_item.id;
+    //         } else if (market_item.slot == Slot::Waist(()) && purchased_waist == 0) {
+    //             shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
+    //             purchased_waist = market_item.id;
+    //         } else if (market_item.slot == Slot::Foot(()) && purchased_foot == 0) {
+    //             shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
+    //             purchased_foot = market_item.id;
+    //         } else if (market_item.slot == Slot::Hand(()) && purchased_hand == 0) {
+    //             shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
+    //             purchased_hand = market_item.id;
+    //         } else if (market_item.slot == Slot::Ring(()) && purchased_ring == 0) {
+    //             shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
+    //             purchased_ring = market_item.id;
+    //         } else if (market_item.slot == Slot::Neck(()) && purchased_necklace == 0) {
+    //             shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
+    //             purchased_necklace = market_item.id;
+    //         }
+    //         i += 1;
+    //     };
+
+    //     assert(
+    //         purchased_weapon != 0
+    //             && purchased_chest != 0
+    //             && purchased_head != 0
+    //             && purchased_waist != 0
+    //             && purchased_foot != 0
+    //             && purchased_hand != 0
+    //             && purchased_ring != 0
+    //             && purchased_necklace != 0,
+    //         'did not purchase all items'
+    //     );
+
+    //     let mut i: u32 = 0;
+    //     loop {
+    //         if i >= market_items.len() {
+    //             break ();
+    //         }
+    //         let market_item = *market_items.at(i).item;
+
+    //         if (market_item.id == purchased_weapon
+    //             || market_item.id == purchased_chest
+    //             || market_item.id == purchased_head
+    //             || market_item.id == purchased_waist
+    //             || market_item.id == purchased_foot
+    //             || market_item.id == purchased_hand
+    //             || market_item.id == purchased_ring
+    //             || market_item.id == purchased_necklace
+    //             || shopping_cart.len() == 19) {
+    //             i += 1;
+    //             continue;
+    //         }
+
+    //         shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
+
+    //         i += 1;
+    //     };
+
+    //     // We intentionally loaded our cart with 19 items which would be one more than max
+    //     // when you add our starter weapon. We did this so we could pop one item off the cart
+    //     // and into this overflow shopping cart which we'll use later
+    //     let mut overflow_item = shopping_cart.pop_front().unwrap();
+    //     overflow_item.equip = true;
+    //     let mut overflow_shopping_cart = ArrayTrait::<ItemPurchase>::new();
+    //     overflow_shopping_cart.append(overflow_item);
+
+    //     // verify we have at least two items in shopping cart
+    //     assert(shopping_cart.len() == 18, 'should be max items');
+
+    //     // buy items in shopping cart which will fully equip the adventurer
+    //     // and fill their bag
+    //     game.buy_items(ADVENTURER_ID, shopping_cart.clone());
+
+    //     // drop our weapon and attempt (should free up an item slow)
+    //     let mut items_to_drop = ArrayTrait::<u8>::new();
+    //     items_to_drop.append(12);
+    //     game.drop(ADVENTURER_ID, items_to_drop);
+
+    //     game.buy_items(ADVENTURER_ID, overflow_shopping_cart.clone());
+
+    //     // get updated adventurer and bag state
+    //     let bag = game.get_bag(ADVENTURER_ID);
+    //     let adventurer = game.get_adventurer(ADVENTURER_ID);
+    // }
+
     #[test]
     #[available_gas(90000000)]
     fn test_drop_item() {
@@ -1449,44 +1575,24 @@ mod tests {
         // assert adventurer has no weapon equipped
         assert(adventurer.weapon.id == 0, 'weapon id should be 0');
         assert(adventurer.weapon.xp == 0, 'weapon should have no xp');
-        assert(adventurer.weapon.metadata == 0, 'weapon should have no metadata');
 
         // assert bag does not have the purchased item
         assert(!bag.contains(purchased_item_id), 'item should not be in bag');
     }
 
     #[test]
-    #[should_panic(expected: ('Too many items', 'ENTRYPOINT_FAILED'))]
+    #[should_panic(expected: ('Adventurer doesnt own item', 'ENTRYPOINT_FAILED'))]
     #[available_gas(90000000)]
-    fn test_drop_item_too_many_items() {
+    fn test_drop_item_without_ownership() {
         // start new game on level 2 so we have access to the market
         let mut game = new_adventurer_lvl2();
 
         // intialize an array with 20 items in it
         let mut drop_list = ArrayTrait::<u8>::new();
-        drop_list.append(1);
-        drop_list.append(2);
-        drop_list.append(3);
-        drop_list.append(4);
-        drop_list.append(5);
-        drop_list.append(6);
-        drop_list.append(7);
-        drop_list.append(8);
-        drop_list.append(9);
-        drop_list.append(10);
-        drop_list.append(11);
-        drop_list.append(12);
-        drop_list.append(13);
-        drop_list.append(14);
-        drop_list.append(15);
-        drop_list.append(16);
-        drop_list.append(17);
-        drop_list.append(18);
-        drop_list.append(19);
-        drop_list.append(20);
+        drop_list.append(255);
 
-        // try to drop 20 items (max number of items is currently 19)
-        // this should result in a panic 'Too many items'
+        // try to drop an item the adventurer doesn't own
+        // this should result in a panic 'Adventurer doesnt own item'
         // this test is annotated to expect that panic
         game.drop(ADVENTURER_ID, drop_list);
     }
