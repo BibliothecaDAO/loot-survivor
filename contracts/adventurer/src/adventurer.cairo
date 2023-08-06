@@ -292,13 +292,6 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    // @notice Checks if the adventurer has at least a specified amount of gold.
-    // @param value The amount of gold to check for.
-    // @return True if the adventurer has at least `value` amount of gold, false otherwise.
-    fn check_gold(self: Adventurer, value: u16) -> bool {
-        self.gold >= value
-    }
-
     // get_item_at_slot returns the item at a given item slot
     // @param self: Adventurer to check
     // @param slot: Slot to check
