@@ -1,4 +1,3 @@
-use debug::PrintTrait;
 use core::result::ResultTrait;
 use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub};
 use traits::{TryInto, Into};
@@ -750,26 +749,32 @@ impl ImplAdventurer of IAdventurer {
     // @param item_id The ID of the item to be dropped. The function will assert if the item is not currently equipped.
     // @notice The function does not handle adding the dropped item to the adventurer's bag or any other inventory system. This must be handled separately.
     fn drop_item(ref self: Adventurer, item_id: u8) {
-        // assert the item is equipped
-        assert(self.is_equipped(item_id), 'item is not equipped');
-
-        // get the slot it's equipped to
-        let slot = ImplLoot::get_slot(item_id);
-
-        // instantiate a blank item
-        let blank_item = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
-
-        // set the item slot to the blank item
-        match slot {
-            Slot::None(()) => (),
-            Slot::Weapon(()) => self.weapon = blank_item,
-            Slot::Chest(()) => self.chest = blank_item,
-            Slot::Head(()) => self.head = blank_item,
-            Slot::Waist(()) => self.waist = blank_item,
-            Slot::Foot(()) => self.foot = blank_item,
-            Slot::Hand(()) => self.hand = blank_item,
-            Slot::Neck(()) => self.neck = blank_item,
-            Slot::Ring(()) => self.ring = blank_item,
+        if self.weapon.id == item_id {
+            self.weapon.id = 0;
+            self.weapon.xp = 0;
+        } else if self.chest.id == item_id {
+            self.chest.id = 0;
+            self.chest.xp = 0;
+        } else if self.head.id == item_id {
+            self.head.id = 0;
+            self.head.xp = 0;
+        } else if self.waist.id == item_id {
+            self.waist.id = 0;
+            self.waist.xp = 0;
+        } else if self.foot.id == item_id {
+            self.foot.id = 0;
+            self.foot.xp = 0;
+        } else if self.hand.id == item_id {
+            self.hand.id = 0;
+            self.hand.xp = 0;
+        } else if self.neck.id == item_id {
+            self.neck.id = 0;
+            self.neck.xp = 0;
+        } else if self.ring.id == item_id {
+            self.ring.id = 0;
+            self.ring.xp = 0;
+        } else {
+            panic_with_felt252('item is not equipped')
         }
     }
 
@@ -777,17 +782,49 @@ impl ImplAdventurer of IAdventurer {
     // @param item_id The id of the item to check
     // @return A boolean indicating if the item is equipped by the adventurer. Returns true if the item is equipped, false otherwise.
     fn is_equipped(self: Adventurer, item_id: u8) -> bool {
-        let slot = ImplLoot::get_slot(item_id);
-        match slot {
-            Slot::None(()) => false,
-            Slot::Weapon(()) => self.weapon.id == item_id,
-            Slot::Chest(()) => self.chest.id == item_id,
-            Slot::Head(()) => self.head.id == item_id,
-            Slot::Waist(()) => self.waist.id == item_id,
-            Slot::Foot(()) => self.foot.id == item_id,
-            Slot::Hand(()) => self.hand.id == item_id,
-            Slot::Neck(()) => self.neck.id == item_id,
-            Slot::Ring(()) => self.ring.id == item_id,
+        if (self.weapon.id == item_id) {
+            true
+        } else if (self.chest.id == item_id) {
+            true
+        } else if (self.head.id == item_id) {
+            true
+        } else if (self.waist.id == item_id) {
+            true
+        } else if (self.foot.id == item_id) {
+            true
+        } else if (self.hand.id == item_id) {
+            true
+        } else if (self.neck.id == item_id) {
+            true
+        } else if (self.ring.id == item_id) {
+            true
+        } else {
+            false
+        }
+    }
+
+    // @dev This function checks if the adventurer has a given item equipped
+    // @param item_id The id of the item to check
+    // @return A boolean indicating if the item is equipped by the adventurer. Returns true if the item is equipped, false otherwise.
+    fn get_item_slot(self: Adventurer, item_id: u8) -> Slot {
+        if (self.weapon.id == item_id) {
+            Slot::Weapon(())
+        } else if (self.chest.id == item_id) {
+            Slot::Chest(())
+        } else if (self.head.id == item_id) {
+            Slot::Head(())
+        } else if (self.waist.id == item_id) {
+            Slot::Waist(())
+        } else if (self.foot.id == item_id) {
+            Slot::Foot(())
+        } else if (self.hand.id == item_id) {
+            Slot::Hand(())
+        } else if (self.neck.id == item_id) {
+            Slot::Neck(())
+        } else if (self.ring.id == item_id) {
+            Slot::Ring(())
+        } else {
+            Slot::None(())
         }
     }
 
@@ -2881,7 +2918,7 @@ fn test_in_battle() {
 }
 
 #[test]
-#[available_gas(900000)]
+#[available_gas(550000)]
 fn test_equip_item() {
     let mut adventurer = ImplAdventurer::new(12, 0, 0, 0, 0, 0, 0, 0);
 
@@ -3044,7 +3081,7 @@ fn test_grant_xp_and_check_for_greatness_increase() {
 }
 
 #[test]
-#[available_gas(2300000)]
+#[available_gas(1200000)]
 fn test_is_equipped() {
     let wand = ItemPrimitive { id: constants::ItemId::Wand, xp: 1, metadata: 1 };
     let demon_crown = ItemPrimitive { id: constants::ItemId::DemonCrown, xp: 1, metadata: 2 };
@@ -3166,7 +3203,7 @@ fn test_is_equipped() {
 
 #[test]
 #[should_panic(expected: ('item is not equipped', ))]
-#[available_gas(1100000)]
+#[available_gas(50000)]
 fn test_drop_item_not_equipped() {
     // instantiate adventurer
     let mut adventurer = ImplAdventurer::new(12, 0, 0, 0, 0, 0, 0, 0);
@@ -3177,7 +3214,7 @@ fn test_drop_item_not_equipped() {
 }
 
 #[test]
-#[available_gas(1100000)]
+#[available_gas(700000)]
 fn test_drop_item() {
     let mut adventurer = ImplAdventurer::new(12, 0, 0, 0, 0, 0, 0, 0);
 
@@ -3195,7 +3232,6 @@ fn test_drop_item() {
     adventurer.drop_item(constants::ItemId::Wand);
     assert(adventurer.weapon.id == 0, 'weapon should be 0');
     assert(adventurer.weapon.xp == 0, 'weapon xp should be 0');
-    assert(adventurer.weapon.metadata == 0, 'weapon metadata should be 0');
 
     // instantiate additional items
     let weapon = ItemPrimitive { id: constants::ItemId::Katana, xp: 1, metadata: 1 };
@@ -3231,40 +3267,32 @@ fn test_drop_item() {
     adventurer.drop_item(weapon.id);
     assert(adventurer.weapon.id == 0, 'weapon should be 0');
     assert(adventurer.weapon.xp == 0, 'weapon xp should be 0');
-    assert(adventurer.weapon.metadata == 0, 'weapon metadata should be 0');
 
     adventurer.drop_item(chest.id);
     assert(adventurer.chest.id == 0, 'chest should be 0');
     assert(adventurer.chest.xp == 0, 'chest xp should be 0');
-    assert(adventurer.chest.metadata == 0, 'chest metadata should be 0');
 
     adventurer.drop_item(head.id);
     assert(adventurer.head.id == 0, 'head should be 0');
     assert(adventurer.head.xp == 0, 'head xp should be 0');
-    assert(adventurer.head.metadata == 0, 'head metadata should be 0');
 
     adventurer.drop_item(waist.id);
     assert(adventurer.waist.id == 0, 'waist should be 0');
     assert(adventurer.waist.xp == 0, 'waist xp should be 0');
-    assert(adventurer.waist.metadata == 0, 'waist metadata should be 0');
 
     adventurer.drop_item(foot.id);
     assert(adventurer.foot.id == 0, 'foot should be 0');
     assert(adventurer.foot.xp == 0, 'foot xp should be 0');
-    assert(adventurer.foot.metadata == 0, 'foot metadata should be 0');
 
     adventurer.drop_item(hand.id);
     assert(adventurer.hand.id == 0, 'hand should be 0');
     assert(adventurer.hand.xp == 0, 'hand xp should be 0');
-    assert(adventurer.hand.metadata == 0, 'hand metadata should be 0');
 
     adventurer.drop_item(neck.id);
     assert(adventurer.neck.id == 0, 'neck should be 0');
     assert(adventurer.neck.xp == 0, 'neck xp should be 0');
-    assert(adventurer.neck.metadata == 0, 'neck metadata should be 0');
 
     adventurer.drop_item(ring.id);
     assert(adventurer.ring.id == 0, 'ring should be 0');
     assert(adventurer.ring.xp == 0, 'ring xp should be 0');
-    assert(adventurer.ring.metadata == 0, 'ring metadata should be 0');
 }
