@@ -1,5 +1,5 @@
 import { InjectedConnector } from "@starknet-react/core";
-import { WebWalletConnector } from "@argent/starknet-react-webwallet-connector";
+// import { WebWalletConnector } from "@argent/starknet-react-webwallet-connector";
 
 export const argentConnector = new InjectedConnector({
   options: {
@@ -24,9 +24,9 @@ function argentWebWalletUrl() {
   }
 }
 
-export const argentWebWalletConnector = new WebWalletConnector({
-  url: argentWebWalletUrl(),
-});
+// export const argentWebWalletConnector = new WebWalletConnector({
+//   url: argentWebWalletUrl(),
+// });
 
 export const connectors = [
   argentConnector,

@@ -23,23 +23,21 @@ trait IGame<TContractState> {
         starting_charsima: u8
     );
     fn explore(ref self: TContractState, adventurer_id: u256);
-    fn attack(ref self: TContractState, adventurer_id: u256);
-    fn attack_till_death(ref self: TContractState, adventurer_id: u256);
-    fn flee(ref self: TContractState, adventurer_id: u256);
+    fn attack(ref self: TContractState, adventurer_id: u256, to_the_death: bool);
+    fn flee(ref self: TContractState, adventurer_id: u256, to_the_death: bool);
     fn equip(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
-    fn drop(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
-    fn buy_items(ref self: TContractState, adventurer_id: u256, items: Array<ItemPurchase>);
-    fn buy_item(ref self: TContractState, adventurer_id: u256, item_id: u8, equip: bool);
-    fn buy_potion(ref self: TContractState, adventurer_id: u256);
-    fn buy_potions(ref self: TContractState, adventurer_id: u256, amount: u8);
-    fn upgrade_stat(ref self: TContractState, adventurer_id: u256, stat: u8, amount: u8);
-    fn upgrade_stats(ref self: TContractState, adventurer_id: u256, stats: Array<u8>);
-    fn buy_items_and_upgrade_stats(
+    fn drop_items(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
+    fn upgrade_adventurer(
         ref self: TContractState,
         adventurer_id: u256,
-        potion_quantity: u8,
+        potions: u8,
+        strength: u8,
+        dexterity: u8,
+        vitality: u8,
+        intelligence: u8,
+        wisdom: u8,
+        charisma: u8,
         items: Array<ItemPurchase>,
-        stats: Array<u8>
     );
     fn slay_idle_adventurer(ref self: TContractState, adventurer_id: u256);
 
