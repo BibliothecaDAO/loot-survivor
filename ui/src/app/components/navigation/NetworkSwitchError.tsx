@@ -24,7 +24,8 @@ export default function NetworkSwitchError({
   if (account && isWrongNetwork) {
     return (
       <div className="fixed flex flex-col items-center top-10 w-[90%] sm:left-3/8 sm:right-3/8 sm:w-1/4 uppercase text-center border border-terminal-green bg-terminal-black z-50">
-        <p>Please switch to Starknet Goerli network to play </p>
+        <p>You are not on Goerli network!</p>
+        <p>Please switch network to avoid risks with funds</p>
         {/* <Button
           onClick={async () => {
             await handeleSwitchToGoerli();
