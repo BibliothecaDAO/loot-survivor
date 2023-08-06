@@ -385,6 +385,7 @@ export default function UpgradeScreen() {
                         potionAmount={potionAmount}
                         setPotionAmount={setPotionAmount}
                         totalCharisma={totalCharisma}
+                        totalVitality={totalVitality}
                       />
                     </div>
                   )}
