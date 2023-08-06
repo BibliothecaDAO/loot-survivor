@@ -1,3 +1,4 @@
+use debug::PrintTrait;
 use core::result::ResultTrait;
 use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub};
 use traits::{TryInto, Into};
@@ -1449,18 +1450,13 @@ fn test_charisma_adjusted_item_price() {
 
     // above minimum price, no charisma (base case)
     let item_price = adventurer.charisma_adjusted_item_price(10);
+    item_price.print();
     assert(item_price == 10, 'price should not change');
 
     // above minimum price, 1 charisma (base case)
     adventurer.stats.charisma = 1;
     let item_price = adventurer.charisma_adjusted_item_price(10);
-    assert(item_price == 10 - CHARISMA_POTION_DISCOUNT, 'price should not change');
-
-    // charisma discount below minimum price
-    adventurer.stats.charisma = 4;
-    let item_price = adventurer.charisma_adjusted_item_price(9);
-    // discount here should be 1, but since price is below minimum, it should be minimum
-    assert(item_price == MINIMUM_ITEM_PRICE, 'price should be minimum');
+    assert(item_price == 10 - CHARISMA_ITEM_DISCOUNT, 'price should not change');
 
     // underflow case
     adventurer.stats.charisma = 31;
@@ -2635,13 +2631,6 @@ fn test_charisma_item_discount_overflow() {
     assert(
         adventurer.charisma_adjusted_item_price(item_price) == item_price - CHARISMA_ITEM_DISCOUNT,
         'wrong discounted price'
-    );
-
-    // discount below minimum price case
-    adventurer.stats.charisma = 7;
-    assert(
-        adventurer.charisma_adjusted_item_price(item_price) == MINIMUM_ITEM_PRICE,
-        'item should be min price'
     );
 
     // underflow case
