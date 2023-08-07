@@ -59,28 +59,20 @@ export default function BeastScreen() {
   const resetData = useQueriesStore((state) => state.resetData);
   const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
 
-  const attackTx = {
-    contractAddress: gameContract?.address ?? "",
-    entrypoint: "attack",
-    calldata: [adventurer?.id?.toString() ?? "", "0"],
+  const attackTx = (till_death: boolean) => {
+    return {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "attack",
+      calldata: [adventurer?.id?.toString() ?? "", "0", till_death ? "1" : "0"],
+    };
   };
 
-  const attackTillDeathTx = {
-    contractAddress: gameContract?.address ?? "",
-    entrypoint: "attack_till_death",
-    calldata: [adventurer?.id?.toString() ?? "", "0"],
-  };
-
-  const fleeTx = {
-    contractAddress: gameContract?.address ?? "",
-    entrypoint: "flee",
-    calldata: [adventurer?.id?.toString() ?? "", "0"],
-  };
-
-  const fleeTillDeathTx = {
-    contractAddress: gameContract?.address ?? "",
-    entrypoint: "flee_till_death",
-    calldata: [adventurer?.id?.toString() ?? "", "0"],
+  const fleeTx = (till_death: boolean) => {
+    return {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "flee",
+      calldata: [adventurer?.id?.toString() ?? "", "0", till_death ? "1" : "0"],
+    };
   };
 
   const [buttonText, setButtonText] = useState("Flee!");
@@ -99,7 +91,7 @@ export default function BeastScreen() {
       label: "SINGLE",
       action: async () => {
         resetData("latestMarketItemsQuery");
-        addToCalls(attackTx);
+        addToCalls(attackTx(false));
         startLoading(
           "Attack",
           "Attacking",
@@ -135,7 +127,7 @@ export default function BeastScreen() {
       mouseLeave: handleMouseLeave,
       action: async () => {
         resetData("latestMarketItemsQuery");
-        addToCalls(attackTillDeathTx);
+        addToCalls(attackTx(true));
         startLoading(
           "Attack Till Death",
           "Attacking",
@@ -171,7 +163,7 @@ export default function BeastScreen() {
       id: 1,
       label: "SINGLE",
       action: async () => {
-        addToCalls(fleeTx);
+        addToCalls(fleeTx(false));
         startLoading(
           "Flee",
           "Fleeing",
@@ -202,44 +194,44 @@ export default function BeastScreen() {
         adventurer.dexterity === 0,
       loading: loading,
     },
-    // {
-    //   id: 2,
-    //   label: "TILL DEATH",
-    //   mouseEnter: handleMouseEnter,
-    //   mouseLeave: handleMouseLeave,
-    //   action: async () => {
-    //     addToCalls(fleeTx);
-    //     startLoading(
-    //       "Flee",
-    //       "Fleeing",
-    //       "battlesByTxHashQuery",
-    //       adventurer?.id,
-    //       { beast: beastData }
-    //     );
-    //     await handleSubmitCalls(writeAsync).then((tx: any) => {
-    //       if (tx) {
-    //         console.log(tx.transaction_hash);
-    //         setTxHash(tx.transaction_hash);
-    //         addTransaction({
-    //           hash: tx.transaction_hash,
-    //           metadata: {
-    //             method: `Flee ${beastData.beast}`,
-    //           },
-    //         });
-    //       }
-    //     });
-    //     resetDataUpdated("battlesByTxHashQuery");
-    //     setEquipItems([])
-    //     setDropItems([])
-    //   },
-    //   disabled:
-    //     adventurer?.beastHealth == undefined ||
-    //     adventurer?.beastHealth == 0 ||
-    //     loading ||
-    //     adventurer?.level == 1  ||
-    //     adventurer.dexterity === 0,
-    //   loading: loading,
-    // },
+    {
+      id: 2,
+      label: "TILL DEATH",
+      mouseEnter: handleMouseEnter,
+      mouseLeave: handleMouseLeave,
+      action: async () => {
+        addToCalls(fleeTx(true));
+        startLoading(
+          "Flee",
+          "Fleeing",
+          "battlesByTxHashQuery",
+          adventurer?.id,
+          { beast: beastData }
+        );
+        await handleSubmitCalls(writeAsync).then((tx: any) => {
+          if (tx) {
+            console.log(tx.transaction_hash);
+            setTxHash(tx.transaction_hash);
+            addTransaction({
+              hash: tx.transaction_hash,
+              metadata: {
+                method: `Flee ${beastData.beast}`,
+              },
+            });
+          }
+        });
+        resetDataUpdated("battlesByTxHashQuery");
+        setEquipItems([]);
+        setDropItems([]);
+      },
+      disabled:
+        adventurer?.beastHealth == undefined ||
+        adventurer?.beastHealth == 0 ||
+        loading ||
+        adventurer?.level == 1 ||
+        adventurer.dexterity === 0,
+      loading: loading,
+    },
   ];
 
   const beastName = processBeastName(

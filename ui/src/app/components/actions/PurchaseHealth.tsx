@@ -6,6 +6,7 @@ import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { CoinIcon } from "../icons/Icons";
 import useUIStore from "@/app/hooks/useUIStore";
+import { getPotionPrice } from "@/app/lib/utils";
 
 interface PurchaseHealthProps {
   upgradeTotalCost: number;
@@ -31,7 +32,7 @@ const PurchaseHealth = ({
   const prevAmountRef = useRef<number | undefined>(0);
   const [buttonClicked, setButtonClicked] = useState(false);
 
-  const potionCost = Math.max((adventurer?.level ?? 0) - 2 * totalCharisma, 1);
+  const potionCost = getPotionPrice(adventurer?.level ?? 0, totalCharisma);
 
   const purchaseGoldAmount = potionAmount * potionCost;
 

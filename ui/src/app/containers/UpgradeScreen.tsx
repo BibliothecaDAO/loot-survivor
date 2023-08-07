@@ -1,19 +1,14 @@
-import { ReactElement, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useContracts } from "../hooks/useContracts";
 import {
-  getKeyFromValue,
   getItemData,
   getValueFromKey,
   getItemPrice,
-  padAddress,
+  getPotionPrice,
 } from "../lib/utils";
 import { GameData } from "../components/GameData";
 import VerticalKeyboardControl from "../components/menu/VerticalMenu";
-import {
-  useTransactionManager,
-  useContractWrite,
-  useWaitForTransaction,
-} from "@starknet-react/core";
+import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { getLatestMarketItems } from "../hooks/graphql/queries";
 import useLoadingStore from "../hooks/useLoadingStore";
@@ -223,7 +218,7 @@ export default function UpgradeScreen() {
   const totalCharisma = (adventurer?.charisma ?? 0) + selectedCharisma;
 
   const purchaseGoldAmount =
-    potionAmount * Math.max(currentLevel - 2 * totalCharisma, 1);
+    potionAmount * getPotionPrice(adventurer?.level ?? 0, totalCharisma);
 
   const itemsGoldSum = purchaseItems.reduce((accumulator, current) => {
     const { tier } = getItemData(

@@ -50,6 +50,14 @@ raw_abi = [
         ],
     },
     {
+        "name": "market::market::ItemPurchase",
+        "type": "struct",
+        "members": [
+            {"name": "item_id", "type": "core::integer::u8"},
+            {"name": "equip", "type": "core::bool"},
+        ],
+    },
+    {
         "name": "survivor::adventurer::Adventurer",
         "type": "struct",
         "members": [
@@ -173,7 +181,7 @@ raw_abi = [
     },
     {
         "kind": "struct",
-        "name": "game::Game::StatUpgradesAvailable",
+        "name": "game::Game::UpgradeAvailable",
         "type": "event",
         "inputs": [
             {
@@ -415,14 +423,17 @@ raw_abi = [
     },
     {
         "kind": "struct",
-        "name": "game::Game::DroppedItem",
+        "name": "game::Game::DroppedItems",
         "type": "event",
         "inputs": [
             {
                 "name": "adventurer_state_with_bag",
                 "type": "game::Game::AdventurerStateWithBag",
             },
-            {"name": "item_id", "type": "core::integer::u8"},
+            {
+                "name": "item_ids",
+                "type": "core::array::Array::<core::integer::u8>",
+            },
         ],
     },
     {
@@ -466,19 +477,6 @@ raw_abi = [
             {"name": "id", "type": "core::integer::u8"},
             {"name": "level", "type": "core::integer::u8"},
             {"name": "specials", "type": "survivor::item_meta::ItemSpecials"},
-        ],
-    },
-    {
-        "kind": "struct",
-        "name": "game::Game::PurchasedPotion",
-        "type": "event",
-        "inputs": [
-            {
-                "name": "adventurer_state",
-                "type": "game::Game::AdventurerState",
-            },
-            {"name": "quantity", "type": "core::integer::u8"},
-            {"name": "health_amount", "type": "core::integer::u16"},
         ],
     },
     {
@@ -539,6 +537,36 @@ raw_abi = [
             {"name": "damage_taken", "type": "core::integer::u16"},
         ],
     },
+    {
+        "kind": "struct",
+        "name": "game::Game::AdventurerUpgraded",
+        "type": "event",
+        "inputs": [
+            {
+                "name": "adventurer_state_with_bag",
+                "type": "game::Game::AdventurerStateWithBag",
+            },
+            {"name": "strength_increase", "type": "core::integer::u8"},
+            {"name": "dexterity_increase", "type": "core::integer::u8"},
+            {"name": "vitality_increase", "type": "core::integer::u8"},
+            {
+                "name": "intelligence_increase",
+                "type": "core::integer::u8",
+            },
+            {"name": "wisdom_increase", "type": "core::integer::u8"},
+            {"name": "charisma_increase", "type": "core::integer::u8"},
+            {"name": "potions_purchased", "type": "core::integer::u8"},
+            {"name": "cost_of_potions", "type": "core::integer::u16"},
+            {
+                "name": "health_from_potions",
+                "type": "core::integer::u16",
+            },
+            {
+                "name": "items_purchased",
+                "type": "core::array::Array::<market::market::ItemPurchase>",
+            },
+        ],
+    },
 ]
 
 game_contract_abi = AbiParser(raw_abi).parse()
@@ -547,12 +575,12 @@ decode_start_game_event = serializer_for_payload(
     game_contract_abi.events["game::Game::StartGame"].inputs
 )
 
-deode_adventurer_upgrade_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::AdventurerUpgrade"].inputs
+decode_adventurer_upgrade_event = serializer_for_payload(
+    game_contract_abi.events["game::Game::AdventurerUpgraded"].inputs
 )
 
-decode_stat_upgrades_available_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::StatUpgradesAvailable"].inputs
+decode_upgrade_available_event = serializer_for_payload(
+    game_contract_abi.events["game::Game::UpgradeAvailable"].inputs
 )
 
 decode_discover_health_event = serializer_for_payload(
@@ -607,8 +635,8 @@ decode_equipped_item_event = serializer_for_payload(
     game_contract_abi.events["game::Game::EquippedItem"].inputs
 )
 
-decode_dropped_item_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::DroppedItem"].inputs
+decode_dropped_items_event = serializer_for_payload(
+    game_contract_abi.events["game::Game::DroppedItems"].inputs
 )
 
 decode_greatness_increased_event = serializer_for_payload(
@@ -617,10 +645,6 @@ decode_greatness_increased_event = serializer_for_payload(
 
 decode_item_special_unlocked_event = serializer_for_payload(
     game_contract_abi.events["game::Game::ItemSpecialUnlocked"].inputs
-)
-
-decode_purchased_potion_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::PurchasedPotion"].inputs
 )
 
 decode_new_high_score_event = serializer_for_payload(

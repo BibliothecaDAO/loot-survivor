@@ -51,9 +51,6 @@ export default function MarketplaceScreen({
   const adventurers = useQueriesStore(
     (state) => state.data.adventurersInListQuery?.adventurers || []
   );
-  const hasStatUpgrades = useAdventurerStore(
-    (state) => state.computed.hasStatUpgrades
-  );
   const adventurerItems = useQueriesStore(
     (state) => state.data.itemsByAdventurerQuery?.items || []
   );
