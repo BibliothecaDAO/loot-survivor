@@ -74,7 +74,7 @@ const WalletSelect = ({}: WalletSelectProps) => {
                     : "Login With Email"}
                 </Button>
               ))}
-              {/* {arcadeConnectors().length ? (
+              {arcadeConnectors().length ? (
                 <>
                   <h5 className="text-center">Arcade Accounts</h5>
                   {arcadeConnectors().map((connector, index) => (
@@ -89,7 +89,7 @@ const WalletSelect = ({}: WalletSelectProps) => {
                 </>
               ) : (
                 ""
-              )} */}
+              )}
             </div>
           </>
         ) : (
