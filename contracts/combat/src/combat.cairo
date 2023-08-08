@@ -580,832 +580,865 @@ impl ImplCombat of ICombat {
     }
 }
 
-#[test]
-#[available_gas(50000)]
-fn test_get_enemy_starting_health_max_values() {
-    // test max value case
-    // no need to assert result just make sure it doesn't panic
-    let enemy_starting_health = ImplCombat::get_enemy_starting_health(
-        255, 340282366920938463463374607431768211455
-    );
-}
-
-#[test]
-#[available_gas(500000)]
-fn test_get_enemy_starting_health_new() {
-    let enemy_starting_health = ImplCombat::get_enemy_starting_health(1, 0);
-    assert(enemy_starting_health == 11, 'lvl1, min beast heatlh is 11');
-}
-
-#[test]
-#[available_gas(500000)]
-fn test_get_enemy_starting_health() {
-    let mut adventurer_level = 2;
-    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 29);
-    assert(min_beast_level == 11, 'lvl2, min beast heatlh is 11');
-    assert(max_beast_level == 40, 'lvl2, max beast lvl is 40');
-
-    adventurer_level = 3;
-    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 44);
-    assert(min_beast_level == 11, 'lvl3, min beast heatlh is 11');
-    assert(max_beast_level == 55, 'lvl3, max beast lvl is 55');
-
-    adventurer_level = 4;
-    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 59);
-    assert(min_beast_level == 11, 'lvl4, min beast heatlh is 11');
-    assert(max_beast_level == 70, 'lvl4, max beast lvl is 70');
-
-    adventurer_level = 5;
-    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 74);
-    assert(min_beast_level == 11, 'lvl5, min beast heatlh is 11');
-    assert(max_beast_level == 85, 'lvl5, max beast lvl is 85');
-
-    adventurer_level = 19;
-    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 284);
-    assert(min_beast_level == 11, 'lvl19, min beast heatlh is 11');
-    assert(max_beast_level == 295, 'lvl19, max beast lvl is 295');
-
-    adventurer_level = 20;
-    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 299);
-    assert(min_beast_level == 101, 'lvl20, min beast heatlh is 101');
-    assert(max_beast_level == 400, 'lvl20, max beast lvl is 310');
-
-    adventurer_level = 29;
-    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 434);
-    assert(min_beast_level == 101, 'lvl29, min beast heatlh is 101');
-    // combat module will return higher health than LS beasts can handle
-    // this is fine as Beast module will cap the health at 511
-    assert(max_beast_level == 535, 'lvl29, max beast lvl is 535');
-
-    adventurer_level = 30;
-    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 449);
-    assert(min_beast_level == 201, 'lvl30, min beast heatlh is 201');
-    assert(max_beast_level == 650, 'lvl30, max beast lvl is 650');
-
-    adventurer_level = 40;
-    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 599);
-    assert(min_beast_level == 401, 'lvl40, min beast heatlh is 401');
-    assert(max_beast_level == 1000, 'lvl40, max beast lvl is 1000');
-
-    adventurer_level = 50;
-    let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 749);
-    assert(min_beast_level == 501, 'lvl50, min beast heatlh is 501');
-    assert(max_beast_level == 1250, 'lvl50, max beast lvl is 1250');
-}
-
-
-#[test]
-#[available_gas(170000)]
-fn test_get_level_from_xp() {
-    assert(ImplCombat::get_level_from_xp(0) == 1, 'XP 0 should return Level 1');
-    assert(ImplCombat::get_level_from_xp(1) == 1, 'XP 1 should return Level 1');
-    assert(ImplCombat::get_level_from_xp(2) == 1, 'XP 2 should return Level 1');
-    assert(ImplCombat::get_level_from_xp(3) == 1, 'XP 3 should return Level 1');
-    assert(ImplCombat::get_level_from_xp(4) == 2, 'XP 4 should return Level 2');
-    assert(ImplCombat::get_level_from_xp(8) == 2, 'XP 8 should return Level 2');
-    assert(ImplCombat::get_level_from_xp(9) == 3, 'XP 9 should return Level 3');
-    assert(ImplCombat::get_level_from_xp(15) == 3, 'XP 15 should return Level 3');
-    assert(ImplCombat::get_level_from_xp(16) == 4, 'XP 16 should return Level 4');
-    assert(ImplCombat::get_level_from_xp(24) == 4, 'XP 24 should return Level 4');
-    assert(ImplCombat::get_level_from_xp(25) == 5, 'XP 25 should return Level 5');
-    assert(ImplCombat::get_level_from_xp(35) == 5, 'XP 35 should return Level 5');
-    assert(ImplCombat::get_level_from_xp(36) == 6, 'XP 36 should return Level 6');
-    assert(ImplCombat::get_level_from_xp(48) == 6, 'XP 48 should return Level 6');
-    assert(ImplCombat::get_level_from_xp(49) == 7, 'XP 49 should return Level 7');
-    assert(ImplCombat::get_level_from_xp(63) == 7, 'XP 63 should return Level 7');
-    assert(ImplCombat::get_level_from_xp(64) == 8, 'XP 64 should return Level 8');
-    assert(ImplCombat::get_level_from_xp(80) == 8, 'XP 80 should return Level 8');
-    assert(ImplCombat::get_level_from_xp(81) == 9, 'XP 81 should return Level 9');
-    assert(ImplCombat::get_level_from_xp(99) == 9, 'XP 99 should return Level 9');
-    assert(ImplCombat::get_level_from_xp(100) == 10, 'XP 100 should return Level 10');
-    assert(ImplCombat::get_level_from_xp(120) == 10, 'XP 120 should return Level 10');
-    assert(ImplCombat::get_level_from_xp(121) == 11, 'XP 121 should return Level 11');
-    assert(ImplCombat::get_level_from_xp(143) == 11, 'XP 143 should return Level 11');
-    assert(ImplCombat::get_level_from_xp(144) == 12, 'XP 144 should return Level 12');
-    assert(ImplCombat::get_level_from_xp(167) == 12, 'XP 167 should return Level 12');
-    assert(ImplCombat::get_level_from_xp(192) == 13, 'XP 192 should return Level 13');
-    assert(ImplCombat::get_level_from_xp(219) == 14, 'XP 219 should return Level 14');
-    assert(ImplCombat::get_level_from_xp(247) == 15, 'XP 247 should return Level 15');
-    assert(ImplCombat::get_level_from_xp(276) == 16, 'XP 276 should return Level 16');
-    assert(ImplCombat::get_level_from_xp(306) == 17, 'XP 306 should return Level 17');
-    assert(ImplCombat::get_level_from_xp(337) == 18, 'XP 337 should return Level 18');
-    assert(ImplCombat::get_level_from_xp(369) == 19, 'XP 369 should return Level 19');
-    assert(ImplCombat::get_level_from_xp(400) == 20, 'XP 400 should return Level 20');
-    assert(ImplCombat::get_level_from_xp(440) == 20, 'XP 440 should return Level 20');
-    assert(ImplCombat::get_level_from_xp(441) == 21, 'XP 441 should return Level 20');
-    assert(ImplCombat::get_level_from_xp(65535) == 255, 'XP 65535 should be Level 255');
-}
-
-#[test]
-#[available_gas(170000)]
-fn test_get_attack_hp() {
-    // Initialize weapon struct
-    // for this test we just need item tier and level so we can ignore other properties
-    let mut weapon = CombatSpec {
-        item_type: Type::Blade_or_Hide(()), tier: Tier::T5(()), level: 0, specials: SpecialPowers {
-            special1: 0, special2: 0, special3: 0
+// ---------------------------
+// ---------- Tests ----------
+// ---------------------------
+#[cfg(test)]
+mod tests {
+    use core::option::OptionTrait;
+    use integer::{u16_sqrt};
+    use core::traits::{TryInto, Into, DivEq};
+    use combat::{
+        combat::{ImplCombat, ICombat, CombatSpec, SpecialPowers},
+        constants::{
+            CombatEnums::{Tier, Type, Slot, WeaponEffectiveness},
+            CombatSettings::{
+                XP_MULTIPLIER, DIFFICULTY_INCREASE_RATE, XP_REWARD_DIVISOR,
+                WEAPON_TIER_DAMAGE_MULTIPLIER, ARMOR_TIER_DAMAGE_MULTIPLIER, ELEMENTAL_DAMAGE_BONUS,
+                STRONG_ELEMENTAL_BONUS_MIN, MAX_CRITICAL_HIT_LUCK, LEVEL_MULTIPLIER
+            }
         }
     };
 
-    // T5 Level 0 Weapon Deals 0HP of Damage
-    weapon.tier = Tier::T5(());
-    weapon.level = 0;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 0, 'T5 LVL0 should deal 0HP');
-
-    // T5 Level 1 Weapon Deals 1HP of Damage
-    weapon.tier = Tier::T5(());
-    weapon.level = 1;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 1, 'T5 LVL1 should deal 1HP');
-
-    // T5 Level 2 Weapon Deals 1HP of Damage
-    weapon.tier = Tier::T5(());
-    weapon.level = 2;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 2, 'T5 LVL2 should deal 2HP');
-
-    // T5 Level 20 Weapon Deals 20HP of Damage
-    weapon.tier = Tier::T5(());
-    weapon.level = 20;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 20, 'T5 LVL20 should deal 20HP');
-
-    // T4 Level 0 Weapon Deals 0HP of Damage
-    weapon.tier = Tier::T4(());
-    weapon.level = 0;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 0, 'T4 LVL0 should deal 0HP');
-
-    // T4 Level 1 Weapon Deals 2HP of Damage
-    weapon.tier = Tier::T4(());
-    weapon.level = 1;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 2, 'T4 LVL1 should deal 2HP');
-
-    // T4 Level 2 Weapon Deals 4HP of Damage
-    weapon.tier = Tier::T4(());
-    weapon.level = 2;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 4, 'T4 LVL2 should deal 4HP');
-
-    // T4 Level 20 Weapon Deals 40HP of Damage
-    weapon.tier = Tier::T4(());
-    weapon.level = 20;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 40, 'T4 LVL20 should deal 40HP');
-
-    // T3 Level 0 Weapon Deals 0HP of Damage
-    weapon.tier = Tier::T3(());
-    weapon.level = 0;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 0, 'T3 LVL0 should deal 0HP');
-
-    // T3 Level 1 Weapon Deals 3HP of Damage
-    weapon.tier = Tier::T3(());
-    weapon.level = 1;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 3, 'T3 LVL1 should deal 3HP');
-
-    // T3 Level 2 Weapon Deals 6HP of Damage
-    weapon.tier = Tier::T3(());
-    weapon.level = 2;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 6, 'T3 LVL2 should deal 6HP');
-
-    // T3 Level 20 Weapon Deals 60HP of Damage
-    weapon.tier = Tier::T3(());
-    weapon.level = 20;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 60, 'T3 LVL20 should deal 60HP');
-
-    // T2 Level 0 Weapon Deals 0HP of Damage
-    weapon.tier = Tier::T2(());
-    weapon.level = 0;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 0, 'T2 LVL0 should deal 0HP');
-
-    // T2 Level 1 Weapon Deals 4HP of Damage
-    weapon.tier = Tier::T2(());
-    weapon.level = 1;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 4, 'T2 LVL1 should deal 4HP');
-
-    // T2 Level 2 Weapon Deals 8HP of Damage
-    weapon.tier = Tier::T2(());
-    weapon.level = 2;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 8, 'T2 LVL2 should deal 8HP');
-
-    // T2 Level 20 Weapon Deals 80HP of Damage
-    weapon.tier = Tier::T2(());
-    weapon.level = 20;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 80, 'T2 LVL20 should deal 80HP');
-
-    // T1 Level 0 Weapon Deals 0HP of Damage
-    weapon.tier = Tier::T1(());
-    weapon.level = 0;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 0, 'T1 LVL0 should deal 0HP');
-
-    // T1 Level 1 Weapon Deals 5HP of Damage
-    weapon.tier = Tier::T1(());
-    weapon.level = 1;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 5, 'T1 LVL1 should deal 5HP');
-
-    // T1 Level 2 Weapon Deals 10HP of Damage
-    weapon.tier = Tier::T1(());
-    weapon.level = 2;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 10, 'T1 LVL2 should deal 10HP');
-
-    // T1 Level 20 Weapon Deals 100HP of Damage
-    weapon.tier = Tier::T1(());
-    weapon.level = 20;
-    let attack_hp = ImplCombat::get_attack_hp(weapon);
-    assert(attack_hp == 100, 'T1 LVL20 should deal 100HP');
-}
-
-#[test]
-#[available_gas(170000)]
-fn test_get_armor_hp() {
-    // T1 Level 20 Armor (no special powers)
-    let mut armor = CombatSpec {
-        item_type: Type::Blade_or_Hide(()), tier: Tier::T1(()), level: 20, specials: SpecialPowers {
-            special2: 0, special3: 0, special1: 0
-        }
-    };
-
-    // T5 Level 0 Weapon Deals 0HP of Damage
-    armor.tier = Tier::T5(());
-    armor.level = 0;
-    let attack_hp = ImplCombat::get_armor_hp(armor);
-    assert(attack_hp == 0, 'T5 LVL0 should deal 0HP');
-
-    // T5 Level 1 Weapon Deals 1HP of Damage
-    armor.tier = Tier::T5(());
-    armor.level = 1;
-    let attack_hp = ImplCombat::get_armor_hp(armor);
-    assert(attack_hp == 1, 'T5 LVL1 should deal 1HP');
-
-    // T5 Level 2 Weapon Deals 1HP of Damage
-    armor.tier = Tier::T5(());
-    armor.level = 2;
-    let attack_hp = ImplCombat::get_armor_hp(armor);
-    assert(attack_hp == 2, 'T5 LVL2 should deal 2HP');
-
-    // T5 Level 20 Weapon Deals 20HP of Damage
-    armor.tier = Tier::T5(());
-    armor.level = 20;
-    let attack_hp = ImplCombat::get_armor_hp(armor);
-    assert(attack_hp == 20, 'T5 LVL20 should deal 20HP');
-
-    // T4 Level 0 Armor Provides 0HP
-    armor.tier = Tier::T4(());
-    armor.level = 0;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 0, 'T4 LVL0 should provide 0HP');
-
-    // T4 Level 1 Armor Provides 2HP
-    armor.tier = Tier::T4(());
-    armor.level = 1;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 2, 'T4 LVL1 should provide 2HP');
-
-    // T4 Level 2 Armor Provides 4HP
-    armor.tier = Tier::T4(());
-    armor.level = 2;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 4, 'T4 LVL2 should provide 4HP');
-
-    // T4 Level 20 Armor Provides 40HP
-    armor.tier = Tier::T4(());
-    armor.level = 20;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 40, 'T4 LVL20 should provide 40HP');
-
-    // T3 Level 0 Armor Provides 0HP
-    armor.tier = Tier::T3(());
-    armor.level = 0;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 0, 'T3 LVL0 should provide 0HP');
-
-    // T3 Level 1 Armor Provides 3HP
-    armor.tier = Tier::T3(());
-    armor.level = 1;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 3, 'T3 LVL1 should provide 3HP');
-
-    // T3 Level 2 Armor Provides 6HP
-    armor.tier = Tier::T3(());
-    armor.level = 2;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 6, 'T3 LVL2 should provide 6HP');
-
-    // T3 Level 20 Armor Provides 60HP
-    armor.tier = Tier::T3(());
-    armor.level = 20;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 60, 'T3 LVL20 should provide 60HP');
-
-    // T2 Level 0 Armor Provides 0HP
-    armor.tier = Tier::T2(());
-    armor.level = 0;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 0, 'T2 LVL0 should provide 0HP');
-
-    // T2 Level 1 Armor Provides 4HP
-    armor.tier = Tier::T2(());
-    armor.level = 1;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 4, 'T2 LVL1 should provide 4HP');
-
-    // T2 Level 2 Armor Provides 8HP
-    armor.tier = Tier::T2(());
-    armor.level = 2;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 8, 'T2 LVL2 should provide 8HP');
-
-    // T2 Level 20 Armor Provides 80HP
-    armor.tier = Tier::T2(());
-    armor.level = 20;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 80, 'T2 LVL20 should provide 80HP');
-
-    // T1 Level 0 Armor Provides 0HP
-    armor.tier = Tier::T1(());
-    armor.level = 0;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 0, 'T1 LVL0 should provide 0HP');
-
-    // T1 Level 1 Armor Provides 5HP
-    armor.tier = Tier::T1(());
-    armor.level = 1;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 5, 'T1 LVL1 should provide 5HP');
-
-    // T1 Level 2 Armor Provides 10HP
-    armor.tier = Tier::T1(());
-    armor.level = 2;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 10, 'T1 LVL2 should provide 10HP');
-
-    // T1 Level 20 Armor Provides 100HP
-    armor.tier = Tier::T1(());
-    armor.level = 20;
-    let armor_hp = ImplCombat::get_armor_hp(armor);
-    assert(armor_hp == 100, 'T1 LVL20 should provide 100HP');
-}
-
-#[test]
-#[available_gas(90000)]
-fn test_critical_hit_bonus() {
-    let base_damage = 100;
-
-    // low critical hit damage (25)
-    let mut entropy = 0;
-    let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
-    assert(critical_hit_damage_bonus == 25, 'should be 25hp bonus');
-
-    // medium-low critical hit damage (50)
-    entropy = 1;
-    let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
-    assert(critical_hit_damage_bonus == 50, 'should be 50 crit hit bonus');
-
-    // medium-high critical hit damage (75)
-    entropy = 2;
-    let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
-    assert(critical_hit_damage_bonus == 75, 'should be 75 crit hit bonus');
-
-    // high critical hit damage (100)
-    entropy = 3;
-    let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
-    assert(critical_hit_damage_bonus == 100, 'should be 100 crit hit bonus');
-}
-
-#[test]
-#[available_gas(90000)]
-fn test_is_critical_hit() {
-    // no entropy or luck is a critical hit
-    let mut luck = 0;
-    let mut entropy = 0;
-    let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
-    assert(is_critical_hit, 'should be critical hit');
-
-    // no luck with 1 entropy is not a critical hit
-    luck = 0;
-    entropy = 2;
-    let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
-    assert(!is_critical_hit, 'should not be critical hit');
-
-    // same entropy but with max luck is a critical hit
-    luck = 40;
-    entropy = 2;
-    let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
-    assert(is_critical_hit, 'should be critical hit');
-
-    // test max luck does not overflow and can critical hit
-    luck = 255;
-    entropy = 0;
-    let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
-    assert(is_critical_hit, 'should be critical hit');
-
-    // test max luck can miss critical hit
-    luck = 255;
-    entropy = 1;
-    let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
-    assert(!is_critical_hit, 'should not be critical hit');
-}
-
-#[test]
-#[available_gas(40000)]
-fn test_get_weapon_effectiveness() {
-    let weapon_type = Type::Magic_or_Cloth(());
-    let armor_type = Type::Bludgeon_or_Metal(());
-    let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
-    assert(effectiveness == WeaponEffectiveness::Strong(()), 'magic is strong against metal');
-
-    let weapon_type = Type::Magic_or_Cloth(());
-    let armor_type = Type::Magic_or_Cloth(());
-    let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
-    assert(effectiveness == WeaponEffectiveness::Fair(()), 'magic is fair against cloth');
-
-    let weapon_type = Type::Magic_or_Cloth(());
-    let armor_type = Type::Blade_or_Hide(());
-    let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
-    assert(effectiveness == WeaponEffectiveness::Weak(()), 'magic is weak against cloth');
-
-    let weapon_type = Type::Blade_or_Hide(());
-    let armor_type = Type::Magic_or_Cloth(());
-    let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
-    assert(effectiveness == WeaponEffectiveness::Strong(()), 'blade is strong against cloth');
-
-    let weapon_type = Type::Blade_or_Hide(());
-    let armor_type = Type::Blade_or_Hide(());
-    let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
-    assert(effectiveness == WeaponEffectiveness::Fair(()), 'blade is fair against hide');
-
-    let weapon_type = Type::Blade_or_Hide(());
-    let armor_type = Type::Bludgeon_or_Metal(());
-    let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
-    assert(effectiveness == WeaponEffectiveness::Weak(()), 'blade is weak against metal');
-
-    let weapon_type = Type::Bludgeon_or_Metal(());
-    let armor_type = Type::Blade_or_Hide(());
-    let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
-    assert(effectiveness == WeaponEffectiveness::Strong(()), 'bludgeon is strong against hide');
-
-    let weapon_type = Type::Bludgeon_or_Metal(());
-    let armor_type = Type::Bludgeon_or_Metal(());
-    let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
-    assert(effectiveness == WeaponEffectiveness::Fair(()), 'bludgeon is fair against metal');
-
-    let weapon_type = Type::Bludgeon_or_Metal(());
-    let armor_type = Type::Magic_or_Cloth(());
-    let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
-    assert(effectiveness == WeaponEffectiveness::Weak(()), 'bludgeon is weak against cloth');
-}
-
-#[test]
-#[available_gas(130000)]
-fn test_get_elemental_bonus() {
-    // use 100 damage for easy math
-    let base_damage = 100;
-
-    // Magic deals +50% against metal
-    let elemental_damage_bonus = ImplCombat::get_elemental_bonus(
-        base_damage, WeaponEffectiveness::Strong(())
-    );
-    assert(elemental_damage_bonus == base_damage + 50, 'strong bonus should be +50%');
-
-    // Magic deals +0% against cloth
-    let elemental_damage_bonus = ImplCombat::get_elemental_bonus(
-        base_damage, WeaponEffectiveness::Fair(())
-    );
-    assert(elemental_damage_bonus == base_damage, 'fair bonus should be +0%');
-
-    // Magic deals -50% against hide
-    let elemental_damage_bonus = ImplCombat::get_elemental_bonus(
-        base_damage, WeaponEffectiveness::Weak(())
-    );
-    assert(elemental_damage_bonus == base_damage - 50, 'weak bonus should be -50%');
-}
-
-#[test]
-#[available_gas(90000)]
-fn test_get_special2_bonus() {
-    let base_damage = 100;
-    let mut entropy = 0;
-
-    let mut weapon_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
-    let mut armor_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
-
-    // weapon without special name should have no bonus
-    let special2_bonus = ImplCombat::get_special2_bonus(
-        base_damage, weapon_specials.special2, armor_specials.special2, entropy
-    );
-    assert(special2_bonus == 0, 'should be no bonus');
-
-    // assign armor a special2 name and ensure lack of weapon special name still results in no bonus
-    armor_specials.special2 = 1;
-    let special2_bonus = ImplCombat::get_special2_bonus(
-        base_damage, weapon_specials.special2, armor_specials.special2, entropy
-    );
-    assert(special2_bonus == 0, 'should be no bonus');
-
-    // give weapon matching special2 to qualify it for bonus
-    // actual amount (4x-7x) will depend on entropy
-    // entropy 0: 4x
-    weapon_specials.special2 = 1;
-    let special2_bonus = ImplCombat::get_special2_bonus(
-        base_damage, weapon_specials.special2, armor_specials.special2, entropy
-    );
-    assert(special2_bonus == 400, 'should be +400hp bonus');
-
-    // entropy 1: 5x
-    entropy = 1;
-    let special2_bonus = ImplCombat::get_special2_bonus(
-        base_damage, weapon_specials.special2, armor_specials.special2, entropy
-    );
-    assert(special2_bonus == 500, 'should be +500hp bonus');
-
-    // entropy 2: 6x
-    entropy = 2;
-    let special2_bonus = ImplCombat::get_special2_bonus(
-        base_damage, weapon_specials.special2, armor_specials.special2, entropy
-    );
-    assert(special2_bonus == 600, 'should be +600hp bonus');
-
-    // entropy 3: 7x
-    entropy = 3;
-    let special2_bonus = ImplCombat::get_special2_bonus(
-        base_damage, weapon_specials.special2, armor_specials.special2, entropy
-    );
-    assert(special2_bonus == 700, 'should be +700hp bonus');
-}
-
-#[test]
-#[available_gas(130000)]
-fn test_get_special3_bonus() {
-    let base_damage = 100;
-    let mut entropy = 0;
-
-    let mut weapon_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
-    let mut armor_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
-
-    // weapon without special name should have no bonus
-    let special3_bonus = ImplCombat::get_special3_bonus(
-        base_damage, weapon_specials.special3, armor_specials.special3, entropy
-    );
-    assert(special3_bonus == 0, 'no prefix2 == no bonus');
-
-    // assign armor a prefix2 name and ensure lack of weapon special name still results in no bonus
-    armor_specials.special3 = 1;
-    let special3_bonus = ImplCombat::get_special3_bonus(
-        base_damage, weapon_specials.special3, armor_specials.special3, entropy
-    );
-    assert(special3_bonus == 0, 'no prefix2 == no bonus');
-
-    // give weapon matching prefix2 to qualify it for bonus
-    // actual amount (25% - 100%) will depend on entropy
-    // entropy 0: 25%
-    weapon_specials.special3 = 1;
-    let special3_bonus = ImplCombat::get_special3_bonus(
-        base_damage, weapon_specials.special3, armor_specials.special3, entropy
-    );
-    assert(special3_bonus == 25, 'should be +25hp bonus');
-
-    // entropy 1: 50%
-    entropy = 1;
-    let special3_bonus = ImplCombat::get_special3_bonus(
-        base_damage, weapon_specials.special3, armor_specials.special3, entropy
-    );
-    assert(special3_bonus == 50, 'should be +50hp bonus');
-
-    // entropy 2: 75%
-    entropy = 2;
-    let special3_bonus = ImplCombat::get_special3_bonus(
-        base_damage, weapon_specials.special3, armor_specials.special3, entropy
-    );
-    assert(special3_bonus == 75, 'should be +75hp bonus');
-
-    // entropy 3: 100%
-    entropy = 3;
-    let special3_bonus = ImplCombat::get_special3_bonus(
-        base_damage, weapon_specials.special3, armor_specials.special3, entropy
-    );
-    assert(special3_bonus == 100, 'should be +100hp bonus');
-}
-
-#[test]
-#[available_gas(50000)]
-fn test_get_strength_bonus() {
-    // use 100 base damage for easy math
-    let base_damage = 100;
-
-    // start with zero strength which should generate no bonus
-    let mut strength = 0;
-    let strength_bonus = ImplCombat::get_strength_bonus(base_damage, strength);
-    assert(strength_bonus == 0, 'no strength == no bonus');
-
-    // increase strength stat to 1 which should generate 20% bonus
-    strength = 1;
-    let strength_bonus = ImplCombat::get_strength_bonus(base_damage, strength);
-    assert(strength_bonus == 20, '1 strength == 20% bonus');
-
-    // increase strength stat to 2 which should generate 40% bonus
-    strength = 2;
-    let strength_bonus = ImplCombat::get_strength_bonus(base_damage, strength);
-    assert(strength_bonus == 40, '1 strength == 40% bonus');
-
-    // test max strength for loot survivor
-    strength = 31;
-    let strength_bonus = ImplCombat::get_strength_bonus(base_damage, strength);
-    assert(strength_bonus == 620, '31 strength == 620% bonus');
-}
-
-#[test]
-#[available_gas(1100000)]
-fn test_calculate_damage() {
-    // initialize weapon
-    let weapon_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
-    let mut weapon = CombatSpec {
-        item_type: Type::Blade_or_Hide(()), tier: Tier::T5(()), level: 1, specials: weapon_specials
-    };
-
-    // initialize armor
-    let armor_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
-    let mut armor = CombatSpec {
-        item_type: Type::Blade_or_Hide(()), tier: Tier::T5(()), level: 1, specials: armor_specials
-    };
-
-    // initialize other combat parameters
-    // start with simplest values to reduce number of variables to track
-    let mut minimum_damage = 0;
-    let mut strength_boost = 0;
-    let mut is_critical_hit = false;
-    let mut entropy = 0;
-
-    // We'll start by simulating the starter beast battle
-    // adventurer selects a T5 Blade (Short Sword) and it'll be greatness/level 1
-    weapon.tier = Tier::T5(());
-    weapon.level = 1;
-
-    // beast is going to be a T5 wearing cloth and it'll be greatness/level 1
-    armor.tier = Tier::T5(());
-    armor.level = 1;
-
-    let damage = ImplCombat::calculate_damage(
-        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
-    );
-
-    // adventurer isn't able to deal any damage to the beast (not good)
-    assert(damage == 0, 'equally matched: 0HP');
-
-    // client can use minimum damage setting to ensure adventurer always does at least some damage
-    minimum_damage = 2;
-    let damage = ImplCombat::calculate_damage(
-        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
-    );
-    assert(damage == 2, 'minimum damage: 2hp');
-
-    // adventurer levels up their weapon to level 4
-    // and encounters another T5 beast wearing cloth
-    weapon.level = 4;
-    let damage = ImplCombat::calculate_damage(
-        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
-    );
-
-    // they can now deal more than the minimum damage
-    assert(damage == 3, 'upgrade to lvl3: 3HP');
-
-    // they then go to the store and upgrade to a Katana (will be level 1)
-    weapon.tier = Tier::T1(());
-    weapon.level = 1;
-    let damage = ImplCombat::calculate_damage(
-        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
-    );
-    // even on level 1, it deals more damage than their starter short sword
-    assert(damage == 4, 'upgrade to katana: 6HP');
-
-    // enable critical hit for that last attack
-    is_critical_hit = true;
-    let damage = ImplCombat::calculate_damage(
-        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
-    );
-    // user picks up a critical hit but gets minimum bonus of 1
-    assert(damage == 5, 'critical hit min bonus: 5HP');
-
-    // we can manipulate entropy to get different results
-    // entropy 3 will produce max bonus of 100% of the base damage (5)
-    entropy = 3;
-    let damage = ImplCombat::calculate_damage(
-        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
-    );
-    assert(damage == 8, 'good critical hit: 8HP');
-
-    // switch to weak elemental
-    weapon.item_type = Type::Blade_or_Hide(());
-    armor.item_type = Type::Bludgeon_or_Metal(());
-    let damage = ImplCombat::calculate_damage(
-        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
-    );
-    // verify damage drops by ~50%
-    assert(damage == 6, 'weak elemental penalty: 6HP');
-
-    // adventurer invests in two strength stat points to get a 40% bonus on base damage (5)
-    strength_boost = 2;
-    let damage = ImplCombat::calculate_damage(
-        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
-    );
-    // verify damage drops by ~50%
-    assert(damage == 8, 'attack should be 9HP');
-
-    // fast forward to late game (G20 Katana)
-    weapon.level = 20;
-    weapon.tier = Tier::T1(());
-    // against a Level 30 T3 beast wearing Metal (strong against blade)
-    armor.level = 40;
-    armor.tier = Tier::T2(());
-    let damage = ImplCombat::calculate_damage(
-        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
-    );
-    assert(damage == 30, 'T1 G20 vs T3 G30: 30hp');
-
-    // Same battle against a magical beast (cloth)
-    weapon.item_type = Type::Blade_or_Hide(());
-    armor.item_type = Type::Magic_or_Cloth(());
-    let damage = ImplCombat::calculate_damage(
-        weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
-    );
-    // deals significantly more damage because elemental is applied
-    // to raw attack damage
-    assert(damage == 130, 'T1 G20 vs T3 G30: 130hp');
-}
-
-
-// level 1: max beast 1
-// level 2: max beast 4
-// level 20: max beast 40
-#[test]
-#[available_gas(750000)]
-fn test_get_random_level() {
-    let mut adventurer_level = 1;
-    let range_level_increase = DIFFICULTY_INCREASE_RATE::NORMAL;
-    let level_multiplier = LEVEL_MULTIPLIER::NORMAL;
-    let beast_level = ImplCombat::get_random_level(adventurer_level, 0);
-
-    adventurer_level = 2;
-    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 3);
-    assert(min_beast_level == 1, 'on lvl2, min beast lvl is 1');
-    assert(max_beast_level == 4, 'on lvl2, max beast lvl is 4');
-
-    adventurer_level = 3;
-    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 5);
-    assert(min_beast_level == 1, 'on lvl3, min beast lvl is 1');
-    assert(max_beast_level == 6, 'on lvl3, max beast lvl is 6');
-
-    adventurer_level = 19;
-    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
-    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 37);
-    assert(min_beast_level == 1, 'on lvl19, min beast lvl is 1');
-    assert(max_beast_level == 38, 'on lvl19, max beast lvl is 38');
-
-    adventurer_level = 20;
-    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 39);
-    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
-    assert(min_beast_level == 11, 'on lvl20, min beast lvl is 11');
-    assert(max_beast_level == 50, 'on lvl20, max beast lvl is 50');
-
-    adventurer_level = 30;
-    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 59);
-    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
-    assert(min_beast_level == 21, 'on lvl30, min beast lvl is 21');
-    assert(max_beast_level == 80, 'on lvl30, max beast lvl is 80');
-
-    adventurer_level = 40;
-    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 79);
-    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
-    assert(min_beast_level == 41, 'on lvl40, min beast lvl is 31');
-    assert(max_beast_level == 120, 'on lvl40, max beast lvl is 120');
-
-    adventurer_level = 50;
-    let max_beast_level = ImplCombat::get_random_level(adventurer_level, 99);
-    let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
-    assert(min_beast_level == 81, 'on lvl50, min beast lvl is 51');
-    assert(max_beast_level == 180, 'on lvl50, max beast lvl is 180');
+    #[test]
+    #[available_gas(50000)]
+    fn test_get_enemy_starting_health_max_values() {
+        // test max value case
+        // no need to assert result just make sure it doesn't panic
+        let enemy_starting_health = ImplCombat::get_enemy_starting_health(
+            255, 340282366920938463463374607431768211455
+        );
+    }
+
+    #[test]
+    #[available_gas(500000)]
+    fn test_get_enemy_starting_health_new() {
+        let enemy_starting_health = ImplCombat::get_enemy_starting_health(1, 0);
+        assert(enemy_starting_health == 11, 'lvl1, min beast heatlh is 11');
+    }
+
+    #[test]
+    #[available_gas(500000)]
+    fn test_get_enemy_starting_health() {
+        let mut adventurer_level = 2;
+        let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 29);
+        assert(min_beast_level == 11, 'lvl2, min beast heatlh is 11');
+        assert(max_beast_level == 40, 'lvl2, max beast lvl is 40');
+
+        adventurer_level = 3;
+        let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 44);
+        assert(min_beast_level == 11, 'lvl3, min beast heatlh is 11');
+        assert(max_beast_level == 55, 'lvl3, max beast lvl is 55');
+
+        adventurer_level = 4;
+        let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 59);
+        assert(min_beast_level == 11, 'lvl4, min beast heatlh is 11');
+        assert(max_beast_level == 70, 'lvl4, max beast lvl is 70');
+
+        adventurer_level = 5;
+        let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 74);
+        assert(min_beast_level == 11, 'lvl5, min beast heatlh is 11');
+        assert(max_beast_level == 85, 'lvl5, max beast lvl is 85');
+
+        adventurer_level = 19;
+        let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 284);
+        assert(min_beast_level == 11, 'lvl19, min beast heatlh is 11');
+        assert(max_beast_level == 295, 'lvl19, max beast lvl is 295');
+
+        adventurer_level = 20;
+        let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 299);
+        assert(min_beast_level == 101, 'lvl20, min beast heatlh is 101');
+        assert(max_beast_level == 400, 'lvl20, max beast lvl is 310');
+
+        adventurer_level = 29;
+        let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 434);
+        assert(min_beast_level == 101, 'lvl29, min beast heatlh is 101');
+        // combat module will return higher health than LS beasts can handle
+        // this is fine as Beast module will cap the health at 511
+        assert(max_beast_level == 535, 'lvl29, max beast lvl is 535');
+
+        adventurer_level = 30;
+        let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 449);
+        assert(min_beast_level == 201, 'lvl30, min beast heatlh is 201');
+        assert(max_beast_level == 650, 'lvl30, max beast lvl is 650');
+
+        adventurer_level = 40;
+        let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 599);
+        assert(min_beast_level == 401, 'lvl40, min beast heatlh is 401');
+        assert(max_beast_level == 1000, 'lvl40, max beast lvl is 1000');
+
+        adventurer_level = 50;
+        let min_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_enemy_starting_health(adventurer_level, 749);
+        assert(min_beast_level == 501, 'lvl50, min beast heatlh is 501');
+        assert(max_beast_level == 1250, 'lvl50, max beast lvl is 1250');
+    }
+
+
+    #[test]
+    #[available_gas(170000)]
+    fn test_get_level_from_xp() {
+        assert(ImplCombat::get_level_from_xp(0) == 1, 'XP 0 should return Level 1');
+        assert(ImplCombat::get_level_from_xp(1) == 1, 'XP 1 should return Level 1');
+        assert(ImplCombat::get_level_from_xp(2) == 1, 'XP 2 should return Level 1');
+        assert(ImplCombat::get_level_from_xp(3) == 1, 'XP 3 should return Level 1');
+        assert(ImplCombat::get_level_from_xp(4) == 2, 'XP 4 should return Level 2');
+        assert(ImplCombat::get_level_from_xp(8) == 2, 'XP 8 should return Level 2');
+        assert(ImplCombat::get_level_from_xp(9) == 3, 'XP 9 should return Level 3');
+        assert(ImplCombat::get_level_from_xp(15) == 3, 'XP 15 should return Level 3');
+        assert(ImplCombat::get_level_from_xp(16) == 4, 'XP 16 should return Level 4');
+        assert(ImplCombat::get_level_from_xp(24) == 4, 'XP 24 should return Level 4');
+        assert(ImplCombat::get_level_from_xp(25) == 5, 'XP 25 should return Level 5');
+        assert(ImplCombat::get_level_from_xp(35) == 5, 'XP 35 should return Level 5');
+        assert(ImplCombat::get_level_from_xp(36) == 6, 'XP 36 should return Level 6');
+        assert(ImplCombat::get_level_from_xp(48) == 6, 'XP 48 should return Level 6');
+        assert(ImplCombat::get_level_from_xp(49) == 7, 'XP 49 should return Level 7');
+        assert(ImplCombat::get_level_from_xp(63) == 7, 'XP 63 should return Level 7');
+        assert(ImplCombat::get_level_from_xp(64) == 8, 'XP 64 should return Level 8');
+        assert(ImplCombat::get_level_from_xp(80) == 8, 'XP 80 should return Level 8');
+        assert(ImplCombat::get_level_from_xp(81) == 9, 'XP 81 should return Level 9');
+        assert(ImplCombat::get_level_from_xp(99) == 9, 'XP 99 should return Level 9');
+        assert(ImplCombat::get_level_from_xp(100) == 10, 'XP 100 should return Level 10');
+        assert(ImplCombat::get_level_from_xp(120) == 10, 'XP 120 should return Level 10');
+        assert(ImplCombat::get_level_from_xp(121) == 11, 'XP 121 should return Level 11');
+        assert(ImplCombat::get_level_from_xp(143) == 11, 'XP 143 should return Level 11');
+        assert(ImplCombat::get_level_from_xp(144) == 12, 'XP 144 should return Level 12');
+        assert(ImplCombat::get_level_from_xp(167) == 12, 'XP 167 should return Level 12');
+        assert(ImplCombat::get_level_from_xp(192) == 13, 'XP 192 should return Level 13');
+        assert(ImplCombat::get_level_from_xp(219) == 14, 'XP 219 should return Level 14');
+        assert(ImplCombat::get_level_from_xp(247) == 15, 'XP 247 should return Level 15');
+        assert(ImplCombat::get_level_from_xp(276) == 16, 'XP 276 should return Level 16');
+        assert(ImplCombat::get_level_from_xp(306) == 17, 'XP 306 should return Level 17');
+        assert(ImplCombat::get_level_from_xp(337) == 18, 'XP 337 should return Level 18');
+        assert(ImplCombat::get_level_from_xp(369) == 19, 'XP 369 should return Level 19');
+        assert(ImplCombat::get_level_from_xp(400) == 20, 'XP 400 should return Level 20');
+        assert(ImplCombat::get_level_from_xp(440) == 20, 'XP 440 should return Level 20');
+        assert(ImplCombat::get_level_from_xp(441) == 21, 'XP 441 should return Level 20');
+        assert(ImplCombat::get_level_from_xp(65535) == 255, 'XP 65535 should be Level 255');
+    }
+
+    #[test]
+    #[available_gas(170000)]
+    fn test_get_attack_hp() {
+        // Initialize weapon struct
+        // for this test we just need item tier and level so we can ignore other properties
+        let mut weapon = CombatSpec {
+            item_type: Type::Blade_or_Hide(()),
+            tier: Tier::T5(()),
+            level: 0,
+            specials: SpecialPowers {
+                special1: 0, special2: 0, special3: 0
+            }
+        };
+
+        // T5 Level 0 Weapon Deals 0HP of Damage
+        weapon.tier = Tier::T5(());
+        weapon.level = 0;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 0, 'T5 LVL0 should deal 0HP');
+
+        // T5 Level 1 Weapon Deals 1HP of Damage
+        weapon.tier = Tier::T5(());
+        weapon.level = 1;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 1, 'T5 LVL1 should deal 1HP');
+
+        // T5 Level 2 Weapon Deals 1HP of Damage
+        weapon.tier = Tier::T5(());
+        weapon.level = 2;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 2, 'T5 LVL2 should deal 2HP');
+
+        // T5 Level 20 Weapon Deals 20HP of Damage
+        weapon.tier = Tier::T5(());
+        weapon.level = 20;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 20, 'T5 LVL20 should deal 20HP');
+
+        // T4 Level 0 Weapon Deals 0HP of Damage
+        weapon.tier = Tier::T4(());
+        weapon.level = 0;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 0, 'T4 LVL0 should deal 0HP');
+
+        // T4 Level 1 Weapon Deals 2HP of Damage
+        weapon.tier = Tier::T4(());
+        weapon.level = 1;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 2, 'T4 LVL1 should deal 2HP');
+
+        // T4 Level 2 Weapon Deals 4HP of Damage
+        weapon.tier = Tier::T4(());
+        weapon.level = 2;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 4, 'T4 LVL2 should deal 4HP');
+
+        // T4 Level 20 Weapon Deals 40HP of Damage
+        weapon.tier = Tier::T4(());
+        weapon.level = 20;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 40, 'T4 LVL20 should deal 40HP');
+
+        // T3 Level 0 Weapon Deals 0HP of Damage
+        weapon.tier = Tier::T3(());
+        weapon.level = 0;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 0, 'T3 LVL0 should deal 0HP');
+
+        // T3 Level 1 Weapon Deals 3HP of Damage
+        weapon.tier = Tier::T3(());
+        weapon.level = 1;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 3, 'T3 LVL1 should deal 3HP');
+
+        // T3 Level 2 Weapon Deals 6HP of Damage
+        weapon.tier = Tier::T3(());
+        weapon.level = 2;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 6, 'T3 LVL2 should deal 6HP');
+
+        // T3 Level 20 Weapon Deals 60HP of Damage
+        weapon.tier = Tier::T3(());
+        weapon.level = 20;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 60, 'T3 LVL20 should deal 60HP');
+
+        // T2 Level 0 Weapon Deals 0HP of Damage
+        weapon.tier = Tier::T2(());
+        weapon.level = 0;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 0, 'T2 LVL0 should deal 0HP');
+
+        // T2 Level 1 Weapon Deals 4HP of Damage
+        weapon.tier = Tier::T2(());
+        weapon.level = 1;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 4, 'T2 LVL1 should deal 4HP');
+
+        // T2 Level 2 Weapon Deals 8HP of Damage
+        weapon.tier = Tier::T2(());
+        weapon.level = 2;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 8, 'T2 LVL2 should deal 8HP');
+
+        // T2 Level 20 Weapon Deals 80HP of Damage
+        weapon.tier = Tier::T2(());
+        weapon.level = 20;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 80, 'T2 LVL20 should deal 80HP');
+
+        // T1 Level 0 Weapon Deals 0HP of Damage
+        weapon.tier = Tier::T1(());
+        weapon.level = 0;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 0, 'T1 LVL0 should deal 0HP');
+
+        // T1 Level 1 Weapon Deals 5HP of Damage
+        weapon.tier = Tier::T1(());
+        weapon.level = 1;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 5, 'T1 LVL1 should deal 5HP');
+
+        // T1 Level 2 Weapon Deals 10HP of Damage
+        weapon.tier = Tier::T1(());
+        weapon.level = 2;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 10, 'T1 LVL2 should deal 10HP');
+
+        // T1 Level 20 Weapon Deals 100HP of Damage
+        weapon.tier = Tier::T1(());
+        weapon.level = 20;
+        let attack_hp = ImplCombat::get_attack_hp(weapon);
+        assert(attack_hp == 100, 'T1 LVL20 should deal 100HP');
+    }
+
+    #[test]
+    #[available_gas(170000)]
+    fn test_get_armor_hp() {
+        // T1 Level 20 Armor (no special powers)
+        let mut armor = CombatSpec {
+            item_type: Type::Blade_or_Hide(()),
+            tier: Tier::T1(()),
+            level: 20,
+            specials: SpecialPowers {
+                special2: 0, special3: 0, special1: 0
+            }
+        };
+
+        // T5 Level 0 Weapon Deals 0HP of Damage
+        armor.tier = Tier::T5(());
+        armor.level = 0;
+        let attack_hp = ImplCombat::get_armor_hp(armor);
+        assert(attack_hp == 0, 'T5 LVL0 should deal 0HP');
+
+        // T5 Level 1 Weapon Deals 1HP of Damage
+        armor.tier = Tier::T5(());
+        armor.level = 1;
+        let attack_hp = ImplCombat::get_armor_hp(armor);
+        assert(attack_hp == 1, 'T5 LVL1 should deal 1HP');
+
+        // T5 Level 2 Weapon Deals 1HP of Damage
+        armor.tier = Tier::T5(());
+        armor.level = 2;
+        let attack_hp = ImplCombat::get_armor_hp(armor);
+        assert(attack_hp == 2, 'T5 LVL2 should deal 2HP');
+
+        // T5 Level 20 Weapon Deals 20HP of Damage
+        armor.tier = Tier::T5(());
+        armor.level = 20;
+        let attack_hp = ImplCombat::get_armor_hp(armor);
+        assert(attack_hp == 20, 'T5 LVL20 should deal 20HP');
+
+        // T4 Level 0 Armor Provides 0HP
+        armor.tier = Tier::T4(());
+        armor.level = 0;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 0, 'T4 LVL0 should provide 0HP');
+
+        // T4 Level 1 Armor Provides 2HP
+        armor.tier = Tier::T4(());
+        armor.level = 1;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 2, 'T4 LVL1 should provide 2HP');
+
+        // T4 Level 2 Armor Provides 4HP
+        armor.tier = Tier::T4(());
+        armor.level = 2;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 4, 'T4 LVL2 should provide 4HP');
+
+        // T4 Level 20 Armor Provides 40HP
+        armor.tier = Tier::T4(());
+        armor.level = 20;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 40, 'T4 LVL20 should provide 40HP');
+
+        // T3 Level 0 Armor Provides 0HP
+        armor.tier = Tier::T3(());
+        armor.level = 0;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 0, 'T3 LVL0 should provide 0HP');
+
+        // T3 Level 1 Armor Provides 3HP
+        armor.tier = Tier::T3(());
+        armor.level = 1;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 3, 'T3 LVL1 should provide 3HP');
+
+        // T3 Level 2 Armor Provides 6HP
+        armor.tier = Tier::T3(());
+        armor.level = 2;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 6, 'T3 LVL2 should provide 6HP');
+
+        // T3 Level 20 Armor Provides 60HP
+        armor.tier = Tier::T3(());
+        armor.level = 20;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 60, 'T3 LVL20 should provide 60HP');
+
+        // T2 Level 0 Armor Provides 0HP
+        armor.tier = Tier::T2(());
+        armor.level = 0;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 0, 'T2 LVL0 should provide 0HP');
+
+        // T2 Level 1 Armor Provides 4HP
+        armor.tier = Tier::T2(());
+        armor.level = 1;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 4, 'T2 LVL1 should provide 4HP');
+
+        // T2 Level 2 Armor Provides 8HP
+        armor.tier = Tier::T2(());
+        armor.level = 2;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 8, 'T2 LVL2 should provide 8HP');
+
+        // T2 Level 20 Armor Provides 80HP
+        armor.tier = Tier::T2(());
+        armor.level = 20;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 80, 'T2 LVL20 should provide 80HP');
+
+        // T1 Level 0 Armor Provides 0HP
+        armor.tier = Tier::T1(());
+        armor.level = 0;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 0, 'T1 LVL0 should provide 0HP');
+
+        // T1 Level 1 Armor Provides 5HP
+        armor.tier = Tier::T1(());
+        armor.level = 1;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 5, 'T1 LVL1 should provide 5HP');
+
+        // T1 Level 2 Armor Provides 10HP
+        armor.tier = Tier::T1(());
+        armor.level = 2;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 10, 'T1 LVL2 should provide 10HP');
+
+        // T1 Level 20 Armor Provides 100HP
+        armor.tier = Tier::T1(());
+        armor.level = 20;
+        let armor_hp = ImplCombat::get_armor_hp(armor);
+        assert(armor_hp == 100, 'T1 LVL20 should provide 100HP');
+    }
+
+    #[test]
+    #[available_gas(90000)]
+    fn test_critical_hit_bonus() {
+        let base_damage = 100;
+
+        // low critical hit damage (25)
+        let mut entropy = 0;
+        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
+        assert(critical_hit_damage_bonus == 25, 'should be 25hp bonus');
+
+        // medium-low critical hit damage (50)
+        entropy = 1;
+        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
+        assert(critical_hit_damage_bonus == 50, 'should be 50 crit hit bonus');
+
+        // medium-high critical hit damage (75)
+        entropy = 2;
+        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
+        assert(critical_hit_damage_bonus == 75, 'should be 75 crit hit bonus');
+
+        // high critical hit damage (100)
+        entropy = 3;
+        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
+        assert(critical_hit_damage_bonus == 100, 'should be 100 crit hit bonus');
+    }
+
+    #[test]
+    #[available_gas(90000)]
+    fn test_is_critical_hit() {
+        // no entropy or luck is a critical hit
+        let mut luck = 0;
+        let mut entropy = 0;
+        let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
+        assert(is_critical_hit, 'should be critical hit');
+
+        // no luck with 1 entropy is not a critical hit
+        luck = 0;
+        entropy = 2;
+        let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
+        assert(!is_critical_hit, 'should not be critical hit');
+
+        // same entropy but with max luck is a critical hit
+        luck = 40;
+        entropy = 2;
+        let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
+        assert(is_critical_hit, 'should be critical hit');
+
+        // test max luck does not overflow and can critical hit
+        luck = 255;
+        entropy = 0;
+        let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
+        assert(is_critical_hit, 'should be critical hit');
+
+        // test max luck can miss critical hit
+        luck = 255;
+        entropy = 1;
+        let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
+        assert(!is_critical_hit, 'should not be critical hit');
+    }
+
+    #[test]
+    #[available_gas(40000)]
+    fn test_get_weapon_effectiveness() {
+        let weapon_type = Type::Magic_or_Cloth(());
+        let armor_type = Type::Bludgeon_or_Metal(());
+        let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
+        assert(effectiveness == WeaponEffectiveness::Strong(()), 'magic is strong against metal');
+
+        let weapon_type = Type::Magic_or_Cloth(());
+        let armor_type = Type::Magic_or_Cloth(());
+        let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
+        assert(effectiveness == WeaponEffectiveness::Fair(()), 'magic is fair against cloth');
+
+        let weapon_type = Type::Magic_or_Cloth(());
+        let armor_type = Type::Blade_or_Hide(());
+        let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
+        assert(effectiveness == WeaponEffectiveness::Weak(()), 'magic is weak against cloth');
+
+        let weapon_type = Type::Blade_or_Hide(());
+        let armor_type = Type::Magic_or_Cloth(());
+        let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
+        assert(effectiveness == WeaponEffectiveness::Strong(()), 'blade is strong against cloth');
+
+        let weapon_type = Type::Blade_or_Hide(());
+        let armor_type = Type::Blade_or_Hide(());
+        let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
+        assert(effectiveness == WeaponEffectiveness::Fair(()), 'blade is fair against hide');
+
+        let weapon_type = Type::Blade_or_Hide(());
+        let armor_type = Type::Bludgeon_or_Metal(());
+        let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
+        assert(effectiveness == WeaponEffectiveness::Weak(()), 'blade is weak against metal');
+
+        let weapon_type = Type::Bludgeon_or_Metal(());
+        let armor_type = Type::Blade_or_Hide(());
+        let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
+        assert(effectiveness == WeaponEffectiveness::Strong(()), 'bludgeon is strong against hide');
+
+        let weapon_type = Type::Bludgeon_or_Metal(());
+        let armor_type = Type::Bludgeon_or_Metal(());
+        let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
+        assert(effectiveness == WeaponEffectiveness::Fair(()), 'bludgeon is fair against metal');
+
+        let weapon_type = Type::Bludgeon_or_Metal(());
+        let armor_type = Type::Magic_or_Cloth(());
+        let effectiveness = ImplCombat::get_weapon_effectiveness(weapon_type, armor_type);
+        assert(effectiveness == WeaponEffectiveness::Weak(()), 'bludgeon is weak against cloth');
+    }
+
+    #[test]
+    #[available_gas(130000)]
+    fn test_get_elemental_bonus() {
+        // use 100 damage for easy math
+        let base_damage = 100;
+
+        // Magic deals +50% against metal
+        let elemental_damage_bonus = ImplCombat::get_elemental_bonus(
+            base_damage, WeaponEffectiveness::Strong(())
+        );
+        assert(elemental_damage_bonus == base_damage + 50, 'strong bonus should be +50%');
+
+        // Magic deals +0% against cloth
+        let elemental_damage_bonus = ImplCombat::get_elemental_bonus(
+            base_damage, WeaponEffectiveness::Fair(())
+        );
+        assert(elemental_damage_bonus == base_damage, 'fair bonus should be +0%');
+
+        // Magic deals -50% against hide
+        let elemental_damage_bonus = ImplCombat::get_elemental_bonus(
+            base_damage, WeaponEffectiveness::Weak(())
+        );
+        assert(elemental_damage_bonus == base_damage - 50, 'weak bonus should be -50%');
+    }
+
+    #[test]
+    #[available_gas(90000)]
+    fn test_get_special2_bonus() {
+        let base_damage = 100;
+        let mut entropy = 0;
+
+        let mut weapon_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
+        let mut armor_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
+
+        // weapon without special name should have no bonus
+        let special2_bonus = ImplCombat::get_special2_bonus(
+            base_damage, weapon_specials.special2, armor_specials.special2, entropy
+        );
+        assert(special2_bonus == 0, 'should be no bonus');
+
+        // assign armor a special2 name and ensure lack of weapon special name still results in no bonus
+        armor_specials.special2 = 1;
+        let special2_bonus = ImplCombat::get_special2_bonus(
+            base_damage, weapon_specials.special2, armor_specials.special2, entropy
+        );
+        assert(special2_bonus == 0, 'should be no bonus');
+
+        // give weapon matching special2 to qualify it for bonus
+        // actual amount (4x-7x) will depend on entropy
+        // entropy 0: 4x
+        weapon_specials.special2 = 1;
+        let special2_bonus = ImplCombat::get_special2_bonus(
+            base_damage, weapon_specials.special2, armor_specials.special2, entropy
+        );
+        assert(special2_bonus == 400, 'should be +400hp bonus');
+
+        // entropy 1: 5x
+        entropy = 1;
+        let special2_bonus = ImplCombat::get_special2_bonus(
+            base_damage, weapon_specials.special2, armor_specials.special2, entropy
+        );
+        assert(special2_bonus == 500, 'should be +500hp bonus');
+
+        // entropy 2: 6x
+        entropy = 2;
+        let special2_bonus = ImplCombat::get_special2_bonus(
+            base_damage, weapon_specials.special2, armor_specials.special2, entropy
+        );
+        assert(special2_bonus == 600, 'should be +600hp bonus');
+
+        // entropy 3: 7x
+        entropy = 3;
+        let special2_bonus = ImplCombat::get_special2_bonus(
+            base_damage, weapon_specials.special2, armor_specials.special2, entropy
+        );
+        assert(special2_bonus == 700, 'should be +700hp bonus');
+    }
+
+    #[test]
+    #[available_gas(130000)]
+    fn test_get_special3_bonus() {
+        let base_damage = 100;
+        let mut entropy = 0;
+
+        let mut weapon_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
+        let mut armor_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
+
+        // weapon without special name should have no bonus
+        let special3_bonus = ImplCombat::get_special3_bonus(
+            base_damage, weapon_specials.special3, armor_specials.special3, entropy
+        );
+        assert(special3_bonus == 0, 'no prefix2 == no bonus');
+
+        // assign armor a prefix2 name and ensure lack of weapon special name still results in no bonus
+        armor_specials.special3 = 1;
+        let special3_bonus = ImplCombat::get_special3_bonus(
+            base_damage, weapon_specials.special3, armor_specials.special3, entropy
+        );
+        assert(special3_bonus == 0, 'no prefix2 == no bonus');
+
+        // give weapon matching prefix2 to qualify it for bonus
+        // actual amount (25% - 100%) will depend on entropy
+        // entropy 0: 25%
+        weapon_specials.special3 = 1;
+        let special3_bonus = ImplCombat::get_special3_bonus(
+            base_damage, weapon_specials.special3, armor_specials.special3, entropy
+        );
+        assert(special3_bonus == 25, 'should be +25hp bonus');
+
+        // entropy 1: 50%
+        entropy = 1;
+        let special3_bonus = ImplCombat::get_special3_bonus(
+            base_damage, weapon_specials.special3, armor_specials.special3, entropy
+        );
+        assert(special3_bonus == 50, 'should be +50hp bonus');
+
+        // entropy 2: 75%
+        entropy = 2;
+        let special3_bonus = ImplCombat::get_special3_bonus(
+            base_damage, weapon_specials.special3, armor_specials.special3, entropy
+        );
+        assert(special3_bonus == 75, 'should be +75hp bonus');
+
+        // entropy 3: 100%
+        entropy = 3;
+        let special3_bonus = ImplCombat::get_special3_bonus(
+            base_damage, weapon_specials.special3, armor_specials.special3, entropy
+        );
+        assert(special3_bonus == 100, 'should be +100hp bonus');
+    }
+
+    #[test]
+    #[available_gas(50000)]
+    fn test_get_strength_bonus() {
+        // use 100 base damage for easy math
+        let base_damage = 100;
+
+        // start with zero strength which should generate no bonus
+        let mut strength = 0;
+        let strength_bonus = ImplCombat::get_strength_bonus(base_damage, strength);
+        assert(strength_bonus == 0, 'no strength == no bonus');
+
+        // increase strength stat to 1 which should generate 20% bonus
+        strength = 1;
+        let strength_bonus = ImplCombat::get_strength_bonus(base_damage, strength);
+        assert(strength_bonus == 20, '1 strength == 20% bonus');
+
+        // increase strength stat to 2 which should generate 40% bonus
+        strength = 2;
+        let strength_bonus = ImplCombat::get_strength_bonus(base_damage, strength);
+        assert(strength_bonus == 40, '1 strength == 40% bonus');
+
+        // test max strength for loot survivor
+        strength = 31;
+        let strength_bonus = ImplCombat::get_strength_bonus(base_damage, strength);
+        assert(strength_bonus == 620, '31 strength == 620% bonus');
+    }
+
+    #[test]
+    #[available_gas(1100000)]
+    fn test_calculate_damage() {
+        // initialize weapon
+        let weapon_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
+        let mut weapon = CombatSpec {
+            item_type: Type::Blade_or_Hide(()),
+            tier: Tier::T5(()),
+            level: 1,
+            specials: weapon_specials
+        };
+
+        // initialize armor
+        let armor_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
+        let mut armor = CombatSpec {
+            item_type: Type::Blade_or_Hide(()),
+            tier: Tier::T5(()),
+            level: 1,
+            specials: armor_specials
+        };
+
+        // initialize other combat parameters
+        // start with simplest values to reduce number of variables to track
+        let mut minimum_damage = 0;
+        let mut strength_boost = 0;
+        let mut is_critical_hit = false;
+        let mut entropy = 0;
+
+        // We'll start by simulating the starter beast battle
+        // adventurer selects a T5 Blade (Short Sword) and it'll be greatness/level 1
+        weapon.tier = Tier::T5(());
+        weapon.level = 1;
+
+        // beast is going to be a T5 wearing cloth and it'll be greatness/level 1
+        armor.tier = Tier::T5(());
+        armor.level = 1;
+
+        let damage = ImplCombat::calculate_damage(
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+        );
+
+        // adventurer isn't able to deal any damage to the beast (not good)
+        assert(damage == 0, 'equally matched: 0HP');
+
+        // client can use minimum damage setting to ensure adventurer always does at least some damage
+        minimum_damage = 2;
+        let damage = ImplCombat::calculate_damage(
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+        );
+        assert(damage == 2, 'minimum damage: 2hp');
+
+        // adventurer levels up their weapon to level 4
+        // and encounters another T5 beast wearing cloth
+        weapon.level = 4;
+        let damage = ImplCombat::calculate_damage(
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+        );
+
+        // they can now deal more than the minimum damage
+        assert(damage == 3, 'upgrade to lvl3: 3HP');
+
+        // they then go to the store and upgrade to a Katana (will be level 1)
+        weapon.tier = Tier::T1(());
+        weapon.level = 1;
+        let damage = ImplCombat::calculate_damage(
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+        );
+        // even on level 1, it deals more damage than their starter short sword
+        assert(damage == 4, 'upgrade to katana: 6HP');
+
+        // enable critical hit for that last attack
+        is_critical_hit = true;
+        let damage = ImplCombat::calculate_damage(
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+        );
+        // user picks up a critical hit but gets minimum bonus of 1
+        assert(damage == 5, 'critical hit min bonus: 5HP');
+
+        // we can manipulate entropy to get different results
+        // entropy 3 will produce max bonus of 100% of the base damage (5)
+        entropy = 3;
+        let damage = ImplCombat::calculate_damage(
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+        );
+        assert(damage == 8, 'good critical hit: 8HP');
+
+        // switch to weak elemental
+        weapon.item_type = Type::Blade_or_Hide(());
+        armor.item_type = Type::Bludgeon_or_Metal(());
+        let damage = ImplCombat::calculate_damage(
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+        );
+        // verify damage drops by ~50%
+        assert(damage == 6, 'weak elemental penalty: 6HP');
+
+        // adventurer invests in two strength stat points to get a 40% bonus on base damage (5)
+        strength_boost = 2;
+        let damage = ImplCombat::calculate_damage(
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+        );
+        // verify damage drops by ~50%
+        assert(damage == 8, 'attack should be 9HP');
+
+        // fast forward to late game (G20 Katana)
+        weapon.level = 20;
+        weapon.tier = Tier::T1(());
+        // against a Level 30 T3 beast wearing Metal (strong against blade)
+        armor.level = 40;
+        armor.tier = Tier::T2(());
+        let damage = ImplCombat::calculate_damage(
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+        );
+        assert(damage == 30, 'T1 G20 vs T3 G30: 30hp');
+
+        // Same battle against a magical beast (cloth)
+        weapon.item_type = Type::Blade_or_Hide(());
+        armor.item_type = Type::Magic_or_Cloth(());
+        let damage = ImplCombat::calculate_damage(
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+        );
+        // deals significantly more damage because elemental is applied
+        // to raw attack damage
+        assert(damage == 130, 'T1 G20 vs T3 G30: 130hp');
+    }
+
+
+    // level 1: max beast 1
+    // level 2: max beast 4
+    // level 20: max beast 40
+    #[test]
+    #[available_gas(750000)]
+    fn test_get_random_level() {
+        let mut adventurer_level = 1;
+        let range_level_increase = DIFFICULTY_INCREASE_RATE::NORMAL;
+        let level_multiplier = LEVEL_MULTIPLIER::NORMAL;
+        let beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+
+        adventurer_level = 2;
+        let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_random_level(adventurer_level, 3);
+        assert(min_beast_level == 1, 'on lvl2, min beast lvl is 1');
+        assert(max_beast_level == 4, 'on lvl2, max beast lvl is 4');
+
+        adventurer_level = 3;
+        let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_random_level(adventurer_level, 5);
+        assert(min_beast_level == 1, 'on lvl3, min beast lvl is 1');
+        assert(max_beast_level == 6, 'on lvl3, max beast lvl is 6');
+
+        adventurer_level = 19;
+        let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+        let max_beast_level = ImplCombat::get_random_level(adventurer_level, 37);
+        assert(min_beast_level == 1, 'on lvl19, min beast lvl is 1');
+        assert(max_beast_level == 38, 'on lvl19, max beast lvl is 38');
+
+        adventurer_level = 20;
+        let max_beast_level = ImplCombat::get_random_level(adventurer_level, 39);
+        let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+        assert(min_beast_level == 11, 'on lvl20, min beast lvl is 11');
+        assert(max_beast_level == 50, 'on lvl20, max beast lvl is 50');
+
+        adventurer_level = 30;
+        let max_beast_level = ImplCombat::get_random_level(adventurer_level, 59);
+        let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+        assert(min_beast_level == 21, 'on lvl30, min beast lvl is 21');
+        assert(max_beast_level == 80, 'on lvl30, max beast lvl is 80');
+
+        adventurer_level = 40;
+        let max_beast_level = ImplCombat::get_random_level(adventurer_level, 79);
+        let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+        assert(min_beast_level == 41, 'on lvl40, min beast lvl is 31');
+        assert(max_beast_level == 120, 'on lvl40, max beast lvl is 120');
+
+        adventurer_level = 50;
+        let max_beast_level = ImplCombat::get_random_level(adventurer_level, 99);
+        let min_beast_level = ImplCombat::get_random_level(adventurer_level, 0);
+        assert(min_beast_level == 81, 'on lvl50, min beast lvl is 51');
+        assert(max_beast_level == 180, 'on lvl50, max beast lvl is 180');
+    }
 }
