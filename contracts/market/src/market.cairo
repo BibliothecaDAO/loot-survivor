@@ -246,203 +246,225 @@ impl ImplMarket of IMarket {
     }
 }
 
-// Tests
+// ---------------------------
+// ---------- Tests ----------
+// ---------------------------
+#[cfg(test)]
+mod tests {
+    use traits::{TryInto, Into};
+    use array::{ArrayTrait, SpanTrait};
+    use option::OptionTrait;
+    use core::clone::Clone;
 
-const TEST_MARKET_SEED: u256 = 515;
-const TEST_OFFSET: u8 = 3;
-
-#[test]
-#[available_gas(50000000)]
-fn test_get_id() {
-    // test bottom end of u256
-    let mut i: u256 = 0;
-    loop {
-        if (i >= 500) {
-            break;
-        }
-        // get market item id
-        let item_id = ImplMarket::get_id(i);
-        // assert item id is within range of items
-        assert(item_id > 0 && item_id <= NUM_ITEMS, 'offset out of bounds');
-        i += 1;
+    use lootitems::{
+        loot::{Loot, ILoot, ImplLoot}, statistics::{item_tier, constants::{ItemId, NUM_ITEMS}}
     };
 
-    // test upper end of u256
-    let mut i: u256 =
-        115792089237316195423570985008687907853269984665640564039457584007913129639735;
-    loop {
-        if (i >= 115792089237316195423570985008687907853269984665640564039457584007913129639935) {
-            break;
-        }
-        // get market item id
-        let item_id = ImplMarket::get_id(i);
-        // assert item id is within range of items
-        assert(item_id > 0 && item_id <= NUM_ITEMS, 'offset out of bounds');
-        i += 1;
+    use combat::constants::CombatEnums::{Tier, Slot};
+    use market::{
+        market::ImplMarket, constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE}
     };
-}
+    use pack::pack::{rshift_split};
 
-#[test]
-#[available_gas(9000000)]
-fn test_get_price() {
-    let t1_price = ImplMarket::get_price(Tier::T1(()));
-    assert(t1_price == (6 - 1) * TIER_PRICE, 't1 price');
+    const TEST_MARKET_SEED: u256 = 515;
+    const TEST_OFFSET: u8 = 3;
 
-    let t2_price = ImplMarket::get_price(Tier::T2(()));
-    assert(t2_price == (6 - 2) * TIER_PRICE, 't2 price');
 
-    let t3_price = ImplMarket::get_price(Tier::T3(()));
-    assert(t3_price == (6 - 3) * TIER_PRICE, 't3 price');
-
-    let t4_price = ImplMarket::get_price(Tier::T4(()));
-    assert(t4_price == (6 - 4) * TIER_PRICE, 't4 price');
-
-    let t5_price = ImplMarket::get_price(Tier::T5(()));
-    assert(t5_price == (6 - 5) * TIER_PRICE, 't5 price');
-}
-
-#[test]
-#[available_gas(220000000)]
-fn test_get_all_items() {
-    let mut market_seeds = ArrayTrait::<u256>::new();
-    market_seeds.append(77);
-
-    let mut offset = ArrayTrait::<u8>::new();
-    offset.append(20);
-
-    // get items from the market
-    let market_items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
-
-    // iterate over the items
-    let mut item_index = 0;
-    loop {
-        if item_index >= market_items.len() {
-            break;
-        }
-        let item = *market_items.at(item_index);
-        let market_items_clone = market_items.clone();
-
-        // and verify the item is not a duplicate
-        let mut duplicate_check_index = item_index + 1;
+    #[test]
+    #[available_gas(50000000)]
+    fn test_get_id() {
+        // test bottom end of u256
+        let mut i: u256 = 0;
         loop {
-            if duplicate_check_index >= market_items_clone.len() {
+            if (i >= 500) {
                 break;
             }
-            assert(item.id != *market_items_clone.at(duplicate_check_index).id, 'duplicate item id');
-            duplicate_check_index += 1;
+            // get market item id
+            let item_id = ImplMarket::get_id(i);
+            // assert item id is within range of items
+            assert(item_id > 0 && item_id <= NUM_ITEMS, 'offset out of bounds');
+            i += 1;
         };
-        item_index += 1;
-    };
-}
+
+        // test upper end of u256
+        let mut i: u256 =
+            115792089237316195423570985008687907853269984665640564039457584007913129639735;
+        loop {
+            if (i >= 115792089237316195423570985008687907853269984665640564039457584007913129639935) {
+                break;
+            }
+            // get market item id
+            let item_id = ImplMarket::get_id(i);
+            // assert item id is within range of items
+            assert(item_id > 0 && item_id <= NUM_ITEMS, 'offset out of bounds');
+            i += 1;
+        };
+    }
+
+    #[test]
+    #[available_gas(9000000)]
+    fn test_get_price() {
+        let t1_price = ImplMarket::get_price(Tier::T1(()));
+        assert(t1_price == (6 - 1) * TIER_PRICE, 't1 price');
+
+        let t2_price = ImplMarket::get_price(Tier::T2(()));
+        assert(t2_price == (6 - 2) * TIER_PRICE, 't2 price');
+
+        let t3_price = ImplMarket::get_price(Tier::T3(()));
+        assert(t3_price == (6 - 3) * TIER_PRICE, 't3 price');
+
+        let t4_price = ImplMarket::get_price(Tier::T4(()));
+        assert(t4_price == (6 - 4) * TIER_PRICE, 't4 price');
+
+        let t5_price = ImplMarket::get_price(Tier::T5(()));
+        assert(t5_price == (6 - 5) * TIER_PRICE, 't5 price');
+    }
+
+    #[test]
+    #[available_gas(220000000)]
+    fn test_get_all_items() {
+        let mut market_seeds = ArrayTrait::<u256>::new();
+        market_seeds.append(77);
+
+        let mut offset = ArrayTrait::<u8>::new();
+        offset.append(20);
+
+        // get items from the market
+        let market_items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
+
+        // iterate over the items
+        let mut item_index = 0;
+        loop {
+            if item_index >= market_items.len() {
+                break;
+            }
+            let item = *market_items.at(item_index);
+            let market_items_clone = market_items.clone();
+
+            // and verify the item is not a duplicate
+            let mut duplicate_check_index = item_index + 1;
+            loop {
+                if duplicate_check_index >= market_items_clone.len() {
+                    break;
+                }
+                assert(
+                    item.id != *market_items_clone.at(duplicate_check_index).id, 'duplicate item id'
+                );
+                duplicate_check_index += 1;
+            };
+            item_index += 1;
+        };
+    }
 
 
-#[test]
-#[available_gas(22000000)]
-fn test_get_all_items_count() {
-    let mut market_seeds = ArrayTrait::<u256>::new();
-    market_seeds.append(1);
+    #[test]
+    #[available_gas(22000000)]
+    fn test_get_all_items_count() {
+        let mut market_seeds = ArrayTrait::<u256>::new();
+        market_seeds.append(1);
 
-    let mut offset = ArrayTrait::<u8>::new();
-    offset.append(3);
+        let mut offset = ArrayTrait::<u8>::new();
+        offset.append(3);
 
-    let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
-    assert(items.len() == NUMBER_OF_ITEMS_PER_LEVEL.into(), 'incorrect number of items');
+        let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
+        assert(items.len() == NUMBER_OF_ITEMS_PER_LEVEL.into(), 'incorrect number of items');
 
-    market_seeds.append(2);
-    offset.append(5);
-    let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
-    assert(items.len() == NUMBER_OF_ITEMS_PER_LEVEL.into() * 2, 'incorrect number of items');
+        market_seeds.append(2);
+        offset.append(5);
+        let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
+        assert(items.len() == NUMBER_OF_ITEMS_PER_LEVEL.into() * 2, 'incorrect number of items');
 
-    market_seeds.append(3);
-    market_seeds.append(4);
-    offset.append(51);
-    offset.append(101);
-    let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
-    assert(items.len() == NUMBER_OF_ITEMS_PER_LEVEL.into() * 4, 'incorrect number of items');
-}
+        market_seeds.append(3);
+        market_seeds.append(4);
+        offset.append(51);
+        offset.append(101);
+        let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
+        assert(items.len() == NUMBER_OF_ITEMS_PER_LEVEL.into() * 4, 'incorrect number of items');
+    }
 
-#[test]
-#[available_gas(9000000)]
-fn test_is_item_available() {
-    let mut i: u256 = 0;
-    let OFFSET: u8 = 3;
-    loop {
-        if i > OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
-            break ();
-        }
+    #[test]
+    #[available_gas(9000000)]
+    fn test_is_item_available() {
+        let mut i: u256 = 0;
+        let OFFSET: u8 = 3;
+        loop {
+            if i > OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
+                break ();
+            }
 
-        let id = ImplMarket::get_id(TEST_MARKET_SEED + i);
-        let mut seeds = ArrayTrait::<u256>::new();
-        seeds.append(TEST_MARKET_SEED + i);
-        let mut offsets = ArrayTrait::<u8>::new();
-        offsets.append(OFFSET);
+            let id = ImplMarket::get_id(TEST_MARKET_SEED + i);
+            let mut seeds = ArrayTrait::<u256>::new();
+            seeds.append(TEST_MARKET_SEED + i);
+            let mut offsets = ArrayTrait::<u8>::new();
+            offsets.append(OFFSET);
 
-        let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
+            let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
 
-        assert(result == true, 'item not available');
+            assert(result == true, 'item not available');
 
-        i += OFFSET.into();
-    };
-}
+            i += OFFSET.into();
+        };
+    }
 
-#[test]
-#[available_gas(90000000)]
-fn test_fake_check_ownership() {
-    let mut i: u256 = 0;
-    let OFFSET: u8 = 3;
+    #[test]
+    #[available_gas(90000000)]
+    fn test_fake_check_ownership() {
+        let mut i: u256 = 0;
+        let OFFSET: u8 = 3;
 
-    loop {
-        if i >= OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
-            break ();
-        }
+        loop {
+            if i >= OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
+                break ();
+            }
 
-        let id = ImplMarket::get_id(TEST_MARKET_SEED + i + 2);
-        let mut seeds = ArrayTrait::<u256>::new();
-        seeds.append(TEST_MARKET_SEED + i);
-        let mut offsets = ArrayTrait::<u8>::new();
-        offsets.append(OFFSET);
+            let id = ImplMarket::get_id(TEST_MARKET_SEED + i + 2);
+            let mut seeds = ArrayTrait::<u256>::new();
+            seeds.append(TEST_MARKET_SEED + i);
+            let mut offsets = ArrayTrait::<u8>::new();
+            offsets.append(OFFSET);
 
-        let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
+            let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
 
-        assert(result == false, 'item');
+            assert(result == false, 'item');
 
-        i += OFFSET.into();
-    };
-}
+            i += OFFSET.into();
+        };
+    }
 
-#[test]
-#[available_gas(9000000)]
-fn test_get_all_items_ownership() {
-    let mut market_seeds = ArrayTrait::<u256>::new();
-    market_seeds.append(TEST_MARKET_SEED);
+    #[test]
+    #[available_gas(9000000)]
+    fn test_get_all_items_ownership() {
+        let mut market_seeds = ArrayTrait::<u256>::new();
+        market_seeds.append(TEST_MARKET_SEED);
 
-    let OFFSET: u8 = 3;
-    let mut offset = ArrayTrait::<u8>::new();
-    offset.append(OFFSET);
+        let OFFSET: u8 = 3;
+        let mut offset = ArrayTrait::<u8>::new();
+        offset.append(OFFSET);
 
-    let items = @ImplMarket::get_all_items(market_seeds.span(), offset.span());
+        let items = @ImplMarket::get_all_items(market_seeds.span(), offset.span());
 
-    let mut i: u256 = 0;
-    let mut item_index: usize = 0;
+        let mut i: u256 = 0;
+        let mut item_index: usize = 0;
 
-    loop {
-        if i >= OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
-            break ();
-        }
+        loop {
+            if i >= OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
+                break ();
+            }
 
-        let id = *items.at(item_index).id;
-        assert(id != 0, 'item id should not be 0');
+            let id = *items.at(item_index).id;
+            assert(id != 0, 'item id should not be 0');
 
-        let mut seeds = ArrayTrait::<u256>::new();
-        seeds.append(TEST_MARKET_SEED + i);
-        let mut offsets = ArrayTrait::<u8>::new();
-        offsets.append(OFFSET);
+            let mut seeds = ArrayTrait::<u256>::new();
+            seeds.append(TEST_MARKET_SEED + i);
+            let mut offsets = ArrayTrait::<u8>::new();
+            offsets.append(OFFSET);
 
-        let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
+            let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
 
-        assert(result == true, 'item');
+            assert(result == true, 'item');
 
-        i += OFFSET.into();
-        item_index += 1;
-    };
+            i += OFFSET.into();
+            item_index += 1;
+        };
+    }
 }
