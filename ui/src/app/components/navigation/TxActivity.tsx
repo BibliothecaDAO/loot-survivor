@@ -19,10 +19,6 @@ import {
   getAdventurerById,
 } from "@/app/hooks/graphql/queries";
 
-export interface TxActivityProps {
-  hash: string | undefined;
-}
-
 export const TxActivity = () => {
   const notificationData = useLoadingStore((state) => state.notificationData);
   const loadingQuery = useLoadingStore((state) => state.loadingQuery);

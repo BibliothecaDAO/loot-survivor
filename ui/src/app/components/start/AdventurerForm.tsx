@@ -330,7 +330,7 @@ export const AdventurerForm = ({
       <>
         <div className="w-full sm:p-8">
           <h3 className="uppercase text-center">Choose your class</h3>
-          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-5 sm:gap-20">
+          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-20">
             {classes.map((classType) => (
               <div
                 key={classType.name}
@@ -366,7 +366,7 @@ export const AdventurerForm = ({
       <>
         <div className="w-full sm:p-8">
           <h3 className="uppercase text-center">Choose your weapon</h3>
-          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-5 sm:gap-20">
+          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-2 sm:gap-20">
             {weapons.map((weapon) => (
               <div
                 key={weapon.name}
@@ -448,7 +448,7 @@ export const AdventurerForm = ({
           )}
           <div className="flex flex-col h-full">
             <Image
-              className="mx-auto border border-terminal-green absolute  object-cover py-4 px-8"
+              className="mx-auto border border-terminal-green absolute  object-cover sm:py-4 sm:px-8"
               src={"/monsters/starterbeast.png"}
               alt="adventurer facing beast"
               fill
@@ -465,6 +465,7 @@ export const AdventurerForm = ({
                 />
               </div>
             )}
+            <TxActivity />
             <div className="absolute top-1/2 left-0 right-0 flex flex-col items-center gap-4 z-10">
               {!account ? (
                 <>
@@ -488,9 +489,7 @@ export const AdventurerForm = ({
                 </>
               ) : (
                 <>
-                  <div className="mb-10 sm:m-0">
-                    <TxActivity />
-                  </div>
+                  {/* <TxActivity /> */}
                   <form onSubmit={handleSubmit}>
                     <Button
                       type="submit"

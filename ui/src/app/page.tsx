@@ -262,7 +262,9 @@ export default function Home() {
             {isMobileDevice && <TxActivity />}
             <div className="flex flex-row justify-between">
               <span className="flex flex-row items-center gap-2 sm:gap-5">
-                <h1 className="glitch m-0">Loot Survivor</h1>
+                <h1 className="glitch m-0 text-lg sm:text-4xl">
+                  Loot Survivor
+                </h1>
                 <PenaltyCountDown
                   lastDiscoveryTime={
                     data.latestDiscoveriesQuery?.discoveries[0]?.timestamp
@@ -275,7 +277,7 @@ export default function Home() {
                   onClick={() => showArcadeDialog(!arcadeDialog)}
                   disabled={isWrongNetwork}
                 >
-                  <ArcadeIcon className="w-8 justify-center" />
+                  <ArcadeIcon className="w-4 sm:w-8 justify-center" />
                 </Button>
                 <Button
                   onClick={() => {

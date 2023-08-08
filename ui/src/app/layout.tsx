@@ -14,7 +14,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning={true}
-        className="text-terminal-green bg-conic-to-br to-terminal-black from-terminal-black bezel-container"
+        className="min-h-screen overflow-hidden text-terminal-green bg-conic-to-br to-terminal-black from-terminal-black bezel-container"
       >
         <img
           src="/crt_green_mask.png"

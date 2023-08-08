@@ -320,7 +320,7 @@ export default function UpgradeScreen() {
   return (
     <>
       {hasStatUpgrades ? (
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2">
           <div className="w-1/3 hidden sm:block">
             <Info adventurer={adventurer} upgradeCost={upgradeTotalCost} />
           </div>
@@ -466,7 +466,7 @@ export default function UpgradeScreen() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-5 items-center animate-pulse w-2/3">
+            <div className="flex flex-col gap-5 items-center animate-pulse w-2/3 sm:w-full">
               <h3 className="mx-auto">Upgrading</h3>
               <p className="text-2xl">Stat Increases:</p>
               {Object.entries(summary["Stats"]).map(([key, value]) => (

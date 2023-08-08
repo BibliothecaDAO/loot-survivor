@@ -297,7 +297,7 @@ export default function BeastScreen() {
 
       <div className="flex flex-col gap-1 sm:gap-0 items-center sm:w-1/2 sm:gap-5 sm:p-4 order-1 text-lg">
         {isAlive && (
-          <div className="flex flex-row gap-2 sm:flex-col items-center">
+          <div className="flex flex-row gap-2 sm:flex-col items-center justify-center">
             <div className="flex flex-col items-center">
               <p className="sm:text-2xl">Attack</p>
               <KeyboardControl
