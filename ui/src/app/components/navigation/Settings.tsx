@@ -1,7 +1,8 @@
 import VerticalKeyboardControl from "../menu//VerticalMenu";
 import {
   CartIcon,
-  CartIconSimple,
+  MuteIcon,
+  VolumeIcon,
   EncountersIcon,
   LedgerIcon,
 } from "../icons/Icons";
@@ -14,6 +15,8 @@ import { useAccount } from "@starknet-react/core";
 import { ButtonData } from "@/app/types";
 
 export default function Settings() {
+  const isMuted = useUIStore((state) => state.isMuted);
+  const setIsMuted = useUIStore((state) => state.setIsMuted);
   const setScreen = useUIStore((state) => state.setScreen);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
@@ -41,11 +44,30 @@ export default function Settings() {
     //   icon: <GuideIcon />,
     //   action: () => setScreen("guide"),
     // },
+    //   <Button
+    //   onClick={() => {
+    //     setIsMuted(!isMuted);
+    //     clickPlay();
+    //   }}
+    //   className="hidden sm:block"
+    // >
+    //   <div className="flex items-center justify-center">
+    //     {isMuted ? (
+    //       <MuteIcon className="w-4 h-4 sm:w-6 sm:h-6" />
+    //     ) : (
+    //       <VolumeIcon className="w-4 h-4 sm:w-6 sm:h-6" />
+    //     )}
+    //   </div>
+    // </Button>
     {
       id: 3,
-      label: "Cart",
-      icon: <CartIconSimple className="w-6 h-6" />,
-      action: () => setDisplayCart(!displayCart),
+      label: isMuted ? "Unmute" : "Mute",
+      icon: isMuted ? (
+        <VolumeIcon className="w-6 h-6" />
+      ) : (
+        <MuteIcon className="w-6 h-6" />
+      ),
+      action: () => setIsMuted(!isMuted),
     },
     {
       id: 4,

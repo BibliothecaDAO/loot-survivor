@@ -59,7 +59,7 @@ export default function GuideScreen() {
   ];
 
   return (
-    <div className="overflow-y-auto h-screen p-2 table-scroll text-xs sm:text-base text-center sm:text-left">
+    <div className="h-[500px] overflow-y-auto sm:h-[650px] p-2 table-scroll text-xs sm:text-base text-center sm:text-left">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
         <h1>Loot Survivor: A Saga of Fortitude and Death</h1>
         <a
@@ -233,7 +233,7 @@ export default function GuideScreen() {
         their explorations. While you cannot directly upgrade Luck, you can
         increase it by equipping jewelry items.
       </p>
-      <div>
+      <div className="text-xxs sm:text-base">
         <table className="w-1/2 m-auto uppercase text-center whitespace-nowrap border border-terminal-green">
           <tbody>
             <tr className="border border-terminal-green">

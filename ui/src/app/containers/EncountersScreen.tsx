@@ -115,7 +115,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
             {displayEncounters.map((encounter: any, index: number) => {
               return (
                 <div
-                  className="w-full p-2 text-left border border-terminal-green"
+                  className="w-full p-1 sm:p-2 text-left border border-terminal-green"
                   key={index}
                 >
                   {encounter.hasOwnProperty("discoveryType") ? (

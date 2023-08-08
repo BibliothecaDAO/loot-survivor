@@ -89,7 +89,8 @@ export default function Home() {
   const { provider } = useProvider();
   const [userDisconnect, setUserDisconnect] = useState(false);
   const { account, status } = useAccount();
-  const [isMuted, setIsMuted] = useState(false);
+  const isMuted = useUIStore((state) => state.isMuted);
+  const setIsMuted = useUIStore((state) => state.setIsMuted);
   const [introComplete, setIntroComplete] = useState(false);
   const type = useLoadingStore((state) => state.type);
   const notificationData = useLoadingStore((state) => state.notificationData);
@@ -284,6 +285,7 @@ export default function Home() {
                     setIsMuted(!isMuted);
                     clickPlay();
                   }}
+                  className="hidden sm:block"
                 >
                   <div className="flex items-center justify-center">
                     {isMuted ? (
@@ -296,17 +298,15 @@ export default function Home() {
                 <Button onClick={async () => await refetch()}>
                   <RefreshIcon className="w-4 h-4 sm:w-6 sm:h-6" />
                 </Button>
-                {!isMobileDevice && account && calls.length > 0 && (
+                {account && calls.length > 0 && (
                   <button
                     onClick={() => {
                       setDisplayCart(!displayCart);
                       clickPlay();
                     }}
-                    className="relative flex flex-row items-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base"
+                    className="relative flex flex-row items-center justify-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base"
                   >
-                    <div className="w-4 h-4">
-                      <CartIconSimple />
-                    </div>
+                    <CartIconSimple className="w-4 h-4" />
                     <p className="hidden sm:block">
                       {displayCart ? "Hide Cart" : "Show Cart"}
                     </p>

@@ -24,6 +24,8 @@ type State = {
   setIsWrongNetwork: (value: boolean) => void;
   onboarded: boolean;
   handleOnboarded: () => void;
+  isMuted: boolean;
+  setIsMuted: (value: boolean) => void;
   screen: ScreenPage;
   setScreen: (value: ScreenPage) => void;
   profile: number;
@@ -63,6 +65,8 @@ const useUIStore = create<State>((set) => ({
   handleOnboarded: () => {
     set({ onboarded: true });
   },
+  isMuted: false,
+  setIsMuted: (value) => set({ isMuted: value }),
   screen: "start",
   setScreen: (value) => set({ screen: value }),
   profile: 0,
