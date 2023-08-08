@@ -482,12 +482,15 @@ export default function UpgradeScreen() {
               )}
               {summary["Items"].length > 0 && (
                 <>
-                  {summary["Items"].map((item: ItemPurchase) => {
+                  {summary["Items"].map((item: ItemPurchase, index: number) => {
                     const { slot } = getItemData(
                       getValueFromKey(gameData.ITEMS, parseInt(item.item)) ?? ""
                     );
                     return (
-                      <div className="flex flex-row gap-2 items-center">
+                      <div
+                        className="flex flex-row gap-2 items-center"
+                        key={index}
+                      >
                         <LootIcon
                           size={isMobileDevice ? "w-4" : "w-5"}
                           type={slot}
