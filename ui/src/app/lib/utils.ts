@@ -293,3 +293,7 @@ export function removeElement(arr: string[], value: string) {
 
   return arr;
 }
+
+export function countOccurrences<T>(arr: T[], value: T): number {
+  return arr.filter((item) => item === value).length;
+}

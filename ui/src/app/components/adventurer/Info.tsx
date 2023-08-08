@@ -7,6 +7,7 @@ import {
   calculateLevel,
   getRealmNameById,
   getKeyFromValue,
+  countOccurrences,
 } from "../../lib/utils";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useCustomQuery from "../../hooks/useCustomQuery";
@@ -35,6 +36,7 @@ export default function Info({
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const dropItems = useUIStore((state) => state.dropItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const upgradeStats = useUIStore((state) => state.upgradeStats);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
@@ -127,6 +129,15 @@ export default function Info({
     "Ring",
   ];
 
+  const vitalitySelected = countOccurrences(
+    upgradeStats,
+    getKeyFromValue(gameData.STATS, "Vitality")
+  );
+
+  const totalHealth = (formatAdventurer.health ?? 0) + vitalitySelected * 10;
+
+  const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
+
   return (
     <div className="h-full border border-terminal-green overflow-auto">
       {!isLoading.itemsByAdventurerQuery ? (
@@ -146,11 +157,8 @@ export default function Info({
               </span> */}
               <span className="flex items-center ">
                 <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
-                <HealthCountDown health={(formatAdventurer.health ?? 0) || 0} />
-                {`/${Math.min(
-                  100 + (formatAdventurer.vitality ?? 0) * 10,
-                  511
-                )}`}
+                <HealthCountDown health={totalHealth || 0} />
+                {`/${Math.min(100 + totalVitality * 10, 511)}`}
               </span>
             </div>
             {adventurer?.id ? (
