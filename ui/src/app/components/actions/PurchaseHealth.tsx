@@ -125,8 +125,6 @@ const PurchaseHealth = ({
   //   [potionAmount]
   // );
 
-  console.log(potionAmount, max);
-
   return (
     <div className="flex flex-col sm:flex-row sm:p-2 md:p-4 items-center">
       <QuantityButtons

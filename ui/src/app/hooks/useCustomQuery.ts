@@ -14,8 +14,8 @@ const useCustomQuery = (
   queryKey: QueryKey,
   query: any,
   variables?: Variables,
-  shouldPoll?: boolean
-  // skip?: boolean
+  shouldPoll?: boolean,
+  skip?: boolean
 ) => {
   const { updateData } = useQueriesStore();
 
@@ -23,7 +23,7 @@ const useCustomQuery = (
     query,
     {
       variables: variables,
-      // skip: !variables?.owner,
+      skip: skip,
     }
   );
 

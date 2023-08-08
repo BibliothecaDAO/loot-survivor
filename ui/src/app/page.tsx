@@ -154,6 +154,16 @@ export default function Home() {
     txAccepted
   );
 
+  // useEffect(() => {
+  //   if (
+  //     data.adventurerByIdQuery &&
+  //     data.adventurerByIdQuery.adventurers[0]?.id
+  //   ) {
+  //     console.log("updated");
+  //     setAdventurer(data.adventurerByIdQuery.adventurers[0]);
+  //   }
+  // }, [data.adventurerByIdQuery?.adventurers[0]?.timestamp]);
+
   useCustomQuery(
     "adventurersByOwnerQuery",
     getAdventurersByOwner,
@@ -182,7 +192,6 @@ export default function Home() {
   }, [connected]);
 
   useEffect(() => {
-    console.log("RUNNING");
     const isWrongNetwork = chain?.id !== constants.StarknetChainId.SN_GOERLI;
     setIsWrongNetwork(isWrongNetwork);
   }, [chain, provider, connected]);
@@ -236,6 +245,9 @@ export default function Home() {
   if (userDisconnect) {
     return <WalletSelect />;
   }
+
+  console.log(adventurer);
+  console.log(data.adventurerByIdQuery?.adventurers[0]);
 
   return (
     // <Maintenance />

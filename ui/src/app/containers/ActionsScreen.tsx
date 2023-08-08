@@ -134,7 +134,6 @@ export default function ActionsScreen() {
           "discoveryByTxHashQuery",
           adventurer?.id
         );
-        console.log("exploring");
         await handleSubmitCalls(writeAsync).then((tx: any) => {
           if (tx) {
             setTxHash(tx.transaction_hash);

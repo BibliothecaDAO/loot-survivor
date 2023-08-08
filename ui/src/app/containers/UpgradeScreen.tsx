@@ -30,13 +30,16 @@ import {
   HeartVitalityIcon,
   LightbulbIcon,
   ScrollIcon,
+  HealthPotionIcon,
 } from "../components/icons/Icons";
+import LootIcon from "../components/icons/LootIcon";
 import PurchaseHealth from "../components/actions/PurchaseHealth";
 import MarketplaceScreen from "./MarketplaceScreen";
 import { UpgradeNav } from "../components/upgrade/UpgradeNav";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { StatAttribute } from "../components/upgrade/StatAttribute";
 import useUIStore from "../hooks/useUIStore";
+import { UpgradeSummary, ItemPurchase } from "../types";
 
 /**
  * @container
@@ -74,6 +77,11 @@ export default function UpgradeScreen() {
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const [upgrades, setUpgrades] = useState<Record<string, number>>({});
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
+  const [summary, setSummary] = useState<UpgradeSummary>({
+    Stats: {},
+    Items: [],
+    Potions: 0,
+  });
 
   const { resetDataUpdated } = useQueriesStore();
 
@@ -99,12 +107,14 @@ export default function UpgradeScreen() {
       icon: <ArrowTargetIcon />,
       description: "Strength increases attack damage by 10%",
       buttonText: "Upgrade Strength",
+      abbrev: "STR",
     },
     {
       name: "Dexterity",
       icon: <CatIcon />,
       description: "Dexterity increases chance of fleeing Beasts",
       buttonText: "Upgrade Dexterity",
+      abbrev: "DEX",
     },
     {
       name: "Vitality",
@@ -112,24 +122,28 @@ export default function UpgradeScreen() {
       icon: <HeartVitalityIcon />,
       description: "Vitality gives 10hp and increases max health by 10hp",
       buttonText: "Upgrade Vitality",
+      abbrev: "VIT",
     },
     {
       name: "Intelligence",
       icon: <LightbulbIcon />,
       description: "Intelligence increases chance of avoiding Obstacles",
       buttonText: "Upgrade Intelligence",
+      abbrev: "INT",
     },
     {
       name: "Wisdom",
       icon: <ScrollIcon />,
       description: "Wisdom increases chance of avoiding a Beast ambush",
       buttonText: "Upgrade Wisdom",
+      abbrev: "WIS",
     },
     {
       name: "Charisma",
       icon: <CoinCharismaIcon />,
       description: "Charisma provides discounts on the marketplace and potions",
       buttonText: "Upgrade Charisma",
+      abbrev: "CHA",
     },
   ];
 
@@ -255,7 +269,6 @@ export default function UpgradeScreen() {
       ],
       // calldata: [adventurer?.id?.toString() ?? "", "0", "0", "0", "0"],
     };
-    console.log(buyItemsAndUpgradeTx);
     addToCalls(buyItemsAndUpgradeTx);
   };
 
@@ -279,6 +292,11 @@ export default function UpgradeScreen() {
         });
       }
     });
+    resetDataUpdated("adventurerByIdQuery");
+    renderSummary();
+    setPurchaseItems([]);
+    setUpgradeStats([]);
+    setUpgrades({});
   };
 
   const lastPage = isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2;
@@ -290,6 +308,14 @@ export default function UpgradeScreen() {
       setUpgradeScreen(1);
     }
   }, [upgradeStats]);
+
+  const renderSummary = () => {
+    setSummary({
+      Stats: upgrades,
+      Items: purchaseItems,
+      Potions: potionAmount,
+    });
+  };
 
   return (
     <>
@@ -314,9 +340,23 @@ export default function UpgradeScreen() {
                   <UpgradeNav activeSection={upgradeScreen} />
                   <div className="flex flex-row gap-3 text-sm sm:text-base justify-center">
                     <div className="flex flex-row gap-3">
-                      <span className="flex flex-row gap-1  items-center">
+                      {/* <span className="flex flex-row gap-1 items-center">
+                        <p className="uppercase">Stats:</p>
+                        {Object.entries(upgrades).length > 0 ? (
+                          Object.entries(upgrades).map(([key, value]) => (
+                            <div key={key}>
+                              {`${
+                                attributes.find((a) => a.name === key)?.abbrev
+                              }x${value}`}
+                            </div>
+                          ))
+                        ) : (
+                          <p>-</p>
+                        )}
+                      </span> */}
+                      <span className="flex flex-row gap-1 items-center">
                         <p className="uppercase">Cost:</p>
-                        <span className="flex text-xl">
+                        <span className="flex flex-row items-center text-xl">
                           <CoinIcon className="self-center w-5 h-5 fill-current text-terminal-yellow" />
                           <p
                             className={
@@ -329,7 +369,7 @@ export default function UpgradeScreen() {
                           </p>
                         </span>
                       </span>
-                      <span className="flex flex-row gap-1  items-center">
+                      <span className="flex flex-row gap-1 items-center">
                         <p className="uppercase">Potions:</p>
                         <span className="flex text-xl text-terminal-yellow">
                           {potionAmount?.toString() ?? 0}
@@ -340,16 +380,6 @@ export default function UpgradeScreen() {
                         <span className="flex text-xl text-terminal-yellow">
                           {purchaseItems?.length}
                         </span>
-                      </span>
-                    </div>
-                    <div className="flex flex-row items-center gap-3">
-                      <span className="flex flex-row sm:gap-1">
-                        {`Charisma: ${totalCharisma} -`}
-                        <CoinIcon className="w-5 h-5 fill-current text-terminal-yellow" />
-                        <p className="text-terminal-yellow">
-                          {totalCharisma * 2}
-                        </p>
-                        <p className="hidden sm:block">{" to price"}</p>
                       </span>
                     </div>
                   </div>
@@ -423,10 +453,6 @@ export default function UpgradeScreen() {
                             : upgradeScreen == 2
                         ) {
                           handleBuyItemsAndUpgradeTx();
-                          resetDataUpdated("adventurerByIdQuery");
-                          setPurchaseItems([]);
-                          setUpgradeStats([]);
-                          setUpgrades({});
                         } else {
                           setUpgradeScreen(upgradeScreen + 1);
                         }
@@ -440,7 +466,47 @@ export default function UpgradeScreen() {
               </div>
             </div>
           ) : (
-            <h1 className="mx-auto loading-ellipsis">Upgrading</h1>
+            <div className="flex flex-col gap-5 items-center animate-pulse w-2/3">
+              <h3 className="mx-auto">Upgrading</h3>
+              <p className="text-2xl">Stat Increases:</p>
+              {Object.entries(summary["Stats"]).map(([key, value]) => (
+                <div className="flex flex-row gap-2 items-center" key={key}>
+                  <span className="w-10 h-10">
+                    {attributes.find((a) => a.name === key)?.icon}
+                  </span>
+                  <p className="text-no-wrap uppercase text-lg">{`${key} x ${value}`}</p>
+                </div>
+              ))}
+              {(summary["Items"].length > 0 || summary["Potions"] > 0) && (
+                <p className="text-2xl">Item Purchases:</p>
+              )}
+              {summary["Items"].length > 0 && (
+                <>
+                  {summary["Items"].map((item: ItemPurchase) => {
+                    const { slot } = getItemData(
+                      getValueFromKey(gameData.ITEMS, parseInt(item.item)) ?? ""
+                    );
+                    return (
+                      <div className="flex flex-row gap-2 items-center">
+                        <LootIcon
+                          size={isMobileDevice ? "w-4" : "w-5"}
+                          type={slot}
+                        />
+                        <p className="text-lg">
+                          {getValueFromKey(gameData.ITEMS, parseInt(item.item))}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </>
+              )}
+              {summary["Potions"] > 0 && (
+                <div className="flex flex-row gap-2 items-center">
+                  <HealthPotionIcon />
+                  <p className="text-lg">{`Health Potions x ${summary["Potions"]}`}</p>
+                </div>
+              )}
+            </div>
           )}
         </div>
       ) : (

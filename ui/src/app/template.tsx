@@ -14,6 +14,17 @@ export default function Template({ children }: { children: React.ReactNode }) {
       typePolicies: {
         Query: {
           fields: {
+            adventurers: {
+              merge(existing = [], incoming) {
+                const incomingTxHashes = new Set(
+                  incoming.map((i: any) => i.id)
+                );
+                const filteredExisting = existing.filter(
+                  (e: any) => !incomingTxHashes.has(e.id)
+                );
+                return [...filteredExisting, ...incoming];
+              },
+            },
             discoveries: {
               merge(existing = [], incoming) {
                 const incomingTxHashes = new Set(

@@ -195,6 +195,14 @@ export interface ItemPurchase {
   equip: string;
 }
 
+export interface UpgradeSummary {
+  Stats: {
+    [key: string]: number;
+  };
+  Items: any;
+  Potions: any;
+}
+
 export type BeastType =
   | "Basilisk"
   | "Kitsune"

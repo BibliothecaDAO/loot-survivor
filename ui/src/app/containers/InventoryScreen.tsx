@@ -75,7 +75,6 @@ export default function InventoryScreen() {
       };
       removeEntrypointFromCalls(equipItemTx.entrypoint);
       addToCalls(equipItemTx);
-      console.log(equipItemTx);
     }
   };
 

@@ -65,7 +65,6 @@ export const StatAttribute = ({
           );
           setUpgrades(newupgrades);
           upgradeHandler((upgrades = newupgrades));
-          console.log(newupgrades);
           if (newupgrades.length === 0) {
             removeEntrypointFromCalls("buy_items_and_upgrade_stats");
           }

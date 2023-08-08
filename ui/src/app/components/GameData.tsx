@@ -12,6 +12,7 @@ export class GameData {
   CLASSES: Dict<string>;
   ORDERS: Dict<string>;
   STATS: Dict<string>;
+  STATS_ABBREVIATIONS: Dict<string>;
   OBSTACLES: Dict<string>;
   DISCOVERY_TYPES: Dict<string>;
   ITEM_DISCOVERY_TYPES: Dict<string>;
@@ -758,6 +759,16 @@ export class GameData {
       4: "Wisdom",
       5: "Charisma",
       6: "Luck",
+    };
+
+    this.STATS_ABBREVIATIONS = {
+      0: "STR",
+      1: "DEX",
+      2: "VIT",
+      3: "INT",
+      4: "WIS",
+      5: "CHA",
+      6: "LUCK",
     };
 
     this.OBSTACLES = {
