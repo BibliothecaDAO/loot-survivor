@@ -1,14 +1,18 @@
 import { NotificationBattleDisplay } from "../beast/BattleDisplay";
 import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
-import SpriteAnimation from "./SpriteAnimation";
 import { GameData } from "../GameData";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
 import { useCallback, useEffect, useState } from "react";
 import { useQueriesStore } from "../../hooks/useQueryStore";
-import { processBeastName, getRandomElement } from "../../lib/utils";
+import {
+  processBeastName,
+  getRandomElement,
+  chunkArray,
+} from "../../lib/utils";
 import { Adventurer, Battle, Discovery, NullAdventurer } from "@/app/types";
-import { useMediaQuery } from "react-responsive";
+import NotificationComponent from "../notifications/NotificationComponent";
+import { Notification } from "@/app/types";
 
 interface NotificationDisplayProps {
   type: string;
@@ -74,13 +78,14 @@ const processAnimation = (
     if (notificationData?.discoveryType == "Beast") {
       if (
         notificationData?.data?.some(
-          (data: Discovery) => data.ambushed && (adventurer.health ?? 0) > 0
+          (data: Discovery) => data.ambushed && (data.adventurerHealth ?? 0) > 0
         )
       ) {
         return gameData.ADVENTURER_ANIMATIONS["Ambush"];
       } else if (
         notificationData?.data?.some(
-          (data: Discovery) => data.ambushed && adventurer.health == 0
+          (data: Discovery) =>
+            data.ambushed && (data.adventurerHealth ?? 0) == 0
         )
       ) {
         return gameData.ADVENTURER_ANIMATIONS["Dead"];
@@ -89,7 +94,7 @@ const processAnimation = (
       }
     } else if (notificationData?.discoveryType == "Obstacle") {
       if (notificationData?.dodgedObstacle == 0) {
-        if (adventurer?.health === 0) {
+        if (notificationData?.adventurerHealth == 0) {
           return gameData.ADVENTURER_ANIMATIONS["Dead"];
         } else {
           return gameData.ADVENTURER_ANIMATIONS["HitByObstacle"];
@@ -103,7 +108,7 @@ const processAnimation = (
     } else if (notificationData?.discoveryType == "Item") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
     } else if (!notificationData?.discoveryType) {
-      if (adventurer.health === 0) {
+      if (notificationData?.adventurerHealth == 0) {
         return gameData.ADVENTURER_ANIMATIONS["IdleDamagePenaltyDead"];
       } else {
         return gameData.ADVENTURER_ANIMATIONS["IdleDamagePenalty"];
@@ -120,33 +125,63 @@ const processAnimation = (
   }
 };
 
-export const processNotification = (
+export const processNotifications = (
   type: string,
-  notificationData: any,
+  notificationData: Discovery[] | Battle[] | string,
   battles: Battle[],
-  hasBeast: boolean
+  hasBeast: boolean,
+  adventurer: Adventurer
 ) => {
+  const notifications: Notification[] = [];
   const beastName = processBeastName(
     battles[0]?.beast ?? "",
     battles[0]?.special2 ?? "",
     battles[0]?.special3 ?? ""
   );
   if (type == "Attack" || type == "Flee") {
-    return (
-      <NotificationBattleDisplay
-        battleData={notificationData?.data ? notificationData?.data : []}
-        type={type}
-      />
-    );
+    const battleScenarios = chunkArray(notificationData as Battle[], 2);
+    for (let i = 0; i < battleScenarios.length; i++) {
+      const animation = processAnimation(
+        type,
+        notificationData,
+        adventurer ?? NullAdventurer
+      );
+      notifications.push({
+        animation: animation ?? "",
+        message: (
+          <NotificationBattleDisplay
+            battleData={notificationData as Battle[]}
+            type={type}
+          />
+        ),
+      });
+    }
   } else if (type == "Explore") {
-    return <DiscoveryDisplay discoveryData={notificationData} />;
+    // Here every discovery item in the DB is a noti, so we can just loop
+    for (let i = 0; i < notificationData.length; i++) {
+      const animation = processAnimation(
+        type,
+        notificationData,
+        adventurer ?? NullAdventurer
+      );
+      notifications.push({
+        animation: animation ?? "",
+        message: (
+          <DiscoveryDisplay discoveryData={notificationData[i] as Discovery} />
+        ),
+      });
+    }
+    return notifications;
   } else if (notificationData == "Rejected") {
-    return (
-      <p>
-        OH NO! The transaction was rejected! Please refresh and try again incase
-        of wallet issues.
-      </p>
-    );
+    return notifications.push({
+      message: (
+        <p>
+          OH NO! The transaction was rejected! Please refresh and try again
+          incase of wallet issues.
+        </p>
+      ),
+      animation: "",
+    });
   } else if (type == "Multicall") {
     return (
       <div className="flex flex-col">
@@ -210,22 +245,13 @@ export const NotificationDisplay = ({
   const battles = data.lastBeastBattleQuery
     ? data.lastBeastBattleQuery.battles
     : [];
-  const animation = processAnimation(
-    type,
-    notificationData,
-    adventurer ?? NullAdventurer
-  );
-  console.log(notificationData);
-  const notification = processNotification(
+  const notifications = processNotifications(
     type,
     notificationData,
     battles,
-    hasBeast
+    hasBeast,
+    adventurer ?? NullAdventurer
   );
-
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
 
   const [setSound, setSoundState] = useState(soundSelector.click);
 
@@ -252,34 +278,7 @@ export const NotificationDisplay = ({
     playSound,
   ]);
 
-  return (
-    <div className="z-10 flex flex-row w-full gap-5 sm:p-2">
-      <div className="w-1/6 sm:w-1/4">
-        <SpriteAnimation
-          frameWidth={isMobileDevice ? 80 : 100}
-          frameHeight={isMobileDevice ? 80 : 100}
-          columns={7}
-          rows={16}
-          frameRate={5}
-          animations={[
-            { name: "idle", startFrame: 0, frameCount: 4 },
-            { name: "run", startFrame: 9, frameCount: 5 },
-            { name: "jump", startFrame: 11, frameCount: 7 },
-            { name: "attack1", startFrame: 42, frameCount: 5 },
-            { name: "attack2", startFrame: 47, frameCount: 6 },
-            { name: "attack3", startFrame: 53, frameCount: 8 },
-            { name: "damage", startFrame: 59, frameCount: 4 },
-            { name: "die", startFrame: 64, frameCount: 9 },
-            { name: "drawSword", startFrame: 70, frameCount: 5 },
-            { name: "discoverItem", startFrame: 85, frameCount: 6 },
-            { name: "slide", startFrame: 24, frameCount: 5 },
-          ]}
-          currentAnimation={animation ?? ""}
-        />
-      </div>
-      <div className="w-5/6 sm:w-3/4 m-auto text-sm sm:text-lg">
-        {notification}
-      </div>
-    </div>
-  );
+  const notifications = [{ message: <p>Hello</p>, animation: "die" }];
+
+  return <NotificationComponent notifications={notifications} />;
 };

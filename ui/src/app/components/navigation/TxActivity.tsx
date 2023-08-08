@@ -126,7 +126,6 @@ export const TxActivity = () => {
         const killedByPenalty = queryData.battlesByTxHashQuery.battles.some(
           (battle) => !battle.attacker && battle.adventurerHealth == 0
         );
-        console.log(killedByBeast || killedByPenalty);
         if (killedByBeast || killedByPenalty) {
           setDeathMessage(
             <NotificationBattleDisplay
@@ -141,10 +140,7 @@ export const TxActivity = () => {
           console.log(queryData.battlesByTxHashQuery.battles);
           showDeathDialog(true);
         }
-        stopLoading({
-          data: queryData.battlesByTxHashQuery.battles,
-          beast: notificationData.beast,
-        });
+        stopLoading(queryData.battlesByTxHashQuery.battles);
       };
 
       const handleExplore = async () => {
@@ -171,7 +167,6 @@ export const TxActivity = () => {
           queryData.discoveryByTxHashQuery.discoveries[0]?.ambushed &&
           queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
             0;
-        console.log(killedByObstacle, killedByPenalty, killedByAmbush);
         if (killedByObstacle || killedByPenalty || killedByAmbush) {
           setDeathMessage(
             <DiscoveryDisplay
@@ -180,7 +175,7 @@ export const TxActivity = () => {
           );
           showDeathDialog(true);
         }
-        stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
+        stopLoading(queryData.discoveryByTxHashQuery.discoveries);
       };
 
       const handleUpgrade = async () => {
