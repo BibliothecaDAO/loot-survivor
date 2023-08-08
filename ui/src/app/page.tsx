@@ -6,7 +6,7 @@ import {
   useProvider,
 } from "@starknet-react/core";
 import { constants } from "starknet";
-import { useState, useEffect, useMemo, use } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Button } from "./components/buttons/Button";
 import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
 import ActionsScreen from "./containers/ActionsScreen";
@@ -121,6 +121,8 @@ export default function Home() {
   const owner = account?.address ? padAddress(account.address) : "";
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
+  const displayHistoryButtonRef = useRef<HTMLButtonElement>(null);
+  const displayCartButtonRef = useRef<HTMLButtonElement>(null);
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
@@ -296,6 +298,7 @@ export default function Home() {
                 </Button>
                 {!isMobileDevice && account && calls.length > 0 && (
                   <button
+                    ref={displayCartButtonRef}
                     onClick={() => {
                       setDisplayCart(!displayCart);
                       clickPlay();
@@ -310,7 +313,9 @@ export default function Home() {
                     </p>
                   </button>
                 )}
-                {displayCart && <TransactionCart />}
+                {displayCart && (
+                  <TransactionCart buttonRef={displayCartButtonRef} />
+                )}
                 {isMobileDevice ? (
                   <>
                     <button
@@ -328,7 +333,10 @@ export default function Home() {
                     {!isMobileDevice && account && (
                       <>
                         <Button
-                          onClick={() => setDisplayHistory(!displayHistory)}
+                          ref={displayHistoryButtonRef}
+                          onClick={() => {
+                            setDisplayHistory(!displayHistory);
+                          }}
                         >
                           {displayHistory ? "Hide Ledger" : "Show Ledger"}
                         </Button>
@@ -351,7 +359,9 @@ export default function Home() {
                     </Button>
                   </>
                 )}
-                {account && displayHistory && <TransactionHistory />}
+                {account && displayHistory && (
+                  <TransactionHistory buttonRef={displayHistoryButtonRef} />
+                )}
               </div>
             </div>
           </div>
