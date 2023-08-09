@@ -11,7 +11,7 @@ import {
   chunkArray,
 } from "../../lib/utils";
 import { Adventurer, Battle, Discovery, NullAdventurer } from "@/app/types";
-import NotificationComponent from "../notifications/NotificationComponent";
+import NotificationComponent from "./NotificationComponent";
 import { Notification } from "@/app/types";
 
 interface NotificationDisplayProps {
@@ -127,7 +127,7 @@ const processAnimation = (
 
 export const processNotifications = (
   type: string,
-  notificationData: Discovery[] | Battle[] | string,
+  notificationData: Discovery[] | Battle[] | string | string[],
   battles: Battle[],
   hasBeast: boolean,
   adventurer: Adventurer
@@ -137,6 +137,11 @@ export const processNotifications = (
     battles[0]?.beast ?? "",
     battles[0]?.special2 ?? "",
     battles[0]?.special3 ?? ""
+  );
+  const animation = processAnimation(
+    type,
+    notificationData,
+    adventurer ?? NullAdventurer
   );
   if (type == "Attack" || type == "Flee") {
     const battleScenarios = chunkArray(notificationData as Battle[], 2);
@@ -150,20 +155,16 @@ export const processNotifications = (
         animation: animation ?? "",
         message: (
           <NotificationBattleDisplay
-            battleData={notificationData as Battle[]}
+            battleData={battleScenarios[i] as Battle[]}
             type={type}
           />
         ),
       });
     }
+    return notifications;
   } else if (type == "Explore") {
     // Here every discovery item in the DB is a noti, so we can just loop
     for (let i = 0; i < notificationData.length; i++) {
-      const animation = processAnimation(
-        type,
-        notificationData,
-        adventurer ?? NullAdventurer
-      );
       notifications.push({
         animation: animation ?? "",
         message: (
@@ -173,64 +174,82 @@ export const processNotifications = (
     }
     return notifications;
   } else if (notificationData == "Rejected") {
-    return notifications.push({
+    notifications.push({
       message: (
         <p>
           OH NO! The transaction was rejected! Please refresh and try again
           incase of wallet issues.
         </p>
       ),
-      animation: "",
+      animation: "damage",
     });
+    return notifications;
   } else if (type == "Multicall") {
-    return (
-      <div className="flex flex-col">
-        {(notificationData as string[])?.map((noti: any, index: number) => {
-          if (hasBeast) {
-            if (
-              noti.startsWith("You equipped") &&
-              battles[0]?.attacker == "Beast" &&
-              battles[0]?.adventurerHealth == 0
-            ) {
-              return (
-                <p key={index}>
-                  You were slaughtered by the beast after trying to equip an
-                  item!
-                </p>
-              );
-            } else if (
-              noti.startsWith("You equipped") &&
-              battles[0]?.attacker == "Beast" &&
-              (battles[0]?.beastHealth ?? 0) > 0 &&
-              (battles[0]?.beastHealth ?? 0) > 0
-            ) {
-              return (
-                <p key={index}>
-                  OUCH! You were attacked by the {beastName} after equipping an
-                  item taking {battles[0].damageTaken}!
-                </p>
-              );
-            } else if (
-              noti.startsWith("You equipped") &&
-              battles[0]?.attacker == "Beast" &&
-              (battles[0]?.beastHealth ?? 0) > 0 &&
-              (battles[0]?.beastHealth ?? 0) == 0
-            ) {
-              return (
-                <p key={index}>
-                  You were attacked by the {beastName} after equipping an item
-                  but defended it!
-                </p>
-              );
-            }
-          }
-          return <p key={index}>{noti}</p>;
-        })}
-      </div>
-    );
+    for (let i = 0; i < notificationData.length; i++) {
+      if (hasBeast) {
+        if (
+          (notificationData[i] as string).startsWith("You equipped") &&
+          battles[0]?.attacker == "Beast" &&
+          battles[0]?.adventurerHealth == 0
+        ) {
+          notifications.push({
+            message: (
+              <p>
+                You were slaughtered by the beast after trying to equip an item!
+              </p>
+            ),
+            animation: animation ?? "",
+          });
+        } else if (
+          (notificationData[i] as string).startsWith("You equipped") &&
+          battles[0]?.attacker == "Beast" &&
+          (battles[0]?.beastHealth ?? 0) > 0 &&
+          (battles[0]?.beastHealth ?? 0) > 0
+        ) {
+          notifications.push({
+            message: (
+              <p>
+                OUCH! You were attacked by the {beastName} after equipping an
+                item taking {battles[0].damageTaken}!
+              </p>
+            ),
+            animation: animation ?? "",
+          });
+        } else if (
+          (notificationData[i] as string).startsWith("You equipped") &&
+          battles[0]?.attacker == "Beast" &&
+          (battles[0]?.beastHealth ?? 0) > 0 &&
+          (battles[0]?.beastHealth ?? 0) == 0
+        ) {
+          notifications.push({
+            message: (
+              <p>
+                You were attacked by the {beastName} after equipping an item but
+                defended it!
+              </p>
+            ),
+            animation: animation ?? "",
+          });
+        } else {
+          notifications.push({
+            message: <p>{notificationData[i] as string}</p>,
+            animation: animation ?? "",
+          });
+        }
+      } else {
+        notifications.push({
+          message: <p>{notificationData[i] as string}</p>,
+          animation: animation ?? "",
+        });
+      }
+    }
   } else {
-    return <p>{notificationData?.toString()}</p>;
+    notifications.push({
+      message: <p>{notificationData as string}</p>,
+      animation: animation ?? "",
+    });
   }
+  return notifications;
 };
 
 export const NotificationDisplay = ({
@@ -238,20 +257,20 @@ export const NotificationDisplay = ({
   notificationData,
   hasBeast,
 }: NotificationDisplayProps) => {
-  const gameData = new GameData();
-
   const { adventurer } = useAdventurerStore();
   const { data } = useQueriesStore();
   const battles = data.lastBeastBattleQuery
     ? data.lastBeastBattleQuery.battles
     : [];
-  const notifications = processNotifications(
+  console.log(notificationData);
+  const notifications: Notification[] = processNotifications(
     type,
     notificationData,
     battles,
     hasBeast,
     adventurer ?? NullAdventurer
   );
+  console.log(notifications);
 
   const [setSound, setSoundState] = useState(soundSelector.click);
 
@@ -261,24 +280,24 @@ export const NotificationDisplay = ({
     play();
   }, [play]);
 
-  useEffect(() => {
-    if (animation) {
-      const animationKey = Object.keys(gameData.ADVENTURER_ANIMATIONS).find(
-        (key) => gameData.ADVENTURER_ANIMATIONS[key] === animation
-      );
-      if (animationKey && gameData.ADVENTURER_SOUNDS[animationKey]) {
-        setSoundState(gameData.ADVENTURER_SOUNDS[animationKey]);
-      }
-      playSound();
-    }
-  }, [
-    animation,
-    gameData.ADVENTURER_ANIMATIONS,
-    gameData.ADVENTURER_SOUNDS,
-    playSound,
-  ]);
+  // useEffect(() => {
+  //   if (animation) {
+  //     const animationKey = Object.keys(gameData.ADVENTURER_ANIMATIONS).find(
+  //       (key) => gameData.ADVENTURER_ANIMATIONS[key] === animation
+  //     );
+  //     if (animationKey && gameData.ADVENTURER_SOUNDS[animationKey]) {
+  //       setSoundState(gameData.ADVENTURER_SOUNDS[animationKey]);
+  //     }
+  //     playSound();
+  //   }
+  // }, [
+  //   animation,
+  //   gameData.ADVENTURER_ANIMATIONS,
+  //   gameData.ADVENTURER_SOUNDS,
+  //   playSound,
+  // ]);
 
-  const notifications = [{ message: <p>Hello</p>, animation: "die" }];
+  // const notifications = [{ message: <p>Hello</p>, animation: "die" }];
 
   return <NotificationComponent notifications={notifications} />;
 };

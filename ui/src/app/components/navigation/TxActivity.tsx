@@ -6,7 +6,7 @@ import useLoadingStore from "../../hooks/useLoadingStore";
 import LootIconLoader from "../icons/Loader";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useMediaQuery } from "react-responsive";
-import { processNotification } from "../../components/navigation/NotificationDisplay";
+import { processNotifications } from "../notifications/NotificationDisplay";
 import useUIStore from "@/app/hooks/useUIStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
@@ -77,13 +77,13 @@ export const TxActivity = () => {
     battles: any,
     hasBeast: boolean
   ) => {
-    const notification = processNotification(
-      type,
-      notificationData,
-      battles,
-      hasBeast
-    );
-    setDeathMessage(notification);
+    // const notification = processNotifications(
+    //   type,
+    //   notificationData,
+    //   battles,
+    //   hasBeast
+    // );
+    setDeathMessage("notification");
     showDeathDialog(true);
   };
 

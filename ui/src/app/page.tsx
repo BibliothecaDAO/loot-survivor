@@ -30,10 +30,10 @@ import useAdventurerStore from "./hooks/useAdventurerStore";
 import useUIStore from "./hooks/useUIStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { CSSTransition } from "react-transition-group";
-import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
+import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
 import { mainnet_addr, getGraphQLUrl } from "./lib/constants";
-import { Menu, NullAdventurer } from "./types";
+import { Menu, NullAdventurer, Battle, Notification } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
@@ -63,6 +63,7 @@ import {
 import { useBurner } from "./lib/burner";
 import { ArcadeDialog } from "./components/ArcadeDialog";
 import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
+import { processNotifications } from "./components/notifications/NotificationDisplay";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -92,6 +93,7 @@ export default function Home() {
   const [isMuted, setIsMuted] = useState(false);
   const [introComplete, setIntroComplete] = useState(false);
   const type = useLoadingStore((state) => state.type);
+  // const type = "Attack";
   const notificationData = useLoadingStore((state) => state.notificationData);
   const showNotification = useLoadingStore((state) => state.showNotification);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
@@ -248,9 +250,6 @@ export default function Home() {
     return <WalletSelect />;
   }
 
-  console.log(adventurer);
-  console.log(data.adventurerByIdQuery?.adventurers[0]);
-
   return (
     // <Maintenance />
     <main
@@ -368,16 +367,8 @@ export default function Home() {
           <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4">
             {!isMobileDevice && <TxActivity />}
           </div>
-          {/* <CSSTransition
-            in={
-              showNotification &&
-              Boolean(notificationData) &&
-              (typeof notificationData === "object"
-                ? "data" in notificationData
-                  ? notificationData.data.length > 0
-                  : true
-                : true)
-            }
+          <CSSTransition
+            in={showNotification && Boolean(notificationData)}
             timeout={500}
             classNames="notification"
             unmountOnExit
@@ -389,7 +380,7 @@ export default function Home() {
                 hasBeast={hasBeast}
               />
             </div>
-          </CSSTransition> */}
+          </CSSTransition>
 
           {deathDialog && <DeathDialog />}
 

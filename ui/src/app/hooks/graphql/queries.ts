@@ -381,7 +381,7 @@ const getBattleByTxHash = gql`
   query get_latest_battle_by_tx($txHash: HexValue) {
     battles(
       where: { txHash: { eq: $txHash } }
-      orderBy: { timestamp: { desc: true } }
+      orderBy: { timestamp: { asc: true } }
     ) {
       ...BattleFields
     }

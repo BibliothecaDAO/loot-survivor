@@ -300,8 +300,8 @@ export function countOccurrences<T>(arr: T[], value: T): number {
 
 export function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   const chunks: T[][] = [];
-  for (let i = 0; i < array.length; i += chunkSize) {
-    const nextChunk = array.slice(i, i + chunkSize);
+  for (let i = 0; i < array?.length; i += chunkSize) {
+    const nextChunk = array?.slice(i, i + chunkSize);
     chunks.push(nextChunk);
     if (nextChunk.length < chunkSize) break; // Stop if we've hit the end of the array
   }

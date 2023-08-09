@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import SpriteAnimation from "./SpriteAnimation";
 import { useMediaQuery } from "react-responsive";
 import { notificationAnimations } from "@/app/lib/constants";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
 
 export interface NotificationComponentProps {
   notifications: any[];
@@ -11,6 +12,7 @@ const NotificationComponent = ({
   notifications,
 }: NotificationComponentProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
 
   const isMobileDevice = useMediaQuery({
     query: "(max-device-width: 480px)",
@@ -20,7 +22,15 @@ const NotificationComponent = ({
     if (currentIndex < notifications.length - 1) {
       const timer = setTimeout(() => {
         setCurrentIndex((prevIndex) => prevIndex + 1);
-      }, 5000);
+      }, 2000);
+      return () => {
+        clearTimeout(timer);
+      };
+    } else if (currentIndex === notifications.length - 1) {
+      const timer = setTimeout(() => {
+        resetNotification();
+        setCurrentIndex(0);
+      }, 2000);
       return () => clearTimeout(timer);
     }
   }, [currentIndex]);
@@ -35,11 +45,11 @@ const NotificationComponent = ({
           rows={16}
           frameRate={5}
           animations={notificationAnimations}
-          currentAnimation={notifications[currentIndex].animation}
+          currentAnimation={notifications[currentIndex]?.animation}
         />
       </div>
       <div className="w-5/6 sm:w-3/4 m-auto text-sm sm:text-lg">
-        {notifications[currentIndex].message}
+        {notifications[currentIndex]?.message}
       </div>
     </div>
   );

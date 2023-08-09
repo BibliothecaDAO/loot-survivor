@@ -6,7 +6,7 @@ import { padAddress, shortenHex } from "../../lib/utils";
 import useOnClickOutside from "../../hooks/useOnClickOutside";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { processNotification } from "./NotificationDisplay";
+import { processNotifications } from "../notifications/NotificationDisplay";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useUIStore from "../../hooks/useUIStore";
 import { MdClose } from "react-icons/md";
@@ -65,14 +65,14 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                     const battles = queryData.battlesByBeastQuery
                       ? queryData.battlesByBeastQuery.battles
                       : [];
-                    if (response) {
-                      notification = processNotification(
-                        response.type,
-                        response.notificationData,
-                        battles,
-                        !!(adventurer?.beastHealth ?? 0 > 0)
-                      );
-                    }
+                    // if (response) {
+                    //   notifications = processNotifications(
+                    //     response.type,
+                    //     response.notificationData,
+                    //     battles,
+                    //     !!(adventurer?.beastHealth ?? 0 > 0)
+                    //   );
+                    // }
                     return (
                       <li
                         key={i}
