@@ -85,7 +85,7 @@ export const TxActivity = () => {
       adventurer ?? NullAdventurer
     );
     // In the case of a chain of notifications we are only interested in the last
-    setDeathMessage(notifications[notifications.length - 1]);
+    setDeathMessage(notifications[notifications.length - 1].message);
     showDeathDialog(true);
   };
 
@@ -131,7 +131,7 @@ export const TxActivity = () => {
         if (killedByBeast || killedByPenalty) {
           setDeathNotification(
             type,
-            notificationData,
+            queryData.battlesByTxHashQuery.battles,
             queryData.battlesByBeastQuery?.battles,
             true
           );
@@ -166,7 +166,7 @@ export const TxActivity = () => {
         if (killedByObstacle || killedByPenalty || killedByAmbush) {
           setDeathNotification(
             type,
-            notificationData,
+            queryData.discoveryByTxHashQuery.discoveries,
             queryData.battlesByBeastQuery?.battles,
             hasBeast
           );
@@ -217,9 +217,6 @@ export const TxActivity = () => {
       try {
         switch (type) {
           case "Attack":
-            await handleAttackOrFlee();
-            break;
-          case "Attack Till Death":
             await handleAttackOrFlee();
             break;
           case "Flee":

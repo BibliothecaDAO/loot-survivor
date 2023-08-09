@@ -137,7 +137,7 @@ export default function BeastScreen() {
         resetData("latestMarketItemsQuery");
         addToCalls(attackTillDeathTx);
         startLoading(
-          "Attack Till Death",
+          "Attack",
           "Attacking",
           "battlesByTxHashQuery",
           adventurer?.id,

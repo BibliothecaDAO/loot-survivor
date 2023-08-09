@@ -140,11 +140,6 @@ export const processNotifications = (
   if (type == "Attack" || type == "Flee") {
     const battleScenarios = chunkArray(notificationData as Battle[], 2);
     for (let i = 0; i < battleScenarios.length; i++) {
-      const animation = processAnimation(
-        type,
-        notificationData,
-        adventurer ?? NullAdventurer
-      );
       notifications.push({
         animation: animation ?? "",
         message: (

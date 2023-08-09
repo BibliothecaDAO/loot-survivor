@@ -6,30 +6,26 @@ import { NullAdventurer } from "@/app/types";
 import NotificationComponent from "./NotificationComponent";
 import { Notification } from "@/app/types";
 import { processNotifications } from "./NotificationHandler";
+import useLoadingStore from "../../hooks/useLoadingStore";
 
-interface NotificationDisplayProps {
-  type: string;
-  notificationData: any;
-  hasBeast: boolean;
-}
-
-export const NotificationDisplay = ({
-  type,
-  notificationData,
-  hasBeast,
-}: NotificationDisplayProps) => {
-  const { adventurer } = useAdventurerStore();
+export const NotificationDisplay = () => {
+  const adventurer = useAdventurerStore((state) => state.adventurer);
+  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const { data } = useQueriesStore();
+  const type = useLoadingStore((state) => state.type);
+  const notificationData = useLoadingStore((state) => state.notificationData);
   const battles = data.lastBeastBattleQuery
     ? data.lastBeastBattleQuery.battles
     : [];
-  const notifications: Notification[] = processNotifications(
-    type,
-    notificationData,
-    battles,
-    hasBeast,
-    adventurer ?? NullAdventurer
-  );
+  const notifications: Notification[] = notificationData
+    ? processNotifications(
+        type,
+        notificationData,
+        battles,
+        hasBeast,
+        adventurer ?? NullAdventurer
+      )
+    : [];
 
   const [setSound, setSoundState] = useState(soundSelector.click);
 
