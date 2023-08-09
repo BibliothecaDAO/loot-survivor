@@ -6,7 +6,7 @@ import useLoadingStore from "../../hooks/useLoadingStore";
 import LootIconLoader from "../icons/Loader";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useMediaQuery } from "react-responsive";
-import { processNotifications } from "../notifications/NotificationDisplay";
+import { processNotifications } from "../notifications/NotificationHandler";
 import useUIStore from "@/app/hooks/useUIStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
@@ -77,13 +77,15 @@ export const TxActivity = () => {
     battles: any,
     hasBeast: boolean
   ) => {
-    // const notification = processNotifications(
-    //   type,
-    //   notificationData,
-    //   battles,
-    //   hasBeast
-    // );
-    setDeathMessage("notification");
+    const notifications = processNotifications(
+      type,
+      notificationData,
+      battles,
+      hasBeast,
+      adventurer ?? NullAdventurer
+    );
+    // In the case of a chain of notifications we are only interested in the last
+    setDeathMessage(notifications[notifications.length - 1]);
     showDeathDialog(true);
   };
 
@@ -127,18 +129,12 @@ export const TxActivity = () => {
           (battle) => !battle.attacker && battle.adventurerHealth == 0
         );
         if (killedByBeast || killedByPenalty) {
-          setDeathMessage(
-            <NotificationBattleDisplay
-              battleData={
-                queryData.battlesByTxHashQuery.battles
-                  ? queryData.battlesByTxHashQuery.battles
-                  : []
-              }
-              type={type}
-            />
+          setDeathNotification(
+            type,
+            notificationData,
+            queryData.battlesByBeastQuery?.battles,
+            true
           );
-          console.log(queryData.battlesByTxHashQuery.battles);
-          showDeathDialog(true);
         }
         stopLoading(queryData.battlesByTxHashQuery.battles);
       };
@@ -168,12 +164,12 @@ export const TxActivity = () => {
           queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
             0;
         if (killedByObstacle || killedByPenalty || killedByAmbush) {
-          setDeathMessage(
-            <DiscoveryDisplay
-              discoveryData={queryData.discoveryByTxHashQuery.discoveries[0]}
-            />
+          setDeathNotification(
+            type,
+            notificationData,
+            queryData.battlesByBeastQuery?.battles,
+            hasBeast
           );
-          showDeathDialog(true);
         }
         stopLoading(queryData.discoveryByTxHashQuery.discoveries);
       };

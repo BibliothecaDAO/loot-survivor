@@ -32,8 +32,7 @@ import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
-import { mainnet_addr, getGraphQLUrl } from "./lib/constants";
-import { Menu, NullAdventurer, Battle, Notification } from "./types";
+import { Menu, NullAdventurer } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
@@ -43,7 +42,6 @@ import {
   CogIcon,
   MuteIcon,
   VolumeIcon,
-  CartIcon,
   GithubIcon,
   RefreshIcon,
   CartIconSimple,
@@ -60,10 +58,8 @@ import {
   getAdventurerById,
   getAdventurersByOwner,
 } from "./hooks/graphql/queries";
-import { useBurner } from "./lib/burner";
 import { ArcadeDialog } from "./components/ArcadeDialog";
 import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
-import { processNotifications } from "./components/notifications/NotificationDisplay";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
