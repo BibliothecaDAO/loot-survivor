@@ -155,7 +155,7 @@ export default function UpgradeScreen() {
     const attribute = attributes.find((attr) => attr.name === selected);
     const amount = attribute ? upgrades[attribute.name] ?? 0 : 0;
     return (
-      <div className="flex sm:w-2/3 h-24 sm:h-full items-center justify-center border-l border-terminal-green p-2">
+      <div className="flex sm:w-2/3 h-24 sm:h-full items-center justify-center p-auto">
         {attribute && (
           <StatAttribute
             amount={amount}
@@ -222,7 +222,7 @@ export default function UpgradeScreen() {
       },
     ];
     return (
-      <div className="sm:w-1/3">
+      <div className="sm:w-1/3 sm:border-r sm:border-terminal-green">
         <VerticalKeyboardControl
           buttonsData={upgradeMenu}
           onSelected={setSelected}
@@ -391,7 +391,7 @@ export default function UpgradeScreen() {
                       <p className="text-xl lg:text-2xl sm:hidden">
                         Stat Upgrades
                       </p>
-                      <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border">
+                      <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border sm:items-center">
                         {isMobileDevice ? (
                           <>
                             {renderContent()}
