@@ -31,5 +31,5 @@ function argentWebWalletUrl() {
 export const connectors = [
   argentConnector,
   braavosConnector,
-  argentWebWalletConnector,
+  // argentWebWalletConnector,
 ];
