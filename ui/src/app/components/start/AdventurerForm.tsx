@@ -219,7 +219,7 @@ export const AdventurerForm = ({
     }
   }, [formData]);
 
-  const handleClassSelection = (classType: string) => {
+  const handleClassSelection = (classType: string | number) => {
     if (classType === "Warrior") {
       setFormData({
         ...formData,
@@ -246,13 +246,23 @@ export const AdventurerForm = ({
         startingIntelligence: "1",
         startingCharisma: "3",
       });
-    } else {
+    } else if (classType === "Scout") {
       setFormData({
         ...formData,
         class: classType,
         startingDexterity: "2",
         startingWisdom: "2",
         startingIntelligence: "2",
+      });
+    } else {
+      setFormData({
+        ...formData,
+        startingDexterity: [],
+        startingWisdom: [],
+        startingIntelligence: [],
+        startingCharisma: [],
+        startingStrength: [],
+        startingVitality: [],
       });
     }
     setStep(step + 1);
@@ -328,15 +338,15 @@ export const AdventurerForm = ({
   if (step === 1) {
     return (
       <>
-        <div className="w-full sm:p-8">
+        <div className="w-full sm:p-8 md:p-4">
           <h3 className="uppercase text-center">Choose your class</h3>
-          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-20">
+          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-20 md:gap-5">
             {classes.map((classType) => (
               <div
                 key={classType.name}
-                className="flex flex-col items-center h-full justify-between border sm:w-56 border-terminal-green"
+                className="flex flex-col items-center h-full justify-between border sm:w-56 md:w-48 border-terminal-green"
               >
-                <div className="relative w-28 h-28 sm:w-56 sm:h-56">
+                <div className="relative w-28 h-28 sm:w-56 sm:h-56 md:h-40">
                   <Image
                     src={classType.image}
                     fill={true}
@@ -346,7 +356,7 @@ export const AdventurerForm = ({
                     }}
                   />
                 </div>
-                <div className="flex items-center p-2 sm:pb-4 h-10 sm:h-20 text-center text-xxs sm:text-base">
+                <div className="flex items-center p-2 sm:pb-4 h-10 sm:h-20 md:h-16 text-center text-xxs sm:text-base md:text-sm">
                   <p className="ml-2">{classType.description}</p>
                 </div>
                 <Button
@@ -357,6 +367,29 @@ export const AdventurerForm = ({
                 </Button>
               </div>
             ))}
+            <div className="flex w-full justify-center uppercase">
+              6 Stat Points Available
+            </div>
+            <div className="flex flex-row w-full gap-16">
+              <Button className="w-full" onClick={() => handleClassSelection}>
+                Strength
+              </Button>
+              <Button className="w-full" onClick={() => handleClassSelection}>
+                Vitality
+              </Button>
+              <Button className="w-full" onClick={() => handleClassSelection}>
+                Wisdom
+              </Button>
+              <Button className="w-full" onClick={() => handleClassSelection}>
+                Intelligence
+              </Button>
+              <Button className="w-full" onClick={() => handleClassSelection}>
+                Dexterity
+              </Button>
+              <Button className="w-full" onClick={() => handleClassSelection}>
+                Charisma
+              </Button>
+            </div>
           </div>
         </div>
       </>
@@ -364,15 +397,15 @@ export const AdventurerForm = ({
   } else if (step === 2) {
     return (
       <>
-        <div className="w-full sm:p-8">
+        <div className="w-full sm:p-8 md:p-4">
           <h3 className="uppercase text-center">Choose your weapon</h3>
-          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-2 sm:gap-20">
+          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-2 sm:gap-20 md:gap-5">
             {weapons.map((weapon) => (
               <div
                 key={weapon.name}
-                className="flex flex-col items-center h-full justify-between border sm:w-56 border-terminal-green"
+                className="flex flex-col items-center h-full justify-between border sm:w-56 md:w-48 border-terminal-green"
               >
-                <div className="relative w-28 h-28 sm:w-56 sm:h-56">
+                <div className="relative w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52">
                   <Image
                     src={weapon.image}
                     fill={true}
@@ -382,7 +415,7 @@ export const AdventurerForm = ({
                     }}
                   />
                 </div>
-                <div className="flex items-center pb-2 sm:pb-4 text-base sm:text-md">
+                <div className="flex items-center pb-2 sm:pb-2 md:pb-4 text-base sm:text-md">
                   {weapon.icon}
                   <p className="ml-2">{weapon.description}</p>
                 </div>

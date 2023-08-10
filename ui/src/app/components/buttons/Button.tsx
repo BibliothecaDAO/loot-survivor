@@ -27,10 +27,12 @@ const buttonVariants = cva(
           "bg-black/70 text-terminal-green hover:bg-black/80 hover:animate-pulse text-center disabled:text-slate-300",
       },
       size: {
-        default: "sm:h-10 px-2 py-1 sm:py-2 sm:px-4 text-xs sm:text-sm",
+        default:
+          "sm:h-10 md:h-8 px-2 py-1 sm:py-2 md:py-1 sm:px-4 text-xs sm:text-sm md:text-lg",
         xxs: "h-4 px-1 text-xs",
         xs: "h-6 px-3 text-xs",
         sm: "h-9 px-3 text-sm ",
+        md: "h-8 px-2 text-sm",
         lg: "h-11 px-8 text-lg",
         xl: "h-12 px-10 text-xl",
       },

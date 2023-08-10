@@ -123,7 +123,7 @@ export const AdventurersList = ({
             )}
           </div>
           {filteredAdventurers.length > 0 && (
-            <div className="hidden sm:block sm:w-2/12 md:w-6/12 lg:w-2/3 w-full">
+            <div className="hidden sm:block sm:w-2/12 md:w-6/12 lg:w-2/3 w-full sm:h-1/3 md:h-2/3">
               <Info adventurer={filteredAdventurers[selectedIndex]} />
             </div>
           )}

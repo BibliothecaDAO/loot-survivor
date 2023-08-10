@@ -139,7 +139,7 @@ export default function Info({
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
 
   return (
-    <div className="h-full border border-terminal-green overflow-auto">
+    <div className="min-h-screen border border-terminal-green overflow-auto">
       {!isLoading.itemsByAdventurerQuery ? (
         <div className="flex flex-row flex-wrap gap-2 p-1">
           <div className="flex flex-col w-full sm:p-2 uppercase">
@@ -188,7 +188,7 @@ export default function Info({
             </div>
 
             <div className="flex flex-col justify-between flex-wrap">
-              <div className="flex flex-row w-full font-semibold text-sm sm:text-base">
+              <div className="flex flex-row w-full font-semibold text-xs sm:text-s lg:text-base">
                 {attributes.map((attribute) => (
                   <div
                     key={attribute.key}
@@ -199,7 +199,7 @@ export default function Info({
                   </div>
                 ))}
               </div>
-              <div className="flex flex-col w-full">
+              <div className="flex flex-col w-full text-xs">
                 {bodyParts.map((part) => (
                   <div key={part}>
                     <ItemDisplay
