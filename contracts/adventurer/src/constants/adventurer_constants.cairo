@@ -27,6 +27,7 @@ const VITALITY_INSTANT_HEALTH_BONUS: u16 = 10;
 // Misc Settings
 const MAX_XP: u16 = 8191; // 2^13 - 1
 const MAX_ADVENTURER_BLOCKS: u16 = 512; // 2^9
+const STAT_UPGRADE_POINTS_PER_LEVEL: u8 = 1;
 
 // controls how much faster items level up compared to the player
 const ITEM_XP_MULTIPLIER_BEASTS: u16 = 2;

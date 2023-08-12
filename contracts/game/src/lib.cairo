@@ -11,7 +11,6 @@ mod Game {
     const TEST_ENTROPY: u64 = 12303548;
     const LOOT_NAME_STORAGE_INDEX_1: u256 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
-    const STAT_UPGRADE_POINTS_PER_LEVEL: u8 = 1;
 
     use option::OptionTrait;
     use box::BoxTrait;
@@ -1145,7 +1144,7 @@ mod Game {
                         // check for level up
                         if (new_level > previous_level) {
                             // process level up
-                            _handle_adventurer_level_up(
+                            _emit_level_up_events(
                                 ref self, ref adventurer, adventurer_id, previous_level, new_level
                             );
                         } else {
@@ -1296,7 +1295,7 @@ mod Game {
 
         if (new_level > previous_level) {
             // if adventurer leveled up, process level up
-            _handle_adventurer_level_up(
+            _emit_level_up_events(
                 ref self, ref adventurer, adventurer_id, previous_level, new_level
             );
         }
@@ -1857,7 +1856,7 @@ mod Game {
 
             // if adventurers new level is greater than previous level
             if (new_level > previous_level) {
-                _handle_adventurer_level_up(
+                _emit_level_up_events(
                     ref self, ref adventurer, adventurer_id, previous_level, new_level
                 );
             }
@@ -2053,7 +2052,7 @@ mod Game {
 
             // check for adventurer level up
             if (new_level > previous_level) {
-                _handle_adventurer_level_up(
+                _emit_level_up_events(
                     ref self, ref adventurer, adventurer_id, previous_level, new_level
                 );
             }
@@ -2534,41 +2533,32 @@ mod Game {
     // @param adventurer_id The unique identifier of the adventurer.
     // @param previous_level The level of the adventurer before this level up.
     // @param new_level The new level of the adventurer after leveling up.
-    fn _handle_adventurer_level_up(
+    fn _emit_level_up_events(
         ref self: ContractState,
         ref adventurer: Adventurer,
         adventurer_id: u256,
         previous_level: u8,
         new_level: u8,
     ) {
-        // add stat upgrades points to adventurer
-        let stat_upgrade_points = (new_level - previous_level) * STAT_UPGRADE_POINTS_PER_LEVEL;
-        adventurer.add_stat_upgrade_points(stat_upgrade_points);
+        let adventurer_state = AdventurerState {
+            owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
+        };
 
         // emit level up event
         __event_AdventurerLeveledUp(
             ref self,
-            adventurer_state: AdventurerState {
-                owner: get_caller_address(), adventurer_id, adventurer
-            },
+            adventurer_state: adventurer_state,
             previous_level: previous_level,
             new_level: new_level
         );
 
         // emit stat upgrades available event
-        __event_UpgradeAvailable(
-            ref self,
-            adventurer_state: AdventurerState {
-                owner: get_caller_address(), adventurer_id, adventurer
-            },
-        );
+        __event_UpgradeAvailable(ref self, adventurer_state);
 
         // emit new items availble with available items
         __event_NewItemsAvailable(
             ref self,
-            adventurer_state: AdventurerState {
-                owner: get_caller_address(), adventurer_id, adventurer
-            },
+            adventurer_state: adventurer_state,
             items: _get_items_on_market(@self, adventurer_id, adventurer)
         );
     }
