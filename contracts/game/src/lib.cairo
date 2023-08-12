@@ -1976,7 +1976,7 @@ mod Game {
             );
 
             // if the adventurer is still alive and fighting to the death
-            if (fight_to_the_death && adventurer.health == 0) {
+            if (fight_to_the_death && adventurer.health > 0) {
                 // attack again
                 _attack(
                     ref self,
