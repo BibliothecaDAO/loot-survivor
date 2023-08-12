@@ -17,7 +17,7 @@ trait IGame<TContractState> {
         adventurer_meta: AdventurerMetadata,
         starting_stats: Stats
     );
-    fn explore(ref self: TContractState, adventurer_id: u256);
+    fn explore(ref self: TContractState, adventurer_id: u256, till_beast: bool);
     fn attack(ref self: TContractState, adventurer_id: u256, to_the_death: bool);
     fn flee(ref self: TContractState, adventurer_id: u256, to_the_death: bool);
     fn equip(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
