@@ -1088,8 +1088,6 @@ mod Game {
         global_entropy: u128,
         till_beast: bool
     ) {
-        let starting_level = adventurer.get_level();
-
         // use entropy sources to generate random exploration
         let (main_explore_rnd, sub_explore_rnd) = _get_live_entropy(
             adventurer_entropy, global_entropy, adventurer
@@ -1208,8 +1206,8 @@ mod Game {
             }
         }
 
-        // if adventurer elected to explore till they find a beast and they are still alive
-        if (till_beast && adventurer.health > 0 && starting_level == adventurer.get_level()) {
+        // if adventurer elected to explore till they find a beast and they are still alive with no stat points
+        if till_beast && adventurer.health > 0 && !(adventurer.stat_points_available > 0) {
             // Keep exploring
             _explore(
                 ref self,
