@@ -1842,7 +1842,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(200000)]
+    #[available_gas(250000)]
     fn test_increase_adventurer_xp() {
         let starting_stats = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, 
@@ -2861,7 +2861,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(100000)]
+    #[available_gas(150000)]
     fn test_increase_xp() {
         // initialize lvl 1 adventurer with no stat points available
         let starting_stats = Stats {
