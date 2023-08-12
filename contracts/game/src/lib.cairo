@@ -124,6 +124,13 @@ mod Game {
 
     #[external(v0)]
     impl Game of IGame<ContractState> {
+        //@notice Initiates the adventure for an adventurer with specific starting configurations.
+        //@param self The current state of the contract.
+        //@param interface_id The address of the specific contract interface.
+        //@param starting_weapon The initial weapon choice of the adventurer (e.g. wand, book, club, short sword).
+        //@param adventurer_meta Metadata containing information about the adventurer.
+        //@param starting_stats The initial statistics of the adventurer.
+        //@dev Ensures that the chosen starting weapon and stats are valid before beginning the adventure.
         fn start(
             ref self: ContractState,
             interface_id: ContractAddress,
@@ -146,7 +153,13 @@ mod Game {
 
             _payout(ref self, caller, block_number, interface_id);
         }
-        fn explore(ref self: ContractState, adventurer_id: u256) {
+
+        //@notice Sends an adventurer to explore.
+        //@param self The current state of the contract.
+        //@param adventurer_id The unique identifier of the adventurer.
+        //@param till_beast Indicates if the adventurer will explore until encountering a beast.
+        //@dev Ensures the caller owns the adventurer and checks various conditions such as the adventurer's health and battle status.
+        fn explore(ref self: ContractState, adventurer_id: u256, till_beast: bool) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
 
@@ -181,8 +194,21 @@ mod Game {
                 _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
             } else {
                 // else send them off to explore
+                let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+                    .entropy
+                    .into();
+
+                let global_entropy = _get_global_entropy(@self).into();
+
                 _explore(
-                    ref self, ref adventurer, adventurer_id, ref name_storage1, ref name_storage2
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    ref name_storage1,
+                    ref name_storage2,
+                    adventurer_entropy,
+                    global_entropy,
+                    till_beast
                 );
             }
 
@@ -199,6 +225,11 @@ mod Game {
             );
         }
 
+        //@notice Initiates an attack action for an adventurer.
+        //@param self The current state of the contract.
+        //@param adventurer_id The unique identifier of the adventurer.
+        //@param to_the_death Indicates if the adventurer will fight to the death.
+        //@dev Ensures the caller owns the adventurer, verifies various conditions, and executes the attack logic.
         fn attack(ref self: ContractState, adventurer_id: u256, to_the_death: bool) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -259,6 +290,13 @@ mod Game {
                 original_name_storage2
             );
         }
+
+        //@notice Initiates a flee action for an adventurer.
+        //@param self The current state of the contract.
+        //@param adventurer_id The unique identifier of the adventurer.
+        //@param to_the_death Indicates if the adventurer will attempt to flee to the death.
+        //@dev Ensures the caller owns the adventurer, verifies various conditions, and executes the flee logic. 
+        //If to_the_death is set, the adventurer will repeatedly attempt to flee until either the adventurer or the beast is dead.
         fn flee(ref self: ContractState, adventurer_id: u256, to_the_death: bool) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -353,6 +391,13 @@ mod Game {
             );
         }
 
+        //@notice Equips an adventurer with specified items.
+        //@param self The current state of the contract.
+        //@param adventurer_id The ID of the adventurer to equip.
+        //@param items An array of items (up to 8) to equip the adventurer with.
+        //@dev This function verifies the ownership, ensures the item count, and equips the adventurer. It also handles a counter-attack if the adventurer is in battle.
+        //@dev This function interacts with various internal methods for assert checks, state unpacking, item equipping, and counter-attacks.
+        //@dev Emits an event if a counter-attack happens in battle (not shown in the code).
         fn equip(ref self: ContractState, adventurer_id: u256, items: Array<u8>) {
             // assert caller owns adventurer
             _assert_ownership(@self, adventurer_id);
@@ -475,6 +520,20 @@ mod Game {
             );
         }
 
+        //@notice Upgrades an adventurer's stats and optionally purchases potions and items.
+        //@param self The current state of the contract.
+        //@param adventurer_id The ID of the adventurer to upgrade.
+        //@param potions The number of potions to purchase.
+        //@param strength Points to add to the strength stat.
+        //@param dexterity Points to add to the dexterity stat.
+        //@param vitality Points to add to the vitality stat.
+        //@param intelligence Points to add to the intelligence stat.
+        //@param wisdom Points to add to the wisdom stat.
+        //@param charisma Points to add to the charisma stat.
+        //@param items An array of items to purchase as part of the upgrade.
+        //@dev This function verifies ownership, asserts that the adventurer is not dead or in battle, ensures the market is open, upgrades stats, and processes potions and item purchases.
+        //@dev Interacts with various internal methods for assert checks, stat upgrades, item purchasing, and event emission.
+        //@emit AdventurerUpgraded An event that is emitted when the adventurer is successfully upgraded.
         fn upgrade_adventurer(
             ref self: ContractState,
             adventurer_id: u256,
@@ -606,22 +665,19 @@ mod Game {
             _pack_adventurer(ref self, adventurer_id, adventurer);
         }
 
+        //
         // view functions
+        //
         fn get_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
-            // get item names from storage
             let (name_storage1, name_storage2) = _get_special_storages(self, adventurer_id);
-            // get adventurer with item stat boosts
             _unpack_adventurer_apply_stat_boost(self, adventurer_id, name_storage1, name_storage2)
         }
-
         fn get_adventurer_no_boosts(self: @ContractState, adventurer_id: u256) -> Adventurer {
             _unpack_adventurer(self, adventurer_id)
         }
-
         fn get_adventurer_meta(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
             _adventurer_meta_unpacked(self, adventurer_id)
         }
-
         fn get_bag(self: @ContractState, adventurer_id: u256) -> Bag {
             _bag_unpacked(self, adventurer_id)
         }
@@ -669,8 +725,6 @@ mod Game {
             _assert_market_is_open(adventurer.stat_points_available);
             _get_market_items_by_slot(self, adventurer_id, adventurer, ImplCombat::u8_to_slot(slot))
         }
-
-        // TODO: Generalize this to accept a tier and rename to 'get_items_on_market_by_tier'
         fn get_items_on_market_by_tier(
             self: @ContractState, adventurer_id: u256, tier: u8
         ) -> Array<u8> {
@@ -693,23 +747,18 @@ mod Game {
         fn get_potion_price(self: @ContractState, adventurer_id: u256) -> u16 {
             _get_potion_price(self, adventurer_id)
         }
-
         fn get_attacking_beast(self: @ContractState, adventurer_id: u256) -> Beast {
             _get_attacking_beast(self, adventurer_id)
         }
-
         fn get_health(self: @ContractState, adventurer_id: u256) -> u16 {
             _unpack_adventurer(self, adventurer_id).health
         }
-
         fn get_xp(self: @ContractState, adventurer_id: u256) -> u16 {
             _unpack_adventurer(self, adventurer_id).xp
         }
-
         fn get_level(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).get_level()
         }
-
         fn get_gold(self: @ContractState, adventurer_id: u256) -> u16 {
             _unpack_adventurer(self, adventurer_id).gold
         }
@@ -1028,17 +1077,12 @@ mod Game {
         ref adventurer: Adventurer,
         adventurer_id: u256,
         ref name_storage1: ItemSpecialsStorage,
-        ref name_storage2: ItemSpecialsStorage
+        ref name_storage2: ItemSpecialsStorage,
+        adventurer_entropy: u128,
+        global_entropy: u128,
+        till_beast: bool
     ) {
-        // https://github.com/starkware-libs/cairo/issues/2942
-        // internal::revoke_ap_tracking();
-        // get adventurer entropy from storage
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
-            .entropy
-            .into();
-
-        // get global game entropy
-        let global_entropy = _get_global_entropy(@self).into();
+        let starting_health = adventurer.health;
 
         // use entropy sources to generate random exploration
         let (main_explore_rnd, sub_explore_rnd) = _get_live_entropy(
@@ -1103,6 +1147,9 @@ mod Game {
                         }
                     );
                 }
+
+                // discovering a beast ends explore recursion
+                return;
             },
             ExploreResult::Obstacle(()) => {
                 _obstacle_encounter(
@@ -1122,14 +1169,6 @@ mod Game {
                         adventurer.add_gold(amount);
                         // emit discovered gold event
                         __event__DiscoveredGold(ref self, adventurer_id, adventurer, amount);
-                        // Keep exploring
-                        _explore(
-                            ref self,
-                            ref adventurer,
-                            adventurer_id,
-                            ref name_storage1,
-                            ref name_storage2
-                        );
                     },
                     TreasureDiscovery::XP(()) => {
                         // apply XP to adventurer
@@ -1142,15 +1181,9 @@ mod Game {
                             _emit_level_up_events(
                                 ref self, ref adventurer, adventurer_id, previous_level, new_level
                             );
-                        } else {
-                            // Keep exploring
-                            _explore(
-                                ref self,
-                                ref adventurer,
-                                adventurer_id,
-                                ref name_storage1,
-                                ref name_storage2
-                            );
+
+                            // leveling up ends explore recursion
+                            return;
                         }
                     },
                     TreasureDiscovery::Health(()) => {
@@ -1164,22 +1197,26 @@ mod Game {
                             adventurer.increase_health(amount);
                             __event__DiscoveredHealth(ref self, adventurer_id, adventurer, amount);
                         }
-
-                        // Keep exploring
-                        _explore(
-                            ref self,
-                            ref adventurer,
-                            adventurer_id,
-                            ref name_storage1,
-                            ref name_storage2
-                        );
                     }
                 }
             }
         }
-    }
 
-    //fn _beast_discovery(ref self: ContractState, adventurer_id: u256) {}
+        // if adventurer elected to explore till they find a beast and they are still alive
+        if till_beast && adventurer.health > 0 {
+            // Keep exploring
+            _explore(
+                ref self,
+                ref adventurer,
+                adventurer_id,
+                ref name_storage1,
+                ref name_storage2,
+                adventurer_entropy,
+                global_entropy,
+                till_beast
+            );
+        }
+    }
 
     fn _obstacle_encounter(
         ref self: ContractState,

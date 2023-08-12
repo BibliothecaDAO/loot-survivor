@@ -172,15 +172,13 @@ mod tests {
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
 
         // go explore
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
         game.flee(ADVENTURER_ID, false);
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
         game.flee(ADVENTURER_ID, false);
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
         game.flee(ADVENTURER_ID, false);
-        game.explore(ADVENTURER_ID);
-        game.explore(ADVENTURER_ID);
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.get_level() == 3, 'adventurer should be lvl 3');
@@ -198,9 +196,9 @@ mod tests {
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
 
         // go explore
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
         game.flee(ADVENTURER_ID, false);
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.get_level() == 4, 'adventurer should be lvl 4');
@@ -218,10 +216,10 @@ mod tests {
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
 
         // go explore
-        game.explore(ADVENTURER_ID);
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
+        game.explore(ADVENTURER_ID, true);
         game.flee(ADVENTURER_ID, false);
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.get_level() == 5, 'adventurer should be lvl 5');
@@ -269,7 +267,7 @@ mod tests {
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
 
         // go explore
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
 
         // verify adventurer is now level 6
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -285,7 +283,7 @@ mod tests {
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
 
         // go explore
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.get_level() == 7, 'adventurer should be lvl 7');
@@ -300,7 +298,7 @@ mod tests {
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
 
         // go explore
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.get_level() == 8, 'adventurer should be lvl 8');
@@ -315,7 +313,7 @@ mod tests {
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
 
         // go explore
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.get_level() == 9, 'adventurer should be lvl 9');
@@ -330,10 +328,10 @@ mod tests {
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
 
         // go explore
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
         game.flee(ADVENTURER_ID, false);
-        game.explore(ADVENTURER_ID);
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
+        game.explore(ADVENTURER_ID, true);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.get_level() == 10, 'adventurer should be lvl 10');
@@ -348,9 +346,9 @@ mod tests {
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
 
         // go explore
-        game.explore(ADVENTURER_ID);
-        game.explore(ADVENTURER_ID);
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
+        game.explore(ADVENTURER_ID, true);
+        game.explore(ADVENTURER_ID, true);
 
         let adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(adventurer.get_level() == 11, 'adventurer should be lvl 11');
@@ -394,7 +392,7 @@ mod tests {
         // try to explore before defeating start beast
         // should result in a panic 'In battle cannot explore' which
         // is annotated in the test
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
     }
 
     #[test]
@@ -499,10 +497,7 @@ mod tests {
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart.clone());
 
         testing::set_block_number(1006);
-        game.explore(ADVENTURER_ID);
-        game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
-        testing::set_block_number(1007);
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
 
         // verify we found a beast
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -532,7 +527,7 @@ mod tests {
 
         // verify adventurer is unable to explore with stat upgrade available
         // this test is annotated to expect a panic so if it doesn't, this test will fail
-        game.explore(ADVENTURER_ID);
+        game.explore(ADVENTURER_ID, true);
     }
 
     #[test]
