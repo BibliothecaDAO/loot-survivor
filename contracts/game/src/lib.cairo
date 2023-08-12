@@ -1209,7 +1209,7 @@ mod Game {
         }
 
         // if adventurer elected to explore till they find a beast and they are still alive
-        if till_beast && adventurer.health > 0 {
+        if (till_beast && adventurer.health > 0 && adventurer.stat_points_available == 0) {
             // Keep exploring
             _explore(
                 ref self,
