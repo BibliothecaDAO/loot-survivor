@@ -1088,7 +1088,7 @@ mod Game {
         global_entropy: u128,
         till_beast: bool
     ) {
-        let starting_health = adventurer.health;
+        let starting_level = adventurer.get_level();
 
         // use entropy sources to generate random exploration
         let (main_explore_rnd, sub_explore_rnd) = _get_live_entropy(
@@ -1209,7 +1209,7 @@ mod Game {
         }
 
         // if adventurer elected to explore till they find a beast and they are still alive
-        if till_beast && adventurer.health > 0 {
+        if (till_beast && adventurer.health > 0 && starting_level == adventurer.get_level()) {
             // Keep exploring
             _explore(
                 ref self,
@@ -1222,6 +1222,7 @@ mod Game {
                 till_beast
             );
         }
+        return;
     }
 
     fn _obstacle_encounter(
