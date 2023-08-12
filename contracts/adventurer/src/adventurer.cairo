@@ -14,7 +14,7 @@ use super::{
             MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, VITALITY_HEALTH_CAP_INCREASE, MAX_GOLD,
             MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS,
             ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, ClassStatBoosts,
-            MAX_BLOCK_COUNT
+            MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
     }
@@ -559,6 +559,13 @@ impl ImplAdventurer of IAdventurer {
 
         // get the new level
         let new_level = self.get_level();
+
+        // if adventurer reached a new level
+        if (new_level > previous_level) {
+            // add stat upgrade points
+            let stat_upgrade_points = (new_level - previous_level) * STAT_UPGRADE_POINTS_PER_LEVEL;
+            self.add_stat_upgrade_points(stat_upgrade_points);
+        }
 
         // return the previous and new levels
         (previous_level, new_level)
@@ -1835,7 +1842,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(200000)]
+    #[available_gas(250000)]
     fn test_increase_adventurer_xp() {
         let starting_stats = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, 
@@ -2854,7 +2861,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(100000)]
+    #[available_gas(150000)]
     fn test_increase_xp() {
         // initialize lvl 1 adventurer with no stat points available
         let starting_stats = Stats {
