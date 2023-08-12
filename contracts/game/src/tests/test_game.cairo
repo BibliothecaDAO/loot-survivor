@@ -498,6 +498,10 @@ mod tests {
 
         testing::set_block_number(1006);
         game.explore(ADVENTURER_ID, true);
+        game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart.clone());
+        testing::set_block_number(1007);
+        game.explore(ADVENTURER_ID, true);
+
 
         // verify we found a beast
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
