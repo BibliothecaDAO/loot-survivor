@@ -386,40 +386,35 @@ mod Game {
                 false
             );
 
-            // TODO: Currently this is causing a Got 'Offset overflow' error while moving [159]
-            // which is being discussed via https://github.com/starkware-libs/cairo/issues/2942
-            // I tried adding internal::revoke_ap_tracking() in a number of places
-            // but was unable to resolve the issue. Until this bug is fixed, changing gear during battle
-            // will not result in the beast counter attacking
-            //
             // if the adventurer is equipping an item during battle
-            // if (adventurer.in_battle()) {
-            //     // get beast from seed
-            //     let (beast, beast_seed) = _get_beast(@self, adventurer, 0);
+            if (adventurer.in_battle()) {
+                // the beast gets a counter attack
 
-            //     let (adventurer_entropy, global_entropy) = _get_adventurer_and_global_entropy(
-            //         @self, adventurer_id
-            //     );
+                // get entropy
+                let (adventurer_entropy, global_entropy) = _get_adventurer_and_global_entropy(
+                    @self, adventurer_id
+                );
 
-            //     // get two random numbers
-            //     // first is used for attack location
-            //     // second is used for determining critical hit (instead _beast_counter_attack)
-            //     let (attack_rnd_1, attack_rnd_2) = _get_live_entropy(
-            //         adventurer_entropy, global_entropy.into(), adventurer
-            //     );
+                // get beast seed from entropy
+                let (beast, beast_seed) = _get_beast(@self, adventurer, adventurer_entropy);
 
-            //     // beast counter attacks
-            //     _beast_counter_attack(
-            //         ref self,
-            //         ref adventurer,
-            //         adventurer_id,
-            //         AdventurerUtils::get_random_attack_location(attack_rnd_1),
-            //         beast,
-            //         beast_seed,
-            //         attack_rnd_2,
-            //         false
-            //     );
-            // }
+                // get two random numbers from entropy sources
+                let (attack_rnd_1, attack_rnd_2) = _get_live_entropy(
+                    adventurer_entropy, global_entropy.into(), adventurer
+                );
+
+                // process beast counter attacks
+                _beast_counter_attack(
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    AdventurerUtils::get_random_attack_location(attack_rnd_1),
+                    beast,
+                    beast_seed,
+                    attack_rnd_2,
+                    false
+                );
+            }
 
             // remove stats, pack, and save adventurer 
             _pack_adventurer_remove_stat_boost(

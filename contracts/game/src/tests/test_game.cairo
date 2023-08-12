@@ -742,7 +742,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item not in bag', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(21000000)]
+    #[available_gas(24000000)]
     fn test_equip_not_in_bag() {
         // start new game
         let mut game = new_adventurer();
@@ -759,7 +759,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Too many items', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(21000000)]
+    #[available_gas(24000000)]
     fn test_equip_too_many_items() {
         // start new game
         let mut game = new_adventurer();
