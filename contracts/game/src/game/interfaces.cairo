@@ -15,12 +15,7 @@ trait IGame<TContractState> {
         interface_id: ContractAddress,
         starting_weapon: u8,
         adventurer_meta: AdventurerMetadata,
-        starting_strength: u8,
-        starting_dexterity: u8,
-        starting_vitality: u8,
-        starting_intelligence: u8,
-        starting_wisdom: u8,
-        starting_charsima: u8
+        starting_stats: Stats
     );
     fn explore(ref self: TContractState, adventurer_id: u256);
     fn attack(ref self: TContractState, adventurer_id: u256, to_the_death: bool);
@@ -92,21 +87,13 @@ trait IGame<TContractState> {
 
     // market details
     fn get_items_on_market(self: @TContractState, adventurer_id: u256) -> Array<LootWithPrice>;
-    fn get_weapons_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_chest_armor_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_head_armor_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_waist_armor_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_foot_armor_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_hand_armor_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_necklaces_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_rings_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_t1_items_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_t2_items_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_t3_items_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_t4_items_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
-    fn get_t5_items_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
+    fn get_items_on_market_by_slot(
+        self: @TContractState, adventurer_id: u256, slot: u8
+    ) -> Array<u8>;
+    fn get_items_on_market_by_tier(
+        self: @TContractState, adventurer_id: u256, tier: u8
+    ) -> Array<u8>;
     fn get_potion_price(self: @TContractState, adventurer_id: u256) -> u16;
-    fn get_attacking_beast(self: @TContractState, adventurer_id: u256) -> Beast;
 
     // adventurer stats (no boosts)
     fn get_base_stats(self: @TContractState, adventurer_id: u256) -> Stats;
@@ -118,6 +105,7 @@ trait IGame<TContractState> {
     fn get_base_charisma(self: @TContractState, adventurer_id: u256) -> u8;
 
     // beast details
+    fn get_attacking_beast(self: @TContractState, adventurer_id: u256) -> Beast;
     fn get_beast_health(self: @TContractState, adventurer_id: u256) -> u16;
     fn get_beast_type(self: @TContractState, beast_id: u8) -> u8;
     fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;

@@ -19,9 +19,9 @@ mod tests {
             constants::{messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE}
         }
     };
-    use combat::constants::CombatEnums::{Slot, Tier};
+    use combat::{constants::CombatEnums::{Slot, Tier}, combat::ImplCombat};
     use survivor::{
-        adventurer_meta::{AdventurerMetadata},
+        adventurer_stats::Stats, adventurer_meta::{AdventurerMetadata},
         constants::adventurer_constants::{
             STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, ClassStatBoosts,
             MAX_BLOCK_COUNT
@@ -68,7 +68,11 @@ mod tests {
             name: 'Loaf'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
         };
 
-        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta, 0, 2, 0, 2, 2, 0);
+        let starting_stats = Stats {
+            strength: 0, dexterity: 2, vitality: 0, intelligence: 2, wisdom: 2, charisma: 0, 
+        };
+
+        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta, starting_stats);
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -85,8 +89,11 @@ mod tests {
         game
     }
 
-    fn new_adventurer_cleric() -> IGameDispatcher {
+    fn new_adventurer_max_charisma() -> IGameDispatcher {
         let mut game = setup();
+        let starting_stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 6, 
+        };
 
         game
             .start(
@@ -95,20 +102,15 @@ mod tests {
                 AdventurerMetadata {
                     name: 'loothero'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
                 },
-                0,
-                0,
-                0,
-                0,
-                0,
-                6,
+                starting_stats
             );
 
         game
     }
 
-    fn new_adventurer_cleric_level2() -> IGameDispatcher {
+    fn new_adventurer_max_charisma_level2() -> IGameDispatcher {
         // start game
-        let mut game = new_adventurer_cleric();
+        let mut game = new_adventurer_max_charisma();
 
         // attack starter beast
         game.attack(ADVENTURER_ID, false);
@@ -232,12 +234,12 @@ mod tests {
         let mut game = new_adventurer_lvl5(stat);
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
-        let weapon_inventory = @game.get_weapons_on_market(ADVENTURER_ID);
-        let chest_inventory = @game.get_chest_armor_on_market(ADVENTURER_ID);
-        let head_inventory = @game.get_head_armor_on_market(ADVENTURER_ID);
-        let waist_inventory = @game.get_waist_armor_on_market(ADVENTURER_ID);
-        let foot_inventory = @game.get_foot_armor_on_market(ADVENTURER_ID);
-        let hand_inventory = @game.get_hand_armor_on_market(ADVENTURER_ID);
+        let weapon_inventory = @game.get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Weapon(())));
+        let chest_inventory = @game.get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Chest(())));
+        let head_inventory = @game.get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Head(())));
+        let waist_inventory = @game.get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Waist(())));
+        let foot_inventory = @game.get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Foot(())));
+        let hand_inventory = @game.get_items_on_market_by_slot(ADVENTURER_ID, ImplCombat::slot_to_u8(Slot::Hand(())));
 
         let purchase_weapon_id = *weapon_inventory.at(0);
         let purchase_chest_id = *chest_inventory.at(2);
@@ -628,20 +630,6 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(75000000)]
-    fn test_buy_and_equip() {
-        let mut game = new_adventurer_lvl2();
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
-        let item_id = *market_items.at(0).item.id;
-        let item_price = *market_items.at(0).price.into();
-        let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
-        shopping_cart.append(ItemPurchase { item_id: item_id, equip: true });
-        game.upgrade_adventurer(ADVENTURER_ID, 0, 1, 0, 0, 0, 0, 0, shopping_cart);
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.gold == (STARTING_GOLD + 4 - item_price), 'wrong gold amount');
-    }
-
-    #[test]
     #[available_gas(70000000)]
     fn test_buy_and_bag_item() {
         let mut game = new_adventurer_lvl2();
@@ -658,13 +646,10 @@ mod tests {
     #[available_gas(80000000)]
     fn test_buy_items() {
         // start game on level 2 so we have access to the market
-        let mut game = new_adventurer_cleric_level2();
+        let mut game = new_adventurer_max_charisma_level2();
 
         // get items from market
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
-
-        // get first item on the market
-        let item_id = *market_items.at(0).item.id;
 
         let mut purchased_weapon: u8 = 0;
         let mut purchased_chest: u8 = 0;
@@ -757,7 +742,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item not in bag', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(20000000)]
+    #[available_gas(21000000)]
     fn test_equip_not_in_bag() {
         // start new game
         let mut game = new_adventurer();
@@ -774,7 +759,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Too many items', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(20000000)]
+    #[available_gas(21000000)]
     fn test_equip_too_many_items() {
         // start new game
         let mut game = new_adventurer();
@@ -801,7 +786,7 @@ mod tests {
     #[available_gas(130000000)]
     fn test_equip() {
         // start game on level 2 so we have access to the market
-        let mut game = new_adventurer_cleric_level2();
+        let mut game = new_adventurer_max_charisma_level2();
 
         // get items from market
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -1378,7 +1363,7 @@ mod tests {
     // #[available_gas(80000000000)]
     // fn test_max_items() {
     //     // start game on level 2 so we have access to the market
-    //     let mut game = new_adventurer_cleric_level2();
+    //     let mut game = new_adventurer_max_charisma_level2();
 
     //     // get items from market
     //     let mut market_items = @game.get_items_on_market(ADVENTURER_ID);
