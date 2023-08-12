@@ -9,6 +9,7 @@ mod Game {
     const IDLE_PENALTY_THRESHOLD_BLOCKS: u16 = 8;
     const IDLE_DEATH_PENALTY_BLOCKS: u16 = 300;
     const TEST_ENTROPY: u64 = 12303548;
+    const MINIMUM_SCORE_FOR_PAYOUTS: u256 = 500;
     const LOOT_NAME_STORAGE_INDEX_1: u256 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
 
@@ -908,15 +909,6 @@ mod Game {
         let lords = self._lords.read();
         let genesis_block = self._genesis_block.read();
 
-        if (BLOCKS_IN_A_WEEK + genesis_block) > block_number {
-            // TODO: Update to actual Lords interface
-            // burn baby
-            // IERC20Dispatcher {
-            //     contract_address: lords
-            // }.burn_away(caller, _to_ether(COST_TO_PLAY));
-            return;
-        }
-
         let mut week = Week {
             DAO: _to_ether(WEEK_2::DAO),
             INTERFACE: _to_ether(WEEK_2::INTERFACE),
@@ -925,17 +917,31 @@ mod Game {
             THIRD_PLACE: _to_ether(WEEK_2::THIRD_PLACE)
         };
 
-        // weeks 2-4
-        if (BLOCKS_IN_A_WEEK * 4 + genesis_block) > block_number {
-            week = Week {
-                DAO: _to_ether(WEEK_4::DAO),
-                INTERFACE: _to_ether(WEEK_4::INTERFACE),
-                FIRST_PLACE: _to_ether(WEEK_4::FIRST_PLACE),
-                SECOND_PLACE: _to_ether(WEEK_4::SECOND_PLACE),
-                THIRD_PLACE: _to_ether(WEEK_4::THIRD_PLACE)
-            }
+        // if third place score is less than minimum score for payouts
+        if (self._scores.read(3) < MINIMUM_SCORE_FOR_PAYOUTS) {
+            // all rewards go to the DAO
+            // the purpose of this is to let a decent set of top scores get set before payouts begin
+            // without this, there would be an incentive to start and die immediately after contract is deployed
+            // to capture the rewards from the launch hype
+            // IERC20Dispatcher {
+            //     contract_address: lords
+            // }.transferFrom(caller, self._dao.read(), week.DAO);
+            return;
         }
 
+        // once reasonable scores have been set
+        // we start doing payouts
+
+        // for the first eight weeks, the majority go to the top three score
+        week = Week {
+            DAO: _to_ether(WEEK_4::DAO),
+            INTERFACE: _to_ether(WEEK_4::INTERFACE),
+            FIRST_PLACE: _to_ether(WEEK_4::FIRST_PLACE),
+            SECOND_PLACE: _to_ether(WEEK_4::SECOND_PLACE),
+            THIRD_PLACE: _to_ether(WEEK_4::THIRD_PLACE)
+        };
+
+        // after 8 weeks, the client providers start getting a share
         if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
             week = Week {
                 DAO: _to_ether(WEEK_8::DAO),
@@ -2971,8 +2977,8 @@ mod Game {
         self._scores.read(adventurer_id)
     }
 
-    fn _check_if_top_score(ref self: ContractState, score: u256) -> bool {
-        if score > self._scores.read(3) {
+    fn _is_top_score(self: @ContractState, score: u16) -> bool {
+        if score.into() > self._scores.read(3) {
             return true;
         }
         false
@@ -2981,11 +2987,19 @@ mod Game {
 
     // sets the scoreboard
     // we set the adventurer id in the scoreboard as we already store the owners address
-    fn _set_scoreboard(ref self: ContractState, adventurer_id: u256, score: u16) {
+    fn _update_leaderboard(ref self: ContractState, adventurer_id: u256, score: u16) {
         let second_place = self._scoreboard.read(2);
         let first_place = self._scoreboard.read(1);
 
+        let adventurer = _unpack_adventurer(@self, adventurer_id);
+        let adventurer_state = AdventurerState {
+            owner: self._owner.read(adventurer_id),
+            adventurer_id: adventurer_id,
+            adventurer: adventurer
+        };
+
         if score.into() > self._scores.read(1) {
+            __event_NewHighScore(ref self, adventurer_state, 1);
             self._scoreboard.write(3, second_place);
             self._scoreboard.write(2, first_place);
             self._scoreboard.write(1, adventurer_id);
@@ -2993,11 +3007,13 @@ mod Game {
             self._scores.write(2, self._scores.read(1));
             self._scores.write(1, score.into());
         } else if score.into() > self._scores.read(2) {
+            __event_NewHighScore(ref self, adventurer_state, 2);
             self._scoreboard.write(3, second_place);
             self._scoreboard.write(2, adventurer_id);
             self._scores.write(3, self._scores.read(2));
             self._scores.write(2, score.into());
         } else if score.into() > self._scores.read(3) {
+            __event_NewHighScore(ref self, adventurer_state, 3);
             self._scoreboard.write(3, adventurer_id);
             self._scores.write(3, score.into());
         }
@@ -3397,7 +3413,11 @@ mod Game {
         killed_by_obstacle: bool,
         killer_id: u8
     ) {
-        _set_scoreboard(ref self, adventurer_state.adventurer_id, adventurer_state.adventurer.xp);
+        if _is_top_score(@self, adventurer_state.adventurer.xp) {
+            _update_leaderboard(
+                ref self, adventurer_state.adventurer_id, adventurer_state.adventurer.xp
+            );
+        }
         self
             .emit(
                 Event::AdventurerDied(

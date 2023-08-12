@@ -459,7 +459,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Cant flee starter beast', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(23000000)]
+    #[available_gas(25000000)]
     fn test_cant_flee_starter_beast() {
         // start new game
         let mut game = new_adventurer();
@@ -552,7 +552,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(80000000)]
+    #[available_gas(85000000)]
     fn test_buy_items_without_stat_upgrade() {
         // mint adventurer and advance to level 2
         let mut game = new_adventurer_lvl2();
@@ -625,7 +625,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(70000000)]
+    #[available_gas(75000000)]
     fn test_buy_and_bag_item() {
         let mut game = new_adventurer_lvl2();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -737,7 +737,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item not in bag', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(24000000)]
+    #[available_gas(26000000)]
     fn test_equip_not_in_bag() {
         // start new game
         let mut game = new_adventurer();
@@ -754,7 +754,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Too many items', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(24000000)]
+    #[available_gas(26000000)]
     fn test_equip_too_many_items() {
         // start new game
         let mut game = new_adventurer();
@@ -1546,7 +1546,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(70000000)]
+    #[available_gas(75000000)]
     fn test_upgrade_stats() {
         // deploy and start new game
         let mut game = new_adventurer_lvl2();
