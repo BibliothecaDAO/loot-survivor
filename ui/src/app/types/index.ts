@@ -205,6 +205,14 @@ export interface UpgradeStats {
   Charisma: number;
 }
 
+export interface UpgradeSummary {
+  Stats: {
+    [key: string]: number;
+  };
+  Items: any;
+  Potions: any;
+}
+
 export type BeastType =
   | "Basilisk"
   | "Kitsune"

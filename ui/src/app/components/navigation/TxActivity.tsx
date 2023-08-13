@@ -10,6 +10,7 @@ import { processNotification } from "../../components/navigation/NotificationDis
 import useUIStore from "@/app/hooks/useUIStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
+import { NotificationBattleDisplay } from "../beast/BattleDisplay";
 import { NullAdventurer } from "@/app/types";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import {
@@ -92,7 +93,8 @@ export const TxActivity = () => {
     {
       txHash: padAddress(hash),
     },
-    txAccepted
+    txAccepted,
+    !hash
   );
 
   useCustomQuery(
@@ -101,7 +103,8 @@ export const TxActivity = () => {
     {
       txHash: padAddress(hash),
     },
-    txAccepted
+    txAccepted,
+    !hash
   );
 
   useEffect(() => {
@@ -125,28 +128,18 @@ export const TxActivity = () => {
         );
         console.log(killedByBeast || killedByPenalty);
         if (killedByBeast || killedByPenalty) {
-          if (killedByBeast) {
-            setDeathNotification(
-              type,
-              {
-                data: queryData.battlesByTxHashQuery.battles,
-                beast: notificationData.beast,
-              },
-              queryData.battlesByTxHashQuery.battles,
-              hasBeast
-            );
-          }
-          if (killedByPenalty) {
-            setDeathNotification(
-              type,
-              {
-                data: queryData.battlesByTxHashQuery.battles,
-                beast: notificationData.beast,
-              },
-              queryData.battlesByTxHashQuery.battles,
-              hasBeast
-            );
-          }
+          setDeathMessage(
+            <NotificationBattleDisplay
+              battleData={
+                queryData.battlesByTxHashQuery.battles
+                  ? queryData.battlesByTxHashQuery.battles
+                  : []
+              }
+              type={type}
+            />
+          );
+          console.log(queryData.battlesByTxHashQuery.battles);
+          showDeathDialog(true);
         }
         stopLoading({
           data: queryData.battlesByTxHashQuery.battles,

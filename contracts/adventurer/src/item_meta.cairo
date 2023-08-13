@@ -6,7 +6,10 @@ use pack::pack::{Packing, rshift_split};
 use pack::constants::pow;
 use lootitems::statistics::constants::{ItemId, ItemSuffix};
 
-use super::{adventurer::{Adventurer, IAdventurer, ImplAdventurer}, item_primitive::ItemPrimitive};
+use super::{
+    adventurer::{Adventurer, IAdventurer, ImplAdventurer}, item_primitive::ItemPrimitive,
+    adventurer_stats::Stats
+};
 use super::bag::{Bag, IBag};
 
 mod STORAGE {
@@ -316,7 +319,6 @@ impl ImplItemSpecials of IItemSpecials {
     }
 
     // @dev This function assigns a metadata ID to an item owned by an adventurer.
-    //
     // @notice It checks the metadata of each item possessed by the adventurer and the items in the bag. 
     // If the metadata of any of these items is larger than the current slot (initialized as 1), 
     // it updates the slot value with that metadata. 
@@ -329,7 +331,7 @@ impl ImplItemSpecials of IItemSpecials {
     // @param bag An instance of Bag that contains various items.
     //
     // @throws This function will throw an error if the new metadata ID exceeds the maximum storage slot.
-    fn set_metadata_id(ref self: ItemPrimitive, adventurer: Adventurer, bag: Bag, ) {
+    fn set_metadata_id(ref self: ItemPrimitive, adventurer: Adventurer, bag: Bag) {
         // adventurer starter weapon has a meta data id of 1
         let mut slot = 1;
 
@@ -391,13 +393,50 @@ impl ImplItemSpecials of IItemSpecials {
             slot = bag.item_11.metadata;
         }
 
-        // ensure we don't assign an item a meta data id
-        // that exceeds our max storage slot
+        // if the slot is less than the max storage slots, assign the new metadata id
         if (slot + 1 <= STORAGE::MAX_TOTAL_STORAGE_SPECIALS) {
             self.metadata = slot + 1;
+        // otherwise we have used all the storage slots and need to reuse one from a dropped item
+        } else if (adventurer.weapon.id == 0 && adventurer.weapon.metadata != 0) {
+            self.metadata = adventurer.weapon.metadata;
+        } else if (adventurer.head.id == 0 && adventurer.head.metadata != 0) {
+            self.metadata = adventurer.head.metadata;
+        } else if (adventurer.chest.id == 0 && adventurer.chest.metadata != 0) {
+            self.metadata = adventurer.chest.metadata;
+        } else if (adventurer.hand.id == 0 && adventurer.hand.metadata != 0) {
+            self.metadata = adventurer.hand.metadata;
+        } else if (adventurer.foot.id == 0 && adventurer.foot.metadata != 0) {
+            self.metadata = adventurer.foot.metadata;
+        } else if (adventurer.ring.id == 0 && adventurer.ring.metadata != 0) {
+            self.metadata = adventurer.ring.metadata;
+        } else if (adventurer.neck.id == 0 && adventurer.neck.metadata != 0) {
+            self.metadata = adventurer.neck.metadata;
+        } else if (adventurer.waist.id == 0 && adventurer.waist.metadata != 0) {
+            self.metadata = adventurer.waist.metadata;
+        } else if (bag.item_1.id == 0 && bag.item_1.metadata != 0) {
+            self.metadata = bag.item_1.metadata;
+        } else if (bag.item_2.id == 0 && bag.item_2.metadata != 0) {
+            self.metadata = bag.item_2.metadata;
+        } else if (bag.item_3.id == 0 && bag.item_3.metadata != 0) {
+            self.metadata = bag.item_3.metadata;
+        } else if (bag.item_4.id == 0 && bag.item_4.metadata != 0) {
+            self.metadata = bag.item_4.metadata;
+        } else if (bag.item_5.id == 0 && bag.item_5.metadata != 0) {
+            self.metadata = bag.item_5.metadata;
+        } else if (bag.item_6.id == 0 && bag.item_6.metadata != 0) {
+            self.metadata = bag.item_6.metadata;
+        } else if (bag.item_7.id == 0 && bag.item_7.metadata != 0) {
+            self.metadata = bag.item_7.metadata;
+        } else if (bag.item_8.id == 0 && bag.item_8.metadata != 0) {
+            self.metadata = bag.item_8.metadata;
+        } else if (bag.item_9.id == 0 && bag.item_9.metadata != 0) {
+            self.metadata = bag.item_9.metadata;
+        } else if (bag.item_10.id == 0 && bag.item_10.metadata != 0) {
+            self.metadata = bag.item_10.metadata;
+        } else if (bag.item_11.id == 0 && bag.item_11.metadata != 0) {
+            self.metadata = bag.item_11.metadata;
         } else {
-            // if we exceeded max storage, panic
-            panic_with_felt252('exceeded metadata storage slots');
+            panic_with_felt252('out of metadata storage slots');
         }
     }
 }
@@ -453,10 +492,14 @@ fn test_item_meta_packing() {
 }
 
 #[test]
-#[available_gas(3000000)]
+#[available_gas(4000000)]
 fn test_set_metadata_id() {
     // start test with a new adventurer wielding a wand
-    let mut adventurer = ImplAdventurer::new(12,1,1,1,1,1,1,1);
+    let mut adventurer = ImplAdventurer::new(
+        12,
+        1,
+        Stats { strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,  }
+    );
 
     // assert adventurer starter weapon has meta data id 1
     assert(adventurer.weapon.metadata == 1, 'advntr wpn meta data shld be 1');
@@ -488,7 +531,7 @@ fn test_set_metadata_id() {
             id: 0, xp: 0, metadata: 0, 
             }, item_11: ItemPrimitive {
             id: 0, xp: 0, metadata: 0, 
-        },
+        }, mutated: false
     };
 
     // stage a bunch of gear

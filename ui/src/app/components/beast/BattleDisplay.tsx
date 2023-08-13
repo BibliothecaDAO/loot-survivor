@@ -171,6 +171,7 @@ export const NotificationBattleDisplay = ({
   const isArray = Array.isArray(battleData);
   const handleBeastInfo = () => {
     if (isArray) {
+      // This can be element in the array as they all contain beast details
       const beastName = processBeastName(
         battleData[0]?.beast ?? "",
         battleData[0]?.special2 ?? "",

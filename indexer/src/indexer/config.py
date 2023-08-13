@@ -275,7 +275,7 @@ class Config:
         self.CLASSES = {
             1: "Cleric",
             2: "Scout",
-            3: "Hunter",
+            3: "Merchant",
             4: "Warrior",
         }
 

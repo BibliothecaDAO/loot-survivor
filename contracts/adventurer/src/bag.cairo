@@ -1,10 +1,10 @@
 use traits::{TryInto, Into};
 use option::OptionTrait;
-
-use pack::pack::{Packing, rshift_split};
-use pack::constants::pow;
-
-use super::{adventurer::{Adventurer, ImplAdventurer, IAdventurer}, item_primitive::ItemPrimitive};
+use pack::{pack::{Packing, rshift_split}, constants::pow};
+use super::{
+    adventurer::{Adventurer, ImplAdventurer, IAdventurer},
+    item_primitive::{ItemPrimitive, ImplItemPrimitive}, item_meta::{ImplItemSpecials, IItemSpecials}
+};
 use lootitems::statistics::constants::ItemId;
 
 // Bag is used for storing gear not equipped to the adventurer
@@ -23,6 +23,7 @@ struct Bag {
     item_9: ItemPrimitive,
     item_10: ItemPrimitive,
     item_11: ItemPrimitive,
+    mutated: bool,
 }
 
 impl BagPacking of Packing<Bag> {
@@ -68,6 +69,7 @@ impl BagPacking of Packing<Bag> {
             item_9: Packing::unpack(item_9.try_into().expect('unpack Bag item_9')),
             item_10: Packing::unpack(item_10.try_into().expect('unpack Bag item_10')),
             item_11: Packing::unpack(item_11.try_into().expect('unpack Bag item_11')),
+            mutated: false
         }
     }
 
@@ -112,115 +114,108 @@ impl ImplBag of IBag {
         }
     }
 
+    // @notice Adds a new item to a given adventurer's bag.
+    // @param self The reference to the Bag instance.
+    // @param adventurer The adventurer instance representing the owner of the bag.
+    // @param item_id The unique identifier for the item.
+    // @dev This function constructs a new item with the given item_id, sets its metadata using the Adventurer and Bag reference, and adds the item to the bag.
+    fn add_new_item(ref self: Bag, adventurer: Adventurer, item_id: u8) {
+        let mut item = ImplItemPrimitive::new(item_id);
+        item.set_metadata_id(adventurer, self);
+        self.add_item(item);
+    }
+
     // @notice Adds an item to the bag
     // @dev If the bag is full, it throws an error
     // @param self The instance of the Bag
     // @param item The item to be added to the bag
     fn add_item(ref self: Bag, item: ItemPrimitive) {
-        // assert bag is not full
-        assert(self.is_full() == false, 'Bag is full');
-
         // assert item id is not 0
         assert(item.id != 0, 'Item ID cannot be 0');
 
-        // get next open slot in bag
-        let open_slot = self.get_open_slot();
-
-        // assert the slot is within expected range
-        assert(open_slot > 0 && open_slot <= 11, 'slot out of bounds');
-
-        // add item to bag
-        if open_slot == 1 {
+        // add item to next available slot
+        if self.item_1.id == 0 {
             self.item_1 = item;
-        } else if open_slot == 2 {
+        } else if self.item_2.id == 0 {
             self.item_2 = item;
-        } else if open_slot == 3 {
+        } else if self.item_3.id == 0 {
             self.item_3 = item;
-        } else if open_slot == 4 {
+        } else if self.item_4.id == 0 {
             self.item_4 = item;
-        } else if open_slot == 5 {
+        } else if self.item_5.id == 0 {
             self.item_5 = item;
-        } else if open_slot == 6 {
+        } else if self.item_6.id == 0 {
             self.item_6 = item;
-        } else if open_slot == 7 {
+        } else if self.item_7.id == 0 {
             self.item_7 = item;
-        } else if open_slot == 8 {
+        } else if self.item_8.id == 0 {
             self.item_8 = item;
-        } else if open_slot == 9 {
+        } else if self.item_9.id == 0 {
             self.item_9 = item;
-        } else if open_slot == 10 {
+        } else if self.item_10.id == 0 {
             self.item_10 = item;
-        } else if open_slot == 11 {
+        } else if self.item_11.id == 0 {
             self.item_11 = item;
+        } else {
+            panic_with_felt252('Bag is full')
         }
+
+        // flag bag as being mutated
+        self.mutated = true;
     }
 
     // @notice Removes an item from the bag by its id
-    // @dev If the item with the specified id is not in the bag, it throws an error
+    // @dev To remove an item we set it's id and xp to zero
+    // @dev We intentionally leave the previous metadata index in place
+    // @dev If the provided item id does not exist in the bag, this function throws an error
     // @param self The instance of the Bag
     // @param item_id The id of the item to be removed
-    fn remove_item(ref self: Bag, item_id: u8) {
-        assert(self.contains(item_id), 'item not in bag');
+    // @return The item that was removed from the bag
+    fn remove_item(ref self: Bag, item_id: u8) -> ItemPrimitive {
+        let removed_item = self.get_item(item_id);
 
-        // create blank empty
-        let blank_item = ItemPrimitive { id: 0, xp: 0, metadata: 0 };
         if self.item_1.id == item_id {
-            self.item_1 = blank_item;
+            self.item_1.id = 0;
+            self.item_1.xp = 0;
         } else if self.item_2.id == item_id {
-            self.item_2 = blank_item;
+            self.item_2.id = 0;
+            self.item_2.xp = 0;
         } else if self.item_3.id == item_id {
-            self.item_3 = blank_item;
+            self.item_3.id = 0;
+            self.item_3.xp = 0;
         } else if self.item_4.id == item_id {
-            self.item_4 = blank_item;
+            self.item_4.id = 0;
+            self.item_4.xp = 0;
         } else if self.item_5.id == item_id {
-            self.item_5 = blank_item;
+            self.item_5.id = 0;
+            self.item_5.xp = 0;
         } else if self.item_6.id == item_id {
-            self.item_6 = blank_item;
+            self.item_6.id = 0;
+            self.item_6.xp = 0;
         } else if self.item_7.id == item_id {
-            self.item_7 = blank_item;
+            self.item_7.id = 0;
+            self.item_7.xp = 0;
         } else if self.item_8.id == item_id {
-            self.item_8 = blank_item;
+            self.item_8.id = 0;
+            self.item_8.xp = 0;
         } else if self.item_9.id == item_id {
-            self.item_9 = blank_item;
+            self.item_9.id = 0;
+            self.item_9.xp = 0;
         } else if self.item_10.id == item_id {
-            self.item_10 = blank_item;
+            self.item_10.id = 0;
+            self.item_10.xp = 0;
         } else if self.item_11.id == item_id {
-            self.item_11 = blank_item;
+            self.item_11.id = 0;
+            self.item_11.xp = 0;
         } else {
             panic_with_felt252('item not in bag')
         }
-    }
 
-    // @notice Gets an open slot in the bag
-    // @dev If the bag is full, it throws an error
-    // @param self The instance of the Bag
-    // @return The index of an open slot in the bag or 0 if no slot is available
-    fn get_open_slot(self: Bag) -> u8 {
-        if self.item_1.id == 0 {
-            1
-        } else if self.item_2.id == 0 {
-            2
-        } else if self.item_3.id == 0 {
-            3
-        } else if self.item_4.id == 0 {
-            4
-        } else if self.item_5.id == 0 {
-            5
-        } else if self.item_6.id == 0 {
-            6
-        } else if self.item_7.id == 0 {
-            7
-        } else if self.item_8.id == 0 {
-            8
-        } else if self.item_9.id == 0 {
-            9
-        } else if self.item_10.id == 0 {
-            10
-        } else if self.item_11.id == 0 {
-            11
-        } else {
-            0
-        }
+        // flag bag as being mutated
+        self.mutated = true;
+
+        // return the removed item
+        removed_item
     }
 
     // @notice Checks if the bag is full
@@ -315,8 +310,8 @@ fn test_contains() {
             }, item_10: ItemPrimitive {
             id: 10, xp: 511, metadata: 10
             }, item_11: ItemPrimitive {
-            id: 255, xp: 511, metadata: 11
-        }
+            id: 255, xp: 511, metadata: 11, 
+        }, mutated: false
     };
 
     assert(bag.contains(0) == true, 'Item 0 should be in bag');
@@ -334,7 +329,7 @@ fn test_contains() {
 }
 
 #[test]
-#[available_gas(5000000)]
+#[available_gas(2500000)]
 fn test_pack_bag() {
     let mut bag = Bag {
         item_1: ItemPrimitive {
@@ -359,7 +354,7 @@ fn test_pack_bag() {
             id: 127, xp: 511, metadata: 31
             }, item_11: ItemPrimitive {
             id: 127, xp: 511, metadata: 31
-        }
+        }, mutated: false,
     };
 
     let packed_bag: Bag = Packing::unpack(bag.pack());
@@ -411,7 +406,7 @@ fn test_pack_bag() {
 
 #[test]
 #[should_panic(expected: ('Item ID cannot be 0', ))]
-#[available_gas(1500000)]
+#[available_gas(20000)]
 fn test_add_item_blank_item() {
     // start with full bag
     let mut bag = Bag {
@@ -437,18 +432,18 @@ fn test_add_item_blank_item() {
             id: 10, xp: 1, metadata: 10
             }, item_11: ItemPrimitive {
             id: 0, xp: 0, metadata: 0
-        },
+        }, mutated: false
     };
 
     // try adding an empty item to the bag
     // this should panic with 'Item ID cannot be 0'
     // which this test is annotated to expect
-    bag.add_item(ItemPrimitive { id: 0, xp: 0, metadata: 0 });
+    bag.add_item(ItemPrimitive { id: 0, xp: 1, metadata: 1 });
 }
 
 #[test]
 #[should_panic(expected: ('Bag is full', ))]
-#[available_gas(1500000)]
+#[available_gas(20000)]
 fn test_add_item_full_bag() {
     // start with full bag
     let mut bag = Bag {
@@ -474,7 +469,7 @@ fn test_add_item_full_bag() {
             id: 10, xp: 1, metadata: 10
             }, item_11: ItemPrimitive {
             id: 11, xp: 1, metadata: 11
-        },
+        }, mutated: false
     };
 
     // try adding an item to a full bag
@@ -484,7 +479,7 @@ fn test_add_item_full_bag() {
 }
 
 #[test]
-#[available_gas(1500000)]
+#[available_gas(250000)]
 fn test_add_item() {
     // start with empty bag
     let mut bag = Bag {
@@ -510,7 +505,7 @@ fn test_add_item() {
             id: 0, xp: 0, metadata: 0
             }, item_11: ItemPrimitive {
             id: 0, xp: 0, metadata: 0
-        },
+        }, mutated: false
     };
 
     // initialize items
@@ -554,7 +549,7 @@ fn test_add_item() {
 }
 
 #[test]
-#[available_gas(200000)]
+#[available_gas(150000)]
 fn test_is_full() {
     // start with full bag
     let mut bag = Bag {
@@ -580,7 +575,7 @@ fn test_is_full() {
             id: 13, xp: 0, metadata: 0
             }, item_11: ItemPrimitive {
             id: 14, xp: 0, metadata: 0
-        },
+        }, mutated: false
     };
 
     // assert bag is full
@@ -628,6 +623,7 @@ fn test_get_item_not_in_bag() {
         item_9: item_9,
         item_10: item_10,
         item_11: item_11,
+        mutated: false,
     };
 
     // try to get an item that is not in bag
@@ -664,6 +660,7 @@ fn test_get_item() {
         item_9: item_9,
         item_10: item_10,
         item_11: item_11,
+        mutated: false,
     };
 
     let item1_from_bag = bag.get_item(11);
@@ -701,7 +698,7 @@ fn test_get_item() {
 }
 
 #[test]
-#[available_gas(35000)]
+#[available_gas(30000)]
 fn test_remove_item() {
     let mut bag = Bag {
         item_1: ItemPrimitive {
@@ -726,21 +723,22 @@ fn test_remove_item() {
             id: 10, xp: 0, metadata: 0
             }, item_11: ItemPrimitive {
             id: 11, xp: 0, metadata: 0
-        },
+        }, mutated: false
     };
 
     // remove item from bag
-    bag.remove_item(6);
+    let removed_item = bag.remove_item(6);
 
     // verify it has been removed
     assert(bag.item_6.id == 0, 'id should be 0');
     assert(bag.item_6.xp == 0, 'xp should be 0');
     assert(bag.item_6.metadata == 0, 'metadata should be 0');
+    assert(removed_item.id == 6, 'removed item is wrong');
 }
 
 #[test]
-#[should_panic(expected: ('item not in bag', ))]
-#[available_gas(35000)]
+#[should_panic(expected: ('Item not in bag', ))]
+#[available_gas(30000)]
 fn test_remove_item_not_in_bag() {
     // initialize bag
     let mut bag = Bag {
@@ -766,7 +764,7 @@ fn test_remove_item_not_in_bag() {
             id: 13, xp: 0, metadata: 0
             }, item_11: ItemPrimitive {
             id: 14, xp: 0, metadata: 0
-        },
+        }, mutated: false
     };
 
     // try to remove an item not in the bag

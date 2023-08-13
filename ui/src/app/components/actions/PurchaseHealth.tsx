@@ -19,6 +19,7 @@ interface PurchaseHealthProps {
     potions?: number,
     items?: any[]
   ) => void;
+  totalVitality: number;
 }
 
 const PurchaseHealth = ({
@@ -27,6 +28,7 @@ const PurchaseHealth = ({
   setPotionAmount,
   totalCharisma,
   upgradeHandler,
+  totalVitality,
 }: PurchaseHealthProps) => {
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);

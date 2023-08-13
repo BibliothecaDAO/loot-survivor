@@ -14,5 +14,5 @@
 		"CAIRO_COMPILER_DIR":"~/.cairo/target/release/",
 		"CAIRO_COMPILER_ARGS":"--add-pythonic-hints"
     },
-	"postCreateCommand":"curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v 0.5.1 && curl https://pyenv.run | bash &&  echo 'export PATH=\"$HOME/.pyenv/bin:$PATH\"' >> ~/.bashrc && echo 'eval \"$(pyenv init -)\"' >> ~/.bashrc && echo 'eval \"$(pyenv virtualenv-init -)\"' >> ~/.bashrc && $HOME/.pyenv/bin/pyenv install 3.9.0 && $HOME/.pyenv/bin/pyenv virtualenv 3.9.0 cairo_venv && echo 'pyenv activate cairo_venv' >> ~/.bashrc && echo 'pip install cairo-lang 2> /dev/null' >> ~/.bashrc"
+	"postCreateCommand":"curl --proto '=https' --tlsv1.2 -sSf https://docs.swmansion.com/scarb/install.sh | bash -s -- -v 0.6.0 && curl https://pyenv.run | bash &&  echo 'export PATH=\"$HOME/.pyenv/bin:$PATH\"' >> ~/.bashrc && echo 'eval \"$(pyenv init -)\"' >> ~/.bashrc && echo 'eval \"$(pyenv virtualenv-init -)\"' >> ~/.bashrc && $HOME/.pyenv/bin/pyenv install 3.9.0 && $HOME/.pyenv/bin/pyenv virtualenv 3.9.0 cairo_venv && echo 'pyenv activate cairo_venv' >> ~/.bashrc && echo 'pip install cairo-lang 2> /dev/null' >> ~/.bashrc"
 }

@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+  useRef,
+  RefObject,
+} from "react";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import { Button } from "../buttons/Button";
@@ -24,9 +30,13 @@ import {
   ZeroUpgrade,
 } from "../../types";
 import { GameData } from "../GameData";
-import { getKeyFromValue } from "../../lib/utils";
+import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 
-const TransactionCart: React.FC = () => {
+export interface TransactionCartProps {
+  buttonRef: RefObject<HTMLElement>;
+}
+
+const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
   const removeFromCalls = useTransactionCartStore(
@@ -55,13 +65,11 @@ const TransactionCart: React.FC = () => {
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const upgradeStats = useUIStore((state) => state.upgradeStats);
   const setUpgradeStats = useUIStore((state) => state.setUpgradeStats);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
 
   const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
-    : [];
-
-  const ownedItems = data.itemsByAdventurerQuery
-    ? data.itemsByAdventurerQuery.items
     : [];
 
   const gameData = new GameData();
@@ -183,7 +191,10 @@ const TransactionCart: React.FC = () => {
   return (
     <>
       {displayCart ? (
-        <div className="absolute right-[50px] w-[300px] h-[400px] sm:right-[280px] top-20 sm:top-32 z-10 sm:w-[400px] sm:h-[400px] p-3 bg-terminal-black border border-terminal-green">
+        <div
+          ref={wrapperRef}
+          className="absolute right-[50px] w-[300px] h-[400px] sm:right-[280px] top-20 sm:top-32 z-10 sm:w-[400px] sm:h-[400px] p-3 bg-terminal-black border border-terminal-green"
+        >
           <div className="flex flex-row justify-between">
             <p className="text-2xl">TRANSACTIONS</p>
             <button
