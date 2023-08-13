@@ -425,6 +425,7 @@ const getLatestMarketItems = gql`
   query get_latest_market_items($adventurerId: FeltValue) {
     items(
       where: { adventurerId: { eq: $adventurerId }, isAvailable: { eq: true } }
+      limit: $limit
     ) {
       ...ItemFields
     }
