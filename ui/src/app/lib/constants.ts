@@ -34,7 +34,7 @@ export const contracts = {
       "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
   },
   goerli: {
-    game: "0x00dbbdb5c2a57e325fcc6148b9a6362cd77d6bfe0992dc0f891b25bd5e979266",
+    game: "0x01d38c077091c66006b3cb4b02062ec11c8f07e8733603d4f87ce5c3d87f9253",
     lords_erc20_mintable:
       "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
   },
@@ -44,4 +44,9 @@ export const appUrl = "https://beta-survivor.realms.world/";
 
 // ---- CONTRACT PARAMS
 // Penalty time is 8 blocks, where each block is ~ 3 minutes
-export const penaltyTime = 8 * (3 * 60);
+export const penaltyTime = 16 * (3 * 60);
+export const itemCharismaDiscount = 1;
+export const itemBasePrice = 3;
+export const potionCharismaDiscount = 2;
+export const potionBasePrice = 2;
+export const idleDeathPenaltyBlocks = 300;

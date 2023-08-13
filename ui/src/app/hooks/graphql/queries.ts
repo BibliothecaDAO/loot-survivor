@@ -70,17 +70,15 @@ const BATTLES_FRAGMENT = `
 const ITEM_FIELDS = `
   item
   adventurerId
-  cost
   ownerAddress
   owner
   equipped
-  createdTime
   purchasedTime
   special1
   special2
   special3
   xp
-  lastUpdatedTime
+  isAvailable
   timestamp
 `;
 
@@ -140,6 +138,22 @@ const BEAST_FIELDS = `
 const BEASTS_FRAGMENT = `
   fragment BeastFields on Beast {
     ${BEAST_FIELDS}
+  }
+`;
+
+const SCORE_FIELDS = `
+  adventurerId
+  owner
+  rank
+  xp
+  txHash
+  blockTime
+  timestamp
+`;
+
+const SCORES_FRAGMENT = `
+  fragment ScoreFields on Score {
+    ${SCORE_FIELDS}
   }
 `;
 
@@ -280,6 +294,15 @@ const getAdventurerByXP = gql`
   }
 `;
 
+const getDeadAdventurerByXP = gql`
+  ${ADVENTURERS_FRAGMENT}
+  query get_adventurer_by_xp {
+    adventurers(orderBy: { xp: { desc: true } }, limit: 10000000) {
+      ...AdventurerFields
+    }
+  }
+`;
+
 const getAdventurersByXPPaginated = gql`
   ${ADVENTURERS_FRAGMENT}
   query get_adventurer_by_xp_paginated($skip: Int) {
@@ -399,11 +422,9 @@ const getItemsByTokenId = gql`
 
 const getLatestMarketItems = gql`
   ${ITEMS_FRAGMENT}
-  query get_latest_market_items($adventurerId: FeltValue, $limit: Int) {
+  query get_latest_market_items($adventurerId: FeltValue) {
     items(
-      where: { adventurerId: { eq: $adventurerId } }
-      limit: $limit
-      orderBy: { createdTime: { desc: true } }
+      where: { adventurerId: { eq: $adventurerId }, isAvailable: { eq: true } }
     ) {
       ...ItemFields
     }
@@ -432,13 +453,10 @@ const getItemsByOwner = gql`
 `;
 
 const getTopScores = gql`
+  ${SCORES_FRAGMENT}
   query get_top_scores {
-    scores(orderBy: { score: { desc: true } }, limit: 10) {
-      address
-      adventurerId
-      rank
-      scoreTime
-      txHash
+    scores(orderBy: { xp: { desc: true } }, limit: 10000000) {
+      ...ScoreFields
     }
   }
 `;

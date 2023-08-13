@@ -12,16 +12,12 @@ from starknet_py.contract import ContractFunction
 from apibara.starknet.proto.types_pb2 import FieldElement
 
 from typing import List
+from itertools import zip_longest
 from indexer.config import Config
 from indexer.decoder import (
     decode_start_game_event,
-    decode_stat_upgrades_available_event,
-    decode_strength_increased_event,
-    decode_dexterity_increased_event,
-    decode_vitality_increased_event,
-    decode_intelligence_increased_event,
-    decode_wisdom_increased_event,
-    decode_charisma_increased_event,
+    decode_upgrade_available_event,
+    decode_adventurer_upgrade_event,
     decode_discover_health_event,
     decode_discover_gold_event,
     decode_discover_xp_event,
@@ -34,17 +30,17 @@ from indexer.decoder import (
     decode_slayed_beast_event,
     decode_flee_failed_event,
     decode_flee_succeeded_event,
-    decode_purchased_item_event,
-    decode_equipped_item_event,
-    decode_dropped_item_event,
+    decode_purchased_items_event,
+    decode_purchased_potions_event,
+    decode_equipped_items_event,
+    decode_dropped_items_event,
     decode_greatness_increased_event,
     decode_item_special_unlocked_event,
-    decode_purchased_potion_event,
     decode_new_high_score_event,
     decode_adventurer_died_event,
     decode_adventurer_leveled_up_event,
     decode_new_items_available_event,
-    decode_idle_damage_penalty_event,
+    decode_idle_death_penalty_event,
 )
 from indexer.utils import (
     felt_to_str,
@@ -313,22 +309,65 @@ async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
     )
 
 
-# async def update_beast_health(info, beast_health):
-#     beast = await info.storage.find_one(
-#         "beasts",
-#         {
-#             "item": check_exists_int(item_id),
-#             "adventurerId": check_exists_int(adventurer_id),
-#         },
-#     )
-#     await info.storage.find_one_and_update(
-#         "beasts",
-#         {"id": check_exists_int(unequipped_item)},
-#         {
-#             "$set": {"equippedAdventurerId": check_exists_int(0)},
-#             "lastUpdatedTime": time,
-#         },
-#     )
+async def create_base_items(info, adventurer_state, item_id):
+    for i in range(1, 102):
+        await info.storage.insert_one(
+            "items",
+            {
+                "item": check_exists_int(i),
+                "adventurerId": check_exists_int(adventurer_state["adventurer_id"]),
+                "owner": False,
+                "equipped": False,
+                "ownerAddress": check_exists_int(adventurer_state["owner"]),
+                "xp": encode_int_as_bytes(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
+                "isAvailable": False,
+                "purchasedTime": check_exists_int(0),
+                "timestamp": datetime.now(),
+            },
+        )
+    await info.storage.find_one_and_update(
+        "items",
+        {
+            "item": check_exists_int(item_id),
+            "adventurerId": check_exists_int(adventurer_state["adventurer_id"]),
+        },
+        {
+            "$set": {
+                "item": check_exists_int(item_id),
+                "adventurerId": check_exists_int(adventurer_state["adventurer_id"]),
+                "owner": True,
+                "equipped": True,
+                "ownerAddress": check_exists_int(adventurer_state["owner"]),
+                "xp": encode_int_as_bytes(0),
+                "cost": encode_int_as_bytes(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
+                "isAvailable": False,
+                "timestamp": datetime.now(),
+            }
+        },
+    )
+
+
+async def reset_item_availability(info, adventurer_state):
+    for i in range(1, 102):
+        await info.storage.find_one_and_update(
+            "items",
+            {
+                "item": check_exists_int(i),
+                "adventurerId": check_exists_int(adventurer_state["adventurer_id"]),
+            },
+            {
+                "$set": {
+                    "isAvailable": False,
+                    "timestamp": datetime.now(),
+                }
+            },
+        )
 
 
 class LootSurvivorIndexer(StarkNetIndexer):
@@ -356,12 +395,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
 
         for survivor_event in [
             "StartGame",
-            "StrengthIncreased",
-            "DexterityIncreased",
-            "VitalityIncreased",
-            "IntelligenceIncreased",
-            "WisdomIncreased",
-            "CharismaIncreased",
+            "AdventurerUpgraded",
             "DiscoveredHealth",
             "DiscoveredGold",
             "DiscoveredXP",
@@ -374,12 +408,12 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "SlayedBeast",
             "FleeFailed",
             "FleeSucceeded",
-            "PurchasedItem",
-            "EquippedItem",
-            "DroppedItem",
+            "PurchasedItems",
+            "PurchasedPotions",
+            "EquippedItems",
+            "DroppedItems",
             "GreatnessIncreased",
             "ItemSpecialUnlocked",
-            "PurchasedPotion",
             "NewHighScore",
             "AdventurerDied",
             "AdventurerLeveledUp",
@@ -405,12 +439,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
 
             await {
                 "StartGame": self.start_game,
-                "StrengthIncreased": self.stat_upgrade,
-                "DexterityIncreased": self.stat_upgrade,
-                "VitalityIncreased": self.stat_upgrade,
-                "IntelligenceIncreased": self.stat_upgrade,
-                "WisdomIncreased": self.stat_upgrade,
-                "CharismaIncreased": self.stat_upgrade,
+                "AdventurerUpgraded": self.upgrade,
                 "DiscoveredHealth": self.discover_health,
                 "DiscoveredGold": self.discover_gold,
                 "DiscoveredXP": self.discover_xp,
@@ -423,17 +452,17 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "SlayedBeast": self.slayed_beast,
                 "FleeFailed": self.flee_failed,
                 "FleeSucceeded": self.flee_succeeded,
-                "PurchasedItem": self.purchased_item,
-                "EquippedItem": self.equipped_item,
-                "DroppedItem": self.dropped_item,
+                "PurchasedItems": self.purchased_items,
+                "PurchasedPotions": self.purchased_potions,
+                "EquippedItems": self.equipped_items,
+                "DroppedItems": self.dropped_items,
                 "GreatnessIncreased": self.greatness_increased,
                 "ItemSpecialUnlocked": self.item_special_unlocked,
-                "PurchasedPotion": self.purchased_potion,
                 "NewHighScore": self.new_high_score,
                 "AdventurerDied": self.adventurer_died,
                 "AdventurerLeveledUp": self.adventurer_leveled_up,
                 "NewItemsAvailable": self.new_items_available,
-                "IdleDamagePenalty": self.idle_damage_penalty,
+                "IdleDeathPenalty": self.idle_death_penalty,
             }[event_name](
                 info,
                 block_time,
@@ -503,23 +532,9 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "timestamp": datetime.now(),
         }
         await info.storage.insert_one("adventurers", start_game_doc)
-        start_item_doc = {
-            "item": check_exists_int(sg.adventurer_state["adventurer"]["weapon"]["id"]),
-            "adventurerId": check_exists_int(sg.adventurer_state["adventurer_id"]),
-            "owner": True,
-            "equipped": True,
-            "ownerAddress": check_exists_int(sg.adventurer_state["owner"]),
-            "xp": encode_int_as_bytes(0),
-            "cost": encode_int_as_bytes(0),
-            "special1": check_exists_int(0),
-            "special2": check_exists_int(0),
-            "special3": check_exists_int(0),
-            "createdTime": datetime.now(),
-            "purchasedTime": check_exists_int(0),
-            "lastUpdatedTime": block_time,
-            "timestamp": datetime.now(),
-        }
-        await info.storage.insert_one("items", start_item_doc)
+        await create_base_items(
+            info, sg.adventurer_state, sg.adventurer_state["adventurer"]["weapon"]["id"]
+        )
         print(
             "- [start game]",
             sg.adventurer_state["adventurer_id"],
@@ -527,7 +542,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             hex(sg.adventurer_state["owner"]),
         )
 
-    async def stat_upgrade(
+    async def upgrade(
         self,
         info: Info,
         block_time: datetime,
@@ -535,9 +550,68 @@ class LootSurvivorIndexer(StarkNetIndexer):
         tx_hash: str,
         data,
     ):
-        su = decode_strength_increased_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, su.adventurer_state, block_time)
-        print("- [stat upgrade]", su.adventurer_state["adventurer_id"])
+        u = decode_adventurer_upgrade_event.deserialize([felt.to_int(i) for i in data])
+        await update_adventurer_helper(
+            info, u.adventurer_state_with_bag["adventurer_state"], block_time
+        )
+        await reset_item_availability(
+            info, u.adventurer_state_with_bag["adventurer_state"]
+        )
+        print(
+            "- [adventurer upgrade]",
+            u.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+        )
+
+    async def purchased_items(
+        self,
+        info: Info,
+        block_time: datetime,
+        _: FieldElement,
+        tx_hash: str,
+        data,
+    ):
+        pi = decode_purchased_items_event.deserialize([felt.to_int(i) for i in data])
+        for item in pi.purchases:
+            purchased_item_doc = {
+                "owner": True,
+                "ownerAddress": check_exists_int(
+                    pi.adventurer_state_with_bag["adventurer_state"]["owner"]
+                ),
+                "purchasedTime": block_time,
+                "timestamp": datetime.now(),
+            }
+            await info.storage.find_one_and_update(
+                "items",
+                {
+                    "item": check_exists_int(item["item"]["id"]),
+                    "adventurerId": check_exists_int(
+                        pi.adventurer_state_with_bag["adventurer_state"][
+                            "adventurer_id"
+                        ]
+                    ),
+                },
+                {
+                    "$set": purchased_item_doc,
+                },
+            )
+        print(
+            "- [purchased items]",
+            pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+        )
+
+    async def purchased_potions(
+        self,
+        info: Info,
+        block_time: datetime,
+        _: FieldElement,
+        tx_hash: str,
+        data,
+    ):
+        pp = decode_purchased_potions_event.deserialize([felt.to_int(i) for i in data])
+        print(
+            "- [purchased potions]",
+            pp.adventurer_state["adventurer_id"],
+        )
 
     async def discover_health(
         self,
@@ -1269,7 +1343,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         except StopIteration:
             print("No documents found in beast_discovery")
 
-    async def purchased_item(
+    async def equipped_items(
         self,
         info: Info,
         block_time: datetime,
@@ -1277,98 +1351,23 @@ class LootSurvivorIndexer(StarkNetIndexer):
         tx_hash: str,
         data: List[FieldElement],
     ):
-        pi = decode_purchased_item_event.deserialize([felt.to_int(i) for i in data])
-        purchased_item_doc = {
-            "owner": True,
-            "equipped": True if pi.equipped else False,
-            "ownerAddress": check_exists_int(
-                pi.adventurer_state_with_bag["adventurer_state"]["owner"]
-            ),
-            "cost": encode_int_as_bytes(pi.cost),
-            "purchasedTime": block_time,
-            "lastUpdatedTime": block_time,
-            "timestamp": datetime.now(),
-        }
-        # Get the most recently created item so it can be updated
-        try:
-            item = await info.storage.find(
-                "items",
-                {
-                    "item": check_exists_int(
-                        pi.item_id,
-                    ),
-                    "adventurerId": check_exists_int(
-                        pi.adventurer_state_with_bag["adventurer_state"][
-                            "adventurer_id"
-                        ]
-                    ),
-                },
-                sort={"createdTime": -1},
-                limit=1,
-            )
-            item_document = next(item)
-            await info.storage.find_one_and_update(
-                "items",
-                {
-                    "item": check_exists_int(pi.item_id),
-                    "adventurerId": check_exists_int(
-                        pi.adventurer_state_with_bag["adventurer_state"][
-                            "adventurer_id"
-                        ]
-                    ),
-                    "lastUpdatedTime": item_document["lastUpdatedTime"],
-                },
-                {"$set": purchased_item_doc},
-            )
-            await update_adventurer_helper(
-                info, pi.adventurer_state_with_bag["adventurer_state"], block_time
-            )
-            await update_adventurer_bag(
-                info,
-                pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-                pi.adventurer_state_with_bag["bag"],
-            )
-            if pi.equipped:
-                await swap_item(
-                    info,
-                    pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-                    pi.item_id,
-                    pi.unequipped_item_id,
-                    block_time,
-                )
-            print(
-                "- [purchased item]",
-                pi.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-                "->",
-                pi.item_id,
-                "->",
-                pi.cost,
-            )
-        except StopIteration:
-            print("No documents found in item")
-
-    async def equipped_item(
-        self,
-        info: Info,
-        block_time: datetime,
-        _: FieldElement,
-        tx_hash: str,
-        data: List[FieldElement],
-    ):
-        ei = decode_equipped_item_event.deserialize([felt.to_int(i) for i in data])
+        ei = decode_equipped_items_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(
             info, ei.adventurer_state_with_bag["adventurer_state"], block_time
         )
-        await swap_item(
-            info,
-            ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-            ei.equipped_item_id,
-            ei.unequipped_item_id,
-            block_time,
-        )
-        print("- [equipped item]", ei.equipped_item_id, "->", ei.unequipped_item_id)
+        for equipped_item, unequipped_item in zip_longest(
+            ei.equipped_items, ei.unequipped_items, fillvalue=0
+        ):
+            await swap_item(
+                info,
+                ei.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
+                equipped_item,
+                unequipped_item,
+                block_time,
+            )
+        print("- [equipped items]", ei.equipped_items, "->", ei.unequipped_items)
 
-    async def dropped_item(
+    async def dropped_items(
         self,
         info: Info,
         block_time: datetime,
@@ -1376,33 +1375,36 @@ class LootSurvivorIndexer(StarkNetIndexer):
         tx_hash: str,
         data: List[FieldElement],
     ):
-        di = decode_dropped_item_event.deserialize([felt.to_int(i) for i in data])
+        di = decode_dropped_items_event.deserialize([felt.to_int(i) for i in data])
         await update_adventurer_helper(
             info, di.adventurer_state_with_bag["adventurer_state"], block_time
         )
-        await info.storage.find_one_and_update(
-            "items",
-            {
-                "item": check_exists_int(di.item_id),
-                "adventurerId": check_exists_int(
-                    di.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
-                ),
-                "owner": True,
-            },
-            {
-                "$set": {
-                    "equipped": False,
-                    "owner": False,
-                    "lastUpdatedTime": block_time,
-                    "timestamp": datetime.now(),
+        for item_id in di.item_ids:
+            await info.storage.find_one_and_update(
+                "items",
+                {
+                    "item": check_exists_int(item_id),
+                    "adventurerId": check_exists_int(
+                        di.adventurer_state_with_bag["adventurer_state"][
+                            "adventurer_id"
+                        ],
+                    ),
+                    "owner": True,
                 },
-            },
-        )
+                {
+                    "$set": {
+                        "equipped": False,
+                        "owner": False,
+                        "lastUpdatedTime": block_time,
+                        "timestamp": datetime.now(),
+                    },
+                },
+            )
         print(
-            "- [dropped item]",
+            "- [dropped items]",
             di.adventurer_state_with_bag["adventurer_state"]["adventurer_id"],
             "->",
-            di.item_id,
+            di.item_ids,
         )
 
     async def greatness_increased(
@@ -1458,32 +1460,6 @@ class LootSurvivorIndexer(StarkNetIndexer):
             isu.id,
         )
 
-    async def purchased_potion(
-        self,
-        info: Info,
-        block_time: datetime,
-        _: FieldElement,
-        tx_hash: str,
-        data: List[FieldElement],
-    ):
-        pp = decode_purchased_potion_event.deserialize([felt.to_int(i) for i in data])
-        await update_adventurer_helper(info, pp.adventurer_state, block_time)
-        purchase_doc = {
-            "txHash": tx_hash,
-            "adventurerId": check_exists_int(pp.adventurer_state["adventurer_id"]),
-            "quantity": check_exists_int(pp.quantity),
-            "healthAmount": encode_int_as_bytes(pp.health_amount),
-            "blockTime": block_time,
-            "timestamp": datetime.now(),
-        }
-        await info.storage.insert_one("health_purchases", purchase_doc)
-        print(
-            "- [purchased potion]",
-            pp.adventurer_state["adventurer_id"],
-            "->",
-            pp.health_amount,
-        )
-
     async def new_high_score(
         self,
         info: Info,
@@ -1519,7 +1495,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": encode_int_as_bytes(ad.adventurer_state["adventurer_id"]),
             "death": check_exists_int(1) if ad.killed_by_beast == 1 else 2,
-            "killerId": check_exists_int(ad.killer_id),
+            "caller": encode_int_as_bytes(ad.caller_address),
             "blockTime": block_time,
             "timestamp": datetime.now(),
         }
@@ -1561,30 +1537,27 @@ class LootSurvivorIndexer(StarkNetIndexer):
             [felt.to_int(i) for i in data]
         )
         for item in sa.items:
-            items_doc = {
-                "item": check_exists_int(item["item"]["id"]),
-                "adventurerId": check_exists_int(sa.adventurer_state["adventurer_id"]),
-                "owner": False,
-                "equipped": False,
-                "ownerAddress": check_exists_int(0),
-                "xp": encode_int_as_bytes(0),
-                "cost": encode_int_as_bytes(item["price"]),
-                "special1": check_exists_int(0),
-                "special2": check_exists_int(0),
-                "special3": check_exists_int(0),
-                "createdTime": datetime.now(),
-                "purchasedTime": check_exists_int(0),
-                "lastUpdatedTime": block_time,
+            item_doc = {
+                "isAvailable": True,
                 "timestamp": datetime.now(),
             }
-            await info.storage.insert_one("items", items_doc)
+            await info.storage.find_one_and_update(
+                "items",
+                {
+                    "item": check_exists_int(item["item"]["id"]),
+                    "adventurerId": check_exists_int(
+                        sa.adventurer_state["adventurer_id"]
+                    ),
+                },
+                {"$set": item_doc},
+            )
 
         print(
             "- [new items available]",
             sa.adventurer_state["adventurer_id"],
         )
 
-    async def idle_damage_penalty(
+    async def idle_death_penalty(
         self,
         info: Info,
         block_time: datetime,
@@ -1592,7 +1565,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         tx_hash: str,
         data: List[FieldElement],
     ):
-        idp = decode_idle_damage_penalty_event.deserialize(
+        idp = decode_idle_death_penalty_event.deserialize(
             [felt.to_int(i) for i in data]
         )
         await update_adventurer_helper(info, idp.adventurer_state, block_time)

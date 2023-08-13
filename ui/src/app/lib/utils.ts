@@ -5,6 +5,11 @@ import BN from "bn.js";
 import Realms from "./realms.json";
 import { Adventurer, Item } from "../types";
 import { GameData } from "../components/GameData";
+import {
+  itemCharismaDiscount,
+  itemBasePrice,
+  potionBasePrice,
+} from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -263,12 +268,16 @@ export function checkAvailableSlots(ownedItems: Item[]) {
 }
 
 export function getItemPrice(tier: number, charisma: number) {
-  const price = (6 - tier) * 3 - 2 * charisma;
-  if (price < 3) {
-    return 3;
+  const price = (6 - tier) * itemBasePrice - itemCharismaDiscount * charisma;
+  if (price < itemBasePrice) {
+    return itemBasePrice;
   } else {
     return price;
   }
+}
+
+export function getPotionPrice(adventurerLevel: number, charisma: number) {
+  return Math.max(adventurerLevel - potionBasePrice * charisma, 1);
 }
 
 export function isFirstElement<T>(arr: T[], element: T): boolean {
