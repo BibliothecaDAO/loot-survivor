@@ -107,16 +107,12 @@ export default function ActionsScreen() {
     txAccepted
   );
 
-  const exploreTx = {
-    contractAddress: gameContract?.address ?? "",
-    entrypoint: "explore",
-    calldata: [adventurer?.id?.toString() ?? "", "0", "0"],
-  };
-
-  const exploreTillBeastTx = {
-    contractAddress: gameContract?.address ?? "",
-    entrypoint: "explore",
-    calldata: [adventurer?.id?.toString() ?? "", "0", "1"],
+  const exploreTx = (till_beast: boolean) => {
+    return {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "explore",
+      calldata: [adventurer?.id?.toString() ?? "", "0", till_beast ? "1" : "0"],
+    };
   };
 
   const buttonsData = [
@@ -126,14 +122,14 @@ export default function ActionsScreen() {
         ? "Exploring..."
         : hasBeast
         ? "Beast found!!"
-        : "Till Beast",
+        : "Till Damage",
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
         resetData("lastBeastQuery");
         resetData("beastQuery");
         resetData("latestMarketItemsQuery");
-        addToCalls(exploreTx);
+        addToCalls(exploreTx(false));
         startLoading(
           "Explore",
           "Exploring",
@@ -166,7 +162,7 @@ export default function ActionsScreen() {
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
-        addToCalls(exploreTillBeastTx);
+        addToCalls(exploreTx(true));
         startLoading(
           "Explore",
           "Exploring",
@@ -212,7 +208,7 @@ export default function ActionsScreen() {
             </p>
           )}
           <div className="flex flex-col items-center sm:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
-            <p className="text-2xl">Into the Mist</p>
+            <p className="uppercase text-2xl">Into the Mist</p>
             <VerticalKeyboardControl
               buttonsData={buttonsData}
               onSelected={(value) => setSelected(value)}

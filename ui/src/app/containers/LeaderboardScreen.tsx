@@ -124,6 +124,7 @@ export default function LeaderboardScree() {
               {displayAdventurers?.map(
                 (adventurer: Adventurer, index: number) => (
                   <LiveRow
+                    key={index}
                     index={index}
                     adventurer={adventurer}
                     rank={rankGold(adventurer, index)}

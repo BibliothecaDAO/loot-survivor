@@ -44,7 +44,7 @@ export const appUrl = "https://beta-survivor.realms.world/";
 
 // ---- CONTRACT PARAMS
 // Penalty time is 8 blocks, where each block is ~ 3 minutes
-export const penaltyTime = 8 * (3 * 60);
+export const penaltyTime = 16 * (3 * 60);
 export const itemCharismaDiscount = 1;
 export const itemBasePrice = 3;
 export const potionCharismaDiscount = 2;

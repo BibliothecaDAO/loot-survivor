@@ -9,7 +9,8 @@ import { useEffect, useState } from "react";
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const client = new ApolloClient({
-    uri: getGraphQLUrl(),
+    // uri: getGraphQLUrl(),
+    uri: "http://localhost:8080/goerli-graphql",
     cache: new InMemoryCache({
       typePolicies: {
         Query: {

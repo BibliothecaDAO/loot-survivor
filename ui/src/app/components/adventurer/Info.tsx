@@ -129,11 +129,7 @@ export default function Info({
     "Ring",
   ];
 
-  const vitalitySelected = countOccurrences(
-    upgradeStats,
-    getKeyFromValue(gameData.STATS, "Vitality")
-  );
-
+  const vitalitySelected = upgradeStats["Vitality"];
   const totalHealth = (formatAdventurer.health ?? 0) + vitalitySelected * 10;
 
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;

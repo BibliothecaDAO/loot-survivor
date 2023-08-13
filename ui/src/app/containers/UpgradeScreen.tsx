@@ -34,8 +34,13 @@ import { UpgradeNav } from "../components/upgrade/UpgradeNav";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { StatAttribute } from "../components/upgrade/StatAttribute";
 import useUIStore from "../hooks/useUIStore";
-import { UpgradeStats, ZeroUpgrade } from "../types";
-import { UpgradeSummary, ItemPurchase } from "../types";
+import {
+  UpgradeStats,
+  ZeroUpgrade,
+  UpgradeSummary,
+  ItemPurchase,
+} from "../types";
+import Summary from "../components/upgrade/Summary";
 
 /**
  * @container
@@ -73,7 +78,7 @@ export default function UpgradeScreen() {
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const [summary, setSummary] = useState<UpgradeSummary>({
-    Stats: {},
+    Stats: ZeroUpgrade,
     Items: [],
     Potions: 0,
   });
@@ -308,7 +313,7 @@ export default function UpgradeScreen() {
 
   const renderSummary = () => {
     setSummary({
-      Stats: upgrades,
+      Stats: upgradeStats,
       Items: purchaseItems,
       Potions: potionAmount,
     });
@@ -331,7 +336,7 @@ export default function UpgradeScreen() {
                   <div className="flex flex-row gap-2 justify-center text-lg sm:text-2xl text-shadow-none">
                     <span>
                       Stat Upgrades Available{" "}
-                      {(adventurer?.statUpgrades ?? 0) - upgradeStats.length}
+                      {(adventurer?.statUpgrades ?? 0) - upgradesLength}
                     </span>
                   </div>
                   <UpgradeNav activeSection={upgradeScreen} />
@@ -467,50 +472,7 @@ export default function UpgradeScreen() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col gap-5 items-center animate-pulse w-2/3">
-              <h3 className="mx-auto">Upgrading</h3>
-              <p className="text-2xl">Stat Increases:</p>
-              {Object.entries(summary["Stats"]).map(([key, value]) => (
-                <div className="flex flex-row gap-2 items-center" key={key}>
-                  <span className="w-10 h-10">
-                    {attributes.find((a) => a.name === key)?.icon}
-                  </span>
-                  <p className="text-no-wrap uppercase text-lg">{`${key} x ${value}`}</p>
-                </div>
-              ))}
-              {(summary["Items"].length > 0 || summary["Potions"] > 0) && (
-                <p className="text-2xl">Item Purchases:</p>
-              )}
-              {summary["Items"].length > 0 && (
-                <>
-                  {summary["Items"].map((item: ItemPurchase, index: number) => {
-                    const { slot } = getItemData(
-                      getValueFromKey(gameData.ITEMS, parseInt(item.item)) ?? ""
-                    );
-                    return (
-                      <div
-                        className="flex flex-row gap-2 items-center"
-                        key={index}
-                      >
-                        <LootIcon
-                          size={isMobileDevice ? "w-4" : "w-5"}
-                          type={slot}
-                        />
-                        <p className="text-lg">
-                          {getValueFromKey(gameData.ITEMS, parseInt(item.item))}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </>
-              )}
-              {summary["Potions"] > 0 && (
-                <div className="flex flex-row gap-2 items-center">
-                  <HealthPotionIcon />
-                  <p className="text-lg">{`Health Potions x ${summary["Potions"]}`}</p>
-                </div>
-              )}
-            </div>
+            <Summary summary={summary} attributes={attributes} />
           )}
         </div>
       ) : (

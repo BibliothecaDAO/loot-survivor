@@ -291,7 +291,7 @@ export default function BeastScreen() {
         {isAlive && (
           <div className="flex flex-row gap-2 sm:flex-col items-center">
             <div className="flex flex-col items-center">
-              <p className="sm:text-2xl">Attack</p>
+              <p className="uppercase sm:text-2xl">Attack</p>
               <KeyboardControl
                 buttonsData={attackButtonsData}
                 size={isMobileDevice ? "sm" : "xl"}
@@ -299,7 +299,7 @@ export default function BeastScreen() {
               />
             </div>
             <div className="flex flex-col items-center">
-              <p className="sm:text-2xl">Flee</p>
+              <p className="uppercase sm:text-2xl">Flee</p>
               <KeyboardControl
                 buttonsData={fleeButtonsData}
                 size={isMobileDevice ? "sm" : "lg"}
