@@ -154,7 +154,11 @@ export default function ActionsScreen() {
     },
     {
       id: 2,
-      label: hasBeast ? "Beast found!!" : "Till Beast",
+      label: loading
+        ? "Exploring..."
+        : hasBeast
+        ? "Beast found!!"
+        : "Till Beast",
       icon: <MistIcon />,
       value: "explore",
       action: async () => {

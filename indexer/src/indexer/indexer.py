@@ -12,6 +12,7 @@ from starknet_py.contract import ContractFunction
 from apibara.starknet.proto.types_pb2 import FieldElement
 
 from typing import List
+from itertools import zip_longest
 from indexer.config import Config
 from indexer.decoder import (
     decode_start_game_event,
@@ -1354,8 +1355,8 @@ class LootSurvivorIndexer(StarkNetIndexer):
         await update_adventurer_helper(
             info, ei.adventurer_state_with_bag["adventurer_state"], block_time
         )
-        for equipped_item, unequipped_item in zip(
-            ei.equipped_items, ei.unequipped_items
+        for equipped_item, unequipped_item in zip_longest(
+            ei.equipped_items, ei.unequipped_items, fillvalue=0
         ):
             await swap_item(
                 info,
