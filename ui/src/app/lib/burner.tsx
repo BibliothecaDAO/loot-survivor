@@ -13,7 +13,7 @@ import Storage from "./storage";
 import { useAccount } from "@starknet-react/core";
 import { ArcadeConnector } from "./arcade";
 
-const PREFUND_AMOUNT = "0x2386f26fc10000"; // 0.001ETH
+export const PREFUND_AMOUNT = "0x2386f26fc10000"; // 0.001ETH
 
 const provider = new Provider({
     sequencer: {
