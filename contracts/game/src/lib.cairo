@@ -49,7 +49,9 @@ mod Game {
         item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
         adventurer_utils::AdventurerUtils
     };
-    use market::market::{ImplMarket, LootWithPrice, ItemPurchase};
+    use market::{
+        market::{ImplMarket, LootWithPrice, ItemPurchase}, constants::{NUMBER_OF_ITEMS_PER_LEVEL}
+    };
     use obstacles::obstacle::{ImplObstacle, IObstacle};
     use combat::{
         combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums::{Slot, Tier}
@@ -151,7 +153,6 @@ mod Game {
             _start(
                 ref self, block_number, caller, starting_weapon, adventurer_meta, starting_stats
             );
-
         //_payout(ref self, caller, block_number, interface_id);
         }
 
@@ -569,8 +570,8 @@ mod Game {
                 _buy_items(
                     ref self,
                     ref adventurer,
-                    unmodified_adventurer,
                     ref bag,
+                    unmodified_adventurer.stat_points_available,
                     name_storage1,
                     name_storage2,
                     adventurer_id,
@@ -696,39 +697,89 @@ mod Game {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_item_specials(self, adventurer_id, adventurer.ring)
         }
-        fn get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<LootWithPrice> {
+        fn get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _assert_market_is_open(adventurer.stat_points_available);
-            _get_items_on_market(self, adventurer_id, adventurer)
+            let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
+                .entropy
+                .into();
+            _get_items_on_market(
+                self, adventurer_entropy, adventurer.xp, adventurer.stat_points_available
+            )
         }
         fn get_items_on_market_by_slot(
             self: @ContractState, adventurer_id: u256, slot: u8
         ) -> Array<u8> {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _assert_market_is_open(adventurer.stat_points_available);
-            _get_market_items_by_slot(self, adventurer_id, adventurer, ImplCombat::u8_to_slot(slot))
+            let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
+                .entropy
+                .into();
+            _get_items_on_market_by_slot(
+                self,
+                adventurer_entropy,
+                adventurer.xp,
+                adventurer.stat_points_available,
+                ImplCombat::u8_to_slot(slot)
+            )
         }
         fn get_items_on_market_by_tier(
             self: @ContractState, adventurer_id: u256, tier: u8
         ) -> Array<u8> {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _assert_market_is_open(adventurer.stat_points_available);
+            let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
+                .entropy
+                .into();
 
             if tier == 1 {
-                _get_market_items_by_tier(self, adventurer_id, adventurer, Tier::T1(()))
+                _get_items_on_market_by_tier(
+                    self,
+                    adventurer_entropy,
+                    adventurer.xp,
+                    adventurer.stat_points_available,
+                    Tier::T1(())
+                )
             } else if tier == 2 {
-                _get_market_items_by_tier(self, adventurer_id, adventurer, Tier::T2(()))
+                _get_items_on_market_by_tier(
+                    self,
+                    adventurer_entropy,
+                    adventurer.xp,
+                    adventurer.stat_points_available,
+                    Tier::T2(())
+                )
             } else if tier == 3 {
-                _get_market_items_by_tier(self, adventurer_id, adventurer, Tier::T3(()))
+                _get_items_on_market_by_tier(
+                    self,
+                    adventurer_entropy,
+                    adventurer.xp,
+                    adventurer.stat_points_available,
+                    Tier::T3(())
+                )
             } else if tier == 4 {
-                _get_market_items_by_tier(self, adventurer_id, adventurer, Tier::T4(()))
+                _get_items_on_market_by_tier(
+                    self,
+                    adventurer_entropy,
+                    adventurer.xp,
+                    adventurer.stat_points_available,
+                    Tier::T4(())
+                )
             } else {
-                _get_market_items_by_tier(self, adventurer_id, adventurer, Tier::T5(()))
+                _get_items_on_market_by_tier(
+                    self,
+                    adventurer_entropy,
+                    adventurer.xp,
+                    adventurer.stat_points_available,
+                    Tier::T5(())
+                )
             }
         }
 
         fn get_potion_price(self: @ContractState, adventurer_id: u256) -> u16 {
             _get_potion_price(self, adventurer_id)
+        }
+        fn get_item_price(self: @ContractState, adventurer_id: u256, item_id: u8) -> u16 {
+            _get_item_price(self, adventurer_id, item_id)
         }
         fn get_attacking_beast(self: @ContractState, adventurer_id: u256) -> Beast {
             _get_attacking_beast(self, adventurer_id)
@@ -1779,6 +1830,10 @@ mod Game {
         ref name_storage2: ItemSpecialsStorage,
         entropy: u128
     ) -> bool {
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+            .entropy
+            .into();
+
         // TODO: Refactor this to reduce code duplication
         if (_get_storage_index(@self, item.metadata) == LOOT_NAME_STORAGE_INDEX_1) {
             let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = item
@@ -1803,7 +1858,9 @@ mod Game {
                     adventurer_state: AdventurerState {
                         owner: get_caller_address(), adventurer_id, adventurer
                     },
-                    items: _get_items_on_market(@self, adventurer_id, adventurer)
+                    items: _get_items_on_market(
+                        @self, adventurer_entropy, adventurer.xp, adventurer.stat_points_available
+                    )
                 );
             }
 
@@ -1853,7 +1910,9 @@ mod Game {
                     adventurer_state: AdventurerState {
                         owner: get_caller_address(), adventurer_id, adventurer
                     },
-                    items: _get_items_on_market(@self, adventurer_id, adventurer)
+                    items: _get_items_on_market(
+                        @self, adventurer_entropy, adventurer.xp, adventurer.stat_points_available
+                    )
                 );
             }
 
@@ -2362,14 +2421,15 @@ mod Game {
     // @dev Function to facilitate the purchase of multiple items.
     // @param adventurer The Adventurer struct instance representing the adventurer buying items.
     // @param bag The Bag struct instance representing the adventurer's current bag of items.
+    // @param stat_points_available The number of stat points available to the adventurer.
     // @param adventurer_id The unique identifier for the adventurer.
     // @param adventurer_entropy The entropy of the adventurer used for randomness.
     // @param items The Array of ItemPurchase instances representing items to be purchased.
     fn _buy_items(
         ref self: ContractState,
         ref adventurer: Adventurer,
-        original_adventurer: Adventurer,
         ref bag: Bag,
+        stat_points_available: u8,
         name_storage1: ItemSpecialsStorage,
         name_storage2: ItemSpecialsStorage,
         adventurer_id: u256,
@@ -2386,6 +2446,11 @@ mod Game {
         let mut unequipped_items = ArrayTrait::<u8>::new();
         let mut items_to_equip = ArrayTrait::<u8>::new();
 
+        // get items on market
+        let items_on_market = _get_items_on_market(
+            @self, adventurer_entropy, adventurer.xp, adventurer.stat_points_available
+        );
+
         // for each item being purchased
         let mut i: u32 = 0;
         loop {
@@ -2396,19 +2461,13 @@ mod Game {
             // get the item
             let item = *items.at(i);
 
-            // buy it and record receipt
-            purchases
-                .append(
-                    _buy_item(
-                        ref self,
-                        ref adventurer,
-                        original_adventurer,
-                        ref bag,
-                        adventurer_id,
-                        adventurer_entropy,
-                        item.item_id
-                    )
-                );
+            // assert item is available on market
+            _assert_item_is_available(
+                adventurer_entropy, stat_points_available, adventurer.xp, item.item_id
+            );
+
+            // buy it and store result in our purchases array for event
+            purchases.append(_buy_item(ref self, ref adventurer, ref bag, item.item_id));
 
             // if item is being equipped as part of the purchase 
             if item.equip {
@@ -2542,27 +2601,18 @@ mod Game {
         adventurer.stat_points_available = 0;
     }
 
-    // @dev This function allows the adventurer to purchase an item from the market.
-    // @notice The item price is adjusted based on the adventurer's charisma. The function also manages the adventurer's inventory based on whether they equip the item or not. It emits an event whenever an item is purchased.
+    // @notice Buy an item with the item price adjusted for adventurer's charisma.
     // @param adventurer The adventurer buying the item. The function modifies the adventurer's gold and equipment.
     // @param bag The bag of the adventurer. The function may add items to the bag if the adventurer unequips an item or opts not to equip a purchased item.
-    // @param adventurer_id The ID of the adventurer.
     // @param item_id The ID of the item to be purchased.
-    // @param equip A boolean indicating if the adventurer should equip the item immediately upon purchasing it. If it is set to false, the item will be added to the adventurer's bag.
     fn _buy_item(
-        ref self: ContractState,
-        ref adventurer: Adventurer,
-        original_adventurer: Adventurer,
-        ref bag: Bag,
-        adventurer_id: u256,
-        adventurer_entropy: u128,
-        item_id: u8
+        ref self: ContractState, ref adventurer: Adventurer, ref bag: Bag, item_id: u8
     ) -> LootWithPrice {
-        // check item is available on market
-        _assert_item_is_available(original_adventurer, adventurer_id, adventurer_entropy, item_id);
+        // create an immutable copy of our adventurer to use for validation
+        let immutable_adventurer = adventurer;
 
         // assert adventurer does not already own the item
-        _assert_item_not_owned(adventurer, bag, item_id);
+        _assert_item_not_owned(immutable_adventurer, bag, item_id);
 
         // get item price
         let base_item_price = ImplMarket::get_price(ImplLoot::get_tier(item_id));
@@ -2571,7 +2621,7 @@ mod Game {
         let charisma_adjusted_price = adventurer.charisma_adjusted_item_price(base_item_price);
 
         // check adventurer has enough gold
-        _assert_has_enough_gold(adventurer, charisma_adjusted_price);
+        _assert_has_enough_gold(immutable_adventurer, charisma_adjusted_price);
 
         // deduct charisma adjusted cost of item from adventurer's gold balance
         adventurer.deduct_gold(charisma_adjusted_price);
@@ -2662,6 +2712,9 @@ mod Game {
         let adventurer_state = AdventurerState {
             owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
         };
+        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+            .entropy
+            .into();
 
         // emit level up event
         __event_AdventurerLeveledUp(
@@ -2678,7 +2731,9 @@ mod Game {
         __event_NewItemsAvailable(
             ref self,
             adventurer_state: adventurer_state,
-            items: _get_items_on_market(@self, adventurer_id, adventurer)
+            items: _get_items_on_market(
+                @self, adventurer_entropy, adventurer.xp, adventurer.stat_points_available
+            )
         );
     }
 
@@ -2761,11 +2816,12 @@ mod Game {
         );
     }
     fn _assert_item_is_available(
-        adventurer: Adventurer, adventurer_id: u256, adventurer_entropy: u128, item_id: u8
+        adventurer_entropy: u128, stat_points_available: u8, adventurer_xp: u16, item_id: u8
     ) {
-        let (seeds, offsets) = adventurer.get_market_seeds(adventurer_id, adventurer_entropy);
         assert(
-            ImplMarket::is_item_available(seeds, offsets, item_id) == true,
+            ImplMarket::is_item_available(
+                adventurer_entropy, adventurer_xp, stat_points_available, item_id
+            ),
             messages::ITEM_DOES_NOT_EXIST
         );
     }
@@ -2874,37 +2930,36 @@ mod Game {
     }
 
     fn _get_items_on_market(
-        self: @ContractState, adventurer_id: u256, adventurer: Adventurer
-    ) -> Array<LootWithPrice> {
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
-            .entropy
-            .into();
-
-        let (seeds, offsets) = adventurer.get_market_seeds(adventurer_id, adventurer_entropy);
-        ImplMarket::get_all_items_with_price(seeds, offsets)
+        self: @ContractState,
+        adventurer_entropy: u128,
+        adventurer_xp: u16,
+        adventurer_stat_points: u8
+    ) -> Array<u8> {
+        ImplMarket::get_market_items(adventurer_entropy, adventurer_xp, adventurer_stat_points)
     }
 
-    fn _get_market_items_by_slot(
-        self: @ContractState, adventurer_id: u256, adventurer: Adventurer, slot: Slot
+    fn _get_items_on_market_by_slot(
+        self: @ContractState,
+        adventurer_entropy: u128,
+        adventurer_xp: u16,
+        adventurer_stat_points: u8,
+        slot: Slot
     ) -> Array<u8> {
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
-            .entropy
-            .into();
-
-        let (seeds, offsets) = adventurer.get_market_seeds(adventurer_id, adventurer_entropy);
-        ImplMarket::get_items_by_slot(seeds, offsets, slot)
+        ImplMarket::get_items_by_slot(
+            adventurer_entropy, adventurer_xp, adventurer_stat_points, slot
+        )
     }
 
-    fn _get_market_items_by_tier(
-        self: @ContractState, adventurer_id: u256, adventurer: Adventurer, tier: Tier
+    fn _get_items_on_market_by_tier(
+        self: @ContractState,
+        adventurer_entropy: u128,
+        adventurer_xp: u16,
+        adventurer_stat_points: u8,
+        tier: Tier
     ) -> Array<u8> {
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
-            .entropy
-            .into();
-
-        let (seeds, offsets) = adventurer.get_market_seeds(adventurer_id, adventurer_entropy);
-
-        ImplMarket::get_items_by_tier(seeds, offsets, tier)
+        ImplMarket::get_items_by_tier(
+            adventurer_entropy, adventurer_xp, adventurer_stat_points, tier
+        )
     }
 
     fn _get_potion_price(self: @ContractState, adventurer_id: u256) -> u16 {
@@ -2915,6 +2970,17 @@ mod Game {
         );
 
         adventurer.charisma_adjusted_potion_price()
+    }
+
+    fn _get_item_price(self: @ContractState, adventurer_id: u256, item_id: u8) -> u16 {
+        let (name_storage1, name_storage2) = _get_special_storages(self, adventurer_id);
+        let adventurer = _unpack_adventurer_apply_stat_boost(
+            self, adventurer_id, name_storage1, name_storage2
+        );
+        let base_item_price = ImplMarket::get_price(ImplLoot::get_tier(item_id));
+        let charisma_adjusted_price = adventurer.charisma_adjusted_item_price(base_item_price);
+
+        charisma_adjusted_price
     }
 
     fn _get_attacking_beast(self: @ContractState, adventurer_id: u256) -> Beast {
@@ -3289,7 +3355,7 @@ mod Game {
     #[derive(Drop, starknet::Event)]
     struct NewItemsAvailable {
         adventurer_state: AdventurerState,
-        items: Array<LootWithPrice>,
+        items: Array<u8>,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -3433,7 +3499,7 @@ mod Game {
     }
 
     fn __event_NewItemsAvailable(
-        ref self: ContractState, adventurer_state: AdventurerState, items: Array<LootWithPrice>, 
+        ref self: ContractState, adventurer_state: AdventurerState, items: Array<u8>, 
     ) {
         self.emit(Event::NewItemsAvailable(NewItemsAvailable { adventurer_state, items }));
     }
