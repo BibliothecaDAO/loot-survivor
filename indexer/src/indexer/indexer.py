@@ -39,7 +39,7 @@ from indexer.decoder import (
     decode_adventurer_died_event,
     decode_adventurer_leveled_up_event,
     decode_new_items_available_event,
-    decode_idle_damage_penalty_event,
+    decode_idle_death_penalty_event,
 )
 from indexer.utils import (
     felt_to_str,
@@ -461,7 +461,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "AdventurerDied": self.adventurer_died,
                 "AdventurerLeveledUp": self.adventurer_leveled_up,
                 "NewItemsAvailable": self.new_items_available,
-                "IdleDamagePenalty": self.idle_damage_penalty,
+                "IdleDeathPenalty": self.idle_death_penalty,
             }[event_name](
                 info,
                 block_time,
@@ -1494,7 +1494,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "txHash": encode_hex_as_bytes(tx_hash),
             "adventurerId": encode_int_as_bytes(ad.adventurer_state["adventurer_id"]),
             "death": check_exists_int(1) if ad.killed_by_beast == 1 else 2,
-            "killerId": check_exists_int(ad.killer_id),
+            "caller": encode_int_as_bytes(ad.caller_address),
             "blockTime": block_time,
             "timestamp": datetime.now(),
         }
@@ -1556,7 +1556,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             sa.adventurer_state["adventurer_id"],
         )
 
-    async def idle_damage_penalty(
+    async def idle_death_penalty(
         self,
         info: Info,
         block_time: datetime,
@@ -1564,7 +1564,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         tx_hash: str,
         data: List[FieldElement],
     ):
-        idp = decode_idle_damage_penalty_event.deserialize(
+        idp = decode_idle_death_penalty_event.deserialize(
             [felt.to_int(i) for i in data]
         )
         await update_adventurer_helper(info, idp.adventurer_state, block_time)

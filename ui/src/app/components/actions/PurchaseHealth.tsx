@@ -28,16 +28,8 @@ const PurchaseHealth = ({
   setPotionAmount,
   totalCharisma,
   upgradeHandler,
-  totalVitality,
 }: PurchaseHealthProps) => {
-  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const removeEntrypointFromCalls = useTransactionCartStore(
-    (state) => state.removeEntrypointFromCalls
-  );
-  const purchaseItems = useUIStore((state) => state.purchaseItems);
-  const upgradeStats = useUIStore((state) => state.upgradeStats);
   const prevAmountRef = useRef<number | undefined>(0);
   const [buttonClicked, setButtonClicked] = useState(false);
 
@@ -59,15 +51,6 @@ const PurchaseHealth = ({
       setPotionAmount(max);
     }
   };
-
-  const calculatedNewHealth = (adventurer?.health ?? 0) + potionAmount * 10;
-
-  const disabled =
-    !hasBalance ||
-    adventurer?.health == maxHealth ||
-    calculatedNewHealth - maxHealth >= 10;
-
-  const currentLevel = adventurer?.level ?? 0;
 
   useEffect(() => {
     if (buttonClicked) {
@@ -149,19 +132,6 @@ const PurchaseHealth = ({
             You can only buy up to Max Health! 1 Potion = 10 Health
           </p>
         </div>
-        {/* <Button
-            disabled={disabled}
-            onClick={async () => {
-              handlePurchaseHealth();
-            }}
-            size={"lg"}
-          >
-            {adventurer?.health == maxHealth
-              ? "Max Health Reached"
-              : calculatedNewHealth - maxHealth >= 10
-              ? "Purchase Over Max Health"
-              : "Purchase Health"}
-          </Button> */}
         {!hasBalance && (
           <p className="m-auto text-red-600">Not enough gold to purchase!</p>
         )}

@@ -27,17 +27,17 @@ export const StatAttribute = ({
   upgradeHandler,
 }: StatAttributeProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const prevAmountRef = useRef<{ [key: string]: number }>(ZeroUpgrade);
-  const upgradeStats = useUIStore((state) => state.upgradeStats);
-  const setUpgradeStats = useUIStore((state) => state.setUpgradeStats);
+  const prevAmountRef = useRef<{ [key: string]: number }>({ ...ZeroUpgrade });
+  const upgrades = useUIStore((state) => state.upgrades);
+  const setUpgrades = useUIStore((state) => state.setUpgrades);
   const gameData = new GameData();
   const [buttonClicked, setButtonClicked] = useState(false);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
 
-  const amount = upgradeStats[name] ?? 0;
-  const upgradesLength = Object.values(upgradeStats).filter(
+  const amount = upgrades[name] ?? 0;
+  const upgradesLength = Object.values(upgrades).filter(
     (value) => value !== 0
   ).length;
 
@@ -52,14 +52,13 @@ export const StatAttribute = ({
         if (amount > prevAmount) {
           // upgradeStats[name] = amount;
           // setUpgradeStats(upgradeStats);
-          upgradeHandler(upgradeStats, undefined, undefined);
+          upgradeHandler(upgrades, undefined, undefined);
         } else if (amount <= prevAmount) {
           // upgradeStats[name] = amount;
           // setUpgradeStats(upgradeStats);
-          upgradeHandler(upgradeStats, undefined, undefined);
+          upgradeHandler(upgrades, undefined, undefined);
           if (
-            Object.values(upgradeStats).filter((value) => value !== 0)
-              .length === 0
+            Object.values(upgrades).filter((value) => value !== 0).length === 0
           ) {
             removeEntrypointFromCalls("upgrade_adventurer");
           }
@@ -81,8 +80,8 @@ export const StatAttribute = ({
           min={0}
           max={newUpgradeTotal}
           setAmount={(value) => {
-            upgradeStats[name] = value;
-            setUpgradeStats(upgradeStats);
+            upgrades[name] = value;
+            setUpgrades(upgrades);
             setButtonClicked(true);
           }}
         />

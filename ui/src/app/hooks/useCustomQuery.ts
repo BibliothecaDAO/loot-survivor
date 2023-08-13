@@ -27,8 +27,6 @@ const useCustomQuery = (
     }
   );
 
-  console.log(error);
-
   const refetchWrapper = useCallback(async () => {
     try {
       await refetch();

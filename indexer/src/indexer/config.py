@@ -290,21 +290,83 @@ class Config:
         }
 
         self.OBSTACLES = {
-            1: "Demonic Alter",
-            2: "Curse",
-            3: "Hex",
-            4: "Magic Lock",
-            5: "Dark Mist",
-            6: "Collapsing Ceiling",
-            7: "Crushing Walls",
-            8: "Rockslide",
-            9: "Tumbling Boulders",
-            10: "Swinging Logs",
-            11: "Pendulum Blades",
-            12: "Flame Jet",
-            13: "Poison Dart",
-            14: "Spiked Pit",
-            15: "Hidden Arrow",
+            # Magical Obstacles
+            1: "Demonic Alter",  # T1
+            2: "Vortex Of Despair",  # T1
+            3: "Eldritch Barrier",  # T1
+            4: "Soul Trap",  # T1
+            5: "Phantom Vortex",  # T1
+            6: "Ectoplasmic Web",  # T2
+            7: "Spectral Chains",  # T2
+            8: "Infernal Pact",  # T2
+            9: "Arcane Explosion",  # T2
+            10: "Hypnotic Essence",  # T2
+            11: "Mischievous Sprites",  # T3
+            12: "Soul Draining Statue",  # T3
+            13: "Petrifying Gaze",  # T3
+            14: "Summoning Circle",  # T3
+            15: "Ethereal Void",  # T3
+            16: "Magic Lock",  # T4
+            17: "Bewitching Fog",  # T4
+            18: "Illusionary Maze",  # T4
+            19: "Spellbound Mirror",  # T4
+            20: "Ensnaring Shadow",  # T4
+            21: "Dark Mist",  # T5
+            22: "Curse",  # T5
+            23: "Haunting Echo",  # T5
+            24: "Hex",  # T5
+            25: "Ghostly Whispers",  # T5
+            # Sharp Obstacles
+            26: "Pendulum Blades",  # T1
+            27: "Icy Razor Winds",  # T1
+            28: "Acidic Thorns",  # T1
+            29: "Dragons Breath",  # T1
+            30: "Pendulum Scythe",  # T1
+            31: "Flame Jet",  # T2
+            32: "Piercing Ice Darts",  # T2
+            33: "Glass Sand Storm",  # T2
+            34: "Poisoned Dart Wall",  # T2
+            35: "Spinning Blade Wheel",  # T2
+            36: "Poison Dart",  # T3
+            37: "Spiked Tumbleweed",  # T3
+            38: "Thunderbolt",  # T3
+            39: "Giant Bear Trap",  # T3
+            40: "Steel Needle Rain",  # T3
+            41: "Spiked Pit",  # T4
+            42: "Diamond Dust Storm",  # T4
+            43: "Trapdoor Scorpion Pit",  # T4
+            44: "Bladed Fan",  # T4
+            45: "Bear Trap",  # T4
+            46: "Porcupine Quill",  # T5
+            47: "Hidden Arrow",  # T5
+            48: "Glass Shard",  # T5
+            49: "Thorn Bush",  # T5
+            50: "Jagged Rocks",  # T5
+            # Crushing Obstacles
+            51: "Subterranean Tremor",  # T3 (Note: This seems to overwrite 'Collapsing Ceiling')
+            52: "Rockslide",  # T1
+            53: "Flash Flood",  # T1
+            54: "Clinging Roots",  # T1
+            55: "Collapsing Cavern",  # T1
+            56: "Crushing Walls",  # T2
+            57: "Smashing Pillars",  # T2
+            58: "Rumbling Catacomb",  # T2
+            59: "Whirling Cyclone",  # T2
+            60: "Erupting Earth",  # T2
+            62: "Falling Chandelier",  # T3
+            63: "Collapsing Bridge",  # T3
+            64: "Raging Sandstorm",  # T3
+            65: "Avalanching Rocks",  # T3
+            66: "Tumbling Boulders",  # T4
+            67: "Slamming Iron Gate",  # T4
+            68: "Shifting Sandtrap",  # T4
+            69: "Erupting Mud Geyser",  # T4
+            70: "Crumbling Staircase",  # T4
+            71: "Swinging Logs",  # T5
+            72: "Unstable Cliff",  # T5
+            73: "Toppling Statue",  # T5
+            74: "Tumbling Barrels",  # T5
+            75: "Rolling Boulder",  # T5
         }
 
         self.OBSTACLE_TIERS = {

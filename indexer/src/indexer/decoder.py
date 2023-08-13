@@ -530,13 +530,13 @@ raw_abi = [
         "name": "game::Game::AdventurerDied",
         "type": "event",
         "inputs": [
+            {"name": "adventurer_state", "type": "game::Game::AdventurerState"},
+            {"name": "killed_by_beast", "type": "core::integer::u8"},
+            {"name": "killed_by_obstacle", "type": "core::integer::u8"},
             {
-                "name": "adventurer_state",
-                "type": "game::Game::AdventurerState",
+                "name": "caller_address",
+                "type": "core::starknet::contract_address::ContractAddress",
             },
-            {"name": "killed_by_beast", "type": "core::bool"},
-            {"name": "killed_by_obstacle", "type": "core::bool"},
-            {"name": "killer_id", "type": "core::integer::u8"},
         ],
     },
     {
@@ -563,12 +563,16 @@ raw_abi = [
     },
     {
         "kind": "struct",
-        "name": "game::Game::IdleDamagePenalty",
+        "name": "game::Game::IdleDeathPenalty",
         "type": "event",
         "inputs": [
             {"name": "adventurer_state", "type": "game::Game::AdventurerState"},
             {"name": "idle_blocks", "type": "core::integer::u16"},
-            {"name": "damage_taken", "type": "core::integer::u16"},
+            {"name": "penalty_threshold", "type": "core::integer::u16"},
+            {
+                "name": "caller",
+                "type": "core::starknet::contract_address::ContractAddress",
+            },
         ],
     },
     {
@@ -692,6 +696,6 @@ decode_new_items_available_event = serializer_for_payload(
     game_contract_abi.events["game::Game::NewItemsAvailable"].inputs
 )
 
-decode_idle_damage_penalty_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::IdleDamagePenalty"].inputs
+decode_idle_death_penalty_event = serializer_for_payload(
+    game_contract_abi.events["game::Game::IdleDeathPenalty"].inputs
 )

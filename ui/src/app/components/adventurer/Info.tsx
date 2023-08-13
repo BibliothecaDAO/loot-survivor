@@ -36,7 +36,7 @@ export default function Info({
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const dropItems = useUIStore((state) => state.dropItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
-  const upgradeStats = useUIStore((state) => state.upgradeStats);
+  const upgrades = useUIStore((state) => state.upgrades);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
@@ -129,7 +129,7 @@ export default function Info({
     "Ring",
   ];
 
-  const vitalitySelected = upgradeStats["Vitality"];
+  const vitalitySelected = upgrades["Vitality"];
   const totalHealth = (formatAdventurer.health ?? 0) + vitalitySelected * 10;
 
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;

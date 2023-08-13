@@ -19,18 +19,18 @@ const Summary = ({ summary, attributes }: UpgradeSummaryProps) => {
     <div className="flex flex-col gap-5 items-center animate-pulse w-2/3">
       <h3 className="mx-auto">Upgrading</h3>
       <p className="text-2xl">Stat Increases:</p>
-      {Object.entries(summary["Stats"]).map(([key, value]) => (
-        <>
-          {value !== 0 && (
+      {Object.entries(summary["Stats"]).map(([key, value]) => {
+        if (value !== 0) {
+          return (
             <div className="flex flex-row gap-2 items-center" key={key}>
               <span className="w-10 h-10">
                 {attributes.find((a) => a.name === key)?.icon}
               </span>
               <p className="text-no-wrap uppercase text-lg">{`${key} x ${value}`}</p>
             </div>
-          )}
-        </>
-      ))}
+          );
+        }
+      })}
       {(summary["Items"].length > 0 || summary["Potions"] > 0) && (
         <p className="text-2xl">Item Purchases:</p>
       )}

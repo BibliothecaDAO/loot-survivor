@@ -63,8 +63,8 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const setDropItems = useUIStore((state) => state.setDropItems);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
-  const upgradeStats = useUIStore((state) => state.upgradeStats);
-  const setUpgradeStats = useUIStore((state) => state.setUpgradeStats);
+  const upgrades = useUIStore((state) => state.upgrades);
+  const setUpgrades = useUIStore((state) => state.setUpgrades);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
 
@@ -179,10 +179,10 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
     setEquipItems([]);
     setDropItems([]);
     setPurchaseItems([]);
-    setUpgradeStats(ZeroUpgrade);
+    setUpgrades({ ...ZeroUpgrade });
   };
 
-  const filteredStats = Object.entries(upgradeStats).filter(
+  const filteredStats = Object.entries(upgrades).filter(
     (stat: any) => stat[1] !== 0
   );
 
@@ -284,10 +284,10 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
                                 <button
                                   onClick={() => {
                                     clickPlay();
-                                    upgradeStats[string] = 0;
-                                    setUpgradeStats(upgradeStats);
+                                    upgrades[string] = 0;
+                                    setUpgrades(upgrades);
                                     const newStats = Object.entries(
-                                      upgradeStats
+                                      upgrades
                                     ).filter((stat: any) => stat[1] !== 0);
                                     if (newStats.length === 0) {
                                       removeFromCalls(call);
@@ -344,7 +344,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
                             setDropItems([]);
                           }
                           if (call.entrypoint === "upgrade_adventurer") {
-                            setUpgradeStats(ZeroUpgrade);
+                            setUpgrades({ ...ZeroUpgrade });
                             setPurchaseItems([]);
                           }
                         }}

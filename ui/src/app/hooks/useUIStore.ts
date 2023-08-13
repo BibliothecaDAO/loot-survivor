@@ -42,8 +42,8 @@ type State = {
   setDropItems: (value: string[]) => void;
   purchaseItems: ItemPurchase[];
   setPurchaseItems: (value: ItemPurchase[]) => void;
-  upgradeStats: UpgradeStats;
-  setUpgradeStats: (value: UpgradeStats) => void;
+  upgrades: UpgradeStats;
+  setUpgrades: (value: UpgradeStats) => void;
   lastAction: Date | null;
   setLastAction: (value: Date | null) => void;
   mintAdventurer: boolean;
@@ -81,8 +81,8 @@ const useUIStore = create<State>((set) => ({
   setDropItems: (value) => set({ dropItems: value }),
   purchaseItems: [],
   setPurchaseItems: (value) => set({ purchaseItems: value }),
-  upgradeStats: ZeroUpgrade,
-  setUpgradeStats: (value) => set({ upgradeStats: value }),
+  upgrades: { ...ZeroUpgrade },
+  setUpgrades: (value) => set({ upgrades: value }),
   lastAction: null,
   setLastAction: (value) => set({ lastAction: value }),
   mintAdventurer: false,
