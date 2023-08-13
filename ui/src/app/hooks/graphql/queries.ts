@@ -141,6 +141,22 @@ const BEASTS_FRAGMENT = `
   }
 `;
 
+const SCORE_FIELDS = `
+  adventurerId
+  owner
+  rank
+  xp
+  txHash
+  blockTime
+  timestamp
+`;
+
+const SCORES_FRAGMENT = `
+  fragment ScoreFields on Score {
+    ${SCORE_FIELDS}
+  }
+`;
+
 const getAdventurer = gql`
   ${ADVENTURERS_FRAGMENT}
   query getAdventurer($owner: HexValue) {
@@ -270,6 +286,15 @@ const getAdventurerByGold = gql`
 `;
 
 const getAdventurerByXP = gql`
+  ${ADVENTURERS_FRAGMENT}
+  query get_adventurer_by_xp {
+    adventurers(orderBy: { xp: { desc: true } }, limit: 10000000) {
+      ...AdventurerFields
+    }
+  }
+`;
+
+const getDeadAdventurerByXP = gql`
   ${ADVENTURERS_FRAGMENT}
   query get_adventurer_by_xp {
     adventurers(orderBy: { xp: { desc: true } }, limit: 10000000) {
@@ -428,15 +453,10 @@ const getItemsByOwner = gql`
 `;
 
 const getTopScores = gql`
+  ${SCORES_FRAGMENT}
   query get_top_scores {
-    scores(orderBy: { xp: { desc: true } }, limit: 10) {
-      address
-      adventurerId
-      rank
-      xp
-      blockTime
-      timestamp
-      txHash
+    scores(orderBy: { xp: { desc: true } }, limit: 10000000) {
+      ...ScoreFields
     }
   }
 `;

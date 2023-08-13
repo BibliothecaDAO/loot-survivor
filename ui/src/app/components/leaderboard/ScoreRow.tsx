@@ -1,4 +1,4 @@
-import { Adventurer, NullAdventurer } from "@/app/types";
+import { Adventurer } from "@/app/types";
 import Lords from "../../../../public/lords.svg";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 
@@ -38,7 +38,7 @@ const ScoreRow = ({
                 : ""
             }`}
           >
-            {index == 0 ? 10 : index == 1 ? 3 : index == 2 ? 2 : ""}
+            {index == 0 ? 13 : index == 1 ? 8 : index == 2 ? 4 : ""}
           </span>
 
           <Lords className="self-center w-6 h-6 ml-4 fill-current" />

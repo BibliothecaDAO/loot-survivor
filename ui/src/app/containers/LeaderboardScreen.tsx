@@ -15,20 +15,20 @@ import { useUiSounds, soundSelector } from "../hooks/useUiSound";
 import KillAdventurer from "../components/actions/KillAdventurer";
 import ScoreRow from "../components/leaderboard/ScoreRow";
 import LiveRow from "../components/leaderboard/LiveRow";
+import useLoadingStore from "../hooks/useLoadingStore";
 
 /**
  * @container
  * @description Provides the leaderboard screen for the adventurer.
  */
-export default function LeaderboardScree() {
+export default function LeaderboardScreen() {
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [showKill, setShowKill] = useState(false);
   const itemsPerPage = 10;
   const [loading, setLoading] = useState(false);
-  const { play: clickPlay } = useUiSounds(soundSelector.click);
 
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
+  const txAccepted = useLoadingStore((state) => state.txAccepted);
 
   const handleRowSelected = async (adventurerId: number) => {
     setLoading(true);
@@ -49,10 +49,12 @@ export default function LeaderboardScree() {
     getAdventurersInListByXp,
     {
       ids: data.topScoresQuery?.scores
-        ? data.topScoresQuery?.scores.map((score: Score) => score.adventurerId)
+        ? data.topScoresQuery?.scores.map(
+            (score: Score) => score.adventurerId ?? 0
+          )
         : [0],
     },
-    false
+    txAccepted
   );
 
   const scores = data.adventurersInListByXpQuery?.adventurers
@@ -100,12 +102,10 @@ export default function LeaderboardScree() {
     return currentRank;
   };
 
-  console.log(adventurers);
-
   return (
     <div className="flex flex-row items-cente justify-between sm:w-3/4 sm:m-auto">
-      <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row justify-between w-full">
-        <div className="flex flex-col w-full sm:mb-4 sm:mb-0 sm:mr-4 flex-grow-2 sm:border sm:border-terminal-green p-2">
+      <div className="sm:w-1/2 flex flex-col gap-5 sm:gap-0 sm:flex-row justify-between w-full">
+        <div className="flex flex-col w-full sm:mb-4 sm:mb-0 sm:mr-4 flex-grow-2 p-2">
           <h4 className="text-center text-lg sm:text-2xl m-0">
             Live Leaderboard
           </h4>
@@ -175,34 +175,75 @@ export default function LeaderboardScree() {
           )}
         </div>
       </div>
-      <div className="hidden sm:block flex flex-col items-center py-2">
-        <h1 className="text-lg sm:text-2xl m-0">Top 3 Submitted Scores</h1>
+      <div className="hidden sm:block sm:w-1/2 flex flex-col items-center py-2">
+        <h4 className="text-lg text-center sm:text-2xl m-0">
+          Submitted Scores
+        </h4>
         {scores.length > 0 ? (
-          <table className="w-full mt-4 text-sm sm:text-xl border border-terminal-green">
-            <thead className="border border-terminal-green">
-              <tr>
-                <th className="p-1">Rank</th>
-                <th className="p-1">Adventurer</th>
-                <th className="p-1">XP</th>
-                <th className="p-1">
-                  Prize <span className="text-sm">(per mint)</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {scores.map((adventurer: Adventurer, index: number) => {
-                if (index > 2) {
-                  return null;
-                } else {
+          <div className="flex flex-col">
+            <table className="w-full text-sm sm:text-xl border border-terminal-green">
+              <thead className="border border-terminal-green">
+                <tr>
+                  <th className="p-1">Rank</th>
+                  <th className="p-1">Adventurer</th>
+                  <th className="p-1">XP</th>
+                  <th className="p-1">
+                    Prize <span className="text-sm">(per mint)</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {scores.map((adventurer: Adventurer, index: number) => (
                   <ScoreRow
                     index={index}
                     adventurer={adventurer}
                     handleRowSelected={handleRowSelected}
-                  />;
-                }
-              })}
-            </tbody>
-          </table>
+                  />
+                ))}
+              </tbody>
+            </table>
+            {adventurers?.length > 10 && (
+              <div className="flex justify-center sm:mt-8">
+                <Button
+                  variant={"outline"}
+                  onClick={() =>
+                    currentPage > 1 && handleClick(currentPage - 1)
+                  }
+                  disabled={currentPage === 1}
+                >
+                  back
+                </Button>
+
+                <Button
+                  variant={"outline"}
+                  key={1}
+                  onClick={() => handleClick(1)}
+                  className={currentPage === 1 ? "animate-pulse" : ""}
+                >
+                  {1}
+                </Button>
+
+                <Button
+                  variant={"outline"}
+                  key={totalPages}
+                  onClick={() => handleClick(totalPages)}
+                  className={currentPage === totalPages ? "animate-pulse" : ""}
+                >
+                  {totalPages}
+                </Button>
+
+                <Button
+                  variant={"outline"}
+                  onClick={() =>
+                    currentPage < totalPages && handleClick(currentPage + 1)
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  next
+                </Button>
+              </div>
+            )}
+          </div>
         ) : (
           <h3 className="text-lg sm:text-2xl py-4">
             No scores submitted yet. Be the first!

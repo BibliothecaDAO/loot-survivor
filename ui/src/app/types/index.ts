@@ -138,12 +138,12 @@ export interface Beast {
 }
 
 export interface Score {
-  adventurerId: number; // Adventurer ID
-  address: string; // Hex Address of the adventurer owner
-  rank: number; // Rank of the score
-  xp: number; // Experience points of the adventurer
-  txHash: string; // Hex of the transaction hash
-  scoreTime: Date; // Time of the score
+  adventurerId?: number; // Adventurer ID
+  owner?: string; // Hex Address of the adventurer owner
+  rank?: number; // Rank of the score
+  xp?: number; // Experience points of the adventurer
+  txHash?: string; // Hex of the transaction hash
+  blockTime?: Date; // Time of the score
   timestamp?: Date; // Indexer timestamp of event process
 }
 
@@ -398,6 +398,16 @@ export const NullItem: Item = {
   tier: undefined,
   type: undefined,
   lastUpdatedTime: undefined,
+};
+
+export const NullScore: Score = {
+  adventurerId: undefined,
+  owner: undefined,
+  rank: undefined,
+  xp: undefined,
+  txHash: undefined,
+  blockTime: undefined,
+  timestamp: undefined,
 };
 
 export const ZeroUpgrade: UpgradeStats = {
