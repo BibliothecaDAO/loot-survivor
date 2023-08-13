@@ -1212,9 +1212,6 @@ mod Game {
                         }
                     );
                 }
-
-                // discovering a beast ends explore recursion
-                return;
             },
             ExploreResult::Obstacle(()) => {
                 _obstacle_encounter(
@@ -1254,9 +1251,6 @@ mod Game {
                             _emit_level_up_events(
                                 ref self, adventurer, adventurer_id, previous_level, new_level
                             );
-
-                            // leveling up ends explore recursion
-                            return;
                         }
                     },
                     TreasureDiscovery::Health(()) => {
@@ -1276,8 +1270,14 @@ mod Game {
             }
         }
 
-        // if adventurer elected to explore till they find a beast and they are still alive with no stat points
-        if till_beast && adventurer.health > 0 && !(adventurer.stat_points_available > 0) {
+        // if adventurer elected to explore till they find a beast and
+        // they have not found a beast yet and
+        // they are still alive and
+        // they have not leveled up
+        if till_beast
+            && adventurer.beast_health == 0
+            && adventurer.health > 0
+            && !(adventurer.stat_points_available > 0) {
             // Keep exploring
             _explore(
                 ref self,
