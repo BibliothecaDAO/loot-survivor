@@ -28,7 +28,7 @@ export default function KillAdventurer() {
     setAdventurerTarget(event.target.value);
   };
 
-  const purchaseHealthTx = {
+  const slayIdleAdventurerTx = {
     contractAddress: gameContract?.address ?? "",
     entrypoint: "slay_idle_adventurer",
     calldata: [adventurerTarget, "0"],
@@ -36,7 +36,7 @@ export default function KillAdventurer() {
   };
 
   const handleSlayAdventurer = async () => {
-    addToCalls(purchaseHealthTx);
+    addToCalls(slayIdleAdventurerTx);
   };
 
   useCustomQuery(

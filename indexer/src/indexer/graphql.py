@@ -608,11 +608,11 @@ class AdventurersFilter:
 @strawberry.input
 class ScoresFilter:
     adventurerId: Optional[FeltValueFilter] = None
-    address: Optional[HexValueFilter] = None
+    owner: Optional[HexValueFilter] = None
     rank: Optional[FeltValueFilter] = None
     xp: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
-    scoreTime: Optional[DateTimeFilter] = None
+    blockTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
 
 
@@ -688,17 +688,15 @@ class BattlesFilter:
 class ItemsFilter:
     item: Optional[ItemFilter] = None
     adventurerId: Optional[FeltValueFilter] = None
-    cost: Optional[FeltValueFilter] = None
     ownerAddress: Optional[HexValueFilter] = None
     owner: Optional[BooleanFilter] = None
     equipped: Optional[BooleanFilter] = None
-    createdTime: Optional[DateTimeFilter] = None
     purchasedTime: Optional[DateTimeFilter] = None
     special1: Optional[Special1Filter] = None
     special2: Optional[Special2Filter] = None
     special3: Optional[Special3Filter] = None
     xp: Optional[FeltValueFilter] = None
-    lastUpdatedTime: Optional[DateTimeFilter] = None
+    isAvailable: Optional[BooleanFilter] = None
     timestamp: Optional[DateTimeFilter] = None
 
 
@@ -738,11 +736,11 @@ class AdventurersOrderByInput:
 @strawberry.input
 class ScoresOrderByInput:
     adventurerId: Optional[OrderByInput] = None
-    address: Optional[OrderByInput] = None
+    owner: Optional[OrderByInput] = None
     rank: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
-    scoreTime: Optional[OrderByInput] = None
+    blockTime: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
 
 
@@ -819,17 +817,15 @@ class BattlesOrderByInput:
 class ItemsOrderByInput:
     item: Optional[OrderByInput] = None
     adventurerId: Optional[OrderByInput] = None
-    cost: Optional[OrderByInput] = None
     ownerAddress: Optional[OrderByInput] = None
     owner: Optional[OrderByInput] = None
     equipped: Optional[OrderByInput] = None
-    createdTime: Optional[OrderByInput] = None
     purchasedTime: Optional[OrderByInput] = None
     special1: Optional[OrderByInput] = None
     special2: Optional[OrderByInput] = None
     special3: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
-    lastUpdatedTime: Optional[OrderByInput] = None
+    isAvailable: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
 
 
@@ -901,22 +897,22 @@ class Adventurer:
 @strawberry.type
 class Score:
     adventurerId: Optional[FeltValue]
-    address: Optional[HexValue]
+    owner: Optional[HexValue]
     rank: Optional[FeltValue]
     xp: Optional[FeltValue]
     txHash: Optional[HexValue]
-    scoreTime: Optional[datetime]
+    blockTime: Optional[datetime]
     timestamp: Optional[datetime]
 
     @classmethod
     def from_mongo(cls, data):
         return cls(
             adventurerId=data["adventurerId"],
-            address=data["address"],
+            owner=data["owner"],
             rank=data["rank"],
             xp=data["xp"],
             txHash=data["txHash"],
-            scoreTime=data["scoreTime"],
+            blockTime=data["blockTime"],
             timestamp=data["timestamp"],
         )
 
@@ -1066,17 +1062,15 @@ class Battle:
 class Item:
     item: Optional[ItemValue]
     adventurerId: Optional[FeltValue]
-    cost: Optional[FeltValue]
     ownerAddress: Optional[HexValue]
     owner: Optional[bool]
     equipped: Optional[bool]
-    createdTime: Optional[datetime]
     purchasedTime: Optional[datetime]
     special1: Optional[Special1Value]
     special2: Optional[Special2Value]
     special3: Optional[Special3Value]
     xp: Optional[FeltValue]
-    lastUpdatedTime: Optional[datetime]
+    isAvailable: Optional[bool]
     timestamp: Optional[datetime]
 
     @classmethod
@@ -1084,17 +1078,15 @@ class Item:
         return cls(
             item=data["item"],
             adventurerId=data["adventurerId"],
-            cost=data["cost"],
             ownerAddress=data["ownerAddress"],
             owner=data["owner"],
             equipped=data["equipped"],
-            createdTime=data["createdTime"],
             purchasedTime=data["purchasedTime"],
             special1=data["special1"],
             special2=data["special2"],
             special3=data["special3"],
             xp=data["xp"],
-            lastUpdatedTime=data["lastUpdatedTime"],
+            isAvailable=data["isAvailable"],
             timestamp=data["timestamp"],
         )
 

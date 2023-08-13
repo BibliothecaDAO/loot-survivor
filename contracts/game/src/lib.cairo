@@ -152,7 +152,7 @@ mod Game {
                 ref self, block_number, caller, starting_weapon, adventurer_meta, starting_stats
             );
 
-            _payout(ref self, caller, block_number, interface_id);
+            //_payout(ref self, caller, block_number, interface_id);
         }
 
         //@notice Sends an adventurer to explore.
@@ -2107,13 +2107,6 @@ mod Game {
             adventurer.get_level(), adventurer.stats.dexterity, flee_entropy
         );
 
-        // stage flee event
-        let flee_event = FleeEvent {
-            adventurer_state: AdventurerState {
-                owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
-            }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
-        };
-
         // if adventurer fled
         if (fled) {
             // set beast health to zero to denote adventurer is no longer in battle
@@ -2123,7 +2116,18 @@ mod Game {
             let (previous_level, new_level) = adventurer.increase_adventurer_xp(1);
 
             // emit flee attempt event
-            __event_FleeSucceeded(ref self, FleeSucceeded { flee_event });
+            __event_FleeSucceeded(
+                ref self,
+                FleeSucceeded {
+                    flee_event: FleeEvent {
+                        adventurer_state: AdventurerState {
+                            owner: get_caller_address(),
+                            adventurer_id: adventurer_id,
+                            adventurer: adventurer
+                        }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
+                    }
+                }
+            );
 
             // check for adventurer level up
             if (new_level > previous_level) {
@@ -2133,7 +2137,18 @@ mod Game {
             }
         } else {
             // // emit flee attempt event
-            __event_FleeFailed(ref self, FleeFailed { flee_event });
+            __event_FleeFailed(
+                ref self,
+                FleeFailed {
+                    flee_event: FleeEvent {
+                        adventurer_state: AdventurerState {
+                            owner: get_caller_address(),
+                            adventurer_id: adventurer_id,
+                            adventurer: adventurer
+                        }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
+                    }
+                }
+            );
 
             // if flee attempt was unsuccessful the beast counter attacks
             // adventurer death is handled as part of _beast_counter_attack()
