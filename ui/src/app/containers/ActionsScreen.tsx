@@ -162,6 +162,9 @@ export default function ActionsScreen() {
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
+        resetData("lastBeastQuery");
+        resetData("beastQuery");
+        resetData("latestMarketItemsQuery");
         addToCalls(exploreTx(true));
         startLoading(
           "Explore",
@@ -180,6 +183,11 @@ export default function ActionsScreen() {
             });
           }
         });
+        resetDataUpdated("discoveryByTxHashQuery");
+        resetDataUpdated("beastQuery");
+        resetDataUpdated("lastBeastQuery");
+        setEquipItems([]);
+        setDropItems([]);
       },
       disabled: hasBeast || loading || !adventurer?.id,
       loading: loading,
