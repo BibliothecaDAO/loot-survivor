@@ -152,7 +152,7 @@ mod Game {
                 ref self, block_number, caller, starting_weapon, adventurer_meta, starting_stats
             );
 
-            _payout(ref self, caller, block_number, interface_id);
+            //_payout(ref self, caller, block_number, interface_id);
         }
 
         //@notice Sends an adventurer to explore.
