@@ -9,7 +9,14 @@ import {
   useTransactionManager,
   useWaitForTransaction,
 } from "@starknet-react/core";
-import { Metadata, Item, Adventurer, Call, ItemPurchase } from "../../types";
+import {
+  Metadata,
+  Item,
+  Adventurer,
+  Call,
+  ItemPurchase,
+  UpgradeStats,
+} from "../../types";
 import { CoinIcon } from "../icons/Icons";
 import EfficacyDisplay from "../icons/EfficacyIcon";
 import { GameData } from "../GameData";
@@ -26,7 +33,11 @@ interface MarketplaceRowProps {
   ownedItems: Item[];
   purchaseItems: ItemPurchase[];
   setPurchaseItems: (value: ItemPurchase[]) => void;
-  upgradeHandler: (upgrades?: any[], purchases?: any[]) => void;
+  upgradeHandler: (
+    upgrades?: UpgradeStats,
+    potions?: number,
+    purchases?: any[]
+  ) => void;
   totalCharisma: number;
 }
 
@@ -181,7 +192,7 @@ const MarketplaceRow = ({
                     },
                   ];
                   setPurchaseItems(newPurchases);
-                  upgradeHandler(undefined, newPurchases);
+                  upgradeHandler(undefined, undefined, newPurchases);
                   setActiveMenu(null);
                 }}
               >
@@ -201,7 +212,7 @@ const MarketplaceRow = ({
                     },
                   ];
                   setPurchaseItems(newPurchases);
-                  upgradeHandler(undefined, newPurchases);
+                  upgradeHandler(undefined, undefined, newPurchases);
                   setActiveMenu(null);
                 }}
               >

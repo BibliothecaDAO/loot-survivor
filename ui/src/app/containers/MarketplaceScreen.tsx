@@ -5,7 +5,7 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import LootIconLoader from "../components/icons/Loader";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import { Item, ItemPurchase, NullItem } from "../types";
+import { Item, ItemPurchase, NullItem, UpgradeStats } from "../types";
 import { getItemData, getItemPrice, getKeyFromValue } from "../lib/utils";
 import PurchaseHealth from "../components/actions/PurchaseHealth";
 import { useMediaQuery } from "react-responsive";
@@ -18,7 +18,11 @@ export interface MarketplaceScreenProps {
   upgradeTotalCost: number;
   purchaseItems: ItemPurchase[];
   setPurchaseItems: (value: ItemPurchase[]) => void;
-  upgradeHandler: (upgrades?: any[], purchases?: any[]) => void;
+  upgradeHandler: (
+    upgrades?: UpgradeStats,
+    potions?: number,
+    purchases?: any[]
+  ) => void;
   totalCharisma: number;
 }
 /**
@@ -237,7 +241,7 @@ export default function MarketplaceScreen({
                           },
                         ];
                         setPurchaseItems(newPurchases);
-                        upgradeHandler(undefined, newPurchases);
+                        upgradeHandler(undefined, undefined, newPurchases);
                         setShowEquipQ(null);
                         setActiveMenu(0);
                       }}
@@ -258,7 +262,7 @@ export default function MarketplaceScreen({
                           },
                         ];
                         setPurchaseItems(newPurchases);
-                        upgradeHandler(undefined, newPurchases);
+                        upgradeHandler(undefined, undefined, newPurchases);
                         setShowEquipQ(null);
                         setActiveMenu(0);
                       }}

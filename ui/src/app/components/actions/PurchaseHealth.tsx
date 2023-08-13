@@ -7,12 +7,18 @@ import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { CoinIcon } from "../icons/Icons";
 import useUIStore from "@/app/hooks/useUIStore";
 import { getPotionPrice } from "@/app/lib/utils";
+import { UpgradeStats } from "@/app/types";
 
 interface PurchaseHealthProps {
   upgradeTotalCost: number;
   potionAmount: number;
   setPotionAmount: (value: number) => void;
   totalCharisma: number;
+  upgradeHandler: (
+    upgrades?: UpgradeStats,
+    potions?: number,
+    items?: any[]
+  ) => void;
 }
 
 const PurchaseHealth = ({
@@ -20,6 +26,7 @@ const PurchaseHealth = ({
   potionAmount,
   setPotionAmount,
   totalCharisma,
+  upgradeHandler,
 }: PurchaseHealthProps) => {
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -60,39 +67,14 @@ const PurchaseHealth = ({
 
   const currentLevel = adventurer?.level ?? 0;
 
-  const handleAddPotionsTx = (
-    potionAmount?: number,
-    upgrades?: any[],
-    items?: any[]
-  ) => {
-    removeEntrypointFromCalls("buy_items_and_upgrade_stats");
-    const buyItemsAndUpgradeTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "buy_items_and_upgrade_stats",
-      calldata: [
-        adventurer?.id?.toString() ?? "",
-        "0",
-        potionAmount,
-        items ? items.length.toString() : purchaseItems.length.toString(),
-        ...(items
-          ? items.flatMap(Object.values)
-          : purchaseItems.flatMap(Object.values)),
-        upgrades ? upgrades.length.toString() : upgradeStats.length.toString(),
-        ...(upgrades ? upgrades : upgradeStats),
-      ],
-      // calldata: [adventurer?.id?.toString() ?? "", "0", "0", "0", "0"],
-    };
-    addToCalls(buyItemsAndUpgradeTx);
-  };
-
   useEffect(() => {
     if (buttonClicked) {
       if (prevAmountRef.current !== undefined) {
         const prevAmount = prevAmountRef.current;
         if (potionAmount > prevAmount) {
-          handleAddPotionsTx(potionAmount, undefined, undefined);
+          upgradeHandler(undefined, potionAmount, undefined);
         } else if (potionAmount <= prevAmount) {
-          handleAddPotionsTx(potionAmount, undefined, undefined);
+          upgradeHandler(undefined, potionAmount, undefined);
         }
         setButtonClicked(false);
       }
@@ -123,8 +105,6 @@ const PurchaseHealth = ({
   //   },
   //   [potionAmount]
   // );
-
-  console.log(potionAmount, max);
 
   return (
     <div className="flex flex-col sm:flex-row sm:p-2 md:p-4 items-center">

@@ -195,6 +195,16 @@ export interface ItemPurchase {
   equip: string;
 }
 
+export interface UpgradeStats {
+  [key: string]: number;
+  Strength: number;
+  Dexterity: number;
+  Vitality: number;
+  Intelligence: number;
+  Wisdom: number;
+  Charisma: number;
+}
+
 export type BeastType =
   | "Basilisk"
   | "Kitsune"
@@ -380,4 +390,13 @@ export const NullItem: Item = {
   tier: undefined,
   type: undefined,
   lastUpdatedTime: undefined,
+};
+
+export const ZeroUpgrade: UpgradeStats = {
+  Strength: 0,
+  Dexterity: 0,
+  Vitality: 0,
+  Intelligence: 0,
+  Wisdom: 0,
+  Charisma: 0,
 };

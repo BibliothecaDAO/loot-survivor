@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { ItemPurchase } from "../types";
+import { ItemPurchase, UpgradeStats, ZeroUpgrade } from "../types";
 
 export type ScreenPage =
   | "start"
@@ -40,8 +40,8 @@ type State = {
   setDropItems: (value: string[]) => void;
   purchaseItems: ItemPurchase[];
   setPurchaseItems: (value: ItemPurchase[]) => void;
-  upgradeStats: string[];
-  setUpgradeStats: (value: string[]) => void;
+  upgradeStats: UpgradeStats;
+  setUpgradeStats: (value: UpgradeStats) => void;
   lastAction: Date | null;
   setLastAction: (value: Date | null) => void;
   mintAdventurer: boolean;
@@ -50,7 +50,6 @@ type State = {
   setInventorySelected: (value: number) => void;
   arcadeDialog: boolean;
   showArcadeDialog: (value: boolean) => void;
-  
 };
 
 const useUIStore = create<State>((set) => ({
@@ -78,7 +77,7 @@ const useUIStore = create<State>((set) => ({
   setDropItems: (value) => set({ dropItems: value }),
   purchaseItems: [],
   setPurchaseItems: (value) => set({ purchaseItems: value }),
-  upgradeStats: [],
+  upgradeStats: ZeroUpgrade,
   setUpgradeStats: (value) => set({ upgradeStats: value }),
   lastAction: null,
   setLastAction: (value) => set({ lastAction: value }),

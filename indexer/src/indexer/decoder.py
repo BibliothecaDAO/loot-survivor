@@ -76,6 +76,7 @@ raw_abi = [
             {"name": "ring", "type": "survivor::bag::LootStatistics"},
             {"name": "beast_health", "type": "core::integer::u16"},
             {"name": "stat_points_available", "type": "core::integer::u8"},
+            {"name": "mutated", "type": "core::bool"},
         ],
     },
     {
@@ -93,6 +94,7 @@ raw_abi = [
             {"name": "item_9", "type": "survivor::bag::LootStatistics"},
             {"name": "item_10", "type": "survivor::bag::LootStatistics"},
             {"name": "item_11", "type": "survivor::bag::LootStatistics"},
+            {"name": "mutated", "type": "core::bool"},
         ],
     },
     {
@@ -410,15 +412,47 @@ raw_abi = [
     },
     {
         "kind": "struct",
-        "name": "game::Game::EquippedItem",
+        "name": "game::Game::PurchasedItems",
         "type": "event",
         "inputs": [
             {
                 "name": "adventurer_state_with_bag",
                 "type": "game::Game::AdventurerStateWithBag",
             },
-            {"name": "equipped_item_id", "type": "core::integer::u8"},
-            {"name": "unequipped_item_id", "type": "core::integer::u8"},
+            {
+                "name": "purchases",
+                "type": "core::array::Array::<market::market::LootWithPrice>",
+            },
+        ],
+    },
+    {
+        "kind": "struct",
+        "name": "game::Game::PurchasedPotions",
+        "type": "event",
+        "inputs": [
+            {"name": "adventurer_state", "type": "game::Game::AdventurerState"},
+            {"name": "quantity", "type": "core::integer::u8"},
+            {"name": "cost", "type": "core::integer::u16"},
+            {"name": "health", "type": "core::integer::u16"},
+        ],
+    },
+    {
+        "kind": "struct",
+        "name": "game::Game::EquippedItems",
+        "type": "event",
+        "inputs": [
+            {
+                "name": "adventurer_state_with_bag",
+                "type": "game::Game::AdventurerStateWithBag",
+            },
+            {
+                "name": "equipped_items",
+                "type": "core::array::Array::<core::integer::u8>",
+            },
+            {
+                "name": "unequipped_items",
+                "type": "core::array::Array::<core::integer::u8>",
+            },
         ],
     },
     {
@@ -549,22 +583,9 @@ raw_abi = [
             {"name": "strength_increase", "type": "core::integer::u8"},
             {"name": "dexterity_increase", "type": "core::integer::u8"},
             {"name": "vitality_increase", "type": "core::integer::u8"},
-            {
-                "name": "intelligence_increase",
-                "type": "core::integer::u8",
-            },
+            {"name": "intelligence_increase", "type": "core::integer::u8"},
             {"name": "wisdom_increase", "type": "core::integer::u8"},
             {"name": "charisma_increase", "type": "core::integer::u8"},
-            {"name": "potions_purchased", "type": "core::integer::u8"},
-            {"name": "cost_of_potions", "type": "core::integer::u16"},
-            {
-                "name": "health_from_potions",
-                "type": "core::integer::u16",
-            },
-            {
-                "name": "items_purchased",
-                "type": "core::array::Array::<market::market::ItemPurchase>",
-            },
         ],
     },
 ]
@@ -631,8 +652,16 @@ decode_flee_succeeded_event = serializer_for_payload(
     game_contract_abi.events["game::Game::FleeSucceeded"].inputs
 )
 
-decode_equipped_item_event = serializer_for_payload(
-    game_contract_abi.events["game::Game::EquippedItem"].inputs
+decode_purchased_items_event = serializer_for_payload(
+    game_contract_abi.events["game::Game::PurchasedItems"].inputs
+)
+
+decode_purchased_potions_event = serializer_for_payload(
+    game_contract_abi.events["game::Game::PurchasedPotions"].inputs
+)
+
+decode_equipped_items_event = serializer_for_payload(
+    game_contract_abi.events["game::Game::EquippedItems"].inputs
 )
 
 decode_dropped_items_event = serializer_for_payload(

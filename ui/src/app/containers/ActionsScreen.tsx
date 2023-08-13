@@ -110,7 +110,13 @@ export default function ActionsScreen() {
   const exploreTx = {
     contractAddress: gameContract?.address ?? "",
     entrypoint: "explore",
-    calldata: [adventurer?.id?.toString() ?? "", "0"],
+    calldata: [adventurer?.id?.toString() ?? "", "0", "0"],
+  };
+
+  const exploreTillBeastTx = {
+    contractAddress: gameContract?.address ?? "",
+    entrypoint: "explore",
+    calldata: [adventurer?.id?.toString() ?? "", "0", "1"],
   };
 
   const buttonsData = [
@@ -120,7 +126,7 @@ export default function ActionsScreen() {
         ? "Exploring..."
         : hasBeast
         ? "Beast found!!"
-        : "Into The Mist",
+        : "Till Beast",
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
@@ -155,63 +161,34 @@ export default function ActionsScreen() {
       disabled: hasBeast || loading || !adventurer?.id,
       loading: loading,
     },
-    // TODO: Implement when contract ready
-    // {
-    //   id: 2,
-    //   label: hasBeast ? "Beast found!!" : "Till Damage",
-    //   icon: <MistIcon />,
-    //   value: "explore_till_damage",
-    //   action: async () => {
-    //     addToCalls(exploreTx);
-    //     startLoading(
-    //       "Explore",
-    //       "Exploring",
-    //       "discoveryByTxHashQuery",
-    //       adventurer?.id
-    //     );
-    //     await handleSubmitCalls(writeAsync).then((tx: any) => {
-    //       if (tx) {
-    //         setTxHash(tx.transaction_hash);
-    //         addTransaction({
-    //           hash: tx.transaction_hash,
-    //           metadata: {
-    //             method: `Explore with ${adventurer?.name}`,
-    //           },
-    //         });
-    //       }
-    //     });
-    //   },
-    //   disabled: hasBeast || loading || !adventurer?.id,
-    //   loading: loading,
-    // },
-    // {
-    //   id: 3,
-    //   label: hasBeast ? "Beast found!!" : "Till Beast",
-    //   icon: <MistIcon />,
-    //   value: "explore_till_beast",
-    //   action: async () => {
-    //     addToCalls(exploreTx);
-    //     startLoading(
-    //       "Explore",
-    //       "Exploring",
-    //       "discoveryByTxHashQuery",
-    //       adventurer?.id
-    //     );
-    //     await handleSubmitCalls(writeAsync).then((tx: any) => {
-    //       if (tx) {
-    //         setTxHash(tx.transaction_hash);
-    //         addTransaction({
-    //           hash: tx.transaction_hash,
-    //           metadata: {
-    //             method: `Explore with ${adventurer?.name}`,
-    //           },
-    //         });
-    //       }
-    //     });
-    //   },
-    //   disabled: hasBeast || loading || !adventurer?.id,
-    //   loading: loading,
-    // },
+    {
+      id: 2,
+      label: hasBeast ? "Beast found!!" : "Till Beast",
+      icon: <MistIcon />,
+      value: "explore",
+      action: async () => {
+        addToCalls(exploreTillBeastTx);
+        startLoading(
+          "Explore",
+          "Exploring",
+          "discoveryByTxHashQuery",
+          adventurer?.id
+        );
+        await handleSubmitCalls(writeAsync).then((tx: any) => {
+          if (tx) {
+            setTxHash(tx.transaction_hash);
+            addTransaction({
+              hash: tx.transaction_hash,
+              metadata: {
+                method: `Explore with ${adventurer?.name}`,
+              },
+            });
+          }
+        });
+      },
+      disabled: hasBeast || loading || !adventurer?.id,
+      loading: loading,
+    },
   ];
 
   return (
@@ -235,7 +212,8 @@ export default function ActionsScreen() {
               Please Select an Adventurer
             </p>
           )}
-          <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
+          <div className="flex flex-col items-center sm:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
+            <p className="text-2xl">Into the Mist</p>
             <VerticalKeyboardControl
               buttonsData={buttonsData}
               onSelected={(value) => setSelected(value)}

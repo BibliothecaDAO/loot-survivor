@@ -32,6 +32,7 @@ import { UpgradeNav } from "../components/upgrade/UpgradeNav";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { StatAttribute } from "../components/upgrade/StatAttribute";
 import useUIStore from "../hooks/useUIStore";
+import { UpgradeStats, ZeroUpgrade } from "../types";
 
 /**
  * @container
@@ -67,7 +68,6 @@ export default function UpgradeScreen() {
   const setUpgradeStats = useUIStore((state) => state.setUpgradeStats);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
-  const [upgrades, setUpgrades] = useState<Record<string, number>>({});
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
 
   const { resetDataUpdated } = useQueriesStore();
@@ -79,7 +79,6 @@ export default function UpgradeScreen() {
     getLatestMarketItems,
     {
       adventurerId: adventurer?.id,
-      limit: 20 * (adventurer?.statUpgrades ?? 0),
     },
     txAccepted
   );
@@ -134,18 +133,10 @@ export default function UpgradeScreen() {
 
   function renderContent() {
     const attribute = attributes.find((attr) => attr.name === selected);
-    const amount = attribute ? upgrades[attribute.name] ?? 0 : 0;
     return (
       <div className="flex sm:w-2/3 h-24 sm:h-full items-center justify-center border-l border-terminal-green p-2">
         {attribute && (
-          <StatAttribute
-            amount={amount}
-            setAmount={setUpgrades}
-            upgrades={upgradeStats}
-            setUpgrades={setUpgradeStats}
-            upgradeHandler={handleAddItemsAndTx}
-            {...attribute}
-          />
+          <StatAttribute upgradeHandler={handleAddItemsAndTx} {...attribute} />
         )}
       </div>
     );
@@ -213,7 +204,7 @@ export default function UpgradeScreen() {
     );
   }
 
-  const selectedCharisma = upgrades["Charisma"] ?? 0;
+  const selectedCharisma = upgradeStats["Charisma"] ?? 0;
 
   const totalCharisma = (adventurer?.charisma ?? 0) + selectedCharisma;
 
@@ -230,21 +221,29 @@ export default function UpgradeScreen() {
 
   const upgradeTotalCost = purchaseGoldAmount + itemsGoldSum;
 
-  const handleAddItemsAndTx = (upgrades?: any[], items?: any[]) => {
-    removeEntrypointFromCalls("buy_items_and_upgrade_stats");
+  const handleAddItemsAndTx = (
+    upgrades?: UpgradeStats,
+    potions?: number,
+    items?: any[]
+  ) => {
+    removeEntrypointFromCalls("upgrade_adventurer");
     const buyItemsAndUpgradeTx = {
       contractAddress: gameContract?.address ?? "",
-      entrypoint: "buy_items_and_upgrade_stats",
+      entrypoint: "upgrade_adventurer",
       calldata: [
         adventurer?.id?.toString() ?? "",
         "0",
         potionAmount,
+        upgrades ? upgrades["Strength"] : upgradeStats["Strength"],
+        upgrades ? upgrades["Dexterity"] : upgradeStats["Dexterity"],
+        upgrades ? upgrades["Vitality"] : upgradeStats["Vitality"],
+        upgrades ? upgrades["Intelligence"] : upgradeStats["Intelligence"],
+        upgrades ? upgrades["Wisdom"] : upgradeStats["Wisdom"],
+        upgrades ? upgrades["Charisma"] : upgradeStats["Charisma"],
         items ? items.length.toString() : purchaseItems.length.toString(),
         ...(items
           ? items.flatMap(Object.values)
           : purchaseItems.flatMap(Object.values)),
-        upgrades ? upgrades.length.toString() : upgradeStats.length.toString(),
-        ...(upgrades ? upgrades : upgradeStats),
       ],
       // calldata: [adventurer?.id?.toString() ?? "", "0", "0", "0", "0"],
     };
@@ -276,7 +275,11 @@ export default function UpgradeScreen() {
 
   const lastPage = isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2;
 
-  const nextDisabled = upgradeStats.length !== adventurer?.statUpgrades;
+  const upgradesLength = Object.values(upgradeStats).filter(
+    (value) => value !== 0
+  ).length;
+
+  const nextDisabled = upgradesLength !== adventurer?.statUpgrades;
 
   useEffect(() => {
     if (upgradeStats.length === 0) {
@@ -378,6 +381,7 @@ export default function UpgradeScreen() {
                         potionAmount={potionAmount}
                         setPotionAmount={setPotionAmount}
                         totalCharisma={totalCharisma}
+                        upgradeHandler={handleAddItemsAndTx}
                       />
                     </div>
                   )}
@@ -417,8 +421,7 @@ export default function UpgradeScreen() {
                           handleBuyItemsAndUpgradeTx();
                           resetDataUpdated("adventurerByIdQuery");
                           setPurchaseItems([]);
-                          setUpgradeStats([]);
-                          setUpgrades({});
+                          setUpgradeStats(ZeroUpgrade);
                         } else {
                           setUpgradeScreen(upgradeScreen + 1);
                         }

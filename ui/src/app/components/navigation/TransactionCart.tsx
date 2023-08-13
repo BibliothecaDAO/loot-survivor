@@ -21,6 +21,7 @@ import {
   Call,
   NullAdventurer,
   ItemPurchase,
+  ZeroUpgrade,
 } from "../../types";
 import { GameData } from "../GameData";
 import { getKeyFromValue } from "../../lib/utils";
@@ -170,8 +171,12 @@ const TransactionCart: React.FC = () => {
     setEquipItems([]);
     setDropItems([]);
     setPurchaseItems([]);
-    setUpgradeStats([]);
+    setUpgradeStats(ZeroUpgrade);
   };
+
+  const filteredStats = Object.entries(upgradeStats).filter(
+    (stat: any) => stat[1] !== 0
+  );
 
   console.log(loadingQuery);
 
@@ -259,33 +264,31 @@ const TransactionCart: React.FC = () => {
                             </div>
                           ))}
                         </div>
-                      ) : call.entrypoint === "buy_items_and_upgrade_stats" ? (
+                      ) : call.entrypoint === "upgrade_adventurer" ? (
                         <div className="flex flex-col">
-                          {upgradeStats.map((stat: string, index: number) => (
-                            <div className="flex flex-row" key={index}>
-                              <p>
-                                {`Upgrade ${getValueFromKey(
-                                  gameData.STATS,
-                                  parseInt(stat)
-                                )}`}
-                              </p>
-                              <button
-                                onClick={() => {
-                                  clickPlay();
-                                  const newStats = upgradeStats.filter(
-                                    (i) => i !== stat
-                                  );
-                                  setUpgradeStats(newStats);
-                                  if (newStats.length === 0) {
-                                    removeFromCalls(call);
-                                  }
-                                }}
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                <MdClose size={20} />
-                              </button>
-                            </div>
-                          ))}
+                          {filteredStats.map(
+                            ([string, number], index: number) => (
+                              <div className="flex flex-row" key={index}>
+                                <p>{`Upgrade ${string} x ${number}`}</p>
+                                <button
+                                  onClick={() => {
+                                    clickPlay();
+                                    upgradeStats[string] = 0;
+                                    setUpgradeStats(upgradeStats);
+                                    const newStats = Object.entries(
+                                      upgradeStats
+                                    ).filter((stat: any) => stat[1] !== 0);
+                                    if (newStats.length === 0) {
+                                      removeFromCalls(call);
+                                    }
+                                  }}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <MdClose size={20} />
+                                </button>
+                              </div>
+                            )
+                          )}
                           {purchaseItems.map(
                             (item: ItemPurchase, index: number) => (
                               <div className="flex flex-row gap-1" key={index}>
@@ -329,10 +332,8 @@ const TransactionCart: React.FC = () => {
                           if (call.entrypoint === "drop") {
                             setDropItems([]);
                           }
-                          if (
-                            call.entrypoint === "buy_items_and_upgrade_stats"
-                          ) {
-                            setUpgradeStats([]);
+                          if (call.entrypoint === "upgrade_adventurer") {
+                            setUpgradeStats(ZeroUpgrade);
                             setPurchaseItems([]);
                           }
                         }}
