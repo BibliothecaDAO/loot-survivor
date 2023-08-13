@@ -6,12 +6,19 @@ import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { CoinIcon } from "../icons/Icons";
 import useUIStore from "@/app/hooks/useUIStore";
+import { getPotionPrice } from "@/app/lib/utils";
+import { UpgradeStats } from "@/app/types";
 
 interface PurchaseHealthProps {
   upgradeTotalCost: number;
   potionAmount: number;
   setPotionAmount: (value: number) => void;
   totalCharisma: number;
+  upgradeHandler: (
+    upgrades?: UpgradeStats,
+    potions?: number,
+    items?: any[]
+  ) => void;
   totalVitality: number;
 }
 
@@ -20,20 +27,13 @@ const PurchaseHealth = ({
   potionAmount,
   setPotionAmount,
   totalCharisma,
-  totalVitality,
+  upgradeHandler,
 }: PurchaseHealthProps) => {
-  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const removeEntrypointFromCalls = useTransactionCartStore(
-    (state) => state.removeEntrypointFromCalls
-  );
-  const purchaseItems = useUIStore((state) => state.purchaseItems);
-  const upgradeStats = useUIStore((state) => state.upgradeStats);
   const prevAmountRef = useRef<number | undefined>(0);
   const [buttonClicked, setButtonClicked] = useState(false);
 
-  const potionCost = Math.max((adventurer?.level ?? 0) - 2 * totalCharisma, 1);
+  const potionCost = getPotionPrice(adventurer?.level ?? 0, totalCharisma);
 
   const purchaseGoldAmount = potionAmount * potionCost;
 
@@ -52,48 +52,14 @@ const PurchaseHealth = ({
     }
   };
 
-  const calculatedNewHealth = (adventurer?.health ?? 0) + potionAmount * 10;
-
-  const disabled =
-    !hasBalance ||
-    adventurer?.health == maxHealth ||
-    calculatedNewHealth - maxHealth >= 10;
-
-  const currentLevel = adventurer?.level ?? 0;
-
-  const handleAddPotionsTx = (
-    potionAmount?: number,
-    upgrades?: any[],
-    items?: any[]
-  ) => {
-    removeEntrypointFromCalls("buy_items_and_upgrade_stats");
-    const buyItemsAndUpgradeTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "buy_items_and_upgrade_stats",
-      calldata: [
-        adventurer?.id?.toString() ?? "",
-        "0",
-        potionAmount,
-        items ? items.length.toString() : purchaseItems.length.toString(),
-        ...(items
-          ? items.flatMap(Object.values)
-          : purchaseItems.flatMap(Object.values)),
-        upgrades ? upgrades.length.toString() : upgradeStats.length.toString(),
-        ...(upgrades ? upgrades : upgradeStats),
-      ],
-      // calldata: [adventurer?.id?.toString() ?? "", "0", "0", "0", "0"],
-    };
-    addToCalls(buyItemsAndUpgradeTx);
-  };
-
   useEffect(() => {
     if (buttonClicked) {
       if (prevAmountRef.current !== undefined) {
         const prevAmount = prevAmountRef.current;
         if (potionAmount > prevAmount) {
-          handleAddPotionsTx(potionAmount, undefined, undefined);
+          upgradeHandler(undefined, potionAmount, undefined);
         } else if (potionAmount <= prevAmount) {
-          handleAddPotionsTx(potionAmount, undefined, undefined);
+          upgradeHandler(undefined, potionAmount, undefined);
         }
         setButtonClicked(false);
       }
@@ -166,19 +132,6 @@ const PurchaseHealth = ({
             You can only buy up to Max Health! 1 Potion = 10 Health
           </p>
         </div>
-        {/* <Button
-            disabled={disabled}
-            onClick={async () => {
-              handlePurchaseHealth();
-            }}
-            size={"lg"}
-          >
-            {adventurer?.health == maxHealth
-              ? "Max Health Reached"
-              : calculatedNewHealth - maxHealth >= 10
-              ? "Purchase Over Max Health"
-              : "Purchase Health"}
-          </Button> */}
         {!hasBalance && (
           <p className="m-auto text-red-600">Not enough gold to purchase!</p>
         )}

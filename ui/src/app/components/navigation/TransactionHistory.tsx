@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, RefObject } from "react";
 import { useTransactionManager } from "@starknet-react/core";
 import { TxStatus } from "./TxStatus";
 import { Metadata } from "../../types";
@@ -13,18 +13,20 @@ import { MdClose } from "react-icons/md";
 import { useUiSounds } from "../../hooks/useUiSound";
 import { soundSelector } from "../../hooks/useUiSound";
 
-const TransactionHistory = () => {
-  const wrapperRef = useRef<HTMLDivElement>(null); // Update the type here
+export interface TransactionHistoryProps {
+  buttonRef: RefObject<HTMLElement>;
+}
+
+const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
-  useOnClickOutside(wrapperRef, () => setDisplayHistory(false));
+  useOnClickOutside(wrapperRef, () => setDisplayHistory(false), buttonRef);
   const { adventurer } = useAdventurerStore();
 
   const { transactions } = useTransactionManager();
   const { data: queryData } = useQueriesStore();
   const displayHistory = useUIStore((state) => state.displayHistory);
   const { play } = useUiSounds(soundSelector.click);
-
-  const method = (transactions[0]?.metadata as Metadata)?.method;
 
   const history = useLoadingStore((state) => state.history);
 
@@ -58,6 +60,7 @@ const TransactionHistory = () => {
                     const response = history.find(
                       (response) => response.hash == tx.hash
                     );
+                    const method = (tx?.metadata as Metadata)?.method;
                     let notification: React.ReactNode = null;
                     const battles = queryData.battlesByBeastQuery
                       ? queryData.battlesByBeastQuery.battles

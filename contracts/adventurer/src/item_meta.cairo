@@ -6,7 +6,10 @@ use pack::pack::{Packing, rshift_split};
 use pack::constants::pow;
 use lootitems::statistics::constants::{ItemId, ItemSuffix};
 
-use super::{adventurer::{Adventurer, IAdventurer, ImplAdventurer}, item_primitive::ItemPrimitive};
+use super::{
+    adventurer::{Adventurer, IAdventurer, ImplAdventurer}, item_primitive::ItemPrimitive,
+    adventurer_stats::Stats
+};
 use super::bag::{Bag, IBag};
 
 mod STORAGE {
@@ -492,7 +495,11 @@ fn test_item_meta_packing() {
 #[available_gas(4000000)]
 fn test_set_metadata_id() {
     // start test with a new adventurer wielding a wand
-    let mut adventurer = ImplAdventurer::new(12, 1, 1, 1, 1, 1, 1, 1);
+    let mut adventurer = ImplAdventurer::new(
+        12,
+        1,
+        Stats { strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,  }
+    );
 
     // assert adventurer starter weapon has meta data id 1
     assert(adventurer.weapon.metadata == 1, 'advntr wpn meta data shld be 1');
@@ -524,7 +531,7 @@ fn test_set_metadata_id() {
             id: 0, xp: 0, metadata: 0, 
             }, item_11: ItemPrimitive {
             id: 0, xp: 0, metadata: 0, 
-        },
+        }, mutated: false
     };
 
     // stage a bunch of gear
