@@ -498,8 +498,9 @@ export const AdventurerForm = ({
                 />
               </div>
             )}
-            <TxActivity />
+
             <div className="absolute top-1/2 left-0 right-0 flex flex-col items-center gap-4 z-10">
+              <TxActivity />
               {!account ? (
                 <>
                   <div className="flex flex-col justify-between">

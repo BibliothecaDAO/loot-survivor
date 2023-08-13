@@ -92,7 +92,7 @@ export const ItemDisplay = ({
     >
       <div className="flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
         <LootIcon
-          size={isMobileDevice ? "w-4" : "w-4"}
+          size={isMobileDevice ? "w-3" : "w-4"}
           type={itemSlot ? itemSlot : slot}
         />
         <Efficacyicon size={isMobileDevice ? "w-4" : "w-4"} type={type} />
@@ -139,7 +139,7 @@ export const ItemDisplay = ({
                         );
                       }}
                     >
-                      <SwapIcon className="w-4 h-4" />
+                      <SwapIcon className="w-2 h-2 lg:w-4 lg:h-4" />
                     </Button>
                   )}
                   {inventory && (
