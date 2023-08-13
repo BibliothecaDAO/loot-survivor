@@ -148,7 +148,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
         case "equip":
           handleEquipItem();
           break;
-        case "drop":
+        case "drop_items":
           handleDropItems();
           break;
         case "purchase_health":
@@ -247,7 +247,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
                             </div>
                           ))}
                         </div>
-                      ) : call.entrypoint === "drop" ? (
+                      ) : call.entrypoint === "drop_items" ? (
                         <div className="flex flex-col">
                           {dropItems.map((item: string, index: number) => (
                             <div className="flex flex-row" key={index}>
@@ -340,7 +340,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
                           if (call.entrypoint === "equip") {
                             setEquipItems([]);
                           }
-                          if (call.entrypoint === "drop") {
+                          if (call.entrypoint === "drop_items") {
                             setDropItems([]);
                           }
                           if (call.entrypoint === "upgrade_adventurer") {
