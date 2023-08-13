@@ -21,20 +21,19 @@ impl ImplObstacle of IObstacle {
         adventurer_level: u8, adventurer_intelligence: u8, entropy: u128
     ) -> (Obstacle, bool) {
         // get random obstacle id
-        let obstacle_id = ImplObstacle::obstacle_encounter_id(entropy);
+        let obstacle_id = ImplObstacle::get_random_id(entropy);
         // get random obstacle level
         let obstacle_level = ImplObstacle::get_random_level(adventurer_level, entropy);
         // return obstacle
         let obstacle = ImplObstacle::get_obstacle(obstacle_id, obstacle_level);
         let dodged = ImplObstacle::dodged(adventurer_level, adventurer_intelligence, entropy);
-        return (obstacle, dodged);
+        (obstacle, dodged)
     }
 
-    // obstacle_encounter_id returns a random obstacle id based on adventurer, adventurer entropy, and game entropy
-    // the obstacle id will be between 1 and the max obstacle id (inclusive)
+    // @notice returns a random obstacle id based on the provided entropy
     // @param entropy: u128 - entropy from random id generation
     // @return u8 - the obstacle id
-    fn obstacle_encounter_id(entropy: u128) -> u8 {
+    fn get_random_id(entropy: u128) -> u8 {
         // select an obstacle between 1 and max obstacle id (inclusive)
         let obstacle_id = (entropy % ObstacleId::MAX_ID.into()) + 1;
 
@@ -58,7 +57,7 @@ impl ImplObstacle of IObstacle {
         Obstacle { id: id, combat_specs: combat_specs }
     }
 
-    // get_level uses the combat lib to generate a random level scoped for the adventurer level
+    // @notice uses the combat lib to generate a random level scoped for the adventurer level
     // @param adventurer_level: the level of adventurer ()
     // @param entropy: entropy for random level generation
     // @return u8 - the obstacle level
@@ -66,114 +65,357 @@ impl ImplObstacle of IObstacle {
         ImplCombat::get_random_level(adventurer_level, entropy)
     }
 
-    // get_tier returns the tier of the obstacle based on the provided obstacle id
+    // @notice returns the tier of the obstacle based on the provided obstacle id
     // @param id: u8 - the obstacle id
     // @return u8 - the obstacle tier
     fn get_tier(id: u8) -> Tier {
         if id == ObstacleId::DemonicAlter {
-            return Tier::T1(());
-        } else if id == ObstacleId::Curse {
-            return Tier::T2(());
-        } else if id == ObstacleId::Hex {
-            return Tier::T3(());
+            Tier::T1(())
+        } else if id == ObstacleId::VortexOfDespair {
+            Tier::T1(())
+        } else if id == ObstacleId::EldritchBarrier {
+            Tier::T1(())
+        } else if id == ObstacleId::SoulTrap {
+            Tier::T1(())
+        } else if id == ObstacleId::PhantomVortex {
+            Tier::T1(())
+        } else if id == ObstacleId::EctoplasmicWeb {
+            Tier::T2(())
+        } else if id == ObstacleId::SpectralChains {
+            Tier::T2(())
+        } else if id == ObstacleId::InfernalPact {
+            Tier::T2(())
+        } else if id == ObstacleId::ArcaneExplosion {
+            Tier::T2(())
+        } else if id == ObstacleId::HypnoticEssence {
+            Tier::T2(())
+        } else if id == ObstacleId::MischievousSprites {
+            Tier::T3(())
+        } else if id == ObstacleId::SoulDrainingStatue {
+            Tier::T3(())
+        } else if id == ObstacleId::PetrifyingGaze {
+            Tier::T3(())
+        } else if id == ObstacleId::SummoningCircle {
+            Tier::T3(())
+        } else if id == ObstacleId::EtherealVoid {
+            Tier::T3(())
         } else if id == ObstacleId::MagicLock {
-            return Tier::T4(());
+            Tier::T4(())
+        } else if id == ObstacleId::BewitchingFog {
+            Tier::T4(())
+        } else if id == ObstacleId::IllusionaryMaze {
+            Tier::T4(())
+        } else if id == ObstacleId::SpellboundMirror {
+            Tier::T4(())
+        } else if id == ObstacleId::EnsnaringShadow {
+            Tier::T4(())
         } else if id == ObstacleId::DarkMist {
-            return Tier::T5(());
-        } else if id == ObstacleId::CollapsingCeiling {
-            return Tier::T1(());
-        } else if id == ObstacleId::CrushingWalls {
-            return Tier::T2(());
-        } else if id == ObstacleId::Rockslide {
-            return Tier::T3(());
-        } else if id == ObstacleId::TumblingBoulders {
-            return Tier::T4(());
-        } else if id == ObstacleId::SwingingLogs {
-            return Tier::T5(());
+            Tier::T5(())
+        } else if id == ObstacleId::Curse {
+            Tier::T5(())
+        } else if id == ObstacleId::HauntingEcho {
+            Tier::T5(())
+        } else if id == ObstacleId::Hex {
+            Tier::T5(())
+        } else if id == ObstacleId::GhostlyWhispers {
+            Tier::T5(())
         } else if id == ObstacleId::PendulumBlades {
-            return Tier::T1(());
+            Tier::T1(())
+        } else if id == ObstacleId::IcyRazorWinds {
+            Tier::T1(())
+        } else if id == ObstacleId::AcidicThorns {
+            Tier::T1(())
+        } else if id == ObstacleId::DragonsBreath {
+            Tier::T1(())
+        } else if id == ObstacleId::PendulumScythe {
+            Tier::T1(())
         } else if id == ObstacleId::FlameJet {
-            return Tier::T2(());
+            Tier::T2(())
+        } else if id == ObstacleId::PiercingIceDarts {
+            Tier::T2(())
+        } else if id == ObstacleId::GlassSandStorm {
+            Tier::T2(())
+        } else if id == ObstacleId::PoisonedDartWall {
+            Tier::T2(())
+        } else if id == ObstacleId::SpinningBladeWheel {
+            Tier::T2(())
         } else if id == ObstacleId::PoisonDart {
-            return Tier::T3(());
+            Tier::T3(())
+        } else if id == ObstacleId::SpikedTumbleweed {
+            Tier::T3(())
+        } else if id == ObstacleId::Thunderbolt {
+            Tier::T3(())
+        } else if id == ObstacleId::GiantBearTrap {
+            Tier::T3(())
+        } else if id == ObstacleId::SteelNeedleRain {
+            Tier::T3(())
         } else if id == ObstacleId::SpikedPit {
-            return Tier::T4(());
+            Tier::T4(())
+        } else if id == ObstacleId::DiamondDustStorm {
+            Tier::T4(())
+        } else if id == ObstacleId::TrapdoorScorpionPit {
+            Tier::T4(())
+        } else if id == ObstacleId::BladedFan {
+            Tier::T4(())
+        } else if id == ObstacleId::BearTrap {
+            Tier::T4(())
+        } else if id == ObstacleId::PorcupineQuill {
+            Tier::T5(())
         } else if id == ObstacleId::HiddenArrow {
-            return Tier::T5(());
+            Tier::T5(())
+        } else if id == ObstacleId::GlassShard {
+            Tier::T5(())
+        } else if id == ObstacleId::ThornBush {
+            Tier::T5(())
+        } else if id == ObstacleId::JaggedRocks {
+            Tier::T5(())
+        } else if id == ObstacleId::CollapsingCeiling {
+            Tier::T1(())
+        } else if id == ObstacleId::Rockslide {
+            Tier::T1(())
+        } else if id == ObstacleId::FlashFlood {
+            Tier::T1(())
+        } else if id == ObstacleId::ClingingRoots {
+            Tier::T1(())
+        } else if id == ObstacleId::CollapsingCavern {
+            Tier::T1(())
+        } else if id == ObstacleId::CrushingWalls {
+            Tier::T2(())
+        } else if id == ObstacleId::SmashingPillars {
+            Tier::T2(())
+        } else if id == ObstacleId::RumblingCatacomb {
+            Tier::T2(())
+        } else if id == ObstacleId::WhirlingCyclone {
+            Tier::T2(())
+        } else if id == ObstacleId::EruptingEarth {
+            Tier::T2(())
+        } else if id == ObstacleId::SubterraneanTremor {
+            Tier::T3(())
+        } else if id == ObstacleId::FallingChandelier {
+            Tier::T3(())
+        } else if id == ObstacleId::CollapsingBridge {
+            Tier::T3(())
+        } else if id == ObstacleId::RagingSandstorm {
+            Tier::T3(())
+        } else if id == ObstacleId::AvalanchingRocks {
+            Tier::T3(())
+        } else if id == ObstacleId::TumblingBoulders {
+            Tier::T4(())
+        } else if id == ObstacleId::SlammingIronGate {
+            Tier::T4(())
+        } else if id == ObstacleId::ShiftingSandtrap {
+            Tier::T4(())
+        } else if id == ObstacleId::EruptingMudGeyser {
+            Tier::T4(())
+        } else if id == ObstacleId::CrumblingStaircase {
+            Tier::T4(())
+        } else if id == ObstacleId::SwingingLogs {
+            Tier::T5(())
+        } else if id == ObstacleId::UnstableCliff {
+            Tier::T5(())
+        } else if id == ObstacleId::TopplingStatue {
+            Tier::T5(())
+        } else if id == ObstacleId::TumblingBarrels {
+            Tier::T5(())
+        } else if id == ObstacleId::RollingBoulder {
+            Tier::T5(())
+        } else {
+            panic_with_felt252('unknown obstacle id')
         }
-
-        // fall through for unknown obstacle id return T5
-        return Tier::T5(());
     }
 
-    // get_type returns the type of the obstacle based on the provided obstacle id
+    // @notice returns the type of the obstacle based on the provided obstacle id
     // @param id: u8 - the obstacle id
     // @return u8 - the obstacle type
     fn get_type(id: u8) -> Type {
         if id == ObstacleId::DemonicAlter {
-            return Type::Magic_or_Cloth(());
-        } else if id == ObstacleId::Curse {
-            return Type::Magic_or_Cloth(());
-        } else if id == ObstacleId::Hex {
-            return Type::Magic_or_Cloth(());
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::VortexOfDespair {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::EldritchBarrier {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::SoulTrap {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::PhantomVortex {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::EctoplasmicWeb {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::SpectralChains {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::InfernalPact {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::ArcaneExplosion {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::HypnoticEssence {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::MischievousSprites {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::SoulDrainingStatue {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::PetrifyingGaze {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::SummoningCircle {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::EtherealVoid {
+            Type::Magic_or_Cloth(())
         } else if id == ObstacleId::MagicLock {
-            return Type::Magic_or_Cloth(());
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::BewitchingFog {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::IllusionaryMaze {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::SpellboundMirror {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::EnsnaringShadow {
+            Type::Magic_or_Cloth(())
         } else if id == ObstacleId::DarkMist {
-            return Type::Magic_or_Cloth(());
-        } else if id == ObstacleId::CollapsingCeiling {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == ObstacleId::CrushingWalls {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == ObstacleId::Rockslide {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == ObstacleId::TumblingBoulders {
-            return Type::Bludgeon_or_Metal(());
-        } else if id == ObstacleId::SwingingLogs {
-            return Type::Bludgeon_or_Metal(());
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::Curse {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::HauntingEcho {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::Hex {
+            Type::Magic_or_Cloth(())
+        } else if id == ObstacleId::GhostlyWhispers {
+            Type::Magic_or_Cloth(())
         } else if id == ObstacleId::PendulumBlades {
-            return Type::Blade_or_Hide(());
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::IcyRazorWinds {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::AcidicThorns {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::DragonsBreath {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::PendulumScythe {
+            Type::Blade_or_Hide(())
         } else if id == ObstacleId::FlameJet {
-            return Type::Blade_or_Hide(());
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::PiercingIceDarts {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::GlassSandStorm {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::PoisonedDartWall {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::SpinningBladeWheel {
+            Type::Blade_or_Hide(())
         } else if id == ObstacleId::PoisonDart {
-            return Type::Blade_or_Hide(());
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::SpikedTumbleweed {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::Thunderbolt {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::GiantBearTrap {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::SteelNeedleRain {
+            Type::Blade_or_Hide(())
         } else if id == ObstacleId::SpikedPit {
-            return Type::Blade_or_Hide(());
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::DiamondDustStorm {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::TrapdoorScorpionPit {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::BladedFan {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::BearTrap {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::PorcupineQuill {
+            Type::Blade_or_Hide(())
         } else if id == ObstacleId::HiddenArrow {
-            return Type::Blade_or_Hide(());
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::GlassShard {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::ThornBush {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::JaggedRocks {
+            Type::Blade_or_Hide(())
+        } else if id == ObstacleId::CollapsingCeiling {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::Rockslide {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::FlashFlood {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::ClingingRoots {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::CollapsingCavern {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::CrushingWalls {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::SmashingPillars {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::RumblingCatacomb {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::WhirlingCyclone {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::EruptingEarth {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::SubterraneanTremor {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::FallingChandelier {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::CollapsingBridge {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::RagingSandstorm {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::AvalanchingRocks {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::TumblingBoulders {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::SlammingIronGate {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::ShiftingSandtrap {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::EruptingMudGeyser {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::CrumblingStaircase {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::SwingingLogs {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::UnstableCliff {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::TopplingStatue {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::TumblingBarrels {
+            Type::Bludgeon_or_Metal(())
+        } else if id == ObstacleId::RollingBoulder {
+            Type::Bludgeon_or_Metal(())
         } else {
-            // should not happen
-            return Type::Blade_or_Hide(());
+            panic_with_felt252('unknown obstacle id')
         }
     }
 
-    // get_damage returns the damage of the obstacle based on the provided obstacle id
+    // @notice Calculates the damage dealt by an obstacle to an armor based on specific combat specifications.
+    // @param obstacle The obstacle whose damage is being calculated.
+    // @param armor_combat_spec The combat specifications of the armor.
+    // @param entropy A value used to introduce randomness in the damage calculation.
+    // @return The calculated damage as a 16-bit unsigned integer.
+    // @dev Note that critical hits are not considered for obstacles in this calculation.
     fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, entropy: u128) -> u16 {
         // no critical hits for obstacles
         let is_critical_hit = false;
 
-        return ImplCombat::calculate_damage(
+        ImplCombat::calculate_damage(
             obstacle.combat_specs,
             armor_combat_spec,
             ObstacleSettings::MINIMUM_DAMAGE,
             ObstacleSettings::DAMAGE_BOOST,
             is_critical_hit,
             entropy
-        );
+        )
     }
 
-    // get_xp_reward returns the xp reward from encountering the obstacle
+    // @notice get_xp_reward returns the xp reward from encountering the obstacle
     // @param obstacle: Obstacle - the obstacle
     // @return u16 - the xp reward
     fn get_xp_reward(self: Obstacle) -> u16 {
         let xp_reward = self.combat_specs.get_xp_reward();
         if (xp_reward < ObstacleSettings::MINIMUM_XP_REWARD) {
-            return ObstacleSettings::MINIMUM_XP_REWARD;
+            ObstacleSettings::MINIMUM_XP_REWARD
         } else {
-            return xp_reward;
+            xp_reward
         }
     }
 
-    // dodged returns true if the adventurer dodged the obstacle
+    // @notice dodged returns true if the adventurer dodged the obstacle
     // @param adventurer_level: u8 - the adventurer level
     // @param adventurer_intelligence: u8 - the adventurer intelligence
     // @param entropy: u128 - the entropy
@@ -181,11 +423,11 @@ impl ImplObstacle of IObstacle {
     fn dodged(adventurer_level: u8, adventurer_intelligence: u8, entropy: u128) -> bool {
         // Delegate ambushed calculation to combat system
         // avoiding beast ambush requires wisdom
-        return ImplCombat::ability_based_avoid_threat(
-            adventurer_level, adventurer_intelligence, entropy
-        );
+        ImplCombat::ability_based_avoid_threat(adventurer_level, adventurer_intelligence, entropy)
     }
 }
+
+// ---------------------------
 // ---------- Tests ----------
 // ---------------------------
 #[cfg(test)]
@@ -199,7 +441,7 @@ mod tests {
     };
 
     #[test]
-    #[available_gas(100000)]
+    #[available_gas(500000)]
     fn test_get_obstacle_tier() {
         let demonic_alter = ObstacleId::DemonicAlter;
         let demonic_alter_tier = ImplObstacle::get_tier(demonic_alter);
@@ -207,11 +449,11 @@ mod tests {
 
         let curse = ObstacleId::Curse;
         let curse_tier = ImplObstacle::get_tier(curse);
-        assert(curse_tier == Tier::T2(()), 'curse should be T2');
+        assert(curse_tier == Tier::T5(()), 'curse should be T5');
 
         let hex = ObstacleId::Hex;
         let hex_tier = ImplObstacle::get_tier(hex);
-        assert(hex_tier == Tier::T3(()), 'hex should be T3');
+        assert(hex_tier == Tier::T5(()), 'hex should be T5');
 
         let magic_lock = ObstacleId::MagicLock;
         let magic_lock_tier = ImplObstacle::get_tier(magic_lock);
@@ -231,7 +473,7 @@ mod tests {
 
         let rockslide = ObstacleId::Rockslide;
         let rockslide_tier = ImplObstacle::get_tier(rockslide);
-        assert(rockslide_tier == Tier::T3(()), 'rockslide should be T3');
+        assert(rockslide_tier == Tier::T1(()), 'rockslide should be T1');
 
         let tumbling_boulders = ObstacleId::TumblingBoulders;
         let tumbling_boulders_tier = ImplObstacle::get_tier(tumbling_boulders);
@@ -263,7 +505,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(100000)]
+    #[available_gas(400000)]
     fn test_get_obstacle_type() {
         let demonic_alter = ObstacleId::DemonicAlter;
         let demonic_alter_type = ImplObstacle::get_type(demonic_alter);
