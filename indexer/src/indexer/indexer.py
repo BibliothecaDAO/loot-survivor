@@ -418,7 +418,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "AdventurerDied",
             "AdventurerLeveledUp",
             "NewItemsAvailable",
-            "IdleDamagePenalty",
+            "IdleDeathPenalty",
         ]:
             add_filter(self.config.GAME_CONTRACT, survivor_event)
 
@@ -1587,7 +1587,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "fled": check_exists_int(0),
                 "damageDealt": encode_int_as_bytes(0),
                 "criticalHit": False,
-                "damageTaken": encode_int_as_bytes(idp.damage_taken),
+                "damageTaken": encode_int_as_bytes(0),
                 "damageLocation": check_exists_int(0),
                 "xpEarnedAdventurer": encode_int_as_bytes(0),
                 "xpEarnedItems": encode_int_as_bytes(0),
@@ -1610,7 +1610,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "obstacle": check_exists_int(0),
                 "obstacleLevel": check_exists_int(0),
                 "dodgedObstacle": encode_int_as_bytes(0),
-                "damageTaken": encode_int_as_bytes(idp.damage_taken),
+                "damageTaken": encode_int_as_bytes(0),
                 "damageLocation": check_exists_int(0),
                 "xpEarnedAdventurer": check_exists_int(0),
                 "xpEarnedItems": check_exists_int(0),
