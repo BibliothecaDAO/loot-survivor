@@ -115,7 +115,8 @@ mod Game {
         // set the genesis block
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
 
-        _set_entropy(ref self);
+        // set global game entropy
+        _set_global_entropy(ref self);
     }
 
     // ------------------------------------------ //
@@ -361,25 +362,6 @@ mod Game {
                     beast,
                     to_the_death
                 );
-                loop {
-                    if !to_the_death || adventurer.health == 0 || adventurer.beast_health == 0 {
-                        break ();
-                    }
-
-                    // if adventurer set the attack to the death flag
-                    // and the adventurer is still alive and the beast is still alive
-                    // attempt to flee again
-                    _flee(
-                        ref self,
-                        ref adventurer,
-                        adventurer_id,
-                        adventurer_entropy,
-                        global_entropy,
-                        beast_seed,
-                        beast,
-                        to_the_death
-                    );
-                };
             }
 
             // update players last action block number
@@ -884,7 +866,7 @@ mod Game {
         }
 
         fn set_entropy(ref self: ContractState) {
-            _set_entropy(ref self)
+            _set_global_entropy(ref self)
         }
 
         fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
@@ -931,7 +913,7 @@ mod Game {
         );
 
         // emit slayed beast event
-        __event__SlayedBeast(
+        __event_SlayedBeast(
             ref self,
             SlayedBeast {
                 adventurer_state: AdventurerState {
@@ -1087,7 +1069,7 @@ mod Game {
         };
 
         // emit a StartGame event 
-        __event__StartGame(
+        __event_StartGame(
             ref self,
             event: StartGame {
                 adventurer_state: AdventurerState {
@@ -1131,7 +1113,7 @@ mod Game {
         adventurer.deduct_health(STARTER_BEAST_ATTACK_DAMAGE);
 
         // and emitting an AmbushedByBeast event
-        __event__AmbushedByBeast(
+        __event_AmbushedByBeast(
             ref self,
             AmbushedByBeast {
                 adventurer_state: AdventurerState {
@@ -1214,7 +1196,7 @@ mod Game {
                     );
                 } else {
                     // Emit Discover Beast event
-                    __event__DiscoveredBeast(
+                    __event_DiscoveredBeast(
                         ref self,
                         DiscoveredBeast {
                             adventurer_state: AdventurerState {
@@ -1259,13 +1241,13 @@ mod Game {
                         // add gold to adventurer
                         adventurer.add_gold(amount);
                         // emit discovered gold event
-                        __event__DiscoveredGold(ref self, DiscoveredGold { discovery });
+                        __event_DiscoveredGold(ref self, DiscoveredGold { discovery });
                     },
                     TreasureDiscovery::XP(()) => {
                         // apply XP to adventurer
                         let (previous_level, new_level) = adventurer.increase_adventurer_xp(amount);
                         // emit discovered xp event
-                        __event__DiscoveredXP(ref self, DiscoveredXP { discovery });
+                        __event_DiscoveredXP(ref self, DiscoveredXP { discovery });
                         // check for level up
                         if (new_level > previous_level) {
                             // process level up
@@ -1283,11 +1265,11 @@ mod Game {
                             // adventurer gets gold instead of health
                             adventurer.add_gold(amount);
                             // emit discovered gold event
-                            __event__DiscoveredGold(ref self, DiscoveredGold { discovery });
+                            __event_DiscoveredGold(ref self, DiscoveredGold { discovery });
                         } else {
                             // otherwise add health
                             adventurer.increase_health(amount);
-                            __event__DiscoveredHealth(ref self, DiscoveredHealth { discovery });
+                            __event_DiscoveredHealth(ref self, DiscoveredHealth { discovery });
                         }
                     }
                 }
@@ -1362,7 +1344,7 @@ mod Game {
         if (!dodged) {
             // emit obstacle discover event
             // items only earn XP when damage is taken
-            __event__HitByObstacle(
+            __event_HitByObstacle(
                 ref self,
                 HitByObstacle {
                     adventurer_state: AdventurerState {
@@ -1381,7 +1363,7 @@ mod Game {
         } else {
             // emit obstacle discover event
             // items do not earn XP from obstacles
-            __event__DodgedObstacle(
+            __event_DodgedObstacle(
                 ref self,
                 DodgedObstacle {
                     adventurer_state: AdventurerState {
@@ -1854,6 +1836,11 @@ mod Game {
         }
     }
 
+    // @notice Retrieves a beast for the adventurer to fight.
+    // @param self The contract's state.
+    // @param adventurer The adventurer who is engaging the beast.
+    // @param adventurer_entropy The entropy related to the adventurer used for generating the beast.
+    // @return (Beast, u128) A tuple containing the generated beast and its corresponding seed.
     fn _get_beast(
         self: @ContractState, adventurer: Adventurer, adventurer_entropy: u128
     ) -> (Beast, u128) {
@@ -1877,6 +1864,13 @@ mod Game {
         )
     }
 
+    // @notice Simulates an attack by the adventurer on a beast.
+    // @param self The contract's state.
+    // @param adventurer The adventurer who is attacking.
+    // @param adventurer_id The unique ID of the adventurer.
+    // @param name_storage1 The first storage of special item names.
+    // @param name_storage2 The second storage of special item names.
+    // @param fight_to_the_death Flag to indicate if the fight should continue until either the adventurer or the beast is defeated.
     fn _attack(
         ref self: ContractState,
         ref adventurer: Adventurer,
@@ -1944,7 +1938,7 @@ mod Game {
             adventurer.beast_health -= damage_dealt;
 
             // emit attack beast event
-            __event__AttackedBeast(
+            __event_AttackedBeast(
                 ref self,
                 AttackedBeast {
                     adventurer_state: AdventurerState {
@@ -1990,12 +1984,15 @@ mod Game {
         }
     }
 
-    // TODO LH: Pull more functionality into this function
-    // such as:
-    // 1. getting beast
-    // 2. determining attack location
-    // those two should significantly reduce the amount of inputs into this function and
-    // reduce code duplication in areas that call this function (they all need to fetch beast, etc)
+    // @notice Handles a counter-attack by a beast after an adventurer's attack or flee attempt.
+    // @param self The contract's state.
+    // @param adventurer The adventurer who is being counter-attacked.
+    // @param adventurer_id The unique ID of the adventurer.
+    // @param attack_location The location of the attack on the adventurer.
+    // @param beast The beast that is counter-attacking.
+    // @param beast_seed The seed related to the beast.
+    // @param entropy The entropy used for the attack simulation.
+    // @param ambushed Flag to indicate if the counter-attack was an ambush.
     fn _beast_counter_attack(
         ref self: ContractState,
         ref adventurer: Adventurer,
@@ -2022,7 +2019,7 @@ mod Game {
         // emit ambushed by beast event
         if (ambushed) {
             // emit attack by beast event
-            __event__AmbushedByBeast(
+            __event_AmbushedByBeast(
                 ref self,
                 AmbushedByBeast {
                     adventurer_state: AdventurerState {
@@ -2042,7 +2039,7 @@ mod Game {
             );
         } else {
             // else emit attacked by beast event
-            __event__AttackedByBeast(
+            __event_AttackedByBeast(
                 ref self,
                 AttackedByBeast {
                     adventurer_state: AdventurerState {
@@ -2081,6 +2078,15 @@ mod Game {
         }
     }
 
+    // @notice Handles an attempt by the adventurer to flee from a battle with a beast.
+    // @param self The contract's state.
+    // @param adventurer The adventurer attempting to flee.
+    // @param adventurer_id The unique ID of the adventurer.
+    // @param adventurer_entropy The entropy related to the adventurer used for generating the beast.
+    // @param global_entropy The global entropy value.
+    // @param beast_seed The seed related to the beast.
+    // @param beast The beast that the adventurer is attempting to flee from.
+    // @param flee_to_the_death Flag to indicate if the flee attempt should continue until either success or the adventurer's defeat.
     fn _flee(
         ref self: ContractState,
         ref adventurer: Adventurer,
@@ -2089,37 +2095,35 @@ mod Game {
         global_entropy: u128,
         beast_seed: u128,
         beast: Beast,
-        to_the_death: bool
+        flee_to_the_death: bool
     ) {
+        // get flee and ambush entropy seeds
         let (flee_entropy, ambush_entropy) = _get_live_entropy(
             adventurer_entropy, global_entropy, adventurer
         );
 
+        // attempt to flee
         let fled = ImplBeast::attempt_flee(
             adventurer.get_level(), adventurer.stats.dexterity, flee_entropy
         );
 
-        // let mut damage_taken = 0;
-        // let mut attack_location = 0;
+        // stage flee event
+        let flee_event = FleeEvent {
+            adventurer_state: AdventurerState {
+                owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
+            }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
+        };
+
+        // if adventurer fled
         if (fled) {
             // set beast health to zero to denote adventurer is no longer in battle
             adventurer.beast_health = 0;
 
-            // each adventurer xp by one to prevent entropy loops resulting
-            // from the adventurer state being same
+            // increment adventurer xp by one to change adventurer entropy state
             let (previous_level, new_level) = adventurer.increase_adventurer_xp(1);
 
             // emit flee attempt event
-            __event__FleeSucceeded(
-                ref self,
-                FleeSucceeded {
-                    adventurer_state: AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
-                }
-            );
+            __event_FleeSucceeded(ref self, FleeSucceeded { flee_event });
 
             // check for adventurer level up
             if (new_level > previous_level) {
@@ -2129,19 +2133,10 @@ mod Game {
             }
         } else {
             // // emit flee attempt event
-            __event__FleeFailed(
-                ref self,
-                FleeFailed {
-                    adventurer_state: AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
-                }
-            );
+            __event_FleeFailed(ref self, FleeFailed { flee_event });
 
             // if flee attempt was unsuccessful the beast counter attacks
-            // adventurer death will be handled as part of counter attack
+            // adventurer death is handled as part of _beast_counter_attack()
             let attack_slot = AdventurerUtils::get_random_attack_location(ambush_entropy);
             let attack_location = ImplCombat::slot_to_u8(attack_slot);
             _beast_counter_attack(
@@ -2155,42 +2150,29 @@ mod Game {
                 false
             );
 
-            // if adventurer died trying to flee
-            if (adventurer.health == 0) {
-                // process adventurer death
-                _process_adventurer_death(
+            // if player has elected to flee till death and they
+            // are still alive with a beast attached to them
+            if (flee_to_the_death && adventurer.health > 0) {
+                // try to flee again
+                _flee(
                     ref self,
-                    AdventurerDied {
-                        adventurer_state: AdventurerState {
-                            owner: self._owner.read(adventurer_id),
-                            adventurer_id: adventurer_id,
-                            adventurer: adventurer
-                        },
-                        killed_by_beast: beast.id,
-                        killed_by_obstacle: 0,
-                        caller_address: get_caller_address()
-                    }
+                    ref adventurer,
+                    adventurer_id,
+                    adventurer_entropy,
+                    global_entropy,
+                    beast_seed,
+                    beast,
+                    true
                 );
             }
-        // TODO: This is the cleaner solution to flee till death
-        // but current version of Cairo is unhappy with this
-        // so doing a top level loop instead
-        // else if (to_the_death) {
-        //     // call _flee again
-        //     _flee(
-        //         ref self,
-        //         ref adventurer,
-        //         adventurer_id,
-        //         adventurer_entropy,
-        //         global_entropy,
-        //         beast_seed,
-        //         beast,
-        //         true
-        //     );
-        // }
         }
     }
 
+    // @notice Equips a specific item to the adventurer, and if there's an item already equipped in that slot, it's moved to the bag.
+    // @param adventurer The reference to the adventurer's state.
+    // @param bag The reference to the adventurer's bag.
+    // @param item The primitive item to be equipped.
+    // @return The ID of the item that has been unequipped.
     fn _equip_item(ref adventurer: Adventurer, ref bag: Bag, item: ItemPrimitive) -> u8 {
         // get the item currently equipped to the slot the item is being equipped to
         let unequipping_item = adventurer.get_item_at_slot(ImplLoot::get_slot(item.id));
@@ -2418,6 +2400,11 @@ mod Game {
         }
     }
 
+    // @notice Process the purchase of potions for the adventurer.
+    // @param adventurer The reference to the adventurer's state.
+    // @param adventurer_id The ID of the adventurer.
+    // @param amount The number of potions to buy.
+    // @dev Emits a `PurchasedPotions` event. Throws if the adventurer does not have enough gold or is buying more health than they can use.
     fn _buy_potions(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, amount: u8
     ) {
@@ -2450,6 +2437,15 @@ mod Game {
         );
     }
 
+    // @notice Upgrades the stats of the adventurer.
+    // @param adventurer The reference to the adventurer's state.
+    // @param strength_increase The number of points to increase the strength stat.
+    // @param dexterity_increase The number of points to increase the dexterity stat.
+    // @param vitality_increase The number of points to increase the vitality stat.
+    // @param intelligence_increase The number of points to increase the intelligence stat.
+    // @param wisdom_increase The number of points to increase the wisdom stat.
+    // @param charisma_increase The number of points to increase the charisma stat.
+    // @dev Throws if not all available stats are being used.
     fn _upgrade_stats(
         self: @ContractState,
         ref adventurer: Adventurer,
@@ -2940,7 +2936,7 @@ mod Game {
         }
     }
 
-    fn _set_entropy(ref self: ContractState) {
+    fn _set_global_entropy(ref self: ContractState) {
         // let hash: felt252  = starknet::get_tx_info().unbox().transaction_hash.into();
 
         let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
@@ -3150,8 +3146,8 @@ mod Game {
         gold_earned: u16,
     }
 
-    #[derive(Drop, starknet::Event)]
-    struct FleeFailed {
+    #[derive(Drop, Serde)]
+    struct FleeEvent {
         adventurer_state: AdventurerState,
         seed: u128,
         id: u8,
@@ -3159,11 +3155,13 @@ mod Game {
     }
 
     #[derive(Drop, starknet::Event)]
+    struct FleeFailed {
+        flee_event: FleeEvent
+    }
+
+    #[derive(Drop, starknet::Event)]
     struct FleeSucceeded {
-        adventurer_state: AdventurerState,
-        seed: u128,
-        id: u8,
-        beast_specs: CombatSpec,
+        flee_event: FleeEvent
     }
 
     #[derive(Drop, starknet::Event)]
@@ -3268,44 +3266,44 @@ mod Game {
     fn __event_AdventurerUpgraded(ref self: ContractState, event: AdventurerUpgraded) {
         self.emit(Event::AdventurerUpgraded(event));
     }
-    fn __event__StartGame(ref self: ContractState, event: StartGame) {
+    fn __event_StartGame(ref self: ContractState, event: StartGame) {
         self.emit(Event::StartGame(event));
     }
-    fn __event__DiscoveredHealth(ref self: ContractState, event: DiscoveredHealth) {
+    fn __event_DiscoveredHealth(ref self: ContractState, event: DiscoveredHealth) {
         self.emit(event);
     }
-    fn __event__DiscoveredGold(ref self: ContractState, event: DiscoveredGold) {
+    fn __event_DiscoveredGold(ref self: ContractState, event: DiscoveredGold) {
         self.emit(Event::DiscoveredGold(event));
     }
-    fn __event__DiscoveredXP(ref self: ContractState, event: DiscoveredXP) {
+    fn __event_DiscoveredXP(ref self: ContractState, event: DiscoveredXP) {
         self.emit(event);
     }
-    fn __event__DodgedObstacle(ref self: ContractState, dodged_obstacle: DodgedObstacle) {
+    fn __event_DodgedObstacle(ref self: ContractState, dodged_obstacle: DodgedObstacle) {
         self.emit(Event::DodgedObstacle(dodged_obstacle));
     }
-    fn __event__HitByObstacle(ref self: ContractState, hit_by_obstacle: HitByObstacle) {
+    fn __event_HitByObstacle(ref self: ContractState, hit_by_obstacle: HitByObstacle) {
         self.emit(Event::HitByObstacle(hit_by_obstacle));
     }
-    fn __event__DiscoveredBeast(ref self: ContractState, discover_beast_event: DiscoveredBeast, ) {
+    fn __event_DiscoveredBeast(ref self: ContractState, discover_beast_event: DiscoveredBeast, ) {
         self.emit(Event::DiscoveredBeast(discover_beast_event));
     }
-    fn __event__AttackedBeast(ref self: ContractState, attack_beast: AttackedBeast, ) {
+    fn __event_AttackedBeast(ref self: ContractState, attack_beast: AttackedBeast, ) {
         self.emit(Event::AttackedBeast(attack_beast));
     }
-    fn __event__AttackedByBeast(ref self: ContractState, attack_by_beast: AttackedByBeast, ) {
+    fn __event_AttackedByBeast(ref self: ContractState, attack_by_beast: AttackedByBeast, ) {
         self.emit(Event::AttackedByBeast(attack_by_beast));
     }
-    fn __event__AmbushedByBeast(ref self: ContractState, ambushed_by_beast: AmbushedByBeast, ) {
+    fn __event_AmbushedByBeast(ref self: ContractState, ambushed_by_beast: AmbushedByBeast, ) {
         self.emit(Event::AmbushedByBeast(ambushed_by_beast));
     }
-    fn __event__SlayedBeast(ref self: ContractState, slayed_beast: SlayedBeast, ) {
+    fn __event_SlayedBeast(ref self: ContractState, slayed_beast: SlayedBeast, ) {
         self.emit(Event::SlayedBeast(slayed_beast));
     }
-    fn __event__FleeFailed(ref self: ContractState, flee_failed: FleeFailed) {
-        self.emit(Event::FleeFailed(flee_failed));
+    fn __event_FleeFailed(ref self: ContractState, flee_event: FleeFailed) {
+        self.emit(Event::FleeFailed(flee_event));
     }
-    fn __event__FleeSucceeded(ref self: ContractState, flee_succeeded: FleeSucceeded) {
-        self.emit(Event::FleeSucceeded(flee_succeeded));
+    fn __event_FleeSucceeded(ref self: ContractState, flee_event: FleeSucceeded) {
+        self.emit(Event::FleeSucceeded(flee_event));
     }
     fn __event_EquippedItems(
         ref self: ContractState,
