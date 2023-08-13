@@ -24,7 +24,9 @@ mod messages {
     const MUST_USE_ALL_STATS: felt252 = 'Must use all stats';
 }
 
-const BLOCKS_IN_A_WEEK: u64 = 3360;
+// TODO: Need to adjust this setting before deployment. It's
+//      currently set to 1 day for testing purposes    
+const BLOCKS_IN_A_WEEK: u64 = 480;
 const COST_TO_PLAY: u256 = 25;
 const STARTING_STATS: u8 = 6;
 

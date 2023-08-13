@@ -967,6 +967,19 @@ mod Game {
         let lords = self._lords.read();
         let genesis_block = self._genesis_block.read();
 
+        // if third place score is less than minimum score for payouts
+        if (self._scores.read(3) < MINIMUM_SCORE_FOR_PAYOUTS) {
+            // all rewards go to the DAO
+            // the purpose of this is to let a decent set of top scores get set before payouts begin
+            // without this, there would be an incentive to start and die immediately after contract is deployed
+            // to capture the rewards from the launch hype
+            IERC20Dispatcher { contract_address: lords }.transferFrom(caller, self._dao.read(), 25);
+            return;
+        }
+
+        // once reasonable scores have been set, we start issuing rewards to players
+        // the reward distribution will change over time but starts with the majority
+        // going to the top players
         let mut week = Week {
             DAO: _to_ether(WEEK_2::DAO),
             INTERFACE: _to_ether(WEEK_2::INTERFACE),
@@ -975,31 +988,18 @@ mod Game {
             THIRD_PLACE: _to_ether(WEEK_2::THIRD_PLACE)
         };
 
-        // if third place score is less than minimum score for payouts
-        if (self._scores.read(3) < MINIMUM_SCORE_FOR_PAYOUTS) {
-            // all rewards go to the DAO
-            // the purpose of this is to let a decent set of top scores get set before payouts begin
-            // without this, there would be an incentive to start and die immediately after contract is deployed
-            // to capture the rewards from the launch hype
-            // IERC20Dispatcher {
-            //     contract_address: lords
-            // }.transferFrom(caller, self._dao.read(), week.DAO);
-            return;
+        // after 4th week, DAO starts to get a small amount of the rewards
+        if (BLOCKS_IN_A_WEEK * 4 + genesis_block) > block_number {
+            week = Week {
+                DAO: _to_ether(WEEK_4::DAO),
+                INTERFACE: _to_ether(WEEK_4::INTERFACE),
+                FIRST_PLACE: _to_ether(WEEK_4::FIRST_PLACE),
+                SECOND_PLACE: _to_ether(WEEK_4::SECOND_PLACE),
+                THIRD_PLACE: _to_ether(WEEK_4::THIRD_PLACE)
+            };
         }
 
-        // once reasonable scores have been set
-        // we start doing payouts
-
-        // for the first eight weeks, the majority go to the top three score
-        week = Week {
-            DAO: _to_ether(WEEK_4::DAO),
-            INTERFACE: _to_ether(WEEK_4::INTERFACE),
-            FIRST_PLACE: _to_ether(WEEK_4::FIRST_PLACE),
-            SECOND_PLACE: _to_ether(WEEK_4::SECOND_PLACE),
-            THIRD_PLACE: _to_ether(WEEK_4::THIRD_PLACE)
-        };
-
-        // after 8 weeks, the client providers start getting a share
+        // after 16 weeks, the client providers start getting a share
         if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
             week = Week {
                 DAO: _to_ether(WEEK_8::DAO),
