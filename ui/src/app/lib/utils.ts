@@ -8,6 +8,7 @@ import { GameData } from "../components/GameData";
 import {
   itemCharismaDiscount,
   itemBasePrice,
+  itemMinimumPrice,
   potionBasePrice,
 } from "./constants";
 
@@ -269,8 +270,8 @@ export function checkAvailableSlots(ownedItems: Item[]) {
 
 export function getItemPrice(tier: number, charisma: number) {
   const price = (6 - tier) * itemBasePrice - itemCharismaDiscount * charisma;
-  if (price < itemBasePrice) {
-    return itemBasePrice;
+  if (price < itemMinimumPrice) {
+    return itemMinimumPrice;
   } else {
     return price;
   }

@@ -187,9 +187,9 @@ export default function LeaderboardScreen() {
                   <th className="p-1">Rank</th>
                   <th className="p-1">Adventurer</th>
                   <th className="p-1">XP</th>
-                  <th className="p-1">
+                  {/* <th className="p-1">
                     Prize <span className="text-sm">(per mint)</span>
-                  </th>
+                  </th> */}
                 </tr>
               </thead>
               <tbody>

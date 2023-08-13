@@ -25,7 +25,7 @@ const ScoreRow = ({
       <td>{index + 1}</td>
       <td>{`${adventurer.name} - ${adventurer.id}`}</td>
       <td>{adventurer.xp}</td>
-      <td>
+      {/* <td>
         <div className="flex flex-row items-center justify-center gap-2">
           <span
             className={` ${
@@ -43,7 +43,7 @@ const ScoreRow = ({
 
           <Lords className="self-center w-6 h-6 ml-4 fill-current" />
         </div>
-      </td>
+      </td> */}
     </tr>
   );
 };
