@@ -195,6 +195,7 @@ export default function LeaderboardScreen() {
               <tbody>
                 {scores.map((adventurer: Adventurer, index: number) => (
                   <ScoreRow
+                    key={index}
                     index={index}
                     adventurer={adventurer}
                     handleRowSelected={handleRowSelected}
