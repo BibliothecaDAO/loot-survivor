@@ -306,11 +306,11 @@ export default function UpgradeScreen() {
 
   const lastPage = isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2;
 
-  const upgradesLength = Object.values(upgrades).filter(
-    (value) => value !== 0
-  ).length;
+  const upgradesTotal = Object.values(upgrades)
+    .filter((value) => value !== 0)
+    .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
-  const nextDisabled = upgradesLength !== adventurer?.statUpgrades;
+  const nextDisabled = upgradesTotal !== adventurer?.statUpgrades;
 
   useEffect(() => {
     if (upgrades.length === 0) {
@@ -326,7 +326,7 @@ export default function UpgradeScreen() {
     });
   };
 
-  const totalStatUpgrades = (adventurer?.statUpgrades ?? 0) - upgradesLength;
+  const totalStatUpgrades = (adventurer?.statUpgrades ?? 0) - upgradesTotal;
 
   return (
     <>
