@@ -6,7 +6,7 @@ import {
   useProvider,
 } from "@starknet-react/core";
 import { constants } from "starknet";
-import { useState, useEffect, useMemo, use } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Button } from "./components/buttons/Button";
 import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
 import ActionsScreen from "./containers/ActionsScreen";
@@ -30,9 +30,8 @@ import useAdventurerStore from "./hooks/useAdventurerStore";
 import useUIStore from "./hooks/useUIStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { CSSTransition } from "react-transition-group";
-import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
+import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
-import { mainnet_addr, getGraphQLUrl } from "./lib/constants";
 import { Menu, NullAdventurer } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
@@ -43,7 +42,6 @@ import {
   CogIcon,
   MuteIcon,
   VolumeIcon,
-  CartIcon,
   GithubIcon,
   RefreshIcon,
   CartIconSimple,
@@ -60,7 +58,6 @@ import {
   getAdventurerById,
   getAdventurersByOwner,
 } from "./hooks/graphql/queries";
-import { useBurner } from "./lib/burner";
 import { ArcadeDialog } from "./components/ArcadeDialog";
 import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
 
@@ -92,9 +89,6 @@ export default function Home() {
   const isMuted = useUIStore((state) => state.isMuted);
   const setIsMuted = useUIStore((state) => state.setIsMuted);
   const [introComplete, setIntroComplete] = useState(false);
-  const type = useLoadingStore((state) => state.type);
-  const notificationData = useLoadingStore((state) => state.notificationData);
-  const showNotification = useLoadingStore((state) => state.showNotification);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
@@ -103,7 +97,6 @@ export default function Home() {
   const setConnected = useUIStore((state) => state.setConnected);
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
-  const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const deathDialog = useUIStore((state) => state.deathDialog);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
@@ -122,6 +115,8 @@ export default function Home() {
   const owner = account?.address ? padAddress(account.address) : "";
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
+  const displayHistoryButtonRef = useRef<HTMLButtonElement>(null);
+  const displayCartButtonRef = useRef<HTMLButtonElement>(null);
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
@@ -247,9 +242,6 @@ export default function Home() {
     return <WalletSelect />;
   }
 
-  console.log(adventurer);
-  console.log(data.adventurerByIdQuery?.adventurers[0]);
-
   return (
     // <Maintenance />
     <main
@@ -300,6 +292,7 @@ export default function Home() {
                 </Button>
                 {account && calls.length > 0 && (
                   <button
+                    ref={displayCartButtonRef}
                     onClick={() => {
                       setDisplayCart(!displayCart);
                       clickPlay();
@@ -312,7 +305,9 @@ export default function Home() {
                     </p>
                   </button>
                 )}
-                {displayCart && <TransactionCart />}
+                {displayCart && (
+                  <TransactionCart buttonRef={displayCartButtonRef} />
+                )}
                 {isMobileDevice ? (
                   <>
                     <button
@@ -330,7 +325,10 @@ export default function Home() {
                     {!isMobileDevice && account && (
                       <>
                         <Button
-                          onClick={() => setDisplayHistory(!displayHistory)}
+                          ref={displayHistoryButtonRef}
+                          onClick={() => {
+                            setDisplayHistory(!displayHistory);
+                          }}
                         >
                           {displayHistory ? "Hide Ledger" : "Show Ledger"}
                         </Button>
@@ -353,35 +351,16 @@ export default function Home() {
                     </Button>
                   </>
                 )}
-                {account && displayHistory && <TransactionHistory />}
+                {account && displayHistory && (
+                  <TransactionHistory buttonRef={displayHistoryButtonRef} />
+                )}
               </div>
             </div>
           </div>
           <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4">
             {!isMobileDevice && <TxActivity />}
           </div>
-          {/* <CSSTransition
-            in={
-              showNotification &&
-              Boolean(notificationData) &&
-              (typeof notificationData === "object"
-                ? "data" in notificationData
-                  ? notificationData.data.length > 0
-                  : true
-                : true)
-            }
-            timeout={500}
-            classNames="notification"
-            unmountOnExit
-          >
-            <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
-              <NotificationDisplay
-                type={type}
-                notificationData={notificationData}
-                hasBeast={hasBeast}
-              />
-            </div>
-          </CSSTransition> */}
+          <NotificationDisplay />
 
           {deathDialog && <DeathDialog />}
 

@@ -37,7 +37,10 @@ impl ItemPrimitivePacking of Packing<ItemPrimitive> {
 
 #[generate_trait]
 impl ImplItemPrimitive of IItemPrimitive {
-    fn new_item(item_id: u8) -> ItemPrimitive { 
+    // @notice creates a new ItemPrimitive with the given id
+    // @param item_id the id of the item
+    // @return the new ItemPrimitive
+    fn new(item_id: u8) -> ItemPrimitive { 
         ItemPrimitive { id: item_id, xp: 0, metadata: 0 }
     }
 }
@@ -46,19 +49,19 @@ impl ImplItemPrimitive of IItemPrimitive {
 #[available_gas(9000)]
 fn test_new_item() {
     // zero case
-    let item = IItemPrimitive::new_item(0);
+    let item = IItemPrimitive::new(0);
     assert(item.id == 0, 'id should be 0');
     assert(item.xp == 0, 'xp should be 0');
     assert(item.metadata == 0, 'metadata should be 0');
 
     // base case
-    let item = IItemPrimitive::new_item(1);
+    let item = IItemPrimitive::new(1);
     assert(item.id == 1, 'id should be 1');
     assert(item.xp == 0, 'xp should be 0');
     assert(item.metadata == 0, 'metadata should be 0');
 
     // max u8 case
-    let item = IItemPrimitive::new_item(255);
+    let item = IItemPrimitive::new(255);
     assert(item.id == 255, 'id should be 255');
     assert(item.xp == 0, 'xp should be 0');
     assert(item.metadata == 0, 'metadata should be 0');

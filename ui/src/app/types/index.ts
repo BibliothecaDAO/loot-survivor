@@ -138,12 +138,12 @@ export interface Beast {
 }
 
 export interface Score {
-  adventurerId: number; // Adventurer ID
-  address: string; // Hex Address of the adventurer owner
-  rank: number; // Rank of the score
-  xp: number; // Experience points of the adventurer
-  txHash: string; // Hex of the transaction hash
-  scoreTime: Date; // Time of the score
+  adventurerId?: number; // Adventurer ID
+  owner?: string; // Hex Address of the adventurer owner
+  rank?: number; // Rank of the score
+  xp?: number; // Experience points of the adventurer
+  txHash?: string; // Hex of the transaction hash
+  blockTime?: Date; // Time of the score
   timestamp?: Date; // Indexer timestamp of event process
 }
 
@@ -195,12 +195,27 @@ export interface ItemPurchase {
   equip: string;
 }
 
+export interface UpgradeStats {
+  [key: string]: number;
+  Strength: number;
+  Dexterity: number;
+  Vitality: number;
+  Intelligence: number;
+  Wisdom: number;
+  Charisma: number;
+}
+
 export interface UpgradeSummary {
   Stats: {
     [key: string]: number;
   };
   Items: any;
   Potions: any;
+}
+
+export interface Notification {
+  message: ReactElement;
+  animation: string;
 }
 
 export type BeastType =
@@ -388,4 +403,23 @@ export const NullItem: Item = {
   tier: undefined,
   type: undefined,
   lastUpdatedTime: undefined,
+};
+
+export const NullScore: Score = {
+  adventurerId: undefined,
+  owner: undefined,
+  rank: undefined,
+  xp: undefined,
+  txHash: undefined,
+  blockTime: undefined,
+  timestamp: undefined,
+};
+
+export const ZeroUpgrade: UpgradeStats = {
+  Strength: 0,
+  Dexterity: 0,
+  Vitality: 0,
+  Intelligence: 0,
+  Wisdom: 0,
+  Charisma: 0,
 };

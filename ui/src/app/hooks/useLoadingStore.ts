@@ -21,6 +21,7 @@ type LoadingState = {
     adventurer: number | undefined,
     notificationData?: any
   ) => void;
+  resetNotification: () => void;
   setTxHash: (hash: string) => void;
   setTxAccepted: (txAccepted: boolean) => void;
   stopLoading: (notificationData?: any) => void;
@@ -57,7 +58,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   },
   setTxHash: (hash) => set({ hash }),
   setTxAccepted: (txAccepted) => set({ txAccepted }),
-  stopLoading: (notificationData) => {
+  stopLoading: (notificationData) =>
     set({
       showNotification: notificationData ? true : false,
       notificationData: notificationData || undefined,
@@ -71,21 +72,15 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
           notificationData: notificationData,
         },
       ],
-    });
-    if (notificationData) {
-      // setTimeout(
-      //   () =>
-      set({
-        type: "",
-        hash: "",
-        notificationData: undefined,
-        showNotification: false,
-        adventurer: undefined,
-      });
-      //   5000
-      // );
-    }
-  },
+      hash: "",
+      adventurer: undefined,
+    }),
+  resetNotification: () =>
+    set({
+      type: "",
+      notificationData: undefined,
+      showNotification: false,
+    }),
   deathMessage: null,
   setDeathMessage: (deathMessage) => {
     set({ deathMessage });

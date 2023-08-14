@@ -6,7 +6,7 @@ import useLoadingStore from "../../hooks/useLoadingStore";
 import LootIconLoader from "../icons/Loader";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { useMediaQuery } from "react-responsive";
-import { processNotification } from "../../components/navigation/NotificationDisplay";
+import { processNotifications } from "../notifications/NotificationHandler";
 import useUIStore from "@/app/hooks/useUIStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { DiscoveryDisplay } from "../actions/DiscoveryDisplay";
@@ -73,13 +73,15 @@ export const TxActivity = () => {
     battles: any,
     hasBeast: boolean
   ) => {
-    const notification = processNotification(
+    const notifications = processNotifications(
       type,
       notificationData,
       battles,
-      hasBeast
+      hasBeast,
+      adventurer ?? NullAdventurer
     );
-    setDeathMessage(notification);
+    // In the case of a chain of notifications we are only interested in the last
+    setDeathMessage(notifications[notifications.length - 1].message);
     showDeathDialog(true);
   };
 
@@ -103,6 +105,8 @@ export const TxActivity = () => {
     !hash
   );
 
+  console.log(txAccepted, hash, isLoadingQueryUpdated);
+
   useEffect(() => {
     const fetchData = async () => {
       console.log(txAccepted, hash, isLoadingQueryUpdated);
@@ -122,25 +126,15 @@ export const TxActivity = () => {
         const killedByPenalty = queryData.battlesByTxHashQuery.battles.some(
           (battle) => !battle.attacker && battle.adventurerHealth == 0
         );
-        console.log(killedByBeast || killedByPenalty);
         if (killedByBeast || killedByPenalty) {
-          setDeathMessage(
-            <NotificationBattleDisplay
-              battleData={
-                queryData.battlesByTxHashQuery.battles
-                  ? queryData.battlesByTxHashQuery.battles
-                  : []
-              }
-              type={type}
-            />
+          setDeathNotification(
+            type,
+            queryData.battlesByTxHashQuery.battles,
+            queryData.battlesByBeastQuery?.battles,
+            true
           );
-          console.log(queryData.battlesByTxHashQuery.battles);
-          showDeathDialog(true);
         }
-        stopLoading({
-          data: queryData.battlesByTxHashQuery.battles,
-          beast: notificationData.beast,
-        });
+        stopLoading(queryData.battlesByTxHashQuery.battles);
       };
 
       const handleExplore = async () => {
@@ -167,16 +161,15 @@ export const TxActivity = () => {
           queryData.discoveryByTxHashQuery.discoveries[0]?.ambushed &&
           queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
             0;
-        console.log(killedByObstacle, killedByPenalty, killedByAmbush);
         if (killedByObstacle || killedByPenalty || killedByAmbush) {
-          setDeathMessage(
-            <DiscoveryDisplay
-              discoveryData={queryData.discoveryByTxHashQuery.discoveries[0]}
-            />
+          setDeathNotification(
+            type,
+            queryData.discoveryByTxHashQuery.discoveries,
+            queryData.battlesByBeastQuery?.battles,
+            hasBeast
           );
-          showDeathDialog(true);
         }
-        stopLoading(queryData.discoveryByTxHashQuery.discoveries[0]);
+        stopLoading(queryData.discoveryByTxHashQuery.discoveries);
       };
 
       const handleUpgrade = async () => {
@@ -205,6 +198,7 @@ export const TxActivity = () => {
       const handleCreate = async () => {
         console.log("in create");
         await refetch("adventurersByOwnerQuery");
+        await refetch("adventurerByIdQuery");
         stopLoading(notificationData);
       };
 
@@ -222,9 +216,6 @@ export const TxActivity = () => {
       try {
         switch (type) {
           case "Attack":
-            await handleAttackOrFlee();
-            break;
-          case "Attack Till Death":
             await handleAttackOrFlee();
             break;
           case "Flee":
@@ -263,6 +254,7 @@ export const TxActivity = () => {
       queryData.adventurerByIdQuery.adventurers[0]?.id
     ) {
       console.log("updated");
+      console.log(queryData.adventurerByIdQuery.adventurers[0]);
       setAdventurer(queryData.adventurerByIdQuery.adventurers[0]);
     }
   }, [queryData.adventurerByIdQuery?.adventurers[0]?.timestamp]);

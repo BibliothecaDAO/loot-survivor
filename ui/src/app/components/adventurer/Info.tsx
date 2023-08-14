@@ -36,7 +36,7 @@ export default function Info({
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const dropItems = useUIStore((state) => state.dropItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
-  const upgradeStats = useUIStore((state) => state.upgradeStats);
+  const upgrades = useUIStore((state) => state.upgrades);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
@@ -94,7 +94,7 @@ export default function Info({
     if (gameContract) {
       const dropItemsTx = {
         contractAddress: gameContract?.address,
-        entrypoint: "drop",
+        entrypoint: "drop_items",
         calldata: [
           adventurer?.id?.toString() ?? "",
           "0",
@@ -129,11 +129,7 @@ export default function Info({
     "Ring",
   ];
 
-  const vitalitySelected = countOccurrences(
-    upgradeStats,
-    getKeyFromValue(gameData.STATS, "Vitality")
-  );
-
+  const vitalitySelected = upgrades["Vitality"];
   const totalHealth = (formatAdventurer.health ?? 0) + vitalitySelected * 10;
 
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
@@ -168,12 +164,6 @@ export default function Info({
                   {
                     getRealmNameById(formatAdventurer.homeRealm ?? 0)
                       ?.properties.name
-                  }
-                </span>
-                <span>
-                  {
-                    getRealmNameById(formatAdventurer.homeRealm ?? 0)
-                      ?.properties.order
                   }
                 </span>
               </div>

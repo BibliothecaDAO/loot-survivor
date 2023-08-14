@@ -11,6 +11,7 @@ import { ImVolumeMute2 } from "react-icons/im";
 import { GiSwapBag } from "react-icons/gi";
 import { GiSpikedWall } from "react-icons/gi";
 import { GiSkullCrossedBones } from "react-icons/gi";
+import { GiDeathSkull } from "react-icons/gi";
 import { GiHealthPotion } from "react-icons/gi";
 import { GiTwoCoins } from "react-icons/gi";
 import { GiStarsStack } from "react-icons/gi";
@@ -68,6 +69,7 @@ const MuteIcon = ImVolumeMute2;
 const LootBagIcon = GiSwapBag;
 const SpikedWallIcon = GiSpikedWall;
 const SkullCrossedBonesIcon = GiSkullCrossedBones;
+const DeathSkullIcon = GiDeathSkull;
 const HealthPotionIcon = GiHealthPotion;
 const TwoCoinIcon = GiTwoCoins;
 const GiStarsStackIcon = GiStarsStack;
@@ -125,6 +127,7 @@ export {
   LootBagIcon,
   SpikedWallIcon,
   SkullCrossedBonesIcon,
+  DeathSkullIcon,
   HealthPotionIcon,
   TwoCoinIcon,
   GiStarsStackIcon,

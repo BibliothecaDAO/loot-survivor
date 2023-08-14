@@ -156,7 +156,7 @@ export const ItemDisplay = ({
                       </p>
                     </Button>
                   )}
-                  {/* {(screen == "play" ||
+                  {(screen == "play" ||
                     screen == "upgrade" ||
                     screen == "player" ||
                     screen == "inventory") && (
@@ -169,7 +169,7 @@ export const ItemDisplay = ({
                     >
                       <DownArrowIcon className="w-4 h-4" />
                     </Button>
-                  )} */}
+                  )}
                 </span>
               </span>
             </div>

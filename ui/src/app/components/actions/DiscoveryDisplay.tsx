@@ -92,21 +92,12 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     }
 
     if (!discoveryData?.discoveryType) {
-      if (!AdventurerHealthExists) {
-        return (
-          <span className="flex flex-row items-center justify-between">
-            <p>OOPS! You were killed by the idle penalty of 80 damage!</p>
-            <GiSandsOfTimeIcon />
-          </span>
-        );
-      } else {
-        return (
-          <span className="flex flex-row items-center justify-between">
-            <p>OOPS! You recieved the idle penalty of 80 damage!</p>
-            <GiSandsOfTimeIcon />
-          </span>
-        );
-      }
+      return (
+        <span className="flex flex-row items-center justify-between">
+          <p>OOPS! You were killed by the idle death penalty!</p>
+          <GiSandsOfTimeIcon />
+        </span>
+      );
     }
 
     if (discoveryData?.discoveryType === "Item") {

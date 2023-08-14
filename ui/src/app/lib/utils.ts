@@ -5,6 +5,12 @@ import BN from "bn.js";
 import Realms from "./realms.json";
 import { Adventurer, Item } from "../types";
 import { GameData } from "../components/GameData";
+import {
+  itemCharismaDiscount,
+  itemBasePrice,
+  itemMinimumPrice,
+  potionBasePrice,
+} from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -263,12 +269,16 @@ export function checkAvailableSlots(ownedItems: Item[]) {
 }
 
 export function getItemPrice(tier: number, charisma: number) {
-  const price = (6 - tier) * 3 - 2 * charisma;
-  if (price < 3) {
-    return 3;
+  const price = (6 - tier) * itemBasePrice - itemCharismaDiscount * charisma;
+  if (price < itemMinimumPrice) {
+    return itemMinimumPrice;
   } else {
     return price;
   }
+}
+
+export function getPotionPrice(adventurerLevel: number, charisma: number) {
+  return Math.max(adventurerLevel - potionBasePrice * charisma, 1);
 }
 
 export function isFirstElement<T>(arr: T[], element: T): boolean {
@@ -296,4 +306,18 @@ export function removeElement(arr: string[], value: string) {
 
 export function countOccurrences<T>(arr: T[], value: T): number {
   return arr.filter((item) => item === value).length;
+}
+
+export function chunkArray<T>(array: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array?.length; i += chunkSize) {
+    const nextChunk = array?.slice(i, i + chunkSize);
+    chunks.push(nextChunk);
+    if (nextChunk.length < chunkSize) break; // Stop if we've hit the end of the array
+  }
+  return chunks;
+}
+
+export function isObject(value: any): value is object {
+  return typeof value === "object" && !Array.isArray(value);
 }
