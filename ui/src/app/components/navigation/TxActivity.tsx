@@ -63,10 +63,6 @@ export const TxActivity = () => {
   const [messageIndex, setMessageIndex] = useState(0);
   const isLoadingQueryUpdated = isDataUpdated[loadingQuery!];
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   const setDeathNotification = (
     type: string,
     notificationData: any,
@@ -282,7 +278,7 @@ export const TxActivity = () => {
         <div className="flex flex-row absolute top-3 sm:top-0 sm:relative items-center gap-5 justify-between text-xs sm:text-base">
           {hash && (
             <div className="flex flex-row gap-2">
-              {!isMobileDevice && "Hash:"}
+              <span className="hidden sm:block">Hash:</span>
               <a
                 href={`https://goerli.voyager.online/tx/${padAddress(hash)}`}
                 target="_blank"
@@ -293,10 +289,12 @@ export const TxActivity = () => {
             </div>
           )}
           <div className="flex flex-row items-center w-40 sm:w-48 loading-ellipsis">
-            <LootIconLoader
-              className="self-center mr-3"
-              size={isMobileDevice ? "w-4" : "w-5"}
-            />
+            <div className="sm:hidden">
+              <LootIconLoader className="self-center mr-3" size={"w-4"} />
+            </div>
+            <div className="hidden sm:block">
+              <LootIconLoader className="self-center mr-3" size={"w-5"} />
+            </div>
             {hash
               ? pendingArray
                 ? (pendingMessage as string[])[messageIndex]
@@ -305,7 +303,7 @@ export const TxActivity = () => {
           </div>
           {data && hash && (
             <div>
-              {!isMobileDevice && "Status:"} {data.status}
+              <span className="hidden sm:block">Status:</span> {data.status}
             </div>
           )}
         </div>

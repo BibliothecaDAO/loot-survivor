@@ -24,10 +24,6 @@ export default function Profile() {
 
   const setScreen = useUIStore((state) => state.setScreen);
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   return (
     <div className="w-full">
       <div className="flex flex-col sm:flex-row gap-5 sm:gap-10 items-center sm:items-start justify-center">
@@ -50,7 +46,9 @@ export default function Profile() {
         ) : (
           <EncountersScreen profile={profile} />
         )}
-        {!isMobileDevice && <EncountersScreen profile={profile} />}
+        <div className="hidden sm:block">
+          <EncountersScreen profile={profile} />
+        </div>
       </div>
     </div>
   );

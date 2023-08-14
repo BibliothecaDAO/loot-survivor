@@ -100,29 +100,50 @@ export const InventoryRow = ({
     };
   }, [isActive, selectedIndex, handleKeyDown]);
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   return (
     <div className="flex flex-row w-full gap-3 sm:gap-1 align-center">
-      <Button
-        className={`h-14 w-12 sm:w-full ${
-          isSelected && !isActive ? "animate-pulse" : ""
-        }`}
-        variant={isSelected ? "default" : "ghost"}
-        size={isMobileDevice ? "sm" : "lg"}
-        onClick={() => {
-          setSelected(menuIndex);
-          setActiveMenu(menuIndex);
-        }}
-        disabled={!adventurer?.id}
-      >
-        <div className="flex flex-row gap-1 items-center">
-          <div className="flex items-center justify-center w-8 h-8">{icon}</div>
-          <p className="text-xl whitespace-nowrap hidden sm:block">{title}</p>
-        </div>
-      </Button>
+      <div className="sm:hidden">
+        <Button
+          className={`h-14 w-12 sm:w-full ${
+            isSelected && !isActive ? "animate-pulse" : ""
+          }`}
+          variant={isSelected ? "default" : "ghost"}
+          size={"sm"}
+          onClick={() => {
+            setSelected(menuIndex);
+            setActiveMenu(menuIndex);
+          }}
+          disabled={!adventurer?.id}
+        >
+          <div className="flex flex-row gap-1 items-center">
+            <div className="flex items-center justify-center w-8 h-8">
+              {icon}
+            </div>
+            <p className="text-xl whitespace-nowrap hidden sm:block">{title}</p>
+          </div>
+        </Button>
+      </div>
+      <div className="hidden sm:block">
+        <Button
+          className={`h-14 w-12 sm:w-full ${
+            isSelected && !isActive ? "animate-pulse" : ""
+          }`}
+          variant={isSelected ? "default" : "ghost"}
+          size={"lg"}
+          onClick={() => {
+            setSelected(menuIndex);
+            setActiveMenu(menuIndex);
+          }}
+          disabled={!adventurer?.id}
+        >
+          <div className="flex flex-row gap-1 items-center">
+            <div className="flex items-center justify-center w-8 h-8">
+              {icon}
+            </div>
+            <p className="text-xl whitespace-nowrap hidden sm:block">{title}</p>
+          </div>
+        </Button>
+      </div>
     </div>
   );
 };

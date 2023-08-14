@@ -189,7 +189,7 @@ export default function Info({
                   </div>
                 ))}
               </div>
-              <div className="w-full flex flex-col lg:grid lg:grid-cols-2 2xl:flex 2xl:flex-col gap-1 2xl:gap-0 text-xs flex-wrap">
+              <div className="w-full flex flex-col 2xl:flex 2xl:flex-col gap-1 2xl:gap-0 text-xs flex-wrap">
                 {bodyParts.map((part) => (
                   <div className="flex-wrap" key={part}>
                     <ItemDisplay

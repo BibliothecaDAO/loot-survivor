@@ -1,6 +1,3 @@
-import { useMediaQuery } from "react-responsive";
-import { useState } from "react";
-
 interface UpgradeNavProps {
   activeSection: number;
 }
@@ -22,36 +19,60 @@ const mobileUpgradeNav = [
 ];
 
 export const UpgradeNav = ({ activeSection }: UpgradeNavProps) => {
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-  const nav = isMobileDevice ? mobileUpgradeNav : mainUpgradeNav;
   return (
-    <div className="flex flex-row justify-center items-center w-full text-shadow-none">
-      {nav.map((item: NavItem, index: number) => (
-        <span key={index} className="flex flex-row">
-          <div
-            className={`uppercase ${
-              activeSection >= item.section
-                ? "text-terminal-green"
-                : "text-slate-600"
-            }`}
-          >
-            {item.label}
-          </div>
-          {item.section !== nav.length && (
+    <>
+      <div className="sm:hidden flex flex-row justify-center items-center w-full text-shadow-none">
+        {mobileUpgradeNav.map((item: NavItem, index: number) => (
+          <span key={index} className="flex flex-row">
             <div
-              className={
-                activeSection > item.section
+              className={`uppercase ${
+                activeSection >= item.section
                   ? "text-terminal-green"
                   : "text-slate-600"
-              }
+              }`}
             >
-              ........
+              {item.label}
             </div>
-          )}
-        </span>
-      ))}
-    </div>
+            {item.section !== mobileUpgradeNav.length && (
+              <div
+                className={
+                  activeSection > item.section
+                    ? "text-terminal-green"
+                    : "text-slate-600"
+                }
+              >
+                ........
+              </div>
+            )}
+          </span>
+        ))}
+      </div>
+      <div className="hidden sm:block flex flex-row justify-center items-center w-full text-shadow-none">
+        {mainUpgradeNav.map((item: NavItem, index: number) => (
+          <span key={index} className="flex flex-row">
+            <div
+              className={`uppercase ${
+                activeSection >= item.section
+                  ? "text-terminal-green"
+                  : "text-slate-600"
+              }`}
+            >
+              {item.label}
+            </div>
+            {item.section !== mainUpgradeNav.length && (
+              <div
+                className={
+                  activeSection > item.section
+                    ? "text-terminal-green"
+                    : "text-slate-600"
+                }
+              >
+                ........
+              </div>
+            )}
+          </span>
+        ))}
+      </div>
+    </>
   );
 };

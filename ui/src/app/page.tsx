@@ -215,10 +215,6 @@ export default function Home() {
     refetch("adventurersByOwnerQuery");
   }, [account]);
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   const mobileMenuDisabled = [
     false,
     hasStatUpgrades,
@@ -252,7 +248,9 @@ export default function Home() {
           <div className="flex flex-col w-full">
             <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
 
-            {isMobileDevice && <TxActivity />}
+            <div className="sm:hidden">
+              <TxActivity />
+            </div>
             <div className="flex flex-row justify-between">
               <span className="flex flex-row items-center gap-2 sm:gap-5">
                 <h1 className="glitch m-0 text-lg sm:text-4xl">
@@ -308,49 +306,46 @@ export default function Home() {
                 {displayCart && (
                   <TransactionCart buttonRef={displayCartButtonRef} />
                 )}
-                {isMobileDevice ? (
-                  <>
-                    <button
-                      className="w-6 h-6"
-                      onClick={() => {
-                        setScreen("settings");
-                        clickPlay();
-                      }}
-                    >
-                      <CogIcon />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    {!isMobileDevice && account && (
-                      <>
-                        <Button
-                          ref={displayHistoryButtonRef}
-                          onClick={() => {
-                            setDisplayHistory(!displayHistory);
-                          }}
-                        >
-                          {displayHistory ? "Hide Ledger" : "Show Ledger"}
-                        </Button>
-                      </>
-                    )}
+                <div className="sm:hidden">
+                  <button
+                    className="w-6 h-6"
+                    onClick={() => {
+                      setScreen("settings");
+                      clickPlay();
+                    }}
+                  >
+                    <CogIcon />
+                  </button>
+                </div>
+                <div className="hidden sm:block sm:flex sm:flex-row sm:items-center sm:gap-1">
+                  {account && (
+                    <>
+                      <Button
+                        ref={displayHistoryButtonRef}
+                        onClick={() => {
+                          setDisplayHistory(!displayHistory);
+                        }}
+                      >
+                        {displayHistory ? "Hide Ledger" : "Show Ledger"}
+                      </Button>
+                    </>
+                  )}
 
-                    <Button
-                      onClick={() => {
-                        disconnect();
-                        resetData();
-                        setAdventurer(NullAdventurer);
-                        setUserDisconnect(true);
-                      }}
-                    >
-                      {account ? displayAddress(account.address) : "Connect"}
-                    </Button>
+                  <Button
+                    onClick={() => {
+                      disconnect();
+                      resetData();
+                      setAdventurer(NullAdventurer);
+                      setUserDisconnect(true);
+                    }}
+                  >
+                    {account ? displayAddress(account.address) : "Connect"}
+                  </Button>
 
-                    <Button href="https://github.com/BibliothecaDAO/loot-survivor">
-                      <GithubIcon className="w-6" />
-                    </Button>
-                  </>
-                )}
+                  <Button href="https://github.com/BibliothecaDAO/loot-survivor">
+                    <GithubIcon className="w-6" />
+                  </Button>
+                </div>
                 {account && displayHistory && (
                   <TransactionHistory buttonRef={displayHistoryButtonRef} />
                 )}
@@ -358,7 +353,9 @@ export default function Home() {
             </div>
           </div>
           <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4">
-            {!isMobileDevice && <TxActivity />}
+            <div className="hidden sm:block">
+              <TxActivity />
+            </div>
           </div>
           <NotificationDisplay />
 
@@ -371,21 +368,28 @@ export default function Home() {
           {introComplete ? (
             <div className="flex flex-col w-full">
               <>
-                <div className="flex justify-center sm:justify-normal sm:pb-2">
+                <div className="sm:hidden flex justify-center sm:justify-normal sm:pb-2">
                   <HorizontalKeyboardControl
-                    buttonsData={
-                      isMobileDevice ? mobileMenuItems : allMenuItems
-                    }
+                    buttonsData={mobileMenuItems}
                     onButtonClick={(value) => {
                       setScreen(value);
                     }}
-                    disabled={
-                      isMobileDevice ? mobileMenuDisabled : allMenuDisabled
-                    }
+                    disabled={mobileMenuDisabled}
+                  />
+                </div>
+                <div className="hidden sm:block flex justify-center sm:justify-normal sm:pb-2">
+                  <HorizontalKeyboardControl
+                    buttonsData={allMenuItems}
+                    onButtonClick={(value) => {
+                      setScreen(value);
+                    }}
+                    disabled={allMenuDisabled}
                   />
                 </div>
 
-                {isMobileDevice && <MobileHeader />}
+                <div className="sm:hidden">
+                  <MobileHeader />
+                </div>
 
                 {screen === "start" && <AdventurerScreen />}
                 {screen === "play" && <ActionsScreen />}

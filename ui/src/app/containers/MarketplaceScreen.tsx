@@ -13,6 +13,7 @@ import { Button } from "../components/buttons/Button";
 import { useContracts } from "../hooks/useContracts";
 import { GameData } from "../components/GameData";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
+import MarketplaceTable from "../components/marketplace/MarketplaceTable";
 
 export interface MarketplaceScreenProps {
   upgradeTotalCost: number;
@@ -52,14 +53,9 @@ export default function MarketplaceScreen({
   const marketLatestItems = useQueriesStore(
     (state) => state.data.latestMarketItemsQuery?.items || []
   );
-  const adventurers = useQueriesStore(
-    (state) => state.data.adventurersInListQuery?.adventurers || []
-  );
   const adventurerItems = useQueriesStore(
     (state) => state.data.itemsByAdventurerQuery?.items || []
   );
-
-  const headings = ["Item", "Tier", "Slot", "Type", "Cost", "Actions"];
 
   const headingToKeyMapping: { [key: string]: string } = {
     Item: "item",
@@ -162,10 +158,6 @@ export default function MarketplaceScreen({
     ? adventurer?.gold - upgradeTotalCost
     : 0;
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   const underMaxItems = adventurerItems.length < 19;
 
   return (
@@ -177,111 +169,78 @@ export default function MarketplaceScreen({
               <LootIconLoader />
             </div>
           )}
-          {!isMobileDevice || (isMobileDevice && showEquipQ === null) ? (
-            <table className="w-full sm:border sm:border-terminal-green">
-              <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
-                <tr className="">
-                  {headings.map((heading, index) => (
-                    <th
-                      key={index}
-                      className="px-2.5 sm:px-3 cursor-pointer"
-                      onClick={() => handleSort(heading)}
-                    >
-                      {heading}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="text-xs sm:text-base">
-                {!isLoading.latestMarketItemsQuery ? (
-                  sortedMarketLatestItems.map((item: Item, index: number) => (
-                    <MarketplaceRow
-                      item={item}
-                      index={index}
-                      selectedIndex={selectedIndex}
-                      adventurers={adventurers}
-                      activeMenu={showEquipQ}
-                      setActiveMenu={setShowEquipQ}
-                      calculatedNewGold={calculatedNewGold}
-                      ownedItems={adventurerItems}
-                      purchaseItems={purchaseItems}
-                      setPurchaseItems={setPurchaseItems}
-                      upgradeHandler={upgradeHandler}
-                      totalCharisma={totalCharisma}
-                      key={index}
-                    />
-                  ))
-                ) : (
-                  <div className="h-full w-full flex justify-center p-10 align-center">
-                    Generating Loot{" "}
-                    <LootIconLoader className="self-center ml-3" size={"w-4"} />
-                  </div>
-                )}
-              </tbody>
-            </table>
-          ) : (
-            <>
-              {(() => {
-                const item = sortedMarketLatestItems[showEquipQ ?? 0];
-                const { tier, type, slot } = getItemData(item.item ?? "");
-                return (
-                  <div className="w-full m-auto h-full flex flex-row items-center justify-center gap-2">
-                    <p>{`Equip ${item.item} ?`}</p>
-                    <Button
-                      onClick={() => {
-                        const newPurchases = [
-                          ...purchaseItems,
-                          {
-                            item:
-                              getKeyFromValue(
-                                gameData.ITEMS,
-                                item?.item ?? ""
-                              ) ?? "0",
-                            equip: "1",
-                          },
-                        ];
-                        setPurchaseItems(newPurchases);
-                        upgradeHandler(undefined, undefined, newPurchases);
-                        setShowEquipQ(null);
-                        setActiveMenu(0);
-                      }}
-                    >
-                      Yes
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        const newPurchases = [
-                          ...purchaseItems,
-                          {
-                            item:
-                              getKeyFromValue(
-                                gameData.ITEMS,
-                                item?.item ?? ""
-                              ) ?? "0",
-                            equip: "0",
-                          },
-                        ];
-                        setPurchaseItems(newPurchases);
-                        upgradeHandler(undefined, undefined, newPurchases);
-                        setShowEquipQ(null);
-                        setActiveMenu(0);
-                      }}
-                    >
-                      No
-                    </Button>
-                    <Button
-                      onClick={() => {
-                        setShowEquipQ(null);
-                        setActiveMenu(0);
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                );
-              })()}
-            </>
-          )}
+          <div className={showEquipQ === null ? "" : "hidden sm:block"}>
+            <MarketplaceTable
+              showEquipQ={showEquipQ}
+              setShowEquipQ={setShowEquipQ}
+              purchaseItems={purchaseItems}
+              setPurchaseItems={setPurchaseItems}
+              upgradeHandler={upgradeHandler}
+              totalCharisma={totalCharisma}
+              calculatedNewGold={calculatedNewGold}
+            />
+          </div>
+          <>
+            {(() => {
+              const item = sortedMarketLatestItems[showEquipQ ?? 0];
+              const { tier, type, slot } = getItemData(item.item ?? "");
+              return (
+                <div
+                  className={`${
+                    showEquipQ !== null ? "sm:hidden" : "hidden"
+                  } w-full m-auto h-full flex flex-row items-center justify-center gap-2`}
+                >
+                  <p>{`Equip ${item.item} ?`}</p>
+                  <Button
+                    onClick={() => {
+                      const newPurchases = [
+                        ...purchaseItems,
+                        {
+                          item:
+                            getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
+                            "0",
+                          equip: "1",
+                        },
+                      ];
+                      setPurchaseItems(newPurchases);
+                      upgradeHandler(undefined, undefined, newPurchases);
+                      setShowEquipQ(null);
+                      setActiveMenu(0);
+                    }}
+                  >
+                    Yes
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const newPurchases = [
+                        ...purchaseItems,
+                        {
+                          item:
+                            getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
+                            "0",
+                          equip: "0",
+                        },
+                      ];
+                      setPurchaseItems(newPurchases);
+                      upgradeHandler(undefined, undefined, newPurchases);
+                      setShowEquipQ(null);
+                      setActiveMenu(0);
+                    }}
+                  >
+                    No
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setShowEquipQ(null);
+                      setActiveMenu(0);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              );
+            })()}
+          </>
         </div>
       ) : (
         <div className="flex w-full h-64">

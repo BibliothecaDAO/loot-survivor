@@ -140,10 +140,6 @@ const MarketplaceRow = ({
     }
   }, [isActive, handleKeyDown]);
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   return (
     <tr
       className={
@@ -154,8 +150,11 @@ const MarketplaceRow = ({
       <td className="text-center">{item.item}</td>
       <td className="text-center">{tier}</td>
       <td className="text-center">
-        <div className="flex justify-center items-center">
-          <LootIcon size={isMobileDevice ? "w-4" : "w-5"} type={slot} />
+        <div className="sm:hidden flex justify-center items-center">
+          <LootIcon size={"w-4"} type={slot} />
+        </div>
+        <div className="hidden sm:flex justify-center items-center">
+          <LootIcon size={"w-5"} type={slot} />
         </div>
       </td>
       <td className="text-center">
@@ -174,8 +173,8 @@ const MarketplaceRow = ({
       </td>
 
       <td className="w-20 sm:w-32 text-center">
-        {!isMobileDevice && activeMenu === index ? (
-          <div className="flex flex-row items-center justify-center gap-2">
+        {activeMenu === index ? (
+          <div className="hidden sm:flex flex-row items-center justify-center gap-2">
             <p>Equip?</p>
             <div className="flex flex-col">
               <Button
@@ -235,7 +234,6 @@ const MarketplaceRow = ({
               checkTransacting(item.item ?? "") ||
               singlePurchaseExists(item.item ?? "") ||
               item.owner ||
-              (isMobileDevice && activeMenu === index && isActive) ||
               checkOwned(item.item ?? "") ||
               checkPurchased(item.item ?? "")
             }
@@ -245,7 +243,6 @@ const MarketplaceRow = ({
               ? "Not Enough Gold"
               : checkTransacting(item.item ?? "") ||
                 singlePurchaseExists(item.item ?? "") ||
-                (isMobileDevice && activeMenu === index && isActive) ||
                 checkPurchased(item.item ?? "")
               ? "In Cart"
               : checkOwned(item.item ?? "")

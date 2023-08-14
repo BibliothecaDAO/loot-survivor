@@ -40,9 +40,6 @@ export const ItemDisplay = ({
   );
   const boost = getValueFromKey(gameData.ITEM_SUFFIX_BOOST, itemSuffix ?? 0);
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const setInventorySelected = useUIStore(
@@ -90,12 +87,13 @@ export const ItemDisplay = ({
         item.item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >
-      <div className="flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
-        <LootIcon
-          size={isMobileDevice ? "w-3" : "w-4"}
-          type={itemSlot ? itemSlot : slot}
-        />
-        <Efficacyicon size={isMobileDevice ? "w-4" : "w-4"} type={type} />
+      <div className="sm:hidden flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
+        <LootIcon size={"w-3"} type={itemSlot ? itemSlot : slot} />
+        <Efficacyicon size={"w-4"} type={type} />
+      </div>
+      <div className="hidden sm:block flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
+        <LootIcon size={"w-4"} type={itemSlot ? itemSlot : slot} />
+        <Efficacyicon size={"w-4"} type={type} />
       </div>
 
       {item.item ? (
@@ -143,17 +141,34 @@ export const ItemDisplay = ({
                     </Button>
                   )}
                   {inventory && (
-                    <Button
-                      className="sm:h-6 sm:p-2"
-                      variant={"contrast"}
-                      size={isMobileDevice ? "xxs" : "sm"}
-                      onClick={equip}
-                      disabled={disabled}
-                    >
-                      <p className="text-xxs sm:text-sm">
-                        {equipped ? "Equipped" : "Equip"}
-                      </p>
-                    </Button>
+                    <>
+                      <div className="sm:hidden">
+                        <Button
+                          className="sm:h-6 sm:p-2"
+                          variant={"contrast"}
+                          size={"xxs"}
+                          onClick={equip}
+                          disabled={disabled}
+                        >
+                          <p className="text-xxs sm:text-sm">
+                            {equipped ? "Equipped" : "Equip"}
+                          </p>
+                        </Button>
+                      </div>
+                      <div className="hidden sm:block">
+                        <Button
+                          className="sm:h-6 sm:p-2"
+                          variant={"contrast"}
+                          size={"xxs"}
+                          onClick={equip}
+                          disabled={disabled}
+                        >
+                          <p className="text-xxs sm:text-sm">
+                            {equipped ? "Equipped" : "Equip"}
+                          </p>
+                        </Button>
+                      </div>
+                    </>
                   )}
                   {(screen == "play" ||
                     screen == "upgrade" ||

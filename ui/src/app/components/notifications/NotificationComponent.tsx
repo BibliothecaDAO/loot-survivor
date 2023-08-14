@@ -16,10 +16,6 @@ const NotificationComponent = ({
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const showNotification = useLoadingStore((state) => state.showNotification);
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   useEffect(() => {
     if (currentIndex < notifications.length - 1) {
       const timer = setTimeout(() => {
@@ -37,10 +33,6 @@ const NotificationComponent = ({
     }
   }, [showNotification, currentIndex]);
 
-  console.log(notifications[currentIndex]?.message);
-
-  console.log(showNotification);
-
   return (
     <CSSTransition
       in={showNotification}
@@ -51,10 +43,21 @@ const NotificationComponent = ({
     >
       <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
         <div className="z-10 flex flex-row w-full gap-5 sm:p-2">
-          <div className="w-1/6 sm:w-1/4">
+          <div className="sm:hidden w-1/6 sm:w-1/4">
             <SpriteAnimation
-              frameWidth={isMobileDevice ? 80 : 100}
-              frameHeight={isMobileDevice ? 80 : 100}
+              frameWidth={80}
+              frameHeight={80}
+              columns={7}
+              rows={16}
+              frameRate={5}
+              animations={notificationAnimations}
+              currentAnimation={notifications[currentIndex]?.animation}
+            />
+          </div>
+          <div className="w-1/6 sm:w-1/4 hidden sm:block">
+            <SpriteAnimation
+              frameWidth={100}
+              frameHeight={100}
               columns={7}
               rows={16}
               frameRate={5}
