@@ -178,7 +178,7 @@ export default function Info({
             </div>
 
             <div className="flex flex-col justify-between flex-wrap">
-              <div className="flex flex-row w-full font-semibold text-xs sm:text-s lg:text-base">
+              <div className="flex flex-row w-full font-semibold text-xs sm:text-sm lg:text-base">
                 {attributes.map((attribute) => (
                   <div
                     key={attribute.key}
@@ -189,7 +189,7 @@ export default function Info({
                   </div>
                 ))}
               </div>
-              <div className="w-full flex flex-col sm:grid sm:grid-cols-2 md:flex md:flex-col gap-1 text-xs flex-wrap">
+              <div className="w-full flex flex-col lg:grid lg:grid-cols-2 2xl:flex 2xl:flex-col gap-1 2xl:gap-0 text-xs flex-wrap">
                 {bodyParts.map((part) => (
                   <div key={part}>
                     <ItemDisplay

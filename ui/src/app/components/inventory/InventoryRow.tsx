@@ -118,18 +118,10 @@ export const InventoryRow = ({
         }}
         disabled={!adventurer?.id}
       >
-        {isMobileDevice ? (
-          <div className="flex items-center justify-center w-10 h-10 sm:hidden">
-            {icon}
-          </div>
-        ) : (
-          <div className="flex flex-row gap-1 items-center">
-            <div className="flex items-center justify-center w-10 h-10">
-              {icon}
-            </div>
-            <p className="text-xl whitespace-nowrap hidden sm:block">{title}</p>
-          </div>
-        )}
+        <div className="flex flex-row gap-1 items-center">
+          <div className="flex items-center justify-center w-8 h-8">{icon}</div>
+          <p className="text-xl whitespace-nowrap hidden sm:block">{title}</p>
+        </div>
       </Button>
     </div>
   );

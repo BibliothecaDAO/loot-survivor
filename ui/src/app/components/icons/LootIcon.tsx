@@ -26,7 +26,7 @@ export interface ItemDisplayProps {
   className?: string;
 }
 
-const ItemDisplay = ({ type, size, className }: ItemDisplayProps) => {
+const ItemDisplay = ({ type, size = "w-5", className }: ItemDisplayProps) => {
   const classes = `fill-current ${size} ${className}`;
   const Components: { [key in string]: ReactElement } = {
     chest: <Chest className={classes} />,

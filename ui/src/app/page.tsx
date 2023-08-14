@@ -245,7 +245,7 @@ export default function Home() {
   return (
     // <Maintenance />
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 lg:p-10 sm:p-8 `}
+      className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
     >
       {introComplete ? (
         <>
