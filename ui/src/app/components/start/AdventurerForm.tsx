@@ -338,15 +338,17 @@ export const AdventurerForm = ({
   if (step === 1) {
     return (
       <>
-        <div className="w-full sm:p-8 md:p-4">
-          <h3 className="uppercase text-center">Choose your class</h3>
-          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-5 lg:gap-10 md:gap-5">
+        <div className="w-full sm:p-8 md:p-4 2xl:flex 2xl:flex-col 2xl:gap-20 2xl:h-[700px]">
+          <h3 className="uppercase text-center 2xl:text-5xl">
+            Choose your class
+          </h3>
+          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-5 md:gap-5 lg:gap-10 2xl:gap-5 2xl:justify-center">
             {classes.map((classType) => (
               <div
                 key={classType.name}
-                className="flex flex-col items-center h-full justify-between border sm:w-56 md:w-48 border-terminal-green"
+                className="flex flex-col items-center justify-between border sm:w-56 md:w-48 2xl:w-64 border-terminal-green"
               >
-                <div className="relative w-28 h-28 sm:w-56 sm:h-56 md:h-40">
+                <div className="relative w-28 h-28 sm:w-56 sm:h-56 md:h-40 2xl:h-64 2xl:w-64">
                   <Image
                     src={classType.image}
                     fill={true}
@@ -367,29 +369,6 @@ export const AdventurerForm = ({
                 </Button>
               </div>
             ))}
-            <div className="flex w-full justify-center uppercase">
-              6 Stat Points Available
-            </div>
-            <div className="flex flex-row w-full gap-2">
-              <Button className="w-full" onClick={() => handleClassSelection}>
-                Strength
-              </Button>
-              <Button className="w-full" onClick={() => handleClassSelection}>
-                Vitality
-              </Button>
-              <Button className="w-full" onClick={() => handleClassSelection}>
-                Wisdom
-              </Button>
-              <Button className="w-full" onClick={() => handleClassSelection}>
-                Intelligence
-              </Button>
-              <Button className="w-full" onClick={() => handleClassSelection}>
-                Dexterity
-              </Button>
-              <Button className="w-full" onClick={() => handleClassSelection}>
-                Charisma
-              </Button>
-            </div>
           </div>
         </div>
       </>
@@ -397,15 +376,17 @@ export const AdventurerForm = ({
   } else if (step === 2) {
     return (
       <>
-        <div className="w-full sm:p-8 md:p-4">
-          <h3 className="uppercase text-center">Choose your weapon</h3>
+        <div className="w-full sm:p-8 md:p-4 2xl:flex 2xl:flex-col 2xl:gap-20 2xl:h-[700px]">
+          <h3 className="uppercase text-center 2xl:text-5xl">
+            Choose your weapon
+          </h3>
           <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-2 sm:gap-20 md:gap-5">
             {weapons.map((weapon) => (
               <div
                 key={weapon.name}
-                className="flex flex-col items-center h-full justify-between border sm:w-56 md:w-48 border-terminal-green"
+                className="flex flex-col items-center justify-between border sm:w-56 md:w-48 2xl:h-64 2xl:w-64 border-terminal-green"
               >
-                <div className="relative w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52">
+                <div className="relative w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52 2xl:h-64 2xl:w-64">
                   <Image
                     src={weapon.image}
                     fill={true}
@@ -439,23 +420,23 @@ export const AdventurerForm = ({
   } else if (step === 3) {
     return (
       <>
-        <div className="w-full text-center sm:w-96 border border-terminal-green p-4 uppercase">
-          <h4>Enter adventurer name</h4>
+        <div className="w-full text-center p-4 uppercase 2xl:flex 2xl:flex-col 2xl:gap-10 2xl:h-[700px]">
+          <h4 className="2xl:text-5xl">Enter adventurer name</h4>
           <div className="items-center flex flex-col gap-2">
             <input
               type="text"
               name="name"
               onChange={handleChange}
-              className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform"
+              className="p-1 m-2 2xl:h-16 2xl:w-64 2xl:text-4xl bg-terminal-black border border-terminal-green animate-pulse transform"
               onKeyDown={handleKeyDown}
               maxLength={13}
             />
           </div>
           <div className="flex flex-row justify-between">
-            <Button size={"xs"} onClick={handleBack}>
+            <Button size={"lg"} onClick={handleBack}>
               Back
             </Button>
-            <Button size={"xs"} onClick={() => handleNameEntry(formData.name)}>
+            <Button size={"lg"} onClick={() => handleNameEntry(formData.name)}>
               Next
             </Button>
           </div>

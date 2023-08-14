@@ -92,7 +92,7 @@ const PurchaseHealth = ({
   // );
 
   return (
-    <div className="flex flex-col sm:flex-row sm:p-2 md:p-4 items-center">
+    <div className="flex flex-col sm:flex-row sm:p-2 md:p-4 2xl:p-0 items-center">
       <QuantityButtons
         amount={potionAmount}
         min={0}

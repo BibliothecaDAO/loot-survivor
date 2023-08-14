@@ -337,7 +337,7 @@ export default function UpgradeScreen() {
           </div>
           {!checkTransacting ? (
             <div className="w-full sm:w-2/3">
-              <div className="flex flex-col gap-2 h-full">
+              <div className="flex flex-col gap-2 2xl:gap-0 h-full">
                 <div className="justify-center text-terminal-green space-x-3">
                   <div className="text-center text-2xl md:text-xl lg:text-4xl sm:p-2 animate-pulse uppercase">
                     Level up!
