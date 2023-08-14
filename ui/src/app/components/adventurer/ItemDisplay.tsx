@@ -86,22 +86,21 @@ export const ItemDisplay = ({
 
   return (
     <div
-      className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-14 ${
+      className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-8 sm:h-10 md:h-14 ${
         item.item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >
       <div className="flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
         <LootIcon
-          size={isMobileDevice ? "w-4" : "w-5"}
+          size={isMobileDevice ? "w-3" : "w-4"}
           type={itemSlot ? itemSlot : slot}
         />
-        <Efficacyicon size={isMobileDevice ? "w-4" : "w-5"} type={type} />
+        <Efficacyicon size={isMobileDevice ? "w-4" : "w-4"} type={type} />
       </div>
 
       {item.item ? (
-        <div className="flex flex-row justify-between w-full px-2 self-center">
+        <div className="flex flex-row justify-between w-full px-1 self-center">
           <div className="w-full whitespace-normal">
-            {" "}
             <div className="flex flex-col text-xs sm:text-sm space-between">
               <div className="flex flex-row font-semibold text-xs space-x-3">
                 <span className=" self-center">
@@ -115,7 +114,7 @@ export const ItemDisplay = ({
                 <span className="text-xxs sm:text-sm">{boost}</span>
               </div>
               <span className="flex flex-row justify-between">
-                <span className="flex font-semibold whitespace-nowrap text-[0.6rem] sm:text-lg">
+                <span className="flex whitespace-nowrap text-[0.6rem] sm:text-xxs md:text-lg">
                   <p>{itemName}</p>
                   <span className="text-xxs sm:text-sm">
                     {slot == "Neck" || slot == "Ring"
@@ -140,7 +139,7 @@ export const ItemDisplay = ({
                         );
                       }}
                     >
-                      <SwapIcon className="w-4 h-4" />
+                      <SwapIcon className="w-2 h-2 lg:w-4 lg:h-4" />
                     </Button>
                   )}
                   {inventory && (
