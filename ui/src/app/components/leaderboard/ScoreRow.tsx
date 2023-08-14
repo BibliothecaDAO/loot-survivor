@@ -5,12 +5,14 @@ import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 interface ScoreLeaderboardRowProps {
   index: number;
   adventurer: Adventurer;
+  rank: number;
   handleRowSelected: (id: number) => void;
 }
 
 const ScoreRow = ({
   index,
   adventurer,
+  rank,
   handleRowSelected,
 }: ScoreLeaderboardRowProps) => {
   const { play: clickPlay } = useUiSounds(soundSelector.click);
@@ -22,7 +24,7 @@ const ScoreRow = ({
         clickPlay();
       }}
     >
-      <td>{index + 1}</td>
+      <td>{rank}</td>
       <td>{`${adventurer.name} - ${adventurer.id}`}</td>
       <td>{adventurer.xp}</td>
       {/* <td>
