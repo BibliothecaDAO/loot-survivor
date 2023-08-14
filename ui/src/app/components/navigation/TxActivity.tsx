@@ -151,7 +151,7 @@ export const TxActivity = () => {
         await refetch("lastBeastBattleQuery");
         await refetch("lastBeastQuery");
         await refetch("beastQuery");
-        await refetch("latestMarketItemsQuery");
+        // await refetch("latestMarketItemsQuery");
         const killedByObstacle =
           queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
             "Obstacle" &&
@@ -261,7 +261,7 @@ export const TxActivity = () => {
       console.log(queryData.adventurerByIdQuery.adventurers[0]);
       setAdventurer(queryData.adventurerByIdQuery.adventurers[0]);
     }
-  }, [queryData.adventurerByIdQuery?.adventurers[0]?.timestamp]);
+  }, [isLoadingQueryUpdated]);
 
   // stop loading when an error is caught
   useEffect(() => {
