@@ -288,7 +288,7 @@ export const TxActivity = () => {
             <div className="flex flex-row gap-2">
               {!isMobileDevice && "Hash:"}
               <a
-                href={`https://testnet.starkscan.co/tx/${padAddress(hash)}`}
+                href={`https://goerli.voyager.online/tx/${padAddress(hash)}`}
                 target="_blank"
                 className="animate-pulse"
               >
