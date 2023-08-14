@@ -262,35 +262,40 @@ export const processNotifications = (
       });
     }
     if ("Items" in notificationData && "Potions" in notificationData) {
-      notifications.push({
-        message: (
-          <div className="flex flex-col items-center">
-            <p>Purchased:</p>
-            {notificationData["Items"].map(
-              (item: ItemPurchase, index: number) => {
-                const { slot } = getItemData(
-                  getValueFromKey(gameData.ITEMS, parseInt(item.item)) ?? ""
-                );
-                return (
-                  <div className="flex flex-row gap-2 items-center" key={index}>
-                    <LootIcon size={"w-4"} type={slot} />
-                    <p>
-                      {getValueFromKey(gameData.ITEMS, parseInt(item.item))}
-                    </p>
-                  </div>
-                );
-              }
-            )}
-            {notificationData["Potions"] > 0 && (
-              <div className="flex flex-row gap-2 items-center">
-                <HealthPotionIcon />
-                <p>{`Health Potions x ${notificationData["Potions"]}`}</p>
-              </div>
-            )}
-          </div>
-        ),
-        animation: gameData.ADVENTURER_ANIMATIONS["PurchaseItem"],
-      });
+      if (notificationData["Items"].length > 0) {
+        notifications.push({
+          message: (
+            <div className="flex flex-col items-center">
+              <p>Purchased:</p>
+              {notificationData["Items"].map(
+                (item: ItemPurchase, index: number) => {
+                  const { slot } = getItemData(
+                    getValueFromKey(gameData.ITEMS, parseInt(item.item)) ?? ""
+                  );
+                  return (
+                    <div
+                      className="flex flex-row gap-2 items-center"
+                      key={index}
+                    >
+                      <LootIcon size={"w-4"} type={slot} />
+                      <p>
+                        {getValueFromKey(gameData.ITEMS, parseInt(item.item))}
+                      </p>
+                    </div>
+                  );
+                }
+              )}
+              {notificationData["Potions"] > 0 && (
+                <div className="flex flex-row gap-2 items-center">
+                  <HealthPotionIcon />
+                  <p>{`Health Potions x ${notificationData["Potions"]}`}</p>
+                </div>
+              )}
+            </div>
+          ),
+          animation: gameData.ADVENTURER_ANIMATIONS["PurchaseItem"],
+        });
+      }
     }
   } else {
     const animation = handleAnimation(notificationData as string);
