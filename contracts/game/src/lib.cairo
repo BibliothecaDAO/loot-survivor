@@ -1225,26 +1225,41 @@ mod Game {
             },
             ExploreResult::Treasure(()) => {
                 let (treasure_type, amount) = adventurer.discover_treasure(sub_explore_rnd);
-                let discovery = Discovery {
-                    adventurer_state: AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    }, amount: amount
-                };
 
                 match treasure_type {
                     TreasureDiscovery::Gold(()) => {
                         // add gold to adventurer
                         adventurer.add_gold(amount);
                         // emit discovered gold event
-                        __event_DiscoveredGold(ref self, DiscoveredGold { discovery });
+                        __event_DiscoveredGold(
+                            ref self,
+                            DiscoveredGold {
+                                discovery: Discovery {
+                                    adventurer_state: AdventurerState {
+                                        owner: get_caller_address(),
+                                        adventurer_id: adventurer_id,
+                                        adventurer: adventurer
+                                    }, amount: amount
+                                }
+                            }
+                        );
                     },
                     TreasureDiscovery::XP(()) => {
                         // apply XP to adventurer
                         let (previous_level, new_level) = adventurer.increase_adventurer_xp(amount);
                         // emit discovered xp event
-                        __event_DiscoveredXP(ref self, DiscoveredXP { discovery });
+                        __event_DiscoveredXP(
+                            ref self,
+                            DiscoveredXP {
+                                discovery: Discovery {
+                                    adventurer_state: AdventurerState {
+                                        owner: get_caller_address(),
+                                        adventurer_id: adventurer_id,
+                                        adventurer: adventurer
+                                    }, amount: amount
+                                }
+                            }
+                        );
                         // check for level up
                         if (new_level > previous_level) {
                             // process level up
@@ -1259,11 +1274,33 @@ mod Game {
                             // adventurer gets gold instead of health
                             adventurer.add_gold(amount);
                             // emit discovered gold event
-                            __event_DiscoveredGold(ref self, DiscoveredGold { discovery });
+                            __event_DiscoveredGold(
+                                ref self,
+                                DiscoveredGold {
+                                    discovery: Discovery {
+                                        adventurer_state: AdventurerState {
+                                            owner: get_caller_address(),
+                                            adventurer_id: adventurer_id,
+                                            adventurer: adventurer
+                                        }, amount: amount
+                                    }
+                                }
+                            );
                         } else {
                             // otherwise add health
                             adventurer.increase_health(amount);
-                            __event_DiscoveredHealth(ref self, DiscoveredHealth { discovery });
+                            __event_DiscoveredHealth(
+                                ref self,
+                                DiscoveredHealth {
+                                    discovery: Discovery {
+                                        adventurer_state: AdventurerState {
+                                            owner: get_caller_address(),
+                                            adventurer_id: adventurer_id,
+                                            adventurer: adventurer
+                                        }, amount: amount
+                                    }
+                                }
+                            );
                         }
                     }
                 }
