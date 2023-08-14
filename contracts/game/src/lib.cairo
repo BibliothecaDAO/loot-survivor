@@ -152,7 +152,7 @@ mod Game {
                 ref self, block_number, caller, starting_weapon, adventurer_meta, starting_stats
             );
 
-            //_payout(ref self, caller, block_number, interface_id);
+        //_payout(ref self, caller, block_number, interface_id);
         }
 
         //@notice Sends an adventurer to explore.
@@ -2250,8 +2250,9 @@ mod Game {
                 _assert_item_not_owned(adventurer, bag, item_id.clone());
 
                 // create new item, equip it, and record if we need unequipped an item
-                unequipped_item_id =
-                    _equip_item(ref adventurer, ref bag, ImplItemPrimitive::new(item_id));
+                let mut new_item = ImplItemPrimitive::new(item_id);
+                new_item.set_metadata_id(adventurer, bag);
+                unequipped_item_id = _equip_item(ref adventurer, ref bag, new_item);
             } else {
                 // otherwise item is being equipped from bag
                 // so remove it from bag, equip it, and record if we need to unequip an item
