@@ -90,7 +90,7 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                             <div className="mr-4 text-xs sm:text-lg">
                               Hash:{" "}
                               <a
-                                href={`https://testnet.starkscan.co/tx/${padAddress(
+                                href={`https://goerli.voyager.online/tx/${padAddress(
                                   tx.hash
                                 )}`}
                                 target="_blank"
