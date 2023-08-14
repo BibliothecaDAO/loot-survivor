@@ -136,19 +136,12 @@ export const BattleDisplay = ({
     }
 
     if (IdleDamagePenalty) {
-      if (AdventurerHealthExists) {
-        return (
-          <span className="flex flex-row items-center justify-between">
-            <p>OOPS! You were hit for 80 damage from idle penalty!</p>
-            <GiSandsOfTimeIcon />
-          </span>
-        );
-      } else {
+      return (
         <span className="flex flex-row items-center justify-between">
-          <p>OOPS! You were killed by the idle penalty of 80 damage!</p>
+          <p>OOPS! You were killed by the idle death penalty!</p>
           <SkullCrossedBonesIcon />
-        </span>;
-      }
+        </span>
+      );
     }
   };
 

@@ -4,17 +4,19 @@ import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import { getKeyFromValue, removeElement } from "@/app/lib/utils";
 import { GameData } from "../GameData";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import useUIStore from "@/app/hooks/useUIStore";
+import { UpgradeStats, ZeroUpgrade } from "@/app/types";
 
 interface StatAttributeProps {
   name: string;
   icon: ReactElement;
   description: string;
   buttonText: string;
-  amount: number;
-  setAmount: (value: any) => void;
-  upgrades: string[];
-  setUpgrades: (values: string[]) => void;
-  upgradeHandler: (value: any[]) => void;
+  upgradeHandler: (
+    upgrades?: UpgradeStats,
+    potions?: number,
+    items?: any[]
+  ) => void;
 }
 
 export const StatAttribute = ({
@@ -22,29 +24,25 @@ export const StatAttribute = ({
   icon,
   description,
   buttonText,
-  amount,
-  setAmount,
-  upgrades,
-  setUpgrades,
   upgradeHandler,
 }: StatAttributeProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const prevAmountRef = useRef<{ [key: string]: number }>({ ...ZeroUpgrade });
+  const upgrades = useUIStore((state) => state.upgrades);
+  const setUpgrades = useUIStore((state) => state.setUpgrades);
   const gameData = new GameData();
   const [buttonClicked, setButtonClicked] = useState(false);
-  const prevAmountRef = useRef<{ [key: string]: number }>({
-    Strength: 0,
-    Dexterity: 0,
-    Vitality: 0,
-    Intelligence: 0,
-    Wisdom: 0,
-    Charisma: 0,
-  });
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
 
+  const amount = upgrades[name] ?? 0;
+  const upgradesLength = Object.values(upgrades).filter(
+    (value) => value !== 0
+  ).length;
+
   const newUpgradeTotal =
-    amount + ((adventurer?.statUpgrades ?? 0) - upgrades.length);
+    amount + ((adventurer?.statUpgrades ?? 0) - upgradesLength);
 
   useEffect(() => {
     if (buttonClicked) {
@@ -52,21 +50,17 @@ export const StatAttribute = ({
         // Access the previous amount for the specific name
         const prevAmount = prevAmountRef.current[name];
         if (amount > prevAmount) {
-          const newupgrades = [
-            ...upgrades,
-            getKeyFromValue(gameData.STATS, name) ?? "",
-          ];
-          setUpgrades(newupgrades);
-          upgradeHandler((upgrades = newupgrades));
+          // upgradeStats[name] = amount;
+          // setUpgradeStats(upgradeStats);
+          upgradeHandler(upgrades, undefined, undefined);
         } else if (amount <= prevAmount) {
-          const newupgrades = removeElement(
-            upgrades,
-            getKeyFromValue(gameData.STATS, name) ?? ""
-          );
-          setUpgrades(newupgrades);
-          upgradeHandler((upgrades = newupgrades));
-          if (newupgrades.length === 0) {
-            removeEntrypointFromCalls("buy_items_and_upgrade_stats");
+          // upgradeStats[name] = amount;
+          // setUpgradeStats(upgradeStats);
+          upgradeHandler(upgrades, undefined, undefined);
+          if (
+            Object.values(upgrades).filter((value) => value !== 0).length === 0
+          ) {
+            removeEntrypointFromCalls("upgrade_adventurer");
           }
         }
         setButtonClicked(false);
@@ -86,7 +80,8 @@ export const StatAttribute = ({
           min={0}
           max={newUpgradeTotal}
           setAmount={(value) => {
-            setAmount((prev: any) => ({ ...prev, [name]: value }));
+            upgrades[name] = value;
+            setUpgrades(upgrades);
             setButtonClicked(true);
           }}
         />
