@@ -257,7 +257,7 @@ export const TxActivity = () => {
       console.log(queryData.adventurerByIdQuery.adventurers[0]);
       setAdventurer(queryData.adventurerByIdQuery.adventurers[0]);
     }
-  }, [queryData.adventurerByIdQuery?.adventurers[0]?.timestamp]);
+  }, [isLoadingQueryUpdated]);
 
   // stop loading when an error is caught
   useEffect(() => {
@@ -284,7 +284,7 @@ export const TxActivity = () => {
             <div className="flex flex-row gap-2">
               {!isMobileDevice && "Hash:"}
               <a
-                href={`https://testnet.starkscan.co/tx/${padAddress(hash)}`}
+                href={`https://goerli.voyager.online/tx/${padAddress(hash)}`}
                 target="_blank"
                 className="animate-pulse"
               >
