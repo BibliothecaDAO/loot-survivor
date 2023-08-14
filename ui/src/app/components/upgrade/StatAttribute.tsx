@@ -37,12 +37,13 @@ export const StatAttribute = ({
   );
 
   const amount = upgrades[name] ?? 0;
-  const upgradesLength = Object.values(upgrades).filter(
-    (value) => value !== 0
-  ).length;
+
+  const upgradesTotal = Object.values(upgrades)
+    .filter((value) => value !== 0)
+    .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
 
   const newUpgradeTotal =
-    amount + ((adventurer?.statUpgrades ?? 0) - upgradesLength);
+    amount + ((adventurer?.statUpgrades ?? 0) - upgradesTotal);
 
   useEffect(() => {
     if (buttonClicked) {
@@ -50,12 +51,8 @@ export const StatAttribute = ({
         // Access the previous amount for the specific name
         const prevAmount = prevAmountRef.current[name];
         if (amount > prevAmount) {
-          // upgradeStats[name] = amount;
-          // setUpgradeStats(upgradeStats);
           upgradeHandler(upgrades, undefined, undefined);
         } else if (amount <= prevAmount) {
-          // upgradeStats[name] = amount;
-          // setUpgradeStats(upgradeStats);
           upgradeHandler(upgrades, undefined, undefined);
           if (
             Object.values(upgrades).filter((value) => value !== 0).length === 0
