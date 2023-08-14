@@ -58,7 +58,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       if (discoveryData?.dodgedObstacle) {
         return (
           <span className="flex flex-row items-center justify-between">
-            <p>PHEW! You avoided the {discoveryData?.obstacle} obstacle!</p>
+            <p>PHEW! You avoided the {discoveryData?.obstacle}!</p>
             <SpikedWallIcon />
           </span>
         );
