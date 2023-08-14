@@ -166,12 +166,6 @@ export default function Info({
                       ?.properties.name
                   }
                 </span>
-                <span>
-                  {
-                    getRealmNameById(formatAdventurer.homeRealm ?? 0)
-                      ?.properties.order
-                  }
-                </span>
               </div>
             ) : (
               <span className="text-center text-lg text-terminal-yellow">
