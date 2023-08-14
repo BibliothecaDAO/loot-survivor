@@ -5,6 +5,9 @@ import {
   processBeastName,
   getRandomElement,
   chunkArray,
+  isObject,
+  getItemData,
+  getValueFromKey,
 } from "../../lib/utils";
 import {
   Adventurer,
@@ -12,7 +15,11 @@ import {
   Discovery,
   NullAdventurer,
   Notification,
+  UpgradeSummary,
+  ItemPurchase,
 } from "@/app/types";
+import LootIcon from "../../components/icons/LootIcon";
+import { HealthPotionIcon } from "../icons/Icons";
 
 const processAnimation = (
   type: string,
@@ -22,20 +29,20 @@ const processAnimation = (
   const gameData = new GameData();
   if (type == "Flee") {
     if (
-      Array.isArray(notificationData?.data) &&
-      notificationData.data.some((data: any) => data.fled)
+      Array.isArray(notificationData) &&
+      notificationData.some((data: any) => data.fled)
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Flee"];
     } else if (
-      Array.isArray(notificationData?.data) &&
-      notificationData.data.some(
+      Array.isArray(notificationData) &&
+      notificationData.some(
         (data: Battle) => data.attacker == "Beast" && data.adventurerHealth == 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
     } else if (
-      Array.isArray(notificationData?.data) &&
-      notificationData.data.some(
+      Array.isArray(notificationData) &&
+      notificationData.some(
         (data: Battle) =>
           data.attacker == "Beast" && (data.adventurerHealth ?? 0) > 0
       )
@@ -44,15 +51,15 @@ const processAnimation = (
     }
   } else if (type == "Attack") {
     if (
-      Array.isArray(notificationData?.data) &&
-      notificationData.data.some(
+      Array.isArray(notificationData) &&
+      notificationData.some(
         (data: Battle) => data.attacker == "Beast" && data.adventurerHealth == 0
       )
     ) {
       return gameData.ADVENTURER_ANIMATIONS["Dead"];
     } else if (
-      Array.isArray(notificationData?.data) &&
-      notificationData.data.some(
+      Array.isArray(notificationData) &&
+      notificationData.some(
         (data: Battle) => data.attacker == "Adventurer" && data.beastHealth == 0
       )
     ) {
@@ -71,24 +78,21 @@ const processAnimation = (
   } else if (type == "Explore") {
     if (notificationData?.discoveryType == "Beast") {
       if (
-        notificationData?.data?.some(
-          (data: Discovery) => data.ambushed && (data.adventurerHealth ?? 0) > 0
-        )
+        notificationData.ambushed &&
+        (notificationData.adventurerHealth ?? 0) > 0
       ) {
         return gameData.ADVENTURER_ANIMATIONS["Ambush"];
       } else if (
-        notificationData?.data?.some(
-          (data: Discovery) =>
-            data.ambushed && (data.adventurerHealth ?? 0) == 0
-        )
+        notificationData.ambushed &&
+        (notificationData.adventurerHealth ?? 0) == 0
       ) {
         return gameData.ADVENTURER_ANIMATIONS["Dead"];
       } else {
         return gameData.ADVENTURER_ANIMATIONS["DiscoverBeast"];
       }
     } else if (notificationData?.discoveryType == "Obstacle") {
-      if (notificationData?.dodgedObstacle == 0) {
-        if (notificationData?.adventurerHealth == 0) {
+      if (notificationData?.dodgedObstacle === 0) {
+        if (notificationData?.adventurerHealth === 0) {
           return gameData.ADVENTURER_ANIMATIONS["Dead"];
         } else {
           return gameData.ADVENTURER_ANIMATIONS["HitByObstacle"];
@@ -121,25 +125,27 @@ const processAnimation = (
 
 export const processNotifications = (
   type: string,
-  notificationData: Discovery[] | Battle[] | string | string[],
+  notificationData: Discovery[] | Battle[] | string | string[] | UpgradeSummary,
   battles: Battle[],
   hasBeast: boolean,
   adventurer: Adventurer
 ) => {
+  console.log(notificationData);
+  const gameData = new GameData();
   const notifications: Notification[] = [];
   const beastName = processBeastName(
     battles[0]?.beast ?? "",
     battles[0]?.special2 ?? "",
     battles[0]?.special3 ?? ""
   );
-  const animation = processAnimation(
-    type,
-    notificationData,
-    adventurer ?? NullAdventurer
-  );
-  if (type == "Attack" || type == "Flee") {
+  const handleAnimation = (data: any) => {
+    return processAnimation(type, data, adventurer ?? NullAdventurer);
+  };
+  const isArray = Array.isArray(notificationData);
+  if ((type == "Attack" || type == "Flee") && isArray) {
     const battleScenarios = chunkArray(notificationData as Battle[], 2);
     for (let i = 0; i < battleScenarios.length; i++) {
+      const animation = handleAnimation(battleScenarios[i] as Battle[]);
       notifications.push({
         animation: animation ?? "",
         message: (
@@ -151,9 +157,11 @@ export const processNotifications = (
       });
     }
     return notifications;
-  } else if (type == "Explore") {
+  } else if (type == "Explore" && isArray) {
     // Here every discovery item in the DB is a noti, so we can just loop
     for (let i = 0; i < notificationData.length; i++) {
+      const animation = handleAnimation(notificationData[i] as Discovery);
+      console.log(animation);
       notifications.push({
         animation: animation ?? "",
         message: (
@@ -173,8 +181,9 @@ export const processNotifications = (
       animation: "damage",
     });
     return notifications;
-  } else if (type == "Multicall") {
+  } else if (type == "Multicall" && isArray) {
     for (let i = 0; i < notificationData.length; i++) {
+      const animation = handleAnimation(notificationData[i] as string);
       if (hasBeast) {
         if (
           (notificationData[i] as string).startsWith("You equipped") &&
@@ -232,7 +241,59 @@ export const processNotifications = (
         });
       }
     }
+  } else if (type == "Upgrade" && isObject(notificationData)) {
+    if ("Stats" in notificationData) {
+      notifications.push({
+        message: (
+          <div className="flex flex-col items-center">
+            <p>Upgraded:</p>
+            {Object.entries(notificationData["Stats"]).map(
+              ([key, value]) =>
+                value !== 0 && (
+                  <p
+                    className="text-no-wrap"
+                    key={key}
+                  >{`${key} x ${value}`}</p>
+                )
+            )}
+          </div>
+        ),
+        animation: gameData.ADVENTURER_ANIMATIONS["Upgrade"],
+      });
+    }
+    if ("Items" in notificationData && "Potions" in notificationData) {
+      notifications.push({
+        message: (
+          <div className="flex flex-col items-center">
+            <p>Purchased:</p>
+            {notificationData["Items"].map(
+              (item: ItemPurchase, index: number) => {
+                const { slot } = getItemData(
+                  getValueFromKey(gameData.ITEMS, parseInt(item.item)) ?? ""
+                );
+                return (
+                  <div className="flex flex-row gap-2 items-center" key={index}>
+                    <LootIcon size={"w-4"} type={slot} />
+                    <p>
+                      {getValueFromKey(gameData.ITEMS, parseInt(item.item))}
+                    </p>
+                  </div>
+                );
+              }
+            )}
+            {notificationData["Potions"] > 0 && (
+              <div className="flex flex-row gap-2 items-center">
+                <HealthPotionIcon />
+                <p>{`Health Potions x ${notificationData["Potions"]}`}</p>
+              </div>
+            )}
+          </div>
+        ),
+        animation: gameData.ADVENTURER_ANIMATIONS["PurchaseItem"],
+      });
+    }
   } else {
+    const animation = handleAnimation(notificationData as string);
     notifications.push({
       message: <p>{notificationData as string}</p>,
       animation: animation ?? "",

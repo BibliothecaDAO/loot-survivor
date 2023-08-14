@@ -317,3 +317,7 @@ export function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   }
   return chunks;
 }
+
+export function isObject(value: any): value is object {
+  return typeof value === "object" && !Array.isArray(value);
+}

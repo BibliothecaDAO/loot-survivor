@@ -109,6 +109,8 @@ export const TxActivity = () => {
     !hash
   );
 
+  console.log(txAccepted, hash, isLoadingQueryUpdated);
+
   useEffect(() => {
     const fetchData = async () => {
       console.log(txAccepted, hash, isLoadingQueryUpdated);
@@ -200,6 +202,7 @@ export const TxActivity = () => {
       const handleCreate = async () => {
         console.log("in create");
         await refetch("adventurersByOwnerQuery");
+        await refetch("adventurerByIdQuery");
         stopLoading(notificationData);
       };
 
@@ -255,6 +258,7 @@ export const TxActivity = () => {
       queryData.adventurerByIdQuery.adventurers[0]?.id
     ) {
       console.log("updated");
+      console.log(queryData.adventurerByIdQuery.adventurers[0]);
       setAdventurer(queryData.adventurerByIdQuery.adventurers[0]);
     }
   }, [queryData.adventurerByIdQuery?.adventurers[0]?.timestamp]);
