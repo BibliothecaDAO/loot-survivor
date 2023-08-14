@@ -42,6 +42,20 @@ export const contracts = {
 
 export const appUrl = "https://beta-survivor.realms.world/";
 
+export const notificationAnimations = [
+  { name: "idle", startFrame: 0, frameCount: 4 },
+  { name: "run", startFrame: 9, frameCount: 5 },
+  { name: "jump", startFrame: 11, frameCount: 7 },
+  { name: "attack1", startFrame: 42, frameCount: 5 },
+  { name: "attack2", startFrame: 47, frameCount: 6 },
+  { name: "attack3", startFrame: 53, frameCount: 8 },
+  { name: "damage", startFrame: 59, frameCount: 4 },
+  { name: "die", startFrame: 64, frameCount: 9 },
+  { name: "drawSword", startFrame: 70, frameCount: 5 },
+  { name: "discoverItem", startFrame: 85, frameCount: 6 },
+  { name: "slide", startFrame: 24, frameCount: 5 },
+];
+
 // ---- CONTRACT PARAMS
 // Penalty time is 8 blocks, where each block is ~ 3 minutes
 export const penaltyTime = 16 * (3 * 60);

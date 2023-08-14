@@ -275,12 +275,17 @@ export default function UpgradeScreen() {
   };
 
   const handleSubmitUpgradeTx = async () => {
+    renderSummary();
     startLoading(
       "Upgrade",
-      `Upgrading ${selected}`,
+      "Upgrading",
       "adventurerByIdQuery",
       adventurer?.id,
-      `You upgraded ${selected}!`
+      {
+        Stats: upgrades,
+        Items: purchaseItems,
+        Potions: potionAmount,
+      }
     );
     handleSubmitCalls(writeAsync).then((tx: any) => {
       if (tx) {
@@ -289,13 +294,12 @@ export default function UpgradeScreen() {
           hash: tx.transaction_hash,
           metadata: {
             method: "Upgrade Stat",
-            description: `Upgrading ${selected}`,
+            description: "Upgrading",
           },
         });
       }
     });
     resetDataUpdated("adventurerByIdQuery");
-    renderSummary();
     setPurchaseItems([]);
     setUpgrades({ ...ZeroUpgrade });
   };

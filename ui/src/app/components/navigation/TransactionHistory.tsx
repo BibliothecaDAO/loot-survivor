@@ -1,12 +1,12 @@
 import React, { useState, useRef, RefObject } from "react";
 import { useTransactionManager } from "@starknet-react/core";
 import { TxStatus } from "./TxStatus";
-import { Metadata } from "../../types";
+import { Metadata, NullAdventurer, Notification } from "../../types";
 import { padAddress, shortenHex } from "../../lib/utils";
 import useOnClickOutside from "../../hooks/useOnClickOutside";
 import useLoadingStore from "../../hooks/useLoadingStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import { processNotification } from "./NotificationDisplay";
+import { processNotifications } from "../notifications/NotificationHandler";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import useUIStore from "../../hooks/useUIStore";
 import { MdClose } from "react-icons/md";
@@ -23,6 +23,7 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
   useOnClickOutside(wrapperRef, () => setDisplayHistory(false), buttonRef);
   const { adventurer } = useAdventurerStore();
 
+  const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const { transactions } = useTransactionManager();
   const { data: queryData } = useQueriesStore();
   const displayHistory = useUIStore((state) => state.displayHistory);
@@ -61,16 +62,17 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                       (response) => response.hash == tx.hash
                     );
                     const method = (tx?.metadata as Metadata)?.method;
-                    let notification: React.ReactNode = null;
+                    let notifications: Notification[] = [];
                     const battles = queryData.battlesByBeastQuery
                       ? queryData.battlesByBeastQuery.battles
                       : [];
                     if (response) {
-                      notification = processNotification(
+                      notifications = processNotifications(
                         response.type,
                         response.notificationData,
                         battles,
-                        !!(adventurer?.beastHealth ?? 0 > 0)
+                        hasBeast,
+                        adventurer ?? NullAdventurer
                       );
                     }
                     return (
@@ -98,7 +100,10 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                             </div>
                             <TxStatus hash={tx.hash} />
                           </div>
-                          {response && notification}
+                          {response &&
+                            notifications.map(
+                              (notification) => notification.message
+                            )}
                         </div>
                       </li>
                     );

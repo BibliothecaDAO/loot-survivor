@@ -205,13 +205,13 @@ export const NotificationBattleDisplay = ({
     battleData.some(
       (data) => data.attacker === "Adventurer" && data.damageDealt == 0
     ) &&
-    (battleData[0]?.adventurerHealth ?? 0) > 0;
+    (battleData[1]?.adventurerHealth ?? 0) > 0;
   const KilledTryingToFlee =
     isArray &&
     battleData.some(
       (data) => data.attacker === "Adventurer" && data.damageDealt == 0
     ) &&
-    (battleData[0]?.adventurerHealth ?? 0) == 0;
+    (battleData[1]?.adventurerHealth ?? 0) == 0;
   const Attacked =
     isArray &&
     battleData.some(
@@ -224,8 +224,9 @@ export const NotificationBattleDisplay = ({
     (battleData[0]?.beastHealth ?? 0) == 0;
   const KilledByBeast =
     isArray &&
-    battleData.some((data) => data.attacker === "Beast") &&
-    adventurer?.health === 0;
+    battleData.some(
+      (data) => data.attacker === "Beast" && (data.adventurerHealth ?? 0) === 0
+    );
   const IdleDamagePenalty =
     isArray &&
     battleData.length == 1 &&
@@ -261,20 +262,21 @@ export const NotificationBattleDisplay = ({
       return (
         <p>
           You attacked the {beastName || ""} with{" "}
-          {battleData[1]?.criticalHit && "a critical hit"} and dealt{" "}
-          {battleData[1]?.damageDealt} damage! They counterattacked for{" "}
-          {battleData[0]?.damageTaken} damage
-          {battleData[0]?.criticalHit && ", a critical hit"}!
+          {battleData[0]?.criticalHit && "a critical hit"} and dealt{" "}
+          {battleData[0]?.damageDealt} damage! They counterattacked for{" "}
+          {battleData[1]?.damageTaken} damage
+          {battleData[1]?.criticalHit && ", a critical hit"}!
         </p>
       );
     } else if (KilledByBeast) {
+      console.log("Here");
       return (
         <p>
           With a last breath you strike the {beastName || ""} with{" "}
-          {battleData[1]?.criticalHit && "a critical hit of "}
-          {battleData[1]?.damageDealt} damage! However, they finish you with{" "}
-          {battleData[0]?.damageTaken} damage
-          {battleData[0]?.criticalHit && ", a critical hit"}!
+          {battleData[0]?.criticalHit && "a critical hit of "}
+          {battleData[0]?.damageDealt} damage! However, they finish you with{" "}
+          {battleData[1]?.damageTaken} damage
+          {battleData[1]?.criticalHit && ", a critical hit"}!
         </p>
       );
     } else if (Slayed) {

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import {
   getAdventurersInListByXp,
   getTopScores,
+  getAdventurerByXP,
 } from "../hooks/graphql/queries";
 import { Button } from "../components/buttons/Button";
 import { CoinIcon } from "../components/icons/Icons";
@@ -28,6 +29,13 @@ export default function LeaderboardScreen() {
   const txAccepted = useLoadingStore((state) => state.txAccepted);
 
   const { data, isLoading, refetch } = useQueriesStore();
+
+  useCustomQuery(
+    "adventurersByXPQuery",
+    getAdventurerByXP,
+    undefined,
+    txAccepted
+  );
 
   useCustomQuery(
     "adventurersInListByXpQuery",

@@ -30,9 +30,8 @@ import useAdventurerStore from "./hooks/useAdventurerStore";
 import useUIStore from "./hooks/useUIStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { CSSTransition } from "react-transition-group";
-import { NotificationDisplay } from "./components/navigation/NotificationDisplay";
+import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
-import { mainnet_addr, getGraphQLUrl } from "./lib/constants";
 import { Menu, NullAdventurer } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
@@ -43,7 +42,6 @@ import {
   CogIcon,
   MuteIcon,
   VolumeIcon,
-  CartIcon,
   GithubIcon,
   RefreshIcon,
   CartIconSimple,
@@ -60,7 +58,6 @@ import {
   getAdventurerById,
   getAdventurersByOwner,
 } from "./hooks/graphql/queries";
-import { useBurner } from "./lib/burner";
 import { ArcadeDialog } from "./components/ArcadeDialog";
 import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
 
@@ -91,9 +88,6 @@ export default function Home() {
   const { account, status } = useAccount();
   const [isMuted, setIsMuted] = useState(false);
   const [introComplete, setIntroComplete] = useState(false);
-  const type = useLoadingStore((state) => state.type);
-  const notificationData = useLoadingStore((state) => state.notificationData);
-  const showNotification = useLoadingStore((state) => state.showNotification);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
@@ -102,7 +96,6 @@ export default function Home() {
   const setConnected = useUIStore((state) => state.setConnected);
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
-  const handleOnboarded = useUIStore((state) => state.handleOnboarded);
   const deathDialog = useUIStore((state) => state.deathDialog);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
@@ -248,9 +241,6 @@ export default function Home() {
     return <WalletSelect />;
   }
 
-  console.log(adventurer);
-  console.log(data.adventurerByIdQuery?.adventurers[0]);
-
   return (
     // <Maintenance />
     <main
@@ -368,28 +358,7 @@ export default function Home() {
           <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4">
             {!isMobileDevice && <TxActivity />}
           </div>
-          {/* <CSSTransition
-            in={
-              showNotification &&
-              Boolean(notificationData) &&
-              (typeof notificationData === "object"
-                ? "data" in notificationData
-                  ? notificationData.data.length > 0
-                  : true
-                : true)
-            }
-            timeout={500}
-            classNames="notification"
-            unmountOnExit
-          >
-            <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
-              <NotificationDisplay
-                type={type}
-                notificationData={notificationData}
-                hasBeast={hasBeast}
-              />
-            </div>
-          </CSSTransition> */}
+          <NotificationDisplay />
 
           {deathDialog && <DeathDialog />}
 

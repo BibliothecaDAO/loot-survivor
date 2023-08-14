@@ -213,6 +213,11 @@ export interface UpgradeSummary {
   Potions: any;
 }
 
+export interface Notification {
+  message: ReactElement;
+  animation: string;
+}
+
 export type BeastType =
   | "Basilisk"
   | "Kitsune"
