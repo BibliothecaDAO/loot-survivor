@@ -173,7 +173,7 @@ export default function Info({
               </span>
             )}
             <hr className="border-terminal-green" />
-            <div className="flex justify-between w-full sm:text-xl pb-1">
+            <div className="flex justify-between w-full sm:text-sm lg:text-xl pb-1">
               <LevelBar xp={formatAdventurer.xp ?? 0} />
             </div>
 
@@ -189,9 +189,9 @@ export default function Info({
                   </div>
                 ))}
               </div>
-              <div className=" w-full grid grid-cols-2 gap-1 text-xs flex-wrap">
+              <div className=" w-full sm:grid grid-cols-2 gap-1 text-xs flex-wrap">
                 {bodyParts.map((part) => (
-                  <div key={part}>
+                  <div className="flex-wrap" key={part}>
                     <ItemDisplay
                       item={
                         items.find(

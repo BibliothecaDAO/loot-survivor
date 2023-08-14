@@ -340,7 +340,7 @@ export const AdventurerForm = ({
       <>
         <div className="w-full sm:p-8 md:p-4">
           <h3 className="uppercase text-center">Choose your class</h3>
-          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-20 md:gap-5">
+          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-5 lg:gap-10 md:gap-5">
             {classes.map((classType) => (
               <div
                 key={classType.name}
@@ -370,7 +370,7 @@ export const AdventurerForm = ({
             <div className="flex w-full justify-center uppercase">
               6 Stat Points Available
             </div>
-            <div className="flex flex-row w-full gap-16">
+            <div className="flex flex-row w-full gap-2">
               <Button className="w-full" onClick={() => handleClassSelection}>
                 Strength
               </Button>

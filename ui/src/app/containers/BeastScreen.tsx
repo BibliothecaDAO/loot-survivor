@@ -272,14 +272,14 @@ export default function BeastScreen() {
   }
 
   return (
-    <div className="sm:w-2/3 flex flex-col sm:flex-row">
+    <div className="sm:w-2/3 sm:h-2/3 flex flex-col sm:flex-row">
       <div className="sm:w-1/2 order-1 sm:order-2">
         {hasBeast ? (
           <>
             <BeastDisplay beastData={beastData} />
           </>
         ) : (
-          <div className="flex flex-col items-center h-full  border-2 border-terminal-green">
+          <div className="flex flex-col items-center border-2 border-terminal-green">
             <p className="m-auto text-lg uppercase text-terminal-green">
               Beast not yet discovered.
             </p>
@@ -287,7 +287,7 @@ export default function BeastScreen() {
         )}
       </div>
 
-      <div className="flex flex-col gap-1 sm:gap-0 items-center sm:w-1/2 sm:gap-5 sm:p-4 order-1 text-lg">
+      <div className="flex flex-col gap-1 sm:gap-0 items-center sm:w-1/2 sm:p-4 order-1 text-lg">
         {isAlive && (
           <div className="flex flex-row gap-2 sm:flex-col items-center justify-center">
             <div className="flex flex-col items-center">
