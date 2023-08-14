@@ -103,17 +103,17 @@ export const ItemDisplay = ({
           <div className="w-full whitespace-normal">
             <div className="flex flex-col text-xs sm:text-sm space-between">
               <div className="flex flex-row font-semibold text-xs space-x-3">
-                <span className=" self-center">
+                <span className="self-center">
                   {item &&
                     `Tier ${tier ?? 0}
                 `}
                 </span>
-                <span className="whitespace-nowrap w-1/2">
+                <span className="whitespace-nowrap w-1/2 hidden xl:block">
                   <ItemBar xp={item.xp ?? 0} />
                 </span>
                 <span className="text-xxs sm:text-sm">{boost}</span>
               </div>
-              <span className="flex flex-row justify-between">
+              <span className="flex flex-row justify-between flex-wrap">
                 <span className="flex whitespace-nowrap text-[0.6rem] sm:text-xxs md:text-lg">
                   <p>{itemName}</p>
                   <span className="text-xxs sm:text-sm">
@@ -139,7 +139,7 @@ export const ItemDisplay = ({
                         );
                       }}
                     >
-                      <SwapIcon className="w-2 h-2 lg:w-4 lg:h-4" />
+                      <SwapIcon className="w-2 h-2 md:w-3 md:h-3 lg:w-4 lg:h-4" />
                     </Button>
                   )}
                   {inventory && (
