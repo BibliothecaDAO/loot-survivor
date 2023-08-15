@@ -10,17 +10,17 @@ export const ArcadeDialog = () => {
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const { connect, connectors, refresh, available } = useConnectors();
+  const { connect, connectors, available } = useConnectors();
   const { create, isDeploying } = useBurner();
-
-  if (!connectors) return <div></div>;
-
+  
   const arcadeConnectors = useCallback(() => {
     return available.filter(
       (connector) =>
         typeof connector.id === "string" && connector.id.includes("0x")
     );
-  }, [available, refresh]);
+  }, [available]);
+
+  if (!connectors) return <div></div>;
 
   return (
     <>
@@ -51,7 +51,7 @@ export const ArcadeDialog = () => {
         </div>
 
         <h5>Existing</h5>
-        <div className="grid sm:grid-cols-3 gap-2 ">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 ">
           {arcadeConnectors().map((account, index) => {
             return (
               <ArcadeAccountCard key={index} account={account} onClick={connect} address={address!} masterAccount={MasterAccount!} />
