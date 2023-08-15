@@ -51,7 +51,7 @@ export const ArcadeDialog = () => {
         </div>
 
         <h5>Existing</h5>
-        <div className="grid grid-cols-3 gap-2 ">
+        <div className="grid sm:grid-cols-3 gap-2 ">
           {arcadeConnectors().map((account, index) => {
             return (
               <ArcadeAccountCard key={index} account={account} onClick={connect} address={address!} masterAccount={MasterAccount!} />
