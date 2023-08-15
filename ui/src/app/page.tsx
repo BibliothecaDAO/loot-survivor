@@ -248,8 +248,8 @@ export default function Home() {
     return <WalletSelect />;
   }
 
-  console.log(adventurer);
-  console.log(data.adventurerByIdQuery?.adventurers[0]);
+  // console.log(adventurer);
+  // console.log(data.adventurerByIdQuery?.adventurers[0]);
 
   return (
     // <Maintenance />

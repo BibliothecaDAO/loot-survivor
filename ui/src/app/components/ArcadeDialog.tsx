@@ -2,23 +2,25 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "./buttons/Button";
 import { PREFUND_AMOUNT, useBurner } from "../lib/burner";
 import { Connector, useAccount, useBalance, useConnectors } from "@starknet-react/core";
-import { Account, AccountInterface, CallData, TransactionStatus } from "starknet";
+import { AccountInterface, CallData, TransactionStatus } from "starknet";
+import { useCallback } from "react";
 
 export const ArcadeDialog = () => {
   const { account: MasterAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const { connect, connectors, refresh } = useConnectors();
+  const { connect, connectors, refresh, available } = useConnectors();
   const { create, isDeploying } = useBurner();
 
   if (!connectors) return <div></div>;
 
-  const arcadeConnectors = () =>
-    connectors.filter(
+  const arcadeConnectors = useCallback(() => {
+    return available.filter(
       (connector) =>
         typeof connector.id === "string" && connector.id.includes("0x")
     );
+  }, [available, refresh]);
 
   return (
     <>
@@ -48,18 +50,18 @@ export const ArcadeDialog = () => {
             )}
         </div>
 
-        {/* <hr className="my-4 border-terminal-green" /> */}
-
         <h5>Existing</h5>
-
-        <div className="grid gap-2 grid-cols-3">
+        <div className="grid grid-cols-3 gap-2 ">
           {arcadeConnectors().map((account, index) => {
             return (
               <ArcadeAccountCard key={index} account={account} onClick={connect} address={address!} masterAccount={MasterAccount!} />
             );
           })}
+          {isDeploying && <div className="flex justify-center border-terminal-green border h-32">
+            <p className="self-center">Deploying Account...</p>
+          </div>}
         </div>
-        {isDeploying && <p>Deploying...</p>}
+
       </div>
     </>
   );
@@ -75,13 +77,13 @@ interface ArcadeAccountCardProps {
 
 export const ArcadeAccountCard = ({ account, onClick, address, masterAccount }: ArcadeAccountCardProps) => {
 
-  const { data, isLoading, error, refetch } = useBalance({
+  const { data } = useBalance({
     address: account.name,
   })
 
   const connected = address == account.name;
 
-  const balance = parseFloat(data?.formatted!).toFixed(3)
+  const balance = parseFloat(data?.formatted!).toFixed(4)
 
   const transfer = async (address: string, account: AccountInterface) => {
     try {
@@ -110,7 +112,7 @@ export const ArcadeAccountCard = ({ account, onClick, address, masterAccount }: 
   };
 
   return (
-    <div className="border border-terminal-green p-3">
+    <div className="border border-terminal-green p-3 hover:bg-terminal-green hover:text-terminal-black ">
       <div className="text-left flex justify-between text-xl mb-4">{account.id} <span>{balance}</span> </div>
       <div className=" flex justify-between">
         <Button
@@ -118,13 +120,6 @@ export const ArcadeAccountCard = ({ account, onClick, address, masterAccount }: 
           onClick={() => onClick(account)}
         >
           {connected ? "connected" : "connect"}
-        </Button>
-        <Button
-          variant={connected ? "default" : "outline"}
-          disabled={connected}
-          onClick={() => transfer(address, masterAccount)}
-        >
-          Refill (0.01)
         </Button>
       </div>
 
