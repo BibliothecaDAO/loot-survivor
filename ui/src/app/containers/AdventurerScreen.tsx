@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccount } from "@starknet-react/core";
 // import { getAdventurersByOwner } from "../hooks/graphql/queries";
 import { padAddress } from "../lib/utils";
@@ -88,6 +88,12 @@ export default function AdventurerScreen() {
       disabled: false,
     },
   ];
+
+  useEffect(() => {
+    if (adventurers.length == 0) {
+      setSelected("create adventurer");
+    }
+  }, []);
 
   if (loading) {
     return <LootIconLoader />;
