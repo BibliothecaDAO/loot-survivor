@@ -455,7 +455,7 @@ export const AdventurerForm = ({
             />
 
             {!isWrongNetwork && (
-              <div className="sm:p-4 text-xs sm:text-xl leading-loose z-10 text-center">
+              <div className="text-xs sm:text-xl leading-loose z-10">
                 <TypeAnimation
                   sequence={[battle]}
                   wrapper="span"

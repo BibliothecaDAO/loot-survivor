@@ -1,11 +1,10 @@
 "use client";
 
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
-import { StarknetConfig, useNetwork } from "@starknet-react/core";
+import { StarknetConfig } from "@starknet-react/core";
 import { useBurner } from "./lib/burner";
 import { getGraphQLUrl } from "./lib/constants";
 import { connectors } from "./lib/connectors";
-import { useEffect, useState } from "react";
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const client = new ApolloClient({
