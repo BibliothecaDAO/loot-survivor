@@ -441,6 +441,52 @@ mod tests {
     };
 
     #[test]
+    #[available_gas(5000000)]
+    fn test_get_obstacle_tier_range_check() {
+        // iterate over all obstacles and make sure we aren't missing any
+        let mut obstacle_id = 1;
+        loop {
+            if obstacle_id > ObstacleId::MAX_ID {
+                break ();
+            }
+
+            // no need to assert something, get_tier will throw a 'unknown obstacle id' if an obstacle is undefined
+            ImplObstacle::get_tier(obstacle_id);
+            obstacle_id += 1;
+        }
+    }
+
+    #[test]
+    #[available_gas(5000000)]
+    fn test_get_obstacle_type_range_check() {
+        // iterate over all obstacles and make sure we aren't missing any
+        let mut obstacle_id = 1;
+        loop {
+            if obstacle_id > ObstacleId::MAX_ID {
+                break ();
+            }
+            // no need to assert something, get_tier will throw a 'unknown obstacle id' if an obstacle is undefined
+            ImplObstacle::get_type(obstacle_id);
+            obstacle_id += 1;
+        }
+    }
+
+    #[test]
+    #[available_gas(5000000)]
+    fn test_get_obstacle_range_check() {
+        // iterate over all obstacles and make sure we aren't missing any
+        let mut obstacle_id = 1;
+        loop {
+            if obstacle_id > ObstacleId::MAX_ID {
+                break ();
+            }
+            // no need to assert something, get_tier will throw a 'unknown obstacle id' if an obstacle is undefined
+            ImplObstacle::get_obstacle(obstacle_id, 1);
+            obstacle_id += 1;
+        }
+    }
+
+    #[test]
     #[available_gas(500000)]
     fn test_get_obstacle_tier() {
         let demonic_alter = ObstacleId::DemonicAlter;
