@@ -90,7 +90,9 @@ export const AdventurersList = ({
                 key={index}
                 ref={(ref) => (buttonRefs.current[index] = ref)}
                 className={
-                  selectedIndex === index && isActive ? "animate-pulse" : ""
+                  selectedIndex === index && isActive
+                    ? "animate-pulse text-lg sm:text-base"
+                    : "text-lg sm:text-base"
                 }
                 variant={
                   selectedIndex === index && isActive ? "default" : "ghost"
@@ -111,7 +113,7 @@ export const AdventurersList = ({
               </Button>
             ))}
           </div>
-          <div className="overflow-y-auto">
+          <div>
             {hasDeadAdventurers && (
               <Button
                 className="w-full h-full"

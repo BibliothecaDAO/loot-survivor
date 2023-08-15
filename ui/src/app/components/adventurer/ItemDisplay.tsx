@@ -83,7 +83,7 @@ export const ItemDisplay = ({
 
   return (
     <div
-      className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-8 sm:h-10 md:h-14 ${
+      className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-10 md:h-14 ${
         item.item ? "bg-terminal-green text-terminal-black" : ""
       }`}
     >
@@ -91,7 +91,7 @@ export const ItemDisplay = ({
         <LootIcon size={"w-3"} type={itemSlot ? itemSlot : slot} />
         <Efficacyicon size={"w-4"} type={type} />
       </div>
-      <div className="hidden sm:block flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
+      <div className="hidden sm:flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
         <LootIcon size={"w-4"} type={itemSlot ? itemSlot : slot} />
         <Efficacyicon size={"w-4"} type={type} />
       </div>
@@ -106,7 +106,7 @@ export const ItemDisplay = ({
                     `Tier ${tier ?? 0}
                 `}
                 </span>
-                <span className="whitespace-nowrap w-1/2 hidden xl:block">
+                <span className="whitespace-nowrap w-1/2">
                   <ItemBar xp={item.xp ?? 0} />
                 </span>
                 <span className="text-xxs sm:text-sm">{boost}</span>
