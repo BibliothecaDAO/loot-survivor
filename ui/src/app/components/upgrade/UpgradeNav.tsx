@@ -47,7 +47,7 @@ export const UpgradeNav = ({ activeSection }: UpgradeNavProps) => {
           </span>
         ))}
       </div>
-      <div className="hidden sm:block flex flex-row justify-center items-center w-full text-shadow-none">
+      <div className="hidden sm:flex flex-row justify-center items-center w-full text-shadow-none">
         {mainUpgradeNav.map((item: NavItem, index: number) => (
           <span key={index} className="flex flex-row">
             <div

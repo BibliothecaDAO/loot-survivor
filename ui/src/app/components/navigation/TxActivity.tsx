@@ -302,7 +302,7 @@ export const TxActivity = () => {
               : "Confirming Tx"}
           </div>
           {data && hash && (
-            <div>
+            <div className="flex flex-row gap-2">
               <span className="hidden sm:block">Status:</span> {data.status}
             </div>
           )}

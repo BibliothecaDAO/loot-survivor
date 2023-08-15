@@ -147,14 +147,10 @@ export default function UpgradeScreen() {
     },
   ];
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   function renderContent() {
     const attribute = attributes.find((attr) => attr.name === selected);
     return (
-      <div className="flex sm:w-2/3 h-24 sm:h-full items-center justify-center p-auto">
+      <div className="order-1 sm:order-2 flex sm:w-2/3 h-24 sm:h-full items-center justify-center p-auto">
         {attribute && (
           <StatAttribute upgradeHandler={handleAddUpgradeTx} {...attribute} />
         )}
@@ -214,7 +210,7 @@ export default function UpgradeScreen() {
       },
     ];
     return (
-      <div className="sm:w-1/3 sm:border-r sm:border-terminal-green">
+      <div className="order-2 sm:order-1 sm:w-1/3 sm:border-r sm:border-terminal-green">
         <VerticalKeyboardControl
           buttonsData={upgradeMenu}
           onSelected={setSelected}
@@ -303,8 +299,6 @@ export default function UpgradeScreen() {
     setPurchaseItems([]);
     setUpgrades({ ...ZeroUpgrade });
   };
-
-  const lastPage = isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2;
 
   const upgradesTotal = Object.values(upgrades)
     .filter((value) => value !== 0)
@@ -404,17 +398,8 @@ export default function UpgradeScreen() {
                         Stat Upgrades
                       </p>
                       <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border sm:items-center">
-                        {isMobileDevice ? (
-                          <>
-                            {renderContent()}
-                            {renderVerticalKeyboardControl()}
-                          </>
-                        ) : (
-                          <>
-                            {renderVerticalKeyboardControl()}
-                            {renderContent()}
-                          </>
-                        )}
+                        {renderContent()}
+                        {renderVerticalKeyboardControl()}
                       </div>
                     </div>
                   )}
@@ -433,9 +418,22 @@ export default function UpgradeScreen() {
                     </div>
                   )}
 
-                  {((!isMobileDevice && upgradeScreen === 2) ||
-                    (isMobileDevice && upgradeScreen === 3)) && (
-                    <div className="flex flex-col items-center sm:gap-2 w-full">
+                  {upgradeScreen === 2 && (
+                    <div className="hidden sm:flex flex-col items-center sm:gap-2 w-full">
+                      <p className="text-xl lg:text-2xl sm:hidden">
+                        Loot Fountain
+                      </p>
+                      <MarketplaceScreen
+                        upgradeTotalCost={upgradeTotalCost}
+                        purchaseItems={purchaseItems}
+                        setPurchaseItems={setPurchaseItems}
+                        upgradeHandler={handleAddUpgradeTx}
+                        totalCharisma={totalCharisma}
+                      />
+                    </div>
+                  )}
+                  {upgradeScreen === 3 && (
+                    <div className="sm:hidden flex-col items-center sm:gap-2 w-full">
                       <p className="text-xl lg:text-2xl sm:hidden">
                         Loot Fountain
                       </p>
@@ -458,23 +456,39 @@ export default function UpgradeScreen() {
                       Back
                     </Button>
                     <Button
-                      className="w-1/2"
+                      className={` ${
+                        upgradeScreen == 2
+                          ? "hidden sm:block"
+                          : upgradeScreen == 3
+                          ? "sm:hidden"
+                          : "hidden"
+                      } w-1/2`}
                       onClick={() => {
-                        if (
-                          isMobileDevice
-                            ? upgradeScreen == 3
-                            : upgradeScreen == 2
-                        ) {
-                          handleSubmitUpgradeTx();
-                          resetDataUpdated("adventurerByIdQuery");
-                          console.log("UPGRADING");
-                        } else {
-                          setUpgradeScreen(upgradeScreen + 1);
-                        }
+                        handleSubmitUpgradeTx();
+                        resetDataUpdated("adventurerByIdQuery");
                       }}
                       disabled={nextDisabled || loading}
                     >
-                      {loading ? "Upgrading..." : lastPage ? "Upgrade" : "Next"}
+                      {loading ? (
+                        <span>Upgrading...</span>
+                      ) : (
+                        <span>Upgrade</span>
+                      )}
+                    </Button>
+                    <Button
+                      className={` ${
+                        upgradeScreen == 2
+                          ? "sm:hidden"
+                          : upgradeScreen == 3
+                          ? "hidden"
+                          : ""
+                      } w-1/2`}
+                      onClick={() => {
+                        setUpgradeScreen(upgradeScreen + 1);
+                      }}
+                      disabled={nextDisabled || loading}
+                    >
+                      <span>Next</span>
                     </Button>
                   </div>
                 </div>
