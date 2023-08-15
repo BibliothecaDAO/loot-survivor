@@ -87,7 +87,7 @@ export default function InventoryScreen() {
     if (gameContract) {
       const dropItemsTx = {
         contractAddress: gameContract?.address,
-        entrypoint: "drop",
+        entrypoint: "drop_items",
         calldata: [
           adventurer?.id?.toString() ?? "",
           "0",

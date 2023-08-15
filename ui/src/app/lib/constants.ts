@@ -34,7 +34,7 @@ export const contracts = {
       "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
   },
   goerli: {
-    game: "0x00dbbdb5c2a57e325fcc6148b9a6362cd77d6bfe0992dc0f891b25bd5e979266",
+    game: "0x071ef5e6d758ad81d8754c0fd6123018388d6dfb53965fae291c498858186ef6",
     lords_erc20_mintable:
       "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
   },
@@ -42,6 +42,26 @@ export const contracts = {
 
 export const appUrl = "https://beta-survivor.realms.world/";
 
+export const notificationAnimations = [
+  { name: "idle", startFrame: 0, frameCount: 4 },
+  { name: "run", startFrame: 9, frameCount: 5 },
+  { name: "jump", startFrame: 11, frameCount: 7 },
+  { name: "attack1", startFrame: 42, frameCount: 5 },
+  { name: "attack2", startFrame: 47, frameCount: 6 },
+  { name: "attack3", startFrame: 53, frameCount: 8 },
+  { name: "damage", startFrame: 59, frameCount: 4 },
+  { name: "die", startFrame: 64, frameCount: 9 },
+  { name: "drawSword", startFrame: 70, frameCount: 5 },
+  { name: "discoverItem", startFrame: 85, frameCount: 6 },
+  { name: "slide", startFrame: 24, frameCount: 5 },
+];
+
 // ---- CONTRACT PARAMS
 // Penalty time is 8 blocks, where each block is ~ 3 minutes
-export const penaltyTime = 8 * (3 * 60);
+export const penaltyTime = 16 * (3 * 60);
+export const itemCharismaDiscount = 1;
+export const itemBasePrice = 4;
+export const itemMinimumPrice = 1;
+export const potionCharismaDiscount = 2;
+export const potionBasePrice = 2;
+export const idleDeathPenaltyBlocks = 300;

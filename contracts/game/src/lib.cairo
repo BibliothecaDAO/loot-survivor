@@ -152,7 +152,7 @@ mod Game {
                 ref self, block_number, caller, starting_weapon, adventurer_meta, starting_stats
             );
 
-            _payout(ref self, caller, block_number, interface_id);
+        //_payout(ref self, caller, block_number, interface_id);
         }
 
         //@notice Sends an adventurer to explore.
@@ -1225,26 +1225,41 @@ mod Game {
             },
             ExploreResult::Treasure(()) => {
                 let (treasure_type, amount) = adventurer.discover_treasure(sub_explore_rnd);
-                let discovery = Discovery {
-                    adventurer_state: AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    }, amount: amount
-                };
 
                 match treasure_type {
                     TreasureDiscovery::Gold(()) => {
                         // add gold to adventurer
                         adventurer.add_gold(amount);
                         // emit discovered gold event
-                        __event_DiscoveredGold(ref self, DiscoveredGold { discovery });
+                        __event_DiscoveredGold(
+                            ref self,
+                            DiscoveredGold {
+                                discovery: Discovery {
+                                    adventurer_state: AdventurerState {
+                                        owner: get_caller_address(),
+                                        adventurer_id: adventurer_id,
+                                        adventurer: adventurer
+                                    }, amount: amount
+                                }
+                            }
+                        );
                     },
                     TreasureDiscovery::XP(()) => {
                         // apply XP to adventurer
                         let (previous_level, new_level) = adventurer.increase_adventurer_xp(amount);
                         // emit discovered xp event
-                        __event_DiscoveredXP(ref self, DiscoveredXP { discovery });
+                        __event_DiscoveredXP(
+                            ref self,
+                            DiscoveredXP {
+                                discovery: Discovery {
+                                    adventurer_state: AdventurerState {
+                                        owner: get_caller_address(),
+                                        adventurer_id: adventurer_id,
+                                        adventurer: adventurer
+                                    }, amount: amount
+                                }
+                            }
+                        );
                         // check for level up
                         if (new_level > previous_level) {
                             // process level up
@@ -1259,11 +1274,33 @@ mod Game {
                             // adventurer gets gold instead of health
                             adventurer.add_gold(amount);
                             // emit discovered gold event
-                            __event_DiscoveredGold(ref self, DiscoveredGold { discovery });
+                            __event_DiscoveredGold(
+                                ref self,
+                                DiscoveredGold {
+                                    discovery: Discovery {
+                                        adventurer_state: AdventurerState {
+                                            owner: get_caller_address(),
+                                            adventurer_id: adventurer_id,
+                                            adventurer: adventurer
+                                        }, amount: amount
+                                    }
+                                }
+                            );
                         } else {
                             // otherwise add health
                             adventurer.increase_health(amount);
-                            __event_DiscoveredHealth(ref self, DiscoveredHealth { discovery });
+                            __event_DiscoveredHealth(
+                                ref self,
+                                DiscoveredHealth {
+                                    discovery: Discovery {
+                                        adventurer_state: AdventurerState {
+                                            owner: get_caller_address(),
+                                            adventurer_id: adventurer_id,
+                                            adventurer: adventurer
+                                        }, amount: amount
+                                    }
+                                }
+                            );
                         }
                     }
                 }
@@ -2107,13 +2144,6 @@ mod Game {
             adventurer.get_level(), adventurer.stats.dexterity, flee_entropy
         );
 
-        // stage flee event
-        let flee_event = FleeEvent {
-            adventurer_state: AdventurerState {
-                owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
-            }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
-        };
-
         // if adventurer fled
         if (fled) {
             // set beast health to zero to denote adventurer is no longer in battle
@@ -2123,7 +2153,18 @@ mod Game {
             let (previous_level, new_level) = adventurer.increase_adventurer_xp(1);
 
             // emit flee attempt event
-            __event_FleeSucceeded(ref self, FleeSucceeded { flee_event });
+            __event_FleeSucceeded(
+                ref self,
+                FleeSucceeded {
+                    flee_event: FleeEvent {
+                        adventurer_state: AdventurerState {
+                            owner: get_caller_address(),
+                            adventurer_id: adventurer_id,
+                            adventurer: adventurer
+                        }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
+                    }
+                }
+            );
 
             // check for adventurer level up
             if (new_level > previous_level) {
@@ -2133,7 +2174,18 @@ mod Game {
             }
         } else {
             // // emit flee attempt event
-            __event_FleeFailed(ref self, FleeFailed { flee_event });
+            __event_FleeFailed(
+                ref self,
+                FleeFailed {
+                    flee_event: FleeEvent {
+                        adventurer_state: AdventurerState {
+                            owner: get_caller_address(),
+                            adventurer_id: adventurer_id,
+                            adventurer: adventurer
+                        }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
+                    }
+                }
+            );
 
             // if flee attempt was unsuccessful the beast counter attacks
             // adventurer death is handled as part of _beast_counter_attack()
@@ -2235,8 +2287,9 @@ mod Game {
                 _assert_item_not_owned(adventurer, bag, item_id.clone());
 
                 // create new item, equip it, and record if we need unequipped an item
-                unequipped_item_id =
-                    _equip_item(ref adventurer, ref bag, ImplItemPrimitive::new(item_id));
+                let mut new_item = ImplItemPrimitive::new(item_id);
+                new_item.set_metadata_id(adventurer, bag);
+                unequipped_item_id = _equip_item(ref adventurer, ref bag, new_item);
             } else {
                 // otherwise item is being equipped from bag
                 // so remove it from bag, equip it, and record if we need to unequip an item

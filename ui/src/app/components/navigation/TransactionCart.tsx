@@ -27,6 +27,7 @@ import {
   Call,
   NullAdventurer,
   ItemPurchase,
+  ZeroUpgrade,
 } from "../../types";
 import { GameData } from "../GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
@@ -62,8 +63,8 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const setDropItems = useUIStore((state) => state.setDropItems);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
-  const upgradeStats = useUIStore((state) => state.upgradeStats);
-  const setUpgradeStats = useUIStore((state) => state.setUpgradeStats);
+  const upgrades = useUIStore((state) => state.upgrades);
+  const setUpgrades = useUIStore((state) => state.setUpgrades);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
 
@@ -147,7 +148,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
         case "equip":
           handleEquipItem();
           break;
-        case "drop":
+        case "drop_items":
           handleDropItems();
           break;
         case "purchase_health":
@@ -178,8 +179,12 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
     setEquipItems([]);
     setDropItems([]);
     setPurchaseItems([]);
-    setUpgradeStats([]);
+    setUpgrades({ ...ZeroUpgrade });
   };
+
+  const filteredStats = Object.entries(upgrades).filter(
+    (stat: any) => stat[1] !== 0
+  );
 
   console.log(loadingQuery);
 
@@ -242,7 +247,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
                             </div>
                           ))}
                         </div>
-                      ) : call.entrypoint === "drop" ? (
+                      ) : call.entrypoint === "drop_items" ? (
                         <div className="flex flex-col">
                           {dropItems.map((item: string, index: number) => (
                             <div className="flex flex-row" key={index}>
@@ -270,33 +275,31 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
                             </div>
                           ))}
                         </div>
-                      ) : call.entrypoint === "buy_items_and_upgrade_stats" ? (
+                      ) : call.entrypoint === "upgrade_adventurer" ? (
                         <div className="flex flex-col">
-                          {upgradeStats.map((stat: string, index: number) => (
-                            <div className="flex flex-row" key={index}>
-                              <p>
-                                {`Upgrade ${getValueFromKey(
-                                  gameData.STATS,
-                                  parseInt(stat)
-                                )}`}
-                              </p>
-                              <button
-                                onClick={() => {
-                                  clickPlay();
-                                  const newStats = upgradeStats.filter(
-                                    (i) => i !== stat
-                                  );
-                                  setUpgradeStats(newStats);
-                                  if (newStats.length === 0) {
-                                    removeFromCalls(call);
-                                  }
-                                }}
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                <MdClose size={20} />
-                              </button>
-                            </div>
-                          ))}
+                          {filteredStats.map(
+                            ([string, number], index: number) => (
+                              <div className="flex flex-row" key={index}>
+                                <p>{`Upgrade ${string} x ${number}`}</p>
+                                <button
+                                  onClick={() => {
+                                    clickPlay();
+                                    upgrades[string] = 0;
+                                    setUpgrades(upgrades);
+                                    const newStats = Object.entries(
+                                      upgrades
+                                    ).filter((stat: any) => stat[1] !== 0);
+                                    if (newStats.length === 0) {
+                                      removeFromCalls(call);
+                                    }
+                                  }}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <MdClose size={20} />
+                                </button>
+                              </div>
+                            )
+                          )}
                           {purchaseItems.map(
                             (item: ItemPurchase, index: number) => (
                               <div className="flex flex-row gap-1" key={index}>
@@ -337,13 +340,11 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
                           if (call.entrypoint === "equip") {
                             setEquipItems([]);
                           }
-                          if (call.entrypoint === "drop") {
+                          if (call.entrypoint === "drop_items") {
                             setDropItems([]);
                           }
-                          if (
-                            call.entrypoint === "buy_items_and_upgrade_stats"
-                          ) {
-                            setUpgradeStats([]);
+                          if (call.entrypoint === "upgrade_adventurer") {
+                            setUpgrades({ ...ZeroUpgrade });
                             setPurchaseItems([]);
                           }
                         }}

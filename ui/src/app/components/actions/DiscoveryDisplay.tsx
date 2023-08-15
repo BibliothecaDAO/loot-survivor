@@ -58,7 +58,13 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       if (discoveryData?.dodgedObstacle) {
         return (
           <span className="flex flex-row items-center justify-between">
-            <p>PHEW! You avoided the {discoveryData?.obstacle} obstacle!</p>
+            <p>
+              PHEW! You avoided{" "}
+              {discoveryData?.obstacle?.endsWith("s")
+                ? discoveryData?.obstacle
+                : `the ${discoveryData?.obstacle}`}
+              !
+            </p>
             <SpikedWallIcon />
           </span>
         );
@@ -92,21 +98,12 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     }
 
     if (!discoveryData?.discoveryType) {
-      if (!AdventurerHealthExists) {
-        return (
-          <span className="flex flex-row items-center justify-between">
-            <p>OOPS! You were killed by the idle penalty of 80 damage!</p>
-            <GiSandsOfTimeIcon />
-          </span>
-        );
-      } else {
-        return (
-          <span className="flex flex-row items-center justify-between">
-            <p>OOPS! You recieved the idle penalty of 80 damage!</p>
-            <GiSandsOfTimeIcon />
-          </span>
-        );
-      }
+      return (
+        <span className="flex flex-row items-center justify-between">
+          <p>OOPS! You were killed by the idle death penalty!</p>
+          <GiSandsOfTimeIcon />
+        </span>
+      );
     }
 
     if (discoveryData?.discoveryType === "Item") {
