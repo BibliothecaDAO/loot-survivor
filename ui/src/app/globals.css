@@ -9,18 +9,18 @@ input[type="text"] {
   font-family: "VT323", monospace;
   font-weight: 400;
   text-shadow: rgb(39, 168, 115, 0.9) 1px 0 10px;
-  animation  : textShadow 0.3s infinite;
+  animation: textShadow 0.3s infinite;
 }
 
 body::after {
   @apply pointer-events-none;
-  content : "";
+  content: "";
   position: fixed;
-  top     : 0;
-  left    : 0;
-  width   : calc(100vw - 20px);
+  top: 0;
+  left: 0;
+  width: calc(100vw - 20px);
   overflow: hidden;
-  height  : 100vh;
+  height: 100vh;
   background: repeating-linear-gradient(0deg,
       rgba(0, 0, 0, 0.45),
       rgba(0, 0, 0, 0.45) 1px,
@@ -34,20 +34,20 @@ body::after {
 
 .crt-frame {
   pointer-events: none;
-  overflow      : hidden;
-  z-index       : 9000;
-  position      : fixed;
-  top           : 0;
-  right         : 0;
-  bottom        : 0;
-  left          : 0;
-  width         : 100%;
-  height        : 100%;
+  overflow: hidden;
+  z-index: 9000;
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .ansi {
   text-shadow: none;
-  font-size  : 6px;
+  font-size: 6px;
 }
 
 h1 {
@@ -129,7 +129,7 @@ h6 {
 
 @layer components {
   .loading-ellipsis::after {
-    content  : "";
+    content: "";
     animation: ellipsis 1s infinite;
   }
 }
@@ -158,7 +158,7 @@ h6 {
 
 body::-webkit-scrollbar,
 .table-scroll::-webkit-scrollbar {
-  width : 0.5em;
+  width: 0.5em;
   height: 0.5em;
 }
 
@@ -166,7 +166,7 @@ body::-webkit-scrollbar,
 
   body::-webkit-scrollbar,
   .table-scroll::-webkit-scrollbar {
-    width : 1em;
+    width: 1em;
     height: 1em;
   }
 }
@@ -182,36 +182,50 @@ body::-webkit-scrollbar-thumb,
 }
 
 .notification-enter {
-  opacity  : 0;
+  opacity: 0;
   transform: translateY(-1rem);
 }
 
 .notification-enter-active {
-  opacity   : 1;
-  transform : translateY(0);
+  opacity: 1;
+  transform: translateY(0);
   transition: opacity 500ms, transform 500ms;
 }
 
 .notification-exit {
-  opacity  : 1;
+  opacity: 1;
   transform: translateY(0);
 }
 
 .notification-exit-active {
-  opacity   : 0;
-  transform : translateY(-1rem);
+  opacity: 0;
+  transform: translateY(-1rem);
   transition: opacity 500ms, transform 500ms;
 }
 
 @keyframes flash {
-  0% { opacity: 0; }
-  50% { opacity: 1; }
-  100% { opacity: 0; }
+
+  0%,
+  100% {
+    opacity: 0;
+  }
+
+  30% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 0.5;
+  }
 }
 
 .flash {
-  @apply bg-terminal-green;
-  animation: flash 0.5s;
+  @apply bg-terminal-green bg-opacity-50;
+  animation: flash 1s ease-in-out;
   position: fixed;
   top: 0;
   left: 0;

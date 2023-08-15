@@ -13,7 +13,7 @@ import Storage from "./storage";
 import { useAccount } from "@starknet-react/core";
 import { ArcadeConnector } from "./arcade";
 
-const PREFUND_AMOUNT = "0x2386f26fc10000"; // 0.001ETH
+export const PREFUND_AMOUNT = "0x2386f26fc10000"; // 0.001ETH
 
 const provider = new Provider({
     sequencer: {
@@ -33,11 +33,8 @@ type BurnerStorage = {
 
 export const useBurner = () => {
     const { account: walletAccount } = useAccount();
-
     const [account, setAccount] = useState<Account>();
     const [isDeploying, setIsDeploying] = useState(false);
-
-    const [arcadeAccounts, setArcadeAccounts] = useState<ArcadeConnector[]>([]);
 
     // init
     useEffect(() => {
@@ -155,12 +152,12 @@ export const useBurner = () => {
         Storage.set("burners", storage);
         console.log("burner created: ", address);
 
-        window.location.reload();
-
         return burner;
     }, [walletAccount]);
 
-    useEffect(() => {
+
+
+    const listConnectors = useCallback(() => {
         const arcadeAccounts = [];
         const burners = list();
 
@@ -174,9 +171,7 @@ export const useBurner = () => {
             arcadeAccounts.push(arcadeConnector);
         }
 
-        setArcadeAccounts(arcadeAccounts);
-
-        console.log(arcadeAccounts)
+        return arcadeAccounts;
     }, [account, isDeploying]);
 
     return {
@@ -186,7 +181,7 @@ export const useBurner = () => {
         create,
         account,
         isDeploying,
-        arcadeAccounts
+        listConnectors
     };
 };
 
