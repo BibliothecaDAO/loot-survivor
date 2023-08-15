@@ -129,9 +129,9 @@ export const AdventurerForm = ({
   useEffect(() => {
     if (
       (account as any)?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz" ||
+      "https://survivor-indexer.bibliothecadao.xyz" ||
       (account as any)?.provider?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz"
+      "https://survivor-indexer.bibliothecadao.xyz"
     ) {
       setConnected(true);
     }
@@ -449,13 +449,13 @@ export const AdventurerForm = ({
           <div className="flex flex-col h-full">
             <Image
               className="mx-auto border border-terminal-green absolute  object-cover py-4 px-8"
-              src={"/monsters/starterbeast.png"}
+              src={"/scenes/intro/beast.png"}
               alt="adventurer facing beast"
               fill
             />
 
             {!isWrongNetwork && (
-              <div className="absolute top-6 left-0 right-0 sm:p-4 text-xs sm:text-xl leading-loose z-10 text-center">
+              <div className="sm:p-4 text-xs sm:text-xl leading-loose z-10 text-center">
                 <TypeAnimation
                   sequence={[battle]}
                   wrapper="span"
@@ -503,7 +503,7 @@ export const AdventurerForm = ({
                 </>
               )}
             </div>
-            <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">
+            <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">
               <Button size={"xs"} variant={"default"} onClick={handleBack}>
                 Back
               </Button>
