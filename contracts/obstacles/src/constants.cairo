@@ -73,7 +73,7 @@ mod ObstacleId {
     const RumblingCatacomb: u8 = 58; //T2
     const WhirlingCyclone: u8 = 59; //T2
     const EruptingEarth: u8 = 60; //T2
-    const SubterraneanTremor: u8 = 51; //T3
+    const SubterraneanTremor: u8 = 61; //T3
     const FallingChandelier: u8 = 62; //T3
     const CollapsingBridge: u8 = 63; //T3
     const RagingSandstorm: u8 = 64; //T3
