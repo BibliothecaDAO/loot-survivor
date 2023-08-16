@@ -1,11 +1,11 @@
 "use client";
 
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
-import { StarknetConfig, useNetwork } from "@starknet-react/core";
 import { useBurner } from "./lib/burner";
 import { getGraphQLUrl } from "./lib/constants";
 import { connectors } from "./lib/connectors";
-import { useEffect, useState } from "react";
+import { StarknetConfig, useConnectors } from "@starknet-react/core";
+import { useCallback, useEffect } from "react";
 
 export default function Template({ children }: { children: React.ReactNode }) {
   const client = new ApolloClient({
@@ -78,11 +78,22 @@ export default function Template({ children }: { children: React.ReactNode }) {
     }),
   });
 
-  const { arcadeAccounts } = useBurner();
+  const { listConnectors } = useBurner();
+  const { refresh } = useConnectors()
+
+  useEffect(() => {
+    const interval = setInterval(refresh, 2000)
+    return () => clearInterval(interval)
+  }, [refresh])
+
+  const connect = useCallback(() => {
+    return [...listConnectors(), ...connectors] as any
+  }, [refresh]);
+
 
   return (
     <StarknetConfig
-      connectors={[...arcadeAccounts, ...connectors] as any}
+      connectors={connect()}
       autoConnect
     >
       <ApolloProvider client={client}>{children}</ApolloProvider>

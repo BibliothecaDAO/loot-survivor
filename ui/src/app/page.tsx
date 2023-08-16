@@ -20,16 +20,11 @@ import { displayAddress, padAddress } from "./lib/utils";
 import TransactionHistory from "./components/navigation/TransactionHistory";
 import TransactionCart from "./components/navigation/TransactionCart";
 import Intro from "./components/intro/Intro";
-import {
-  AddDevnetEthButton,
-  MintEthButton,
-} from "./components/archived/DevnetConnectors";
 import { TxActivity } from "./components/navigation/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
 import useAdventurerStore from "./hooks/useAdventurerStore";
 import useUIStore from "./hooks/useUIStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
-import { CSSTransition } from "react-transition-group";
 import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
 import { Menu, NullAdventurer } from "./types";

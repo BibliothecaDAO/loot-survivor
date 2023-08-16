@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "../buttons/Button";
-import WalletSelect from "./WalletSelect";
 import { TypeAnimation } from "react-type-animation";
 import { prologue, chapter1, chapter2, chapter3 } from "../../lib/constants";
 import Image from "next/image";
@@ -12,7 +11,7 @@ interface IntroProps {
 const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
   const [screen, setScreen] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const [buttonText, setButtonText] = useState("do you dare?");
+  const [flash, setFlash] = useState(false);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -50,35 +49,26 @@ const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
     }
   }, [screen, onIntroComplete]);
 
-  const handleMouseEnter = () => {
-    setButtonText("are you sure?");
-  };
-
-  const handleMouseLeave = () => {
-    setButtonText("do you dare?");
-  };
-
-  const [flash, setFlash] = useState(false);
-
   useEffect(() => {
     setFlash(true);
     const timer = setTimeout(() => {
       setFlash(false);
-    }, 500); // 500ms corresponds to the animation duration
-    return () => clearTimeout(timer); // clean up on unmount or when the screen changes
+    }, 500);
+    return () => clearTimeout(timer);
   }, [screen]);
 
   const renderScreen = (src: string, alt: string, sequence: any) => (
-    <div className="flex flex-col w-full h-full justify-between">
-      <div className="flex flex-col h-full">
-        <Image
-          className="mx-auto border border-terminal-green absolute object-cover"
-          src={src}
-          alt={alt}
-          fill
-        />
+    <div className="flex w-full h-full">
 
-        <div className="p-2 pt-20 text-xs sm:text-xl leading-loose z-10">
+      <Image
+        className=" absolute object-cover animate-pulse"
+        src={src}
+        alt={alt}
+        fill
+      />
+
+      <div className="w-full z-10 pt-20">
+        <div className="text-xs sm:text-xl leading-loose z-10">
           <TypeAnimation
             key={screen.toString()}
             sequence={sequence}
@@ -88,40 +78,42 @@ const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
             style={{ fontSize: "2em" }}
           />
         </div>
+
+        <div className="flex  mt-10">
+          <Button
+            className="animate-pulse"
+            size={"sm"}
+            variant={"outline"}
+            onClick={() => setScreen(4)}
+          >
+            [skip]
+          </Button>
+        </div>
       </div>
-      <div className="flex flex-row gap-10 mt-auto">
-        <Button
-          className="animate-pulse"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          onClick={() => setScreen(4)}
-        >
-          [skip]
-        </Button>
-      </div>
+
     </div>
   );
 
   return (
     <>
-      {flash && <div className="flash" />}
+      {flash && screen != 0 && <div className="flash" />}
       {screen == 0 &&
-        renderScreen("/scenes/scene2.png", "start", [
+        renderScreen("/scenes/intro/sculls.png", "start", [
           prologue,
-          () => setTimeout(() => setScreen(1), 2000),
+          () => setTimeout(() => setScreen(1), 3000),
         ])}
       {screen == 1 &&
-        renderScreen("/scenes/scene1.png", "second screen", [
+        renderScreen("/scenes/intro/incave.png", "second screen", [
           chapter1,
           () => setTimeout(() => setScreen(2), 3000),
         ])}
       {screen == 2 &&
-        renderScreen("/scenes/cave.png", "cave", [
+        renderScreen("/scenes/intro/cave.png", "cave", [
           chapter2,
           () => setTimeout(() => setScreen(3), 3000),
         ])}
       {screen == 3 &&
-        renderScreen("/scenes/fountain.png", "fountain", [
+        renderScreen("/scenes/intro/fountain.png", "fountain", [
           chapter3,
           () => setTimeout(() => setScreen(4), 3000),
         ])}
