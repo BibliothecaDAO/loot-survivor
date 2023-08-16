@@ -420,7 +420,7 @@ export default function UpgradeScreen() {
 
                   {upgradeScreen === 2 && (
                     <div className="hidden sm:flex flex-col items-center sm:gap-2 w-full">
-                      <p className="text-xl lg:text-2xl sm:hidden">
+                      <p className="text-xl text-center lg:text-2xl sm:hidden">
                         Loot Fountain
                       </p>
                       <MarketplaceScreen

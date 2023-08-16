@@ -81,7 +81,7 @@ export const AdventurersList = ({
   }, [isActive, handleKeyDown]);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col items-center h-screen">
       {sortedAdventurers.length > 0 ? (
         <div className="flex flex-col gap-2 sm:flex-row w-full h-full items-center sm:items-start">
           <div className="flex flex-col w-full sm:w-1/3 overflow-y-auto mx-2 border border-terminal-green sm:border-none h-[350px] sm:h-[625px] p-1">
