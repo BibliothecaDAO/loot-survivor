@@ -10,7 +10,7 @@ import {
     TransactionStatus,
 } from "starknet";
 import Storage from "./storage";
-import { useAccount } from "@starknet-react/core";
+import { useAccount, useConnectors } from "@starknet-react/core";
 import { ArcadeConnector } from "./arcade";
 
 export const PREFUND_AMOUNT = "0x2386f26fc10000"; // 0.001ETH
@@ -32,6 +32,7 @@ type BurnerStorage = {
 
 
 export const useBurner = () => {
+    const { refresh } = useConnectors()
     const { account: walletAccount } = useAccount();
     const [account, setAccount] = useState<Account>();
     const [isDeploying, setIsDeploying] = useState(false);
@@ -151,7 +152,7 @@ export const useBurner = () => {
         setIsDeploying(false);
         Storage.set("burners", storage);
         console.log("burner created: ", address);
-
+        refresh();
         return burner;
     }, [walletAccount]);
 
@@ -171,8 +172,14 @@ export const useBurner = () => {
             arcadeAccounts.push(arcadeConnector);
         }
 
+
         return arcadeAccounts;
     }, [account, isDeploying]);
+
+    useEffect(() => {
+        const interval = setInterval(refresh, 2000)
+        return () => clearInterval(interval)
+    }, [refresh])
 
     return {
         get,
