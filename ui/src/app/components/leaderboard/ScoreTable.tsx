@@ -59,7 +59,7 @@ const ScoreLeaderboardTable = ({
     }
   };
   return (
-    <div className="flex sm:w-1/2 flex-col items-center py-2 gap-2">
+    <div className="flex flex-col items-center py-2 gap-2">
       <h4 className="text-2xl text-center sm:text-2xl m-0">Submitted Scores</h4>
       {scores.length > 0 ? (
         <div className="flex flex-col w-full gap-5">

@@ -60,11 +60,11 @@ export default function LeaderboardScreen() {
     );
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between sm:w-3/4 sm:m-auto">
-      <div className={`${showScores ? "hidden " : ""}sm:block w-full`}>
+    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between">
+      <div className={`${showScores ? "hidden " : ""}sm:block w-full sm:w-1/2`}>
         <LiveTable itemsPerPage={itemsPerPage} />
       </div>
-      <div className={`${showScores ? "" : "hidden "}sm:block w-full`}>
+      <div className={`${showScores ? "" : "hidden "}sm:block w-full sm:w-1/2`}>
         <ScoreTable itemsPerPage={itemsPerPage} />
       </div>
       <Button
