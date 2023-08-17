@@ -311,23 +311,40 @@ async def swap_item(info, adventurer_id, equipped_item, unequipped_item, time):
 
 async def create_base_items(info, adventurer_state, item_id):
     for i in range(1, 102):
-        await info.storage.insert_one(
+        # Check if the document already exists
+        doc_cursor = await info.storage.find(
             "items",
             {
-                "item": check_exists_int(i),
+                "id": check_exists_int(i),
                 "adventurerId": check_exists_int(adventurer_state["adventurer_id"]),
-                "owner": False,
-                "equipped": False,
-                "ownerAddress": check_exists_int(adventurer_state["owner"]),
-                "xp": encode_int_as_bytes(0),
-                "special1": check_exists_int(0),
-                "special2": check_exists_int(0),
-                "special3": check_exists_int(0),
-                "isAvailable": False,
-                "purchasedTime": check_exists_int(0),
-                "timestamp": datetime.now(),
             },
         )
+        doc_exists = True
+        try:
+            doc = next(doc_cursor)
+        except StopIteration:
+            doc_exists = False
+
+        if not doc_exists:  # If the document does not exist, insert it
+            await info.storage.insert_one(
+                "items",
+                {
+                    "item": check_exists_int(i),
+                    "adventurerId": check_exists_int(adventurer_state["adventurer_id"]),
+                    "owner": False,
+                    "equipped": False,
+                    "ownerAddress": check_exists_int(adventurer_state["owner"]),
+                    "xp": encode_int_as_bytes(0),
+                    "special1": check_exists_int(0),
+                    "special2": check_exists_int(0),
+                    "special3": check_exists_int(0),
+                    "isAvailable": False,
+                    "purchasedTime": check_exists_int(0),
+                    "timestamp": datetime.now(),
+                },
+            )
+        else:
+            print("Item already exists.")
     await info.storage.find_one_and_update(
         "items",
         {
@@ -531,16 +548,32 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "lastUpdatedTime": block_time,
             "timestamp": datetime.now(),
         }
-        await info.storage.insert_one("adventurers", start_game_doc)
-        await create_base_items(
-            info, sg.adventurer_state, sg.adventurer_state["adventurer"]["weapon"]["id"]
+        # Check if the document already exists
+        doc_cursor = await info.storage.find(
+            "adventurers",
+            {"id": check_exists_int(sg.adventurer_state["adventurer_id"])},
         )
-        print(
-            "- [start game]",
-            sg.adventurer_state["adventurer_id"],
-            "->",
-            hex(sg.adventurer_state["owner"]),
-        )
+        doc_exists = True
+        try:
+            doc = next(doc_cursor)
+        except StopIteration:
+            doc_exists = False
+
+        if not doc_exists:  # If the document does not exist, insert it
+            await info.storage.insert_one("adventurers", start_game_doc)
+            await create_base_items(
+                info,
+                sg.adventurer_state,
+                sg.adventurer_state["adventurer"]["weapon"]["id"],
+            )
+            print(
+                "- [start game]",
+                sg.adventurer_state["adventurer_id"],
+                "->",
+                hex(sg.adventurer_state["owner"]),
+            )
+        else:
+            print("Document already exists.")
 
     async def upgrade(
         self,
@@ -651,13 +684,55 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "discoveryTime": block_time,
             "timestamp": datetime.now(),
         }
-        await info.storage.insert_one("discoveries", discovery_doc)
-        print(
-            "- [discovered health]",
-            dh.adventurer_state["adventurer_id"],
-            "->",
-            dh.health_amount,
+        # Check if the document already exists
+        doc_cursor = await info.storage.find(
+            "items",
+            {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "adventurerId": check_exists_int(dh.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    dh.adventurer_state["adventurer"]["health"]
+                ),
+                "discoveryType": encode_int_as_bytes(3),
+                "subDiscoveryType": check_exists_int(1),
+                "outputAmount": encode_int_as_bytes(dh.health_amount),
+                "obstacle": check_exists_int(0),
+                "obstacleLevel": check_exists_int(0),
+                "dodgedObstacle": encode_int_as_bytes(0),
+                "damageTaken": encode_int_as_bytes(0),
+                "damageLocation": check_exists_int(0),
+                "xpEarnedAdventurer": check_exists_int(0),
+                "xpEarnedItems": check_exists_int(0),
+                "entity": check_exists_int(0),
+                "entityLevel": check_exists_int(0),
+                "entityHealth": encode_int_as_bytes(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
+                "ambushed": check_exists_int(0),
+                "seed": encode_int_as_bytes(0),
+                "discoveryTime": block_time,
+            },
         )
+        doc_exists = True
+        try:
+            doc = next(doc_cursor)
+        except StopIteration:
+            doc_exists = False
+
+        if not doc_exists:  # If the document does not exist, insert it
+            await info.storage.insert_one(
+                "discoveries",
+                discovery_doc,
+            )
+            print(
+                "- [discovered health]",
+                dh.adventurer_state["adventurer_id"],
+                "->",
+                dh.health_amount,
+            )
+        else:
+            print("Document already exists.")
 
     async def discover_gold(
         self,
@@ -697,13 +772,52 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "discoveryTime": block_time,
             "timestamp": datetime.now(),
         }
-        await info.storage.insert_one("discoveries", discovery_doc)
-        print(
-            "- [discovered gold]",
-            dg.adventurer_state["adventurer_id"],
-            "->",
-            dg.gold_amount,
+        # Check if the document already exists
+        doc_cursor = await info.storage.find(
+            "items",
+            {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "adventurerId": check_exists_int(dg.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    dg.adventurer_state["adventurer"]["health"]
+                ),
+                "discoveryType": encode_int_as_bytes(3),
+                "subDiscoveryType": check_exists_int(2),
+                "outputAmount": encode_int_as_bytes(dg.gold_amount),
+                "obstacle": check_exists_int(0),
+                "obstacleLevel": check_exists_int(0),
+                "dodgedObstacle": encode_int_as_bytes(0),
+                "damageTaken": encode_int_as_bytes(0),
+                "damageLocation": check_exists_int(0),
+                "xpEarnedAdventurer": check_exists_int(0),
+                "xpEarnedItems": check_exists_int(0),
+                "entity": check_exists_int(0),
+                "entityLevel": check_exists_int(0),
+                "entityHealth": encode_int_as_bytes(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
+                "ambushed": check_exists_int(0),
+                "seed": encode_int_as_bytes(0),
+                "discoveryTime": block_time,
+            },
         )
+        doc_exists = True
+        try:
+            doc = next(doc_cursor)
+        except StopIteration:
+            doc_exists = False
+
+        if not doc_exists:  # If the document does not exist, insert it
+            await info.storage.insert_one("discoveries", discovery_doc)
+            print(
+                "- [discovered gold]",
+                dg.adventurer_state["adventurer_id"],
+                "->",
+                dg.gold_amount,
+            )
+        else:
+            print("Document already exists.")
 
     async def discover_xp(
         self,
@@ -743,13 +857,52 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "discoveryTime": block_time,
             "timestamp": datetime.now(),
         }
-        await info.storage.insert_one("discoveries", discovery_doc)
-        print(
-            "- [discovered xp]",
-            dx.adventurer_state["adventurer_id"],
-            "->",
-            dx.xp_amount,
+        # Check if the document already exists
+        doc_cursor = await info.storage.find(
+            "items",
+            {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "adventurerId": check_exists_int(dx.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    dx.adventurer_state["adventurer"]["health"]
+                ),
+                "discoveryType": encode_int_as_bytes(3),
+                "subDiscoveryType": check_exists_int(3),
+                "outputAmount": encode_int_as_bytes(dx.xp_amount),
+                "obstacle": check_exists_int(0),
+                "obstacleLevel": check_exists_int(0),
+                "dodgedObstacle": encode_int_as_bytes(0),
+                "damageTaken": encode_int_as_bytes(0),
+                "damageLocation": check_exists_int(0),
+                "xpEarnedAdventurer": check_exists_int(0),
+                "xpEarnedItems": check_exists_int(0),
+                "entity": check_exists_int(0),
+                "entityLevel": check_exists_int(0),
+                "entityHealth": encode_int_as_bytes(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
+                "ambushed": check_exists_int(0),
+                "seed": encode_int_as_bytes(0),
+                "discoveryTime": block_time,
+            },
         )
+        doc_exists = True
+        try:
+            doc = next(doc_cursor)
+        except StopIteration:
+            doc_exists = False
+
+        if not doc_exists:  # If the document does not exist, insert it
+            await info.storage.insert_one("discoveries", discovery_doc)
+            print(
+                "- [discovered xp]",
+                dx.adventurer_state["adventurer_id"],
+                "->",
+                dx.xp_amount,
+            )
+        else:
+            print("Document already exists.")
 
     async def dodged_obstacle(
         self,
@@ -789,18 +942,57 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "discoveryTime": block_time,
             "timestamp": datetime.now(),
         }
-        await info.storage.insert_one("discoveries", discovery_doc)
-        await update_items_xp(
-            info,
-            do.adventurer_state["adventurer_id"],
-            do.adventurer_state["adventurer"],
+        # Check if the document already exists
+        doc_cursor = await info.storage.find(
+            "items",
+            {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "adventurerId": check_exists_int(do.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    do.adventurer_state["adventurer"]["health"]
+                ),
+                "discoveryType": encode_int_as_bytes(2),
+                "subDiscoveryType": check_exists_int(0),
+                "outputAmount": encode_int_as_bytes(0),
+                "obstacle": check_exists_int(do.id),
+                "obstacleLevel": check_exists_int(do.level),
+                "dodgedObstacle": encode_int_as_bytes(1),
+                "damageTaken": encode_int_as_bytes(do.damage_taken),
+                "damageLocation": check_exists_int(do.damage_location),
+                "xpEarnedAdventurer": check_exists_int(do.xp_earned_adventurer),
+                "xpEarnedItems": check_exists_int(do.xp_earned_items),
+                "entity": check_exists_int(0),
+                "entityLevel": check_exists_int(0),
+                "entityHealth": encode_int_as_bytes(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
+                "ambushed": check_exists_int(0),
+                "seed": encode_int_as_bytes(0),
+                "discoveryTime": block_time,
+            },
         )
-        print(
-            "- [dodged obstacle]",
-            do.adventurer_state["adventurer_id"],
-            "->",
-            do.id,
-        )
+        doc_exists = True
+        try:
+            doc = next(doc_cursor)
+        except StopIteration:
+            doc_exists = False
+
+        if not doc_exists:  # If the document does not exist, insert it
+            await info.storage.insert_one("discoveries", discovery_doc)
+            await update_items_xp(
+                info,
+                do.adventurer_state["adventurer_id"],
+                do.adventurer_state["adventurer"],
+            )
+            print(
+                "- [dodged obstacle]",
+                do.adventurer_state["adventurer_id"],
+                "->",
+                do.id,
+            )
+        else:
+            print("Document already exists.")
 
     async def hit_by_obstacle(
         self,
@@ -840,18 +1032,57 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "discoveryTime": block_time,
             "timestamp": datetime.now(),
         }
-        await info.storage.insert_one("discoveries", discovery_doc)
-        await update_items_xp(
-            info,
-            do.adventurer_state["adventurer_id"],
-            do.adventurer_state["adventurer"],
+        # Check if the document already exists
+        doc_cursor = await info.storage.find(
+            "items",
+            {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "adventurerId": check_exists_int(do.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    do.adventurer_state["adventurer"]["health"]
+                ),
+                "discoveryType": encode_int_as_bytes(2),
+                "subDiscoveryType": check_exists_int(0),
+                "outputAmount": encode_int_as_bytes(0),
+                "obstacle": check_exists_int(do.id),
+                "obstacleLevel": check_exists_int(do.level),
+                "dodgedObstacle": encode_int_as_bytes(0),
+                "damageTaken": encode_int_as_bytes(do.damage_taken),
+                "damageLocation": check_exists_int(do.damage_location),
+                "xpEarnedAdventurer": check_exists_int(do.xp_earned_adventurer),
+                "xpEarnedItems": check_exists_int(do.xp_earned_items),
+                "entity": check_exists_int(0),
+                "entityLevel": check_exists_int(0),
+                "entityHealth": encode_int_as_bytes(0),
+                "special1": check_exists_int(0),
+                "special2": check_exists_int(0),
+                "special3": check_exists_int(0),
+                "ambushed": check_exists_int(0),
+                "seed": encode_int_as_bytes(0),
+                "discoveryTime": block_time,
+            },
         )
-        print(
-            "- [hit by obstacle]",
-            do.adventurer_state["adventurer_id"],
-            "->",
-            do.id,
-        )
+        doc_exists = True
+        try:
+            doc = next(doc_cursor)
+        except StopIteration:
+            doc_exists = False
+
+        if not doc_exists:  # If the document does not exist, insert it
+            await info.storage.insert_one("discoveries", discovery_doc)
+            await update_items_xp(
+                info,
+                do.adventurer_state["adventurer_id"],
+                do.adventurer_state["adventurer"],
+            )
+            print(
+                "- [hit by obstacle]",
+                do.adventurer_state["adventurer_id"],
+                "->",
+                do.id,
+            )
+        else:
+            print("Document already exists.")
 
     async def discover_beast(
         self,
@@ -892,30 +1123,71 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "discoveryTime": block_time,
             "timestamp": datetime.now(),
         }
-        await info.storage.insert_one("discoveries", discovery_doc)
-        beast_doc = {
-            "beast": check_exists_int(db.id),
-            "health": encode_int_as_bytes(
-                db.adventurer_state["adventurer"]["beast_health"]
-            ),
-            "level": encode_int_as_bytes(db.beast_specs["level"]),
-            "special1": check_exists_int(db.beast_specs["specials"]["special1"]),
-            "special2": check_exists_int(db.beast_specs["specials"]["special2"]),
-            "special3": check_exists_int(db.beast_specs["specials"]["special3"]),
-            "seed": encode_int_as_bytes(db.seed),
-            "adventurerId": check_exists_int(db.adventurer_state["adventurer_id"]),
-            "slainOnTime": check_exists_timestamp(0),
-            "createdTime": datetime.now(),
-            "lastUpdatedTime": block_time,
-            "timestamp": datetime.now(),
-        }
-        await info.storage.insert_one("beasts", beast_doc)
-        print(
-            "- [discovered beast]",
-            db.adventurer_state["adventurer_id"],
-            "->",
-            db.id,
+        # Check if the document already exists
+        doc_cursor = await info.storage.find(
+            "items",
+            {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "adventurerId": check_exists_int(db.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    db.adventurer_state["adventurer"]["health"]
+                ),
+                "discoveryType": encode_int_as_bytes(1),
+                "subDiscoveryType": check_exists_int(0),
+                "outputAmount": encode_int_as_bytes(0),
+                "obstacle": check_exists_int(0),
+                "obstacleLevel": check_exists_int(0),
+                "dodgedObstacle": encode_int_as_bytes(0),
+                "damageTaken": encode_int_as_bytes(0),
+                "damageLocation": check_exists_int(0),
+                "xpEarnedAdventurer": check_exists_int(0),
+                "xpEarnedItems": check_exists_int(0),
+                "entity": check_exists_int(db.id),
+                "entityLevel": check_exists_int(db.beast_specs["level"]),
+                "entityHealth": encode_int_as_bytes(
+                    db.adventurer_state["adventurer"]["beast_health"]
+                ),
+                "special1": check_exists_int(db.beast_specs["specials"]["special1"]),
+                "special2": check_exists_int(db.beast_specs["specials"]["special2"]),
+                "special3": check_exists_int(db.beast_specs["specials"]["special3"]),
+                "ambushed": check_exists_int(0),
+                "seed": encode_int_as_bytes(db.seed),
+                "discoveryTime": block_time,
+            },
         )
+        doc_exists = True
+        try:
+            doc = next(doc_cursor)
+        except StopIteration:
+            doc_exists = False
+
+        if not doc_exists:  # If the document does not exist, insert it
+            await info.storage.insert_one("discoveries", discovery_doc)
+            beast_doc = {
+                "beast": check_exists_int(db.id),
+                "health": encode_int_as_bytes(
+                    db.adventurer_state["adventurer"]["beast_health"]
+                ),
+                "level": encode_int_as_bytes(db.beast_specs["level"]),
+                "special1": check_exists_int(db.beast_specs["specials"]["special1"]),
+                "special2": check_exists_int(db.beast_specs["specials"]["special2"]),
+                "special3": check_exists_int(db.beast_specs["specials"]["special3"]),
+                "seed": encode_int_as_bytes(db.seed),
+                "adventurerId": check_exists_int(db.adventurer_state["adventurer_id"]),
+                "slainOnTime": check_exists_timestamp(0),
+                "createdTime": datetime.now(),
+                "lastUpdatedTime": block_time,
+                "timestamp": datetime.now(),
+            }
+            await info.storage.insert_one("beasts", beast_doc)
+            print(
+                "- [discovered beast]",
+                db.adventurer_state["adventurer_id"],
+                "->",
+                db.id,
+            )
+        else:
+            print("Document already exists.")
 
     async def ambushed_by_beast(
         self,
@@ -956,59 +1228,100 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "discoveryTime": block_time,
             "timestamp": datetime.now(),
         }
-        await info.storage.insert_one("discoveries", discovery_doc)
-        attacked_by_beast_doc = {
-            "txHash": encode_hex_as_bytes(tx_hash),
-            "beast": check_exists_int(abb.id),
-            "beastHealth": encode_int_as_bytes(
-                abb.adventurer_state["adventurer"]["beast_health"]
-            ),
-            "beastLevel": encode_int_as_bytes(abb.beast_specs["level"]),
-            "special1": check_exists_int(abb.beast_specs["specials"]["special1"]),
-            "special2": check_exists_int(abb.beast_specs["specials"]["special2"]),
-            "special3": check_exists_int(abb.beast_specs["specials"]["special3"]),
-            "seed": encode_int_as_bytes(abb.seed),
-            "adventurerId": check_exists_int(abb.adventurer_state["adventurer_id"]),
-            "adventurerHealth": encode_int_as_bytes(
-                abb.adventurer_state["adventurer"]["health"]
-            ),
-            "attacker": check_exists_int(2),
-            "fled": check_exists_int(0),
-            "damageDealt": encode_int_as_bytes(0),
-            "criticalHit": abb.critical_hit,
-            "damageTaken": encode_int_as_bytes(abb.damage),
-            "damageLocation": check_exists_int(abb.location),
-            "xpEarnedAdventurer": encode_int_as_bytes(0),
-            "xpEarnedItems": encode_int_as_bytes(0),
-            "goldEarned": encode_int_as_bytes(0),
-            "discoveryTime": block_time,
-            "blockTime": block_time,
-            "timestamp": datetime.now(),
-        }
-        await info.storage.insert_one("battles", attacked_by_beast_doc)
-        beast_doc = {
-            "beast": check_exists_int(abb.id),
-            "health": encode_int_as_bytes(
-                abb.adventurer_state["adventurer"]["beast_health"]
-            ),
-            "level": encode_int_as_bytes(abb.beast_specs["level"]),
-            "special1": check_exists_int(abb.beast_specs["specials"]["special1"]),
-            "special2": check_exists_int(abb.beast_specs["specials"]["special2"]),
-            "special3": check_exists_int(abb.beast_specs["specials"]["special3"]),
-            "seed": encode_int_as_bytes(abb.seed),
-            "adventurerId": check_exists_int(abb.adventurer_state["adventurer_id"]),
-            "slainOnTime": check_exists_timestamp(0),
-            "createdTime": datetime.now(),
-            "lastUpdatedTime": block_time,
-            "timestamp": datetime.now(),
-        }
-        await info.storage.insert_one("beasts", beast_doc)
-        print(
-            "- [ambushed by beast]",
-            abb.adventurer_state["adventurer_id"],
-            "->",
-            abb.id,
+        # Check if the document already exists
+        doc_cursor = await info.storage.find(
+            "items",
+            {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "adventurerId": check_exists_int(abb.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    abb.adventurer_state["adventurer"]["health"]
+                ),
+                "discoveryType": encode_int_as_bytes(1),
+                "subDiscoveryType": check_exists_int(0),
+                "outputAmount": encode_int_as_bytes(0),
+                "obstacle": check_exists_int(0),
+                "obstacleLevel": check_exists_int(0),
+                "dodgedObstacle": encode_int_as_bytes(0),
+                "damageTaken": encode_int_as_bytes(0),
+                "damageLocation": check_exists_int(0),
+                "xpEarnedAdventurer": check_exists_int(0),
+                "xpEarnedItems": check_exists_int(0),
+                "entity": check_exists_int(abb.id),
+                "entityLevel": check_exists_int(abb.beast_specs["level"]),
+                "entityHealth": encode_int_as_bytes(
+                    abb.adventurer_state["adventurer"]["beast_health"]
+                ),
+                "special1": check_exists_int(abb.beast_specs["specials"]["special1"]),
+                "special2": check_exists_int(abb.beast_specs["specials"]["special2"]),
+                "special3": check_exists_int(abb.beast_specs["specials"]["special3"]),
+                "ambushed": check_exists_int(1),
+                "seed": encode_int_as_bytes(abb.seed),
+                "discoveryTime": block_time,
+            },
         )
+        doc_exists = True
+        try:
+            doc = next(doc_cursor)
+        except StopIteration:
+            doc_exists = False
+
+        if not doc_exists:  # If the document does not exist, insert it
+            await info.storage.insert_one("discoveries", discovery_doc)
+            attacked_by_beast_doc = {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "adventurerId": check_exists_int(abb.adventurer_state["adventurer_id"]),
+                "adventurerHealth": encode_int_as_bytes(
+                    abb.adventurer_state["adventurer"]["health"]
+                ),
+                "discoveryType": encode_int_as_bytes(1),
+                "subDiscoveryType": check_exists_int(0),
+                "outputAmount": encode_int_as_bytes(0),
+                "obstacle": check_exists_int(0),
+                "obstacleLevel": check_exists_int(0),
+                "dodgedObstacle": encode_int_as_bytes(0),
+                "damageTaken": encode_int_as_bytes(0),
+                "damageLocation": check_exists_int(0),
+                "xpEarnedAdventurer": check_exists_int(0),
+                "xpEarnedItems": check_exists_int(0),
+                "entity": check_exists_int(abb.id),
+                "entityLevel": check_exists_int(abb.beast_specs["level"]),
+                "entityHealth": encode_int_as_bytes(
+                    abb.adventurer_state["adventurer"]["beast_health"]
+                ),
+                "special1": check_exists_int(abb.beast_specs["specials"]["special1"]),
+                "special2": check_exists_int(abb.beast_specs["specials"]["special2"]),
+                "special3": check_exists_int(abb.beast_specs["specials"]["special3"]),
+                "ambushed": check_exists_int(1),
+                "seed": encode_int_as_bytes(abb.seed),
+                "timestamp": datetime.now(),
+            }
+            await info.storage.insert_one("battles", attacked_by_beast_doc)
+            beast_doc = {
+                "beast": check_exists_int(abb.id),
+                "health": encode_int_as_bytes(
+                    abb.adventurer_state["adventurer"]["beast_health"]
+                ),
+                "level": encode_int_as_bytes(abb.beast_specs["level"]),
+                "special1": check_exists_int(abb.beast_specs["specials"]["special1"]),
+                "special2": check_exists_int(abb.beast_specs["specials"]["special2"]),
+                "special3": check_exists_int(abb.beast_specs["specials"]["special3"]),
+                "seed": encode_int_as_bytes(abb.seed),
+                "adventurerId": check_exists_int(abb.adventurer_state["adventurer_id"]),
+                "slainOnTime": check_exists_timestamp(0),
+                "createdTime": datetime.now(),
+                "lastUpdatedTime": block_time,
+                "timestamp": datetime.now(),
+            }
+            await info.storage.insert_one("beasts", beast_doc)
+            print(
+                "- [ambushed by beast]",
+                abb.adventurer_state["adventurer_id"],
+                "->",
+                abb.id,
+            )
+        else:
+            print("Document already exists.")
 
     async def attack_beast(
         self,
@@ -1071,13 +1384,61 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "blockTime": block_time,
                 "timestamp": datetime.now(),
             }
-            await info.storage.insert_one("battles", attacked_beast_doc)
-            print(
-                "- [attack beast]",
-                ba.id,
-                "->",
-                ba.adventurer_state["adventurer_id"],
+            # Check if the document already exists
+            doc_cursor = await info.storage.find(
+                "items",
+                {
+                    "txHash": encode_hex_as_bytes(tx_hash),
+                    "beast": check_exists_int(ba.id),
+                    "beastHealth": encode_int_as_bytes(
+                        ba.adventurer_state["adventurer"]["beast_health"]
+                    ),
+                    "beastLevel": encode_int_as_bytes(ba.beast_specs["level"]),
+                    "special1": check_exists_int(
+                        ba.beast_specs["specials"]["special1"]
+                    ),
+                    "special2": check_exists_int(
+                        ba.beast_specs["specials"]["special2"]
+                    ),
+                    "special3": check_exists_int(
+                        ba.beast_specs["specials"]["special3"]
+                    ),
+                    "seed": encode_int_as_bytes(ba.seed),
+                    "adventurerId": check_exists_int(
+                        ba.adventurer_state["adventurer_id"]
+                    ),
+                    "adventurerHealth": encode_int_as_bytes(
+                        ba.adventurer_state["adventurer"]["health"]
+                    ),
+                    "attacker": check_exists_int(1),
+                    "fled": check_exists_int(0),
+                    "damageDealt": encode_int_as_bytes(ba.damage),
+                    "criticalHit": ba.critical_hit,
+                    "damageTaken": encode_int_as_bytes(0),
+                    "damageLocation": check_exists_int(ba.location),
+                    "xpEarnedAdventurer": encode_int_as_bytes(0),
+                    "xpEarnedItems": encode_int_as_bytes(0),
+                    "goldEarned": encode_int_as_bytes(0),
+                    "discoveryTime": beast_document["discoveryTime"],
+                    "blockTime": block_time,
+                },
             )
+            doc_exists = True
+            try:
+                doc = next(doc_cursor)
+            except StopIteration:
+                doc_exists = False
+
+            if not doc_exists:  # If the document does not exist, insert it
+                await info.storage.insert_one("battles", attacked_beast_doc)
+                print(
+                    "- [attack beast]",
+                    ba.id,
+                    "->",
+                    ba.adventurer_state["adventurer_id"],
+                )
+            else:
+                print("Document already exists.")
         except StopIteration:
             print("No documents found in beast_discovery")
 
@@ -1133,13 +1494,61 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "blockTime": block_time,
                 "timestamp": datetime.now(),
             }
-            await info.storage.insert_one("battles", attacked_by_beast_doc)
-            print(
-                "- [attacked by beast]",
-                abb.id,
-                "->",
-                abb.adventurer_state["adventurer_id"],
+            # Check if the document already exists
+            doc_cursor = await info.storage.find(
+                "items",
+                {
+                    "txHash": encode_hex_as_bytes(tx_hash),
+                    "beast": check_exists_int(abb.id),
+                    "beastHealth": encode_int_as_bytes(
+                        abb.adventurer_state["adventurer"]["beast_health"]
+                    ),
+                    "beastLevel": encode_int_as_bytes(abb.beast_specs["level"]),
+                    "special1": check_exists_int(
+                        abb.beast_specs["specials"]["special1"]
+                    ),
+                    "special2": check_exists_int(
+                        abb.beast_specs["specials"]["special2"]
+                    ),
+                    "special3": check_exists_int(
+                        abb.beast_specs["specials"]["special3"]
+                    ),
+                    "seed": encode_int_as_bytes(abb.seed),
+                    "adventurerId": check_exists_int(
+                        abb.adventurer_state["adventurer_id"]
+                    ),
+                    "adventurerHealth": encode_int_as_bytes(
+                        abb.adventurer_state["adventurer"]["health"]
+                    ),
+                    "attacker": check_exists_int(2),
+                    "fled": check_exists_int(0),
+                    "damageDealt": encode_int_as_bytes(0),
+                    "criticalHit": abb.critical_hit,
+                    "damageTaken": encode_int_as_bytes(abb.damage),
+                    "damageLocation": check_exists_int(abb.location),
+                    "xpEarnedAdventurer": encode_int_as_bytes(0),
+                    "xpEarnedItems": encode_int_as_bytes(0),
+                    "goldEarned": encode_int_as_bytes(0),
+                    "discoveryTime": beast_document["discoveryTime"],
+                    "blockTime": block_time,
+                },
             )
+            doc_exists = True
+            try:
+                doc = next(doc_cursor)
+            except StopIteration:
+                doc_exists = False
+
+            if not doc_exists:  # If the document does not exist, insert it
+                await info.storage.insert_one("battles", attacked_by_beast_doc)
+                print(
+                    "- [attacked by beast]",
+                    abb.id,
+                    "->",
+                    abb.adventurer_state["adventurer_id"],
+                )
+            else:
+                print("Document already exists.")
         except StopIteration:
             print("No documents found in beast_discovery")
 
@@ -1204,18 +1613,66 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "blockTime": block_time,
                 "timestamp": datetime.now(),
             }
-            await info.storage.insert_one("battles", slayed_beast_doc)
-            await update_items_xp(
-                info,
-                sb.adventurer_state["adventurer_id"],
-                sb.adventurer_state["adventurer"],
+            # Check if the document already exists
+            doc_cursor = await info.storage.find(
+                "items",
+                {
+                    "txHash": encode_hex_as_bytes(tx_hash),
+                    "beast": check_exists_int(sb.id),
+                    "beastHealth": encode_int_as_bytes(
+                        sb.adventurer_state["adventurer"]["beast_health"]
+                    ),
+                    "beastLevel": encode_int_as_bytes(sb.beast_specs["level"]),
+                    "special1": check_exists_int(
+                        sb.beast_specs["specials"]["special1"]
+                    ),
+                    "special2": check_exists_int(
+                        sb.beast_specs["specials"]["special2"]
+                    ),
+                    "special3": check_exists_int(
+                        sb.beast_specs["specials"]["special3"]
+                    ),
+                    "seed": encode_int_as_bytes(sb.seed),
+                    "adventurerId": check_exists_int(
+                        sb.adventurer_state["adventurer_id"]
+                    ),
+                    "adventurerHealth": encode_int_as_bytes(
+                        sb.adventurer_state["adventurer"]["health"]
+                    ),
+                    "attacker": check_exists_int(1),
+                    "fled": check_exists_int(0),
+                    "damageDealt": encode_int_as_bytes(sb.damage_dealt),
+                    "criticalHit": sb.critical_hit,
+                    "damageTaken": encode_int_as_bytes(0),
+                    "damageLocation": check_exists_int(0),
+                    "xpEarnedAdventurer": encode_int_as_bytes(sb.xp_earned_adventurer),
+                    "xpEarnedItems": encode_int_as_bytes(sb.xp_earned_items),
+                    "goldEarned": encode_int_as_bytes(sb.gold_earned),
+                    "discoveryTime": beast_document["discoveryTime"],
+                    "blockTime": block_time,
+                },
             )
-            print(
-                "- [slayed beast]",
-                sb.id,
-                "->",
-                sb.adventurer_state["adventurer_id"],
-            )
+            doc_exists = True
+            try:
+                doc = next(doc_cursor)
+            except StopIteration:
+                doc_exists = False
+
+            if not doc_exists:  # If the document does not exist, insert it
+                await info.storage.insert_one("battles", slayed_beast_doc)
+                await update_items_xp(
+                    info,
+                    sb.adventurer_state["adventurer_id"],
+                    sb.adventurer_state["adventurer"],
+                )
+                print(
+                    "- [slayed beast]",
+                    sb.id,
+                    "->",
+                    sb.adventurer_state["adventurer_id"],
+                )
+            else:
+                print("Document already exists.")
         except StopIteration:
             print("No documents found in beast_discovery")
 
@@ -1271,13 +1728,61 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "blockTime": block_time,
                 "timestamp": datetime.now(),
             }
-            await info.storage.insert_one("battles", flee_attempt_doc)
-            print(
-                "- [flee failed]",
-                fa.id,
-                "->",
-                fa.adventurer_state["adventurer_id"],
+            # Check if the document already exists
+            doc_cursor = await info.storage.find(
+                "items",
+                {
+                    "txHash": encode_hex_as_bytes(tx_hash),
+                    "beast": check_exists_int(fa.id),
+                    "beastHealth": encode_int_as_bytes(
+                        fa.adventurer_state["adventurer"]["beast_health"]
+                    ),
+                    "beastLevel": encode_int_as_bytes(fa.beast_specs["level"]),
+                    "special1": check_exists_int(
+                        fa.beast_specs["specials"]["special1"]
+                    ),
+                    "special2": check_exists_int(
+                        fa.beast_specs["specials"]["special2"]
+                    ),
+                    "special3": check_exists_int(
+                        fa.beast_specs["specials"]["special3"]
+                    ),
+                    "seed": encode_int_as_bytes(fa.seed),
+                    "adventurerId": check_exists_int(
+                        fa.adventurer_state["adventurer_id"]
+                    ),
+                    "adventurerHealth": encode_int_as_bytes(
+                        fa.adventurer_state["adventurer"]["health"]
+                    ),
+                    "attacker": check_exists_int(1),
+                    "fled": check_exists_int(0),
+                    "damageDealt": encode_int_as_bytes(0),
+                    "criticalHit": False,
+                    "damageTaken": encode_int_as_bytes(0),
+                    "damageLocation": check_exists_int(0),
+                    "xpEarnedAdventurer": encode_int_as_bytes(0),
+                    "xpEarnedItems": encode_int_as_bytes(0),
+                    "goldEarned": encode_int_as_bytes(0),
+                    "discoveryTime": beast_document["discoveryTime"],
+                    "blockTime": block_time,
+                },
             )
+            doc_exists = True
+            try:
+                doc = next(doc_cursor)
+            except StopIteration:
+                doc_exists = False
+
+            if not doc_exists:  # If the document does not exist, insert it
+                await info.storage.insert_one("battles", flee_attempt_doc)
+                print(
+                    "- [flee failed]",
+                    fa.id,
+                    "->",
+                    fa.adventurer_state["adventurer_id"],
+                )
+            else:
+                print("Document already exists.")
         except StopIteration:
             print("No documents found in beast_discovery")
 
@@ -1333,13 +1838,61 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "blockTime": block_time,
                 "timestamp": datetime.now(),
             }
-            await info.storage.insert_one("battles", flee_attempt_doc)
-            print(
-                "- [flee succeeded]",
-                fa.id,
-                "->",
-                fa.adventurer_state["adventurer_id"],
+            # Check if the document already exists
+            doc_cursor = await info.storage.find(
+                "items",
+                {
+                    "txHash": encode_hex_as_bytes(tx_hash),
+                    "beast": check_exists_int(fa.id),
+                    "beastHealth": encode_int_as_bytes(
+                        fa.adventurer_state["adventurer"]["beast_health"]
+                    ),
+                    "beastLevel": encode_int_as_bytes(fa.beast_specs["level"]),
+                    "special1": check_exists_int(
+                        fa.beast_specs["specials"]["special1"]
+                    ),
+                    "special2": check_exists_int(
+                        fa.beast_specs["specials"]["special2"]
+                    ),
+                    "special3": check_exists_int(
+                        fa.beast_specs["specials"]["special3"]
+                    ),
+                    "seed": encode_int_as_bytes(fa.seed),
+                    "adventurerId": check_exists_int(
+                        fa.adventurer_state["adventurer_id"]
+                    ),
+                    "adventurerHealth": encode_int_as_bytes(
+                        fa.adventurer_state["adventurer"]["health"]
+                    ),
+                    "attacker": check_exists_int(1),
+                    "fled": check_exists_int(1),
+                    "damageDealt": encode_int_as_bytes(0),
+                    "criticalHit": False,
+                    "damageTaken": encode_int_as_bytes(0),
+                    "damageLocation": check_exists_int(0),
+                    "xpEarnedAdventurer": encode_int_as_bytes(0),
+                    "xpEarnedItems": encode_int_as_bytes(0),
+                    "goldEarned": encode_int_as_bytes(0),
+                    "discoveryTime": beast_document["discoveryTime"],
+                    "blockTime": block_time,
+                },
             )
+            doc_exists = True
+            try:
+                doc = next(doc_cursor)
+            except StopIteration:
+                doc_exists = False
+
+            if not doc_exists:  # If the document does not exist, insert it
+                await info.storage.insert_one("battles", flee_attempt_doc)
+                print(
+                    "- [flee succeeded]",
+                    fa.id,
+                    "->",
+                    fa.adventurer_state["adventurer_id"],
+                )
+            else:
+                print("Document already exists.")
         except StopIteration:
             print("No documents found in beast_discovery")
 
@@ -1478,8 +2031,31 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "blockTime": block_time,
             "timestamp": datetime.now(),
         }
-        await info.storage.insert_one("scores", new_high_score_doc)
-        print("- [new high score]", hs.adventurer_state["adventurer_id"])
+        # Check if the document already exists
+        doc_cursor = await info.storage.find(
+            "scores",
+            {
+                "txHash": encode_hex_as_bytes(tx_hash),
+                "adventurerId": encode_int_as_bytes(
+                    hs.adventurer_state["adventurer_id"]
+                ),
+                "rank": encode_int_as_bytes(hs.rank),
+                "xp": encode_int_as_bytes(hs.adventurer_state["adventurer"]["xp"]),
+                "owner": encode_int_as_bytes(hs.adventurer_state["owner"]),
+                "blockTime": block_time,
+            },
+        )
+        doc_exists = True
+        try:
+            doc = next(doc_cursor)
+        except StopIteration:
+            doc_exists = False
+
+        if not doc_exists:  # If the document does not exist, insert it
+            await info.storage.insert_one("scores", new_high_score_doc)
+            print("- [new high score]", hs.adventurer_state["adventurer_id"])
+        else:
+            print("Document already exists.")
 
     async def adventurer_died(
         self,
@@ -1596,7 +2172,47 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "blockTime": block_time,
                 "timestamp": datetime.now(),
             }
-            await info.storage.insert_one("battles", penalty_battle_doc)
+            # Check if the document already exists
+            doc_cursor = await info.storage.find(
+                "battles",
+                {
+                    "txHash": encode_hex_as_bytes(tx_hash),
+                    "beast": check_exists_int(0),
+                    "beastHealth": encode_int_as_bytes(0),
+                    "beastLevel": encode_int_as_bytes(0),
+                    "special1": check_exists_int(0),
+                    "special2": check_exists_int(0),
+                    "special3": check_exists_int(0),
+                    "seed": encode_int_as_bytes(0),
+                    "adventurerId": check_exists_int(
+                        idp.adventurer_state["adventurer_id"]
+                    ),
+                    "adventurerHealth": encode_int_as_bytes(
+                        idp.adventurer_state["adventurer"]["health"]
+                    ),
+                    "attacker": check_exists_int(0),
+                    "fled": check_exists_int(0),
+                    "damageDealt": encode_int_as_bytes(0),
+                    "criticalHit": False,
+                    "damageTaken": encode_int_as_bytes(0),
+                    "damageLocation": check_exists_int(0),
+                    "xpEarnedAdventurer": encode_int_as_bytes(0),
+                    "xpEarnedItems": encode_int_as_bytes(0),
+                    "goldEarned": encode_int_as_bytes(0),
+                    "discoveryTime": block_time,
+                    "blockTime": block_time,
+                },
+            )
+            doc_exists = True
+            try:
+                doc = next(doc_cursor)
+            except StopIteration:
+                doc_exists = False
+
+            if not doc_exists:  # If the document does not exist, insert it
+                await info.storage.insert_one("battles", penalty_battle_doc)
+            else:
+                pass
         else:
             penalty_discovery_doc = {
                 "txHash": encode_hex_as_bytes(tx_hash),
@@ -1625,7 +2241,48 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 "discoveryTime": block_time,
                 "timestamp": datetime.now(),
             }
-            await info.storage.insert_one("discoveries", penalty_discovery_doc)
+            # Check if the document already exists
+            doc_cursor = await info.storage.find(
+                "discoveries",
+                {
+                    "txHash": encode_hex_as_bytes(tx_hash),
+                    "adventurerId": check_exists_int(
+                        idp.adventurer_state["adventurer_id"]
+                    ),
+                    "adventurerHealth": encode_int_as_bytes(
+                        idp.adventurer_state["adventurer"]["health"]
+                    ),
+                    "discoveryType": check_exists_int(0),
+                    "subDiscoveryType": check_exists_int(0),
+                    "outputAmount": encode_int_as_bytes(0),
+                    "obstacle": check_exists_int(0),
+                    "obstacleLevel": check_exists_int(0),
+                    "dodgedObstacle": encode_int_as_bytes(0),
+                    "damageTaken": encode_int_as_bytes(0),
+                    "damageLocation": check_exists_int(0),
+                    "xpEarnedAdventurer": check_exists_int(0),
+                    "xpEarnedItems": check_exists_int(0),
+                    "entity": check_exists_int(0),
+                    "entityLevel": check_exists_int(0),
+                    "entityHealth": encode_int_as_bytes(0),
+                    "special1": check_exists_int(0),
+                    "special2": check_exists_int(0),
+                    "special3": check_exists_int(0),
+                    "ambushed": check_exists_int(0),
+                    "seed": encode_int_as_bytes(0),
+                    "discoveryTime": block_time,
+                },
+            )
+            doc_exists = True
+            try:
+                doc = next(doc_cursor)
+            except StopIteration:
+                doc_exists = False
+
+            if not doc_exists:  # If the document does not exist, insert it
+                await info.storage.insert_one("discoveries", penalty_discovery_doc)
+            else:
+                pass
         print(
             "- [idle damage penalty]",
             idp.adventurer_state["adventurer_id"],

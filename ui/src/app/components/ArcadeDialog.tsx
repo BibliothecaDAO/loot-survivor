@@ -58,7 +58,7 @@ export const ArcadeDialog = () => {
         </div>
 
         <h5>Existing</h5>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 ">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 overflow-y-auto ">
           {arcadeConnectors().map((account, index) => {
             return (
               <ArcadeAccountCard
@@ -129,8 +129,8 @@ export const ArcadeAccountCard = ({
   };
 
   return (
-    <div className="border border-terminal-green p-3 hover:bg-terminal-green hover:text-terminal-black ">
-      <div className="text-left flex justify-between text-xl mb-4">
+    <div className="border border-terminal-green p-3 hover:bg-terminal-green hover:text-terminal-black">
+      <div className="text-left flex justify-between text-sm sm:text-xl mb-4">
         {account.id} <span>{balance}</span>{" "}
       </div>
       <div className=" flex justify-between">
