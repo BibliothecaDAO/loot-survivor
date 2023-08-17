@@ -79,8 +79,7 @@ export default function Home() {
   const { disconnect, connectors } = useConnectors();
   const { chain } = useNetwork();
   const { provider } = useProvider();
-  const [userDisconnect, setUserDisconnect] = useState(false);
-  const { account, status } = useAccount();
+  const { account, status, isConnected } = useAccount();
   const isMuted = useUIStore((state) => state.isMuted);
   const setIsMuted = useUIStore((state) => state.setIsMuted);
   const [introComplete, setIntroComplete] = useState(false);
@@ -177,12 +176,6 @@ export default function Home() {
   }, [account, setConnected]);
 
   useEffect(() => {
-    if (connected) {
-      setUserDisconnect(false);
-    }
-  }, [connected]);
-
-  useEffect(() => {
     const isWrongNetwork = chain?.id !== constants.StarknetChainId.SN_GOERLI;
     setIsWrongNetwork(isWrongNetwork);
   }, [chain, provider, connected]);
@@ -229,7 +222,7 @@ export default function Home() {
     false,
   ];
 
-  if (userDisconnect) {
+  if (!isConnected && introComplete) {
     return <WalletSelect />;
   }
 
@@ -301,7 +294,7 @@ export default function Home() {
                 {displayCart && (
                   <TransactionCart buttonRef={displayCartButtonRef} />
                 )}
-                <div className="sm:hidden">
+                <div className="flex items-center sm:hidden">
                   <button
                     className="w-6 h-6"
                     onClick={() => {
@@ -331,7 +324,6 @@ export default function Home() {
                       disconnect();
                       resetData();
                       setAdventurer(NullAdventurer);
-                      setUserDisconnect(true);
                     }}
                   >
                     {account ? displayAddress(account.address) : "Connect"}

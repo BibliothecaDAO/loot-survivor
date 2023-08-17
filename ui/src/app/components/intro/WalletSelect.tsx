@@ -93,14 +93,14 @@ const WalletSelect = ({}: WalletSelectProps) => {
             </div>
           </>
         ) : (
-          <>
+          <div className="flex flex-col gap-5">
             <WalletTutorial />
             <div className="flex justify-center">
               <Button size={"sm"} onClick={() => setScreen("wallet")}>
                 Back
               </Button>
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>

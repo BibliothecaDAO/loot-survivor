@@ -1,29 +1,23 @@
 import VerticalKeyboardControl from "../menu//VerticalMenu";
-import {
-  CartIcon,
-  MuteIcon,
-  VolumeIcon,
-  EncountersIcon,
-  LedgerIcon,
-} from "../icons/Icons";
-import { GuideIcon } from "../icons/Icons";
+import { MuteIcon, VolumeIcon, LedgerIcon } from "../icons/Icons";
 import { ChatIcon } from "../icons/Icons";
 import useUIStore from "../../hooks/useUIStore";
 import { displayAddress } from "@/app/lib/utils";
 import { useConnectors } from "@starknet-react/core";
 import { useAccount } from "@starknet-react/core";
-import { ButtonData } from "@/app/types";
+import { ButtonData, NullAdventurer } from "@/app/types";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
 export default function Settings() {
   const isMuted = useUIStore((state) => state.isMuted);
   const setIsMuted = useUIStore((state) => state.setIsMuted);
-  const setScreen = useUIStore((state) => state.setScreen);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
-  const displayCart = useUIStore((state) => state.displayCart);
-  const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { disconnect } = useConnectors();
   const { account } = useAccount();
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
+  const { resetData } = useQueriesStore();
 
   const buttonsData: ButtonData[] = [
     {
@@ -78,7 +72,11 @@ export default function Settings() {
     {
       id: 5,
       label: displayAddress(account?.address ?? ""),
-      action: () => disconnect(),
+      action: () => {
+        disconnect();
+        resetData();
+        setAdventurer(NullAdventurer);
+      },
       variant: "default",
     },
   ];

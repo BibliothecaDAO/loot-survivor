@@ -421,7 +421,7 @@ export const AdventurerForm = ({
     return (
       <>
         <div className="w-full text-center p-4 uppercase 2xl:flex 2xl:flex-col 2xl:gap-10 2xl:h-[700px]">
-          <h4 className="2xl:text-5xl">Enter adventurer name</h4>
+          <h3 className="2xl:text-5xl">Enter adventurer name</h3>
           <div className="items-center flex flex-col gap-2">
             <input
               type="text"

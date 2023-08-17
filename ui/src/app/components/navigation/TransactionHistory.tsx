@@ -37,7 +37,7 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
         transactions ? (
           <div
             ref={wrapperRef}
-            className="absolute m-auto z-10 right-8 sm:right-16 top-20 sm:top-32 w-1/4 sm:w-[650px] h-3/4 p-4 bg-terminal-black border border-terminal-green overflow-y-auto"
+            className="absolute m-auto z-10 right-[50px] w-[300px] h-[400px] sm:right-16 top-20 sm:top-32 w-1/4 sm:w-[650px] h-3/4 p-4 bg-terminal-black border border-terminal-green overflow-y-auto"
           >
             <div className="flex flex-row justify-between">
               <p className="text-2xl">Ledger</p>
@@ -88,7 +88,7 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                             </p>
                             {/* </div> */}
                             <div className="mr-4 text-xs sm:text-lg">
-                              Hash:{" "}
+                              <span className="hidden sm:block">Hash:</span>
                               <a
                                 href={`https://goerli.voyager.online/tx/${padAddress(
                                   tx.hash

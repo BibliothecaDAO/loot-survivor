@@ -60,7 +60,7 @@ const LiveLeaderboardTable = ({ itemsPerPage }: LiveLeaderboardTableProps) => {
     <div className="sm:w-1/2 flex flex-col gap-5 sm:gap-0 sm:flex-row justify-between w-full">
       <div className="flex flex-col w-full sm:mb-4 sm:mb-0 sm:mr-4 flex-grow-2 p-2 gap-2">
         <h4 className="text-center text-2xl m-0">Live Leaderboard</h4>
-        <table className="w-full sm:text-xl border border-terminal-green text-lg">
+        <table className="w-full text-lg sm:text-xl border border-terminal-green">
           <thead className="border border-terminal-green">
             <tr>
               <th className="p-1">Rank</th>
