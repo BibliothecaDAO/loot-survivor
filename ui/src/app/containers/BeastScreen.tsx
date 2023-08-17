@@ -161,7 +161,7 @@ export default function BeastScreen() {
   const fleeButtonsData: ButtonData[] = [
     {
       id: 1,
-      label: "SINGLE",
+      label: adventurer?.dexterity === 0 ? "DEX TOO LOW" : "SINGLE",
       action: async () => {
         addToCalls(fleeTx(false));
         startLoading(
@@ -196,7 +196,7 @@ export default function BeastScreen() {
     },
     {
       id: 2,
-      label: "TILL DEATH",
+      label: adventurer?.dexterity === 0 ? "DEX TOO LOW" : "TILL DEATH",
       mouseEnter: handleMouseEnter,
       mouseLeave: handleMouseLeave,
       action: async () => {
