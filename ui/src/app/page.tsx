@@ -79,6 +79,8 @@ export default function Home() {
   const { disconnect, connectors } = useConnectors();
   const { chain } = useNetwork();
   const { provider } = useProvider();
+  const disconnected = useUIStore((state) => state.disconnected);
+  const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { account, status, isConnected } = useAccount();
   const isMuted = useUIStore((state) => state.isMuted);
   const setIsMuted = useUIStore((state) => state.setIsMuted);
@@ -87,8 +89,6 @@ export default function Home() {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
-  const connected = useUIStore((state) => state.connected);
-  const setConnected = useUIStore((state) => state.setConnected);
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const deathDialog = useUIStore((state) => state.deathDialog);
@@ -170,15 +170,9 @@ export default function Home() {
   }, [play, stop]);
 
   useEffect(() => {
-    if (!account?.address) {
-      setConnected(false);
-    }
-  }, [account, setConnected]);
-
-  useEffect(() => {
     const isWrongNetwork = chain?.id !== constants.StarknetChainId.SN_GOERLI;
     setIsWrongNetwork(isWrongNetwork);
-  }, [chain, provider, connected]);
+  }, [chain, provider, isConnected]);
 
   useEffect(() => {
     if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
@@ -222,7 +216,13 @@ export default function Home() {
     false,
   ];
 
-  if (!isConnected && introComplete) {
+  useEffect(() => {
+    if (isConnected) {
+      setDisconnected(false);
+    }
+  }, [isConnected]);
+
+  if (!isConnected && introComplete && disconnected) {
     return <WalletSelect />;
   }
 
@@ -324,6 +324,7 @@ export default function Home() {
                       disconnect();
                       resetData();
                       setAdventurer(NullAdventurer);
+                      setDisconnected(true);
                     }}
                   >
                     {account ? displayAddress(account.address) : "Connect"}

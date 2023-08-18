@@ -72,7 +72,6 @@ export const AdventurerForm = ({
   const gameData = new GameData();
   const [step, setStep] = useState(1);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const setConnected = useUIStore((state) => state.setConnected);
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
 
   const walletConnectors = () =>
@@ -125,21 +124,6 @@ export const AdventurerForm = ({
   const getRandomNumber = (to: number) => {
     return (Math.floor(Math.random() * to) + 1).toString();
   };
-
-  useEffect(() => {
-    if (
-      (account as any)?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz" ||
-      (account as any)?.provider?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz"
-    ) {
-      setConnected(true);
-    }
-
-    if (account) {
-      setConnected(true);
-    }
-  }, [account, setConnected]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>

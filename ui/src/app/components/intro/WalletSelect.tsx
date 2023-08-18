@@ -11,22 +11,6 @@ const WalletSelect = ({}: WalletSelectProps) => {
   const { connectors, connect } = useConnectors();
   const { account } = useAccount();
   const [screen, setScreen] = useState("wallet");
-  const setConnected = useUIStore((state) => state.setConnected);
-
-  useEffect(() => {
-    if (
-      (account as any)?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz" ||
-      (account as any)?.provider?.baseUrl ==
-        "https://survivor-indexer.bibliothecadao.xyz"
-    ) {
-      setConnected(true);
-    }
-
-    if (account) {
-      setConnected(true);
-    }
-  }, [account, setConnected]);
 
   if (!connectors) return <div></div>;
 

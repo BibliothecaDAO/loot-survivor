@@ -18,8 +18,8 @@ export type ScreenPage =
   | "tutorial";
 
 type State = {
-  connected: boolean;
-  setConnected: (value: boolean) => void;
+  disconnected: boolean;
+  setDisconnected: (value: boolean) => void;
   isWrongNetwork: boolean;
   setIsWrongNetwork: (value: boolean) => void;
   onboarded: boolean;
@@ -57,8 +57,8 @@ type State = {
 };
 
 const useUIStore = create<State>((set) => ({
-  connected: false,
-  setConnected: (value) => set({ connected: value }),
+  disconnected: false,
+  setDisconnected: (value) => set({ disconnected: value }),
   isWrongNetwork: false,
   setIsWrongNetwork: (value) => set({ isWrongNetwork: value }),
   onboarded: false,

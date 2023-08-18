@@ -14,8 +14,9 @@ export default function Settings() {
   const setIsMuted = useUIStore((state) => state.setIsMuted);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
+  const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { disconnect } = useConnectors();
-  const { account } = useAccount();
+  const { account, isConnected } = useAccount();
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const { resetData } = useQueriesStore();
 
@@ -71,11 +72,12 @@ export default function Settings() {
     },
     {
       id: 5,
-      label: displayAddress(account?.address ?? ""),
+      label: isConnected ? displayAddress(account?.address ?? "") : "Connect",
       action: () => {
         disconnect();
         resetData();
         setAdventurer(NullAdventurer);
+        setDisconnected(true);
       },
       variant: "default",
     },
