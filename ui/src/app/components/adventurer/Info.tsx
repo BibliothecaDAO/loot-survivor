@@ -135,7 +135,7 @@ export default function Info({
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
 
   return (
-    <div className="border border-terminal-green xl:h-[500px]">
+    <div className="border border-terminal-green xl:h-[500px] 2xl:h-full">
       {!isLoading.itemsByAdventurerQuery ? (
         <div className="flex flex-row flex-wrap gap-2 p-1">
           <div className="flex flex-col w-full sm:p-2 uppercase">
@@ -189,7 +189,7 @@ export default function Info({
                   </div>
                 ))}
               </div>
-              <div className="w-full flex flex-col 2xl:flex 2xl:flex-col sm:gap-1 2xl:gap-0 text-xs xl:h-[320px] xl:overflow-y-auto 2xl:h-full">
+              <div className="w-full flex flex-col 2xl:flex 2xl:flex-col sm:gap-1 2xl:gap-0 text-xs xl:h-[320px] xl:overflow-y-auto 2xl:h-fit">
                 {bodyParts.map((part) => (
                   <ItemDisplay
                     item={
