@@ -9,7 +9,7 @@ interface WalletSelectProps {}
 
 const WalletSelect = ({}: WalletSelectProps) => {
   const { connectors, connect } = useConnectors();
-  const { account } = useAccount();
+  const setDisconnected = useUIStore((state) => state.setDisconnected);
   const [screen, setScreen] = useState("wallet");
 
   if (!connectors) return <div></div>;
@@ -79,9 +79,12 @@ const WalletSelect = ({}: WalletSelectProps) => {
         ) : (
           <div className="flex flex-col gap-5">
             <WalletTutorial />
-            <div className="flex justify-center">
+            <div className="flex flex-row gap-5 justify-center">
               <Button size={"sm"} onClick={() => setScreen("wallet")}>
                 Back
+              </Button>
+              <Button size={"sm"} onClick={() => setDisconnected(false)}>
+                Continue Anyway
               </Button>
             </div>
           </div>
