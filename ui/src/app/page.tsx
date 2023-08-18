@@ -379,7 +379,7 @@ export default function Home() {
                   <MobileHeader />
                 </div>
 
-                <div className="overflow-y-auto h-[440px] sm:h-full">
+                <div className="overflow-y-auto h-[460px] sm:h-full">
                   {screen === "start" && <AdventurerScreen />}
                   {screen === "play" && <ActionsScreen />}
                   {screen === "inventory" && <InventoryScreen />}
