@@ -379,6 +379,7 @@ export default function Home() {
                   <MobileHeader />
                 </div>
 
+                {/* <div className="overflow-y-auto h-[460px] sm:h-full"> */}
                 {screen === "start" && <AdventurerScreen />}
                 {screen === "play" && <ActionsScreen />}
                 {screen === "inventory" && <InventoryScreen />}
@@ -390,6 +391,7 @@ export default function Home() {
                 {screen === "settings" && <Settings />}
                 {screen === "player" && <Player />}
                 {screen === "wallet" && <WalletSelect />}
+                {/* </div> */}
               </>
             </div>
           ) : null}
