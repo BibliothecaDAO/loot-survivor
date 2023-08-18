@@ -220,7 +220,7 @@ export const ItemDisplay = ({
                       onClick={() => handleDrop(item.item ?? "")}
                       disabled={checkDropping(item.item ?? "")}
                     >
-                      <DownArrowIcon className="w-3 h-3lg:w-4 lg:h-4" />
+                      <DownArrowIcon className="w-3 h-3 lg:w-4 lg:h-4" />
                     </Button>
                   )}
                 </span>
