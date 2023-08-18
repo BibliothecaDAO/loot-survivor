@@ -461,7 +461,7 @@ export const AdventurerForm = ({
             />
 
             {!isWrongNetwork && (
-              <div className="text-xs sm:text-xl leading-loose z-10">
+              <div className="absolute text-xs sm:text-xl leading-normal sm:leading-loose z-10 top-1/4">
                 <span className="sm:hidden">
                   <TxActivity />
                 </span>
