@@ -191,20 +191,18 @@ export default function Info({
               </div>
               <div className="w-full flex flex-col 2xl:flex 2xl:flex-col sm:gap-1 2xl:gap-0 text-xs flex-wrap">
                 {bodyParts.map((part) => (
-                  <div className="flex-wrap" key={part}>
-                    <ItemDisplay
-                      item={
-                        items.find(
-                          (item: Item) =>
-                            item.item ===
-                              formatAdventurer[part.toLowerCase()] &&
-                            item.equipped
-                        ) || NullItem
-                      }
-                      itemSlot={part}
-                      handleDrop={handleDropItems}
-                    />
-                  </div>
+                  <ItemDisplay
+                    item={
+                      items.find(
+                        (item: Item) =>
+                          item.item === formatAdventurer[part.toLowerCase()] &&
+                          item.equipped
+                      ) || NullItem
+                    }
+                    itemSlot={part}
+                    handleDrop={handleDropItems}
+                    key={part}
+                  />
                 ))}
               </div>
             </div>
