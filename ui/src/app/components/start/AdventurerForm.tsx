@@ -470,6 +470,9 @@ export const AdventurerForm = ({
 
             {!isWrongNetwork && (
               <div className="text-xs sm:text-xl leading-loose z-10">
+                <span className="sm:hidden">
+                  <TxActivity />
+                </span>
                 <TypeAnimation
                   sequence={[battle]}
                   wrapper="span"
@@ -481,7 +484,9 @@ export const AdventurerForm = ({
             )}
 
             <div className="absolute top-1/2 left-0 right-0 flex flex-col items-center gap-4 z-10">
-              <TxActivity />
+              <span className="hidden sm:block">
+                <TxActivity />
+              </span>
               {!account ? (
                 <>
                   <div className="flex flex-col justify-between">
