@@ -379,17 +379,19 @@ export default function Home() {
                   <MobileHeader />
                 </div>
 
-                {screen === "start" && <AdventurerScreen />}
-                {screen === "play" && <ActionsScreen />}
-                {screen === "inventory" && <InventoryScreen />}
-                {screen === "leaderboard" && <LeaderboardScreen />}
-                {screen === "upgrade" && <UpgradeScreen />}
-                {screen === "profile" && <Profile />}
-                {screen === "encounters" && <EncountersScreen />}
-                {screen === "guide" && <GuideScreen />}
-                {screen === "settings" && <Settings />}
-                {screen === "player" && <Player />}
-                {screen === "wallet" && <WalletSelect />}
+                <div className="overflow-y-auto h-[425px] sm:h-full">
+                  {screen === "start" && <AdventurerScreen />}
+                  {screen === "play" && <ActionsScreen />}
+                  {screen === "inventory" && <InventoryScreen />}
+                  {screen === "leaderboard" && <LeaderboardScreen />}
+                  {screen === "upgrade" && <UpgradeScreen />}
+                  {screen === "profile" && <Profile />}
+                  {screen === "encounters" && <EncountersScreen />}
+                  {screen === "guide" && <GuideScreen />}
+                  {screen === "settings" && <Settings />}
+                  {screen === "player" && <Player />}
+                  {screen === "wallet" && <WalletSelect />}
+                </div>
               </>
             </div>
           ) : null}
