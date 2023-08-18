@@ -160,25 +160,25 @@ export const ItemDisplay = ({
                   </span>
                 </span>
                 <span className="flex flex-row items-center gap-1">
-                  {/* {(screen == "play" ||
+                  {(screen == "play" ||
                     screen == "upgrade" ||
-                    screen == "player") && ( */}
-                  <Button
-                    variant={"contrast"}
-                    size={"xxs"}
-                    className="p-1"
-                    onClick={() => {
-                      setScreen("inventory");
-                      setInventorySelected(
-                        parseInt(
-                          getKeyFromValue(gameData.SLOTS, slot ?? "") ?? ""
-                        ) ?? 0
-                      );
-                    }}
-                  >
-                    <SwapIcon className="w-3 h-3 lg:w-4 lg:h-4" />
-                  </Button>
-                  {/* )} */}
+                    screen == "player") && (
+                    <Button
+                      variant={"contrast"}
+                      size={"xxs"}
+                      className="p-1"
+                      onClick={() => {
+                        setScreen("inventory");
+                        setInventorySelected(
+                          parseInt(
+                            getKeyFromValue(gameData.SLOTS, slot ?? "") ?? ""
+                          ) ?? 0
+                        );
+                      }}
+                    >
+                      <SwapIcon className="w-3 h-3 lg:w-4 lg:h-4" />
+                    </Button>
+                  )}
                   {inventory && (
                     <>
                       <div className="sm:hidden">
@@ -209,20 +209,20 @@ export const ItemDisplay = ({
                       </div>
                     </>
                   )}
-                  {/* {(screen == "play" ||
+                  {(screen == "play" ||
                     screen == "upgrade" ||
                     screen == "player" ||
-                    screen == "inventory") && ( */}
-                  <Button
-                    variant={"contrast"}
-                    size={"xxs"}
-                    className="p-1"
-                    onClick={() => handleDrop(item.item ?? "")}
-                    disabled={checkDropping(item.item ?? "")}
-                  >
-                    <DownArrowIcon className="w-3 h-3lg:w-4 lg:h-4" />
-                  </Button>
-                  {/* )} */}
+                    screen == "inventory") && (
+                    <Button
+                      variant={"contrast"}
+                      size={"xxs"}
+                      className="p-1"
+                      onClick={() => handleDrop(item.item ?? "")}
+                      disabled={checkDropping(item.item ?? "")}
+                    >
+                      <DownArrowIcon className="w-3 h-3lg:w-4 lg:h-4" />
+                    </Button>
+                  )}
                 </span>
               </span>
             </div>
