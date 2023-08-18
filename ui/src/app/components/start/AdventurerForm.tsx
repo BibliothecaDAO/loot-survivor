@@ -420,7 +420,7 @@ export const AdventurerForm = ({
   } else if (step === 3) {
     return (
       <>
-        <div className="w-full text-center p-4 uppercase 2xl:flex 2xl:flex-col 2xl:gap-10 2xl:h-[700px]">
+        <div className="sm:w-3/4 text-center p-4 uppercase 2xl:flex 2xl:flex-col 2xl:gap-10 2xl:h-[700px]">
           <h3 className="2xl:text-5xl">Enter adventurer name</h3>
           <div className="items-center flex flex-col gap-2">
             <input
@@ -432,7 +432,15 @@ export const AdventurerForm = ({
               maxLength={13}
             />
           </div>
-          <div className="flex flex-row justify-between">
+          <div className="sm:hidden flex flex-row justify-between">
+            <Button size={"sm"} onClick={handleBack}>
+              Back
+            </Button>
+            <Button size={"sm"} onClick={() => handleNameEntry(formData.name)}>
+              Next
+            </Button>
+          </div>
+          <div className="hidden sm:flex flex-row justify-between">
             <Button size={"lg"} onClick={handleBack}>
               Back
             </Button>
@@ -508,18 +516,15 @@ export const AdventurerForm = ({
                   </div>
                 </>
               ) : (
-                <>
-                  {/* <TxActivity /> */}
-                  <form onSubmit={handleSubmit}>
-                    <Button
-                      type="submit"
-                      size={"xl"}
-                      disabled={!formFilled || !account || isWrongNetwork}
-                    >
-                      {formFilled ? "Start Game!!" : "Fill details"}
-                    </Button>
-                  </form>
-                </>
+                <form onSubmit={handleSubmit}>
+                  <Button
+                    type="submit"
+                    size={"xl"}
+                    disabled={!formFilled || !account || isWrongNetwork}
+                  >
+                    {formFilled ? "Start Game!!" : "Fill details"}
+                  </Button>
+                </form>
               )}
             </div>
             <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">

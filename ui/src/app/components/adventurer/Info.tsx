@@ -182,14 +182,14 @@ export default function Info({
                 {attributes.map((attribute) => (
                   <div
                     key={attribute.key}
-                    className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black mb-2"
+                    className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black mb-1 sm:mb-2"
                   >
                     {attribute.key}
                     <span className="pl-1">{attribute.value}</span>
                   </div>
                 ))}
               </div>
-              <div className="w-full flex flex-col 2xl:flex 2xl:flex-col gap-1 2xl:gap-0 text-xs flex-wrap">
+              <div className="w-full flex flex-col 2xl:flex 2xl:flex-col sm:gap-1 2xl:gap-0 text-xs flex-wrap">
                 {bodyParts.map((part) => (
                   <div className="flex-wrap" key={part}>
                     <ItemDisplay
