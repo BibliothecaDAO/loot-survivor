@@ -93,9 +93,7 @@ export default function RootLayout({
           alt="crt green mask"
           className="absolute w-full pointer-events-none crt-frame hidden sm:block"
         />
-        <ApolloProvider client={client}>
-          {children}
-        </ApolloProvider>
+        <ApolloProvider client={client}>{children}</ApolloProvider>
       </body>
     </html>
   );
