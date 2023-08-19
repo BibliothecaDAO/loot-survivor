@@ -60,7 +60,7 @@ export default function LeaderboardScreen() {
     );
 
   return (
-    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between">
+    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden">
       <div className={`${showScores ? "hidden " : ""}sm:block w-full sm:w-1/2`}>
         <LiveTable itemsPerPage={itemsPerPage} />
       </div>

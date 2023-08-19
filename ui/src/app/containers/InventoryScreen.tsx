@@ -318,7 +318,7 @@ export default function InventoryScreen() {
                 items of Tier 5 offer the most basic value.
               </p>
             </div>
-            <div className="flex flex-col overflow-y-auto h-[450px] sm:h-[550px]">
+            <div className="flex flex-col overflow-y-auto h-[450px] sm:h-[360px] 2xl:h-full 2xl:overflow-y-hidden">
               {selectedItems.length ? (
                 selectedItems.map((item: Item, index: number) => {
                   const itemId =

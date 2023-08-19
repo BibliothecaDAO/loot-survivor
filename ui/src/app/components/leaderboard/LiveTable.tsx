@@ -60,7 +60,7 @@ const LiveLeaderboardTable = ({ itemsPerPage }: LiveLeaderboardTableProps) => {
     <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row justify-between w-full">
       <div className="flex flex-col w-full sm:mr-4 flex-grow-2 p-2 gap-2">
         <h4 className="text-center text-2xl m-0">Live Leaderboard</h4>
-        <table className="w-full text-lg sm:text-xl border border-terminal-green">
+        <table className="w-full xl:text-lg 2xl:text-xl border border-terminal-green">
           <thead className="border border-terminal-green">
             <tr>
               <th className="p-1">Rank</th>
@@ -86,7 +86,7 @@ const LiveLeaderboardTable = ({ itemsPerPage }: LiveLeaderboardTableProps) => {
           </tbody>
         </table>
         {adventurers?.length > 10 && (
-          <div className="flex justify-center sm:mt-8">
+          <div className="flex justify-center sm:mt-8 xl:mt-2">
             <Button
               variant={"outline"}
               onClick={() => currentPage > 1 && handleClick(currentPage - 1)}
