@@ -151,7 +151,7 @@ export const ItemDisplay = ({
                 <span className="text-xxs sm:text-sm">{boost}</span>
               </div>
               <span className="flex flex-row justify-between gap-5">
-                <span className="flex whitespace-nowrap text-sm sm:text-xxs md:text-lg">
+                <span className="flex flex-row gap-1 whitespace-nowrap text-sm sm:text-xxs md:text-lg">
                   <p>{itemName}</p>
                   <span className="text-xxs sm:text-sm">
                     {slot == "Neck" || slot == "Ring"
