@@ -135,10 +135,10 @@ export default function Info({
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
 
   return (
-    <div className="border border-terminal-green xl:h-[500px] xl:overflow-y-auto 2xl:h-full">
+    <div className="border border-terminal-green xl:h-[500px]">
       {!isLoading.itemsByAdventurerQuery ? (
-        <div className="flex flex-row flex-wrap gap-2 p-1">
-          <div className="flex flex-col w-full sm:p-2 uppercase">
+        <div className="flex flex-row flex-wrap gap-2 p-1 xl:h-full">
+          <div className="flex flex-col w-full sm:p-2 uppercase xl:h-full">
             <div className="flex justify-between w-full text-xl sm:text-2xl lg:text-3xl border-b border-terminal-green">
               {formatAdventurer.name}
               <span className="flex items-center text-terminal-yellow">
@@ -177,19 +177,19 @@ export default function Info({
               <LevelBar xp={formatAdventurer.xp ?? 0} />
             </div>
 
-            <div className="flex flex-col justify-between">
+            <div className="flex flex-col w-full justify-between overflow-hidden">
               <div className="flex flex-row w-full font-semibold text-xs sm:text-sm lg:text-base">
                 {attributes.map((attribute) => (
                   <div
                     key={attribute.key}
-                    className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black mb-1 sm:mb-2"
+                    className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black  sm:mb-2"
                   >
                     {attribute.key}
                     <span className="pl-1">{attribute.value}</span>
                   </div>
                 ))}
               </div>
-              <div className="w-full flex flex-col sm:gap-1 2xl:gap-0 text-xs xl:h-[460px] 2xl:h-full">
+              <div className="w-full flex flex-col sm:gap-1 2xl:gap-0 text-xs h-full overflow-y-auto">
                 {bodyParts.map((part) => (
                   <ItemDisplay
                     item={
