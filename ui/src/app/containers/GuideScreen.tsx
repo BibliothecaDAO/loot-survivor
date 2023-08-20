@@ -59,7 +59,7 @@ export default function GuideScreen() {
   ];
 
   return (
-    <div className="h-[500px] overflow-y-auto sm:h-[650px] p-2 table-scroll text-xs sm:text-base text-center sm:text-left">
+    <div className="h-[500px] overflow-y-auto 2xl:h-[650px] p-2 table-scroll text-xs sm:text-base text-center sm:text-left">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
         <h1>Loot Survivor: A Saga of Fortitude and Death</h1>
         <a

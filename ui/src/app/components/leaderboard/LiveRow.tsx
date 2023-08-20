@@ -50,7 +50,7 @@ const LiveLeaderboardRow = ({
 
   return (
     <tr
-      className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
+      className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer xl:h-2 xl:text-lg 2xl:text-xl 2xl:h-4"
       onClick={() => {
         handleRowSelected(adventurer.id ?? 0);
         clickPlay();
@@ -84,6 +84,7 @@ const LiveLeaderboardRow = ({
             handleSlayAdventurer();
             clickPlay();
           }}
+          className="xl:h-2 2xl:h-4"
           disabled={
             idleTime < idleDeathPenaltyBlocks ||
             adventurer?.health === 0 ||
