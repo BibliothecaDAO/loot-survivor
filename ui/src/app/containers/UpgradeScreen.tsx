@@ -330,10 +330,10 @@ export default function UpgradeScreen() {
             <Info adventurer={adventurer} upgradeCost={upgradeTotalCost} />
           </div>
           {!checkTransacting ? (
-            <div className="w-full sm:w-2/3">
+            <div className="w-full sm:w-2/3 xl:h-[500px] xl:overflow-y-auto 2xl:h-full">
               <div className="flex flex-col gap-2 2xl:gap-0 h-full">
                 <div className="justify-center text-terminal-green space-x-3">
-                  <div className="text-center text-2xl md:text-xl lg:text-4xl sm:p-2 animate-pulse uppercase">
+                  <div className="text-center text-2xl md:text-xl 2xl:text-4xl xl:text-xl sm:p-2 animate-pulse uppercase">
                     Level up!
                   </div>
                   <div className="flex flex-row gap-2 justify-center text-lg sm:text-2xl text-shadow-none">
