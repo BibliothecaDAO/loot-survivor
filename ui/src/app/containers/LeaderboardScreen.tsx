@@ -50,7 +50,7 @@ export default function LeaderboardScreen() {
     txAccepted
   );
 
-  useCustomQuery("topScoresQuery", getTopScores, undefined, false);
+  useCustomQuery("topScoresQuery", getTopScores, undefined, txAccepted);
 
   if (isLoading.adventurersByXPQuery || loading)
     return (

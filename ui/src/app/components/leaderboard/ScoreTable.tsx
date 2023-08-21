@@ -58,6 +58,7 @@ const ScoreLeaderboardTable = ({
       setCurrentPage(newPage);
     }
   };
+
   return (
     <div className="flex flex-col items-center py-2 gap-2">
       <h4 className="text-2xl text-center sm:text-2xl m-0">Submitted Scores</h4>
