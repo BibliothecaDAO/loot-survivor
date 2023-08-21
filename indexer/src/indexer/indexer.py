@@ -56,7 +56,7 @@ from indexer.utils import (
 # Print apibara logs
 root_logger = logging.getLogger("apibara")
 # change to `logging.DEBUG` to print more information
-root_logger.setLevel(logging.INFO)
+root_logger.setLevel(logging.DEBUG)
 root_logger.addHandler(logging.StreamHandler())
 
 
