@@ -72,7 +72,6 @@ export const AdventurerForm = ({
   const gameData = new GameData();
   const [step, setStep] = useState(1);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const setConnected = useUIStore((state) => state.setConnected);
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
 
   const walletConnectors = () =>
@@ -125,21 +124,6 @@ export const AdventurerForm = ({
   const getRandomNumber = (to: number) => {
     return (Math.floor(Math.random() * to) + 1).toString();
   };
-
-  useEffect(() => {
-    if (
-      (account as any)?.baseUrl ==
-      "https://survivor-indexer.bibliothecadao.xyz" ||
-      (account as any)?.provider?.baseUrl ==
-      "https://survivor-indexer.bibliothecadao.xyz"
-    ) {
-      setConnected(true);
-    }
-
-    if (account) {
-      setConnected(true);
-    }
-  }, [account, setConnected]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -219,7 +203,7 @@ export const AdventurerForm = ({
     }
   }, [formData]);
 
-  const handleClassSelection = (classType: string) => {
+  const handleClassSelection = (classType: string | number) => {
     if (classType === "Warrior") {
       setFormData({
         ...formData,
@@ -246,13 +230,23 @@ export const AdventurerForm = ({
         startingIntelligence: "1",
         startingCharisma: "3",
       });
-    } else {
+    } else if (classType === "Scout") {
       setFormData({
         ...formData,
         class: classType,
         startingDexterity: "2",
         startingWisdom: "2",
         startingIntelligence: "2",
+      });
+    } else {
+      setFormData({
+        ...formData,
+        startingDexterity: [],
+        startingWisdom: [],
+        startingIntelligence: [],
+        startingCharisma: [],
+        startingStrength: [],
+        startingVitality: [],
       });
     }
     setStep(step + 1);
@@ -328,15 +322,17 @@ export const AdventurerForm = ({
   if (step === 1) {
     return (
       <>
-        <div className="w-full sm:p-8">
-          <h3 className="uppercase text-center">Choose your class</h3>
-          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-5 sm:gap-20">
+        <div className="w-full sm:p-8 md:p-4 2xl:flex 2xl:flex-col 2xl:gap-20 2xl:h-[700px]">
+          <h3 className="uppercase text-center 2xl:text-5xl">
+            Choose your class
+          </h3>
+          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-5 md:gap-5 lg:gap-10 2xl:gap-5 2xl:justify-center">
             {classes.map((classType) => (
               <div
                 key={classType.name}
-                className="flex flex-col items-center h-full justify-between border sm:w-56 border-terminal-green"
+                className="flex flex-col items-center justify-between border sm:w-56 md:w-48 2xl:w-64 border-terminal-green"
               >
-                <div className="relative w-28 h-28 sm:w-56 sm:h-56">
+                <div className="relative w-28 h-28 sm:w-56 sm:h-56 md:h-40 2xl:h-64 2xl:w-64">
                   <Image
                     src={classType.image}
                     fill={true}
@@ -346,7 +342,7 @@ export const AdventurerForm = ({
                     }}
                   />
                 </div>
-                <div className="flex items-center p-2 sm:pb-4 h-10 sm:h-20 text-center text-xxs sm:text-base">
+                <div className="flex items-center p-2 sm:pb-4 h-10 sm:h-20 md:h-16 text-center text-xxs sm:text-base md:text-sm">
                   <p className="ml-2">{classType.description}</p>
                 </div>
                 <Button
@@ -364,15 +360,17 @@ export const AdventurerForm = ({
   } else if (step === 2) {
     return (
       <>
-        <div className="w-full sm:p-8">
-          <h3 className="uppercase text-center">Choose your weapon</h3>
-          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-5 sm:gap-20">
+        <div className="w-full sm:p-8 md:p-4 2xl:flex 2xl:flex-col 2xl:gap-20 2xl:h-[700px]">
+          <h3 className="uppercase text-center 2xl:text-5xl">
+            Choose your weapon
+          </h3>
+          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-2 sm:gap-20 md:gap-5">
             {weapons.map((weapon) => (
               <div
                 key={weapon.name}
-                className="flex flex-col items-center h-full justify-between border sm:w-56 border-terminal-green"
+                className="flex flex-col items-center justify-between border sm:w-56 md:w-48 2xl:h-64 2xl:w-64 border-terminal-green"
               >
-                <div className="relative w-28 h-28 sm:w-56 sm:h-56">
+                <div className="relative w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52 2xl:h-64 2xl:w-64">
                   <Image
                     src={weapon.image}
                     fill={true}
@@ -382,7 +380,7 @@ export const AdventurerForm = ({
                     }}
                   />
                 </div>
-                <div className="flex items-center pb-2 sm:pb-4 text-base sm:text-md">
+                <div className="flex items-center pb-2 sm:pb-2 md:pb-4 text-base sm:text-md">
                   {weapon.icon}
                   <p className="ml-2">{weapon.description}</p>
                 </div>
@@ -406,23 +404,31 @@ export const AdventurerForm = ({
   } else if (step === 3) {
     return (
       <>
-        <div className="w-full text-center sm:w-96 border border-terminal-green p-4 uppercase">
-          <h4>Enter adventurer name</h4>
+        <div className="sm:w-3/4 text-center p-4 uppercase 2xl:flex 2xl:flex-col 2xl:gap-10 2xl:h-[700px]">
+          <h3 className="2xl:text-5xl">Enter adventurer name</h3>
           <div className="items-center flex flex-col gap-2">
             <input
               type="text"
               name="name"
               onChange={handleChange}
-              className="p-1 m-2 bg-terminal-black border border-terminal-green animate-pulse transform"
+              className="p-1 m-2 2xl:h-16 2xl:w-64 2xl:text-4xl bg-terminal-black border border-terminal-green animate-pulse transform"
               onKeyDown={handleKeyDown}
               maxLength={13}
             />
           </div>
-          <div className="flex flex-row justify-between">
-            <Button size={"xs"} onClick={handleBack}>
+          <div className="sm:hidden flex flex-row justify-between">
+            <Button size={"sm"} onClick={handleBack}>
               Back
             </Button>
-            <Button size={"xs"} onClick={() => handleNameEntry(formData.name)}>
+            <Button size={"sm"} onClick={() => handleNameEntry(formData.name)}>
+              Next
+            </Button>
+          </div>
+          <div className="hidden sm:flex flex-row justify-between">
+            <Button size={"lg"} onClick={handleBack}>
+              Back
+            </Button>
+            <Button size={"lg"} onClick={() => handleNameEntry(formData.name)}>
               Next
             </Button>
           </div>
@@ -448,14 +454,18 @@ export const AdventurerForm = ({
           )}
           <div className="flex flex-col h-full">
             <Image
-              className="mx-auto border border-terminal-green absolute  object-cover py-4 px-8"
+              className="mx-auto border border-terminal-green absolute  object-cover sm:py-4 sm:px-8"
               src={"/scenes/intro/beast.png"}
               alt="adventurer facing beast"
               fill
             />
 
+            <span className="absolute sm:hidden top-0">
+              <TxActivity />
+            </span>
+
             {!isWrongNetwork && (
-              <div className="text-xs sm:text-xl leading-loose z-10">
+              <div className="absolute text-xs sm:text-xl leading-normal sm:leading-loose z-10 top-1/4">
                 <TypeAnimation
                   sequence={[battle]}
                   wrapper="span"
@@ -465,7 +475,11 @@ export const AdventurerForm = ({
                 />
               </div>
             )}
+
             <div className="absolute top-1/2 left-0 right-0 flex flex-col items-center gap-4 z-10">
+              <span className="hidden sm:block">
+                <TxActivity />
+              </span>
               {!account ? (
                 <>
                   <div className="flex flex-col justify-between">
@@ -487,20 +501,15 @@ export const AdventurerForm = ({
                   </div>
                 </>
               ) : (
-                <>
-                  <div className="mb-10 sm:m-0">
-                    <TxActivity />
-                  </div>
-                  <form onSubmit={handleSubmit}>
-                    <Button
-                      type="submit"
-                      size={"xl"}
-                      disabled={!formFilled || !account || isWrongNetwork}
-                    >
-                      {formFilled ? "Start Game!!" : "Fill details"}
-                    </Button>
-                  </form>
-                </>
+                <form onSubmit={handleSubmit}>
+                  <Button
+                    type="submit"
+                    size={"xl"}
+                    disabled={!formFilled || !account || isWrongNetwork}
+                  >
+                    {formFilled ? "Start Game!!" : "Fill details"}
+                  </Button>
+                </form>
               )}
             </div>
             <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">

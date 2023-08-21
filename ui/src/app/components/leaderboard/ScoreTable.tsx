@@ -58,12 +58,13 @@ const ScoreLeaderboardTable = ({
       setCurrentPage(newPage);
     }
   };
+
   return (
-    <div className="hidden sm:block sm:w-1/2 flex flex-col items-center py-2">
-      <h4 className="text-lg text-center sm:text-2xl m-0">Submitted Scores</h4>
+    <div className="flex flex-col items-center py-2 gap-2">
+      <h4 className="text-2xl text-center sm:text-2xl m-0">Submitted Scores</h4>
       {scores.length > 0 ? (
-        <div className="flex flex-col">
-          <table className="w-full text-sm sm:text-xl border border-terminal-green">
+        <div className="flex flex-col w-full gap-5">
+          <table className="w-full text-lg sm:text-xl border border-terminal-green">
             <thead className="border border-terminal-green">
               <tr>
                 <th className="p-1">Rank</th>

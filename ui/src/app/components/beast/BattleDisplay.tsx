@@ -227,17 +227,8 @@ export const NotificationBattleDisplay = ({
     battleData.some(
       (data) => data.attacker === "Beast" && (data.adventurerHealth ?? 0) === 0
     );
-  const IdleDamagePenalty =
-    isArray &&
-    battleData.length == 1 &&
-    !battleData[0].beast &&
-    (battleData[0].adventurerHealth ?? 0) > 0;
-
-  const KilledByIdlePenalty =
-    isArray &&
-    battleData.length == 1 &&
-    !battleData[0].beast &&
-    (battleData[0].adventurerHealth ?? 0) == 0;
+  const IdleDeathPenalty =
+    isArray && battleData.length == 1 && !battleData[0].beast;
 
   const renderBattleNotification = () => {
     if (BeastFled) {
@@ -269,7 +260,6 @@ export const NotificationBattleDisplay = ({
         </p>
       );
     } else if (KilledByBeast) {
-      console.log("Here");
       return (
         <p>
           With a last breath you strike the {beastName || ""} with{" "}
@@ -292,11 +282,14 @@ export const NotificationBattleDisplay = ({
           />
         </div>
       );
-    } else if (IdleDamagePenalty) {
-      return <p>You were hit for 80 damage from idle penalty!</p>;
-    } else if (KilledByIdlePenalty) {
-      return <p>You were killed from 80 damage by the idle penalty!</p>;
+    } else if (IdleDeathPenalty) {
+      return <p>You were killed from the idle death penalty!</p>;
     }
   };
-  return <div>{renderBattleNotification()}</div>;
+  return (
+    <div className="flex flex-row items-center justify-between">
+      {renderBattleNotification()}
+      <SkullCrossedBonesIcon />
+    </div>
+  );
 };

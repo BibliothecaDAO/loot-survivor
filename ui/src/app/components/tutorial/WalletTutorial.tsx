@@ -8,7 +8,7 @@ export const WalletTutorial = () => {
   };
 
   return (
-    <div className="flex flex-col items-center text-center p-10">
+    <div className="flex flex-col h-[550px] sm:h-full items-center text-center p-10 overflow-y-auto">
       <h2 className="mt-0">Welcome to Loot Survivor!</h2>
 
       <p className="text-sm sm:text-lg">

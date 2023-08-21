@@ -25,7 +25,7 @@ import useLoadingStore from "../hooks/useLoadingStore";
 export default function LeaderboardScreen() {
   const itemsPerPage = 10;
   const [loading, setLoading] = useState(false);
-
+  const [showScores, setShowScores] = useState(false);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
 
   const { data, isLoading, refetch } = useQueriesStore();
@@ -50,7 +50,7 @@ export default function LeaderboardScreen() {
     txAccepted
   );
 
-  useCustomQuery("topScoresQuery", getTopScores, undefined, false);
+  useCustomQuery("topScoresQuery", getTopScores, undefined, txAccepted);
 
   if (isLoading.adventurersByXPQuery || loading)
     return (
@@ -60,9 +60,21 @@ export default function LeaderboardScreen() {
     );
 
   return (
-    <div className="flex flex-row items-cente justify-between sm:w-3/4 sm:m-auto">
-      <LiveTable itemsPerPage={itemsPerPage} />
-      <ScoreTable itemsPerPage={itemsPerPage} />
+    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden">
+      <div className={`${showScores ? "hidden " : ""}sm:block w-full sm:w-1/2`}>
+        <LiveTable itemsPerPage={itemsPerPage} />
+      </div>
+      <div className={`${showScores ? "" : "hidden "}sm:block w-full sm:w-1/2`}>
+        <ScoreTable itemsPerPage={itemsPerPage} />
+      </div>
+      <Button
+        onClick={() =>
+          showScores ? setShowScores(false) : setShowScores(true)
+        }
+        className="sm:hidden"
+      >
+        {showScores ? "Show Live Leaderboard" : "Show Scores"}
+      </Button>
     </div>
   );
 }

@@ -1,26 +1,24 @@
 import VerticalKeyboardControl from "../menu//VerticalMenu";
-import {
-  CartIcon,
-  CartIconSimple,
-  EncountersIcon,
-  LedgerIcon,
-} from "../icons/Icons";
-import { GuideIcon } from "../icons/Icons";
+import { MuteIcon, VolumeIcon, LedgerIcon } from "../icons/Icons";
 import { ChatIcon } from "../icons/Icons";
 import useUIStore from "../../hooks/useUIStore";
 import { displayAddress } from "@/app/lib/utils";
 import { useConnectors } from "@starknet-react/core";
 import { useAccount } from "@starknet-react/core";
-import { ButtonData } from "@/app/types";
+import { ButtonData, NullAdventurer } from "@/app/types";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
 export default function Settings() {
-  const setScreen = useUIStore((state) => state.setScreen);
+  const isMuted = useUIStore((state) => state.isMuted);
+  const setIsMuted = useUIStore((state) => state.setIsMuted);
   const displayHistory = useUIStore((state) => state.displayHistory);
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
-  const displayCart = useUIStore((state) => state.displayCart);
-  const setDisplayCart = useUIStore((state) => state.setDisplayCart);
+  const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { disconnect } = useConnectors();
-  const { account } = useAccount();
+  const { account, isConnected } = useAccount();
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
+  const { resetData } = useQueriesStore();
 
   const buttonsData: ButtonData[] = [
     {
@@ -41,11 +39,30 @@ export default function Settings() {
     //   icon: <GuideIcon />,
     //   action: () => setScreen("guide"),
     // },
+    //   <Button
+    //   onClick={() => {
+    //     setIsMuted(!isMuted);
+    //     clickPlay();
+    //   }}
+    //   className="hidden sm:block"
+    // >
+    //   <div className="flex items-center justify-center">
+    //     {isMuted ? (
+    //       <MuteIcon className="w-4 h-4 sm:w-6 sm:h-6" />
+    //     ) : (
+    //       <VolumeIcon className="w-4 h-4 sm:w-6 sm:h-6" />
+    //     )}
+    //   </div>
+    // </Button>
     {
       id: 3,
-      label: "Cart",
-      icon: <CartIconSimple className="w-6 h-6" />,
-      action: () => setDisplayCart(!displayCart),
+      label: isMuted ? "Unmute" : "Mute",
+      icon: isMuted ? (
+        <VolumeIcon className="w-6 h-6" />
+      ) : (
+        <MuteIcon className="w-6 h-6" />
+      ),
+      action: () => setIsMuted(!isMuted),
     },
     {
       id: 4,
@@ -55,8 +72,13 @@ export default function Settings() {
     },
     {
       id: 5,
-      label: displayAddress(account?.address ?? ""),
-      action: () => disconnect(),
+      label: isConnected ? displayAddress(account?.address ?? "") : "Connect",
+      action: () => {
+        disconnect();
+        resetData();
+        setAdventurer(NullAdventurer);
+        setDisconnected(true);
+      },
       variant: "default",
     },
   ];

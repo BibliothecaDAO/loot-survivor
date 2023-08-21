@@ -3,7 +3,6 @@ import { ItemPurchase, UpgradeSummary } from "@/app/types";
 import { GameData } from "../GameData";
 import { HealthPotionIcon } from "../icons/Icons";
 import LootIcon from "../../components/icons/LootIcon";
-import { useMediaQuery } from "react-responsive";
 
 interface UpgradeSummaryProps {
   summary: UpgradeSummary;
@@ -12,9 +11,6 @@ interface UpgradeSummaryProps {
 
 const Summary = ({ summary, attributes }: UpgradeSummaryProps) => {
   const gameData = new GameData();
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
   return (
     <div className="flex flex-col gap-5 items-center animate-pulse w-2/3">
       <h3 className="mx-auto">Upgrading</h3>
@@ -42,7 +38,12 @@ const Summary = ({ summary, attributes }: UpgradeSummaryProps) => {
             );
             return (
               <div className="flex flex-row gap-2 items-center" key={index}>
-                <LootIcon size={isMobileDevice ? "w-4" : "w-5"} type={slot} />
+                <div className="sm:hidden">
+                  <LootIcon size={"w-4"} type={slot} />
+                </div>
+                <div className="hidden sm:block">
+                  <LootIcon size={"w-5"} type={slot} />
+                </div>
                 <p className="text-lg">
                   {getValueFromKey(gameData.ITEMS, parseInt(item.item))}
                 </p>

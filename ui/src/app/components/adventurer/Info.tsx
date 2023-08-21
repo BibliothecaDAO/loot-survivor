@@ -135,11 +135,11 @@ export default function Info({
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
 
   return (
-    <div className="h-full border border-terminal-green overflow-auto">
+    <div className="border border-terminal-green xl:h-[500px] 2xl:h-full">
       {!isLoading.itemsByAdventurerQuery ? (
-        <div className="flex flex-row flex-wrap gap-2 p-1">
-          <div className="flex flex-col w-full sm:p-2 uppercase">
-            <div className="flex justify-between w-full text-xl sm:text-3xl border-b border-terminal-green">
+        <div className="flex flex-row flex-wrap gap-2 p-1 xl:h-full">
+          <div className="flex flex-col w-full sm:p-2 uppercase xl:h-full">
+            <div className="flex justify-between w-full text-xl sm:text-2xl lg:text-3xl border-b border-terminal-green">
               {formatAdventurer.name}
               <span className="flex items-center text-terminal-yellow">
                 <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
@@ -173,38 +173,36 @@ export default function Info({
               </span>
             )}
             <hr className="border-terminal-green" />
-            <div className="flex justify-between w-full sm:text-xl">
+            <div className="flex justify-between w-full sm:text-sm lg:text-xl pb-1">
               <LevelBar xp={formatAdventurer.xp ?? 0} />
             </div>
 
-            <div className="flex flex-col justify-between flex-wrap">
-              <div className="flex flex-row w-full font-semibold text-sm sm:text-base">
+            <div className="flex flex-col w-full justify-between overflow-hidden">
+              <div className="flex flex-row w-full font-semibold text-xs sm:text-sm lg:text-base">
                 {attributes.map((attribute) => (
                   <div
                     key={attribute.key}
-                    className="flex justify-between px-1 bg-terminal-green text-terminal-black w-full border border-terminal-black mb-2"
+                    className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black  sm:mb-2"
                   >
                     {attribute.key}
-                    <span className="pl-3">{attribute.value}</span>
+                    <span className="pl-1">{attribute.value}</span>
                   </div>
                 ))}
               </div>
-              <div className="flex flex-col w-full">
+              <div className="w-full flex flex-col sm:gap-1 2xl:gap-0 text-xs h-full overflow-y-auto 2xl:overflow-y-hidden">
                 {bodyParts.map((part) => (
-                  <div key={part}>
-                    <ItemDisplay
-                      item={
-                        items.find(
-                          (item: Item) =>
-                            item.item ===
-                              formatAdventurer[part.toLowerCase()] &&
-                            item.equipped
-                        ) || NullItem
-                      }
-                      itemSlot={part}
-                      handleDrop={handleDropItems}
-                    />
-                  </div>
+                  <ItemDisplay
+                    item={
+                      items.find(
+                        (item: Item) =>
+                          item.item === formatAdventurer[part.toLowerCase()] &&
+                          item.equipped
+                      ) || NullItem
+                    }
+                    itemSlot={part}
+                    handleDrop={handleDropItems}
+                    key={part}
+                  />
                 ))}
               </div>
             </div>

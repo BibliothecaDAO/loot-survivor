@@ -15,7 +15,7 @@ interface VerticalKeyboardControlProps {
   onEnterAction?: boolean;
   isActive?: boolean;
   setActiveMenu?: (value: number) => void;
-  size?: "default" | "xs" | "sm" | "lg" | "xl";
+  size?: "default" | "xs" | "sm" | "md" | "lg" | "xl";
 }
 
 const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
@@ -70,12 +70,12 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
     if (isActive) {
       window.addEventListener("keydown", handleKeyDown);
     }
-  
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isActive]);
-  
+
   // Clean up when selectedIndex or handleKeyDown changes
   useEffect(() => {
     return () => {

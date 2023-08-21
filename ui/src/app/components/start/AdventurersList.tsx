@@ -81,7 +81,7 @@ export const AdventurersList = ({
   }, [isActive, handleKeyDown]);
 
   return (
-    <div className="flex flex-col ">
+    <div className="flex flex-col items-center h-screen">
       {sortedAdventurers.length > 0 ? (
         <div className="flex flex-col gap-2 sm:flex-row w-full h-full items-center sm:items-start">
           <div className="flex flex-col w-full sm:w-1/3 overflow-y-auto mx-2 border border-terminal-green sm:border-none h-[350px] sm:h-[625px] p-1">
@@ -90,7 +90,9 @@ export const AdventurersList = ({
                 key={index}
                 ref={(ref) => (buttonRefs.current[index] = ref)}
                 className={
-                  selectedIndex === index && isActive ? "animate-pulse" : ""
+                  selectedIndex === index && isActive
+                    ? "animate-pulse text-lg sm:text-base"
+                    : "text-lg sm:text-base"
                 }
                 variant={
                   selectedIndex === index && isActive ? "default" : "ghost"
@@ -100,7 +102,7 @@ export const AdventurersList = ({
                   setSelectedIndex(index);
                 }}
               >
-                <div className="flex flex-row text-center gap-5">
+                <div className="flex flex-row items-center text-center gap-5">
                   <p>{`${adventurer.name} - ${adventurer.id}`}</p>
                   {adventurer?.health === 0 && (
                     <div className="w-4">
@@ -123,13 +125,15 @@ export const AdventurersList = ({
             )}
           </div>
           {filteredAdventurers.length > 0 && (
-            <div className="hidden sm:block sm:w-2/12 md:w-6/12 lg:w-2/3 w-full">
+            <div className="hidden sm:block sm:w-6/12 md:w-6/12 lg:w-2/3 w-full">
               <Info adventurer={filteredAdventurers[selectedIndex]} />
             </div>
           )}
         </div>
       ) : (
-        <p className="text-lg uppercase">You do not have any adventurers!</p>
+        <p className="text-lg uppercase flex-1">
+          You do not have any adventurers!
+        </p>
       )}
     </div>
   );

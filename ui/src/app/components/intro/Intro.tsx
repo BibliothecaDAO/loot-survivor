@@ -59,7 +59,6 @@ const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
 
   const renderScreen = (src: string, alt: string, sequence: any) => (
     <div className="flex w-full h-full">
-
       <Image
         className=" absolute object-cover animate-pulse"
         src={src}
@@ -68,7 +67,7 @@ const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
       />
 
       <div className="w-full z-10 pt-20">
-        <div className="text-xs sm:text-xl leading-loose z-10">
+        <div className="text-xs sm:text-xl leading-normal sm:leading-loose z-10">
           <TypeAnimation
             key={screen.toString()}
             sequence={sequence}
@@ -90,7 +89,6 @@ const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
           </Button>
         </div>
       </div>
-
     </div>
   );
 

@@ -196,7 +196,7 @@ export default function ActionsScreen() {
 
   return (
     <div className="flex flex-col sm:flex-row flex-wrap">
-      <div className="hidden sm:block sm:w-1/3">
+      <div className="hidden sm:block sm:w-1/2 lg:w-1/3">
         <Info adventurer={adventurer} />
       </div>
 

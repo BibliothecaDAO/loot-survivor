@@ -24,13 +24,9 @@ export default function Profile() {
 
   const setScreen = useUIStore((state) => state.setScreen);
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   return (
     <div className="w-full">
-      <div className="flex flex-col sm:flex-row gap-5 sm:gap-10 items-center sm:items-start justify-center">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-10 items-center sm:items-start justify-center">
         <Button
           className="animate-pulse hidden sm:block"
           onClick={() => setScreen("leaderboard")}
@@ -44,13 +40,15 @@ export default function Profile() {
           {encounters ? "Player" : "Encounters"}
         </Button>
         {!encounters ? (
-          <div className="w-full sm:w-1/3 ml-4">
+          <div className="w-full sm:w-1/3 sm:ml-4">
             <Info adventurer={adventurer} profileExists={true} />
           </div>
         ) : (
           <EncountersScreen profile={profile} />
         )}
-        {!isMobileDevice && <EncountersScreen profile={profile} />}
+        <div className="hidden sm:block">
+          <EncountersScreen profile={profile} />
+        </div>
       </div>
     </div>
   );

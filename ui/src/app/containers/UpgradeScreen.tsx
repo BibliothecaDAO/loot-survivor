@@ -147,14 +147,10 @@ export default function UpgradeScreen() {
     },
   ];
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   function renderContent() {
     const attribute = attributes.find((attr) => attr.name === selected);
     return (
-      <div className="flex sm:w-2/3 h-24 sm:h-full items-center justify-center border-l border-terminal-green p-2">
+      <div className="order-1 sm:order-2 flex sm:w-2/3 h-24 sm:h-full items-center justify-center p-auto">
         {attribute && (
           <StatAttribute upgradeHandler={handleAddUpgradeTx} {...attribute} />
         )}
@@ -214,7 +210,7 @@ export default function UpgradeScreen() {
       },
     ];
     return (
-      <div className="sm:w-1/3">
+      <div className="order-2 sm:order-1 sm:w-1/3 sm:border-r sm:border-terminal-green">
         <VerticalKeyboardControl
           buttonsData={upgradeMenu}
           onSelected={setSelected}
@@ -304,8 +300,6 @@ export default function UpgradeScreen() {
     setUpgrades({ ...ZeroUpgrade });
   };
 
-  const lastPage = isMobileDevice ? upgradeScreen == 3 : upgradeScreen == 2;
-
   const upgradesTotal = Object.values(upgrades)
     .filter((value) => value !== 0)
     .reduce((accumulator, currentValue) => accumulator + currentValue, 0);
@@ -331,15 +325,15 @@ export default function UpgradeScreen() {
   return (
     <>
       {hasStatUpgrades ? (
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2">
           <div className="w-1/3 hidden sm:block">
             <Info adventurer={adventurer} upgradeCost={upgradeTotalCost} />
           </div>
           {!checkTransacting ? (
-            <div className="w-full sm:w-2/3">
-              <div className="flex flex-col gap-2 h-full">
+            <div className="w-full sm:w-2/3 xl:h-[500px] xl:overflow-y-auto 2xl:h-full">
+              <div className="flex flex-col gap-2 2xl:gap-0 h-full">
                 <div className="justify-center text-terminal-green space-x-3">
-                  <div className="text-center text-2xl md:text-xl lg:text-4xl sm:p-2 animate-pulse uppercase">
+                  <div className="text-center text-2xl md:text-xl 2xl:text-4xl xl:text-xl sm:p-2 animate-pulse uppercase">
                     Level up!
                   </div>
                   <div className="flex flex-row gap-2 justify-center text-lg sm:text-2xl text-shadow-none">
@@ -403,18 +397,9 @@ export default function UpgradeScreen() {
                       <p className="text-xl lg:text-2xl sm:hidden">
                         Stat Upgrades
                       </p>
-                      <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border">
-                        {isMobileDevice ? (
-                          <>
-                            {renderContent()}
-                            {renderVerticalKeyboardControl()}
-                          </>
-                        ) : (
-                          <>
-                            {renderVerticalKeyboardControl()}
-                            {renderContent()}
-                          </>
-                        )}
+                      <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border sm:items-center">
+                        {renderContent()}
+                        {renderVerticalKeyboardControl()}
                       </div>
                     </div>
                   )}
@@ -433,10 +418,23 @@ export default function UpgradeScreen() {
                     </div>
                   )}
 
-                  {((!isMobileDevice && upgradeScreen === 2) ||
-                    (isMobileDevice && upgradeScreen === 3)) && (
-                    <div className="flex flex-col items-center sm:gap-2 w-full">
-                      <p className="text-xl lg:text-2xl sm:hidden">
+                  {upgradeScreen === 2 && (
+                    <div className="hidden sm:flex flex-col items-center sm:gap-2 w-full">
+                      <p className="text-xl text-center lg:text-2xl sm:hidden">
+                        Loot Fountain
+                      </p>
+                      <MarketplaceScreen
+                        upgradeTotalCost={upgradeTotalCost}
+                        purchaseItems={purchaseItems}
+                        setPurchaseItems={setPurchaseItems}
+                        upgradeHandler={handleAddUpgradeTx}
+                        totalCharisma={totalCharisma}
+                      />
+                    </div>
+                  )}
+                  {upgradeScreen === 3 && (
+                    <div className="sm:hidden flex-col items-center sm:gap-2 w-full">
+                      <p className="text-xl text-center lg:text-2xl sm:hidden">
                         Loot Fountain
                       </p>
                       <MarketplaceScreen
@@ -458,23 +456,39 @@ export default function UpgradeScreen() {
                       Back
                     </Button>
                     <Button
-                      className="w-1/2"
+                      className={` ${
+                        upgradeScreen == 2
+                          ? "hidden sm:block"
+                          : upgradeScreen == 3
+                          ? "sm:hidden"
+                          : "hidden"
+                      } w-1/2`}
                       onClick={() => {
-                        if (
-                          isMobileDevice
-                            ? upgradeScreen == 3
-                            : upgradeScreen == 2
-                        ) {
-                          handleSubmitUpgradeTx();
-                          resetDataUpdated("adventurerByIdQuery");
-                          console.log("UPGRADING");
-                        } else {
-                          setUpgradeScreen(upgradeScreen + 1);
-                        }
+                        handleSubmitUpgradeTx();
+                        resetDataUpdated("adventurerByIdQuery");
                       }}
                       disabled={nextDisabled || loading}
                     >
-                      {loading ? "Upgrading..." : lastPage ? "Upgrade" : "Next"}
+                      {loading ? (
+                        <span>Upgrading...</span>
+                      ) : (
+                        <span>Upgrade</span>
+                      )}
+                    </Button>
+                    <Button
+                      className={` ${
+                        upgradeScreen == 2
+                          ? "sm:hidden"
+                          : upgradeScreen == 3
+                          ? "hidden"
+                          : ""
+                      } w-1/2`}
+                      onClick={() => {
+                        setUpgradeScreen(upgradeScreen + 1);
+                      }}
+                      disabled={nextDisabled || loading}
+                    >
+                      <span>Next</span>
                     </Button>
                   </div>
                 </div>

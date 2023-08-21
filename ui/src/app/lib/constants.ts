@@ -12,7 +12,7 @@ export const chapter3 =
 export const chapter4 =
   "They find golden coins in their pocket, glimmering in the dim light - an enigma wrapped in the shroud of the unexpected.";
 export const battle =
-  "A beast lurks in the shadow, the time for battle is nigh.";
+  "A beast lurks in the shadow, prepare for battle!";
 
 export const mainnet_addr = "https://alpha-mainnet.starknet.io";
 

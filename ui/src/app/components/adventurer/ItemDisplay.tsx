@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import { Item } from "../../types";
 import LootIcon from "../icons/LootIcon";
 import Efficacyicon from "../icons/EfficacyIcon";
@@ -40,9 +41,6 @@ export const ItemDisplay = ({
   );
   const boost = getValueFromKey(gameData.ITEM_SUFFIX_BOOST, itemSuffix ?? 0);
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const setInventorySelected = useUIStore(
@@ -50,61 +48,99 @@ export const ItemDisplay = ({
   );
   const dropItems = useUIStore((state) => state.dropItems);
 
+  const scrollableRef = React.useRef<HTMLDivElement | null>(null);
+  const animationFrameRef = React.useRef<number | null>(null);
+
+  function handleMouseEnter() {
+    const el = scrollableRef.current;
+    if (!el) return; // Guard clause
+    const endPos = el.scrollWidth - el.offsetWidth; // Calculate the width of the overflow
+
+    // Use this to control the speed of the scroll
+    const duration = 4000; // In milliseconds
+
+    const start = performance.now();
+    const initialScrollLeft = el.scrollLeft;
+
+    requestAnimationFrame(function step(now) {
+      const elapsed = now - start;
+      let rawProgress = elapsed / duration;
+
+      let progress;
+      if (rawProgress <= 0.5) {
+        // For the first half, we scale rawProgress from [0, 0.5] to [0, 1]
+        progress = rawProgress * 2;
+      } else {
+        // For the second half, we scale rawProgress from [0.5, 1] to [1, 0]
+        progress = 2 - rawProgress * 2;
+      }
+
+      el.scrollLeft = initialScrollLeft + progress * endPos;
+
+      if (rawProgress < 1) {
+        animationFrameRef.current = requestAnimationFrame(step);
+      } else {
+        // Restart the animation once it's done
+        handleMouseEnter();
+      }
+    });
+  }
+
+  function handleMouseLeave() {
+    const el = scrollableRef.current;
+    if (!el) return; // Guard clause
+
+    if (animationFrameRef.current !== null) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    // When mouse leaves, smoothly scroll back to the start
+    el.scrollLeft = 0;
+  }
+
+  useEffect(() => {
+    const el = scrollableRef.current;
+
+    if (!el) return; // If the element is not there, do nothing.
+
+    // Attach event listeners
+    el.addEventListener("mouseenter", handleMouseEnter);
+    el.addEventListener("mouseleave", handleMouseLeave);
+
+    // Cleanup event listeners on unmount
+    return () => {
+      el.removeEventListener("mouseenter", handleMouseEnter);
+      el.removeEventListener("mouseleave", handleMouseLeave);
+    };
+  }, []); // Empty dependency array means this effect runs once when component mounts
+
   const checkDropping = (item: string) => {
     return dropItems.includes(getKeyFromValue(gameData.ITEMS, item) ?? "");
   };
 
-  // const scrollableRef = React.useRef(null);
-
-  // function handleMouseEnter() {
-  //   const el = scrollableRef.current;
-  //   const endPos = el.scrollWidth - el.offsetWidth; // Calculate the width of the overflow
-
-  //   // Use this to control the speed of the scroll
-  //   const duration = 10000; // In milliseconds
-
-  //   const start = performance.now();
-  //   const initialScrollLeft = el.scrollLeft;
-
-  //   requestAnimationFrame(function step(now) {
-  //     const elapsed = now - start;
-  //     const progress = Math.min(elapsed / duration, 1);
-  //     el.scrollLeft = initialScrollLeft + progress * endPos;
-
-  //     if (progress < 1) {
-  //       requestAnimationFrame(step);
-  //     }
-  //   });
-  // }
-
-  // function handleMouseLeave() {
-  //   const el = scrollableRef.current;
-
-  //   // When mouse leaves, smoothly scroll back to the start
-  //   el.scrollLeft = 0;
-  // }
-
   return (
     <div
-      className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-14 ${
+      className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-10 md:h-14 xl:h-[55px] ${
         item.item ? "bg-terminal-green text-terminal-black" : ""
       }`}
+      ref={scrollableRef}
     >
-      <div className="flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
-        <LootIcon
-          size={isMobileDevice ? "w-4" : "w-5"}
-          type={itemSlot ? itemSlot : slot}
-        />
-        <Efficacyicon size={isMobileDevice ? "w-4" : "w-5"} type={type} />
+      <div className="sm:hidden flex flex-col items-center justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
+        <LootIcon size={"w-3"} type={itemSlot ? itemSlot : slot} />
+        <Efficacyicon size={"w-4"} type={type} />
+      </div>
+      <div className="hidden sm:flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
+        <LootIcon size={"w-4"} type={itemSlot ? itemSlot : slot} />
+        <Efficacyicon size={"w-4"} type={type} />
       </div>
 
       {item.item ? (
-        <div className="flex flex-row justify-between w-full px-2 self-center">
+        <div className="flex flex-row justify-between w-full px-1 self-center">
           <div className="w-full whitespace-normal">
-            {" "}
             <div className="flex flex-col text-xs sm:text-sm space-between">
               <div className="flex flex-row font-semibold text-xs space-x-3">
-                <span className=" self-center">
+                <span className="self-center">
                   {item &&
                     `Tier ${tier ?? 0}
                 `}
@@ -114,8 +150,8 @@ export const ItemDisplay = ({
                 </span>
                 <span className="text-xxs sm:text-sm">{boost}</span>
               </div>
-              <span className="flex flex-row justify-between">
-                <span className="flex font-semibold whitespace-nowrap text-[0.6rem] sm:text-lg">
+              <span className="flex flex-row justify-between gap-5">
+                <span className="flex flex-row gap-1 whitespace-nowrap text-sm sm:text-xxs md:text-lg">
                   <p>{itemName}</p>
                   <span className="text-xxs sm:text-sm">
                     {slot == "Neck" || slot == "Ring"
@@ -140,21 +176,38 @@ export const ItemDisplay = ({
                         );
                       }}
                     >
-                      <SwapIcon className="w-4 h-4" />
+                      <SwapIcon className="w-3 h-3 lg:w-4 lg:h-4" />
                     </Button>
                   )}
                   {inventory && (
-                    <Button
-                      className="sm:h-6 sm:p-2"
-                      variant={"contrast"}
-                      size={isMobileDevice ? "xxs" : "sm"}
-                      onClick={equip}
-                      disabled={disabled}
-                    >
-                      <p className="text-xxs sm:text-sm">
-                        {equipped ? "Equipped" : "Equip"}
-                      </p>
-                    </Button>
+                    <>
+                      <div className="sm:hidden">
+                        <Button
+                          className="sm:h-6 sm:p-2"
+                          variant={"contrast"}
+                          size={"xxs"}
+                          onClick={equip}
+                          disabled={disabled}
+                        >
+                          <p className="text-xxs sm:text-sm">
+                            {equipped ? "Equipped" : "Equip"}
+                          </p>
+                        </Button>
+                      </div>
+                      <div className="hidden sm:block">
+                        <Button
+                          className="sm:h-6 sm:p-2"
+                          variant={"contrast"}
+                          size={"xxs"}
+                          onClick={equip}
+                          disabled={disabled}
+                        >
+                          <p className="text-xxs sm:text-sm">
+                            {equipped ? "Equipped" : "Equip"}
+                          </p>
+                        </Button>
+                      </div>
+                    </>
                   )}
                   {(screen == "play" ||
                     screen == "upgrade" ||
@@ -167,7 +220,7 @@ export const ItemDisplay = ({
                       onClick={() => handleDrop(item.item ?? "")}
                       disabled={checkDropping(item.item ?? "")}
                     >
-                      <DownArrowIcon className="w-4 h-4" />
+                      <DownArrowIcon className="w-3 h-3 lg:w-4 lg:h-4" />
                     </Button>
                   )}
                 </span>

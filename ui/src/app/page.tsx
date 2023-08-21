@@ -79,16 +79,16 @@ export default function Home() {
   const { disconnect, connectors } = useConnectors();
   const { chain } = useNetwork();
   const { provider } = useProvider();
-  const [userDisconnect, setUserDisconnect] = useState(false);
-  const { account, status } = useAccount();
-  const [isMuted, setIsMuted] = useState(false);
+  const disconnected = useUIStore((state) => state.disconnected);
+  const setDisconnected = useUIStore((state) => state.setDisconnected);
+  const { account, status, isConnected } = useAccount();
+  const isMuted = useUIStore((state) => state.isMuted);
+  const setIsMuted = useUIStore((state) => state.setIsMuted);
   const [introComplete, setIntroComplete] = useState(false);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
-  const connected = useUIStore((state) => state.connected);
-  const setConnected = useUIStore((state) => state.setConnected);
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const deathDialog = useUIStore((state) => state.deathDialog);
@@ -170,21 +170,9 @@ export default function Home() {
   }, [play, stop]);
 
   useEffect(() => {
-    if (!account?.address) {
-      setConnected(false);
-    }
-  }, [account, setConnected]);
-
-  useEffect(() => {
-    if (connected) {
-      setUserDisconnect(false);
-    }
-  }, [connected]);
-
-  useEffect(() => {
     const isWrongNetwork = chain?.id !== constants.StarknetChainId.SN_GOERLI;
     setIsWrongNetwork(isWrongNetwork);
-  }, [chain, provider, connected]);
+  }, [chain, provider, isConnected]);
 
   useEffect(() => {
     if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
@@ -209,10 +197,6 @@ export default function Home() {
     refetch("adventurersByOwnerQuery");
   }, [account]);
 
-  const isMobileDevice = useMediaQuery({
-    query: "(max-device-width: 480px)",
-  });
-
   const mobileMenuDisabled = [
     false,
     hasStatUpgrades,
@@ -232,24 +216,34 @@ export default function Home() {
     false,
   ];
 
-  if (userDisconnect) {
+  useEffect(() => {
+    if (isConnected) {
+      setDisconnected(false);
+    }
+  }, [isConnected]);
+
+  if (!isConnected && introComplete && disconnected) {
     return <WalletSelect />;
   }
 
   return (
     // <Maintenance />
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-20 `}
+      className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
     >
       {introComplete ? (
         <>
           <div className="flex flex-col w-full">
             <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
 
-            {isMobileDevice && <TxActivity />}
+            <div className="sm:hidden">
+              <TxActivity />
+            </div>
             <div className="flex flex-row justify-between">
               <span className="flex flex-row items-center gap-2 sm:gap-5">
-                <h1 className="glitch m-0">Loot Survivor</h1>
+                <h1 className="glitch m-0 text-lg sm:text-4xl">
+                  Loot Survivor
+                </h1>
                 <PenaltyCountDown
                   lastDiscoveryTime={
                     data.latestDiscoveriesQuery?.discoveries[0]?.timestamp
@@ -262,13 +256,14 @@ export default function Home() {
                   onClick={() => showArcadeDialog(!arcadeDialog)}
                   disabled={isWrongNetwork}
                 >
-                  <ArcadeIcon className="w-8 justify-center" />
+                  <ArcadeIcon className="w-4 sm:w-8 justify-center" />
                 </Button>
                 <Button
                   onClick={() => {
                     setIsMuted(!isMuted);
                     clickPlay();
                   }}
+                  className="hidden sm:block"
                 >
                   <div className="flex items-center justify-center">
                     {isMuted ? (
@@ -281,18 +276,16 @@ export default function Home() {
                 <Button onClick={async () => await refetch()}>
                   <RefreshIcon className="w-4 h-4 sm:w-6 sm:h-6" />
                 </Button>
-                {!isMobileDevice && account && calls.length > 0 && (
+                {account && calls.length > 0 && (
                   <button
                     ref={displayCartButtonRef}
                     onClick={() => {
                       setDisplayCart(!displayCart);
                       clickPlay();
                     }}
-                    className="relative flex flex-row items-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base"
+                    className="relative flex flex-row items-center justify-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base"
                   >
-                    <div className="w-4 h-4">
-                      <CartIconSimple />
-                    </div>
+                    <CartIconSimple className="w-4 h-4" />
                     <p className="hidden sm:block">
                       {displayCart ? "Hide Cart" : "Show Cart"}
                     </p>
@@ -301,49 +294,46 @@ export default function Home() {
                 {displayCart && (
                   <TransactionCart buttonRef={displayCartButtonRef} />
                 )}
-                {isMobileDevice ? (
-                  <>
-                    <button
-                      className="w-6 h-6"
-                      onClick={() => {
-                        setScreen("settings");
-                        clickPlay();
-                      }}
-                    >
-                      <CogIcon />
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    {!isMobileDevice && account && (
-                      <>
-                        <Button
-                          ref={displayHistoryButtonRef}
-                          onClick={() => {
-                            setDisplayHistory(!displayHistory);
-                          }}
-                        >
-                          {displayHistory ? "Hide Ledger" : "Show Ledger"}
-                        </Button>
-                      </>
-                    )}
+                <div className="flex items-center sm:hidden">
+                  <button
+                    className="w-6 h-6"
+                    onClick={() => {
+                      setScreen("settings");
+                      clickPlay();
+                    }}
+                  >
+                    <CogIcon />
+                  </button>
+                </div>
+                <div className="hidden sm:block sm:flex sm:flex-row sm:items-center sm:gap-1">
+                  {account && (
+                    <>
+                      <Button
+                        ref={displayHistoryButtonRef}
+                        onClick={() => {
+                          setDisplayHistory(!displayHistory);
+                        }}
+                      >
+                        {displayHistory ? "Hide Ledger" : "Show Ledger"}
+                      </Button>
+                    </>
+                  )}
 
-                    <Button
-                      onClick={() => {
-                        disconnect();
-                        resetData();
-                        setAdventurer(NullAdventurer);
-                        setUserDisconnect(true);
-                      }}
-                    >
-                      {account ? displayAddress(account.address) : "Connect"}
-                    </Button>
+                  <Button
+                    onClick={() => {
+                      disconnect();
+                      resetData();
+                      setAdventurer(NullAdventurer);
+                      setDisconnected(true);
+                    }}
+                  >
+                    {account ? displayAddress(account.address) : "Connect"}
+                  </Button>
 
-                    <Button href="https://github.com/BibliothecaDAO/loot-survivor">
-                      <GithubIcon className="w-6" />
-                    </Button>
-                  </>
-                )}
+                  <Button href="https://github.com/BibliothecaDAO/loot-survivor">
+                    <GithubIcon className="w-6" />
+                  </Button>
+                </div>
                 {account && displayHistory && (
                   <TransactionHistory buttonRef={displayHistoryButtonRef} />
                 )}
@@ -351,7 +341,9 @@ export default function Home() {
             </div>
           </div>
           <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4">
-            {!isMobileDevice && <TxActivity />}
+            <div className="hidden sm:block">
+              <TxActivity />
+            </div>
           </div>
           <NotificationDisplay />
 
@@ -364,22 +356,30 @@ export default function Home() {
           {introComplete ? (
             <div className="flex flex-col w-full">
               <>
-                <div className="flex justify-center sm:justify-normal sm:pb-2">
+                <div className="sm:hidden flex justify-center sm:justify-normal sm:pb-2">
                   <HorizontalKeyboardControl
-                    buttonsData={
-                      isMobileDevice ? mobileMenuItems : allMenuItems
-                    }
+                    buttonsData={mobileMenuItems}
                     onButtonClick={(value) => {
                       setScreen(value);
                     }}
-                    disabled={
-                      isMobileDevice ? mobileMenuDisabled : allMenuDisabled
-                    }
+                    disabled={mobileMenuDisabled}
+                  />
+                </div>
+                <div className="hidden sm:block flex justify-center sm:justify-normal sm:pb-2">
+                  <HorizontalKeyboardControl
+                    buttonsData={allMenuItems}
+                    onButtonClick={(value) => {
+                      setScreen(value);
+                    }}
+                    disabled={allMenuDisabled}
                   />
                 </div>
 
-                {isMobileDevice && <MobileHeader />}
+                <div className="sm:hidden">
+                  <MobileHeader />
+                </div>
 
+                {/* <div className="overflow-y-auto h-[460px] sm:h-full"> */}
                 {screen === "start" && <AdventurerScreen />}
                 {screen === "play" && <ActionsScreen />}
                 {screen === "inventory" && <InventoryScreen />}
@@ -391,6 +391,7 @@ export default function Home() {
                 {screen === "settings" && <Settings />}
                 {screen === "player" && <Player />}
                 {screen === "wallet" && <WalletSelect />}
+                {/* </div> */}
               </>
             </div>
           ) : null}

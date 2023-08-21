@@ -177,7 +177,7 @@ export default function InventoryScreen() {
 
   return (
     <div className="flex flex-row sm:gap-5">
-      <div className="hidden sm:block sm:w-1/3">
+      <div className="hidden sm:block sm:w-1/2 lg:w-1/3">
         <Info adventurer={adventurer} />
       </div>
       <div className="flex flex-col w-1/6">
@@ -203,7 +203,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 1}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.weapon}
-          icon={<LootIcon type="weapon" />}
+          icon={<LootIcon type="weapon" size="w-4" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -216,7 +216,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 2}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.chest}
-          icon={<LootIcon type="chest" />}
+          icon={<LootIcon type="chest" size="w-4" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -229,7 +229,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 3}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.head}
-          icon={<LootIcon type="head" />}
+          icon={<LootIcon type="head" size="w-4" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -242,7 +242,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 4}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.hand}
-          icon={<LootIcon type="hand" />}
+          icon={<LootIcon type="hand" size="w-4" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -255,7 +255,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 5}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.waist}
-          icon={<LootIcon type="waist" />}
+          icon={<LootIcon type="waist" size="w-4" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -268,7 +268,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 6}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.foot}
-          icon={<LootIcon type="foot" />}
+          icon={<LootIcon type="foot" size="w-4" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -281,7 +281,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 7}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.neck}
-          icon={<LootIcon type="neck" />}
+          icon={<LootIcon type="neck" size="w-4" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -294,7 +294,7 @@ export default function InventoryScreen() {
           isSelected={inventorySelected == 8}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.ring}
-          icon={<LootIcon type="ring" />}
+          icon={<LootIcon type="ring" size="w-4" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
@@ -318,7 +318,7 @@ export default function InventoryScreen() {
                 items of Tier 5 offer the most basic value.
               </p>
             </div>
-            <div className="flex flex-col overflow-y-auto h-[450px] sm:h-[550px]">
+            <div className="flex flex-col overflow-y-auto h-[450px] sm:h-[360px] 2xl:h-full 2xl:overflow-y-hidden">
               {selectedItems.length ? (
                 selectedItems.map((item: Item, index: number) => {
                   const itemId =

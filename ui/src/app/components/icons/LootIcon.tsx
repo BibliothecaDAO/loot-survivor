@@ -10,7 +10,15 @@ import Ring from "../../../../public/icons/loot/ring.svg";
 import { LootBagIcon } from "./Icons";
 
 // export type ItemType = "chest" | "weapon" | "head" | "hand" | "waist" | "foot" | "neck" | "ring";
-export type IconSize = "w-4" | "w-5" | "w-6" | "w-7" | "w-8" | "w-10";
+export type IconSize =
+  | "w-2"
+  | "w-3"
+  | "w-4"
+  | "w-5"
+  | "w-6"
+  | "w-7"
+  | "w-8"
+  | "w-10";
 
 export interface ItemDisplayProps {
   type: string;

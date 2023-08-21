@@ -102,7 +102,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
   // }
 
   return (
-    <div className="flex flex-col items-center mx-auto text-sm sm:text-xl">
+    <div className="flex flex-col items-center mx-auto text-sm sm:text-xl xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden">
       {displayEncounters.length > 0 ? (
         <>
           <h3 className="text-center">
@@ -115,7 +115,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
             {displayEncounters.map((encounter: any, index: number) => {
               return (
                 <div
-                  className="w-full p-2 text-left border border-terminal-green"
+                  className="w-full p-1 sm:p-2 text-left border border-terminal-green"
                   key={index}
                 >
                   {encounter.hasOwnProperty("discoveryType") ? (
