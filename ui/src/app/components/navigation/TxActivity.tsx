@@ -18,6 +18,8 @@ import {
   getDiscoveryByTxHash,
   getAdventurerById,
 } from "@/app/hooks/graphql/queries";
+import { parseEvent } from "@/app/lib/utils/parseEvent";
+import { InvokeTransactionReceiptResponse } from "starknet";
 
 export const TxActivity = () => {
   const notificationData = useLoadingStore((state) => state.notificationData);
@@ -59,6 +61,7 @@ export const TxActivity = () => {
       stopLoading("Rejected");
     },
   });
+  console.log(data ? parseEvent(data as InvokeTransactionReceiptResponse) : []);
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
   const isLoadingQueryUpdated = isDataUpdated[loadingQuery!];
@@ -101,12 +104,10 @@ export const TxActivity = () => {
     !hash
   );
 
-  console.log(txAccepted, hash, isLoadingQueryUpdated);
-
   useEffect(() => {
     const fetchData = async () => {
-      console.log(txAccepted, hash, isLoadingQueryUpdated);
-      if (!txAccepted || !hash || !isLoadingQueryUpdated) return;
+      console.log(txAccepted, hash);
+      if (!txAccepted || !hash) return;
 
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
@@ -122,6 +123,8 @@ export const TxActivity = () => {
         const killedByPenalty = queryData.battlesByTxHashQuery.battles.some(
           (battle) => !battle.attacker && battle.adventurerHealth == 0
         );
+        // const killedByBeast = false;
+        // const killedByPenalty = false;
         if (killedByBeast || killedByPenalty) {
           setDeathNotification(
             type,
@@ -242,7 +245,7 @@ export const TxActivity = () => {
     };
 
     fetchData();
-  }, [isLoadingQueryUpdated]);
+  }, [txAccepted]);
 
   useEffect(() => {
     if (

@@ -2,15 +2,15 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 
-import Realms from "./realms.json";
-import { Adventurer, Item } from "../types";
-import { GameData } from "../components/GameData";
+import Realms from "../realms.json";
+import { Adventurer, Item } from "../../types";
+import { GameData } from "../../components/GameData";
 import {
   itemCharismaDiscount,
   itemBasePrice,
   itemMinimumPrice,
   potionBasePrice,
-} from "./constants";
+} from "../constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -320,4 +320,8 @@ export function chunkArray<T>(array: T[], chunkSize: number): T[][] {
 
 export function isObject(value: any): value is object {
   return typeof value === "object" && !Array.isArray(value);
+}
+
+export function convertToBoolean(value: number): boolean {
+  return value === 1;
 }

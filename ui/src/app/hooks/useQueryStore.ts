@@ -77,6 +77,7 @@ interface InitialData {
 
 type QueriesState = {
   data: InitialData;
+  setData: (queryKey: QueryKey, data: InitialData) => void;
   isLoading: Record<QueryKey, boolean>;
   isDataUpdated: Record<QueryKey, boolean> & { global: boolean };
   refetchFunctions: Record<QueryKey, () => Promise<any>>;
@@ -194,6 +195,13 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
 
 export const useQueriesStore = create<QueriesState>((set, get) => ({
   data: initialData,
+  setData: (queryKey, newData) => {
+    set((state) => ({
+      ...state,
+      data: { ...state.data, [queryKey]: newData },
+      isDataUpdated: { ...state.isDataUpdated, [queryKey]: true },
+    }));
+  },
   isLoading: initialLoading,
   isDataUpdated: initialIsDataUpdated,
   refetchFunctions: initialRefetchFunctions,

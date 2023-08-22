@@ -183,7 +183,7 @@ export default function MarketplaceScreen({
           <>
             {(() => {
               const item = sortedMarketLatestItems[showEquipQ ?? 0];
-              const { tier, type, slot } = getItemData(item.item ?? "");
+              const { tier, type, slot } = getItemData(item?.item ?? "");
               return (
                 <div
                   className={`${

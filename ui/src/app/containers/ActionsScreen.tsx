@@ -96,6 +96,8 @@ export default function ActionsScreen() {
     txAccepted
   );
 
+  console.log(lastBeast);
+
   useCustomQuery(
     "battlesByBeastQuery",
     getBattlesByBeast,
