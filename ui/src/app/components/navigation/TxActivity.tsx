@@ -112,14 +112,26 @@ export const TxActivity = () => {
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
         console.log("in battle");
-        const killedByBeast = queryData.battlesByTxHashQuery.battles.some(
+        setData("adventurersByOwnerQuery", {
+          adventurers: [
+            ...(queryData.adventurersByOwnerQuery?.adventurers ?? []),
+            events.find((event) => event.name === "StartGame").data,
+          ],
+        });
+        const killedByBeast = events.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
-        const killedByPenalty = queryData.battlesByTxHashQuery.battles.some(
+        const killedByPenalty = events.some(
           (battle) => !battle.attacker && battle.adventurerHealth == 0
         );
-        // const killedByBeast = false;
-        // const killedByPenalty = false;
+        // setData("adventurerByIdQuery", {
+        //   adventurers: [
+        //     events.find(
+        //       (event) =>
+        //         event.name === "AttackedBeast" || event.name == "FleeSucceeded"
+        //     ).data[0],
+        //   ],
+        // });
         if (killedByBeast || killedByPenalty) {
           setDeathNotification(
             type,
@@ -158,6 +170,17 @@ export const TxActivity = () => {
       };
 
       const handleUpgrade = async () => {
+        setData("adventurerByIdQuery", {
+          adventurers: [
+            events.find((event) => event.name === "AdventurerUpgraded").data,
+          ],
+        });
+        // Reset items to no availability
+        // for (let i = 1; i <= 101; i++) {
+        //   setData("itemsByAdventurerQuery", {
+
+        //   })
+        // }
         stopLoading(notificationData);
         if (!hasStatUpgrades) {
           setScreen("play");
@@ -179,12 +202,12 @@ export const TxActivity = () => {
         setData("adventurersByOwnerQuery", {
           adventurers: [
             ...(queryData.adventurersByOwnerQuery?.adventurers ?? []),
-            events.find((event) => event.name === "StartGame").data,
+            events.find((event) => event.name === "StartGame").data[0],
           ],
         });
         setData("adventurerByIdQuery", {
           adventurers: [
-            events.find((event) => event.name === "StartGame").data,
+            events.find((event) => event.name === "StartGame").data[0],
           ],
         });
         stopLoading(notificationData);

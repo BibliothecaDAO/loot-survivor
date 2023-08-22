@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { isEqual } from "lodash";
 import { Battle, Beast, Item, Adventurer, Discovery, Score } from "../types";
+import { GameData } from "../components/GameData";
 
 export type QueryKey =
   | "lastBattleQuery"
@@ -27,30 +28,37 @@ export type QueryKey =
   | "adventurerToSlayQuery";
 
 interface BattlesResult {
+  [key: string]: Battle[];
   battles: Battle[];
 }
 
 interface DiscoveriesResult {
+  [key: string]: Battle[];
   discoveries: Discovery[];
 }
 
 interface BeastsResult {
+  [key: string]: Battle[];
   beasts: Beast[];
 }
 
 interface AdventurersResult {
+  [key: string]: Battle[];
   adventurers: Adventurer[];
 }
 
 interface ItemsResult {
+  [key: string]: Battle[];
   items: Item[];
 }
 
 interface ScoresResult {
+  [key: string]: Battle[];
   scores: Score[];
 }
 
 interface InitialData {
+  // [key: string]: BattlesResult | DiscoveriesResult | BeastsResult | AdventurersResult | ItemsResult | ScoresResult | null;
   lastBattleQuery: BattlesResult | null;
   lastBeastBattleQuery: BattlesResult | null;
   battlesByAdventurerQuery: BattlesResult | null;
@@ -77,7 +85,12 @@ interface InitialData {
 
 type QueriesState = {
   data: InitialData;
-  setData: (queryKey: QueryKey, data: any) => void;
+  setData: (
+    queryKey: QueryKey,
+    data: any,
+    attribute?: string,
+    index?: number
+  ) => void;
   isLoading: Record<QueryKey, boolean>;
   isDataUpdated: Record<QueryKey, boolean> & { global: boolean };
   refetchFunctions: Record<QueryKey, () => Promise<any>>;
@@ -195,12 +208,45 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
 
 export const useQueriesStore = create<QueriesState>((set, get) => ({
   data: initialData,
-  setData: (queryKey, newData) => {
-    set((state) => ({
-      data: { ...state.data, [queryKey]: newData },
-      isDataUpdated: { ...state.isDataUpdated, [queryKey]: true },
-    }));
-    console.log(get().data, get().isDataUpdated);
+  setData: (queryKey, newData, attribute, index) => {
+    const gameData = new GameData();
+    set((state) => {
+      if (typeof attribute === "string" && typeof index === "number") {
+        // This assumes the data structure always contains an array, like battles, discoveries, etc.
+        const existingData = state.data[queryKey];
+        const internalKey = gameData.QUERY_KEYS[queryKey];
+
+        if (!internalKey) {
+          console.error("Internal key mapping not found for:", queryKey);
+          return state;
+        }
+
+        if (!existingData) {
+          console.error("Existing data not found for:", queryKey);
+          return state;
+        }
+
+        const targetArray = [...existingData[internalKey]];
+
+        if (targetArray[index]) {
+          targetArray[index] = { ...targetArray[index], [attribute]: newData };
+        }
+        return {
+          data: {
+            ...state.data,
+            [queryKey]: {
+              [internalKey]: targetArray,
+            },
+          },
+          isDataUpdated: { ...state.isDataUpdated, [queryKey]: true },
+        };
+      } else {
+        return {
+          data: { ...state.data, [queryKey]: newData },
+          isDataUpdated: { ...state.isDataUpdated, [queryKey]: true },
+        };
+      }
+    });
   },
   isLoading: initialLoading,
   isDataUpdated: initialIsDataUpdated,

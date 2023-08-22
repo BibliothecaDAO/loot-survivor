@@ -152,6 +152,10 @@ export function getRankFromList(id: number, data: Adventurer[]) {
   return data.findIndex((data) => data.id === id);
 }
 
+export const getRandomNumber = (to: number) => {
+  return (Math.floor(Math.random() * to) + 1).toString();
+};
+
 export function getOrdinalSuffix(n: number): string {
   let j = n % 10;
   let k = n % 100;

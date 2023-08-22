@@ -27,6 +27,7 @@ import {
   NewItemsAvailableEvent,
   IdleDeathPenaltyEvent,
   AdventurerUpgradedEvent,
+  AdventurerState,
 } from "../../types/events";
 import { Adventurer } from "@/app/types";
 import { feltToString } from ".";
@@ -58,6 +59,28 @@ type EventData =
   | NewItemsAvailableEvent
   | IdleDeathPenaltyEvent
   | AdventurerUpgradedEvent;
+
+function createBaseItems(data: AdventurerState) {
+  const gameData = new GameData();
+  let items = [];
+  for (let i = 1; i <= 101; i++) {
+    items.push({
+      item: gameData.ITEMS[i],
+      adventurerId: data.adventurerId,
+      owner: false,
+      equipped: false,
+      ownerAddress: data.owner,
+      xp: 0,
+      special1: 0,
+      special2: 0,
+      special3: 0,
+      isAvailable: false,
+      purchasedTime: 0,
+      timestamp: new Date(),
+    });
+  }
+  return items;
+}
 
 function processAdventurerState(data: any) {
   const gameData = new GameData();
@@ -152,7 +175,8 @@ export function processData(event: EventData, eventName: string) {
         lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
         timestamp: new Date(),
       };
-      return updateAdventurerDoc;
+      const items = createBaseItems(startGameEvent.adventurerState);
+      return [updateAdventurerDoc, items];
     case "AdventurerUpgraded":
       const adventurerUpgradedEvent = event as AdventurerUpgradedEvent;
       return processAdventurerState(adventurerUpgradedEvent);

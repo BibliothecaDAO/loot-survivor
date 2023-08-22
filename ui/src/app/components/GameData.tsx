@@ -31,6 +31,7 @@ export class GameData {
   ADVENTURER_ANIMATIONS: DictString<string>;
   ADVENTURER_SOUNDS: DictString<string>;
   SELECTOR_KEYS: DictString<string>;
+  QUERY_KEYS: DictString<string>;
 
   constructor() {
     this.CONTRACTS = {
@@ -1152,6 +1153,31 @@ export class GameData {
       AdventurerLeveledUp: hash.getSelectorFromName("AdventurerLeveledUp"),
       NewItemsAvailable: hash.getSelectorFromName("NewItemsAvailable"),
       IdleDeathPenalty: hash.getSelectorFromName("IdleDeathPenalty"),
+    };
+
+    this.QUERY_KEYS = {
+      lastBattleQuery: "battles",
+      lastBeastBattleQuery: "battles",
+      battlesByAdventurerQuery: "battles",
+      battlesByTxHashQuery: "battles",
+      battlesByBeastQuery: "battles",
+      lastBeastQuery: "beasts",
+      beastQuery: "beasts",
+      discoveriesQuery: "discoveries",
+      latestDiscoveriesQuery: "discoveries",
+      discoveryByTxHashQuery: "discoveries",
+      adventurersByOwnerQuery: "adventurers",
+      adventurerByIdQuery: "adventurers",
+      leaderboardByIdQuery: "adventurers",
+      adventurersByGoldQuery: "adventurers",
+      adventurersByXPQuery: "adventurers",
+      adventurersInListQuery: "adventurers",
+      adventurersInListByXpQuery: "adventurers",
+      itemsByAdventurerQuery: "items",
+      itemsByProfileQuery: "items",
+      topScoresQuery: "scores",
+      latestMarketItemsQuery: "items",
+      adventurerToSlayQuery: "adventurers",
     };
   }
 }
