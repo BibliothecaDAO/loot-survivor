@@ -111,12 +111,8 @@ export const TxActivity = () => {
 
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
-        await refetch("battlesByTxHashQuery");
-        // await refetch("adventurerByIdQuery");
-        await refetch("battlesByBeastQuery");
-        await refetch("battlesByAdventurerQuery");
-        await refetch("latestMarketItemsQuery");
         console.log("in battle");
+        const events = parseEvent(data as InvokeTransactionReceiptResponse);
         const killedByBeast = queryData.battlesByTxHashQuery.battles.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );

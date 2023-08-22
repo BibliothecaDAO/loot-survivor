@@ -1,7 +1,4 @@
-import {
-  GetTransactionReceiptResponse,
-  InvokeTransactionReceiptResponse,
-} from "starknet";
+import { InvokeTransactionReceiptResponse } from "starknet";
 import { GameData } from "../../components/GameData";
 import { getKeyFromValue, convertToBoolean, chunkArray } from ".";
 import {
@@ -31,6 +28,7 @@ import {
   NewItemsAvailableEvent,
   IdleDeathPenaltyEvent,
 } from "../../types/events";
+import { processData } from "./processData";
 
 function parseAdventurerState(data: string[]) {
   return {
@@ -210,34 +208,45 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
             entropy: parseInt(raw.data[43]),
           },
         };
-        events.push(startGameData);
+        const startGameEvent = processData(startGameData, eventName);
+        events.push(startGameEvent);
         break;
       case "AdventurerUpgraded":
         const upgradeAvailableData: UpgradeAvailableEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
         };
-        events.push(upgradeAvailableData);
+        const upgradeAvailableEvent = processData(
+          upgradeAvailableData,
+          eventName
+        );
+        events.push(upgradeAvailableEvent);
         break;
       case "DiscoveredHealth":
         const discoveredHealthData: DiscoveredHealthEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
           healthAmount: parseInt(raw.data[40]),
         };
-        events.push(discoveredHealthData);
+        const discoveredHealthEvent = processData(
+          discoveredHealthData,
+          eventName
+        );
+        events.push(discoveredHealthEvent);
         break;
       case "DiscoveredGold":
         const discoveredGoldData: DiscoveredGoldEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
           goldAmount: parseInt(raw.data[40]),
         };
-        events.push(discoveredGoldData);
+        const discoveredGoldEvent = processData(discoveredGoldData, eventName);
+        events.push(discoveredGoldEvent);
         break;
       case "DiscoveredXP":
         const discoveredXPData: DiscoveredXPEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
           xpAmount: parseInt(raw.data[40]),
         };
-        events.push(discoveredXPData);
+        const discoveredXPEvent = processData(discoveredXPData, eventName);
+        events.push(discoveredXPEvent);
         break;
       case "DodgedObstacle":
         const dodgedObstacleData: DodgedObstacleEvent = {
@@ -249,7 +258,8 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           xpEarnedAdventurer: parseInt(raw.data[44]),
           xpEarnedItems: parseInt(raw.data[45]),
         };
-        events.push(dodgedObstacleData);
+        const dodgedObstacleEvent = processData(dodgedObstacleData, eventName);
+        events.push(dodgedObstacleEvent);
         break;
       case "HitByObstacle":
         const hitByObstacleData: HitByObstacleEvent = {
@@ -261,7 +271,8 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           xpEarnedAdventurer: parseInt(raw.data[44]),
           xpEarnedItems: parseInt(raw.data[45]),
         };
-        events.push(hitByObstacleData);
+        const hitByObstacleEvent = processData(hitByObstacleData, eventName);
+        events.push(hitByObstacleEvent);
         break;
       case "DiscoveredBeast":
         const discoveredBeastData: DiscoveredBeastEvent = {
@@ -279,7 +290,11 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
             },
           },
         };
-        events.push(discoveredBeastData);
+        const discoveredBeastEvent = processData(
+          discoveredBeastData,
+          eventName
+        );
+        events.push(discoveredBeastEvent);
         break;
       case "AmbushedByBeast":
         const ambushedByBeastData: AmbushedByBeastEvent = {
@@ -300,7 +315,11 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           criticalHit: convertToBoolean(parseInt(raw.data[49])),
           location: parseInt(raw.data[50]),
         };
-        events.push(ambushedByBeastData);
+        const ambushedByBeastEvent = processData(
+          ambushedByBeastData,
+          eventName
+        );
+        events.push(ambushedByBeastEvent);
         break;
       case "AttackedBeast":
         const attackedBeastData: AttackedBeastEvent = {
@@ -321,7 +340,8 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           criticalHit: convertToBoolean(parseInt(raw.data[49])),
           location: parseInt(raw.data[50]),
         };
-        events.push(attackedBeastData);
+        const attackedBeastEvent = processData(attackedBeastData, eventName);
+        events.push(attackedBeastEvent);
         break;
       case "AttackedByBeast":
         const attackedByBeastData: AttackedByBeastEvent = {
@@ -342,7 +362,11 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           criticalHit: convertToBoolean(parseInt(raw.data[49])),
           location: parseInt(raw.data[50]),
         };
-        events.push(attackedByBeastData);
+        const attackedByBeastEvent = processData(
+          attackedByBeastData,
+          eventName
+        );
+        events.push(attackedByBeastEvent);
         break;
       case "SlayedBeast":
         const slayedBeastData: SlayedBeastEvent = {
@@ -365,7 +389,8 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           xpEarnedItems: parseInt(raw.data[51]),
           goldEarned: parseInt(raw.data[52]),
         };
-        events.push(slayedBeastData);
+        const slayedBeastEvent = processData(slayedBeastData, eventName);
+        events.push(slayedBeastEvent);
         break;
       case "FleeFailed":
         const fleeFailedData: FleeFailedEvent = {
@@ -383,7 +408,8 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
             },
           },
         };
-        events.push(fleeFailedData);
+        const fleeFailedEvent = processData(fleeFailedData, eventName);
+        events.push(fleeFailedEvent);
         break;
       case "FleeSucceeded":
         const fleeSucceededData: FleeSucceededEvent = {
@@ -401,7 +427,8 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
             },
           },
         };
-        events.push(fleeSucceededData);
+        const fleeSucceededEvent = processData(fleeSucceededData, eventName);
+        events.push(fleeSucceededEvent);
         break;
       case "PurchasedItems":
         const purchasedItemsData: PurchasedItemsEvent = {
@@ -420,7 +447,11 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           cost: parseInt(raw.data[41]),
           health: parseInt(raw.data[42]),
         };
-        events.push(purchasedPotionsData);
+        const purchasedPotionsEvent = processData(
+          purchasedPotionsData,
+          eventName
+        );
+        events.push(purchasedPotionsEvent);
         break;
       case "EquippedItems":
         const { equippedItems, unequippedItems } = parseEquippedItems(
@@ -434,7 +465,8 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           equippedItems: equippedItems,
           unequippedItems: unequippedItems,
         };
-        events.push(equippedItemsData);
+        const equippedItemsEvent = processData(equippedItemsData, eventName);
+        events.push(equippedItemsEvent);
         break;
       case "DroppedItems":
         const itemIds = [];
@@ -449,7 +481,8 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           },
           itemIds: itemIds,
         };
-        events.push(droppedItemsData);
+        const droppedItemsEvent = processData(droppedItemsData, eventName);
+        events.push(droppedItemsEvent);
         break;
       case "GreatnessIncreased":
         const greatnessIncreasedData: GreatnessIncreasedEvent = {
@@ -458,7 +491,11 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           previousLevel: parseInt(raw.data[41]),
           newLevel: parseInt(raw.data[42]),
         };
-        events.push(greatnessIncreasedData);
+        const greatnessIncreasedEvent = processData(
+          greatnessIncreasedData,
+          eventName
+        );
+        events.push(greatnessIncreasedEvent);
         break;
       case "ItemSpecialUnlocked":
         const itemSpecialsUnlockedData: ItemSpecialUnlockedEvent = {
@@ -471,14 +508,19 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
             special3: parseInt(raw.data[44]),
           },
         };
-        events.push(itemSpecialsUnlockedData);
+        const itemSpecialsUnlockedEvent = processData(
+          itemSpecialsUnlockedData,
+          eventName
+        );
+        events.push(itemSpecialsUnlockedEvent);
         break;
       case "NewHighScore":
         const newHighScoreData: NewHighScoreEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
           rank: parseInt(raw.data[40]),
         };
-        events.push(newHighScoreData);
+        const newHighScoreEvent = processData(newHighScoreData, eventName);
+        events.push(newHighScoreEvent);
         break;
       case "AdventurerDied":
         const adventurerDiedData: AdventurerDiedEvent = {
@@ -486,7 +528,8 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           killedByBeast: parseInt(raw.data[40]),
           killedByObstacle: parseInt(raw.data[41]),
         };
-        events.push(adventurerDiedData);
+        const adventurerDiedEvent = processData(adventurerDiedData, eventName);
+        events.push(adventurerDiedEvent);
         break;
       case "AdventurerLeveledUp":
         const adventurerLeveledUpData: AdventurerLeveledUpEvent = {
@@ -494,14 +537,22 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           previousLevel: parseInt(raw.data[40]),
           newLevel: parseInt(raw.data[41]),
         };
-        events.push(adventurerLeveledUpData);
+        const adventurerLeveledUpEvent = processData(
+          adventurerLeveledUpData,
+          eventName
+        );
+        events.push(adventurerLeveledUpEvent);
         break;
       case "NewItemsAvailable":
         const newItemsAvailableData: NewItemsAvailableEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
           items: parseItems(raw.data.slice(40)),
         };
-        events.push(newItemsAvailableData);
+        const newItemsAvailableEvent = processData(
+          newItemsAvailableData,
+          eventName
+        );
+        events.push(newItemsAvailableEvent);
         break;
       case "IdleDeathPenalty":
         const idleDeathPenaltyData: IdleDeathPenaltyEvent = {
@@ -510,7 +561,11 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
           penaltyThreshold: parseInt(raw.data[41]),
           caller: raw.data[42],
         };
-        events.push(idleDeathPenaltyData);
+        const idleDeathPenaltyEvent = processData(
+          idleDeathPenaltyData,
+          eventName
+        );
+        events.push(idleDeathPenaltyEvent);
         break;
     }
   }
