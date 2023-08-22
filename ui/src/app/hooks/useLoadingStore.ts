@@ -58,7 +58,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   },
   setTxHash: (hash) => set({ hash }),
   setTxAccepted: (txAccepted) => set({ txAccepted }),
-  stopLoading: (notificationData) =>
+  stopLoading: (notificationData) => {
     set({
       showNotification: notificationData ? true : false,
       notificationData: notificationData || undefined,
@@ -74,7 +74,8 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       ],
       hash: "",
       adventurer: undefined,
-    }),
+    });
+  },
   resetNotification: () =>
     set({
       type: "",

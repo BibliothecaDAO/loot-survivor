@@ -77,7 +77,7 @@ interface InitialData {
 
 type QueriesState = {
   data: InitialData;
-  setData: (queryKey: QueryKey, data: InitialData) => void;
+  setData: (queryKey: QueryKey, data: any) => void;
   isLoading: Record<QueryKey, boolean>;
   isDataUpdated: Record<QueryKey, boolean> & { global: boolean };
   refetchFunctions: Record<QueryKey, () => Promise<any>>;
@@ -197,48 +197,21 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
   data: initialData,
   setData: (queryKey, newData) => {
     set((state) => ({
-      ...state,
       data: { ...state.data, [queryKey]: newData },
       isDataUpdated: { ...state.isDataUpdated, [queryKey]: true },
     }));
+    console.log(get().data, get().isDataUpdated);
   },
   isLoading: initialLoading,
   isDataUpdated: initialIsDataUpdated,
   refetchFunctions: initialRefetchFunctions,
-  updateData: (queryKey, newData, loading, refetch) => {
+  updateData: (queryKey, newData, loading) => {
     set((state) => {
-      const oldData = state.data[queryKey];
-      const queryKeysToIgnore = [
-        "battlesByTxHashQuery",
-        "discoveryByTxHashQuery",
-      ];
-      const hasEmptyArray =
-        newData && typeof newData === "object"
-          ? Object.values(newData).some(
-              (arr) => Array.isArray(arr) && arr.length === 0
-            )
-          : false;
-      const ignoreDataChange =
-        queryKeysToIgnore.includes(queryKey) && hasEmptyArray;
-      const isDataChanged =
-        !ignoreDataChange &&
-        (oldData !== null ||
-          (newData && Object.values(newData).some((arr: any) => arr.length))) &&
-        !isEqual(oldData, newData);
-      if (isDataChanged && newData !== undefined) {
-        return {
-          ...state,
-          data: { ...state.data, [queryKey]: newData },
-          isLoading: { ...state.isLoading, [queryKey]: loading },
-          isDataUpdated: {
-            ...state.isDataUpdated,
-            [queryKey]: true,
-            global: true,
-          },
-          refetchFunctions: { ...state.refetchFunctions, [queryKey]: refetch },
-        };
-      }
-      return state;
+      return {
+        ...state,
+        data: { ...state.data, [queryKey]: newData },
+        isLoading: { ...state.isLoading, [queryKey]: loading },
+      };
     });
   },
   resetData: (queryKey) => {

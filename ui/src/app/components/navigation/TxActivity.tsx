@@ -49,6 +49,7 @@ export const TxActivity = () => {
     isDataUpdated,
     refetch,
     resetDataUpdated,
+    setData,
     resetData,
   } = useQueriesStore();
   const { data } = useWaitForTransaction({
@@ -60,8 +61,8 @@ export const TxActivity = () => {
     onRejected: () => {
       stopLoading("Rejected");
     },
-  });
-  console.log(data ? parseEvent(data as InvokeTransactionReceiptResponse) : []);
+  }) as { data: InvokeTransactionReceiptResponse };
+  console.log(data ? parseEvent(data) : []);
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
   const isLoadingQueryUpdated = isDataUpdated[loadingQuery!];
@@ -106,13 +107,12 @@ export const TxActivity = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log(txAccepted, hash);
-      if (!txAccepted || !hash) return;
+      console.log(txAccepted, hash, isLoadingQueryUpdated);
+      if (!txAccepted || !hash || data?.events?.length == 0) return;
 
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
         console.log("in battle");
-        const events = parseEvent(data as InvokeTransactionReceiptResponse);
         const killedByBeast = queryData.battlesByTxHashQuery.battles.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
@@ -192,8 +192,27 @@ export const TxActivity = () => {
 
       const handleCreate = async () => {
         console.log("in create");
-        await refetch("adventurersByOwnerQuery");
-        await refetch("adventurerByIdQuery");
+        console.log(data);
+        const events = parseEvent(data);
+        console.log(events);
+        setData("adventurersByOwnerQuery", {
+          adventurers: [
+            ...(queryData.adventurersByOwnerQuery?.adventurers ?? []),
+            events[0],
+          ],
+        });
+        setData("adventurerByIdQuery", {
+          adventurers: [events[0]],
+        });
+        console.log({
+          adventurers: [
+            ...(queryData.adventurersByOwnerQuery?.adventurers ?? []),
+            events[0],
+          ],
+        });
+        console.log({
+          adventurers: [events[0]],
+        });
         stopLoading(notificationData);
       };
 

@@ -17,6 +17,7 @@ const useCustomQuery = (
   shouldPoll?: boolean,
   skip?: boolean
 ) => {
+  const previousData = useRef();
   const { updateData } = useQueriesStore();
 
   const { data, startPolling, stopPolling, loading, refetch, error } = useQuery(
@@ -36,11 +37,10 @@ const useCustomQuery = (
     }
   }, [refetch]);
 
-  useEffect(() => {
-    if (data) {
-      updateData(queryKey, data, loading, refetchWrapper);
-    }
-  }, [data, updateData, loading, queryKey, refetchWrapper, variables]);
+  if (data && previousData.current !== data) {
+    updateData(queryKey, data, loading, refetchWrapper);
+    previousData.current = data;
+  }
 
   useEffect(() => {
     if (shouldPoll) {

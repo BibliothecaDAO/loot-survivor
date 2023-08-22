@@ -142,9 +142,10 @@ export default function Home() {
     {
       id: adventurer?.id ?? 0,
     },
-    txAccepted
+    false
   );
 
+  console.log(data.adventurersByOwnerQuery);
   console.log(data.adventurerByIdQuery);
 
   // useEffect(() => {
@@ -163,7 +164,7 @@ export default function Home() {
     {
       owner: owner,
     },
-    txAccepted
+    false
   );
 
   useEffect(() => {
@@ -195,10 +196,6 @@ export default function Home() {
       setMintAdventurer(false);
     }
   }, [data.adventurersByOwnerQuery?.adventurers.length]);
-
-  useEffect(() => {
-    refetch("adventurersByOwnerQuery");
-  }, [account]);
 
   const mobileMenuDisabled = [
     false,

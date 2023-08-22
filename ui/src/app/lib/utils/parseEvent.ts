@@ -208,7 +208,9 @@ export function parseEvent(receipt: InvokeTransactionReceiptResponse) {
             entropy: parseInt(raw.data[43]),
           },
         };
+        console.log(startGameData);
         const startGameEvent = processData(startGameData, eventName);
+        console.log(startGameEvent);
         events.push(startGameEvent);
         break;
       case "AdventurerUpgraded":
