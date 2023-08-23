@@ -208,7 +208,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
             entropy: parseInt(raw.data[43]),
           },
         };
-        const startGameEvent = processData(startGameData, eventName);
+        const startGameEvent = processData(
+          startGameData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: startGameEvent });
         break;
       case "AdventurerUpgraded":
@@ -217,7 +221,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         };
         const upgradeAvailableEvent = processData(
           upgradeAvailableData,
-          eventName
+          eventName,
+          receipt.transaction_hash
         );
         events.push({ name: eventName, data: upgradeAvailableEvent });
         break;
@@ -228,7 +233,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         };
         const discoveredHealthEvent = processData(
           discoveredHealthData,
-          eventName
+          eventName,
+          receipt.transaction_hash
         );
         events.push({ name: eventName, data: discoveredHealthEvent });
         break;
@@ -237,7 +243,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
           goldAmount: parseInt(raw.data[40]),
         };
-        const discoveredGoldEvent = processData(discoveredGoldData, eventName);
+        const discoveredGoldEvent = processData(
+          discoveredGoldData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: discoveredGoldEvent });
         break;
       case "DiscoveredXP":
@@ -245,7 +255,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
           xpAmount: parseInt(raw.data[40]),
         };
-        const discoveredXPEvent = processData(discoveredXPData, eventName);
+        const discoveredXPEvent = processData(
+          discoveredXPData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: discoveredXPEvent });
         break;
       case "DodgedObstacle":
@@ -258,7 +272,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
           xpEarnedAdventurer: parseInt(raw.data[44]),
           xpEarnedItems: parseInt(raw.data[45]),
         };
-        const dodgedObstacleEvent = processData(dodgedObstacleData, eventName);
+        const dodgedObstacleEvent = processData(
+          dodgedObstacleData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: dodgedObstacleEvent });
         break;
       case "HitByObstacle":
@@ -271,7 +289,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
           xpEarnedAdventurer: parseInt(raw.data[44]),
           xpEarnedItems: parseInt(raw.data[45]),
         };
-        const hitByObstacleEvent = processData(hitByObstacleData, eventName);
+        const hitByObstacleEvent = processData(
+          hitByObstacleData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: hitByObstacleEvent });
         break;
       case "DiscoveredBeast":
@@ -292,7 +314,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         };
         const discoveredBeastEvent = processData(
           discoveredBeastData,
-          eventName
+          eventName,
+          receipt.transaction_hash
         );
         events.push({ name: eventName, data: discoveredBeastEvent });
         break;
@@ -317,7 +340,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         };
         const ambushedByBeastEvent = processData(
           ambushedByBeastData,
-          eventName
+          eventName,
+          receipt.transaction_hash
         );
         events.push({ name: eventName, data: ambushedByBeastEvent });
         break;
@@ -340,7 +364,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
           criticalHit: convertToBoolean(parseInt(raw.data[49])),
           location: parseInt(raw.data[50]),
         };
-        const attackedBeastEvent = processData(attackedBeastData, eventName);
+        const attackedBeastEvent = processData(
+          attackedBeastData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: attackedBeastEvent });
         break;
       case "AttackedByBeast":
@@ -364,7 +392,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         };
         const attackedByBeastEvent = processData(
           attackedByBeastData,
-          eventName
+          eventName,
+          receipt.transaction_hash
         );
         events.push({ name: eventName, data: attackedByBeastEvent });
         break;
@@ -389,7 +418,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
           xpEarnedItems: parseInt(raw.data[51]),
           goldEarned: parseInt(raw.data[52]),
         };
-        const slayedBeastEvent = processData(slayedBeastData, eventName);
+        const slayedBeastEvent = processData(
+          slayedBeastData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: slayedBeastEvent });
         break;
       case "FleeFailed":
@@ -408,7 +441,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
             },
           },
         };
-        const fleeFailedEvent = processData(fleeFailedData, eventName);
+        const fleeFailedEvent = processData(
+          fleeFailedData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: fleeFailedEvent });
         break;
       case "FleeSucceeded":
@@ -427,7 +464,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
             },
           },
         };
-        const fleeSucceededEvent = processData(fleeSucceededData, eventName);
+        const fleeSucceededEvent = processData(
+          fleeSucceededData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: fleeSucceededEvent });
         break;
       case "PurchasedItems":
@@ -438,7 +479,12 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
           },
           purchases: parseItems(raw.data.slice(73)),
         };
-        events.push({ name: eventName, data: purchasedItemsData });
+        const purchasedItemsEvent = processData(
+          purchasedItemsData,
+          eventName,
+          receipt.transaction_hash
+        );
+        events.push({ name: eventName, data: purchasedItemsEvent });
         break;
       case "PurchasedPotions":
         const purchasedPotionsData: PurchasedPotionsEvent = {
@@ -449,7 +495,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         };
         const purchasedPotionsEvent = processData(
           purchasedPotionsData,
-          eventName
+          eventName,
+          receipt.transaction_hash
         );
         events.push({ name: eventName, data: purchasedPotionsEvent });
         break;
@@ -465,7 +512,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
           equippedItems: equippedItems,
           unequippedItems: unequippedItems,
         };
-        const equippedItemsEvent = processData(equippedItemsData, eventName);
+        const equippedItemsEvent = processData(
+          equippedItemsData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: equippedItemsEvent });
         break;
       case "DroppedItems":
@@ -481,7 +532,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
           },
           itemIds: itemIds,
         };
-        const droppedItemsEvent = processData(droppedItemsData, eventName);
+        const droppedItemsEvent = processData(
+          droppedItemsData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: droppedItemsEvent });
         break;
       case "GreatnessIncreased":
@@ -493,7 +548,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         };
         const greatnessIncreasedEvent = processData(
           greatnessIncreasedData,
-          eventName
+          eventName,
+          receipt.transaction_hash
         );
         events.push({ name: eventName, data: greatnessIncreasedEvent });
         break;
@@ -510,7 +566,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         };
         const itemSpecialsUnlockedEvent = processData(
           itemSpecialsUnlockedData,
-          eventName
+          eventName,
+          receipt.transaction_hash
         );
         events.push({ name: eventName, data: itemSpecialsUnlockedEvent });
         break;
@@ -519,7 +576,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
           rank: parseInt(raw.data[40]),
         };
-        const newHighScoreEvent = processData(newHighScoreData, eventName);
+        const newHighScoreEvent = processData(
+          newHighScoreData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: newHighScoreEvent });
         break;
       case "AdventurerDied":
@@ -528,7 +589,11 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
           killedByBeast: parseInt(raw.data[40]),
           killedByObstacle: parseInt(raw.data[41]),
         };
-        const adventurerDiedEvent = processData(adventurerDiedData, eventName);
+        const adventurerDiedEvent = processData(
+          adventurerDiedData,
+          eventName,
+          receipt.transaction_hash
+        );
         events.push({ name: eventName, data: adventurerDiedEvent });
         break;
       case "AdventurerLeveledUp":
@@ -539,7 +604,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         };
         const adventurerLeveledUpEvent = processData(
           adventurerLeveledUpData,
-          eventName
+          eventName,
+          receipt.transaction_hash
         );
         events.push({ name: eventName, data: adventurerLeveledUpEvent });
         break;
@@ -550,7 +616,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         };
         const newItemsAvailableEvent = processData(
           newItemsAvailableData,
-          eventName
+          eventName,
+          receipt.transaction_hash
         );
         events.push({ name: eventName, data: newItemsAvailableEvent });
         break;
@@ -563,7 +630,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         };
         const idleDeathPenaltyEvent = processData(
           idleDeathPenaltyData,
-          eventName
+          eventName,
+          receipt.transaction_hash
         );
         events.push({ name: eventName, data: idleDeathPenaltyEvent });
         break;

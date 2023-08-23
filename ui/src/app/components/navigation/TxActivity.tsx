@@ -199,17 +199,17 @@ export const TxActivity = () => {
 
       const handleCreate = async () => {
         console.log("in create");
-        setData("adventurersByOwnerQuery", {
-          adventurers: [
-            ...(queryData.adventurersByOwnerQuery?.adventurers ?? []),
-            events.find((event) => event.name === "StartGame").data[0],
-          ],
-        });
-        setData("adventurerByIdQuery", {
-          adventurers: [
-            events.find((event) => event.name === "StartGame").data[0],
-          ],
-        });
+        // setData("adventurersByOwnerQuery", {
+        //   adventurers: [
+        //     ...(queryData.adventurersByOwnerQuery?.adventurers ?? []),
+        //     events.find((event) => event.name === "StartGame").data[0],
+        //   ],
+        // });
+        // setData("adventurerByIdQuery", {
+        //   adventurers: [
+        //     events.find((event) => event.name === "StartGame").data[0],
+        //   ],
+        // });
         stopLoading(notificationData);
       };
 

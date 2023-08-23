@@ -995,30 +995,30 @@ class LootSurvivorIndexer(StarkNetIndexer):
         await info.storage.insert_one("discoveries", discovery_doc)
         attacked_by_beast_doc = {
             "txHash": encode_hex_as_bytes(tx_hash),
+            "beast": check_exists_int(abb.id),
+            "beastHealth": encode_int_as_bytes(
+                abb.adventurer_state["adventurer"]["beast_health"]
+            ),
+            "beastLevel": encode_int_as_bytes(abb.beast_specs["level"]),
+            "special1": check_exists_int(abb.beast_specs["specials"]["special1"]),
+            "special2": check_exists_int(abb.beast_specs["specials"]["special2"]),
+            "special3": check_exists_int(abb.beast_specs["specials"]["special3"]),
+            "seed": encode_int_as_bytes(abb.seed),
             "adventurerId": check_exists_int(abb.adventurer_state["adventurer_id"]),
             "adventurerHealth": encode_int_as_bytes(
                 abb.adventurer_state["adventurer"]["health"]
             ),
-            "discoveryType": encode_int_as_bytes(1),
-            "subDiscoveryType": check_exists_int(0),
-            "outputAmount": encode_int_as_bytes(0),
-            "obstacle": check_exists_int(0),
-            "obstacleLevel": check_exists_int(0),
-            "dodgedObstacle": encode_int_as_bytes(0),
+            "attacker": check_exists_int(1),
+            "fled": check_exists_int(0),
+            "damageDealt": encode_int_as_bytes(abb.damage),
+            "criticalHit": abb.critical_hit,
             "damageTaken": encode_int_as_bytes(0),
-            "damageLocation": check_exists_int(0),
-            "xpEarnedAdventurer": check_exists_int(0),
-            "xpEarnedItems": check_exists_int(0),
-            "entity": check_exists_int(abb.id),
-            "entityLevel": check_exists_int(abb.beast_specs["level"]),
-            "entityHealth": encode_int_as_bytes(
-                abb.adventurer_state["adventurer"]["beast_health"]
-            ),
-            "special1": check_exists_int(abb.beast_specs["specials"]["special1"]),
-            "special2": check_exists_int(abb.beast_specs["specials"]["special2"]),
-            "special3": check_exists_int(abb.beast_specs["specials"]["special3"]),
-            "ambushed": check_exists_int(1),
-            "seed": encode_int_as_bytes(abb.seed),
+            "damageLocation": check_exists_int(abb.location),
+            "xpEarnedAdventurer": encode_int_as_bytes(0),
+            "xpEarnedItems": encode_int_as_bytes(0),
+            "goldEarned": encode_int_as_bytes(0),
+            "discoveryTime": block_time,
+            "blockTime": block_time,
             "timestamp": datetime.now(),
         }
         await info.storage.insert_one("battles", attacked_by_beast_doc)

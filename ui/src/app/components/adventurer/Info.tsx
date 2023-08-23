@@ -71,6 +71,8 @@ export default function Info({
     ? data.itemsByAdventurerQuery.items
     : [];
 
+  console.log(data.itemsByAdventurerQuery, formatAdventurer);
+
   const neckItem =
     items.find(
       (item: Item) => item.item == formatAdventurer.neck && item.equipped

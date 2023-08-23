@@ -5,18 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { useContracts } from "../../hooks/useContracts";
-import { stringToFelt } from "../../lib/utils";
-import {
-  useAccount,
-  useConnectors,
-  useTransactionManager,
-  useContractWrite,
-} from "@starknet-react/core";
-import { getKeyFromValue } from "../../lib/utils";
-import { GameData } from "../GameData";
-import useLoadingStore from "../../hooks/useLoadingStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import { useAccount, useConnectors } from "@starknet-react/core";
 import useUIStore from "../../hooks/useUIStore";
 import { FormData, Adventurer } from "@/app/types";
 import { Button } from "../buttons/Button";
@@ -26,7 +15,6 @@ import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
 import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { MdClose } from "react-icons/md";
 import { syscalls } from "@/app/lib/utils/syscalls";
 
@@ -44,8 +32,6 @@ export const AdventurerForm = ({
   const { account } = useAccount();
   const { connectors, connect } = useConnectors();
 
-  const { addTransaction } = useTransactionManager();
-  const formatAddress = account ? account.address : "0x0";
   const [formData, setFormData] = useState<FormData>({
     startingWeapon: "",
     name: "",
@@ -60,25 +46,13 @@ export const AdventurerForm = ({
   });
   const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
 
-  const calls = useTransactionCartStore((state) => state.calls);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { writeAsync } = useContractWrite({ calls });
-  const { gameContract, lordsContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const gameData = new GameData();
   const [step, setStep] = useState(1);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
 
   const walletConnectors = () =>
     connectors.filter((connector) => !connector.id.includes("0x"));
-
-  const { resetDataUpdated } = useQueriesStore();
 
   const { spawn } = syscalls();
 
@@ -122,10 +96,6 @@ export const AdventurerForm = ({
 
   const handleButtonClick = () => {
     setShowWalletTutorial(true);
-  };
-
-  const getRandomNumber = (to: number) => {
-    return (Math.floor(Math.random() * to) + 1).toString();
   };
 
   const handleChange = (

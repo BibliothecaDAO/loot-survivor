@@ -113,7 +113,11 @@ function processAdventurerState(data: any) {
   return updateAdventurerDoc;
 }
 
-export function processData(event: EventData, eventName: string) {
+export function processData(
+  event: EventData,
+  eventName: string,
+  txHash?: string
+) {
   const gameData = new GameData();
   switch (eventName) {
     case "StartGame":
@@ -182,58 +186,501 @@ export function processData(event: EventData, eventName: string) {
       return processAdventurerState(adventurerUpgradedEvent);
     case "DiscoveredHealth":
       const discoveredHealthEvent = event as DiscoveredHealthEvent;
-      return processAdventurerState(discoveredHealthEvent);
+      const discoveredHealthAdventurerData = processAdventurerState(
+        discoveredHealthEvent
+      );
+      const discoverHealthData = {
+        txHash: txHash,
+        adventurerId: discoveredHealthEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          discoveredHealthEvent.adventurerState["adventurer"]["health"],
+        discoveryType: gameData.DISCOVERY_TYPES[3],
+        subDiscoveryType: gameData.ITEM_DISCOVERY_TYPES[1],
+        outputAmount: discoveredHealthEvent.healthAmount,
+        obstacle: null,
+        obstacleLevel: null,
+        dodgedObstacle: false,
+        damageTaken: 0,
+        damageLocation: null,
+        xpEarnedAdventurer: null,
+        xpEarnedItems: null,
+        entity: null,
+        entityLevel: null,
+        entityHealth: 0,
+        special1: null,
+        special2: null,
+        special3: null,
+        ambushed: null,
+        seed: 0,
+        discoveryTime: new Date(),
+        timestamp: new Date(),
+      };
+      return [discoveredHealthAdventurerData, discoverHealthData];
     case "DiscoveredGold":
       const discoveredGoldEvent = event as DiscoveredGoldEvent;
-      return processAdventurerState(discoveredGoldEvent);
+      const discoveredGoldAdventurerData =
+        processAdventurerState(discoveredGoldEvent);
+      const discoverGoldData = {
+        txHash: txHash,
+        adventurerId: discoveredGoldEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          discoveredGoldEvent.adventurerState["adventurer"]["health"],
+        discoveryType: gameData.DISCOVERY_TYPES[3],
+        subDiscoveryType: gameData.ITEM_DISCOVERY_TYPES[2],
+        outputAmount: discoveredGoldEvent.goldAmount,
+        obstacle: null,
+        obstacleLevel: null,
+        dodgedObstacle: false,
+        damageTaken: 0,
+        damageLocation: null,
+        xpEarnedAdventurer: null,
+        xpEarnedItems: null,
+        entity: null,
+        entityLevel: null,
+        entityHealth: 0,
+        special1: null,
+        special2: null,
+        special3: null,
+        ambushed: null,
+        seed: 0,
+        discoveryTime: new Date(),
+        timestamp: new Date(),
+      };
+
+      return [discoveredGoldAdventurerData, discoverGoldData];
     case "DiscoveredXP":
       const discoveredXPEvent = event as DiscoveredXPEvent;
-      return processAdventurerState(discoveredXPEvent);
+      const discoveredXPAdventurerData =
+        processAdventurerState(discoveredXPEvent);
+      const discoverXPData = {
+        txHash: txHash,
+        adventurerId: discoveredXPEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          discoveredXPEvent.adventurerState["adventurer"]["health"],
+        discoveryType: gameData.DISCOVERY_TYPES[3],
+        subDiscoveryType: gameData.ITEM_DISCOVERY_TYPES[3],
+        outputAmount: discoveredXPEvent.xpAmount,
+        obstacle: null,
+        obstacleLevel: null,
+        dodgedObstacle: false,
+        damageTaken: 0,
+        damageLocation: null,
+        xpEarnedAdventurer: null,
+        xpEarnedItems: null,
+        entity: null,
+        entityLevel: null,
+        entityHealth: 0,
+        special1: null,
+        special2: null,
+        special3: null,
+        ambushed: null,
+        seed: 0,
+        discoveryTime: new Date(),
+        timestamp: new Date(),
+      };
+
+      return [discoveredXPAdventurerData, discoverXPData];
     case "DodgedObstacle":
       const dodgedObstacleEvent = event as DodgedObstacleEvent;
-      return processAdventurerState(dodgedObstacleEvent);
+      const dodgedObstacleAdventurerData =
+        processAdventurerState(dodgedObstacleEvent);
+      const dodgedObstacleData = {
+        txHash: txHash,
+        adventurerId: dodgedObstacleEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          dodgedObstacleEvent.adventurerState["adventurer"]["health"],
+        discoveryType: gameData.DISCOVERY_TYPES[2],
+        subDiscoveryType: null,
+        outputAmount: 0,
+        obstacle: dodgedObstacleEvent.id,
+        obstacleLevel: dodgedObstacleEvent.level,
+        dodgedObstacle: 1,
+        damageTaken: dodgedObstacleEvent.damageTaken,
+        damageLocation: dodgedObstacleEvent.damageLocation,
+        xpEarnedAdventurer: dodgedObstacleEvent.xpEarnedAdventurer,
+        xpEarnedItems: dodgedObstacleEvent.xpEarnedItems,
+        entity: null,
+        entityLevel: null,
+        entityHealth: 0,
+        special1: null,
+        special2: null,
+        special3: null,
+        ambushed: null,
+        seed: 0,
+        discoveryTime: new Date(),
+        timestamp: new Date(),
+      };
+
+      return [dodgedObstacleAdventurerData, dodgedObstacleData];
     case "HitByObstacle":
       const hitByObstacleEvent = event as HitByObstacleEvent;
-      return processAdventurerState(hitByObstacleEvent);
+      const hitByObstacleAdventurerData =
+        processAdventurerState(hitByObstacleEvent);
+      const hitByObstacleData = {
+        txHash: txHash,
+        adventurerId: hitByObstacleEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          hitByObstacleEvent.adventurerState["adventurer"]["health"],
+        discoveryType: gameData.DISCOVERY_TYPES[2],
+        subDiscoveryType: null,
+        outputAmount: 0,
+        obstacle: hitByObstacleEvent.id,
+        obstacleLevel: hitByObstacleEvent.level,
+        dodgedObstacle: 0,
+        damageTaken: hitByObstacleEvent.damageTaken,
+        damageLocation: hitByObstacleEvent.damageLocation,
+        xpEarnedAdventurer: hitByObstacleEvent.xpEarnedAdventurer,
+        xpEarnedItems: hitByObstacleEvent.xpEarnedItems,
+        entity: null,
+        entityLevel: null,
+        entityHealth: 0,
+        special1: null,
+        special2: null,
+        special3: null,
+        ambushed: null,
+        seed: 0,
+        discoveryTime: new Date(),
+        timestamp: new Date(),
+      };
+
+      return [hitByObstacleAdventurerData, hitByObstacleData];
     case "DiscoveredBeast":
       const discoveredBeastEvent = event as DiscoveredBeastEvent;
-      return processAdventurerState(discoveredBeastEvent);
+      const discoveredBeastAdventurerData =
+        processAdventurerState(discoveredBeastEvent);
+      const discoveredBeastData = {
+        txHash: txHash,
+        adventurerId: discoveredBeastEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          discoveredBeastEvent.adventurerState["adventurer"]["health"],
+        discoveryType: gameData.DISCOVERY_TYPES[1],
+        subDiscoveryType: null,
+        outputAmount: 0,
+        obstacle: null,
+        obstacleLevel: null,
+        dodgedObstacle: 0,
+        damageTaken: 0,
+        damageLocation: null,
+        xpEarnedAdventurer: null,
+        xpEarnedItems: null,
+        entity: gameData.BEASTS[discoveredBeastEvent.id],
+        entityLevel: discoveredBeastEvent.beastSpecs["level"],
+        entityHealth:
+          discoveredBeastEvent.adventurerState["adventurer"]["beastHealth"],
+        special1: discoveredBeastEvent.beastSpecs["specials"]["special1"],
+        special2: discoveredBeastEvent.beastSpecs["specials"]["special2"],
+        special3: discoveredBeastEvent.beastSpecs["specials"]["special3"],
+        ambushed: null,
+        seed: discoveredBeastEvent.seed,
+        discoveryTime: new Date(),
+        timestamp: new Date(),
+      };
+      const discoveredBeastBeastData = {
+        beast: gameData.BEASTS[discoveredBeastEvent.id],
+        health:
+          discoveredBeastEvent.adventurerState["adventurer"]["beastHealth"],
+        level: discoveredBeastEvent.beastSpecs["level"],
+        special1: discoveredBeastEvent.beastSpecs["specials"]["special1"],
+        special2: discoveredBeastEvent.beastSpecs["specials"]["special2"],
+        special3: discoveredBeastEvent.beastSpecs["specials"]["special3"],
+        seed: discoveredBeastEvent.seed,
+        adventurerId: discoveredBeastEvent.adventurerState["adventurerId"],
+        slainOnTime: null,
+        createdTime: new Date(),
+        lastUpdatedTime: new Date(),
+        timestamp: new Date(),
+      };
+      return [
+        discoveredBeastAdventurerData,
+        discoveredBeastData,
+        discoveredBeastBeastData,
+      ];
     case "AmbushedByBeast":
       const ambushedByBeastEvent = event as AmbushedByBeastEvent;
-      return processAdventurerState(ambushedByBeastEvent);
+      const ambushedByBeastAdventurerData =
+        processAdventurerState(ambushedByBeastEvent);
+      const ambushedByBeastData = {
+        txHash: txHash,
+        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          ambushedByBeastEvent.adventurerState["adventurer"]["health"],
+        discoveryType: gameData.DISCOVERY_TYPES[1],
+        subDiscoveryType: null,
+        outputAmount: 0,
+        obstacle: null,
+        obstacleLevel: null,
+        dodgedObstacle: 0,
+        damageTaken: 0,
+        damageLocation: null,
+        xpEarnedAdventurer: null,
+        xpEarnedItems: null,
+        entity: gameData.BEASTS[ambushedByBeastEvent.id],
+        entityLevel: ambushedByBeastEvent.beastSpecs["level"],
+        entityHealth:
+          ambushedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
+        special1: ambushedByBeastEvent.beastSpecs["specials"]["special1"],
+        special2: ambushedByBeastEvent.beastSpecs["specials"]["special2"],
+        special3: ambushedByBeastEvent.beastSpecs["specials"]["special3"],
+        ambushed: null,
+        seed: ambushedByBeastEvent.seed,
+        discoveryTime: new Date(),
+        timestamp: new Date(),
+      };
+      const ambushedByBeastBeastData = {
+        beast: gameData.BEASTS[ambushedByBeastEvent.id],
+        health:
+          ambushedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
+        level: ambushedByBeastEvent.beastSpecs["level"],
+        special1: ambushedByBeastEvent.beastSpecs["specials"]["special1"],
+        special2: ambushedByBeastEvent.beastSpecs["specials"]["special2"],
+        special3: ambushedByBeastEvent.beastSpecs["specials"]["special3"],
+        seed: ambushedByBeastEvent.seed,
+        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"],
+        slainOnTime: null,
+        createdTime: new Date(),
+        lastUpdatedTime: new Date(),
+        timestamp: new Date(),
+      };
+      const ambushedByBeastAttackData = {
+        txHash: txHash,
+        beast: gameData.BEASTS[ambushedByBeastEvent.id],
+        beastHealth:
+          ambushedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
+        beastLevel: ambushedByBeastEvent.beastSpecs["level"],
+        special1: ambushedByBeastEvent.beastSpecs["specials"]["special1"],
+        special2: ambushedByBeastEvent.beastSpecs["specials"]["special2"],
+        special3: ambushedByBeastEvent.beastSpecs["specials"]["special3"],
+        seed: ambushedByBeastEvent.seed,
+        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          ambushedByBeastEvent.adventurerState["adventurer"]["health"],
+        attacker: "Beast",
+        fled: null,
+        damageDealt: 0,
+        criticalHit: ambushedByBeastEvent.criticalHit,
+        damageTaken: ambushedByBeastEvent.damage,
+        damageLocation: ambushedByBeastEvent.location,
+        xpEarnedAdventurer: 0,
+        xpEarnedItems: 0,
+        goldEarned: 0,
+        discoveryTime: new Date(),
+        blockTime: new Date(),
+        timestamp: new Date(),
+      };
+      return [
+        ambushedByBeastAdventurerData,
+        ambushedByBeastData,
+        ambushedByBeastBeastData,
+        ambushedByBeastAttackData,
+      ];
     case "AttackedBeast":
       const attackedBeastEvent = event as AttackedBeastEvent;
-      return processAdventurerState(attackedBeastEvent);
+      const attackedBeastAdventurerData =
+        processAdventurerState(attackedBeastEvent);
+      const attackedBeastData = {
+        txHash: txHash,
+        beast: gameData.BEASTS[attackedBeastEvent.id],
+        beastHealth:
+          attackedBeastEvent.adventurerState["adventurer"]["beastHealth"],
+        beastLevel: attackedBeastEvent.beastSpecs["level"],
+        special1: attackedBeastEvent.beastSpecs["specials"]["special1"],
+        special2: attackedBeastEvent.beastSpecs["specials"]["special2"],
+        special3: attackedBeastEvent.beastSpecs["specials"]["special3"],
+        seed: attackedBeastEvent.seed,
+        adventurerId: attackedBeastEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          attackedBeastEvent.adventurerState["adventurer"]["health"],
+        attacker: "Adventurer",
+        fled: null,
+        damageDealt: attackedBeastEvent.damage,
+        criticalHit: attackedBeastEvent.criticalHit,
+        damageTaken: 0,
+        damageLocation: attackedBeastEvent.location,
+        xpEarnedAdventurer: 0,
+        xpEarnedItems: 0,
+        goldEarned: 0,
+        discoveryTime: new Date(),
+        blockTime: new Date(),
+        timestamp: new Date(),
+      };
+      return [attackedBeastAdventurerData, attackedBeastData];
     case "AttackedByBeast":
-      const AttackedByBeastEvent = event as AttackedByBeastEvent;
-      return processAdventurerState(AttackedByBeastEvent);
+      const attackedByBeastEvent = event as AttackedByBeastEvent;
+      const attackedByBeastData = {
+        txHash: txHash,
+        beast: gameData.BEASTS[attackedByBeastEvent.id],
+        beastHealth:
+          attackedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
+        beastLevel: attackedByBeastEvent.beastSpecs["level"],
+        special1: attackedByBeastEvent.beastSpecs["specials"]["special1"],
+        special2: attackedByBeastEvent.beastSpecs["specials"]["special2"],
+        special3: attackedByBeastEvent.beastSpecs["specials"]["special3"],
+        seed: attackedByBeastEvent.seed,
+        adventurerId: attackedByBeastEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          attackedByBeastEvent.adventurerState["adventurer"]["health"],
+        attacker: "Beast",
+        fled: null,
+        damageDealt: 0,
+        criticalHit: attackedByBeastEvent.criticalHit,
+        damageTaken: attackedByBeastEvent.damage,
+        damageLocation: attackedByBeastEvent.location,
+        xpEarnedAdventurer: 0,
+        xpEarnedItems: 0,
+        goldEarned: 0,
+        discoveryTime: new Date(),
+        blockTime: new Date(),
+        timestamp: new Date(),
+      };
+      return [attackedByBeastEvent, attackedByBeastData];
     case "SlayedBeast":
       const slayedBeastEvent = event as SlayedBeastEvent;
-      return processAdventurerState(slayedBeastEvent);
+      const slayedBeastAdventurerData =
+        processAdventurerState(slayedBeastEvent);
+      const slayedBeastData = {
+        txHash: txHash,
+        beast: gameData.BEASTS[slayedBeastEvent.id],
+        beastHealth:
+          slayedBeastEvent.adventurerState["adventurer"]["beastHealth"],
+        beastLevel: slayedBeastEvent.beastSpecs["level"],
+        special1: slayedBeastEvent.beastSpecs["specials"]["special1"],
+        special2: slayedBeastEvent.beastSpecs["specials"]["special2"],
+        special3: slayedBeastEvent.beastSpecs["specials"]["special3"],
+        seed: slayedBeastEvent.seed,
+        adventurerId: slayedBeastEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          slayedBeastEvent.adventurerState["adventurer"]["health"],
+        attacker: "Adventurer",
+        fled: null,
+        damageDealt: slayedBeastEvent.damageDealt,
+        criticalHit: slayedBeastEvent.criticalHit,
+        damageTaken: 0,
+        damageLocation: null,
+        xpEarnedAdventurer: slayedBeastEvent.xpEarnedAdventurer,
+        xpEarnedItems: slayedBeastEvent.xpEarnedItems,
+        goldEarned: slayedBeastEvent.goldEarned,
+        discoveryTime: new Date(),
+        blockTime: new Date(),
+        timestamp: new Date(),
+      };
+      return [slayedBeastAdventurerData, slayedBeastData];
     case "FleeFailed":
       const fleeFailedEvent = event as FleeFailedEvent;
-      return processAdventurerState(fleeFailedEvent);
+      const fleeFailedAdventurerData = processAdventurerState(fleeFailedEvent);
+      const fleeFailedData = {
+        txHash: txHash,
+        beast: gameData.BEASTS[fleeFailedEvent.id],
+        beastHealth:
+          fleeFailedEvent.adventurerState["adventurer"]["beastHealth"],
+        beastLevel: fleeFailedEvent.beastSpecs["level"],
+        special1: fleeFailedEvent.beastSpecs["specials"]["special1"],
+        special2: fleeFailedEvent.beastSpecs["specials"]["special2"],
+        special3: fleeFailedEvent.beastSpecs["specials"]["special3"],
+        seed: fleeFailedEvent.seed,
+        adventurerId: fleeFailedEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          fleeFailedEvent.adventurerState["adventurer"]["health"],
+        attacker: "Beast",
+        fled: null,
+        damageDealt: 0,
+        criticalHit: false,
+        damageTaken: 0,
+        damageLocation: null,
+        xpEarnedAdventurer: 0,
+        xpEarnedItems: 0,
+        goldEarned: 0,
+        discoveryTime: new Date(),
+        blockTime: new Date(),
+        timestamp: new Date(),
+      };
+      return [fleeFailedAdventurerData, fleeFailedData];
     case "FleeSucceeded":
       const fleeSucceededEvent = event as FleeSucceededEvent;
-      return processAdventurerState(fleeSucceededEvent);
+      const fleeSucceededAdventurerData =
+        processAdventurerState(fleeSucceededEvent);
+      const fleeSucceededData = {
+        txHash: txHash,
+        beast: gameData.BEASTS[fleeSucceededEvent.id],
+        beastHealth:
+          fleeSucceededEvent.adventurerState["adventurer"]["beastHealth"],
+        beastLevel: fleeSucceededEvent.beastSpecs["level"],
+        special1: fleeSucceededEvent.beastSpecs["specials"]["special1"],
+        special2: fleeSucceededEvent.beastSpecs["specials"]["special2"],
+        special3: fleeSucceededEvent.beastSpecs["specials"]["special3"],
+        seed: fleeSucceededEvent.seed,
+        adventurerId: fleeSucceededEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          fleeSucceededEvent.adventurerState["adventurer"]["health"],
+        attacker: "Beast",
+        fled: true,
+        damageDealt: 0,
+        criticalHit: false,
+        damageTaken: 0,
+        damageLocation: null,
+        xpEarnedAdventurer: 0,
+        xpEarnedItems: 0,
+        goldEarned: 0,
+        discoveryTime: new Date(),
+        blockTime: new Date(),
+        timestamp: new Date(),
+      };
+      return [fleeSucceededAdventurerData, fleeSucceededData];
     case "PurchasedItems":
       const purchasedItemsEvent = event as PurchasedItemsEvent;
-      return processAdventurerState(purchasedItemsEvent);
+      const purchasedItemsAdventurerData =
+        processAdventurerState(purchasedItemsEvent);
+      return [purchasedItemsAdventurerData, purchasedItemsEvent.purchases];
     case "PurchasedPotions":
       const purchasedPotionsEvent = event as PurchasedPotionsEvent;
       return processAdventurerState(purchasedPotionsEvent);
     case "EquippedItems":
       const equippedItemsEvent = event as EquippedItemsEvent;
-      return processAdventurerState(equippedItemsEvent);
+      const equipedItemsAdventurerData =
+        processAdventurerState(equippedItemsEvent);
+      const formattedEquippedItems = [];
+      for (let i = 0; i < equippedItemsEvent.equippedItems.length; i++) {
+        formattedEquippedItems.push(
+          gameData.ITEMS[equippedItemsEvent.equippedItems[i]]
+        );
+      }
+      const formattedUnequippedItems = [];
+      for (let i = 0; i < equippedItemsEvent.unequippedItems.length; i++) {
+        formattedUnequippedItems.push(
+          gameData.ITEMS[equippedItemsEvent.equippedItems[i]]
+        );
+      }
+      return [
+        equipedItemsAdventurerData,
+        formattedEquippedItems,
+        formattedUnequippedItems,
+      ];
     case "DroppedItems":
       const droppedItemsEvent = event as DroppedItemsEvent;
-      return processAdventurerState(droppedItemsEvent);
+      const droppedItemsAdventurerData =
+        processAdventurerState(droppedItemsEvent);
+      const formattedDroppedItems = [];
+      for (let i = 0; i < droppedItemsEvent.itemIds.length; i++) {
+        formattedDroppedItems.push(
+          gameData.ITEMS[droppedItemsEvent.itemIds[i]]
+        );
+      }
+      return [droppedItemsAdventurerData, formattedDroppedItems];
     case "GreatnessIncreased":
       const greatnessIncreasedEvent = event as GreatnessIncreasedEvent;
       return processAdventurerState(greatnessIncreasedEvent);
     case "ItemSpecialUnlocked":
       const itemsSpecialUnlockedEvent = event as ItemSpecialUnlockedEvent;
-      return processAdventurerState(itemsSpecialUnlockedEvent);
+      const itemSpecialUnlockedAdventurerData = processAdventurerState(
+        itemsSpecialUnlockedEvent
+      );
+      const itemData = {
+        item: itemsSpecialUnlockedEvent.id,
+        special1: itemsSpecialUnlockedEvent.specials.special1,
+        special2: itemsSpecialUnlockedEvent.specials.special2,
+        special3: itemsSpecialUnlockedEvent.specials.special3,
+        timestamp: new Date(),
+      };
+      return [itemSpecialUnlockedAdventurerData, itemData];
     case "NewHighScore":
       const newHishScoreEvent = event as NewHighScoreEvent;
       return processAdventurerState(newHishScoreEvent);
@@ -245,9 +692,72 @@ export function processData(event: EventData, eventName: string) {
       return processAdventurerState(adventurerLeveledUpEvent);
     case "NewItemsAvailable":
       const newItemsAvailableEvent = event as NewItemsAvailableEvent;
-      return processAdventurerState(newItemsAvailableEvent);
+      const newItemsAvailableAdventurerData = processAdventurerState(
+        newItemsAvailableEvent
+      );
+      const formattedNewItems = [];
+      for (let i = 0; i < newItemsAvailableEvent.items.length; i++) {
+        formattedNewItems.push(
+          gameData.ITEMS[newItemsAvailableEvent.items[i]["item"]["id"]]
+        );
+      }
+      return [newItemsAvailableAdventurerData, formattedNewItems];
     case "IdleDeathPenalty":
       const idleDeathPenaltyEvent = event as IdleDeathPenaltyEvent;
-      return processAdventurerState(idleDeathPenaltyEvent);
+      const penaltyAdventurerData = processAdventurerState(
+        idleDeathPenaltyEvent
+      );
+      const penaltyBattleData = {
+        txHash: txHash,
+        beast: null,
+        beastHealth: 0,
+        beastLevel: 0,
+        special1: null,
+        special2: null,
+        special3: null,
+        seed: 0,
+        adventurerId: idleDeathPenaltyEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          idleDeathPenaltyEvent.adventurerState["adventurer"]["health"],
+        attacker: null,
+        fled: null,
+        damageDealt: 0,
+        criticalHit: false,
+        damageTaken: 0,
+        damageLocation: null,
+        xpEarnedAdventurer: 0,
+        xpEarnedItems: 0,
+        goldEarned: 0,
+        discoveryTime: new Date(),
+        blockTime: new Date(),
+        timestamp: new Date(),
+      };
+      const penaltyDiscoveryData = {
+        txHash: txHash,
+        adventurerId: idleDeathPenaltyEvent.adventurerState["adventurerId"],
+        adventurerHealth:
+          idleDeathPenaltyEvent.adventurerState["adventurer"]["health"],
+        discoveryType: null,
+        subDiscoveryType: null,
+        outputAmount: 0,
+        obstacle: null,
+        obstacleLevel: null,
+        dodgedObstacle: 0,
+        damageTaken: 0,
+        damageLocation: null,
+        xpEarnedAdventurer: null,
+        xpEarnedItems: null,
+        entity: null,
+        entityLevel: null,
+        entityHealth: 0,
+        special1: null,
+        special2: null,
+        special3: null,
+        ambushed: null,
+        seed: 0,
+        discoveryTime: new Date(),
+        timestamp: new Date(),
+      };
+      return [penaltyAdventurerData, penaltyBattleData, penaltyDiscoveryData];
   }
 }
