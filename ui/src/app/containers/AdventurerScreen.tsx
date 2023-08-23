@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAccount } from "@starknet-react/core";
 // import { getAdventurersByOwner } from "../hooks/graphql/queries";
 import { padAddress } from "../lib/utils";
@@ -54,6 +54,12 @@ export default function AdventurerScreen() {
   useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
 
   console.log(owner);
+
+  // const ownerVariables = useMemo(() => {
+  //   return {
+  //     owner: owner,
+  //   };
+  // }, [owner]);
 
   useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
     owner: owner,

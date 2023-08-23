@@ -136,6 +136,10 @@ export default function Home() {
     setIntroComplete(true);
   };
 
+  const adventurerIdVariables = useMemo(() => {
+    return { id: adventurer?.id ?? 0 };
+  }, [adventurer?.id]);
+
   useCustomQuery("adventurerByIdQuery", getAdventurerById, {
     id: adventurer?.id ?? 0,
   });

@@ -2,6 +2,7 @@ import { use, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "./useQueryStore";
 import { AdventurerQuery, BattleQuery, ItemQuery } from "./graphql/types";
+import { isEqual } from "lodash";
 
 type Variables = Record<
   string,
@@ -32,11 +33,15 @@ const useCustomQuery = (
     }
   }, [refetch]);
 
+  const prevVariablesRef = useRef<Variables>();
+
   useEffect(() => {
-    if (data) {
+    console.log(queryKey, variables);
+    if (data && !isEqual(prevVariablesRef.current, variables)) {
       updateData(queryKey, data, loading, refetchWrapper);
     }
-  }, []);
+    prevVariablesRef.current = variables;
+  }, [variables]);
 };
 
 export default useCustomQuery;
