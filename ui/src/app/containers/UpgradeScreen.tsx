@@ -41,7 +41,7 @@ import {
   ItemPurchase,
 } from "../types";
 import Summary from "../components/upgrade/Summary";
-import { syscalls } from "../lib/utils/syscalls";
+import { Syscalls } from "../lib/utils/Syscalls";
 
 /**
  * @container
@@ -73,9 +73,7 @@ export default function UpgradeScreen() {
     Potions: 0,
   });
 
-  const { resetDataUpdated } = useQueriesStore();
-
-  const { upgrade } = syscalls();
+  const { upgrade } = Syscalls();
 
   const gameData = new GameData();
 
@@ -429,7 +427,6 @@ export default function UpgradeScreen() {
                       } w-1/2`}
                       onClick={() => {
                         handleSubmitUpgradeTx();
-                        resetDataUpdated("adventurerByIdQuery");
                       }}
                       disabled={nextDisabled || loading}
                     >

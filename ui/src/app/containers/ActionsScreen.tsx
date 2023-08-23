@@ -21,7 +21,7 @@ import { padAddress } from "../lib/utils";
 import BeastScreen from "./BeastScreen";
 import { NullDiscovery } from "../types";
 import useUIStore from "../hooks/useUIStore";
-import { syscalls } from "@/app/lib/utils/syscalls";
+import { Syscalls } from "@/app/lib/utils/Syscalls";
 
 /**
  * @container
@@ -45,7 +45,7 @@ export default function ActionsScreen() {
     (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
   );
 
-  const { explore } = syscalls();
+  const { explore } = Syscalls();
 
   useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
     txHash: padAddress(hash),

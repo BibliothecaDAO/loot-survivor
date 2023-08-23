@@ -16,7 +16,7 @@ import { getKeyFromValue, stringToFelt, getRandomNumber } from ".";
 import { parseEvents } from "./parseEvents";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
-export function syscalls() {
+export function Syscalls() {
   const gameData = new GameData();
 
   const { gameContract, lordsContract } = useContracts();

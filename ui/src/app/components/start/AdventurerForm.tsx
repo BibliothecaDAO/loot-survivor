@@ -16,7 +16,7 @@ import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
 import { MdClose } from "react-icons/md";
-import { syscalls } from "@/app/lib/utils/syscalls";
+import { Syscalls } from "@/app/lib/utils/Syscalls";
 
 export interface AdventurerFormProps {
   isActive: boolean;
@@ -54,7 +54,7 @@ export const AdventurerForm = ({
   const walletConnectors = () =>
     connectors.filter((connector) => !connector.id.includes("0x"));
 
-  const { spawn } = syscalls();
+  const { spawn } = Syscalls();
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement> | KeyboardEvent) => {

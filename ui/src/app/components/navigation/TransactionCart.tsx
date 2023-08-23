@@ -31,7 +31,7 @@ import {
 } from "../../types";
 import { GameData } from "../GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
-import { syscalls } from "@/app/lib/utils/syscalls";
+import { Syscalls } from "@/app/lib/utils/Syscalls";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
@@ -54,7 +54,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const [notification, setNotification] = useState<string[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
   const [loadingQuery, setLoadingQuery] = useState<QueryKey | null>(null);
-  const { data, resetDataUpdated } = useQueriesStore();
+  const { data } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
@@ -69,7 +69,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
 
-  const { multicall } = syscalls();
+  const { multicall } = Syscalls();
 
   const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
