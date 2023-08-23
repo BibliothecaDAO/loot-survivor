@@ -31,7 +31,7 @@ export default function AdventurerScreen() {
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
-
+  const { data } = useQueriesStore();
   const adventurers = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers || []
   );
@@ -52,6 +52,14 @@ export default function AdventurerScreen() {
   // );
 
   useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
+
+  console.log(owner);
+
+  useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
+    owner: owner,
+  });
+
+  console.log(data.adventurersByOwnerQuery);
 
   // TODO: Remove polling
   // useCustomQuery(

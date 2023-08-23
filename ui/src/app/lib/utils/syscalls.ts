@@ -22,12 +22,7 @@ export function syscalls() {
   const { gameContract, lordsContract } = useContracts();
   const { addTransaction } = useTransactionManager();
   const { account } = useAccount();
-  const {
-    data: queryData,
-    resetDataUpdated,
-    resetData,
-    setData,
-  } = useQueriesStore();
+  const { data: queryData, resetData, setData } = useQueriesStore();
 
   const formatAddress = account ? account.address : "0x0";
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -165,6 +160,7 @@ export function syscalls() {
         },
       ],
     });
+    stopLoading(`You have spawned ${formData.name}!`);
   };
 
   const explore = async (till_beast: boolean) => {
@@ -182,7 +178,7 @@ export function syscalls() {
 
     const tx = await handleSubmitCalls(writeAsync);
     const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-      retryInterval: 100,
+      retryInterval: 1000,
     });
 
     setTxHash(tx.transaction_hash);
@@ -222,7 +218,7 @@ export function syscalls() {
     );
     const tx = await handleSubmitCalls(writeAsync);
     const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-      retryInterval: 100,
+      retryInterval: 1000,
     });
     setTxHash(tx.transaction_hash);
     addTransaction({
@@ -232,7 +228,6 @@ export function syscalls() {
       },
     });
 
-    resetDataUpdated("battlesByTxHashQuery");
     setEquipItems([]);
     setDropItems([]);
   };
@@ -248,7 +243,7 @@ export function syscalls() {
     });
     const tx = await handleSubmitCalls(writeAsync);
     const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-      retryInterval: 100,
+      retryInterval: 1000,
     });
     setTxHash(tx.transaction_hash);
     addTransaction({
@@ -268,7 +263,6 @@ export function syscalls() {
         ).data,
       ],
     });
-    resetDataUpdated("battlesByTxHashQuery");
     setEquipItems([]);
     setDropItems([]);
   };
@@ -291,7 +285,7 @@ export function syscalls() {
     );
     const tx = await handleSubmitCalls(writeAsync);
     const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-      retryInterval: 100,
+      retryInterval: 1000,
     });
     setTxHash(tx.transaction_hash);
     addTransaction({
@@ -368,7 +362,7 @@ export function syscalls() {
 
     const tx = await handleSubmitCalls(writeAsync);
     const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-      retryInterval: 100,
+      retryInterval: 1000,
     });
     setTxHash(tx?.transaction_hash);
     addTransaction({

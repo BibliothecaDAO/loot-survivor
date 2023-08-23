@@ -9,7 +9,6 @@ type LoadingState = {
   hash: string;
   txAccepted: boolean;
   pendingMessage: string | string[];
-  loadingQuery: QueryKey | null;
   showNotification: boolean;
   notificationData: any;
   adventurer: number | undefined;
@@ -51,7 +50,6 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       loading: true,
       type: type,
       pendingMessage,
-      loadingQuery,
       adventurer,
       notificationData,
     });

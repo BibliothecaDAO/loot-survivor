@@ -92,7 +92,6 @@ type QueriesState = {
     index?: number
   ) => void;
   isLoading: Record<QueryKey, boolean>;
-  isDataUpdated: Record<QueryKey, boolean> & { global: boolean };
   refetchFunctions: Record<QueryKey, () => Promise<any>>;
   updateData: (
     queryKey: QueryKey,
@@ -102,7 +101,6 @@ type QueriesState = {
   ) => void;
   refetch: (queryKey?: QueryKey) => Promise<void>;
   resetData: (queryKey?: QueryKey) => void;
-  resetDataUpdated: (queryKey?: QueryKey) => void;
 };
 
 const initialData: InitialData = {
@@ -238,18 +236,15 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
               [internalKey]: targetArray,
             },
           },
-          isDataUpdated: { ...state.isDataUpdated, [queryKey]: true },
         };
       } else {
         return {
           data: { ...state.data, [queryKey]: newData },
-          isDataUpdated: { ...state.isDataUpdated, [queryKey]: true },
         };
       }
     });
   },
   isLoading: initialLoading,
-  isDataUpdated: initialIsDataUpdated,
   refetchFunctions: initialRefetchFunctions,
   updateData: (queryKey, newData, loading) => {
     set((state) => {
@@ -267,15 +262,6 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
       }));
     } else {
       set({ data: initialData });
-    }
-  },
-  resetDataUpdated: (queryKey) => {
-    if (queryKey) {
-      set((state) => ({
-        isDataUpdated: { ...state.isDataUpdated, [queryKey]: false },
-      }));
-    } else {
-      set({ isDataUpdated: initialIsDataUpdated });
     }
   },
   refetch: async (queryKey) => {

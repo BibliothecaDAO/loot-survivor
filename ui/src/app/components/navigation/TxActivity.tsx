@@ -23,7 +23,6 @@ import { InvokeTransactionReceiptResponse } from "starknet";
 
 export const TxActivity = () => {
   const notificationData = useLoadingStore((state) => state.notificationData);
-  const loadingQuery = useLoadingStore((state) => state.loadingQuery);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const loading = useLoadingStore((state) => state.loading);
   const hash = useLoadingStore((state) => state.hash);
@@ -44,14 +43,7 @@ export const TxActivity = () => {
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
   );
-  const {
-    data: queryData,
-    isDataUpdated,
-    refetch,
-    resetDataUpdated,
-    setData,
-    resetData,
-  } = useQueriesStore();
+  const { data: queryData, refetch, setData, resetData } = useQueriesStore();
   const { data } = useWaitForTransaction({
     hash,
     watch: true,
@@ -64,7 +56,6 @@ export const TxActivity = () => {
   }) as { data: InvokeTransactionReceiptResponse };
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
-  const isLoadingQueryUpdated = isDataUpdated[loadingQuery!];
 
   const setDeathNotification = (
     type: string,
@@ -104,7 +95,6 @@ export const TxActivity = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log(txAccepted, hash, isLoadingQueryUpdated);
       if (!txAccepted || !hash || data?.events?.length == 0) return;
       const events = parseEvents(data);
       const handleAttackOrFlee = async () => {
@@ -186,7 +176,6 @@ export const TxActivity = () => {
       };
 
       const handleMulticall = async () => {
-        console.log(loadingQuery, isLoadingQueryUpdated);
         const killedFromEquipping =
           (pendingMessage as string[]).includes("Equipping") && !isAlive;
         if (killedFromEquipping) {
@@ -197,6 +186,7 @@ export const TxActivity = () => {
 
       const handleCreate = async () => {
         console.log("in create");
+        // NOW HANDLED IN SYSCALLS
         // setData("adventurersByOwnerQuery", {
         //   adventurers: [
         //     ...(queryData.adventurersByOwnerQuery?.adventurers ?? []),
@@ -208,7 +198,7 @@ export const TxActivity = () => {
         //     events.find((event) => event.name === "StartGame").data[0],
         //   ],
         // });
-        stopLoading(notificationData);
+        // stopLoading(notificationData);
       };
 
       const handleDefault = async () => {
@@ -217,7 +207,6 @@ export const TxActivity = () => {
 
       const handleDataUpdate = () => {
         setTxAccepted(false);
-        resetDataUpdated(loadingQuery!);
       };
 
       console.log(type);
@@ -266,7 +255,7 @@ export const TxActivity = () => {
       console.log(queryData.adventurerByIdQuery.adventurers[0]);
       setAdventurer(queryData.adventurerByIdQuery.adventurers[0]);
     }
-  }, [isLoadingQueryUpdated]);
+  }, []);
 
   // stop loading when an error is caught
   useEffect(() => {

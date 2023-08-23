@@ -153,10 +153,6 @@ export default function Home() {
   //   }
   // }, [data.adventurerByIdQuery?.adventurers[0]?.timestamp]);
 
-  useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
-    owner: owner,
-  });
-
   useEffect(() => {
     return () => {
       stop();
