@@ -45,23 +45,13 @@ export default function Info({
 
   const gameData = new GameData();
 
-  useCustomQuery(
-    "itemsByAdventurerQuery",
-    getItemsByAdventurer,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
+    adventurerId: adventurer?.id ?? 0,
+  });
 
-  useCustomQuery(
-    "itemsByProfileQuery",
-    getItemsByAdventurer,
-    {
-      adventurerId: profile ?? 0,
-    },
-    txAccepted
-  );
+  useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
+    adventurerId: profile ?? 0,
+  });
 
   const items = profileExists
     ? data.itemsByProfileQuery

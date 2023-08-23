@@ -51,12 +51,7 @@ export default function AdventurerScreen() {
   //   txAccepted
   // );
 
-  useCustomQuery(
-    "adventurersByXPQuery",
-    getAdventurerByXP,
-    undefined,
-    txAccepted
-  );
+  useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
 
   // TODO: Remove polling
   // useCustomQuery(

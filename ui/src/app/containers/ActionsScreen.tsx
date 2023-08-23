@@ -47,54 +47,29 @@ export default function ActionsScreen() {
 
   const { explore } = syscalls();
 
-  useCustomQuery(
-    "discoveryByTxHashQuery",
-    getDiscoveryByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted
-  );
+  useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
+    txHash: padAddress(hash),
+  });
 
-  useCustomQuery(
-    "latestDiscoveriesQuery",
-    getLatestDiscoveries,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
+    adventurerId: adventurer?.id ?? 0,
+  });
 
-  useCustomQuery(
-    "lastBeastQuery",
-    getLastBeastDiscovery,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  useCustomQuery("lastBeastQuery", getLastBeastDiscovery, {
+    adventurerId: adventurer?.id ?? 0,
+  });
 
-  useCustomQuery(
-    "beastQuery",
-    getBeast,
-    {
-      adventurerId: adventurer?.id ?? 0,
-      beast: lastBeast?.entity,
-      seed: lastBeast?.seed,
-    },
-    txAccepted
-  );
+  useCustomQuery("beastQuery", getBeast, {
+    adventurerId: adventurer?.id ?? 0,
+    beast: lastBeast?.entity,
+    seed: lastBeast?.seed,
+  });
 
-  useCustomQuery(
-    "battlesByBeastQuery",
-    getBattlesByBeast,
-    {
-      adventurerId: adventurer?.id ?? 0,
-      beast: lastBeast?.entity,
-      seed: lastBeast?.seed,
-    },
-    txAccepted
-  );
+  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
+    adventurerId: adventurer?.id ?? 0,
+    beast: lastBeast?.entity,
+    seed: lastBeast?.seed,
+  });
 
   const buttonsData = [
     {

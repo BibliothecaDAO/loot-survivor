@@ -136,14 +136,9 @@ export default function Home() {
     setIntroComplete(true);
   };
 
-  useCustomQuery(
-    "adventurerByIdQuery",
-    getAdventurerById,
-    {
-      id: adventurer?.id ?? 0,
-    },
-    false
-  );
+  useCustomQuery("adventurerByIdQuery", getAdventurerById, {
+    id: adventurer?.id ?? 0,
+  });
 
   console.log(data.adventurersByOwnerQuery);
   console.log(data.adventurerByIdQuery);
@@ -158,14 +153,9 @@ export default function Home() {
   //   }
   // }, [data.adventurerByIdQuery?.adventurers[0]?.timestamp]);
 
-  useCustomQuery(
-    "adventurersByOwnerQuery",
-    getAdventurersByOwner,
-    {
-      owner: owner,
-    },
-    false
-  );
+  useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
+    owner: owner,
+  });
 
   useEffect(() => {
     return () => {

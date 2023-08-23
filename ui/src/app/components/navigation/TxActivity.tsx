@@ -90,7 +90,6 @@ export const TxActivity = () => {
     {
       txHash: padAddress(hash),
     },
-    txAccepted,
     !hash
   );
 
@@ -100,7 +99,6 @@ export const TxActivity = () => {
     {
       txHash: padAddress(hash),
     },
-    txAccepted,
     !hash
   );
 

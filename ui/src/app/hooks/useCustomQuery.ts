@@ -14,18 +14,14 @@ const useCustomQuery = (
   queryKey: QueryKey,
   query: any,
   variables?: Variables,
-  shouldPoll?: boolean,
   skip?: boolean
 ) => {
   const { updateData } = useQueriesStore();
 
-  const { data, startPolling, stopPolling, loading, refetch, error } = useQuery(
-    query,
-    {
-      variables: variables,
-      skip: skip,
-    }
-  );
+  const { data, loading, refetch } = useQuery(query, {
+    variables: variables,
+    skip: skip,
+  });
 
   const refetchWrapper = useCallback(async () => {
     try {
@@ -41,14 +37,6 @@ const useCustomQuery = (
       updateData(queryKey, data, loading, refetchWrapper);
     }
   }, []);
-
-  useEffect(() => {
-    if (shouldPoll) {
-      startPolling(5000);
-    } else {
-      stopPolling();
-    }
-  }, [shouldPoll, startPolling, stopPolling]);
 };
 
 export default useCustomQuery;
