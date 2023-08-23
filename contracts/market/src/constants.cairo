@@ -1,5 +1,5 @@
 // number of items per level per survivor
-const NUMBER_OF_ITEMS_PER_LEVEL: u8 = 20;
+const NUMBER_OF_ITEMS_PER_LEVEL: u8 = 21;
 
 // number of loot items
 const NUM_LOOT_ITEMS: u8 = 101;

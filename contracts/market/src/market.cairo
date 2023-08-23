@@ -3,6 +3,7 @@ use traits::{TryInto, Into};
 use array::{ArrayTrait, SpanTrait};
 use option::OptionTrait;
 use core::clone::Clone;
+use poseidon::poseidon_hash_span;
 
 use lootitems::{
     loot::{Loot, ILoot, ImplLoot}, statistics::{item_tier, constants::{ItemId, NUM_ITEMS}}
@@ -25,12 +26,17 @@ struct ItemPurchase {
     equip: bool,
 }
 
+// @dev: While we could abstract the loop in many of the functions of this class
+//       we intentionally don't to provide maximum gas efficieny. For example, we could
+//       provide a 'get_market_item_ids' and then have the other functions iterate over that
+//       array, but that would require an additional loop and additional gas. Perhaps one of you
+//       reading this will be able to find a way to abstract the loop without incurring additional
+//       gas costs. If so, I look forward to seeing the associated pull request. Cheers.
 #[generate_trait]
 impl ImplMarket of IMarket {
-    // @notice Retrieves the price associated with a particular tier.
+    // @notice Retrieves the price associated with an item tier.
     // @param tier - A Tier enum indicating the item tier.
     // @return The price as an unsigned 16-bit integer.
-    // @dev This function matches the tier enum to a respective price calculation.
     fn get_price(tier: Tier) -> u16 {
         match tier {
             Tier::None(()) => 0,
@@ -42,150 +48,101 @@ impl ImplMarket of IMarket {
         }
     }
 
-    /// @notice Retrieves all items associated with an array of seeds and offsets.
-    /// @param seeds - A Span of 128-bit unsigned integers representing unique identifiers for the seeds.
-    /// @param offsets - A Span of 8-bit unsigned integers representing offset values for the seeds.
-    /// @return An Array of Loot.
-    fn get_all_items(seeds: Span<u256>, offsets: Span<u8>) -> Array<Loot> {
-        let mut all_items = ArrayTrait::<Loot>::new();
+    // @notice Returns an array of items that are available on the market.
+    // @param adventurer_entropy The entropy of the adventurer used for randomness.
+    // @param adventurer_xp The xp of the adventurer used for randomness.
+    // @param adventurer_stat_points The stat points of the adventurer used for market size
+    // @return An array of items that are available on the market.
+    fn get_market_items(
+        adventurer_entropy: u128, adventurer_xp: u16, adventurer_stat_points: u8
+    ) -> Array<u8> {
+        let market_size = ImplMarket::get_market_size(adventurer_stat_points);
+        if market_size >= NUM_ITEMS.into() {
+            return ImplMarket::all_loot_items();
+        }
 
-        // iterate over our array of seeds
-        let mut seed_index: u32 = 0;
+        let (seed, offset) = ImplMarket::get_market_seed_and_offset(
+            adventurer_entropy, adventurer_xp
+        );
+
+        let mut all_items = ArrayTrait::<u8>::new();
+        let mut item_count: u16 = 0;
         loop {
-            // if we checked all seeds, return false
-            if seed_index >= seeds.len() {
+            if item_count >= market_size.into() {
                 break;
             }
-            let seed = *seeds.at(seed_index);
-            let offset = *offsets.at(seed_index);
-
-            let mut item_offset: u256 = 0;
-            loop {
-                if item_offset >= offset.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
-                    break;
-                }
-
-                all_items.append(ImplLoot::get_item(ImplMarket::get_id(seed + item_offset.into())));
-                item_offset += offset.into();
-            };
-
-            // otherwise continue to the next seed
-            seed_index += 1;
+            let item_id = ImplMarket::get_id(seed + (offset.into() * item_count).into());
+            all_items.append(item_id);
+            item_count += 1;
         };
-
         all_items
     }
 
-    // Retrieves all items with their associated prices for an array of seeds and offsets.
-    // @param seeds - A Span of 128-bit unsigned integers representing unique identifiers for the seeds.
-    // @param offsets - A Span of 8-bit unsigned integers representing offset values for the seeds.
-    // @return An Array of LootWithPrice.
-    fn get_all_items_with_price(seeds: Span<u256>, offsets: Span<u8>) -> Array<LootWithPrice> {
-        let mut all_items = ArrayTrait::<LootWithPrice>::new();
+    // @notice Returns an array of items that are available on the market.
+    // @param adventurer_entropy The entropy of the adventurer used for randomness.
+    // @param adventurer_xp The xp of the adventurer used for randomness.
+    // @param adventurer_stat_points The stat points of the adventurer used for market size
+    // @param slot The slot of the item to filter by
+    // @return An array of items that are available on the market that match the slot
+    fn get_items_by_slot(
+        adventurer_entropy: u128, adventurer_xp: u16, adventurer_stat_points: u8, slot: Slot
+    ) -> Array<u8> {
+        let (seed, offset) = ImplMarket::get_market_seed_and_offset(
+            adventurer_entropy, adventurer_xp
+        );
 
-        // iterate over our array of seeds
-        let mut seed_index: u32 = 0;
-        loop {
-            // if we checked all seeds, return false
-            if seed_index >= seeds.len() {
-                break;
-            }
-            let seed = *seeds.at(seed_index);
-            let offset = *offsets.at(seed_index);
+        let market_size = ImplMarket::get_market_size(adventurer_stat_points);
 
-            let mut item_offset: u256 = 0;
-            loop {
-                if item_offset >= offset.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
-                    break ();
-                }
-
-                let id = ImplMarket::get_id(seed + item_offset.into());
-                all_items
-                    .append(
-                        LootWithPrice {
-                            item: ImplLoot::get_item(id),
-                            price: ImplMarket::get_price(ImplLoot::get_tier(id))
-                        }
-                    );
-                item_offset += offset.into();
-            };
-            // otherwise continue to the next seed
-            seed_index += 1;
-        };
-
-        all_items
-    }
-
-    // @notice Retrieves item IDs by specific slot for an array of seeds and offsets.
-    // @param seeds - A Span of 128-bit unsigned integers representing unique identifiers for the seeds.
-    // @param offsets - A Span of 8-bit unsigned integers representing offset values for the seeds.
-    // @param slot - A Slot enum indicating the specific slot to filter by.
-    // @return An Array of 8-bit unsigned integers representing item IDs.
-    fn get_items_by_slot(seeds: Span<u256>, offsets: Span<u8>, slot: Slot) -> Array<u8> {
         let mut return_ids = ArrayTrait::<u8>::new();
-
-        // iterate over our array of seeds
-        let mut seed_index: u32 = 0;
+        let mut item_count: u16 = 0;
         loop {
-            // if we checked all seeds, return false
-            if seed_index >= seeds.len() {
+            if item_count >= market_size {
                 break;
             }
-            let seed = *seeds.at(seed_index);
-            let offset = *offsets.at(seed_index);
-            let mut item_offset: u256 = 0;
-            loop {
-                if item_offset >= offset.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
-                    break ();
-                }
-                let id = ImplMarket::get_id((seed + item_offset.into()));
-                if (ImplLoot::get_slot(id) == slot) {
-                    return_ids.append(id);
-                }
-
-                item_offset += offset.into();
-            };
-            seed_index += 1;
+            let item_id = ImplMarket::get_id(seed + (offset.into() * item_count).into());
+            if (ImplLoot::get_slot(item_id) == slot) {
+                return_ids.append(item_id);
+            }
+            item_count += 1;
         };
-
         return_ids
     }
 
-    // @notice Retrieves item IDs by specific tier for an array of seeds and offsets.
-    // @param seeds - A Span of 128-bit unsigned integers representing unique identifiers for the seeds.
-    // @param offsets - A Span of 8-bit unsigned integers representing offset values for the seeds.
-    // @param tier - A Tier enum indicating the specific tier to filter by.
-    // @return An Array of 8-bit unsigned integers representing item IDs.
-    fn get_items_by_tier(seeds: Span<u256>, offsets: Span<u8>, tier: Tier) -> Array<u8> {
-        let mut return_ids = ArrayTrait::<u8>::new();
+    // @notice Returns an array of items that are available on the market.
+    // @param adventurer_entropy The entropy of the adventurer used for randomness.
+    // @param adventurer_xp The xp of the adventurer used for randomness.
+    // @param adventurer_stat_points The stat points of the adventurer used for market size
+    // @param tier The tier of the item to filter by
+    // @return An array of items that are available on the market that match the tier
+    fn get_items_by_tier(
+        adventurer_entropy: u128, adventurer_xp: u16, adventurer_stat_points: u8, tier: Tier
+    ) -> Array<u8> {
+        let (seed, offset) = ImplMarket::get_market_seed_and_offset(
+            adventurer_entropy, adventurer_xp
+        );
 
-        // iterate over our array of seeds
-        let mut seed_index: u32 = 0;
+        let market_size = ImplMarket::get_market_size(adventurer_stat_points);
+
+        let mut return_ids = ArrayTrait::<u8>::new();
+        let mut item_count: u16 = 0;
         loop {
-            // if we checked all seeds, return false
-            if seed_index >= seeds.len() {
+            if item_count >= market_size {
                 break;
             }
-            let seed = *seeds.at(seed_index);
-            let offset = *offsets.at(seed_index);
-
-            let mut item_offset: u256 = 0;
-            loop {
-                if item_offset >= offset.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
-                    break ();
-                }
-                let id = ImplMarket::get_id((seed + item_offset.into()));
-                if (ImplLoot::get_tier(id) == tier) {
-                    return_ids.append(id);
-                }
-
-                item_offset += offset.into();
-            };
-            // otherwise continue to the next seed
-            seed_index += 1;
+            let item_id = ImplMarket::get_id(seed + (offset.into() * item_count).into());
+            if (ImplLoot::get_tier(item_id) == tier) {
+                return_ids.append(item_id);
+            }
+            item_count += 1;
         };
-
         return_ids
+    }
+
+    // @notice Returns an array of items that are available on the market.
+    // @param stats_points_available: The number of stat points available to the adventurer.
+    // @return An array of items that are available on the market.
+    fn get_market_size(stat_points_available: u8) -> u16 {
+        stat_points_available.into() * NUMBER_OF_ITEMS_PER_LEVEL.into()
     }
 
     // @notice Gets a u8 item id from a u256 seed
@@ -196,53 +153,79 @@ impl ImplMarket of IMarket {
         1 + item_id.try_into().unwrap()
     }
 
-    // @notice This function checks if an item is available within the provided seeds and offsets.
-    // @dev The function iterates over seeds and offsets. For each seed, it checks 
-    //      whether the item is available. If the item is not found in any of the seeds, 
-    //      the function returns false. If the item is found, the function returns true.
-    // @param seeds An array of seed values of type `u256`.
-    // @param offsets An array of offset values of type `u8`.
-    // @param item_id The ID of the item to be checked, of type `u8`.
-    // @return A boolean value indicating whether the item is available within the seeds and offsets.
-    fn is_item_available(seeds: Span<u256>, offsets: Span<u8>, item_id: u8) -> bool {
-        // iterate over our array of seeds
-        let mut seed_index: u32 = 0;
-        loop {
-            // if we checked all seeds, return false
-            if seed_index >= seeds.len() {
-                break false;
-            }
-            let seed = *seeds.at(seed_index);
-            let offset = *offsets.at(seed_index);
-
-            // for each seed check if the item is available
-            let mut item_available_for_seed = false;
-            let mut item_offset: u256 = 0;
+    // @notice is_item_available checks if an item is available on the market
+    // @param adventurer_entropy The entropy of the adventurer used for randomness.
+    // @param adventurer_xp The xp of the adventurer used for randomness.
+    // @param adventurer_stat_points The stat points of the adventurer used for market size
+    // @param item_id The item id to check for availability
+    // @return A boolean indicating if the item is available on the market.
+    fn is_item_available(
+        adventurer_entropy: u128, adventurer_xp: u16, adventurer_stat_points: u8, item_id: u8
+    ) -> bool {
+        // if the size of the market is larger than the number of items
+        let market_size = ImplMarket::get_market_size(adventurer_stat_points);
+        if market_size >= NUM_ITEMS.into() {
+            // no need to waste compute, return true
+            true
+        } else {
+            let (seed, offset) = ImplMarket::get_market_seed_and_offset(
+                adventurer_entropy, adventurer_xp
+            );
+            let mut item_count: u16 = 0;
             loop {
-                // if we checked all items for this seed, return false
-
-                if item_offset >= offset.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
-                    break;
+                // if we reached the end of the market and haven't found the item
+                if item_count >= market_size.into() {
+                    // break/return false
+                    break false;
                 }
 
-                // if we found the item in this seed
-                if item_id == ImplMarket::get_id((seed.into() + item_offset.into())) {
-                    // capture that we found the item
-                    item_available_for_seed = true;
-                    // and break out of this loop   
-                    break;
+                // if we found the item
+                if item_id == ImplMarket::get_id(seed + (offset.into() * item_count).into()) {
+                    // break/return true
+                    break true;
                 }
-                item_offset += offset.into();
-            };
-
-            // if we found the item in this seed, return true
-            if item_available_for_seed == true {
-                break true;
+                item_count += 1;
             }
-
-            // otherwise continue to the next seed
-            seed_index += 1;
         }
+    }
+
+    // TODO: Use new cairo array init syntax instead of loop
+    fn all_loot_items() -> Array<u8> {
+        let mut all_items = ArrayTrait::<u8>::new();
+        let mut item_id: u8 = 1;
+        loop {
+            if item_id > NUM_ITEMS {
+                break;
+            }
+            all_items.append(item_id);
+            item_id += 1;
+        };
+        all_items
+    }
+
+    // @dev Function to generate a unique hash for the market based on the adventurer's id, entropy, xp and stat points available.
+    // @param adventurer_entropy The entropy of the adventurer used for randomness.
+    // @param xp The experience points of the adventurer.
+    // @return A 128bit hash used for market seed and an 8bit offset used for market offset.z
+    fn get_market_seed_and_offset(adventurer_entropy: u128, xp: u16) -> (u256, u8) {
+        let mut hash_span = ArrayTrait::new();
+        hash_span.append(adventurer_entropy.into());
+        hash_span.append(xp.into());
+        ImplMarket::split_hash_into_seed_and_offset(poseidon_hash_span(hash_span.span()))
+    }
+
+    // @notice This function takes in a Poseidon hash and splits it into a seed and offset.
+    // @dev The split is performed by shifting the hash and dividing it into two segments. The
+    // function returns a tuple of a 256-bit unsigned integer and an 8-bit unsigned integer.
+    // @param poseidon_hash A 252-bit field element of a Poseidon hash.
+    // @return A tuple where the first element is a 256-bit unsigned integer that represents the
+    // market seed and the second element is an 8-bit unsigned integer that represents the market offset.
+    fn split_hash_into_seed_and_offset(poseidon_hash: felt252) -> (u256, u8) {
+        // split hash into two u128s, one for market seed, one for offset
+        let (market_seed, offset) = rshift_split(poseidon_hash.into(), NUM_ITEMS.into() - 1);
+
+        // return market seed and market offset
+        (market_seed, 1 + offset.try_into().unwrap())
     }
 }
 
@@ -255,11 +238,9 @@ mod tests {
     use array::{ArrayTrait, SpanTrait};
     use option::OptionTrait;
     use core::clone::Clone;
-
     use lootitems::{
         loot::{Loot, ILoot, ImplLoot}, statistics::{item_tier, constants::{ItemId, NUM_ITEMS}}
     };
-
     use combat::constants::CombatEnums::{Tier, Slot};
     use market::{
         market::ImplMarket, constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE}
@@ -269,9 +250,23 @@ mod tests {
     const TEST_MARKET_SEED: u256 = 515;
     const TEST_OFFSET: u8 = 3;
 
+    #[test]
+    #[available_gas(1230000)]
+    fn test_is_item_available_false_gas_small() {
+        let adventurer_entropy = 12345;
+        let adventurer_xp = 25;
+        let adventurer_stats_points = 1;
+        let item_id = 101;
+        assert(
+            ImplMarket::is_item_available(
+                adventurer_entropy, adventurer_xp, adventurer_stats_points, item_id
+            ) == false,
+            'item should not be avail'
+        );
+    }
 
     #[test]
-    #[available_gas(50000000)]
+    #[available_gas(34000000)]
     fn test_get_id() {
         // test bottom end of u256
         let mut i: u256 = 0;
@@ -302,7 +297,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(9000000)]
+    #[available_gas(50000)]
     fn test_get_price() {
         let t1_price = ImplMarket::get_price(Tier::T1(()));
         assert(t1_price == (6 - 1) * TIER_PRICE, 't1 price');
@@ -321,16 +316,43 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(220000000)]
-    fn test_get_all_items() {
-        let mut market_seeds = ArrayTrait::<u256>::new();
-        market_seeds.append(77);
+    #[available_gas(1240000)]
+    fn test_get_market_items_gas_small_market() {
+        let adventurer_entropy = 12345;
+        let adventurer_xp = 24;
+        let adventurer_stats_points = 1;
+        ImplMarket::get_market_items(adventurer_entropy, adventurer_xp, adventurer_stats_points);
+    }
 
-        let mut offset = ArrayTrait::<u8>::new();
-        offset.append(20);
+    #[test]
+    #[available_gas(4500000)]
+    fn test_get_market_items_gas_large_market() {
+        let adventurer_entropy = 12345;
+        let adventurer_xp = 24;
+        let adventurer_stats_points = 4;
+        ImplMarket::get_market_items(adventurer_entropy, adventurer_xp, adventurer_stats_points);
+    }
+
+    #[test]
+    #[available_gas(670000)]
+    fn test_get_market_items_gas_xlarge_market() {
+        let adventurer_entropy = 12345;
+        let adventurer_xp = 24;
+        let adventurer_stats_points = 10;
+        ImplMarket::get_market_items(adventurer_entropy, adventurer_xp, adventurer_stats_points);
+    }
+
+    #[test]
+    #[available_gas(5700000)]
+    fn test_get_market_items_check_duplicates() {
+        let adventurer_entropy = 12345;
+        let adventurer_xp = 24;
+        let adventurer_stats_points = 1;
 
         // get items from the market
-        let market_items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
+        let market_items = ImplMarket::get_market_items(
+            adventurer_entropy, adventurer_xp, adventurer_stats_points
+        );
 
         // iterate over the items
         let mut item_index = 0;
@@ -347,124 +369,269 @@ mod tests {
                 if duplicate_check_index >= market_items_clone.len() {
                     break;
                 }
-                assert(
-                    item.id != *market_items_clone.at(duplicate_check_index).id, 'duplicate item id'
-                );
+                assert(item != *market_items_clone.at(duplicate_check_index), 'duplicate item id');
                 duplicate_check_index += 1;
             };
             item_index += 1;
         };
     }
 
+    #[test]
+    #[available_gas(4500000)]
+    fn test_get_market_items_count() {
+        let adventurer_entropy = 12345;
+        let adventurer_xp = 2;
+        let adventurer_stats_points = 1;
+
+        let items = ImplMarket::get_market_items(
+            adventurer_entropy, adventurer_xp, adventurer_stats_points
+        );
+        assert(
+            items.len() == (adventurer_stats_points.into() * NUMBER_OF_ITEMS_PER_LEVEL.into()),
+            'incorrect number of items'
+        );
+
+        let adventurer_stats_points = 2;
+        let items = ImplMarket::get_market_items(
+            adventurer_entropy, adventurer_xp, adventurer_stats_points
+        );
+        assert(
+            items.len() == (adventurer_stats_points.into() * NUMBER_OF_ITEMS_PER_LEVEL.into()),
+            'incorrect number of items'
+        );
+
+        let adventurer_stats_points = 10;
+        let items = ImplMarket::get_market_items(
+            adventurer_entropy, adventurer_xp, adventurer_stats_points
+        );
+        assert(items.len() == NUM_ITEMS.into(), 'incorrect number of items');
+    }
+
+    // @notice verify that items that are not on the market are not available for purchase
+    #[test]
+    #[available_gas(150000000)]
+    fn test_is_item_available_false() {
+        let adventurer_entropy = 12345;
+        let adventurer_xp = 24;
+        let adventurer_stats_points = 1;
+
+        let mut items_on_market = ImplMarket::get_market_items(
+            adventurer_entropy, adventurer_xp, adventurer_stats_points
+        );
+
+        // iterate over all items
+        let mut all_items_iterator: u8 = 1;
+        loop {
+            if all_items_iterator >= NUM_ITEMS {
+                break ();
+            }
+
+            // check if the item is on the market by iterating over all items on the market
+            let is_on_market = is_item_on_market(items_on_market.clone(), all_items_iterator);
+
+            // check if the item is available using our public function (more gas efficient)
+            let result = ImplMarket::is_item_available(
+                adventurer_entropy, adventurer_xp, adventurer_stats_points, all_items_iterator
+            );
+
+            // verify the two results are the same
+            if is_on_market {
+                assert(result == true, 'item should be available');
+            } else {
+                assert(result == false, 'item should not be available');
+            }
+
+            all_items_iterator += 1;
+        };
+    }
+
+    // @notice verify that items that are on the market are available for purchase
+    // @dev this test is the more gas intensive version of is_item_available because it
+    //     iterates over all items on the market and checks if they are available
+    fn is_item_on_market(market: Array<u8>, item: u8) -> bool {
+        let mut is_item_on_market = false;
+        let mut market_items: u32 = 0;
+        loop {
+            if market_items >= market.len() {
+                break;
+            }
+
+            let market_item = *market.at(market_items);
+
+            if item == market_item {
+                is_item_on_market = true;
+            }
+            market_items += 1;
+        };
+        is_item_on_market
+    }
 
     #[test]
-    #[available_gas(22000000)]
-    fn test_get_all_items_count() {
-        let mut market_seeds = ArrayTrait::<u256>::new();
-        market_seeds.append(1);
+    #[available_gas(15500000)]
+    fn test_get_market_items_ownership() {
+        let adventurer_entropy = 12345;
+        let adventurer_xp = 24;
+        let adventurer_stats_points = 1;
 
-        let mut offset = ArrayTrait::<u8>::new();
-        offset.append(3);
-
-        let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
+        let items = @ImplMarket::get_market_items(
+            adventurer_entropy, adventurer_xp, adventurer_stats_points
+        );
         assert(items.len() == NUMBER_OF_ITEMS_PER_LEVEL.into(), 'incorrect number of items');
 
-        market_seeds.append(2);
-        offset.append(5);
-        let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
-        assert(items.len() == NUMBER_OF_ITEMS_PER_LEVEL.into() * 2, 'incorrect number of items');
-
-        market_seeds.append(3);
-        market_seeds.append(4);
-        offset.append(51);
-        offset.append(101);
-        let items = ImplMarket::get_all_items(market_seeds.span(), offset.span());
-        assert(items.len() == NUMBER_OF_ITEMS_PER_LEVEL.into() * 4, 'incorrect number of items');
-    }
-
-    #[test]
-    #[available_gas(9000000)]
-    fn test_is_item_available() {
-        let mut i: u256 = 0;
-        let OFFSET: u8 = 3;
+        // iterate over the items on the market
+        let mut item_count: u32 = 0;
         loop {
-            if i > OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
+            if item_count >= NUMBER_OF_ITEMS_PER_LEVEL.into() {
                 break ();
             }
 
-            let id = ImplMarket::get_id(TEST_MARKET_SEED + i);
-            let mut seeds = ArrayTrait::<u256>::new();
-            seeds.append(TEST_MARKET_SEED + i);
-            let mut offsets = ArrayTrait::<u8>::new();
-            offsets.append(OFFSET);
+            // get item id and assert it's within range
+            let item_id = *items.at(item_count);
+            assert(item_id > 0 && item_id <= NUM_ITEMS, 'item id out of range');
 
-            let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
+            // assert item is available on the market
+            assert(
+                ImplMarket::is_item_available(
+                    adventurer_entropy, adventurer_xp, adventurer_stats_points, item_id
+                ),
+                'item'
+            );
 
-            assert(result == true, 'item not available');
-
-            i += OFFSET.into();
+            item_count += 1;
         };
     }
 
     #[test]
-    #[available_gas(90000000)]
-    fn test_fake_check_ownership() {
-        let mut i: u256 = 0;
-        let OFFSET: u8 = 3;
+    #[available_gas(198000000)]
+    fn test_get_market_items_ownership_multi_level4() {
+        let adventurer_entropy = 12345;
+        let adventurer_xp = 24;
+        let adventurer_stats_points = 4;
 
+        let items = @ImplMarket::get_market_items(
+            adventurer_entropy, adventurer_xp, adventurer_stats_points
+        );
+        assert(
+            items.len() == (NUMBER_OF_ITEMS_PER_LEVEL.into() * adventurer_stats_points.into()),
+            'incorrect number of items'
+        );
+
+        // iterate over the items on the market
+        let mut item_count: u32 = 0;
         loop {
-            if i >= OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
+            if item_count >= items.len().into() {
                 break ();
             }
 
-            let id = ImplMarket::get_id(TEST_MARKET_SEED + i + 2);
-            let mut seeds = ArrayTrait::<u256>::new();
-            seeds.append(TEST_MARKET_SEED + i);
-            let mut offsets = ArrayTrait::<u8>::new();
-            offsets.append(OFFSET);
+            // get item id and assert it's within range
+            let item_id = *items.at(item_count);
+            assert(item_id > 0 && item_id <= NUM_ITEMS, 'item id out of range');
 
-            let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
+            // assert item is available on the market
+            assert(
+                ImplMarket::is_item_available(
+                    adventurer_entropy, adventurer_xp, adventurer_stats_points, item_id
+                ),
+                'item'
+            );
 
-            assert(result == false, 'item');
-
-            i += OFFSET.into();
+            item_count += 1;
         };
     }
 
     #[test]
-    #[available_gas(9000000)]
-    fn test_get_all_items_ownership() {
-        let mut market_seeds = ArrayTrait::<u256>::new();
-        market_seeds.append(TEST_MARKET_SEED);
+    #[available_gas(8000000)]
+    fn test_get_market_items_ownership_multi_level8() {
+        let adventurer_entropy = 12345;
+        let adventurer_xp = 24;
+        let adventurer_stats_points = 8;
 
-        let OFFSET: u8 = 3;
-        let mut offset = ArrayTrait::<u8>::new();
-        offset.append(OFFSET);
+        let items = @ImplMarket::get_market_items(
+            adventurer_entropy, adventurer_xp, adventurer_stats_points
+        );
+        assert(items.len() == NUM_ITEMS.into(), 'incorrect number of items');
 
-        let items = @ImplMarket::get_all_items(market_seeds.span(), offset.span());
-
-        let mut i: u256 = 0;
-        let mut item_index: usize = 0;
-
+        // iterate over the items on the market
+        let mut item_count: u32 = 0;
         loop {
-            if i >= OFFSET.into() * NUMBER_OF_ITEMS_PER_LEVEL.into() {
+            if item_count >= items.len() {
                 break ();
             }
 
-            let id = *items.at(item_index).id;
-            assert(id != 0, 'item id should not be 0');
+            // get item id and assert it's within range
+            let item_id = *items.at(item_count);
+            assert(item_id > 0 && item_id <= NUM_ITEMS, 'item id out of range');
 
-            let mut seeds = ArrayTrait::<u256>::new();
-            seeds.append(TEST_MARKET_SEED + i);
-            let mut offsets = ArrayTrait::<u8>::new();
-            offsets.append(OFFSET);
+            // assert item is available on the market
+            assert(
+                ImplMarket::is_item_available(
+                    adventurer_entropy, adventurer_xp, adventurer_stats_points, item_id
+                ),
+                'item'
+            );
 
-            let result = ImplMarket::is_item_available(seeds.span(), offsets.span(), id);
+            item_count += 1;
+        };
+    }
 
-            assert(result == true, 'item');
+    #[test]
+    #[available_gas(50000000)]
+    fn test_get_market_seed_and_offset() {
+        // verify adventurers minted during the same block have different entropy
+        let mut i: u128 = 1;
+        loop {
+            if (i >= 100) {
+                break;
+            }
+            let adventurer_id: u256 = 1;
+            let block_number = 839152;
+            let xp: u16 = 3;
+            let stats_points_available: u8 = 4;
+            let adventurer_entropy = 1;
 
-            i += OFFSET.into();
-            item_index += 1;
+            let (market_seed, market_offset) = ImplMarket::get_market_seed_and_offset(
+                adventurer_entropy, xp
+            );
+
+            // assert market offset is within range of items
+            assert(market_offset > 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
+            i += 1;
+        };
+    }
+
+    #[test]
+    #[available_gas(30000000)]
+    fn test_split_hash_into_seed_and_offset() {
+        // iterate over low range of u128 starting at 0
+        let mut i: u128 = 0;
+        loop {
+            let poseidon_hash: felt252 = i.into();
+            let (market_seed, market_offset) = ImplMarket::split_hash_into_seed_and_offset(
+                poseidon_hash
+            );
+            if (i >= 102) {
+                break;
+            }
+
+            // assert market offset is within range of items
+            assert(market_offset > 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
+            i += 1;
+        };
+
+        // iterate over upper bound up to max u128
+        let mut i: u128 = 340282366920938463463374607431768211100;
+        loop {
+            let poseidon_hash: felt252 = i.into();
+            let (market_seed, market_offset) = ImplMarket::split_hash_into_seed_and_offset(
+                poseidon_hash
+            );
+            if (i >= 340282366920938463463374607431768211455) {
+                break;
+            }
+
+            // assert market offset is within range of items
+            assert(market_offset > 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
+            i += 1;
         };
     }
 }
