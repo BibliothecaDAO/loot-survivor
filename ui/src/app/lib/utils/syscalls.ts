@@ -648,29 +648,21 @@ export function Syscalls() {
     const eventPurchasedItemsEvent = events.find(
       (event) => event.name === "PurchasedItems"
     );
-    setData("itemsByAdventurerQuery", {
-      items: [
-        ...(queryData.itemsByAdventurerQuery?.items ?? []),
-        eventPurchasedItemsEvent.data[1],
-      ],
-    });
+    const purchasedItems = [];
+    for (let purchasedItem of eventPurchasedItemsEvent.data[1]) {
+      purchasedItems.push(purchasedItem);
+    }
     const equippedItemsEvent = events.find(
       (event) => event.name === "EquippedItems"
     );
-    const equippedItems = [];
     for (let equippedItem of equippedItemsEvent.data[1]) {
-      const ownedItem = eventPurchasedItemsEvent.data[1].find(
-        (item: any) => item.item == equippedItem
-      );
-      equippedItems.unshift({
-        ...ownedItem,
-        ["equipped"]: true,
-      });
+      let item = purchasedItems.find((item) => item.item === equippedItem);
+      item.equipped = true;
     }
     setData("itemsByAdventurerQuery", {
       items: [
         ...(queryData.itemsByAdventurerQuery?.items ?? []),
-        ...equippedItems,
+        ...purchasedItems,
       ],
     });
     for (let unequippedItem of equippedItemsEvent.data[2]) {
@@ -735,6 +727,51 @@ export function Syscalls() {
       receipt as InvokeTransactionReceiptResponse,
       queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
     );
+
+    const equippedItemsEvents = events.filter(
+      (event) => event.name === "EquippedItems"
+    );
+    // Equip items that are not purchases
+    for (let equippedItemsEvent of equippedItemsEvents) {
+      setData("adventurerByIdQuery", {
+        adventurers: [equippedItemsEvent.data[0]],
+      });
+      for (let equippedItem of equippedItemsEvent.data[1]) {
+        const ownedItemIndex =
+          queryData.itemsByAdventurerQuery?.items.findIndex(
+            (item) => item.item == equippedItem
+          );
+        setData("itemsByAdventurerQuery", true, "equipped", ownedItemIndex);
+      }
+      for (let unequippedItem of equippedItemsEvent.data[2]) {
+        const ownedItemIndex =
+          queryData.itemsByAdventurerQuery?.items.findIndex(
+            (item) => item.item == unequippedItem
+          );
+        setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
+      }
+    }
+
+    const droppedItemsEvents = events.filter(
+      (event) => event.name === "DroppedItems"
+    );
+    for (let droppedItemsEvent of droppedItemsEvents) {
+      setData("adventurerByIdQuery", {
+        adventurers: [droppedItemsEvent.data[0]],
+      });
+      for (let droppedItem of droppedItemsEvent.data[1]) {
+        const ownedItemIndex =
+          queryData.itemsByAdventurerQuery?.items.findIndex(
+            (item) => item.item == droppedItem
+          );
+        setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
+        setData("itemsByAdventurerQuery", false, "owned", ownedItemIndex);
+        setData("itemsByAdventurerQuery", null, "ownerAddress", ownedItemIndex);
+        setData("itemsByAdventurerQuery", null, "adventurerId", ownedItemIndex);
+      }
+    }
+
+    stopLoading(notification);
   };
 
   return { spawn, explore, attack, flee, upgrade, multicall };
