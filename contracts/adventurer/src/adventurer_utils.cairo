@@ -32,6 +32,7 @@ impl AdventurerUtils of IAdventurer {
     // @param current_stat The current value of the stat.
     // @param increase_amount The amount by which to increase the stat.
     // @return The increased stat value, or `MAX_STAT_VALUE` if an increase would cause an overflow.
+    #[inline(always)]
     fn overflow_protected_stat_increase(current_stat: u8, increase_amount: u8) -> u8 {
         // u8 overflow check
         if (u8_overflowing_add(current_stat, increase_amount).is_ok()) {
@@ -105,6 +106,7 @@ impl AdventurerUtils of IAdventurer {
     // TODO: Need to refactor this and add_suffix_boost to ensure they
     // stay insync. I think the design used for AdventurerClass in adventurer_meta
     // is good. 
+    #[inline(always)]
     fn get_vitality_item_boost(suffix: u8) -> u8 {
         if (suffix == of_Power) {
             0
