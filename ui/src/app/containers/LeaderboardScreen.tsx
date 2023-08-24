@@ -30,27 +30,17 @@ export default function LeaderboardScreen() {
 
   const { data, isLoading, refetch } = useQueriesStore();
 
-  useCustomQuery(
-    "adventurersByXPQuery",
-    getAdventurerByXP,
-    undefined,
-    txAccepted
-  );
+  // useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
 
-  useCustomQuery(
-    "adventurersInListByXpQuery",
-    getAdventurersInListByXp,
-    {
-      ids: data.topScoresQuery?.scores
-        ? data.topScoresQuery?.scores.map(
-            (score: Score) => score.adventurerId ?? 0
-          )
-        : [0],
-    },
-    txAccepted
-  );
+  // useCustomQuery("adventurersInListByXpQuery", getAdventurersInListByXp, {
+  //   ids: data.topScoresQuery?.scores
+  //     ? data.topScoresQuery?.scores.map(
+  //         (score: Score) => score.adventurerId ?? 0
+  //       )
+  //     : [0],
+  // });
 
-  useCustomQuery("topScoresQuery", getTopScores, undefined, txAccepted);
+  // useCustomQuery("topScoresQuery", getTopScores, undefined);
 
   if (isLoading.adventurersByXPQuery || loading)
     return (

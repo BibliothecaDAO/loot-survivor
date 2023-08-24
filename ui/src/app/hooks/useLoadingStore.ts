@@ -9,7 +9,6 @@ type LoadingState = {
   hash: string;
   txAccepted: boolean;
   pendingMessage: string | string[];
-  loadingQuery: QueryKey | null;
   showNotification: boolean;
   notificationData: any;
   adventurer: number | undefined;
@@ -51,14 +50,13 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       loading: true,
       type: type,
       pendingMessage,
-      loadingQuery,
       adventurer,
       notificationData,
     });
   },
   setTxHash: (hash) => set({ hash }),
   setTxAccepted: (txAccepted) => set({ txAccepted }),
-  stopLoading: (notificationData) =>
+  stopLoading: (notificationData) => {
     set({
       showNotification: notificationData ? true : false,
       notificationData: notificationData || undefined,
@@ -74,7 +72,8 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       ],
       hash: "",
       adventurer: undefined,
-    }),
+    });
+  },
   resetNotification: () =>
     set({
       type: "",

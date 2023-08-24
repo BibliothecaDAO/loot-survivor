@@ -22,29 +22,19 @@ import BeastScreen from "./BeastScreen";
 import { NullDiscovery } from "../types";
 import useUIStore from "../hooks/useUIStore";
 import MazeLoader from "../components/icons/MazeLoader";
+import { Syscalls } from "@/app/lib/utils/Syscalls";
+
 
 /**
  * @container
  * @description Provides the actions screen for the adventurer.
  */
 export default function ActionsScreen() {
-  const calls = useTransactionCartStore((state) => state.calls);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
-  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const { addTransaction } = useTransactionManager();
-  const { writeAsync } = useContractWrite({ calls });
   const loading = useLoadingStore((state) => state.loading);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
   const hash = useLoadingStore((state) => state.hash);
   const [selected, setSelected] = useState<string>("");
-  const setEquipItems = useUIStore((state) => state.setEquipItems);
-  const setDropItems = useUIStore((state) => state.setDropItems);
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
 
@@ -56,65 +46,32 @@ export default function ActionsScreen() {
   const lastBeast = useQueriesStore(
     (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
   );
-  const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
-  const resetData = useQueriesStore((state) => state.resetData);
 
-  useCustomQuery(
-    "discoveryByTxHashQuery",
-    getDiscoveryByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted
-  );
+  const { explore } = Syscalls();
 
-  useCustomQuery(
-    "latestDiscoveriesQuery",
-    getLatestDiscoveries,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  // useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
+  //   txHash: padAddress(hash),
+  // });
 
-  useCustomQuery(
-    "lastBeastQuery",
-    getLastBeastDiscovery,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  // useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
+  //   adventurerId: adventurer?.id ?? 0,
+  // });
 
-  useCustomQuery(
-    "beastQuery",
-    getBeast,
-    {
-      adventurerId: adventurer?.id ?? 0,
-      beast: lastBeast?.entity,
-      seed: lastBeast?.seed,
-    },
-    txAccepted
-  );
+  // useCustomQuery("lastBeastQuery", getLastBeastDiscovery, {
+  //   adventurerId: adventurer?.id ?? 0,
+  // });
 
-  useCustomQuery(
-    "battlesByBeastQuery",
-    getBattlesByBeast,
-    {
-      adventurerId: adventurer?.id ?? 0,
-      beast: lastBeast?.entity,
-      seed: lastBeast?.seed,
-    },
-    txAccepted
-  );
+  // useCustomQuery("beastQuery", getBeast, {
+  //   adventurerId: adventurer?.id ?? 0,
+  //   beast: lastBeast?.entity,
+  //   seed: lastBeast?.seed,
+  // });
 
-  const exploreTx = (till_beast: boolean) => {
-    return {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "explore",
-      calldata: [adventurer?.id?.toString() ?? "", "0", till_beast ? "1" : "0"],
-    };
-  };
+  // useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
+  //   adventurerId: adventurer?.id ?? 0,
+  //   beast: lastBeast?.entity,
+  //   seed: lastBeast?.seed,
+  // });
 
   const buttonsData = [
     {
@@ -123,32 +80,7 @@ export default function ActionsScreen() {
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
-        resetData("lastBeastQuery");
-        resetData("beastQuery");
-        resetData("latestMarketItemsQuery");
-        addToCalls(exploreTx(false));
-        startLoading(
-          "Explore",
-          "Exploring",
-          "discoveryByTxHashQuery",
-          adventurer?.id
-        );
-        await handleSubmitCalls(writeAsync).then((tx: any) => {
-          if (tx) {
-            setTxHash(tx.transaction_hash);
-            addTransaction({
-              hash: tx.transaction_hash,
-              metadata: {
-                method: `Explore with ${adventurer?.name}`,
-              },
-            });
-          }
-        });
-        resetDataUpdated("discoveryByTxHashQuery");
-        resetDataUpdated("beastQuery");
-        resetDataUpdated("lastBeastQuery");
-        setEquipItems([]);
-        setDropItems([]);
+        explore(false);
       },
       disabled: hasBeast || loading || !adventurer?.id,
       loading: loading,
@@ -163,32 +95,7 @@ export default function ActionsScreen() {
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
-        resetData("lastBeastQuery");
-        resetData("beastQuery");
-        resetData("latestMarketItemsQuery");
-        addToCalls(exploreTx(true));
-        startLoading(
-          "Explore",
-          "Exploring",
-          "discoveryByTxHashQuery",
-          adventurer?.id
-        );
-        await handleSubmitCalls(writeAsync).then((tx: any) => {
-          if (tx) {
-            setTxHash(tx.transaction_hash);
-            addTransaction({
-              hash: tx.transaction_hash,
-              metadata: {
-                method: `Explore with ${adventurer?.name}`,
-              },
-            });
-          }
-        });
-        resetDataUpdated("discoveryByTxHashQuery");
-        resetDataUpdated("beastQuery");
-        resetDataUpdated("lastBeastQuery");
-        setEquipItems([]);
-        setDropItems([]);
+        explore(true);
       },
       disabled: hasBeast || loading || !adventurer?.id,
       loading: loading,

@@ -18,10 +18,11 @@ import {
   getDiscoveryByTxHash,
   getAdventurerById,
 } from "@/app/hooks/graphql/queries";
+import { parseEvents } from "@/app/lib/utils/parseEvents";
+import { InvokeTransactionReceiptResponse } from "starknet";
 
 export const TxActivity = () => {
   const notificationData = useLoadingStore((state) => state.notificationData);
-  const loadingQuery = useLoadingStore((state) => state.loadingQuery);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const loading = useLoadingStore((state) => state.loading);
   const hash = useLoadingStore((state) => state.hash);
@@ -42,13 +43,7 @@ export const TxActivity = () => {
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
   );
-  const {
-    data: queryData,
-    isDataUpdated,
-    refetch,
-    resetDataUpdated,
-    resetData,
-  } = useQueriesStore();
+  const { data: queryData, refetch, setData, resetData } = useQueriesStore();
   const { data } = useWaitForTransaction({
     hash,
     watch: true,
@@ -58,10 +53,9 @@ export const TxActivity = () => {
     onRejected: () => {
       stopLoading("Rejected");
     },
-  });
+  }) as { data: InvokeTransactionReceiptResponse };
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
-  const isLoadingQueryUpdated = isDataUpdated[loadingQuery!];
 
   const setDeathNotification = (
     type: string,
@@ -81,45 +75,34 @@ export const TxActivity = () => {
     showDeathDialog(true);
   };
 
-  useCustomQuery(
-    "battlesByTxHashQuery",
-    getBattleByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted,
-    !hash
-  );
+  // useCustomQuery(
+  //   "battlesByTxHashQuery",
+  //   getBattleByTxHash,
+  //   {
+  //     txHash: padAddress(hash),
+  //   },
+  //   !hash
+  // );
 
-  useCustomQuery(
-    "discoveryByTxHashQuery",
-    getDiscoveryByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted,
-    !hash
-  );
-
-  console.log(txAccepted, hash, isLoadingQueryUpdated);
+  // useCustomQuery(
+  //   "discoveryByTxHashQuery",
+  //   getDiscoveryByTxHash,
+  //   {
+  //     txHash: padAddress(hash),
+  //   },
+  //   !hash
+  // );
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log(txAccepted, hash, isLoadingQueryUpdated);
-      if (!txAccepted || !hash || !isLoadingQueryUpdated) return;
-
+      if (!txAccepted || !hash || data?.events?.length == 0) return;
+      const events = parseEvents(data);
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
-        await refetch("battlesByTxHashQuery");
-        // await refetch("adventurerByIdQuery");
-        await refetch("battlesByBeastQuery");
-        await refetch("battlesByAdventurerQuery");
-        await refetch("latestMarketItemsQuery");
-        console.log("in battle");
-        const killedByBeast = queryData.battlesByTxHashQuery.battles.some(
+        const killedByBeast = events.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
-        const killedByPenalty = queryData.battlesByTxHashQuery.battles.some(
+        const killedByPenalty = events.some(
           (battle) => !battle.attacker && battle.adventurerHealth == 0
         );
         if (killedByBeast || killedByPenalty) {
@@ -130,20 +113,10 @@ export const TxActivity = () => {
             true
           );
         }
-        stopLoading(queryData.battlesByTxHashQuery.battles);
       };
 
       const handleExplore = async () => {
         if (!queryData?.discoveryByTxHashQuery) return;
-
-        await refetch("discoveryByTxHashQuery");
-        await refetch("discoveriesQuery");
-        await refetch("latestDiscoveriesQuery");
-        // await refetch("adventurerByIdQuery");
-        await refetch("lastBeastBattleQuery");
-        await refetch("lastBeastQuery");
-        await refetch("beastQuery");
-        await refetch("latestMarketItemsQuery");
         const killedByObstacle =
           queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
             "Obstacle" &&
@@ -165,24 +138,27 @@ export const TxActivity = () => {
             hasBeast
           );
         }
-        stopLoading(queryData.discoveryByTxHashQuery.discoveries);
       };
 
       const handleUpgrade = async () => {
-        // await refetch("adventurerByIdQuery");
-        await refetch("latestMarketItemsQuery");
-        stopLoading(notificationData);
+        // setData("adventurerByIdQuery", {
+        //   adventurers: [
+        //     events.find((event) => event.name === "AdventurerUpgraded").data,
+        //   ],
+        // });
+        // Reset items to no availability
+        // for (let i = 1; i <= 101; i++) {
+        //   setData("itemsByAdventurerQuery", {
+
+        //   })
+        // }
+        // stopLoading(notificationData);
         if (!hasStatUpgrades) {
           setScreen("play");
         }
       };
 
       const handleMulticall = async () => {
-        console.log(loadingQuery, isLoadingQueryUpdated);
-        // await refetch("adventurerByIdQuery");
-        await refetch("itemsByAdventurerQuery");
-        await refetch("battlesByBeastQuery");
-        await refetch("latestMarketItemsQuery");
         const killedFromEquipping =
           (pendingMessage as string[]).includes("Equipping") && !isAlive;
         if (killedFromEquipping) {
@@ -192,10 +168,19 @@ export const TxActivity = () => {
       };
 
       const handleCreate = async () => {
-        console.log("in create");
-        await refetch("adventurersByOwnerQuery");
-        await refetch("adventurerByIdQuery");
-        stopLoading(notificationData);
+        // NOW HANDLED IN SYSCALLS
+        // setData("adventurersByOwnerQuery", {
+        //   adventurers: [
+        //     ...(queryData.adventurersByOwnerQuery?.adventurers ?? []),
+        //     events.find((event) => event.name === "StartGame").data[0],
+        //   ],
+        // });
+        // setData("adventurerByIdQuery", {
+        //   adventurers: [
+        //     events.find((event) => event.name === "StartGame").data[0],
+        //   ],
+        // });
+        // stopLoading(notificationData);
       };
 
       const handleDefault = async () => {
@@ -204,10 +189,7 @@ export const TxActivity = () => {
 
       const handleDataUpdate = () => {
         setTxAccepted(false);
-        resetDataUpdated(loadingQuery!);
       };
-
-      console.log(type);
 
       try {
         switch (type) {
@@ -242,7 +224,7 @@ export const TxActivity = () => {
     };
 
     fetchData();
-  }, [isLoadingQueryUpdated]);
+  }, [txAccepted]);
 
   useEffect(() => {
     if (
@@ -253,7 +235,7 @@ export const TxActivity = () => {
       console.log(queryData.adventurerByIdQuery.adventurers[0]);
       setAdventurer(queryData.adventurerByIdQuery.adventurers[0]);
     }
-  }, [isLoadingQueryUpdated]);
+  }, [loading]);
 
   // stop loading when an error is caught
   useEffect(() => {

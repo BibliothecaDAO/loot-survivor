@@ -2,6 +2,7 @@ import { use, useEffect, useMemo, useRef, useCallback } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "./useQueryStore";
 import { AdventurerQuery, BattleQuery, ItemQuery } from "./graphql/types";
+import { isEqual } from "lodash";
 
 type Variables = Record<
   string,
@@ -14,18 +15,14 @@ const useCustomQuery = (
   queryKey: QueryKey,
   query: any,
   variables?: Variables,
-  shouldPoll?: boolean,
   skip?: boolean
 ) => {
   const { updateData } = useQueriesStore();
 
-  const { data, startPolling, stopPolling, loading, refetch, error } = useQuery(
-    query,
-    {
-      variables: variables,
-      skip: skip,
-    }
-  );
+  const { data, loading, refetch } = useQuery(query, {
+    variables: variables,
+    skip: skip,
+  });
 
   const refetchWrapper = useCallback(async () => {
     try {
@@ -36,19 +33,14 @@ const useCustomQuery = (
     }
   }, [refetch]);
 
-  useEffect(() => {
-    if (data) {
-      updateData(queryKey, data, loading, refetchWrapper);
-    }
-  }, [data, updateData, loading, queryKey, refetchWrapper, variables]);
+  const prevVariablesRef = useRef<Variables>();
 
   useEffect(() => {
-    if (shouldPoll) {
-      startPolling(5000);
-    } else {
-      stopPolling();
+    if (data && !isEqual(prevVariablesRef.current, variables)) {
+      updateData(queryKey, data, loading, refetchWrapper);
     }
-  }, [shouldPoll, startPolling, stopPolling]);
+    prevVariablesRef.current = variables;
+  }, []);
 };
 
 export default useCustomQuery;

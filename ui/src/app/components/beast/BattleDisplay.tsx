@@ -189,8 +189,6 @@ export const NotificationBattleDisplay = ({
     }
   };
 
-  console.log(battleData);
-
   const { beastName, beastLevel, tier } = handleBeastInfo();
   const { data } = useQueriesStore();
   const rank = getRankFromList(

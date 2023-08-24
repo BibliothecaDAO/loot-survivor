@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAccount } from "@starknet-react/core";
 // import { getAdventurersByOwner } from "../hooks/graphql/queries";
 import { padAddress } from "../lib/utils";
@@ -31,7 +31,7 @@ export default function AdventurerScreen() {
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
-
+  const { data } = useQueriesStore();
   const adventurers = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers || []
   );
@@ -51,12 +51,17 @@ export default function AdventurerScreen() {
   //   txAccepted
   // );
 
-  useCustomQuery(
-    "adventurersByXPQuery",
-    getAdventurerByXP,
-    undefined,
-    txAccepted
-  );
+  // useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
+
+  // const ownerVariables = useMemo(() => {
+  //   return {
+  //     owner: owner,
+  //   };
+  // }, [owner]);
+
+  // useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
+  //   owner: owner,
+  // });
 
   // TODO: Remove polling
   // useCustomQuery(

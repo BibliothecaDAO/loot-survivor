@@ -136,14 +136,15 @@ export default function Home() {
     setIntroComplete(true);
   };
 
-  useCustomQuery(
-    "adventurerByIdQuery",
-    getAdventurerById,
-    {
-      id: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  const adventurerIdVariables = useMemo(() => {
+    return { id: adventurer?.id ?? 0 };
+  }, [adventurer?.id]);
+
+  // useCustomQuery("adventurerByIdQuery", getAdventurerById, {
+  //   id: adventurer?.id ?? 0,
+  // });
+
+  console.log(data);
 
   // useEffect(() => {
   //   if (
@@ -154,15 +155,6 @@ export default function Home() {
   //     setAdventurer(data.adventurerByIdQuery.adventurers[0]);
   //   }
   // }, [data.adventurerByIdQuery?.adventurers[0]?.timestamp]);
-
-  useCustomQuery(
-    "adventurersByOwnerQuery",
-    getAdventurersByOwner,
-    {
-      owner: owner,
-    },
-    txAccepted
-  );
 
   useEffect(() => {
     return () => {
@@ -193,10 +185,6 @@ export default function Home() {
       setMintAdventurer(false);
     }
   }, [data.adventurersByOwnerQuery?.adventurers.length]);
-
-  useEffect(() => {
-    refetch("adventurersByOwnerQuery");
-  }, [account]);
 
   const mobileMenuDisabled = [
     false,

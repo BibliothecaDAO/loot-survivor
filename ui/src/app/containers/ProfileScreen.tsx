@@ -12,14 +12,9 @@ export default function Profile() {
   const { data } = useQueriesStore();
   const profile = useUIStore((state) => state.profile);
   const [encounters, setEncounters] = useState(false);
-  useCustomQuery(
-    "leaderboardByIdQuery",
-    getAdventurerById,
-    {
-      id: profile ?? 0,
-    },
-    false
-  );
+  // useCustomQuery("leaderboardByIdQuery", getAdventurerById, {
+  //   id: profile ?? 0,
+  // });
   const adventurer = data.leaderboardByIdQuery?.adventurers[0];
 
   const setScreen = useUIStore((state) => state.setScreen);

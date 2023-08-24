@@ -38,23 +38,13 @@ export default function EncountersScreen({ profile }: EncountersProps) {
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const queryData = useQueriesStore((state) => state.data);
 
-  useCustomQuery(
-    "discoveriesQuery",
-    getDiscoveries,
-    {
-      adventurerId: profile ? profile : adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  // useCustomQuery("discoveriesQuery", getDiscoveries, {
+  //   adventurerId: profile ? profile : adventurer?.id ?? 0,
+  // });
 
-  useCustomQuery(
-    "battlesByAdventurerQuery",
-    getBattlesByAdventurer,
-    {
-      adventurerId: profile ? profile : adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  // useCustomQuery("battlesByAdventurerQuery", getBattlesByAdventurer, {
+  //   adventurerId: profile ? profile : adventurer?.id ?? 0,
+  // });
 
   useEffect(() => {
     if (data) {

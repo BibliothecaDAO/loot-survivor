@@ -130,7 +130,6 @@ export const processNotifications = (
   hasBeast: boolean,
   adventurer: Adventurer
 ) => {
-  console.log(notificationData);
   const gameData = new GameData();
   const notifications: Notification[] = [];
   const beastName = processBeastName(
@@ -161,7 +160,6 @@ export const processNotifications = (
     // Here every discovery item in the DB is a noti, so we can just loop
     for (let i = 0; i < notificationData.length; i++) {
       const animation = handleAnimation(notificationData[i] as Discovery);
-      console.log(animation);
       notifications.push({
         animation: animation ?? "",
         message: (

@@ -31,6 +31,7 @@ import {
 } from "../../types";
 import { GameData } from "../GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
+import { Syscalls } from "@/app/lib/utils/Syscalls";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
@@ -53,7 +54,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const [notification, setNotification] = useState<string[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
   const [loadingQuery, setLoadingQuery] = useState<QueryKey | null>(null);
-  const { data, resetDataUpdated } = useQueriesStore();
+  const { data } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
@@ -67,6 +68,8 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const setUpgrades = useUIStore((state) => state.setUpgrades);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
+
+  const { multicall } = Syscalls();
 
   const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
@@ -185,8 +188,6 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const filteredStats = Object.entries(upgrades).filter(
     (stat: any) => stat[1] !== 0
   );
-
-  console.log(loadingQuery);
 
   return (
     <>
@@ -361,45 +362,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
           <div className="flex flex-row gap-2 absolute bottom-4">
             <Button
               onClick={async () => {
-                const items: string[] = [];
-
-                for (const dict of calls) {
-                  if (
-                    dict.hasOwnProperty("entrypoint") &&
-                    (dict["entrypoint"] === "bid_on_item" ||
-                      dict["entrypoint"] === "claim_item")
-                  ) {
-                    if (Array.isArray(dict.calldata)) {
-                      items.push(dict.calldata[0]?.toString() ?? "");
-                    }
-                  }
-                  if (dict["entrypoint"] === "equip") {
-                    if (Array.isArray(dict.calldata)) {
-                      items.push(dict.calldata[2]?.toString() ?? "");
-                    }
-                  }
-                }
-                startLoading(
-                  "Multicall",
-                  loadingMessage,
-                  loadingQuery,
-                  adventurer?.id,
-                  notification
-                );
-
-                await handleSubmitCalls(writeAsync).then((tx: any) => {
-                  if (tx) {
-                    setTxHash(tx?.transaction_hash);
-                    addTransaction({
-                      hash: tx.transaction_hash,
-                      metadata: {
-                        method: "Multicall",
-                        marketIds: items,
-                      },
-                    });
-                  }
-                });
-                resetDataUpdated();
+                await multicall(loadingMessage, loadingQuery, notification);
                 handleResetCalls();
               }}
             >

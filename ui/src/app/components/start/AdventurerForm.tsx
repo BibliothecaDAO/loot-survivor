@@ -5,18 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { useContracts } from "../../hooks/useContracts";
-import { stringToFelt } from "../../lib/utils";
-import {
-  useAccount,
-  useConnectors,
-  useTransactionManager,
-  useContractWrite,
-} from "@starknet-react/core";
-import { getKeyFromValue } from "../../lib/utils";
-import { GameData } from "../GameData";
-import useLoadingStore from "../../hooks/useLoadingStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import { useAccount, useConnectors } from "@starknet-react/core";
 import useUIStore from "../../hooks/useUIStore";
 import { FormData, Adventurer } from "@/app/types";
 import { Button } from "../buttons/Button";
@@ -26,8 +15,8 @@ import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
 import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { MdClose } from "react-icons/md";
+import { Syscalls } from "@/app/lib/utils/Syscalls";
 
 export interface AdventurerFormProps {
   isActive: boolean;
@@ -43,8 +32,6 @@ export const AdventurerForm = ({
   const { account } = useAccount();
   const { connectors, connect } = useConnectors();
 
-  const { addTransaction } = useTransactionManager();
-  const formatAddress = account ? account.address : "0x0";
   const [formData, setFormData] = useState<FormData>({
     startingWeapon: "",
     name: "",
@@ -59,17 +46,7 @@ export const AdventurerForm = ({
   });
   const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
 
-  const calls = useTransactionCartStore((state) => state.calls);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { writeAsync } = useContractWrite({ calls });
-  const { gameContract, lordsContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const gameData = new GameData();
   const [step, setStep] = useState(1);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
@@ -77,7 +54,7 @@ export const AdventurerForm = ({
   const walletConnectors = () =>
     connectors.filter((connector) => !connector.id.includes("0x"));
 
-  const { resetDataUpdated } = useQueriesStore();
+  const { spawn } = Syscalls();
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement> | KeyboardEvent) => {
@@ -121,10 +98,6 @@ export const AdventurerForm = ({
     setShowWalletTutorial(true);
   };
 
-  const getRandomNumber = (to: number) => {
-    return (Math.floor(Math.random() * to) + 1).toString();
-  };
-
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -137,60 +110,8 @@ export const AdventurerForm = ({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const mintLords = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(mintLords);
-
-    const approveLordsTx = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(approveLordsTx);
-
-    const mintAdventurerTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "start",
-      calldata: [
-        "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
-        getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
-        stringToFelt(formData.name).toString(),
-        getRandomNumber(8000),
-        getKeyFromValue(gameData.CLASSES, formData.class) ?? "",
-        "1",
-        formData.startingStrength,
-        formData.startingDexterity,
-        formData.startingVitality,
-        formData.startingIntelligence,
-        formData.startingWisdom,
-        formData.startingCharisma,
-      ],
-    };
-
-    addToCalls(mintAdventurerTx);
-    startLoading(
-      "Create",
-      "Spawning Adventurer",
-      "adventurersByOwnerQuery",
-      undefined,
-      `You have spawned ${formData.name}!`
-    );
-    await handleSubmitCalls(writeAsync).then((tx: any) => {
-      if (tx) {
-        setTxHash(tx.transaction_hash);
-        addTransaction({
-          hash: tx?.transaction_hash,
-          metadata: {
-            method: `Spawn ${formData.name}`,
-          },
-        });
-      }
-    });
+    await spawn(formData);
     setMintAdventurer(true);
-    resetDataUpdated("adventurersByOwnerQuery");
   };
 
   const [formFilled, setFormFilled] = useState(false);

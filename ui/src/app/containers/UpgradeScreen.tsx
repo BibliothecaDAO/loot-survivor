@@ -41,6 +41,7 @@ import {
   ItemPurchase,
 } from "../types";
 import Summary from "../components/upgrade/Summary";
+import { Syscalls } from "../lib/utils/Syscalls";
 
 /**
  * @container
@@ -49,26 +50,15 @@ import Summary from "../components/upgrade/Summary";
 export default function UpgradeScreen() {
   const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const currentLevel = useAdventurerStore(
-    (state) => state.computed.currentLevel
-  );
   const loading = useLoadingStore((state) => state.loading);
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
-  const { addTransaction } = useTransactionManager();
-  const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
   );
-  const { writeAsync } = useContractWrite({ calls });
   const [selected, setSelected] = useState("");
   const [upgradeScreen, setUpgradeScreen] = useState(1);
   const [potionAmount, setPotionAmount] = useState(0);
@@ -83,19 +73,14 @@ export default function UpgradeScreen() {
     Potions: 0,
   });
 
-  const { resetDataUpdated } = useQueriesStore();
+  const { upgrade } = Syscalls();
 
   const gameData = new GameData();
 
-  useCustomQuery(
-    "latestMarketItemsQuery",
-    getLatestMarketItems,
-    {
-      adventurerId: adventurer?.id,
-      limit: 20 * (adventurer?.statUpgrades ?? 0),
-    },
-    txAccepted
-  );
+  // useCustomQuery("latestMarketItemsQuery", getLatestMarketItems, {
+  //   adventurerId: adventurer?.id,
+  //   limit: 20 * (adventurer?.statUpgrades ?? 0),
+  // });
 
   const checkTransacting =
     typeof pendingMessage === "string" &&
@@ -272,30 +257,7 @@ export default function UpgradeScreen() {
 
   const handleSubmitUpgradeTx = async () => {
     renderSummary();
-    startLoading(
-      "Upgrade",
-      "Upgrading",
-      "adventurerByIdQuery",
-      adventurer?.id,
-      {
-        Stats: upgrades,
-        Items: purchaseItems,
-        Potions: potionAmount,
-      }
-    );
-    handleSubmitCalls(writeAsync).then((tx: any) => {
-      if (tx) {
-        setTxHash(tx.transaction_hash);
-        addTransaction({
-          hash: tx.transaction_hash,
-          metadata: {
-            method: "Upgrade Stat",
-            description: "Upgrading",
-          },
-        });
-      }
-    });
-    resetDataUpdated("adventurerByIdQuery");
+    upgrade(upgrades, purchaseItems, potionAmount);
     setPurchaseItems([]);
     setUpgrades({ ...ZeroUpgrade });
   };
@@ -465,7 +427,6 @@ export default function UpgradeScreen() {
                       } w-1/2`}
                       onClick={() => {
                         handleSubmitUpgradeTx();
-                        resetDataUpdated("adventurerByIdQuery");
                       }}
                       disabled={nextDisabled || loading}
                     >

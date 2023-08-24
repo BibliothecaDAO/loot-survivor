@@ -39,14 +39,9 @@ export default function KillAdventurer() {
     addToCalls(slayIdleAdventurerTx);
   };
 
-  useCustomQuery(
-    "adventurerToSlayQuery",
-    getAdventurerById,
-    {
-      id: parseInt(adventurerTarget),
-    },
-    txAccepted
-  );
+  useCustomQuery("adventurerToSlayQuery", getAdventurerById, {
+    id: parseInt(adventurerTarget),
+  });
 
   const slayAdventurer = data.adventurerToSlayQuery
     ? data.adventurerToSlayQuery.adventurers[0]
