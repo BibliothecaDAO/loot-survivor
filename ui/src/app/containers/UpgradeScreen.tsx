@@ -41,7 +41,7 @@ import {
   ItemPurchase,
 } from "../types";
 import Summary from "../components/upgrade/Summary";
-import { Syscalls } from "../lib/utils/Syscalls";
+import { syscalls } from "../lib/utils/syscalls";
 
 /**
  * @container
@@ -73,7 +73,7 @@ export default function UpgradeScreen() {
     Potions: 0,
   });
 
-  const { upgrade } = Syscalls();
+  const { upgrade } = syscalls({});
 
   const gameData = new GameData();
 

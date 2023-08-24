@@ -31,7 +31,7 @@ import {
 } from "../../types";
 import { GameData } from "../GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
-import { Syscalls } from "@/app/lib/utils/Syscalls";
+import { syscalls } from "@/app/lib/utils/syscalls";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
@@ -69,7 +69,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
 
-  const { multicall } = Syscalls();
+  const { multicall } = syscalls({});
 
   const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items

@@ -8,7 +8,7 @@ import React, { useState } from "react";
 import { processBeastName } from "../lib/utils";
 import { Battle, NullDiscovery, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
-import { Syscalls } from "../lib/utils/Syscalls";
+import { syscalls } from "../lib/utils/syscalls";
 
 /**
  * @container
@@ -19,7 +19,7 @@ export default function BeastScreen() {
   const loading = useLoadingStore((state) => state.loading);
   const [showBattleLog, setShowBattleLog] = useState(false);
 
-  const { attack, flee } = Syscalls();
+  const { attack, flee } = syscalls({});
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);

@@ -16,33 +16,48 @@ import { getKeyFromValue, stringToFelt, getRandomNumber } from ".";
 import { parseEvents } from "./parseEvents";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
-export function Syscalls() {
+export interface SyscallsProps {
+  gameContract?: any;
+  lordsContract?: any;
+  addTransaction?: any;
+  account?: any;
+  queryData?: any;
+  resetData?: any;
+  setData?: any;
+  adventurer?: any;
+  addToCalls?: any;
+  calls?: any;
+  handleSubmitCalls?: any;
+  startLoading?: any;
+  stopLoading?: any;
+  setTxHash?: any;
+  writeAsync?: any;
+  setEquipItems?: any;
+  setDropItems?: any;
+}
+
+export function syscalls({
+  gameContract,
+  lordsContract,
+  addTransaction,
+  account,
+  queryData,
+  resetData,
+  setData,
+  adventurer,
+  addToCalls,
+  calls,
+  handleSubmitCalls,
+  startLoading,
+  stopLoading,
+  setTxHash,
+  writeAsync,
+  setEquipItems,
+  setDropItems,
+}: SyscallsProps) {
   const gameData = new GameData();
 
-  const { gameContract, lordsContract } = useContracts();
-  const { addTransaction } = useTransactionManager();
-  const { account } = useAccount();
-  const { data: queryData, resetData, setData } = useQueriesStore();
-
   const formatAddress = account ? account.address : "0x0";
-  const adventurer = useAdventurerStore((state) => state.adventurer);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const calls = useTransactionCartStore((state) => state.calls);
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
-  const hash = useLoadingStore((state) => state.hash);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { writeAsync } = useContractWrite({ calls });
-  const equipItems = useUIStore((state) => state.equipItems);
-  const setEquipItems = useUIStore((state) => state.setEquipItems);
-  const setDropItems = useUIStore((state) => state.setDropItems);
-  const removeEntrypointFromCalls = useTransactionCartStore(
-    (state) => state.removeEntrypointFromCalls
-  );
 
   const spawn = async (formData: FormData) => {
     const mintLords = {
@@ -667,7 +682,7 @@ export function Syscalls() {
     });
     for (let unequippedItem of equippedItemsEvent.data[2]) {
       const ownedItemIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
-        (item) => item.item == unequippedItem
+        (item: any) => item.item == unequippedItem
       );
       setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
     }
@@ -739,14 +754,14 @@ export function Syscalls() {
       for (let equippedItem of equippedItemsEvent.data[1]) {
         const ownedItemIndex =
           queryData.itemsByAdventurerQuery?.items.findIndex(
-            (item) => item.item == equippedItem
+            (item: any) => item.item == equippedItem
           );
         setData("itemsByAdventurerQuery", true, "equipped", ownedItemIndex);
       }
       for (let unequippedItem of equippedItemsEvent.data[2]) {
         const ownedItemIndex =
           queryData.itemsByAdventurerQuery?.items.findIndex(
-            (item) => item.item == unequippedItem
+            (item: any) => item.item == unequippedItem
           );
         setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
       }
@@ -762,7 +777,7 @@ export function Syscalls() {
       for (let droppedItem of droppedItemsEvent.data[1]) {
         const ownedItemIndex =
           queryData.itemsByAdventurerQuery?.items.findIndex(
-            (item) => item.item == droppedItem
+            (item: any) => item.item == droppedItem
           );
         setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
         setData("itemsByAdventurerQuery", false, "owned", ownedItemIndex);
