@@ -8,7 +8,11 @@ import {
 } from "../lib/utils";
 import { GameData } from "../components/GameData";
 import VerticalKeyboardControl from "../components/menu/VerticalMenu";
-import { useTransactionManager, useContractWrite } from "@starknet-react/core";
+import {
+  useTransactionManager,
+  useContractWrite,
+  useAccount,
+} from "@starknet-react/core";
 import useCustomQuery from "../hooks/useCustomQuery";
 import { getLatestMarketItems } from "../hooks/graphql/queries";
 import useLoadingStore from "../hooks/useLoadingStore";
@@ -41,14 +45,14 @@ import {
   ItemPurchase,
 } from "../types";
 import Summary from "../components/upgrade/Summary";
-import { Syscalls } from "../lib/utils/Syscalls";
+import { syscalls } from "../lib/utils/syscalls";
 
 /**
  * @container
  * @description Provides the upgrade screen for the adventurer.
  */
 export default function UpgradeScreen() {
-  const { gameContract } = useContracts();
+  const { gameContract, lordsContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
@@ -73,7 +77,42 @@ export default function UpgradeScreen() {
     Potions: 0,
   });
 
-  const { upgrade } = Syscalls();
+  const { addTransaction } = useTransactionManager();
+  const { data: queryData, resetData, setData } = useQueriesStore();
+  const { account } = useAccount();
+  const calls = useTransactionCartStore((state) => state.calls);
+  const handleSubmitCalls = useTransactionCartStore(
+    (state) => state.handleSubmitCalls
+  );
+  const startLoading = useLoadingStore((state) => state.startLoading);
+  const stopLoading = useLoadingStore((state) => state.stopLoading);
+  const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
+  const hash = useLoadingStore((state) => state.hash);
+  const setTxHash = useLoadingStore((state) => state.setTxHash);
+  const { writeAsync } = useContractWrite({ calls });
+  const equipItems = useUIStore((state) => state.equipItems);
+  const setEquipItems = useUIStore((state) => state.setEquipItems);
+  const setDropItems = useUIStore((state) => state.setDropItems);
+
+  const { upgrade } = syscalls({
+    gameContract,
+    lordsContract,
+    addTransaction,
+    account,
+    queryData,
+    resetData,
+    setData,
+    adventurer,
+    addToCalls,
+    calls,
+    handleSubmitCalls,
+    startLoading,
+    stopLoading,
+    setTxHash,
+    writeAsync,
+    setEquipItems,
+    setDropItems,
+  });
 
   const gameData = new GameData();
 
