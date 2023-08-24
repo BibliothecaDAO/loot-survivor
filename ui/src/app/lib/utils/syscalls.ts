@@ -636,15 +636,15 @@ export function syscalls({
       }
     );
     const tx = await handleSubmitCalls(writeAsync);
+    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
+      retryInterval: 1000,
+    });
     setTxHash(tx.transaction_hash);
     addTransaction({
       hash: tx.transaction_hash,
       metadata: {
         method: `Upgrade`,
       },
-    });
-    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-      retryInterval: 1000,
     });
 
     // Add optimistic data
