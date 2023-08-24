@@ -16,7 +16,7 @@ import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
 import { MdClose } from "react-icons/md";
-import { Syscalls } from "@/app/lib/utils/Syscalls";
+import { Syscalls } from "../../lib/utils/Syscalls";
 
 export interface AdventurerFormProps {
   isActive: boolean;
