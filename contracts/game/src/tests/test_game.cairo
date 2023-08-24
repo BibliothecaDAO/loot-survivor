@@ -371,7 +371,7 @@ mod tests {
     // }
 
     #[test]
-    #[available_gas(3000000000000)]
+    #[available_gas(300000000000)]
     fn test_start() {
         let mut game = new_adventurer(1000);
 
@@ -392,7 +392,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(38000000)]
+    #[available_gas(36000000)]
     fn test_no_explore_during_battle() {
         let mut game = new_adventurer(1000);
 
@@ -466,7 +466,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Cant flee starter beast', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(25000000)]
+    #[available_gas(23000000)]
     fn test_cant_flee_starter_beast() {
         // start new game
         let mut game = new_adventurer(1000);
@@ -479,7 +479,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Not in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(65000000)]
+    #[available_gas(63000000)]
     fn test_cant_flee_outside_battle() {
         // start adventuer and advance to level 2
         let mut game = new_adventurer_lvl2();
@@ -491,7 +491,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(15000000000)]
+    #[available_gas(13000000000)]
     fn test_flee() {
         let mut game = new_adventurer_lvl2();
 
@@ -521,7 +521,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Stat upgrade available', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(8000000000)]
+    #[available_gas(7800000000)]
     fn test_explore_not_allowed_with_avail_stat_upgrade() {
         let mut game = new_adventurer(1000);
 
@@ -561,7 +561,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(75000000)]
+    #[available_gas(73000000)]
     fn test_buy_items_without_stat_upgrade() {
         // mint adventurer and advance to level 2
         let mut game = new_adventurer_lvl2();
@@ -584,7 +584,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item already owned', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(64000000)]
+    #[available_gas(62000000)]
     fn test_buy_duplicate_item_equipped() {
         // start new game on level 2 so we have access to the market
         let mut game = new_adventurer_lvl2();
@@ -605,7 +605,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item already owned', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(63000000)]
+    #[available_gas(61000000)]
     fn test_buy_duplicate_item_bagged() {
         // start new game on level 2 so we have access to the market
         let mut game = new_adventurer_lvl2();

@@ -86,6 +86,7 @@ impl ImplBag of IBag {
     // @param self The instance of the Bag
     // @param item_id The id of the item to be retrieved
     // @return The item from the bag with the specified id
+    #[inline(always)]
     fn get_item(self: Bag, item_id: u8) -> ItemPrimitive {
         if self.item_1.id == item_id {
             self.item_1
@@ -129,6 +130,7 @@ impl ImplBag of IBag {
     // @dev If the bag is full, it throws an error
     // @param self The instance of the Bag
     // @param item The item to be added to the bag
+    #[inline(always)]
     fn add_item(ref self: Bag, item: ItemPrimitive) {
         // assert item id is not 0
         assert(item.id != 0, 'Item ID cannot be 0');
@@ -171,6 +173,7 @@ impl ImplBag of IBag {
     // @param self The instance of the Bag
     // @param item_id The id of the item to be removed
     // @return The item that was removed from the bag
+    #[inline(always)]
     fn remove_item(ref self: Bag, item_id: u8) -> ItemPrimitive {
         let removed_item = self.get_item(item_id);
 
@@ -222,6 +225,7 @@ impl ImplBag of IBag {
     // @dev A bag is considered full if all item slots are occupied (id of the item is non-zero)
     // @param self The instance of the Bag
     // @return A boolean value indicating whether the bag is full
+    #[inline(always)]
     fn is_full(self: Bag) -> bool {
         if self.item_1.id == 0 {
             false
@@ -256,6 +260,7 @@ impl ImplBag of IBag {
     // @param self The Bag object in which to search for the item
     // @param item The id of the item to search for
     // @return A bool indicating whether the item is present in the bag
+    #[inline(always)]
     fn contains(self: Bag, item: u8) -> bool {
         if self.item_1.id == item {
             true
@@ -286,7 +291,7 @@ impl ImplBag of IBag {
 }
 
 #[test]
-#[available_gas(200000)]
+#[available_gas(88000)]
 fn test_contains() {
     let bag = Bag {
         item_1: ItemPrimitive {
@@ -329,7 +334,7 @@ fn test_contains() {
 }
 
 #[test]
-#[available_gas(2500000)]
+#[available_gas(2390000)]
 fn test_pack_bag() {
     let mut bag = Bag {
         item_1: ItemPrimitive {
@@ -443,7 +448,7 @@ fn test_add_item_blank_item() {
 
 #[test]
 #[should_panic(expected: ('Bag is full', ))]
-#[available_gas(20000)]
+#[available_gas(15000)]
 fn test_add_item_full_bag() {
     // start with full bag
     let mut bag = Bag {
@@ -479,7 +484,7 @@ fn test_add_item_full_bag() {
 }
 
 #[test]
-#[available_gas(250000)]
+#[available_gas(180000)]
 fn test_add_item() {
     // start with empty bag
     let mut bag = Bag {
@@ -549,7 +554,7 @@ fn test_add_item() {
 }
 
 #[test]
-#[available_gas(150000)]
+#[available_gas(59900)]
 fn test_is_full() {
     // start with full bag
     let mut bag = Bag {
@@ -597,7 +602,7 @@ fn test_is_full() {
 
 #[test]
 #[should_panic(expected: ('Item not in bag', ))]
-#[available_gas(15000)]
+#[available_gas(85000)]
 fn test_get_item_not_in_bag() {
     let item_1 = ItemPrimitive { id: 11, xp: 0, metadata: 0 };
     let item_2 = ItemPrimitive { id: 12, xp: 0, metadata: 0 };
@@ -634,7 +639,7 @@ fn test_get_item_not_in_bag() {
 }
 
 #[test]
-#[available_gas(150000)]
+#[available_gas(85000)]
 fn test_get_item() {
     let item_1 = ItemPrimitive { id: 11, xp: 0, metadata: 0 };
     let item_2 = ItemPrimitive { id: 12, xp: 0, metadata: 0 };
@@ -698,7 +703,7 @@ fn test_get_item() {
 }
 
 #[test]
-#[available_gas(30000)]
+#[available_gas(21900)]
 fn test_remove_item() {
     let mut bag = Bag {
         item_1: ItemPrimitive {
@@ -738,7 +743,7 @@ fn test_remove_item() {
 
 #[test]
 #[should_panic(expected: ('Item not in bag', ))]
-#[available_gas(30000)]
+#[available_gas(21900)]
 fn test_remove_item_not_in_bag() {
     // initialize bag
     let mut bag = Bag {

@@ -1316,7 +1316,7 @@ mod Game {
                     },
                     TreasureDiscovery::Health(()) => {
                         // if adventurer's health is already full
-                        if (adventurer.has_full_health()) {
+                        if (adventurer.is_health_full()) {
                             // adventurer gets gold instead of health
                             adventurer.add_gold(amount);
                             // emit discovered gold event
@@ -2780,31 +2780,38 @@ mod Game {
             item
         )
     }
-
+    #[inline(always)]
     fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
         self._owner.read(adventurer_id)
     }
+    #[inline(always)]
     fn _assert_ownership(self: @ContractState, adventurer_id: u256) {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
     }
+    #[inline(always)]
     fn _assert_in_battle(beast_health: u16) {
         assert(beast_health > 0, messages::NOT_IN_BATTLE);
     }
+    #[inline(always)]
     fn _assert_dexterity_not_zero(dexterity: u8) {
         assert(dexterity > 0, messages::ZERO_DEXTERITY);
     }
+    #[inline(always)]
     fn _assert_not_in_battle(beast_health: u16) {
         assert(beast_health == 0, messages::ACTION_NOT_ALLOWED_DURING_BATTLE);
     }
+    #[inline(always)]
     fn _assert_market_is_open(stat_points_available: u8) {
         assert(stat_points_available > 0, messages::MARKET_CLOSED);
     }
+    #[inline(always)]
     fn _assert_item_not_owned(adventurer: Adventurer, bag: Bag, item_id: u8) {
         assert(
             adventurer.is_equipped(item_id) == false && bag.contains(item_id) == false,
             messages::ITEM_ALREADY_OWNED
         );
     }
+    #[inline(always)]
     fn _assert_item_is_available(
         adventurer_entropy: u128, stat_points_available: u8, adventurer_xp: u16, item_id: u8
     ) {
@@ -2815,20 +2822,25 @@ mod Game {
             messages::ITEM_DOES_NOT_EXIST
         );
     }
+    #[inline(always)]
     fn _assert_not_starter_beast(adventurer_level: u8) {
         assert(adventurer_level > 1, messages::CANT_FLEE_STARTER_BEAST);
     }
+    #[inline(always)]
     fn _assert_no_stat_upgrades_available(stat_points_available: u8) {
         assert(stat_points_available == 0, messages::STAT_UPGRADES_AVAILABLE);
     }
+    #[inline(always)]
     fn _assert_not_dead(health: u16) {
         assert(health > 0, messages::DEAD_ADVENTURER);
     }
+    #[inline(always)]
     fn _assert_valid_starter_weapon(starting_weapon: u8) {
         assert(
             ImplLoot::is_starting_weapon(starting_weapon) == true, messages::INVALID_STARTING_WEAPON
         );
     }
+    #[inline(always)]
     fn _assert_starting_stat_count(starting_stats: Stats) {
         let total_stats = starting_stats.strength
             + starting_stats.dexterity
@@ -2839,6 +2851,7 @@ mod Game {
 
         assert(total_stats == STARTING_STATS, messages::WRONG_STARTING_STATS);
     }
+    #[inline(always)]
     fn _assert_has_enough_gold(adventurer: Adventurer, cost: u16) {
         assert(adventurer.gold >= cost, messages::NOT_ENOUGH_GOLD);
     }
@@ -3372,48 +3385,63 @@ mod Game {
         charisma_increase: u8,
     }
 
+    #[inline(always)]
     fn __event_AdventurerUpgraded(ref self: ContractState, event: AdventurerUpgraded) {
         self.emit(Event::AdventurerUpgraded(event));
     }
+    #[inline(always)]
     fn __event_StartGame(ref self: ContractState, event: StartGame) {
         self.emit(Event::StartGame(event));
     }
+    #[inline(always)]
     fn __event_DiscoveredHealth(ref self: ContractState, event: DiscoveredHealth) {
         self.emit(event);
     }
+    #[inline(always)]
     fn __event_DiscoveredGold(ref self: ContractState, event: DiscoveredGold) {
         self.emit(Event::DiscoveredGold(event));
     }
+    #[inline(always)]
     fn __event_DiscoveredXP(ref self: ContractState, event: DiscoveredXP) {
         self.emit(event);
     }
+    #[inline(always)]
     fn __event_DodgedObstacle(ref self: ContractState, dodged_obstacle: DodgedObstacle) {
         self.emit(Event::DodgedObstacle(dodged_obstacle));
     }
+    #[inline(always)]
     fn __event_HitByObstacle(ref self: ContractState, hit_by_obstacle: HitByObstacle) {
         self.emit(Event::HitByObstacle(hit_by_obstacle));
     }
+    #[inline(always)]
     fn __event_DiscoveredBeast(ref self: ContractState, discover_beast_event: DiscoveredBeast, ) {
         self.emit(Event::DiscoveredBeast(discover_beast_event));
     }
+    #[inline(always)]
     fn __event_AttackedBeast(ref self: ContractState, attack_beast: AttackedBeast, ) {
         self.emit(Event::AttackedBeast(attack_beast));
     }
+    #[inline(always)]
     fn __event_AttackedByBeast(ref self: ContractState, attack_by_beast: AttackedByBeast, ) {
         self.emit(Event::AttackedByBeast(attack_by_beast));
     }
+    #[inline(always)]
     fn __event_AmbushedByBeast(ref self: ContractState, ambushed_by_beast: AmbushedByBeast, ) {
         self.emit(Event::AmbushedByBeast(ambushed_by_beast));
     }
+    #[inline(always)]
     fn __event_SlayedBeast(ref self: ContractState, slayed_beast: SlayedBeast, ) {
         self.emit(Event::SlayedBeast(slayed_beast));
     }
+    #[inline(always)]
     fn __event_FleeFailed(ref self: ContractState, flee_event: FleeFailed) {
         self.emit(Event::FleeFailed(flee_event));
     }
+    #[inline(always)]
     fn __event_FleeSucceeded(ref self: ContractState, flee_event: FleeSucceeded) {
         self.emit(Event::FleeSucceeded(flee_event));
     }
+    #[inline(always)]
     fn __event_EquippedItems(
         ref self: ContractState,
         adventurer_state_with_bag: AdventurerStateWithBag,
@@ -3427,7 +3455,7 @@ mod Game {
                 )
             );
     }
-
+    #[inline(always)]
     fn __event_DroppedItems(
         ref self: ContractState,
         adventurer_state_with_bag: AdventurerStateWithBag,
@@ -3435,7 +3463,7 @@ mod Game {
     ) {
         self.emit(Event::DroppedItems(DroppedItems { adventurer_state_with_bag, item_ids }));
     }
-
+    #[inline(always)]
     fn __event_ItemLeveledUp(
         ref self: ContractState,
         adventurer_state: AdventurerState,
@@ -3450,7 +3478,7 @@ mod Game {
                 )
             );
     }
-
+    #[inline(always)]
     fn __event_ItemSpecialUnlocked(
         ref self: ContractState,
         adventurer_state: AdventurerState,
@@ -3465,15 +3493,15 @@ mod Game {
                 )
             );
     }
-
+    #[inline(always)]
     fn __event_NewHighScore(ref self: ContractState, adventurer_state: AdventurerState, rank: u8) {
         self.emit(Event::NewHighScore(NewHighScore { adventurer_state, rank }));
     }
-
+    #[inline(always)]
     fn __event_AdventurerDied(ref self: ContractState, adventurer_died_event: AdventurerDied) {
         self.emit(Event::AdventurerDied(adventurer_died_event));
     }
-
+    #[inline(always)]
     fn __event_AdventurerLeveledUp(
         ref self: ContractState,
         adventurer_state: AdventurerState,
@@ -3487,25 +3515,25 @@ mod Game {
                 )
             );
     }
-
+    #[inline(always)]
     fn __event_NewItemsAvailable(
         ref self: ContractState, adventurer_state: AdventurerState, items: Array<u8>, 
     ) {
         self.emit(Event::NewItemsAvailable(NewItemsAvailable { adventurer_state, items }));
     }
-
+    #[inline(always)]
     fn __event_IdleDeathPenalty(ref self: ContractState, idle_death_penalty: IdleDeathPenalty) {
         self.emit(Event::IdleDeathPenalty(idle_death_penalty));
     }
-
+    #[inline(always)]
     fn __event_UpgradeAvailable(ref self: ContractState, adventurer_state: AdventurerState) {
         self.emit(Event::UpgradeAvailable(UpgradeAvailable { adventurer_state }));
     }
-
+    #[inline(always)]
     fn __event_PurchasedItems(ref self: ContractState, purchased_items: PurchasedItems) {
         self.emit(Event::PurchasedItems(purchased_items));
     }
-
+    #[inline(always)]
     fn __event_PurchasedPotions(ref self: ContractState, purchased_potions: PurchasedPotions) {
         self.emit(Event::PurchasedPotions(purchased_potions));
     }
