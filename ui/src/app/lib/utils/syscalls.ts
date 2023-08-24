@@ -294,6 +294,7 @@ export function Syscalls() {
         items: itemData,
       });
     }
+    console.log(discoveries);
     setData("latestDiscoveriesQuery", {
       discoveries: [
         ...discoveries,
@@ -381,21 +382,6 @@ export function Syscalls() {
       battles.unshift(slayedBeastEvent.data[1]);
       setData("beastQuery", slayedBeastEvent.data[0].beastHealth, "health", 0);
     }
-    setData("battlesByBeastQuery", {
-      battles: [
-        ...battles,
-        ...(queryData.battlesByAdventurerQuery?.battles ?? []),
-      ],
-    });
-    setData("battlesByAdventurerQuery", {
-      battles: [
-        ...battles,
-        ...(queryData.battlesByAdventurerQuery?.battles ?? []),
-      ],
-    });
-    setData("battlesByTxHashQuery", {
-      battles: [...battles.reverse()],
-    });
 
     const adventurerDiedExists = events.some((event) => {
       if (event.name === "AdventurerDied") {
@@ -456,6 +442,23 @@ export function Syscalls() {
         items: itemData,
       });
     }
+
+    setData("battlesByBeastQuery", {
+      battles: [
+        ...battles,
+        ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+      ],
+    });
+    setData("battlesByAdventurerQuery", {
+      battles: [
+        ...battles,
+        ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+      ],
+    });
+    setData("battlesByTxHashQuery", {
+      battles: [...battles.reverse()],
+    });
+
     stopLoading(battles);
     setEquipItems([]);
     setDropItems([]);
@@ -499,7 +502,7 @@ export function Syscalls() {
     }
 
     const attackedByBeastEvents = events.filter(
-      (event) => event.name === "AttackedByAdventurer"
+      (event) => event.name === "AttackedByBeast"
     );
     for (let attackedByBeastEvent of attackedByBeastEvents) {
       setData("adventurerByIdQuery", {
@@ -517,6 +520,8 @@ export function Syscalls() {
       });
       battles.unshift(fleeSucceededEvent.data[1]);
     }
+
+    console.log(battles);
 
     const adventurerDiedExists = events.some((event) => {
       if (event.name === "AdventurerDied") {
@@ -577,6 +582,22 @@ export function Syscalls() {
         items: itemData,
       });
     }
+
+    setData("battlesByBeastQuery", {
+      battles: [
+        ...battles,
+        ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+      ],
+    });
+    setData("battlesByAdventurerQuery", {
+      battles: [
+        ...battles,
+        ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+      ],
+    });
+    setData("battlesByTxHashQuery", {
+      battles: [...battles.reverse()],
+    });
 
     stopLoading(battles);
     setEquipItems([]);

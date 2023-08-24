@@ -123,7 +123,7 @@ export function processPurchases(data: any, adventurerState: any) {
   for (let item of data) {
     purchasedItems.push({
       item: gameData.ITEMS[item.item.id],
-      adventurerId: adventurerState["adventurerId"],
+      adventurerId: adventurerState["adventurerId"].low,
       owner: true,
       equipped: false,
       ownerAddress: adventurerState["owner"],
@@ -219,7 +219,7 @@ export function processData(
       );
       const discoverHealthData = {
         txHash: txHash,
-        adventurerId: discoveredHealthEvent.adventurerState["adventurerId"],
+        adventurerId: discoveredHealthEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           discoveredHealthEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[3],
@@ -252,7 +252,7 @@ export function processData(
       );
       const discoverGoldData = {
         txHash: txHash,
-        adventurerId: discoveredGoldEvent.adventurerState["adventurerId"],
+        adventurerId: discoveredGoldEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           discoveredGoldEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[3],
@@ -286,7 +286,7 @@ export function processData(
       );
       const discoverXPData = {
         txHash: txHash,
-        adventurerId: discoveredXPEvent.adventurerState["adventurerId"],
+        adventurerId: discoveredXPEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           discoveredXPEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[3],
@@ -320,7 +320,7 @@ export function processData(
       );
       const dodgedObstacleData = {
         txHash: txHash,
-        adventurerId: dodgedObstacleEvent.adventurerState["adventurerId"],
+        adventurerId: dodgedObstacleEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           dodgedObstacleEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[2],
@@ -354,7 +354,7 @@ export function processData(
       );
       const hitByObstacleData = {
         txHash: txHash,
-        adventurerId: hitByObstacleEvent.adventurerState["adventurerId"],
+        adventurerId: hitByObstacleEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           hitByObstacleEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[2],
@@ -388,7 +388,7 @@ export function processData(
       );
       const discoveredBeastData = {
         txHash: txHash,
-        adventurerId: discoveredBeastEvent.adventurerState["adventurerId"],
+        adventurerId: discoveredBeastEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           discoveredBeastEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[1],
@@ -422,7 +422,7 @@ export function processData(
         special2: discoveredBeastEvent.beastSpecs["specials"]["special2"],
         special3: discoveredBeastEvent.beastSpecs["specials"]["special3"],
         seed: discoveredBeastEvent.seed,
-        adventurerId: discoveredBeastEvent.adventurerState["adventurerId"],
+        adventurerId: discoveredBeastEvent.adventurerState["adventurerId"].low,
         slainOnTime: null,
         createdTime: new Date(),
         lastUpdatedTime: new Date(),
@@ -441,7 +441,7 @@ export function processData(
       );
       const ambushedByBeastData = {
         txHash: txHash,
-        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"],
+        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           ambushedByBeastEvent.adventurerState["adventurer"]["health"],
         discoveryType: gameData.DISCOVERY_TYPES[1],
@@ -475,7 +475,7 @@ export function processData(
         special2: ambushedByBeastEvent.beastSpecs["specials"]["special2"],
         special3: ambushedByBeastEvent.beastSpecs["specials"]["special3"],
         seed: ambushedByBeastEvent.seed,
-        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"],
+        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"].low,
         slainOnTime: null,
         createdTime: new Date(),
         lastUpdatedTime: new Date(),
@@ -491,7 +491,7 @@ export function processData(
         special2: ambushedByBeastEvent.beastSpecs["specials"]["special2"],
         special3: ambushedByBeastEvent.beastSpecs["specials"]["special3"],
         seed: ambushedByBeastEvent.seed,
-        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"],
+        adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           ambushedByBeastEvent.adventurerState["adventurer"]["health"],
         attacker: "Beast",
@@ -529,7 +529,7 @@ export function processData(
         special2: attackedBeastEvent.beastSpecs["specials"]["special2"],
         special3: attackedBeastEvent.beastSpecs["specials"]["special3"],
         seed: attackedBeastEvent.seed,
-        adventurerId: attackedBeastEvent.adventurerState["adventurerId"],
+        adventurerId: attackedBeastEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           attackedBeastEvent.adventurerState["adventurer"]["health"],
         attacker: "Adventurer",
@@ -558,7 +558,7 @@ export function processData(
         special2: attackedByBeastEvent.beastSpecs["specials"]["special2"],
         special3: attackedByBeastEvent.beastSpecs["specials"]["special3"],
         seed: attackedByBeastEvent.seed,
-        adventurerId: attackedByBeastEvent.adventurerState["adventurerId"],
+        adventurerId: attackedByBeastEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           attackedByBeastEvent.adventurerState["adventurer"]["health"],
         attacker: "Beast",
@@ -591,7 +591,7 @@ export function processData(
         special2: slayedBeastEvent.beastSpecs["specials"]["special2"],
         special3: slayedBeastEvent.beastSpecs["specials"]["special3"],
         seed: slayedBeastEvent.seed,
-        adventurerId: slayedBeastEvent.adventurerState["adventurerId"],
+        adventurerId: slayedBeastEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           slayedBeastEvent.adventurerState["adventurer"]["health"],
         attacker: "Adventurer",
@@ -624,10 +624,10 @@ export function processData(
         special2: fleeFailedEvent.beastSpecs["specials"]["special2"],
         special3: fleeFailedEvent.beastSpecs["specials"]["special3"],
         seed: fleeFailedEvent.seed,
-        adventurerId: fleeFailedEvent.adventurerState["adventurerId"],
+        adventurerId: fleeFailedEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           fleeFailedEvent.adventurerState["adventurer"]["health"],
-        attacker: "Beast",
+        attacker: "Adventurer",
         fled: null,
         damageDealt: 0,
         criticalHit: false,
@@ -657,10 +657,10 @@ export function processData(
         special2: fleeSucceededEvent.beastSpecs["specials"]["special2"],
         special3: fleeSucceededEvent.beastSpecs["specials"]["special3"],
         seed: fleeSucceededEvent.seed,
-        adventurerId: fleeSucceededEvent.adventurerState["adventurerId"],
+        adventurerId: fleeSucceededEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           fleeSucceededEvent.adventurerState["adventurer"]["health"],
-        attacker: "Beast",
+        attacker: "Adventurer",
         fled: true,
         damageDealt: 0,
         criticalHit: false,
@@ -782,7 +782,7 @@ export function processData(
         special2: null,
         special3: null,
         seed: 0,
-        adventurerId: idleDeathPenaltyEvent.adventurerState["adventurerId"],
+        adventurerId: idleDeathPenaltyEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           idleDeathPenaltyEvent.adventurerState["adventurer"]["health"],
         attacker: null,
@@ -800,7 +800,7 @@ export function processData(
       };
       const penaltyDiscoveryData = {
         txHash: txHash,
-        adventurerId: idleDeathPenaltyEvent.adventurerState["adventurerId"],
+        adventurerId: idleDeathPenaltyEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
           idleDeathPenaltyEvent.adventurerState["adventurer"]["health"],
         discoveryType: null,
