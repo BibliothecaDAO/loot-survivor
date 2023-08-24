@@ -324,22 +324,22 @@ export const AdventurerForm = ({
     {
       name: "Seer",
       description: "+3 Intelligence +3 Wisdom",
-      image: "/classes/seer.png",
+      image: "/classes/hunter2.png",
     },
     {
       name: "Mage",
       description: "+1 Dexterity +1 Vitality +2 Intelligence +2 Wisdom",
-      image: "/classes/mage.png",
+      image: "/classes/cleric2.png",
     },
     {
       name: "Bard",
       description: "+1 Intelligence 1+ Dexterity +2 Strength +2 Charisma",
-      image: "/classes/bard.png",
+      image: "/classes/scout2.png",
     },
     {
       name: "Brute",
       description: "+6 Strength",
-      image: "/classes/brute.png",
+      image: "/classes/warrior2.png",
     },
   ];
 
@@ -377,13 +377,13 @@ export const AdventurerForm = ({
           <h3 className="uppercase text-center 2xl:text-5xl">
             Choose your class
           </h3>
-          <div className="grid grid-cols-2 xl:overflow-y-auto xl:h-[400px] sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-5 md:gap-5 lg:gap-10 2xl:gap-5 2xl:justify-center">
+          <div className="grid grid-cols-2 xl:overflow-y-auto xl:h-[420px] sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-5 md:gap-5 lg:gap-10 2xl:gap-5 2xl:justify-center">
             {classes.map((classType) => (
               <div
                 key={classType.name}
-                className="flex flex-col items-center justify-between border sm:w-56 md:w-48 2xl:w-64 border-terminal-green"
+                className="flex flex-col items-center justify-between border sm:w-52 md:w-48 2xl:w-64 border-terminal-green"
               >
-                <div className="relative w-28 h-28 sm:w-56 sm:h-56 md:h-40 2xl:h-64 2xl:w-64">
+                <div className="relative w-20 h-20 2xl:h-64 2xl:w-64">
                   <Image
                     src={classType.image}
                     fill={true}

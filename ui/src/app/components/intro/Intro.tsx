@@ -96,17 +96,17 @@ const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
     <>
       {flash && screen != 0 && <div className="flash" />}
       {screen == 0 &&
-        renderScreen("/scenes/intro/skulls.png", "start", [
+        renderScreen("/scenes/intro/incave.png", "start", [
           prologue,
           () => setTimeout(() => setScreen(1), 3000),
         ])}
       {screen == 1 &&
-        renderScreen("/scenes/intro/incave.png", "second screen", [
+        renderScreen("/scenes/intro/skulls.png", "cave", [
           chapter1,
           () => setTimeout(() => setScreen(2), 3000),
         ])}
       {screen == 2 &&
-        renderScreen("/scenes/intro/cave.png", "cave", [
+        renderScreen("/scenes/intro/cave.png", "skulls", [
           chapter2,
           () => setTimeout(() => setScreen(3), 3000),
         ])}
