@@ -588,17 +588,12 @@ mod Game {
                             owner: get_caller_address(), adventurer_id, adventurer
                         }, bag: bag
                     },
-                    strength_increase: adventurer.stats.strength
-                        - unmodified_adventurer.stats.strength,
-                    dexterity_increase: adventurer.stats.dexterity
-                        - unmodified_adventurer.stats.dexterity,
-                    vitality_increase: adventurer.stats.vitality
-                        - unmodified_adventurer.stats.vitality,
-                    intelligence_increase: adventurer.stats.intelligence
-                        - unmodified_adventurer.stats.intelligence,
-                    wisdom_increase: adventurer.stats.wisdom - unmodified_adventurer.stats.wisdom,
-                    charisma_increase: adventurer.stats.charisma
-                        - unmodified_adventurer.stats.charisma
+                    strength_increase: strength,
+                    dexterity_increase: dexterity,
+                    vitality_increase: vitality,
+                    intelligence_increase: intelligence,
+                    wisdom_increase: wisdom,
+                    charisma_increase: charisma,
                 }
             );
 
@@ -2433,7 +2428,7 @@ mod Game {
         name_storage1: ItemSpecialsStorage,
         name_storage2: ItemSpecialsStorage,
         adventurer_id: u256,
-        items: Array<ItemPurchase>,
+        items_to_purchase: Array<ItemPurchase>,
     ) {
         // get adventurer entropy
         let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
@@ -2446,20 +2441,15 @@ mod Game {
         let mut unequipped_items = ArrayTrait::<u8>::new();
         let mut items_to_equip = ArrayTrait::<u8>::new();
 
-        // get items on market
-        let items_on_market = _get_items_on_market(
-            @self, adventurer_entropy, adventurer.xp, adventurer.stat_points_available
-        );
-
         // for each item being purchased
-        let mut i: u32 = 0;
+        let mut item_number: u32 = 0;
         loop {
-            if i >= items.len() {
+            if item_number >= items_to_purchase.len() {
                 break ();
             }
 
             // get the item
-            let item = *items.at(i);
+            let item = *items_to_purchase.at(item_number);
 
             // assert item is available on market
             _assert_item_is_available(
@@ -2479,7 +2469,7 @@ mod Game {
             }
 
             // increment counter
-            i += 1;
+            item_number += 1;
         };
 
         // emit purchased items event
