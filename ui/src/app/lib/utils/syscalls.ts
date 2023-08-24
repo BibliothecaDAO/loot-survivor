@@ -87,15 +87,15 @@ export function Syscalls() {
       `You have spawned ${formData.name}!`
     );
     const tx = await handleSubmitCalls(writeAsync);
-    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-      retryInterval: 1000,
-    });
     setTxHash(tx.transaction_hash);
     addTransaction({
       hash: tx?.transaction_hash,
       metadata: {
         method: `Spawn ${formData.name}`,
       },
+    });
+    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
+      retryInterval: 1000,
     });
     const events = parseEvents(receipt as InvokeTransactionReceiptResponse, {
       name: formData["name"],
@@ -116,8 +116,9 @@ export function Syscalls() {
       adventurers: [adventurerState],
     });
     setData("latestDiscoveriesQuery", {
-      discoveries: events.find((event) => event.name === "AmbushedByBeast")
-        .data[1],
+      discoveries: [
+        events.find((event) => event.name === "AmbushedByBeast").data[1],
+      ],
     });
     setData("beastQuery", {
       beasts: [
@@ -164,10 +165,6 @@ export function Syscalls() {
     );
 
     const tx = await handleSubmitCalls(writeAsync);
-    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-      retryInterval: 1000,
-    });
-
     setTxHash(tx.transaction_hash);
     addTransaction({
       hash: tx.transaction_hash,
@@ -175,132 +172,96 @@ export function Syscalls() {
         method: `Explore with ${adventurer?.name}`,
       },
     });
-
-    const events = parseEvents(
-      receipt as InvokeTransactionReceiptResponse,
-      queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
-    );
-    setData("adventurerByIdQuery", {
-      adventurers: [events.find((event) => event.name === "StartGame").data[0]],
-    });
-    // If new items available set them as available
-    for (let i = 0; i <= 101; i++) {
-      setData("latestMarketItemsQuery", null, "isAvailable", i);
-      setData("latestMarketItemsQuery", new Date(), "timestamp", i);
-    }
-    setEquipItems([]);
-    setDropItems([]);
-  };
-
-  const attack = async (tillDeath: boolean, beastData: any) => {
-    resetData("latestMarketItemsQuery");
-    addToCalls({
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "attack",
-      calldata: [adventurer?.id?.toString() ?? "", "0", tillDeath ? "1" : "0"],
-    });
-    startLoading(
-      "Attack",
-      "Attacking",
-      "battlesByTxHashQuery",
-      adventurer?.id,
-      { beast: beastData }
-    );
-    const tx = await handleSubmitCalls(writeAsync);
     const receipt = await account?.waitForTransaction(tx.transaction_hash, {
       retryInterval: 1000,
     });
-    setTxHash(tx.transaction_hash);
-    addTransaction({
-      hash: tx.transaction_hash,
-      metadata: {
-        method: `Attack ${beastData.beast}`,
-      },
-    });
-
-    // reset battles by tx hash
-    setData("battlesByTxHashQuery", {
-      battles: null,
-    });
 
     const events = parseEvents(
       receipt as InvokeTransactionReceiptResponse,
       queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
     );
-    const attackedBeastExists = events.some((event) => {
-      if (event.name === "AttackedBeast") {
+    const discoveries = [];
+
+    const filteredDiscoveries = events.filter(
+      (event) =>
+        event.name === "DiscoveredHealth" ||
+        event.name === "DiscoveredGold" ||
+        event.name === "DiscoveredXP" ||
+        event.name === "DodgedObstacle" ||
+        event.name === "HitByObstacle"
+    );
+    if (filteredDiscoveries.length > 0) {
+      for (let discovery of filteredDiscoveries) {
+        setData("adventurerByIdQuery", {
+          adventurers: [discovery.data[0]],
+        });
+        discoveries.unshift(discovery.data[1]);
+      }
+    }
+
+    const filteredBeastDiscoveries = events.filter(
+      (event) =>
+        event.name === "DiscoveredBeast" || event.name === "AmbushedByBeast"
+    );
+    if (filteredBeastDiscoveries.length > 0) {
+      for (let discovery of filteredBeastDiscoveries) {
+        setData("battlesByBeastQuery", {
+          battles: null,
+        });
+        setData("adventurerByIdQuery", {
+          adventurers: [discovery.data[0]],
+        });
+        discoveries.unshift(discovery.data[1]);
+        setData("beastQuery", { beasts: [discovery.data[2]] });
+      }
+    }
+
+    const filteredBeastAmbushes = events.filter(
+      (event) => event.name === "AmbushedByBeast"
+    );
+    if (filteredBeastAmbushes.length > 0) {
+      setData("battlesByBeastQuery", {
+        battles: null,
+      });
+      for (let discovery of filteredBeastAmbushes) {
+        setData("adventurerByIdQuery", {
+          adventurers: [discovery.data[0]],
+        });
+        discoveries.unshift(discovery.data[1]);
+        setData("beastQuery", { beasts: [discovery.data[2]] });
+        setData("battlesByBeastQuery", {
+          battles: [discovery.data[3]],
+        });
+      }
+    }
+
+    const adventurerDiedExists = events.some((event) => {
+      if (event.name === "AdventurerDied") {
         return true;
       }
       return false;
     });
-    if (attackedBeastExists) {
-      const attackedBeastEvents = events.filter(
-        (event) => event.name === "AttackedBeast"
-      );
-      for (let attackedBeastEvent of attackedBeastEvents) {
-        setData("adventurerByIdQuery", {
-          adventurers: [attackedBeastEvent.data[0]],
-        });
-        setData("battlesByAdventurerQuery", {
-          battles: [
-            ...(queryData.battlesByAdventurerQuery?.battles ?? []),
-            attackedBeastEvent.data[1],
-          ],
-        });
-        setData("battlesByTxHashQuery", {
-          battles: [
-            ...(queryData.battlesByTxHashQuery?.battles ?? []),
-            attackedBeastEvent.data[1],
-          ],
-        });
-        setData(
-          "beastQuery",
-          attackedBeastEvent.data[0].beastHealth,
-          "health",
-          0
-        );
-      }
-      const attackedByBeastEvents = events.filter(
-        (event) => event.name === "AttackedByBeast"
-      );
-      for (let attackedByBeastEvent of attackedByBeastEvents) {
-        setData("adventurerByIdQuery", {
-          adventurers: [attackedByBeastEvent.data[0]],
-        });
-        setData("battlesByAdventurerQuery", {
-          battles: [
-            ...(queryData.battlesByAdventurerQuery?.battles ?? []),
-            attackedByBeastEvent.data[1],
-          ],
-        });
-        setData("battlesByTxHashQuery", {
-          battles: [
-            ...(queryData.battlesByTxHashQuery?.battles ?? []),
-            attackedByBeastEvent.data[1],
-          ],
-        });
-      }
-    } else {
-      const slayedBeastEvent = events.find(
-        (event) => event.name === "SlayedBeast"
+    if (adventurerDiedExists) {
+      const adventurerDiedEvent = events.find(
+        (event) => event.name === "AdventurerDied"
       );
       setData("adventurerByIdQuery", {
-        adventurers: [slayedBeastEvent.data[0]],
+        adventurers: [adventurerDiedEvent.data],
       });
-      setData("battlesByAdventurerQuery", {
-        battles: [
-          ...(queryData.battlesByAdventurerQuery?.battles ?? []),
-          slayedBeastEvent.data[1],
-        ],
-      });
-      setData("battlesByTxHashQuery", {
-        battles: [
-          ...(queryData.battlesByTxHashQuery?.battles ?? []),
-          slayedBeastEvent.data[1],
-        ],
-      });
-      setData("beastQuery", slayedBeastEvent.data[0].beastHealth, "health", 0);
     }
+
+    const filteredDeathPenalty = events.filter(
+      (event) => event.name === "IdleDeathPenalty"
+    );
+    if (filteredDeathPenalty.length > 0) {
+      for (let discovery of filteredDeathPenalty) {
+        setData("adventurerByIdQuery", {
+          adventurers: [discovery.data[0]],
+        });
+        discoveries.unshift(discovery.data[2]);
+      }
+    }
+
     const newItemsAvailableExists = events.some((event) => {
       if (event.name === "NewItemsAvailable") {
         return true;
@@ -314,7 +275,7 @@ export function Syscalls() {
       const newItems = newItemsAvailableEvent.data[1];
       const itemData = [];
       for (let newItem of newItems) {
-        itemData.push({
+        itemData.unshift({
           item: newItem,
           adventurerId: newItemsAvailableEvent.data[0]["id"],
           owner: false,
@@ -333,7 +294,169 @@ export function Syscalls() {
         items: itemData,
       });
     }
-    stopLoading(queryData.battlesByTxHashQuery?.battles);
+    setData("latestDiscoveriesQuery", {
+      discoveries: [
+        ...discoveries,
+        ...(queryData.latestDiscoveriesQuery?.discoveries ?? []),
+      ],
+    });
+    setData("discoveryByTxHashQuery", {
+      discoveries: [...discoveries.reverse()],
+    });
+    setEquipItems([]);
+    setDropItems([]);
+    stopLoading(discoveries);
+  };
+
+  const attack = async (tillDeath: boolean, beastData: any) => {
+    resetData("latestMarketItemsQuery");
+    addToCalls({
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "attack",
+      calldata: [adventurer?.id?.toString() ?? "", "0", tillDeath ? "1" : "0"],
+    });
+    startLoading(
+      "Attack",
+      "Attacking",
+      "battlesByTxHashQuery",
+      adventurer?.id,
+      { beast: beastData }
+    );
+    const tx = await handleSubmitCalls(writeAsync);
+    setTxHash(tx.transaction_hash);
+    addTransaction({
+      hash: tx.transaction_hash,
+      metadata: {
+        method: `Attack ${beastData.beast}`,
+      },
+    });
+    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
+      retryInterval: 1000,
+    });
+
+    // reset battles by tx hash
+    setData("battlesByTxHashQuery", {
+      battles: null,
+    });
+
+    const events = parseEvents(
+      receipt as InvokeTransactionReceiptResponse,
+      queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
+    );
+    const battles = [];
+
+    const attackedBeastEvents = events.filter(
+      (event) => event.name === "AttackedBeast"
+    );
+    for (let attackedBeastEvent of attackedBeastEvents) {
+      setData("adventurerByIdQuery", {
+        adventurers: [attackedBeastEvent.data[0]],
+      });
+      battles.unshift(attackedBeastEvent.data[1]);
+      setData(
+        "beastQuery",
+        attackedBeastEvent.data[0].beastHealth,
+        "health",
+        0
+      );
+    }
+
+    const attackedByBeastEvents = events.filter(
+      (event) => event.name === "AttackedByBeast"
+    );
+    for (let attackedByBeastEvent of attackedByBeastEvents) {
+      setData("adventurerByIdQuery", {
+        adventurers: [attackedByBeastEvent.data[0]],
+      });
+      battles.unshift(attackedByBeastEvent.data[1]);
+    }
+
+    const slayedBeastEvents = events.filter(
+      (event) => event.name === "SlayedBeast"
+    );
+    for (let slayedBeastEvent of slayedBeastEvents) {
+      setData("adventurerByIdQuery", {
+        adventurers: [slayedBeastEvent.data[0]],
+      });
+      battles.unshift(slayedBeastEvent.data[1]);
+      setData("beastQuery", slayedBeastEvent.data[0].beastHealth, "health", 0);
+    }
+    setData("battlesByBeastQuery", {
+      battles: [
+        ...battles,
+        ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+      ],
+    });
+    setData("battlesByAdventurerQuery", {
+      battles: [
+        ...battles,
+        ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+      ],
+    });
+    setData("battlesByTxHashQuery", {
+      battles: [...battles.reverse()],
+    });
+
+    const adventurerDiedExists = events.some((event) => {
+      if (event.name === "AdventurerDied") {
+        return true;
+      }
+      return false;
+    });
+    if (adventurerDiedExists) {
+      const adventurerDiedEvent = events.find(
+        (event) => event.name === "AdventurerDied"
+      );
+      setData("adventurerByIdQuery", {
+        adventurers: [adventurerDiedEvent.data],
+      });
+    }
+
+    const filteredDeathPenalty = events.filter(
+      (event) => event.name === "IdleDeathPenalty"
+    );
+    if (filteredDeathPenalty.length > 0) {
+      for (let discovery of filteredDeathPenalty) {
+        setData("adventurerByIdQuery", {
+          adventurers: [discovery.data[0]],
+        });
+        battles.unshift(discovery.data[1]);
+      }
+    }
+
+    const newItemsAvailableExists = events.some((event) => {
+      if (event.name === "NewItemsAvailable") {
+        return true;
+      }
+      return false;
+    });
+    if (newItemsAvailableExists) {
+      const newItemsAvailableEvent = events.find(
+        (event) => event.name === "NewItemsAvailable"
+      );
+      const newItems = newItemsAvailableEvent.data[1];
+      const itemData = [];
+      for (let newItem of newItems) {
+        itemData.unshift({
+          item: newItem,
+          adventurerId: newItemsAvailableEvent.data[0]["id"],
+          owner: false,
+          equipped: false,
+          ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+          xp: 0,
+          special1: null,
+          special2: null,
+          special3: null,
+          isAvailable: false,
+          purchasedTime: null,
+          timestamp: new Date(),
+        });
+      }
+      setData("latestMarketItemsQuery", {
+        items: itemData,
+      });
+    }
+    stopLoading(battles);
     setEquipItems([]);
     setDropItems([]);
   };
@@ -348,9 +471,6 @@ export function Syscalls() {
       beast: beastData,
     });
     const tx = await handleSubmitCalls(writeAsync);
-    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-      retryInterval: 1000,
-    });
     setTxHash(tx.transaction_hash);
     addTransaction({
       hash: tx.transaction_hash,
@@ -358,20 +478,107 @@ export function Syscalls() {
         method: `Flee ${beastData.beast}`,
       },
     });
+    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
+      retryInterval: 1000,
+    });
     // Add optimistic data
     const events = parseEvents(
       receipt as InvokeTransactionReceiptResponse,
       queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
     );
-    // Update adventurer
-    setData("adventurerByIdQuery", {
-      adventurers: [
-        events.find(
-          (event) =>
-            event.name === "FleeFailed" || event.name === "FleeSucceeded"
-        ).data,
-      ],
+    const battles = [];
+
+    const fleeFailedEvents = events.filter(
+      (event) => event.name === "FleeFailed"
+    );
+    for (let fleeFailedEvent of fleeFailedEvents) {
+      setData("adventurerByIdQuery", {
+        adventurers: [fleeFailedEvent.data[0]],
+      });
+      battles.unshift(fleeFailedEvent.data[1]);
+    }
+
+    const attackedByBeastEvents = events.filter(
+      (event) => event.name === "AttackedByAdventurer"
+    );
+    for (let attackedByBeastEvent of attackedByBeastEvents) {
+      setData("adventurerByIdQuery", {
+        adventurers: [attackedByBeastEvent.data[0]],
+      });
+      battles.unshift(attackedByBeastEvent.data[1]);
+    }
+
+    const fleeSucceededEvents = events.filter(
+      (event) => event.name === "FleeSucceeded"
+    );
+    for (let fleeSucceededEvent of fleeSucceededEvents) {
+      setData("adventurerByIdQuery", {
+        adventurers: [fleeSucceededEvent.data[0]],
+      });
+      battles.unshift(fleeSucceededEvent.data[1]);
+    }
+
+    const adventurerDiedExists = events.some((event) => {
+      if (event.name === "AdventurerDied") {
+        return true;
+      }
+      return false;
     });
+    if (adventurerDiedExists) {
+      const adventurerDiedEvent = events.find(
+        (event) => event.name === "AdventurerDied"
+      );
+      setData("adventurerByIdQuery", {
+        adventurers: [adventurerDiedEvent.data],
+      });
+    }
+
+    const filteredDeathPenalty = events.filter(
+      (event) => event.name === "IdleDeathPenalty"
+    );
+    if (filteredDeathPenalty.length > 0) {
+      for (let discovery of filteredDeathPenalty) {
+        setData("adventurerByIdQuery", {
+          adventurers: [discovery.data[0]],
+        });
+        battles.unshift(discovery.data[1]);
+      }
+    }
+
+    const newItemsAvailableExists = events.some((event) => {
+      if (event.name === "NewItemsAvailable") {
+        return true;
+      }
+      return false;
+    });
+    if (newItemsAvailableExists) {
+      const newItemsAvailableEvent = events.find(
+        (event) => event.name === "NewItemsAvailable"
+      );
+      const newItems = newItemsAvailableEvent.data[1];
+      const itemData = [];
+      for (let newItem of newItems) {
+        itemData.unshift({
+          item: newItem,
+          adventurerId: newItemsAvailableEvent.data[0]["id"],
+          owner: false,
+          equipped: false,
+          ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+          xp: 0,
+          special1: null,
+          special2: null,
+          special3: null,
+          isAvailable: false,
+          purchasedTime: null,
+          timestamp: new Date(),
+        });
+      }
+      setData("latestMarketItemsQuery", {
+        items: itemData,
+      });
+    }
+
+    stopLoading(battles);
     setEquipItems([]);
     setDropItems([]);
   };
@@ -393,9 +600,6 @@ export function Syscalls() {
       }
     );
     const tx = await handleSubmitCalls(writeAsync);
-    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-      retryInterval: 1000,
-    });
     setTxHash(tx.transaction_hash);
     addTransaction({
       hash: tx.transaction_hash,
@@ -403,8 +607,9 @@ export function Syscalls() {
         method: `Upgrade`,
       },
     });
-
-    console.log(receipt);
+    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
+      retryInterval: 1000,
+    });
 
     // Add optimistic data
     const events = parseEvents(
@@ -431,20 +636,22 @@ export function Syscalls() {
     const equippedItemsEvent = events.find(
       (event) => event.name === "EquippedItems"
     );
+    const equippedItems = [];
     for (let equippedItem of equippedItemsEvent.data[1]) {
       const ownedItem = eventPurchasedItemsEvent.data[1].find(
         (item: any) => item.item == equippedItem
       );
-      setData("itemsByAdventurerQuery", {
-        items: [
-          ...(queryData.itemsByAdventurerQuery?.items ?? []),
-          {
-            ...ownedItem,
-            ["equipped"]: true,
-          },
-        ],
+      equippedItems.unshift({
+        ...ownedItem,
+        ["equipped"]: true,
       });
     }
+    setData("itemsByAdventurerQuery", {
+      items: [
+        ...(queryData.itemsByAdventurerQuery?.items ?? []),
+        ...equippedItems,
+      ],
+    });
     for (let unequippedItem of equippedItemsEvent.data[2]) {
       const ownedItemIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
         (item) => item.item == unequippedItem
@@ -474,12 +681,12 @@ export function Syscalls() {
           dict["entrypoint"] === "claim_item")
       ) {
         if (Array.isArray(dict.calldata)) {
-          items.push(dict.calldata[0]?.toString() ?? "");
+          items.unshift(dict.calldata[0]?.toString() ?? "");
         }
       }
       if (dict["entrypoint"] === "equip") {
         if (Array.isArray(dict.calldata)) {
-          items.push(dict.calldata[2]?.toString() ?? "");
+          items.unshift(dict.calldata[2]?.toString() ?? "");
         }
       }
     }

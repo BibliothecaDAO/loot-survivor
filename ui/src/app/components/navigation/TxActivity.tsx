@@ -138,7 +138,6 @@ export const TxActivity = () => {
             hasBeast
           );
         }
-        stopLoading(queryData.discoveryByTxHashQuery.discoveries);
       };
 
       const handleUpgrade = async () => {
