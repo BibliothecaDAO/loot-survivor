@@ -730,6 +730,10 @@ export class GameData {
       2: "Scout",
       3: "Merchant",
       4: "Warrior",
+      5: "Seer",
+      6: "Mage",
+      7: "Bard",
+      8: "Brute",
     };
 
     this.ORDERS = {

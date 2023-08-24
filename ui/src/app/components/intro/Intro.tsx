@@ -96,7 +96,7 @@ const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
     <>
       {flash && screen != 0 && <div className="flash" />}
       {screen == 0 &&
-        renderScreen("/scenes/intro/sculls.png", "start", [
+        renderScreen("/scenes/intro/skulls.png", "start", [
           prologue,
           () => setTimeout(() => setScreen(1), 3000),
         ])}

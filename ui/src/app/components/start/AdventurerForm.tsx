@@ -238,6 +238,37 @@ export const AdventurerForm = ({
         startingWisdom: "2",
         startingIntelligence: "2",
       });
+    } else if (classType === "Seer") {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingIntelligence: "3",
+        startingWisdom: "3",
+      });
+    } else if (classType === "Mage") {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingIntelligence: "2",
+        startingWisdom: "2",
+        startingVitality: "1",
+        startingDexterity: "1",
+      });
+    } else if (classType === "Bard") {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingIntelligence: "1",
+        startingDexterity: "1",
+        startingStrength: "2",
+        startingCharisma: "2",
+      });
+    } else if (classType === "Brute") {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingStrength: "6",
+      });
     } else {
       setFormData({
         ...formData,
@@ -290,6 +321,26 @@ export const AdventurerForm = ({
         "+1 Strength +1 Dexterity +1 Vitality +1 Intelligence +1 Wisdom +1 Charisma",
       image: "/classes/warrior2.png",
     },
+    {
+      name: "Seer",
+      description: "+3 Intelligence +3 Wisdom",
+      image: "/classes/seer.png",
+    },
+    {
+      name: "Mage",
+      description: "+1 Dexterity +1 Vitality +2 Intelligence +2 Wisdom",
+      image: "/classes/mage.png",
+    },
+    {
+      name: "Bard",
+      description: "+1 Intelligence 1+ Dexterity +2 Strength +2 Charisma",
+      image: "/classes/bard.png",
+    },
+    {
+      name: "Brute",
+      description: "+6 Strength",
+      image: "/classes/brute.png",
+    },
   ];
 
   const weapons = [
@@ -326,7 +377,7 @@ export const AdventurerForm = ({
           <h3 className="uppercase text-center 2xl:text-5xl">
             Choose your class
           </h3>
-          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-5 md:gap-5 lg:gap-10 2xl:gap-5 2xl:justify-center">
+          <div className="grid grid-cols-2 xl:overflow-y-auto xl:h-[400px] sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-5 md:gap-5 lg:gap-10 2xl:gap-5 2xl:justify-center">
             {classes.map((classType) => (
               <div
                 key={classType.name}
