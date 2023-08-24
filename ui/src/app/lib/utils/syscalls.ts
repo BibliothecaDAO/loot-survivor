@@ -115,6 +115,10 @@ export function Syscalls() {
     setData("adventurerByIdQuery", {
       adventurers: [adventurerState],
     });
+    setData("latestDiscoveriesQuery", {
+      discoveries: events.find((event) => event.name === "AmbushedByBeast")
+        .data[1],
+    });
     setData("beastQuery", {
       beasts: [
         events.find((event) => event.name === "AmbushedByBeast").data[2],
@@ -407,8 +411,6 @@ export function Syscalls() {
       receipt as InvokeTransactionReceiptResponse,
       queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
     );
-    console.log(events);
-    console.log(queryData.adventurerByIdQuery?.adventurers[0]);
     // Update adventurer
     setData("adventurerByIdQuery", {
       adventurers: [
@@ -429,14 +431,21 @@ export function Syscalls() {
     const equippedItemsEvent = events.find(
       (event) => event.name === "EquippedItems"
     );
-    for (let equippedItem of eventPurchasedItemsEvent.data[1]) {
-      const ownedItemIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
-        (item) => item.item == equippedItem
+    for (let equippedItem of equippedItemsEvent.data[1]) {
+      const ownedItem = eventPurchasedItemsEvent.data[1].find(
+        (item: any) => item.item == equippedItem
       );
-      setData("itemsByAdventurerQuery", true, "equipped", ownedItemIndex);
+      setData("itemsByAdventurerQuery", {
+        items: [
+          ...(queryData.itemsByAdventurerQuery?.items ?? []),
+          {
+            ...ownedItem,
+            ["equipped"]: true,
+          },
+        ],
+      });
     }
-    console.log(eventPurchasedItemsEvent.data[2]);
-    for (let unequippedItem of eventPurchasedItemsEvent.data[2]) {
+    for (let unequippedItem of equippedItemsEvent.data[2]) {
       const ownedItemIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
         (item) => item.item == unequippedItem
       );

@@ -108,7 +108,7 @@ function processAdventurerState(data: any, currentAdventurer?: any) {
     statUpgrades: data.adventurerState["adventurer"]["statPointsAvailable"],
     name: currentAdventurer["name"],
     homeRealm: currentAdventurer["homeRealm"],
-    classType: currentAdventurer["class"],
+    classType: currentAdventurer["classType"],
     entropy: currentAdventurer["entropy"],
     createdTime: currentAdventurer.createdTime,
     lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
@@ -704,7 +704,7 @@ export function processData(
       const formattedUnequippedItems = [];
       for (let i = 0; i < equippedItemsEvent.unequippedItems.length; i++) {
         formattedUnequippedItems.push(
-          gameData.ITEMS[equippedItemsEvent.equippedItems[i]]
+          gameData.ITEMS[equippedItemsEvent.unequippedItems[i]]
         );
       }
       return [
