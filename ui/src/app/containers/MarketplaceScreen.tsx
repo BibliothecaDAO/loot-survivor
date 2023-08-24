@@ -190,7 +190,7 @@ export default function MarketplaceScreen({
                     showEquipQ !== null ? "sm:hidden" : "hidden"
                   } w-full m-auto h-full flex flex-row items-center justify-center gap-2`}
                 >
-                  <p>{`Equip ${item.item} ?`}</p>
+                  <p>{`Equip ${item?.item} ?`}</p>
                   <Button
                     onClick={() => {
                       const newPurchases = [

@@ -51,9 +51,7 @@ export default function AdventurerScreen() {
   //   txAccepted
   // );
 
-  useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
-
-  console.log(owner);
+  // useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
 
   // const ownerVariables = useMemo(() => {
   //   return {
@@ -61,11 +59,9 @@ export default function AdventurerScreen() {
   //   };
   // }, [owner]);
 
-  useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
-    owner: owner,
-  });
-
-  console.log(data.adventurersByOwnerQuery);
+  // useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
+  //   owner: owner,
+  // });
 
   // TODO: Remove polling
   // useCustomQuery(

@@ -121,8 +121,6 @@ export const useBurner = () => {
       0
     );
 
-    console.log(walletAccount);
-
     if (!walletAccount) {
       throw new Error("wallet account not found");
     }
@@ -142,8 +140,6 @@ export const useBurner = () => {
       addressSalt: publicKey,
     });
 
-    console.log(deployTx);
-
     // save burner
     let storage = Storage.get("burners") || {};
     for (let address in storage) {
@@ -160,7 +156,6 @@ export const useBurner = () => {
     setAccount(burner);
     setIsDeploying(false);
     Storage.set("burners", storage);
-    console.log("burner created: ", address);
     refresh();
     return burner;
   }, [walletAccount]);
@@ -208,8 +203,6 @@ const prefundAccount = async (address: string, account: AccountInterface) => {
       entrypoint: "transfer",
       calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
     });
-
-    console.log(transaction_hash);
 
     const result = await account.waitForTransaction(transaction_hash, {
       retryInterval: 1000,

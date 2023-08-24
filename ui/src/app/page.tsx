@@ -140,9 +140,9 @@ export default function Home() {
     return { id: adventurer?.id ?? 0 };
   }, [adventurer?.id]);
 
-  useCustomQuery("adventurerByIdQuery", getAdventurerById, {
-    id: adventurer?.id ?? 0,
-  });
+  // useCustomQuery("adventurerByIdQuery", getAdventurerById, {
+  //   id: adventurer?.id ?? 0,
+  // });
 
   console.log(data);
 

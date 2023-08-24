@@ -75,23 +75,23 @@ export const TxActivity = () => {
     showDeathDialog(true);
   };
 
-  useCustomQuery(
-    "battlesByTxHashQuery",
-    getBattleByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    !hash
-  );
+  // useCustomQuery(
+  //   "battlesByTxHashQuery",
+  //   getBattleByTxHash,
+  //   {
+  //     txHash: padAddress(hash),
+  //   },
+  //   !hash
+  // );
 
-  useCustomQuery(
-    "discoveryByTxHashQuery",
-    getDiscoveryByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    !hash
-  );
+  // useCustomQuery(
+  //   "discoveryByTxHashQuery",
+  //   getDiscoveryByTxHash,
+  //   {
+  //     txHash: padAddress(hash),
+  //   },
+  //   !hash
+  // );
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,7 +99,6 @@ export const TxActivity = () => {
       const events = parseEvents(data);
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
-        console.log("in battle");
         const killedByBeast = events.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
@@ -143,18 +142,18 @@ export const TxActivity = () => {
       };
 
       const handleUpgrade = async () => {
-        setData("adventurerByIdQuery", {
-          adventurers: [
-            events.find((event) => event.name === "AdventurerUpgraded").data,
-          ],
-        });
+        // setData("adventurerByIdQuery", {
+        //   adventurers: [
+        //     events.find((event) => event.name === "AdventurerUpgraded").data,
+        //   ],
+        // });
         // Reset items to no availability
         // for (let i = 1; i <= 101; i++) {
         //   setData("itemsByAdventurerQuery", {
 
         //   })
         // }
-        stopLoading(notificationData);
+        // stopLoading(notificationData);
         if (!hasStatUpgrades) {
           setScreen("play");
         }
@@ -170,7 +169,6 @@ export const TxActivity = () => {
       };
 
       const handleCreate = async () => {
-        console.log("in create");
         // NOW HANDLED IN SYSCALLS
         // setData("adventurersByOwnerQuery", {
         //   adventurers: [
@@ -193,8 +191,6 @@ export const TxActivity = () => {
       const handleDataUpdate = () => {
         setTxAccepted(false);
       };
-
-      console.log(type);
 
       try {
         switch (type) {

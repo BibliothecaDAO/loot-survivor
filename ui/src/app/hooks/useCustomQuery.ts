@@ -36,7 +36,6 @@ const useCustomQuery = (
   const prevVariablesRef = useRef<Variables>();
 
   useEffect(() => {
-    console.log(queryKey, variables);
     if (data && !isEqual(prevVariablesRef.current, variables)) {
       updateData(queryKey, data, loading, refetchWrapper);
     }

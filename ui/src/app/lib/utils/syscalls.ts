@@ -104,7 +104,6 @@ export function Syscalls() {
       entropy: 0,
       createdTime: new Date(),
     });
-    console.log(events);
     const adventurerState = events.find((event) => event.name === "StartGame")
       .data[0];
     setData("adventurersByOwnerQuery", {
@@ -126,10 +125,6 @@ export function Syscalls() {
         events.find((event) => event.name === "AmbushedByBeast").data[3],
       ],
     });
-    // Create base items
-    // setData("latestMarketItemsQuery", {
-    //   items: events.find((event) => event.name === "StartGame").data[1],
-    // });
     setData("itemsByAdventurerQuery", {
       items: [
         {
@@ -181,7 +176,6 @@ export function Syscalls() {
       receipt as InvokeTransactionReceiptResponse,
       queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
     );
-    console.log(events);
     setData("adventurerByIdQuery", {
       adventurers: [events.find((event) => event.name === "StartGame").data[0]],
     });
@@ -229,7 +223,6 @@ export function Syscalls() {
       receipt as InvokeTransactionReceiptResponse,
       queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
     );
-    console.log(events);
     const attackedBeastExists = events.some((event) => {
       if (event.name === "AttackedBeast") {
         return true;
@@ -407,11 +400,15 @@ export function Syscalls() {
       },
     });
 
+    console.log(receipt);
+
     // Add optimistic data
     const events = parseEvents(
       receipt as InvokeTransactionReceiptResponse,
       queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
     );
+    console.log(events);
+    console.log(queryData.adventurerByIdQuery?.adventurers[0]);
     // Update adventurer
     setData("adventurerByIdQuery", {
       adventurers: [
@@ -419,29 +416,39 @@ export function Syscalls() {
       ],
     });
 
-    // Reset items to no availability
-    for (let i = 0; i <= 101; i++) {
-      setData("latestMarketItemsQuery", null, "isAvailable", i);
-      setData("latestMarketItemsQuery", new Date(), "timestamp", i);
-    }
-
     // Add purchased items
-    const eventPurchasedItems = events.find(
+    const eventPurchasedItemsEvent = events.find(
       (event) => event.name === "PurchasedItems"
-    ).data.purchasedItems;
-    eventPurchasedItems.forEach((value: any, index: number) => {
-      setData("itemsByAdventurerQuery", true, "owner", index);
-      setData(
-        "itemsByAdventurerQuery",
-        events.find((event) => event.name === "AdventurerUpgraded").data
-          .adventurerState["owner"],
-        "ownerAddress",
-        index
-      );
-      setData("itemsByAdventurerQuery", new Date(), "purchasedItem", index);
-      setData("itemsByAdventurerQuery", new Date(), "timestamp", index);
+    );
+    setData("itemsByAdventurerQuery", {
+      items: [
+        ...(queryData.itemsByAdventurerQuery?.items ?? []),
+        eventPurchasedItemsEvent.data[1],
+      ],
     });
-    //
+    const equippedItemsEvent = events.find(
+      (event) => event.name === "EquippedItems"
+    );
+    for (let equippedItem of eventPurchasedItemsEvent.data[1]) {
+      const ownedItemIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+        (item) => item.item == equippedItem
+      );
+      setData("itemsByAdventurerQuery", true, "equipped", ownedItemIndex);
+    }
+    console.log(eventPurchasedItemsEvent.data[2]);
+    for (let unequippedItem of eventPurchasedItemsEvent.data[2]) {
+      const ownedItemIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+        (item) => item.item == unequippedItem
+      );
+      setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
+    }
+    // Reset items to no availability
+    setData("latestMarketItemsQuery", null);
+    stopLoading({
+      Stats: upgrades,
+      Items: purchaseItems,
+      Potions: potionAmount,
+    });
   };
 
   const multicall = async (

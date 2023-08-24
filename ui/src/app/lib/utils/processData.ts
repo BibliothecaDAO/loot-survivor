@@ -117,6 +117,28 @@ function processAdventurerState(data: any, currentAdventurer?: any) {
   return updateAdventurerDoc;
 }
 
+export function processPurchases(data: any, adventurerState: any) {
+  const gameData = new GameData();
+  const purchasedItems = [];
+  for (let item of data) {
+    purchasedItems.push({
+      item: gameData.ITEMS[item.item.id],
+      adventurerId: adventurerState["adventurerId"],
+      owner: true,
+      equipped: false,
+      ownerAddress: adventurerState["owner"],
+      xp: 0,
+      special1: null,
+      special2: null,
+      special3: null,
+      isAvailable: false,
+      purchasedTime: new Date(),
+      timestamp: new Date(),
+    });
+  }
+  return purchasedItems;
+}
+
 export function processData(
   event: EventData,
   eventName: string,
@@ -655,17 +677,22 @@ export function processData(
     case "PurchasedItems":
       const purchasedItemsEvent = event as PurchasedItemsEvent;
       const purchasedItemsAdventurerData = processAdventurerState(
-        purchasedItemsEvent,
+        purchasedItemsEvent.adventurerStateWithBag,
         currentAdventurer
       );
-      return [purchasedItemsAdventurerData, purchasedItemsEvent.purchases];
+      const purchases = processPurchases(
+        purchasedItemsEvent.purchases,
+        purchasedItemsEvent.adventurerStateWithBag.adventurerState
+      );
+      console.log("Purchases:", purchases);
+      return [purchasedItemsAdventurerData, purchases];
     case "PurchasedPotions":
       const purchasedPotionsEvent = event as PurchasedPotionsEvent;
       return processAdventurerState(purchasedPotionsEvent, currentAdventurer);
     case "EquippedItems":
       const equippedItemsEvent = event as EquippedItemsEvent;
       const equipedItemsAdventurerData = processAdventurerState(
-        equippedItemsEvent,
+        equippedItemsEvent.adventurerStateWithBag,
         currentAdventurer
       );
       const formattedEquippedItems = [];
@@ -688,7 +715,7 @@ export function processData(
     case "DroppedItems":
       const droppedItemsEvent = event as DroppedItemsEvent;
       const droppedItemsAdventurerData = processAdventurerState(
-        droppedItemsEvent,
+        droppedItemsEvent.adventurerStateWithBag,
         currentAdventurer
       );
       const formattedDroppedItems = [];
@@ -733,7 +760,6 @@ export function processData(
         newItemsAvailableEvent,
         currentAdventurer
       );
-      console.log(newItemsAvailableEvent);
       const formattedNewItems = [];
       for (let i = 0; i < newItemsAvailableEvent.items.length; i++) {
         formattedNewItems.push(

@@ -189,8 +189,6 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
     (stat: any) => stat[1] !== 0
   );
 
-  console.log(loadingQuery);
-
   return (
     <>
       {displayCart ? (

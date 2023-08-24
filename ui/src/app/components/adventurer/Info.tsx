@@ -45,13 +45,13 @@ export default function Info({
 
   const gameData = new GameData();
 
-  useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
-    adventurerId: adventurer?.id ?? 0,
-  });
+  // useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
+  //   adventurerId: adventurer?.id ?? 0,
+  // });
 
-  useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
-    adventurerId: profile ?? 0,
-  });
+  // useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
+  //   adventurerId: profile ?? 0,
+  // });
 
   const items = profileExists
     ? data.itemsByProfileQuery
@@ -60,8 +60,6 @@ export default function Info({
     : data.itemsByAdventurerQuery
     ? data.itemsByAdventurerQuery.items
     : [];
-
-  console.log(data.itemsByAdventurerQuery, formatAdventurer);
 
   const neckItem =
     items.find(

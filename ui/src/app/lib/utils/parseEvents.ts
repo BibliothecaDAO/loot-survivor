@@ -161,7 +161,6 @@ function parseBag(data: string[]) {
 function parseItems(data: string[]) {
   const purchases = [];
   const chunkedArray = chunkArray(data, 5);
-  console.log(chunkedArray);
   for (let i = 0; i < chunkedArray.length; i++) {
     purchases.push({
       item: {
@@ -200,6 +199,7 @@ export function parseEvents(
 
   for (let raw of receipt.events) {
     const eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]);
+    console.log(eventName);
 
     switch (eventName) {
       case "StartGame":
@@ -223,6 +223,7 @@ export function parseEvents(
         const upgradeAvailableData: UpgradeAvailableEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
         };
+        console.log(upgradeAvailableData);
         const upgradeAvailableEvent = processData(
           upgradeAvailableData,
           eventName,
@@ -494,7 +495,8 @@ export function parseEvents(
             adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
             bag: parseBag(raw.data.slice(40, 73)),
           },
-          purchases: parseItems(raw.data.slice(73)),
+          // Skip array length
+          purchases: parseItems(raw.data.slice(75)),
         };
         const purchasedItemsEvent = processData(
           purchasedItemsData,
@@ -521,7 +523,8 @@ export function parseEvents(
         break;
       case "EquippedItems":
         const { equippedItems, unequippedItems } = parseEquippedItems(
-          raw.data.slice(73)
+          // Skip array length
+          raw.data.slice(75)
         );
         const equippedItemsData: EquippedItemsEvent = {
           adventurerStateWithBag: {
@@ -541,7 +544,8 @@ export function parseEvents(
         break;
       case "DroppedItems":
         const itemIds = [];
-        const itemsData = raw.data.slice(73);
+        // Skip array length
+        const itemsData = raw.data.slice(75);
         for (let i = 0; i < itemsData.length; i++) {
           itemIds.push(parseInt(itemsData[i]));
         }
@@ -638,6 +642,7 @@ export function parseEvents(
       case "NewItemsAvailable":
         const newItemsAvailableData: NewItemsAvailableEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
+          // Skip array length
           items: parseItems(raw.data.slice(41)),
         };
         const newItemsAvailableEvent = processData(
