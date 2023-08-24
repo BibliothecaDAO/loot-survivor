@@ -308,6 +308,7 @@ export const AdventurerForm = ({
                   <Image
                     src={classType.image}
                     fill={true}
+                    sizes="xl"
                     alt={classType.name}
                     style={{
                       objectFit: "contain",

@@ -70,6 +70,7 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
           src={image}
           alt="monsters"
           fill={true}
+          sizes="xl"
           placeholder="blur"
           blurDataURL={
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAABCAQAAABeK7cBAAAADUlEQVR42mNkrmdgAAABkwCE1XPyYQAAAABJRU5ErkJggg=="

@@ -633,6 +633,8 @@ export function Syscalls() {
         eventPurchasedItemsEvent.data[1],
       ],
     });
+
+
     const equippedItemsEvent = events.find(
       (event) => event.name === "EquippedItems"
     );
