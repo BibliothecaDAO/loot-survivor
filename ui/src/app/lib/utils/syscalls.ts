@@ -17,23 +17,23 @@ import { parseEvents } from "./parseEvents";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 
 export interface SyscallsProps {
-  gameContract?: any;
-  lordsContract?: any;
-  addTransaction?: any;
-  account?: any;
-  queryData?: any;
-  resetData?: any;
-  setData?: any;
-  adventurer?: any;
-  addToCalls?: any;
-  calls?: any;
-  handleSubmitCalls?: any;
-  startLoading?: any;
-  stopLoading?: any;
-  setTxHash?: any;
-  writeAsync?: any;
-  setEquipItems?: any;
-  setDropItems?: any;
+  gameContract: any;
+  lordsContract: any;
+  addTransaction: any;
+  account: any;
+  queryData: any;
+  resetData: (...args: any[]) => any;
+  setData: (...args: any[]) => any;
+  adventurer: any;
+  addToCalls: (...args: any[]) => any;
+  calls: any;
+  handleSubmitCalls: (...args: any[]) => any;
+  startLoading: (...args: any[]) => any;
+  stopLoading: (...args: any[]) => any;
+  setTxHash: (...args: any[]) => any;
+  writeAsync: (...args: any[]) => any;
+  setEquipItems: (...args: any[]) => any;
+  setDropItems: (...args: any[]) => any;
 }
 
 export function syscalls({

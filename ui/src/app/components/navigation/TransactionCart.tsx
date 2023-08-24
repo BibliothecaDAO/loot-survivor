@@ -6,7 +6,11 @@ import React, {
   RefObject,
 } from "react";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import { useTransactionManager, useContractWrite } from "@starknet-react/core";
+import {
+  useTransactionManager,
+  useContractWrite,
+  useAccount,
+} from "@starknet-react/core";
 import { Button } from "../buttons/Button";
 import { MdClose } from "react-icons/md";
 import useLoadingStore from "../../hooks/useLoadingStore";
@@ -32,6 +36,7 @@ import {
 import { GameData } from "../GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 import { syscalls } from "@/app/lib/utils/syscalls";
+import { useContracts } from "@/app/hooks/useContracts";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
@@ -69,7 +74,36 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
 
-  const { multicall } = syscalls({});
+  const { gameContract, lordsContract } = useContracts();
+  const { data: queryData, resetData, setData } = useQueriesStore();
+  const { account } = useAccount();
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const stopLoading = useLoadingStore((state) => state.stopLoading);
+  const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
+  const hash = useLoadingStore((state) => state.hash);
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
+  );
+
+  const { multicall } = syscalls({
+    gameContract,
+    lordsContract,
+    addTransaction,
+    account,
+    queryData,
+    resetData,
+    setData,
+    adventurer,
+    addToCalls,
+    calls,
+    handleSubmitCalls,
+    startLoading,
+    stopLoading,
+    setTxHash,
+    writeAsync,
+    setEquipItems,
+    setDropItems,
+  });
 
   const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items

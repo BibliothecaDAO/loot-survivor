@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { useTransactionManager, useContractWrite } from "@starknet-react/core";
+import {
+  useTransactionManager,
+  useContractWrite,
+  useAccount,
+} from "@starknet-react/core";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
@@ -45,7 +49,46 @@ export default function ActionsScreen() {
     (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
   );
 
-  const { explore } = syscalls({});
+  const { gameContract, lordsContract } = useContracts();
+  const { addTransaction } = useTransactionManager();
+  const { data: queryData, resetData, setData } = useQueriesStore();
+  const { account } = useAccount();
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const calls = useTransactionCartStore((state) => state.calls);
+  const handleSubmitCalls = useTransactionCartStore(
+    (state) => state.handleSubmitCalls
+  );
+  const startLoading = useLoadingStore((state) => state.startLoading);
+  const stopLoading = useLoadingStore((state) => state.stopLoading);
+  const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
+  const setTxHash = useLoadingStore((state) => state.setTxHash);
+  const { writeAsync } = useContractWrite({ calls });
+  const equipItems = useUIStore((state) => state.equipItems);
+  const setEquipItems = useUIStore((state) => state.setEquipItems);
+  const setDropItems = useUIStore((state) => state.setDropItems);
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
+  );
+
+  const { explore } = syscalls({
+    gameContract,
+    lordsContract,
+    addTransaction,
+    account,
+    queryData,
+    resetData,
+    setData,
+    adventurer,
+    addToCalls,
+    calls,
+    handleSubmitCalls,
+    startLoading,
+    stopLoading,
+    setTxHash,
+    writeAsync,
+    setEquipItems,
+    setDropItems,
+  });
 
   // useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
   //   txHash: padAddress(hash),
