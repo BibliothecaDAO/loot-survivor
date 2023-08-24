@@ -144,8 +144,7 @@ export default function Home() {
     id: adventurer?.id ?? 0,
   });
 
-  console.log(data.adventurersByOwnerQuery);
-  console.log(data.adventurerByIdQuery);
+  console.log(data);
 
   // useEffect(() => {
   //   if (

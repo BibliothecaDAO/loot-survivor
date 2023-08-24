@@ -82,7 +82,7 @@ function createBaseItems(data: AdventurerState) {
   return items;
 }
 
-function processAdventurerState(data: any) {
+function processAdventurerState(data: any, currentAdventurer?: any) {
   const gameData = new GameData();
   const updateAdventurerDoc: Adventurer = {
     id: data.adventurerState["adventurerId"].low,
@@ -98,7 +98,6 @@ function processAdventurerState(data: any) {
     charisma: data.adventurerState["adventurer"]["stats"]["charisma"],
     gold: data.adventurerState["adventurer"]["gold"],
     weapon: gameData.ITEMS[data.adventurerState["adventurer"]["weapon"]["id"]],
-    chest: gameData.ITEMS[data.adventurerState["adventurer"]["chest"]["id"]],
     head: gameData.ITEMS[data.adventurerState["adventurer"]["head"]["id"]],
     waist: gameData.ITEMS[data.adventurerState["adventurer"]["waist"]["id"]],
     foot: gameData.ITEMS[data.adventurerState["adventurer"]["foot"]["id"]],
@@ -107,6 +106,11 @@ function processAdventurerState(data: any) {
     ring: gameData.ITEMS[data.adventurerState["adventurer"]["ring"]["id"]],
     beastHealth: data.adventurerState["adventurer"]["beastHealth"],
     statUpgrades: data.adventurerState["adventurer"]["statPointsAvailable"],
+    name: currentAdventurer["name"],
+    homeRealm: currentAdventurer["homeRealm"],
+    classType: currentAdventurer["class"],
+    entropy: currentAdventurer["entropy"],
+    createdTime: currentAdventurer.createdTime,
     lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
     timestamp: new Date(), // Equivalent to datetime.now() in Python.
   };
@@ -116,7 +120,8 @@ function processAdventurerState(data: any) {
 export function processData(
   event: EventData,
   eventName: string,
-  txHash?: string
+  txHash?: string,
+  currentAdventurer?: any
 ) {
   const gameData = new GameData();
   switch (eventName) {
@@ -183,11 +188,12 @@ export function processData(
       return [updateAdventurerDoc, items];
     case "AdventurerUpgraded":
       const adventurerUpgradedEvent = event as AdventurerUpgradedEvent;
-      return processAdventurerState(adventurerUpgradedEvent);
+      return processAdventurerState(adventurerUpgradedEvent, currentAdventurer);
     case "DiscoveredHealth":
       const discoveredHealthEvent = event as DiscoveredHealthEvent;
       const discoveredHealthAdventurerData = processAdventurerState(
-        discoveredHealthEvent
+        discoveredHealthEvent,
+        currentAdventurer
       );
       const discoverHealthData = {
         txHash: txHash,
@@ -218,8 +224,10 @@ export function processData(
       return [discoveredHealthAdventurerData, discoverHealthData];
     case "DiscoveredGold":
       const discoveredGoldEvent = event as DiscoveredGoldEvent;
-      const discoveredGoldAdventurerData =
-        processAdventurerState(discoveredGoldEvent);
+      const discoveredGoldAdventurerData = processAdventurerState(
+        discoveredGoldEvent,
+        currentAdventurer
+      );
       const discoverGoldData = {
         txHash: txHash,
         adventurerId: discoveredGoldEvent.adventurerState["adventurerId"],
@@ -250,8 +258,10 @@ export function processData(
       return [discoveredGoldAdventurerData, discoverGoldData];
     case "DiscoveredXP":
       const discoveredXPEvent = event as DiscoveredXPEvent;
-      const discoveredXPAdventurerData =
-        processAdventurerState(discoveredXPEvent);
+      const discoveredXPAdventurerData = processAdventurerState(
+        discoveredXPEvent,
+        currentAdventurer
+      );
       const discoverXPData = {
         txHash: txHash,
         adventurerId: discoveredXPEvent.adventurerState["adventurerId"],
@@ -282,8 +292,10 @@ export function processData(
       return [discoveredXPAdventurerData, discoverXPData];
     case "DodgedObstacle":
       const dodgedObstacleEvent = event as DodgedObstacleEvent;
-      const dodgedObstacleAdventurerData =
-        processAdventurerState(dodgedObstacleEvent);
+      const dodgedObstacleAdventurerData = processAdventurerState(
+        dodgedObstacleEvent,
+        currentAdventurer
+      );
       const dodgedObstacleData = {
         txHash: txHash,
         adventurerId: dodgedObstacleEvent.adventurerState["adventurerId"],
@@ -314,8 +326,10 @@ export function processData(
       return [dodgedObstacleAdventurerData, dodgedObstacleData];
     case "HitByObstacle":
       const hitByObstacleEvent = event as HitByObstacleEvent;
-      const hitByObstacleAdventurerData =
-        processAdventurerState(hitByObstacleEvent);
+      const hitByObstacleAdventurerData = processAdventurerState(
+        hitByObstacleEvent,
+        currentAdventurer
+      );
       const hitByObstacleData = {
         txHash: txHash,
         adventurerId: hitByObstacleEvent.adventurerState["adventurerId"],
@@ -346,8 +360,10 @@ export function processData(
       return [hitByObstacleAdventurerData, hitByObstacleData];
     case "DiscoveredBeast":
       const discoveredBeastEvent = event as DiscoveredBeastEvent;
-      const discoveredBeastAdventurerData =
-        processAdventurerState(discoveredBeastEvent);
+      const discoveredBeastAdventurerData = processAdventurerState(
+        discoveredBeastEvent,
+        currentAdventurer
+      );
       const discoveredBeastData = {
         txHash: txHash,
         adventurerId: discoveredBeastEvent.adventurerState["adventurerId"],
@@ -397,8 +413,10 @@ export function processData(
       ];
     case "AmbushedByBeast":
       const ambushedByBeastEvent = event as AmbushedByBeastEvent;
-      const ambushedByBeastAdventurerData =
-        processAdventurerState(ambushedByBeastEvent);
+      const ambushedByBeastAdventurerData = processAdventurerState(
+        ambushedByBeastEvent,
+        currentAdventurer
+      );
       const ambushedByBeastData = {
         txHash: txHash,
         adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"],
@@ -475,8 +493,10 @@ export function processData(
       ];
     case "AttackedBeast":
       const attackedBeastEvent = event as AttackedBeastEvent;
-      const attackedBeastAdventurerData =
-        processAdventurerState(attackedBeastEvent);
+      const attackedBeastAdventurerData = processAdventurerState(
+        attackedBeastEvent,
+        currentAdventurer
+      );
       const attackedBeastData = {
         txHash: txHash,
         beast: gameData.BEASTS[attackedBeastEvent.id],
@@ -535,8 +555,10 @@ export function processData(
       return [attackedByBeastEvent, attackedByBeastData];
     case "SlayedBeast":
       const slayedBeastEvent = event as SlayedBeastEvent;
-      const slayedBeastAdventurerData =
-        processAdventurerState(slayedBeastEvent);
+      const slayedBeastAdventurerData = processAdventurerState(
+        slayedBeastEvent,
+        currentAdventurer
+      );
       const slayedBeastData = {
         txHash: txHash,
         beast: gameData.BEASTS[slayedBeastEvent.id],
@@ -566,7 +588,10 @@ export function processData(
       return [slayedBeastAdventurerData, slayedBeastData];
     case "FleeFailed":
       const fleeFailedEvent = event as FleeFailedEvent;
-      const fleeFailedAdventurerData = processAdventurerState(fleeFailedEvent);
+      const fleeFailedAdventurerData = processAdventurerState(
+        fleeFailedEvent,
+        currentAdventurer
+      );
       const fleeFailedData = {
         txHash: txHash,
         beast: gameData.BEASTS[fleeFailedEvent.id],
@@ -596,8 +621,10 @@ export function processData(
       return [fleeFailedAdventurerData, fleeFailedData];
     case "FleeSucceeded":
       const fleeSucceededEvent = event as FleeSucceededEvent;
-      const fleeSucceededAdventurerData =
-        processAdventurerState(fleeSucceededEvent);
+      const fleeSucceededAdventurerData = processAdventurerState(
+        fleeSucceededEvent,
+        currentAdventurer
+      );
       const fleeSucceededData = {
         txHash: txHash,
         beast: gameData.BEASTS[fleeSucceededEvent.id],
@@ -627,16 +654,20 @@ export function processData(
       return [fleeSucceededAdventurerData, fleeSucceededData];
     case "PurchasedItems":
       const purchasedItemsEvent = event as PurchasedItemsEvent;
-      const purchasedItemsAdventurerData =
-        processAdventurerState(purchasedItemsEvent);
+      const purchasedItemsAdventurerData = processAdventurerState(
+        purchasedItemsEvent,
+        currentAdventurer
+      );
       return [purchasedItemsAdventurerData, purchasedItemsEvent.purchases];
     case "PurchasedPotions":
       const purchasedPotionsEvent = event as PurchasedPotionsEvent;
-      return processAdventurerState(purchasedPotionsEvent);
+      return processAdventurerState(purchasedPotionsEvent, currentAdventurer);
     case "EquippedItems":
       const equippedItemsEvent = event as EquippedItemsEvent;
-      const equipedItemsAdventurerData =
-        processAdventurerState(equippedItemsEvent);
+      const equipedItemsAdventurerData = processAdventurerState(
+        equippedItemsEvent,
+        currentAdventurer
+      );
       const formattedEquippedItems = [];
       for (let i = 0; i < equippedItemsEvent.equippedItems.length; i++) {
         formattedEquippedItems.push(
@@ -656,8 +687,10 @@ export function processData(
       ];
     case "DroppedItems":
       const droppedItemsEvent = event as DroppedItemsEvent;
-      const droppedItemsAdventurerData =
-        processAdventurerState(droppedItemsEvent);
+      const droppedItemsAdventurerData = processAdventurerState(
+        droppedItemsEvent,
+        currentAdventurer
+      );
       const formattedDroppedItems = [];
       for (let i = 0; i < droppedItemsEvent.itemIds.length; i++) {
         formattedDroppedItems.push(
@@ -667,11 +700,12 @@ export function processData(
       return [droppedItemsAdventurerData, formattedDroppedItems];
     case "GreatnessIncreased":
       const greatnessIncreasedEvent = event as GreatnessIncreasedEvent;
-      return processAdventurerState(greatnessIncreasedEvent);
+      return processAdventurerState(greatnessIncreasedEvent, currentAdventurer);
     case "ItemSpecialUnlocked":
       const itemsSpecialUnlockedEvent = event as ItemSpecialUnlockedEvent;
       const itemSpecialUnlockedAdventurerData = processAdventurerState(
-        itemsSpecialUnlockedEvent
+        itemsSpecialUnlockedEvent,
+        currentAdventurer
       );
       const itemData = {
         item: itemsSpecialUnlockedEvent.id,
@@ -683,18 +717,23 @@ export function processData(
       return [itemSpecialUnlockedAdventurerData, itemData];
     case "NewHighScore":
       const newHishScoreEvent = event as NewHighScoreEvent;
-      return processAdventurerState(newHishScoreEvent);
+      return processAdventurerState(newHishScoreEvent, currentAdventurer);
     case "AdventurerDied":
       const adventurerDiedEvent = event as AdventurerDiedEvent;
-      return processAdventurerState(adventurerDiedEvent);
+      return processAdventurerState(adventurerDiedEvent, currentAdventurer);
     case "AdventurerLeveledUp":
       const adventurerLeveledUpEvent = event as AdventurerLeveledUpEvent;
-      return processAdventurerState(adventurerLeveledUpEvent);
+      return processAdventurerState(
+        adventurerLeveledUpEvent,
+        currentAdventurer
+      );
     case "NewItemsAvailable":
       const newItemsAvailableEvent = event as NewItemsAvailableEvent;
       const newItemsAvailableAdventurerData = processAdventurerState(
-        newItemsAvailableEvent
+        newItemsAvailableEvent,
+        currentAdventurer
       );
+      console.log(newItemsAvailableEvent);
       const formattedNewItems = [];
       for (let i = 0; i < newItemsAvailableEvent.items.length; i++) {
         formattedNewItems.push(
@@ -705,7 +744,8 @@ export function processData(
     case "IdleDeathPenalty":
       const idleDeathPenaltyEvent = event as IdleDeathPenaltyEvent;
       const penaltyAdventurerData = processAdventurerState(
-        idleDeathPenaltyEvent
+        idleDeathPenaltyEvent,
+        currentAdventurer
       );
       const penaltyBattleData = {
         txHash: txHash,

@@ -41,7 +41,7 @@ const useCustomQuery = (
       updateData(queryKey, data, loading, refetchWrapper);
     }
     prevVariablesRef.current = variables;
-  }, [variables]);
+  }, []);
 };
 
 export default useCustomQuery;

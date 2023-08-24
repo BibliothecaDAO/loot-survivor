@@ -100,26 +100,12 @@ export const TxActivity = () => {
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
         console.log("in battle");
-        setData("adventurersByOwnerQuery", {
-          adventurers: [
-            ...(queryData.adventurersByOwnerQuery?.adventurers ?? []),
-            events.find((event) => event.name === "StartGame").data,
-          ],
-        });
         const killedByBeast = events.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
         const killedByPenalty = events.some(
           (battle) => !battle.attacker && battle.adventurerHealth == 0
         );
-        // setData("adventurerByIdQuery", {
-        //   adventurers: [
-        //     events.find(
-        //       (event) =>
-        //         event.name === "AttackedBeast" || event.name == "FleeSucceeded"
-        //     ).data[0],
-        //   ],
-        // });
         if (killedByBeast || killedByPenalty) {
           setDeathNotification(
             type,
@@ -128,7 +114,6 @@ export const TxActivity = () => {
             true
           );
         }
-        stopLoading(queryData.battlesByTxHashQuery.battles);
       };
 
       const handleExplore = async () => {
@@ -255,7 +240,7 @@ export const TxActivity = () => {
       console.log(queryData.adventurerByIdQuery.adventurers[0]);
       setAdventurer(queryData.adventurerByIdQuery.adventurers[0]);
     }
-  }, []);
+  }, [loading]);
 
   // stop loading when an error is caught
   useEffect(() => {

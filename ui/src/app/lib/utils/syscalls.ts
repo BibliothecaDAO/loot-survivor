@@ -1,6 +1,6 @@
 import { InvokeTransactionReceiptResponse } from "starknet";
 import { GameData } from "@/app/components/GameData";
-import { FormData, UpgradeStats } from "@/app/types";
+import { FormData, NullAdventurer, UpgradeStats } from "@/app/types";
 import { useContracts } from "@/app/hooks/useContracts";
 import {
   useAccount,
@@ -97,7 +97,13 @@ export function Syscalls() {
         method: `Spawn ${formData.name}`,
       },
     });
-    const events = parseEvents(receipt as InvokeTransactionReceiptResponse);
+    const events = parseEvents(receipt as InvokeTransactionReceiptResponse, {
+      name: formData["name"],
+      homeRealm: formData["homeRealmId"],
+      classType: formData["class"],
+      entropy: 0,
+      createdTime: new Date(),
+    });
     console.log(events);
     const adventurerState = events.find((event) => event.name === "StartGame")
       .data[0];
@@ -121,27 +127,9 @@ export function Syscalls() {
       ],
     });
     // Create base items
-    for (let i = 0; i <= 101; i++) {
-      setData("latestMarketItemsQuery", {
-        items: [
-          ...(queryData.latestMarketItemsQuery?.items ?? []),
-          {
-            item: gameData.ITEMS[i],
-            adventurerId: adventurerState["id"],
-            owner: false,
-            equipped: false,
-            ownerAddress: adventurerState["owner"],
-            xp: 0,
-            special1: null,
-            special2: null,
-            special3: null,
-            isAvailable: false,
-            purchasedTime: null,
-            timestamp: new Date(),
-          },
-        ],
-      });
-    }
+    // setData("latestMarketItemsQuery", {
+    //   items: events.find((event) => event.name === "StartGame").data[1],
+    // });
     setData("itemsByAdventurerQuery", {
       items: [
         {
@@ -189,7 +177,11 @@ export function Syscalls() {
       },
     });
 
-    const events = parseEvents(receipt as InvokeTransactionReceiptResponse);
+    const events = parseEvents(
+      receipt as InvokeTransactionReceiptResponse,
+      queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
+    );
+    console.log(events);
     setData("adventurerByIdQuery", {
       adventurers: [events.find((event) => event.name === "StartGame").data[0]],
     });
@@ -228,6 +220,123 @@ export function Syscalls() {
       },
     });
 
+    // reset battles by tx hash
+    setData("battlesByTxHashQuery", {
+      battles: null,
+    });
+
+    const events = parseEvents(
+      receipt as InvokeTransactionReceiptResponse,
+      queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
+    );
+    console.log(events);
+    const attackedBeastExists = events.some((event) => {
+      if (event.name === "AttackedBeast") {
+        return true;
+      }
+      return false;
+    });
+    if (attackedBeastExists) {
+      const attackedBeastEvents = events.filter(
+        (event) => event.name === "AttackedBeast"
+      );
+      for (let attackedBeastEvent of attackedBeastEvents) {
+        setData("adventurerByIdQuery", {
+          adventurers: [attackedBeastEvent.data[0]],
+        });
+        setData("battlesByAdventurerQuery", {
+          battles: [
+            ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+            attackedBeastEvent.data[1],
+          ],
+        });
+        setData("battlesByTxHashQuery", {
+          battles: [
+            ...(queryData.battlesByTxHashQuery?.battles ?? []),
+            attackedBeastEvent.data[1],
+          ],
+        });
+        setData(
+          "beastQuery",
+          attackedBeastEvent.data[0].beastHealth,
+          "health",
+          0
+        );
+      }
+      const attackedByBeastEvents = events.filter(
+        (event) => event.name === "AttackedByBeast"
+      );
+      for (let attackedByBeastEvent of attackedByBeastEvents) {
+        setData("adventurerByIdQuery", {
+          adventurers: [attackedByBeastEvent.data[0]],
+        });
+        setData("battlesByAdventurerQuery", {
+          battles: [
+            ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+            attackedByBeastEvent.data[1],
+          ],
+        });
+        setData("battlesByTxHashQuery", {
+          battles: [
+            ...(queryData.battlesByTxHashQuery?.battles ?? []),
+            attackedByBeastEvent.data[1],
+          ],
+        });
+      }
+    } else {
+      const slayedBeastEvent = events.find(
+        (event) => event.name === "SlayedBeast"
+      );
+      setData("adventurerByIdQuery", {
+        adventurers: [slayedBeastEvent.data[0]],
+      });
+      setData("battlesByAdventurerQuery", {
+        battles: [
+          ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+          slayedBeastEvent.data[1],
+        ],
+      });
+      setData("battlesByTxHashQuery", {
+        battles: [
+          ...(queryData.battlesByTxHashQuery?.battles ?? []),
+          slayedBeastEvent.data[1],
+        ],
+      });
+      setData("beastQuery", slayedBeastEvent.data[0].beastHealth, "health", 0);
+    }
+    const newItemsAvailableExists = events.some((event) => {
+      if (event.name === "NewItemsAvailable") {
+        return true;
+      }
+      return false;
+    });
+    if (newItemsAvailableExists) {
+      const newItemsAvailableEvent = events.find(
+        (event) => event.name === "NewItemsAvailable"
+      );
+      const newItems = newItemsAvailableEvent.data[1];
+      const itemData = [];
+      for (let newItem of newItems) {
+        itemData.push({
+          item: newItem,
+          adventurerId: newItemsAvailableEvent.data[0]["id"],
+          owner: false,
+          equipped: false,
+          ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+          xp: 0,
+          special1: null,
+          special2: null,
+          special3: null,
+          isAvailable: false,
+          purchasedTime: null,
+          timestamp: new Date(),
+        });
+      }
+      setData("latestMarketItemsQuery", {
+        items: itemData,
+      });
+    }
+    stopLoading(queryData.battlesByTxHashQuery?.battles);
     setEquipItems([]);
     setDropItems([]);
   };
@@ -253,7 +362,10 @@ export function Syscalls() {
       },
     });
     // Add optimistic data
-    const events = parseEvents(receipt as InvokeTransactionReceiptResponse);
+    const events = parseEvents(
+      receipt as InvokeTransactionReceiptResponse,
+      queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
+    );
     // Update adventurer
     setData("adventurerByIdQuery", {
       adventurers: [
@@ -296,7 +408,10 @@ export function Syscalls() {
     });
 
     // Add optimistic data
-    const events = parseEvents(receipt as InvokeTransactionReceiptResponse);
+    const events = parseEvents(
+      receipt as InvokeTransactionReceiptResponse,
+      queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
+    );
     // Update adventurer
     setData("adventurerByIdQuery", {
       adventurers: [
@@ -372,7 +487,10 @@ export function Syscalls() {
         marketIds: items,
       },
     });
-    const events = parseEvents(receipt as InvokeTransactionReceiptResponse);
+    const events = parseEvents(
+      receipt as InvokeTransactionReceiptResponse,
+      queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
+    );
   };
 
   return { spawn, explore, attack, flee, upgrade, multicall };

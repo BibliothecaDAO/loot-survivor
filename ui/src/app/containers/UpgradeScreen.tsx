@@ -77,10 +77,10 @@ export default function UpgradeScreen() {
 
   const gameData = new GameData();
 
-  useCustomQuery("latestMarketItemsQuery", getLatestMarketItems, {
-    adventurerId: adventurer?.id,
-    limit: 20 * (adventurer?.statUpgrades ?? 0),
-  });
+  // useCustomQuery("latestMarketItemsQuery", getLatestMarketItems, {
+  //   adventurerId: adventurer?.id,
+  //   limit: 20 * (adventurer?.statUpgrades ?? 0),
+  // });
 
   const checkTransacting =
     typeof pendingMessage === "string" &&

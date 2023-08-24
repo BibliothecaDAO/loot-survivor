@@ -161,6 +161,7 @@ function parseBag(data: string[]) {
 function parseItems(data: string[]) {
   const purchases = [];
   const chunkedArray = chunkArray(data, 5);
+  console.log(chunkedArray);
   for (let i = 0; i < chunkedArray.length; i++) {
     purchases.push({
       item: {
@@ -186,7 +187,10 @@ function parseEquippedItems(data: string[]) {
   return { equippedItems, unequippedItems };
 }
 
-export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
+export function parseEvents(
+  receipt: InvokeTransactionReceiptResponse,
+  currentAdventurer?: any
+) {
   if (!receipt.events) {
     throw new Error(`No events found`);
   }
@@ -222,7 +226,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const upgradeAvailableEvent = processData(
           upgradeAvailableData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: upgradeAvailableEvent });
         break;
@@ -234,7 +239,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const discoveredHealthEvent = processData(
           discoveredHealthData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: discoveredHealthEvent });
         break;
@@ -246,7 +252,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const discoveredGoldEvent = processData(
           discoveredGoldData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: discoveredGoldEvent });
         break;
@@ -258,7 +265,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const discoveredXPEvent = processData(
           discoveredXPData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: discoveredXPEvent });
         break;
@@ -275,7 +283,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const dodgedObstacleEvent = processData(
           dodgedObstacleData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: dodgedObstacleEvent });
         break;
@@ -292,7 +301,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const hitByObstacleEvent = processData(
           hitByObstacleData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: hitByObstacleEvent });
         break;
@@ -315,7 +325,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const discoveredBeastEvent = processData(
           discoveredBeastData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: discoveredBeastEvent });
         break;
@@ -341,7 +352,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const ambushedByBeastEvent = processData(
           ambushedByBeastData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: ambushedByBeastEvent });
         break;
@@ -367,7 +379,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const attackedBeastEvent = processData(
           attackedBeastData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: attackedBeastEvent });
         break;
@@ -393,7 +406,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const attackedByBeastEvent = processData(
           attackedByBeastData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: attackedByBeastEvent });
         break;
@@ -421,7 +435,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const slayedBeastEvent = processData(
           slayedBeastData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: slayedBeastEvent });
         break;
@@ -444,7 +459,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const fleeFailedEvent = processData(
           fleeFailedData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: fleeFailedEvent });
         break;
@@ -467,7 +483,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const fleeSucceededEvent = processData(
           fleeSucceededData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: fleeSucceededEvent });
         break;
@@ -482,7 +499,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const purchasedItemsEvent = processData(
           purchasedItemsData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: purchasedItemsEvent });
         break;
@@ -496,7 +514,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const purchasedPotionsEvent = processData(
           purchasedPotionsData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: purchasedPotionsEvent });
         break;
@@ -515,7 +534,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const equippedItemsEvent = processData(
           equippedItemsData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: equippedItemsEvent });
         break;
@@ -535,7 +555,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const droppedItemsEvent = processData(
           droppedItemsData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: droppedItemsEvent });
         break;
@@ -549,7 +570,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const greatnessIncreasedEvent = processData(
           greatnessIncreasedData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: greatnessIncreasedEvent });
         break;
@@ -567,7 +589,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const itemSpecialsUnlockedEvent = processData(
           itemSpecialsUnlockedData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: itemSpecialsUnlockedEvent });
         break;
@@ -579,7 +602,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const newHighScoreEvent = processData(
           newHighScoreData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: newHighScoreEvent });
         break;
@@ -592,7 +616,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const adventurerDiedEvent = processData(
           adventurerDiedData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: adventurerDiedEvent });
         break;
@@ -605,19 +630,21 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const adventurerLeveledUpEvent = processData(
           adventurerLeveledUpData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: adventurerLeveledUpEvent });
         break;
       case "NewItemsAvailable":
         const newItemsAvailableData: NewItemsAvailableEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
-          items: parseItems(raw.data.slice(40)),
+          items: parseItems(raw.data.slice(41)),
         };
         const newItemsAvailableEvent = processData(
           newItemsAvailableData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: newItemsAvailableEvent });
         break;
@@ -631,7 +658,8 @@ export function parseEvents(receipt: InvokeTransactionReceiptResponse) {
         const idleDeathPenaltyEvent = processData(
           idleDeathPenaltyData,
           eventName,
-          receipt.transaction_hash
+          receipt.transaction_hash,
+          currentAdventurer
         );
         events.push({ name: eventName, data: idleDeathPenaltyEvent });
         break;
