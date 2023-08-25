@@ -20,6 +20,8 @@ export const DeathDialog = () => {
     data.adventurersByXPQuery?.adventurers ?? []
   );
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
+
+  console.log(deathMessage);
   return (
     <>
       <div className="top-0 left-0 fixed text-center h-full w-full z-50">

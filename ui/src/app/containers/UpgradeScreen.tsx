@@ -93,6 +93,9 @@ export default function UpgradeScreen() {
   const equipItems = useUIStore((state) => state.equipItems);
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
+  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
 
   const { upgrade } = syscalls({
     gameContract,
@@ -112,6 +115,9 @@ export default function UpgradeScreen() {
     writeAsync,
     setEquipItems,
     setDropItems,
+    setDeathMessage,
+    showDeathDialog,
+    resetNotification,
   });
 
   const gameData = new GameData();

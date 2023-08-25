@@ -81,6 +81,9 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
   const hash = useLoadingStore((state) => state.hash);
+  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
+  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
@@ -103,6 +106,9 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
     writeAsync,
     setEquipItems,
     setDropItems,
+    setDeathMessage,
+    showDeathDialog,
+    resetNotification,
   });
 
   const items = data.latestMarketItemsQuery

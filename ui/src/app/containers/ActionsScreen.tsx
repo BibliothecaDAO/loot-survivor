@@ -67,6 +67,9 @@ export default function ActionsScreen() {
   const equipItems = useUIStore((state) => state.equipItems);
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
+  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
@@ -89,6 +92,9 @@ export default function ActionsScreen() {
     writeAsync,
     setEquipItems,
     setDropItems,
+    setDeathMessage,
+    showDeathDialog,
+    resetNotification,
   });
 
   // useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {

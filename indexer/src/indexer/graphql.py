@@ -637,7 +637,7 @@ class DiscoveriesFilter:
     special2: Optional[Special2Filter] = None
     special3: Optional[Special3Filter] = None
     seed: Optional[HexValueFilter] = None
-    ambushed: Optional[OrderByInput] = None
+    ambushed: Optional[BooleanFilter] = None
     discoveryTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
     txHash: Optional[HexValueFilter] = None
@@ -926,7 +926,7 @@ class Discovery:
     outputAmount: Optional[FeltValue]
     obstacle: Optional[ObstacleValue]
     obstacleLevel: Optional[FeltValue]
-    dodgedObstacle: Optional[BooleanValue]
+    dodgedObstacle: Optional[bool]
     damageTaken: Optional[FeltValue]
     damageLocation: Optional[SlotValue]
     xpEarnedAdventurer: Optional[FeltValue]
@@ -937,7 +937,7 @@ class Discovery:
     special1: Optional[Special1Value]
     special2: Optional[Special2Value]
     special3: Optional[Special3Value]
-    ambushed: Optional[BooleanValue]
+    ambushed: Optional[bool]
     discoveryTime: Optional[datetime]
     timestamp: Optional[datetime]
     seed: Optional[HexValue]

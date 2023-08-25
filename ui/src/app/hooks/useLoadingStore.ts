@@ -17,8 +17,7 @@ type LoadingState = {
     type: string,
     pendingMessage: string | string[],
     data: any,
-    adventurer: number | undefined,
-    notificationData?: any
+    adventurer: number | undefined
   ) => void;
   resetNotification: () => void;
   setTxHash: (hash: string) => void;
@@ -39,19 +38,12 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   notificationData: undefined,
   adventurer: undefined,
   history: [],
-  startLoading: (
-    type,
-    pendingMessage,
-    loadingQuery,
-    adventurer,
-    notificationData
-  ) => {
+  startLoading: (type, pendingMessage, loadingQuery, adventurer) => {
     set({
       loading: true,
       type: type,
       pendingMessage,
       adventurer,
-      notificationData,
     });
   },
   setTxHash: (hash) => set({ hash }),
@@ -72,6 +64,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       ],
       hash: "",
       adventurer: undefined,
+      txAccepted: false,
     });
   },
   resetNotification: () =>

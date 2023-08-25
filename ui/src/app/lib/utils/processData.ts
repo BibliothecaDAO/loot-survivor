@@ -140,6 +140,20 @@ export function processPurchases(data: any, adventurerState: any) {
   return purchasedItems;
 }
 
+export function processItemsXP(data: any) {
+  const itemsXP = [
+    data.adventurerState["adventurer"]["weapon"]["xp"],
+    data.adventurerState["adventurer"]["chest"]["xp"],
+    data.adventurerState["adventurer"]["head"]["xp"],
+    data.adventurerState["adventurer"]["waist"]["xp"],
+    data.adventurerState["adventurer"]["foot"]["xp"],
+    data.adventurerState["adventurer"]["hand"]["xp"],
+    data.adventurerState["adventurer"]["neck"]["xp"],
+    data.adventurerState["adventurer"]["ring"]["xp"],
+  ];
+  return itemsXP;
+}
+
 export function processData(
   event: EventData,
   eventName: string,
@@ -239,7 +253,7 @@ export function processData(
         special1: null,
         special2: null,
         special3: null,
-        ambushed: null,
+        ambushed: false,
         seed: 0,
         discoveryTime: new Date(),
         timestamp: new Date(),
@@ -272,7 +286,7 @@ export function processData(
         special1: null,
         special2: null,
         special3: null,
-        ambushed: null,
+        ambushed: false,
         seed: 0,
         discoveryTime: new Date(),
         timestamp: new Date(),
@@ -306,7 +320,7 @@ export function processData(
         special1: null,
         special2: null,
         special3: null,
-        ambushed: null,
+        ambushed: false,
         seed: 0,
         discoveryTime: new Date(),
         timestamp: new Date(),
@@ -340,13 +354,17 @@ export function processData(
         special1: null,
         special2: null,
         special3: null,
-        ambushed: null,
+        ambushed: false,
         seed: 0,
         discoveryTime: new Date(),
         timestamp: new Date(),
       };
-
-      return [dodgedObstacleAdventurerData, dodgedObstacleData];
+      const dodgedObstacleItemsXP = processItemsXP(dodgedObstacleEvent);
+      return [
+        dodgedObstacleAdventurerData,
+        dodgedObstacleData,
+        dodgedObstacleItemsXP,
+      ];
     case "HitByObstacle":
       const hitByObstacleEvent = event as HitByObstacleEvent;
       const hitByObstacleAdventurerData = processAdventurerState(
@@ -374,13 +392,17 @@ export function processData(
         special1: null,
         special2: null,
         special3: null,
-        ambushed: null,
+        ambushed: false,
         seed: 0,
         discoveryTime: new Date(),
         timestamp: new Date(),
       };
-
-      return [hitByObstacleAdventurerData, hitByObstacleData];
+      const hitByObstacleItemsXP = processItemsXP(hitByObstacleEvent);
+      return [
+        hitByObstacleAdventurerData,
+        hitByObstacleData,
+        hitByObstacleItemsXP,
+      ];
     case "DiscoveredBeast":
       const discoveredBeastEvent = event as DiscoveredBeastEvent;
       const discoveredBeastAdventurerData = processAdventurerState(
@@ -409,7 +431,7 @@ export function processData(
         special1: discoveredBeastEvent.beastSpecs["specials"]["special1"],
         special2: discoveredBeastEvent.beastSpecs["specials"]["special2"],
         special3: discoveredBeastEvent.beastSpecs["specials"]["special3"],
-        ambushed: null,
+        ambushed: false,
         seed: discoveredBeastEvent.seed,
         discoveryTime: new Date(),
         timestamp: new Date(),
@@ -462,7 +484,7 @@ export function processData(
         special1: ambushedByBeastEvent.beastSpecs["specials"]["special1"],
         special2: ambushedByBeastEvent.beastSpecs["specials"]["special2"],
         special3: ambushedByBeastEvent.beastSpecs["specials"]["special3"],
-        ambushed: null,
+        ambushed: true,
         seed: ambushedByBeastEvent.seed,
         discoveryTime: new Date(),
         timestamp: new Date(),
@@ -608,7 +630,8 @@ export function processData(
         blockTime: new Date(),
         timestamp: new Date(),
       };
-      return [slayedBeastAdventurerData, slayedBeastData];
+      const slayedBeastItemsXP = processItemsXP(slayedBeastEvent);
+      return [slayedBeastAdventurerData, slayedBeastData, slayedBeastItemsXP];
     case "FleeFailed":
       const fleeFailedEvent = event as FleeFailedEvent;
       const fleeFailedAdventurerData = processAdventurerState(
@@ -820,7 +843,7 @@ export function processData(
         special1: null,
         special2: null,
         special3: null,
-        ambushed: null,
+        ambushed: false,
         seed: 0,
         discoveryTime: new Date(),
         timestamp: new Date(),
