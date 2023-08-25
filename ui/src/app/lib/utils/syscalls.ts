@@ -1,6 +1,11 @@
 import { InvokeTransactionReceiptResponse } from "starknet";
 import { GameData } from "@/app/components/GameData";
-import { FormData, NullAdventurer, UpgradeStats } from "@/app/types";
+import {
+  Adventurer,
+  FormData,
+  NullAdventurer,
+  UpgradeStats,
+} from "@/app/types";
 import { useContracts } from "@/app/hooks/useContracts";
 import {
   useAccount,
@@ -58,6 +63,49 @@ export function syscalls({
   const gameData = new GameData();
 
   const formatAddress = account ? account.address : "0x0";
+
+  const updateItemsXP = (adventurerState: Adventurer, itemsXP: number[]) => {
+    const weapon = adventurerState.weapon;
+    const weaponIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+      (item: any) => item.item == weapon
+    );
+    const chest = adventurerState.chest;
+    setData("itemsByAdventurerQuery", itemsXP[0], "xp", weaponIndex);
+    const chestIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+      (item: any) => item.item == chest
+    );
+    setData("itemsByAdventurerQuery", itemsXP[1], "xp", chestIndex);
+    const head = adventurerState.head;
+    const headIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+      (item: any) => item.item == head
+    );
+    setData("itemsByAdventurerQuery", itemsXP[2], "xp", headIndex);
+    const waist = adventurerState.waist;
+    const waistIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+      (item: any) => item.item == waist
+    );
+    setData("itemsByAdventurerQuery", itemsXP[3], "xp", waistIndex);
+    const foot = adventurerState.foot;
+    const footIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+      (item: any) => item.item == foot
+    );
+    setData("itemsByAdventurerQuery", itemsXP[4], "xp", footIndex);
+    const hand = adventurerState.hand;
+    const handIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+      (item: any) => item.item == hand
+    );
+    setData("itemsByAdventurerQuery", itemsXP[5], "xp", handIndex);
+    const neck = adventurerState.neck;
+    const neckIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+      (item: any) => item.item == neck
+    );
+    setData("itemsByAdventurerQuery", itemsXP[6], "xp", neckIndex);
+    const ring = adventurerState.ring;
+    const ringIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
+      (item: any) => item.item == ring
+    );
+    setData("itemsByAdventurerQuery", itemsXP[7], "xp", ringIndex);
+  };
 
   const spawn = async (formData: FormData) => {
     const mintLords = {
@@ -211,6 +259,12 @@ export function syscalls({
           adventurers: [discovery.data[0]],
         });
         discoveries.unshift(discovery.data[1]);
+        if (
+          discovery.name === "DodgedObstacle" ||
+          discovery.name === "HitByObstacle"
+        ) {
+          updateItemsXP(discovery.data[0], discovery.data[2]);
+        }
       }
     }
 
@@ -309,6 +363,7 @@ export function syscalls({
         items: itemData,
       });
     }
+
     console.log(discoveries);
     setData("latestDiscoveriesQuery", {
       discoveries: [
@@ -395,6 +450,7 @@ export function syscalls({
         adventurers: [slayedBeastEvent.data[0]],
       });
       battles.unshift(slayedBeastEvent.data[1]);
+      updateItemsXP(slayedBeastEvent.data[0], slayedBeastEvent.data[2]);
       setData("beastQuery", slayedBeastEvent.data[0].beastHealth, "health", 0);
     }
 
