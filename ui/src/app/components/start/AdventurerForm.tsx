@@ -21,12 +21,12 @@ import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
 import { MdClose } from "react-icons/md";
-import { syscalls } from "@/app/lib/utils/syscalls";
 import { useContracts } from "@/app/hooks/useContracts";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
+import { syscalls } from "@/app/lib/utils/syscalls";
 
 export interface AdventurerFormProps {
   isActive: boolean;
