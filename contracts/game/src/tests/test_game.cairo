@@ -371,7 +371,7 @@ mod tests {
     // }
 
     #[test]
-    #[available_gas(3000000000000)]
+    #[available_gas(300000000000)]
     fn test_start() {
         let mut game = new_adventurer(1000);
 
@@ -392,7 +392,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(38000000)]
+    #[available_gas(36000000)]
     fn test_no_explore_during_battle() {
         let mut game = new_adventurer(1000);
 
@@ -466,7 +466,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Cant flee starter beast', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(25000000)]
+    #[available_gas(23000000)]
     fn test_cant_flee_starter_beast() {
         // start new game
         let mut game = new_adventurer(1000);
@@ -479,7 +479,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Not in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(65000000)]
+    #[available_gas(63000000)]
     fn test_cant_flee_outside_battle() {
         // start adventuer and advance to level 2
         let mut game = new_adventurer_lvl2();
@@ -491,7 +491,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(15000000000)]
+    #[available_gas(13000000000)]
     fn test_flee() {
         let mut game = new_adventurer_lvl2();
 
@@ -521,7 +521,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Stat upgrade available', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(8000000000)]
+    #[available_gas(7800000000)]
     fn test_explore_not_allowed_with_avail_stat_upgrade() {
         let mut game = new_adventurer(1000);
 
@@ -542,15 +542,14 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(1800000000)]
+    #[available_gas(10000000)]
     fn test_buy_items_during_battle() {
         // mint new adventurer (will start in battle with starter beast)
         let mut game = new_adventurer(1000);
 
         // get valid item from market
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
-        let item_id = *market_items.at(0).item.id;
-        let item_price = *market_items.at(0).price.into();
+        let item_id = *market_items.at(0);
 
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
         shopping_cart.append(ItemPurchase { item_id: item_id, equip: true });
@@ -562,14 +561,14 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(85000000)]
+    #[available_gas(73000000)]
     fn test_buy_items_without_stat_upgrade() {
         // mint adventurer and advance to level 2
         let mut game = new_adventurer_lvl2();
 
         // get valid item from market
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
-        let item_id = *market_items.at(0).item.id;
+        let item_id = *market_items.at(0);
         let mut shoppping_cart = ArrayTrait::<ItemPurchase>::new();
 
         shoppping_cart.append(ItemPurchase { item_id: item_id, equip: true });
@@ -585,7 +584,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item already owned', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(80000000)]
+    #[available_gas(62000000)]
     fn test_buy_duplicate_item_equipped() {
         // start new game on level 2 so we have access to the market
         let mut game = new_adventurer_lvl2();
@@ -594,7 +593,7 @@ mod tests {
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
 
         // get first item on the market
-        let item_id = *market_items.at(0).item.id;
+        let item_id = *market_items.at(0);
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
         shopping_cart.append(ItemPurchase { item_id: item_id, equip: true });
         shopping_cart.append(ItemPurchase { item_id: item_id, equip: true });
@@ -606,7 +605,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Item already owned', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(80000000)]
+    #[available_gas(61000000)]
     fn test_buy_duplicate_item_bagged() {
         // start new game on level 2 so we have access to the market
         let mut game = new_adventurer_lvl2();
@@ -615,7 +614,7 @@ mod tests {
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
 
         // try to buy same item but equip one and put one in bag
-        let item_id = *market_items.at(0).item.id;
+        let item_id = *market_items.at(0);
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
         shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
         shopping_cart.append(ItemPurchase { item_id: item_id, equip: true });
@@ -635,20 +634,20 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(75000000)]
+    #[available_gas(65000000)]
     fn test_buy_and_bag_item() {
         let mut game = new_adventurer_lvl2();
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
-        let item_id = *market_items.at(0).item.id;
+        let item_id = *market_items.at(0);
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
         shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart);
         let bag = game.get_bag(ADVENTURER_ID);
-        assert(bag.item_1.id == *market_items.at(0).item.id, 'item should be in bag');
+        assert(bag.item_1.id == *market_items.at(0), 'item should be in bag');
     }
 
     #[test]
-    #[available_gas(80000000)]
+    #[available_gas(71000000)]
     fn test_buy_items() {
         // start game on level 2 so we have access to the market
         let mut game = new_adventurer_max_charisma_level2();
@@ -671,43 +670,46 @@ mod tests {
             if i >= market_items.len() {
                 break ();
             }
-            let market_item = *market_items.at(i).item;
+            let market_item_id = *market_items.at(i);
+            let market_item_tier = ImplLoot::get_tier(market_item_id);
 
-            if (market_item.tier != Tier::T5(()) && market_item.tier != Tier::T4(())) {
+            if (market_item_tier != Tier::T5(()) && market_item_tier != Tier::T4(())) {
                 i += 1;
                 continue;
             }
 
+            let market_item_slot = ImplLoot::get_slot(market_item_id);
+
             // if the item is a weapon and we haven't purchased a weapon yet
             // and the item is a tier 4 or 5 item
             // repeat this for everything
-            if (market_item.slot == Slot::Weapon(())
+            if (market_item_slot == Slot::Weapon(())
                 && purchased_weapon == 0
-                && market_item.id != 12) {
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
-                purchased_weapon = market_item.id;
-            } else if (market_item.slot == Slot::Chest(()) && purchased_chest == 0) {
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
-                purchased_chest = market_item.id;
-            } else if (market_item.slot == Slot::Head(()) && purchased_head == 0) {
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: true });
-                purchased_head = market_item.id;
-            } else if (market_item.slot == Slot::Waist(()) && purchased_waist == 0) {
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
-                purchased_waist = market_item.id;
-            } else if (market_item.slot == Slot::Foot(()) && purchased_foot == 0) {
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
-                purchased_foot = market_item.id;
-            } else if (market_item.slot == Slot::Hand(()) && purchased_hand == 0) {
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
-                purchased_hand = market_item.id;
+                && market_item_id != 12) {
+                shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: true });
+                purchased_weapon = market_item_id;
+            } else if (market_item_slot == Slot::Chest(()) && purchased_chest == 0) {
+                shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: true });
+                purchased_chest = market_item_id;
+            } else if (market_item_slot == Slot::Head(()) && purchased_head == 0) {
+                shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: true });
+                purchased_head = market_item_id;
+            } else if (market_item_slot == Slot::Waist(()) && purchased_waist == 0) {
+                shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: false });
+                purchased_waist = market_item_id;
+            } else if (market_item_slot == Slot::Foot(()) && purchased_foot == 0) {
+                shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: false });
+                purchased_foot = market_item_id;
+            } else if (market_item_slot == Slot::Hand(()) && purchased_hand == 0) {
+                shopping_cart.append(ItemPurchase { item_id: market_item_id, equip: false });
+                purchased_hand = market_item_id;
             }
             i += 1;
         };
 
         // verify we have at least two items in shopping cart
         let shopping_cart_length = shopping_cart.len();
-        assert(shopping_cart_length > 1, 'need more items to equip');
+        assert(shopping_cart_length > 1, 'need more items to buy');
 
         // buy items in shopping cart
         game.upgrade_adventurer(ADVENTURER_ID, 0, 0, 0, 0, 0, 0, 1, shopping_cart.clone());
@@ -788,7 +790,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(130000000)]
+    #[available_gas(92000000)]
     fn test_equip() {
         // start game on level 2 so we have access to the market
         let mut game = new_adventurer_max_charisma_level2();
@@ -797,7 +799,7 @@ mod tests {
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
 
         // get first item on the market
-        let item_id = *market_items.at(0).item.id;
+        let item_id = *market_items.at(0);
 
         let mut purchased_weapon: u8 = 0;
         let mut purchased_chest: u8 = 0;
@@ -807,7 +809,7 @@ mod tests {
         let mut purchased_hand: u8 = 0;
         let mut purchased_ring: u8 = 0;
         let mut purchased_necklace: u8 = 0;
-        let mut purchased_items = ArrayTrait::<Loot>::new();
+        let mut purchased_items = ArrayTrait::<u8>::new();
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
 
         let mut i: u32 = 0;
@@ -815,58 +817,60 @@ mod tests {
             if i >= market_items.len() {
                 break ();
             }
-            let market_item = *market_items.at(i).item;
+            let item_id = *market_items.at(i);
+            let item_slot = ImplLoot::get_slot(item_id);
+            let item_tier = ImplLoot::get_tier(item_id);
 
             // if the item is a weapon and we haven't purchased a weapon yet
             // and the item is a tier 4 or 5 item
             // repeat this for everything
-            if (market_item.slot == Slot::Weapon(())
+            if (item_slot == Slot::Weapon(())
                 && purchased_weapon == 0
-                && (market_item.tier == Tier::T5(()))
-                && market_item.id != 12) {
-                purchased_items.append(market_item);
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
-                purchased_weapon = market_item.id;
-            } else if (market_item.slot == Slot::Chest(())
+                && (item_tier == Tier::T5(()))
+                && item_id != 12) {
+                purchased_items.append(item_id);
+                shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
+                purchased_weapon = item_id;
+            } else if (item_slot == Slot::Chest(())
                 && purchased_chest == 0
-                && market_item.tier == Tier::T5(())) {
-                purchased_items.append(market_item);
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
-                purchased_chest = market_item.id;
-            } else if (market_item.slot == Slot::Head(())
+                && item_tier == Tier::T5(())) {
+                purchased_items.append(item_id);
+                shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
+                purchased_chest = item_id;
+            } else if (item_slot == Slot::Head(())
                 && purchased_head == 0
-                && market_item.tier == Tier::T5(())) {
-                purchased_items.append(market_item);
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
-                purchased_head = market_item.id;
-            } else if (market_item.slot == Slot::Waist(())
+                && item_tier == Tier::T5(())) {
+                purchased_items.append(item_id);
+                shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
+                purchased_head = item_id;
+            } else if (item_slot == Slot::Waist(())
                 && purchased_waist == 0
-                && market_item.tier == Tier::T5(())) {
-                purchased_items.append(market_item);
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
-                purchased_waist = market_item.id;
-            } else if (market_item.slot == Slot::Foot(())
+                && item_tier == Tier::T5(())) {
+                purchased_items.append(item_id);
+                shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
+                purchased_waist = item_id;
+            } else if (item_slot == Slot::Foot(())
                 && purchased_foot == 0
-                && market_item.tier == Tier::T5(())) {
-                purchased_items.append(market_item);
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
-                purchased_foot = market_item.id;
-            } else if (market_item.slot == Slot::Hand(())
+                && item_tier == Tier::T5(())) {
+                purchased_items.append(item_id);
+                shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
+                purchased_foot = item_id;
+            } else if (item_slot == Slot::Hand(())
                 && purchased_hand == 0
-                && market_item.tier == Tier::T5(())) {
-                purchased_items.append(market_item);
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
-                purchased_hand = market_item.id;
-            } else if (market_item.slot == Slot::Ring(())
+                && item_tier == Tier::T5(())) {
+                purchased_items.append(item_id);
+                shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
+                purchased_hand = item_id;
+            } else if (item_slot == Slot::Ring(())
                 && purchased_ring == 0
-                && market_item.tier == Tier::T3(())) {
-                purchased_items.append(market_item);
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
-                purchased_ring = market_item.id;
-            } else if (market_item.slot == Slot::Neck(()) && purchased_necklace == 0) {
-                purchased_items.append(market_item);
-                shopping_cart.append(ItemPurchase { item_id: market_item.id, equip: false });
-                purchased_necklace = market_item.id;
+                && item_tier == Tier::T3(())) {
+                purchased_items.append(item_id);
+                shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
+                purchased_ring = item_id;
+            } else if (item_slot == Slot::Neck(()) && purchased_necklace == 0) {
+                purchased_items.append(item_id);
+                shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
+                purchased_necklace = item_id;
             }
             i += 1;
         };
@@ -889,8 +893,8 @@ mod tests {
                 break ();
             }
             // verify they are all in our bag
-            assert(bag.contains(*purchased_items_span.at(i).id), 'item should be in bag');
-            items_to_equip.append(*purchased_items_span.at(i).id);
+            assert(bag.contains(*purchased_items_span.at(i)), 'item should be in bag');
+            items_to_equip.append(*purchased_items_span.at(i));
             i += 1;
         };
 
@@ -913,7 +917,7 @@ mod tests {
             assert(!bag.contains(*items_to_equip.at(i)), 'item should not be in bag');
             // and equipped on the adventurer
             assert(
-                adventurer.is_equipped(*purchased_items_span.at(i).id), 'item should be equipped'
+                adventurer.is_equipped(*purchased_items_span.at(i)), 'item should be equipped'
             );
             i += 1;
         };
@@ -1451,7 +1455,7 @@ mod tests {
     // }
 
     #[test]
-    #[available_gas(90000000)]
+    #[available_gas(83000000)]
     fn test_drop_item() {
         // start new game on level 2 so we have access to the market
         let mut game = new_adventurer_lvl2();
@@ -1460,7 +1464,7 @@ mod tests {
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
 
         // get first item on the market
-        let purchased_item_id = *market_items.at(0).item.id;
+        let purchased_item_id = *market_items.at(0);
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
         shopping_cart.append(ItemPurchase { item_id: purchased_item_id, equip: false });
 
@@ -1559,7 +1563,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(100000000)]
+    #[available_gas(75000000)]
     fn test_upgrade_adventurer() {
         // deploy and start new game
         let mut game = new_adventurer_lvl2();
@@ -1574,8 +1578,8 @@ mod tests {
 
         // items to purchase
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
-        let item_1 = *market_items.at(0).item.id;
-        let item_2 = *market_items.at(1).item.id;
+        let item_1 = *market_items.at(0);
+        let item_2 = *market_items.at(1);
         let mut items_to_purchase = ArrayTrait::<ItemPurchase>::new();
         items_to_purchase.append(ItemPurchase { item_id: item_1, equip: true });
         items_to_purchase.append(ItemPurchase { item_id: item_2, equip: true });

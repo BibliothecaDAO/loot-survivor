@@ -32,6 +32,7 @@ impl AdventurerUtils of IAdventurer {
     // @param current_stat The current value of the stat.
     // @param increase_amount The amount by which to increase the stat.
     // @return The increased stat value, or `MAX_STAT_VALUE` if an increase would cause an overflow.
+    #[inline(always)]
     fn overflow_protected_stat_increase(current_stat: u8, increase_amount: u8) -> u8 {
         // u8 overflow check
         if (u8_overflowing_add(current_stat, increase_amount).is_ok()) {
@@ -105,6 +106,7 @@ impl AdventurerUtils of IAdventurer {
     // TODO: Need to refactor this and add_suffix_boost to ensure they
     // stay insync. I think the design used for AdventurerClass in adventurer_meta
     // is good. 
+    #[inline(always)]
     fn get_vitality_item_boost(suffix: u8) -> u8 {
         if (suffix == of_Power) {
             0
@@ -142,43 +144,6 @@ impl AdventurerUtils of IAdventurer {
             0
         }
     }
-
-    // @dev Function to generate a unique hash for the market based on the adventurer's id, entropy, xp and stat points available.
-    // @param adventurer_id The unique identifier for the adventurer.
-    // @param adventurer_entropy The entropy of the adventurer used for randomness.
-    // @param xp The experience points of the adventurer.
-    // @param stats_points_available The available stat points that can be used for upgrades.
-    // @return A unique hash in the form of a 128-bit unsigned integer.
-    fn get_market_seed_and_offset(
-        adventurer_id: u256, adventurer_entropy: u128, xp: u16, stats_points_available: u8
-    ) -> (u256, u8) {
-        let mut hash_span = ArrayTrait::new();
-        hash_span.append(adventurer_id.try_into().unwrap());
-        hash_span.append(adventurer_entropy.into());
-        hash_span.append(xp.into());
-        hash_span.append(stats_points_available.into());
-        AdventurerUtils::split_hash_into_seed_and_offset(poseidon_hash_span(hash_span.span()))
-    }
-
-    // @notice This function takes in a Poseidon hash and splits it into a seed and offset.
-    //
-    // @dev The split is performed by shifting the hash and dividing it into two segments. The
-    // function returns a tuple of a 256-bit unsigned integer and an 8-bit unsigned integer.
-    //
-    // @param poseidon_hash A 252-bit field element of a Poseidon hash.
-    //
-    // @return A tuple where the first element is a 256-bit unsigned integer that represents the
-    // market seed and the second element is an 8-bit unsigned integer that represents the market offset.
-    // The offset value has 1 added to it before it is returned.
-    //
-    // @example split_hash_into_seed_and_offset(poseidonHash)
-    fn split_hash_into_seed_and_offset(poseidon_hash: felt252) -> (u256, u8) {
-        // split hash into two u128s, one for market seed, one for offset
-        let (market_seed, offset) = rshift_split(poseidon_hash.into(), NUM_ITEMS.into() - 1);
-
-        // return market seed and market offset
-        (market_seed, 1 + offset.try_into().unwrap())
-    }
 }
 
 #[test]
@@ -194,69 +159,6 @@ fn test_generate_advetnurer_entropy() {
         let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
             block_number, adventurer_id
         );
-        i += 1;
-    };
-}
-
-#[test]
-#[available_gas(50000000)]
-fn test_get_market_seed_and_offset() {
-    // verify adventurers minted during the same block have different entropy
-    let mut i: u128 = 1;
-    loop {
-        if (i >= 100) {
-            break;
-        }
-        let adventurer_id: u256 = 1;
-        let block_number = 839152;
-        let xp: u16 = 3;
-        let stats_points_available: u8 = 4;
-        let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
-            block_number, adventurer_id
-        );
-
-        let (market_seed, market_offset) = AdventurerUtils::get_market_seed_and_offset(
-            adventurer_id, adventurer_entropy, xp, stats_points_available
-        );
-
-        // assert market offset is within range of items
-        assert(market_offset > 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
-        i += 1;
-    };
-}
-
-#[test]
-#[available_gas(30000000)]
-fn test_split_hash_into_seed_and_offset() {
-    // iterate over low range of u128 starting at 0
-    let mut i: u128 = 0;
-    loop {
-        let poseidon_hash: felt252 = i.into();
-        let (market_seed, market_offset) = AdventurerUtils::split_hash_into_seed_and_offset(
-            poseidon_hash
-        );
-        if (i >= 102) {
-            break;
-        }
-
-        // assert market offset is within range of items
-        assert(market_offset > 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
-        i += 1;
-    };
-
-    // iterate over upper bound up to max u128
-    let mut i: u128 = 340282366920938463463374607431768211100;
-    loop {
-        let poseidon_hash: felt252 = i.into();
-        let (market_seed, market_offset) = AdventurerUtils::split_hash_into_seed_and_offset(
-            poseidon_hash
-        );
-        if (i >= 340282366920938463463374607431768211455) {
-            break;
-        }
-
-        // assert market offset is within range of items
-        assert(market_offset > 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
         i += 1;
     };
 }

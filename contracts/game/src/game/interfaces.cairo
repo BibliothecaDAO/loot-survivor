@@ -4,7 +4,7 @@ use survivor::{
     item_meta::{ItemSpecials, ItemSpecialsStorage}
 };
 use lootitems::loot::{Loot};
-use market::market::{LootWithPrice, ItemPurchase};
+use market::market::{ItemPurchase};
 use beasts::beast::Beast;
 
 #[starknet::interface]
@@ -86,7 +86,7 @@ trait IGame<TContractState> {
     fn get_ring_specials(self: @TContractState, adventurer_id: u256) -> ItemSpecials;
 
     // market details
-    fn get_items_on_market(self: @TContractState, adventurer_id: u256) -> Array<LootWithPrice>;
+    fn get_items_on_market(self: @TContractState, adventurer_id: u256) -> Array<u8>;
     fn get_items_on_market_by_slot(
         self: @TContractState, adventurer_id: u256, slot: u8
     ) -> Array<u8>;
@@ -94,6 +94,7 @@ trait IGame<TContractState> {
         self: @TContractState, adventurer_id: u256, tier: u8
     ) -> Array<u8>;
     fn get_potion_price(self: @TContractState, adventurer_id: u256) -> u16;
+    fn get_item_price(self: @TContractState, adventurer_id: u256, item_id: u8) -> u16;
 
     // adventurer stats (no boosts)
     fn get_base_stats(self: @TContractState, adventurer_id: u256) -> Stats;
