@@ -66,9 +66,9 @@ export const TxActivity = () => {
     const notifications = processNotifications(
       type,
       notificationData,
-      battles,
+      adventurer ?? NullAdventurer,
       hasBeast,
-      adventurer ?? NullAdventurer
+      battles
     );
     // In the case of a chain of notifications we are only interested in the last
     setDeathMessage(notifications[notifications.length - 1].message);
@@ -99,45 +99,45 @@ export const TxActivity = () => {
       const events = parseEvents(data);
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
-        const killedByBeast = events.some(
-          (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
-        );
-        const killedByPenalty = events.some(
-          (battle) => !battle.attacker && battle.adventurerHealth == 0
-        );
-        if (killedByBeast || killedByPenalty) {
-          setDeathNotification(
-            type,
-            queryData.battlesByTxHashQuery.battles,
-            queryData.battlesByBeastQuery?.battles,
-            true
-          );
-        }
+        // const killedByBeast = events.some(
+        //   (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
+        // );
+        // const killedByPenalty = events.some(
+        //   (battle) => !battle.attacker && battle.adventurerHealth == 0
+        // );
+        // if (killedByBeast || killedByPenalty) {
+        //   setDeathNotification(
+        //     type,
+        //     queryData.battlesByTxHashQuery.battles,
+        //     queryData.battlesByBeastQuery?.battles,
+        //     true
+        //   );
+        // }
       };
 
       const handleExplore = async () => {
         if (!queryData?.discoveryByTxHashQuery) return;
-        const killedByObstacle =
-          queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
-            "Obstacle" &&
-          queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-            0;
-        const killedByPenalty =
-          !queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType &&
-          queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-            0;
-        const killedByAmbush =
-          queryData.discoveryByTxHashQuery.discoveries[0]?.ambushed &&
-          queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-            0;
-        if (killedByObstacle || killedByPenalty || killedByAmbush) {
-          setDeathNotification(
-            type,
-            queryData.discoveryByTxHashQuery.discoveries,
-            queryData.battlesByBeastQuery?.battles,
-            hasBeast
-          );
-        }
+        // const killedByObstacle =
+        //   queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
+        //     "Obstacle" &&
+        //   queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
+        //     0;
+        // const killedByPenalty =
+        //   !queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType &&
+        //   queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
+        //     0;
+        // const killedByAmbush =
+        //   queryData.discoveryByTxHashQuery.discoveries[0]?.ambushed &&
+        //   queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
+        //     0;
+        // if (killedByObstacle || killedByPenalty || killedByAmbush) {
+        //   setDeathNotification(
+        //     type,
+        //     queryData.discoveryByTxHashQuery.discoveries,
+        //     queryData.battlesByBeastQuery?.battles,
+        //     hasBeast
+        //   );
+        // }
       };
 
       const handleUpgrade = async () => {

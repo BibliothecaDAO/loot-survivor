@@ -70,9 +70,9 @@ const TransactionHistory = ({ buttonRef }: TransactionHistoryProps) => {
                       notifications = processNotifications(
                         response.type,
                         response.notificationData,
-                        battles,
+                        adventurer ?? NullAdventurer,
                         hasBeast,
-                        adventurer ?? NullAdventurer
+                        battles
                       );
                     }
                     return (

@@ -6,20 +6,10 @@ import {
   NullAdventurer,
   UpgradeStats,
 } from "@/app/types";
-import { useContracts } from "@/app/hooks/useContracts";
-import {
-  useAccount,
-  useContractWrite,
-  useTransactionManager,
-  useWaitForTransaction,
-} from "@starknet-react/core";
-import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
-import useLoadingStore from "@/app/hooks/useLoadingStore";
-import useUIStore from "@/app/hooks/useUIStore";
-import { QueryKey, useQueriesStore } from "@/app/hooks/useQueryStore";
+import { QueryKey } from "@/app/hooks/useQueryStore";
 import { getKeyFromValue, stringToFelt, getRandomNumber } from ".";
 import { parseEvents } from "./parseEvents";
-import useAdventurerStore from "@/app/hooks/useAdventurerStore";
+import { processNotifications } from "@/app/components/notifications/NotificationHandler";
 
 export interface SyscallsProps {
   gameContract: any;
@@ -39,6 +29,9 @@ export interface SyscallsProps {
   writeAsync: (...args: any[]) => any;
   setEquipItems: (...args: any[]) => any;
   setDropItems: (...args: any[]) => any;
+  setDeathMessage: (...args: any[]) => any;
+  showDeathDialog: (...args: any[]) => any;
+  resetNotification: (...args: any[]) => any;
 }
 
 export function syscalls({
@@ -59,10 +52,15 @@ export function syscalls({
   writeAsync,
   setEquipItems,
   setDropItems,
+  setDeathMessage,
+  showDeathDialog,
+  resetNotification,
 }: SyscallsProps) {
   const gameData = new GameData();
 
   const formatAddress = account ? account.address : "0x0";
+
+  // resetNotification();
 
   const updateItemsXP = (adventurerState: Adventurer, itemsXP: number[]) => {
     const weapon = adventurerState.weapon;
@@ -107,6 +105,25 @@ export function syscalls({
     setData("itemsByAdventurerQuery", itemsXP[7], "xp", ringIndex);
   };
 
+  const setDeathNotification = (
+    type: string,
+    notificationData: any,
+    adventurer: any,
+    battles?: any,
+    hasBeast?: boolean
+  ) => {
+    const notifications = processNotifications(
+      type,
+      notificationData,
+      battles,
+      hasBeast,
+      adventurer
+    );
+    // In the case of a chain of notifications we are only interested in the last
+    setDeathMessage(notifications[notifications.length - 1].message);
+    showDeathDialog(true);
+  };
+
   const spawn = async (formData: FormData) => {
     const mintLords = {
       contractAddress: lordsContract?.address ?? "",
@@ -146,8 +163,7 @@ export function syscalls({
       "Create",
       "Spawning Adventurer",
       "adventurersByOwnerQuery",
-      undefined,
-      `You have spawned ${formData.name}!`
+      undefined
     );
     const tx = await handleSubmitCalls(writeAsync);
     setTxHash(tx.transaction_hash);
@@ -317,6 +333,23 @@ export function syscalls({
       setData("adventurerByIdQuery", {
         adventurers: [adventurerDiedEvent.data],
       });
+      const killedByObstacle =
+        discoveries.reverse()[0]?.discoveryType == "Obstacle" &&
+        discoveries.reverse()[0]?.adventurerHealth == 0;
+      const killedByPenalty =
+        discoveries.reverse()[0]?.discoveryType &&
+        discoveries.reverse()[0]?.adventurerHealth == 0;
+      const killedByAmbush =
+        discoveries.reverse()[0]?.ambushed &&
+        discoveries.reverse()[0]?.adventurerHealth == 0;
+      if (killedByObstacle || killedByPenalty || killedByAmbush) {
+        setDeathNotification(
+          "explore",
+          discoveries.reverse(),
+          adventurerDiedEvent.data
+        );
+      }
+      console.log(adventurerDiedEvent.data);
     }
 
     const filteredDeathPenalty = events.filter(
@@ -374,6 +407,7 @@ export function syscalls({
     setData("discoveryByTxHashQuery", {
       discoveries: [...discoveries.reverse()],
     });
+
     setEquipItems([]);
     setDropItems([]);
     stopLoading(discoveries);
@@ -386,13 +420,7 @@ export function syscalls({
       entrypoint: "attack",
       calldata: [adventurer?.id?.toString() ?? "", "0", tillDeath ? "1" : "0"],
     });
-    startLoading(
-      "Attack",
-      "Attacking",
-      "battlesByTxHashQuery",
-      adventurer?.id,
-      { beast: beastData }
-    );
+    startLoading("Attack", "Attacking", "battlesByTxHashQuery", adventurer?.id);
     const tx = await handleSubmitCalls(writeAsync);
     setTxHash(tx.transaction_hash);
     addTransaction({
@@ -467,6 +495,20 @@ export function syscalls({
       setData("adventurerByIdQuery", {
         adventurers: [adventurerDiedEvent.data],
       });
+      console.log(adventurerDiedEvent.data);
+      const killedByBeast = events.some(
+        (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
+      );
+      const killedByPenalty = events.some(
+        (battle) => !battle.attacker && battle.adventurerHealth == 0
+      );
+      if (killedByBeast || killedByPenalty) {
+        setDeathNotification(
+          "attack",
+          battles.reverse(),
+          adventurerDiedEvent.data
+        );
+      }
     }
 
     const filteredDeathPenalty = events.filter(
@@ -541,9 +583,7 @@ export function syscalls({
       entrypoint: "flee",
       calldata: [adventurer?.id?.toString() ?? "", "0", tillDeath ? "1" : "0"],
     });
-    startLoading("Flee", "Fleeing", "battlesByTxHashQuery", adventurer?.id, {
-      beast: beastData,
-    });
+    startLoading("Flee", "Fleeing", "battlesByTxHashQuery", adventurer?.id);
     const tx = await handleSubmitCalls(writeAsync);
     setTxHash(tx.transaction_hash);
     addTransaction({
@@ -680,27 +720,17 @@ export function syscalls({
     purchaseItems: any[],
     potionAmount: number
   ) => {
-    startLoading(
-      "Upgrade",
-      "Upgrading",
-      "adventurerByIdQuery",
-      adventurer?.id,
-      {
-        Stats: upgrades,
-        Items: purchaseItems,
-        Potions: potionAmount,
-      }
-    );
+    startLoading("Upgrade", "Upgrading", "adventurerByIdQuery", adventurer?.id);
     const tx = await handleSubmitCalls(writeAsync);
-    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-      retryInterval: 1000,
-    });
     setTxHash(tx.transaction_hash);
     addTransaction({
       hash: tx.transaction_hash,
       metadata: {
         method: `Upgrade`,
       },
+    });
+    const receipt = await account?.waitForTransaction(tx.transaction_hash, {
+      retryInterval: 1000,
     });
 
     // Add optimistic data
@@ -716,19 +746,30 @@ export function syscalls({
     });
 
     // Add purchased items
-    const eventPurchasedItemsEvent = events.find(
+    const purchaseItemsEvents = events.filter(
       (event) => event.name === "PurchasedItems"
     );
     const purchasedItems = [];
-    for (let purchasedItem of eventPurchasedItemsEvent.data[1]) {
-      purchasedItems.push(purchasedItem);
+    for (let purchasedItemEvent of purchaseItemsEvents) {
+      for (let purchasedItem of purchasedItemEvent.data[1]) {
+        purchasedItems.push(purchasedItem);
+      }
     }
-    const equippedItemsEvent = events.find(
+    const equippedItemsEvents = events.filter(
       (event) => event.name === "EquippedItems"
     );
-    for (let equippedItem of equippedItemsEvent.data[1]) {
-      let item = purchasedItems.find((item) => item.item === equippedItem);
-      item.equipped = true;
+    for (let equippedItemsEvent of equippedItemsEvents) {
+      for (let equippedItem of equippedItemsEvent.data[1]) {
+        let item = purchasedItems.find((item) => item.item === equippedItem);
+        item.equipped = true;
+      }
+      for (let unequippedItem of equippedItemsEvent.data[2]) {
+        const ownedItemIndex =
+          queryData.itemsByAdventurerQuery?.items.findIndex(
+            (item: any) => item.item == unequippedItem
+          );
+        setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
+      }
     }
     setData("itemsByAdventurerQuery", {
       items: [
@@ -736,12 +777,6 @@ export function syscalls({
         ...purchasedItems,
       ],
     });
-    for (let unequippedItem of equippedItemsEvent.data[2]) {
-      const ownedItemIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
-        (item: any) => item.item == unequippedItem
-      );
-      setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
-    }
     // Reset items to no availability
     setData("latestMarketItemsQuery", null);
     stopLoading({
@@ -774,13 +809,7 @@ export function syscalls({
         }
       }
     }
-    startLoading(
-      "Multicall",
-      loadingMessage,
-      loadingQuery,
-      adventurer?.id,
-      notification
-    );
+    startLoading("Multicall", loadingMessage, loadingQuery, adventurer?.id);
 
     const tx = await handleSubmitCalls(writeAsync);
     const receipt = await account?.waitForTransaction(tx.transaction_hash, {
@@ -831,14 +860,10 @@ export function syscalls({
         adventurers: [droppedItemsEvent.data[0]],
       });
       for (let droppedItem of droppedItemsEvent.data[1]) {
-        const ownedItemIndex =
-          queryData.itemsByAdventurerQuery?.items.findIndex(
-            (item: any) => item.item == droppedItem
-          );
-        setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
-        setData("itemsByAdventurerQuery", false, "owned", ownedItemIndex);
-        setData("itemsByAdventurerQuery", null, "ownerAddress", ownedItemIndex);
-        setData("itemsByAdventurerQuery", null, "adventurerId", ownedItemIndex);
+        const newItems = queryData.itemsByAdventurerQuery?.items.filter(
+          (item: any) => item.item !== droppedItem
+        );
+        setData("itemsByAdventurerQuery", { items: newItems });
       }
     }
 

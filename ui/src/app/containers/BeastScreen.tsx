@@ -57,6 +57,9 @@ export default function BeastScreen() {
   const equipItems = useUIStore((state) => state.equipItems);
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
+  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
   );
@@ -79,6 +82,9 @@ export default function BeastScreen() {
     writeAsync,
     setEquipItems,
     setDropItems,
+    setDeathMessage,
+    showDeathDialog,
+    resetNotification,
   });
 
   const [buttonText, setButtonText] = useState("Flee!");
