@@ -96,7 +96,6 @@ export const TxActivity = () => {
   useEffect(() => {
     const fetchData = async () => {
       if (!txAccepted || !hash || data?.events?.length == 0) return;
-      const events = parseEvents(data);
       const handleAttackOrFlee = async () => {
         if (!queryData?.battlesByTxHashQuery) return;
         // const killedByBeast = events.some(
