@@ -64,6 +64,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       ],
       hash: "",
       adventurer: undefined,
+      txAccepted: false,
     });
   },
   resetNotification: () =>

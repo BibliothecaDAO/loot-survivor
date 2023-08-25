@@ -87,6 +87,7 @@ export default function Home() {
   const setIsMuted = useUIStore((state) => state.setIsMuted);
   const [introComplete, setIntroComplete] = useState(false);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
+  const loading = useLoadingStore((state) => state.loading);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
@@ -185,6 +186,17 @@ export default function Home() {
       setMintAdventurer(false);
     }
   }, [data.adventurersByOwnerQuery?.adventurers.length]);
+
+  useEffect(() => {
+    if (
+      data.adventurerByIdQuery &&
+      data.adventurerByIdQuery.adventurers[0]?.id
+    ) {
+      console.log("updated");
+      console.log(data.adventurerByIdQuery.adventurers[0]);
+      setAdventurer(data.adventurerByIdQuery.adventurers[0]);
+    }
+  }, [loading]);
 
   const mobileMenuDisabled = [
     false,
