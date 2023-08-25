@@ -78,7 +78,8 @@ export default function UpgradeScreen() {
   });
 
   const { addTransaction } = useTransactionManager();
-  const { data: queryData, resetData, setData } = useQueriesStore();
+  const { resetData, setData } = useQueriesStore();
+  const queryData = useQueriesStore((state) => state.data);
   const { account } = useAccount();
   const calls = useTransactionCartStore((state) => state.calls);
   const handleSubmitCalls = useTransactionCartStore(
