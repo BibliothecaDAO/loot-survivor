@@ -60,8 +60,6 @@ export function syscalls({
 
   const formatAddress = account ? account.address : "0x0";
 
-  // resetNotification();
-
   const updateItemsXP = (adventurerState: Adventurer, itemsXP: number[]) => {
     const weapon = adventurerState.weapon;
     const weaponIndex = queryData.itemsByAdventurerQuery?.items.findIndex(
@@ -125,6 +123,8 @@ export function syscalls({
   };
 
   const spawn = async (formData: FormData) => {
+    resetNotification();
+
     const mintLords = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "mint",
@@ -243,6 +243,8 @@ export function syscalls({
   };
 
   const explore = async (till_beast: boolean) => {
+    resetNotification();
+
     addToCalls({
       contractAddress: gameContract?.address ?? "",
       entrypoint: "explore",
@@ -428,6 +430,8 @@ export function syscalls({
   };
 
   const attack = async (tillDeath: boolean, beastData: any) => {
+    resetNotification();
+
     resetData("latestMarketItemsQuery");
     addToCalls({
       contractAddress: gameContract?.address ?? "",
@@ -603,6 +607,8 @@ export function syscalls({
   };
 
   const flee = async (tillDeath: boolean, beastData: any) => {
+    resetNotification();
+
     addToCalls({
       contractAddress: gameContract?.address ?? "",
       entrypoint: "flee",
@@ -674,7 +680,6 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data],
         });
-        console.log(adventurerDiedEvent.data);
         const killedByBeast = events.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
@@ -764,6 +769,8 @@ export function syscalls({
     purchaseItems: any[],
     potionAmount: number
   ) => {
+    resetNotification();
+
     startLoading("Upgrade", "Upgrading", "adventurerByIdQuery", adventurer?.id);
     try {
       const tx = await handleSubmitCalls(writeAsync);
@@ -840,6 +847,8 @@ export function syscalls({
     loadingQuery: QueryKey | null,
     notification: string[]
   ) => {
+    resetNotification();
+
     const items: string[] = [];
 
     for (const dict of calls) {
@@ -914,6 +923,26 @@ export function syscalls({
           );
           setData("itemsByAdventurerQuery", { items: newItems });
         }
+      }
+
+      const adventurerDiedExists = events.some((event) => {
+        if (event.name === "AdventurerDied") {
+          return true;
+        }
+        return false;
+      });
+      if (adventurerDiedExists) {
+        const adventurerDiedEvent = events.find(
+          (event) => event.name === "AdventurerDied"
+        );
+        setData("adventurerByIdQuery", {
+          adventurers: [adventurerDiedEvent.data],
+        });
+        setDeathNotification(
+          "Multicall",
+          ["You equipped"],
+          adventurerDiedEvent.data
+        );
       }
 
       stopLoading(notification);
