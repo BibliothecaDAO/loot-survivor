@@ -115,9 +115,9 @@ export function syscalls({
     const notifications = processNotifications(
       type,
       notificationData,
-      battles,
+      adventurer,
       hasBeast,
-      adventurer
+      battles
     );
     // In the case of a chain of notifications we are only interested in the last
     setDeathMessage(notifications[notifications.length - 1].message);
@@ -355,7 +355,7 @@ export function syscalls({
           discoveries.reverse()[0]?.adventurerHealth == 0;
         if (killedByObstacle || killedByPenalty || killedByAmbush) {
           setDeathNotification(
-            "explore",
+            "Explore",
             discoveries.reverse(),
             adventurerDiedEvent.data
           );
@@ -526,7 +526,7 @@ export function syscalls({
         );
         if (killedByBeast || killedByPenalty) {
           setDeathNotification(
-            "attack",
+            "Attack",
             battles.reverse(),
             adventurerDiedEvent.data
           );
@@ -594,7 +594,7 @@ export function syscalls({
         battles: [...battles.reverse()],
       });
 
-      stopLoading(battles);
+      stopLoading(battles.reverse());
       setEquipItems([]);
       setDropItems([]);
     } catch (e) {
@@ -683,7 +683,7 @@ export function syscalls({
         );
         if (killedByBeast || killedByPenalty) {
           setDeathNotification(
-            "attack",
+            "Flee",
             battles.reverse(),
             adventurerDiedEvent.data
           );
