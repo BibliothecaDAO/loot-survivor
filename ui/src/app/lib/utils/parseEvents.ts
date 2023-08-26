@@ -199,7 +199,6 @@ export function parseEvents(
 
   for (let raw of receipt.events) {
     const eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]);
-    console.log(eventName);
 
     switch (eventName) {
       case "StartGame":
@@ -223,7 +222,6 @@ export function parseEvents(
         const upgradeAvailableData: UpgradeAvailableEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
         };
-        console.log(upgradeAvailableData);
         const upgradeAvailableEvent = processData(
           upgradeAvailableData,
           eventName,

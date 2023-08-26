@@ -8,21 +8,17 @@ import React, { useState } from "react";
 import { processBeastName } from "../lib/utils";
 import { Battle, NullDiscovery, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
-import { syscalls } from "../lib/utils/syscalls";
-import { useContracts } from "../hooks/useContracts";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
-import {
-  useTransactionManager,
-  useContractWrite,
-  useAccount,
-} from "@starknet-react/core";
-import useUIStore from "../hooks/useUIStore";
+
+interface BeastScreenProps {
+  attack: (...args: any[]) => any;
+  flee: (...args: any[]) => any;
+}
 
 /**
  * @container
  * @description Provides the beast screen for adventurer battles.
  */
-export default function BeastScreen() {
+export default function BeastScreen({ attack, flee }: BeastScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const [showBattleLog, setShowBattleLog] = useState(false);
@@ -38,54 +34,6 @@ export default function BeastScreen() {
   const formatBattles = useQueriesStore(
     (state) => state.data.battlesByBeastQuery?.battles || []
   );
-
-  const { gameContract, lordsContract } = useContracts();
-  const { addTransaction } = useTransactionManager();
-  const { data: queryData, resetData, setData } = useQueriesStore();
-  const { account } = useAccount();
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const calls = useTransactionCartStore((state) => state.calls);
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
-  const hash = useLoadingStore((state) => state.hash);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { writeAsync } = useContractWrite({ calls });
-  const equipItems = useUIStore((state) => state.equipItems);
-  const setEquipItems = useUIStore((state) => state.setEquipItems);
-  const setDropItems = useUIStore((state) => state.setDropItems);
-  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
-  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const resetNotification = useLoadingStore((state) => state.resetNotification);
-  const removeEntrypointFromCalls = useTransactionCartStore(
-    (state) => state.removeEntrypointFromCalls
-  );
-
-  const { attack, flee } = syscalls({
-    gameContract,
-    lordsContract,
-    addTransaction,
-    account,
-    queryData,
-    resetData,
-    setData,
-    adventurer,
-    addToCalls,
-    calls,
-    handleSubmitCalls,
-    startLoading,
-    stopLoading,
-    setTxHash,
-    writeAsync,
-    setEquipItems,
-    setDropItems,
-    setDeathMessage,
-    showDeathDialog,
-    resetNotification,
-  });
 
   const [buttonText, setButtonText] = useState("Flee!");
 

@@ -247,6 +247,7 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
   isLoading: initialLoading,
   refetchFunctions: initialRefetchFunctions,
   updateData: (queryKey, newData, loading) => {
+    console.log(newData);
     set((state) => {
       return {
         ...state,

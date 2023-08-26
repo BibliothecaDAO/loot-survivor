@@ -1,38 +1,30 @@
 import { useState } from "react";
-import { useContracts } from "../hooks/useContracts";
-import {
-  useTransactionManager,
-  useContractWrite,
-  useAccount,
-} from "@starknet-react/core";
 import useLoadingStore from "../hooks/useLoadingStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import VerticalKeyboardControl from "../components/menu/VerticalMenu";
 import Info from "../components/adventurer/Info";
 import Discovery from "../components/actions/Discovery";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import useCustomQuery from "../hooks/useCustomQuery";
-import {
-  getLatestDiscoveries,
-  getDiscoveryByTxHash,
-  getLastBeastDiscovery,
-  getBeast,
-  getBattlesByBeast,
-} from "../hooks/graphql/queries";
 import { MistIcon } from "../components/icons/Icons";
-import { padAddress } from "../lib/utils";
 import BeastScreen from "./BeastScreen";
 import { NullDiscovery } from "../types";
-import useUIStore from "../hooks/useUIStore";
 import MazeLoader from "../components/icons/MazeLoader";
-import { syscalls } from "@/app/lib/utils/syscalls";
+
+interface ActionsScreenProps {
+  explore: (...args: any[]) => any;
+  attack: (...args: any[]) => any;
+  flee: (...args: any[]) => any;
+}
 
 /**
  * @container
  * @description Provides the actions screen for the adventurer.
  */
-export default function ActionsScreen() {
+export default function ActionsScreen({
+  explore,
+  attack,
+  flee,
+}: ActionsScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
@@ -49,53 +41,6 @@ export default function ActionsScreen() {
   const lastBeast = useQueriesStore(
     (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
   );
-
-  const { gameContract, lordsContract } = useContracts();
-  const { addTransaction } = useTransactionManager();
-  const { data: queryData, resetData, setData } = useQueriesStore();
-  const { account } = useAccount();
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const calls = useTransactionCartStore((state) => state.calls);
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { writeAsync } = useContractWrite({ calls });
-  const equipItems = useUIStore((state) => state.equipItems);
-  const setEquipItems = useUIStore((state) => state.setEquipItems);
-  const setDropItems = useUIStore((state) => state.setDropItems);
-  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
-  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const resetNotification = useLoadingStore((state) => state.resetNotification);
-  const removeEntrypointFromCalls = useTransactionCartStore(
-    (state) => state.removeEntrypointFromCalls
-  );
-
-  const { explore } = syscalls({
-    gameContract,
-    lordsContract,
-    addTransaction,
-    account,
-    queryData,
-    resetData,
-    setData,
-    adventurer,
-    addToCalls,
-    calls,
-    handleSubmitCalls,
-    startLoading,
-    stopLoading,
-    setTxHash,
-    writeAsync,
-    setEquipItems,
-    setDropItems,
-    setDeathMessage,
-    showDeathDialog,
-    resetNotification,
-  });
 
   // useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
   //   txHash: padAddress(hash),
@@ -157,7 +102,7 @@ export default function ActionsScreen() {
       </div>
 
       {hasBeast ? (
-        <BeastScreen />
+        <BeastScreen attack={attack} flee={flee} />
       ) : (
         <>
           {adventurer?.id ? (

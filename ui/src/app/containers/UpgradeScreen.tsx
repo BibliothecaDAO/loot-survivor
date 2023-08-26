@@ -8,19 +8,11 @@ import {
 } from "../lib/utils";
 import { GameData } from "../components/GameData";
 import VerticalKeyboardControl from "../components/menu/VerticalMenu";
-import {
-  useTransactionManager,
-  useContractWrite,
-  useAccount,
-} from "@starknet-react/core";
-import useCustomQuery from "../hooks/useCustomQuery";
-import { getLatestMarketItems } from "../hooks/graphql/queries";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import Info from "../components/adventurer/Info";
 import { Button } from "../components/buttons/Button";
-import { useMediaQuery } from "react-responsive";
 import {
   ArrowTargetIcon,
   CatIcon,
@@ -31,27 +23,23 @@ import {
   ScrollIcon,
   HealthPotionIcon,
 } from "../components/icons/Icons";
-import LootIcon from "../components/icons/LootIcon";
 import PurchaseHealth from "../components/actions/PurchaseHealth";
 import MarketplaceScreen from "./MarketplaceScreen";
 import { UpgradeNav } from "../components/upgrade/UpgradeNav";
-import { useQueriesStore } from "../hooks/useQueryStore";
 import { StatAttribute } from "../components/upgrade/StatAttribute";
 import useUIStore from "../hooks/useUIStore";
-import {
-  UpgradeStats,
-  ZeroUpgrade,
-  UpgradeSummary,
-  ItemPurchase,
-} from "../types";
+import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "../types";
 import Summary from "../components/upgrade/Summary";
-import { syscalls } from "../lib/utils/syscalls";
+
+interface UpgradeScreenProps {
+  upgrade: (...args: any[]) => any;
+}
 
 /**
  * @container
  * @description Provides the upgrade screen for the adventurer.
  */
-export default function UpgradeScreen() {
+export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
   const { gameContract, lordsContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
@@ -70,54 +58,12 @@ export default function UpgradeScreen() {
   const setUpgrades = useUIStore((state) => state.setUpgrades);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
+  const setScreen = useUIStore((state) => state.setScreen);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const [summary, setSummary] = useState<UpgradeSummary>({
     Stats: { ...ZeroUpgrade },
     Items: [],
     Potions: 0,
-  });
-
-  const { addTransaction } = useTransactionManager();
-  const { data: queryData, resetData, setData } = useQueriesStore();
-  const { account } = useAccount();
-  const calls = useTransactionCartStore((state) => state.calls);
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
-  const hash = useLoadingStore((state) => state.hash);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { writeAsync } = useContractWrite({ calls });
-  const equipItems = useUIStore((state) => state.equipItems);
-  const setEquipItems = useUIStore((state) => state.setEquipItems);
-  const setDropItems = useUIStore((state) => state.setDropItems);
-  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
-  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const resetNotification = useLoadingStore((state) => state.resetNotification);
-
-  const { upgrade } = syscalls({
-    gameContract,
-    lordsContract,
-    addTransaction,
-    account,
-    queryData,
-    resetData,
-    setData,
-    adventurer,
-    addToCalls,
-    calls,
-    handleSubmitCalls,
-    startLoading,
-    stopLoading,
-    setTxHash,
-    writeAsync,
-    setEquipItems,
-    setDropItems,
-    setDeathMessage,
-    showDeathDialog,
-    resetNotification,
   });
 
   const gameData = new GameData();
