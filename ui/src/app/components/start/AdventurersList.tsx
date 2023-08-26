@@ -22,6 +22,7 @@ export const AdventurersList = ({
   const [showZeroHealth, setShowZeroHealth] = useState(true);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
+  const setSwitchAdventurer = useUIStore((state) => state.setSwitchAdventurer);
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
 
@@ -98,6 +99,7 @@ export const AdventurersList = ({
                   selectedIndex === index && isActive ? "default" : "ghost"
                 }
                 onClick={() => {
+                  setSwitchAdventurer(true);
                   setAdventurer(adventurer);
                   setSelectedIndex(index);
                 }}
