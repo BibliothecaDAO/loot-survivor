@@ -21,7 +21,7 @@ const MAX_GREATNESS_STAT_BONUS: u8 = 1;
 // Stat Settings
 const MAX_STAT_VALUE: u8 = 31; // 2^5 - 1
 const MAX_STAT_UPGRADES: u8 = 7; // 2^3 - 1
-const VITALITY_HEALTH_CAP_INCREASE: u8 = 10;
+const HEALTH_INCREASE_PER_VITALITY: u8 = 10;
 const VITALITY_INSTANT_HEALTH_BONUS: u16 = 10;
 
 // Misc Settings

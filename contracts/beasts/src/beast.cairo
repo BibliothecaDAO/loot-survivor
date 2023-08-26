@@ -295,7 +295,7 @@ impl ImplBeast of IBeast {
     }
 
     fn get_type(id: u8) -> Type {
-        assert(id > 0 && id <= MAX_ID, 'invalid beast id');
+        assert(id != 0 && id <= MAX_ID, 'invalid beast id');
         if id == Warlock
             || id == Typhon
             || id == Jiangshi
@@ -380,7 +380,7 @@ impl ImplBeast of IBeast {
     }
 
     fn get_tier(id: u8) -> Tier {
-        assert(id > 0 && id <= MAX_ID, 'invalid beast id');
+        assert(id != 0 && id <= MAX_ID, 'invalid beast id');
         if id == Warlock
             || id == Typhon
             || id == Jiangshi

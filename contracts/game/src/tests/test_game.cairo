@@ -28,7 +28,8 @@ mod tests {
             MAX_BLOCK_COUNT
         },
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, item_primitive::ItemPrimitive,
-        bag::{Bag, IBag}
+        bag::{Bag, IBag},
+        adventurer_utils::AdventurerUtils
     };
     use beasts::constants::{BeastSettings, BeastId};
 
@@ -380,7 +381,7 @@ mod tests {
 
         // check adventurer
         assert(adventurer_1.weapon.id == ItemId::Wand, 'weapon');
-        assert(adventurer_1.beast_health > 0, 'beast_health');
+        assert(adventurer_1.beast_health != 0, 'beast_health');
 
         // check meta
         assert(adventurer_meta_1.name == 'Loaf', 'name');
@@ -511,7 +512,7 @@ mod tests {
 
         // verify we found a beast
         let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(updated_adventurer.beast_health > 0, 'should have found a beast');
+        assert(updated_adventurer.beast_health != 0, 'should have found a beast');
 
         // flee from beast
         game.flee(ADVENTURER_ID, false);
@@ -667,7 +668,7 @@ mod tests {
 
         let mut i: u32 = 0;
         loop {
-            if i >= market_items.len() {
+            if i == market_items.len() {
                 break ();
             }
             let market_item_id = *market_items.at(i);
@@ -725,7 +726,7 @@ mod tests {
         // iterate over the items we bought
         let mut i: u32 = 0;
         loop {
-            if i >= shopping_cart.len() {
+            if i == shopping_cart.len() {
                 break ();
             }
             let item_purchase = *shopping_cart.at(i);
@@ -814,7 +815,7 @@ mod tests {
 
         let mut i: u32 = 0;
         loop {
-            if i >= market_items.len() {
+            if i == market_items.len() {
                 break ();
             }
             let item_id = *market_items.at(i);
@@ -889,7 +890,7 @@ mod tests {
         // iterate over the items we bought
         let mut i: u32 = 0;
         loop {
-            if i >= purchased_items_span.len() {
+            if i == purchased_items_span.len() {
                 break ();
             }
             // verify they are all in our bag
@@ -910,7 +911,7 @@ mod tests {
         // iterate over the items we equipped
         let mut i: u32 = 0;
         loop {
-            if i >= items_to_equip.len() {
+            if i == items_to_equip.len() {
                 break ();
             }
             // verify they are no longer in bag
@@ -968,7 +969,7 @@ mod tests {
 
         // get number of potions required to reach full health
         let potions_to_full_health: u8 = (POTION_HEALTH_AMOUNT
-            / (adventurer.get_max_health() - adventurer.health))
+            / (AdventurerUtils::get_max_health(adventurer.stats.vitality) - adventurer.health))
             .try_into()
             .unwrap();
 
