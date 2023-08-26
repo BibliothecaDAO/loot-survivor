@@ -200,8 +200,8 @@ export default function Home() {
     owner === ""
   );
 
-  console.log(adventurer?.id ?? 0);
-  console.log(data);
+  // console.log(adventurer?.id ?? 0);
+  // console.log(data);
 
   // const adventurerVariables = useMemo(() => {
   //   return {
