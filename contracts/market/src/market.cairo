@@ -68,7 +68,7 @@ impl ImplMarket of IMarket {
         let mut all_items = ArrayTrait::<u8>::new();
         let mut item_count: u16 = 0;
         loop {
-            if item_count >= market_size.into() {
+            if item_count == market_size.into() {
                 break;
             }
             let item_id = ImplMarket::get_id(seed + (offset.into() * item_count).into());
@@ -96,7 +96,7 @@ impl ImplMarket of IMarket {
         let mut return_ids = ArrayTrait::<u8>::new();
         let mut item_count: u16 = 0;
         loop {
-            if item_count >= market_size {
+            if item_count == market_size {
                 break;
             }
             let item_id = ImplMarket::get_id(seed + (offset.into() * item_count).into());
@@ -126,7 +126,7 @@ impl ImplMarket of IMarket {
         let mut return_ids = ArrayTrait::<u8>::new();
         let mut item_count: u16 = 0;
         loop {
-            if item_count >= market_size {
+            if item_count == market_size {
                 break;
             }
             let item_id = ImplMarket::get_id(seed + (offset.into() * item_count).into());
@@ -174,7 +174,7 @@ impl ImplMarket of IMarket {
             let mut item_count: u16 = 0;
             loop {
                 // if we reached the end of the market and haven't found the item
-                if item_count >= market_size.into() {
+                if item_count == market_size.into() {
                     // break/return false
                     break false;
                 }
@@ -271,13 +271,13 @@ mod tests {
         // test bottom end of u256
         let mut i: u256 = 0;
         loop {
-            if (i >= 500) {
+            if (i == 500) {
                 break;
             }
             // get market item id
             let item_id = ImplMarket::get_id(i);
             // assert item id is within range of items
-            assert(item_id > 0 && item_id <= NUM_ITEMS, 'offset out of bounds');
+            assert(item_id != 0 && item_id <= NUM_ITEMS, 'offset out of bounds');
             i += 1;
         };
 
@@ -285,13 +285,13 @@ mod tests {
         let mut i: u256 =
             115792089237316195423570985008687907853269984665640564039457584007913129639735;
         loop {
-            if (i >= 115792089237316195423570985008687907853269984665640564039457584007913129639935) {
+            if (i == 115792089237316195423570985008687907853269984665640564039457584007913129639935) {
                 break;
             }
             // get market item id
             let item_id = ImplMarket::get_id(i);
             // assert item id is within range of items
-            assert(item_id > 0 && item_id <= NUM_ITEMS, 'offset out of bounds');
+            assert(item_id != 0 && item_id <= NUM_ITEMS, 'offset out of bounds');
             i += 1;
         };
     }
@@ -357,7 +357,7 @@ mod tests {
         // iterate over the items
         let mut item_index = 0;
         loop {
-            if item_index >= market_items.len() {
+            if item_index == market_items.len() {
                 break;
             }
             let item = *market_items.at(item_index);
@@ -366,7 +366,7 @@ mod tests {
             // and verify the item is not a duplicate
             let mut duplicate_check_index = item_index + 1;
             loop {
-                if duplicate_check_index >= market_items_clone.len() {
+                if duplicate_check_index == market_items_clone.len() {
                     break;
                 }
                 assert(item != *market_items_clone.at(duplicate_check_index), 'duplicate item id');
@@ -422,7 +422,7 @@ mod tests {
         // iterate over all items
         let mut all_items_iterator: u8 = 1;
         loop {
-            if all_items_iterator >= NUM_ITEMS {
+            if all_items_iterator == NUM_ITEMS {
                 break ();
             }
 
@@ -452,7 +452,7 @@ mod tests {
         let mut is_item_on_market = false;
         let mut market_items: u32 = 0;
         loop {
-            if market_items >= market.len() {
+            if market_items == market.len() {
                 break;
             }
 
@@ -481,13 +481,13 @@ mod tests {
         // iterate over the items on the market
         let mut item_count: u32 = 0;
         loop {
-            if item_count >= NUMBER_OF_ITEMS_PER_LEVEL.into() {
+            if item_count == NUMBER_OF_ITEMS_PER_LEVEL.into() {
                 break ();
             }
 
             // get item id and assert it's within range
             let item_id = *items.at(item_count);
-            assert(item_id > 0 && item_id <= NUM_ITEMS, 'item id out of range');
+            assert(item_id != 0 && item_id <= NUM_ITEMS, 'item id out of range');
 
             // assert item is available on the market
             assert(
@@ -519,13 +519,13 @@ mod tests {
         // iterate over the items on the market
         let mut item_count: u32 = 0;
         loop {
-            if item_count >= items.len().into() {
+            if item_count == items.len().into() {
                 break ();
             }
 
             // get item id and assert it's within range
             let item_id = *items.at(item_count);
-            assert(item_id > 0 && item_id <= NUM_ITEMS, 'item id out of range');
+            assert(item_id != 0 && item_id <= NUM_ITEMS, 'item id out of range');
 
             // assert item is available on the market
             assert(
@@ -554,13 +554,13 @@ mod tests {
         // iterate over the items on the market
         let mut item_count: u32 = 0;
         loop {
-            if item_count >= items.len() {
+            if item_count == items.len() {
                 break ();
             }
 
             // get item id and assert it's within range
             let item_id = *items.at(item_count);
-            assert(item_id > 0 && item_id <= NUM_ITEMS, 'item id out of range');
+            assert(item_id != 0 && item_id <= NUM_ITEMS, 'item id out of range');
 
             // assert item is available on the market
             assert(
@@ -580,7 +580,7 @@ mod tests {
         // verify adventurers minted during the same block have different entropy
         let mut i: u128 = 1;
         loop {
-            if (i >= 100) {
+            if (i == 100) {
                 break;
             }
             let adventurer_id: u256 = 1;
@@ -594,7 +594,7 @@ mod tests {
             );
 
             // assert market offset is within range of items
-            assert(market_offset > 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
+            assert(market_offset != 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
             i += 1;
         };
     }
@@ -609,12 +609,12 @@ mod tests {
             let (market_seed, market_offset) = ImplMarket::split_hash_into_seed_and_offset(
                 poseidon_hash
             );
-            if (i >= 102) {
+            if (i == 101) {
                 break;
             }
 
             // assert market offset is within range of items
-            assert(market_offset > 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
+            assert(market_offset != 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
             i += 1;
         };
 
@@ -625,12 +625,12 @@ mod tests {
             let (market_seed, market_offset) = ImplMarket::split_hash_into_seed_and_offset(
                 poseidon_hash
             );
-            if (i >= 340282366920938463463374607431768211455) {
+            if (i == 340282366920938463463374607431768211455) {
                 break;
             }
 
             // assert market offset is within range of items
-            assert(market_offset > 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
+            assert(market_offset != 0 && market_offset < NUM_ITEMS, 'offset out of bounds');
             i += 1;
         };
     }

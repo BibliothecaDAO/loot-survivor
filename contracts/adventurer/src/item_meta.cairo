@@ -211,7 +211,7 @@ impl ImplItemSpecials of IItemSpecials {
     fn get_specials(self: ItemSpecialsStorage, item: ItemPrimitive) -> ItemSpecials {
         // assert the items meta data id is within bounds
         assert(
-            item.metadata > 0 && item.metadata <= STORAGE::MAX_TOTAL_STORAGE_SPECIALS,
+            item.metadata != 0 && item.metadata <= STORAGE::MAX_TOTAL_STORAGE_SPECIALS,
             'metadata id out of bounds'
         );
 
@@ -272,7 +272,7 @@ impl ImplItemSpecials of IItemSpecials {
     fn set_specials(ref self: ItemSpecialsStorage, item: ItemPrimitive, specials: ItemSpecials) {
         // assert the items meta data id is within bounds
         assert(
-            item.metadata > 0 && item.metadata <= STORAGE::MAX_TOTAL_STORAGE_SPECIALS,
+            item.metadata != 0 && item.metadata <= STORAGE::MAX_TOTAL_STORAGE_SPECIALS,
             'metadata id out of bounds'
         );
 

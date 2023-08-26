@@ -215,7 +215,7 @@ mod Game {
             }
 
             // update players last action block number
-            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
+            adventurer.last_action.set_last_action(starknet::get_block_info().unbox().block_number);
 
             // write the resulting adventurer to storage
             _pack_adventurer_remove_stat_boost(
@@ -281,7 +281,7 @@ mod Game {
             }
 
             // update players last action block number
-            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
+            adventurer.last_action.set_last_action(starknet::get_block_info().unbox().block_number);
 
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -366,7 +366,7 @@ mod Game {
             }
 
             // update players last action block number
-            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
+            adventurer.last_action.set_last_action(starknet::get_block_info().unbox().block_number);
 
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -559,13 +559,13 @@ mod Game {
             );
 
             // if the player is buying potions as part of the upgrade
-            if potions > 0 {
+            if potions != 0 {
                 // process potion purchase
                 _buy_potions(ref self, ref adventurer, adventurer_id, potions);
             }
 
             // if the player is buying items as part of the upgrade
-            if (items.len() > 0) {
+            if (items.len() != 0) {
                 // process item purchase, passing in the unmodified adventurer so we can access the original market items
                 _buy_items(
                     ref self,
@@ -941,7 +941,7 @@ mod Game {
 
         // give adventurer gold reward
         let gold_reward = beast.get_gold_reward(beast_seed);
-        adventurer.add_gold(gold_reward);
+        adventurer.gold.increase_gold(gold_reward);
 
         // grant adventuer xp
         let xp_earned = beast.get_xp_reward();
@@ -1057,14 +1057,14 @@ mod Game {
         }
 
         // DAO
-        if (week.DAO > 0) {
+        if (week.DAO != 0) {
             IERC20Dispatcher {
                 contract_address: lords
             }.transferFrom(caller, self._dao.read(), week.DAO);
         }
 
         // interface
-        if (week.INTERFACE > 0) {
+        if (week.INTERFACE != 0) {
             IERC20Dispatcher {
                 contract_address: lords
             }.transferFrom(caller, interface, week.INTERFACE);
@@ -1156,7 +1156,7 @@ mod Game {
         );
 
         // spoof a beast ambush by deducting health from the adventurer
-        adventurer.deduct_health(STARTER_BEAST_ATTACK_DAMAGE);
+        adventurer.health.decrease_health(STARTER_BEAST_ATTACK_DAMAGE);
 
         // and emitting an AmbushedByBeast event
         __event_AmbushedByBeast(
@@ -1275,7 +1275,7 @@ mod Game {
                 match treasure_type {
                     TreasureDiscovery::Gold(()) => {
                         // add gold to adventurer
-                        adventurer.add_gold(amount);
+                        adventurer.gold.increase_gold(amount);
                         // emit discovered gold event
                         __event_DiscoveredGold(
                             ref self,
@@ -1316,9 +1316,9 @@ mod Game {
                     },
                     TreasureDiscovery::Health(()) => {
                         // if adventurer's health is already full
-                        if (adventurer.is_health_full()) {
+                        if (AdventurerUtils::is_health_full(adventurer.health, adventurer.stats.vitality)) {
                             // adventurer gets gold instead of health
-                            adventurer.add_gold(amount);
+                            adventurer.gold.increase_gold(amount);
                             // emit discovered gold event
                             __event_DiscoveredGold(
                                 ref self,
@@ -1359,8 +1359,8 @@ mod Game {
         // they have not leveled up
         if till_beast
             && adventurer.beast_health == 0
-            && adventurer.health > 0
-            && !(adventurer.stat_points_available > 0) {
+            && adventurer.health != 0
+            && !(adventurer.stat_points_available != 0) {
             // Keep exploring
             _explore(
                 ref self,
@@ -1409,7 +1409,7 @@ mod Game {
         // if the obstalce was not dodged
         if (!dodged) {
             // adventurer takes this damage
-            adventurer.deduct_health(damage_taken);
+            adventurer.health.decrease_health(damage_taken);
         }
 
         // grant XP to equipped items
@@ -1578,7 +1578,7 @@ mod Game {
     /// @param entropy An unsigned integer used for entropy generation. This is often derived from a source of randomness.
     ///
     /// The function first retrieves the names of the special items an adventurer may possess. It then calculates the XP increase by applying a multiplier to the provided 'value'.
-    /// The function then checks each item slot (weapon, chest, head, waist, foot, hand, neck, ring) of the adventurer to see if an item is equipped (item ID > 0).
+    /// The function then checks each item slot (weapon, chest, head, waist, foot, hand, neck, ring) of the adventurer to see if an item is equipped (item ID != 0).
     /// If an item is equipped, it calls `_add_xp_to_item` to apply the XP increase to the item and handle any resulting events.
     fn _grant_xp_to_equipped_items(
         ref self: ContractState,
@@ -1598,7 +1598,7 @@ mod Game {
         let mut name_storage2_modified = false;
 
         // if weapon is equipped
-        if adventurer.weapon.id > 0 {
+        if adventurer.weapon.id != 0 {
             // grant xp and handle any resulting events
             let specials_assigned = _add_xp_to_item(
                 ref self,
@@ -1622,7 +1622,7 @@ mod Game {
             }
         }
         // if chest armor is equipped
-        if adventurer.chest.id > 0 {
+        if adventurer.chest.id != 0 {
             // grant xp and handle any resulting events
             let specials_assigned = _add_xp_to_item(
                 ref self,
@@ -1646,7 +1646,7 @@ mod Game {
             }
         }
         // if head armor is equipped
-        if adventurer.head.id > 0 {
+        if adventurer.head.id != 0 {
             // grant xp and handle any resulting events
             let specials_assigned = _add_xp_to_item(
                 ref self,
@@ -1671,7 +1671,7 @@ mod Game {
         }
 
         // if waist armor is equipped
-        if adventurer.waist.id > 0 {
+        if adventurer.waist.id != 0 {
             // grant xp and handle any resulting events
             let specials_assigned = _add_xp_to_item(
                 ref self,
@@ -1694,7 +1694,7 @@ mod Game {
             }
         }
         // if foot armor is equipped
-        if adventurer.foot.id > 0 {
+        if adventurer.foot.id != 0 {
             // grant xp and handle any resulting events
             let specials_assigned = _add_xp_to_item(
                 ref self,
@@ -1717,7 +1717,7 @@ mod Game {
             }
         }
         // if hand armor is equipped
-        if adventurer.hand.id > 0 {
+        if adventurer.hand.id != 0 {
             // grant xp and handle any resulting events
             let specials_assigned = _add_xp_to_item(
                 ref self,
@@ -1740,7 +1740,7 @@ mod Game {
             }
         }
         // if neck armor is equipped
-        if adventurer.neck.id > 0 {
+        if adventurer.neck.id != 0 {
             // grant xp and handle any resulting events
             let specials_assigned = _add_xp_to_item(
                 ref self,
@@ -1763,7 +1763,7 @@ mod Game {
             }
         }
         // if ring is equipped
-        if adventurer.ring.id > 0 {
+        if adventurer.ring.id != 0 {
             // grant xp and handle any resulting events
             let specials_assigned = _add_xp_to_item(
                 ref self,
@@ -1836,7 +1836,7 @@ mod Game {
 
             if (previous_level != new_level && new_level == ITEM_MAX_GREATNESS) {
                 // adventurer gets stat upgrade points when item reaches max greatness
-                adventurer.add_stat_upgrade_points(MAX_GREATNESS_STAT_BONUS);
+                adventurer.stat_points_available.increase_stat_points_available(MAX_GREATNESS_STAT_BONUS);
 
                 // emit stat upgrades available event
                 __event_UpgradeAvailable(
@@ -1888,7 +1888,7 @@ mod Game {
 
             if (previous_level != new_level && new_level == ITEM_MAX_GREATNESS) {
                 // adventurer gets stat upgrade points when item reaches max greatness
-                adventurer.add_stat_upgrade_points(MAX_GREATNESS_STAT_BONUS);
+                adventurer.stat_points_available.increase_stat_points_available(MAX_GREATNESS_STAT_BONUS);
 
                 // emit stat upgrades available event
                 __event_UpgradeAvailable(
@@ -2061,7 +2061,7 @@ mod Game {
             );
 
             // if the adventurer is still alive and fighting to the death
-            if (fight_to_the_death && adventurer.health > 0) {
+            if (fight_to_the_death && adventurer.health != 0) {
                 // attack again
                 _attack(
                     ref self,
@@ -2104,7 +2104,7 @@ mod Game {
         let (damage, critical_hit) = beast.counter_attack(armor_combat_spec, entropy);
 
         // deduct the damage dealt
-        adventurer.deduct_health(damage);
+        adventurer.health.decrease_health(damage);
 
         // if counter attack was result of an ambush
         // emit ambushed by beast event
@@ -2258,7 +2258,7 @@ mod Game {
 
             // if player has elected to flee till death and they
             // are still alive with a beast attached to them
-            if (flee_to_the_death && adventurer.health > 0) {
+            if (flee_to_the_death && adventurer.health != 0) {
                 // try to flee again
                 _flee(
                     ref self,
@@ -2325,7 +2325,7 @@ mod Game {
         // for we item we need to equip
         let mut i: u32 = 0;
         loop {
-            if i >= items_to_equip.len() {
+            if i == items_to_equip.len() {
                 break ();
             }
 
@@ -2351,7 +2351,7 @@ mod Game {
             }
 
             // if an item was unequipped
-            if unequipped_item_id > 0 {
+            if unequipped_item_id != 0 {
                 // add it to our return array so we can emit these in events
                 unequipped_items.append(unequipped_item_id);
             }
@@ -2395,7 +2395,7 @@ mod Game {
         // for each item
         let mut i: u32 = 0;
         loop {
-            if i >= items.len() {
+            if i == items.len() {
                 break ();
             }
 
@@ -2444,7 +2444,7 @@ mod Game {
         // for each item being purchased
         let mut item_number: u32 = 0;
         loop {
-            if item_number >= items_to_purchase.len() {
+            if item_number == items_to_purchase.len() {
                 break ();
             }
 
@@ -2487,7 +2487,7 @@ mod Game {
         );
 
         // if we have items to equip as part of the purchase
-        if (items_to_equip.len() > 0) {
+        if (items_to_equip.len() != 0) {
             // equip them and record the items that were unequipped
             _equip_items(
                 ref self,
@@ -2568,25 +2568,25 @@ mod Game {
 
         _assert_stat_balance(adventurer, num_stat_upgrades.into());
 
-        if strength_increase > 0 {
-            adventurer.increase_strength(strength_increase);
+        if strength_increase != 0 {
+            adventurer.stats.increase_strength(strength_increase);
         }
 
-        if dexterity_increase > 0 {
-            adventurer.increase_dexterity(dexterity_increase);
+        if dexterity_increase != 0 {
+            adventurer.stats.increase_dexterity(dexterity_increase);
         }
-        if vitality_increase > 0 {
-            adventurer.increase_vitality(vitality_increase);
+        if vitality_increase != 0 {
+            adventurer.stats.increase_vitality(vitality_increase);
             adventurer.increase_health(VITALITY_INSTANT_HEALTH_BONUS);
         }
-        if intelligence_increase > 0 {
-            adventurer.increase_intelligence(intelligence_increase);
+        if intelligence_increase != 0 {
+            adventurer.stats.increase_intelligence(intelligence_increase);
         }
-        if wisdom_increase > 0 {
-            adventurer.increase_wisdom(wisdom_increase);
+        if wisdom_increase != 0 {
+            adventurer.stats.increase_wisdom(wisdom_increase);
         }
-        if charisma_increase > 0 {
-            adventurer.increase_charisma(charisma_increase);
+        if charisma_increase != 0 {
+            adventurer.stats.increase_charisma(charisma_increase);
         }
         adventurer.stat_points_available = 0;
     }
@@ -2790,11 +2790,11 @@ mod Game {
     }
     #[inline(always)]
     fn _assert_in_battle(beast_health: u16) {
-        assert(beast_health > 0, messages::NOT_IN_BATTLE);
+        assert(beast_health != 0, messages::NOT_IN_BATTLE);
     }
     #[inline(always)]
     fn _assert_dexterity_not_zero(dexterity: u8) {
-        assert(dexterity > 0, messages::ZERO_DEXTERITY);
+        assert(dexterity != 0, messages::ZERO_DEXTERITY);
     }
     #[inline(always)]
     fn _assert_not_in_battle(beast_health: u16) {
@@ -2802,7 +2802,7 @@ mod Game {
     }
     #[inline(always)]
     fn _assert_market_is_open(stat_points_available: u8) {
-        assert(stat_points_available > 0, messages::MARKET_CLOSED);
+        assert(stat_points_available != 0, messages::MARKET_CLOSED);
     }
     #[inline(always)]
     fn _assert_item_not_owned(adventurer: Adventurer, bag: Bag, item_id: u8) {
@@ -2832,7 +2832,7 @@ mod Game {
     }
     #[inline(always)]
     fn _assert_not_dead(health: u16) {
-        assert(health > 0, messages::DEAD_ADVENTURER);
+        assert(health != 0, messages::DEAD_ADVENTURER);
     }
     #[inline(always)]
     fn _assert_valid_starter_weapon(starting_weapon: u8) {
@@ -2859,7 +2859,7 @@ mod Game {
         let adventurer_health_after_potions = adventurer.health + purchased_health;
         // assert adventurer is not buying more health than needed
         assert(
-            adventurer_health_after_potions < adventurer.get_max_health() + POTION_HEALTH_AMOUNT,
+            adventurer_health_after_potions < AdventurerUtils::get_max_health(adventurer.stats.vitality) + POTION_HEALTH_AMOUNT,
             messages::HEALTH_FULL
         );
     }
@@ -2884,7 +2884,7 @@ mod Game {
         let idle_blocks = adventurer
             .get_idle_blocks(starknet::get_block_info().unbox().block_number);
 
-        return (idle_blocks >= IDLE_DEATH_PENALTY_BLOCKS, idle_blocks);
+        (idle_blocks >= IDLE_DEATH_PENALTY_BLOCKS, idle_blocks)
     }
 
     // @notice: The idle penalty in Loot Survivor is death to protect the game against bots
@@ -2991,7 +2991,7 @@ mod Game {
         let adventurer = _unpack_adventurer(self, adventurer_id);
 
         // assert adventurer is in battle
-        assert(adventurer.beast_health > 0, messages::NOT_IN_BATTLE);
+        assert(adventurer.beast_health != 0, messages::NOT_IN_BATTLE);
 
         // get adventurer entropy
         let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)

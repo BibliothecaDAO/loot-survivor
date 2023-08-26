@@ -431,15 +431,15 @@ impl ImplCombat of ICombat {
         }
     }
 
-    // get_level_from_xp returns the level for a given xp
+    // @notice: get_level_from_xp returns the level for a given xp
     // @param xp: the xp to get the level for
     // @return u8: the level for the given xp
     #[inline(always)]
     fn get_level_from_xp(xp: u16) -> u8 {
-        if (xp > 0) {
-            u16_sqrt(xp)
-        } else {
+        if (xp == 0) {
             1
+        } else {
+            u16_sqrt(xp)
         }
     }
 

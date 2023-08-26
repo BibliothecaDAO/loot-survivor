@@ -6,10 +6,13 @@ use array::ArrayTrait;
 use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub, U128IntoU256};
 use super::{
     constants::{
-        adventurer_constants::{MAX_STAT_VALUE, U128_MAX, ClassStatBoosts},
+        adventurer_constants::{
+            MAX_STAT_VALUE, U128_MAX, ClassStatBoosts, STARTING_HEALTH,
+            HEALTH_INCREASE_PER_VITALITY, MAX_ADVENTURER_HEALTH
+        },
         discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
     },
-    adventurer_stats::Stats
+    adventurer_stats::Stats, adventurer::{Adventurer, ImplAdventurer, IAdventurer},
 };
 use lootitems::statistics::constants::{
     NUM_ITEMS,
@@ -23,7 +26,7 @@ use combat::constants::CombatEnums::{Type, Tier, Slot};
 use pack::pack::{rshift_split};
 
 #[generate_trait]
-impl AdventurerUtils of IAdventurer {
+impl AdventurerUtils of IAdventurerUtils {
     // @dev Provides overflow protected stat increase.
     //      This function protects against u8 overflow but allows stat
     //      to exceed MAX_STAT_VALUE as adventurers live stats are expected
@@ -32,13 +35,12 @@ impl AdventurerUtils of IAdventurer {
     // @param current_stat The current value of the stat.
     // @param increase_amount The amount by which to increase the stat.
     // @return The increased stat value, or `MAX_STAT_VALUE` if an increase would cause an overflow.
-    #[inline(always)]
-    fn overflow_protected_stat_increase(current_stat: u8, increase_amount: u8) -> u8 {
+    fn overflow_protected_stat_increase(ref self: u8, amount: u8) {
         // u8 overflow check
-        if (u8_overflowing_add(current_stat, increase_amount).is_ok()) {
-            current_stat + increase_amount
+        if (u8_overflowing_add(self, amount).is_ok()) {
+            self += amount
         } else {
-            MAX_STAT_VALUE
+            self = MAX_STAT_VALUE
         }
     }
 
@@ -144,88 +146,202 @@ impl AdventurerUtils of IAdventurer {
             0
         }
     }
-}
 
-#[test]
-#[available_gas(6482260)]
-fn test_generate_adventurer_entropy() {
-    let mut i: u256 = 1;
-    loop {
-        if (i >= 100) {
-            break;
+    // Returns the maximum health an adventurer can have.
+    // The maximum health is the sum of the starting health and the health increase due to the adventurer's vitality.
+    //
+    // @return The maximum health as a u16. If the total health would exceed the maximum possible health, 
+    //         then this value is capped to MAX_ADVENTURER_HEALTH.
+    #[inline(always)]
+    fn get_max_health(vitality: u8) -> u16 {
+        // Calculate vitality boost, casting to u16 to prevent overflow during multiplication
+        let vitality_boost: u16 = (vitality.into() * HEALTH_INCREASE_PER_VITALITY.into());
+
+        // Check if health calculation would result in overflow
+        if (u16_overflowing_add(STARTING_HEALTH, vitality_boost).is_ok()) {
+            // If it does not cause overflow, check if health + vitality boost is within maximum allowed health
+            if (STARTING_HEALTH + vitality_boost <= MAX_ADVENTURER_HEALTH) {
+                // if it is, return full boost
+                return (STARTING_HEALTH + vitality_boost);
+            }
         }
-        let adventurer_id: u256 = i;
-        let block_number = 839152;
-        let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
-            block_number, adventurer_id
-        );
-        i += 1;
+
+        // In the case of potential overflow or exceeding max adventurer health, return max adventurer health
+        MAX_ADVENTURER_HEALTH
+    }
+
+    #[inline(always)]
+    fn is_health_full(health: u16, vitality: u8) -> bool {
+        health == AdventurerUtils::get_max_health(vitality)
+    }
+}
+
+// ---------------------------
+// ---------- Tests ----------
+// ---------------------------
+#[cfg(test)]
+mod tests {
+    use survivor::{
+        constants::{
+            adventurer_constants::{
+                MAX_STAT_VALUE, U128_MAX, ClassStatBoosts, STARTING_HEALTH,
+                HEALTH_INCREASE_PER_VITALITY, MAX_ADVENTURER_HEALTH
+            },
+            discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
+        },
+        adventurer_stats::Stats, adventurer::{Adventurer, ImplAdventurer, IAdventurer},
+        adventurer_utils::AdventurerUtils
     };
-}
+    use combat::constants::CombatEnums::{Type, Tier, Slot};
+    #[test]
+    #[available_gas(150000)]
+    fn test_is_health_full() {
+        let starting_stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+        };
+        let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
-#[test]
-#[available_gas(30000)]
-fn test_overflow_protected_stat_increase() {
-    // base case
-    assert(
-        AdventurerUtils::overflow_protected_stat_increase(1, 1) == 2, 'stat should increase by 1'
-    );
+        // adventurers should start with full health
+        assert(
+            AdventurerUtils::is_health_full(adventurer.health, adventurer.stats.vitality) == true,
+            'should start with full health'
+        );
 
-    // u8 overflow case
-    assert(
-        AdventurerUtils::overflow_protected_stat_increase(MAX_STAT_VALUE, 255) == MAX_STAT_VALUE,
-        'stat should not overflow'
-    );
-}
+        // increase max health via vitality boost
+        // health is no longer technically full
+        adventurer.stats.vitality = 2;
+        assert(
+            AdventurerUtils::is_health_full(adventurer.health, adventurer.stats.vitality) == false,
+            'vitality increased max'
+        );
 
-#[test]
-#[available_gas(40000)]
-fn test_get_random_explore() {
-    // exploring with zero entropy will result in a beast discovery
-    let entropy = 0;
-    let discovery = AdventurerUtils::get_random_explore(entropy);
-    assert(discovery == ExploreResult::Beast(()), 'adventurer should find beast');
+        // fill up health
+        adventurer.increase_health(100);
+        assert(
+            AdventurerUtils::is_health_full(adventurer.health, adventurer.stats.vitality) == true,
+            'health should be full'
+        );
 
-    let entropy = 1;
-    let discovery = AdventurerUtils::get_random_explore(entropy);
-    assert(discovery == ExploreResult::Obstacle(()), 'adventurer should find obstacle');
+        // deduct 1 health
+        adventurer.health.decrease_health(1);
+        assert(
+            AdventurerUtils::is_health_full(adventurer.health, adventurer.stats.vitality) == false,
+            'health should not be full'
+        );
+    }
 
-    let entropy = 2;
-    let discovery = AdventurerUtils::get_random_explore(entropy);
-    assert(discovery == ExploreResult::Treasure(()), 'adventurer should find treasure');
+    #[test]
+    #[available_gas(200000)]
+    fn test_get_max_health() {
+        let starting_stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+        };
+        let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
-    // rollover and verify beast discovery
-    let entropy = 3;
-    let discovery = AdventurerUtils::get_random_explore(entropy);
-    assert(discovery == ExploreResult::Beast(()), 'adventurer should find beast');
-}
+        // assert starting state
+        assert(
+            AdventurerUtils::get_max_health(adventurer.stats.vitality) == STARTING_HEALTH,
+            'advntr should have max health'
+        );
 
-#[test]
-#[available_gas(60000)]
-fn test_get_random_attack_location() {
-    // base cases
-    let mut entropy = 0;
-    let mut armor = AdventurerUtils::get_random_attack_location(entropy);
-    assert(armor == Slot::Chest(()), 'should be chest');
+        // base case
+        adventurer.stats.vitality = 1;
+        // assert max health is starting health + single vitality increase
+        assert(
+            AdventurerUtils::get_max_health(adventurer.stats.vitality) == STARTING_HEALTH
+                + HEALTH_INCREASE_PER_VITALITY.into(),
+            'max health shuld be 120'
+        );
 
-    entropy = 1;
-    armor = AdventurerUtils::get_random_attack_location(entropy);
-    assert(armor == Slot::Head(()), 'should be head');
+        // extreme/overflow case
+        adventurer.stats.vitality = 255;
+        assert(
+            AdventurerUtils::get_max_health(adventurer.stats.vitality) == MAX_ADVENTURER_HEALTH,
+            'wrong max health'
+        );
+    }
 
-    entropy = 2;
-    armor = AdventurerUtils::get_random_attack_location(entropy);
-    assert(armor == Slot::Waist(()), 'should be waist');
 
-    entropy = 3;
-    armor = AdventurerUtils::get_random_attack_location(entropy);
-    assert(armor == Slot::Foot(()), 'should be foot');
+    #[test]
+    #[available_gas(6482260)]
+    fn test_generate_adventurer_entropy() {
+        let mut i: u256 = 1;
+        loop {
+            if (i >= 100) {
+                break;
+            }
+            let adventurer_id: u256 = i;
+            let block_number = 839152;
+            let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
+                block_number, adventurer_id
+            );
+            i += 1;
+        };
+    }
 
-    entropy = 4;
-    armor = AdventurerUtils::get_random_attack_location(entropy);
-    assert(armor == Slot::Hand(()), 'should be hand');
+    #[test]
+    #[available_gas(30000)]
+    fn test_overflow_protected_stat_increase() {
+        let mut stat: u8 = 1;
 
-    // rollover and verify armor goes back to chest
-    entropy = 5;
-    armor = AdventurerUtils::get_random_attack_location(entropy);
-    assert(armor == Slot::Chest(()), 'should be chest');
+        // base case
+        AdventurerUtils::overflow_protected_stat_increase(ref stat, 1);
+        assert(stat == 2, 'stat should increase by 1');
+
+        // u8 overflow case
+        AdventurerUtils::overflow_protected_stat_increase(ref stat, 255);
+        assert(stat == MAX_STAT_VALUE, 'stat should not overflow');
+    }
+
+    #[test]
+    #[available_gas(40000)]
+    fn test_get_random_explore() {
+        // exploring with zero entropy will result in a beast discovery
+        let entropy = 0;
+        let discovery = AdventurerUtils::get_random_explore(entropy);
+        assert(discovery == ExploreResult::Beast(()), 'adventurer should find beast');
+
+        let entropy = 1;
+        let discovery = AdventurerUtils::get_random_explore(entropy);
+        assert(discovery == ExploreResult::Obstacle(()), 'adventurer should find obstacle');
+
+        let entropy = 2;
+        let discovery = AdventurerUtils::get_random_explore(entropy);
+        assert(discovery == ExploreResult::Treasure(()), 'adventurer should find treasure');
+
+        // rollover and verify beast discovery
+        let entropy = 3;
+        let discovery = AdventurerUtils::get_random_explore(entropy);
+        assert(discovery == ExploreResult::Beast(()), 'adventurer should find beast');
+    }
+
+    #[test]
+    #[available_gas(60000)]
+    fn test_get_random_attack_location() {
+        // base cases
+        let mut entropy = 0;
+        let mut armor = AdventurerUtils::get_random_attack_location(entropy);
+        assert(armor == Slot::Chest(()), 'should be chest');
+
+        entropy = 1;
+        armor = AdventurerUtils::get_random_attack_location(entropy);
+        assert(armor == Slot::Head(()), 'should be head');
+
+        entropy = 2;
+        armor = AdventurerUtils::get_random_attack_location(entropy);
+        assert(armor == Slot::Waist(()), 'should be waist');
+
+        entropy = 3;
+        armor = AdventurerUtils::get_random_attack_location(entropy);
+        assert(armor == Slot::Foot(()), 'should be foot');
+
+        entropy = 4;
+        armor = AdventurerUtils::get_random_attack_location(entropy);
+        assert(armor == Slot::Hand(()), 'should be hand');
+
+        // rollover and verify armor goes back to chest
+        entropy = 5;
+        armor = AdventurerUtils::get_random_attack_location(entropy);
+        assert(armor == Slot::Chest(()), 'should be chest');
+    }
 }
