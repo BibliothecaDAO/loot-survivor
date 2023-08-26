@@ -121,6 +121,8 @@ export default function Home() {
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
   const displayHistoryButtonRef = useRef<HTMLButtonElement>(null);
   const displayCartButtonRef = useRef<HTMLButtonElement>(null);
+  const switchAdventurer = useUIStore((state) => state.switchAdventurer);
+  const setSwitchAdventurer = useUIStore((state) => state.setSwitchAdventurer);
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
@@ -142,6 +144,8 @@ export default function Home() {
   const resetNotification = useLoadingStore((state) => state.resetNotification);
 
   const { data, refetch, resetData, setData } = useQueriesStore();
+
+  const [initialLoad, setInitialLoad] = useState(true);
 
   const { spawn, explore, attack, flee, upgrade, multicall } = syscalls({
     gameContract,
@@ -200,14 +204,14 @@ export default function Home() {
     owner === ""
   );
 
-  console.log(adventurer?.id ?? 0);
-  console.log(data);
+  // console.log(adventurer?.id ?? 0);
+  // console.log(data);
 
-  // const adventurerVariables = useMemo(() => {
-  //   return {
-  //     id: adventurer?.id ?? 0,
-  //   };
-  // }, [adventurer?.id ?? 0]);
+  const adventurerVariables = useMemo(() => {
+    return {
+      id: adventurer?.id ?? 0,
+    };
+  }, [adventurer?.id ?? 0]);
 
   // useCustomQuery(
   //   "adventurerByIdQuery",
@@ -246,7 +250,7 @@ export default function Home() {
   //     beast: lastBeast?.entity,
   //     seed: lastBeast?.seed,
   //   };
-  // }, [adventurer?.id ?? 0, lastBeast?.entity, lastBeast?.seed]);
+  // }, [adventurer?.id ?? 0]);
 
   // useCustomQuery("beastQuery", getBeast, beastVariables, mintAdventurer);
 
@@ -278,16 +282,16 @@ export default function Home() {
     }
   }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
 
-  useEffect(() => {
-    if (
-      data.adventurerByIdQuery &&
-      data.adventurerByIdQuery.adventurers[0]?.id
-    ) {
-      console.log("updated");
-      console.log(data.adventurerByIdQuery.adventurers[0]);
-      setAdventurer(data.adventurerByIdQuery.adventurers[0]);
-    }
-  }, [data.adventurerByIdQuery?.adventurers[0]]);
+  // useEffect(() => {
+  //   if (
+  //     data.adventurerByIdQuery &&
+  //     data.adventurerByIdQuery.adventurers[0]?.id
+  //   ) {
+  //     console.log("updated");
+  //     console.log(data.adventurerByIdQuery.adventurers[0]);
+  //     setAdventurer(data.adventurerByIdQuery.adventurers[0]);
+  //   }
+  // }, [data.adventurerByIdQuery?.adventurers[0]]);
 
   const mobileMenuDisabled = [
     false,

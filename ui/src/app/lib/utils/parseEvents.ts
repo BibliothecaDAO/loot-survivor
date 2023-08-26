@@ -176,11 +176,14 @@ function parseItems(data: string[]) {
 }
 
 function parseEquippedItems(data: string[]) {
-  const equippedLength = data.length / 2;
+  const equippedLength = parseInt(data[0]);
   const equippedItems = [];
   const unequippedItems = [];
-  for (let i = 0; i < equippedLength; i++) {
+  for (let i = 1; i <= equippedLength; i++) {
     equippedItems.push(parseInt(data[i]));
+  }
+  const unequippedLength = parseInt(data[equippedLength + 1]);
+  for (let i = 2; i <= unequippedLength + 1; i++) {
     unequippedItems.push(parseInt(data[i + equippedLength]));
   }
   return { equippedItems, unequippedItems };
@@ -521,8 +524,8 @@ export function parseEvents(
         break;
       case "EquippedItems":
         const { equippedItems, unequippedItems } = parseEquippedItems(
-          // Skip array length
-          raw.data.slice(75)
+          // Include equipped array length
+          raw.data.slice(74)
         );
         const equippedItemsData: EquippedItemsEvent = {
           adventurerStateWithBag: {
