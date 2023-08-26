@@ -147,8 +147,8 @@ impl AdventurerUtils of IAdventurer {
 }
 
 #[test]
-#[available_gas(9999999999999999999)]
-fn test_generate_advetnurer_entropy() {
+#[available_gas(6482260)]
+fn test_generate_adventurer_entropy() {
     let mut i: u256 = 1;
     loop {
         if (i >= 100) {
