@@ -32,6 +32,9 @@ export interface SyscallsProps {
   setDeathMessage: (...args: any[]) => any;
   showDeathDialog: (...args: any[]) => any;
   resetNotification: (...args: any[]) => any;
+  setScreen: (...args: any[]) => any;
+  setAdventurer: (...args: any[]) => any;
+  setMintAdventurer: (...args: any[]) => any;
 }
 
 export function syscalls({
@@ -55,6 +58,9 @@ export function syscalls({
   setDeathMessage,
   showDeathDialog,
   resetNotification,
+  setScreen,
+  setAdventurer,
+  setMintAdventurer,
 }: SyscallsProps) {
   const gameData = new GameData();
 
@@ -177,14 +183,6 @@ export function syscalls({
       const receipt = await account?.waitForTransaction(tx.transaction_hash, {
         retryInterval: 1000,
       });
-      console.log(receipt);
-      console.log({
-        name: formData["name"],
-        homeRealm: formData["homeRealmId"],
-        classType: formData["class"],
-        entropy: 0,
-        createdTime: new Date(),
-      });
       const events = parseEvents(receipt as InvokeTransactionReceiptResponse, {
         name: formData["name"],
         homeRealm: formData["homeRealmId"],
@@ -237,6 +235,9 @@ export function syscalls({
         ],
       });
       stopLoading(`You have spawned ${formData.name}!`);
+      setAdventurer(adventurerState);
+      setScreen("play");
+      setMintAdventurer(true);
     } catch (e) {
       console.log(e);
     }
@@ -268,7 +269,6 @@ export function syscalls({
       const receipt = await account?.waitForTransaction(tx.transaction_hash, {
         retryInterval: 1000,
       });
-      console.log(queryData.adventurerByIdQuery?.adventurers[0]);
       const events = parseEvents(
         receipt as InvokeTransactionReceiptResponse,
         queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
@@ -362,7 +362,6 @@ export function syscalls({
             adventurerDiedEvent.data
           );
         }
-        console.log(adventurerDiedEvent.data);
       }
 
       const filteredDeathPenalty = events.filter(
@@ -410,7 +409,6 @@ export function syscalls({
         });
       }
 
-      console.log(discoveries);
       setData("latestDiscoveriesQuery", {
         discoveries: [
           ...discoveries,
@@ -424,6 +422,7 @@ export function syscalls({
       setEquipItems([]);
       setDropItems([]);
       stopLoading(discoveries);
+      setMintAdventurer(false);
     } catch (e) {
       console.log(e);
     }
@@ -456,7 +455,6 @@ export function syscalls({
       setData("battlesByTxHashQuery", {
         battles: null,
       });
-      console.log(queryData.adventurerByIdQuery?.adventurers[0]);
       const events = parseEvents(
         receipt as InvokeTransactionReceiptResponse,
         queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
@@ -506,8 +504,6 @@ export function syscalls({
         );
       }
 
-      console.log(battles);
-
       const adventurerDiedExists = events.some((event) => {
         if (event.name === "AdventurerDied") {
           return true;
@@ -521,7 +517,6 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data],
         });
-        console.log(adventurerDiedEvent.data);
         const killedByBeast = battles.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
@@ -601,6 +596,7 @@ export function syscalls({
       stopLoading(battles.reverse());
       setEquipItems([]);
       setDropItems([]);
+      setMintAdventurer(false);
     } catch (e) {
       console.log(e);
     }
@@ -628,7 +624,6 @@ export function syscalls({
         retryInterval: 1000,
       });
       // Add optimistic data
-      console.log(queryData.adventurerByIdQuery?.adventurers[0]);
       const events = parseEvents(
         receipt as InvokeTransactionReceiptResponse,
         queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
@@ -664,8 +659,6 @@ export function syscalls({
         });
         battles.unshift(fleeSucceededEvent.data[1]);
       }
-
-      console.log(battles);
 
       const adventurerDiedExists = events.some((event) => {
         if (event.name === "AdventurerDied") {
@@ -759,6 +752,7 @@ export function syscalls({
       stopLoading(battles);
       setEquipItems([]);
       setDropItems([]);
+      setMintAdventurer(false);
     } catch (e) {
       console.log(e);
     }
@@ -786,7 +780,6 @@ export function syscalls({
       });
 
       // Add optimistic data
-      console.log(queryData.adventurerByIdQuery?.adventurers[0]);
       const events = parseEvents(
         receipt as InvokeTransactionReceiptResponse,
         queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
@@ -837,6 +830,7 @@ export function syscalls({
         Items: purchaseItems,
         Potions: potionAmount,
       });
+      setMintAdventurer(false);
     } catch (e) {
       console.log(e);
     }
@@ -946,6 +940,7 @@ export function syscalls({
       }
 
       stopLoading(notification);
+      setMintAdventurer(false);
     } catch (e) {
       console.log(e);
     }

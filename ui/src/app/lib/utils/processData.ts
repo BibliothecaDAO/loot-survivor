@@ -708,7 +708,6 @@ export function processData(
         purchasedItemsEvent.purchases,
         purchasedItemsEvent.adventurerStateWithBag.adventurerState
       );
-      console.log("Purchases:", purchases);
       return [purchasedItemsAdventurerData, purchases];
     case "PurchasedPotions":
       const purchasedPotionsEvent = event as PurchasedPotionsEvent;

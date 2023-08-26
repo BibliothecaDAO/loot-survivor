@@ -1,28 +1,24 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAccount } from "@starknet-react/core";
 // import { getAdventurersByOwner } from "../hooks/graphql/queries";
-import { padAddress } from "../lib/utils";
 import { AdventurersList } from "../components/start/AdventurersList";
 import { CreateAdventurer } from "../components/start/CreateAdventurer";
 import VerticalKeyboardControl from "../components/menu/VerticalMenu";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import LootIconLoader from "../components/icons/Loader";
-import useCustomQuery from "../hooks/useCustomQuery";
 import useLoadingStore from "../hooks/useLoadingStore";
-import {
-  getAdventurerById,
-  getAdventurerByXP,
-  getAdventurersByOwner,
-} from "../hooks/graphql/queries";
 import useAdventurerStore from "../hooks/useAdventurerStore";
-import { useMediaQuery } from "react-responsive";
 import { NullAdventurer } from "../types";
+
+interface AdventurerScreenProps {
+  spawn: (...args: any[]) => any;
+}
 
 /**
  * @container
  * @description Provides the start screen for the adventurer.
  */
-export default function AdventurerScreen() {
+export default function AdventurerScreen({ spawn }: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
   const [loading, setLoading] = useState(false);
@@ -40,18 +36,7 @@ export default function AdventurerScreen() {
   );
   const resetData = useQueriesStore((state) => state.resetData);
 
-  const owner = account?.address ? padAddress(account.address) : "";
-
-  // useCustomQuery(
-  //   "adventurerByIdQuery",
-  //   getAdventurerById,
-  //   {
-  //     id: adventurer?.id ?? 0,
-  //   },
-  //   txAccepted
-  // );
-
-  // useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
+  // const owner = account?.address ? padAddress(account.address) : "";
 
   // const ownerVariables = useMemo(() => {
   //   return {
@@ -59,18 +44,10 @@ export default function AdventurerScreen() {
   //   };
   // }, [owner]);
 
-  // useCustomQuery("adventurersByOwnerQuery", getAdventurersByOwner, {
-  //   owner: owner,
-  // });
-
-  // TODO: Remove polling
   // useCustomQuery(
   //   "adventurersByOwnerQuery",
   //   getAdventurersByOwner,
-  //   {
-  //     owner: owner,
-  //   },
-  //   txAccepted
+  //   ownerVariables
   // );
 
   const menu = [
@@ -133,6 +110,7 @@ export default function AdventurerScreen() {
             isActive={activeMenu == 2}
             onEscape={() => setActiveMenu(0)}
             adventurers={adventurers}
+            spawn={spawn}
           />
         </div>
       )}

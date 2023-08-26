@@ -6,14 +6,8 @@ import React, {
   RefObject,
 } from "react";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import {
-  useTransactionManager,
-  useContractWrite,
-  useAccount,
-} from "@starknet-react/core";
 import { Button } from "../buttons/Button";
 import { MdClose } from "react-icons/md";
-import useLoadingStore from "../../hooks/useLoadingStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useQueriesStore, QueryKey } from "../../hooks/useQueryStore";
 import {
@@ -25,37 +19,22 @@ import {
 import useUIStore from "../../hooks/useUIStore";
 import { useUiSounds } from "../../hooks/useUiSound";
 import { soundSelector } from "../../hooks/useUiSound";
-import {
-  Item,
-  NullItem,
-  Call,
-  NullAdventurer,
-  ItemPurchase,
-  ZeroUpgrade,
-} from "../../types";
+import { Item, NullItem, Call, ItemPurchase, ZeroUpgrade } from "../../types";
 import { GameData } from "../GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
-import { syscalls } from "@/app/lib/utils/syscalls";
-import { useContracts } from "@/app/hooks/useContracts";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
+  multicall: (...args: any[]) => any;
 }
 
-const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
+const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
   const removeFromCalls = useTransactionCartStore(
     (state) => state.removeFromCalls
   );
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { addTransaction } = useTransactionManager();
-  const { writeAsync } = useContractWrite({ calls });
   const [notification, setNotification] = useState<string[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
   const [loadingQuery, setLoadingQuery] = useState<QueryKey | null>(null);
@@ -73,43 +52,6 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const setUpgrades = useUIStore((state) => state.setUpgrades);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
-
-  const { gameContract, lordsContract } = useContracts();
-  const { data: queryData, resetData, setData } = useQueriesStore();
-  const { account } = useAccount();
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
-  const hash = useLoadingStore((state) => state.hash);
-  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
-  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const resetNotification = useLoadingStore((state) => state.resetNotification);
-  const removeEntrypointFromCalls = useTransactionCartStore(
-    (state) => state.removeEntrypointFromCalls
-  );
-
-  const { multicall } = syscalls({
-    gameContract,
-    lordsContract,
-    addTransaction,
-    account,
-    queryData,
-    resetData,
-    setData,
-    adventurer,
-    addToCalls,
-    calls,
-    handleSubmitCalls,
-    startLoading,
-    stopLoading,
-    setTxHash,
-    writeAsync,
-    setEquipItems,
-    setDropItems,
-    setDeathMessage,
-    showDeathDialog,
-    resetNotification,
-  });
 
   const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items

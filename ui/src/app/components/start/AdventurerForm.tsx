@@ -5,12 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import {
-  useAccount,
-  useConnectors,
-  useTransactionManager,
-  useContractWrite,
-} from "@starknet-react/core";
+import { useAccount, useConnectors } from "@starknet-react/core";
 import useUIStore from "../../hooks/useUIStore";
 import { FormData, Adventurer } from "@/app/types";
 import { Button } from "../buttons/Button";
@@ -21,23 +16,19 @@ import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
 import { MdClose } from "react-icons/md";
-import { syscalls } from "@/app/lib/utils/syscalls";
-import { useContracts } from "@/app/hooks/useContracts";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
-import useAdventurerStore from "@/app/hooks/useAdventurerStore";
-import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
-import useLoadingStore from "@/app/hooks/useLoadingStore";
 
 export interface AdventurerFormProps {
   isActive: boolean;
   onEscape: () => void;
   adventurers: Adventurer[];
+  spawn: (...args: any[]) => any;
 }
 
 export const AdventurerForm = ({
   isActive,
   onEscape,
   adventurers,
+  spawn,
 }: AdventurerFormProps) => {
   const { account } = useAccount();
   const { connectors, connect } = useConnectors();
@@ -63,56 +54,6 @@ export const AdventurerForm = ({
 
   const walletConnectors = () =>
     connectors.filter((connector) => !connector.id.includes("0x"));
-
-  const { gameContract, lordsContract } = useContracts();
-  const { addTransaction } = useTransactionManager();
-  const { data: queryData, resetData, setData } = useQueriesStore();
-
-  const formatAddress = account ? account.address : "0x0";
-  const adventurer = useAdventurerStore((state) => state.adventurer);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const calls = useTransactionCartStore((state) => state.calls);
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const stopLoading = useLoadingStore((state) => state.stopLoading);
-  const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
-  const hash = useLoadingStore((state) => state.hash);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { writeAsync } = useContractWrite({ calls });
-  const equipItems = useUIStore((state) => state.equipItems);
-  const setEquipItems = useUIStore((state) => state.setEquipItems);
-  const setDropItems = useUIStore((state) => state.setDropItems);
-  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
-  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const resetNotification = useLoadingStore((state) => state.resetNotification);
-  const removeEntrypointFromCalls = useTransactionCartStore(
-    (state) => state.removeEntrypointFromCalls
-  );
-
-  const { spawn } = syscalls({
-    gameContract,
-    lordsContract,
-    addTransaction,
-    account,
-    queryData,
-    resetData,
-    setData,
-    adventurer,
-    addToCalls,
-    calls,
-    handleSubmitCalls,
-    startLoading,
-    stopLoading,
-    setTxHash,
-    writeAsync,
-    setEquipItems,
-    setDropItems,
-    setDeathMessage,
-    showDeathDialog,
-    resetNotification,
-  });
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement> | KeyboardEvent) => {
@@ -168,8 +109,8 @@ export const AdventurerForm = ({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    console.log(spawn);
     await spawn(formData);
-    setMintAdventurer(true);
   };
 
   const [formFilled, setFormFilled] = useState(false);

@@ -19,7 +19,7 @@ const useCustomQuery = (
 ) => {
   const { updateData } = useQueriesStore();
 
-  const { data, loading, refetch } = useQuery(query, {
+  const { data, loading, refetch, error } = useQuery(query, {
     variables: variables,
     skip: skip,
   });
@@ -36,11 +36,13 @@ const useCustomQuery = (
   const prevVariablesRef = useRef<Variables>();
 
   useEffect(() => {
-    if (data && !isEqual(prevVariablesRef.current, variables)) {
+    console.log(variables);
+    console.log(queryKey, data, loading, error);
+    if (data) {
       updateData(queryKey, data, loading, refetchWrapper);
     }
     prevVariablesRef.current = variables;
-  }, []);
+  }, [data, variables]);
 };
 
 export default useCustomQuery;

@@ -4,6 +4,8 @@ import {
   useConnectors,
   useNetwork,
   useProvider,
+  useContractWrite,
+  useTransactionManager,
 } from "@starknet-react/core";
 import { constants } from "starknet";
 import { useState, useEffect, useMemo, useRef } from "react";
@@ -27,12 +29,11 @@ import useUIStore from "./hooks/useUIStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
-import { Menu, NullAdventurer } from "./types";
+import { Menu, NullAdventurer, NullDiscovery } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
 import WalletSelect from "./components/intro/WalletSelect";
-import { useMediaQuery } from "react-responsive";
 import {
   CogIcon,
   MuteIcon,
@@ -52,9 +53,16 @@ import useCustomQuery from "./hooks/useCustomQuery";
 import {
   getAdventurerById,
   getAdventurersByOwner,
+  getLatestDiscoveries,
+  getLastBeastDiscovery,
+  getBeast,
+  getBattlesByBeast,
+  getItemsByAdventurer,
 } from "./hooks/graphql/queries";
 import { ArcadeDialog } from "./components/ArcadeDialog";
 import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
+import { syscalls } from "./lib/utils/syscalls";
+import { useContracts } from "./hooks/useContracts";
 import { Maintenance } from "./components/archived/Maintenance";
 
 const allMenuItems: Menu[] = [
@@ -117,7 +125,49 @@ export default function Home() {
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
 
-  const { data, refetch, resetData } = useQueriesStore();
+  const { gameContract, lordsContract } = useContracts();
+  const { addTransaction } = useTransactionManager();
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const handleSubmitCalls = useTransactionCartStore(
+    (state) => state.handleSubmitCalls
+  );
+  const startLoading = useLoadingStore((state) => state.startLoading);
+  const stopLoading = useLoadingStore((state) => state.stopLoading);
+  const setTxHash = useLoadingStore((state) => state.setTxHash);
+  const { writeAsync } = useContractWrite({ calls });
+  const setEquipItems = useUIStore((state) => state.setEquipItems);
+  const setDropItems = useUIStore((state) => state.setDropItems);
+  const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
+  const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
+
+  const { data, refetch, resetData, setData } = useQueriesStore();
+
+  const { spawn, explore, attack, flee, upgrade, multicall } = syscalls({
+    gameContract,
+    lordsContract,
+    addTransaction,
+    account,
+    queryData: data,
+    resetData,
+    setData,
+    adventurer,
+    addToCalls,
+    calls,
+    handleSubmitCalls,
+    startLoading,
+    stopLoading,
+    setTxHash,
+    writeAsync,
+    setEquipItems,
+    setDropItems,
+    setDeathMessage,
+    showDeathDialog,
+    resetNotification,
+    setScreen,
+    setAdventurer,
+    setMintAdventurer,
+  });
 
   const playState = useMemo(
     () => ({
@@ -137,25 +187,75 @@ export default function Home() {
     setIntroComplete(true);
   };
 
-  const adventurerIdVariables = useMemo(() => {
-    return { id: adventurer?.id ?? 0 };
-  }, [adventurer?.id]);
+  const ownerVariables = useMemo(() => {
+    return {
+      owner: owner,
+    };
+  }, [owner]);
 
-  // useCustomQuery("adventurerByIdQuery", getAdventurerById, {
-  //   id: adventurer?.id ?? 0,
-  // });
+  useCustomQuery(
+    "adventurersByOwnerQuery",
+    getAdventurersByOwner,
+    ownerVariables,
+    owner === ""
+  );
 
+  console.log(adventurer?.id ?? 0);
   console.log(data);
 
-  // useEffect(() => {
-  //   if (
-  //     data.adventurerByIdQuery &&
-  //     data.adventurerByIdQuery.adventurers[0]?.id
-  //   ) {
-  //     console.log("updated");
-  //     setAdventurer(data.adventurerByIdQuery.adventurers[0]);
-  //   }
-  // }, [data.adventurerByIdQuery?.adventurers[0]?.timestamp]);
+  // const adventurerVariables = useMemo(() => {
+  //   return {
+  //     id: adventurer?.id ?? 0,
+  //   };
+  // }, [adventurer?.id ?? 0]);
+
+  // useCustomQuery(
+  //   "adventurerByIdQuery",
+  //   getAdventurerById,
+  //   adventurerVariables,
+  //   mintAdventurer
+  // );
+
+  // useCustomQuery(
+  //   "latestDiscoveriesQuery",
+  //   getLatestDiscoveries,
+  //   adventurerVariables
+  // );
+
+  // useCustomQuery(
+  //   "lastBeastQuery",
+  //   getLastBeastDiscovery,
+  //   adventurerVariables,
+  //   mintAdventurer
+  // );
+
+  // useCustomQuery(
+  //   "itemsByAdventurerQuery",
+  //   getItemsByAdventurer,
+  //   adventurerVariables,
+  //   mintAdventurer
+  // );
+
+  // const lastBeast = useQueriesStore(
+  //   (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
+  // );
+
+  // const beastVariables = useMemo(() => {
+  //   return {
+  //     adventurerId: adventurer?.id ?? 0,
+  //     beast: lastBeast?.entity,
+  //     seed: lastBeast?.seed,
+  //   };
+  // }, [adventurer?.id ?? 0, lastBeast?.entity, lastBeast?.seed]);
+
+  // useCustomQuery("beastQuery", getBeast, beastVariables, mintAdventurer);
+
+  // useCustomQuery(
+  //   "battlesByBeastQuery",
+  //   getBattlesByBeast,
+  //   beastVariables,
+  //   mintAdventurer
+  // );
 
   useEffect(() => {
     return () => {
@@ -179,15 +279,6 @@ export default function Home() {
   }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
 
   useEffect(() => {
-    if (mintAdventurer && data.adventurersByOwnerQuery) {
-      const adventurers = data.adventurersByOwnerQuery.adventurers;
-      setAdventurer(adventurers[adventurers.length - 1]);
-      setScreen("play");
-      setMintAdventurer(false);
-    }
-  }, [data.adventurersByOwnerQuery?.adventurers.length]);
-
-  useEffect(() => {
     if (
       data.adventurerByIdQuery &&
       data.adventurerByIdQuery.adventurers[0]?.id
@@ -196,7 +287,7 @@ export default function Home() {
       console.log(data.adventurerByIdQuery.adventurers[0]);
       setAdventurer(data.adventurerByIdQuery.adventurers[0]);
     }
-  }, [loading]);
+  }, [data.adventurerByIdQuery?.adventurers[0]]);
 
   const mobileMenuDisabled = [
     false,
@@ -293,7 +384,10 @@ export default function Home() {
                   </button>
                 )}
                 {displayCart && (
-                  <TransactionCart buttonRef={displayCartButtonRef} />
+                  <TransactionCart
+                    buttonRef={displayCartButtonRef}
+                    multicall={multicall}
+                  />
                 )}
                 <div className="flex items-center sm:hidden">
                   <button
@@ -381,11 +475,17 @@ export default function Home() {
                 </div>
 
                 {/* <div className="overflow-y-auto h-[460px] sm:h-full"> */}
-                {screen === "start" && <AdventurerScreen />}
-                {screen === "play" && <ActionsScreen />}
+                {screen === "start" && <AdventurerScreen spawn={spawn} />}
+                {screen === "play" && (
+                  <ActionsScreen
+                    explore={explore}
+                    attack={attack}
+                    flee={flee}
+                  />
+                )}
                 {screen === "inventory" && <InventoryScreen />}
                 {screen === "leaderboard" && <LeaderboardScreen />}
-                {screen === "upgrade" && <UpgradeScreen />}
+                {screen === "upgrade" && <UpgradeScreen upgrade={upgrade} />}
                 {screen === "profile" && <Profile />}
                 {screen === "encounters" && <EncountersScreen />}
                 {screen === "guide" && <GuideScreen />}
