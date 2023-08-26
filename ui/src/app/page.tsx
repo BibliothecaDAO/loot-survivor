@@ -137,11 +137,11 @@ export default function Home() {
     setIntroComplete(true);
   };
 
-  const adventurerIdVariables = useMemo(() => {
-    return { id: adventurer?.id ?? 0 };
-  }, [adventurer?.id]);
+  // const adventurerIdVariables = useMemo(() => {
+  //   return { id: adventurer?.id ?? 0 };
+  // }, [adventurer?.id]);
 
-  console.log(data);
+  // console.log(data);
 
   useEffect(() => {
     return () => {
@@ -164,10 +164,6 @@ export default function Home() {
     }
   }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
 
-  // useEffect(() => {
-  //   refetch();
-  // }, []);
-
   useEffect(() => {
     if (mintAdventurer && data.adventurersByOwnerQuery) {
       const adventurers = data.adventurersByOwnerQuery.adventurers;
@@ -177,7 +173,6 @@ export default function Home() {
     }
   }, [data.adventurersByOwnerQuery?.adventurers.length]);
 
-  // dev commented out for now
   // useEffect(() => {
   //   if (data?.adventurerByIdQuery?.adventurers[0]?.id) {
   //     console.log("updated");
@@ -185,6 +180,7 @@ export default function Home() {
   //     setAdventurer(data.adventurerByIdQuery.adventurers[0]);
   //   }
   // }, [data?.adventurerByIdQuery]);
+  // console.log(adventurer);
 
   const mobileMenuDisabled = [
     false,
