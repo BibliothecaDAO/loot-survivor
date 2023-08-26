@@ -428,9 +428,18 @@ export function processData(
         entityLevel: discoveredBeastEvent.beastSpecs["level"],
         entityHealth:
           discoveredBeastEvent.adventurerState["adventurer"]["beastHealth"],
-        special1: discoveredBeastEvent.beastSpecs["specials"]["special1"],
-        special2: discoveredBeastEvent.beastSpecs["specials"]["special2"],
-        special3: discoveredBeastEvent.beastSpecs["specials"]["special3"],
+        special1:
+          gameData.ITEM_NAME_PREFIXES[
+            discoveredBeastEvent.beastSpecs["specials"]["special1"]
+          ],
+        special2:
+          gameData.ITEM_NAME_SUFFIXES[
+            discoveredBeastEvent.beastSpecs["specials"]["special2"]
+          ],
+        special3:
+          gameData.ITEM_SUFFIXES[
+            discoveredBeastEvent.beastSpecs["specials"]["special3"]
+          ],
         ambushed: false,
         seed: discoveredBeastEvent.seed,
         discoveryTime: new Date(),
@@ -441,9 +450,18 @@ export function processData(
         health:
           discoveredBeastEvent.adventurerState["adventurer"]["beastHealth"],
         level: discoveredBeastEvent.beastSpecs["level"],
-        special1: discoveredBeastEvent.beastSpecs["specials"]["special1"],
-        special2: discoveredBeastEvent.beastSpecs["specials"]["special2"],
-        special3: discoveredBeastEvent.beastSpecs["specials"]["special3"],
+        special1:
+          gameData.ITEM_NAME_PREFIXES[
+            discoveredBeastEvent.beastSpecs["specials"]["special1"]
+          ],
+        special2:
+          gameData.ITEM_NAME_SUFFIXES[
+            discoveredBeastEvent.beastSpecs["specials"]["special2"]
+          ],
+        special3:
+          gameData.ITEM_SUFFIXES[
+            discoveredBeastEvent.beastSpecs["specials"]["special3"]
+          ],
         seed: discoveredBeastEvent.seed,
         adventurerId: discoveredBeastEvent.adventurerState["adventurerId"].low,
         slainOnTime: null,
@@ -481,9 +499,18 @@ export function processData(
         entityLevel: ambushedByBeastEvent.beastSpecs["level"],
         entityHealth:
           ambushedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
-        special1: ambushedByBeastEvent.beastSpecs["specials"]["special1"],
-        special2: ambushedByBeastEvent.beastSpecs["specials"]["special2"],
-        special3: ambushedByBeastEvent.beastSpecs["specials"]["special3"],
+        special1:
+          gameData.ITEM_NAME_PREFIXES[
+            ambushedByBeastEvent.beastSpecs["specials"]["special1"]
+          ],
+        special2:
+          gameData.ITEM_NAME_SUFFIXES[
+            ambushedByBeastEvent.beastSpecs["specials"]["special2"]
+          ],
+        special3:
+          gameData.ITEM_SUFFIXES[
+            ambushedByBeastEvent.beastSpecs["specials"]["special3"]
+          ],
         ambushed: true,
         seed: ambushedByBeastEvent.seed,
         discoveryTime: new Date(),
@@ -494,9 +521,18 @@ export function processData(
         health:
           ambushedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
         level: ambushedByBeastEvent.beastSpecs["level"],
-        special1: ambushedByBeastEvent.beastSpecs["specials"]["special1"],
-        special2: ambushedByBeastEvent.beastSpecs["specials"]["special2"],
-        special3: ambushedByBeastEvent.beastSpecs["specials"]["special3"],
+        special1:
+          gameData.ITEM_NAME_PREFIXES[
+            ambushedByBeastEvent.beastSpecs["specials"]["special1"]
+          ],
+        special2:
+          gameData.ITEM_NAME_SUFFIXES[
+            ambushedByBeastEvent.beastSpecs["specials"]["special2"]
+          ],
+        special3:
+          gameData.ITEM_SUFFIXES[
+            ambushedByBeastEvent.beastSpecs["specials"]["special3"]
+          ],
         seed: ambushedByBeastEvent.seed,
         adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"].low,
         slainOnTime: null,
@@ -510,9 +546,18 @@ export function processData(
         beastHealth:
           ambushedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: ambushedByBeastEvent.beastSpecs["level"],
-        special1: ambushedByBeastEvent.beastSpecs["specials"]["special1"],
-        special2: ambushedByBeastEvent.beastSpecs["specials"]["special2"],
-        special3: ambushedByBeastEvent.beastSpecs["specials"]["special3"],
+        special1:
+          gameData.ITEM_NAME_PREFIXES[
+            ambushedByBeastEvent.beastSpecs["specials"]["special1"]
+          ],
+        special2:
+          gameData.ITEM_NAME_SUFFIXES[
+            ambushedByBeastEvent.beastSpecs["specials"]["special2"]
+          ],
+        special3:
+          gameData.ITEM_SUFFIXES[
+            ambushedByBeastEvent.beastSpecs["specials"]["special3"]
+          ],
         seed: ambushedByBeastEvent.seed,
         adventurerId: ambushedByBeastEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
@@ -548,9 +593,18 @@ export function processData(
         beastHealth:
           attackedBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: attackedBeastEvent.beastSpecs["level"],
-        special1: attackedBeastEvent.beastSpecs["specials"]["special1"],
-        special2: attackedBeastEvent.beastSpecs["specials"]["special2"],
-        special3: attackedBeastEvent.beastSpecs["specials"]["special3"],
+        special1:
+          gameData.ITEM_NAME_PREFIXES[
+            attackedBeastEvent.beastSpecs["specials"]["special1"]
+          ],
+        special2:
+          gameData.ITEM_NAME_SUFFIXES[
+            attackedBeastEvent.beastSpecs["specials"]["special2"]
+          ],
+        special3:
+          gameData.ITEM_SUFFIXES[
+            attackedBeastEvent.beastSpecs["specials"]["special3"]
+          ],
         seed: attackedBeastEvent.seed,
         adventurerId: attackedBeastEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
@@ -577,9 +631,18 @@ export function processData(
         beastHealth:
           attackedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: attackedByBeastEvent.beastSpecs["level"],
-        special1: attackedByBeastEvent.beastSpecs["specials"]["special1"],
-        special2: attackedByBeastEvent.beastSpecs["specials"]["special2"],
-        special3: attackedByBeastEvent.beastSpecs["specials"]["special3"],
+        special1:
+          gameData.ITEM_NAME_PREFIXES[
+            attackedByBeastEvent.beastSpecs["specials"]["special1"]
+          ],
+        special2:
+          gameData.ITEM_NAME_SUFFIXES[
+            attackedByBeastEvent.beastSpecs["specials"]["special2"]
+          ],
+        special3:
+          gameData.ITEM_SUFFIXES[
+            attackedByBeastEvent.beastSpecs["specials"]["special3"]
+          ],
         seed: attackedByBeastEvent.seed,
         adventurerId: attackedByBeastEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
@@ -610,9 +673,18 @@ export function processData(
         beastHealth:
           slayedBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: slayedBeastEvent.beastSpecs["level"],
-        special1: slayedBeastEvent.beastSpecs["specials"]["special1"],
-        special2: slayedBeastEvent.beastSpecs["specials"]["special2"],
-        special3: slayedBeastEvent.beastSpecs["specials"]["special3"],
+        special1:
+          gameData.ITEM_NAME_PREFIXES[
+            slayedBeastEvent.beastSpecs["specials"]["special1"]
+          ],
+        special2:
+          gameData.ITEM_NAME_SUFFIXES[
+            slayedBeastEvent.beastSpecs["specials"]["special2"]
+          ],
+        special3:
+          gameData.ITEM_SUFFIXES[
+            slayedBeastEvent.beastSpecs["specials"]["special3"]
+          ],
         seed: slayedBeastEvent.seed,
         adventurerId: slayedBeastEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
@@ -644,9 +716,18 @@ export function processData(
         beastHealth:
           fleeFailedEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: fleeFailedEvent.beastSpecs["level"],
-        special1: fleeFailedEvent.beastSpecs["specials"]["special1"],
-        special2: fleeFailedEvent.beastSpecs["specials"]["special2"],
-        special3: fleeFailedEvent.beastSpecs["specials"]["special3"],
+        special1:
+          gameData.ITEM_NAME_PREFIXES[
+            fleeFailedEvent.beastSpecs["specials"]["special1"]
+          ],
+        special2:
+          gameData.ITEM_NAME_SUFFIXES[
+            fleeFailedEvent.beastSpecs["specials"]["special2"]
+          ],
+        special3:
+          gameData.ITEM_SUFFIXES[
+            fleeFailedEvent.beastSpecs["specials"]["special3"]
+          ],
         seed: fleeFailedEvent.seed,
         adventurerId: fleeFailedEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
@@ -677,9 +758,18 @@ export function processData(
         beastHealth:
           fleeSucceededEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: fleeSucceededEvent.beastSpecs["level"],
-        special1: fleeSucceededEvent.beastSpecs["specials"]["special1"],
-        special2: fleeSucceededEvent.beastSpecs["specials"]["special2"],
-        special3: fleeSucceededEvent.beastSpecs["specials"]["special3"],
+        special1:
+          gameData.ITEM_NAME_PREFIXES[
+            fleeSucceededEvent.beastSpecs["specials"]["special1"]
+          ],
+        special2:
+          gameData.ITEM_NAME_SUFFIXES[
+            fleeSucceededEvent.beastSpecs["specials"]["special2"]
+          ],
+        special3:
+          gameData.ITEM_SUFFIXES[
+            fleeSucceededEvent.beastSpecs["specials"]["special3"]
+          ],
         seed: fleeSucceededEvent.seed,
         adventurerId: fleeSucceededEvent.adventurerState["adventurerId"].low,
         adventurerHealth:
@@ -759,9 +849,16 @@ export function processData(
       );
       const itemData = {
         item: itemsSpecialUnlockedEvent.id,
-        special1: itemsSpecialUnlockedEvent.specials.special1,
-        special2: itemsSpecialUnlockedEvent.specials.special2,
-        special3: itemsSpecialUnlockedEvent.specials.special3,
+        special1:
+          gameData.ITEM_NAME_PREFIXES[
+            itemsSpecialUnlockedEvent.specials.special1
+          ],
+        special2:
+          gameData.ITEM_NAME_SUFFIXES[
+            itemsSpecialUnlockedEvent.specials.special2
+          ],
+        special3:
+          gameData.ITEM_SUFFIXES[itemsSpecialUnlockedEvent.specials.special3],
         timestamp: new Date(),
       };
       return [itemSpecialUnlockedAdventurerData, itemData];
