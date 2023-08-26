@@ -848,7 +848,7 @@ export function processData(
         currentAdventurer
       );
       const itemData = {
-        item: itemsSpecialUnlockedEvent.id,
+        item: gameData.ITEMS[itemsSpecialUnlockedEvent.id],
         special1:
           gameData.ITEM_NAME_PREFIXES[
             itemsSpecialUnlockedEvent.specials.special1
