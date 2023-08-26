@@ -137,11 +137,11 @@ export default function Home() {
     setIntroComplete(true);
   };
 
-  const adventurerIdVariables = useMemo(() => {
-    return { id: adventurer?.id ?? 0 };
-  }, [adventurer?.id]);
+  // const adventurerIdVariables = useMemo(() => {
+  //   return { id: adventurer?.id ?? 0 };
+  // }, [adventurer?.id]);
 
-  console.log(data);
+  // console.log(data);
 
   useEffect(() => {
     return () => {
@@ -173,14 +173,14 @@ export default function Home() {
     }
   }, [data.adventurersByOwnerQuery?.adventurers.length]);
 
-  useEffect(() => {
-    if (data?.adventurerByIdQuery?.adventurers[0]?.id) {
-      console.log("updated");
-      console.log(data.adventurerByIdQuery.adventurers[0]);
-      setAdventurer(data.adventurerByIdQuery.adventurers[0]);
-    }
-  }, [data?.adventurerByIdQuery]);
-  console.log(adventurer);
+  // useEffect(() => {
+  //   if (data?.adventurerByIdQuery?.adventurers[0]?.id) {
+  //     console.log("updated");
+  //     console.log(data.adventurerByIdQuery.adventurers[0]);
+  //     setAdventurer(data.adventurerByIdQuery.adventurers[0]);
+  //   }
+  // }, [data?.adventurerByIdQuery]);
+  // console.log(adventurer);
 
   const mobileMenuDisabled = [
     false,
