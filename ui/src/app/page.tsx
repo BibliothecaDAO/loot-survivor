@@ -207,16 +207,11 @@ export default function Home() {
   // console.log(adventurer?.id ?? 0);
   // console.log(data);
 
-  // const adventurerVariables = useMemo(() => {
-  //   if (switchAdventurer) {
-  //     console.log("variable");
-  //     return {
-  //       id: adventurer?.id ?? 0,
-  //     };
-  //   }
-  //   // setInitialLoad(false);
-  //   setSwitchAdventurer(false);
-  // }, [adventurer?.id ?? 0, switchAdventurer]);
+  const adventurerVariables = useMemo(() => {
+    return {
+      id: adventurer?.id ?? 0,
+    };
+  }, [adventurer?.id ?? 0]);
 
   // useCustomQuery(
   //   "adventurerByIdQuery",
@@ -250,16 +245,12 @@ export default function Home() {
   // );
 
   // const beastVariables = useMemo(() => {
-  //   if (switchAdventurer) {
-  //     return {
-  //       adventurerId: adventurer?.id ?? 0,
-  //       beast: lastBeast?.entity,
-  //       seed: lastBeast?.seed,
-  //     };
-  //   }
-  //   setSwitchAdventurer(false);
-  //   // setInitialLoad(false);
-  // }, [adventurer?.id ?? 0, switchAdventurer]);
+  //   return {
+  //     adventurerId: adventurer?.id ?? 0,
+  //     beast: lastBeast?.entity,
+  //     seed: lastBeast?.seed,
+  //   };
+  // }, [adventurer?.id ?? 0]);
 
   // useCustomQuery("beastQuery", getBeast, beastVariables, mintAdventurer);
 
