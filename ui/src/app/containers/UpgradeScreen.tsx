@@ -338,12 +338,12 @@ export default function UpgradeScreen() {
           </div>
           {!checkTransacting ? (
             <div className="w-full sm:w-2/3 xl:h-[500px] xl:overflow-y-auto 2xl:h-full">
-              <div className="flex flex-col gap-2 2xl:gap-0 h-full">
+              <div className="flex flex-col gap-2 xl:gap-0 xl:h-[300px] 2xl:h-full">
                 <div className="justify-center text-terminal-green space-x-3">
-                  <div className="text-center text-2xl md:text-xl 2xl:text-4xl xl:text-xl sm:p-2 animate-pulse uppercase">
+                  <div className="text-center text-2xl 2xl:text-4xl xl:text-xl sm:p-2 xl:p-0 animate-pulse uppercase">
                     Level up!
                   </div>
-                  <div className="flex flex-row gap-2 justify-center text-lg sm:text-2xl text-shadow-none">
+                  <div className="flex flex-row gap-2 xl:gap-0 justify-center text-lg 2xl:text-2xl text-shadow-none">
                     <span>
                       {totalStatUpgrades > 0
                         ? `Stat Upgrades Available ${totalStatUpgrades}`
@@ -389,7 +389,7 @@ export default function UpgradeScreen() {
                         </span>
                       </span>
                       <span className="flex flex-row gap-1 items-center">
-                        <p className="uppercase">Items:</p>
+                        <p className="uppercase text-lg">Items:</p>
                         <span className="flex text-xl text-terminal-yellow">
                           {purchaseItems?.length}
                         </span>
@@ -401,7 +401,7 @@ export default function UpgradeScreen() {
                 <div className="flex flex-col gap-2">
                   {upgradeScreen === 1 && (
                     <div className="flex flex-col sm:gap-2 items-center w-full">
-                      <p className="text-xl lg:text-2xl sm:hidden">
+                      <p className="text-lg lg:text-2xl sm:hidden">
                         Stat Upgrades
                       </p>
                       <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border sm:items-center">
@@ -412,8 +412,11 @@ export default function UpgradeScreen() {
                   )}
 
                   {upgradeScreen === 2 && (
-                    <div className="flex flex-col gap-5 sm:gap-2 sm:flex-row items-center justify-center flex-wrap">
-                      <p className="text-xl lg:text-2xl">Potions</p>
+                    <div
+                      className="flex flex-col gap-5 sm:gap-2 xl:gap-0
+                     sm:flex-row items-center justify-center flex-wrap"
+                    >
+                      <p className="text-sm 2xl:text-2xl">Potions</p>
                       <PurchaseHealth
                         upgradeTotalCost={upgradeTotalCost}
                         potionAmount={potionAmount}
@@ -441,9 +444,9 @@ export default function UpgradeScreen() {
                   )}
                   {upgradeScreen === 3 && (
                     <div className="sm:hidden flex-col items-center sm:gap-2 w-full">
-                      <p className="text-xl text-center lg:text-2xl sm:hidden">
+                      {/* <p className="text-xl text-center lg:text-2xl sm:hidden">
                         Loot Fountain
-                      </p>
+                      </p> */}
                       <MarketplaceScreen
                         upgradeTotalCost={upgradeTotalCost}
                         purchaseItems={purchaseItems}
