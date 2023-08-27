@@ -190,8 +190,9 @@ export function syscalls({
         entropy: 0,
         createdTime: new Date(),
       });
-      const adventurerState = events.find((event) => event.name === "StartGame")
-        .data[0];
+      const adventurerState = events.find(
+        (event) => event.name === "AmbushedByBeast"
+      ).data[0];
       setData("adventurersByOwnerQuery", {
         adventurers: [
           ...(queryData.adventurersByOwnerQuery?.adventurers ?? []),
