@@ -197,12 +197,12 @@ export default function Home() {
     };
   }, [owner]);
 
-  useCustomQuery(
-    "adventurersByOwnerQuery",
-    getAdventurersByOwner,
-    ownerVariables,
-    owner === ""
-  );
+  // useCustomQuery(
+  //   "adventurersByOwnerQuery",
+  //   getAdventurersByOwner,
+  //   ownerVariables,
+  //   owner === ""
+  // );
 
   // console.log(adventurer?.id ?? 0);
   // console.log(data);
