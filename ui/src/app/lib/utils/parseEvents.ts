@@ -641,10 +641,15 @@ export function parseEvents(
         events.push({ name: eventName, data: adventurerLeveledUpEvent });
         break;
       case "NewItemsAvailable":
+        const newItems = raw.data.slice(41);
+        const newItemsIds = [];
+        for (let i = 0; i < newItems.length; i++) {
+          newItemsIds.push(parseInt(newItems[i]));
+        }
         const newItemsAvailableData: NewItemsAvailableEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
           // Skip array length
-          items: parseItems(raw.data.slice(41)),
+          items: newItemsIds,
         };
         const newItemsAvailableEvent = processData(
           newItemsAvailableData,

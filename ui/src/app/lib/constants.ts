@@ -11,8 +11,7 @@ export const chapter3 =
   "Intrigued, they draw closer, their form dancing on the water's surface. Four oddities lie within - a wand, a book, a club, and a sword. Selecting one, the others dissolve, leaving an unnerving hush in their wake.";
 export const chapter4 =
   "They find golden coins in their pocket, glimmering in the dim light - an enigma wrapped in the shroud of the unexpected.";
-export const battle =
-  "A beast lurks in the shadow, prepare for battle!";
+export const battle = "A beast lurks in the shadow, prepare for battle!";
 
 export const mainnet_addr = "https://alpha-mainnet.starknet.io";
 
@@ -34,7 +33,7 @@ export const contracts = {
       "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
   },
   goerli: {
-    game: "0x00545c35f9d949507bc7319f0caf56e995bc6153d5d3dcc152b48013bc98809c",
+    game: "0x03342cb67cf22ee0e9c9cebe1e59be2ab2db1045c8ca0927a8049577fdedd4f5",
     lords_erc20_mintable:
       "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
   },

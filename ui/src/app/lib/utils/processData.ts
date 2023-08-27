@@ -882,9 +882,7 @@ export function processData(
       );
       const formattedNewItems = [];
       for (let i = 0; i < newItemsAvailableEvent.items.length; i++) {
-        formattedNewItems.push(
-          gameData.ITEMS[newItemsAvailableEvent.items[i]["item"]["id"]]
-        );
+        formattedNewItems.push(gameData.ITEMS[newItemsAvailableEvent.items[i]]);
       }
       return [newItemsAvailableAdventurerData, formattedNewItems];
     case "IdleDeathPenalty":

@@ -555,10 +555,7 @@ raw_abi = [
         "type": "event",
         "inputs": [
             {"name": "adventurer_state", "type": "game::Game::AdventurerState"},
-            {
-                "name": "items",
-                "type": "core::array::Array::<market::market::LootWithPrice>",
-            },
+            {"name": "items", "type": "core::array::Array::<core::integer::u8>"},
         ],
     },
     {
