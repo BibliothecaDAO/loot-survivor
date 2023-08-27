@@ -178,8 +178,8 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
               </div>
             </div>
             <div className="hidden sm:block flex flex-row gap-2 sm:flex-col items-center justify-center">
-              <div className="flex flex-col items-center">
-                <p className="uppercase sm:text-2xl">Attack</p>
+              <div className="flex flex-col items-center justify-center">
+                <p className="uppercase sm:text-xl 2xl:text-2xl">Attack</p>
                 <KeyboardControl
                   buttonsData={attackButtonsData}
                   size={"xl"}
@@ -187,10 +187,10 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
                 />
               </div>
               <div className="flex flex-col items-center">
-                <p className="uppercase sm:text-2xl">Flee</p>
+                <p className="uppercase sm:text-xl 2xl:text-2xl">Flee</p>
                 <KeyboardControl
                   buttonsData={fleeButtonsData}
-                  size={"lg"}
+                  size={"xl"}
                   direction="row"
                 />
               </div>
@@ -198,7 +198,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
           </>
         )}
 
-        <div className="hidden sm:block">
+        <div className="hidden sm:block xl:h-[500px] 2xl:h-full">
           {(hasBeast || formatBattles.length > 0) && <BattleLog />}
         </div>
 
