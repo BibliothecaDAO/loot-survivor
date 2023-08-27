@@ -14,7 +14,7 @@ use super::{
             MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, HEALTH_INCREASE_PER_VITALITY, MAX_GOLD,
             MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS,
             ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, ClassStatBoosts,
-            MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL
+            MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, PENDENT_G20_STAT_BONUS
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
     }
@@ -22,7 +22,7 @@ use super::{
 use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
 use lootitems::{
     loot::{Loot, ILoot, ImplLoot},
-    statistics::{constants, item_tier, item_type, constants::ItemSuffix}
+    statistics::{constants, item_tier, item_type, constants::{ItemSuffix, ItemId}}
 };
 use combat::{
     combat::{ImplCombat, CombatSpec, SpecialPowers}, constants::CombatEnums::{Type, Tier, Slot}
@@ -312,7 +312,7 @@ impl ImplAdventurer of IAdventurer {
     // @return u16: The amount of treasure discovered.
     fn discover_treasure(self: Adventurer, entropy: u128) -> (TreasureDiscovery, u16) {
         // generate random item discovery
-        let item_type = ExploreUtils::get_random_treasury_discovery(self, entropy);
+        let item_type = ExploreUtils::get_random_discovery(entropy);
 
         match item_type {
             TreasureDiscovery::Gold(()) => {
@@ -1312,6 +1312,32 @@ impl ImplAdventurer of IAdventurer {
     fn set_last_action(ref self: u16, current_block: u64) {
         self = (current_block % MAX_BLOCK_COUNT).try_into().unwrap();
     }
+
+    // @notice checks if adventurer has double health discoveries unlocked
+    // @param adventurer the Adventurer to check if double health discovery is unlocked
+    // @return bool: true if double health discoveries is unlocked, false otherwise
+    #[inline(always)]
+    fn double_health_discovery_unlocked(self: Adventurer) -> bool {
+        self.neck.id == ItemId::Amulet && self.neck.get_greatness() == 20
+    }
+
+    // @notice checks if adventurer has double gold discovery ability unlocked
+    // @param adventurer the Adventurer to check if double gold discovery is unlocked
+    // @return bool: true if double gold discoveries is unlocked, false otherwise
+    #[inline(always)]
+    fn double_gold_discovery_unlocked(self: Adventurer) -> bool {
+        self.neck.id == ItemId::Necklace && self.neck.get_greatness() == 20
+    }
+
+    // @notice check if 
+    #[inline(always)]
+    fn item_stat_bonus(self: ItemPrimitive) -> u8 {
+        if self.id == ItemId::Pendant {
+            PENDENT_G20_STAT_BONUS
+        } else {
+            0
+        }
+    }
 }
 
 // ---------------------------
@@ -1328,7 +1354,7 @@ mod tests {
 
     use lootitems::{
         loot::{Loot, ILoot, ImplLoot},
-        statistics::{constants, item_tier, item_type, constants::ItemSuffix}
+        statistics::{constants, item_tier, item_type, constants::{ItemSuffix, ItemId}}
     };
 
     use combat::{constants::CombatEnums::{Slot}};
@@ -1351,6 +1377,136 @@ mod tests {
         }
     };
     use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
+
+    #[test]
+    #[available_gas(3300)]
+    fn test_item_stat_bonus() {
+        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
+        let pendant = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 1 };
+        let necklace = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 1 };
+
+        assert(amulet.item_stat_bonus() == 0, 'amulet gets no stat bonus');
+        assert(necklace.item_stat_bonus() == 0, 'necklace gets no stat bonus');
+        assert(pendant.item_stat_bonus() == 1, 'pendant gets a stat bonus');
+    }
+
+    #[test]
+    #[available_gas(32690)]
+    fn test_double_gold_discovery_unlocked_gas() {
+        let adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+        ImplAdventurer::double_gold_discovery_unlocked(adventurer);
+    }
+
+    #[test]
+    #[available_gas(66630)]
+    fn test_double_gold_discovery_unlocked() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+
+        // verify new adventurers don't have double gold discovery unlocked
+        assert(
+            ImplAdventurer::double_gold_discovery_unlocked(adventurer) == false,
+            'double gold not unlocked'
+        );
+
+        // equip an amulet and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
+        assert(
+            ImplAdventurer::double_gold_discovery_unlocked(adventurer) == false,
+            'amulet does not unlock 2xgold'
+        );
+
+        // equip a pendant and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 1 };
+        assert(
+            ImplAdventurer::double_gold_discovery_unlocked(adventurer) == false,
+            'pendant does not unlock 2xgold'
+        );
+
+        // equip a necklace that is not greatness 20 and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 399, metadata: 1 };
+        assert(
+            ImplAdventurer::double_gold_discovery_unlocked(adventurer) == false,
+            'G19 necklace not unlock 2xgold'
+        );
+
+        // lastly we equip a necklace that is greatness 20 and verify result is true
+        adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 1 };
+        assert(
+            ImplAdventurer::double_gold_discovery_unlocked(adventurer) == true,
+            'G20 necklace unlocks 2xgold'
+        );
+    }
+
+    #[test]
+    #[available_gas(32690)]
+    fn test_double_health_discovery_unlocked_gas() {
+        let adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+        ImplAdventurer::double_health_discovery_unlocked(adventurer);
+    }
+
+    #[test]
+    #[available_gas(66630)]
+    fn test_double_health_discovery_unlocked() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+
+        // verify new adventurers don't have double gold discovery unlocked
+        assert(
+            ImplAdventurer::double_health_discovery_unlocked(adventurer) == false,
+            'started with 2xhealth'
+        );
+
+        // equip a pendant and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 1 };
+        assert(
+            ImplAdventurer::double_health_discovery_unlocked(adventurer) == false,
+            'pendant unlocked 2xhealth'
+        );
+
+        // equip a necklace and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 1 };
+        assert(
+            ImplAdventurer::double_health_discovery_unlocked(adventurer) == false,
+            'necklace unlocked 2xhealth'
+        );
+
+        // equip a g19 amulet and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 399, metadata: 1 };
+        assert(
+            ImplAdventurer::double_health_discovery_unlocked(adventurer) == false,
+            'G19 amulet not unlock 2xgold'
+        );
+
+        // equip a g20 amulet and verify double health discovery is unlocked
+        adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
+        assert(
+            ImplAdventurer::double_health_discovery_unlocked(adventurer) == true,
+            'g20 amulet unlocks 2xhealth'
+        );
+    }
 
     #[test]
     #[available_gas(100000)]
@@ -3057,17 +3213,17 @@ mod tests {
         adventurer.xp = 25;
 
         // disover gold
-        let (discovery_type, amount) = adventurer.discover_treasure(5);
+        let (discovery_type, amount) = adventurer.discover_treasure(0);
         assert(discovery_type == TreasureDiscovery::Gold(()), 'should have found gold');
         assert(amount != 0, 'gold should be non-zero');
 
         // discover health
-        let (discovery_type, amount) = adventurer.discover_treasure(6);
+        let (discovery_type, amount) = adventurer.discover_treasure(1);
         assert(discovery_type == TreasureDiscovery::Health(()), 'should have found health');
         assert(amount != 0, 'health should be non-zero');
 
         // discover xp
-        let (discovery_type, amount) = adventurer.discover_treasure(7);
+        let (discovery_type, amount) = adventurer.discover_treasure(2);
         assert(discovery_type == TreasureDiscovery::XP(()), 'should have found xp');
         assert(amount != 0, 'xp should be non-zero');
     }

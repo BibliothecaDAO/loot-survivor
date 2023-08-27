@@ -2,83 +2,192 @@ use core::option::OptionTrait;
 use core::traits::{Into, TryInto};
 
 use survivor::{
-    adventurer::{Adventurer, ImplAdventurer},
+    adventurer::{Adventurer, ImplAdventurer, ItemPrimitive},
     constants::discovery_constants::{
         DiscoveryEnums::TreasureDiscovery, DiscoveryEnums::ExploreResult
     }
 };
+use lootitems::statistics::constants::ItemId;
 
 #[generate_trait]
 impl ExploreUtils of Explore {
-    // get_random_treasury_discovery returns a random number between 0 and 3 based on provided entropy
-    // @param adventurer: Adventurer
-    // @param adventurer_entropy: The adventurer specific entropy seed
-    // @param global_entropy: The global game entropy seed
-    // @return u64: A random number between 0 and 3 denoting the outcome of the explore
-    fn get_random_treasury_discovery(adventurer: Adventurer, entropy: u128) -> TreasureDiscovery {
-        let discovery_type = (entropy + adventurer.xp.into()) % 3;
+    // @notice: generates a random discovery {Gold, Health, XP} based on provided entropy
+    // @param entropy: Entropy to use for random discovery
+    // @return TreasureDiscovery: The type of discovery
+    fn get_random_discovery(entropy: u128) -> TreasureDiscovery {
+        let discovery_type = entropy % 3;
         if (discovery_type == 0) {
-            return TreasureDiscovery::Gold(());
+            TreasureDiscovery::Gold(())
         } else if (discovery_type == 1) {
-            return TreasureDiscovery::Health(());
+            TreasureDiscovery::Health(())
         } else {
-            return TreasureDiscovery::XP(());
+            TreasureDiscovery::XP(())
         }
     }
 
-    // get_level_adjusted_discovery_amount generates a random discovery amount based on adventurer level and provided entropy
-    // @param adventurer: Adventurer
-    // @param adventurer_entropy: The adventurer specific entropy seed
-    // @param global_entropy: The global game entropy seed
+    // @notice: generates a random discovery amount based on adventurer level and provided entropy
+    // @dev: The range for discovery amoutn increases by 3 every 5 levels
+    // @param adventurer_level: The level of the adventurer
+    // @param entropy: The entropy seed to use for random discovery amount
     // @return u16: the amount of gold discovered
-    fn get_level_adjusted_discovery_amount(adventurer: Adventurer, entropy: u128) -> u16 {
-        // get adventurer's level
-        let adventurer_level = ImplAdventurer::get_level(adventurer);
-
-        // divide adventurer level by 5 and store the whole number
+    fn get_base_discovery_amount(adventurer_level: u8, entropy: u128) -> u16 {
         let discovery_multiplier = adventurer_level / 5;
-
-        // add 1 to the whole number, multiply by 3, and convert to u64
         let discovery_range: u128 = (discovery_multiplier.into() + 1) * 3;
-
-        // divide rnd by discovery_range and store the remainder as discovery amount
         let discovery_amount = 1 + (entropy % discovery_range);
-
-        // return discovery amount as a u16
         discovery_amount.try_into().unwrap()
     }
 
-    // get_gold_discovery generates a random gold discovery based on adventurer level and provided entropy
+    // @notice: generates a random gold discovery based on adventurer level and provided entropy
     // @param adventurer: Adventurer
-    // @param adventurer_entropy: The adventurer specific entropy seed
-    // @param global_entropy: The global game entropy seed
+    // @param entropy: The entropy seed to use for random discovery amount
     // @return u16: the amount of gold discovered
-    // @dev splitting up the discovery types into their own functions to provide option to adjust discovery amounts by type
-    //      for example by making gold discovery amount higher than health discovery amounts.
     fn get_gold_discovery(adventurer: Adventurer, entropy: u128) -> u16 {
-        // generate gold discovery based on adventurer level
-        return ExploreUtils::get_level_adjusted_discovery_amount(adventurer, entropy);
+        let base_gold = ExploreUtils::get_base_discovery_amount(adventurer.get_level(), entropy);
+        if adventurer.double_gold_discovery_unlocked() {
+            base_gold * 2
+        } else {
+            base_gold
+        }
     }
 
-    // get_health_discovery generates a random health discovery based on adventurer level and provided entropy
+
+    // @notice: generates a random health discovery based on adventurer level and provided entropy
     // @param adventurer: Adventurer
-    // @param adventurer_entropy: The adventurer specific entropy seed
-    // @param global_entropy: The global game entropy seed
+    // @param entropy: The entropy seed to use for random discovery amount
     // @return u16: the amount of health discovered
-    // @dev splitting up the discovery types into their own functions to provide option to adjust discovery amounts by type
-    //      for example by making gold discovery amount higher than health discovery amounts.
     fn get_health_discovery(adventurer: Adventurer, entropy: u128) -> u16 {
-        return ExploreUtils::get_level_adjusted_discovery_amount(adventurer, entropy);
+        let base_health = ExploreUtils::get_base_discovery_amount(adventurer.get_level(), entropy);
+        if adventurer.double_health_discovery_unlocked() {
+            base_health * 2
+        } else {
+            base_health
+        }
     }
 
-    // get_xp_discovery generates a random xp discovery based on adventurer level and provided entropy
-    // @param adventurer: Adventurer
-    // @param adventurer_entropy: The adventurer specific entropy seed
-    // @param global_entropy: The global game entropy seed
+    // @notice: generates a random xp discovery based on adventurer level and provided entropy
+    // @param adventurer: the Adventurer
+    // @param entropy: The entropy seed to use for random discovery amount
     // @return u16: the amount of xp discovered
-    // @dev splitting up the discovery types into their own functions to provide option to adjust discovery amounts by type
-    //      for example by making gold discovery amount higher than xp discovery amounts.
     fn get_xp_discovery(adventurer: Adventurer, entropy: u128) -> u16 {
-        return ExploreUtils::get_level_adjusted_discovery_amount(adventurer, entropy);
+        ExploreUtils::get_base_discovery_amount(adventurer.get_level(), entropy)
+    }
+}
+
+// ---------------------------
+// ---------- Tests ----------
+// ---------------------------
+#[cfg(test)]
+mod tests {
+    use survivor::{
+        exploration::ExploreUtils, adventurer::{ImplAdventurer, ItemPrimitive},
+        adventurer_stats::Stats
+    };
+    use lootitems::statistics::constants::ItemId;
+
+    #[test]
+    #[available_gas(69690)]
+    fn test_get_gold_discovery_gas() {
+        let adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+        let entropy = 0;
+        ExploreUtils::get_gold_discovery(adventurer, entropy);
+    }
+
+    #[test]
+    #[available_gas(509690)]
+    fn test_get_gold_discovery() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+
+        // base discovery for level 1 adventurer with 0 entropy should be 1
+        let entropy = 0;
+        let gold_discovery = ExploreUtils::get_gold_discovery(adventurer, entropy);
+        assert(gold_discovery == 1, 'gold_discovery should be 1');
+
+        // equip an amulet and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
+        let gold_discovery = ExploreUtils::get_gold_discovery(adventurer, entropy);
+        assert(gold_discovery == 1, 'gold_discovery should be 1');
+
+        // equip a pendant and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 1 };
+        let gold_discovery = ExploreUtils::get_gold_discovery(adventurer, entropy);
+        assert(gold_discovery == 1, 'gold_discovery should be 1');
+
+        // last we equip a necklace and verify result is doubled
+        adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 1 };
+        let gold_discovery = ExploreUtils::get_gold_discovery(adventurer, entropy);
+        assert(gold_discovery == 2, 'gold_discovery should be 2');
+    }
+
+    #[test]
+    #[available_gas(61690)]
+    fn test_get_health_discovery_gas() {
+        let adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+        let entropy = 12345;
+        ExploreUtils::get_health_discovery(adventurer, entropy);
+    }
+
+    #[test]
+    #[available_gas(509690)]
+    fn test_get_health_discovery() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+
+        // base discovery for level 1 adventurer with 0 entropy should be 1
+        let entropy = 0;
+        let discovery_amount = ExploreUtils::get_health_discovery(adventurer, entropy);
+        assert(discovery_amount == 1, 'health discovery should be 1');
+
+        // equip a pendant and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 1 };
+        let discovery_amount = ExploreUtils::get_health_discovery(adventurer, entropy);
+        assert(discovery_amount == 1, 'health discovery should be 1');
+
+        // last we equip a necklace and verify result is doubled
+        adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 1 };
+        let discovery_amount = ExploreUtils::get_health_discovery(adventurer, entropy);
+        assert(discovery_amount == 1, 'health discovery should be 1');
+
+        // equip an amulet and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
+        let discovery_amount = ExploreUtils::get_health_discovery(adventurer, entropy);
+        assert(discovery_amount == 2, 'double discovery fail');
+    }
+
+    #[test]
+    #[available_gas(24850)]
+    fn test_get_base_discovery_amount_gas() {
+        let level = 1;
+        let entropy = 12345;
+        let discovery_amount = ExploreUtils::get_base_discovery_amount(level, entropy);
+    }
+
+    #[test]
+    #[available_gas(6980)]
+    fn test_get_random_discovery_gas() {
+        let entropy = 12345;
+        ExploreUtils::get_random_discovery(entropy);
     }
 }

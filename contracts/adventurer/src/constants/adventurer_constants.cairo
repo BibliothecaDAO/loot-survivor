@@ -17,6 +17,7 @@ const MINIMUM_ITEM_PRICE: u16 = 1;
 const ITEM_MAX_GREATNESS: u8 = 20;
 const ITEM_MAX_XP: u16 = 400;
 const MAX_GREATNESS_STAT_BONUS: u8 = 1;
+const PENDENT_G20_STAT_BONUS: u8 = 1;
 
 // Stat Settings
 const MAX_STAT_VALUE: u8 = 31; // 2^5 - 1
