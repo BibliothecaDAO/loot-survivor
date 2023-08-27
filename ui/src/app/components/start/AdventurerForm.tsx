@@ -241,26 +241,26 @@ export const AdventurerForm = ({
         "+1 Strength +1 Dexterity +1 Vitality +1 Intelligence +1 Wisdom +1 Charisma",
       image: "/classes/warrior2.png",
     },
-    {
-      name: "Seer",
-      description: "+3 Intelligence +3 Wisdom",
-      image: "/classes/hunter2.png",
-    },
-    {
-      name: "Mage",
-      description: "+1 Dexterity +1 Vitality +2 Intelligence +2 Wisdom",
-      image: "/classes/cleric2.png",
-    },
-    {
-      name: "Bard",
-      description: "+1 Intelligence 1+ Dexterity +2 Strength +2 Charisma",
-      image: "/classes/scout2.png",
-    },
-    {
-      name: "Brute",
-      description: "+6 Strength",
-      image: "/classes/warrior2.png",
-    },
+    // {
+    //   name: "Seer",
+    //   description: "+3 Intelligence +3 Wisdom",
+    //   image: "/classes/hunter2.png",
+    // },
+    // {
+    //   name: "Mage",
+    //   description: "+1 Dexterity +1 Vitality +2 Intelligence +2 Wisdom",
+    //   image: "/classes/cleric2.png",
+    // },
+    // {
+    //   name: "Bard",
+    //   description: "+1 Intelligence 1+ Dexterity +2 Strength +2 Charisma",
+    //   image: "/classes/scout2.png",
+    // },
+    // {
+    //   name: "Brute",
+    //   description: "+6 Strength",
+    //   image: "/classes/warrior2.png",
+    // },
   ];
 
   const weapons = [
@@ -303,7 +303,7 @@ export const AdventurerForm = ({
                 key={classType.name}
                 className="flex flex-col items-center justify-between border sm:w-52 md:w-48 2xl:w-64 border-terminal-green"
               >
-                <div className="relative w-20 h-20 2xl:h-64 2xl:w-64">
+                <div className="relative w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52 2xl:h-64 2xl:w-64">
                   <Image
                     src={classType.image}
                     fill={true}
