@@ -625,6 +625,10 @@ export function processData(
       return [attackedBeastAdventurerData, attackedBeastData];
     case "AttackedByBeast":
       const attackedByBeastEvent = event as AttackedByBeastEvent;
+      const attackedByBeastAdventurerData = processAdventurerState(
+        attackedByBeastEvent,
+        currentAdventurer
+      );
       const attackedByBeastData = {
         txHash: txHash,
         beast: gameData.BEASTS[attackedByBeastEvent.id],
@@ -660,7 +664,7 @@ export function processData(
         blockTime: new Date(),
         timestamp: new Date(),
       };
-      return [attackedByBeastEvent, attackedByBeastData];
+      return [attackedByBeastAdventurerData, attackedByBeastData];
     case "SlayedBeast":
       const slayedBeastEvent = event as SlayedBeastEvent;
       const slayedBeastAdventurerData = processAdventurerState(

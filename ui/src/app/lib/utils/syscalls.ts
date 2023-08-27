@@ -638,6 +638,8 @@ export function syscalls({
         });
       }
 
+      console.log(battles);
+
       setData("battlesByBeastQuery", {
         battles: [
           ...battles,
