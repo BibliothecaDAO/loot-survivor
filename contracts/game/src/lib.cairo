@@ -31,7 +31,8 @@ mod Game {
         }
     };
     use lootitems::{
-        loot::{ILoot, Loot, ImplLoot}, statistics::constants::{NamePrefixLength, NameSuffixLength}
+        loot::{ILoot, Loot, ImplLoot},
+        statistics::constants::{ItemId, NamePrefixLength, NameSuffixLength}
     };
     use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
     use survivor::{
@@ -497,7 +498,8 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
-                    }, bag: bag
+                    },
+                    bag: bag
                 },
                 items
             );
@@ -586,7 +588,8 @@ mod Game {
                     adventurer_state_with_bag: AdventurerStateWithBag {
                         adventurer_state: AdventurerState {
                             owner: get_caller_address(), adventurer_id, adventurer
-                        }, bag: bag
+                        },
+                        bag: bag
                     },
                     strength_increase: strength,
                     dexterity_increase: dexterity,
@@ -966,7 +969,10 @@ mod Game {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
-                    }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                },
+                seed: beast_seed,
+                id: beast.id,
+                beast_specs: CombatSpec {
                     tier: beast.combat_spec.tier,
                     item_type: beast.combat_spec.item_type,
                     level: beast.combat_spec.level,
@@ -1037,53 +1043,50 @@ mod Game {
         // we start doing payouts
 
         // for the first eight weeks, the majority go to the top three score
-        week = Week {
-            DAO: _to_ether(WEEK_4::DAO),
-            INTERFACE: _to_ether(WEEK_4::INTERFACE),
-            FIRST_PLACE: _to_ether(WEEK_4::FIRST_PLACE),
-            SECOND_PLACE: _to_ether(WEEK_4::SECOND_PLACE),
-            THIRD_PLACE: _to_ether(WEEK_4::THIRD_PLACE)
-        };
+        week =
+            Week {
+                DAO: _to_ether(WEEK_4::DAO),
+                INTERFACE: _to_ether(WEEK_4::INTERFACE),
+                FIRST_PLACE: _to_ether(WEEK_4::FIRST_PLACE),
+                SECOND_PLACE: _to_ether(WEEK_4::SECOND_PLACE),
+                THIRD_PLACE: _to_ether(WEEK_4::THIRD_PLACE)
+            };
 
         // after 8 weeks, the client providers start getting a share
         if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
-            week = Week {
-                DAO: _to_ether(WEEK_8::DAO),
-                INTERFACE: _to_ether(WEEK_8::INTERFACE),
-                FIRST_PLACE: _to_ether(WEEK_8::FIRST_PLACE),
-                SECOND_PLACE: _to_ether(WEEK_8::SECOND_PLACE),
-                THIRD_PLACE: _to_ether(WEEK_8::THIRD_PLACE)
-            }
+            week =
+                Week {
+                    DAO: _to_ether(WEEK_8::DAO),
+                    INTERFACE: _to_ether(WEEK_8::INTERFACE),
+                    FIRST_PLACE: _to_ether(WEEK_8::FIRST_PLACE),
+                    SECOND_PLACE: _to_ether(WEEK_8::SECOND_PLACE),
+                    THIRD_PLACE: _to_ether(WEEK_8::THIRD_PLACE)
+                }
         }
 
         // DAO
         if (week.DAO != 0) {
-            IERC20Dispatcher {
-                contract_address: lords
-            }.transferFrom(caller, self._dao.read(), week.DAO);
+            IERC20Dispatcher { contract_address: lords }
+                .transferFrom(caller, self._dao.read(), week.DAO);
         }
 
         // interface
         if (week.INTERFACE != 0) {
-            IERC20Dispatcher {
-                contract_address: lords
-            }.transferFrom(caller, interface, week.INTERFACE);
+            IERC20Dispatcher { contract_address: lords }
+                .transferFrom(caller, interface, week.INTERFACE);
         }
 
         // first place
-        IERC20Dispatcher {
-            contract_address: lords
-        }.transferFrom(caller, self._owner.read(self._scoreboard.read(1)), week.FIRST_PLACE);
+        IERC20Dispatcher { contract_address: lords }
+            .transferFrom(caller, self._owner.read(self._scoreboard.read(1)), week.FIRST_PLACE);
 
         // second place
-        IERC20Dispatcher {
-            contract_address: lords
-        }.transferFrom(caller, self._owner.read(self._scoreboard.read(2)), week.SECOND_PLACE);
+        IERC20Dispatcher { contract_address: lords }
+            .transferFrom(caller, self._owner.read(self._scoreboard.read(2)), week.SECOND_PLACE);
 
         // third place
-        IERC20Dispatcher {
-            contract_address: lords
-        }.transferFrom(caller, self._owner.read(self._scoreboard.read(3)), week.THIRD_PLACE);
+        IERC20Dispatcher { contract_address: lords }
+            .transferFrom(caller, self._owner.read(self._scoreboard.read(3)), week.THIRD_PLACE);
     }
 
     fn _start(
@@ -1120,7 +1123,8 @@ mod Game {
             event: StartGame {
                 adventurer_state: AdventurerState {
                     owner: caller, adventurer_id, adventurer: new_adventurer
-                }, adventurer_meta: adventurer_meta
+                },
+                adventurer_meta: adventurer_meta
             }
         );
 
@@ -1166,7 +1170,10 @@ mod Game {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
-                    }, seed: beast_seed, id: starter_beast.id, beast_specs: CombatSpec {
+                },
+                seed: beast_seed,
+                id: starter_beast.id,
+                beast_specs: CombatSpec {
                     tier: starter_beast.combat_spec.tier,
                     item_type: starter_beast.combat_spec.item_type,
                     level: starter_beast.combat_spec.level,
@@ -1249,7 +1256,10 @@ mod Game {
                                 owner: get_caller_address(),
                                 adventurer_id: adventurer_id,
                                 adventurer: adventurer
-                                }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                            },
+                            seed: beast_seed,
+                            id: beast.id,
+                            beast_specs: CombatSpec {
                                 tier: beast.combat_spec.tier,
                                 item_type: beast.combat_spec.item_type,
                                 level: beast.combat_spec.level,
@@ -1270,6 +1280,9 @@ mod Game {
                 );
             },
             ExploreResult::Treasure(()) => {
+                // TODO: Consider passing in adventurer ref into discover_treasure and handling
+                //       adventurer mutations within lib functions. The lib functions could return
+                //       a generic Discovery event which would be emitted here
                 let (treasure_type, amount) = adventurer.discover_treasure(sub_explore_rnd);
 
                 match treasure_type {
@@ -1285,7 +1298,8 @@ mod Game {
                                         owner: get_caller_address(),
                                         adventurer_id: adventurer_id,
                                         adventurer: adventurer
-                                    }, amount: amount
+                                    },
+                                    amount: amount
                                 }
                             }
                         );
@@ -1302,7 +1316,8 @@ mod Game {
                                         owner: get_caller_address(),
                                         adventurer_id: adventurer_id,
                                         adventurer: adventurer
-                                    }, amount: amount
+                                    },
+                                    amount: amount
                                 }
                             }
                         );
@@ -1316,7 +1331,9 @@ mod Game {
                     },
                     TreasureDiscovery::Health(()) => {
                         // if adventurer's health is already full
-                        if (AdventurerUtils::is_health_full(adventurer.health, adventurer.stats.vitality)) {
+                        if (AdventurerUtils::is_health_full(
+                            adventurer.health, adventurer.stats.vitality
+                        )) {
                             // adventurer gets gold instead of health
                             adventurer.gold.increase_gold(amount);
                             // emit discovered gold event
@@ -1328,7 +1345,8 @@ mod Game {
                                             owner: get_caller_address(),
                                             adventurer_id: adventurer_id,
                                             adventurer: adventurer
-                                        }, amount: amount
+                                        },
+                                        amount: amount
                                     }
                                 }
                             );
@@ -1343,7 +1361,8 @@ mod Game {
                                             owner: get_caller_address(),
                                             adventurer_id: adventurer_id,
                                             adventurer: adventurer
-                                        }, amount: amount
+                                        },
+                                        amount: amount
                                     }
                                 }
                             );
@@ -1836,7 +1855,12 @@ mod Game {
 
             if (previous_level != new_level && new_level == ITEM_MAX_GREATNESS) {
                 // adventurer gets stat upgrade points when item reaches max greatness
-                adventurer.stat_points_available.increase_stat_points_available(MAX_GREATNESS_STAT_BONUS);
+                // certain items grant bonus stat points when they reach max greatness
+                adventurer
+                    .stat_points_available
+                    .increase_stat_points_available(
+                        MAX_GREATNESS_STAT_BONUS + item.item_stat_bonus()
+                    );
 
                 // emit stat upgrades available event
                 __event_UpgradeAvailable(
@@ -1888,7 +1912,9 @@ mod Game {
 
             if (previous_level != new_level && new_level == ITEM_MAX_GREATNESS) {
                 // adventurer gets stat upgrade points when item reaches max greatness
-                adventurer.stat_points_available.increase_stat_points_available(MAX_GREATNESS_STAT_BONUS);
+                adventurer
+                    .stat_points_available
+                    .increase_stat_points_available(MAX_GREATNESS_STAT_BONUS);
 
                 // emit stat upgrades available event
                 __event_UpgradeAvailable(
@@ -2036,7 +2062,10 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
-                        }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                    },
+                    seed: beast_seed,
+                    id: beast.id,
+                    beast_specs: CombatSpec {
                         tier: beast.combat_spec.tier,
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
@@ -2117,7 +2146,10 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
-                        }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                    },
+                    seed: beast_seed,
+                    id: beast.id,
+                    beast_specs: CombatSpec {
                         tier: beast.combat_spec.tier,
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
@@ -2137,7 +2169,10 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
-                        }, seed: beast_seed, id: beast.id, beast_specs: CombatSpec {
+                    },
+                    seed: beast_seed,
+                    id: beast.id,
+                    beast_specs: CombatSpec {
                         tier: beast.combat_spec.tier,
                         item_type: beast.combat_spec.item_type,
                         level: beast.combat_spec.level,
@@ -2215,7 +2250,10 @@ mod Game {
                             owner: get_caller_address(),
                             adventurer_id: adventurer_id,
                             adventurer: adventurer
-                        }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
+                        },
+                        seed: beast_seed,
+                        id: beast.id,
+                        beast_specs: beast.combat_spec
                     }
                 }
             );
@@ -2236,7 +2274,10 @@ mod Game {
                             owner: get_caller_address(),
                             adventurer_id: adventurer_id,
                             adventurer: adventurer
-                        }, seed: beast_seed, id: beast.id, beast_specs: beast.combat_spec
+                        },
+                        seed: beast_seed,
+                        id: beast.id,
+                        beast_specs: beast.combat_spec
                     }
                 }
             );
@@ -2370,7 +2411,8 @@ mod Game {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
-                }, bag: bag
+                },
+                bag: bag
             },
             equipped_items,
             unequipped_items,
@@ -2481,8 +2523,10 @@ mod Game {
                         owner: get_caller_address(),
                         adventurer_id: adventurer_id,
                         adventurer: adventurer
-                    }, bag: bag
-                }, purchases: purchases
+                    },
+                    bag: bag
+                },
+                purchases: purchases
             }
         );
 
@@ -2534,7 +2578,10 @@ mod Game {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
-                }, quantity: amount, cost: cost_of_potions, health: health_from_potions
+                },
+                quantity: amount,
+                cost: cost_of_potions,
+                health: health_from_potions
             }
         );
     }
@@ -2757,6 +2804,7 @@ mod Game {
             .write((adventurer_id, storage_index), loot_special_names_storage.pack());
     }
 
+    // TODO: Check if any of the equipped items are G15+ and if not, save gas and don't read storage
     fn _get_special_storages(
         self: @ContractState, adventurer_id: u256
     ) -> (ItemSpecialsStorage, ItemSpecialsStorage) {
@@ -2859,7 +2907,10 @@ mod Game {
         let adventurer_health_after_potions = adventurer.health + purchased_health;
         // assert adventurer is not buying more health than needed
         assert(
-            adventurer_health_after_potions < AdventurerUtils::get_max_health(adventurer.stats.vitality) + POTION_HEALTH_AMOUNT,
+            adventurer_health_after_potions < AdventurerUtils::get_max_health(
+                adventurer.stats.vitality
+            )
+                + POTION_HEALTH_AMOUNT,
             messages::HEALTH_FULL
         );
     }
@@ -2919,7 +2970,10 @@ mod Game {
                     owner: self._owner.read(adventurer_id),
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
-                }, killed_by_beast: 0, killed_by_obstacle: 0, caller_address: get_caller_address()
+                },
+                killed_by_beast: 0,
+                killed_by_obstacle: 0,
+                caller_address: get_caller_address()
             }
         );
     }
@@ -3034,9 +3088,7 @@ mod Game {
                 tier: ImplLoot::get_tier(item.id),
                 item_type: ImplLoot::get_type(item.id),
                 level: item.get_greatness().into(),
-                specials: SpecialPowers {
-                    special1: 0, special2: 0, special3: 0
-                }
+                specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
             };
         } else {
             // if it's above 15, fetch the special names
@@ -3345,7 +3397,7 @@ mod Game {
 
     #[derive(Drop, starknet::Event)]
     struct ShopAvailable {
-        inventory: Array<Loot>, 
+        inventory: Array<Loot>,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -3371,7 +3423,7 @@ mod Game {
 
     #[derive(Drop, starknet::Event)]
     struct UpgradeAvailable {
-        adventurer_state: AdventurerState, 
+        adventurer_state: AdventurerState,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -3414,23 +3466,23 @@ mod Game {
         self.emit(Event::HitByObstacle(hit_by_obstacle));
     }
     #[inline(always)]
-    fn __event_DiscoveredBeast(ref self: ContractState, discover_beast_event: DiscoveredBeast, ) {
+    fn __event_DiscoveredBeast(ref self: ContractState, discover_beast_event: DiscoveredBeast,) {
         self.emit(Event::DiscoveredBeast(discover_beast_event));
     }
     #[inline(always)]
-    fn __event_AttackedBeast(ref self: ContractState, attack_beast: AttackedBeast, ) {
+    fn __event_AttackedBeast(ref self: ContractState, attack_beast: AttackedBeast,) {
         self.emit(Event::AttackedBeast(attack_beast));
     }
     #[inline(always)]
-    fn __event_AttackedByBeast(ref self: ContractState, attack_by_beast: AttackedByBeast, ) {
+    fn __event_AttackedByBeast(ref self: ContractState, attack_by_beast: AttackedByBeast,) {
         self.emit(Event::AttackedByBeast(attack_by_beast));
     }
     #[inline(always)]
-    fn __event_AmbushedByBeast(ref self: ContractState, ambushed_by_beast: AmbushedByBeast, ) {
+    fn __event_AmbushedByBeast(ref self: ContractState, ambushed_by_beast: AmbushedByBeast,) {
         self.emit(Event::AmbushedByBeast(ambushed_by_beast));
     }
     #[inline(always)]
-    fn __event_SlayedBeast(ref self: ContractState, slayed_beast: SlayedBeast, ) {
+    fn __event_SlayedBeast(ref self: ContractState, slayed_beast: SlayedBeast,) {
         self.emit(Event::SlayedBeast(slayed_beast));
     }
     #[inline(always)]
@@ -3517,7 +3569,7 @@ mod Game {
     }
     #[inline(always)]
     fn __event_NewItemsAvailable(
-        ref self: ContractState, adventurer_state: AdventurerState, items: Array<u8>, 
+        ref self: ContractState, adventurer_state: AdventurerState, items: Array<u8>,
     ) {
         self.emit(Event::NewItemsAvailable(NewItemsAvailable { adventurer_state, items }));
     }
