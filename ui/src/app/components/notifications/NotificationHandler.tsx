@@ -92,16 +92,16 @@ const processAnimation = (
       }
     } else if (notificationData?.discoveryType == "Obstacle") {
       if (notificationData?.dodgedObstacle) {
+        return getRandomElement([
+          gameData.ADVENTURER_ANIMATIONS["AvoidObstacle1"],
+          gameData.ADVENTURER_ANIMATIONS["AvoidObstacle2"],
+        ]);
+      } else {
         if (notificationData?.adventurerHealth === 0) {
           return gameData.ADVENTURER_ANIMATIONS["Dead"];
         } else {
           return gameData.ADVENTURER_ANIMATIONS["HitByObstacle"];
         }
-      } else {
-        return getRandomElement([
-          gameData.ADVENTURER_ANIMATIONS["AvoidObstacle1"],
-          gameData.ADVENTURER_ANIMATIONS["AvoidObstacle2"],
-        ]);
       }
     } else if (notificationData?.discoveryType == "Item") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
