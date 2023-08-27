@@ -41,7 +41,7 @@ const NotificationComponent = ({
       unmountOnExit
       key={currentIndex}
     >
-      <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border rounded-lg border-terminal-green bg-terminal-black z-50">
+      <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border-4 border-terminal-green bg-terminal-black z-50 shadow-xl">
         <div className="z-10 flex flex-row w-full gap-5 sm:p-2">
           <div className="sm:hidden w-1/6 sm:w-1/4">
             <SpriteAnimation

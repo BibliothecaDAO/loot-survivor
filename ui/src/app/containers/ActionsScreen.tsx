@@ -8,6 +8,7 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import { MistIcon } from "../components/icons/Icons";
 import BeastScreen from "./BeastScreen";
 import { NullDiscovery } from "../types";
+import MazeLoader from "../components/icons/MazeLoader";
 
 interface ActionsScreenProps {
   explore: (...args: any[]) => any;
@@ -116,6 +117,7 @@ export default function ActionsScreen({
             </p>
           )}
           <div className="flex flex-col items-center sm:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
+            {/* {loading && <MazeLoader />} */}
             <p className="uppercase text-2xl">Into the Mist</p>
             <VerticalKeyboardControl
               buttonsData={buttonsData}
