@@ -50,7 +50,7 @@ mod CombatSettings {
 
     // controls the minimum damage bonus for elemental damage
     const STRONG_ELEMENTAL_BONUS_MIN: u16 = 10; // u16 because this is used with other u16s
-    const MAX_CRITICAL_HIT_LUCK: u8 = 40; // max luck for critical hit. Will produce 50% chance
+    const MAX_CRITICAL_HIT_LUCK: u8 = 100; // max luck for critical hit. Will produce 50% chance
 
     enum Difficulty {
         Easy: (),

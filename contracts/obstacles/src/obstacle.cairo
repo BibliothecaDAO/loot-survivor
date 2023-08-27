@@ -390,8 +390,10 @@ impl ImplObstacle of IObstacle {
     // @return The calculated damage as a 16-bit unsigned integer.
     // @dev Note that critical hits are not considered for obstacles in this calculation.
     fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, entropy: u128) -> u16 {
-        // no critical hits for obstacles
-        let is_critical_hit = false;
+        // obstacle critical hit is always 1/6
+        let is_critical_hit = (entropy % 6) == 0;
+        let double_critical_hit_damage = false;
+        let double_name_damage = false;
 
         ImplCombat::calculate_damage(
             obstacle.combat_specs,
@@ -399,6 +401,8 @@ impl ImplObstacle of IObstacle {
             ObstacleSettings::MINIMUM_DAMAGE,
             ObstacleSettings::DAMAGE_BOOST,
             is_critical_hit,
+            double_critical_hit_damage,
+            double_name_damage,
             entropy
         )
     }
@@ -407,7 +411,7 @@ impl ImplObstacle of IObstacle {
     // @param obstacle: Obstacle - the obstacle
     // @return u16 - the xp reward
     fn get_xp_reward(self: Obstacle) -> u16 {
-        let xp_reward = self.combat_specs.get_xp_reward();
+        let xp_reward = self.combat_specs.get_base_reward();
         if (xp_reward < ObstacleSettings::MINIMUM_XP_REWARD) {
             ObstacleSettings::MINIMUM_XP_REWARD
         } else {

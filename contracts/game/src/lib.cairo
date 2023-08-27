@@ -866,7 +866,13 @@ mod Game {
         adventurer.beast_health = 0;
 
         // give adventurer gold reward
-        let gold_reward = beast.get_gold_reward(beast_seed);
+        // TODO Gas Optimization: beast.get_gold_reward and get_xp_reward both call the same 
+        // get_base_reward from Combat module. Should refactor this to only make that call once and have
+        // get_gold_reward and get_xp_reward operator on the base reward
+        let mut gold_reward = beast.get_gold_reward(beast_seed);
+        if adventurer.double_gold_from_beasts_unlocked() {
+            gold_reward *= 2;
+        }
         adventurer.gold.increase_gold(gold_reward);
 
         // grant adventuer xp
@@ -1877,11 +1883,11 @@ mod Game {
             .entropy
             .into();
 
-        // get beast and beast seed
-        let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
-
         // get game entropy from storage
         let global_entropy: u128 = _get_global_entropy(@self).into();
+
+        // get beast and beast seed
+        let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
 
         // When generating the beast, we need to ensure entropy remains fixed for the battle
         // for attacking however, we should change the entropy during battle so we use adventurer and beast health
@@ -1891,11 +1897,17 @@ mod Game {
         );
 
         // get the damage dealt to the beast
+        // TODO: Consider returning a tuple with detailed damage info (total_damage, base_damage, critical_hit_damage, name_bonus_damage)
+        let weapon_combat_spec = _get_combat_spec(@self, adventurer_id, adventurer.weapon);
+        let double_critical_hit = adventurer.double_critical_hit_unlocked();
+        let double_name_bonus_damage = adventurer.double_special_name_damage_unlocked();
         let (damage_dealt, critical_hit) = beast
             .attack(
-                _get_combat_spec(@self, adventurer_id, adventurer.weapon),
+                weapon_combat_spec,
                 adventurer.get_luck(),
                 adventurer.stats.strength,
+                double_critical_hit,
+                double_name_bonus_damage,
                 attack_rnd_1
             );
 
@@ -2893,36 +2905,36 @@ mod Game {
         }
     }
 
-    // _get_combat_spec returns the combat spec of an item
-    // as part of this we get the item details from the loot description
+    // @notice returns the combat spec for an item so it can be used with combat module
+    // @param self - read-only reference to the contract state
+    // @param adventurer_id - the id of the adventurer
+    // @param item - the item to get the combat spec for
     fn _get_combat_spec(
         self: @ContractState, adventurer_id: u256, item: ItemPrimitive
     ) -> CombatSpec {
-        // if item greatness is less than 15, no need to fetch the special names it doesn't have them
-        if (item.get_greatness() < 15) {
-            return CombatSpec {
-                tier: ImplLoot::get_tier(item.id),
-                item_type: ImplLoot::get_type(item.id),
-                level: item.get_greatness().into(),
-                specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
-            };
-        } else {
-            // if it's above 15, fetch the special names
+        let mut specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
+
+        // if item is greatness 15 or higher
+        if (item.get_greatness() >= 15) {
+            // get item specials
             let item_details = ImplItemSpecials::get_specials(
                 _get_specials_storage(self, adventurer_id, _get_storage_index(self, item.metadata)),
                 item
             );
-            // return combat spec of item
-            return CombatSpec {
-                tier: ImplLoot::get_tier(item.id),
-                item_type: ImplLoot::get_type(item.id),
-                level: item.get_greatness().into(),
-                specials: SpecialPowers {
+            specials =
+                SpecialPowers {
                     special1: item_details.special1,
                     special2: item_details.special2,
                     special3: item_details.special3
-                }
-            };
+                };
+        }
+
+        // return combat spec for item
+        CombatSpec {
+            tier: ImplLoot::get_tier(item.id),
+            item_type: ImplLoot::get_type(item.id),
+            level: item.get_greatness().into(),
+            specials: specials
         }
     }
 

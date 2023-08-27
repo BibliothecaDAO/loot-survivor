@@ -37,6 +37,8 @@ impl ImplCombat of ICombat {
     // @param minimum_damage: the minimum damage that can be done
     // @param strength_boost: the strength boost of the attacker
     // @param is_critical_hit: whether or not the attack was a critical hit
+    // @param double_critical_hit_damage: whether or not the critical hit damage is doubled
+    // @param double_name_bonus_damage: whether or not the name bonus damage is doubled
     // @param weapon_effectiveness: the effectiveness of the weapon against the armor
     // @param entropy: the entropy used to calculate critical hit bonus and name prefix bonus
     // @return u16: the damage done by the attacker
@@ -46,6 +48,8 @@ impl ImplCombat of ICombat {
         minimum_damage: u16,
         strength_boost: u16,
         is_critical_hit: bool,
+        double_critical_hit_damage: bool,
+        double_name_bonus_damage: bool,
         entropy: u128,
     ) -> u16 {
         // get base damage
@@ -63,15 +67,21 @@ impl ImplCombat of ICombat {
 
         // if attack was critical hit
         let mut critical_hit_bonus = 0;
-        if (is_critical_hit) {
+        if is_critical_hit {
             // add critical hit bonus
             critical_hit_bonus = ImplCombat::critical_hit_bonus(base_attack_hp, entropy);
+            // if double critical hit damage is unlocked
+            if double_critical_hit_damage {
+                // double damage
+                critical_hit_bonus *= 2;
+            }
         }
 
         // get special name damage bonus
         let item_specials_bonus = ImplCombat::get_name_damage_bonus(
-            base_attack_hp, weapon.specials, armor.specials, entropy
+            base_attack_hp, weapon.specials, armor.specials, double_name_bonus_damage, entropy
         );
+
 
         // get adventurer strength bonus
         let strength_bonus = ImplCombat::get_strength_bonus(base_attack_hp, strength_boost);
@@ -267,33 +277,21 @@ impl ImplCombat of ICombat {
         }
     }
 
-    // is_critical_hit determines if an attack is a critical hit
+    // @notice determines if the attack is a critical hit
+    // @dev critical hit chance is based on Adventurer's luck stat
     // @param luck: the luck of the adventurer
     // @param entropy: the entropy used to create random outcome
     // @return bool: true if the attack is a critical hit, false otherwise
     fn is_critical_hit(luck: u8, entropy: u128) -> bool {
-        // maximum luck is governed by CombatSettings::MAX_CRITICAL_HIT_LUCK
-        // current setting is 50. With Luck at 50, player has 50% chance of critical hit
-        let mut effective_luck = luck;
-        if (luck > MAX_CRITICAL_HIT_LUCK) {
-            effective_luck = MAX_CRITICAL_HIT_LUCK;
-        }
-
-        // critical hit chance is whole number of luck / 10
-        // so the chance of getting a critical hit increases every 10 luck
-        let critical_hit_chance: u8 = effective_luck / 10;
-
-        // critical hit random number is modulo the max critical hit chance
-        // this will result in a number between 0 and 5
-        let critical_hit_outcome = entropy % (6 - critical_hit_chance).into();
-
-        // if the critical hit random number is 0 (no remainder)
-        if (critical_hit_outcome == 0) {
-            // return true
+        // if adventurer has reached max critical hit change
+        if (luck >= MAX_CRITICAL_HIT_LUCK) {
+            // every attack is a critical hit
             true
         } else {
-            // otherwise return false
-            false
+            // otherwise we roll a dice between 0 and MAX_CRITICAL_HIT_LUCK (100)
+            let critical_hit_dice_roll = (entropy % MAX_CRITICAL_HIT_LUCK.into());
+            // and adventurer gets a critical hit if their luck is higher than the dice roll
+            luck > critical_hit_dice_roll.try_into().unwrap()
         }
     }
 
@@ -319,7 +317,7 @@ impl ImplCombat of ICombat {
     // @param entropy: entropy for randomizing name prefix damage bonus
     // @return u16: the bonus damage
     fn get_special2_bonus(
-        damage: u16, weapon_prefix1: u8, armor_prefix1: u8, entropy: u128, 
+        damage: u16, weapon_prefix1: u8, armor_prefix1: u8, entropy: u128,
     ) -> u16 {
         // is the weapon prefix matches the armor prefix
         if (weapon_prefix1 != 0 && weapon_prefix1 == armor_prefix1) {
@@ -341,7 +339,7 @@ impl ImplCombat of ICombat {
     // @param entropy: entropy for randomizing name prefix 2 damage bonus
     // @return u16: the bonus damage
     fn get_special3_bonus(
-        base_damage: u16, weapon_prefix2: u8, armor_prefix2: u8, entropy: u128, 
+        base_damage: u16, weapon_prefix2: u8, armor_prefix2: u8, entropy: u128,
     ) -> u16 {
         // is the weapon prefix2 matches the armor prefix2
         if (weapon_prefix2 != 0 && weapon_prefix2 == armor_prefix2) {
@@ -363,10 +361,11 @@ impl ImplCombat of ICombat {
     // @param base_damage: the base damage done by the attacker
     // @param weapon_name: the name of the weapon used by the attacker
     // @param armor_name: the name of the armor worn by the defender
+    // @param double_damage: whether or not the damage is doubled
     // @param entropy: entropy for randomizing special item damage bonus
     // @return u16: the bonus damage done by a special item
     fn get_name_damage_bonus(
-        base_damage: u16, weapon_name: SpecialPowers, armor_name: SpecialPowers, entropy: u128
+        base_damage: u16, weapon_name: SpecialPowers, armor_name: SpecialPowers, double_damage: bool, entropy: u128
     ) -> u16 {
         let special2_bonus = ImplCombat::get_special2_bonus(
             base_damage, weapon_name.special2, armor_name.special2, entropy
@@ -376,8 +375,13 @@ impl ImplCombat of ICombat {
             base_damage, weapon_name.special3, armor_name.special3, entropy
         );
 
-        // return the sum of the name prefix and name suffix bonuses
-        special2_bonus + special3_bonus
+        // if double damage is unlocked
+        if double_damage {
+            // double 
+            2 * (special2_bonus + special3_bonus)
+        } else {
+            special2_bonus + special3_bonus
+        }
     }
 
     // get_adventurer_strength_bonus returns the bonus damage for adventurer strength
@@ -443,10 +447,10 @@ impl ImplCombat of ICombat {
         }
     }
 
-    // get_xp_reward returns the xp reward for defeating an entity
-    // @param defeated_entity: the entity that was defeated
-    // @return u16: the xp reward for defeating the entity
-    fn get_xp_reward(self: CombatSpec) -> u16 {
+    // @notice gets the base reward for defeating an entity
+    // @param CombatSpec for the defeated the entity
+    // @return u16: the base reward
+    fn get_base_reward(self: CombatSpec) -> u16 {
         match self.tier {
             Tier::None(()) => {
                 0
@@ -469,7 +473,7 @@ impl ImplCombat of ICombat {
         }
     }
 
-    fn get_random_damage_location(entropy: u128, ) -> Slot {
+    fn get_random_damage_location(entropy: u128,) -> Slot {
         // generate random damage location based on Item Slot which has
         // armor in slots 2-6 inclusive
         let damage_location = (2 + (entropy % 6)).try_into().unwrap();
@@ -736,9 +740,7 @@ mod tests {
             item_type: Type::Blade_or_Hide(()),
             tier: Tier::T5(()),
             level: 0,
-            specials: SpecialPowers {
-                special1: 0, special2: 0, special3: 0
-            }
+            specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
         };
 
         // T5 Level 0 Weapon Deals 0HP of Damage
@@ -870,9 +872,7 @@ mod tests {
             item_type: Type::Blade_or_Hide(()),
             tier: Tier::T1(()),
             level: 20,
-            specials: SpecialPowers {
-                special2: 0, special3: 0, special1: 0
-            }
+            specials: SpecialPowers { special2: 0, special3: 0, special1: 0 }
         };
 
         // T5 Level 0 Weapon Deals 0HP of Damage
@@ -1023,25 +1023,23 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(90000)]
+    #[available_gas(45400)]
     fn test_is_critical_hit() {
-        // no entropy or luck is a critical hit
+        // no critical hit without luck
         let mut luck = 0;
         let mut entropy = 0;
         let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
+        assert(is_critical_hit == false, 'no critical hit without luck');
+
+        // 1 luck gets us a critical hit with 0 entropy
+        luck = 1;
+        let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
         assert(is_critical_hit, 'should be critical hit');
 
-        // no luck with 1 entropy is not a critical hit
-        luck = 0;
-        entropy = 2;
+        // increase our entropy to remove critical hit 
+        entropy = 1;
         let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
         assert(!is_critical_hit, 'should not be critical hit');
-
-        // same entropy but with max luck is a critical hit
-        luck = 40;
-        entropy = 2;
-        let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
-        assert(is_critical_hit, 'should be critical hit');
 
         // test max luck does not overflow and can critical hit
         luck = 255;
@@ -1049,11 +1047,10 @@ mod tests {
         let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
         assert(is_critical_hit, 'should be critical hit');
 
-        // test max luck can miss critical hit
-        luck = 255;
+        // with max luck, every attack is critical hit
         entropy = 1;
         let is_critical_hit = ImplCombat::is_critical_hit(luck, entropy);
-        assert(!is_critical_hit, 'should not be critical hit');
+        assert(is_critical_hit, 'should be critical hit');
     }
 
     #[test]
@@ -1301,7 +1298,7 @@ mod tests {
         armor.level = 1;
 
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
         );
 
         // adventurer isn't able to deal any damage to the beast (not good)
@@ -1310,7 +1307,7 @@ mod tests {
         // client can use minimum damage setting to ensure adventurer always does at least some damage
         minimum_damage = 2;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
         );
         assert(damage == 2, 'minimum damage: 2hp');
 
@@ -1318,7 +1315,7 @@ mod tests {
         // and encounters another T5 beast wearing cloth
         weapon.level = 4;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
         );
 
         // they can now deal more than the minimum damage
@@ -1328,7 +1325,7 @@ mod tests {
         weapon.tier = Tier::T1(());
         weapon.level = 1;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
         );
         // even on level 1, it deals more damage than their starter short sword
         assert(damage == 4, 'upgrade to katana: 6HP');
@@ -1336,7 +1333,7 @@ mod tests {
         // enable critical hit for that last attack
         is_critical_hit = true;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
         );
         // user picks up a critical hit but gets minimum bonus of 1
         assert(damage == 5, 'critical hit min bonus: 5HP');
@@ -1345,7 +1342,7 @@ mod tests {
         // entropy 3 will produce max bonus of 100% of the base damage (5)
         entropy = 3;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
         );
         assert(damage == 8, 'good critical hit: 8HP');
 
@@ -1353,7 +1350,7 @@ mod tests {
         weapon.item_type = Type::Blade_or_Hide(());
         armor.item_type = Type::Bludgeon_or_Metal(());
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
         );
         // verify damage drops by ~50%
         assert(damage == 6, 'weak elemental penalty: 6HP');
@@ -1361,7 +1358,7 @@ mod tests {
         // adventurer invests in two strength stat points to get a 40% bonus on base damage (5)
         strength_boost = 2;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
         );
         // verify damage drops by ~50%
         assert(damage == 8, 'attack should be 9HP');
@@ -1373,7 +1370,7 @@ mod tests {
         armor.level = 40;
         armor.tier = Tier::T2(());
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
         );
         assert(damage == 30, 'T1 G20 vs T3 G30: 30hp');
 
@@ -1381,7 +1378,7 @@ mod tests {
         weapon.item_type = Type::Blade_or_Hide(());
         armor.item_type = Type::Magic_or_Cloth(());
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
         );
         // deals significantly more damage because elemental is applied
         // to raw attack damage
