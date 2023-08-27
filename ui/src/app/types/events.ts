@@ -305,7 +305,7 @@ export type AdventurerLeveledUpEvent = {
 
 export type NewItemsAvailableEvent = {
   adventurerState: AdventurerState;
-  items: LootWithPrice[];
+  items: number[];
 };
 
 export type IdleDeathPenaltyEvent = {

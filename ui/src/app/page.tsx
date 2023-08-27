@@ -282,16 +282,16 @@ export default function Home() {
     }
   }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
 
-  // useEffect(() => {
-  //   if (
-  //     data.adventurerByIdQuery &&
-  //     data.adventurerByIdQuery.adventurers[0]?.id
-  //   ) {
-  //     console.log("updated");
-  //     console.log(data.adventurerByIdQuery.adventurers[0]);
-  //     setAdventurer(data.adventurerByIdQuery.adventurers[0]);
-  //   }
-  // }, [data.adventurerByIdQuery?.adventurers[0]]);
+  useEffect(() => {
+    if (
+      data.adventurerByIdQuery &&
+      data.adventurerByIdQuery.adventurers[0]?.id
+    ) {
+      console.log("updated");
+      console.log(data.adventurerByIdQuery.adventurers[0]);
+      setAdventurer(data.adventurerByIdQuery.adventurers[0]);
+    }
+  }, [data.adventurerByIdQuery?.adventurers[0]]);
 
   const mobileMenuDisabled = [
     false,

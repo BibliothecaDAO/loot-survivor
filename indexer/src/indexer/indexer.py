@@ -1580,7 +1580,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             await info.storage.find_one_and_update(
                 "items",
                 {
-                    "item": check_exists_int(item["item"]["id"]),
+                    "item": check_exists_int(item),
                     "adventurerId": check_exists_int(
                         sa.adventurer_state["adventurer_id"]
                     ),
