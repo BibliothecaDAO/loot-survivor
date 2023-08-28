@@ -308,19 +308,19 @@ export function syscalls({
                     item.item == itemSpecialUnlockedEvent.data[1].item
                 );
               setData(
-                "itemsByAdventurerIdQuery",
+                "itemsByAdventurerQuery",
                 itemSpecialUnlockedEvent.data[1].special1,
                 "special1",
                 ownedItemIndex
               );
               setData(
-                "itemsByAdventurerIdQuery",
+                "itemsByAdventurerQuery",
                 itemSpecialUnlockedEvent.data[1].special2,
                 "special2",
                 ownedItemIndex
               );
               setData(
-                "itemsByAdventurerIdQuery",
+                "itemsByAdventurerQuery",
                 itemSpecialUnlockedEvent.data[1].special3,
                 "special3",
                 ownedItemIndex
@@ -546,19 +546,19 @@ export function syscalls({
               (item: any) => item.item == itemSpecialUnlockedEvent.data[1].item
             );
           setData(
-            "itemsByAdventurerIdQuery",
+            "itemsByAdventurerQuery",
             itemSpecialUnlockedEvent.data[1].special1,
             "special1",
             ownedItemIndex
           );
           setData(
-            "itemsByAdventurerIdQuery",
+            "itemsByAdventurerQuery",
             itemSpecialUnlockedEvent.data[1].special2,
             "special2",
             ownedItemIndex
           );
           setData(
-            "itemsByAdventurerIdQuery",
+            "itemsByAdventurerQuery",
             itemSpecialUnlockedEvent.data[1].special3,
             "special3",
             ownedItemIndex
