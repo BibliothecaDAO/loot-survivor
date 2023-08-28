@@ -52,10 +52,6 @@ export default function Info({
     };
   }, [adventurer?.id ?? 0]);
 
-  const derivedAdventurer = useMemo(() => {
-    return storeData.adventurerByIdQuery?.adventurer;
-  }, [storeData]);
-
   useCustomQuery(
     "itemsByAdventurerQuery",
     getItemsByAdventurer,
@@ -71,11 +67,11 @@ export default function Info({
   // });
 
   const items = profileExists
-    ? storeData.itemsByProfileQuery
-      ? storeData.itemsByProfileQuery.items
+    ? data.itemsByProfileQuery
+      ? data.itemsByProfileQuery.items
       : []
-    : storeData.itemsByAdventurerQuery
-    ? storeData.itemsByAdventurerQuery.items
+    : data.itemsByAdventurerQuery
+    ? data.itemsByAdventurerQuery.items
     : [];
 
   const neckItem =
