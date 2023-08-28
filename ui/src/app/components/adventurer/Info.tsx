@@ -46,17 +46,17 @@ export default function Info({
 
   const gameData = new GameData();
 
-  const adventurerVariables = useMemo(() => {
-    return {
-      id: adventurer?.id ?? 0,
-    };
-  }, [adventurer?.id ?? 0]);
+  // const adventurerVariables = useMemo(() => {
+  //   return {
+  //     id: adventurer?.id ?? 0,
+  //   };
+  // }, [adventurer?.id ?? 0]);
 
-  useCustomQuery(
-    "itemsByAdventurerQuery",
-    getItemsByAdventurer,
-    adventurerVariables
-  );
+  // useCustomQuery(
+  //   "itemsByAdventurerQuery",
+  //   getItemsByAdventurer,
+  //   adventurerVariables,
+  // );
 
   // useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
   //   adventurerId: adventurer?.id ?? 0,
