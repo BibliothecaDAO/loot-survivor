@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Adventurer, NullAdventurer, NullItem } from "../../types";
 import { getItemsByAdventurer } from "../../hooks/graphql/queries";
 import { HeartIcon, CoinIcon, BagIcon } from "../icons/Icons";
@@ -32,7 +33,7 @@ export default function Info({
 }: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
   const profile = useUIStore((state) => state.profile);
-  const { data, isLoading } = useQueriesStore();
+  const { data, isLoading, data: storeData } = useQueriesStore();
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const dropItems = useUIStore((state) => state.dropItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
@@ -45,6 +46,22 @@ export default function Info({
 
   const gameData = new GameData();
 
+  const adventurerVariables = useMemo(() => {
+    return {
+      id: adventurer?.id ?? 0,
+    };
+  }, [adventurer?.id ?? 0]);
+
+  const derivedAdventurer = useMemo(() => {
+    return storeData.adventurerByIdQuery?.adventurer;
+  }, [storeData]);
+
+  useCustomQuery(
+    "itemsByAdventurerQuery",
+    getItemsByAdventurer,
+    adventurerVariables
+  );
+
   // useCustomQuery("itemsByAdventurerQuery", getItemsByAdventurer, {
   //   adventurerId: adventurer?.id ?? 0,
   // });
@@ -54,11 +71,11 @@ export default function Info({
   // });
 
   const items = profileExists
-    ? data.itemsByProfileQuery
-      ? data.itemsByProfileQuery.items
+    ? storeData.itemsByProfileQuery
+      ? storeData.itemsByProfileQuery.items
       : []
-    : data.itemsByAdventurerQuery
-    ? data.itemsByAdventurerQuery.items
+    : storeData.itemsByAdventurerQuery
+    ? storeData.itemsByAdventurerQuery.items
     : [];
 
   const neckItem =

@@ -197,12 +197,12 @@ export default function Home() {
     };
   }, [owner]);
 
-  // useCustomQuery(
-  //   "adventurersByOwnerQuery",
-  //   getAdventurersByOwner,
-  //   ownerVariables,
-  //   owner === ""
-  // );
+  useCustomQuery(
+    "adventurersByOwnerQuery",
+    getAdventurersByOwner,
+    ownerVariables,
+    owner === ""
+  );
 
   // console.log(adventurer?.id ?? 0);
   // console.log(data);
@@ -227,13 +227,6 @@ export default function Home() {
   // );
 
   // useCustomQuery(
-  //   "lastBeastQuery",
-  //   getLastBeastDiscovery,
-  //   adventurerVariables,
-  //   mintAdventurer
-  // );
-
-  // useCustomQuery(
   //   "itemsByAdventurerQuery",
   //   getItemsByAdventurer,
   //   adventurerVariables,
@@ -244,13 +237,20 @@ export default function Home() {
   //   (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
   // );
 
+  // useCustomQuery(
+  //   "lastBeastQuery",
+  //   getLastBeastDiscovery,
+  //   adventurerVariables,
+  //   mintAdventurer
+  // );
+
   // const beastVariables = useMemo(() => {
   //   return {
   //     adventurerId: adventurer?.id ?? 0,
   //     beast: lastBeast?.entity,
   //     seed: lastBeast?.seed,
   //   };
-  // }, [adventurer?.id ?? 0]);
+  // }, [adventurer?.id ?? 0, lastBeast?.entity, lastBeast?.seed]);
 
   // useCustomQuery("beastQuery", getBeast, beastVariables, mintAdventurer);
 
@@ -369,7 +369,7 @@ export default function Home() {
                     )}
                   </div>
                 </Button>
-                <Button onClick={async () => await refetch()}>
+                <Button onClick={() => refetch()}>
                   <RefreshIcon className="w-4 h-4 sm:w-6 sm:h-6" />
                 </Button>
                 {account && calls.length > 0 && (
