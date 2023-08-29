@@ -202,6 +202,7 @@ export function syscalls({
       setData("adventurerByIdQuery", {
         adventurers: [adventurerState],
       });
+      setAdventurer(adventurerState);
       setData("latestDiscoveriesQuery", {
         discoveries: [
           events.find((event) => event.name === "AmbushedByBeast").data[1],
@@ -289,6 +290,7 @@ export function syscalls({
           setData("adventurerByIdQuery", {
             adventurers: [discovery.data[0]],
           });
+          setAdventurer(discovery.data[0]);
           discoveries.unshift(discovery.data[1]);
           if (
             discovery.name === "DodgedObstacle" ||
@@ -302,6 +304,7 @@ export function syscalls({
               setData("adventurerByIdQuery", {
                 adventurers: [itemSpecialUnlockedEvent.data[0]],
               });
+              setAdventurer(itemSpecialUnlockedEvent.data[0]);
               const ownedItemIndex =
                 queryData.itemsByAdventurerQuery?.items.findIndex(
                   (item: any) =>
@@ -341,6 +344,7 @@ export function syscalls({
           setData("adventurerByIdQuery", {
             adventurers: [discovery.data[0]],
           });
+          setAdventurer(discovery.data[0]);
           discoveries.unshift(discovery.data[1]);
           setData("beastQuery", { beasts: [discovery.data[2]] });
         }
@@ -357,6 +361,7 @@ export function syscalls({
           setData("adventurerByIdQuery", {
             adventurers: [discovery.data[0]],
           });
+          setAdventurer(discovery.data[0]);
           discoveries.unshift(discovery.data[1]);
           setData("beastQuery", { beasts: [discovery.data[2]] });
           setData("battlesByBeastQuery", {
@@ -378,6 +383,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data],
         });
+        setAdventurer(adventurerDiedEvent.data);
         const killedByObstacle =
           discoveries.reverse()[0]?.discoveryType == "Obstacle" &&
           discoveries.reverse()[0]?.adventurerHealth == 0;
@@ -394,6 +400,7 @@ export function syscalls({
             adventurerDiedEvent.data
           );
         }
+        setScreen("start");
       }
 
       const filteredDeathPenalty = events.filter(
@@ -404,6 +411,7 @@ export function syscalls({
           setData("adventurerByIdQuery", {
             adventurers: [discovery.data[0]],
           });
+          setAdventurer(discovery.data[0]);
           discoveries.unshift(discovery.data[2]);
         }
       }
@@ -439,6 +447,7 @@ export function syscalls({
         setData("latestMarketItemsQuery", {
           items: itemData,
         });
+        setScreen("upgrade");
       }
 
       setData("latestDiscoveriesQuery", {
@@ -500,6 +509,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [attackedBeastEvent.data[0]],
         });
+        setAdventurer(attackedBeastEvent.data[0]);
         battles.unshift(attackedBeastEvent.data[1]);
         setData(
           "beastQuery",
@@ -516,6 +526,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [attackedByBeastEvent.data[0]],
         });
+        setAdventurer(attackedByBeastEvent.data[0]);
         battles.unshift(attackedByBeastEvent.data[1]);
       }
 
@@ -526,6 +537,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [slayedBeastEvent.data[0]],
         });
+        setAdventurer(slayedBeastEvent.data[0]);
         battles.unshift(slayedBeastEvent.data[1]);
         updateItemsXP(slayedBeastEvent.data[0], slayedBeastEvent.data[2]);
         setData(
@@ -541,6 +553,7 @@ export function syscalls({
           setData("adventurerByIdQuery", {
             adventurers: [itemSpecialUnlockedEvent.data[0]],
           });
+          setAdventurer(itemSpecialUnlockedEvent.data[0]);
           const ownedItemIndex =
             queryData.itemsByAdventurerQuery?.items.findIndex(
               (item: any) => item.item == itemSpecialUnlockedEvent.data[1].item
@@ -579,6 +592,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data],
         });
+        setAdventurer(adventurerDiedEvent.data);
         const killedByBeast = battles.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
@@ -592,6 +606,7 @@ export function syscalls({
             adventurerDiedEvent.data
           );
         }
+        setScreen("start");
       }
 
       const filteredDeathPenalty = events.filter(
@@ -602,6 +617,7 @@ export function syscalls({
           setData("adventurerByIdQuery", {
             adventurers: [discovery.data[0]],
           });
+          setAdventurer(discovery.data[0]);
           battles.unshift(discovery.data[1]);
         }
       }
@@ -637,6 +653,7 @@ export function syscalls({
         setData("latestMarketItemsQuery", {
           items: itemData,
         });
+        setScreen("upgrade");
       }
 
       console.log(battles);
@@ -701,6 +718,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [fleeFailedEvent.data[0]],
         });
+        setAdventurer(fleeFailedEvent.data[0]);
         battles.unshift(fleeFailedEvent.data[1]);
       }
 
@@ -711,6 +729,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [attackedByBeastEvent.data[0]],
         });
+        setAdventurer(attackedByBeastEvent.data[0]);
         battles.unshift(attackedByBeastEvent.data[1]);
       }
 
@@ -721,6 +740,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [fleeSucceededEvent.data[0]],
         });
+        setAdventurer(fleeSucceededEvent.data[0]);
         battles.unshift(fleeSucceededEvent.data[1]);
       }
 
@@ -737,6 +757,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data],
         });
+        setAdventurer(adventurerDiedEvent.data);
         const killedByBeast = events.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
@@ -750,6 +771,7 @@ export function syscalls({
             adventurerDiedEvent.data
           );
         }
+        setScreen("start");
       }
 
       const filteredDeathPenalty = events.filter(
@@ -760,6 +782,7 @@ export function syscalls({
           setData("adventurerByIdQuery", {
             adventurers: [discovery.data[0]],
           });
+          setAdventurer(discovery.data[0]);
           battles.unshift(discovery.data[1]);
         }
       }
@@ -795,6 +818,7 @@ export function syscalls({
         setData("latestMarketItemsQuery", {
           items: itemData,
         });
+        setScreen("upgrade");
       }
 
       setData("battlesByBeastQuery", {
@@ -854,7 +878,9 @@ export function syscalls({
           events.find((event) => event.name === "AdventurerUpgraded").data,
         ],
       });
-
+      setAdventurer(
+        events.find((event) => event.name === "AdventurerUpgraded").data
+      );
       // Add purchased items
       const purchaseItemsEvents = events.filter(
         (event) => event.name === "PurchasedItems"
@@ -894,6 +920,7 @@ export function syscalls({
         Items: purchaseItems,
         Potions: potionAmount,
       });
+      setScreen("play");
       setMintAdventurer(false);
     } catch (e) {
       console.log(e);
@@ -952,6 +979,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [equippedItemsEvent.data[0]],
         });
+        setAdventurer(equippedItemsEvent.data[0]);
         for (let equippedItem of equippedItemsEvent.data[1]) {
           const ownedItemIndex =
             queryData.itemsByAdventurerQuery?.items.findIndex(
@@ -975,6 +1003,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [droppedItemsEvent.data[0]],
         });
+        setAdventurer(droppedItemsEvent.data[0]);
         for (let droppedItem of droppedItemsEvent.data[1]) {
           const newItems = queryData.itemsByAdventurerQuery?.items.filter(
             (item: any) => item.item !== droppedItem
@@ -996,11 +1025,13 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data],
         });
+        setAdventurer(adventurerDiedEvent.data);
         setDeathNotification(
           "Multicall",
           ["You equipped"],
           adventurerDiedEvent.data
         );
+        setScreen("start");
       }
 
       stopLoading(notification);

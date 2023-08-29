@@ -8,7 +8,7 @@ import {
   useTransactionManager,
 } from "@starknet-react/core";
 import { constants } from "starknet";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { Button } from "./components/buttons/Button";
 import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
 import ActionsScreen from "./containers/ActionsScreen";
@@ -58,12 +58,15 @@ import {
   getBeast,
   getBattlesByBeast,
   getItemsByAdventurer,
+  getLatestMarketItems,
 } from "./hooks/graphql/queries";
 import { ArcadeDialog } from "./components/ArcadeDialog";
 import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
 import { syscalls } from "./lib/utils/syscalls";
 import { useContracts } from "./hooks/useContracts";
 import { Maintenance } from "./components/archived/Maintenance";
+import { set } from "lodash";
+import LootIconLoader from "./components/icons/Loader";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -121,8 +124,6 @@ export default function Home() {
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
   const displayHistoryButtonRef = useRef<HTMLButtonElement>(null);
   const displayCartButtonRef = useRef<HTMLButtonElement>(null);
-  const switchAdventurer = useUIStore((state) => state.switchAdventurer);
-  const setSwitchAdventurer = useUIStore((state) => state.setSwitchAdventurer);
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
@@ -143,7 +144,15 @@ export default function Home() {
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
 
-  const { data, refetch, resetData, setData } = useQueriesStore();
+  const {
+    data,
+    refetch,
+    resetData,
+    setData,
+    isLoading,
+    setIsLoading,
+    setNotLoading,
+  } = useQueriesStore();
 
   const [initialLoad, setInitialLoad] = useState(true);
 
@@ -197,15 +206,12 @@ export default function Home() {
     };
   }, [owner]);
 
-  useCustomQuery(
+  const adventurersData = useCustomQuery(
     "adventurersByOwnerQuery",
     getAdventurersByOwner,
     ownerVariables,
     owner === ""
   );
-
-  // console.log(adventurer?.id ?? 0);
-  // console.log(data);
 
   const adventurerVariables = useMemo(() => {
     return {
@@ -213,53 +219,88 @@ export default function Home() {
     };
   }, [adventurer?.id ?? 0]);
 
-  // useCustomQuery(
-  //   "adventurerByIdQuery",
-  //   getAdventurerById,
-  //   adventurerVariables,
-  //   mintAdventurer
-  // );
+  useCustomQuery("adventurerByIdQuery", getAdventurerById, adventurerVariables);
 
-  // useCustomQuery(
-  //   "latestDiscoveriesQuery",
-  //   getLatestDiscoveries,
-  //   adventurerVariables
-  // );
+  useCustomQuery(
+    "latestDiscoveriesQuery",
+    getLatestDiscoveries,
+    adventurerVariables
+  );
 
   useCustomQuery(
     "itemsByAdventurerQuery",
     getItemsByAdventurer,
-    adventurerVariables,
-    mintAdventurer
+    adventurerVariables
   );
 
-  // const lastBeast = useQueriesStore(
-  //   (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
-  // );
+  useCustomQuery(
+    "latestMarketItemsQuery",
+    getLatestMarketItems,
+    adventurerVariables
+  );
 
-  // useCustomQuery(
-  //   "lastBeastQuery",
-  //   getLastBeastDiscovery,
-  //   adventurerVariables,
-  //   mintAdventurer
-  // );
+  const lastBeastData = useCustomQuery(
+    "lastBeastQuery",
+    getLastBeastDiscovery,
+    adventurerVariables
+  );
 
-  // const beastVariables = useMemo(() => {
-  //   return {
-  //     adventurerId: adventurer?.id ?? 0,
-  //     beast: lastBeast?.entity,
-  //     seed: lastBeast?.seed,
-  //   };
-  // }, [adventurer?.id ?? 0, lastBeast?.entity, lastBeast?.seed]);
+  console.log(lastBeastData);
 
-  // useCustomQuery("beastQuery", getBeast, beastVariables, mintAdventurer);
+  const beastVariables = useMemo(() => {
+    return {
+      adventurerId: adventurer?.id ?? 0,
+      beast: lastBeastData?.discoveries[0]?.entity,
+      seed: lastBeastData?.discoveries[0]?.seed,
+    };
+  }, [
+    adventurer?.id ?? 0,
+    lastBeastData?.discoveries[0]?.entity,
+    lastBeastData?.discoveries[0]?.seed,
+  ]);
 
-  // useCustomQuery(
-  //   "battlesByBeastQuery",
-  //   getBattlesByBeast,
-  //   beastVariables,
-  //   mintAdventurer
-  // );
+  useCustomQuery("beastQuery", getBeast, beastVariables);
+
+  useCustomQuery("battlesByBeastQuery", getBattlesByBeast, beastVariables);
+
+  const handleSwitchAdventurer = async (adventurerId: number) => {
+    console.log("START REFETCH");
+    setIsLoading();
+    const newAdventurerData = await refetch("adventurerByIdQuery", {
+      id: adventurerId,
+    });
+    const newLatestDiscoveriesData = await refetch("latestDiscoveriesQuery", {
+      id: adventurerId,
+    });
+    const newAdventurerItemsData = await refetch("itemsByAdventurerQuery", {
+      id: adventurerId,
+    });
+    const newMarketItemsData = await refetch("latestMarketItemsQuery", {
+      id: adventurerId,
+    });
+    const newLastBeastData = await refetch("lastBeastQuery", {
+      id: adventurerId,
+    });
+    const newBeastData = await refetch("beastQuery", {
+      adventurerId: adventurerId,
+      beast: newLastBeastData.discoveries[0]?.entity,
+      seed: newLastBeastData.discoveries[0]?.seed,
+    });
+    const newBattlesByBeastData = await refetch("battlesByBeastQuery", {
+      adventurerId: adventurerId,
+      beast: newLastBeastData.discoveries[0]?.entity,
+      seed: newLastBeastData.discoveries[0]?.seed,
+    });
+    setData("adventurerByIdQuery", newAdventurerData);
+    setData("latestDiscoveriesQuery", newLatestDiscoveriesData);
+    setData("itemsByAdventurerQuery", newAdventurerItemsData);
+    setData("latestMarketItemsQuery", newMarketItemsData);
+    setData("lastBeastQuery", newLastBeastData);
+    setData("beastQuery", newBeastData);
+    setData("battlesByBeastQuery", newBattlesByBeastData);
+    setNotLoading();
+    console.log("END REFETCH");
+  };
 
   useEffect(() => {
     return () => {
@@ -272,6 +313,13 @@ export default function Home() {
     setIsWrongNetwork(isWrongNetwork);
   }, [chain, provider, isConnected]);
 
+  // Initialize adventurers from owner
+  useEffect(() => {
+    if (adventurersData) {
+      setData("adventurersByOwnerQuery", adventurersData);
+    }
+  }, [adventurersData]);
+
   useEffect(() => {
     if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
       setScreen("play");
@@ -281,17 +329,6 @@ export default function Home() {
       setScreen("start");
     }
   }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
-
-  useEffect(() => {
-    if (
-      data.adventurerByIdQuery &&
-      data.adventurerByIdQuery.adventurers[0]?.id
-    ) {
-      console.log("updated");
-      console.log(data.adventurerByIdQuery.adventurers[0]);
-      setAdventurer(data.adventurerByIdQuery.adventurers[0]);
-    }
-  }, [data.adventurerByIdQuery?.adventurers[0]]);
 
   const mobileMenuDisabled = [
     false,
@@ -479,23 +516,38 @@ export default function Home() {
                 </div>
 
                 {/* <div className="overflow-y-auto h-[460px] sm:h-full"> */}
-                {screen === "start" && <AdventurerScreen spawn={spawn} />}
-                {screen === "play" && (
-                  <ActionsScreen
-                    explore={explore}
-                    attack={attack}
-                    flee={flee}
-                  />
+                {isLoading.global ? (
+                  <div className="fixed left-1/2 right-1/2 top-1/2 bottom-1/2">
+                    <LootIconLoader size="w-10" />
+                  </div>
+                ) : (
+                  <>
+                    {screen === "start" && (
+                      <AdventurerScreen
+                        spawn={spawn}
+                        handleSwitchAdventurer={handleSwitchAdventurer}
+                      />
+                    )}
+                    {screen === "play" && (
+                      <ActionsScreen
+                        explore={explore}
+                        attack={attack}
+                        flee={flee}
+                      />
+                    )}
+                    {screen === "inventory" && <InventoryScreen />}
+                    {screen === "leaderboard" && <LeaderboardScreen />}
+                    {screen === "upgrade" && (
+                      <UpgradeScreen upgrade={upgrade} />
+                    )}
+                    {screen === "profile" && <Profile />}
+                    {screen === "encounters" && <EncountersScreen />}
+                    {screen === "guide" && <GuideScreen />}
+                    {screen === "settings" && <Settings />}
+                    {screen === "player" && <Player />}
+                    {screen === "wallet" && <WalletSelect />}
+                  </>
                 )}
-                {screen === "inventory" && <InventoryScreen />}
-                {screen === "leaderboard" && <LeaderboardScreen />}
-                {screen === "upgrade" && <UpgradeScreen upgrade={upgrade} />}
-                {screen === "profile" && <Profile />}
-                {screen === "encounters" && <EncountersScreen />}
-                {screen === "guide" && <GuideScreen />}
-                {screen === "settings" && <Settings />}
-                {screen === "player" && <Player />}
-                {screen === "wallet" && <WalletSelect />}
                 {/* </div> */}
               </>
             </div>

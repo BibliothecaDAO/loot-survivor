@@ -91,15 +91,12 @@ type QueriesState = {
     attribute?: string,
     index?: number
   ) => void;
-  isLoading: Record<QueryKey, boolean>;
-  refetchFunctions: Record<QueryKey, () => Promise<any>>;
-  updateData: (
-    queryKey: QueryKey,
-    newData: any,
-    loading: boolean,
-    refetch: () => Promise<void>
-  ) => void;
-  refetch: (queryKey?: QueryKey) => Promise<void>;
+  setRefetch: (queryKey: QueryKey, refetch: () => Promise<any>) => void;
+  isLoading: Record<QueryKey, boolean> & { global: boolean };
+  setIsLoading: (queryKey?: QueryKey) => void;
+  setNotLoading: (queryKey?: QueryKey) => void;
+  refetchFunctions: Record<QueryKey, (variables?: any) => Promise<any>>;
+  refetch: (queryKey?: QueryKey, variables?: any) => Promise<any>;
   resetData: (queryKey?: QueryKey) => void;
 };
 
@@ -128,32 +125,7 @@ const initialData: InitialData = {
   adventurerToSlayQuery: null,
 };
 
-const initialLoading: Record<QueryKey, boolean> = {
-  lastBattleQuery: false,
-  lastBeastBattleQuery: false,
-  battlesByAdventurerQuery: false,
-  battlesByTxHashQuery: false,
-  battlesByBeastQuery: false,
-  lastBeastQuery: false,
-  beastQuery: false,
-  discoveriesQuery: false,
-  latestDiscoveriesQuery: false,
-  discoveryByTxHashQuery: false,
-  adventurersByOwnerQuery: false,
-  adventurerByIdQuery: false,
-  leaderboardByIdQuery: false,
-  adventurersByGoldQuery: false,
-  adventurersByXPQuery: false,
-  adventurersInListQuery: false,
-  adventurersInListByXpQuery: false,
-  itemsByAdventurerQuery: false,
-  itemsByProfileQuery: false,
-  topScoresQuery: false,
-  latestMarketItemsQuery: false,
-  adventurerToSlayQuery: false,
-};
-
-const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
+const initialLoading: Record<QueryKey, boolean> & { global: boolean } = {
   lastBattleQuery: false,
   lastBeastBattleQuery: false,
   battlesByAdventurerQuery: false,
@@ -244,18 +216,37 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
       }
     });
   },
-  isLoading: initialLoading,
-  refetchFunctions: initialRefetchFunctions,
-  updateData: (queryKey, newData, loading) => {
-    console.log(newData);
+  setRefetch: (queryKey, refetch) => {
     set((state) => {
       return {
-        ...state,
-        data: { ...state.data, [queryKey]: newData },
-        isLoading: { ...state.isLoading, [queryKey]: loading },
+        refetchFunctions: { ...state.refetchFunctions, [queryKey]: refetch },
       };
     });
   },
+  isLoading: initialLoading,
+  setIsLoading: (queryKey) => {
+    if (queryKey) {
+      set((state) => ({
+        isLoading: { ...state.isLoading, [queryKey]: true },
+      }));
+    } else {
+      set((state) => ({
+        isLoading: { ...state.isLoading, global: true },
+      }));
+    }
+  },
+  setNotLoading: (queryKey) => {
+    if (queryKey) {
+      set((state) => ({
+        isLoading: { ...state.isLoading, [queryKey]: false },
+      }));
+    } else {
+      set((state) => ({
+        isLoading: { ...state.isLoading, global: false },
+      }));
+    }
+  },
+  refetchFunctions: initialRefetchFunctions,
   resetData: (queryKey) => {
     if (queryKey) {
       set((state) => ({
@@ -265,14 +256,15 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
       set({ data: initialData });
     }
   },
-  refetch: async (queryKey) => {
+  refetch: async (queryKey, variables) => {
     const { refetchFunctions } = get();
     if (queryKey) {
       const refetch = refetchFunctions[queryKey];
 
       if (refetch) {
         try {
-          await refetch();
+          const newData = await refetch(variables);
+          return newData;
         } catch (error) {
           console.error(`Error refetching ${queryKey}:`, error);
           throw error;
@@ -285,14 +277,40 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
     } else {
       // If no queryKey is supplied, refetch all queries
       const allKeys = Object.keys(refetchFunctions);
+      const newDataObject: Record<QueryKey, any> = {
+        lastBattleQuery: null,
+        lastBeastBattleQuery: null,
+        battlesByAdventurerQuery: null,
+        battlesByTxHashQuery: null,
+        battlesByBeastQuery: null,
+        lastBeastQuery: null,
+        beastQuery: null,
+        discoveriesQuery: null,
+        latestDiscoveriesQuery: null,
+        discoveryByTxHashQuery: null,
+        adventurersByOwnerQuery: null,
+        adventurerByIdQuery: null,
+        leaderboardByIdQuery: null,
+        adventurersByGoldQuery: null,
+        adventurersByXPQuery: null,
+        adventurersInListQuery: null,
+        adventurersInListByXpQuery: null,
+        itemsByAdventurerQuery: null,
+        itemsByProfileQuery: null,
+        topScoresQuery: null,
+        latestMarketItemsQuery: null,
+        adventurerToSlayQuery: null,
+      };
       for (let key of allKeys) {
         const refetch = refetchFunctions[key as QueryKey];
         try {
-          await refetch();
+          const { data: newData } = await refetch();
+          newDataObject[key as QueryKey] = newData;
         } catch (error) {
           console.error(`Error refetching ${key}:`, error);
         }
       }
+      return newDataObject;
     }
   },
 }));

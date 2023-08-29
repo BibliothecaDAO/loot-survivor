@@ -12,13 +12,17 @@ import { NullAdventurer } from "../types";
 
 interface AdventurerScreenProps {
   spawn: (...args: any[]) => any;
+  handleSwitchAdventurer: (...args: any[]) => any;
 }
 
 /**
  * @container
  * @description Provides the start screen for the adventurer.
  */
-export default function AdventurerScreen({ spawn }: AdventurerScreenProps) {
+export default function AdventurerScreen({
+  spawn,
+  handleSwitchAdventurer,
+}: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
   const [selected, setSelected] = useState<String>("");
   const [loading, setLoading] = useState(false);
@@ -101,6 +105,7 @@ export default function AdventurerScreen({ spawn }: AdventurerScreenProps) {
             isActive={activeMenu == 1}
             onEscape={() => setActiveMenu(0)}
             adventurers={adventurers}
+            handleSwitchAdventurer={handleSwitchAdventurer}
           />
         </div>
       )}

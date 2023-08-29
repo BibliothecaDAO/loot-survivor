@@ -6,23 +6,25 @@ import { ButtonData } from "../KeyboardControls";
 import { Adventurer } from "@/app/types";
 import { SkullIcon } from "../icons/Icons";
 import useUIStore from "@/app/hooks/useUIStore";
+import { useQueriesStore } from "../../hooks/useQueryStore";
 
 export interface AdventurerListProps {
   isActive: boolean;
   onEscape: () => void;
   adventurers: Adventurer[];
+  handleSwitchAdventurer: (...args: any[]) => any;
 }
 
 export const AdventurersList = ({
   isActive,
   onEscape,
   adventurers,
+  handleSwitchAdventurer,
 }: AdventurerListProps) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [showZeroHealth, setShowZeroHealth] = useState(true);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
-  const setSwitchAdventurer = useUIStore((state) => state.setSwitchAdventurer);
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
 
@@ -37,16 +39,6 @@ export const AdventurersList = ({
   const hasDeadAdventurers = sortedAdventurers.some(
     (adventurer) => adventurer.health === 0
   );
-
-  const buttonsData: ButtonData[] = [];
-  for (let i = 0; i < adventurers.length; i++) {
-    buttonsData.push({
-      id: i + 1,
-      label: `${adventurers[i].name} - ${adventurers[i].id}`,
-      action: () => setAdventurer(adventurers[i]),
-      disabled: false,
-    });
-  }
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -99,8 +91,8 @@ export const AdventurersList = ({
                   selectedIndex === index && isActive ? "default" : "ghost"
                 }
                 onClick={() => {
-                  setSwitchAdventurer(true);
                   setAdventurer(adventurer);
+                  handleSwitchAdventurer(adventurer.id);
                   setSelectedIndex(index);
                 }}
               >
