@@ -79,7 +79,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       id: 1,
       label: adventurer?.dexterity === 0 ? "DEX TOO LOW" : "SINGLE",
       action: async () => {
-        flee(true, beastData);
+        flee(false, beastData);
       },
       disabled:
         adventurer?.beastHealth == undefined ||

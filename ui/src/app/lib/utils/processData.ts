@@ -452,7 +452,7 @@ export function processData(
         level: discoveredBeastEvent.beastSpecs["level"],
         special1:
           gameData.ITEM_NAME_PREFIXES[
-            discoveredBeastEvent.beastSpecs["specials"]["special1"]
+            discoveredBeastEvent.beastSpecs["specials"]["special3"]
           ],
         special2:
           gameData.ITEM_NAME_SUFFIXES[
@@ -460,7 +460,7 @@ export function processData(
           ],
         special3:
           gameData.ITEM_SUFFIXES[
-            discoveredBeastEvent.beastSpecs["specials"]["special3"]
+            discoveredBeastEvent.beastSpecs["specials"]["special1"]
           ],
         seed: discoveredBeastEvent.seed,
         adventurerId: discoveredBeastEvent.adventurerState["adventurerId"].low,
