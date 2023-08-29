@@ -44,7 +44,7 @@ mod Game {
             adventurer_constants::{
                 POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER_BEASTS, ITEM_XP_MULTIPLIER_OBSTACLES,
                 ITEM_MAX_GREATNESS, MAX_GREATNESS_STAT_BONUS, StatisticIndex,
-                VITALITY_INSTANT_HEALTH_BONUS
+                VITALITY_INSTANT_HEALTH_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK
             }
         },
         item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
@@ -72,6 +72,7 @@ mod Game {
         _counter: u256,
         _lords: ContractAddress,
         _dao: ContractAddress,
+        _collectible_beasts: ContractAddress,
         // 1,2,3 // Survivor ID
         _scoreboard: LegacyMap::<u256, u256>,
         _scores: LegacyMap::<u256, u256>,
@@ -110,10 +111,16 @@ mod Game {
     }
 
     #[constructor]
-    fn constructor(ref self: ContractState, lords: ContractAddress, dao: ContractAddress) {
+    fn constructor(
+        ref self: ContractState,
+        lords: ContractAddress,
+        dao: ContractAddress,
+        collectible_beasts: ContractAddress
+    ) {
         // set the contract addresses
         self._lords.write(lords);
         self._dao.write(dao);
+        self._collectible_beasts.write(collectible_beasts);
 
         // set the genesis block
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
@@ -339,19 +346,7 @@ mod Game {
                 let global_entropy: u128 = _get_global_entropy(@self).into();
 
                 // get beast seed based on adventurer entropy and adventurer state
-                let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
-                // generate beast without special powers ()
-                let beast = ImplBeast::get_beast(
-                    adventurer.get_level(),
-                    ImplBeast::get_special_names(
-                        adventurer.get_level(),
-                        beast_seed,
-                        NamePrefixLength.into(),
-                        NameSuffixLength.into()
-                    ),
-                    beast_seed,
-                    ImplLoot::get_type(adventurer.weapon.id)
-                );
+                let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
 
                 // attempt to flee
                 _flee(
@@ -425,7 +420,7 @@ mod Game {
                 );
 
                 // get beast seed from entropy
-                let (beast, beast_seed) = _get_beast(@self, adventurer, adventurer_entropy);
+                let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
 
                 // get two random numbers from entropy sources
                 let (attack_rnd_1, attack_rnd_2) = _get_live_entropy(
@@ -437,9 +432,9 @@ mod Game {
                     ref self,
                     ref adventurer,
                     adventurer_id,
-                    AdventurerUtils::get_random_attack_location(attack_rnd_1),
                     beast,
                     beast_seed,
+                    attack_rnd_1,
                     attack_rnd_2,
                     false
                 );
@@ -990,6 +985,32 @@ mod Game {
         if (new_level > previous_level) {
             _emit_level_up_events(ref self, adventurer, adventurer_id, previous_level, new_level);
         }
+
+        if beast.combat_spec.level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK {
+            _mint_beast(@self, beast);
+        }
+    }
+
+    fn _mint_beast(self: @ContractState, beast: Beast) {
+        let collectible_beasts_contract = ILeetLootDispatcher {
+            contract_address: self._collectible_beasts.read()
+        };
+
+        let is_beast_minted = collectible_beasts_contract
+            .isMinted(
+                beast.id, beast.combat_spec.specials.special2, beast.combat_spec.specials.special3
+            );
+
+        if !is_beast_minted {
+            collectible_beasts_contract
+                .mint(
+                    get_caller_address(),
+                    beast.id,
+                    beast.combat_spec.specials.special2,
+                    beast.combat_spec.specials.special3,
+                    beast.combat_spec.level.into()
+                );
+        }
     }
 
     fn _process_adventurer_death(ref self: ContractState, adventurer_died_event: AdventurerDied) {
@@ -1212,38 +1233,25 @@ mod Game {
 
         match explore_result {
             ExploreResult::Beast(()) => {
-                // get a seed for the beast based on adventurer stats
-                // this seed needs to be fixed during the course of the battle
-                // so we can use it to dynamically generate the same beast during combat
-                let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
+                // get beast and beast seed
+                let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
 
-                // encounter beast and check if adventurer was ambushed
-                let (beast, was_ambushed) = ImplBeast::beast_encounter(
-                    adventurer.get_level(),
-                    adventurer.stats.wisdom,
-                    NamePrefixLength,
-                    NameSuffixLength,
-                    beast_seed
-                );
-
-                // initialize the beast health. This is the only timeD beast.starting_health should be
-                // used. In subsequent calls to attack the beast, adventurer.beast_health should be used as the persistent
-                // storage of the beast health
+                // init beast health (this is only info about beast that we store)
                 adventurer.beast_health = beast.starting_health;
 
-                // if adventurer was ambushed
-                if (was_ambushed) {
-                    // get random attack location
-                    let damage_slot = AdventurerUtils::get_random_attack_location(sub_explore_rnd);
+                // check if beast ambushed adventurer
+                let is_ambushed = adventurer.is_ambushed(beast_seed);
 
-                    // determine damage (adventurer dieing will be handled as part of the counter attack)
+                // if adventurer was ambushed
+                if (is_ambushed) {
+                    // process beast attack
                     _beast_counter_attack(
                         ref self,
                         ref adventurer,
                         adventurer_id,
-                        damage_slot,
                         beast,
                         beast_seed,
+                        sub_explore_rnd,
                         sub_explore_rnd,
                         true
                     );
@@ -1953,34 +1961,6 @@ mod Game {
         }
     }
 
-    // @notice Retrieves a beast for the adventurer to fight.
-    // @param self The contract's state.
-    // @param adventurer The adventurer who is engaging the beast.
-    // @param adventurer_entropy The entropy related to the adventurer used for generating the beast.
-    // @return (Beast, u128) A tuple containing the generated beast and its corresponding seed.
-    fn _get_beast(
-        self: @ContractState, adventurer: Adventurer, adventurer_entropy: u128
-    ) -> (Beast, u128) {
-        // get beast seed based on adventurer state and adventurer entropy
-        let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
-
-        // get and return beast using beast seed
-        (
-            ImplBeast::get_beast(
-                adventurer.get_level(),
-                ImplBeast::get_special_names(
-                    adventurer.get_level(),
-                    beast_seed,
-                    NamePrefixLength.into(),
-                    NameSuffixLength.into()
-                ),
-                beast_seed,
-                ImplLoot::get_type(adventurer.weapon.id)
-            ),
-            beast_seed
-        )
-    }
-
     // @notice Simulates an attack by the adventurer on a beast.
     // @param self The contract's state.
     // @param adventurer The adventurer who is attacking.
@@ -2001,18 +1981,8 @@ mod Game {
             .entropy
             .into();
 
-        // get beast seed based on adventurer state and adventurer entropy
-        let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
-
-        // regenerate beast from seed
-        let beast = ImplBeast::get_beast(
-            adventurer.get_level(),
-            ImplBeast::get_special_names(
-                adventurer.get_level(), beast_seed, NamePrefixLength.into(), NameSuffixLength.into()
-            ),
-            beast_seed,
-            ImplLoot::get_type(adventurer.weapon.id)
-        );
+        // get beast and beast seed
+        let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
 
         // get game entropy from storage
         let global_entropy: u128 = _get_global_entropy(@self).into();
@@ -2082,9 +2052,9 @@ mod Game {
                 ref self,
                 ref adventurer,
                 adventurer_id,
-                AdventurerUtils::get_random_attack_location(attack_rnd_1),
                 beast,
                 beast_seed,
+                attack_rnd_1,
                 attack_rnd_2,
                 false
             );
@@ -2117,20 +2087,23 @@ mod Game {
         ref self: ContractState,
         ref adventurer: Adventurer,
         adventurer_id: u256,
-        attack_location: Slot,
         beast: Beast,
         beast_seed: u128,
-        entropy: u128,
+        critical_hit_rnd: u128,
+        attack_location_rnd: u128,
         ambushed: bool
     ) {
-        // generate a random attack slot for the beast and get the armor the adventurer has at that slot
+        // get the location of the beast attack
+        let attack_location = AdventurerUtils::get_random_attack_location(attack_location_rnd);
+
+        // get adventurer armor at that location
         let armor = adventurer.get_item_at_slot(attack_location);
 
-        // convert loot item to combat spec so it can be used with combat library
+        // convert get combat spec of the armor
         let armor_combat_spec = _get_combat_spec(@self, adventurer_id, armor);
 
         // process beast counter attack
-        let (damage, critical_hit) = beast.counter_attack(armor_combat_spec, entropy);
+        let (damage, critical_hit) = beast.counter_attack(armor_combat_spec, critical_hit_rnd);
 
         // deduct the damage dealt
         adventurer.health.decrease_health(damage);
@@ -2282,17 +2255,14 @@ mod Game {
                 }
             );
 
-            // if flee attempt was unsuccessful the beast counter attacks
-            // adventurer death is handled as part of _beast_counter_attack()
-            let attack_slot = AdventurerUtils::get_random_attack_location(ambush_entropy);
-            let attack_location = ImplCombat::slot_to_u8(attack_slot);
+            // if the flee attempt failed, beast counter attacks
             _beast_counter_attack(
                 ref self,
                 ref adventurer,
                 adventurer_id,
-                attack_slot,
                 beast,
                 beast_seed,
+                ambush_entropy,
                 ambush_entropy,
                 false
             );
@@ -3052,21 +3022,11 @@ mod Game {
             .entropy
             .into();
 
-        // get beast seed based on adventurer entropy and adventurer state
-        let beast_seed: u128 = adventurer.get_beast_seed(adventurer_entropy);
+        // get beast and beast seed
+        let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
 
-        // get beast based on adventurer level and beast special names
-        ImplBeast::get_beast(
-            adventurer.get_level(),
-            ImplBeast::get_special_names(
-                adventurer.get_level(),
-                beast_seed,
-                NamePrefixLength.into(),
-                NameSuffixLength.into(),
-            ),
-            beast_seed,
-            ImplLoot::get_type(adventurer.weapon.id)
-        )
+        // return beast
+        beast
     }
 
     fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u256 {
@@ -3588,5 +3548,13 @@ mod Game {
     #[inline(always)]
     fn __event_PurchasedPotions(ref self: ContractState, purchased_potions: PurchasedPotions) {
         self.emit(Event::PurchasedPotions(purchased_potions));
+    }
+
+    #[starknet::interface]
+    trait ILeetLoot<T> {
+        fn mint(
+            ref self: T, to: ContractAddress, beast: u8, prefix: u8, suffix: u8, level: felt252
+        );
+        fn isMinted(ref self: T, beast: u8, prefix: u8, suffix: u8) -> bool;
     }
 }
