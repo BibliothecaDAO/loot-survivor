@@ -226,12 +226,12 @@ export default function Home() {
   //   adventurerVariables
   // );
 
-  // useCustomQuery(
-  //   "itemsByAdventurerQuery",
-  //   getItemsByAdventurer,
-  //   adventurerVariables,
-  //   mintAdventurer
-  // );
+  useCustomQuery(
+    "itemsByAdventurerQuery",
+    getItemsByAdventurer,
+    adventurerVariables,
+    mintAdventurer
+  );
 
   // const lastBeast = useQueriesStore(
   //   (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
