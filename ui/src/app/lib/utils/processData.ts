@@ -499,7 +499,7 @@ export function processData(
         entityLevel: ambushedByBeastEvent.beastSpecs["level"],
         entityHealth:
           ambushedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
-        special1:
+        special3:
           gameData.ITEM_NAME_PREFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special1"]
           ],
@@ -507,7 +507,7 @@ export function processData(
           gameData.ITEM_NAME_SUFFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special2"]
           ],
-        special3:
+        special1:
           gameData.ITEM_SUFFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special3"]
           ],
