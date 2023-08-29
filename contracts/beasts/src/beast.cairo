@@ -34,38 +34,6 @@ struct Beast {
 
 #[generate_trait]
 impl ImplBeast of IBeast {
-    //@notice This function generates a Beast instance based on the given adventurer's level, their special powers, a seed for randomness, and their weapon type.
-    //@dev If the adventurer's level exceeds the STARTER_BEAST_LEVEL_THRESHOLD, the beast is generated with attributes (id, starting_health, combat_spec) based on the adventurer's level and the provided seed. 
-    //Otherwise, a starter beast is generated according to the adventurer's weapon type.
-    //@param adventurer_level The level of the adventurer, represented as a u8 (unsigned 8-bit integer). 
-    //@param specials Special powers for the beast
-    //@param seed A u128 (unsigned 128-bit integer) value used to generate randomness in the Beast's attributes.
-    //@param weapon_type A Type value indicating the type of weapon that the adventurer uses.
-    //@return A Beast instance with either generated attributes or the default starter attributes, based on the adventurer's level.
-    fn get_beast(
-        adventurer_level: u8, special_names: SpecialPowers, seed: u128, weapon_type: Type
-    ) -> Beast {
-        // if the adventurer has passed the starter beast level threshold
-        if (adventurer_level > STARTER_BEAST_LEVEL_THRESHOLD) {
-            // generate a beast based on the provided seed
-            let beast_id = ImplBeast::get_beast_id(seed);
-            Beast {
-                id: beast_id,
-                starting_health: ImplBeast::get_starting_health(adventurer_level, seed),
-                combat_spec: CombatSpec {
-                    tier: ImplBeast::get_tier(beast_id),
-                    item_type: ImplBeast::get_type(beast_id),
-                    level: ImplBeast::get_level(adventurer_level, seed),
-                    specials: special_names
-                }
-            }
-        } else {
-            // if the adventurer has not passed the starter beast level threshold
-            // generate a starter beast
-            ImplBeast::get_starter_beast(weapon_type, seed)
-        }
-    }
-
     // get_starter_beast returns a beast intended for the first battle of the game
     // the beast is chosen based on the type of weapon the adventurer starts with
     // the beast is chosen to be weak against the weapon type
@@ -98,44 +66,15 @@ impl ImplBeast of IBeast {
         }
 
         Beast {
-            id: beast_id, starting_health: STARTER_BEAST_HEALTH, combat_spec: CombatSpec {
+            id: beast_id,
+            starting_health: STARTER_BEAST_HEALTH,
+            combat_spec: CombatSpec {
                 tier: ImplBeast::get_tier(beast_id),
                 item_type: ImplBeast::get_type(beast_id),
                 level: 1,
-                specials: SpecialPowers {
-                    special1: 0, special2: 0, special3: 0
-                }
+                specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
             }
         }
-    }
-
-    fn beast_encounter(
-        adventurer_level: u8,
-        adventurer_wisdom: u8,
-        special2_size: u8,
-        special3_size: u8,
-        battle_fixed_seed: u128
-    ) -> (Beast, bool) {
-        // generate a beast based on the seed
-        // @dev: since we don't have default values for func parameters in cairo
-        //       we need to pass in a dummy value for the unused type param
-        let unused_type_param = Type::Ring(());
-        let beast = ImplBeast::get_beast(
-            adventurer_level,
-            ImplBeast::get_special_names(
-                adventurer_level, battle_fixed_seed, special2_size.into(), special3_size.into()
-            ),
-            battle_fixed_seed,
-            unused_type_param
-        );
-
-        // check if beast ambushed adventurer
-        let ambushed_adventurer = ImplBeast::ambush(
-            adventurer_level, adventurer_wisdom, battle_fixed_seed
-        );
-
-        // return beast and whether or not the adventurer was ambushed
-        (beast, ambushed_adventurer)
     }
 
     fn get_beast_id(seed: u128) -> u8 {
@@ -153,14 +92,14 @@ impl ImplBeast of IBeast {
     }
 
 
-    fn get_starting_health(adventurer_level: u8, entropy: u128, ) -> u16 {
+    fn get_starting_health(adventurer_level: u8, entropy: u128,) -> u16 {
         // Delete this function to combat system but pass in difficulty parameters
         // which control when and how quickly beasts health increases
         let beast_health = ImplCombat::get_enemy_starting_health(adventurer_level, entropy);
 
         // if the beast health provdied by combat library
         // is higher than the max allowed for a beast
-        if beast_health >= MAXIMUM_HEALTH {
+        if beast_health > MAXIMUM_HEALTH {
             // return max
             MAXIMUM_HEALTH
         } else {
@@ -238,19 +177,6 @@ impl ImplBeast of IBeast {
         )
     }
 
-    // ambush is used to determine if an adventurer avoided a beast ambush
-    // @param adventurer_level: the level of the adventurer
-    // @param adventurer_wisdom: the wisdom of the adventurer
-    // @param entropy: the entropy used to generate the random number
-    // @return: true if the ambush was successful, false otherwise
-    fn ambush(adventurer_level: u8, adventurer_wisdom: u8, battle_fixed_entropy: u128) -> bool {
-        // Delegate ambushed calculation to combat system which uses an avoidance formula
-        // so we invert the result and use wisdom for the trait to avoid
-        !ImplCombat::ability_based_avoid_threat(
-            adventurer_level, adventurer_wisdom, battle_fixed_entropy
-        )
-    }
-
     // attempt_flee is used to determine if an adventurer is able to flee from a beast
     // @param adventurer_level: the level of the adventurer
     // @param adventurer_dexterity: the dexterity of the adventurer
@@ -295,174 +221,31 @@ impl ImplBeast of IBeast {
     }
 
     fn get_type(id: u8) -> Type {
-        assert(id != 0 && id <= MAX_ID, 'invalid beast id');
-        if id == Warlock
-            || id == Typhon
-            || id == Jiangshi
-            || id == Anansi
-            || id == Basilisk
-            || id == Gorgon
-            || id == Kitsune
-            || id == Lich
-            || id == Chimera
-            || id == Wendigo
-            || id == Rakshasa
-            || id == Werewolf
-            || id == Banshee
-            || id == Draugr
-            || id == Vampire
-            || id == Goblin
-            || id == Ghoul
-            || id == Wraith
-            || id == Sprite
-            || id == Kappa
-            || id == Fairy
-            || id == Leprechaun
-            || id == Kelpie
-            || id == Pixie
-            || id == Gnome {
+        assert(id != 0, 'invalid beast id');
+        if (id <= 25) {
             Type::Magic_or_Cloth(())
-        } else if id == Griffin
-            || id == Manticore
-            || id == Phoenix
-            || id == Dragon
-            || id == Minotaur
-            || id == Qilin
-            || id == Ammit
-            || id == Nue
-            || id == Skinwalker
-            || id == Chupacabra
-            || id == Weretiger
-            || id == Wyvern
-            || id == Roc
-            || id == Harpy
-            || id == Pegasus
-            || id == Hippogriff
-            || id == Fenrir
-            || id == Jaguar
-            || id == Satori
-            || id == DireWolf
-            || id == Bear
-            || id == Wolf
-            || id == Mantis
-            || id == Spider
-            || id == Rat {
+        } else if id <= 50 {
             Type::Blade_or_Hide(())
-        } else if id == Kraken
-            || id == Colossus
-            || id == Balrog
-            || id == Leviathan
-            || id == Tarrasque
-            || id == Titan
-            || id == Nephilim
-            || id == Behemoth
-            || id == Hydra
-            || id == Juggernaut
-            || id == Oni
-            || id == Jotunn
-            || id == Ettin
-            || id == Cyclops
-            || id == Giant
-            || id == NemeanLion
-            || id == Berserker
-            || id == Yeti
-            || id == Golem
-            || id == Ent
-            || id == Troll
-            || id == Bigfoot
-            || id == Ogre
-            || id == Orc
-            || id == Skeleton {
+        } else if id <= 75 {
             Type::Bludgeon_or_Metal(())
         } else {
-            panic_with_felt252('unknown beast id')
+            panic_with_felt252('invalid beast id')
         }
     }
 
     fn get_tier(id: u8) -> Tier {
-        assert(id != 0 && id <= MAX_ID, 'invalid beast id');
-        if id == Warlock
-            || id == Typhon
-            || id == Jiangshi
-            || id == Anansi
-            || id == Basilisk
-            || id == Griffin
-            || id == Manticore
-            || id == Phoenix
-            || id == Dragon
-            || id == Minotaur
-            || id == Kraken
-            || id == Colossus
-            || id == Balrog
-            || id == Leviathan
-            || id == Tarrasque {
+        if ((id > 0 && id <= 5) || (id >= 26 && id <= 30) || (id >= 51 && id <= 55)) {
             Tier::T1(())
-        } else if id == Gorgon
-            || id == Kitsune
-            || id == Lich
-            || id == Chimera
-            || id == Wendigo
-            || id == Qilin
-            || id == Ammit
-            || id == Nue
-            || id == Skinwalker
-            || id == Chupacabra
-            || id == Titan
-            || id == Nephilim
-            || id == Behemoth
-            || id == Hydra
-            || id == Juggernaut {
+        } else if ((id >= 6 && id <= 10) || (id >= 31 && id <= 35) || (id >= 56 && id <= 60)) {
             Tier::T2(())
-        } else if id == Rakshasa
-            || id == Werewolf
-            || id == Banshee
-            || id == Draugr
-            || id == Vampire
-            || id == Weretiger
-            || id == Wyvern
-            || id == Roc
-            || id == Harpy
-            || id == Pegasus
-            || id == Oni
-            || id == Jotunn
-            || id == Ettin
-            || id == Cyclops
-            || id == Giant {
+        } else if ((id >= 11 && id <= 15) || (id >= 36 && id <= 40) || (id >= 61 && id <= 65)) {
             Tier::T3(())
-        } else if id == Goblin
-            || id == Ghoul
-            || id == Wraith
-            || id == Sprite
-            || id == Kappa
-            || id == Hippogriff
-            || id == Fenrir
-            || id == Jaguar
-            || id == Satori
-            || id == DireWolf
-            || id == NemeanLion
-            || id == Berserker
-            || id == Yeti
-            || id == Golem
-            || id == Ent {
+        } else if ((id >= 16 && id <= 20) || (id >= 41 && id <= 45) || (id >= 66 && id <= 70)) {
             Tier::T4(())
-        } else if id == Fairy
-            || id == Leprechaun
-            || id == Kelpie
-            || id == Pixie
-            || id == Gnome
-            || id == Bear
-            || id == Wolf
-            || id == Mantis
-            || id == Spider
-            || id == Rat
-            || id == Troll
-            || id == Bigfoot
-            || id == Ogre
-            || id == Orc
-            || id == Skeleton {
+        } else if ((id >= 21 && id <= 25) || (id >= 46 && id <= 50) || (id >= 71 && id <= 75)) {
             Tier::T5(())
         } else {
-            panic_with_felt252('unknown beast id')
+            panic_with_felt252('invalid beast id')
         }
     }
 }
@@ -472,6 +255,7 @@ impl ImplBeast of IBeast {
 // ---------------------------
 #[cfg(test)]
 mod tests {
+    use debug::PrintTrait;
     use core::serde::Serde;
     use traits::{TryInto, Into};
     use option::OptionTrait;
@@ -503,7 +287,7 @@ mod tests {
     };
 
     #[test]
-    #[should_panic(expected: ('invalid beast id', ))]
+    #[should_panic(expected: ('invalid beast id',))]
     #[available_gas(70000)]
     fn test_get_tier_invalid_id() {
         // provide an ID that doesn't exist
@@ -537,7 +321,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('invalid beast id', ))]
+    #[should_panic(expected: ('invalid beast id',))]
     #[available_gas(70000)]
     fn test_get_type_invalid_id() {
         // provide an ID that doesn't exist
@@ -566,94 +350,18 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(200000)]
-    fn test_ambush() {
-        // verify that below difficulty cliff, adventurers are immune to ambushes
-        let mut adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL - 1;
-        let mut adventurer_wisdom = 0;
-        let mut entropy = 1;
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
-            'no ambush below difficult cliff'
-        );
-        entropy = 2;
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
-            'no ambush below difficult cliff'
-        );
-        entropy = 3;
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
-            'no ambush below difficult cliff'
-        );
-        entropy = 4;
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
-            'no ambush below difficult cliff'
-        );
-        entropy = 5;
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
-            'no ambush below difficult cliff'
-        );
-
-        // go above difficulty cliff
-        adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL + 1;
-        // worst entropy is one less than adventurer_level
-        // since this adventurer has no wisdom, this will result in them getting ambushed
-        entropy = (adventurer_level - 1).into();
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == true,
-            'unwise adventurer gets ambushed'
-        );
-
-        // if adventurer has at least one wisdom stat after the difficult cliff
-        // they remain immune to ambushes
-        adventurer_wisdom = 1;
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
-            'wise adventurer avoids ambush'
-        );
-        entropy = 1;
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
-            'wise adventurer avoids ambush'
-        );
-        entropy = 2;
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
-            'wise adventurer avoids ambush'
-        );
-        entropy = 3;
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
-            'wise adventurer avoids ambush'
-        );
-        entropy = 4;
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
-            'wise adventurer avoids ambush'
-        );
-        entropy = 5;
-        assert(
-            ImplBeast::ambush(adventurer_level, adventurer_wisdom, entropy) == false,
-            'wise adventurer avoids ambush'
-        );
-    }
-
-    #[test]
     #[available_gas(250000)]
     fn test_counter_attack() {
         // initialize warlock beast
         let warlock = Warlock;
         let mut beast = Beast {
-            id: warlock, starting_health: 100, combat_spec: CombatSpec {
+            id: warlock,
+            starting_health: 100,
+            combat_spec: CombatSpec {
                 item_type: ImplBeast::get_type(warlock),
                 tier: ImplBeast::get_tier(warlock),
                 level: 5,
-                specials: SpecialPowers {
-                    special1: 0, special2: 0, special3: 0, 
-                }
+                specials: SpecialPowers { special1: 0, special2: 0, special3: 0, }
             }
         };
 
@@ -662,9 +370,7 @@ mod tests {
             item_type: Type::Bludgeon_or_Metal(()),
             tier: Tier::T5(()),
             level: 1,
-            specials: SpecialPowers {
-                special1: 0, special2: 0, special3: 0, 
-            }
+            specials: SpecialPowers { special1: 0, special2: 0, special3: 0, }
         };
 
         let entropy = 0;
@@ -685,21 +391,19 @@ mod tests {
             item_type: Type::Blade_or_Hide(()),
             tier: Tier::T1(()),
             level: 20,
-            specials: SpecialPowers {
-                special1: 0, special2: 0, special3: 0
-            }
+            specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
         };
 
         // initialize goblin beast
         let goblin = Goblin;
         let beast = Beast {
-            id: goblin, starting_health: 100, combat_spec: CombatSpec {
+            id: goblin,
+            starting_health: 100,
+            combat_spec: CombatSpec {
                 item_type: ImplBeast::get_type(goblin),
                 tier: ImplBeast::get_tier(goblin),
                 level: 5,
-                specials: SpecialPowers {
-                    special1: 0, special2: 0, special3: 0
-                }
+                specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
             }
         };
 
@@ -725,72 +429,57 @@ mod tests {
     #[available_gas(500000)]
     fn test_get_level() {
         let mut adventurer_level = 1;
-        let range_level_increase = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL;
-        let level_multiplier = CombatSettings::LEVEL_MULTIPLIER::NORMAL;
 
-        // beast level and adventurer level will be same up to the difficulty cliff
-        let entity_level = ImplBeast::get_level(adventurer_level, 0);
-        assert(entity_level == adventurer_level.into(), 'lvl should eql advr lvl');
+        // at level 1, we'll get a beast with level 1 or 2
+        assert(ImplBeast::get_level(adventurer_level, 0) == 1, 'lvl should eql advr lvl');
+        assert(ImplBeast::get_level(adventurer_level, 1) == 2, 'lvl should eql advr lvl');
+        assert(ImplBeast::get_level(adventurer_level, 2) == 1, 'lvl should eql advr lvl');
+        assert(ImplBeast::get_level(adventurer_level, 3) == 2, 'lvl should eql advr lvl');
 
-        adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL + 1;
-        let entity_level = ImplBeast::get_level(adventurer_level, 0);
-        assert(entity_level == 3, 'beast lvl should be 3');
-
-        let entity_level = ImplBeast::get_level(adventurer_level, 1);
-        assert(entity_level == 4, 'beast lvl should be 4');
-
-        let entity_level = ImplBeast::get_level(adventurer_level, 2);
-        assert(entity_level == 5, 'beast lvl should be 5');
-
-        let entity_level = ImplBeast::get_level(adventurer_level, 3);
-        assert(entity_level == 6, 'beast lvl should be 6');
-
-        let entity_level = ImplBeast::get_level(adventurer_level, 4);
-        assert(entity_level == 7, 'beast lvl should be 7');
-
-        let entity_level = ImplBeast::get_level(adventurer_level, 5);
-        assert(entity_level == 8, 'beast lvl should be 8');
-
-        let entity_level = ImplBeast::get_level(adventurer_level, 6);
-        assert(entity_level == 9, 'beast lvl should be 9');
-
-        let entity_level = ImplBeast::get_level(adventurer_level, 7);
-        assert(entity_level == 10, 'beast lvl should be 10');
-
-        // verify we roll over back to beast level 1
-        let entity_level = ImplBeast::get_level(adventurer_level, 8);
-        assert(entity_level == 3, 'entity lvl should be 3');
+        // advance adventurer to level 4
+        adventurer_level = 4;
+        assert(ImplBeast::get_level(adventurer_level, 0) == 1, 'beast lvl should be 1');
+        assert(ImplBeast::get_level(adventurer_level, 1) == 2, 'beast lvl should be 2');
+        assert(ImplBeast::get_level(adventurer_level, 2) == 3, 'beast lvl should be 3');
+        assert(ImplBeast::get_level(adventurer_level, 3) == 4, 'beast lvl should be 4');
+        assert(ImplBeast::get_level(adventurer_level, 4) == 5, 'beast lvl should be 5');
+        assert(ImplBeast::get_level(adventurer_level, 5) == 6, 'beast lvl should be 6');
+        assert(ImplBeast::get_level(adventurer_level, 6) == 7, 'beast lvl should be 7');
+        assert(ImplBeast::get_level(adventurer_level, 7) == 8, 'beast lvl should be 8');
+        // verify we rollover back to 1 for our lvl4 adventurer
+        assert(ImplBeast::get_level(adventurer_level, 8) == 1, 'beast lvl should be 1');
     }
 
     #[test]
     #[available_gas(200000)]
     fn test_get_starting_health() {
-        let mut adventurer_level = 1;
-        let mut entropy = 0;
+        let adventurer_level = 1;
 
-        // lowest beast starting health is 6
-        let starting_health = ImplBeast::get_starting_health(adventurer_level, entropy);
-        assert(starting_health == 6, 'minimum beast health is 6');
+        // test level 1 adventurer
+        assert(
+            ImplBeast::get_starting_health(adventurer_level, 0) == 11, 'minimum beast health is 11'
+        );
 
-        // with adventurer at 4x difficulty cliff
-        // beast health will start to increase
-        // entropy 0 gives us lower end
-        adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL * 4;
-        let starting_health = ImplBeast::get_starting_health(adventurer_level, entropy);
-        assert(starting_health == 21, 'beast health should be 21');
+        // test with adventurer at 4x difficulty cliff
+        // entropy 0 gives us minimum beast health
+        let adventurer_level = CombatSettings::DIFFICULTY_INCREASE_RATE::NORMAL * 4;
+        assert(
+            ImplBeast::get_starting_health(adventurer_level, 0) == 11, 'beast health should be 11'
+        );
 
-        // test upper end up health
-        // with our default settings, the above tests demonstrate that an adventurer on level 16 will discover beasts
-        // with health between 21 and 74. When they hit level 20, max health will increase by an additional 15 to 89
-        entropy = 74;
-        let starting_health = ImplBeast::get_starting_health(adventurer_level, entropy);
-        assert(starting_health == 95, 'beast health should be 95');
+        // test upper end up beast health at 4x difficulty cliff
+        assert(
+            ImplBeast::get_starting_health(adventurer_level, 74) == 85, 'beast health should be 85'
+        );
 
         // test extremes
-        adventurer_level = 255; // max u8
-        entropy = 340282366920938463463374607431768211455; // max u128
-        let starting_health = ImplBeast::get_starting_health(adventurer_level, entropy);
-        assert(starting_health == MAXIMUM_HEALTH, 'beast health should be max');
+        let adventurer_level = 255; // max u8
+        assert(
+            ImplBeast::get_starting_health(
+                adventurer_level, 340282366920938463463374607431768211455
+            ) == MAXIMUM_HEALTH,
+            'beast health should be max'
+        );
     }
 
     #[test]
@@ -813,39 +502,16 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(400000)]
-    fn test_get_beast() {
-        let adventurer_level = 2;
-        let special_names = SpecialPowers { special1: 0, special2: 0, special3: 0 };
-        let seed = 1;
-
-        // generate beast for seed
-        let starting_weapon = Type::Magic_or_Cloth(());
-        let original_beast = ImplBeast::get_beast(
-            adventurer_level, special_names, seed, starting_weapon
-        );
-
-        // adjust the other input paramters
-        let adventurer_level = 3;
-        let special_names = SpecialPowers { special1: 1, special2: 1, special3: 1 };
-        let new_beast = ImplBeast::get_beast(
-            adventurer_level, special_names, seed, starting_weapon
-        );
-
-        // verify beasts are the same since the seed did not change
-        assert(original_beast.id == new_beast.id, 'seed produced two diff beastIds');
-    }
-    #[test]
     #[available_gas(250000)]
     fn test_get_gold_reward() {
         let mut beast = Beast {
-            id: 1, starting_health: 100, combat_spec: CombatSpec {
+            id: 1,
+            starting_health: 100,
+            combat_spec: CombatSpec {
                 tier: Tier::T1(()),
                 item_type: Type::Magic_or_Cloth(()),
                 level: 10,
-                specials: SpecialPowers {
-                    special1: 3, special2: 1, special3: 2
-                },
+                specials: SpecialPowers { special1: 3, special2: 1, special3: 2 },
             },
         };
 

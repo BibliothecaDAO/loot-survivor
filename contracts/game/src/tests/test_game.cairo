@@ -28,8 +28,7 @@ mod tests {
             MAX_BLOCK_COUNT
         },
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, item_primitive::ItemPrimitive,
-        bag::{Bag, IBag},
-        adventurer_utils::AdventurerUtils
+        bag::{Bag, IBag}, adventurer_utils::AdventurerUtils
     };
     use beasts::constants::{BeastSettings, BeastId};
 
@@ -38,6 +37,10 @@ mod tests {
     }
 
     fn DAO() -> ContractAddress {
+        contract_address_const::<1>()
+    }
+
+    fn COLLECTIBLE_BEASTS() -> ContractAddress {
         contract_address_const::<1>()
     }
 
@@ -54,6 +57,7 @@ mod tests {
         let mut calldata = ArrayTrait::new();
         calldata.append(DAO().into());
         calldata.append(DAO().into());
+        calldata.append(COLLECTIBLE_BEASTS().into());
 
         let (address0, _) = deploy_syscall(
             Game::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
@@ -71,7 +75,7 @@ mod tests {
         };
 
         let starting_stats = Stats {
-            strength: 0, dexterity: 2, vitality: 0, intelligence: 2, wisdom: 2, charisma: 0, 
+            strength: 0, dexterity: 2, vitality: 0, intelligence: 2, wisdom: 2, charisma: 0,
         };
 
         game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta, starting_stats);
@@ -94,7 +98,7 @@ mod tests {
     fn new_adventurer_max_charisma() -> IGameDispatcher {
         let mut game = setup(1000);
         let starting_stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 6, 
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 6,
         };
 
         game
@@ -917,9 +921,7 @@ mod tests {
             // verify they are no longer in bag
             assert(!bag.contains(*items_to_equip.at(i)), 'item should not be in bag');
             // and equipped on the adventurer
-            assert(
-                adventurer.is_equipped(*purchased_items_span.at(i)), 'item should be equipped'
-            );
+            assert(adventurer.is_equipped(*purchased_items_span.at(i)), 'item should be equipped');
             i += 1;
         };
     }

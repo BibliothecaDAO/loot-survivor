@@ -14,7 +14,7 @@ use super::{
             MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, HEALTH_INCREASE_PER_VITALITY, MAX_GOLD,
             MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS,
             ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, ClassStatBoosts,
-            MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, PENDENT_G20_STAT_BONUS
+            MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, PENDENT_G20_STAT_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
     }
@@ -22,7 +22,10 @@ use super::{
 use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
 use lootitems::{
     loot::{Loot, ILoot, ImplLoot},
-    statistics::{constants, item_tier, item_type, constants::{ItemSuffix, ItemId}}
+    statistics::{
+        constants, item_tier, item_type,
+        constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength}
+    }
 };
 use combat::{
     combat::{ImplCombat, CombatSpec, SpecialPowers}, constants::CombatEnums::{Type, Tier, Slot}
@@ -267,40 +270,55 @@ impl ImplAdventurer of IAdventurer {
         ImplCombat::get_level_from_xp(self.xp)
     }
 
-    // beast_encounter psuedo discovers a beast for an adventurer
-    // since the beast is generated at runtime, we simply need to set the
-    // beasts health which will enable the contract to detect the adventurer is in a battle
-    // allowing adventurer to call "attack"
-    // @param self: Adventurer to discover beast for
-    // @param entropy: Entropy for generating beast
-    // @return Adventurer: Adventurer with beast discovered
-    fn beast_encounter(ref self: Adventurer, adventurer_entropy: u128) -> Beast {
-        // generate battle fixed entropy by combining adventurer xp and adventurer entropy
+    fn get_beast(self: Adventurer, adventurer_entropy: u128) -> (Beast, u128) {
         let beast_seed: u128 = self.get_beast_seed(adventurer_entropy);
-        let special_names = ImplBeast::get_special_names(
-            self.get_level(),
-            beast_seed,
-            constants::NamePrefixLength.into(),
-            constants::NameSuffixLength.into()
-        );
+        let adventurer_level = self.get_level();
 
-        // get beast using battle fixed seed
-        // this is important because in the context of this call
-        // the player has just encountered the beast and will
-        // subsequently be calling "attack" to attack the beast
-        // to enable the adventurer state to fit in a single 252felt, we
-        // don't store anything about the beast in the adventurer state
-        // except it's health. Instead the beast is generated at run-time
-        // via the battle_fixed_seed
-        let beast = ImplBeast::get_beast(
-            self.get_level(), special_names, beast_seed, ImplLoot::get_type(self.weapon.id)
-        );
+        // @dev ideally this would be a setting but to minimize gas we're using hardcoded value so we can use cheaper equal operator
+        if (adventurer_level == 1) {
+            (
+                ImplBeast::get_starter_beast(ImplLoot::get_type(self.weapon.id), beast_seed),
+                beast_seed
+            )
+        } else {
+            let beast_id = ImplBeast::get_beast_id(beast_seed);
+            let starting_health = ImplBeast::get_starting_health(adventurer_level, beast_seed);
+            let beast_tier = ImplBeast::get_tier(beast_id);
+            let beast_type = ImplBeast::get_type(beast_id);
+            let beast_level = ImplBeast::get_level(adventurer_level, beast_seed);
+            let mut special_names = SpecialPowers { special1: 0, special2: 0, special3: 0 };
 
-        // otherwise generate random starting health for the beast
-        self.set_beast_health(beast.starting_health);
+            if (beast_level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK) {
+                special_names =
+                    ImplBeast::get_special_names(
+                        adventurer_level,
+                        beast_seed,
+                        constants::NamePrefixLength.into(),
+                        constants::NameSuffixLength.into()
+                    );
+            }
 
-        // return beast
-        beast
+            let beast = Beast {
+                id: beast_id,
+                starting_health: starting_health,
+                combat_spec: CombatSpec {
+                    tier: beast_tier,
+                    item_type: beast_type,
+                    level: beast_level,
+                    specials: special_names
+                }
+            };
+
+            (beast, beast_seed)
+        }
+    }
+
+    // @notice checks if the adventurer was ambushed
+    // @param self: Adventurer to check
+    // @param entropy: Entropy for determining if the adventurer was ambushed
+    // @return bool: True if the adventurer was ambushed, false if not
+    fn is_ambushed(self: Adventurer, entropy: u128) -> bool {
+        !ImplCombat::ability_based_avoid_threat(self.get_level(), self.stats.wisdom, entropy)
     }
 
     // Attempts to discover treasure during an adventure.
@@ -1549,6 +1567,44 @@ mod tests {
         ImplAdventurer::get_beast_seed(adventurer, adventurer_entropy);
         adventurer.xp = 100;
         ImplAdventurer::get_beast_seed(adventurer, adventurer_entropy);
+    }
+
+    #[test]
+    #[available_gas(1064170)]
+    fn test_get_beast() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+            }
+        );
+
+        let entropy = 1;
+        // check new adventurer (level 1) gets a starter beast
+        let (beast, beast_seed) = adventurer.get_beast(entropy);
+        assert(beast.combat_spec.level == 1, 'beast should be lvl1');
+        assert(beast.combat_spec.specials.special1 == 0, 'beast should have no special1');
+        assert(beast.combat_spec.specials.special2 == 0, 'beast should have no special2');
+        assert(beast.combat_spec.specials.special3 == 0, 'beast should have no special3');
+
+        let entropy = 2;
+        // check beast is still starter beast with different entropy source
+        let (beast, beast_seed) = adventurer.get_beast(entropy);
+        assert(beast.combat_spec.level == 1, 'beast should be lvl1');
+        assert(beast.combat_spec.specials.special1 == 0, 'beast should have no special1');
+        assert(beast.combat_spec.specials.special2 == 0, 'beast should have no special2');
+        assert(beast.combat_spec.specials.special3 == 0, 'beast should have no special3');
+
+        // advance adventurer to level 2
+        adventurer.xp = 4;
+        let entropy = 1;
+        let (beast1, beast_seed) = adventurer.get_beast(entropy);
+        let entropy = 2;
+        let (beast2, beast_seed) = adventurer.get_beast(entropy);
+
+        // verify beasts are the same since the seed did not change
+        assert(beast1.id != beast2.id, 'beasts not unique');
     }
 
     #[test]
@@ -3600,5 +3656,42 @@ mod tests {
         adventurer.drop_item(ring.id);
         assert(adventurer.ring.id == 0, 'ring should be 0');
         assert(adventurer.ring.xp == 0, 'ring xp should be 0');
+    }
+
+    #[test]
+    #[available_gas(272270)]
+    fn test_is_ambush() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+            }
+        );
+
+        // without any wisdom, adventurer should get ambushed by all entropy
+        assert(adventurer.is_ambushed(1), 'no wisdom should get ambushed');
+        assert(adventurer.is_ambushed(2), 'no wisdom should get ambushed');
+        assert(adventurer.is_ambushed(3), 'no wisdom should get ambushed');
+        assert(adventurer.is_ambushed(4), 'no wisdom should get ambushed');
+        assert(adventurer.is_ambushed(5), 'no wisdom should get ambushed');
+
+        // level 1 adventurer with 1 wisdom should never get ambushed
+        adventurer.stats.wisdom = 1;
+        assert(!adventurer.is_ambushed(1), 'wise adventurer avoids ambush');
+        assert(!adventurer.is_ambushed(2), 'wise adventurer avoids ambush');
+        assert(!adventurer.is_ambushed(3), 'wise adventurer avoids ambush');
+        assert(!adventurer.is_ambushed(4), 'wise adventurer avoids ambush');
+        assert(!adventurer.is_ambushed(5), 'wise adventurer avoids ambush');
+        assert(!adventurer.is_ambushed(6), 'wise adventurer avoids ambush');
+
+        // increase adventurer to level 2, now chance is 1/2
+        adventurer.xp = 4;
+        assert(adventurer.is_ambushed(1), 'should be ambushed 1');
+        assert(!adventurer.is_ambushed(2), 'should not be ambushed 2');
+        assert(adventurer.is_ambushed(3), 'should be ambushed 3');
+        assert(!adventurer.is_ambushed(4), 'should not be ambushed 4');
+        assert(adventurer.is_ambushed(5), 'should be ambushed 5');
+        assert(!adventurer.is_ambushed(6), 'should not be ambushed 6');
     }
 }
