@@ -207,15 +207,8 @@ fn get(id: u8) -> Tier {
     } else if id == ItemId::HeavyGloves {
         Tier::T5(())
     } else {
-        panic_with_felt252('invalid loot item id')
+        Tier::T5(())
     }
-}
-
-#[test]
-#[should_panic(expected: ('invalid loot item id', ))]
-#[available_gas(3000000)]
-fn test_get_item_tier_invalid() {
-    get(255);
 }
 
 #[test]
@@ -304,4 +297,6 @@ fn test_get_item_tiers() {
     let shirt_id = ItemId::Shirt;
     let shirt_tier = get(shirt_id);
     assert(shirt_tier == Tier::T5(()), 'shirt is T5');
+
+    assert(get(255) == Tier::T5(()), 'undefined is T5');
 }
