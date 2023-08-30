@@ -353,6 +353,7 @@ class Config:
             58: "Rumbling Catacomb",  # T2
             59: "Whirling Cyclone",  # T2
             60: "Erupting Earth",  # T2
+            61: "Subterranean Tremor",  # T3
             62: "Falling Chandelier",  # T3
             63: "Collapsing Bridge",  # T3
             64: "Raging Sandstorm",  # T3

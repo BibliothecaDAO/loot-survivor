@@ -39,7 +39,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
   const queryData = useQueriesStore((state) => state.data);
 
   const discoveriesData = useCustomQuery("discoveriesQuery", getDiscoveries, {
-    adventurerId: profile ? profile : adventurer?.id ?? 0,
+    id: profile ? profile : adventurer?.id ?? 0,
   });
 
   const battlesData = useCustomQuery(
@@ -80,6 +80,8 @@ export default function EncountersScreen({ profile }: EncountersProps) {
     }
   }, [discoveriesData, battlesData, data]); // Runs whenever 'data' changes
 
+  console.log(sortedCombined);
+
   const totalPages = Math.ceil(sortedCombined.length / encountersPerPage);
 
   const handleClick = (newPage: number): void => {
@@ -113,7 +115,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
           )}
           <div className="flex flex-col items-center gap-2 overflow-auto">
             {displayEncounters.map((encounter: any, index: number) => {
-              console.log(encounter);
+              console.log(displayEncounters);
               return (
                 <div
                   className="w-full p-1 sm:p-2 text-left border border-terminal-green"

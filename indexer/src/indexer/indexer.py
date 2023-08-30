@@ -1008,7 +1008,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
             "adventurerHealth": encode_int_as_bytes(
                 abb.adventurer_state["adventurer"]["health"]
             ),
-            "attacker": check_exists_int(1),
+            "attacker": check_exists_int(2),
             "fled": check_exists_int(0),
             "damageDealt": encode_int_as_bytes(0),
             "criticalHit": abb.critical_hit,

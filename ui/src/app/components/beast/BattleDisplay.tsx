@@ -235,16 +235,16 @@ export const NotificationBattleDisplay = ({
       return (
         <p>
           You failed to flee the {beastName || ""} and were attacked taking{" "}
-          {battleData[0]?.damageTaken} damage
-          {battleData[0]?.criticalHit && ", a critical hit"}!
+          {battleData[1]?.damageTaken} damage
+          {battleData[1]?.criticalHit && ", a critical hit"}!
         </p>
       );
     } else if (KilledTryingToFlee) {
       return (
         <p>
           You were killed trying to flee the {beastName || ""} taking{" "}
-          {battleData[0]?.damageTaken} damage
-          {battleData[0]?.criticalHit && ", a critical hit"}!
+          {battleData[1]?.damageTaken} damage
+          {battleData[1]?.criticalHit && ", a critical hit"}!
         </p>
       );
     } else if (Attacked) {
