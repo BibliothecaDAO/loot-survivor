@@ -617,6 +617,7 @@ export function parseEvents(
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
           killedByBeast: parseInt(raw.data[40]),
           killedByObstacle: parseInt(raw.data[41]),
+          callerAddress: raw.data[42],
         };
         const adventurerDiedEvent = processData(
           adventurerDiedData,

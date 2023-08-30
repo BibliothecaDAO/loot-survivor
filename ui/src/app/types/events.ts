@@ -295,6 +295,7 @@ export type AdventurerDiedEvent = {
   adventurerState: AdventurerState;
   killedByBeast: u8;
   killedByObstacle: u8;
+  callerAddress: ContractAddress;
 };
 
 export type AdventurerLeveledUpEvent = {

@@ -845,6 +845,7 @@ export class GameData {
       58: "Rumbling Catacomb",
       59: "Whirling Cyclone",
       60: "Erupting Earth",
+      61: "Subterranean Tremor",
       62: "Falling Chandelier",
       63: "Collapsing Bridge",
       64: "Raging Sandstorm",

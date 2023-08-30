@@ -429,15 +429,15 @@ export function processData(
         entityHealth:
           discoveredBeastEvent.adventurerState["adventurer"]["beastHealth"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             discoveredBeastEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             discoveredBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             discoveredBeastEvent.beastSpecs["specials"]["special3"]
           ],
         ambushed: false,
@@ -451,15 +451,15 @@ export function processData(
           discoveredBeastEvent.adventurerState["adventurer"]["beastHealth"],
         level: discoveredBeastEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             discoveredBeastEvent.beastSpecs["specials"]["special3"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             discoveredBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             discoveredBeastEvent.beastSpecs["specials"]["special1"]
           ],
         seed: discoveredBeastEvent.seed,
@@ -500,15 +500,15 @@ export function processData(
         entityHealth:
           ambushedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
         special:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special1:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special3"]
           ],
         ambushed: true,
@@ -522,15 +522,15 @@ export function processData(
           ambushedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
         level: ambushedByBeastEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: ambushedByBeastEvent.seed,
@@ -547,15 +547,15 @@ export function processData(
           ambushedByBeastEvent.adventurerState["adventurer"]["beastHealth"],
         beastLevel: ambushedByBeastEvent.beastSpecs["level"],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
+          gameData.ITEM_SUFFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special1"]
           ],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special2"]
           ],
         special3:
-          gameData.ITEM_SUFFIXES[
+          gameData.ITEM_NAME_SUFFIXES[
             ambushedByBeastEvent.beastSpecs["specials"]["special3"]
           ],
         seed: ambushedByBeastEvent.seed,
@@ -871,7 +871,16 @@ export function processData(
       return processAdventurerState(newHishScoreEvent, currentAdventurer);
     case "AdventurerDied":
       const adventurerDiedEvent = event as AdventurerDiedEvent;
-      return processAdventurerState(adventurerDiedEvent, currentAdventurer);
+      const adventurerDiedAdventurerData = processAdventurerState(
+        adventurerDiedEvent,
+        currentAdventurer
+      );
+      const adventurerDiedData = {
+        killedByBeast: adventurerDiedEvent.killedByBeast,
+        killedByObstacle: adventurerDiedEvent.killedByObstacle,
+        callerAddress: adventurerDiedEvent.callerAddress,
+      };
+      return [adventurerDiedAdventurerData, adventurerDiedData];
     case "AdventurerLeveledUp":
       const adventurerLeveledUpEvent = event as AdventurerLeveledUpEvent;
       return processAdventurerState(

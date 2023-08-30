@@ -382,9 +382,14 @@ export function syscalls({
         );
         console.log(adventurerDiedEvent.name);
         setData("adventurerByIdQuery", {
-          adventurers: [adventurerDiedEvent.data],
+          adventurers: [adventurerDiedEvent.data[0]],
         });
-        setAdventurer(adventurerDiedEvent.data);
+        const deadAdventurerIndex =
+          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+            (adventurer: any) => adventurer.id == adventurerDiedEvent.data[0].id
+          );
+        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
+        setAdventurer(adventurerDiedEvent.data[0]);
         const killedByObstacle =
           discoveries.reverse()[0]?.discoveryType == "Obstacle" &&
           discoveries.reverse()[0]?.adventurerHealth == 0;
@@ -398,7 +403,7 @@ export function syscalls({
           setDeathNotification(
             "Explore",
             discoveries.reverse(),
-            adventurerDiedEvent.data
+            adventurerDiedEvent.data[0]
           );
         }
         setScreen("start");
@@ -583,9 +588,14 @@ export function syscalls({
           (event) => event.name === "AdventurerDied"
         );
         setData("adventurerByIdQuery", {
-          adventurers: [adventurerDiedEvent.data],
+          adventurers: [adventurerDiedEvent.data[0]],
         });
-        setAdventurer(adventurerDiedEvent.data);
+        const deadAdventurerIndex =
+          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+            (adventurer: any) => adventurer.id == adventurerDiedEvent.data[0].id
+          );
+        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
+        setAdventurer(adventurerDiedEvent.data[0]);
         const killedByBeast = battles.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
@@ -596,7 +606,7 @@ export function syscalls({
           setDeathNotification(
             "Attack",
             battles.reverse(),
-            adventurerDiedEvent.data
+            adventurerDiedEvent.data[0]
           );
         }
         setScreen("start");
@@ -748,9 +758,14 @@ export function syscalls({
           (event) => event.name === "AdventurerDied"
         );
         setData("adventurerByIdQuery", {
-          adventurers: [adventurerDiedEvent.data],
+          adventurers: [adventurerDiedEvent.data[0]],
         });
-        setAdventurer(adventurerDiedEvent.data);
+        const deadAdventurerIndex =
+          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+            (adventurer: any) => adventurer.id == adventurerDiedEvent.data[0].id
+          );
+        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
+        setAdventurer(adventurerDiedEvent.data[0]);
         const killedByBeast = events.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
         );
@@ -761,7 +776,7 @@ export function syscalls({
           setDeathNotification(
             "Flee",
             battles.reverse(),
-            adventurerDiedEvent.data
+            adventurerDiedEvent.data[0]
           );
         }
         setScreen("start");
@@ -1016,15 +1031,24 @@ export function syscalls({
           (event) => event.name === "AdventurerDied"
         );
         setData("adventurerByIdQuery", {
-          adventurers: [adventurerDiedEvent.data],
+          adventurers: [adventurerDiedEvent.data[0]],
         });
-        setAdventurer(adventurerDiedEvent.data);
-        setDeathNotification(
-          "Multicall",
-          ["You equipped"],
-          adventurerDiedEvent.data
-        );
-        setScreen("start");
+        if (adventurerDiedEvent.data[1].callerAddress > 0) {
+          const deadAdventurerIndex =
+            queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+              (adventurer: any) =>
+                adventurer.id == adventurerDiedEvent.data[0].id
+            );
+          setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
+        } else {
+          setAdventurer(adventurerDiedEvent.data[0]);
+          setDeathNotification(
+            "Multicall",
+            ["You equipped"],
+            adventurerDiedEvent.data[0]
+          );
+          setScreen("start");
+        }
       }
 
       stopLoading(notification);
