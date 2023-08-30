@@ -119,13 +119,8 @@ mod tests {
         let gold_discovery = ExploreUtils::get_gold_discovery(adventurer, entropy);
         assert(gold_discovery == 1, 'gold_discovery should be 1');
 
-        // equip a pendant and verify result doesn't change
-        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 1 };
-        let gold_discovery = ExploreUtils::get_gold_discovery(adventurer, entropy);
-        assert(gold_discovery == 1, 'gold_discovery should be 1');
-
-        // last we equip a necklace and verify result is doubled
-        adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 1 };
+        // equip a pendant and verify we get 2x gold
+        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 2 };
         let gold_discovery = ExploreUtils::get_gold_discovery(adventurer, entropy);
         assert(gold_discovery == 2, 'gold_discovery should be 2');
     }

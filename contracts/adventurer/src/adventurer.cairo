@@ -14,7 +14,7 @@ use super::{
             MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, HEALTH_INCREASE_PER_VITALITY, MAX_GOLD,
             MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS,
             ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, ClassStatBoosts,
-            MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, PENDENT_G20_STAT_BONUS,
+            MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, NECKLACE_G20_BONUS_STATS,
             SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
@@ -1281,6 +1281,19 @@ impl ImplAdventurer of IAdventurer {
         self = (current_block % MAX_BLOCK_COUNT).try_into().unwrap();
     }
 
+    // @notice gets stat bonus for an item
+    // @dev this is currently used for the pendant which grants +1 stat point at greatness 20
+    // @param item the ItemPrimitive to check if it qualifies for bonus stat points
+    // @return u8: the stat bonus, 0 if none 
+    #[inline(always)]
+    fn item_stat_bonus(self: ItemPrimitive) -> u8 {
+        if self.id == ItemId::Necklace {
+            NECKLACE_G20_BONUS_STATS
+        } else {
+            0
+        }
+    }
+
     // @notice checks if adventurer has double health discoveries unlocked
     // @param adventurer the Adventurer to check if double health discovery is unlocked
     // @return bool: true if double health discoveries is unlocked, false otherwise
@@ -1290,11 +1303,25 @@ impl ImplAdventurer of IAdventurer {
     }
 
     // @notice checks if adventurer has double gold discovery ability unlocked
+    // @dev unlock is the pendant with greatness 20
     // @param adventurer the Adventurer to check if double gold discovery is unlocked
     // @return bool: true if double gold discoveries is unlocked, false otherwise
     #[inline(always)]
     fn double_gold_discovery_unlocked(self: Adventurer) -> bool {
-        self.neck.id == ItemId::Necklace && self.neck.get_greatness() == 20
+        self.neck.id == ItemId::Pendant && self.neck.get_greatness() == 20
+    }
+
+    // @notice gets luck bonus for an item
+    // @dev this is currently used for the silver ring which grants +20 luck at greatness 20
+    // @param item the ItemPrimitive to check if it qualifies for double luck
+    // @return u8 the luck bonus, 0 if none
+    #[inline(always)]
+    fn item_luck_bonus(self: ItemPrimitive) -> u8 {
+        if (self.id == ItemId::SilverRing && self.get_greatness() == 20) {
+            SILVER_RING_G20_LUCK_BONUS
+        } else {
+            0
+        }
     }
 
     // @notice checks if adventurer has double gold from beasts ability unlocked
@@ -1322,32 +1349,6 @@ impl ImplAdventurer of IAdventurer {
     #[inline(always)]
     fn double_special_name_damage_unlocked(self: Adventurer) -> bool {
         self.ring.id == ItemId::TitaniumRing && self.ring.get_greatness() == 20
-    }
-
-    // @notice gets stat bonus for an item
-    // @dev this is currently used for the pendant which grants +1 stat point at greatness 20
-    // @param item the ItemPrimitive to check if it qualifies for bonus stat points
-    // @return u8: the stat bonus, 0 if none 
-    #[inline(always)]
-    fn item_stat_bonus(self: ItemPrimitive) -> u8 {
-        if self.id == ItemId::Pendant {
-            PENDENT_G20_STAT_BONUS
-        } else {
-            0
-        }
-    }
-
-    // @notice gets luck bonus for an item
-    // @dev this is currently used for the silver ring which grants +20 luck at greatness 20
-    // @param item the ItemPrimitive to check if it qualifies for double luck
-    // @return u8 the luck bonus, 0 if none
-    #[inline(always)]
-    fn item_luck_bonus(self: ItemPrimitive) -> u8 {
-        if (self.id == ItemId::SilverRing && self.get_greatness() == 20) {
-            SILVER_RING_G20_LUCK_BONUS
-        } else {
-            0
-        }
     }
 }
 
@@ -1609,8 +1610,8 @@ mod tests {
         let necklace = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 1 };
 
         assert(amulet.item_stat_bonus() == 0, 'amulet gets no stat bonus');
-        assert(necklace.item_stat_bonus() == 0, 'necklace gets no stat bonus');
-        assert(pendant.item_stat_bonus() == 1, 'pendant gets a stat bonus');
+        assert(pendant.item_stat_bonus() == 0, 'pendant gets no stat bonus');
+        assert(necklace.item_stat_bonus() == 1, 'necklace gets a stat bonus');
     }
 
     #[test]
@@ -1639,36 +1640,34 @@ mod tests {
 
         // verify new adventurers don't have double gold discovery unlocked
         assert(
-            ImplAdventurer::double_gold_discovery_unlocked(adventurer) == false,
-            'double gold not unlocked'
+            !ImplAdventurer::double_gold_discovery_unlocked(adventurer), 'double gold not unlocked'
         );
 
         // equip an amulet and verify result doesn't change
         adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
         assert(
-            ImplAdventurer::double_gold_discovery_unlocked(adventurer) == false,
+            !ImplAdventurer::double_gold_discovery_unlocked(adventurer),
             'amulet does not unlock 2xgold'
-        );
-
-        // equip a pendant and verify result doesn't change
-        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 1 };
-        assert(
-            ImplAdventurer::double_gold_discovery_unlocked(adventurer) == false,
-            'pendant does not unlock 2xgold'
-        );
-
-        // equip a necklace that is not greatness 20 and verify result doesn't change
-        adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 399, metadata: 1 };
-        assert(
-            ImplAdventurer::double_gold_discovery_unlocked(adventurer) == false,
-            'G19 necklace not unlock 2xgold'
         );
 
         // lastly we equip a necklace that is greatness 20 and verify result is true
         adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 1 };
         assert(
-            ImplAdventurer::double_gold_discovery_unlocked(adventurer) == true,
-            'G20 necklace unlocks 2xgold'
+            !ImplAdventurer::double_gold_discovery_unlocked(adventurer),
+            'necklace does not unlock 2xgold'
+        );
+
+        // equip a pendant with 399 xp (greatness 19) and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 399, metadata: 1 };
+        assert(
+            !ImplAdventurer::double_gold_discovery_unlocked(adventurer),
+            'G19 pendant ! unlock 2xgold'
+        );
+
+        // equip a pendant and verify result doesn't change
+        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 1 };
+        assert(
+            ImplAdventurer::double_gold_discovery_unlocked(adventurer), 'g20 pendant unlocks 2xgold'
         );
     }
 

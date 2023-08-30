@@ -5,213 +5,218 @@ use combat::constants::CombatEnums::Tier;
 
 fn get(id: u8) -> Tier {
     if id == ItemId::Pendant {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::Necklace {
-        return Tier::T1(());
+        Tier::T2(())
     } else if id == ItemId::Amulet {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::GoldRing {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::SilverRing {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::BronzeRing {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::PlatinumRing {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::TitaniumRing {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::GhostWand {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::GraveWand {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::BoneWand {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::Wand {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::Grimoire {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::Chronicle {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::Tome {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::Book {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::DivineRobe {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::SilkRobe {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::LinenRobe {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::Robe {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::Shirt {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::Crown {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::DivineHood {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::SilkHood {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::LinenHood {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::Hood {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::BrightsilkSash {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::SilkSash {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::WoolSash {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::LinenSash {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::Sash {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::DivineSlippers {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::SilkSlippers {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::WoolShoes {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::LinenShoes {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::Shoes {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::DivineGloves {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::SilkGloves {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::WoolGloves {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::LinenGloves {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::Gloves {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::Katana {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::Falchion {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::Scimitar {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::LongSword {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::ShortSword {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::DemonHusk {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::DragonskinArmor {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::StuddedLeatherArmor {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::HardLeatherArmor {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::LeatherArmor {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::DemonCrown {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::DragonsCrown {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::WarCap {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::LeatherCap {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::Cap {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::DemonhideBelt {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::DragonskinBelt {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::StuddedLeatherBelt {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::HardLeatherBelt {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::LeatherBelt {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::DemonhideBoots {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::DragonskinBoots {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::StuddedLeatherBoots {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::HardLeatherBoots {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::LeatherBoots {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::DemonsHands {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::DragonskinGloves {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::StuddedLeatherGloves {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::HardLeatherGloves {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::LeatherGloves {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::Warhammer {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::Quarterstaff {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::Maul {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::Mace {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::Club {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::HolyChestplate {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::OrnateChestplate {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::PlateMail {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::ChainMail {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::RingMail {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::AncientHelm {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::OrnateHelm {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::GreatHelm {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::FullHelm {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::Helm {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::OrnateBelt {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::WarBelt {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::PlatedBelt {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::MeshBelt {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::HeavyBelt {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::HolyGreaves {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::OrnateGreaves {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::Greaves {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::ChainBoots {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::HeavyBoots {
-        return Tier::T5(());
+        Tier::T5(())
     } else if id == ItemId::HolyGauntlets {
-        return Tier::T1(());
+        Tier::T1(())
     } else if id == ItemId::OrnateGauntlets {
-        return Tier::T2(());
+        Tier::T2(())
     } else if id == ItemId::Gauntlets {
-        return Tier::T3(());
+        Tier::T3(())
     } else if id == ItemId::ChainGloves {
-        return Tier::T4(());
+        Tier::T4(())
     } else if id == ItemId::HeavyGloves {
-        return Tier::T5(());
+        Tier::T5(())
     } else {
-        // invalid id passed in
-        return Tier::T5(());
+        panic_with_felt252('invalid loot item id')
     }
 }
 
+#[test]
+#[should_panic(expected: ('invalid loot item id', ))]
+#[available_gas(3000000)]
+fn test_get_item_tier_invalid() {
+    get(255);
+}
 
 #[test]
 #[available_gas(3000000)]
@@ -222,7 +227,7 @@ fn test_get_item_tiers() {
 
     let necklace = ItemId::Necklace;
     let necklace_tier = get(necklace);
-    assert(necklace_tier == Tier::T1(()), 'necklace is T1');
+    assert(necklace_tier == Tier::T2(()), 'necklace is T2');
 
     let amulet = ItemId::Amulet;
     let amulet_tier = get(amulet);
