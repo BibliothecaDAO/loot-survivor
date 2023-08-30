@@ -105,7 +105,7 @@ impl AdventurerUtils of IAdventurerUtils {
         (r.try_into().unwrap(), d.try_into().unwrap())
     }
 
-    // TODO: Need to refactor this and add_suffix_boost to ensure they
+    // TODO: Need to refactor this and apply_suffix_boost to ensure they
     // stay insync. I think the design used for AdventurerClass in adventurer_meta
     // is good. 
     #[inline(always)]

@@ -196,26 +196,13 @@ impl ItemSpecialsStoragePacking of Packing<ItemSpecialsStorage> {
 
 #[generate_trait]
 impl ImplItemSpecials of IItemSpecials {
-    // @dev This is a function that retrieves special items from storage based on loot statistics.
-    //
-    // @notice It utilizes the metadata from item to determine which item to retrieve.
-    // If the metadata value matches one of the predefined indices (from 1 to 19), it will return the associated item.
-    // In the event of an unhandled index, it will trigger a panic with the specific error 'item specials not in storage'.
-    //
+    // @notice gets item specials from storage using the items meta data pointer
     // @param self A reference to ItemSpecialsStorage which stores all special items.
     // @param item An instance of ItemPrimitive that contains metadata used for item retrieval.
-    //
     // @return An instance of ItemSpecials corresponding to the metadata in item.
-    //
-    // @throws This function will throw an error if the metadata in item doesn't match any of the predefined indices.
+    // @throws 'item specials not in storage' if the item doesn't have specials in storage
     fn get_specials(self: ItemSpecialsStorage, item: ItemPrimitive) -> ItemSpecials {
-        // assert the items meta data id is within bounds
-        assert(
-            item.metadata != 0 && item.metadata <= STORAGE::MAX_TOTAL_STORAGE_SPECIALS,
-            'metadata id out of bounds'
-        );
-
-        // Since this function doesn't know which name storage it has been given
+        // @dev Since this function doesn't know which name storage it has been given
         // it needs to consider both storage 1 and storage 2. In the current system
         // which is relatively rigid (wip), name storage 1 is used for the first 10 items
         // and name storage 2 is used for the next 9 items. As such, if this function
@@ -257,6 +244,54 @@ impl ImplItemSpecials of IItemSpecials {
         }
     }
 
+    fn get_specials_full(
+        specials_storage1: ItemSpecialsStorage,
+        specials_storage2: ItemSpecialsStorage,
+        item: ItemPrimitive
+    ) -> ItemSpecials {
+        if item.metadata == STORAGE::INDEX_1 {
+            specials_storage1.item_1
+        } else if item.metadata == STORAGE::INDEX_2 {
+            specials_storage1.item_2
+        } else if item.metadata == STORAGE::INDEX_3 {
+            specials_storage1.item_3
+        } else if item.metadata == STORAGE::INDEX_4 {
+            specials_storage1.item_4
+        } else if item.metadata == STORAGE::INDEX_5 {
+            specials_storage1.item_5
+        } else if item.metadata == STORAGE::INDEX_6 {
+            specials_storage1.item_6
+        } else if item.metadata == STORAGE::INDEX_7 {
+            specials_storage1.item_7
+        } else if item.metadata == STORAGE::INDEX_8 {
+            specials_storage1.item_8
+        } else if item.metadata == STORAGE::INDEX_9 {
+            specials_storage1.item_9
+        } else if item.metadata == STORAGE::INDEX_10 {
+            specials_storage1.item_10
+        } else if item.metadata == STORAGE::INDEX_11 {
+            specials_storage2.item_1
+        } else if item.metadata == STORAGE::INDEX_12 {
+            specials_storage2.item_2
+        } else if item.metadata == STORAGE::INDEX_13 {
+            specials_storage2.item_3
+        } else if item.metadata == STORAGE::INDEX_14 {
+            specials_storage2.item_4
+        } else if item.metadata == STORAGE::INDEX_15 {
+            specials_storage2.item_5
+        } else if item.metadata == STORAGE::INDEX_16 {
+            specials_storage2.item_6
+        } else if item.metadata == STORAGE::INDEX_17 {
+            specials_storage2.item_7
+        } else if item.metadata == STORAGE::INDEX_18 {
+            specials_storage2.item_8
+        } else if item.metadata == STORAGE::INDEX_19 {
+            specials_storage2.item_9
+        } else {
+            panic_with_felt252('item specials not in storage')
+        }
+    }
+
     // @dev This function sets special attributes for a given item in storage.
     //
     // @notice It uses the metadata of an item to decide where to place the special attributes
@@ -270,13 +305,7 @@ impl ImplItemSpecials of IItemSpecials {
     //
     // @throws This function will throw an error if the metadata in item doesn't match any of the predefined indices.
     fn set_specials(ref self: ItemSpecialsStorage, item: ItemPrimitive, specials: ItemSpecials) {
-        // assert the items meta data id is within bounds
-        assert(
-            item.metadata != 0 && item.metadata <= STORAGE::MAX_TOTAL_STORAGE_SPECIALS,
-            'metadata id out of bounds'
-        );
-
-        // Since this function doesn't know which name storage it has been given
+        // @dev Since this function doesn't know which name storage it has been given
         // it needs to consider both storage 1 and storage 2. In the current system
         // which is relatively rigid (wip), name storage 1 is used for the first 10 items
         // and name storage 2 is used for the next 9 items. As such, if this function
@@ -446,27 +475,26 @@ impl ImplItemSpecials of IItemSpecials {
 fn test_item_meta_packing() {
     // initailize ItemSpecialsStorage with strategic test values
     let storage = ItemSpecialsStorage {
-        item_1: ItemSpecials {
-            special1: 0, special2: 0, special3: 0 // zero case
-            }, item_2: ItemSpecials {
-            special1: 1, special2: 2, special3: 3 // uniqueness
-            }, item_3: ItemSpecials {
-            special1: 4, special2: 4, special3: 4 // all same
-            }, item_4: ItemSpecials {
-            special1: 15, special2: 127, special3: 31 // max packable values
-            }, item_5: ItemSpecials {
-            special1: 255, special2: 255, special3: 255 // max u8 values
-            }, item_6: ItemSpecials {
-            special1: 5, special2: 5, special3: 5 // dnc
-            }, item_7: ItemSpecials {
-            special1: 6, special2: 6, special3: 6 // dnc
-            }, item_8: ItemSpecials {
-            special1: 7, special2: 7, special3: 7 // dnc
-            }, item_9: ItemSpecials {
-            special1: 8, special2: 8, special3: 8 // dnc
-            }, item_10: ItemSpecials {
-            special1: 9, special2: 9, special3: 9 // dnc
-        }
+        item_1: ItemSpecials { special1: 0, special2: 0, special3: 0 // zero case
+         },
+        item_2: ItemSpecials { special1: 1, special2: 2, special3: 3 // uniqueness
+         },
+        item_3: ItemSpecials { special1: 4, special2: 4, special3: 4 // all same
+         },
+        item_4: ItemSpecials { special1: 15, special2: 127, special3: 31 // max packable values
+         },
+        item_5: ItemSpecials { special1: 255, special2: 255, special3: 255 // max u8 values
+         },
+        item_6: ItemSpecials { special1: 5, special2: 5, special3: 5 // dnc
+         },
+        item_7: ItemSpecials { special1: 6, special2: 6, special3: 6 // dnc
+         },
+        item_8: ItemSpecials { special1: 7, special2: 7, special3: 7 // dnc
+         },
+        item_9: ItemSpecials { special1: 8, special2: 8, special3: 8 // dnc
+         },
+        item_10: ItemSpecials { special1: 9, special2: 9, special3: 9 // dnc
+         }
     };
 
     // pack and then unpack the specials
@@ -498,7 +526,7 @@ fn test_set_metadata_id() {
     let mut adventurer = ImplAdventurer::new(
         12,
         1,
-        Stats { strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,  }
+        Stats { strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1, }
     );
 
     // assert adventurer starter weapon has meta data id 1
@@ -509,29 +537,18 @@ fn test_set_metadata_id() {
 
     // and an empty bag
     let mut bag = Bag {
-        item_1: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
-            }, item_2: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
-            }, item_3: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
-            }, item_4: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
-            }, item_5: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
-            }, item_6: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
-            }, item_7: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
-            }, item_8: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
-            }, item_9: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
-            }, item_10: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
-            }, item_11: ItemPrimitive {
-            id: 0, xp: 0, metadata: 0, 
-        }, mutated: false
+        item_1: ItemPrimitive { id: 0, xp: 0, metadata: 0, },
+        item_2: ItemPrimitive { id: 0, xp: 0, metadata: 0, },
+        item_3: ItemPrimitive { id: 0, xp: 0, metadata: 0, },
+        item_4: ItemPrimitive { id: 0, xp: 0, metadata: 0, },
+        item_5: ItemPrimitive { id: 0, xp: 0, metadata: 0, },
+        item_6: ItemPrimitive { id: 0, xp: 0, metadata: 0, },
+        item_7: ItemPrimitive { id: 0, xp: 0, metadata: 0, },
+        item_8: ItemPrimitive { id: 0, xp: 0, metadata: 0, },
+        item_9: ItemPrimitive { id: 0, xp: 0, metadata: 0, },
+        item_10: ItemPrimitive { id: 0, xp: 0, metadata: 0, },
+        item_11: ItemPrimitive { id: 0, xp: 0, metadata: 0, },
+        mutated: false
     };
 
     // stage a bunch of gear
@@ -731,8 +748,7 @@ fn test_get_specials() {
         item_8: holy_gauntlets_specials,
         item_9: demonhide_boots_specials,
         item_10: ItemSpecials { // no item 10 in storage2
-            special1: 0, special2: 0, special3: 0
-        }
+         special1: 0, special2: 0, special3: 0 }
     };
 
     // assert calling get_special for each item returns the expected specials
@@ -792,33 +808,22 @@ fn test_get_specials() {
 }
 
 #[test]
-#[should_panic(expected: ('metadata id out of bounds', ))]
+#[should_panic(expected: ('item specials not in storage',))]
 #[available_gas(30000)]
 fn test_get_specials_overflow_fail() {
     // initialize ItemSpecialsStorage with all empty ItemSpecials
     // as we don't need them for this test
     let name_storage1 = ItemSpecialsStorage {
-        item_1: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_2: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_3: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_4: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_5: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_6: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_7: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_8: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_9: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_10: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-        },
+        item_1: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_2: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_3: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_4: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_5: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_6: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_7: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_8: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_9: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_10: ItemSpecials { special2: 0, special3: 0, special1: 0 },
     };
 
     // initialze an item whose meta data exceeds the max storage slot for the special storage
@@ -833,33 +838,22 @@ fn test_get_specials_overflow_fail() {
 }
 
 #[test]
-#[should_panic(expected: ('metadata id out of bounds', ))]
+#[should_panic(expected: ('item specials not in storage',))]
 #[available_gas(30000)]
 fn test_get_specials_zero_fail() {
     // initialize ItemSpecialsStorage with all empty ItemSpecials
     // as we don't need them for this test
     let name_storage1 = ItemSpecialsStorage {
-        item_1: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_2: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_3: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_4: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_5: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_6: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_7: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_8: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_9: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_10: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-        },
+        item_1: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_2: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_3: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_4: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_5: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_6: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_7: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_8: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_9: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_10: ItemSpecials { special2: 0, special3: 0, special1: 0 },
     };
 
     // initialze an item whose meta data exceeds the max storage slot for the special storage
@@ -876,51 +870,29 @@ fn test_get_specials_zero_fail() {
 #[available_gas(600000)]
 fn test_set_specials() {
     let mut storage1 = ItemSpecialsStorage {
-        item_1: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_2: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_3: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_4: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_5: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_6: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_7: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_8: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_9: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_10: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-        }
+        item_1: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_2: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_3: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_4: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_5: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_6: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_7: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_8: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_9: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_10: ItemSpecials { special2: 0, special3: 0, special1: 0, }
     };
 
     let mut storage2 = ItemSpecialsStorage {
-        item_1: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_2: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_3: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_4: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_5: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_6: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_7: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_8: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_9: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-            }, item_10: ItemSpecials {
-            special2: 0, special3: 0, special1: 0, 
-        }
+        item_1: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_2: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_3: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_4: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_5: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_6: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_7: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_8: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_9: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        item_10: ItemSpecials { special2: 0, special3: 0, special1: 0, }
     };
 
     // Storage 1 Tests
@@ -1022,33 +994,22 @@ fn test_set_specials() {
 }
 
 #[test]
-#[should_panic(expected: ('metadata id out of bounds', ))]
+#[should_panic(expected: ('meta data id not in storage',))]
 #[available_gas(40000)]
 fn test_set_specials_storage_zero_fail() {
     // initialize ItemSpecialsStorage with all empty ItemSpecials
     // as we don't need them for this test
     let mut name_storage1 = ItemSpecialsStorage {
-        item_1: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_2: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_3: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_4: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_5: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_6: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_7: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_8: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_9: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_10: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-        },
+        item_1: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_2: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_3: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_4: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_5: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_6: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_7: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_8: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_9: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_10: ItemSpecials { special2: 0, special3: 0, special1: 0 },
     };
 
     // initialze an item with meta data id zero
@@ -1063,33 +1024,22 @@ fn test_set_specials_storage_zero_fail() {
 }
 
 #[test]
-#[should_panic(expected: ('metadata id out of bounds', ))]
+#[should_panic(expected: ('meta data id not in storage',))]
 #[available_gas(40000)]
 fn test_set_specials_storage_overflow_fail() {
     // initialize ItemSpecialsStorage with all empty ItemSpecials
     // as we don't need them for this test
     let mut name_storage1 = ItemSpecialsStorage {
-        item_1: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_2: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_3: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_4: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_5: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_6: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_7: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_8: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_9: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-            }, item_10: ItemSpecials {
-            special2: 0, special3: 0, special1: 0
-        },
+        item_1: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_2: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_3: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_4: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_5: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_6: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_7: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_8: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_9: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        item_10: ItemSpecials { special2: 0, special3: 0, special1: 0 },
     };
 
     // initialze an item whose meta data exceeds the max storage slot for the special storage
