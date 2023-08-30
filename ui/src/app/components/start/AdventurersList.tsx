@@ -95,6 +95,7 @@ export const AdventurersList = ({
                   handleSwitchAdventurer(adventurer.id);
                   setSelectedIndex(index);
                 }}
+                disabled={adventurer?.health === 0}
               >
                 <div className="flex flex-row items-center text-center gap-5">
                   <p>{`${adventurer.name} - ${adventurer.id}`}</p>

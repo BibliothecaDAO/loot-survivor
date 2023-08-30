@@ -3,19 +3,23 @@ import { useQueriesStore } from "../hooks/useQueryStore";
 import { Button } from "../components/buttons/Button";
 import useUIStore from "../hooks/useUIStore";
 import useCustomQuery from "../hooks/useCustomQuery";
-import { getAdventurerById } from "../hooks/graphql/queries";
-import { useState } from "react";
+import {
+  getAdventurerById,
+  getItemsByAdventurer,
+} from "../hooks/graphql/queries";
+import { useEffect, useState } from "react";
 import EncountersScreen from "./EncountersScreen";
 import { useMediaQuery } from "react-responsive";
+import { NullAdventurer } from "../types";
 
 export default function Profile() {
-  const { data } = useQueriesStore();
+  const { data, setData, setIsLoading, setNotLoading, refetch } =
+    useQueriesStore();
   const profile = useUIStore((state) => state.profile);
   const [encounters, setEncounters] = useState(false);
-  // useCustomQuery("leaderboardByIdQuery", getAdventurerById, {
-  //   id: profile ?? 0,
-  // });
-  const adventurer = data.leaderboardByIdQuery?.adventurers[0];
+
+  const adventurer =
+    data.leaderboardByIdQuery?.adventurers[0] ?? NullAdventurer;
 
   const setScreen = useUIStore((state) => state.setScreen);
 

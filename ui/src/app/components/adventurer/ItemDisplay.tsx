@@ -122,7 +122,7 @@ export const ItemDisplay = ({
   return (
     <div
       className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-10 md:h-14 xl:h-[55px] ${
-        item.item ? "bg-terminal-green text-terminal-black" : ""
+        item.item ? "bg-terminal-green text-terminal-black overflow-auto" : ""
       }`}
       ref={scrollableRef}
     >

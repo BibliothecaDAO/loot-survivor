@@ -97,8 +97,6 @@ export default function Home() {
   const isMuted = useUIStore((state) => state.isMuted);
   const setIsMuted = useUIStore((state) => state.setIsMuted);
   const [introComplete, setIntroComplete] = useState(false);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
-  const loading = useLoadingStore((state) => state.loading);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const calls = useTransactionCartStore((state) => state.calls);
@@ -109,10 +107,8 @@ export default function Home() {
   const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
-  const mintAdventurer = useUIStore((state) => state.mintAdventurer);
   const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
-  const [showDeathCount, setShowDeathCount] = useState(true);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
@@ -153,8 +149,6 @@ export default function Home() {
     setIsLoading,
     setNotLoading,
   } = useQueriesStore();
-
-  const [initialLoad, setInitialLoad] = useState(true);
 
   const { spawn, explore, attack, flee, upgrade, multicall } = syscalls({
     gameContract,

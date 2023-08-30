@@ -38,25 +38,35 @@ export default function EncountersScreen({ profile }: EncountersProps) {
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const queryData = useQueriesStore((state) => state.data);
 
-  // useCustomQuery("discoveriesQuery", getDiscoveries, {
-  //   adventurerId: profile ? profile : adventurer?.id ?? 0,
-  // });
+  const discoveriesData = useCustomQuery("discoveriesQuery", getDiscoveries, {
+    adventurerId: profile ? profile : adventurer?.id ?? 0,
+  });
 
-  // useCustomQuery("battlesByAdventurerQuery", getBattlesByAdventurer, {
-  //   adventurerId: profile ? profile : adventurer?.id ?? 0,
-  // });
+  const battlesData = useCustomQuery(
+    "battlesByAdventurerQuery",
+    getBattlesByAdventurer,
+    {
+      adventurerId: profile ? profile : adventurer?.id ?? 0,
+    }
+  );
+
+  // useEffect(() => {
+  //   if (adventurersByXPdata) {
+  //     setIsLoading();
+  //     setData("adventurersByXPQuery", adventurersByXPdata);
+  //     setNotLoading();
+  //   }
+  // }, [adventurersByXPdata]);
 
   useEffect(() => {
     if (data) {
       setLoadingData(true);
 
-      const discoveries = queryData.discoveriesQuery
-        ? queryData.discoveriesQuery.discoveries
+      const discoveries = discoveriesData?.discoveries
+        ? discoveriesData?.discoveries
         : [];
 
-      const battles = queryData.battlesByAdventurerQuery
-        ? queryData.battlesByAdventurerQuery.battles
-        : [];
+      const battles = battlesData?.battles ? battlesData?.battles : [];
 
       const combined = [...discoveries, ...battles];
       const sorted = combined.sort((a: any, b: any) => {
@@ -68,7 +78,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
       setSortedCombined(sorted);
       setLoadingData(false);
     }
-  }, [queryData.discoveriesQuery, queryData.battlesByAdventurerQuery, data]); // Runs whenever 'data' changes
+  }, [discoveriesData, battlesData, data]); // Runs whenever 'data' changes
 
   const totalPages = Math.ceil(sortedCombined.length / encountersPerPage);
 
@@ -103,6 +113,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
           )}
           <div className="flex flex-col items-center gap-2 overflow-auto">
             {displayEncounters.map((encounter: any, index: number) => {
+              console.log(encounter);
               return (
                 <div
                   className="w-full p-1 sm:p-2 text-left border border-terminal-green"

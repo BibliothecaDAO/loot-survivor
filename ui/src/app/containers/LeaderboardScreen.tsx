@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   getAdventurersInListByXp,
   getTopScores,
   getAdventurerByXP,
+  getAdventurerById,
+  getItemsByAdventurer,
 } from "../hooks/graphql/queries";
 import { Button } from "../components/buttons/Button";
 import { CoinIcon } from "../components/icons/Icons";
@@ -28,34 +30,59 @@ export default function LeaderboardScreen() {
   const [showScores, setShowScores] = useState(false);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
 
-  const { data, isLoading, refetch } = useQueriesStore();
+  const { data, isLoading, refetch, setData, setIsLoading, setNotLoading } =
+    useQueriesStore();
 
-  useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
+  const adventurersByXPdata = useCustomQuery(
+    "adventurersByXPQuery",
+    getAdventurerByXP,
+    undefined
+  );
 
-  // useCustomQuery("adventurersInListByXpQuery", getAdventurersInListByXp, {
-  //   ids: data.topScoresQuery?.scores
-  //     ? data.topScoresQuery?.scores.map(
-  //         (score: Score) => score.adventurerId ?? 0
-  //       )
-  //     : [0],
-  // });
+  const profile = useUIStore((state) => state.profile);
 
-  // useCustomQuery("topScoresQuery", getTopScores, undefined);
+  useCustomQuery("leaderboardByIdQuery", getAdventurerById, {
+    id: profile ?? 0,
+  });
 
-  if (isLoading.adventurersByXPQuery || loading)
-    return (
-      <div className="flex justify-center p-20 align-middle">
-        <LootIconLoader />
-      </div>
-    );
+  useCustomQuery("itemsByProfileQuery", getItemsByAdventurer, {
+    id: profile ?? 0,
+  });
+
+  const handlefetchProfileData = async (adventurerId: number) => {
+    setIsLoading();
+    const newProfileAdventurerData = await refetch("leaderboardByIdQuery", {
+      id: adventurerId,
+    });
+    const newItemsByProfileData = await refetch("itemsByProfileQuery", {
+      id: adventurerId,
+    });
+    setData("leaderboardByIdQuery", newProfileAdventurerData);
+    setData("itemsByProfileQuery", newItemsByProfileData);
+    setNotLoading();
+  };
+
+  useEffect(() => {
+    if (adventurersByXPdata) {
+      setIsLoading();
+      setData("adventurersByXPQuery", adventurersByXPdata);
+      setNotLoading();
+    }
+  }, [adventurersByXPdata]);
 
   return (
     <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden">
       <div className={`${showScores ? "hidden " : ""}sm:block w-full sm:w-1/2`}>
-        <LiveTable itemsPerPage={itemsPerPage} />
+        <LiveTable
+          itemsPerPage={itemsPerPage}
+          handleFetchProfileData={handlefetchProfileData}
+        />
       </div>
       <div className={`${showScores ? "" : "hidden "}sm:block w-full sm:w-1/2`}>
-        <ScoreTable itemsPerPage={itemsPerPage} />
+        <ScoreTable
+          itemsPerPage={itemsPerPage}
+          handleFetchProfileData={handlefetchProfileData}
+        />
       </div>
       <Button
         onClick={() =>

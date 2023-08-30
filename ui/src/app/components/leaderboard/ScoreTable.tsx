@@ -7,17 +7,20 @@ import useUIStore from "@/app/hooks/useUIStore";
 
 export interface ScoreLeaderboardTableProps {
   itemsPerPage: number;
+  handleFetchProfileData: (adventurerId: number) => void;
 }
 
 const ScoreLeaderboardTable = ({
   itemsPerPage,
+  handleFetchProfileData,
 }: ScoreLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const { data, isLoading, refetch } = useQueriesStore();
-  const scores = data.adventurersInListByXpQuery?.adventurers
-    ? data.adventurersInListByXpQuery?.adventurers
+  const adventurers = data.adventurersByXPQuery?.adventurers
+    ? data.adventurersByXPQuery?.adventurers
     : [];
+  const scores = adventurers.filter((adventurer) => adventurer.health === 0);
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
   const displayScores = scores?.slice(
