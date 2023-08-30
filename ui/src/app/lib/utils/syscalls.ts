@@ -1033,7 +1033,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
-        if (adventurerDiedEvent.data[0].callerAddress > 0) {
+        if (adventurerDiedEvent.data[1].callerAddress > 0) {
           const deadAdventurerIndex =
             queryData.adventurersByOwnerQuery?.adventurers.findIndex(
               (adventurer: any) =>
