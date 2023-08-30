@@ -310,15 +310,15 @@ export default function Home() {
     }
   }, [adventurersData]);
 
-  useEffect(() => {
-    if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
-      setScreen("play");
-    } else if (hasStatUpgrades) {
-      setScreen("upgrade");
-    } else if (!adventurer || !isAlive) {
-      setScreen("start");
-    }
-  }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
+  // useEffect(() => {
+  //   if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
+  //     setScreen("play");
+  //   } else if (hasStatUpgrades) {
+  //     setScreen("upgrade");
+  //   } else if (!adventurer || !isAlive) {
+  //     setScreen("start");
+  //   }
+  // }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
 
   const mobileMenuDisabled = [
     false,
@@ -503,38 +503,36 @@ export default function Home() {
                 </div>
 
                 {/* <div className="overflow-y-auto h-[460px] sm:h-full"> */}
-                {isLoading.global ? (
+                {/* {isLoading.global ? (
                   <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     <LootIconLoader size="w-10" />
                   </div>
-                ) : (
-                  <>
-                    {screen === "start" && (
-                      <AdventurerScreen
-                        spawn={spawn}
-                        handleSwitchAdventurer={handleSwitchAdventurer}
-                      />
-                    )}
-                    {screen === "play" && (
-                      <ActionsScreen
-                        explore={explore}
-                        attack={attack}
-                        flee={flee}
-                      />
-                    )}
-                    {screen === "inventory" && <InventoryScreen />}
-                    {screen === "leaderboard" && <LeaderboardScreen />}
-                    {screen === "upgrade" && (
-                      <UpgradeScreen upgrade={upgrade} />
-                    )}
-                    {screen === "profile" && <Profile />}
-                    {screen === "encounters" && <EncountersScreen />}
-                    {screen === "guide" && <GuideScreen />}
-                    {screen === "settings" && <Settings />}
-                    {screen === "player" && <Player />}
-                    {screen === "wallet" && <WalletSelect />}
-                  </>
-                )}
+                ) : ( */}
+                <>
+                  {screen === "start" && (
+                    <AdventurerScreen
+                      spawn={spawn}
+                      handleSwitchAdventurer={handleSwitchAdventurer}
+                    />
+                  )}
+                  {screen === "play" && (
+                    <ActionsScreen
+                      explore={explore}
+                      attack={attack}
+                      flee={flee}
+                    />
+                  )}
+                  {screen === "inventory" && <InventoryScreen />}
+                  {screen === "leaderboard" && <LeaderboardScreen />}
+                  {screen === "upgrade" && <UpgradeScreen upgrade={upgrade} />}
+                  {screen === "profile" && <Profile />}
+                  {screen === "encounters" && <EncountersScreen />}
+                  {screen === "guide" && <GuideScreen />}
+                  {screen === "settings" && <Settings />}
+                  {screen === "player" && <Player />}
+                  {screen === "wallet" && <WalletSelect />}
+                </>
+                {/* )} */}
                 {/* </div> */}
               </>
             </div>

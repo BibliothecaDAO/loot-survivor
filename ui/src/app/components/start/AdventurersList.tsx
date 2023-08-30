@@ -7,6 +7,7 @@ import { Adventurer } from "@/app/types";
 import { SkullIcon } from "../icons/Icons";
 import useUIStore from "@/app/hooks/useUIStore";
 import { useQueriesStore } from "../../hooks/useQueryStore";
+import LootIconLoader from "../../components/icons/Loader";
 
 export interface AdventurerListProps {
   isActive: boolean;
@@ -25,6 +26,8 @@ export const AdventurersList = ({
   const [showZeroHealth, setShowZeroHealth] = useState(true);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
+
+  const { isLoading } = useQueriesStore();
 
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
 
@@ -121,7 +124,11 @@ export const AdventurersList = ({
           </div>
           {filteredAdventurers.length > 0 && (
             <div className="hidden sm:block sm:w-6/12 md:w-6/12 lg:w-2/3 w-full">
-              <Info adventurer={filteredAdventurers[selectedIndex]} />
+              {isLoading.global ? (
+                <LootIconLoader className="m-auto" size="w-10" />
+              ) : (
+                <Info adventurer={filteredAdventurers[selectedIndex]} />
+              )}
             </div>
           )}
         </div>
