@@ -1033,18 +1033,22 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
-        const deadAdventurerIndex =
-          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-            (adventurer: any) => adventurer.id == adventurerDiedEvent.data[0].id
+        if (adventurerDiedEvent.data[0].callerAddress > 0) {
+          const deadAdventurerIndex =
+            queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+              (adventurer: any) =>
+                adventurer.id == adventurerDiedEvent.data[0].id
+            );
+          setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
+        } else {
+          setAdventurer(adventurerDiedEvent.data[0]);
+          setDeathNotification(
+            "Multicall",
+            ["You equipped"],
+            adventurerDiedEvent.data[0]
           );
-        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
-        setAdventurer(adventurerDiedEvent.data[0]);
-        setDeathNotification(
-          "Multicall",
-          ["You equipped"],
-          adventurerDiedEvent.data[0]
-        );
-        setScreen("start");
+          setScreen("start");
+        }
       }
 
       stopLoading(notification);
