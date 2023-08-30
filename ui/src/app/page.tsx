@@ -396,9 +396,6 @@ export default function Home() {
                     )}
                   </div>
                 </Button>
-                <Button onClick={() => refetch()}>
-                  <RefreshIcon className="w-4 h-4 sm:w-6 sm:h-6" />
-                </Button>
                 {account && calls.length > 0 && (
                   <button
                     ref={displayCartButtonRef}
@@ -507,7 +504,7 @@ export default function Home() {
 
                 {/* <div className="overflow-y-auto h-[460px] sm:h-full"> */}
                 {isLoading.global ? (
-                  <div className="fixed left-1/2 right-1/2 top-1/2 bottom-1/2">
+                  <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                     <LootIconLoader size="w-10" />
                   </div>
                 ) : (
