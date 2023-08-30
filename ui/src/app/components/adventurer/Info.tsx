@@ -128,6 +128,7 @@ export default function Info({
               {formatAdventurer.gold
                 ? formatAdventurer.gold - (upgradeCost ?? 0)
                 : 0}
+              {formatAdventurer.gold === 511 ? "Full" : ""}
             </span>
             {/* <span className="flex text-lg items-center sm:text-3xl">
                 <BagIcon className="self-center w-4 h-4 fill-current" />{" "}
@@ -136,7 +137,7 @@ export default function Info({
             <span className="flex items-center ">
               <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
               <HealthCountDown health={totalHealth || 0} />
-              {`/${Math.min(100 + totalVitality * 10, 511)}`}
+              {`/${Math.min(100 + totalVitality * 10, 720)}`}
             </span>
           </div>
           {adventurer?.id ? (
