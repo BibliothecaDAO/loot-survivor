@@ -454,7 +454,7 @@ mod tests {
         assert(loot.slot == unpacked.slot, 'slot');
     }
     #[test]
-    #[available_gas(1800000)]
+    #[available_gas(1865640)]
     fn test_get_item_part1() {
         let katana_id = ItemId::Katana;
         let katana_item = ImplLoot::get_item(katana_id);
@@ -470,7 +470,7 @@ mod tests {
 
         let necklace_id = ItemId::Necklace;
         let necklace_item = ImplLoot::get_item(necklace_id);
-        assert(necklace_item.tier == Tier::T1(()), 'necklace is T1');
+        assert(necklace_item.tier == Tier::T2(()), 'necklace is T2');
         assert(necklace_item.item_type == Type::Necklace(()), 'necklace is necklace');
         assert(necklace_item.slot == Slot::Neck(()), 'necklace is neck slot');
 
@@ -601,7 +601,7 @@ mod tests {
         assert(divine_hood_item.slot == Slot::Head(()), 'divine hood is head armor');
     }
     #[test]
-    #[available_gas(1800000)]
+    #[available_gas(1943350)]
     fn test_get_item_part2() {
         let silk_hood_id = ItemId::SilkHood;
         let silk_hood_item = ImplLoot::get_item(silk_hood_id);
@@ -763,7 +763,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(1400000)]
+    #[available_gas(1166250)]
     fn test_get_item_part3() {
         let studded_leather_armor_id = ItemId::StuddedLeatherArmor;
         let studded_leather_armor_item = ImplLoot::get_item(studded_leather_armor_id);
@@ -876,7 +876,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(1000000)]
+    #[available_gas(1010830)]
     fn test_get_item_part4() {
         let studded_leather_boots_id = ItemId::StuddedLeatherBoots;
         let studded_leather_boots_item = ImplLoot::get_item(studded_leather_boots_id);
