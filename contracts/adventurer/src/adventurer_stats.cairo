@@ -15,6 +15,21 @@ struct Stats { // 5 bits each
     charisma: u8 // 5 bits
 }
 
+#[generate_trait]
+impl StatUtils of IStat {
+    fn new() -> Stats {
+        Stats {
+            strength: 0,
+            dexterity: 0,
+            vitality: 0,
+            intelligence: 0,
+            wisdom: 0,
+            charisma: 0
+        }
+    }
+
+}
+
 impl StatsPacking of Packing<Stats> {
     fn pack(self: Stats) -> felt252 {
         let overflow_protected = self.overflow_pack_protection();
