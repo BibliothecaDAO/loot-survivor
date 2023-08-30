@@ -21,30 +21,27 @@ export const DeathDialog = () => {
   );
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
 
-  console.log(deathMessage);
   return (
     <>
-      <div className="top-0 left-0 fixed text-center h-full w-full z-50">
+      <div className="top-0 left-0 fixed text-center h-full w-full z-40">
         <Image
           src={"/scenes/intro/sculls.png"}
           alt="skull"
           className="absolute object-cover"
           fill
         />
+        <div className="absolute inset-0 bg-black opacity-50"></div>
 
-        <div className="flex flex-col gap-4 sm:gap-10 items-center z-10 p-20 h-full">
-          <div className="flex flex-col gap-2 items-center justify-center z-10 self-center ">
-            <h1 className="text-red-500">YOU DIED!</h1>
+        <div className="flex flex-col gap-4 sm:gap-10 items-center justify-center z-10 p-20 h-full">
+          <div className="flex flex-col gap-5 items-center justify-center z-10 self-center ">
+            <h1 className="text-red-500 text-6xl">YOU DIED!</h1>
             <span className="text-lg sm:text-2xl text-terminal-yellow">
               {deathMessage}
             </span>
             <p className="sm:text-2xl">
               {adventurer?.name} died level {adventurer?.level} with{" "}
-              {adventurer?.xp} XP, a valiant effort!
-            </p>
-            <p className="hidden sm:block sm:text-xl">
-              Make sure to share your score. Continue the journey with another
-              adventurer:{" "}
+              {adventurer?.xp} XP, a valiant effort! Make sure to share your
+              score. Continue the journey with another adventurer:{" "}
             </p>
           </div>
           <TwitterShareButton

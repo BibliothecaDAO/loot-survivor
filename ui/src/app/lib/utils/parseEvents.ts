@@ -202,7 +202,6 @@ export function parseEvents(
 
   for (let raw of receipt.events) {
     const eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]);
-    console.log(eventName);
 
     switch (eventName) {
       case "StartGame":

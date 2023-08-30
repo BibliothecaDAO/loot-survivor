@@ -26,6 +26,7 @@ export const NotificationDisplay = () => {
         battles
       )
     : [];
+  console.log(notificationData);
 
   const [setSound, setSoundState] = useState(soundSelector.click);
 

@@ -245,8 +245,6 @@ export default function Home() {
     adventurerVariables
   );
 
-  console.log(lastBeastData);
-
   const beastVariables = useMemo(() => {
     return {
       adventurerId: adventurer?.id ?? 0,
@@ -264,7 +262,6 @@ export default function Home() {
   useCustomQuery("battlesByBeastQuery", getBattlesByBeast, beastVariables);
 
   const handleSwitchAdventurer = async (adventurerId: number) => {
-    console.log("START REFETCH");
     setIsLoading();
     const newAdventurerData = await refetch("adventurerByIdQuery", {
       id: adventurerId,
@@ -299,7 +296,6 @@ export default function Home() {
     setData("beastQuery", newBeastData);
     setData("battlesByBeastQuery", newBattlesByBeastData);
     setNotLoading();
-    console.log("END REFETCH");
   };
 
   useEffect(() => {

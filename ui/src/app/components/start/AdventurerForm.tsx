@@ -109,7 +109,6 @@ export const AdventurerForm = ({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log(spawn);
     await spawn(formData);
   };
 

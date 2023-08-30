@@ -39,7 +39,7 @@ export const contracts = {
   },
 };
 
-export const appUrl = "https://beta-survivor.realms.world/";
+export const appUrl = "https://survivor.realms.world/";
 
 export const notificationAnimations = [
   { name: "idle", startFrame: 0, frameCount: 4 },

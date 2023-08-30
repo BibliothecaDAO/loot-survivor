@@ -380,6 +380,7 @@ export function syscalls({
         const adventurerDiedEvent = events.find(
           (event) => event.name === "AdventurerDied"
         );
+        console.log(adventurerDiedEvent.name);
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data],
         });
@@ -503,9 +504,12 @@ export function syscalls({
       const battles = [];
 
       const attackedBeastEvents = events.filter(
-        (event) => event.name === "AttackedBeast"
+        (event) =>
+          event.name === "AttackedBeast" || event.name === "AttackedByBeast"
       );
       for (let attackedBeastEvent of attackedBeastEvents) {
+        console.log(attackedBeastEvent.name);
+        console.log(attackedBeastEvent.data[0]);
         setData("adventurerByIdQuery", {
           adventurers: [attackedBeastEvent.data[0]],
         });
@@ -517,17 +521,6 @@ export function syscalls({
           "health",
           0
         );
-      }
-
-      const attackedByBeastEvents = events.filter(
-        (event) => event.name === "AttackedByBeast"
-      );
-      for (let attackedByBeastEvent of attackedByBeastEvents) {
-        setData("adventurerByIdQuery", {
-          adventurers: [attackedByBeastEvent.data[0]],
-        });
-        setAdventurer(attackedByBeastEvent.data[0]);
-        battles.unshift(attackedByBeastEvent.data[1]);
       }
 
       const slayedBeastEvents = events.filter(
@@ -656,8 +649,6 @@ export function syscalls({
         setScreen("upgrade");
       }
 
-      console.log(battles);
-
       setData("battlesByBeastQuery", {
         battles: [
           ...battles,
@@ -674,7 +665,9 @@ export function syscalls({
         battles: [...battles.reverse()],
       });
 
-      stopLoading(battles.reverse());
+      console.log(battles);
+
+      stopLoading(battles);
       setEquipItems([]);
       setDropItems([]);
       setMintAdventurer(false);

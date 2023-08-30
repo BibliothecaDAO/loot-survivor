@@ -28,7 +28,6 @@ const useCustomQuery = (
   const refetchWrapper = useCallback(
     async (variables?: Variables) => {
       const { data: newData } = await refetch(variables);
-      console.log(newData, variables);
       return newData;
     },
     [refetch]

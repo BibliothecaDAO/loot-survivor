@@ -854,15 +854,15 @@ export function processData(
       const itemData = {
         item: gameData.ITEMS[itemsSpecialUnlockedEvent.id],
         special1:
-          gameData.ITEM_NAME_PREFIXES[
-            itemsSpecialUnlockedEvent.specials.special1
-          ],
+          gameData.ITEM_SUFFIXES[itemsSpecialUnlockedEvent.specials.special1],
         special2:
-          gameData.ITEM_NAME_SUFFIXES[
+          gameData.ITEM_NAME_PREFIXES[
             itemsSpecialUnlockedEvent.specials.special2
           ],
         special3:
-          gameData.ITEM_SUFFIXES[itemsSpecialUnlockedEvent.specials.special3],
+          gameData.ITEM_NAME_SUFFIXES[
+            itemsSpecialUnlockedEvent.specials.special3
+          ],
         timestamp: new Date(),
       };
       return [itemSpecialUnlockedAdventurerData, itemData];
