@@ -101,12 +101,12 @@ const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
           () => setTimeout(() => setScreen(1), 3000),
         ])}
       {screen == 1 &&
-        renderScreen("/scenes/intro/skulls.png", "cave", [
+        renderScreen("/scenes/intro/cave.png", "cave", [
           chapter1,
           () => setTimeout(() => setScreen(2), 3000),
         ])}
       {screen == 2 &&
-        renderScreen("/scenes/intro/cave.png", "skulls", [
+        renderScreen("/scenes/intro/opening.png", "skulls", [
           chapter2,
           () => setTimeout(() => setScreen(3), 3000),
         ])}
