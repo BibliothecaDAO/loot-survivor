@@ -404,7 +404,9 @@ mod Game {
             _assert_ownership(@self, adventurer_id);
 
             // unpack adventurer from storage (no need to apply stat boosts)
-            let mut adventurer = _unpack_adventurer(@self, adventurer_id);
+            let (mut adventurer, stat_boosts) = _unpack_adventurer_with_stat_boosts(
+                @self, adventurer_id
+            );
 
             // assert adventurer is not dead
             _assert_not_dead(adventurer.health);
@@ -418,7 +420,9 @@ mod Game {
             // if the adventurer was mutated
             if (adventurer.mutated) {
                 // pack and save it
-                _pack_adventurer(ref self, adventurer_id, adventurer);
+                _pack_adventurer_remove_stat_boost(
+                    ref self, ref adventurer, adventurer_id, stat_boosts
+                );
             }
 
             // if the bag was mutated
