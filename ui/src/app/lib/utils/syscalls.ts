@@ -384,6 +384,11 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data],
         });
+        const deadAdventurerIndex =
+          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+            (adventurer: any) => adventurer.id == adventurerDiedEvent.data.id
+          );
+        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
         setAdventurer(adventurerDiedEvent.data);
         const killedByObstacle =
           discoveries.reverse()[0]?.discoveryType == "Obstacle" &&
@@ -585,6 +590,11 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data],
         });
+        const deadAdventurerIndex =
+          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+            (adventurer: any) => adventurer.id == adventurerDiedEvent.data.id
+          );
+        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
         setAdventurer(adventurerDiedEvent.data);
         const killedByBeast = battles.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
@@ -750,6 +760,11 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data],
         });
+        const deadAdventurerIndex =
+          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+            (adventurer: any) => adventurer.id == adventurerDiedEvent.data.id
+          );
+        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
         setAdventurer(adventurerDiedEvent.data);
         const killedByBeast = events.some(
           (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
@@ -1018,6 +1033,11 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data],
         });
+        const deadAdventurerIndex =
+          queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+            (adventurer: any) => adventurer.id == adventurerDiedEvent.data.id
+          );
+        setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
         setAdventurer(adventurerDiedEvent.data);
         setDeathNotification(
           "Multicall",
