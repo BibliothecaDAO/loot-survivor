@@ -5,9 +5,7 @@ use option::OptionTrait;
 use core::clone::Clone;
 use poseidon::poseidon_hash_span;
 
-use lootitems::{
-    loot::{Loot, ILoot, ImplLoot}, statistics::{item_tier, constants::{ItemId, NUM_ITEMS}}
-};
+use lootitems::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemId, NUM_ITEMS}};
 
 use combat::constants::CombatEnums::{Tier, Slot};
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE};
@@ -238,9 +236,7 @@ mod tests {
     use array::{ArrayTrait, SpanTrait};
     use option::OptionTrait;
     use core::clone::Clone;
-    use lootitems::{
-        loot::{Loot, ILoot, ImplLoot}, statistics::{item_tier, constants::{ItemId, NUM_ITEMS}}
-    };
+    use lootitems::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemId, NUM_ITEMS}};
     use combat::constants::CombatEnums::{Tier, Slot};
     use market::{
         market::ImplMarket, constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE}

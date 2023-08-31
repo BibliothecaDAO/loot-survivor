@@ -1,3 +1,3 @@
 mod loot;
-mod statistics;
+mod constants;
 mod utils;

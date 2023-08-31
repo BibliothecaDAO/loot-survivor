@@ -12,7 +12,7 @@ mod tests {
     use box::BoxTrait;
 
     use market::market::{ImplMarket, LootWithPrice, ItemPurchase};
-    use lootitems::{loot::{Loot, ImplLoot, ILoot}, statistics::constants::{ItemId}};
+    use lootitems::{loot::{Loot, ImplLoot, ILoot}, constants::{ItemId}};
     use game::{
         Game,
         game::{

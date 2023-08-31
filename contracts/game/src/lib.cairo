@@ -31,8 +31,7 @@ mod Game {
         }
     };
     use lootitems::{
-        loot::{ILoot, Loot, ImplLoot},
-        statistics::constants::{ItemId, NamePrefixLength, NameSuffixLength}
+        loot::{ILoot, Loot, ImplLoot}, constants::{ItemId, NamePrefixLength, NameSuffixLength}
     };
     use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
     use survivor::{
@@ -55,7 +54,7 @@ mod Game {
     };
     use obstacles::obstacle::{ImplObstacle, IObstacle};
     use combat::{
-        combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums::{Slot, Tier}
+        combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums::{Slot, Tier, Type}
     };
     use beasts::beast::{Beast, IBeast, ImplBeast};
 
@@ -2503,8 +2502,10 @@ mod Game {
         // assert adventurer does not already own the item
         _assert_item_not_owned(immutable_adventurer, bag, item_id);
 
+        let item = ImplLoot::get_item(item_id);
+
         // get item price
-        let base_item_price = ImplMarket::get_price(ImplLoot::get_tier(item_id));
+        let base_item_price = ImplMarket::get_price(item.tier);
 
         // get item price after charisma discount
         let charisma_adjusted_price = adventurer.charisma_adjusted_item_price(base_item_price);
@@ -2516,7 +2517,7 @@ mod Game {
         adventurer.deduct_gold(charisma_adjusted_price);
 
         // return item with price
-        LootWithPrice { item: ImplLoot::get_item(item_id), price: charisma_adjusted_price }
+        LootWithPrice { item: item, price: charisma_adjusted_price }
     }
 
     // _get_live_entropy generates entropy for exploration
@@ -2912,29 +2913,49 @@ mod Game {
     fn _get_combat_spec(
         self: @ContractState, adventurer_id: u256, item: ItemPrimitive
     ) -> CombatSpec {
-        let mut specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
 
-        // if item is greatness 15 or higher
-        if (item.get_greatness() >= 15) {
-            // get item specials
-            let item_details = ImplItemSpecials::get_specials(
-                _get_specials_storage(self, adventurer_id, _get_storage_index(self, item.metadata)),
-                item
-            );
-            specials =
-                SpecialPowers {
+        // if item is 0, return a default combat spec
+        if (item.id == 0) {
+            CombatSpec {
+                tier: Tier::None(()),
+                item_type: Type::None(()),
+                level: 1,
+                specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
+            }
+        } else {
+            // otherwise get the loot item from the item id
+            let loot_item = ImplLoot::get_item(item.id);
+
+            // if the item is lower than G15
+            if item.get_greatness() < 15 {
+                // we don't need to fetch item specials from storage
+                CombatSpec {
+                    tier: loot_item.tier,
+                    item_type: loot_item.item_type,
+                    level: item.get_greatness().into(),
+                    specials: SpecialPowers { special1: 0, special2: 0, special3: 0 }
+                }
+            } else {
+                // if item is G15 or above, we need to fetch specials
+                let item_details = ImplItemSpecials::get_specials(
+                    _get_specials_storage(
+                        self, adventurer_id, _get_storage_index(self, item.metadata)
+                    ),
+                    item
+                );
+                let specials = SpecialPowers {
                     special1: item_details.special1,
                     special2: item_details.special2,
                     special3: item_details.special3
                 };
-        }
-
-        // return combat spec for item
-        CombatSpec {
-            tier: ImplLoot::get_tier(item.id),
-            item_type: ImplLoot::get_type(item.id),
-            level: item.get_greatness().into(),
-            specials: specials
+                // and return a CombatSpec with those specials
+                CombatSpec {
+                    tier: loot_item.tier,
+                    item_type: loot_item.item_type,
+                    level: item.get_greatness().into(),
+                    specials: specials
+                }
+            }
         }
     }
 

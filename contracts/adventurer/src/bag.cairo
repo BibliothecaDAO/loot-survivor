@@ -5,7 +5,7 @@ use super::{
     adventurer::{Adventurer, ImplAdventurer, IAdventurer},
     item_primitive::{ItemPrimitive, ImplItemPrimitive}, item_meta::{ImplItemSpecials, IItemSpecials}
 };
-use lootitems::statistics::constants::ItemId;
+use lootitems::constants::ItemId;
 
 // Bag is used for storing gear not equipped to the adventurer
 // TODO: Change this to an Array<ItemPrimitive> with id: u8, size: u8, and modified: bool

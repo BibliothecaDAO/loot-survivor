@@ -23,10 +23,7 @@ use super::{
 use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
 use lootitems::{
     loot::{Loot, ILoot, ImplLoot},
-    statistics::{
-        constants, item_tier, item_type,
-        constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength}
-    }
+    constants::{ItemSuffix, ItemId, NamePrefixLength, NameSuffixLength}
 };
 use combat::{
     combat::{ImplCombat, CombatSpec, SpecialPowers}, constants::CombatEnums::{Type, Tier, Slot}
@@ -294,8 +291,8 @@ impl ImplAdventurer of IAdventurer {
                     ImplBeast::get_special_names(
                         adventurer_level,
                         beast_seed,
-                        constants::NamePrefixLength.into(),
-                        constants::NameSuffixLength.into()
+                        NamePrefixLength.into(),
+                        NameSuffixLength.into()
                     );
             }
 
@@ -1364,10 +1361,7 @@ mod tests {
     use poseidon::poseidon_hash_span;
     use array::ArrayTrait;
 
-    use lootitems::{
-        loot::{Loot, ILoot, ImplLoot},
-        statistics::{constants, item_tier, item_type, constants::{ItemSuffix, ItemId}}
-    };
+    use lootitems::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemSuffix, ItemId}};
 
     use combat::{constants::CombatEnums::{Slot}};
 
@@ -2546,7 +2540,7 @@ mod tests {
     //     };
     //     let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
     //     // create demon crown item
-    //     let item = ItemPrimitive { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
     //     // try to equip it to adventurer as a weapon
     //     adventurer.equip_weapon(item);
     // // should panic with 'Item is not weapon' message
@@ -2564,13 +2558,13 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
         // Create Katana item
-        let item = ItemPrimitive { id: constants::ItemId::Katana, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 0 };
 
         // Equip to adventurer as a weapon
         adventurer.equip_weapon(item);
 
         // Assert item was equipped
-        assert(adventurer.weapon.id == constants::ItemId::Katana, 'did not equip weapon');
+        assert(adventurer.weapon.id == ItemId::Katana, 'did not equip weapon');
         assert(adventurer.weapon.xp == 1, 'weapon xp is not 1');
         assert(adventurer.weapon.metadata == 0, 'weapon metadata is not 0');
     }
@@ -2586,7 +2580,7 @@ mod tests {
     //     };
     //     let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
     //     // try to equip a Demon Crown as chest item
-    //     let item = ItemPrimitive { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
     //     adventurer.equip_chest_armor(item);
     // // should panic with 'Item is not chest armor' message
     // // because Demon Crown is not chest armor
@@ -2602,12 +2596,12 @@ mod tests {
         };
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
         // equip Divine Robe as chest item
-        let item = ItemPrimitive { id: constants::ItemId::DivineRobe, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 0 };
         adventurer.equip_chest_armor(item);
 
         // this should not panic
         // assert item was equipped
-        assert(adventurer.chest.id == constants::ItemId::DivineRobe, 'did not equip chest armor');
+        assert(adventurer.chest.id == ItemId::DivineRobe, 'did not equip chest armor');
         assert(adventurer.chest.xp == 1, 'chest armor xp is not 1');
         assert(adventurer.chest.metadata == 0, 'chest armor metadata is not 0');
     }
@@ -2623,7 +2617,7 @@ mod tests {
     //     };
     //     let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
     //     // try to equip a Katana as head item
-    //     let item = ItemPrimitive { id: constants::ItemId::Katana, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 0 };
     //     adventurer.equip_head_armor(item);
     // // should panic with 'Item is not head armor' message
     // }
@@ -2636,11 +2630,11 @@ mod tests {
         };
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
         // equip Crown as head item
-        let item = ItemPrimitive { id: constants::ItemId::Crown, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 0 };
         adventurer.equip_head_armor(item);
         // this should not panic
         // assert item was equipped
-        assert(adventurer.head.id == constants::ItemId::Crown, 'did not equip head armor');
+        assert(adventurer.head.id == ItemId::Crown, 'did not equip head armor');
         assert(adventurer.head.xp == 1, 'head armor xp is not 1');
         assert(adventurer.head.metadata == 0, 'head armor metadata is not 0');
     }
@@ -2656,7 +2650,7 @@ mod tests {
     //     };
     //     let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
     //     // try to equip a Demon Crown as waist item
-    //     let item = ItemPrimitive { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
     //     adventurer.equip_waist_armor(item);
     // // should panic with 'Item is not waist armor' message
     // }
@@ -2670,12 +2664,12 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
         // equip Wool Sash as waist item
-        let item = ItemPrimitive { id: constants::ItemId::WoolSash, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::WoolSash, xp: 1, metadata: 0 };
         adventurer.equip_waist_armor(item);
 
         // this should not panic
         // assert item was equipped
-        assert(adventurer.waist.id == constants::ItemId::WoolSash, 'did not equip waist armor');
+        assert(adventurer.waist.id == ItemId::WoolSash, 'did not equip waist armor');
         assert(adventurer.waist.xp == 1, 'waist armor xp is not 1');
         assert(adventurer.waist.metadata == 0, 'waist armor metadata is not 0');
     }
@@ -2691,7 +2685,7 @@ mod tests {
     //     };
     //     let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
     //     // try to equip a Demon Crown as foot item
-    //     let item = ItemPrimitive { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
     //     adventurer.equip_foot_armor(item);
     // // should panic with 'Item is not foot armor' message
     // }
@@ -2705,12 +2699,12 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
         // equip Silk Slippers as foot item
-        let item = ItemPrimitive { id: constants::ItemId::SilkSlippers, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::SilkSlippers, xp: 1, metadata: 0 };
         adventurer.equip_foot_armor(item);
 
         // this should not panic
         // assert item was equipped
-        assert(adventurer.foot.id == constants::ItemId::SilkSlippers, 'did not equip foot armor');
+        assert(adventurer.foot.id == ItemId::SilkSlippers, 'did not equip foot armor');
         assert(adventurer.foot.xp == 1, 'foot armor xp is not 1');
         assert(adventurer.foot.metadata == 0, 'foot armor metadata is not 0');
     }
@@ -2727,7 +2721,7 @@ mod tests {
     //     let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
     //     // try to equip a Demon Crown as hand item
-    //     let item = ItemPrimitive { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
     //     adventurer.equip_hand_armor(item);
     // // should panic with 'Item is not hand armor' message
     // }
@@ -2741,12 +2735,12 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
         // equip Divine Gloves as hand item
-        let item = ItemPrimitive { id: constants::ItemId::DivineGloves, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::DivineGloves, xp: 1, metadata: 0 };
         adventurer.equip_hand_armor(item);
 
         // this should not panic
         // assert item was equipped
-        assert(adventurer.hand.id == constants::ItemId::DivineGloves, 'did not equip hand armor');
+        assert(adventurer.hand.id == ItemId::DivineGloves, 'did not equip hand armor');
         assert(adventurer.hand.xp == 1, 'hand armor xp is not 1');
         assert(adventurer.hand.metadata == 0, 'hand armor metadata is not 0');
     }
@@ -2763,7 +2757,7 @@ mod tests {
     //     let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
     //     // try to equip a Demon Crown as necklace
-    //     let item = ItemPrimitive { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
     //     adventurer.equip_necklace(item);
     // // should panic with 'Item is not necklace' message
     // }
@@ -2777,12 +2771,12 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
         // equip Pendant as necklace
-        let item = ItemPrimitive { id: constants::ItemId::Pendant, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::Pendant, xp: 1, metadata: 0 };
         adventurer.equip_necklace(item);
 
         // this should not panic
         // assert item was equipped
-        assert(adventurer.neck.id == constants::ItemId::Pendant, 'did not equip necklace');
+        assert(adventurer.neck.id == ItemId::Pendant, 'did not equip necklace');
         assert(adventurer.neck.xp == 1, 'necklace xp is not 1');
         assert(adventurer.neck.metadata == 0, 'necklace metadata is not 0');
     }
@@ -2799,7 +2793,7 @@ mod tests {
     //     let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
     //     // try to equip a Demon Crown as ring
-    //     let item = ItemPrimitive { id: constants::ItemId::DemonCrown, xp: 1, metadata: 0 };
+    //     let item = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 0 };
     //     adventurer.equip_ring(item);
     // // should panic with 'Item is not a ring' message
     // }
@@ -2811,9 +2805,9 @@ mod tests {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
         };
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
-        let item = ItemPrimitive { id: constants::ItemId::PlatinumRing, xp: 1, metadata: 0 };
+        let item = ItemPrimitive { id: ItemId::PlatinumRing, xp: 1, metadata: 0 };
         adventurer.equip_ring(item);
-        assert(adventurer.ring.id == constants::ItemId::PlatinumRing, 'did not equip ring');
+        assert(adventurer.ring.id == ItemId::PlatinumRing, 'did not equip ring');
         assert(adventurer.ring.xp == 1, 'ring xp is not 1');
         assert(adventurer.ring.metadata == 0, 'ring metadata is not 0');
     }
@@ -2826,9 +2820,7 @@ mod tests {
         };
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
         let entropy = 1;
-        let item_ghost_wand = ItemPrimitive {
-            id: constants::ItemId::GhostWand, xp: 1, metadata: 1
-        };
+        let item_ghost_wand = ItemPrimitive { id: ItemId::GhostWand, xp: 1, metadata: 1 };
         adventurer.equip_item(item_ghost_wand);
 
         let blank_special_name = ItemSpecials { special2: 0, special3: 0, special1: 0 };
@@ -2991,13 +2983,11 @@ mod tests {
         // but technically possible so the contract needs to be able to handle it
 
         // to test this lets create a new item
-        let divine_robe = ItemPrimitive { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
+        let divine_robe = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
         adventurer.equip_item(divine_robe);
 
         // verify starting state
-        assert(
-            adventurer.chest.id == constants::ItemId::DivineRobe, 'advntr should have divine robe'
-        );
+        assert(adventurer.chest.id == ItemId::DivineRobe, 'advntr should have divine robe');
         assert(adventurer.chest.xp == 1, 'divine robe should have 1 xp');
         assert(adventurer.chest.metadata == 2, 'advntr should have divine robe');
         let divine_robe_starting_level = adventurer.chest.get_greatness();
@@ -3098,14 +3088,14 @@ mod tests {
         );
 
         // stage items
-        let weapon = ItemPrimitive { id: constants::ItemId::Katana, xp: 1, metadata: 1 };
-        let chest = ItemPrimitive { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
-        let head = ItemPrimitive { id: constants::ItemId::Crown, xp: 1, metadata: 3 };
-        let waist = ItemPrimitive { id: constants::ItemId::DemonhideBelt, xp: 1, metadata: 4 };
-        let foot = ItemPrimitive { id: constants::ItemId::LeatherBoots, xp: 1, metadata: 5 };
-        let hand = ItemPrimitive { id: constants::ItemId::LeatherGloves, xp: 1, metadata: 6 };
-        let neck = ItemPrimitive { id: constants::ItemId::Amulet, xp: 1, metadata: 7 };
-        let ring = ItemPrimitive { id: constants::ItemId::GoldRing, xp: 1, metadata: 8 };
+        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
+        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
+        let head = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 3 };
+        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 4 };
+        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1, metadata: 5 };
+        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
 
         // equip items
         adventurer.equip_weapon(weapon);
@@ -3140,14 +3130,14 @@ mod tests {
         );
 
         // stage items
-        let weapon = ItemPrimitive { id: constants::ItemId::Katana, xp: 1, metadata: 1 };
-        let chest = ItemPrimitive { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
-        let head = ItemPrimitive { id: constants::ItemId::Crown, xp: 1, metadata: 3 };
-        let waist = ItemPrimitive { id: constants::ItemId::DemonhideBelt, xp: 1, metadata: 4 };
-        let foot = ItemPrimitive { id: constants::ItemId::LeatherBoots, xp: 1, metadata: 5 };
-        let hand = ItemPrimitive { id: constants::ItemId::LeatherGloves, xp: 1, metadata: 6 };
-        let neck = ItemPrimitive { id: constants::ItemId::Amulet, xp: 1, metadata: 7 };
-        let ring = ItemPrimitive { id: constants::ItemId::GoldRing, xp: 1, metadata: 8 };
+        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
+        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
+        let head = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 3 };
+        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 4 };
+        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1, metadata: 5 };
+        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
 
         // equip half the items, adventurer will have nothing equipped for the other slots
         adventurer.equip_weapon(weapon);
@@ -3624,9 +3614,9 @@ mod tests {
                 strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
             }
         );
-        let neck = ItemPrimitive { id: constants::ItemId::Amulet, xp: 1, metadata: 7 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
         adventurer.equip_necklace(neck);
-        let ring = ItemPrimitive { id: constants::ItemId::GoldRing, xp: 1, metadata: 8 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
         adventurer.equip_ring(ring);
         assert(adventurer.get_luck() == 2, 'start with no luck');
     }
@@ -3644,19 +3634,17 @@ mod tests {
         assert(adventurer.get_luck() == 0, 'start with no luck');
 
         // equip a greatness 1 necklace
-        let neck = ItemPrimitive { id: constants::ItemId::Amulet, xp: 1, metadata: 7 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
         adventurer.equip_necklace(neck);
         assert(adventurer.get_luck() == 1, 'should be 1 luck');
 
         // equip a greatness 1 ring
-        let ring = ItemPrimitive { id: constants::ItemId::GoldRing, xp: 1, metadata: 8 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
         adventurer.equip_ring(ring);
         assert(adventurer.get_luck() == 2, 'should be 2 luck');
 
         // equip a greatness 19 silver ring
-        let mut silver_ring = ItemPrimitive {
-            id: constants::ItemId::SilverRing, xp: 399, metadata: 8
-        };
+        let mut silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 399, metadata: 8 };
         adventurer.equip_ring(silver_ring);
         assert(adventurer.get_luck() == 20, 'should be 20 luck');
 
@@ -3713,14 +3701,14 @@ mod tests {
         assert(adventurer.ring.id == 0, 'ring should be 0');
 
         // stage items
-        let weapon = ItemPrimitive { id: constants::ItemId::Katana, xp: 1, metadata: 1 };
-        let chest = ItemPrimitive { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
-        let head = ItemPrimitive { id: constants::ItemId::Crown, xp: 1, metadata: 3 };
-        let waist = ItemPrimitive { id: constants::ItemId::DemonhideBelt, xp: 1, metadata: 4 };
-        let foot = ItemPrimitive { id: constants::ItemId::LeatherBoots, xp: 1, metadata: 5 };
-        let hand = ItemPrimitive { id: constants::ItemId::LeatherGloves, xp: 1, metadata: 6 };
-        let neck = ItemPrimitive { id: constants::ItemId::Amulet, xp: 1, metadata: 7 };
-        let ring = ItemPrimitive { id: constants::ItemId::GoldRing, xp: 1, metadata: 8 };
+        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
+        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
+        let head = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 3 };
+        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 4 };
+        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1, metadata: 5 };
+        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
 
         adventurer.equip_item(weapon);
         adventurer.equip_item(chest);
@@ -3745,8 +3733,8 @@ mod tests {
     #[test]
     #[available_gas(1000000)]
     fn test_is_equipped() {
-        let wand = ItemPrimitive { id: constants::ItemId::Wand, xp: 1, metadata: 1 };
-        let demon_crown = ItemPrimitive { id: constants::ItemId::DemonCrown, xp: 1, metadata: 2 };
+        let wand = ItemPrimitive { id: ItemId::Wand, xp: 1, metadata: 1 };
+        let demon_crown = ItemPrimitive { id: ItemId::DemonCrown, xp: 1, metadata: 2 };
         let starting_stats = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
         };
@@ -3767,20 +3755,14 @@ mod tests {
         assert(adventurer.is_equipped(demon_crown.id) == false, 'demon crown is not equipped');
 
         // stage items
-        let katana = ItemPrimitive { id: constants::ItemId::Katana, xp: 1, metadata: 1 };
-        let divine_robe = ItemPrimitive { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
-        let crown = ItemPrimitive { id: constants::ItemId::Crown, xp: 1, metadata: 3 };
-        let demonhide_belt = ItemPrimitive {
-            id: constants::ItemId::DemonhideBelt, xp: 1, metadata: 4
-        };
-        let leather_boots = ItemPrimitive {
-            id: constants::ItemId::LeatherBoots, xp: 1, metadata: 5
-        };
-        let leather_gloves = ItemPrimitive {
-            id: constants::ItemId::LeatherGloves, xp: 1, metadata: 6
-        };
-        let amulet = ItemPrimitive { id: constants::ItemId::Amulet, xp: 1, metadata: 7 };
-        let gold_ring = ItemPrimitive { id: constants::ItemId::GoldRing, xp: 1, metadata: 8 };
+        let katana = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
+        let divine_robe = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
+        let crown = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 3 };
+        let demonhide_belt = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 4 };
+        let leather_boots = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1, metadata: 5 };
+        let leather_gloves = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
+        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
+        let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
 
         // Equip a katana and verify is_equipped returns true for katana and false everything else
         adventurer.equip_item(katana);
@@ -3900,7 +3882,7 @@ mod tests {
         // try to drop an item that isn't equipped
         // this should panic with 'item is not equipped'
         // the test is annotated to expect this panic
-        adventurer.drop_item(constants::ItemId::Crown);
+        adventurer.drop_item(ItemId::Crown);
     }
 
     #[test]
@@ -3912,7 +3894,7 @@ mod tests {
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
         // assert starting conditions
-        assert(adventurer.weapon.id == constants::ItemId::Wand, 'weapon should be wand');
+        assert(adventurer.weapon.id == ItemId::Wand, 'weapon should be wand');
         assert(adventurer.chest.id == 0, 'chest should be 0');
         assert(adventurer.head.id == 0, 'head should be 0');
         assert(adventurer.waist.id == 0, 'waist should be 0');
@@ -3922,19 +3904,19 @@ mod tests {
         assert(adventurer.ring.id == 0, 'ring should be 0');
 
         // drop equipped wand
-        adventurer.drop_item(constants::ItemId::Wand);
+        adventurer.drop_item(ItemId::Wand);
         assert(adventurer.weapon.id == 0, 'weapon should be 0');
         assert(adventurer.weapon.xp == 0, 'weapon xp should be 0');
 
         // instantiate additional items
-        let weapon = ItemPrimitive { id: constants::ItemId::Katana, xp: 1, metadata: 1 };
-        let chest = ItemPrimitive { id: constants::ItemId::DivineRobe, xp: 1, metadata: 2 };
-        let head = ItemPrimitive { id: constants::ItemId::Crown, xp: 1, metadata: 3 };
-        let waist = ItemPrimitive { id: constants::ItemId::DemonhideBelt, xp: 1, metadata: 4 };
-        let foot = ItemPrimitive { id: constants::ItemId::LeatherBoots, xp: 1, metadata: 5 };
-        let hand = ItemPrimitive { id: constants::ItemId::LeatherGloves, xp: 1, metadata: 6 };
-        let neck = ItemPrimitive { id: constants::ItemId::Amulet, xp: 1, metadata: 7 };
-        let ring = ItemPrimitive { id: constants::ItemId::GoldRing, xp: 1, metadata: 8 };
+        let weapon = ItemPrimitive { id: ItemId::Katana, xp: 1, metadata: 1 };
+        let chest = ItemPrimitive { id: ItemId::DivineRobe, xp: 1, metadata: 2 };
+        let head = ItemPrimitive { id: ItemId::Crown, xp: 1, metadata: 3 };
+        let waist = ItemPrimitive { id: ItemId::DemonhideBelt, xp: 1, metadata: 4 };
+        let foot = ItemPrimitive { id: ItemId::LeatherBoots, xp: 1, metadata: 5 };
+        let hand = ItemPrimitive { id: ItemId::LeatherGloves, xp: 1, metadata: 6 };
+        let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
+        let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
 
         // equip item
         adventurer.equip_item(weapon);

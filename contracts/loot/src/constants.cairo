@@ -1,6 +1,6 @@
 const NUM_ITEMS: u8 = 101;
 
-mod ItemId {
+mod ItemId {    
     const Pendant: u8 = 1;
     const Necklace: u8 = 2;
     const Amulet: u8 = 3;

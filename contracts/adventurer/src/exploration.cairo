@@ -7,7 +7,7 @@ use survivor::{
         DiscoveryEnums::TreasureDiscovery, DiscoveryEnums::ExploreResult
     }
 };
-use lootitems::statistics::constants::ItemId;
+use lootitems::constants::ItemId;
 
 #[generate_trait]
 impl ExploreUtils of Explore {
@@ -82,7 +82,7 @@ mod tests {
         exploration::ExploreUtils, adventurer::{ImplAdventurer, ItemPrimitive},
         adventurer_stats::Stats
     };
-    use lootitems::statistics::constants::ItemId;
+    use lootitems::constants::ItemId;
 
     #[test]
     #[available_gas(69690)]
