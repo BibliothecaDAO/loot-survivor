@@ -147,11 +147,12 @@ export default function Info({
                       +{(vitalitySelected + potionAmount) * 10}
                     </p>
                   )}
+                   */}{" "}
                   {vitalitySelected && (
                     <p className="absolute top-[-10px] left-[60px] text-sm">
                       +{vitalitySelected * 10}
                     </p>
-                  )} */}
+                  )}
                 </span>
               </div>
               <div className="flex justify-between w-full text-sm sm:text-base">
