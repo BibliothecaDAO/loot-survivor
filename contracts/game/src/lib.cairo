@@ -164,7 +164,7 @@ mod Game {
             _start(
                 ref self, block_number, caller, starting_weapon, adventurer_meta, starting_stats
             );
-        //_payout(ref self, caller, block_number, interface_id);
+            _payout(ref self, caller, block_number, interface_id);
         }
 
         //@notice Sends an adventurer to explore.
@@ -985,9 +985,8 @@ mod Game {
             // the purpose of this is to let a decent set of top scores get set before payouts begin
             // without this, there would be an incentive to start and die immediately after contract is deployed
             // to capture the rewards from the launch hype
-            // IERC20Dispatcher {
-            //     contract_address: lords
-            // }.transferFrom(caller, self._dao.read(), week.DAO);
+            IERC20Dispatcher { contract_address: lords }
+                .transferFrom(caller, self._dao.read(), _to_ether(week.DAO));
             return;
         }
 
