@@ -367,12 +367,14 @@ export default function Home() {
                 <h1 className="glitch m-0 text-lg sm:text-4xl">
                   Loot Survivor
                 </h1>
-                <PenaltyCountDown
-                  lastDiscoveryTime={
-                    data.latestDiscoveriesQuery?.discoveries[0]?.timestamp
-                  }
-                  lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
-                />
+                {adventurer?.id && (
+                  <PenaltyCountDown
+                    lastDiscoveryTime={
+                      data.latestDiscoveriesQuery?.discoveries[0]?.timestamp
+                    }
+                    lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
+                  />
+                )}
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
                 <Button

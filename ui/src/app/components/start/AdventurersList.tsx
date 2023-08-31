@@ -22,7 +22,7 @@ export const AdventurersList = ({
   adventurers,
   handleSwitchAdventurer,
 }: AdventurerListProps) => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const [showZeroHealth, setShowZeroHealth] = useState(true);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);

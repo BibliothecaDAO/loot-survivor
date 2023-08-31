@@ -23,7 +23,7 @@ const ItemBar: React.FC<ItemBarProps> = ({ xp }) => {
       ) : (
         <>
           <div className="flex flex-row h-1 items-center gap-2 relative mt-2">
-            <span>{level}</span>
+            <span className="text-sm">{level}</span>
             <span className="w-full flex flex-col self-center mb-2">
               <span className="text-xs text-center">{xp} XP</span>
               <div className="w-full h-1 border border-black bg-terminal-green dark:bg-terminal-green">
@@ -33,7 +33,7 @@ const ItemBar: React.FC<ItemBarProps> = ({ xp }) => {
                 />
               </div>
             </span>
-            <span>{level + 1}</span>
+            <span className="text-sm">{level + 1}</span>
           </div>
         </>
       )}
