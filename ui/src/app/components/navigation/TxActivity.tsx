@@ -18,10 +18,11 @@ import {
   getDiscoveryByTxHash,
   getAdventurerById,
 } from "@/app/hooks/graphql/queries";
+import { parseEvents } from "@/app/lib/utils/parseEvents";
+import { InvokeTransactionReceiptResponse } from "starknet";
 
 export const TxActivity = () => {
   const notificationData = useLoadingStore((state) => state.notificationData);
-  const loadingQuery = useLoadingStore((state) => state.loadingQuery);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const loading = useLoadingStore((state) => state.loading);
   const hash = useLoadingStore((state) => state.hash);
@@ -42,13 +43,7 @@ export const TxActivity = () => {
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
   );
-  const {
-    data: queryData,
-    isDataUpdated,
-    refetch,
-    resetDataUpdated,
-    resetData,
-  } = useQueriesStore();
+  const { data: queryData, refetch, setData, resetData } = useQueriesStore();
   const { data } = useWaitForTransaction({
     hash,
     watch: true,
@@ -58,202 +53,27 @@ export const TxActivity = () => {
     onRejected: () => {
       stopLoading("Rejected");
     },
-  });
+  }) as { data: InvokeTransactionReceiptResponse };
   const pendingArray = Array.isArray(pendingMessage);
   const [messageIndex, setMessageIndex] = useState(0);
-  const isLoadingQueryUpdated = isDataUpdated[loadingQuery!];
 
-  const setDeathNotification = (
-    type: string,
-    notificationData: any,
-    battles: any,
-    hasBeast: boolean
-  ) => {
-    const notifications = processNotifications(
-      type,
-      notificationData,
-      battles,
-      hasBeast,
-      adventurer ?? NullAdventurer
-    );
-    // In the case of a chain of notifications we are only interested in the last
-    setDeathMessage(notifications[notifications.length - 1].message);
-    showDeathDialog(true);
-  };
+  // useCustomQuery(
+  //   "battlesByTxHashQuery",
+  //   getBattleByTxHash,
+  //   {
+  //     txHash: padAddress(hash),
+  //   },
+  //   !hash
+  // );
 
-  useCustomQuery(
-    "battlesByTxHashQuery",
-    getBattleByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted,
-    !hash
-  );
-
-  useCustomQuery(
-    "discoveryByTxHashQuery",
-    getDiscoveryByTxHash,
-    {
-      txHash: padAddress(hash),
-    },
-    txAccepted,
-    !hash
-  );
-
-  console.log(txAccepted, hash, isLoadingQueryUpdated);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      console.log(txAccepted, hash, isLoadingQueryUpdated);
-      if (!txAccepted || !hash || !isLoadingQueryUpdated) return;
-
-      const handleAttackOrFlee = async () => {
-        if (!queryData?.battlesByTxHashQuery) return;
-        await refetch("battlesByTxHashQuery");
-        // await refetch("adventurerByIdQuery");
-        await refetch("battlesByBeastQuery");
-        await refetch("battlesByAdventurerQuery");
-        await refetch("latestMarketItemsQuery");
-        console.log("in battle");
-        const killedByBeast = queryData.battlesByTxHashQuery.battles.some(
-          (battle) => battle.attacker == "Beast" && battle.adventurerHealth == 0
-        );
-        const killedByPenalty = queryData.battlesByTxHashQuery.battles.some(
-          (battle) => !battle.attacker && battle.adventurerHealth == 0
-        );
-        if (killedByBeast || killedByPenalty) {
-          setDeathNotification(
-            type,
-            queryData.battlesByTxHashQuery.battles,
-            queryData.battlesByBeastQuery?.battles,
-            true
-          );
-        }
-        stopLoading(queryData.battlesByTxHashQuery.battles);
-      };
-
-      const handleExplore = async () => {
-        if (!queryData?.discoveryByTxHashQuery) return;
-
-        await refetch("discoveryByTxHashQuery");
-        await refetch("discoveriesQuery");
-        await refetch("latestDiscoveriesQuery");
-        // await refetch("adventurerByIdQuery");
-        await refetch("lastBeastBattleQuery");
-        await refetch("lastBeastQuery");
-        await refetch("beastQuery");
-        await refetch("latestMarketItemsQuery");
-        const killedByObstacle =
-          queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType ==
-            "Obstacle" &&
-          queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-            0;
-        const killedByPenalty =
-          !queryData.discoveryByTxHashQuery.discoveries[0]?.discoveryType &&
-          queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-            0;
-        const killedByAmbush =
-          queryData.discoveryByTxHashQuery.discoveries[0]?.ambushed &&
-          queryData.discoveryByTxHashQuery.discoveries[0]?.adventurerHealth ==
-            0;
-        if (killedByObstacle || killedByPenalty || killedByAmbush) {
-          setDeathNotification(
-            type,
-            queryData.discoveryByTxHashQuery.discoveries,
-            queryData.battlesByBeastQuery?.battles,
-            hasBeast
-          );
-        }
-        stopLoading(queryData.discoveryByTxHashQuery.discoveries);
-      };
-
-      const handleUpgrade = async () => {
-        // await refetch("adventurerByIdQuery");
-        await refetch("latestMarketItemsQuery");
-        stopLoading(notificationData);
-        if (!hasStatUpgrades) {
-          setScreen("play");
-        }
-      };
-
-      const handleMulticall = async () => {
-        console.log(loadingQuery, isLoadingQueryUpdated);
-        // await refetch("adventurerByIdQuery");
-        await refetch("itemsByAdventurerQuery");
-        await refetch("battlesByBeastQuery");
-        await refetch("latestMarketItemsQuery");
-        const killedFromEquipping =
-          (pendingMessage as string[]).includes("Equipping") && !isAlive;
-        if (killedFromEquipping) {
-          setDeathNotification(type, notificationData, [], true);
-        }
-        stopLoading(notificationData);
-      };
-
-      const handleCreate = async () => {
-        console.log("in create");
-        await refetch("adventurersByOwnerQuery");
-        await refetch("adventurerByIdQuery");
-        stopLoading(notificationData);
-      };
-
-      const handleDefault = async () => {
-        stopLoading(notificationData);
-      };
-
-      const handleDataUpdate = () => {
-        setTxAccepted(false);
-        resetDataUpdated(loadingQuery!);
-      };
-
-      console.log(type);
-
-      try {
-        switch (type) {
-          case "Attack":
-            await handleAttackOrFlee();
-            break;
-          case "Flee":
-            await handleAttackOrFlee();
-            break;
-          case "Explore":
-            await handleExplore();
-            break;
-          case "Upgrade":
-            await handleUpgrade();
-            break;
-          case "Multicall":
-            await handleMulticall();
-            break;
-          case "Create":
-            await handleCreate();
-            break;
-          default:
-            await handleDefault();
-            break;
-        }
-      } catch (error) {
-        console.error("An error occurred during fetching:", error);
-        // handle error (e.g., update state to show error message)
-      }
-
-      handleDataUpdate();
-    };
-
-    fetchData();
-  }, [isLoadingQueryUpdated]);
-
-  useEffect(() => {
-    if (
-      queryData.adventurerByIdQuery &&
-      queryData.adventurerByIdQuery.adventurers[0]?.id
-    ) {
-      console.log("updated");
-      console.log(queryData.adventurerByIdQuery.adventurers[0]);
-      setAdventurer(queryData.adventurerByIdQuery.adventurers[0]);
-    }
-  }, [isLoadingQueryUpdated]);
+  // useCustomQuery(
+  //   "discoveryByTxHashQuery",
+  //   getDiscoveryByTxHash,
+  //   {
+  //     txHash: padAddress(hash),
+  //   },
+  //   !hash
+  // );
 
   // stop loading when an error is caught
   useEffect(() => {

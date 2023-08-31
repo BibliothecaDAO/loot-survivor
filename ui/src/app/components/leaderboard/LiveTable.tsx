@@ -7,9 +7,13 @@ import useUIStore from "@/app/hooks/useUIStore";
 
 export interface LiveLeaderboardTableProps {
   itemsPerPage: number;
+  handleFetchProfileData: (adventurerId: number) => void;
 }
 
-const LiveLeaderboardTable = ({ itemsPerPage }: LiveLeaderboardTableProps) => {
+const LiveLeaderboardTable = ({
+  itemsPerPage,
+  handleFetchProfileData,
+}: LiveLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const { data, isLoading, refetch } = useQueriesStore();
@@ -44,6 +48,7 @@ const LiveLeaderboardTable = ({ itemsPerPage }: LiveLeaderboardTableProps) => {
     try {
       setProfile(adventurerId);
       setScreen("profile");
+      await handleFetchProfileData(adventurerId);
     } catch (error) {
       console.error(error);
     } finally {

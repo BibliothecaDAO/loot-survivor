@@ -1,7 +1,7 @@
-import { use, useEffect, useMemo, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@apollo/client";
 import { useQueriesStore, QueryKey } from "./useQueryStore";
-import { AdventurerQuery, BattleQuery, ItemQuery } from "./graphql/types";
+import { isEqual } from "lodash";
 
 type Variables = Record<
   string,
@@ -14,41 +14,30 @@ const useCustomQuery = (
   queryKey: QueryKey,
   query: any,
   variables?: Variables,
-  shouldPoll?: boolean,
   skip?: boolean
 ) => {
-  const { updateData } = useQueriesStore();
+  const { setRefetch } = useQueriesStore((state) => ({
+    setRefetch: state.setRefetch,
+  }));
 
-  const { data, startPolling, stopPolling, loading, refetch, error } = useQuery(
-    query,
-    {
-      variables: variables,
-      skip: skip,
-    }
+  const { data, loading, refetch, error } = useQuery(query, {
+    variables: variables,
+    skip: skip,
+  });
+
+  const refetchWrapper = useCallback(
+    async (variables?: Variables) => {
+      const { data: newData } = await refetch(variables);
+      return newData;
+    },
+    [refetch]
   );
 
-  const refetchWrapper = useCallback(async () => {
-    try {
-      await refetch();
-    } catch (error) {
-      console.error("Error refetching:", error);
-      throw error;
-    }
-  }, [refetch]);
-
   useEffect(() => {
-    if (data) {
-      updateData(queryKey, data, loading, refetchWrapper);
-    }
-  }, [data, updateData, loading, queryKey, refetchWrapper, variables]);
+    setRefetch(queryKey, refetchWrapper);
+  }, []);
 
-  useEffect(() => {
-    if (shouldPoll) {
-      startPolling(5000);
-    } else {
-      stopPolling();
-    }
-  }, [shouldPoll, startPolling, stopPolling]);
+  return data;
 };
 
 export default useCustomQuery;

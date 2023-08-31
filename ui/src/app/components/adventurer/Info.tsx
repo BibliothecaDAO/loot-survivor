@@ -1,6 +1,7 @@
+import { useMemo } from "react";
 import { Adventurer, NullAdventurer, NullItem } from "../../types";
 import { getItemsByAdventurer } from "../../hooks/graphql/queries";
-import { HeartIcon, CoinIcon, BagIcon } from "../icons/Icons";
+import { HeartIcon, CoinIcon, BagIcon, QuestionMarkIcon } from "../icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
 import {
@@ -32,10 +33,11 @@ export default function Info({
 }: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
   const profile = useUIStore((state) => state.profile);
-  const { data, isLoading } = useQueriesStore();
+  const { data, isLoading, data: storeData } = useQueriesStore();
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const dropItems = useUIStore((state) => state.dropItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const potionAmount = useUIStore((state) => state.potionAmount);
   const upgrades = useUIStore((state) => state.upgrades);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
@@ -44,24 +46,6 @@ export default function Info({
   const { gameContract } = useContracts();
 
   const gameData = new GameData();
-
-  useCustomQuery(
-    "itemsByAdventurerQuery",
-    getItemsByAdventurer,
-    {
-      adventurerId: adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
-
-  useCustomQuery(
-    "itemsByProfileQuery",
-    getItemsByAdventurer,
-    {
-      adventurerId: profile ?? 0,
-    },
-    txAccepted
-  );
 
   const items = profileExists
     ? data.itemsByProfileQuery
@@ -130,34 +114,47 @@ export default function Info({
   ];
 
   const vitalitySelected = upgrades["Vitality"];
-  const totalHealth = (formatAdventurer.health ?? 0) + vitalitySelected * 10;
+  const totalHealth =
+    (formatAdventurer.health ?? 0) + (vitalitySelected + potionAmount) * 10;
 
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
 
   return (
-    <div className="border border-terminal-green xl:h-[500px] 2xl:h-full">
-      {!isLoading.itemsByAdventurerQuery ? (
-        <div className="flex flex-row flex-wrap gap-2 p-1 xl:h-full">
-          <div className="flex flex-col w-full sm:p-2 uppercase xl:h-full">
-            <div className="flex justify-between w-full text-xl sm:text-2xl lg:text-3xl border-b border-terminal-green">
-              {formatAdventurer.name}
-              <span className="flex items-center text-terminal-yellow">
-                <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
-                {formatAdventurer.gold
-                  ? formatAdventurer.gold - (upgradeCost ?? 0)
-                  : 0}
-              </span>
-              {/* <span className="flex text-lg items-center sm:text-3xl">
+    <>
+      {adventurer?.id ? (
+        <div className="border border-terminal-green xl:h-[500px] 2xl:h-full">
+          <div className="flex flex-row flex-wrap gap-2 p-1 xl:h-full">
+            <div className="flex flex-col w-full sm:p-2 uppercase xl:h-full">
+              <div className="flex justify-between w-full text-xl sm:text-2xl lg:text-3xl border-b border-terminal-green">
+                {formatAdventurer.name}
+                <span className="flex items-center text-terminal-yellow">
+                  <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
+                  {formatAdventurer.gold
+                    ? formatAdventurer.gold - (upgradeCost ?? 0)
+                    : 0}
+                  {formatAdventurer.gold === 511 ? "Full" : ""}
+                </span>
+                {/* <span className="flex text-lg items-center sm:text-3xl">
                 <BagIcon className="self-center w-4 h-4 fill-current" />{" "}
                 {`${items.length}/${19}`}
               </span> */}
-              <span className="flex items-center ">
-                <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
-                <HealthCountDown health={totalHealth || 0} />
-                {`/${Math.min(100 + totalVitality * 10, 511)}`}
-              </span>
-            </div>
-            {adventurer?.id ? (
+                <span className="relative flex items-center ">
+                  <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
+                  <HealthCountDown health={totalHealth || 0} />
+                  {`/${Math.min(100 + totalVitality * 10, 720)}`}
+                  {/* {(potionAmount || vitalitySelected) && (
+                    <p className="absolute top-[-10px] left-[30px] text-sm">
+                      +{(vitalitySelected + potionAmount) * 10}
+                    </p>
+                  )}
+                   */}{" "}
+                  {vitalitySelected && (
+                    <p className="absolute top-[-10px] left-[60px] text-sm">
+                      +{vitalitySelected * 10}
+                    </p>
+                  )}
+                </span>
+              </div>
               <div className="flex justify-between w-full text-sm sm:text-base">
                 {formatAdventurer.classType}{" "}
                 <span>
@@ -167,48 +164,49 @@ export default function Info({
                   }
                 </span>
               </div>
-            ) : (
-              <span className="text-center text-lg text-terminal-yellow">
-                No Adventurer Selected
-              </span>
-            )}
-            <hr className="border-terminal-green" />
-            <div className="flex justify-between w-full sm:text-sm lg:text-xl pb-1">
-              <LevelBar xp={formatAdventurer.xp ?? 0} />
-            </div>
-
-            <div className="flex flex-col w-full justify-between overflow-hidden">
-              <div className="flex flex-row w-full font-semibold text-xs sm:text-sm lg:text-base">
-                {attributes.map((attribute) => (
-                  <div
-                    key={attribute.key}
-                    className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black  sm:mb-2"
-                  >
-                    {attribute.key}
-                    <span className="pl-1">{attribute.value}</span>
-                  </div>
-                ))}
+              <hr className="border-terminal-green" />
+              <div className="flex justify-between w-full sm:text-sm lg:text-xl pb-1">
+                <LevelBar xp={formatAdventurer.xp ?? 0} />
               </div>
-              <div className="w-full flex flex-col sm:gap-1 2xl:gap-0 text-xs h-full overflow-y-auto 2xl:overflow-y-hidden">
-                {bodyParts.map((part) => (
-                  <ItemDisplay
-                    item={
-                      items.find(
-                        (item: Item) =>
-                          item.item === formatAdventurer[part.toLowerCase()] &&
-                          item.equipped
-                      ) || NullItem
-                    }
-                    itemSlot={part}
-                    handleDrop={handleDropItems}
-                    key={part}
-                  />
-                ))}
+
+              <div className="flex flex-col w-full justify-between overflow-hidden">
+                <div className="flex flex-row w-full font-semibold text-xs sm:text-sm lg:text-base">
+                  {attributes.map((attribute) => (
+                    <div
+                      key={attribute.key}
+                      className="flex flex-wrap justify-between p-1 bg-terminal-green text-terminal-black w-full border border-terminal-black  sm:mb-2"
+                    >
+                      {attribute.key}
+                      <span className="pl-1">{attribute.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="w-full flex flex-col sm:gap-1 2xl:gap-0 text-xs h-full xl:h-[500px] overflow-y-auto 2xl:overflow-hidden">
+                  {bodyParts.map((part) => (
+                    <ItemDisplay
+                      item={
+                        items.find(
+                          (item: Item) =>
+                            item.item ===
+                              formatAdventurer[part.toLowerCase()] &&
+                            item.equipped
+                        ) || NullItem
+                      }
+                      itemSlot={part}
+                      handleDrop={handleDropItems}
+                      key={part}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      ) : null}
-    </div>
+      ) : (
+        <div className="flex items-center justify-center border border-terminal-green xl:h-[500px]">
+          <QuestionMarkIcon className="w-1/2 h-1/2" />
+        </div>
+      )}
+    </>
   );
 }

@@ -5,18 +5,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
-import { useContracts } from "../../hooks/useContracts";
-import { stringToFelt } from "../../lib/utils";
-import {
-  useAccount,
-  useConnectors,
-  useTransactionManager,
-  useContractWrite,
-} from "@starknet-react/core";
-import { getKeyFromValue } from "../../lib/utils";
-import { GameData } from "../GameData";
-import useLoadingStore from "../../hooks/useLoadingStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
+import { useAccount, useConnectors } from "@starknet-react/core";
 import useUIStore from "../../hooks/useUIStore";
 import { FormData, Adventurer } from "@/app/types";
 import { Button } from "../buttons/Button";
@@ -26,25 +15,24 @@ import { BladeIcon, BludgeonIcon, MagicIcon } from "../icons/Icons";
 import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { MdClose } from "react-icons/md";
 
 export interface AdventurerFormProps {
   isActive: boolean;
   onEscape: () => void;
   adventurers: Adventurer[];
+  spawn: (...args: any[]) => any;
 }
 
 export const AdventurerForm = ({
   isActive,
   onEscape,
   adventurers,
+  spawn,
 }: AdventurerFormProps) => {
   const { account } = useAccount();
   const { connectors, connect } = useConnectors();
 
-  const { addTransaction } = useTransactionManager();
-  const formatAddress = account ? account.address : "0x0";
   const [formData, setFormData] = useState<FormData>({
     startingWeapon: "",
     name: "",
@@ -59,25 +47,13 @@ export const AdventurerForm = ({
   });
   const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
 
-  const calls = useTransactionCartStore((state) => state.calls);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { writeAsync } = useContractWrite({ calls });
-  const { gameContract, lordsContract } = useContracts();
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const gameData = new GameData();
   const [step, setStep] = useState(1);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
 
   const walletConnectors = () =>
     connectors.filter((connector) => !connector.id.includes("0x"));
-
-  const { resetDataUpdated } = useQueriesStore();
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement> | KeyboardEvent) => {
@@ -121,10 +97,6 @@ export const AdventurerForm = ({
     setShowWalletTutorial(true);
   };
 
-  const getRandomNumber = (to: number) => {
-    return (Math.floor(Math.random() * to) + 1).toString();
-  };
-
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -137,60 +109,7 @@ export const AdventurerForm = ({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    const mintLords = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(mintLords);
-
-    const approveLordsTx = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(approveLordsTx);
-
-    const mintAdventurerTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "start",
-      calldata: [
-        "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
-        getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
-        stringToFelt(formData.name).toString(),
-        getRandomNumber(8000),
-        getKeyFromValue(gameData.CLASSES, formData.class) ?? "",
-        "1",
-        formData.startingStrength,
-        formData.startingDexterity,
-        formData.startingVitality,
-        formData.startingIntelligence,
-        formData.startingWisdom,
-        formData.startingCharisma,
-      ],
-    };
-
-    addToCalls(mintAdventurerTx);
-    startLoading(
-      "Create",
-      "Spawning Adventurer",
-      "adventurersByOwnerQuery",
-      undefined,
-      `You have spawned ${formData.name}!`
-    );
-    await handleSubmitCalls(writeAsync).then((tx: any) => {
-      if (tx) {
-        setTxHash(tx.transaction_hash);
-        addTransaction({
-          hash: tx?.transaction_hash,
-          metadata: {
-            method: `Spawn ${formData.name}`,
-          },
-        });
-      }
-    });
-    setMintAdventurer(true);
-    resetDataUpdated("adventurersByOwnerQuery");
+    await spawn(formData);
   };
 
   const [formFilled, setFormFilled] = useState(false);
@@ -237,6 +156,37 @@ export const AdventurerForm = ({
         startingDexterity: "2",
         startingWisdom: "2",
         startingIntelligence: "2",
+      });
+    } else if (classType === "Seer") {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingIntelligence: "3",
+        startingWisdom: "3",
+      });
+    } else if (classType === "Mage") {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingIntelligence: "2",
+        startingWisdom: "2",
+        startingVitality: "1",
+        startingDexterity: "1",
+      });
+    } else if (classType === "Bard") {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingIntelligence: "1",
+        startingDexterity: "1",
+        startingStrength: "2",
+        startingCharisma: "2",
+      });
+    } else if (classType === "Brute") {
+      setFormData({
+        ...formData,
+        class: classType,
+        startingStrength: "6",
       });
     } else {
       setFormData({
@@ -290,6 +240,26 @@ export const AdventurerForm = ({
         "+1 Strength +1 Dexterity +1 Vitality +1 Intelligence +1 Wisdom +1 Charisma",
       image: "/classes/warrior2.png",
     },
+    // {
+    //   name: "Seer",
+    //   description: "+3 Intelligence +3 Wisdom",
+    //   image: "/classes/hunter2.png",
+    // },
+    // {
+    //   name: "Mage",
+    //   description: "+1 Dexterity +1 Vitality +2 Intelligence +2 Wisdom",
+    //   image: "/classes/cleric2.png",
+    // },
+    // {
+    //   name: "Bard",
+    //   description: "+1 Intelligence 1+ Dexterity +2 Strength +2 Charisma",
+    //   image: "/classes/scout2.png",
+    // },
+    // {
+    //   name: "Brute",
+    //   description: "+6 Strength",
+    //   image: "/classes/warrior2.png",
+    // },
   ];
 
   const weapons = [
@@ -326,16 +296,17 @@ export const AdventurerForm = ({
           <h3 className="uppercase text-center 2xl:text-5xl">
             Choose your class
           </h3>
-          <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-5 md:gap-5 lg:gap-10 2xl:gap-5 2xl:justify-center">
+          <div className="grid grid-cols-2 xl:overflow-y-auto xl:h-[420px] sm:flex flex-wrap sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-5 md:gap-5 lg:gap-10 2xl:gap-5 2xl:justify-center">
             {classes.map((classType) => (
               <div
                 key={classType.name}
-                className="flex flex-col items-center justify-between border sm:w-56 md:w-48 2xl:w-64 border-terminal-green"
+                className="flex flex-col items-center justify-between border sm:w-52 md:w-48 2xl:w-64 border-terminal-green"
               >
-                <div className="relative w-28 h-28 sm:w-56 sm:h-56 md:h-40 2xl:h-64 2xl:w-64">
+                <div className="relative w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52 2xl:h-64 2xl:w-64">
                   <Image
                     src={classType.image}
                     fill={true}
+                    sizes="xl"
                     alt={classType.name}
                     style={{
                       objectFit: "contain",
@@ -501,7 +472,13 @@ export const AdventurerForm = ({
                   </div>
                 </>
               ) : (
-                <form onSubmit={handleSubmit}>
+                <form
+                  onSubmit={async (e) => {
+                    if (formData) {
+                      await handleSubmit(e);
+                    }
+                  }}
+                >
                   <Button
                     type="submit"
                     size={"xl"}

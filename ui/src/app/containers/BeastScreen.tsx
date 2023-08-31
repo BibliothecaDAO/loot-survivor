@@ -1,49 +1,27 @@
-import { useContracts } from "../hooks/useContracts";
-import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import KeyboardControl, { ButtonData } from "../components/KeyboardControls";
 import { BattleDisplay } from "../components/beast/BattleDisplay";
 import { BeastDisplay } from "../components/beast/BeastDisplay";
 import useLoadingStore from "../hooks/useLoadingStore";
-import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import React, { useState } from "react";
-import useUIStore from "../hooks/useUIStore";
 import { processBeastName } from "../lib/utils";
-import useCustomQuery from "../hooks/useCustomQuery";
-import {
-  getBattlesByBeast,
-  getBeast,
-  getLastBeastDiscovery,
-  getBattlesByAdventurer,
-} from "../hooks/graphql/queries";
 import { Battle, NullDiscovery, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
-import { useMediaQuery } from "react-responsive";
-import LootIconLoader from "../components/icons/Loader";
+
+interface BeastScreenProps {
+  attack: (...args: any[]) => any;
+  flee: (...args: any[]) => any;
+}
 
 /**
  * @container
  * @description Provides the beast screen for adventurer battles.
  */
-export default function BeastScreen() {
-  const calls = useTransactionCartStore((state) => state.calls);
-  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
-  const { gameContract } = useContracts();
-  const { addTransaction } = useTransactionManager();
+export default function BeastScreen({ attack, flee }: BeastScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
-  const { writeAsync } = useContractWrite({ calls });
   const loading = useLoadingStore((state) => state.loading);
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
-  const hash = useLoadingStore((state) => state.hash);
   const [showBattleLog, setShowBattleLog] = useState(false);
-  const setEquipItems = useUIStore((state) => state.setEquipItems);
-  const setDropItems = useUIStore((state) => state.setDropItems);
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
@@ -56,24 +34,6 @@ export default function BeastScreen() {
   const formatBattles = useQueriesStore(
     (state) => state.data.battlesByBeastQuery?.battles || []
   );
-  const resetData = useQueriesStore((state) => state.resetData);
-  const resetDataUpdated = useQueriesStore((state) => state.resetDataUpdated);
-
-  const attackTx = (till_death: boolean) => {
-    return {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "attack",
-      calldata: [adventurer?.id?.toString() ?? "", "0", till_death ? "1" : "0"],
-    };
-  };
-
-  const fleeTx = (till_death: boolean) => {
-    return {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "flee",
-      calldata: [adventurer?.id?.toString() ?? "", "0", till_death ? "1" : "0"],
-    };
-  };
 
   const [buttonText, setButtonText] = useState("Flee!");
 
@@ -90,29 +50,7 @@ export default function BeastScreen() {
       id: 1,
       label: "SINGLE",
       action: async () => {
-        resetData("latestMarketItemsQuery");
-        addToCalls(attackTx(false));
-        startLoading(
-          "Attack",
-          "Attacking",
-          "battlesByTxHashQuery",
-          adventurer?.id,
-          { beast: beastData }
-        );
-        await handleSubmitCalls(writeAsync).then((tx: any) => {
-          if (tx) {
-            setTxHash(tx.transaction_hash);
-            addTransaction({
-              hash: tx.transaction_hash,
-              metadata: {
-                method: `Attack ${beastData.beast}`,
-              },
-            });
-          }
-        });
-        resetDataUpdated("battlesByTxHashQuery");
-        setEquipItems([]);
-        setDropItems([]);
+        await attack(false, beastData);
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -126,29 +64,7 @@ export default function BeastScreen() {
       mouseEnter: handleMouseEnter,
       mouseLeave: handleMouseLeave,
       action: async () => {
-        resetData("latestMarketItemsQuery");
-        addToCalls(attackTx(true));
-        startLoading(
-          "Attack",
-          "Attacking",
-          "battlesByTxHashQuery",
-          adventurer?.id,
-          { beast: beastData }
-        );
-        await handleSubmitCalls(writeAsync).then((tx: any) => {
-          if (tx) {
-            setTxHash(tx.transaction_hash);
-            addTransaction({
-              hash: tx.transaction_hash,
-              metadata: {
-                method: `Attack ${beastData.beast}`,
-              },
-            });
-          }
-        });
-        resetDataUpdated("battlesByTxHashQuery");
-        setEquipItems([]);
-        setDropItems([]);
+        await attack(true, beastData);
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -163,28 +79,7 @@ export default function BeastScreen() {
       id: 1,
       label: adventurer?.dexterity === 0 ? "DEX TOO LOW" : "SINGLE",
       action: async () => {
-        addToCalls(fleeTx(false));
-        startLoading(
-          "Flee",
-          "Fleeing",
-          "battlesByTxHashQuery",
-          adventurer?.id,
-          { beast: beastData }
-        );
-        await handleSubmitCalls(writeAsync).then((tx: any) => {
-          if (tx) {
-            setTxHash(tx.transaction_hash);
-            addTransaction({
-              hash: tx.transaction_hash,
-              metadata: {
-                method: `Flee ${beastData.beast}`,
-              },
-            });
-          }
-        });
-        resetDataUpdated("battlesByTxHashQuery");
-        setEquipItems([]);
-        setDropItems([]);
+        await flee(false, beastData);
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -200,29 +95,7 @@ export default function BeastScreen() {
       mouseEnter: handleMouseEnter,
       mouseLeave: handleMouseLeave,
       action: async () => {
-        addToCalls(fleeTx(true));
-        startLoading(
-          "Flee",
-          "Fleeing",
-          "battlesByTxHashQuery",
-          adventurer?.id,
-          { beast: beastData }
-        );
-        await handleSubmitCalls(writeAsync).then((tx: any) => {
-          if (tx) {
-            console.log(tx.transaction_hash);
-            setTxHash(tx.transaction_hash);
-            addTransaction({
-              hash: tx.transaction_hash,
-              metadata: {
-                method: `Flee ${beastData.beast}`,
-              },
-            });
-          }
-        });
-        resetDataUpdated("battlesByTxHashQuery");
-        setEquipItems([]);
-        setDropItems([]);
+        await flee(true, beastData);
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -305,8 +178,8 @@ export default function BeastScreen() {
               </div>
             </div>
             <div className="hidden sm:block flex flex-row gap-2 sm:flex-col items-center justify-center">
-              <div className="flex flex-col items-center">
-                <p className="uppercase sm:text-2xl">Attack</p>
+              <div className="flex flex-col items-center justify-center">
+                <p className="uppercase sm:text-xl 2xl:text-2xl">Attack</p>
                 <KeyboardControl
                   buttonsData={attackButtonsData}
                   size={"xl"}
@@ -314,10 +187,10 @@ export default function BeastScreen() {
                 />
               </div>
               <div className="flex flex-col items-center">
-                <p className="uppercase sm:text-2xl">Flee</p>
+                <p className="uppercase sm:text-xl 2xl:text-2xl">Flee</p>
                 <KeyboardControl
                   buttonsData={fleeButtonsData}
-                  size={"lg"}
+                  size={"xl"}
                   direction="row"
                 />
               </div>
@@ -325,7 +198,7 @@ export default function BeastScreen() {
           </>
         )}
 
-        <div className="hidden sm:block">
+        <div className="hidden sm:block xl:h-[500px] 2xl:h-full">
           {(hasBeast || formatBattles.length > 0) && <BattleLog />}
         </div>
 

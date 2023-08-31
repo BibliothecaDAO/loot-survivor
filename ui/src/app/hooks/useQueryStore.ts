@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { isEqual } from "lodash";
 import { Battle, Beast, Item, Adventurer, Discovery, Score } from "../types";
+import { GameData } from "../components/GameData";
 
 export type QueryKey =
   | "lastBattleQuery"
@@ -27,30 +28,37 @@ export type QueryKey =
   | "adventurerToSlayQuery";
 
 interface BattlesResult {
+  [key: string]: Battle[];
   battles: Battle[];
 }
 
 interface DiscoveriesResult {
+  [key: string]: Battle[];
   discoveries: Discovery[];
 }
 
 interface BeastsResult {
+  [key: string]: Battle[];
   beasts: Beast[];
 }
 
 interface AdventurersResult {
+  [key: string]: Battle[];
   adventurers: Adventurer[];
 }
 
 interface ItemsResult {
+  [key: string]: Battle[];
   items: Item[];
 }
 
 interface ScoresResult {
+  [key: string]: Battle[];
   scores: Score[];
 }
 
 interface InitialData {
+  // [key: string]: BattlesResult | DiscoveriesResult | BeastsResult | AdventurersResult | ItemsResult | ScoresResult | null;
   lastBattleQuery: BattlesResult | null;
   lastBeastBattleQuery: BattlesResult | null;
   battlesByAdventurerQuery: BattlesResult | null;
@@ -77,18 +85,19 @@ interface InitialData {
 
 type QueriesState = {
   data: InitialData;
-  isLoading: Record<QueryKey, boolean>;
-  isDataUpdated: Record<QueryKey, boolean> & { global: boolean };
-  refetchFunctions: Record<QueryKey, () => Promise<any>>;
-  updateData: (
+  setData: (
     queryKey: QueryKey,
-    newData: any,
-    loading: boolean,
-    refetch: () => Promise<void>
+    data: any,
+    attribute?: string,
+    index?: number
   ) => void;
-  refetch: (queryKey?: QueryKey) => Promise<void>;
+  setRefetch: (queryKey: QueryKey, refetch: () => Promise<any>) => void;
+  isLoading: Record<QueryKey, boolean> & { global: boolean };
+  setIsLoading: (queryKey?: QueryKey) => void;
+  setNotLoading: (queryKey?: QueryKey) => void;
+  refetchFunctions: Record<QueryKey, (variables?: any) => Promise<any>>;
+  refetch: (queryKey?: QueryKey, variables?: any) => Promise<any>;
   resetData: (queryKey?: QueryKey) => void;
-  resetDataUpdated: (queryKey?: QueryKey) => void;
 };
 
 const initialData: InitialData = {
@@ -116,32 +125,7 @@ const initialData: InitialData = {
   adventurerToSlayQuery: null,
 };
 
-const initialLoading: Record<QueryKey, boolean> = {
-  lastBattleQuery: false,
-  lastBeastBattleQuery: false,
-  battlesByAdventurerQuery: false,
-  battlesByTxHashQuery: false,
-  battlesByBeastQuery: false,
-  lastBeastQuery: false,
-  beastQuery: false,
-  discoveriesQuery: false,
-  latestDiscoveriesQuery: false,
-  discoveryByTxHashQuery: false,
-  adventurersByOwnerQuery: false,
-  adventurerByIdQuery: false,
-  leaderboardByIdQuery: false,
-  adventurersByGoldQuery: false,
-  adventurersByXPQuery: false,
-  adventurersInListQuery: false,
-  adventurersInListByXpQuery: false,
-  itemsByAdventurerQuery: false,
-  itemsByProfileQuery: false,
-  topScoresQuery: false,
-  latestMarketItemsQuery: false,
-  adventurerToSlayQuery: false,
-};
-
-const initialIsDataUpdated: Record<QueryKey, boolean> & { global: boolean } = {
+const initialLoading: Record<QueryKey, boolean> & { global: boolean } = {
   lastBattleQuery: false,
   lastBeastBattleQuery: false,
   battlesByAdventurerQuery: false,
@@ -194,45 +178,75 @@ const initialRefetchFunctions: Record<QueryKey, () => Promise<any>> = {
 
 export const useQueriesStore = create<QueriesState>((set, get) => ({
   data: initialData,
-  isLoading: initialLoading,
-  isDataUpdated: initialIsDataUpdated,
-  refetchFunctions: initialRefetchFunctions,
-  updateData: (queryKey, newData, loading, refetch) => {
+  setData: (queryKey, newData, attribute, index) => {
+    const gameData = new GameData();
     set((state) => {
-      const oldData = state.data[queryKey];
-      const queryKeysToIgnore = [
-        "battlesByTxHashQuery",
-        "discoveryByTxHashQuery",
-      ];
-      const hasEmptyArray =
-        newData && typeof newData === "object"
-          ? Object.values(newData).some(
-              (arr) => Array.isArray(arr) && arr.length === 0
-            )
-          : false;
-      const ignoreDataChange =
-        queryKeysToIgnore.includes(queryKey) && hasEmptyArray;
-      const isDataChanged =
-        !ignoreDataChange &&
-        (oldData !== null ||
-          (newData && Object.values(newData).some((arr: any) => arr.length))) &&
-        !isEqual(oldData, newData);
-      if (isDataChanged && newData !== undefined) {
+      if (typeof attribute === "string" && typeof index === "number") {
+        // This assumes the data structure always contains an array, like battles, discoveries, etc.
+        const existingData = state.data[queryKey];
+        const internalKey = gameData.QUERY_KEYS[queryKey];
+
+        if (!internalKey) {
+          console.error("Internal key mapping not found for:", queryKey);
+          return state;
+        }
+
+        if (!existingData) {
+          console.error("Existing data not found for:", queryKey);
+          return state;
+        }
+
+        const targetArray = [...existingData[internalKey]];
+
+        if (targetArray[index]) {
+          targetArray[index] = { ...targetArray[index], [attribute]: newData };
+        }
         return {
-          ...state,
-          data: { ...state.data, [queryKey]: newData },
-          isLoading: { ...state.isLoading, [queryKey]: loading },
-          isDataUpdated: {
-            ...state.isDataUpdated,
-            [queryKey]: true,
-            global: true,
+          data: {
+            ...state.data,
+            [queryKey]: {
+              [internalKey]: targetArray,
+            },
           },
-          refetchFunctions: { ...state.refetchFunctions, [queryKey]: refetch },
+        };
+      } else {
+        return {
+          data: { ...state.data, [queryKey]: newData },
         };
       }
-      return state;
     });
   },
+  setRefetch: (queryKey, refetch) => {
+    set((state) => {
+      return {
+        refetchFunctions: { ...state.refetchFunctions, [queryKey]: refetch },
+      };
+    });
+  },
+  isLoading: initialLoading,
+  setIsLoading: (queryKey) => {
+    if (queryKey) {
+      set((state) => ({
+        isLoading: { ...state.isLoading, [queryKey]: true },
+      }));
+    } else {
+      set((state) => ({
+        isLoading: { ...state.isLoading, global: true },
+      }));
+    }
+  },
+  setNotLoading: (queryKey) => {
+    if (queryKey) {
+      set((state) => ({
+        isLoading: { ...state.isLoading, [queryKey]: false },
+      }));
+    } else {
+      set((state) => ({
+        isLoading: { ...state.isLoading, global: false },
+      }));
+    }
+  },
+  refetchFunctions: initialRefetchFunctions,
   resetData: (queryKey) => {
     if (queryKey) {
       set((state) => ({
@@ -242,23 +256,15 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
       set({ data: initialData });
     }
   },
-  resetDataUpdated: (queryKey) => {
-    if (queryKey) {
-      set((state) => ({
-        isDataUpdated: { ...state.isDataUpdated, [queryKey]: false },
-      }));
-    } else {
-      set({ isDataUpdated: initialIsDataUpdated });
-    }
-  },
-  refetch: async (queryKey) => {
+  refetch: async (queryKey, variables) => {
     const { refetchFunctions } = get();
     if (queryKey) {
       const refetch = refetchFunctions[queryKey];
 
       if (refetch) {
         try {
-          await refetch();
+          const newData = await refetch(variables);
+          return newData;
         } catch (error) {
           console.error(`Error refetching ${queryKey}:`, error);
           throw error;
@@ -271,14 +277,40 @@ export const useQueriesStore = create<QueriesState>((set, get) => ({
     } else {
       // If no queryKey is supplied, refetch all queries
       const allKeys = Object.keys(refetchFunctions);
+      const newDataObject: Record<QueryKey, any> = {
+        lastBattleQuery: null,
+        lastBeastBattleQuery: null,
+        battlesByAdventurerQuery: null,
+        battlesByTxHashQuery: null,
+        battlesByBeastQuery: null,
+        lastBeastQuery: null,
+        beastQuery: null,
+        discoveriesQuery: null,
+        latestDiscoveriesQuery: null,
+        discoveryByTxHashQuery: null,
+        adventurersByOwnerQuery: null,
+        adventurerByIdQuery: null,
+        leaderboardByIdQuery: null,
+        adventurersByGoldQuery: null,
+        adventurersByXPQuery: null,
+        adventurersInListQuery: null,
+        adventurersInListByXpQuery: null,
+        itemsByAdventurerQuery: null,
+        itemsByProfileQuery: null,
+        topScoresQuery: null,
+        latestMarketItemsQuery: null,
+        adventurerToSlayQuery: null,
+      };
       for (let key of allKeys) {
         const refetch = refetchFunctions[key as QueryKey];
         try {
-          await refetch();
+          const { data: newData } = await refetch();
+          newDataObject[key as QueryKey] = newData;
         } catch (error) {
           console.error(`Error refetching ${key}:`, error);
         }
       }
+      return newDataObject;
     }
   },
 }));

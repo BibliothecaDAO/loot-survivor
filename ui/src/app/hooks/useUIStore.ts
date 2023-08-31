@@ -44,6 +44,8 @@ type State = {
   setDropItems: (value: string[]) => void;
   purchaseItems: ItemPurchase[];
   setPurchaseItems: (value: ItemPurchase[]) => void;
+  potionAmount: number;
+  setPotionAmount: (value: number) => void;
   upgrades: UpgradeStats;
   setUpgrades: (value: UpgradeStats) => void;
   lastAction: Date | null;
@@ -54,6 +56,8 @@ type State = {
   setInventorySelected: (value: number) => void;
   arcadeDialog: boolean;
   showArcadeDialog: (value: boolean) => void;
+  switchAdventurer: boolean;
+  setSwitchAdventurer: (value: boolean) => void;
 };
 
 const useUIStore = create<State>((set) => ({
@@ -85,6 +89,8 @@ const useUIStore = create<State>((set) => ({
   setDropItems: (value) => set({ dropItems: value }),
   purchaseItems: [],
   setPurchaseItems: (value) => set({ purchaseItems: value }),
+  potionAmount: 0,
+  setPotionAmount: (value) => set({ potionAmount: value }),
   upgrades: { ...ZeroUpgrade },
   setUpgrades: (value) => set({ upgrades: value }),
   lastAction: null,
@@ -95,6 +101,8 @@ const useUIStore = create<State>((set) => ({
   setInventorySelected: (value) => set({ inventorySelected: value }),
   arcadeDialog: false,
   showArcadeDialog: (value) => set({ arcadeDialog: value }),
+  switchAdventurer: false,
+  setSwitchAdventurer: (value) => set({ switchAdventurer: value }),
 }));
 
 export default useUIStore;

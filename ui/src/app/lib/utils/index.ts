@@ -2,15 +2,15 @@ import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
 
-import Realms from "./realms.json";
-import { Adventurer, Item } from "../types";
-import { GameData } from "../components/GameData";
+import Realms from "../realms.json";
+import { Adventurer, Item } from "../../types";
+import { GameData } from "../../components/GameData";
 import {
   itemCharismaDiscount,
   itemBasePrice,
   itemMinimumPrice,
   potionBasePrice,
-} from "./constants";
+} from "../constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -151,6 +151,10 @@ export function getRealmNameById(id: number) {
 export function getRankFromList(id: number, data: Adventurer[]) {
   return data.findIndex((data) => data.id === id);
 }
+
+export const getRandomNumber = (to: number) => {
+  return (Math.floor(Math.random() * to) + 1).toString();
+};
 
 export function getOrdinalSuffix(n: number): string {
   let j = n % 10;
@@ -320,4 +324,8 @@ export function chunkArray<T>(array: T[], chunkSize: number): T[][] {
 
 export function isObject(value: any): value is object {
   return typeof value === "object" && !Array.isArray(value);
+}
+
+export function convertToBoolean(value: number): boolean {
+  return value === 1;
 }

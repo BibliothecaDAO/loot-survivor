@@ -17,9 +17,6 @@ import useLoadingStore from "../hooks/useLoadingStore";
 export interface EncountersProps {
   profile?: number;
 }
-interface FormattedDiscovery extends Discovery {
-  timestamp: Date | undefined;
-}
 
 /**
  * @container
@@ -38,35 +35,35 @@ export default function EncountersScreen({ profile }: EncountersProps) {
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const queryData = useQueriesStore((state) => state.data);
 
-  useCustomQuery(
-    "discoveriesQuery",
-    getDiscoveries,
-    {
-      adventurerId: profile ? profile : adventurer?.id ?? 0,
-    },
-    txAccepted
-  );
+  const discoveriesData = useCustomQuery("discoveriesQuery", getDiscoveries, {
+    id: profile ? profile : adventurer?.id ?? 0,
+  });
 
-  useCustomQuery(
+  const battlesData = useCustomQuery(
     "battlesByAdventurerQuery",
     getBattlesByAdventurer,
     {
       adventurerId: profile ? profile : adventurer?.id ?? 0,
-    },
-    txAccepted
+    }
   );
+
+  // useEffect(() => {
+  //   if (adventurersByXPdata) {
+  //     setIsLoading();
+  //     setData("adventurersByXPQuery", adventurersByXPdata);
+  //     setNotLoading();
+  //   }
+  // }, [adventurersByXPdata]);
 
   useEffect(() => {
     if (data) {
       setLoadingData(true);
 
-      const discoveries = queryData.discoveriesQuery
-        ? queryData.discoveriesQuery.discoveries
+      const discoveries = discoveriesData?.discoveries
+        ? discoveriesData?.discoveries
         : [];
 
-      const battles = queryData.battlesByAdventurerQuery
-        ? queryData.battlesByAdventurerQuery.battles
-        : [];
+      const battles = battlesData?.battles ? battlesData?.battles : [];
 
       const combined = [...discoveries, ...battles];
       const sorted = combined.sort((a: any, b: any) => {
@@ -78,7 +75,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
       setSortedCombined(sorted);
       setLoadingData(false);
     }
-  }, [queryData.discoveriesQuery, queryData.battlesByAdventurerQuery, data]); // Runs whenever 'data' changes
+  }, [discoveriesData, battlesData, data]); // Runs whenever 'data' changes
 
   const totalPages = Math.ceil(sortedCombined.length / encountersPerPage);
 
@@ -103,79 +100,85 @@ export default function EncountersScreen({ profile }: EncountersProps) {
 
   return (
     <div className="flex flex-col items-center mx-auto text-sm sm:text-xl xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden">
-      {displayEncounters.length > 0 ? (
+      {adventurer?.id || profile ? (
         <>
-          <h3 className="text-center">
-            {profile ? "Encounters" : "Your Encounters"}
-          </h3>
-          {(isLoading.latestDiscoveriesQuery || loadingData) && (
-            <LootIconLoader />
-          )}
-          <div className="flex flex-col items-center gap-2 overflow-auto">
-            {displayEncounters.map((encounter: any, index: number) => {
-              return (
-                <div
-                  className="w-full p-1 sm:p-2 text-left border border-terminal-green"
-                  key={index}
-                >
-                  {encounter.hasOwnProperty("discoveryType") ? (
-                    <DiscoveryDisplay discoveryData={encounter} />
-                  ) : (
-                    <BattleDisplay
-                      battleData={encounter}
-                      beastName={processBeastName(
-                        encounter?.beast,
-                        encounter?.special2,
-                        encounter?.special3
+          {displayEncounters.length > 0 ? (
+            <>
+              <h3 className="text-center">
+                {profile ? "Encounters" : "Your Encounters"}
+              </h3>
+              {(isLoading.latestDiscoveriesQuery || loadingData) && (
+                <LootIconLoader />
+              )}
+              <div className="flex flex-col items-center gap-2 overflow-auto">
+                {displayEncounters.map((encounter: any, index: number) => {
+                  return (
+                    <div
+                      className="w-full p-1 sm:p-2 text-left border border-terminal-green"
+                      key={index}
+                    >
+                      {encounter.hasOwnProperty("discoveryType") ? (
+                        <DiscoveryDisplay discoveryData={encounter} />
+                      ) : (
+                        <BattleDisplay
+                          battleData={encounter}
+                          beastName={processBeastName(
+                            encounter?.beast,
+                            encounter?.special2,
+                            encounter?.special3
+                          )}
+                        />
                       )}
-                    />
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : (
+            <p className="text-lg">You have not yet made any encounters!</p>
+          )}
+          {sortedCombined.length > 10 && (
+            <div className="flex justify-center mt-8">
+              <Button
+                variant={"outline"}
+                onClick={() => currentPage > 1 && handleClick(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                back
+              </Button>
+
+              <Button
+                variant={"outline"}
+                key={1}
+                onClick={() => handleClick(1)}
+                className={currentPage === 1 ? "animate-pulse" : ""}
+              >
+                {1}
+              </Button>
+
+              <Button
+                variant={"outline"}
+                key={totalPages}
+                onClick={() => handleClick(totalPages)}
+                className={currentPage === totalPages ? "animate-pulse" : ""}
+              >
+                {totalPages}
+              </Button>
+
+              <Button
+                variant={"outline"}
+                onClick={() =>
+                  currentPage < totalPages && handleClick(currentPage + 1)
+                }
+                disabled={currentPage === totalPages}
+              >
+                next
+              </Button>
+            </div>
+          )}
         </>
       ) : (
-        <p className="text-lg">You have not yet made any encounters!</p>
-      )}
-      {sortedCombined.length > 10 && (
-        <div className="flex justify-center mt-8">
-          <Button
-            variant={"outline"}
-            onClick={() => currentPage > 1 && handleClick(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            back
-          </Button>
-
-          <Button
-            variant={"outline"}
-            key={1}
-            onClick={() => handleClick(1)}
-            className={currentPage === 1 ? "animate-pulse" : ""}
-          >
-            {1}
-          </Button>
-
-          <Button
-            variant={"outline"}
-            key={totalPages}
-            onClick={() => handleClick(totalPages)}
-            className={currentPage === totalPages ? "animate-pulse" : ""}
-          >
-            {totalPages}
-          </Button>
-
-          <Button
-            variant={"outline"}
-            onClick={() =>
-              currentPage < totalPages && handleClick(currentPage + 1)
-            }
-            disabled={currentPage === totalPages}
-          >
-            next
-          </Button>
-        </div>
+        <h3>Please select an adventurer!</h3>
       )}
     </div>
   );

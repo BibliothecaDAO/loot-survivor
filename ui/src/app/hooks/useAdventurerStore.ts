@@ -12,13 +12,13 @@ type State = {
   setAdventurer: (value: Adventurer) => void;
   image?: string;
   setImage: (value: string) => void;
-  computed:{
+  computed: {
     hasBeast: boolean;
     hasStatUpgrades: boolean;
     isAlive: boolean;
     hasNoXp: boolean;
     currentLevel: number;
-  }
+  };
 };
 
 const useAdventurerStore = create<State>((set, get) => ({
@@ -31,12 +31,22 @@ const useAdventurerStore = create<State>((set, get) => ({
   image: undefined,
   setImage: (value) => set({ image: value }),
   computed: {
-    get hasBeast () { return (get().adventurer?.beastHealth ?? 0) > 0 },
-    get hasStatUpgrades () { return (get().adventurer?.statUpgrades ?? 0) > 0 },
-    get isAlive () { return (get().adventurer?.health ?? 0) > 0 },
-    get hasNoXp () { return (get().adventurer?.xp ?? 0) === 0 },
-    get currentLevel () { return (get().adventurer?.level ?? 0) },
- }
+    get hasBeast() {
+      return (get().adventurer?.beastHealth ?? 0) > 0;
+    },
+    get hasStatUpgrades() {
+      return (get().adventurer?.statUpgrades ?? 0) > 0;
+    },
+    get isAlive() {
+      return (get().adventurer?.health ?? 0) > 0;
+    },
+    get hasNoXp() {
+      return (get().adventurer?.xp ?? 0) === 0;
+    },
+    get currentLevel() {
+      return get().adventurer?.level ?? 0;
+    },
+  },
 }));
 
 export default useAdventurerStore;

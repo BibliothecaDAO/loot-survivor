@@ -6,10 +6,8 @@ import React, {
   RefObject,
 } from "react";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import { useTransactionManager, useContractWrite } from "@starknet-react/core";
 import { Button } from "../buttons/Button";
 import { MdClose } from "react-icons/md";
-import useLoadingStore from "../../hooks/useLoadingStore";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useQueriesStore, QueryKey } from "../../hooks/useQueryStore";
 import {
@@ -21,39 +19,26 @@ import {
 import useUIStore from "../../hooks/useUIStore";
 import { useUiSounds } from "../../hooks/useUiSound";
 import { soundSelector } from "../../hooks/useUiSound";
-import {
-  Item,
-  NullItem,
-  Call,
-  NullAdventurer,
-  ItemPurchase,
-  ZeroUpgrade,
-} from "../../types";
+import { Item, NullItem, Call, ItemPurchase, ZeroUpgrade } from "../../types";
 import { GameData } from "../GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
+  multicall: (...args: any[]) => any;
 }
 
-const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
+const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const calls = useTransactionCartStore((state) => state.calls);
   const removeFromCalls = useTransactionCartStore(
     (state) => state.removeFromCalls
   );
-  const handleSubmitCalls = useTransactionCartStore(
-    (state) => state.handleSubmitCalls
-  );
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
-  const startLoading = useLoadingStore((state) => state.startLoading);
-  const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { addTransaction } = useTransactionManager();
-  const { writeAsync } = useContractWrite({ calls });
   const [notification, setNotification] = useState<string[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
   const [loadingQuery, setLoadingQuery] = useState<QueryKey | null>(null);
-  const { data, resetDataUpdated } = useQueriesStore();
+  const { data } = useQueriesStore();
   const displayCart = useUIStore((state) => state.displayCart);
   const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
@@ -185,8 +170,6 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
   const filteredStats = Object.entries(upgrades).filter(
     (stat: any) => stat[1] !== 0
   );
-
-  console.log(loadingQuery);
 
   return (
     <>
@@ -361,45 +344,7 @@ const TransactionCart = ({ buttonRef }: TransactionCartProps) => {
           <div className="flex flex-row gap-2 absolute bottom-4">
             <Button
               onClick={async () => {
-                const items: string[] = [];
-
-                for (const dict of calls) {
-                  if (
-                    dict.hasOwnProperty("entrypoint") &&
-                    (dict["entrypoint"] === "bid_on_item" ||
-                      dict["entrypoint"] === "claim_item")
-                  ) {
-                    if (Array.isArray(dict.calldata)) {
-                      items.push(dict.calldata[0]?.toString() ?? "");
-                    }
-                  }
-                  if (dict["entrypoint"] === "equip") {
-                    if (Array.isArray(dict.calldata)) {
-                      items.push(dict.calldata[2]?.toString() ?? "");
-                    }
-                  }
-                }
-                startLoading(
-                  "Multicall",
-                  loadingMessage,
-                  loadingQuery,
-                  adventurer?.id,
-                  notification
-                );
-
-                await handleSubmitCalls(writeAsync).then((tx: any) => {
-                  if (tx) {
-                    setTxHash(tx?.transaction_hash);
-                    addTransaction({
-                      hash: tx.transaction_hash,
-                      metadata: {
-                        method: "Multicall",
-                        marketIds: items,
-                      },
-                    });
-                  }
-                });
-                resetDataUpdated();
+                await multicall(loadingMessage, loadingQuery, notification);
                 handleResetCalls();
               }}
             >

@@ -1,3 +1,5 @@
+import { hash } from "starknet";
+
 export type Dict<T> = { [key: number]: T };
 export type DictString<T> = { [key: string]: T };
 
@@ -28,6 +30,8 @@ export class GameData {
   BEAST_IMAGES: DictString<string>;
   ADVENTURER_ANIMATIONS: DictString<string>;
   ADVENTURER_SOUNDS: DictString<string>;
+  SELECTOR_KEYS: DictString<string>;
+  QUERY_KEYS: DictString<string>;
 
   constructor() {
     this.CONTRACTS = {
@@ -519,7 +523,7 @@ export class GameData {
 
     this.ITEM_TIERS = {
       Pendant: 1,
-      Necklace: 1,
+      Necklace: 2,
       Amulet: 1,
       SilverRing: 2,
       BronzeRing: 3,
@@ -730,6 +734,10 @@ export class GameData {
       2: "Scout",
       3: "Merchant",
       4: "Warrior",
+      5: "Seer",
+      6: "Mage",
+      7: "Bard",
+      8: "Brute",
     };
 
     this.ORDERS = {
@@ -837,6 +845,7 @@ export class GameData {
       58: "Rumbling Catacomb",
       59: "Whirling Cyclone",
       60: "Erupting Earth",
+      61: "Subterranean Tremor",
       62: "Falling Chandelier",
       63: "Collapsing Bridge",
       64: "Raging Sandstorm",
@@ -938,24 +947,24 @@ export class GameData {
     };
 
     this.ITEM_NAME_SUFFIXES = {
-      1: "Bane ",
-      2: "Root ",
-      3: "Bite ",
-      4: "Song ",
-      5: "Roar ",
-      6: "Grasp ",
-      7: "Instrument ",
-      8: "Glow ",
-      9: "Bender ",
-      10: "Shadow ",
-      11: "Whisper ",
-      12: "Shout ",
-      13: "Growl ",
-      14: "Tear ",
-      15: "Peak ",
-      16: "Form ",
-      17: "Sun ",
-      18: "Moon ",
+      1: "Bane",
+      2: "Root",
+      3: "Bite",
+      4: "Song",
+      5: "Roar",
+      6: "Grasp",
+      7: "Instrument",
+      8: "Glow",
+      9: "Bender",
+      10: "Shadow",
+      11: "Whisper",
+      12: "Shout",
+      13: "Growl",
+      14: "Tear",
+      15: "Peak",
+      16: "Form",
+      17: "Sun",
+      18: "Moon",
     };
 
     this.ITEM_SUFFIXES = {
@@ -1121,6 +1130,59 @@ export class GameData {
       AvoidObstacle: "fight_ui_sound.mp3",
       HitByObstacle: "fight_ui_sound.mp3",
       Multicall: "fight_ui_sound.mp3",
+    };
+
+    this.SELECTOR_KEYS = {
+      StartGame: hash.getSelectorFromName("StartGame"),
+      AdventurerUpgraded: hash.getSelectorFromName("AdventurerUpgraded"),
+      DiscoveredHealth: hash.getSelectorFromName("DiscoveredHealth"),
+      DiscoveredGold: hash.getSelectorFromName("DiscoveredGold"),
+      DiscoveredXP: hash.getSelectorFromName("DiscoveredXP"),
+      DodgedObstacle: hash.getSelectorFromName("DodgedObstacle"),
+      HitByObstacle: hash.getSelectorFromName("HitByObstacle"),
+      DiscoveredBeast: hash.getSelectorFromName("DiscoveredBeast"),
+      AmbushedByBeast: hash.getSelectorFromName("AmbushedByBeast"),
+      AttackedBeast: hash.getSelectorFromName("AttackedBeast"),
+      AttackedByBeast: hash.getSelectorFromName("AttackedByBeast"),
+      SlayedBeast: hash.getSelectorFromName("SlayedBeast"),
+      FleeFailed: hash.getSelectorFromName("FleeFailed"),
+      FleeSucceeded: hash.getSelectorFromName("FleeSucceeded"),
+      PurchasedItems: hash.getSelectorFromName("PurchasedItems"),
+      PurchasedPotions: hash.getSelectorFromName("PurchasedPotions"),
+      EquippedItems: hash.getSelectorFromName("EquippedItems"),
+      DroppedItems: hash.getSelectorFromName("DroppedItems"),
+      GreatnessIncreased: hash.getSelectorFromName("GreatnessIncreased"),
+      ItemSpecialUnlocked: hash.getSelectorFromName("ItemSpecialUnlocked"),
+      NewHighScore: hash.getSelectorFromName("NewHighScore"),
+      AdventurerDied: hash.getSelectorFromName("AdventurerDied"),
+      AdventurerLeveledUp: hash.getSelectorFromName("AdventurerLeveledUp"),
+      NewItemsAvailable: hash.getSelectorFromName("NewItemsAvailable"),
+      IdleDeathPenalty: hash.getSelectorFromName("IdleDeathPenalty"),
+    };
+
+    this.QUERY_KEYS = {
+      lastBattleQuery: "battles",
+      lastBeastBattleQuery: "battles",
+      battlesByAdventurerQuery: "battles",
+      battlesByTxHashQuery: "battles",
+      battlesByBeastQuery: "battles",
+      lastBeastQuery: "beasts",
+      beastQuery: "beasts",
+      discoveriesQuery: "discoveries",
+      latestDiscoveriesQuery: "discoveries",
+      discoveryByTxHashQuery: "discoveries",
+      adventurersByOwnerQuery: "adventurers",
+      adventurerByIdQuery: "adventurers",
+      leaderboardByIdQuery: "adventurers",
+      adventurersByGoldQuery: "adventurers",
+      adventurersByXPQuery: "adventurers",
+      adventurersInListQuery: "adventurers",
+      adventurersInListByXpQuery: "adventurers",
+      itemsByAdventurerQuery: "items",
+      itemsByProfileQuery: "items",
+      topScoresQuery: "scores",
+      latestMarketItemsQuery: "items",
+      adventurerToSlayQuery: "adventurers",
     };
   }
 }

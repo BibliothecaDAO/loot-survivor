@@ -21,11 +21,12 @@ export const NotificationDisplay = () => {
     ? processNotifications(
         type,
         notificationData,
-        battles,
+        adventurer ?? NullAdventurer,
         hasBeast,
-        adventurer ?? NullAdventurer
+        battles
       )
     : [];
+  console.log(notificationData);
 
   const [setSound, setSoundState] = useState(soundSelector.click);
 

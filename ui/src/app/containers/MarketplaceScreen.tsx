@@ -183,14 +183,14 @@ export default function MarketplaceScreen({
           <>
             {(() => {
               const item = sortedMarketLatestItems[showEquipQ ?? 0];
-              const { tier, type, slot } = getItemData(item.item ?? "");
+              const { tier, type, slot } = getItemData(item?.item ?? "");
               return (
                 <div
                   className={`${
                     showEquipQ !== null ? "sm:hidden" : "hidden"
                   } w-full m-auto h-full flex flex-row items-center justify-center gap-2`}
                 >
-                  <p>{`Equip ${item.item} ?`}</p>
+                  <p>{`Equip ${item?.item} ?`}</p>
                   <Button
                     onClick={() => {
                       const newPurchases = [

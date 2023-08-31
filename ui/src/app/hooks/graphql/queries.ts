@@ -168,9 +168,9 @@ const getAdventurer = gql`
 
 const getDiscoveries = gql`
   ${DISCOVERIES_FRAGMENT}
-  query getDiscoveries($adventurerId: FeltValue) {
+  query getDiscoveries($id: FeltValue) {
     discoveries(
-      where: { adventurerId: { eq: $adventurerId } }
+      where: { adventurerId: { eq: $id } }
       limit: 1000000
       orderBy: { timestamp: { desc: true } }
     ) {
@@ -181,9 +181,9 @@ const getDiscoveries = gql`
 
 const getLatestDiscoveries = gql`
   ${DISCOVERIES_FRAGMENT}
-  query getLatestDiscoveries($adventurerId: FeltValue) {
+  query getLatestDiscoveries($id: FeltValue) {
     discoveries(
-      where: { adventurerId: { eq: $adventurerId } }
+      where: { adventurerId: { eq: $id } }
       limit: 10
       orderBy: { timestamp: { desc: true } }
     ) {
@@ -207,9 +207,9 @@ const getLastDiscovery = gql`
 
 const getLastBeastDiscovery = gql`
   ${DISCOVERIES_FRAGMENT}
-  query get_last_beast_query($adventurerId: FeltValue) {
+  query get_last_beast_query($id: FeltValue) {
     discoveries(
-      where: { adventurerId: { eq: $adventurerId }, entity: { gt: 0 } }
+      where: { adventurerId: { eq: $id }, entity: { gt: 0 } }
       limit: 1
       orderBy: { timestamp: { desc: true } }
     ) {
@@ -422,10 +422,10 @@ const getItemsByTokenId = gql`
 
 const getLatestMarketItems = gql`
   ${ITEMS_FRAGMENT}
-  query get_latest_market_items($adventurerId: FeltValue, $limit: Int) {
+  query get_latest_market_items($id: FeltValue) {
     items(
-      where: { adventurerId: { eq: $adventurerId }, isAvailable: { eq: true } }
-      limit: $limit
+      where: { adventurerId: { eq: $id }, isAvailable: { eq: true } }
+      limit: 100000
     ) {
       ...ItemFields
     }
@@ -434,9 +434,9 @@ const getLatestMarketItems = gql`
 
 const getItemsByAdventurer = gql`
   ${ITEMS_FRAGMENT}
-  query get_items_by_adventurer($adventurerId: FeltValue) {
+  query get_items_by_adventurer($id: FeltValue) {
     items(
-      where: { adventurerId: { eq: $adventurerId }, owner: { eq: true } }
+      where: { adventurerId: { eq: $id }, owner: { eq: true } }
       limit: 10000000
     ) {
       ...ItemFields

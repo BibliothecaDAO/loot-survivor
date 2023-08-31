@@ -110,8 +110,6 @@ export const ArcadeAccountCard = ({
         calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
       });
 
-      console.log(transaction_hash);
-
       const result = await account.waitForTransaction(transaction_hash, {
         retryInterval: 1000,
         successStates: [TransactionStatus.ACCEPTED_ON_L2],

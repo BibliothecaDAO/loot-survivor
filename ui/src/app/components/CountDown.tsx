@@ -36,11 +36,13 @@ export const HealthCountDown = ({ health }: any) => {
 export interface PenaltyCountDownProps {
   lastDiscoveryTime?: Date;
   lastBattleTime?: Date;
+  dataLoading: boolean;
 }
 
 export const PenaltyCountDown = ({
   lastDiscoveryTime,
   lastBattleTime,
+  dataLoading,
 }: PenaltyCountDownProps) => {
   const [seconds, setSeconds] = useState(0);
 
@@ -87,7 +89,7 @@ export const PenaltyCountDown = ({
 
   return (
     <div className="text-xs sm:text-lg mt-2 sm:mt-4">
-      {targetTime ? (
+      {!dataLoading ? (
         seconds > 0 ? (
           <span className="flex flex-row gap-1 items-center">
             <p>{countingMessage}</p>

@@ -92,7 +92,7 @@ const PurchaseHealth = ({
   // );
 
   return (
-    <div className="flex flex-col sm:flex-row sm:p-2 md:p-4 2xl:p-0 items-center">
+    <div className="flex flex-col sm:flex-row sm:p-2 2xl:p-0 items-center">
       <QuantityButtons
         amount={potionAmount}
         min={0}
@@ -109,14 +109,14 @@ const PurchaseHealth = ({
           potionAmount === max
         }
         onClick={fillToMax}
-        size={"sm"}
+        size={"xs"}
         className="m-auto"
       >
         Fill to Max
       </Button>
       <div className="flex flex-col gap-2 sm:flex-row items-center p-4">
         <div className="flex flex-col text-sm text-center items-center">
-          <span className="flex flex-row gap-1 sm:text-lg">
+          <span className="flex flex-row gap-1 2xl:text-lg">
             <p>
               Purchasing{" "}
               <strong className="text-terminal-yellow">{potionAmount}</strong>{" "}
@@ -127,7 +127,7 @@ const PurchaseHealth = ({
               <p className="text-terminal-yellow">{purchaseGoldAmount}</p>
             </span>
           </span>
-          <p className="pr-4">
+          <p className="pr-4 xl:text-xs">
             {" "}
             You can only buy up to Max Health! 1 Potion = 10 Health
           </p>

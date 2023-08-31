@@ -91,17 +91,17 @@ const processAnimation = (
         return gameData.ADVENTURER_ANIMATIONS["DiscoverBeast"];
       }
     } else if (notificationData?.discoveryType == "Obstacle") {
-      if (notificationData?.dodgedObstacle === 0) {
+      if (notificationData?.dodgedObstacle) {
+        return getRandomElement([
+          gameData.ADVENTURER_ANIMATIONS["AvoidObstacle1"],
+          gameData.ADVENTURER_ANIMATIONS["AvoidObstacle2"],
+        ]);
+      } else {
         if (notificationData?.adventurerHealth === 0) {
           return gameData.ADVENTURER_ANIMATIONS["Dead"];
         } else {
           return gameData.ADVENTURER_ANIMATIONS["HitByObstacle"];
         }
-      } else {
-        return getRandomElement([
-          gameData.ADVENTURER_ANIMATIONS["AvoidObstacle1"],
-          gameData.ADVENTURER_ANIMATIONS["AvoidObstacle2"],
-        ]);
       }
     } else if (notificationData?.discoveryType == "Item") {
       return gameData.ADVENTURER_ANIMATIONS["DiscoverItem"];
@@ -126,18 +126,12 @@ const processAnimation = (
 export const processNotifications = (
   type: string,
   notificationData: Discovery[] | Battle[] | string | string[] | UpgradeSummary,
-  battles: Battle[],
-  hasBeast: boolean,
-  adventurer: Adventurer
+  adventurer: Adventurer,
+  hasBeast?: boolean,
+  battles?: Battle[]
 ) => {
-  console.log(notificationData);
   const gameData = new GameData();
   const notifications: Notification[] = [];
-  const beastName = processBeastName(
-    battles[0]?.beast ?? "",
-    battles[0]?.special2 ?? "",
-    battles[0]?.special3 ?? ""
-  );
   const handleAnimation = (data: any) => {
     return processAnimation(type, data, adventurer ?? NullAdventurer);
   };
@@ -161,7 +155,6 @@ export const processNotifications = (
     // Here every discovery item in the DB is a noti, so we can just loop
     for (let i = 0; i < notificationData.length; i++) {
       const animation = handleAnimation(notificationData[i] as Discovery);
-      console.log(animation);
       notifications.push({
         animation: animation ?? "",
         message: (
@@ -184,7 +177,12 @@ export const processNotifications = (
   } else if (type == "Multicall" && isArray) {
     for (let i = 0; i < notificationData.length; i++) {
       const animation = handleAnimation(notificationData[i] as string);
-      if (hasBeast) {
+      if (hasBeast && battles) {
+        const beastName = processBeastName(
+          battles[0]?.beast ?? "",
+          battles[0]?.special2 ?? "",
+          battles[0]?.special3 ?? ""
+        );
         if (
           (notificationData[i] as string).startsWith("You equipped") &&
           battles[0]?.attacker == "Beast" &&
@@ -193,7 +191,8 @@ export const processNotifications = (
           notifications.push({
             message: (
               <p>
-                You were slaughtered by the beast after trying to equip an item!
+                You were slaughtered by the {beastName} after trying to equip an
+                item!
               </p>
             ),
             animation: animation ?? "",
