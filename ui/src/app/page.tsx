@@ -373,6 +373,7 @@ export default function Home() {
                       data.latestDiscoveriesQuery?.discoveries[0]?.timestamp
                     }
                     lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
+                    dataLoading={isLoading.global}
                   />
                 )}
               </span>
