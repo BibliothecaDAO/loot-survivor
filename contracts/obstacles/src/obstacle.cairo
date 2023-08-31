@@ -49,9 +49,7 @@ impl ImplObstacle of IObstacle {
             tier: ImplObstacle::get_tier(id),
             item_type: ImplObstacle::get_type(id),
             level: _level,
-            specials: SpecialPowers {
-                special1: 0, special2: 0, special3: 0, 
-            }
+            specials: SpecialPowers { special1: 0, special2: 0, special3: 0, }
         };
 
         Obstacle { id: id, combat_specs: combat_specs }
@@ -69,317 +67,46 @@ impl ImplObstacle of IObstacle {
     // @param id: u8 - the obstacle id
     // @return u8 - the obstacle tier
     fn get_tier(id: u8) -> Tier {
-        if id == ObstacleId::DemonicAlter {
+        if ImplObstacle::is_t1(id) {
             Tier::T1(())
-        } else if id == ObstacleId::VortexOfDespair {
-            Tier::T1(())
-        } else if id == ObstacleId::EldritchBarrier {
-            Tier::T1(())
-        } else if id == ObstacleId::SoulTrap {
-            Tier::T1(())
-        } else if id == ObstacleId::PhantomVortex {
-            Tier::T1(())
-        } else if id == ObstacleId::EctoplasmicWeb {
+        } else if ImplObstacle::is_t2(id){
             Tier::T2(())
-        } else if id == ObstacleId::SpectralChains {
-            Tier::T2(())
-        } else if id == ObstacleId::InfernalPact {
-            Tier::T2(())
-        } else if id == ObstacleId::ArcaneExplosion {
-            Tier::T2(())
-        } else if id == ObstacleId::HypnoticEssence {
-            Tier::T2(())
-        } else if id == ObstacleId::MischievousSprites {
+        } else if ImplObstacle::is_t3(id) {
             Tier::T3(())
-        } else if id == ObstacleId::SoulDrainingStatue {
-            Tier::T3(())
-        } else if id == ObstacleId::PetrifyingGaze {
-            Tier::T3(())
-        } else if id == ObstacleId::SummoningCircle {
-            Tier::T3(())
-        } else if id == ObstacleId::EtherealVoid {
-            Tier::T3(())
-        } else if id == ObstacleId::MagicLock {
+        } else if ImplObstacle::is_t4(id) {
             Tier::T4(())
-        } else if id == ObstacleId::BewitchingFog {
-            Tier::T4(())
-        } else if id == ObstacleId::IllusionaryMaze {
-            Tier::T4(())
-        } else if id == ObstacleId::SpellboundMirror {
-            Tier::T4(())
-        } else if id == ObstacleId::EnsnaringShadow {
-            Tier::T4(())
-        } else if id == ObstacleId::DarkMist {
-            Tier::T5(())
-        } else if id == ObstacleId::Curse {
-            Tier::T5(())
-        } else if id == ObstacleId::HauntingEcho {
-            Tier::T5(())
-        } else if id == ObstacleId::Hex {
-            Tier::T5(())
-        } else if id == ObstacleId::GhostlyWhispers {
-            Tier::T5(())
-        } else if id == ObstacleId::PendulumBlades {
-            Tier::T1(())
-        } else if id == ObstacleId::IcyRazorWinds {
-            Tier::T1(())
-        } else if id == ObstacleId::AcidicThorns {
-            Tier::T1(())
-        } else if id == ObstacleId::DragonsBreath {
-            Tier::T1(())
-        } else if id == ObstacleId::PendulumScythe {
-            Tier::T1(())
-        } else if id == ObstacleId::FlameJet {
-            Tier::T2(())
-        } else if id == ObstacleId::PiercingIceDarts {
-            Tier::T2(())
-        } else if id == ObstacleId::GlassSandStorm {
-            Tier::T2(())
-        } else if id == ObstacleId::PoisonedDartWall {
-            Tier::T2(())
-        } else if id == ObstacleId::SpinningBladeWheel {
-            Tier::T2(())
-        } else if id == ObstacleId::PoisonDart {
-            Tier::T3(())
-        } else if id == ObstacleId::SpikedTumbleweed {
-            Tier::T3(())
-        } else if id == ObstacleId::Thunderbolt {
-            Tier::T3(())
-        } else if id == ObstacleId::GiantBearTrap {
-            Tier::T3(())
-        } else if id == ObstacleId::SteelNeedleRain {
-            Tier::T3(())
-        } else if id == ObstacleId::SpikedPit {
-            Tier::T4(())
-        } else if id == ObstacleId::DiamondDustStorm {
-            Tier::T4(())
-        } else if id == ObstacleId::TrapdoorScorpionPit {
-            Tier::T4(())
-        } else if id == ObstacleId::BladedFan {
-            Tier::T4(())
-        } else if id == ObstacleId::BearTrap {
-            Tier::T4(())
-        } else if id == ObstacleId::PorcupineQuill {
-            Tier::T5(())
-        } else if id == ObstacleId::HiddenArrow {
-            Tier::T5(())
-        } else if id == ObstacleId::GlassShard {
-            Tier::T5(())
-        } else if id == ObstacleId::ThornBush {
-            Tier::T5(())
-        } else if id == ObstacleId::JaggedRocks {
-            Tier::T5(())
-        } else if id == ObstacleId::CollapsingCeiling {
-            Tier::T1(())
-        } else if id == ObstacleId::Rockslide {
-            Tier::T1(())
-        } else if id == ObstacleId::FlashFlood {
-            Tier::T1(())
-        } else if id == ObstacleId::ClingingRoots {
-            Tier::T1(())
-        } else if id == ObstacleId::CollapsingCavern {
-            Tier::T1(())
-        } else if id == ObstacleId::CrushingWalls {
-            Tier::T2(())
-        } else if id == ObstacleId::SmashingPillars {
-            Tier::T2(())
-        } else if id == ObstacleId::RumblingCatacomb {
-            Tier::T2(())
-        } else if id == ObstacleId::WhirlingCyclone {
-            Tier::T2(())
-        } else if id == ObstacleId::EruptingEarth {
-            Tier::T2(())
-        } else if id == ObstacleId::SubterraneanTremor {
-            Tier::T3(())
-        } else if id == ObstacleId::FallingChandelier {
-            Tier::T3(())
-        } else if id == ObstacleId::CollapsingBridge {
-            Tier::T3(())
-        } else if id == ObstacleId::RagingSandstorm {
-            Tier::T3(())
-        } else if id == ObstacleId::AvalanchingRocks {
-            Tier::T3(())
-        } else if id == ObstacleId::TumblingBoulders {
-            Tier::T4(())
-        } else if id == ObstacleId::SlammingIronGate {
-            Tier::T4(())
-        } else if id == ObstacleId::ShiftingSandtrap {
-            Tier::T4(())
-        } else if id == ObstacleId::EruptingMudGeyser {
-            Tier::T4(())
-        } else if id == ObstacleId::CrumblingStaircase {
-            Tier::T4(())
-        } else if id == ObstacleId::SwingingLogs {
-            Tier::T5(())
-        } else if id == ObstacleId::UnstableCliff {
-            Tier::T5(())
-        } else if id == ObstacleId::TopplingStatue {
-            Tier::T5(())
-        } else if id == ObstacleId::TumblingBarrels {
-            Tier::T5(())
-        } else if id == ObstacleId::RollingBoulder {
-            Tier::T5(())
         } else {
-            panic_with_felt252('unknown obstacle id')
+            Tier::T5(())
         }
+    }
+
+    #[inline(always)]
+    fn is_t1(id: u8) -> bool {
+        (id > 0 && id <= 5) || (id >= 26 && id <= 30) || (id >= 51 && id <= 55)
+    }
+    #[inline(always)]
+    fn is_t2(id: u8) -> bool {
+        (id >= 6 && id <= 10) || (id >= 31 && id <= 35) || (id >= 56 && id <= 60)
+    }
+    #[inline(always)]
+    fn is_t3(id: u8) -> bool {
+        (id >= 11 && id <= 15) || (id >= 36 && id <= 40) || (id >= 61 && id <= 65)
+    }
+    #[inline(always)]
+    fn is_t4(id: u8) -> bool {
+        (id >= 16 && id <= 20) || (id >= 41 && id <= 45) || (id >= 66 && id <= 70)
     }
 
     // @notice returns the type of the obstacle based on the provided obstacle id
     // @param id: u8 - the obstacle id
     // @return u8 - the obstacle type
     fn get_type(id: u8) -> Type {
-        if id == ObstacleId::DemonicAlter {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::VortexOfDespair {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::EldritchBarrier {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::SoulTrap {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::PhantomVortex {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::EctoplasmicWeb {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::SpectralChains {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::InfernalPact {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::ArcaneExplosion {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::HypnoticEssence {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::MischievousSprites {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::SoulDrainingStatue {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::PetrifyingGaze {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::SummoningCircle {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::EtherealVoid {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::MagicLock {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::BewitchingFog {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::IllusionaryMaze {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::SpellboundMirror {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::EnsnaringShadow {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::DarkMist {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::Curse {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::HauntingEcho {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::Hex {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::GhostlyWhispers {
-            Type::Magic_or_Cloth(())
-        } else if id == ObstacleId::PendulumBlades {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::IcyRazorWinds {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::AcidicThorns {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::DragonsBreath {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::PendulumScythe {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::FlameJet {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::PiercingIceDarts {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::GlassSandStorm {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::PoisonedDartWall {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::SpinningBladeWheel {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::PoisonDart {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::SpikedTumbleweed {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::Thunderbolt {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::GiantBearTrap {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::SteelNeedleRain {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::SpikedPit {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::DiamondDustStorm {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::TrapdoorScorpionPit {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::BladedFan {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::BearTrap {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::PorcupineQuill {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::HiddenArrow {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::GlassShard {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::ThornBush {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::JaggedRocks {
-            Type::Blade_or_Hide(())
-        } else if id == ObstacleId::CollapsingCeiling {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::Rockslide {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::FlashFlood {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::ClingingRoots {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::CollapsingCavern {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::CrushingWalls {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::SmashingPillars {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::RumblingCatacomb {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::WhirlingCyclone {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::EruptingEarth {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::SubterraneanTremor {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::FallingChandelier {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::CollapsingBridge {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::RagingSandstorm {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::AvalanchingRocks {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::TumblingBoulders {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::SlammingIronGate {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::ShiftingSandtrap {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::EruptingMudGeyser {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::CrumblingStaircase {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::SwingingLogs {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::UnstableCliff {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::TopplingStatue {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::TumblingBarrels {
-            Type::Bludgeon_or_Metal(())
-        } else if id == ObstacleId::RollingBoulder {
-            Type::Bludgeon_or_Metal(())
+        if id < ObstacleId::PendulumBlades {
+            return Type::Magic_or_Cloth(());
+        } else if id < ObstacleId::CollapsingCeiling {
+            return Type::Blade_or_Hide(());
         } else {
-            panic_with_felt252('unknown obstacle id')
+            return Type::Bludgeon_or_Metal(());
         }
     }
 
@@ -445,7 +172,19 @@ mod tests {
     };
 
     #[test]
-    #[available_gas(5000000)]
+    #[available_gas(16780)]
+    fn test_get_tier_gas() {
+        ImplObstacle::get_tier(75);
+    }
+
+    #[test]
+    #[available_gas(1840)]
+    fn test_get_type_gas() {
+        ImplObstacle::get_type(75);
+    }
+
+    #[test]
+    #[available_gas(1666510)]
     fn test_get_obstacle_tier_range_check() {
         // iterate over all obstacles and make sure we aren't missing any
         let mut obstacle_id = 1;
@@ -461,7 +200,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(5000000)]
+    #[available_gas(531070)]
     fn test_get_obstacle_type_range_check() {
         // iterate over all obstacles and make sure we aren't missing any
         let mut obstacle_id = 1;
@@ -476,7 +215,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(5000000)]
+    #[available_gas(1897550)]
     fn test_get_obstacle_range_check() {
         // iterate over all obstacles and make sure we aren't missing any
         let mut obstacle_id = 1;
@@ -491,7 +230,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(500000)]
+    #[available_gas(270400)]
     fn test_get_obstacle_tier() {
         let demonic_alter = ObstacleId::DemonicAlter;
         let demonic_alter_tier = ImplObstacle::get_tier(demonic_alter);
@@ -555,7 +294,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(400000)]
+    #[available_gas(46300)]
     fn test_get_obstacle_type() {
         let demonic_alter = ObstacleId::DemonicAlter;
         let demonic_alter_type = ImplObstacle::get_type(demonic_alter);

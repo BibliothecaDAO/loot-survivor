@@ -240,6 +240,9 @@ impl ImplBeast of IBeast {
         base_reward + (bonus_base * bonus_multiplier)
     }
 
+    // @notice gets the type of a beast
+    // @param id: the id of the beast
+    // @return: the type of the beast
     fn get_type(id: u8) -> Type {
         assert(id != 0, 'invalid beast id');
         if (id <= 25) {
@@ -253,20 +256,38 @@ impl ImplBeast of IBeast {
         }
     }
 
+    // @notice gets the tier of a beast
+    // @param id: the id of the beast
+    // @return: the tier of the beast
     fn get_tier(id: u8) -> Tier {
-        if ((id > 0 && id <= 5) || (id >= 26 && id <= 30) || (id >= 51 && id <= 55)) {
+        if ImplBeast::is_t1(id) {
             Tier::T1(())
-        } else if ((id >= 6 && id <= 10) || (id >= 31 && id <= 35) || (id >= 56 && id <= 60)) {
+        } else if ImplBeast::is_t2(id){
             Tier::T2(())
-        } else if ((id >= 11 && id <= 15) || (id >= 36 && id <= 40) || (id >= 61 && id <= 65)) {
+        } else if ImplBeast::is_t3(id) {
             Tier::T3(())
-        } else if ((id >= 16 && id <= 20) || (id >= 41 && id <= 45) || (id >= 66 && id <= 70)) {
+        } else if ImplBeast::is_t4(id) {
             Tier::T4(())
-        } else if ((id >= 21 && id <= 25) || (id >= 46 && id <= 50) || (id >= 71 && id <= 75)) {
-            Tier::T5(())
         } else {
-            panic_with_felt252('invalid beast id')
+            Tier::T5(())
         }
+    }
+
+    #[inline(always)]
+    fn is_t1(id: u8) -> bool {
+        (id > 0 && id <= 5) || (id >= 26 && id <= 30) || (id >= 51 && id <= 55)
+    }
+    #[inline(always)]
+    fn is_t2(id: u8) -> bool {
+        (id >= 6 && id <= 10) || (id >= 31 && id <= 35) || (id >= 56 && id <= 60)
+    }
+    #[inline(always)]
+    fn is_t3(id: u8) -> bool {
+        (id >= 11 && id <= 15) || (id >= 36 && id <= 40) || (id >= 61 && id <= 65)
+    }
+    #[inline(always)]
+    fn is_t4(id: u8) -> bool {
+        (id >= 16 && id <= 20) || (id >= 41 && id <= 45) || (id >= 66 && id <= 70)
     }
 }
 
@@ -307,13 +328,21 @@ mod tests {
     };
 
     #[test]
-    #[should_panic(expected: ('invalid beast id',))]
+    #[available_gas(21800)]
+    fn test_get_tier_gas() {
+        ImplBeast::get_tier(MAX_ID);
+    }
+
+    #[test]
     #[available_gas(70000)]
-    fn test_get_tier_invalid_id() {
-        // provide an ID that doesn't exist
-        // this should panic with the message 'invalid beast id'
-        // test is annotated to expect this panic
-        ImplBeast::get_tier(MAX_ID + 1);
+    fn test_get_tier_unknown_id() {
+        assert(ImplBeast::get_tier(MAX_ID + 1) == Tier::T5(()), 'unknown id gets T5');
+    }
+
+    #[test]
+    #[available_gas(70000)]
+    fn test_get_tier_max_value() {
+        assert(ImplBeast::get_tier(255) == Tier::T5(()), 'should be unknown / T5');
     }
 
     #[test]
