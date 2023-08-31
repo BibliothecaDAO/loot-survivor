@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react";
 import TwitterShareButton from "../buttons/TwitterShareButtons";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
@@ -7,18 +8,32 @@ import Image from "next/image";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
 import { appUrl } from "@/app/lib/constants";
+import {
+  getAdventurersInListByXp,
+  getAdventurerByXP,
+  getAdventurerById,
+} from "@/app/hooks/graphql/queries";
+import useCustomQuery from "@/app/hooks/useCustomQuery";
 
 export const DeathDialog = () => {
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const { data } = useQueriesStore();
+  const { data, isLoading, refetch, setData, setIsLoading, setNotLoading } =
+    useQueriesStore();
+
+  const adventurersByXPdata = useCustomQuery(
+    "adventurersByXPQuery",
+    getAdventurerByXP,
+    undefined
+  );
 
   const rank = getRankFromList(
     adventurer?.id ?? 0,
-    data.adventurersByXPQuery?.adventurers ?? []
+    adventurersByXPdata?.adventurers ?? []
   );
+
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
 
   return (
@@ -39,7 +54,7 @@ export const DeathDialog = () => {
               {deathMessage}
             </span>
             <p className="sm:text-2xl">
-              {adventurer?.name} died level {adventurer?.level} with{" "}
+              {adventurer?.name} died level {adventurer?.level} with {""}
               {adventurer?.xp} XP, a valiant effort! Make sure to share your
               score. Continue the journey with another adventurer:{" "}
             </p>

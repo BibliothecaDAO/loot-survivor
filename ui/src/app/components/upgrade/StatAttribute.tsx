@@ -70,7 +70,7 @@ export const StatAttribute = ({
   return (
     <div className="flex flex-col gap-1 sm:gap-3 items-center">
       <span className="hidden sm:block w-10 h-10">{icon}</span>
-      <p className="sm:text-[28px] xl:text-xl 2xl:text-2xl  text-center h-2/3">
+      <p className="sm:text-[28px] xl:text-2xl text-center h-2/3">
         {description}
       </p>
       <span className="flex flex-row items-center">

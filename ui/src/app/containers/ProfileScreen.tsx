@@ -45,7 +45,7 @@ export default function Profile() {
         ) : (
           <EncountersScreen profile={profile} />
         )}
-        <div className="hidden sm:block">
+        <div className="hidden sm:block xl:w-full">
           <EncountersScreen profile={profile} />
         </div>
       </div>

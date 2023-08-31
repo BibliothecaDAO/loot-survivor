@@ -97,7 +97,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       name: "Vitality",
       id: 3,
       icon: <HeartVitalityIcon />,
-      description: "Vitality gives 10hp and increases max health by 10hp",
+      description: "Vitality increases max health and gives +10hp ",
       buttonText: "Upgrade Vitality",
       abbrev: "VIT",
     },

@@ -133,7 +133,7 @@ export const BattleDisplay = ({
       return (
         <span className="flex flex-row items-center justify-between">
           <p>
-            YIKES! Killed by the {beastName} from
+            Killed by the {beastName} taking {""}
             {battleData?.damageTaken} damage to {damageLocation}
             {CriticalHit && (
               <>
@@ -317,7 +317,7 @@ export const NotificationBattleDisplay = ({
             !
           </p>
           <p>
-            Killed by the {beastName || ""} from
+            Killed by the {beastName || ""} taking {""}
             {battleData[1]?.damageTaken} damage
             {battleData[0]?.criticalHit && (
               <>
