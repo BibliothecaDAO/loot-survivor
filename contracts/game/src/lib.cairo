@@ -23,8 +23,12 @@ mod Game {
     use array::ArrayTrait;
     use poseidon::poseidon_hash_span;
 
+    use openzeppelin::token::erc20::interface::{
+        IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
+    };
+
     use super::game::{
-        interfaces::{IGame, IERC20Dispatcher, IERC20DispatcherTrait, IERC20LibraryDispatcher},
+        interfaces::{IGame},
         constants::{
             messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
             U128_MAX, STARTER_BEAST_ATTACK_DAMAGE, STARTING_STATS
@@ -981,7 +985,7 @@ mod Game {
             // the purpose of this is to let a decent set of top scores get set before payouts begin
             // without this, there would be an incentive to start and die immediately after contract is deployed
             // to capture the rewards from the launch hype
-            IERC20Dispatcher { contract_address: lords }
+            IERC20CamelDispatcher { contract_address: lords }
                 .transferFrom(caller, self._dao.read(), _to_ether(week.DAO));
             return;
         }
@@ -1013,26 +1017,26 @@ mod Game {
 
         // DAO
         if (week.DAO != 0) {
-            IERC20Dispatcher { contract_address: lords }
+            IERC20CamelDispatcher { contract_address: lords }
                 .transferFrom(caller, self._dao.read(), week.DAO);
         }
 
         // interface
         if (week.INTERFACE != 0) {
-            IERC20Dispatcher { contract_address: lords }
+            IERC20CamelDispatcher { contract_address: lords }
                 .transferFrom(caller, interface, week.INTERFACE);
         }
 
         // first place
-        IERC20Dispatcher { contract_address: lords }
+        IERC20CamelDispatcher { contract_address: lords }
             .transferFrom(caller, self._owner.read(self._scoreboard.read(1)), week.FIRST_PLACE);
 
         // second place
-        IERC20Dispatcher { contract_address: lords }
+        IERC20CamelDispatcher { contract_address: lords }
             .transferFrom(caller, self._owner.read(self._scoreboard.read(2)), week.SECOND_PLACE);
 
         // third place
-        IERC20Dispatcher { contract_address: lords }
+        IERC20CamelDispatcher { contract_address: lords }
             .transferFrom(caller, self._owner.read(self._scoreboard.read(3)), week.THIRD_PLACE);
     }
 
@@ -2912,7 +2916,6 @@ mod Game {
     fn _get_combat_spec(
         self: @ContractState, adventurer_id: u256, item: ItemPrimitive
     ) -> CombatSpec {
-
         // if item is 0, return a default combat spec
         if (item.id == 0) {
             CombatSpec {
