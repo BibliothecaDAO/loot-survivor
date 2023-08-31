@@ -985,7 +985,7 @@ mod Game {
             // the purpose of this is to let a decent set of top scores get set before payouts begin
             // without this, there would be an incentive to start and die immediately after contract is deployed
             // to capture the rewards from the launch hype
-            IERC20Dispatcher { contract_address: lords }
+            IERC20CamelDispatcher { contract_address: lords }
                 .transferFrom(caller, self._dao.read(), _to_ether(week.DAO));
             return;
         }

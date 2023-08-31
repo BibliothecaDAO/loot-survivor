@@ -10,7 +10,10 @@ mod tests {
     };
     use traits::TryInto;
     use box::BoxTrait;
-
+    use openzeppelin::token::erc20::interface::{
+        IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
+    };
+    use openzeppelin::token::erc20::erc20::ERC20;
     use market::market::{ImplMarket, LootWithPrice, ItemPurchase};
     use lootitems::{loot::{Loot, ImplLoot, ILoot}, constants::{ItemId}};
     use game::{
@@ -20,6 +23,9 @@ mod tests {
             constants::{messages::{STAT_UPGRADES_AVAILABLE}, STARTER_BEAST_ATTACK_DAMAGE}
         }
     };
+    use openzeppelin::utils::serde::SerializedAppend;
+    use openzeppelin::tests::mocks::camel20_mock::CamelERC20Mock;
+    use openzeppelin::tests::utils;
     use combat::{constants::CombatEnums::{Slot, Tier}, combat::ImplCombat};
     use survivor::{
         adventurer_stats::Stats, adventurer_meta::{AdventurerMetadata},
@@ -44,18 +50,36 @@ mod tests {
         contract_address_const::<1>()
     }
 
-    fn CALLER() -> ContractAddress {
-        contract_address_const::<0x1>()
+    const ADVENTURER_ID: u256 = 1;
+
+    const MAX_LORDS: u256 = 500000000000000000000;
+    const APPROVE: u256 = 50000000000000000000;
+    const NAME: felt252 = 111;
+    const SYMBOL: felt252 = 222;
+
+    fn OWNER() -> ContractAddress {
+        contract_address_const::<10>()
     }
 
-    const ADVENTURER_ID: u256 = 1;
-    const MAX_LORDS: felt252 = 500000000000000000000;
+    fn deploy_lords() -> ContractAddress {
+        let mut calldata = array![];
+        calldata.append_serde(NAME);
+        calldata.append_serde(SYMBOL);
+        calldata.append_serde(MAX_LORDS);
+        calldata.append_serde(OWNER());
+
+        let lords0 = utils::deploy(CamelERC20Mock::TEST_CLASS_HASH, calldata);
+
+        lords0
+    }
 
     fn setup(starting_block: u64) -> IGameDispatcher {
         testing::set_block_number(starting_block);
 
+        let lords = deploy_lords();
+
         let mut calldata = ArrayTrait::new();
-        calldata.append(DAO().into());
+        calldata.append(lords.into());
         calldata.append(DAO().into());
         calldata.append(COLLECTIBLE_BEASTS().into());
 
@@ -63,6 +87,12 @@ mod tests {
             Game::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
         )
             .unwrap();
+
+        testing::set_contract_address(OWNER());
+
+        let lordsContract = IERC20CamelDispatcher { contract_address: lords };
+
+        lordsContract.approve(address0, APPROVE.into());
 
         IGameDispatcher { contract_address: address0 }
     }
@@ -394,10 +424,9 @@ mod tests {
 
         adventurer_meta_1.entropy;
     }
-
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(36000000)]
+    #[available_gas(900000000)]
     fn test_no_explore_during_battle() {
         let mut game = new_adventurer(1000);
 
@@ -409,7 +438,7 @@ mod tests {
 
     #[test]
     #[should_panic]
-    #[available_gas(900000)]
+    #[available_gas(90000000)]
     fn test_attack() {
         let mut game = new_adventurer(1000);
 
@@ -547,7 +576,7 @@ mod tests {
 
     #[test]
     #[should_panic(expected: ('Market is closed', 'ENTRYPOINT_FAILED'))]
-    #[available_gas(10000000)]
+    #[available_gas(100000000)]
     fn test_buy_items_during_battle() {
         // mint new adventurer (will start in battle with starter beast)
         let mut game = new_adventurer(1000);
@@ -1201,7 +1230,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(20000000)]
+    #[available_gas(90000000)]
     fn test_get_xp() {
         let mut game = new_adventurer(1000);
         let adventurer = game.get_adventurer(ADVENTURER_ID);

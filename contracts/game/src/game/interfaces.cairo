@@ -124,12 +124,3 @@ trait IGame<TContractState> {
     // checks ----------------------------------------------------
     fn owner_of(self: @TContractState, adventurer_id: u256) -> ContractAddress;
 }
-
-
-#[starknet::interface]
-trait IERC20<TContractState> {
-    fn transferFrom(
-        ref self: TContractState, sender: ContractAddress, recipient: ContractAddress, amount: u256
-    ) -> bool;
-    fn burn_away(ref self: TContractState, to: ContractAddress, amount: u256);
-}
