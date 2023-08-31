@@ -138,15 +138,20 @@ export default function Info({
                 <BagIcon className="self-center w-4 h-4 fill-current" />{" "}
                 {`${items.length}/${19}`}
               </span> */}
-                <span className="flex items-center ">
+                <span className="relative flex items-center ">
                   <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
-                  {/* <span className="flex flex-col">
-                    <p className="text-sm">
-                      +{(vitalitySelected + potionAmount) * 10}
-                    </p> */}
                   <HealthCountDown health={totalHealth || 0} />
-                  {/* </span> */}
                   {`/${Math.min(100 + totalVitality * 10, 720)}`}
+                  {/* {(potionAmount || vitalitySelected) && (
+                    <p className="absolute top-[-10px] left-[30px] text-sm">
+                      +{(vitalitySelected + potionAmount) * 10}
+                    </p>
+                  )}
+                  {vitalitySelected && (
+                    <p className="absolute top-[-10px] left-[60px] text-sm">
+                      +{vitalitySelected * 10}
+                    </p>
+                  )} */}
                 </span>
               </div>
               <div className="flex justify-between w-full text-sm sm:text-base">
