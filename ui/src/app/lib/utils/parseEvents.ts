@@ -189,7 +189,7 @@ function parseEquippedItems(data: string[]) {
   return { equippedItems, unequippedItems };
 }
 
-export function parseEvents(
+export async function parseEvents(
   receipt: InvokeTransactionReceiptResponse,
   currentAdventurer?: any
 ) {

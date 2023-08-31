@@ -183,13 +183,16 @@ export function syscalls({
       const receipt = await account?.waitForTransaction(tx.transaction_hash, {
         retryInterval: 2000,
       });
-      const events = parseEvents(receipt as InvokeTransactionReceiptResponse, {
-        name: formData["name"],
-        homeRealm: formData["homeRealmId"],
-        classType: formData["class"],
-        entropy: 0,
-        createdTime: new Date(),
-      });
+      const events = await parseEvents(
+        receipt as InvokeTransactionReceiptResponse,
+        {
+          name: formData["name"],
+          homeRealm: formData["homeRealmId"],
+          classType: formData["class"],
+          entropy: 0,
+          createdTime: new Date(),
+        }
+      );
       const adventurerState = events.find(
         (event) => event.name === "AmbushedByBeast"
       ).data[0];
@@ -271,7 +274,7 @@ export function syscalls({
       const receipt = await account?.waitForTransaction(tx.transaction_hash, {
         retryInterval: 2000,
       });
-      const events = parseEvents(
+      const events = await parseEvents(
         receipt as InvokeTransactionReceiptResponse,
         queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
       );
@@ -503,7 +506,7 @@ export function syscalls({
       setData("battlesByTxHashQuery", {
         battles: null,
       });
-      const events = parseEvents(
+      const events = await parseEvents(
         receipt as InvokeTransactionReceiptResponse,
         queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
       );
@@ -708,7 +711,7 @@ export function syscalls({
         retryInterval: 2000,
       });
       // Add optimistic data
-      const events = parseEvents(
+      const events = await parseEvents(
         receipt as InvokeTransactionReceiptResponse,
         queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
       );
@@ -876,7 +879,7 @@ export function syscalls({
       });
 
       // Add optimistic data
-      const events = parseEvents(
+      const events = await parseEvents(
         receipt as InvokeTransactionReceiptResponse,
         queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
       );
@@ -979,7 +982,7 @@ export function syscalls({
           marketIds: items,
         },
       });
-      const events = parseEvents(
+      const events = await parseEvents(
         receipt as InvokeTransactionReceiptResponse,
         queryData.adventurerByIdQuery?.adventurers[0] ?? NullAdventurer
       );
