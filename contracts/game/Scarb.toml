@@ -8,10 +8,8 @@ lootitems = { path = "../loot" }
 survivor = { path = "../adventurer" }
 market = { path = "../market" }
 obstacles = { path = "../obstacles" }
+openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts", rev = "05429e4" }
 
 [[target.starknet-contract]]
 allowed-libfuncs-list.name = "experimental"
 allowed-libfuncs = true
-
-
-
