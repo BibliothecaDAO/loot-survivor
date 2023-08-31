@@ -8,7 +8,7 @@ export const chapter1 =
 export const chapter2 =
   "Where? How? Water whispers nearby. They move, reaching through the mist. Suddenly, a fountain materializes, an ethereal sentinel obscured by the swirling vapor.";
 export const chapter3 =
-  "Intrigued, they draw closer, their form dancing on the water's surface. Four oddities lie within - a wand, a book, a club, and a sword. Selecting one, the others dissolve, leaving an unnerving hush in their wake.";
+  "Intrigued, they draw closer, their form dancing on the water's surface. Four oddities lie within - a wand, a book, a club, and a sword.";
 export const chapter4 =
   "They find golden coins in their pocket, glimmering in the dim light - an enigma wrapped in the shroud of the unexpected.";
 export const battle = "A beast lurks in the shadow, prepare for battle!";
