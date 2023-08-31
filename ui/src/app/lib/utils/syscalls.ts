@@ -181,7 +181,7 @@ export function syscalls({
         },
       });
       const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-        retryInterval: 1000,
+        retryInterval: 2000,
       });
       const events = parseEvents(receipt as InvokeTransactionReceiptResponse, {
         name: formData["name"],
@@ -269,7 +269,7 @@ export function syscalls({
         },
       });
       const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-        retryInterval: 1000,
+        retryInterval: 2000,
       });
       const events = parseEvents(
         receipt as InvokeTransactionReceiptResponse,
@@ -496,7 +496,7 @@ export function syscalls({
         },
       });
       const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-        retryInterval: 1000,
+        retryInterval: 2000,
       });
 
       // reset battles by tx hash
@@ -705,7 +705,7 @@ export function syscalls({
         },
       });
       const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-        retryInterval: 1000,
+        retryInterval: 2000,
       });
       // Add optimistic data
       const events = parseEvents(
@@ -872,7 +872,7 @@ export function syscalls({
         },
       });
       const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-        retryInterval: 1000,
+        retryInterval: 2000,
       });
 
       // Add optimistic data
@@ -969,7 +969,7 @@ export function syscalls({
     try {
       const tx = await handleSubmitCalls(writeAsync);
       const receipt = await account?.waitForTransaction(tx.transaction_hash, {
-        retryInterval: 1000,
+        retryInterval: 2000,
       });
       setTxHash(tx?.transaction_hash);
       addTransaction({
