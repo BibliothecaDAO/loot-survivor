@@ -4,7 +4,7 @@ use option::OptionTrait;
 use integer::{U256TryIntoU32, U256TryIntoU16, U256TryIntoU8};
 use pack::pack::{Packing, rshift_split};
 use pack::constants::pow;
-use lootitems::statistics::constants::{ItemId, ItemSuffix};
+use lootitems::constants::{ItemId, ItemSuffix};
 
 use super::{
     adventurer::{Adventurer, IAdventurer, ImplAdventurer}, item_primitive::ItemPrimitive,

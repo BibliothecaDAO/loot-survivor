@@ -14,7 +14,7 @@ use super::{
     },
     adventurer_stats::Stats, adventurer::{Adventurer, ImplAdventurer, IAdventurer},
 };
-use lootitems::statistics::constants::{
+use lootitems::constants::{
     NUM_ITEMS,
     ItemSuffix::{
         of_Power, of_Giant, of_Titans, of_Skill, of_Perfection, of_Brilliance, of_Enlightenment,
