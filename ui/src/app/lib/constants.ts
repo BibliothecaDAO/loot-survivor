@@ -2,9 +2,9 @@ import { constants } from "starknet";
 // export const prologue =
 //   "In the beginning, echoes of a thousand whispers stirred, breathing life into a mystical force. This force, known as the Adventurer's Will, gave rise to an enigmatic figure destined to navigate the boundless realms of a world shrouded in darkness: the Adventurer. Armed with nothing but their will to survive and a weapon as an extension of their spirit, they found themselves on the brink of an uncharted and forsaken land where the sun no longer graced the sky, and a dying moon cast an eerie glow. Each exploration was a unique labyrinth of trials, treasures, and mythical creatures. As the Adventurer journeyed through these desolate realms, their power grew, their bag filled with enchanted protection - precious loot that empowered them with the strength and wisdom needed to confront the lurking horrors. Beasts of unimaginable terror, each bearing unique attacks, weapons, and armor, roamed these lands, turning every encounter into a choice between battle and flight, a calculated risk between survival and demise. The veil between the living and the dead had grown thin in this forsaken world, allowing malevolent beings to wreak havoc upon the remnants. Amidst the chaos and looming dread, a desperate hope flickered in the hearts of the survivors, tethered to an ancient prophecy whispering of a chosen one who would restore balance. Relying on their cunning and resourcefulness, growing stronger with each fall and rising, fueled by the knowledge and experiences of their past lives. And so, the question remains: will the Adventurer fulfill their destiny as the harbinger of hope, or succumb to the encroaching darkness that threatens to consume all that remains?";
 export const prologue =
-"An adventurer stirs from a slumber in a cold, dark cave."
-;
-export const chapter1 = "Disoriented, they scour the darkness, the only sound a dripping echo and the biting whisper of wind.";
+  "An adventurer stirs from a slumber in a cold, dark cave.";
+export const chapter1 =
+  "Disoriented, they scour the darkness, the only sound a dripping echo and the biting whisper of wind.";
 export const chapter2 =
   "Where? How? Water whispers nearby. They move, reaching through the mist. Suddenly, a fountain materializes, an ethereal sentinel obscured by the swirling vapor.";
 export const chapter3 =
@@ -33,7 +33,7 @@ export const contracts = {
       "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
   },
   goerli: {
-    game: "0x04856b25c68bef7b982fc1a74f61c426e6649157df017f1cd14549bf38516c5c",
+    game: "0x0779ac9aea39f0a6d8e8b4eb64c5195e910a95475fcda291a1b93469dfed95ba",
     lords_erc20_mintable:
       "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
   },
