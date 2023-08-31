@@ -50,7 +50,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       id: 1,
       label: "SINGLE",
       action: async () => {
-        attack(false, beastData);
+        await attack(false, beastData);
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -64,7 +64,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       mouseEnter: handleMouseEnter,
       mouseLeave: handleMouseLeave,
       action: async () => {
-        attack(true, beastData);
+        await attack(true, beastData);
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -79,7 +79,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       id: 1,
       label: adventurer?.dexterity === 0 ? "DEX TOO LOW" : "SINGLE",
       action: async () => {
-        flee(false, beastData);
+        await flee(false, beastData);
       },
       disabled:
         adventurer?.beastHealth == undefined ||
@@ -95,7 +95,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       mouseEnter: handleMouseEnter,
       mouseLeave: handleMouseLeave,
       action: async () => {
-        flee(true, beastData);
+        await flee(true, beastData);
       },
       disabled:
         adventurer?.beastHealth == undefined ||

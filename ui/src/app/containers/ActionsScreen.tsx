@@ -73,7 +73,7 @@ export default function ActionsScreen({
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
-        explore(false);
+        await explore(false);
       },
       disabled: hasBeast || loading || !adventurer?.id,
       loading: loading,
@@ -88,7 +88,7 @@ export default function ActionsScreen({
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
-        explore(true);
+        await explore(true);
       },
       disabled: hasBeast || loading || !adventurer?.id,
       loading: loading,
