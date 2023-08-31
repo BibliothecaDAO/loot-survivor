@@ -397,7 +397,7 @@ export function syscalls({
           discoveries.reverse()[0]?.discoveryType == "Obstacle" &&
           discoveries.reverse()[0]?.adventurerHealth == 0;
         const killedByPenalty =
-          discoveries.reverse()[0]?.discoveryType &&
+          !discoveries.reverse()[0]?.discoveryType &&
           discoveries.reverse()[0]?.adventurerHealth == 0;
         const killedByAmbush =
           discoveries.reverse()[0]?.ambushed &&
@@ -1041,7 +1041,7 @@ export function syscalls({
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
-        if (adventurerDiedEvent.data[1].callerAddress > 0) {
+        if (adventurerDiedEvent.data[1].callerAddress === account?.address) {
           const deadAdventurerIndex =
             queryData.adventurersByOwnerQuery?.adventurers.findIndex(
               (adventurer: any) =>
