@@ -121,9 +121,9 @@ export const ItemDisplay = ({
 
   return (
     <div
-      className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-10 md:h-14 xl:h-[55px] ${
+      className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-10 md:h-full  ${
         item.item
-          ? "bg-terminal-green text-terminal-black overflow-x-auto overflow-y-hidden"
+          ? "bg-terminal-green text-terminal-black 2xl:overflow-x-auto 2xl:overflow-y-hidden"
           : ""
       }`}
       ref={scrollableRef}
