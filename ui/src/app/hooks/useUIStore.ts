@@ -44,6 +44,8 @@ type State = {
   setDropItems: (value: string[]) => void;
   purchaseItems: ItemPurchase[];
   setPurchaseItems: (value: ItemPurchase[]) => void;
+  potionAmount: number;
+  setPotionAmount: (value: number) => void;
   upgrades: UpgradeStats;
   setUpgrades: (value: UpgradeStats) => void;
   lastAction: Date | null;
@@ -87,6 +89,8 @@ const useUIStore = create<State>((set) => ({
   setDropItems: (value) => set({ dropItems: value }),
   purchaseItems: [],
   setPurchaseItems: (value) => set({ purchaseItems: value }),
+  potionAmount: 0,
+  setPotionAmount: (value) => set({ potionAmount: value }),
   upgrades: { ...ZeroUpgrade },
   setUpgrades: (value) => set({ upgrades: value }),
   lastAction: null,

@@ -82,7 +82,12 @@ export const BattleDisplay = ({
         <span className="flex flex-row items-center justify-between">
           <p className="w-full justify-between text-terminal-yellow">
             NICE! Attacked the {beastName} for {battleData?.damageDealt} damage
-            {CriticalHit && ", a critical hit"}!
+            {CriticalHit && (
+              <>
+                , a <span className="text-terminal-yellow">critical hit</span>
+              </>
+            )}
+            !
           </p>
           <GiBattleGearIcon />
         </span>
@@ -93,8 +98,13 @@ export const BattleDisplay = ({
       return (
         <span className="flex flex-row items-center justify-between">
           <p className="w-full justify-between">
-            GREAT! You defeated the {beastName} with a final blow of{" "}
-            {battleData?.damageDealt} damage{CriticalHit && ", a critical hit"}!
+            GREAT! Slayed the {beastName} with {battleData?.damageDealt} damage
+            {CriticalHit && (
+              <>
+                , a <span className="text-terminal-yellow">critical hit</span>
+              </>
+            )}
+            !
           </p>
           <GiBattleGearIcon />
         </span>
@@ -105,8 +115,14 @@ export const BattleDisplay = ({
       return (
         <span className="flex flex-row items-center justify-between">
           <p>
-            OUCH! The {beastName} attacked your {damageLocation}, dealing{" "}
-            {battleData?.damageTaken} damage{CriticalHit && ", a critical hit"}!
+            OUCH! The {beastName} dealt {battleData?.damageTaken} damage to{" "}
+            {damageLocation}
+            {CriticalHit && (
+              <>
+                , a <span className="text-terminal-yellow">critical hit</span>
+              </>
+            )}
+            !
           </p>
           <GiBattleGearIcon />
         </span>
@@ -117,9 +133,14 @@ export const BattleDisplay = ({
       return (
         <span className="flex flex-row items-center justify-between">
           <p>
-            YIKES! You were killed by the {beastName} as it dealt{" "}
-            {battleData?.damageTaken} damage to your {damageLocation}
-            {CriticalHit && ", a critical hit"}!
+            YIKES! Killed by the {beastName} from
+            {battleData?.damageTaken} damage to {damageLocation}
+            {CriticalHit && (
+              <>
+                , a <span className="text-terminal-yellow">critical hit</span>
+              </>
+            )}
+            !
           </p>
           <SkullCrossedBonesIcon />
         </span>
@@ -251,7 +272,8 @@ export const NotificationBattleDisplay = ({
         <span className="flex flex-col gap-1">
           <p>Failed to flee the {beastName || ""}.</p>
           <p>
-            Killed by {beastName || ""} from {battleData[1]?.damageTaken} damage
+            Killed by the {beastName || ""} from {battleData[1]?.damageTaken}{" "}
+            damage
             {battleData[1]?.criticalHit && (
               <>
                 , a <span className="text-terminal-yellow">critical hit</span>

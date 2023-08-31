@@ -37,6 +37,7 @@ export default function Info({
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const dropItems = useUIStore((state) => state.dropItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const potionAmount = useUIStore((state) => state.potionAmount);
   const upgrades = useUIStore((state) => state.upgrades);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
@@ -113,7 +114,8 @@ export default function Info({
   ];
 
   const vitalitySelected = upgrades["Vitality"];
-  const totalHealth = (formatAdventurer.health ?? 0) + vitalitySelected * 10;
+  const totalHealth =
+    (formatAdventurer.health ?? 0) + (vitalitySelected + potionAmount) * 10;
 
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
 
@@ -138,7 +140,12 @@ export default function Info({
               </span> */}
                 <span className="flex items-center ">
                   <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
+                  {/* <span className="flex flex-col">
+                    <p className="text-sm">
+                      +{(vitalitySelected + potionAmount) * 10}
+                    </p> */}
                   <HealthCountDown health={totalHealth || 0} />
+                  {/* </span> */}
                   {`/${Math.min(100 + totalVitality * 10, 720)}`}
                 </span>
               </div>

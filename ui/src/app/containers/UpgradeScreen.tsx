@@ -53,7 +53,8 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
   );
   const [selected, setSelected] = useState("");
   const [upgradeScreen, setUpgradeScreen] = useState(1);
-  const [potionAmount, setPotionAmount] = useState(0);
+  const potionAmount = useUIStore((state) => state.potionAmount);
+  const setPotionAmount = useUIStore((state) => state.setPotionAmount);
   const upgrades = useUIStore((state) => state.upgrades);
   const setUpgrades = useUIStore((state) => state.setUpgrades);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
@@ -299,20 +300,6 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                   <UpgradeNav activeSection={upgradeScreen} />
                   <div className="flex flex-row gap-3 text-sm sm:text-base justify-center">
                     <div className="flex flex-row gap-3">
-                      {/* <span className="flex flex-row gap-1 items-center">
-                        <p className="uppercase">Stats:</p>
-                        {Object.entries(upgrades).length > 0 ? (
-                          Object.entries(upgrades).map(([key, value]) => (
-                            <div key={key}>
-                              {`${
-                                attributes.find((a) => a.name === key)?.abbrev
-                              }x${value}`}
-                            </div>
-                          ))
-                        ) : (
-                          <p>-</p>
-                        )}
-                      </span> */}
                       <span className="flex flex-row gap-1 items-center">
                         <p className="uppercase">Cost:</p>
                         <span className="flex flex-row items-center text-xl">
