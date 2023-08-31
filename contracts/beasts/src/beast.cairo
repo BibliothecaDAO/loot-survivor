@@ -244,15 +244,14 @@ impl ImplBeast of IBeast {
     // @param id: the id of the beast
     // @return: the type of the beast
     fn get_type(id: u8) -> Type {
-        assert(id != 0, 'invalid beast id');
-        if (id <= 25) {
-            Type::Magic_or_Cloth(())
-        } else if id <= 50 {
-            Type::Blade_or_Hide(())
-        } else if id <= 75 {
-            Type::Bludgeon_or_Metal(())
+        if (id >= 0 && id < 26) {
+            return Type::Magic_or_Cloth(());
+        } else if id < 51 {
+            return Type::Blade_or_Hide(());
+        } else if id < 76 {
+            return Type::Bludgeon_or_Metal(());
         } else {
-            panic_with_felt252('invalid beast id')
+            return Type::None(());
         }
     }
 
@@ -261,33 +260,33 @@ impl ImplBeast of IBeast {
     // @return: the tier of the beast
     fn get_tier(id: u8) -> Tier {
         if ImplBeast::is_t1(id) {
-            Tier::T1(())
-        } else if ImplBeast::is_t2(id){
-            Tier::T2(())
+            return Tier::T1(());
+        } else if ImplBeast::is_t2(id) {
+            return Tier::T2(());
         } else if ImplBeast::is_t3(id) {
-            Tier::T3(())
+            return Tier::T3(());
         } else if ImplBeast::is_t4(id) {
-            Tier::T4(())
+            return Tier::T4(());
         } else {
-            Tier::T5(())
+            return Tier::T5(());
         }
     }
 
     #[inline(always)]
     fn is_t1(id: u8) -> bool {
-        (id > 0 && id <= 5) || (id >= 26 && id <= 30) || (id >= 51 && id <= 55)
+        (id >= 1 && id <= 5) || (id >= 26 && id < 31) || (id >= 51 && id < 56)
     }
     #[inline(always)]
     fn is_t2(id: u8) -> bool {
-        (id >= 6 && id <= 10) || (id >= 31 && id <= 35) || (id >= 56 && id <= 60)
+        (id >= 6 && id < 11) || (id >= 31 && id < 36) || (id >= 56 && id < 61)
     }
     #[inline(always)]
     fn is_t3(id: u8) -> bool {
-        (id >= 11 && id <= 15) || (id >= 36 && id <= 40) || (id >= 61 && id <= 65)
+        (id >= 11 && id < 16) || (id >= 36 && id < 41) || (id >= 61 && id < 66)
     }
     #[inline(always)]
     fn is_t4(id: u8) -> bool {
-        (id >= 16 && id <= 20) || (id >= 41 && id <= 45) || (id >= 66 && id <= 70)
+        (id >= 16 && id < 21) || (id >= 41 && id < 46) || (id >= 66 && id < 71)
     }
 }
 
@@ -370,17 +369,31 @@ mod tests {
     }
 
     #[test]
-    #[should_panic(expected: ('invalid beast id',))]
-    #[available_gas(70000)]
-    fn test_get_type_invalid_id() {
-        // provide an ID that doesn't exist
-        // this should panic with the message 'invalid beast id'
-        // test is annotated to expect this panic
-        ImplBeast::get_type(MAX_ID + 1);
+    #[available_gas(2980)]
+    fn test_get_type_gas() {
+        ImplBeast::get_type(MAX_ID);
     }
 
     #[test]
-    #[available_gas(400000)]
+    #[available_gas(7750)]
+    fn test_get_type_invalid_id() {
+        assert(ImplBeast::get_type(MAX_ID + 1) == Type::None(()), 'unknown id is Type None');
+    }
+
+    #[test]
+    #[available_gas(7750)]
+    fn test_get_type_zero() {
+        assert(ImplBeast::get_type(MAX_ID + 1) == Type::None(()), 'zero is unknown / Type None');
+    }
+
+    #[test]
+    #[available_gas(4880)]
+    fn test_get_type_max_value() {
+        assert(ImplBeast::get_type(255) == Type::None(()), 'max is unknown / Type None');
+    }
+
+    #[test]
+    #[available_gas(21600)]
     fn test_get_type() {
         let warlock_type = ImplBeast::get_type(Warlock);
         assert(warlock_type == Type::Magic_or_Cloth(()), 'Warlock is magical');
