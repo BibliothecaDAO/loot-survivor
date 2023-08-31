@@ -100,7 +100,7 @@ export default function EncountersScreen({ profile }: EncountersProps) {
 
   return (
     <div className="flex flex-col items-center mx-auto text-sm sm:text-xl xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden">
-      {adventurer?.id ? (
+      {adventurer?.id || profile ? (
         <>
           {displayEncounters.length > 0 ? (
             <>

@@ -32,14 +32,14 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         if (AdventurerHealthExists) {
           return (
             <span className="flex flex-row items-center justify-between">
-              <p>YIKES! You were ambushed by a {beastName}</p>
+              <p>YIKES! Ambushed by a {beastName}</p>
               <GiBruteIcon />
             </span>
           );
         } else {
           return (
             <span className="flex flex-row items-center justify-between">
-              <p>YIKES! You were killed from an ambush by a {beastName}</p>
+              <p>YIKES! Killed by a {beastName} from an ambush</p>
               <SkullCrossedBonesIcon />
             </span>
           );
@@ -47,7 +47,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       } else {
         return (
           <span className="flex flex-row items-center justify-between">
-            <p>OH NO! You discovered a {beastName}!</p>
+            <p>OH NO! Discovered a {beastName}!</p>
             <GiBruteIcon />
           </span>
         );
@@ -59,7 +59,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         return (
           <span className="flex flex-row items-center justify-between">
             <p>
-              PHEW! You avoided{" "}
+              PHEW! Avoided{" "}
               {discoveryData?.obstacle?.endsWith("s")
                 ? discoveryData?.obstacle
                 : `the ${discoveryData?.obstacle}`}
@@ -72,11 +72,11 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         return (
           <span className="flex flex-row items-center justify-between">
             <p>
-              OUCH!{" "}
+              OUCH! Killed by{" "}
               {discoveryData?.obstacle?.endsWith("s")
-                ? `A ${discoveryData?.obstacle}`
+                ? `a ${discoveryData?.obstacle}`
                 : discoveryData?.obstacle}{" "}
-              killed you with {discoveryData?.damageTaken} damage!
+              with {discoveryData?.damageTaken} damage!
             </p>
             <SkullCrossedBonesIcon />
           </span>
@@ -100,7 +100,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
     if (!discoveryData?.discoveryType) {
       return (
         <span className="flex flex-row items-center justify-between">
-          <p>OOPS! You were killed by the idle death penalty!</p>
+          <p>OOPS! Killed by idle death penalty!</p>
           <GiSandsOfTimeIcon />
         </span>
       );
@@ -111,7 +111,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         return (
           <span className="flex flex-row items-center justify-between">
             <div className="flex flex-row gap-1 self-center items-center text-terminal-yellow">
-              <p className="text-terminal-green">NICE! You discovered </p>
+              <p className="text-terminal-green">NICE! Discovered </p>
               <span className="flex flex-row items-center">
                 <CoinIcon className="mt-1 self-center w-5 h-5 fill-current" />
                 <span className="text-terminal-yellow">
@@ -128,10 +128,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         return (
           <span className="flex flex-row items-center justify-between">
             <div className="flex self-center">
-              <p>
-                GREAT! You discovered {discoveryData?.outputAmount} health!{" "}
-              </p>
-              <HeartIcon className="mt-1 self-center w-5 h-5 fill-current" />
+              <p>GREAT! Discovered {discoveryData?.outputAmount} health! </p>
             </div>
             <HealthPotionIcon />
           </span>
@@ -141,7 +138,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
       if (discoveryData?.subDiscoveryType === "XP") {
         return (
           <span className="flex flex-row items-center justify-between">
-            <p>NICE! You discovered {discoveryData.outputAmount} XP!</p>
+            <p>NICE! Discovered {discoveryData.outputAmount} XP!</p>
             <GiStarsStackIcon />
           </span>
         );
