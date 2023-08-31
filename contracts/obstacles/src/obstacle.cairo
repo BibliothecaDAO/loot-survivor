@@ -68,33 +68,33 @@ impl ImplObstacle of IObstacle {
     // @return u8 - the obstacle tier
     fn get_tier(id: u8) -> Tier {
         if ImplObstacle::is_t1(id) {
-            Tier::T1(())
+            return Tier::T1(());
         } else if ImplObstacle::is_t2(id){
-            Tier::T2(())
+            return Tier::T2(());
         } else if ImplObstacle::is_t3(id) {
-            Tier::T3(())
+            return Tier::T3(());
         } else if ImplObstacle::is_t4(id) {
-            Tier::T4(())
+            return Tier::T4(());
         } else {
-            Tier::T5(())
+            return Tier::T5(());
         }
     }
 
     #[inline(always)]
     fn is_t1(id: u8) -> bool {
-        (id > 0 && id <= 5) || (id >= 26 && id <= 30) || (id >= 51 && id <= 55)
+        (id >= 1 && id < 6) || (id >= 26 && id < 31) || (id >= 51 && id < 56)
     }
     #[inline(always)]
     fn is_t2(id: u8) -> bool {
-        (id >= 6 && id <= 10) || (id >= 31 && id <= 35) || (id >= 56 && id <= 60)
+        (id >= 6 && id < 11) || (id >= 31 && id < 36) || (id >= 56 && id < 61)
     }
     #[inline(always)]
     fn is_t3(id: u8) -> bool {
-        (id >= 11 && id <= 15) || (id >= 36 && id <= 40) || (id >= 61 && id <= 65)
+        (id >= 11 && id < 16) || (id >= 36 && id < 41) || (id >= 61 && id < 66)
     }
     #[inline(always)]
     fn is_t4(id: u8) -> bool {
-        (id >= 16 && id <= 20) || (id >= 41 && id <= 45) || (id >= 66 && id <= 70)
+        (id >= 16 && id < 21) || (id >= 41 && id < 46) || (id >= 66 && id < 71)
     }
 
     // @notice returns the type of the obstacle based on the provided obstacle id
@@ -172,7 +172,7 @@ mod tests {
     };
 
     #[test]
-    #[available_gas(16780)]
+    #[available_gas(14390)]
     fn test_get_tier_gas() {
         ImplObstacle::get_tier(75);
     }
