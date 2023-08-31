@@ -25,7 +25,7 @@ export const DeathDialog = () => {
     <>
       <div className="top-0 left-0 fixed text-center h-full w-full z-40">
         <Image
-          src={"/scenes/intro/sculls.png"}
+          src={"/scenes/intro/skulls.png"}
           alt="skull"
           className="absolute object-cover"
           fill
