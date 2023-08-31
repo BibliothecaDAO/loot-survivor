@@ -468,6 +468,7 @@ export function syscalls({
 
       setEquipItems([]);
       setDropItems([]);
+      console.log(discoveries);
       stopLoading(discoveries);
       setMintAdventurer(false);
     } catch (e) {
@@ -676,7 +677,6 @@ export function syscalls({
       });
 
       console.log(battles);
-
       stopLoading(battles);
       setEquipItems([]);
       setDropItems([]);
@@ -844,7 +844,7 @@ export function syscalls({
       setData("battlesByTxHashQuery", {
         battles: [...battles.reverse()],
       });
-
+      console.log(battles);
       stopLoading(battles);
       setEquipItems([]);
       setDropItems([]);
@@ -923,6 +923,11 @@ export function syscalls({
       });
       // Reset items to no availability
       setData("latestMarketItemsQuery", null);
+      console.log({
+        Stats: upgrades,
+        Items: purchaseItems,
+        Potions: potionAmount,
+      });
       stopLoading({
         Stats: upgrades,
         Items: purchaseItems,
