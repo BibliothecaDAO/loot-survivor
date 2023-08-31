@@ -9,3 +9,6 @@ contracts/obstacles/target/CACHEDIR.TAG
 contracts/obstacles/target/dev/obstacles.sierra
 contracts/beasts/target/dev/beasts.sierra
 contracts/beasts/target/CACHEDIR.TAG
+
+keys
+account

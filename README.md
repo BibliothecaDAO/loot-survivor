@@ -265,3 +265,10 @@ starknet call --function get_base_charisma --address $CONTRACT_ADDRESS --input $
 starknet call --function get_charisma --address $CONTRACT_ADDRESS --input $ADVENTURER_ID 0 --account $ACCOUNT_NAME
 ```
 
+
+# Starkli Deploy
+
+
+starkli declare /contracts/game/target/dev/game_Game.sierra.json --account ./account --keystore ./keys --max-fee 0.01
+
+starkli deploy 0x00cccbd15bf27792e7635bd89da237de68b13d29ec01b5cae1da786b276be8a4 $LORDS_ADDRESS $DAO_ADDRESS 0x06fe9215a0f193431f30043e612d921b62331946529ebf5f258949a4b34aa799 --account ./account --keystore ./keys
