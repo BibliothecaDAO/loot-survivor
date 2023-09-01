@@ -324,7 +324,7 @@ export default function InventoryScreen() {
                   const itemId =
                     getKeyFromValue(gameData.ITEMS, item?.item ?? "") ?? "";
                   return (
-                    <div className="w-full" key={index}>
+                    <div className="w-full mb-1" key={index}>
                       <ItemDisplay
                         item={item}
                         inventory={true}

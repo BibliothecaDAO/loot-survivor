@@ -114,10 +114,10 @@ export default function Info({
   ];
 
   const vitalitySelected = upgrades["Vitality"];
-  const totalHealth =
-    (formatAdventurer.health ?? 0) + (vitalitySelected + potionAmount) * 10;
 
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
+
+  const totalHealth = (formatAdventurer.health ?? 0) + vitalitySelected * 10;
 
   return (
     <>
