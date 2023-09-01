@@ -30,7 +30,7 @@ export const ArcadeDialog = () => {
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
-      <div className="fixed text-center top-1/8 left-1/8 sm:left-1/4 w-3/4 sm:w-1/2 h-3/4 border bg-terminal-black z-50 border-terminal-green p-3 overflow-y-auto">
+      <div className="fixed text-center top-1/8 left-1/8 sm:left-1/4 w-3/4 sm:w-1/2 h-3/4 border-2 bg-terminal-black z-50 border-terminal-green p-3 overflow-y-auto">
         <Button onClick={() => showArcadeDialog(!arcadeDialog)}>close</Button>
 
         <h3 className="mt-8">Arcade Account</h3>

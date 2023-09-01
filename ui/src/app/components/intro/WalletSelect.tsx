@@ -43,7 +43,7 @@ const WalletSelect = ({}: WalletSelectProps) => {
               <h3 className="mb-10">Time to Survive</h3>
             </div>
 
-            <div className="flex flex-col gap-5 m-auto">
+            <div className="flex flex-col gap-5 m-auto overflow-y-auto">
               <Button onClick={() => setScreen("tutorial")}>
                 I don&apos;t have a wallet
               </Button>

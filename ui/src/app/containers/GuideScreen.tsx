@@ -178,12 +178,13 @@ export default function GuideScreen() {
       </p>
       <p>
         {" "}
-        Once an item reaches greatness 15 it achieves a suffix which grants the
+        Once an item reaches Greatness 15 it achieves a suffix which grants the
         adventurer +3 stat boost while it is equipped. Items are also granted a
         coveted +1 modifier when they reach 20 Greatness and an additional +1
         stat boost to your adventurer. If you meet a beast with the same suffix
         and prefix of your item, special hits can be achieved!
       </p>
+
       <h4 className="mb-2 text-center">Item Suffixes and Their Attributes</h4>
       <div className="">
         <table className="w-1/2 m-auto uppercase">
@@ -211,7 +212,11 @@ export default function GuideScreen() {
           </tbody>
         </table>
       </div>
-
+      <h3 className="">Jewelery Abilities</h3>
+      <p>
+        Jewelry items provide unique abilities which get unlocked when they
+        reach Greatness 20.
+      </p>
       <h3 className="mb-2">Loot Fountain</h3>
       <p>
         You can trade your gold at the mystical Loot Fountain on each level up,
