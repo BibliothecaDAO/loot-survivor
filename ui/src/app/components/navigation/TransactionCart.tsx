@@ -46,6 +46,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const dropItems = useUIStore((state) => state.dropItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const setPotionAmount = useUIStore((state) => state.setPotionAmount);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const upgrades = useUIStore((state) => state.upgrades);
@@ -163,6 +164,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
     resetCalls();
     setEquipItems([]);
     setDropItems([]);
+    setPotionAmount(0);
     setPurchaseItems([]);
     setUpgrades({ ...ZeroUpgrade });
   };

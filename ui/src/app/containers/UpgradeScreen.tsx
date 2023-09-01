@@ -250,6 +250,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
   const handleSubmitUpgradeTx = async () => {
     renderSummary();
     await upgrade(upgrades, purchaseItems, potionAmount);
+    setPotionAmount(0);
     setPurchaseItems([]);
     setUpgrades({ ...ZeroUpgrade });
   };
