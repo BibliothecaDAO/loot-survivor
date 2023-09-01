@@ -1,6 +1,7 @@
 import { ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import BN from "bn.js";
+import BigNumber from "BigNumber.js";
 
 import Realms from "../realms.json";
 import { Adventurer, Item } from "../../types";
@@ -47,7 +48,7 @@ const P = new BN(
   16
 );
 
-export function feltToString(felt: BN) {
+export function feltToString(felt: BigNumber) {
   const newStrB = Buffer.from(felt.toString(16), "hex");
   return newStrB.toString();
 }
