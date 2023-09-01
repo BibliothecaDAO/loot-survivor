@@ -347,7 +347,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
 
                   {upgradeScreen === 2 && (
                     <div
-                      className="flex flex-col gap-5 sm:gap-2 xl:gap-0
+                      className="flex flex-col gap-5 sm:gap-2
                      sm:flex-row items-center justify-center flex-wrap"
                     >
                       <p className="text-sm 2xl:text-2xl">Potions</p>

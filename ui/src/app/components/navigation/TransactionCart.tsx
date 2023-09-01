@@ -46,6 +46,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const dropItems = useUIStore((state) => state.dropItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
+  const potionAmount = useUIStore((state) => state.potionAmount);
   const setPotionAmount = useUIStore((state) => state.setPotionAmount);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
@@ -284,6 +285,23 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                                 </button>
                               </div>
                             )
+                          )}
+                          {potionAmount !== 0 && (
+                            <div className="flex flex-row">
+                              <p>
+                                Purchase {potionAmount} Potion
+                                {potionAmount > 1 ? "s" : ""}
+                              </p>
+                              <button
+                                onClick={() => {
+                                  clickPlay();
+                                  setPotionAmount(0);
+                                }}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <MdClose size={20} />
+                              </button>
+                            </div>
                           )}
                           {purchaseItems.map(
                             (item: ItemPurchase, index: number) => (
