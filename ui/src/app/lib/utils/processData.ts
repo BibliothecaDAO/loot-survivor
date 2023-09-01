@@ -1,4 +1,3 @@
-import BigNumber from "BigNumber.js";
 import { GameData } from "@/app/components/GameData";
 import {
   DiscoveredHealthEvent,
@@ -213,9 +212,7 @@ export function processData(
           startGameEvent.adventurerState["adventurer"]["beastHealth"],
         statUpgrades:
           startGameEvent.adventurerState["adventurer"]["statPointsAvailable"],
-        name: feltToString(
-          new BigNumber(startGameEvent.adventurerMeta["name"].toString())
-        ),
+        name: feltToString(startGameEvent.adventurerMeta["name"]),
         homeRealm: startGameEvent.adventurerMeta["homeRealm"],
         classType: gameData.CLASSES[startGameEvent.adventurerMeta["class"]],
         entropy: startGameEvent.adventurerMeta["entropy"],
