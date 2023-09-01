@@ -28,6 +28,7 @@ export const DeathDialog = () => {
     getAdventurerByXP,
     undefined
   );
+  console.log(adventurersByXPdata.adventurers);
 
   const rank = getRankFromList(
     adventurer?.id ?? 0,

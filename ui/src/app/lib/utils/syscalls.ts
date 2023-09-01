@@ -412,50 +412,50 @@ export function syscalls({
         setScreen("start");
       }
 
-      const filteredDeathPenalty = events.filter(
+      const idleDeathPenaltyEvents = events.filter(
         (event) => event.name === "IdleDeathPenalty"
       );
-      if (filteredDeathPenalty.length > 0) {
-        for (let discovery of filteredDeathPenalty) {
+      if (idleDeathPenaltyEvents.length > 0) {
+        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
           setData("adventurerByIdQuery", {
-            adventurers: [discovery.data[0]],
+            adventurers: [idleDeathPenaltyEvent.data[0]],
           });
-          setAdventurer(discovery.data[0]);
-          discoveries.unshift(discovery.data[2]);
+          setAdventurer(idleDeathPenaltyEvent.data[0]);
+          discoveries.unshift(idleDeathPenaltyEvent.data[2]);
         }
       }
 
-      const newItemsAvailableExists = events.some((event) => {
-        if (event.name === "NewItemsAvailable") {
-          return true;
-        }
-        return false;
-      });
-      if (newItemsAvailableExists) {
-        const newItemsAvailableEvent = events.find(
-          (event) => event.name === "NewItemsAvailable"
-        );
-        const newItems = newItemsAvailableEvent.data[1];
-        const itemData = [];
-        for (let newItem of newItems) {
-          itemData.unshift({
-            item: newItem,
-            adventurerId: newItemsAvailableEvent.data[0]["id"],
-            owner: false,
-            equipped: false,
-            ownerAddress: newItemsAvailableEvent.data[0]["owner"],
-            xp: 0,
-            special1: null,
-            special2: null,
-            special3: null,
-            isAvailable: false,
-            purchasedTime: null,
-            timestamp: new Date(),
+      const newItemsAvailableEvents = events.filter(
+        (event) => event.name === "NewItemsAvailable"
+      );
+      if (newItemsAvailableEvents.length > 0) {
+        for (let newItemsAvailableEvent of newItemsAvailableEvents) {
+          setData("adventurerByIdQuery", {
+            adventurers: [newItemsAvailableEvent.data[0]],
+          });
+          setAdventurer(newItemsAvailableEvent.data[0]);
+          const newItems = newItemsAvailableEvent.data[1];
+          const itemData = [];
+          for (let newItem of newItems) {
+            itemData.unshift({
+              item: newItem,
+              adventurerId: newItemsAvailableEvent.data[0]["id"],
+              owner: false,
+              equipped: false,
+              ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+              xp: 0,
+              special1: null,
+              special2: null,
+              special3: null,
+              isAvailable: false,
+              purchasedTime: null,
+              timestamp: new Date(),
+            });
+          }
+          setData("latestMarketItemsQuery", {
+            items: itemData,
           });
         }
-        setData("latestMarketItemsQuery", {
-          items: itemData,
-        });
         setScreen("upgrade");
       }
 
@@ -616,50 +616,50 @@ export function syscalls({
         setScreen("start");
       }
 
-      const filteredDeathPenalty = events.filter(
+      const idleDeathPenaltyEvents = events.filter(
         (event) => event.name === "IdleDeathPenalty"
       );
-      if (filteredDeathPenalty.length > 0) {
-        for (let discovery of filteredDeathPenalty) {
+      if (idleDeathPenaltyEvents.length > 0) {
+        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
           setData("adventurerByIdQuery", {
-            adventurers: [discovery.data[0]],
+            adventurers: [idleDeathPenaltyEvent.data[0]],
           });
-          setAdventurer(discovery.data[0]);
-          battles.unshift(discovery.data[1]);
+          setAdventurer(idleDeathPenaltyEvent.data[0]);
+          battles.unshift(idleDeathPenaltyEvent.data[1]);
         }
       }
 
-      const newItemsAvailableExists = events.some((event) => {
-        if (event.name === "NewItemsAvailable") {
-          return true;
-        }
-        return false;
-      });
-      if (newItemsAvailableExists) {
-        const newItemsAvailableEvent = events.find(
-          (event) => event.name === "NewItemsAvailable"
-        );
-        const newItems = newItemsAvailableEvent.data[1];
-        const itemData = [];
-        for (let newItem of newItems) {
-          itemData.unshift({
-            item: newItem,
-            adventurerId: newItemsAvailableEvent.data[0]["id"],
-            owner: false,
-            equipped: false,
-            ownerAddress: newItemsAvailableEvent.data[0]["owner"],
-            xp: 0,
-            special1: null,
-            special2: null,
-            special3: null,
-            isAvailable: false,
-            purchasedTime: null,
-            timestamp: new Date(),
+      const newItemsAvailableEvents = events.filter(
+        (event) => event.name === "NewItemsAvailable"
+      );
+      if (newItemsAvailableEvents.length > 0) {
+        for (let newItemsAvailableEvent of newItemsAvailableEvents) {
+          setData("adventurerByIdQuery", {
+            adventurers: [newItemsAvailableEvent.data[0]],
+          });
+          setAdventurer(newItemsAvailableEvent.data[0]);
+          const newItems = newItemsAvailableEvent.data[1];
+          const itemData = [];
+          for (let newItem of newItems) {
+            itemData.unshift({
+              item: newItem,
+              adventurerId: newItemsAvailableEvent.data[0]["id"],
+              owner: false,
+              equipped: false,
+              ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+              xp: 0,
+              special1: null,
+              special2: null,
+              special3: null,
+              isAvailable: false,
+              purchasedTime: null,
+              timestamp: new Date(),
+            });
+          }
+          setData("latestMarketItemsQuery", {
+            items: itemData,
           });
         }
-        setData("latestMarketItemsQuery", {
-          items: itemData,
-        });
         setScreen("upgrade");
       }
 
@@ -785,50 +785,46 @@ export function syscalls({
         setScreen("start");
       }
 
-      const filteredDeathPenalty = events.filter(
+      const idleDeathPenaltyEvents = events.filter(
         (event) => event.name === "IdleDeathPenalty"
       );
-      if (filteredDeathPenalty.length > 0) {
-        for (let discovery of filteredDeathPenalty) {
+      if (idleDeathPenaltyEvents.length > 0) {
+        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
           setData("adventurerByIdQuery", {
-            adventurers: [discovery.data[0]],
+            adventurers: [idleDeathPenaltyEvent.data[0]],
           });
-          setAdventurer(discovery.data[0]);
-          battles.unshift(discovery.data[1]);
+          setAdventurer(idleDeathPenaltyEvent.data[0]);
+          battles.unshift(idleDeathPenaltyEvent.data[1]);
         }
       }
 
-      const newItemsAvailableExists = events.some((event) => {
-        if (event.name === "NewItemsAvailable") {
-          return true;
-        }
-        return false;
-      });
-      if (newItemsAvailableExists) {
-        const newItemsAvailableEvent = events.find(
-          (event) => event.name === "NewItemsAvailable"
-        );
-        const newItems = newItemsAvailableEvent.data[1];
-        const itemData = [];
-        for (let newItem of newItems) {
-          itemData.unshift({
-            item: newItem,
-            adventurerId: newItemsAvailableEvent.data[0]["id"],
-            owner: false,
-            equipped: false,
-            ownerAddress: newItemsAvailableEvent.data[0]["owner"],
-            xp: 0,
-            special1: null,
-            special2: null,
-            special3: null,
-            isAvailable: false,
-            purchasedTime: null,
-            timestamp: new Date(),
+      const newItemsAvailableEvents = events.filter(
+        (event) => event.name === "NewItemsAvailable"
+      );
+      if (newItemsAvailableEvents.length > 0) {
+        for (let newItemsAvailableEvent of newItemsAvailableEvents) {
+          const newItems = newItemsAvailableEvent.data[1];
+          const itemData = [];
+          for (let newItem of newItems) {
+            itemData.unshift({
+              item: newItem,
+              adventurerId: newItemsAvailableEvent.data[0]["id"],
+              owner: false,
+              equipped: false,
+              ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+              xp: 0,
+              special1: null,
+              special2: null,
+              special3: null,
+              isAvailable: false,
+              purchasedTime: null,
+              timestamp: new Date(),
+            });
+          }
+          setData("latestMarketItemsQuery", {
+            items: itemData,
           });
         }
-        setData("latestMarketItemsQuery", {
-          items: itemData,
-        });
         setScreen("upgrade");
       }
 
