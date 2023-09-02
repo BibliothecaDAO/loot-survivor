@@ -7,9 +7,7 @@ import {
   ATTACKED_BEAST,
   ATTACKED_BY_BEAST,
   DISCOVERED_BEAST,
-  parseAmbushedByBeast,
   parseAttackedBeast,
-  parseAttackedByBeast,
   parseDiscoveredBeast,
   parseSlayedBeast,
   SLAYED_BEAST,
@@ -36,7 +34,7 @@ export const config: Config<Starknet, Mongo | Console> = {
   filter,
   startingBlock: START,
   finality: "DATA_STATUS_PENDING",
-  sinkType: "mongo",
+  sinkType: "console",
   sinkOptions: {
     database: "loot_example",
     collectionName: "beasts",

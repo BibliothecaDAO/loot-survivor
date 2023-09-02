@@ -38,7 +38,7 @@ export const config: Config<Starknet, Mongo | Console> = {
   filter,
   startingBlock: START,
   finality: "DATA_STATUS_PENDING",
-  sinkType: "mongo",
+  sinkType: "console",
   sinkOptions: {
     database: "loot_example",
     collectionName: "adventurers",

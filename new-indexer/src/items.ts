@@ -3,24 +3,24 @@ import type { Block, Starknet } from "https://esm.sh/@apibara/indexer/starknet";
 import type { Mongo } from "https://esm.sh/@apibara/indexer/sink/mongo";
 import type { Console } from "https://esm.sh/@apibara/indexer/sink/console";
 import {
-  AMBUSHED_BY_BEAST,
-  ATTACKED_BEAST,
-  ATTACKED_BY_BEAST,
-  DISCOVERED_BEAST,
-  DISCOVERED_GOLD,
-  DISCOVERED_HEALTH,
-  parseAmbushedByBeast,
-  parseDiscoveredBeast,
-  parseDiscoveredGold,
-  parseDiscoveredHealth,
-  parseDiscoveredXp,
+  DODGED_OBSTACLE,
+  DROPPED_ITEMS,
+  EQUIPPED_ITEMS,
+  HIT_BY_OBSTACLE,
+  ITEM_SPECIAL_UNLOCKED,
+  parseDodgedObstacle,
+  parseDroppedItems,
+  parseEquippedItems,
+  parseHitByObstacle,
+  parseItemSpecialUnlocked,
   parsePurchasedItems,
+  parseSlayedBeast,
   parseStartGame,
   PURCHASED_ITEMS,
   SLAYED_BEAST,
   START_GAME,
 } from "./utils/events.ts";
-import { insertDiscovery, insertItem } from "./utils/helpers.js";
+import { insertItem, updateItemsXP } from "./utils/helpers.js";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
@@ -28,11 +28,14 @@ const START = +(Deno.env.get("START") || 0);
 const filter = {
   header: { weak: true },
   events: [
-    { fromAddress: GAME, keys: [DISCOVERED_BEAST] },
-    { fromAddress: GAME, keys: [AMBUSHED_BY_BEAST] },
-    { fromAddress: GAME, keys: [ATTACKED_BEAST] },
-    { fromAddress: GAME, keys: [ATTACKED_BY_BEAST] },
+    { fromAddress: GAME, keys: [START_GAME] },
+    { fromAddress: GAME, keys: [PURCHASED_ITEMS] },
+    { fromAddress: GAME, keys: [EQUIPPED_ITEMS] },
+    { fromAddress: GAME, keys: [DROPPED_ITEMS] },
+    { fromAddress: GAME, keys: [HIT_BY_OBSTACLE] },
+    { fromAddress: GAME, keys: [DODGED_OBSTACLE] },
     { fromAddress: GAME, keys: [SLAYED_BEAST] },
+    { fromAddress: GAME, keys: [ITEM_SPECIAL_UNLOCKED] },
   ],
 };
 
@@ -42,10 +45,10 @@ export const config: Config<Starknet, Mongo | Console> = {
   filter,
   startingBlock: START,
   finality: "DATA_STATUS_PENDING",
-  sinkType: "mongo",
+  sinkType: "console",
   sinkOptions: {
     database: "loot_example",
-    collectionName: "beasts",
+    collectionName: "items",
     // @ts-ignore - indexer package not updated
     entityMode: true,
   },
@@ -60,8 +63,9 @@ export default function transform({ header, events }: Block) {
         const { value } = parseStartGame(event.data, 0);
         const as = value.adventurerState;
         // console.log("Start game", value);
+        const itemInserts: any[] = [];
         for (let i = 1; i < 102; i++) {
-          return [
+          itemInserts.push(
             insertItem({
               item: i,
               adventurerId: as.adventurerId,
@@ -75,122 +79,106 @@ export default function transform({ header, events }: Block) {
               isAvailable: false,
               purchasedTime: null,
               timestamp,
-            }),
-          ];
+            })
+          );
         }
+
+        return itemInserts;
       }
       case PURCHASED_ITEMS: {
         const { value } = parsePurchasedItems(event.data, 0);
         const as = value.adventurerState;
         // console.log("Start game", value);
-        for (item of value.purchases) {
-          // return {
-          //   entity: {
-          //     item: adventurerState.adventurerId,
-          //   },
-          //   update: {
-          //     $set: {
-          //     };
-        }
+        const result = value.purchases.map((item) => ({
+          entity: {
+            item: item.item.id,
+            adventurerId: as.adventurerId,
+          },
+          update: {
+            $set: {
+              owner: true,
+              equipped: false,
+              ownerAddress: as.owner,
+              purchasedTime: timestamp,
+              timestamp,
+            },
+          },
+        }));
+        return result;
       }
-      case DISCOVERED_XP: {
-        const { value } = parseDiscoveredXp(event.data, 0);
+      case EQUIPPED_ITEMS: {
+        const { value } = parseEquippedItems(event.data, 0);
         const as = value.adventurerState;
         // console.log("Start game", value);
-        return [
-          insertDiscovery({
-            txHash: receipt.transaction_hash,
+        const equippedResult = value.equippedItems.map((item) => ({
+          entity: {
+            item: item,
             adventurerId: as.adventurerId,
-            adventurerHealth: as.adventurer.health,
-            discoveryType: 3,
-            subDiscoveryType: 1,
-            outputAmount: value.xpAmount,
-            obstacle: null,
-            obstacleLevel: null,
-            dodgedObstacle: null,
-            damageTaken: null,
-            damageLocation: null,
-            xpEarnedAdventurer: null,
-            xpEarnedItems: null,
-            entity: null,
-            entityLevel: null,
-            entityHealth: null,
-            special1: null,
-            special2: null,
-            special3: null,
-            ambushed: null,
-            seed: null,
-            discoveryTime: timestamp,
-            timestamp,
-          }),
-        ];
+          },
+          update: {
+            $set: {
+              equipped: true,
+              timestamp,
+            },
+          },
+        }));
+        const unequippedResult = value.unequippedItems.map((item) => ({
+          entity: {
+            item: item,
+            adventurerId: as.adventurerId,
+          },
+          update: {
+            $set: {
+              equipped: false,
+              timestamp,
+            },
+          },
+        }));
+        return [...equippedResult, ...unequippedResult];
       }
-      case DISCOVERED_BEAST: {
-        const { value } = parseDiscoveredBeast(event.data, 0);
+      case DROPPED_ITEMS: {
+        const { value } = parseDroppedItems(event.data, 0);
         const as = value.adventurerState;
-        const bs = value.beastSpec;
         // console.log("Start game", value);
-        return [
-          insertDiscovery({
-            txHash: receipt.transaction_hash,
+        const result = value.droppedItems.map((item) => ({
+          entity: {
+            item: item,
             adventurerId: as.adventurerId,
-            adventurerHealth: as.adventurer.health,
-            discoveryType: 3,
-            subDiscoveryType: 1,
-            outputAmount: null,
-            obstacle: null,
-            obstacleLevel: null,
-            dodgedObstacle: null,
-            damageTaken: null,
-            damageLocation: null,
-            xpEarnedAdventurer: null,
-            xpEarnedItems: null,
-            entity: value.id,
-            entityLevel: bs.level,
-            entityHealth: as.adventurer.beastHealth,
-            special1: bs.specials.special1,
-            special2: bs.specials.special2,
-            special3: bs.specials.special3,
-            ambushed: false,
-            seed: value.seed,
-            discoveryTime: timestamp,
-            timestamp,
-          }),
-        ];
+          },
+          update: {
+            $set: {
+              owner: false,
+              equipped: false,
+              ownerAddress: null,
+              timestamp,
+            },
+          },
+        }));
+        return result;
       }
-      case AMBUSHED_BY_BEAST: {
-        const { value } = parseAmbushedByBeast(event.data, 0);
+      case HIT_BY_OBSTACLE: {
+        const { value } = parseHitByObstacle(event.data, 0);
         const as = value.adventurerState;
-        const bs = value.beastSpec;
         // console.log("Start game", value);
-        return [
-          insertDiscovery({
-            txHash: receipt.transaction_hash,
-            adventurerId: as.adventurerId,
-            adventurerHealth: as.adventurer.health,
-            discoveryType: 3,
-            subDiscoveryType: 1,
-            outputAmount: null,
-            obstacle: null,
-            obstacleLevel: null,
-            dodgedObstacle: null,
-            damageTaken: null,
-            damageLocation: null,
-            xpEarnedAdventurer: null,
-            xpEarnedItems: null,
-            entity: value.id,
-            entityLevel: bs.level,
-            entityHealth: as.adventurer.beastHealth,
-            special1: bs.specials.special1,
-            special2: bs.specials.special2,
-            special3: bs.specials.special3,
-            ambushed: true,
-            seed: value.seed,
-            discoveryTime: timestamp,
-            timestamp,
-          }),
-        ];
+        return updateItemsXP({ adventurerState: as });
       }
+      case DODGED_OBSTACLE: {
+        const { value } = parseDodgedObstacle(event.data, 0);
+        const as = value.adventurerState;
+        // console.log("Start game", value);
+        return updateItemsXP({ adventurerState: as });
+      }
+      case SLAYED_BEAST: {
+        const { value } = parseSlayedBeast(event.data, 0);
+        const as = value.adventurerState;
+        // console.log("Start game", value);
+        return updateItemsXP({ adventurerState: as });
+      }
+      case ITEM_SPECIAL_UNLOCKED:
+        const { value } = parseItemSpecialUnlocked(event.data, 0);
+        const as = value.adventurerState;
+        // console.log("Start game", value);
+        return updateItemsXP({ adventurerState: as });
       default: {
         console.warn("Unknown event", event.keys[0]);
         return [];

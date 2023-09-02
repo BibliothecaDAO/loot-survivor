@@ -25,11 +25,12 @@ const START = +(Deno.env.get("START") || 0);
 const filter = {
   header: { weak: true },
   events: [
-    { fromAddress: GAME, keys: [DISCOVERED_BEAST] },
-    { fromAddress: GAME, keys: [AMBUSHED_BY_BEAST] },
     { fromAddress: GAME, keys: [ATTACKED_BEAST] },
     { fromAddress: GAME, keys: [ATTACKED_BY_BEAST] },
+    { fromAddress: GAME, keys: [AMBUSHED_BY_BEAST] },
     { fromAddress: GAME, keys: [SLAYED_BEAST] },
+    { fromAddress: GAME, keys: [FLEE_FAILED] },
+    { fromAddress: GAME, keys: [FLEE_SUCCEEDED] },
   ],
 };
 
@@ -39,10 +40,10 @@ export const config: Config<Starknet, Mongo | Console> = {
   filter,
   startingBlock: START,
   finality: "DATA_STATUS_PENDING",
-  sinkType: "mongo",
+  sinkType: "console",
   sinkOptions: {
     database: "loot_example",
-    collectionName: "beasts",
+    collectionName: "battles",
     // @ts-ignore - indexer package not updated
     entityMode: true,
   },

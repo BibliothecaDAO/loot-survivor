@@ -344,3 +344,111 @@ export function insertItem({
     },
   };
 }
+
+export function updateItemXP({ item, adventurerId, xp }: any) {
+  const entityDoc = {
+    item,
+    adventurerId,
+  };
+
+  return {
+    entityDoc,
+    update: {
+      $set: {
+        ...entityDoc,
+        xp,
+      },
+    },
+  };
+}
+
+export function updateItemsXP({
+  adventurerState,
+}: {
+  adventurerState: ReturnType<typeof parseAdventurerState>["value"];
+}) {
+  const { adventurer } = adventurerState;
+  const itemUpdates: any[] = [];
+  itemUpdates.push(
+    updateItemXP({
+      item: adventurer.weapon.id,
+      adventurerId: adventurerState.adventurerId,
+      xp: adventurer.weapon.xp,
+    })
+  );
+  itemUpdates.push(
+    updateItemXP({
+      item: adventurer.chest.id,
+      adventurerId: adventurerState.adventurerId,
+      xp: adventurer.chest.xp,
+    })
+  );
+  itemUpdates.push(
+    updateItemXP({
+      item: adventurer.head.id,
+      adventurerId: adventurerState.adventurerId,
+      xp: adventurer.head.xp,
+    })
+  );
+  itemUpdates.push(
+    updateItemXP({
+      item: adventurer.waist.id,
+      adventurerId: adventurerState.adventurerId,
+      xp: adventurer.waist.xp,
+    })
+  );
+  itemUpdates.push(
+    updateItemXP({
+      item: adventurer.foot.id,
+      adventurerId: adventurerState.adventurerId,
+      xp: adventurer.foot.xp,
+    })
+  );
+  itemUpdates.push(
+    updateItemXP({
+      item: adventurer.hand.id,
+      adventurerId: adventurerState.adventurerId,
+      xp: adventurer.hand.xp,
+    })
+  );
+  itemUpdates.push(
+    updateItemXP({
+      item: adventurer.neck.id,
+      adventurerId: adventurerState.adventurerId,
+      xp: adventurer.neck.xp,
+    })
+  );
+  itemUpdates.push(
+    updateItemXP({
+      item: adventurer.ring.id,
+      adventurerId: adventurerState.adventurerId,
+      xp: adventurer.ring.xp,
+    })
+  );
+  return itemUpdates;
+}
+
+export function updateItemSpecials({
+  item,
+  adventurerId,
+  special1,
+  special2,
+  special3,
+}: any) {
+  const entityDoc = {
+    item,
+    adventurerId,
+  };
+
+  return {
+    entityDoc,
+    update: {
+      $set: {
+        ...entityDoc,
+        special1,
+        special2,
+        special3,
+      },
+    },
+  };
+}

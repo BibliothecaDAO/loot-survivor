@@ -22,6 +22,8 @@ export const ADVENTURER_UPGRADED = eventKey("AdventurerUpgraded");
 export const DISCOVERED_HEALTH = eventKey("DiscoveredHealth");
 export const DISCOVERED_GOLD = eventKey("DiscoveredGold");
 export const DISCOVERED_XP = eventKey("DiscoveredXP");
+export const HIT_BY_OBSTACLE = eventKey("HitByObstacle");
+export const DODGED_OBSTACLE = eventKey("DodgedObstacle");
 
 export const DISCOVERED_BEAST = eventKey("DiscoveredBeast");
 export const AMBUSHED_BY_BEAST = eventKey("AmbushedByBeast");
@@ -35,6 +37,9 @@ export const FLEE_SUCCEEDED = eventKey("FleeSucceeded");
 export const PURCHASED_POTIONS = eventKey("PurchasedPotions");
 export const PURCHASED_ITEMS = eventKey("PurchasedItems");
 export const NEW_ITEMS_AVAILABLE = eventKey("NewItemsAvailable");
+export const EQUIPPED_ITEMS = eventKey("EquippedItems");
+export const DROPPED_ITEMS = eventKey("DroppedItems");
+export const ITEM_SPECIAL_UNLOCKED = eventKey("ItemSpecialUnlocked");
 
 export const parseStats = combineParsers({
   strength: { index: 0, parser: parseU8 },
@@ -58,12 +63,10 @@ export const parseLoot = combineParsers({
   slot: { index: 3, parser: parseU8 },
 });
 
-export const parseLootWithPriceArray = parseArray(
-  combineParsers({
-    item: { index: 0, parser: parseLoot },
-    price: { index: 1, parser: parseU16 },
-  })
-);
+export const parseLootWithPrice = combineParsers({
+  item: { index: 0, parser: parseLoot },
+  price: { index: 1, parser: parseU16 },
+});
 
 export const parseAdventurer = combineParsers({
   lastAction: { index: 0, parser: parseU16 },
@@ -209,6 +212,26 @@ export const parseDiscoveredXp = combineParsers({
   xpAmount: { index: 1, parser: parseU16 },
 });
 
+export const parseHitByObstacle = combineParsers({
+  adventurerState: { index: 0, parser: parseAdventurerState },
+  id: { index: 1, parser: parseU8 },
+  level: { index: 2, parser: parseU8 },
+  damageTaken: { index: 1, parser: parseU16 },
+  damageLocation: { index: 2, parser: parseU8 },
+  xpEarnedAdventurer: { index: 1, parser: parseU16 },
+  xpEarnedItems: { index: 1, parser: parseU16 },
+});
+
+export const parseDodgedObstacle = combineParsers({
+  adventurerState: { index: 0, parser: parseAdventurerState },
+  id: { index: 1, parser: parseU8 },
+  level: { index: 2, parser: parseU8 },
+  damageTaken: { index: 1, parser: parseU16 },
+  damageLocation: { index: 2, parser: parseU8 },
+  xpEarnedAdventurer: { index: 1, parser: parseU16 },
+  xpEarnedItems: { index: 1, parser: parseU16 },
+});
+
 export const parseFleeFailed = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
   seed: { index: 1, parser: parseU128 },
@@ -235,5 +258,23 @@ export const parsePurchasedItems = combineParsers({
   quantity: { index: 1, parser: parseU8 },
   cost: { index: 2, parser: parseU16 },
   health: { index: 3, parser: parseU16 },
-  purchases: { index: 4, parser: parseLootWithPriceArray },
+  purchases: { index: 4, parser: parseArray(parseLootWithPrice) },
+});
+
+export const parseEquippedItems = combineParsers({
+  adventurerState: { index: 0, parser: parseAdventurerState },
+  equippedItems: { index: 1, parser: parseArray(parseU8) },
+  unequippedItems: { index: 2, parser: parseArray(parseU8) },
+});
+
+export const parseDroppedItems = combineParsers({
+  adventurerState: { index: 0, parser: parseAdventurerState },
+  droppedItems: { index: 1, parser: parseArray(parseU8) },
+});
+
+export const parseItemSpecialUnlocked = combineParsers({
+  adventurerState: { index: 0, parser: parseAdventurerState },
+  id: { index: 1, parser: parseU8 },
+  level: { index: 2, parser: parseU8 },
+  specials: { index: 3, parser: parseSpecialPowers },
 });
