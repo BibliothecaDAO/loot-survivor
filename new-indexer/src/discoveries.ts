@@ -20,7 +20,7 @@ import {
   parseHitByObstacle,
   SLAYED_BEAST,
 } from "./utils/events.ts";
-import { insertDiscovery } from "./utils/helpers.js";
+import { insertDiscovery } from "./utils/helpers.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);

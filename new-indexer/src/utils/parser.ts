@@ -89,6 +89,7 @@ export function combineParsers<
       })
       .reduce(
         (memo, fieldParser) => {
+          console.log(fieldParser);
           const { value: parsedValue, next } = fieldParser[1].parser(
             data,
             memo.next

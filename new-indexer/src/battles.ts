@@ -17,7 +17,7 @@ import {
   parseSlayedBeast,
   SLAYED_BEAST,
 } from "./utils/events.ts";
-import { insertBattle, insertDiscovery } from "./utils/helpers.js";
+import { insertBattle } from "./utils/helpers.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);

@@ -20,7 +20,7 @@ import {
   SLAYED_BEAST,
   START_GAME,
 } from "./utils/events.ts";
-import { insertItem, updateItemsXP } from "./utils/helpers.js";
+import { insertItem, updateItemsXP } from "./utils/helpers.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
@@ -87,7 +87,7 @@ export default function transform({ header, events }: Block) {
       }
       case PURCHASED_ITEMS: {
         const { value } = parsePurchasedItems(event.data, 0);
-        const as = value.adventurerState;
+        const as = value.adventurerStateWithBag.adventurerState;
         // console.log("Start game", value);
         const result = value.purchases.map((item) => ({
           entity: {
@@ -108,7 +108,7 @@ export default function transform({ header, events }: Block) {
       }
       case EQUIPPED_ITEMS: {
         const { value } = parseEquippedItems(event.data, 0);
-        const as = value.adventurerState;
+        const as = value.adventurerStateWithBag.adventurerState;
         // console.log("Start game", value);
         const equippedResult = value.equippedItems.map((item) => ({
           entity: {
@@ -138,9 +138,9 @@ export default function transform({ header, events }: Block) {
       }
       case DROPPED_ITEMS: {
         const { value } = parseDroppedItems(event.data, 0);
-        const as = value.adventurerState;
+        const as = value.adventurerStateWithBag.adventurerState;
         // console.log("Start game", value);
-        const result = value.droppedItems.map((item) => ({
+        const result = value.itemIds.map((item) => ({
           entity: {
             item: item,
             adventurerId: as.adventurerId,

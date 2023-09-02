@@ -254,22 +254,22 @@ export const parsePurchasedPotions = combineParsers({
 });
 
 export const parsePurchasedItems = combineParsers({
-  adventurerState: { index: 0, parser: parseAdventurerState },
-  quantity: { index: 1, parser: parseU8 },
-  cost: { index: 2, parser: parseU16 },
-  health: { index: 3, parser: parseU16 },
-  purchases: { index: 4, parser: parseArray(parseLootWithPrice) },
+  adventurerStateWithBag: {
+    index: 0,
+    parser: parseAdventurerStateWithBag,
+  },
+  purchases: { index: 1, parser: parseArray(parseLootWithPrice) },
 });
 
 export const parseEquippedItems = combineParsers({
-  adventurerState: { index: 0, parser: parseAdventurerState },
+  adventurerStateWithBag: { index: 0, parser: parseAdventurerStateWithBag },
   equippedItems: { index: 1, parser: parseArray(parseU8) },
   unequippedItems: { index: 2, parser: parseArray(parseU8) },
 });
 
 export const parseDroppedItems = combineParsers({
-  adventurerState: { index: 0, parser: parseAdventurerState },
-  droppedItems: { index: 1, parser: parseArray(parseU8) },
+  adventurerStateWithBag: { index: 0, parser: parseAdventurerStateWithBag },
+  itemIds: { index: 1, parser: parseArray(parseU8) },
 });
 
 export const parseItemSpecialUnlocked = combineParsers({
