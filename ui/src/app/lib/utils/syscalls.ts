@@ -922,11 +922,6 @@ export function syscalls({
       });
       // Reset items to no availability
       setData("latestMarketItemsQuery", null);
-      console.log({
-        Stats: upgrades,
-        Items: purchaseItems,
-        Potions: potionAmount,
-      });
       stopLoading({
         Stats: upgrades,
         Items: purchaseItems,
