@@ -556,36 +556,17 @@ mod Game {
         // @notice slays an adventurer that has been idle for too long
         // @dev Anyone can call this function, so we intentionally don't assert ownership.
         // @param adventurer_id The unique identifier for the adventurer to be slayed.
-        fn slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
-            // unpack adventurer from storage (no need for stat boosts)
-            let mut adventurer = _unpack_adventurer(@self, adventurer_id);
-
-            // assert adventurer is not already dead
-            _assert_not_dead(adventurer.health);
-
-            // assert adventurer is idle
-            _assert_is_idle(adventurer);
-
-            // slay adventurer by setting health to 0
-            adventurer.health = 0;
-
-            // handle adventurer death
-            _process_adventurer_death(
-                ref self,
-                AdventurerDied {
-                    adventurer_state: AdventurerState {
-                        owner: self._owner.read(adventurer_id),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    },
-                    killed_by_beast: 0,
-                    killed_by_obstacle: 0,
-                    caller_address: get_caller_address()
+        fn slay_idle_adventurers(ref self: ContractState, adventurer_ids: Array<u256>) {
+            assert(adventurer_ids.len() != 0, 'No adventurer ids provided');
+            let mut adventurer_index: u32 = 0;
+            loop {
+                if adventurer_index == adventurer_ids.len() {
+                    break;
                 }
-            );
-
-            // save adventurer (gg)
-            _pack_adventurer(ref self, adventurer_id, adventurer);
+                let adventurer_id = *adventurer_ids.at(adventurer_index);
+                _slay_idle_adventurer(ref self, adventurer_id);
+                adventurer_index += 1;
+            }
         }
 
         //
@@ -854,6 +835,38 @@ mod Game {
     // ------------------------------------------ //
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
+
+    fn _slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
+        // unpack adventurer from storage (no need for stat boosts)
+        let mut adventurer = _unpack_adventurer(@self, adventurer_id);
+
+        // assert adventurer is not already dead
+        _assert_not_dead(adventurer.health);
+
+        // assert adventurer is idle
+        _assert_is_idle(adventurer);
+
+        // slay adventurer by setting health to 0
+        adventurer.health = 0;
+
+        // handle adventurer death
+        _process_adventurer_death(
+            ref self,
+            AdventurerDied {
+                adventurer_state: AdventurerState {
+                    owner: self._owner.read(adventurer_id),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                killed_by_beast: 0,
+                killed_by_obstacle: 0,
+                caller_address: get_caller_address()
+            }
+        );
+
+        // save adventurer (gg)
+        _pack_adventurer(ref self, adventurer_id, adventurer);
+    }
 
     fn _process_beast_death(
         ref self: ContractState,
@@ -1455,7 +1468,8 @@ mod Game {
             // get item
             let item = *equipped_items.at(item_index);
             // increase item xp and record previous and new level
-            let (previous_level, new_level) = adventurer.increase_item_xp_at_slot(ImplLoot::get_slot(item.id), xp_amount);
+            let (previous_level, new_level) = adventurer
+                .increase_item_xp_at_slot(ImplLoot::get_slot(item.id), xp_amount);
             // if item leveled up
             if new_level > previous_level {
                 // process level up
@@ -1473,7 +1487,6 @@ mod Game {
                 // add item to list of items that leveled up to be emitted in event
                 items_leveled_up.append(updated_item);
             }
-            
 
             item_index += 1;
         };
@@ -1503,8 +1516,15 @@ mod Game {
     }
 
     fn _process_item_level_up(
-        ref self: ContractState, ref adventurer: Adventurer, ref name_storage1: ItemSpecialsStorage, ref name_storage2: ItemSpecialsStorage, item: ItemPrimitive, previous_level: u8, new_level: u8, entropy: u128
-    ) -> ItemLeveledUp{
+        ref self: ContractState,
+        ref adventurer: Adventurer,
+        ref name_storage1: ItemSpecialsStorage,
+        ref name_storage2: ItemSpecialsStorage,
+        item: ItemPrimitive,
+        previous_level: u8,
+        new_level: u8,
+        entropy: u128
+    ) -> ItemLeveledUp {
         // check if item reached greatness 20
         if (new_level == ITEM_MAX_GREATNESS) {
             // if so, adventurer gets bonus stat points (currently just 1)
