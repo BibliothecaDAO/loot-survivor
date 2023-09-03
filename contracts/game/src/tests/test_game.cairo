@@ -795,7 +795,8 @@ mod tests {
                 buy_and_equip_tested = true;
             } else {
                 // if equip was false, verify item is in bag
-                assert(bag.contains(item_purchase.item_id), 'item not in bag');
+                let (contains, _) = bag.contains(item_purchase.item_id);
+                assert(contains, 'item not in bag');
                 buy_and_bagged_tested = true;
             }
             i += 1;
@@ -951,7 +952,8 @@ mod tests {
                 break ();
             }
             // verify they are all in our bag
-            assert(bag.contains(*purchased_items_span.at(i)), 'item should be in bag');
+            let (contains, _) = bag.contains(*purchased_items_span.at(i));
+            assert(contains, 'item should be in bag');
             items_to_equip.append(*purchased_items_span.at(i));
             i += 1;
         };
@@ -971,8 +973,9 @@ mod tests {
             if i == items_to_equip.len() {
                 break ();
             }
+            let (contains, _) = bag.contains(*purchased_items_span.at(i));
             // verify they are no longer in bag
-            assert(!bag.contains(*items_to_equip.at(i)), 'item should not be in bag');
+            assert(!contains, 'item should not be in bag');
             // and equipped on the adventurer
             assert(adventurer.is_equipped(*purchased_items_span.at(i)), 'item should be equipped');
             i += 1;
@@ -1219,7 +1222,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(128236310)]
+    #[available_gas(137119130)]
     fn test_multi_slay_adventurers() {
         let STARTING_BLOCK_NUMBER = 512;
 
@@ -1594,7 +1597,8 @@ mod tests {
         // assert adventurer has starting weapon equipped
         assert(adventurer.weapon.id != 0, 'adventurer should have weapon');
         // assert bag has the purchased item
-        assert(bag.contains(purchased_item_id), 'item should be in bag');
+        let (contains, _) = bag.contains(purchased_item_id);
+        assert(contains, 'item should be in bag');
 
         // create drop list consisting of adventurers equipped weapon and purchased item that is in bag
         let mut drop_list = ArrayTrait::<u8>::new();
@@ -1614,7 +1618,8 @@ mod tests {
         assert(adventurer.weapon.xp == 0, 'weapon should have no xp');
 
         // assert bag does not have the purchased item
-        assert(!bag.contains(purchased_item_id), 'item should not be in bag');
+        let (contains, _) = bag.contains(purchased_item_id);
+        assert(!contains, 'item should not be in bag');
     }
 
     #[test]
