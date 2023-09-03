@@ -848,6 +848,13 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
+    /// @notice Applies specials to an item.
+    /// @param self The primitive item data.
+    /// @param name_storage Reference to the item specials storage which will be updated
+    /// @param suffix_unlocked Flag indicating if the suffix is unlocked.
+    /// @param prefixes_unlocked Flag indicating if the prefixes are unlocked.
+    /// @param entropy Randomness input for generating item specials.
+    /// @return ItemSpecials instance with applied specials.
     fn apply_specials(
         self: ItemPrimitive,
         ref name_storage: ItemSpecialsStorage,
@@ -866,6 +873,11 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
+    // @notice Applies suffix and prefixes to an item
+    // @param self The primitive item data.
+    // @param name_storage Reference to the item specials storage.
+    // @param entropy Randomness input for generating item specials.
+    // @return ItemSpecials instance with applied specials.
     fn apply_suffix_and_prefixes(
         self: ItemPrimitive, ref name_storage: ItemSpecialsStorage, entropy: u128
     ) -> ItemSpecials {
@@ -888,6 +900,11 @@ impl ImplAdventurer of IAdventurer {
         specials
     }
 
+    // @notice Applies suffix to an item.
+    // @param self The primitive item data.
+    // @param name_storage Reference to the item specials storage.
+    // @param entropy Randomness input for generating the item suffix.
+    // @return ItemSpecials instance with applied suffix.
     fn apply_suffix(
         self: ItemPrimitive, ref name_storage: ItemSpecialsStorage, entropy: u128
     ) -> ItemSpecials {
@@ -908,6 +925,11 @@ impl ImplAdventurer of IAdventurer {
         specials
     }
 
+    // @dev Apply only the prefixes to an item while preserving any existing suffix.
+    // @param self The primitive item data.
+    // @param name_storage Reference to the item specials storage.
+    // @param entropy Randomness input for generating the item prefixes.
+    // @return ItemSpecials instance with applied prefixes.
     fn apply_prefixes(
         self: ItemPrimitive, ref name_storage: ItemSpecialsStorage, entropy: u128
     ) -> ItemSpecials {
