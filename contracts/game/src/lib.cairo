@@ -103,7 +103,7 @@ mod Game {
         PurchasedPotions: PurchasedPotions,
         EquippedItems: EquippedItems,
         DroppedItems: DroppedItems,
-        ItemLeveledUp: ItemLeveledUp,
+        ItemsLeveledUp: ItemsLeveledUp,
         ItemSpecialUnlocked: ItemSpecialUnlocked,
         NewHighScore: NewHighScore,
         AdventurerDied: AdventurerDied,
@@ -556,36 +556,17 @@ mod Game {
         // @notice slays an adventurer that has been idle for too long
         // @dev Anyone can call this function, so we intentionally don't assert ownership.
         // @param adventurer_id The unique identifier for the adventurer to be slayed.
-        fn slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
-            // unpack adventurer from storage (no need for stat boosts)
-            let mut adventurer = _unpack_adventurer(@self, adventurer_id);
-
-            // assert adventurer is not already dead
-            _assert_not_dead(adventurer.health);
-
-            // assert adventurer is idle
-            _assert_is_idle(adventurer);
-
-            // slay adventurer by setting health to 0
-            adventurer.health = 0;
-
-            // handle adventurer death
-            _process_adventurer_death(
-                ref self,
-                AdventurerDied {
-                    adventurer_state: AdventurerState {
-                        owner: self._owner.read(adventurer_id),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    },
-                    killed_by_beast: 0,
-                    killed_by_obstacle: 0,
-                    caller_address: get_caller_address()
+        fn slay_idle_adventurers(ref self: ContractState, adventurer_ids: Array<u256>) {
+            assert(adventurer_ids.len() != 0, 'No adventurer ids provided');
+            let mut adventurer_index: u32 = 0;
+            loop {
+                if adventurer_index == adventurer_ids.len() {
+                    break;
                 }
-            );
-
-            // save adventurer (gg)
-            _pack_adventurer(ref self, adventurer_id, adventurer);
+                let adventurer_id = *adventurer_ids.at(adventurer_index);
+                _slay_idle_adventurer(ref self, adventurer_id);
+                adventurer_index += 1;
+            }
         }
 
         //
@@ -855,6 +836,38 @@ mod Game {
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
 
+    fn _slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
+        // unpack adventurer from storage (no need for stat boosts)
+        let mut adventurer = _unpack_adventurer(@self, adventurer_id);
+
+        // assert adventurer is not already dead
+        _assert_not_dead(adventurer.health);
+
+        // assert adventurer is idle
+        _assert_is_idle(adventurer);
+
+        // slay adventurer by setting health to 0
+        adventurer.health = 0;
+
+        // handle adventurer death
+        _process_adventurer_death(
+            ref self,
+            AdventurerDied {
+                adventurer_state: AdventurerState {
+                    owner: self._owner.read(adventurer_id),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                killed_by_beast: 0,
+                killed_by_obstacle: 0,
+                caller_address: get_caller_address()
+            }
+        );
+
+        // save adventurer (gg)
+        _pack_adventurer(ref self, adventurer_id, adventurer);
+    }
+
     fn _process_beast_death(
         ref self: ContractState,
         ref adventurer: Adventurer,
@@ -879,12 +892,13 @@ mod Game {
         adventurer.gold.increase_gold(gold_reward);
 
         // grant adventuer xp
-        let xp_earned = beast.get_xp_reward();
-        let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_earned);
+        let adventurer_xp_reward = beast.get_xp_reward();
+        let (previous_level, new_level) = adventurer.increase_adventurer_xp(adventurer_xp_reward);
 
-        // grant equipped items xp
+        // grant equipped items xp, items level faster than Adventurers
+        let item_xp_reward = adventurer_xp_reward * ITEM_XP_MULTIPLIER_BEASTS;
         _grant_xp_to_equipped_items(
-            ref self, ref adventurer, adventurer_id, xp_earned, attack_rnd_2
+            ref self, ref adventurer, adventurer_id, item_xp_reward, attack_rnd_2
         );
 
         // emit slayed beast event
@@ -906,14 +920,14 @@ mod Game {
                 },
                 damage_dealt: damage_dealt,
                 critical_hit: critical_hit,
-                xp_earned_adventurer: xp_earned,
-                xp_earned_items: xp_earned * ITEM_XP_MULTIPLIER_BEASTS,
+                xp_earned_adventurer: adventurer_xp_reward,
+                xp_earned_items: item_xp_reward,
                 gold_earned: gold_reward
             }
         );
 
         // if adventurers new level is greater than previous level
-        if (new_level > previous_level) {
+        if (adventurer.stat_points_available > 0) {
             _emit_level_up_events(ref self, adventurer, adventurer_id, previous_level, new_level);
         }
 
@@ -1251,7 +1265,7 @@ mod Game {
                             }
                         );
                         // check for level up
-                        if (new_level > previous_level) {
+                        if (adventurer.stat_points_available > 0) {
                             // process level up
                             _emit_level_up_events(
                                 ref self, adventurer, adventurer_id, previous_level, new_level
@@ -1419,453 +1433,151 @@ mod Game {
             return;
         }
 
-        if (new_level > previous_level) {
+        if (adventurer.stat_points_available > 0) {
             // if adventurer leveled up, process level up
             _emit_level_up_events(ref self, adventurer, adventurer_id, previous_level, new_level);
         }
     }
 
-    // @title Handle Item Leveling Events
-    // @notice This function handles the various events that may occur when an item levels up.
-    // @dev This function should only be called internally within the smart contract.
-    //
-    // @param self A reference to the ContractState. This function requires mutable access to the ContractState to handle item leveling events.
-    // @param adventurer The Adventurer object representing the adventurer who owns the item.
-    // @param adventurer_id The unique identifier for the adventurer who owns the item.
-    // @param item_id The unique identifier for the item that may level up.
-    // @param previous_level The previous level of the item before it possibly leveled up.
-    // @param new_level The new level of the item after it possibly leveled up.
-    // @param suffix_assigned A boolean indicating whether a suffix was assigned to the item when it leveled up.
-    // @param prefixes_assigned A boolean indicating whether a prefix was assigned to the item when it leveled up.
-    // @param special_names The ItemSpecials object storing the special names for the item.
-    //
-    // The function first checks if the item's new level is higher than its previous level. If it is, it generates a 'ItemLeveledUp' event.
-    // The function then checks if a suffix was assigned to the item when it leveled up. If it was, it generates an 'ItemSpecialUnlocked' event.
-    // Lastly, the function checks if a prefix was assigned to the item when it leveled up. If it was, it generates an 'ItemSpecialUnlocked' event.
-    fn _handle_item_leveling_events(
+    // @notice Grants XP to items currently equipped by an adventurer, and processes any level ups.// 
+    // @dev This function does three main things:
+    //   1. Iterates through each of the equipped items for the given adventurer.
+    //   2. Increases the XP for the equipped item. If the item levels up, it processes the level up and updates the item.
+    //   3. If any items have leveled up, emits an `ItemsLeveledUp` event.// 
+    // @param self The contract's state reference.
+    // @param adventurer Reference to the adventurer's state.
+    // @param adventurer_id Unique identifier for the adventurer.
+    // @param xp_amount Amount of XP to grant to each equipped item.
+    // @param entropy Random data used for any deterministic randomness during processing.// 
+    // @return None. However, it may emit an `ItemsLeveledUp` event.// 
+    fn _grant_xp_to_equipped_items(
         ref self: ContractState,
-        adventurer: Adventurer,
+        ref adventurer: Adventurer,
         adventurer_id: u256,
-        item_id: u8,
-        previous_level: u8,
-        new_level: u8,
-        suffix_assigned: bool,
-        prefixes_assigned: bool,
-        special_names: ItemSpecials
+        xp_amount: u16,
+        entropy: u128
     ) {
-        // if the new level is higher than the previous level
-        if (new_level > previous_level) {
-            // generate greatness increased event
-            __event_ItemLeveledUp(
+        let (mut name_storage1, mut name_storage2) = _get_special_storages(@self, adventurer_id);
+        let mut items_leveled_up = ArrayTrait::<ItemLeveledUp>::new();
+        let equipped_items = adventurer.get_equipped_items();
+        let mut item_index: u32 = 0;
+        loop {
+            if item_index == equipped_items.len() {
+                break;
+            }
+            // get item
+            let item = *equipped_items.at(item_index);
+            // increase item xp and record previous and new level
+            let (previous_level, new_level) = adventurer
+                .increase_item_xp_at_slot(ImplLoot::get_slot(item.id), xp_amount);
+            // if item leveled up
+            if new_level > previous_level {
+                // process level up
+                let updated_item = _process_item_level_up(
+                    ref self,
+                    ref adventurer,
+                    ref name_storage1,
+                    ref name_storage2,
+                    item,
+                    previous_level,
+                    new_level,
+                    entropy
+                );
+
+                // add item to list of items that leveled up to be emitted in event
+                items_leveled_up.append(updated_item);
+            }
+
+            item_index += 1;
+        };
+
+        if items_leveled_up.len() != 0 {
+            __event_ItemsLeveledUp(
                 ref self,
                 AdventurerState {
                     owner: get_caller_address(),
                     adventurer_id: adventurer_id,
                     adventurer: adventurer
                 },
-                item_id,
-                previous_level,
-                new_level
+                items_leveled_up
             );
-
-            // if item suffix was assigned
-            if (suffix_assigned) {
-                // generate item suffix discovered event
-                __event_ItemSpecialUnlocked(
-                    ref self,
-                    AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    },
-                    item_id,
-                    new_level,
-                    special_names
-                );
-            }
-
-            // if item prefixes were assigned
-            if (prefixes_assigned) {
-                // generate item prefix discovered event
-                __event_ItemSpecialUnlocked(
-                    ref self,
-                    AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    },
-                    item_id,
-                    new_level,
-                    special_names
-                );
-            }
-        }
-    }
-
-    /// @title Grant XP to Equipped Items
-    /// @notice This function handles the process of granting experience (XP) to all the equipped items of an adventurer.
-    /// @dev This function should only be called internally within the smart contract.
-    ///
-    /// @param self A reference to the ContractState. This function requires mutable access to the ContractState to update the adventurer's equipped items' XP.
-    /// @param adventurer_id The unique identifier for the adventurer whose equipped items will be updated.
-    /// @param adventurer A reference to the Adventurer object. This object represents the adventurer whose equipped items' XP will be updated.
-    /// @param value The amount of experience points to be added to the equipped items before applying the item XP multiplier.
-    /// @param entropy An unsigned integer used for entropy generation. This is often derived from a source of randomness.
-    ///
-    /// The function first retrieves the names of the special items an adventurer may possess. It then calculates the XP increase by applying a multiplier to the provided 'value'.
-    /// The function then checks each item slot (weapon, chest, head, waist, foot, hand, neck, ring) of the adventurer to see if an item is equipped (item ID != 0).
-    /// If an item is equipped, it calls `_add_xp_to_item` to apply the XP increase to the item and handle any resulting events.
-    fn _grant_xp_to_equipped_items(
-        ref self: ContractState,
-        ref adventurer: Adventurer,
-        adventurer_id: u256,
-        value: u16,
-        entropy: u128
-    ) {
-        let xp_increase = value * ITEM_XP_MULTIPLIER_BEASTS;
-
-        let (mut name_storage1, mut name_storage2) = _get_special_storages(@self, adventurer_id);
-
-        // TODO LH: Consider including a modified bool on the 
-        // ItemSpecialsStorage struct so that we can more easily
-        // flag the storage as modified when it happens.
-        let mut name_storage1_modified = false;
-        let mut name_storage2_modified = false;
-
-        // if weapon is equipped
-        if adventurer.weapon.id != 0 {
-            // grant xp and handle any resulting events
-            let specials_assigned = _add_xp_to_item(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                ref adventurer.weapon,
-                xp_increase,
-                ref name_storage1,
-                ref name_storage2,
-                entropy
-            );
-
-            if (specials_assigned) {
-                if (_get_storage_index(
-                    @self, adventurer.weapon.metadata
-                ) == LOOT_NAME_STORAGE_INDEX_1) {
-                    name_storage1_modified = true;
-                } else {
-                    name_storage2_modified = true;
-                }
-            }
-        }
-        // if chest armor is equipped
-        if adventurer.chest.id != 0 {
-            // grant xp and handle any resulting events
-            let specials_assigned = _add_xp_to_item(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                ref adventurer.chest,
-                xp_increase,
-                ref name_storage1,
-                ref name_storage2,
-                entropy
-            );
-
-            if (specials_assigned) {
-                if (_get_storage_index(
-                    @self, adventurer.chest.metadata
-                ) == LOOT_NAME_STORAGE_INDEX_1) {
-                    name_storage1_modified = true;
-                } else {
-                    name_storage2_modified = true;
-                }
-            }
-        }
-        // if head armor is equipped
-        if adventurer.head.id != 0 {
-            // grant xp and handle any resulting events
-            let specials_assigned = _add_xp_to_item(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                ref adventurer.head,
-                xp_increase,
-                ref name_storage1,
-                ref name_storage2,
-                entropy
-            );
-
-            if (specials_assigned) {
-                if (_get_storage_index(
-                    @self, adventurer.head.metadata
-                ) == LOOT_NAME_STORAGE_INDEX_1) {
-                    name_storage1_modified = true;
-                } else {
-                    name_storage2_modified = true;
-                }
-            }
         }
 
-        // if waist armor is equipped
-        if adventurer.waist.id != 0 {
-            // grant xp and handle any resulting events
-            let specials_assigned = _add_xp_to_item(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                ref adventurer.waist,
-                xp_increase,
-                ref name_storage1,
-                ref name_storage2,
-                entropy
-            );
-            if (specials_assigned) {
-                if (_get_storage_index(
-                    @self, adventurer.waist.metadata
-                ) == LOOT_NAME_STORAGE_INDEX_1) {
-                    name_storage1_modified = true;
-                } else {
-                    name_storage2_modified = true;
-                }
-            }
-        }
-        // if foot armor is equipped
-        if adventurer.foot.id != 0 {
-            // grant xp and handle any resulting events
-            let specials_assigned = _add_xp_to_item(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                ref adventurer.foot,
-                xp_increase,
-                ref name_storage1,
-                ref name_storage2,
-                entropy
-            );
-            if (specials_assigned) {
-                if (_get_storage_index(
-                    @self, adventurer.foot.metadata
-                ) == LOOT_NAME_STORAGE_INDEX_1) {
-                    name_storage1_modified = true;
-                } else {
-                    name_storage2_modified = true;
-                }
-            }
-        }
-        // if hand armor is equipped
-        if adventurer.hand.id != 0 {
-            // grant xp and handle any resulting events
-            let specials_assigned = _add_xp_to_item(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                ref adventurer.hand,
-                xp_increase,
-                ref name_storage1,
-                ref name_storage2,
-                entropy
-            );
-            if (specials_assigned) {
-                if (_get_storage_index(
-                    @self, adventurer.hand.metadata
-                ) == LOOT_NAME_STORAGE_INDEX_1) {
-                    name_storage1_modified = true;
-                } else {
-                    name_storage2_modified = true;
-                }
-            }
-        }
-        // if neck armor is equipped
-        if adventurer.neck.id != 0 {
-            // grant xp and handle any resulting events
-            let specials_assigned = _add_xp_to_item(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                ref adventurer.neck,
-                xp_increase,
-                ref name_storage1,
-                ref name_storage2,
-                entropy
-            );
-            if (specials_assigned) {
-                if (_get_storage_index(
-                    @self, adventurer.neck.metadata
-                ) == LOOT_NAME_STORAGE_INDEX_1) {
-                    name_storage1_modified = true;
-                } else {
-                    name_storage2_modified = true;
-                }
-            }
-        }
-        // if ring is equipped
-        if adventurer.ring.id != 0 {
-            // grant xp and handle any resulting events
-            let specials_assigned = _add_xp_to_item(
-                ref self,
-                adventurer_id,
-                ref adventurer,
-                ref adventurer.ring,
-                xp_increase,
-                ref name_storage1,
-                ref name_storage2,
-                entropy
-            );
-            if (specials_assigned) {
-                if (_get_storage_index(
-                    @self, adventurer.ring.metadata
-                ) == LOOT_NAME_STORAGE_INDEX_1) {
-                    name_storage1_modified = true;
-                } else {
-                    name_storage2_modified = true;
-                }
-            }
-        }
-        if (name_storage1_modified) {
+        if (name_storage1.mutated) {
             _pack_loot_special_names_storage(
                 ref self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1, name_storage1
             );
         }
-        if (name_storage2_modified) {
+        if (name_storage2.mutated) {
             _pack_loot_special_names_storage(
                 ref self, adventurer_id, LOOT_NAME_STORAGE_INDEX_2, name_storage2
             );
         }
     }
 
-    // @title Grant XP to Item and Emit Event
-    // @notice This function grants experience (XP) to a specified item and emits any resulting events.
-    // @dev This function should only be called internally within the smart contract.
-    //
-    // @param self A reference to the ContractState. This function requires mutable access to the ContractState to update the specified item's XP.
-    // @param adventurer_id The unique identifier for the adventurer who owns the item.
-    // @param adventurer A reference to the Adventurer object. This object represents the adventurer who owns the item.
-    // @param item A reference to the ItemPrimitive object. This object represents the item to which XP will be granted.
-    // @param amount The amount of experience points to be added to the item before applying the item XP multiplier.
-    // @param name_storage1 A reference to the ItemSpecialsStorage object. This object stores the special names for items that an adventurer may possess.
-    // @param name_storage2 A reference to the ItemSpecialsStorage object. This object stores the special names for items that an adventurer may possess.
-    // @param entropy An unsigned integer used for entropy generation. This is often derived from a source of randomness.
-    //
-    // The function first calculates the XP increase by applying a multiplier to the provided 'amount'.
-    // It then checks the description index of the item. If the index matches with LOOT_NAME_STORAGE_INDEX_1, it uses name_storage1 for the item's special names; otherwise, it uses name_storage2.
-    // It then calls `increase_item_xp` on the item to apply the XP increase and retrieve data about the item's original level, new level, and whether a suffix or prefix was assigned, and the item's special names.
-    // Lastly, it calls `_handle_item_leveling_events` to handle any events resulting from the item leveling up.
-    // @return A boolean indicating whether a suffix or prefix was assigned to the item when it leveled up.
-    fn _add_xp_to_item(
+    fn _process_item_level_up(
         ref self: ContractState,
-        adventurer_id: u256,
         ref adventurer: Adventurer,
-        ref item: ItemPrimitive,
-        xp_increase: u16,
         ref name_storage1: ItemSpecialsStorage,
         ref name_storage2: ItemSpecialsStorage,
+        item: ItemPrimitive,
+        previous_level: u8,
+        new_level: u8,
         entropy: u128
-    ) -> bool {
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
-            .entropy
-            .into();
+    ) -> ItemLeveledUp {
+        // check if item reached greatness 20
+        if (new_level == ITEM_MAX_GREATNESS) {
+            // if so, adventurer gets bonus stat points (currently just 1)
+            adventurer
+                .stat_points_available
+                .increase_stat_points_available(MAX_GREATNESS_STAT_BONUS + item.item_stat_bonus());
+        }
 
-        // TODO: Refactor this to reduce code duplication
-        if (_get_storage_index(@self, item.metadata) == LOOT_NAME_STORAGE_INDEX_1) {
-            let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = item
-                .increase_item_xp(xp_increase, ref name_storage1, entropy);
+        // check if item unlocked any specials as part of level up
+        let (suffix_unlocked, prefixes_unlocked) = ImplAdventurer::unlocked_specials(
+            previous_level, new_level
+        );
 
-            if (previous_level != new_level && new_level == ITEM_MAX_GREATNESS) {
-                // adventurer gets stat upgrade points when item reaches max greatness
-                // certain items grant bonus stat points when they reach max greatness
-                adventurer
-                    .stat_points_available
-                    .increase_stat_points_available(
-                        MAX_GREATNESS_STAT_BONUS + item.item_stat_bonus()
-                    );
-
-                // emit stat upgrades available event
-                __event_UpgradeAvailable(
-                    ref self,
-                    AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    }
-                );
-
-                __event_NewItemsAvailable(
-                    ref self,
-                    adventurer_state: AdventurerState {
-                        owner: get_caller_address(), adventurer_id, adventurer
-                    },
-                    items: _get_items_on_market(
-                        @self, adventurer_entropy, adventurer.xp, adventurer.stat_points_available
-                    )
-                );
+        let mut specials = ItemSpecials { special1: 0, special2: 0, special3: 0 };
+        // if specials were unlocked
+        if (suffix_unlocked || prefixes_unlocked) {
+            // apply them and record the new specials so we can include them in event
+            if (_get_storage_index(@self, item.metadata) == LOOT_NAME_STORAGE_INDEX_1) {
+                specials = item
+                    .apply_specials(ref name_storage1, suffix_unlocked, prefixes_unlocked, entropy);
+            } else {
+                specials = item
+                    .apply_specials(ref name_storage2, suffix_unlocked, prefixes_unlocked, entropy);
             }
 
             // if item received a suffix as part of the level up
-            if (suffix_assigned) {
-                // adventurer gets a health boost from items that boost vitality
-                adventurer
-                    .increase_health(
-                        AdventurerUtils::get_vitality_item_boost(special_names.special1).into()
-                            * VITALITY_INSTANT_HEALTH_BONUS
-                    );
+            if (suffix_unlocked) {
+                // check if the suffix provided a vitality boost
+                let vitality_boost = AdventurerUtils::get_vitality_item_boost(specials.special1);
+                if (vitality_boost != 0) {
+                    // if so, adventurer gets health
+                    let health_amount = vitality_boost.into() * VITALITY_INSTANT_HEALTH_BONUS;
+                    adventurer.increase_health(health_amount);
+                }
             }
 
-            _handle_item_leveling_events(
-                ref self,
-                adventurer,
-                adventurer_id,
-                item.id,
+            ItemLeveledUp {
+                item_id: item.id,
                 previous_level,
                 new_level,
-                suffix_assigned,
-                prefix_assigned,
-                special_names
-            );
-
-            (suffix_assigned == true || prefix_assigned == true)
+                suffix_unlocked,
+                prefixes_unlocked,
+                specials
+            }
         } else {
-            let (previous_level, new_level, suffix_assigned, prefix_assigned, special_names) = item
-                .increase_item_xp(xp_increase, ref name_storage2, entropy);
-
-            if (previous_level != new_level && new_level == ITEM_MAX_GREATNESS) {
-                // adventurer gets stat upgrade points when item reaches max greatness
-                adventurer
-                    .stat_points_available
-                    .increase_stat_points_available(MAX_GREATNESS_STAT_BONUS);
-
-                // emit stat upgrades available event
-                __event_UpgradeAvailable(
-                    ref self,
-                    AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    }
-                );
-
-                __event_NewItemsAvailable(
-                    ref self,
-                    adventurer_state: AdventurerState {
-                        owner: get_caller_address(), adventurer_id, adventurer
-                    },
-                    items: _get_items_on_market(
-                        @self, adventurer_entropy, adventurer.xp, adventurer.stat_points_available
-                    )
-                );
-            }
-
-            _handle_item_leveling_events(
-                ref self,
-                adventurer,
-                adventurer_id,
-                item.id,
+            ItemLeveledUp {
+                item_id: item.id,
                 previous_level,
                 new_level,
-                suffix_assigned,
-                prefix_assigned,
-                special_names
-            );
-
-            (suffix_assigned == true || prefix_assigned == true)
+                suffix_unlocked,
+                prefixes_unlocked,
+                specials
+            }
         }
     }
 
@@ -2133,7 +1845,7 @@ mod Game {
             );
 
             // check for adventurer level up
-            if (new_level > previous_level) {
+            if (adventurer.stat_points_available > 0) {
                 _emit_level_up_events(
                     ref self, adventurer, adventurer_id, previous_level, new_level
                 );
@@ -2612,13 +2324,14 @@ mod Game {
             .into();
 
         // emit level up event
-        __event_AdventurerLeveledUp(
-            ref self,
-            adventurer_state: adventurer_state,
-            previous_level: previous_level,
-            new_level: new_level
-        );
-
+        if (new_level > previous_level) {
+            __event_AdventurerLeveledUp(
+                ref self,
+                adventurer_state: adventurer_state,
+                previous_level: previous_level,
+                new_level: new_level
+            );
+        }
         // emit stat upgrades available event
         __event_UpgradeAvailable(ref self, adventurer_state);
 
@@ -3216,12 +2929,20 @@ mod Game {
         item_ids: Array<u8>,
     }
 
-    #[derive(Drop, starknet::Event)]
+    #[derive(Drop, Serde)]
     struct ItemLeveledUp {
-        adventurer_state: AdventurerState,
         item_id: u8,
         previous_level: u8,
         new_level: u8,
+        suffix_unlocked: bool,
+        prefixes_unlocked: bool,
+        specials: ItemSpecials
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct ItemsLeveledUp {
+        adventurer_state: AdventurerState,
+        items: Array<ItemLeveledUp>,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -3244,11 +2965,6 @@ mod Game {
         killed_by_beast: u8,
         killed_by_obstacle: u8,
         caller_address: ContractAddress,
-    }
-
-    #[derive(Drop, starknet::Event)]
-    struct ShopAvailable {
-        inventory: Array<Loot>,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -3367,19 +3083,10 @@ mod Game {
         self.emit(Event::DroppedItems(DroppedItems { adventurer_state_with_bag, item_ids }));
     }
     #[inline(always)]
-    fn __event_ItemLeveledUp(
-        ref self: ContractState,
-        adventurer_state: AdventurerState,
-        item_id: u8,
-        previous_level: u8,
-        new_level: u8
+    fn __event_ItemsLeveledUp(
+        ref self: ContractState, adventurer_state: AdventurerState, items: Array<ItemLeveledUp>,
     ) {
-        self
-            .emit(
-                Event::ItemLeveledUp(
-                    ItemLeveledUp { adventurer_state, item_id, previous_level, new_level }
-                )
-            );
+        self.emit(Event::ItemsLeveledUp(ItemsLeveledUp { adventurer_state, items }));
     }
     #[inline(always)]
     fn __event_ItemSpecialUnlocked(
