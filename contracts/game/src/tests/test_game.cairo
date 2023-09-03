@@ -97,6 +97,30 @@ mod tests {
         IGameDispatcher { contract_address: address0 }
     }
 
+    fn add_adventurer_to_game(ref game: IGameDispatcher) {
+        let adventurer_meta = AdventurerMetadata {
+            name: 'loothero'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
+        };
+
+        let starting_stats = Stats {
+            strength: 0, dexterity: 2, vitality: 0, intelligence: 2, wisdom: 2, charisma: 0,
+        };
+
+        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta, starting_stats);
+
+        let original_adventurer = game.get_adventurer(ADVENTURER_ID);
+        assert(original_adventurer.xp == 0, 'wrong starting xp');
+        assert(
+            original_adventurer.health == STARTING_HEALTH - STARTER_BEAST_ATTACK_DAMAGE,
+            'wrong starting health'
+        );
+        assert(original_adventurer.weapon.id == ItemId::Wand, 'wrong starting weapon');
+        assert(
+            original_adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
+            'wrong starter beast health '
+        );
+    }
+
     fn new_adventurer(starting_block: u64) -> IGameDispatcher {
         let mut game = setup(starting_block);
 
@@ -1063,7 +1087,8 @@ mod tests {
         // this should result in contract throwing a panic 'Adventurer is not idle'
         // because the adventurer is not idle for the full IDLE_DEATH_PENALTY_BLOCKS
         // This test is annotated to expect that panic
-        game.slay_idle_adventurer(ADVENTURER_ID);
+        let idle_adventurers = array![ADVENTURER_ID];
+        game.slay_idle_adventurers(idle_adventurers);
     }
 
     #[test]
@@ -1088,7 +1113,8 @@ mod tests {
         // this should result in contract throwing a panic 'Adventurer is not idle'
         // because the adventurer is not idle for the full IDLE_DEATH_PENALTY_BLOCKS
         // This test is annotated to expect that panic
-        game.slay_idle_adventurer(ADVENTURER_ID);
+        let idle_adventurers = array![ADVENTURER_ID];
+        game.slay_idle_adventurers(idle_adventurers);
     }
 
     #[test]
@@ -1133,7 +1159,8 @@ mod tests {
         );
 
         // slay idle adventurer
-        game.slay_idle_adventurer(ADVENTURER_ID);
+        let idle_adventurers = array![ADVENTURER_ID];
+        game.slay_idle_adventurers(idle_adventurers);
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1181,13 +1208,69 @@ mod tests {
         );
 
         // call slay idle adventurer
-        game.slay_idle_adventurer(ADVENTURER_ID);
+        let idle_adventurers = array![ADVENTURER_ID];
+        game.slay_idle_adventurers(idle_adventurers);
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
 
         // assert adventurer is dead
         assert(adventurer.health == 0, 'adventurer should be dead');
+    }
+
+    #[test]
+    #[available_gas(128236310)]
+    fn test_multi_slay_adventurers() {
+        let STARTING_BLOCK_NUMBER = 512;
+
+        let ADVENTURER2_ID = 2;
+        let ADVENTURER3_ID = 3;
+
+        // deploy and start new game
+        let mut game = new_adventurer(STARTING_BLOCK_NUMBER);
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let adventurer2 = add_adventurer_to_game(ref game);
+        let adventurer3 = add_adventurer_to_game(ref game);
+
+        // attack starter beast, resulting in adventurer last action block number being 1
+        game.attack(ADVENTURER_ID, false);
+        game.attack(ADVENTURER2_ID, false);
+        game.attack(ADVENTURER3_ID, false);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+
+        // roll forward blockchain to make adventurer idle
+        testing::set_block_number(
+            adventurer.last_action.into() + Game::IDLE_DEATH_PENALTY_BLOCKS.into()
+        );
+
+        // get current block number
+        let current_block_number = starknet::get_block_info().unbox().block_number;
+
+        // verify current block number % MAX_BLOCK_COUNT is greater than adventurers last action block number
+        // this is imperative because this test is testing the case where the adventurer last action block number
+        // is greater than the (current_block_number % MAX_BLOCK_COUNT)
+        assert(
+            (current_block_number % MAX_BLOCK_COUNT) > adventurer.last_action.into(),
+            'last action !> current block'
+        );
+
+        // call slay idle adventurer
+        let idle_adventurers = array![ADVENTURER_ID, ADVENTURER2_ID, ADVENTURER3_ID];
+        game.slay_idle_adventurers(idle_adventurers);
+
+        // get updated adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let adventurer2 = game.get_adventurer(ADVENTURER2_ID);
+        let adventurer3 = game.get_adventurer(ADVENTURER3_ID);
+
+        // assert adventurer is dead
+        assert(adventurer.health == 0, 'adventurer should be dead');
+        assert(adventurer2.health == 0, 'adventurer2 should be dead');
+        assert(adventurer3.health == 0, 'adventurer3 should be dead');
     }
 
     #[test]
