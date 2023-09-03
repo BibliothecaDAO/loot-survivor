@@ -679,8 +679,7 @@ export function syscalls({
         battles: [...battles.reverse()],
       });
 
-      console.log(battles);
-      stopLoading(battles);
+      stopLoading(battles.reverse());
       setEquipItems([]);
       setDropItems([]);
       setMintAdventurer(false);
