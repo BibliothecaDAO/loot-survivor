@@ -897,10 +897,10 @@ export function syscalls({
           purchasedItems.push(purchasedItem);
         }
       }
-      const equippedItemsEventEquipped = events.filter(
+      const equippedItemsEvents = events.filter(
         (event) => event.name === "EquippedItems"
       );
-      for (let equippedItemsEvent of equippedItemsEventEquipped) {
+      for (let equippedItemsEvent of equippedItemsEvents) {
         for (let equippedItem of equippedItemsEvent.data[1]) {
           let item = purchasedItems.find((item) => item.item === equippedItem);
           item.equipped = true;
@@ -912,10 +912,7 @@ export function syscalls({
           ...purchasedItems,
         ],
       });
-      const equippedItemsEventsUnequipped = events.filter(
-        (event) => event.name === "EquippedItems"
-      );
-      for (let equippedItemsEvent of equippedItemsEventsUnequipped) {
+      for (let equippedItemsEvent of equippedItemsEvents) {
         for (let unequippedItem of equippedItemsEvent.data[2]) {
           const ownedItemIndex =
             queryData.itemsByAdventurerQuery?.items.findIndex(
