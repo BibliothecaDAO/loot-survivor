@@ -897,20 +897,13 @@ export function syscalls({
           purchasedItems.push(purchasedItem);
         }
       }
-      const equippedItemsEvents = events.filter(
+      const equippedItemsEventEquipped = events.filter(
         (event) => event.name === "EquippedItems"
       );
-      for (let equippedItemsEvent of equippedItemsEvents) {
+      for (let equippedItemsEvent of equippedItemsEventEquipped) {
         for (let equippedItem of equippedItemsEvent.data[1]) {
           let item = purchasedItems.find((item) => item.item === equippedItem);
           item.equipped = true;
-        }
-        for (let unequippedItem of equippedItemsEvent.data[2]) {
-          const ownedItemIndex =
-            queryData.itemsByAdventurerQuery?.items.findIndex(
-              (item: any) => item.item == unequippedItem
-            );
-          setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
         }
       }
       setData("itemsByAdventurerQuery", {
@@ -919,6 +912,18 @@ export function syscalls({
           ...purchasedItems,
         ],
       });
+      const equippedItemsEventsUnequipped = events.filter(
+        (event) => event.name === "EquippedItems"
+      );
+      for (let equippedItemsEvent of equippedItemsEventsUnequipped) {
+        for (let unequippedItem of equippedItemsEvent.data[2]) {
+          const ownedItemIndex =
+            queryData.itemsByAdventurerQuery?.items.findIndex(
+              (item: any) => item.item == unequippedItem
+            );
+          setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
+        }
+      }
       // Reset items to no availability
       setData("latestMarketItemsQuery", null);
       stopLoading({

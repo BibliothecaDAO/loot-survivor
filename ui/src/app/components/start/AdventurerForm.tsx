@@ -16,6 +16,7 @@ import { TypeAnimation } from "react-type-animation";
 import { battle } from "@/app/lib/constants";
 import { TxActivity } from "../navigation/TxActivity";
 import { MdClose } from "react-icons/md";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
 
 export interface AdventurerFormProps {
   isActive: boolean;
@@ -45,7 +46,7 @@ export const AdventurerForm = ({
     startingWisdom: "0",
     startingCharisma: "0",
   });
-  const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
+  const loading = useLoadingStore((state) => state.loading);
 
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [step, setStep] = useState(1);
@@ -482,7 +483,9 @@ export const AdventurerForm = ({
                   <Button
                     type="submit"
                     size={"xl"}
-                    disabled={!formFilled || !account || isWrongNetwork}
+                    disabled={
+                      !formFilled || !account || isWrongNetwork || loading
+                    }
                   >
                     {formFilled ? "Start Game!!" : "Fill details"}
                   </Button>
