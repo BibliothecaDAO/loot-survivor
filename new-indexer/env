@@ -1,3 +1,3 @@
 GAME="0x0779ac9aea39f0a6d8e8b4eb64c5195e910a95475fcda291a1b93469dfed95ba"
-START=854340
+START=850000
 MONGO_CONNECTION_STRING="mongodb://apibara:apibara@localhost:27017"

@@ -120,13 +120,8 @@ export function updateBeastHealth({
   seed,
   adventurerId,
   health,
-  level,
-  special1,
-  special2,
-  special3,
   slayed,
   slainOnTime,
-  createdTime,
   lastUpdatedTime,
   timestamp,
 }: any) {
@@ -138,28 +133,17 @@ export function updateBeastHealth({
 
   const newBeast = slayed
     ? {
+        ...entity,
         health: encodeIntAsBytes(BigInt(health)),
-        level: checkExistsInt(BigInt(level)),
-        special1: checkExistsInt(BigInt(special1)),
-        special2: checkExistsInt(BigInt(special2)),
-        special3: checkExistsInt(BigInt(special3)),
         slainOnTime: slainOnTime,
-        createdTime: createdTime,
         lastUpdatedTime: lastUpdatedTime,
         timestamp,
-        ...entity,
       }
     : {
+        ...entity,
         health: encodeIntAsBytes(BigInt(health)),
-        level: checkExistsInt(BigInt(level)),
-        special1: checkExistsInt(BigInt(special1)),
-        special2: checkExistsInt(BigInt(special2)),
-        special3: checkExistsInt(BigInt(special3)),
-        slainOnTime: slainOnTime,
-        createdTime: createdTime,
         lastUpdatedTime: lastUpdatedTime,
         timestamp,
-        ...entity,
       };
 
   return {

@@ -84,7 +84,6 @@ export default function transform({ header, events }: Block) {
             special3: value.beastSpec.specials.special3,
             slayed: false,
             slainOnTime: null,
-            createdTime: null,
             lastUpdatedTime: timestamp,
             timestamp,
           }),
