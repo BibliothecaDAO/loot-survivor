@@ -514,7 +514,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
         start_game_doc = {
             "id": check_exists_int(sg.adventurer_state["adventurer_id"]),
             "owner": check_exists_int(sg.adventurer_state["owner"]),
-            "lastAction": check_exists_int(
+            "lastAction": encode_int_as_bytes(
                 sg.adventurer_state["adventurer"]["last_action"]
             ),
             "health": encode_int_as_bytes(sg.adventurer_state["adventurer"]["health"]),
@@ -1009,7 +1009,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                 abb.adventurer_state["adventurer"]["health"]
             ),
             "attacker": check_exists_int(2),
-            "fled": check_exists_int(0),
+            "fled": False,
             "damageDealt": encode_int_as_bytes(0),
             "criticalHit": abb.critical_hit,
             "damageTaken": encode_int_as_bytes(abb.damage),
@@ -1095,7 +1095,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                     ba.adventurer_state["adventurer"]["health"]
                 ),
                 "attacker": check_exists_int(1),
-                "fled": check_exists_int(0),
+                "fled": False,
                 "damageDealt": encode_int_as_bytes(ba.damage),
                 "criticalHit": ba.critical_hit,
                 "damageTaken": encode_int_as_bytes(0),
@@ -1157,7 +1157,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                     abb.adventurer_state["adventurer"]["health"]
                 ),
                 "attacker": check_exists_int(2),
-                "fled": check_exists_int(0),
+                "fled": False,
                 "damageDealt": encode_int_as_bytes(0),
                 "criticalHit": abb.critical_hit,
                 "damageTaken": encode_int_as_bytes(abb.damage),
@@ -1228,7 +1228,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                     sb.adventurer_state["adventurer"]["health"]
                 ),
                 "attacker": check_exists_int(1),
-                "fled": check_exists_int(0),
+                "fled": False,
                 "damageDealt": encode_int_as_bytes(sb.damage_dealt),
                 "criticalHit": sb.critical_hit,
                 "damageTaken": encode_int_as_bytes(0),
@@ -1295,7 +1295,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                     fa.adventurer_state["adventurer"]["health"]
                 ),
                 "attacker": check_exists_int(1),
-                "fled": check_exists_int(0),
+                "fled": False,
                 "damageDealt": encode_int_as_bytes(0),
                 "criticalHit": False,
                 "damageTaken": encode_int_as_bytes(0),
@@ -1357,7 +1357,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                     fa.adventurer_state["adventurer"]["health"]
                 ),
                 "attacker": check_exists_int(1),
-                "fled": check_exists_int(1),
+                "fled": True,
                 "damageDealt": encode_int_as_bytes(0),
                 "criticalHit": False,
                 "damageTaken": encode_int_as_bytes(0),
@@ -1620,7 +1620,7 @@ class LootSurvivorIndexer(StarkNetIndexer):
                     idp.adventurer_state["adventurer"]["health"]
                 ),
                 "attacker": check_exists_int(0),
-                "fled": check_exists_int(0),
+                "fled": False,
                 "damageDealt": encode_int_as_bytes(0),
                 "criticalHit": False,
                 "damageTaken": encode_int_as_bytes(0),

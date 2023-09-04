@@ -6,7 +6,6 @@ import {
   AMBUSHED_BY_BEAST,
   ATTACKED_BEAST,
   ATTACKED_BY_BEAST,
-  DISCOVERED_BEAST,
   FLEE_FAILED,
   FLEE_SUCCEEDED,
   parseAmbushedByBeast,
@@ -40,9 +39,9 @@ export const config: Config<Starknet, Mongo | Console> = {
   filter,
   startingBlock: START,
   finality: "DATA_STATUS_PENDING",
-  sinkType: "console",
+  sinkType: "mongo",
   sinkOptions: {
-    database: "loot_example",
+    database: "mongo_goerli",
     collectionName: "battles",
     // @ts-ignore - indexer package not updated
     entityMode: true,
@@ -61,7 +60,7 @@ export default function transform({ header, events }: Block) {
         // console.log("Start game", value);
         return [
           insertBattle({
-            txHash: receipt.transaction_hash,
+            txHash: receipt.transactionHash,
             beast: value.id,
             beastHealth: as.adventurer.beastHealth,
             beastLevel: bs.level,
@@ -71,12 +70,12 @@ export default function transform({ header, events }: Block) {
             seed: value.seed,
             adventurerId: as.adventurerId,
             adventurerHealth: as.adventurer.health,
-            attacker: "Adventurer",
-            fled: null,
+            attacker: 1,
+            fled: false,
             damageDealt: value.damage,
             criticalHit: value.criticalHit,
             damageTaken: 0,
-            damageLocation: null,
+            damageLocation: 0,
             xpEarnedAdventurer: 0,
             xpEarnedItems: 0,
             goldEarned: 0,
@@ -93,7 +92,7 @@ export default function transform({ header, events }: Block) {
         // console.log("Start game", value);
         return [
           insertBattle({
-            txHash: receipt.transaction_hash,
+            txHash: receipt.transactionHash,
             beast: value.id,
             beastHealth: as.adventurer.beastHealth,
             beastLevel: bs.level,
@@ -103,8 +102,8 @@ export default function transform({ header, events }: Block) {
             seed: value.seed,
             adventurerId: as.adventurerId,
             adventurerHealth: as.adventurer.health,
-            attacker: "Beast",
-            fled: null,
+            attacker: 2,
+            fled: false,
             damageDealt: 0,
             criticalHit: value.criticalHit,
             damageTaken: value.damage,
@@ -125,7 +124,7 @@ export default function transform({ header, events }: Block) {
         // console.log("Start game", value);
         return [
           insertBattle({
-            txHash: receipt.transaction_hash,
+            txHash: receipt.transactionHash,
             beast: value.id,
             beastHealth: as.adventurer.beastHealth,
             beastLevel: bs.level,
@@ -135,8 +134,8 @@ export default function transform({ header, events }: Block) {
             seed: value.seed,
             adventurerId: as.adventurerId,
             adventurerHealth: as.adventurer.health,
-            attacker: "Beast",
-            fled: null,
+            attacker: 2,
+            fled: false,
             damageDealt: 0,
             criticalHit: value.criticalHit,
             damageTaken: value.damage,
@@ -157,7 +156,7 @@ export default function transform({ header, events }: Block) {
         // console.log("Start game", value);
         return [
           insertBattle({
-            txHash: receipt.transaction_hash,
+            txHash: receipt.transactionHash,
             beast: value.id,
             beastHealth: as.adventurer.beastHealth,
             beastLevel: bs.level,
@@ -167,12 +166,12 @@ export default function transform({ header, events }: Block) {
             seed: value.seed,
             adventurerId: as.adventurerId,
             adventurerHealth: as.adventurer.health,
-            attacker: "Adventurer",
-            fled: null,
+            attacker: 1,
+            fled: false,
             damageDealt: value.damageDealt,
             criticalHit: value.criticalHit,
             damageTaken: 0,
-            damageLocation: null,
+            damageLocation: 0,
             xpEarnedAdventurer: value.xpEarnedAdventurer,
             xpEarnedItems: value.xpEarnedItems,
             goldEarned: 0,
@@ -189,7 +188,7 @@ export default function transform({ header, events }: Block) {
         // console.log("Start game", value);
         return [
           insertBattle({
-            txHash: receipt.transaction_hash,
+            txHash: receipt.transactionHash,
             beast: value.id,
             beastHealth: as.adventurer.beastHealth,
             beastLevel: bs.level,
@@ -199,12 +198,12 @@ export default function transform({ header, events }: Block) {
             seed: value.seed,
             adventurerId: as.adventurerId,
             adventurerHealth: as.adventurer.health,
-            attacker: "Adventurer",
-            fled: null,
+            attacker: 1,
+            fled: false,
             damageDealt: 0,
             criticalHit: false,
             damageTaken: 0,
-            damageLocation: null,
+            damageLocation: 0,
             xpEarnedAdventurer: 0,
             xpEarnedItems: 0,
             goldEarned: 0,
@@ -221,7 +220,7 @@ export default function transform({ header, events }: Block) {
         // console.log("Start game", value);
         return [
           insertBattle({
-            txHash: receipt.transaction_hash,
+            txHash: receipt.transactionHash,
             beast: value.id,
             beastHealth: as.adventurer.beastHealth,
             beastLevel: bs.level,
@@ -231,12 +230,12 @@ export default function transform({ header, events }: Block) {
             seed: value.seed,
             adventurerId: as.adventurerId,
             adventurerHealth: as.adventurer.health,
-            attacker: "Adventurer",
+            attacker: 1,
             fled: true,
             damageDealt: 0,
             criticalHit: false,
             damageTaken: 0,
-            damageLocation: null,
+            damageLocation: 0,
             xpEarnedAdventurer: 0,
             xpEarnedItems: 0,
             goldEarned: 0,
