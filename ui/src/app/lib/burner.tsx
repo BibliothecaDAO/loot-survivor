@@ -180,10 +180,10 @@ export const useBurner = () => {
     return arcadeAccounts;
   }, [account, isDeploying]);
 
-  // useEffect(() => {
-  //     const interval = setInterval(refresh, 2000)
-  //     return () => clearInterval(interval)
-  // }, [refresh])
+  useEffect(() => {
+    const interval = setInterval(refresh, 2000);
+    return () => clearInterval(interval);
+  }, [refresh]);
 
   return {
     get,
