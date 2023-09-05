@@ -156,9 +156,9 @@ export default function InventoryScreen() {
     Weapon = "Weapon",
     Chest = "Chest",
     Head = "Head",
-    Hand = "Hand",
     Waist = "Waist",
     Foot = "Foot",
+    Hand = "Hand",
     Neck = "Neck",
     Ring = "Ring",
   }
@@ -234,25 +234,12 @@ export default function InventoryScreen() {
           setEquipItems={setEquipItems}
         />
         <InventoryRow
-          title={"Hand Armor"}
-          items={groupedItems["Hand"]}
+          title={"Waist Armor"}
+          items={groupedItems["Waist"]}
           menuIndex={4}
           isActive={activeMenu == 4}
           setActiveMenu={setActiveMenu}
           isSelected={inventorySelected == 4}
-          setSelected={setInventorySelected}
-          equippedItem={adventurer?.hand}
-          icon={<LootIcon type="hand" size="w-4" />}
-          equipItems={equipItems}
-          setEquipItems={setEquipItems}
-        />
-        <InventoryRow
-          title={"Waist Armor"}
-          items={groupedItems["Waist"]}
-          menuIndex={5}
-          isActive={activeMenu == 5}
-          setActiveMenu={setActiveMenu}
-          isSelected={inventorySelected == 5}
           setSelected={setInventorySelected}
           equippedItem={adventurer?.waist}
           icon={<LootIcon type="waist" size="w-4" />}
@@ -262,13 +249,26 @@ export default function InventoryScreen() {
         <InventoryRow
           title={"Foot Armor"}
           items={groupedItems["Foot"]}
+          menuIndex={5}
+          isActive={activeMenu == 5}
+          setActiveMenu={setActiveMenu}
+          isSelected={inventorySelected == 5}
+          setSelected={setInventorySelected}
+          equippedItem={adventurer?.foot}
+          icon={<LootIcon type="foot" size="w-4" />}
+          equipItems={equipItems}
+          setEquipItems={setEquipItems}
+        />
+        <InventoryRow
+          title={"Hand Armor"}
+          items={groupedItems["Hand"]}
           menuIndex={6}
           isActive={activeMenu == 6}
           setActiveMenu={setActiveMenu}
           isSelected={inventorySelected == 6}
           setSelected={setInventorySelected}
-          equippedItem={adventurer?.foot}
-          icon={<LootIcon type="foot" size="w-4" />}
+          equippedItem={adventurer?.hand}
+          icon={<LootIcon type="hand" size="w-4" />}
           equipItems={equipItems}
           setEquipItems={setEquipItems}
         />
