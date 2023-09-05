@@ -5,7 +5,8 @@ FROM ubuntu:latest
 # Install required packages and set non-interactive for apt-get
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
-    apt-get install -y curl bash
+    apt-get install -y curl bash && \
+    apt-get install jq
 
 # Install Apibara
 RUN curl -sL https://install.apibara.com | bash
