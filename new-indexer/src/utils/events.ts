@@ -31,6 +31,8 @@ export const ATTACKED_BEAST = eventKey("AttackedBeast");
 export const ATTACKED_BY_BEAST = eventKey("AttackedByBeast");
 export const SLAYED_BEAST = eventKey("SlayedBeast");
 
+export const ADVENTURER_DIED = eventKey("AdventurerDied");
+
 export const FLEE_FAILED = eventKey("FleeFailed");
 export const FLEE_SUCCEEDED = eventKey("FleeSucceeded");
 
@@ -155,6 +157,13 @@ export const parseSlayedBeast = combineParsers({
   goldEarned: { index: 8, parser: parseU16 },
 });
 
+export const parseAdventurerDied = combineParsers({
+  adventurerState: { index: 0, parser: parseAdventurerState },
+  killedByBeast: { index: 1, parser: parseU8 },
+  killedByObstacle: { index: 2, parser: parseU8 },
+  callerAddress: { index: 3, parser: parseFelt252 },
+});
+
 export const parseAdventurerMetadata = combineParsers({
   name: { index: 0, parser: parseU128 },
   homeRealm: { index: 1, parser: parseU16 },
@@ -277,4 +286,9 @@ export const parseItemSpecialUnlocked = combineParsers({
   id: { index: 1, parser: parseU8 },
   level: { index: 2, parser: parseU8 },
   specials: { index: 3, parser: parseSpecialPowers },
+});
+
+export const parseNewItemsAvailable = combineParsers({
+  adventurerState: { index: 0, parser: parseAdventurerState },
+  items: { index: 1, parser: parseArray(parseU8) },
 });

@@ -3,16 +3,20 @@ import type { Block, Starknet } from "https://esm.sh/@apibara/indexer/starknet";
 import type { Mongo } from "https://esm.sh/@apibara/indexer/sink/mongo";
 import type { Console } from "https://esm.sh/@apibara/indexer/sink/console";
 import {
+  ADVENTURER_UPGRADED,
   DODGED_OBSTACLE,
   DROPPED_ITEMS,
   EQUIPPED_ITEMS,
   HIT_BY_OBSTACLE,
   ITEM_SPECIAL_UNLOCKED,
+  NEW_ITEMS_AVAILABLE,
+  parseAdventurerUpgraded,
   parseDodgedObstacle,
   parseDroppedItems,
   parseEquippedItems,
   parseHitByObstacle,
   parseItemSpecialUnlocked,
+  parseNewItemsAvailable,
   parsePurchasedItems,
   parseSlayedBeast,
   parseStartGame,
@@ -198,11 +202,53 @@ export default function transform({ header, events }: Block) {
         // console.log("Start game", value);
         return updateItemsXP({ adventurerState: as });
       }
-      case ITEM_SPECIAL_UNLOCKED:
+      case ITEM_SPECIAL_UNLOCKED: {
         const { value } = parseItemSpecialUnlocked(event.data, 0);
         const as = value.adventurerState;
         // console.log("Start game", value);
         return updateItemsXP({ adventurerState: as });
+      }
+      case NEW_ITEMS_AVAILABLE: {
+        const { value } = parseNewItemsAvailable(event.data, 0);
+        const as = value.adventurerState;
+        const newResult = value.items.map((item) => ({
+          entity: {
+            item: checkExistsInt(BigInt(item)),
+            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+          },
+          update: {
+            $set: {
+              item: checkExistsInt(BigInt(item)),
+              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+              isAvailable: true,
+              timestamp: new Date().toISOString(),
+            },
+          },
+        }));
+        return newResult;
+      }
+      case ADVENTURER_UPGRADED: {
+        const { value } = parseAdventurerUpgraded(event.data, 0);
+        const as = value.adventurerStateWithBag.adventurerState;
+        const itemUpdates: any[] = [];
+        for (let i = 1; i < 102; i++) {
+          itemUpdates.push({
+            entity: {
+              item: checkExistsInt(BigInt(i)),
+              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+            },
+            update: {
+              $set: {
+                item: checkExistsInt(BigInt(i)),
+                adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+                isAvailable: false,
+                timestamp: new Date().toISOString(),
+              },
+            },
+          });
+        }
+        return itemUpdates;
+      }
       default: {
         console.warn("Unknown event", event.keys[0]);
         return [];

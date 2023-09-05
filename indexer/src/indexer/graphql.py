@@ -1234,7 +1234,7 @@ def get_adventurers(
 ) -> List[Adventurer]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"_cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)
@@ -1285,7 +1285,7 @@ def get_scores(
 ) -> List[Score]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"_cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)
@@ -1328,7 +1328,7 @@ def get_discoveries(
 ) -> List[Discovery]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)
@@ -1378,7 +1378,7 @@ def get_beasts(
 ) -> List[Discovery]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"_cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)
@@ -1427,7 +1427,7 @@ def get_battles(
 ) -> List[Battle]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"_cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)
@@ -1472,7 +1472,7 @@ def get_items(
 ) -> List[Item]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"_cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)

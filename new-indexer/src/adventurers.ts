@@ -15,6 +15,32 @@ import {
   START_GAME,
   PURCHASED_POTIONS,
   PURCHASED_ITEMS,
+  ATTACKED_BY_BEAST,
+  ADVENTURER_DIED,
+  parseAdventurerDied,
+  parseAttackedByBeast,
+  AMBUSHED_BY_BEAST,
+  parseAmbushedByBeast,
+  ATTACKED_BEAST,
+  SLAYED_BEAST,
+  parseSlayedBeast,
+  FLEE_FAILED,
+  parseFleeFailed,
+  FLEE_SUCCEEDED,
+  parseFleeSucceeded,
+  ITEM_SPECIAL_UNLOCKED,
+  parseItemSpecialUnlocked,
+  EQUIPPED_ITEMS,
+  parsePurchasedItems,
+  parseEquippedItems,
+  DROPPED_ITEMS,
+  parseDroppedItems,
+  HIT_BY_OBSTACLE,
+  parseHitByObstacle,
+  DODGED_OBSTACLE,
+  parseDodgedObstacle,
+  NEW_ITEMS_AVAILABLE,
+  parseNewItemsAvailable,
 } from "./utils/events.ts";
 import { insertAdventurer, updateAdventurer } from "./utils/helpers.ts";
 
@@ -29,6 +55,8 @@ const filter = {
     { fromAddress: GAME, keys: [DISCOVERED_HEALTH] },
     { fromAddress: GAME, keys: [DISCOVERED_GOLD] },
     { fromAddress: GAME, keys: [DISCOVERED_XP] },
+    { fromAddress: GAME, keys: [ATTACKED_BY_BEAST] },
+    { fromAddress: GAME, keys: [ADVENTURER_DIED] },
   ],
 };
 
@@ -127,6 +155,24 @@ export default function transform({ header, events }: Block) {
           }),
         ];
       }
+      case DODGED_OBSTACLE: {
+        const { value } = parseDodgedObstacle(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case HIT_BY_OBSTACLE: {
+        const { value } = parseHitByObstacle(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerState,
+          }),
+        ];
+      }
       case PURCHASED_POTIONS: {
         const { value } = parseDiscoveredXp(event.data, 0);
         return [
@@ -137,7 +183,106 @@ export default function transform({ header, events }: Block) {
         ];
       }
       case PURCHASED_ITEMS: {
-        const { value } = parseDiscoveredXp(event.data, 0);
+        const { value } = parsePurchasedItems(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerStateWithBag.adventurerState,
+          }),
+        ];
+      }
+      case EQUIPPED_ITEMS: {
+        const { value } = parseEquippedItems(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerStateWithBag.adventurerState,
+          }),
+        ];
+      }
+      case DROPPED_ITEMS: {
+        const { value } = parseDroppedItems(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerStateWithBag.adventurerState,
+          }),
+        ];
+      }
+      case ATTACKED_BEAST: {
+        const { value } = parseAttackedByBeast(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case ATTACKED_BY_BEAST: {
+        const { value } = parseAttackedByBeast(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case AMBUSHED_BY_BEAST: {
+        const { value } = parseAmbushedByBeast(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case SLAYED_BEAST: {
+        const { value } = parseSlayedBeast(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case ADVENTURER_DIED: {
+        const { value } = parseAdventurerDied(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case FLEE_FAILED: {
+        const { value } = parseFleeFailed(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case FLEE_SUCCEEDED: {
+        const { value } = parseFleeSucceeded(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case ITEM_SPECIAL_UNLOCKED: {
+        const { value } = parseItemSpecialUnlocked(event.data, 0);
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case NEW_ITEMS_AVAILABLE: {
+        const { value } = parseNewItemsAvailable(event.data, 0);
         return [
           updateAdventurer({
             timestamp: new Date().toISOString(),
