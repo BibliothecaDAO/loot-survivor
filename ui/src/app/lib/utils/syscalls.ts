@@ -443,7 +443,6 @@ export function syscalls({
         const adventurerDiedEvent = events.find(
           (event) => event.name === "AdventurerDied"
         );
-        console.log(adventurerDiedEvent.name);
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
@@ -531,7 +530,6 @@ export function syscalls({
 
       setEquipItems([]);
       setDropItems([]);
-      console.log(discoveries);
       stopLoading(discoveries);
       setMintAdventurer(false);
     } catch (e) {
@@ -582,8 +580,6 @@ export function syscalls({
           event.name === "AttackedBeast" || event.name === "AttackedByBeast"
       );
       for (let attackedBeastEvent of attackedBeastEvents) {
-        console.log(attackedBeastEvent.name);
-        console.log(attackedBeastEvent.data[0]);
         setData("adventurerByIdQuery", {
           adventurers: [attackedBeastEvent.data[0]],
         });
@@ -912,7 +908,6 @@ export function syscalls({
       setData("battlesByTxHashQuery", {
         battles: [...battles.reverse()],
       });
-      console.log(battles);
       stopLoading(battles);
       setEquipItems([]);
       setDropItems([]);
@@ -1090,6 +1085,25 @@ export function syscalls({
         }
       }
 
+      const battles = [];
+      // Handle the beast counterattack from swapping
+      const attackedBeastEvents = events.filter(
+        (event) => event.name === "AttackedByBeast"
+      );
+      for (let attackedBeastEvent of attackedBeastEvents) {
+        setData("adventurerByIdQuery", {
+          adventurers: [attackedBeastEvent.data[0]],
+        });
+        setAdventurer(attackedBeastEvent.data[0]);
+        battles.unshift(attackedBeastEvent.data[1]);
+        setData(
+          "beastQuery",
+          attackedBeastEvent.data[0].beastHealth,
+          "health",
+          0
+        );
+      }
+
       const droppedItemsEvents = events.filter(
         (event) => event.name === "DroppedItems"
       );
@@ -1138,6 +1152,22 @@ export function syscalls({
           setScreen("start");
         }
       }
+
+      setData("battlesByBeastQuery", {
+        battles: [
+          ...battles,
+          ...(queryData.battlesByBeastQuery?.battles ?? []),
+        ],
+      });
+      setData("battlesByAdventurerQuery", {
+        battles: [
+          ...battles,
+          ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+        ],
+      });
+      setData("battlesByTxHashQuery", {
+        battles: [...battles.reverse()],
+      });
 
       stopLoading(notification);
       setMintAdventurer(false);
