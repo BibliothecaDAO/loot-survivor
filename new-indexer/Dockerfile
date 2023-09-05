@@ -8,6 +8,8 @@ RUN apt-get update && \
     apt-get install -y curl bash && \
     apt-get install -y jq
 
+
+SHELL ["/bin/bash", "-c"]
 # Install Apibara
 RUN curl -sL https://install.apibara.com | bash && \
     source /root/.bashrc && \
