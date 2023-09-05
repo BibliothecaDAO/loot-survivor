@@ -1,5 +1,4 @@
-# Use a base image. You may choose any base image that suits your needs.
-# Here, I'm using Ubuntu as the base.
+# Use Ubuntu as the base.
 FROM ubuntu:latest
 
 # Install required packages and set non-interactive for apt-get
@@ -20,6 +19,8 @@ WORKDIR /app
 COPY src .
 COPY env .
 COPY deno.json .
+
+RUN ls
 
 # To run multiple tasks, you could use a script or use CMD like below.
 CMD apibara run --allow-env=env src/adventurers.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1001 && \
