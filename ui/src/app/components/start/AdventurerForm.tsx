@@ -207,14 +207,14 @@ export const AdventurerForm = ({
       image: "/classes/cleric2.png",
     },
     {
-      name: "Scout",
-      description: "+1 Intelligence 1+ Dexterity +2 Strength +2 Charisma",
-      image: "/classes/scout2.png",
-    },
-    {
       name: "Merchant",
       description: "+6 Charisma",
       image: "/classes/hunter2.png",
+    },
+    {
+      name: "Scout",
+      description: "+1 Intelligence 1+ Dexterity +2 Strength +2 Charisma",
+      image: "/classes/scout2.png",
     },
     {
       name: "Warrior",
