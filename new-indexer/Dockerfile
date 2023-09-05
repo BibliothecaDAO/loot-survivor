@@ -9,13 +9,8 @@ RUN apt-get update && \
     apt-get install -y jq
 
 # Install Apibara
-RUN curl -sL https://install.apibara.com | bash
-
-# Switch to bash
-SHELL ["/bin/bash", "-c"]
-
-# Install Apibara plugins
-RUN source /root/.bashrc && \
+RUN curl -sL https://install.apibara.com | bash && \
+    source /root/.bashrc && \
     apibara plugins install sink-console && \
     apibara plugins install sink-mongo
 
