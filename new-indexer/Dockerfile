@@ -12,19 +12,11 @@ RUN apt-get update && \
 SHELL ["/bin/bash", "-c"]
 ENV PATH="/root/.local/share/apibara/bin:${PATH}"
 RUN curl -sL https://install.apibara.com | bash && \
-    ls -al /root/.local/share/apibara && \
     apibara plugins install sink-console && \
     apibara plugins install sink-mongo
-# Copy source code into container. Assume that your source code is in the "src" directory.
-COPY src/ /app/src/
-
-# Change working directory
-WORKDIR /app
-
-# Run apibara tasks. Note that "indexer" and "dna_XXX" are placeholders, you'll need to replace them.
+    
 # To run multiple tasks, you could use a script or use CMD like below.
-CMD source /root/.bashrc && \ 
-    apibara run --allow-env=env src/adventurers.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1001 && \
+CMD apibara run --allow-env=env src/adventurers.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1001 && \
     apibara run --allow-env=env src/battles.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1002 && \
     apibara run --allow-env=env src/beasts.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1003 && \
     apibara run --allow-env=env src/discoveries.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1004 && \
