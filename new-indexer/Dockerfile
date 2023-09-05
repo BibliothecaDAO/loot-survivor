@@ -10,13 +10,11 @@ RUN apt-get update && \
 
 
 SHELL ["/bin/bash", "-c"]
-# Install Apibara
+ENV PATH="/root/.local/share/apibara/bin:${PATH}"
 RUN curl -sL https://install.apibara.com | bash && \
     ls -al /root/.local/share/apibara && \
-    source /root/.bashrc && \
     apibara plugins install sink-console && \
     apibara plugins install sink-mongo
-
 # Copy source code into container. Assume that your source code is in the "src" directory.
 COPY src/ /app/src/
 
