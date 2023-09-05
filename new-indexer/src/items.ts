@@ -21,6 +21,7 @@ import {
   START_GAME,
 } from "./utils/events.ts";
 import { insertItem, updateItemsXP } from "./utils/helpers.ts";
+import { checkExistsInt, encodeIntAsBytes } from "./utils/encode.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
@@ -77,13 +78,30 @@ export default function transform({ header, events }: Block) {
               special2: 0,
               special3: 0,
               isAvailable: false,
-              purchasedTime: null,
-              timestamp,
+              purchasedTime: 0,
+              timestamp: new Date().toISOString(),
             })
           );
         }
 
-        return itemInserts;
+        const starterWeapon = {
+          entity: {
+            item: checkExistsInt(BigInt(as.adventurer.weapon.id)),
+            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+          },
+          update: {
+            $set: {
+              item: checkExistsInt(BigInt(as.adventurer.weapon.id)),
+              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+              owner: true,
+              equipped: true,
+              ownerAddress: checkExistsInt(BigInt(as.owner)),
+              timestamp: new Date().toISOString(),
+            },
+          },
+        };
+
+        return [...itemInserts, starterWeapon];
       }
       case PURCHASED_ITEMS: {
         const { value } = parsePurchasedItems(event.data, 0);
@@ -91,16 +109,16 @@ export default function transform({ header, events }: Block) {
         // console.log("Start game", value);
         const result = value.purchases.map((item) => ({
           entity: {
-            item: item.item.id,
-            adventurerId: as.adventurerId,
+            item: checkExistsInt(BigInt(item.item.id)),
+            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
           },
           update: {
             $set: {
               owner: true,
               equipped: false,
-              ownerAddress: as.owner,
-              purchasedTime: timestamp,
-              timestamp,
+              ownerAddress: checkExistsInt(BigInt(as.owner)),
+              purchasedTime: new Date().toISOString(),
+              timestamp: new Date().toISOString(),
             },
           },
         }));
@@ -112,25 +130,29 @@ export default function transform({ header, events }: Block) {
         // console.log("Start game", value);
         const equippedResult = value.equippedItems.map((item) => ({
           entity: {
-            item: item,
-            adventurerId: as.adventurerId,
+            item: checkExistsInt(BigInt(item)),
+            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
           },
           update: {
             $set: {
+              item: checkExistsInt(BigInt(item)),
+              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
               equipped: true,
-              timestamp,
+              timestamp: new Date().toISOString(),
             },
           },
         }));
         const unequippedResult = value.unequippedItems.map((item) => ({
           entity: {
-            item: item,
-            adventurerId: as.adventurerId,
+            item: checkExistsInt(BigInt(item)),
+            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
           },
           update: {
             $set: {
+              item: checkExistsInt(BigInt(item)),
+              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
               equipped: false,
-              timestamp,
+              timestamp: new Date().toISOString(),
             },
           },
         }));
@@ -142,15 +164,17 @@ export default function transform({ header, events }: Block) {
         // console.log("Start game", value);
         const result = value.itemIds.map((item) => ({
           entity: {
-            item: item,
-            adventurerId: as.adventurerId,
+            item: checkExistsInt(BigInt(item)),
+            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
           },
           update: {
             $set: {
+              item: checkExistsInt(BigInt(item)),
+              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
               owner: false,
               equipped: false,
               ownerAddress: null,
-              timestamp,
+              timestamp: new Date().toISOString(),
             },
           },
         }));

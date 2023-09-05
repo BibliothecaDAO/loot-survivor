@@ -84,9 +84,9 @@ export default function transform({ header, events }: Block) {
             special2: 0,
             special3: 0,
             ambushed: false,
-            seed: null,
-            discoveryTime: timestamp,
-            timestamp,
+            seed: 0,
+            discoveryTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -117,8 +117,8 @@ export default function transform({ header, events }: Block) {
             special3: 0,
             ambushed: false,
             seed: 0,
-            discoveryTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -149,8 +149,8 @@ export default function transform({ header, events }: Block) {
             special3: 0,
             ambushed: false,
             seed: 0,
-            discoveryTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -180,8 +180,8 @@ export default function transform({ header, events }: Block) {
             special3: 0,
             ambushed: false,
             seed: 0,
-            discoveryTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -211,8 +211,8 @@ export default function transform({ header, events }: Block) {
             special3: 0,
             ambushed: false,
             seed: 0,
-            discoveryTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -244,8 +244,8 @@ export default function transform({ header, events }: Block) {
             special3: bs.specials.special3,
             ambushed: false,
             seed: value.seed,
-            discoveryTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -277,8 +277,8 @@ export default function transform({ header, events }: Block) {
             special3: bs.specials.special3,
             ambushed: true,
             seed: value.seed,
-            discoveryTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }

@@ -79,9 +79,9 @@ export default function transform({ header, events }: Block) {
             xpEarnedAdventurer: 0,
             xpEarnedItems: 0,
             goldEarned: 0,
-            discoveryTime: timestamp,
-            blockTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            blockTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -111,9 +111,9 @@ export default function transform({ header, events }: Block) {
             xpEarnedAdventurer: 0,
             xpEarnedItems: 0,
             goldEarned: 0,
-            discoveryTime: timestamp,
-            blockTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            blockTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -143,9 +143,9 @@ export default function transform({ header, events }: Block) {
             xpEarnedAdventurer: 0,
             xpEarnedItems: 0,
             goldEarned: 0,
-            discoveryTime: timestamp,
-            blockTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            blockTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -175,9 +175,9 @@ export default function transform({ header, events }: Block) {
             xpEarnedAdventurer: value.xpEarnedAdventurer,
             xpEarnedItems: value.xpEarnedItems,
             goldEarned: 0,
-            discoveryTime: timestamp,
-            blockTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            blockTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -207,9 +207,9 @@ export default function transform({ header, events }: Block) {
             xpEarnedAdventurer: 0,
             xpEarnedItems: 0,
             goldEarned: 0,
-            discoveryTime: timestamp,
-            blockTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            blockTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -239,9 +239,9 @@ export default function transform({ header, events }: Block) {
             xpEarnedAdventurer: 0,
             xpEarnedItems: 0,
             goldEarned: 0,
-            discoveryTime: timestamp,
-            blockTime: timestamp,
-            timestamp,
+            discoveryTime: new Date().toISOString(),
+            blockTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }

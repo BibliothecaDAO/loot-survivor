@@ -85,9 +85,9 @@ export default function transform({ header, events }: Block) {
             homeRealm: am.homeRealm,
             classType: am.class,
             entropy: am.entropy,
-            createdTime: timestamp,
-            lastUpdatedTime: timestamp,
-            timestamp,
+            createdTime: new Date().toISOString(),
+            lastUpdatedTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -96,7 +96,7 @@ export default function transform({ header, events }: Block) {
         return [
           updateAdventurer({
             adventurerState: value.adventurerStateWithBag.adventurerState,
-            timestamp,
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -104,7 +104,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseDiscoveredHealth(event.data, 0);
         return [
           updateAdventurer({
-            timestamp,
+            timestamp: new Date().toISOString(),
             adventurerState: value.adventurerState,
           }),
         ];
@@ -113,7 +113,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseDiscoveredGold(event.data, 0);
         return [
           updateAdventurer({
-            timestamp,
+            timestamp: new Date().toISOString(),
             adventurerState: value.adventurerState,
           }),
         ];
@@ -122,7 +122,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseDiscoveredXp(event.data, 0);
         return [
           updateAdventurer({
-            timestamp,
+            timestamp: new Date().toISOString(),
             adventurerState: value.adventurerState,
           }),
         ];
@@ -131,7 +131,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseDiscoveredXp(event.data, 0);
         return [
           updateAdventurer({
-            timestamp,
+            timestamp: new Date().toISOString(),
             adventurerState: value.adventurerState,
           }),
         ];
@@ -140,7 +140,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseDiscoveredXp(event.data, 0);
         return [
           updateAdventurer({
-            timestamp,
+            timestamp: new Date().toISOString(),
             adventurerState: value.adventurerState,
           }),
         ];

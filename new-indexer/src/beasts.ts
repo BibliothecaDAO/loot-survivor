@@ -51,7 +51,7 @@ export default function transform({ header, events }: Block) {
     switch (event.keys[0]) {
       case DISCOVERED_BEAST: {
         const { value } = parseDiscoveredBeast(event.data, 0);
-        // console.log("Discovered beast", value);
+        console.log("Discovered beast", value);
         return [
           insertBeast({
             beast: value.id,
@@ -64,15 +64,15 @@ export default function transform({ header, events }: Block) {
             special3: value.beastSpec.specials.special3,
             slayed: false,
             slainOnTime: null,
-            createdTime: timestamp,
-            lastUpdatedTime: timestamp,
-            timestamp,
+            createdTime: new Date().toISOString(),
+            lastUpdatedTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
       case AMBUSHED_BY_BEAST: {
         const { value } = parseAmbushedByBeast(event.data, 0);
-        // console.log("Discovered beast", value);
+        console.log("Discovered beast", value);
         return [
           insertBeast({
             beast: value.id,
@@ -85,29 +85,25 @@ export default function transform({ header, events }: Block) {
             special3: value.beastSpec.specials.special3,
             slayed: false,
             slainOnTime: null,
-            createdTime: timestamp,
-            lastUpdatedTime: timestamp,
-            timestamp,
+            createdTime: new Date().toISOString(),
+            lastUpdatedTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
       case ATTACKED_BEAST: {
         const { value } = parseAttackedBeast(event.data, 0);
-        // console.log("Attacked beast", value);
+        console.log("Attacked beast", value);
         return [
           updateBeastHealth({
             beast: value.id,
             adventurerId: value.adventurerState.adventurerId,
             seed: value.seed,
             health: value.adventurerState.adventurer.health,
-            level: value.beastSpec.level,
-            special1: value.beastSpec.specials.special1,
-            special2: value.beastSpec.specials.special2,
-            special3: value.beastSpec.specials.special3,
             slayed: false,
             slainOnTime: null,
-            lastUpdatedTime: timestamp,
-            timestamp,
+            lastUpdatedTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }
@@ -120,15 +116,10 @@ export default function transform({ header, events }: Block) {
             adventurerId: value.adventurerState.adventurerId,
             seed: value.seed,
             health: value.adventurerState.adventurer.health,
-            level: value.beastSpec.level,
-            special1: value.beastSpec.specials.special1,
-            special2: value.beastSpec.specials.special2,
-            special3: value.beastSpec.specials.special3,
             slayed: true,
-            slainOnTime: timestamp,
-            createdTime: null,
-            lastUpdatedTime: timestamp,
-            timestamp,
+            slainOnTime: new Date().toISOString(),
+            lastUpdatedTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
           }),
         ];
       }

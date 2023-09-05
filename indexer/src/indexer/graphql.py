@@ -16,10 +16,10 @@ config = Config()
 
 
 def parse_hex(value):
-    bytesValue = value.to_bytes(32, "big")
     if not value.startswith("0x"):
         raise ValueError("invalid Hex value")
-    return bytes.fromhex(bytesValue.replace("0x", ""))
+    bytesValue = bytes.fromhex(value.replace("0x", ""))
+    return base64.b64encode(bytesValue).decode("utf-8")
 
 
 def serialize_hex(value):
