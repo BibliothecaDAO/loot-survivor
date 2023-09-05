@@ -57,7 +57,6 @@ export default function transform({ header, events }: Block) {
         const { value } = parseAttackedBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
-        // console.log("Start game", value);
         return [
           insertBattle({
             txHash: receipt.transactionHash,
@@ -89,7 +88,6 @@ export default function transform({ header, events }: Block) {
         const { value } = parseAttackedByBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
-        // console.log("Start game", value);
         return [
           insertBattle({
             txHash: receipt.transactionHash,
@@ -121,7 +119,6 @@ export default function transform({ header, events }: Block) {
         const { value } = parseAmbushedByBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
-        // console.log("Start game", value);
         return [
           insertBattle({
             txHash: receipt.transactionHash,
@@ -153,7 +150,6 @@ export default function transform({ header, events }: Block) {
         const { value } = parseSlayedBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
-        // console.log("Start game", value);
         return [
           insertBattle({
             txHash: receipt.transactionHash,
@@ -185,7 +181,6 @@ export default function transform({ header, events }: Block) {
         const { value } = parseFleeFailed(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
-        // console.log("Start game", value);
         return [
           insertBattle({
             txHash: receipt.transactionHash,
@@ -217,7 +212,6 @@ export default function transform({ header, events }: Block) {
         const { value } = parseFleeSucceeded(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
-        // console.log("Start game", value);
         return [
           insertBattle({
             txHash: receipt.transactionHash,

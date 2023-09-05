@@ -51,7 +51,6 @@ export default function transform({ header, events }: Block) {
     switch (event.keys[0]) {
       case DISCOVERED_BEAST: {
         const { value } = parseDiscoveredBeast(event.data, 0);
-        console.log("Discovered beast", value);
         return [
           insertBeast({
             beast: value.id,
@@ -72,7 +71,6 @@ export default function transform({ header, events }: Block) {
       }
       case AMBUSHED_BY_BEAST: {
         const { value } = parseAmbushedByBeast(event.data, 0);
-        console.log("Discovered beast", value);
         return [
           insertBeast({
             beast: value.id,
@@ -93,7 +91,6 @@ export default function transform({ header, events }: Block) {
       }
       case ATTACKED_BEAST: {
         const { value } = parseAttackedBeast(event.data, 0);
-        console.log("Attacked beast", value);
         return [
           updateBeastHealth({
             beast: value.id,
@@ -109,7 +106,6 @@ export default function transform({ header, events }: Block) {
       }
       case SLAYED_BEAST: {
         const { value } = parseSlayedBeast(event.data, 0);
-        // console.log("Slayed beast", value);
         return [
           updateBeastHealth({
             beast: value.id,

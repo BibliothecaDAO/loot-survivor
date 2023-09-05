@@ -67,7 +67,6 @@ export default function transform({ header, events }: Block) {
       case START_GAME: {
         const { value } = parseStartGame(event.data, 0);
         const as = value.adventurerState;
-        // console.log("Start game", value);
         const itemInserts: any[] = [];
         for (let i = 1; i < 102; i++) {
           itemInserts.push(
@@ -110,7 +109,6 @@ export default function transform({ header, events }: Block) {
       case PURCHASED_ITEMS: {
         const { value } = parsePurchasedItems(event.data, 0);
         const as = value.adventurerStateWithBag.adventurerState;
-        // console.log("Start game", value);
         const result = value.purchases.map((item) => ({
           entity: {
             item: checkExistsInt(BigInt(item.item.id)),
@@ -131,7 +129,6 @@ export default function transform({ header, events }: Block) {
       case EQUIPPED_ITEMS: {
         const { value } = parseEquippedItems(event.data, 0);
         const as = value.adventurerStateWithBag.adventurerState;
-        // console.log("Start game", value);
         const equippedResult = value.equippedItems.map((item) => ({
           entity: {
             item: checkExistsInt(BigInt(item)),
@@ -165,7 +162,6 @@ export default function transform({ header, events }: Block) {
       case DROPPED_ITEMS: {
         const { value } = parseDroppedItems(event.data, 0);
         const as = value.adventurerStateWithBag.adventurerState;
-        // console.log("Start game", value);
         const result = value.itemIds.map((item) => ({
           entity: {
             item: checkExistsInt(BigInt(item)),
@@ -187,25 +183,21 @@ export default function transform({ header, events }: Block) {
       case HIT_BY_OBSTACLE: {
         const { value } = parseHitByObstacle(event.data, 0);
         const as = value.adventurerState;
-        // console.log("Start game", value);
         return updateItemsXP({ adventurerState: as });
       }
       case DODGED_OBSTACLE: {
         const { value } = parseDodgedObstacle(event.data, 0);
         const as = value.adventurerState;
-        // console.log("Start game", value);
         return updateItemsXP({ adventurerState: as });
       }
       case SLAYED_BEAST: {
         const { value } = parseSlayedBeast(event.data, 0);
         const as = value.adventurerState;
-        // console.log("Start game", value);
         return updateItemsXP({ adventurerState: as });
       }
       case ITEM_SPECIAL_UNLOCKED: {
         const { value } = parseItemSpecialUnlocked(event.data, 0);
         const as = value.adventurerState;
-        // console.log("Start game", value);
         return updateItemsXP({ adventurerState: as });
       }
       case NEW_ITEMS_AVAILABLE: {

@@ -84,7 +84,6 @@ export default function transform({ header, events }: Block) {
         const { value } = parseStartGame(event.data, 0);
         const as = value.adventurerState;
         const am = value.adventurerMeta;
-        // console.log("Start game", value);
         return [
           insertAdventurer({
             id: as.adventurerId,

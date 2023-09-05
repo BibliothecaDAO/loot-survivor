@@ -220,7 +220,6 @@ export default function transform({ header, events }: Block) {
         const { value } = parseDiscoveredBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
-        // console.log("Start game", value);
         return [
           insertDiscovery({
             txHash: receipt.transactionHash,
@@ -253,7 +252,6 @@ export default function transform({ header, events }: Block) {
         const { value } = parseAmbushedByBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
-        // console.log("Start game", value);
         return [
           insertDiscovery({
             txHash: receipt.transactionHash,
