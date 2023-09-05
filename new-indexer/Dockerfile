@@ -15,6 +15,9 @@ RUN curl -sL https://install.apibara.com | bash && \
     apibara plugins install sink-console && \
     apibara plugins install sink-mongo
 
+
+RUN ls
+
 WORKDIR /new-indexer
 
 # To run multiple tasks, you could use a script or use CMD like below.
