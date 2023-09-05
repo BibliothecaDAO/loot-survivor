@@ -9,6 +9,7 @@ import {
 } from "@starknet-react/core";
 import { AccountInterface, CallData, TransactionStatus } from "starknet";
 import { useCallback } from "react";
+import { useBurnerContext } from "../context";
 
 export const ArcadeDialog = () => {
   const { account: MasterAccount, address, connector } = useAccount();
@@ -16,7 +17,7 @@ export const ArcadeDialog = () => {
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const { connect, connectors, available } = useConnectors();
-  const { create, isDeploying } = useBurner();
+  const { burner: { create, isDeploying } } = useBurnerContext();
 
   const arcadeConnectors = useCallback(() => {
     return available.filter(
@@ -43,18 +44,18 @@ export const ArcadeDialog = () => {
         <div className="flex justify-center">
           {((connector?.options as any)?.id == "argentX" ||
             (connector?.options as any)?.id == "braavos") && (
-            <div>
-              <Button onClick={() => create()} disabled={isWrongNetwork}>
-                create arcade account
-              </Button>
-              <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                Note: This will initiate a 0.01 ETH transaction to the new{" "}
-                <br />
-                account. Your page will reload after the Account has been
-                created!
-              </p>
-            </div>
-          )}
+              <div>
+                <Button onClick={() => create()} disabled={isWrongNetwork}>
+                  create arcade account
+                </Button>
+                <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
+                  Note: This will initiate a 0.01 ETH transaction to the new{" "}
+                  <br />
+                  account. Your page will reload after the Account has been
+                  created!
+                </p>
+              </div>
+            )}
         </div>
 
         <h5>Existing</h5>

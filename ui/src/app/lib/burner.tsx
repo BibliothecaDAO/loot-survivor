@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Account,
   AccountInterface,
@@ -110,7 +110,12 @@ export const useBurner = () => {
     [walletAccount]
   );
 
+  const [accountLength, setAccountLength] = useState(0);
+
   const create = useCallback(async () => {
+
+    setAccountLength(list().length);
+
     setIsDeploying(true);
     const privateKey = stark.randomAddress();
     const publicKey = ec.starkCurve.getStarkKey(privateKey);
@@ -154,11 +159,20 @@ export const useBurner = () => {
     };
 
     setAccount(burner);
-    setIsDeploying(false);
+
     Storage.set("burners", storage);
-    refresh();
+
+    setIsDeploying(false);
+
     return burner;
   }, [walletAccount]);
+
+  useMemo(() => {
+    const interval = setInterval(refresh, 2000)
+    console.log('refreshing')
+    return () => clearInterval(interval)
+  }, [isDeploying])
+
 
   const listConnectors = useCallback(() => {
     const arcadeAccounts = [];
@@ -178,12 +192,7 @@ export const useBurner = () => {
     }
 
     return arcadeAccounts;
-  }, [account, isDeploying]);
-
-  // useEffect(() => {
-  //     const interval = setInterval(refresh, 2000)
-  //     return () => clearInterval(interval)
-  // }, [refresh])
+  }, [account]);
 
   return {
     get,
