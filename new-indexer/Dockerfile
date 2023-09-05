@@ -20,17 +20,23 @@ COPY src ./src
 COPY env .
 COPY deno.json .
 
-# # To run multiple tasks, you could use a script or use CMD like below.
-# CMD apibara run --allow-env=env src/adventurers.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1001 && \
-#     apibara run --allow-env=env src/battles.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1002 && \
-#     apibara run --allow-env=env src/beasts.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1003 && \
-#     apibara run --allow-env=env src/discoveries.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1004 && \
-#     apibara run --allow-env=env src/items.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1005
+# Copy and set permissions for individual scripts
+COPY run_adventurers.sh /run_adventurers.sh
+COPY run_battles.sh /run_battles.sh
+COPY run_beasts.sh /run_beasts.sh
+COPY run_discoveries.sh /run_discoveries.sh
+COPY run_items.sh /run_items.sh
 
-# Copy and set permissions
-COPY apibara-script.sh /apibara-script.sh
-RUN chmod +x /apibara-script.sh
+# Make individual scripts executable
+RUN chmod +x /run_adventurers.sh
+RUN chmod +x /run_battles.sh
+RUN chmod +x /run_beasts.sh
+RUN chmod +x /run_discoveries.sh
+RUN chmod +x /run_items.sh
+
+# Copy and set permissions for master script
+COPY master_script.sh /master_script.sh
+RUN chmod +x /master_script.sh
 
 # Run your script
-CMD ["/apibara-script.sh"]
-
+CMD ["/master_script.sh"]
