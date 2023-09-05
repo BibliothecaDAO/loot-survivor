@@ -24,7 +24,6 @@ const filter = {
     { fromAddress: GAME, keys: [DISCOVERED_BEAST] },
     { fromAddress: GAME, keys: [AMBUSHED_BY_BEAST] },
     { fromAddress: GAME, keys: [ATTACKED_BEAST] },
-    { fromAddress: GAME, keys: [ATTACKED_BY_BEAST] },
     { fromAddress: GAME, keys: [SLAYED_BEAST] },
   ],
 };
