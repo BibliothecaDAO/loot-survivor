@@ -906,20 +906,31 @@ export function syscalls({
           item.equipped = true;
         }
       }
-      setData("itemsByAdventurerQuery", {
-        items: [
-          ...(queryData.itemsByAdventurerQuery?.items ?? []),
-          ...purchasedItems,
-        ],
-      });
+      let unequipIndexes = [];
       for (let equippedItemsEvent of equippedItemsEvents) {
         for (let unequippedItem of equippedItemsEvent.data[2]) {
           const ownedItemIndex =
             queryData.itemsByAdventurerQuery?.items.findIndex(
               (item: any) => item.item == unequippedItem
             );
-          setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
+          let item = purchasedItems.find(
+            (item) => item.item === unequippedItem
+          );
+          if (item) {
+            item.equipped = false;
+          } else {
+            unequipIndexes.push(ownedItemIndex);
+          }
         }
+      }
+      setData("itemsByAdventurerQuery", {
+        items: [
+          ...(queryData.itemsByAdventurerQuery?.items ?? []),
+          ...purchasedItems,
+        ],
+      });
+      for (let i = 0; i < unequipIndexes.length; i++) {
+        setData("itemsByAdventurerQuery", false, "equipped", unequipIndexes[i]);
       }
       // Reset items to no availability
       setData("latestMarketItemsQuery", null);
