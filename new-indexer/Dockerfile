@@ -16,7 +16,7 @@ RUN curl -sL https://install.apibara.com | bash && \
 
 WORKDIR /app
 
-COPY src .
+COPY src /src
 COPY env .
 COPY deno.json .
 
