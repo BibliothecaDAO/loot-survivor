@@ -47,7 +47,7 @@ const P = new BN(
   16
 );
 
-export function feltToString(felt: BN) {
+export function feltToString(felt: number) {
   const newStrB = Buffer.from(felt.toString(16), "hex");
   return newStrB.toString();
 }

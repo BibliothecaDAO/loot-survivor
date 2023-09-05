@@ -6,6 +6,7 @@ import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Button } from "../buttons/Button";
 import { useBlock } from "@starknet-react/core";
 import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
 
 interface LiveLeaderboardRowProps {
   index: number;
@@ -28,6 +29,18 @@ const LiveLeaderboardRow = ({
     blockIdentifier: "latest",
   });
   const dead = (adventurer.health ?? 0) <= 0;
+  const adventurersByOwner = useQueriesStore(
+    (state) => state.data.adventurersByOwnerQuery?.adventurers ?? []
+  );
+
+  const ownedAdventurer = adventurersByOwner.some(
+    (a) => a.id === adventurer.id
+  );
+
+  const topScores = [...adventurersByOwner].sort(
+    (a, b) => (b.xp ?? 0) - (a.xp ?? 0)
+  );
+  const topScoreAdventurer = topScores[0]?.id === adventurer.id;
 
   const slayIdleAdventurerTx = {
     contractAddress: gameContract?.address ?? "",
@@ -50,7 +63,13 @@ const LiveLeaderboardRow = ({
 
   return (
     <tr
-      className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer xl:h-2 xl:text-lg 2xl:text-xl 2xl:h-full"
+      className={`text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer xl:h-2 xl:text-lg 2xl:text-xl 2xl:h-full ${
+        topScoreAdventurer
+          ? "bg-terminal-yellow-50"
+          : ownedAdventurer
+          ? "bg-terminal-green-50"
+          : ""
+      }`}
       onClick={() => {
         handleRowSelected(adventurer.id ?? 0);
         clickPlay();

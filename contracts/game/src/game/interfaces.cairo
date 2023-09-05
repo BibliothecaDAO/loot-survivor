@@ -34,7 +34,7 @@ trait IGame<TContractState> {
         charisma: u8,
         items: Array<ItemPurchase>,
     );
-    fn slay_idle_adventurer(ref self: TContractState, adventurer_id: u256);
+    fn slay_idle_adventurers(ref self: TContractState, adventurer_ids: Array<u256>);
 
     // --------- view functions ---------
 

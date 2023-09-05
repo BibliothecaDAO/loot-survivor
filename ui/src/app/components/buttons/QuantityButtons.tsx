@@ -8,7 +8,7 @@ interface ButtonProps {
   setAmount: (value: number) => void;
 }
 
-const HealthSlider: React.FC<ButtonProps> = ({
+const HealthButtons: React.FC<ButtonProps> = ({
   amount,
   max,
   min,
@@ -49,4 +49,4 @@ const HealthSlider: React.FC<ButtonProps> = ({
   );
 };
 
-export default HealthSlider;
+export default HealthButtons;

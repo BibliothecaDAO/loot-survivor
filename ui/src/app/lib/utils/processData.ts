@@ -1,4 +1,3 @@
-import BN from "bn.js";
 import { GameData } from "@/app/components/GameData";
 import {
   DiscoveredHealthEvent,
@@ -213,7 +212,7 @@ export function processData(
           startGameEvent.adventurerState["adventurer"]["beastHealth"],
         statUpgrades:
           startGameEvent.adventurerState["adventurer"]["statPointsAvailable"],
-        name: feltToString(new BN(startGameEvent.adventurerMeta["name"])),
+        name: feltToString(startGameEvent.adventurerMeta["name"]),
         homeRealm: startGameEvent.adventurerMeta["homeRealm"],
         classType: gameData.CLASSES[startGameEvent.adventurerMeta["class"]],
         entropy: startGameEvent.adventurerMeta["entropy"],

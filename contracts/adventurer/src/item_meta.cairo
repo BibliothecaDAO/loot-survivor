@@ -47,9 +47,9 @@ const MAX_SPECIAL3: u8 = 31;
 
 #[derive(PartialEq, Drop, Copy, Serde)]
 struct ItemSpecials {
-    special1: u8, // 4 bit
-    special2: u8, // 7 bits
-    special3: u8, // 5 bits
+    special1: u8, // 4 bits in storage
+    special2: u8, // 7 bits in storage
+    special3: u8, // 5 bits in storage
 }
 
 // Player can have a total of 20 items. We map the items index to a slot in the metadata
@@ -65,6 +65,7 @@ struct ItemSpecialsStorage {
     item_8: ItemSpecials,
     item_9: ItemSpecials,
     item_10: ItemSpecials,
+    mutated: bool,
 }
 
 // TODO: We can greatly simplify and harden our meta data storage by switching to the below
@@ -184,7 +185,8 @@ impl ItemSpecialsStoragePacking of Packing<ItemSpecialsStorage> {
             item_7: Packing::unpack(item_7.try_into().expect('unpack LISNS item_7')),
             item_8: Packing::unpack(item_8.try_into().expect('unpack LISNS item_8')),
             item_9: Packing::unpack(item_9.try_into().expect('unpack LISNS item_9')),
-            item_10: Packing::unpack(item_10.try_into().expect('unpack LISNS item_10'))
+            item_10: Packing::unpack(item_10.try_into().expect('unpack LISNS item_10')),
+            mutated: false,
         }
     }
 
@@ -345,6 +347,9 @@ impl ImplItemSpecials of IItemSpecials {
             // behaving as intended
             panic_with_felt252('meta data id not in storage')
         }
+
+        // flag storage as mutated so we know we need to write it to storage
+        self.mutated = true;
     }
 
     // @dev This function assigns a metadata ID to an item owned by an adventurer.
@@ -494,7 +499,8 @@ fn test_item_meta_packing() {
         item_9: ItemSpecials { special1: 8, special2: 8, special3: 8 // dnc
          },
         item_10: ItemSpecials { special1: 9, special2: 9, special3: 9 // dnc
-         }
+         },
+        mutated: false,
     };
 
     // pack and then unpack the specials
@@ -733,7 +739,8 @@ fn test_get_specials() {
         item_7: leather_gloves_specials,
         item_8: silk_gloves_specials,
         item_9: linen_gloves_specials,
-        item_10: crown_specials
+        item_10: crown_specials,
+        mutated: false
     };
 
     // initialize special storage 2 with remaining 9 items
@@ -748,7 +755,8 @@ fn test_get_specials() {
         item_8: holy_gauntlets_specials,
         item_9: demonhide_boots_specials,
         item_10: ItemSpecials { // no item 10 in storage2
-         special1: 0, special2: 0, special3: 0 }
+         special1: 0, special2: 0, special3: 0 },
+        mutated: false
     };
 
     // assert calling get_special for each item returns the expected specials
@@ -824,6 +832,7 @@ fn test_get_specials_overflow_fail() {
         item_8: ItemSpecials { special2: 0, special3: 0, special1: 0 },
         item_9: ItemSpecials { special2: 0, special3: 0, special1: 0 },
         item_10: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        mutated: false
     };
 
     // initialze an item whose meta data exceeds the max storage slot for the special storage
@@ -854,6 +863,7 @@ fn test_get_specials_zero_fail() {
         item_8: ItemSpecials { special2: 0, special3: 0, special1: 0 },
         item_9: ItemSpecials { special2: 0, special3: 0, special1: 0 },
         item_10: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        mutated: false
     };
 
     // initialze an item whose meta data exceeds the max storage slot for the special storage
@@ -879,7 +889,8 @@ fn test_set_specials() {
         item_7: ItemSpecials { special2: 0, special3: 0, special1: 0, },
         item_8: ItemSpecials { special2: 0, special3: 0, special1: 0, },
         item_9: ItemSpecials { special2: 0, special3: 0, special1: 0, },
-        item_10: ItemSpecials { special2: 0, special3: 0, special1: 0, }
+        item_10: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        mutated: false
     };
 
     let mut storage2 = ItemSpecialsStorage {
@@ -892,7 +903,8 @@ fn test_set_specials() {
         item_7: ItemSpecials { special2: 0, special3: 0, special1: 0, },
         item_8: ItemSpecials { special2: 0, special3: 0, special1: 0, },
         item_9: ItemSpecials { special2: 0, special3: 0, special1: 0, },
-        item_10: ItemSpecials { special2: 0, special3: 0, special1: 0, }
+        item_10: ItemSpecials { special2: 0, special3: 0, special1: 0, },
+        mutated: false
     };
 
     // Storage 1 Tests
@@ -1010,6 +1022,7 @@ fn test_set_specials_storage_zero_fail() {
         item_8: ItemSpecials { special2: 0, special3: 0, special1: 0 },
         item_9: ItemSpecials { special2: 0, special3: 0, special1: 0 },
         item_10: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        mutated: false
     };
 
     // initialze an item with meta data id zero
@@ -1040,6 +1053,7 @@ fn test_set_specials_storage_overflow_fail() {
         item_8: ItemSpecials { special2: 0, special3: 0, special1: 0 },
         item_9: ItemSpecials { special2: 0, special3: 0, special1: 0 },
         item_10: ItemSpecials { special2: 0, special3: 0, special1: 0 },
+        mutated: false
     };
 
     // initialze an item whose meta data exceeds the max storage slot for the special storage

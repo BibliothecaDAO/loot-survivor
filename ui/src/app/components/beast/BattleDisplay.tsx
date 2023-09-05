@@ -339,8 +339,11 @@ export const NotificationBattleDisplay = ({
             )}
             !
           </p>
-          <TwitterShareButton
+          {/* <TwitterShareButton
             text={`My adventurer just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+          /> */}
+          <TwitterShareButton
+            text={`${adventurer?.name} just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
           />
         </div>
       );
