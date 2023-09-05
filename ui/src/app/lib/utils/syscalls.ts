@@ -35,6 +35,7 @@ export interface SyscallsProps {
   setScreen: (...args: any[]) => any;
   setAdventurer: (...args: any[]) => any;
   setMintAdventurer: (...args: any[]) => any;
+  setStartOption: (...args: any[]) => any;
 }
 
 export function syscalls({
@@ -61,6 +62,7 @@ export function syscalls({
   setScreen,
   setAdventurer,
   setMintAdventurer,
+  setStartOption,
 }: SyscallsProps) {
   const gameData = new GameData();
 
@@ -410,6 +412,7 @@ export function syscalls({
           );
         }
         setScreen("start");
+        setStartOption("create adventurer")
       }
 
       const filteredDeathPenalty = events.filter(
@@ -613,7 +616,8 @@ export function syscalls({
             adventurerDiedEvent.data[0]
           );
         }
-        setScreen("start");
+        setScreen("start")
+        setStartOption("create adventurer");
       }
 
       const filteredDeathPenalty = events.filter(
@@ -782,7 +786,8 @@ export function syscalls({
             adventurerDiedEvent.data[0]
           );
         }
-        setScreen("start");
+        setScreen("start")
+        setStartOption("create adventurer");
       }
 
       const filteredDeathPenalty = events.filter(
@@ -1055,7 +1060,8 @@ export function syscalls({
             ["You equipped"],
             adventurerDiedEvent.data[0]
           );
-          setScreen("start");
+          setScreen("start")
+          setStartOption("create adventurer");
         }
       }
 

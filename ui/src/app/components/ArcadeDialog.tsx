@@ -1,3 +1,5 @@
+import React from "react";
+import { useState } from "react";
 import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "./buttons/Button";
 import { PREFUND_AMOUNT, useBurner } from "../lib/burner";
@@ -29,36 +31,35 @@ export const ArcadeDialog = () => {
 
   return (
     <>
-      <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
-      <div className="fixed text-center top-1/8 left-1/8 sm:left-1/4 w-3/4 sm:w-1/2 h-3/4 border-2 bg-terminal-black z-50 border-terminal-green p-3 overflow-y-auto">
-        <Button onClick={() => showArcadeDialog(!arcadeDialog)}>close</Button>
-
-        <h3 className="mt-8">Arcade Account</h3>
-
-        <p className="sm:text-2xl pb-8">
-          Create an Arcade Account here <br /> to allow for signature free
-          gameplay!
+      <div className="fixed inset-0 opacity-80 bg-terminal-black z-40 m-2" />
+      <div className="fixed text-center top-1/8 left-1/8 sm:left-1/4 w-3/4 sm:w-1/2 h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
+        <h3 className="mt-4">Arcade Accounts</h3>
+        <p className="m-2 text-xl">
+          Go deep into the mist with signature free gameplay! <br /> Connect
+          your wallet to create an Arcade Account
         </p>
 
-        <div className="flex justify-center">
+        {/* 
+        <p className="text-sm xl:text-xl 2xl:text-2xl pb-4">
+          Create your AA here <br /> for signature free gameplay!
+        </p> */}
+
+        <div className="flex justify-center mb-1">
           {((connector?.options as any)?.id == "argentX" ||
             (connector?.options as any)?.id == "braavos") && (
             <div>
+              <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
+                Note: This will initiate a 0.01 ETH transaction from your
+                connected wallet to the arcade account. <br />
+                You may need to refresh after the account has been created!
+              </p>
               <Button onClick={() => create()} disabled={isWrongNetwork}>
                 create arcade account
               </Button>
-              <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                Note: This will initiate a 0.01 ETH transaction to the new{" "}
-                <br />
-                account. Your page will reload after the Account has been
-                created!
-              </p>
             </div>
           )}
         </div>
-
-        <h5>Existing</h5>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 overflow-hidden">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 overflow-hidden my-6">
           {arcadeConnectors().map((account, index) => {
             return (
               <ArcadeAccountCard
@@ -71,10 +72,13 @@ export const ArcadeDialog = () => {
             );
           })}
           {isDeploying && (
-            <div className="flex justify-center border-terminal-green border sm:h-32">
+            <div className="flex justify-center border-terminal-green border">
               <p className="self-center">Deploying Account...</p>
             </div>
           )}
+        </div>
+        <div>
+          <Button onClick={() => showArcadeDialog(!arcadeDialog)}>close</Button>
         </div>
       </div>
     </>
@@ -97,6 +101,7 @@ export const ArcadeAccountCard = ({
   const { data } = useBalance({
     address: account.name,
   });
+  const [isCopied, setIsCopied] = useState(false);
 
   const connected = address == account.name;
 
@@ -126,19 +131,37 @@ export const ArcadeAccountCard = ({
     }
   };
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
+
   return (
-    <div className="border border-terminal-green p-3 hover:bg-terminal-green hover:text-terminal-black">
-      <div className="text-left flex justify-between text-sm sm:text-xl mb-0 sm:mb-4">
-        {account.id} <span>{balance}</span>{" "}
+    <div className="border border-terminal-green p-3 hover:bg-terminal-green hover:text-terminal-black items-center">
+      <div className="text-left flex flex-col text-sm sm:text-xl mb-0 sm:mb-4 items-center">
+        <span
+          onClick={() => copyToClipboard(account.id)}
+          style={{ cursor: "pointer" }}
+        >
+          {account.id}
+        </span>
+        <span className="text-lg">{balance}ETH</span>{" "}
       </div>
-      <div className=" flex justify-between">
+      <div className="flex justify-center">
         <Button
-          variant={connected ? "default" : "outline"}
+          variant={connected ? "default" : "ghost"}
           onClick={() => onClick(account)}
         >
           {connected ? "connected" : "connect"}
         </Button>
       </div>
+
+      {isCopied && <span>Copied!</span>}
     </div>
   );
 };

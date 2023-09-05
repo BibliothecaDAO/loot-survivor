@@ -26,24 +26,24 @@ const WalletSelect = ({}: WalletSelectProps) => {
     );
 
   return (
-    <div className="flex flex-col p-8">
-      <div className="flex flex-col self-center my-auto">
+    <div className="flex flex-col p-8 mt-56">
+      <div className="flex flex-col self-center ">
         {screen === "wallet" ? (
           <>
-            <div className="w-full">
+            <div className="fixed inset-y-0 left-0 z-[-1]">
               <Image
-                className=" mx-auto p-10 animate-pulse"
+                className="mx-auto p-10 animate-pulse object-cover "
                 src={"/monsters/balrog.png"}
                 alt="start"
-                width={200}
-                height={200}
+                width={500}
+                height={500}
               />
             </div>
             <div className="w-full text-center">
               <h3 className="mb-10">Time to Survive</h3>
             </div>
 
-            <div className="flex flex-col gap-5 m-auto overflow-y-auto">
+            <div className="flex flex-col gap-2 m-auto overflow-y-auto">
               <Button onClick={() => setScreen("tutorial")}>
                 I don&apos;t have a wallet
               </Button>
@@ -61,19 +61,30 @@ const WalletSelect = ({}: WalletSelectProps) => {
               {arcadeConnectors().length ? (
                 <>
                   <h5 className="text-center">Arcade Accounts</h5>
-                  {arcadeConnectors().map((connector, index) => (
-                    <Button
-                      onClick={() => connect(connector)}
-                      key={index}
-                      className="w-full"
-                    >
-                      Connect {connector.id}
-                    </Button>
-                  ))}
+                  <div className="flex flex-row gap-2 overflow-auto">
+                    {arcadeConnectors().map((connector, index) => (
+                      <Button
+                        onClick={() => connect(connector)}
+                        key={index}
+                        className="w-full"
+                      >
+                        Connect {connector.id}
+                      </Button>
+                    ))}
+                  </div>
                 </>
               ) : (
                 ""
               )}
+              <div className="fixed inset-y-0 right-0 z-[-1]">
+                <Image
+                  className="mx-auto p-10 animate-pulse object-cover "
+                  src={"/monsters/dragon.png"}
+                  alt="start"
+                  width={500}
+                  height={500}
+                />
+              </div>
             </div>
           </>
         ) : (

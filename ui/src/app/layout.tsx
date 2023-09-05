@@ -82,7 +82,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <title>Loot Survivors</title>
+        <title>Loot Survivor</title>
       </head>
       <body
         suppressHydrationWarning={true}
