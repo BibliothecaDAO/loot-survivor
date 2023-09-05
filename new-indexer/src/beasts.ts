@@ -7,6 +7,7 @@ import {
   ATTACKED_BEAST,
   ATTACKED_BY_BEAST,
   DISCOVERED_BEAST,
+  parseAmbushedByBeast,
   parseAttackedBeast,
   parseDiscoveredBeast,
   parseSlayedBeast,
@@ -50,6 +51,27 @@ export default function transform({ header, events }: Block) {
     switch (event.keys[0]) {
       case DISCOVERED_BEAST: {
         const { value } = parseDiscoveredBeast(event.data, 0);
+        // console.log("Discovered beast", value);
+        return [
+          insertBeast({
+            beast: value.id,
+            adventurerId: value.adventurerState.adventurerId,
+            seed: value.seed,
+            health: value.adventurerState.adventurer.health,
+            level: value.beastSpec.level,
+            special1: value.beastSpec.specials.special1,
+            special2: value.beastSpec.specials.special2,
+            special3: value.beastSpec.specials.special3,
+            slayed: false,
+            slainOnTime: null,
+            createdTime: timestamp,
+            lastUpdatedTime: timestamp,
+            timestamp,
+          }),
+        ];
+      }
+      case AMBUSHED_BY_BEAST: {
+        const { value } = parseAmbushedByBeast(event.data, 0);
         // console.log("Discovered beast", value);
         return [
           insertBeast({
