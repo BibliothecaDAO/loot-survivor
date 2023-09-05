@@ -106,9 +106,9 @@ export default function Info({
     "Weapon",
     "Chest",
     "Head",
-    "Hand",
     "Waist",
     "Foot",
+    "Hand",
     "Neck",
     "Ring",
   ];
