@@ -6,7 +6,7 @@ FROM ubuntu:latest
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get install -y curl bash && \
-    apt-get install jq
+    apt-get install -y jq
 
 # Install Apibara
 RUN curl -sL https://install.apibara.com | bash
