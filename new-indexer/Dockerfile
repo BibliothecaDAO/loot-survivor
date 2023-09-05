@@ -20,19 +20,11 @@ COPY src ./src
 COPY env .
 COPY deno.json .
 
-# Copy and set permissions for individual scripts
-COPY run_adventurers.sh /run_adventurers.sh
-COPY run_battles.sh /run_battles.sh
-COPY run_beasts.sh /run_beasts.sh
-COPY run_discoveries.sh /run_discoveries.sh
-COPY run_items.sh /run_items.sh
+# Copy scripts folder into the container
+COPY scripts /scripts
 
 # Make individual scripts executable
-RUN chmod +x /run_adventurers.sh
-RUN chmod +x /run_battles.sh
-RUN chmod +x /run_beasts.sh
-RUN chmod +x /run_discoveries.sh
-RUN chmod +x /run_items.sh
+RUN chmod +x /scripts/*.sh
 
 # Copy and set permissions for master script
 COPY master_script.sh /master_script.sh
