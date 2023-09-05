@@ -11,6 +11,9 @@ RUN apt-get update && \
 # Install Apibara
 RUN curl -sL https://install.apibara.com | bash
 
+# Switch to bash
+SHELL ["/bin/bash", "-c"]
+
 # Install Apibara plugins
 RUN source /root/.bashrc && \
     apibara plugins install sink-console && \
