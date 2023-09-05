@@ -14,7 +14,9 @@ ENV PATH="/root/.local/share/apibara/bin:${PATH}"
 RUN curl -sL https://install.apibara.com | bash && \
     apibara plugins install sink-console && \
     apibara plugins install sink-mongo
-    
+
+WORKDIR /new-indexer
+
 # To run multiple tasks, you could use a script or use CMD like below.
 CMD apibara run --allow-env=env src/adventurers.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1001 && \
     apibara run --allow-env=env src/battles.ts -A dna_jX3t04zs9zywBnHWVmUq --status-server-address 0.0.0.0:1002 && \
