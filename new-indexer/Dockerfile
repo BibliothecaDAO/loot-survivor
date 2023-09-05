@@ -12,6 +12,7 @@ RUN apt-get update && \
 SHELL ["/bin/bash", "-c"]
 # Install Apibara
 RUN curl -sL https://install.apibara.com | bash && \
+    ls -al /root/.local/share/apibara && \
     source /root/.bashrc && \
     apibara plugins install sink-console && \
     apibara plugins install sink-mongo
