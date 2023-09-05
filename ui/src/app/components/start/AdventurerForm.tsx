@@ -127,12 +127,7 @@ export const AdventurerForm = ({
       setFormData({
         ...formData,
         class: classType,
-        startingStrength: "1",
-        startingDexterity: "1",
-        startingVitality: "1",
-        startingIntelligence: "1",
-        startingWisdom: "1",
-        startingCharisma: "1",
+        startingStrength: "6",
       });
     } else if (classType === "Merchant") {
       setFormData({
@@ -153,9 +148,10 @@ export const AdventurerForm = ({
       setFormData({
         ...formData,
         class: classType,
-        startingDexterity: "2",
-        startingWisdom: "2",
-        startingIntelligence: "2",
+        startingIntelligence: "1",
+        startingDexterity: "1",
+        startingStrength: "2",
+        startingCharisma: "2",
       });
     } else if (classType === "Seer") {
       setFormData({
@@ -172,21 +168,6 @@ export const AdventurerForm = ({
         startingWisdom: "2",
         startingVitality: "1",
         startingDexterity: "1",
-      });
-    } else if (classType === "Bard") {
-      setFormData({
-        ...formData,
-        class: classType,
-        startingIntelligence: "1",
-        startingDexterity: "1",
-        startingStrength: "2",
-        startingCharisma: "2",
-      });
-    } else if (classType === "Brute") {
-      setFormData({
-        ...formData,
-        class: classType,
-        startingStrength: "6",
       });
     } else {
       setFormData({
@@ -226,7 +207,7 @@ export const AdventurerForm = ({
     },
     {
       name: "Scout",
-      description: "+2 Intelligence +2 Wisdom +2 Dexterity",
+      description: "+1 Intelligence 1+ Dexterity +2 Strength +2 Charisma",
       image: "/classes/scout2.png",
     },
     {
@@ -236,8 +217,7 @@ export const AdventurerForm = ({
     },
     {
       name: "Warrior",
-      description:
-        "+1 Strength +1 Dexterity +1 Vitality +1 Intelligence +1 Wisdom +1 Charisma",
+      description: "+6 Strength",
       image: "/classes/warrior2.png",
     },
     // {
