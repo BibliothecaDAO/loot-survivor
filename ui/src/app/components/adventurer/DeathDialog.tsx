@@ -60,8 +60,11 @@ export const DeathDialog = () => {
               score. Continue the journey with another adventurer:{" "}
             </p>
           </div>
-          <TwitterShareButton
+          {/* <TwitterShareButton
             text={`RIP ${adventurer?.name}, who died at ${ordinalRank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+          /> */}
+          <TwitterShareButton
+            text={`RIP ${adventurer?.name}.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
           />
           <Button
             onClick={() => {

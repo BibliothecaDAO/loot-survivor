@@ -49,6 +49,7 @@ const PurchaseHealth = ({
   const fillToMax = () => {
     if (hasBalance) {
       setPotionAmount(max);
+      setButtonClicked(true);
     }
   };
 

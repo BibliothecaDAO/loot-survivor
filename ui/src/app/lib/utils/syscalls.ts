@@ -679,8 +679,7 @@ export function syscalls({
         battles: [...battles.reverse()],
       });
 
-      console.log(battles);
-      stopLoading(battles);
+      stopLoading(battles.reverse());
       setEquipItems([]);
       setDropItems([]);
       setMintAdventurer(false);
@@ -906,6 +905,14 @@ export function syscalls({
           let item = purchasedItems.find((item) => item.item === equippedItem);
           item.equipped = true;
         }
+      }
+      setData("itemsByAdventurerQuery", {
+        items: [
+          ...(queryData.itemsByAdventurerQuery?.items ?? []),
+          ...purchasedItems,
+        ],
+      });
+      for (let equippedItemsEvent of equippedItemsEvents) {
         for (let unequippedItem of equippedItemsEvent.data[2]) {
           const ownedItemIndex =
             queryData.itemsByAdventurerQuery?.items.findIndex(
@@ -914,19 +921,8 @@ export function syscalls({
           setData("itemsByAdventurerQuery", false, "equipped", ownedItemIndex);
         }
       }
-      setData("itemsByAdventurerQuery", {
-        items: [
-          ...(queryData.itemsByAdventurerQuery?.items ?? []),
-          ...purchasedItems,
-        ],
-      });
       // Reset items to no availability
       setData("latestMarketItemsQuery", null);
-      console.log({
-        Stats: upgrades,
-        Items: purchaseItems,
-        Potions: potionAmount,
-      });
       stopLoading({
         Stats: upgrades,
         Items: purchaseItems,

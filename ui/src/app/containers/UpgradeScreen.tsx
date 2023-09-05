@@ -228,21 +228,30 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
       calldata: [
         adventurer?.id?.toString() ?? "",
         "0",
-        potionAmount,
-        currenUpgrades ? currenUpgrades["Strength"] : upgrades["Strength"],
-        currenUpgrades ? currenUpgrades["Dexterity"] : upgrades["Dexterity"],
-        currenUpgrades ? currenUpgrades["Vitality"] : upgrades["Vitality"],
+        potions ? potions.toString() : potionAmount.toString(),
         currenUpgrades
-          ? currenUpgrades["Intelligence"]
-          : upgrades["Intelligence"],
-        currenUpgrades ? currenUpgrades["Wisdom"] : upgrades["Wisdom"],
-        currenUpgrades ? currenUpgrades["Charisma"] : upgrades["Charisma"],
+          ? currenUpgrades["Strength"].toString()
+          : upgrades["Strength"].toString(),
+        currenUpgrades
+          ? currenUpgrades["Dexterity"].toString()
+          : upgrades["Dexterity"].toString(),
+        currenUpgrades
+          ? currenUpgrades["Vitality"].toString()
+          : upgrades["Vitality"].toString(),
+        currenUpgrades
+          ? currenUpgrades["Intelligence"].toString()
+          : upgrades["Intelligence"].toString(),
+        currenUpgrades
+          ? currenUpgrades["Wisdom"].toString()
+          : upgrades["Wisdom"].toString(),
+        currenUpgrades
+          ? currenUpgrades["Charisma"].toString()
+          : upgrades["Charisma"].toString(),
         items ? items.length.toString() : purchaseItems.length.toString(),
         ...(items
           ? items.flatMap(Object.values)
           : purchaseItems.flatMap(Object.values)),
       ],
-      // calldata: [adventurer?.id?.toString() ?? "", "0", "0", "0", "0"],
     };
     addToCalls(upgradeTx);
   };
