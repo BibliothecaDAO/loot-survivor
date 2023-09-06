@@ -209,7 +209,7 @@ const getLastBeastDiscovery = gql`
   ${DISCOVERIES_FRAGMENT}
   query get_last_beast_query($id: FeltValue) {
     discoveries(
-      where: { adventurerId: { eq: $id }, entity: { gt: 0 } }
+      where: { adventurerId: { eq: $id }, entityLevel: { gt: 0 } }
       limit: 1
       orderBy: { timestamp: { desc: true } }
     ) {
