@@ -225,6 +225,26 @@ export function insertDiscovery({
   const entityDoc = {
     txHash: checkExistsInt(BigInt(txHash)),
     adventurerId: checkExistsInt(BigInt(adventurerId)),
+    adventurerHealth: checkExistsInt(BigInt(adventurerHealth)),
+    discoveryType: checkExistsInt(BigInt(discoveryType)),
+    subDiscoveryType: checkExistsInt(BigInt(subDiscoveryType)),
+    outputAmount: encodeIntAsBytes(BigInt(outputAmount)),
+    obstacle: checkExistsInt(BigInt(obstacle)),
+    obstacleLevel: checkExistsInt(BigInt(obstacleLevel)),
+    dodgedObstacle: dodgedObstacle,
+    damageTaken: encodeIntAsBytes(BigInt(damageTaken)),
+    damageLocation: checkExistsInt(BigInt(damageLocation)),
+    xpEarnedAdventurer: checkExistsInt(BigInt(xpEarnedAdventurer)),
+    xpEarnedItems: checkExistsInt(BigInt(xpEarnedItems)),
+    entity: checkExistsInt(BigInt(entity)),
+    entityLevel: checkExistsInt(BigInt(entityLevel)),
+    entityHealth: encodeIntAsBytes(BigInt(entityHealth)),
+    special1: checkExistsInt(BigInt(special1)),
+    special2: checkExistsInt(BigInt(special2)),
+    special3: checkExistsInt(BigInt(special3)),
+    ambushed: ambushed,
+    seed: encodeIntAsBytes(BigInt(seed)),
+    discoveryTime,
     timestamp,
   };
 
@@ -233,26 +253,6 @@ export function insertDiscovery({
     update: {
       $set: {
         ...entityDoc,
-        adventurerHealth: checkExistsInt(BigInt(adventurerHealth)),
-        discoveryType: checkExistsInt(BigInt(discoveryType)),
-        subDiscoveryType: checkExistsInt(BigInt(subDiscoveryType)),
-        outputAmount: encodeIntAsBytes(BigInt(outputAmount)),
-        obstacle: checkExistsInt(BigInt(obstacle)),
-        obstacleLevel: checkExistsInt(BigInt(obstacleLevel)),
-        dodgedObstacle: dodgedObstacle,
-        damageTaken: encodeIntAsBytes(BigInt(damageTaken)),
-        damageLocation: checkExistsInt(BigInt(damageLocation)),
-        xpEarnedAdventurer: checkExistsInt(BigInt(xpEarnedAdventurer)),
-        xpEarnedItems: checkExistsInt(BigInt(xpEarnedItems)),
-        entity: checkExistsInt(BigInt(entity)),
-        entityLevel: checkExistsInt(BigInt(entityLevel)),
-        entityHealth: encodeIntAsBytes(BigInt(entityHealth)),
-        special1: checkExistsInt(BigInt(special1)),
-        special2: checkExistsInt(BigInt(special2)),
-        special3: checkExistsInt(BigInt(special3)),
-        ambushed: ambushed,
-        seed: encodeIntAsBytes(BigInt(seed)),
-        discoveryTime,
       },
     },
   };
@@ -307,6 +307,7 @@ export function insertBattle({
     timestamp: timestamp,
   };
 
+  // every battle should be unique
   return {
     entity,
     update: {
