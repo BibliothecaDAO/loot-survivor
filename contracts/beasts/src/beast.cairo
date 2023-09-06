@@ -147,8 +147,9 @@ impl ImplBeast of IBeast {
         weapon: CombatSpec,
         adventurer_luck: u8,
         adventurer_strength: u8,
-        double_critical_hit: bool,
-        double_name_bonus_damage: bool,
+        critical_hit_damage_multiplier: u8,
+        name_bonus_damage_multplier: u8,
+        armor_defense_multiplier: u8,
         entropy: u128
     ) -> (u16, bool) {
         // check if the attack is a critical hit
@@ -162,8 +163,9 @@ impl ImplBeast of IBeast {
                 MINIMUM_DAMAGE,
                 adventurer_strength.into(),
                 is_critical_hit,
-                double_critical_hit,
-                double_name_bonus_damage,
+                critical_hit_damage_multiplier,
+                name_bonus_damage_multplier,
+                armor_defense_multiplier,
                 entropy
             ),
             is_critical_hit
@@ -178,8 +180,9 @@ impl ImplBeast of IBeast {
     fn counter_attack(self: Beast, armor: CombatSpec, entropy: u128) -> (u16, bool) {
         // beast have a fixed 1/6 chance of critical hit
         let is_critical_hit = (entropy % 6) == 0;
-        let double_critical_hit_damage = false;
-        let double_name_bonus_damage = false;
+        let critical_hit_damage_multplier = 1;
+        let name_bonus_damage_multplier = 1;
+        let armor_defense_multplier = 1;
 
         // delegate damage calculation to combat system
         (
@@ -189,8 +192,9 @@ impl ImplBeast of IBeast {
                 MINIMUM_DAMAGE,
                 STRENGTH_BONUS,
                 is_critical_hit,
-                double_critical_hit_damage,
-                double_name_bonus_damage,
+                critical_hit_damage_multplier,
+                name_bonus_damage_multplier,
+                armor_defense_multplier,
                 entropy
             ),
             is_critical_hit
@@ -227,11 +231,10 @@ impl ImplBeast of IBeast {
             base_reward = GOLD_REWARD_BASE_MINIMUM;
         }
 
-        // gold bonus will be based on 10% increments
+        // gold bonus will be based on 25% increments
         let bonus_base = base_reward / GOLD_REWARD_BONUS_DIVISOR;
 
-        // multiplier will be 0-10 inclusive, providing
-        // a maximum gold bonus of 100%
+        // multiplier will be 0-4 inclusive, providing a bonus range of (25%, 50%, 75%, 100%)
         let bonus_multiplier = (entropy % (1 + GOLD_REWARD_BONUS_MAX_MULTPLIER))
             .try_into()
             .unwrap();
@@ -442,7 +445,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(500000)]
+    #[available_gas(505770)]
     fn test_attack() {
         let mut adventurer_strength = 0;
         let mut adventurer_luck = 0;
@@ -470,25 +473,25 @@ mod tests {
         };
 
         let (damage, critical_hit) = beast
-            .attack(weapon, adventurer_luck, adventurer_strength, false, false, entropy);
+            .attack(weapon, adventurer_luck, adventurer_strength, 1, 1, 1, entropy);
         assert(damage == 140, 'g20 katana ruins lvl5 goblin');
 
         // bump adventurer strength by 1 which gives a +20% on base attack damage
         // T1 G20 is 100 base HP so they gain an extra 20HP for their strength stat
         adventurer_strength = 1;
         let (damage, critical_hit) = beast
-            .attack(weapon, adventurer_luck, adventurer_strength, false, false, entropy);
+            .attack(weapon, adventurer_luck, adventurer_strength, 1, 1, 1, entropy);
         assert(damage == 160, 'strength gives extra damage');
 
         // boost luck to generate a critical hit (sorry gobblin)
         adventurer_luck = 40;
         let (damage, critical_hit) = beast
-            .attack(weapon, adventurer_luck, adventurer_strength, false, false, entropy);
+            .attack(weapon, adventurer_luck, adventurer_strength, 1, 1, 1, entropy);
         assert(damage == 235, 'critical hit gives extra damage');
 
         // rerun same attack with double critical hit enabled
         let (damage, critical_hit) = beast
-            .attack(weapon, adventurer_luck, adventurer_strength, true, false, entropy);
+            .attack(weapon, adventurer_luck, adventurer_strength, 2, 1, 1, entropy);
         assert(damage == 310, 'double critical hit damage');
     }
 
