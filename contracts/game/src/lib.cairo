@@ -1422,9 +1422,7 @@ mod Game {
             );
             // and return as game is now over
             return;
-        }
-
-        if (adventurer.stat_points_available > 0) {
+        } else if (adventurer.stat_points_available > 0) {
             // if adventurer leveled up, process level up
             _emit_level_up_events(ref self, adventurer, adventurer_id, previous_level, new_level);
         }
