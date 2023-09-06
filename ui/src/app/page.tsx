@@ -147,8 +147,6 @@ export default function Home() {
     address,
   });
 
-  console.log(adventurer);
-
   const {
     data,
     refetch,
