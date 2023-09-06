@@ -34,14 +34,9 @@ export const ArcadeDialog = () => {
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40 m-2" />
       <div className="fixed text-center top-1/8 left-1/8 sm:left-1/4 w-3/4 sm:w-1/2 h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
         <h3 className="mt-4">Arcade Accounts</h3>
-        <p className="m-2 text-xl">
+        <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
           Go deep into the mist with signature free gameplay!
         </p>
-
-        {/* 
-        <p className="text-sm xl:text-xl 2xl:text-2xl pb-4">
-          Create your AA here <br /> for signature free gameplay!
-        </p> */}
 
         <div className="flex justify-center mb-1">
           {((connector?.options as any)?.id == "argentX" ||
