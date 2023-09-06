@@ -57,6 +57,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseAttackedBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
+        console.log("ATTACKED_BEAST", "->", "BATTLES UPDATE");
         return [
           insertBattle({
             txHash: receipt.transactionHash,
@@ -88,6 +89,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseAttackedByBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
+        console.log("ATTACKED_BY_BEAST", "->", "BATTLES UPDATE");
         return [
           insertBattle({
             txHash: receipt.transactionHash,
@@ -119,6 +121,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseAmbushedByBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
+        console.log("AMBUSHED_BY_BEAST", "->", "BATTLES UPDATE");
         return [
           insertBattle({
             txHash: receipt.transactionHash,
@@ -150,6 +153,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseSlayedBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
+        console.log("SLAYED_BEAST", "->", "BATTLES UPDATE");
         return [
           insertBattle({
             txHash: receipt.transactionHash,
@@ -181,6 +185,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseFleeFailed(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
+        console.log("FLEE_FAILED", "->", "BATTLES UPDATE");
         return [
           insertBattle({
             txHash: receipt.transactionHash,
@@ -212,6 +217,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseFleeSucceeded(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
+        console.log("FLEE_SUCCEEDED", "->", "BATTLES UPDATE");
         return [
           insertBattle({
             txHash: receipt.transactionHash,
