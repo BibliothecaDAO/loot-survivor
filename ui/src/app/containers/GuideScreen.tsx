@@ -349,7 +349,7 @@ export default function GuideScreen() {
       </p>
       <div>
         {jewelryData.map((category, i) => (
-          <div>
+          <div key={i}>
             <h4 className="text-center justify-center mb-2">
               {category.category}
             </h4>
