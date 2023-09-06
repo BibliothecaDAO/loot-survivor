@@ -25,6 +25,8 @@ const buttonVariants = cva(
         link: "bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-slate-900 dark:text-slate-100 hover:bg-transparent dark:hover:bg-transparent",
         contrast:
           "bg-black/70 text-terminal-green hover:bg-black/80 hover:animate-pulse text-center disabled:text-slate-300",
+        token:
+          "bg-terminal-black border-terminal-green hover:bg-terminal-green/20 hover:animate-pulse text-terminal-green",
       },
       size: {
         default: "sm:h-10 px-2 py-1 sm:py-2 sm:px-4 text-xs sm:text-sm",

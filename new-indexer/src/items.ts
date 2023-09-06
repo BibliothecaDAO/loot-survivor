@@ -116,6 +116,8 @@ export default function transform({ header, events }: Block) {
           },
           update: {
             $set: {
+              item: checkExistsInt(BigInt(item.item.id)),
+              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
               owner: true,
               equipped: false,
               ownerAddress: checkExistsInt(BigInt(as.owner)),
