@@ -15,7 +15,8 @@ export type ScreenPage =
   | "settings"
   | "player"
   | "wallet"
-  | "tutorial";
+  | "tutorial"
+  | "create adventurer";
 
 type State = {
   disconnected: boolean;
@@ -54,6 +55,8 @@ type State = {
   setMintAdventurer: (value: boolean) => void;
   inventorySelected: number | null;
   setInventorySelected: (value: number) => void;
+  startOption: string | null;
+  setStartOption: (value: string) => void;
   arcadeDialog: boolean;
   showArcadeDialog: (value: boolean) => void;
   switchAdventurer: boolean;
@@ -99,6 +102,8 @@ const useUIStore = create<State>((set) => ({
   setMintAdventurer: (value) => set({ mintAdventurer: value }),
   inventorySelected: null,
   setInventorySelected: (value) => set({ inventorySelected: value }),
+  startOption: "",
+  setStartOption: (value) => set({ startOption: value }),
   arcadeDialog: false,
   showArcadeDialog: (value) => set({ arcadeDialog: value }),
   switchAdventurer: false,

@@ -139,6 +139,7 @@ export default function Home() {
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
+  const setStartOption = useUIStore((state) => state.setStartOption);
 
   const {
     data,
@@ -174,6 +175,7 @@ export default function Home() {
     setScreen,
     setAdventurer,
     setMintAdventurer,
+    setStartOption,
   });
 
   const playState = useMemo(
@@ -383,6 +385,7 @@ export default function Home() {
                   disabled={isWrongNetwork}
                 >
                   <ArcadeIcon className="w-4 sm:w-8 justify-center" />
+                  arcade account
                 </Button>
                 <Button
                   onClick={() => {
