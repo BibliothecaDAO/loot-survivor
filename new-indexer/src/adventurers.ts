@@ -41,6 +41,8 @@ import {
   parseDodgedObstacle,
   NEW_ITEMS_AVAILABLE,
   parseNewItemsAvailable,
+  DISCOVERED_BEAST,
+  parseDiscoveredBeast,
 } from "./utils/events.ts";
 import { insertAdventurer, updateAdventurer } from "./utils/helpers.ts";
 
@@ -57,6 +59,7 @@ const filter = {
     { fromAddress: GAME, keys: [DISCOVERED_XP] },
     { fromAddress: GAME, keys: [DODGED_OBSTACLE] },
     { fromAddress: GAME, keys: [HIT_BY_OBSTACLE] },
+    { fromAddress: GAME, keys: [DISCOVERED_BEAST] },
     { fromAddress: GAME, keys: [PURCHASED_POTIONS] },
     { fromAddress: GAME, keys: [PURCHASED_ITEMS] },
     { fromAddress: GAME, keys: [EQUIPPED_ITEMS] },
@@ -185,6 +188,16 @@ export default function transform({ header, events }: Block) {
       case HIT_BY_OBSTACLE: {
         const { value } = parseHitByObstacle(event.data, 0);
         console.log("HIT_BY_OBSTACLE", "->", "ADVENTURER UPDATES");
+        return [
+          updateAdventurer({
+            timestamp: new Date().toISOString(),
+            adventurerState: value.adventurerState,
+          }),
+        ];
+      }
+      case DISCOVERED_BEAST: {
+        const { value } = parseDiscoveredBeast(event.data, 0);
+        console.log("DISCOVERED_BEAST", "->", "ADVENTURER UPDATES");
         return [
           updateAdventurer({
             timestamp: new Date().toISOString(),

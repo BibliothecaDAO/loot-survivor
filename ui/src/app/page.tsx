@@ -147,7 +147,7 @@ export default function Home() {
     address,
   });
 
-  console.log(lordsBalance);
+  console.log(adventurer);
 
   const {
     data,
