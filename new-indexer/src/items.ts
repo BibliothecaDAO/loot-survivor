@@ -41,6 +41,8 @@ const filter = {
     { fromAddress: GAME, keys: [DODGED_OBSTACLE] },
     { fromAddress: GAME, keys: [SLAYED_BEAST] },
     { fromAddress: GAME, keys: [ITEM_SPECIAL_UNLOCKED] },
+    { fromAddress: GAME, keys: [NEW_ITEMS_AVAILABLE] },
+    { fromAddress: GAME, keys: [ADVENTURER_UPGRADED] },
   ],
 };
 
@@ -68,6 +70,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseStartGame(event.data, 0);
         const as = value.adventurerState;
         const itemInserts: any[] = [];
+        console.log("START_GAME", "->", "ITEMS UPDATES");
         for (let i = 1; i < 102; i++) {
           itemInserts.push(
             insertItem({
@@ -109,6 +112,7 @@ export default function transform({ header, events }: Block) {
       case PURCHASED_ITEMS: {
         const { value } = parsePurchasedItems(event.data, 0);
         const as = value.adventurerStateWithBag.adventurerState;
+        console.log("PURCHASED_ITEMS", "->", "ITEMS UPDATES");
         const result = value.purchases.map((item) => ({
           entity: {
             item: checkExistsInt(BigInt(item.item.id)),
@@ -131,6 +135,7 @@ export default function transform({ header, events }: Block) {
       case EQUIPPED_ITEMS: {
         const { value } = parseEquippedItems(event.data, 0);
         const as = value.adventurerStateWithBag.adventurerState;
+        console.log("EQUIPPED_ITEMS", "->", "ITEMS UPDATES");
         const equippedResult = value.equippedItems.map((item) => ({
           entity: {
             item: checkExistsInt(BigInt(item)),
@@ -164,6 +169,7 @@ export default function transform({ header, events }: Block) {
       case DROPPED_ITEMS: {
         const { value } = parseDroppedItems(event.data, 0);
         const as = value.adventurerStateWithBag.adventurerState;
+        console.log("DROPPED_ITEMS", "->", "ITEMS UPDATES");
         const result = value.itemIds.map((item) => ({
           entity: {
             item: checkExistsInt(BigInt(item)),
@@ -185,26 +191,31 @@ export default function transform({ header, events }: Block) {
       case HIT_BY_OBSTACLE: {
         const { value } = parseHitByObstacle(event.data, 0);
         const as = value.adventurerState;
+        console.log("HIT_BY_OBSTACLE", "->", "ITEMS UPDATES");
         return updateItemsXP({ adventurerState: as });
       }
       case DODGED_OBSTACLE: {
         const { value } = parseDodgedObstacle(event.data, 0);
         const as = value.adventurerState;
+        console.log("DODGED_OBSTACLE", "->", "ITEMS UPDATES");
         return updateItemsXP({ adventurerState: as });
       }
       case SLAYED_BEAST: {
         const { value } = parseSlayedBeast(event.data, 0);
         const as = value.adventurerState;
+        console.log("SLAYED_BEAST", "->", "ITEMS UPDATES");
         return updateItemsXP({ adventurerState: as });
       }
       case ITEM_SPECIAL_UNLOCKED: {
         const { value } = parseItemSpecialUnlocked(event.data, 0);
         const as = value.adventurerState;
+        console.log("ITEM_SPECIAL_UNLOCKED", "->", "ITEMS UPDATES");
         return updateItemsXP({ adventurerState: as });
       }
       case NEW_ITEMS_AVAILABLE: {
         const { value } = parseNewItemsAvailable(event.data, 0);
         const as = value.adventurerState;
+        console.log("NEW_ITEMS_AVAILABLE", "->", "ITEMS UPDATES");
         const newResult = value.items.map((item) => ({
           entity: {
             item: checkExistsInt(BigInt(item)),
@@ -224,6 +235,7 @@ export default function transform({ header, events }: Block) {
       case ADVENTURER_UPGRADED: {
         const { value } = parseAdventurerUpgraded(event.data, 0);
         const as = value.adventurerStateWithBag.adventurerState;
+        console.log("ADVENTURER_UPGRADED", "->", "ITEMS UPDATES");
         const itemUpdates: any[] = [];
         for (let i = 1; i < 102; i++) {
           itemUpdates.push({

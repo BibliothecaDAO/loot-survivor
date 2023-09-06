@@ -61,7 +61,7 @@ export default function transform({ header, events }: Block) {
       case DISCOVERED_HEALTH: {
         const { value } = parseDiscoveredHealth(event.data, 0);
         const as = value.adventurerState;
-        // console.log("Start game", value);
+        console.log("DISCOVERED_HEALTH", "->", "DISCOVERIES UPDATES");
         return [
           insertDiscovery({
             txHash: receipt.transactionHash,
@@ -93,7 +93,7 @@ export default function transform({ header, events }: Block) {
       case DISCOVERED_GOLD: {
         const { value } = parseDiscoveredGold(event.data, 0);
         const as = value.adventurerState;
-        // console.log("Start game", value);
+        console.log("DISCOVERED_HEALTH", "->", "DISCOVERIES UPDATES");
         return [
           insertDiscovery({
             txHash: receipt.transactionHash,
@@ -125,7 +125,7 @@ export default function transform({ header, events }: Block) {
       case DISCOVERED_XP: {
         const { value } = parseDiscoveredXp(event.data, 0);
         const as = value.adventurerState;
-        // console.log("Start game", value);
+        console.log("DISCOVERED_XP", "->", "DISCOVERIES UPDATES");
         return [
           insertDiscovery({
             txHash: receipt.transactionHash,
@@ -157,6 +157,7 @@ export default function transform({ header, events }: Block) {
       case HIT_BY_OBSTACLE: {
         const { value } = parseHitByObstacle(event.data, 0);
         const as = value.adventurerState;
+        console.log("HIT_BY_OBSTACLE", "->", "DISCOVERIES UPDATES");
         return [
           insertDiscovery({
             txHash: receipt.transactionHash,
@@ -188,6 +189,7 @@ export default function transform({ header, events }: Block) {
       case DODGED_OBSTACLE: {
         const { value } = parseHitByObstacle(event.data, 0);
         const as = value.adventurerState;
+        console.log("DODGED_OBSTACLE", "->", "DISCOVERIES UPDATES");
         return [
           insertDiscovery({
             txHash: receipt.transactionHash,
@@ -220,6 +222,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseDiscoveredBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
+        console.log("DISCOVERED_BEAST", "->", "DISCOVERIES UPDATES");
         return [
           insertDiscovery({
             txHash: receipt.transactionHash,
@@ -252,6 +255,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseAmbushedByBeast(event.data, 0);
         const as = value.adventurerState;
         const bs = value.beastSpec;
+        console.log("AMBUSHED_BY_BEAST", "->", "DISCOVERIES UPDATES");
         return [
           insertDiscovery({
             txHash: receipt.transactionHash,
