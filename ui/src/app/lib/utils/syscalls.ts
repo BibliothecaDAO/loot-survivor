@@ -471,7 +471,6 @@ export function syscalls({
 
       setEquipItems([]);
       setDropItems([]);
-      console.log(discoveries);
       stopLoading(discoveries);
       setMintAdventurer(false);
     } catch (e) {
@@ -517,8 +516,6 @@ export function syscalls({
           event.name === "AttackedBeast" || event.name === "AttackedByBeast"
       );
       for (let attackedBeastEvent of attackedBeastEvents) {
-        console.log(attackedBeastEvent.name);
-        console.log(attackedBeastEvent.data[0]);
         setData("adventurerByIdQuery", {
           adventurers: [attackedBeastEvent.data[0]],
         });
@@ -676,10 +673,10 @@ export function syscalls({
         ],
       });
       setData("battlesByTxHashQuery", {
-        battles: [...battles.reverse()],
+        battles: [...battles],
       });
 
-      stopLoading(battles.reverse());
+      stopLoading(battles);
       setEquipItems([]);
       setDropItems([]);
       setMintAdventurer(false);
@@ -842,7 +839,6 @@ export function syscalls({
       setData("battlesByTxHashQuery", {
         battles: [...battles.reverse()],
       });
-      console.log(battles);
       stopLoading(battles);
       setEquipItems([]);
       setDropItems([]);

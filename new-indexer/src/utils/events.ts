@@ -178,17 +178,17 @@ export const parseStartGame = combineParsers({
 
 export const parseBag = combineParsers({
   item1: { index: 0, parser: parseLootStatistics },
-  item2: { index: 0, parser: parseLootStatistics },
-  item3: { index: 0, parser: parseLootStatistics },
-  item4: { index: 0, parser: parseLootStatistics },
-  item5: { index: 0, parser: parseLootStatistics },
-  item6: { index: 0, parser: parseLootStatistics },
-  item7: { index: 0, parser: parseLootStatistics },
-  item8: { index: 0, parser: parseLootStatistics },
-  item9: { index: 0, parser: parseLootStatistics },
-  item10: { index: 0, parser: parseLootStatistics },
-  item11: { index: 0, parser: parseLootStatistics },
-  mutated: { index: 0, parser: parseBoolean },
+  item2: { index: 1, parser: parseLootStatistics },
+  item3: { index: 2, parser: parseLootStatistics },
+  item4: { index: 3, parser: parseLootStatistics },
+  item5: { index: 4, parser: parseLootStatistics },
+  item6: { index: 5, parser: parseLootStatistics },
+  item7: { index: 6, parser: parseLootStatistics },
+  item8: { index: 7, parser: parseLootStatistics },
+  item9: { index: 8, parser: parseLootStatistics },
+  item10: { index: 9, parser: parseLootStatistics },
+  item11: { index: 10, parser: parseLootStatistics },
+  mutated: { index: 11, parser: parseBoolean },
 });
 
 export const parseAdventurerStateWithBag = combineParsers({
@@ -225,20 +225,20 @@ export const parseHitByObstacle = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
   id: { index: 1, parser: parseU8 },
   level: { index: 2, parser: parseU8 },
-  damageTaken: { index: 1, parser: parseU16 },
-  damageLocation: { index: 2, parser: parseU8 },
-  xpEarnedAdventurer: { index: 1, parser: parseU16 },
-  xpEarnedItems: { index: 1, parser: parseU16 },
+  damageTaken: { index: 3, parser: parseU16 },
+  damageLocation: { index: 4, parser: parseU8 },
+  xpEarnedAdventurer: { index: 5, parser: parseU16 },
+  xpEarnedItems: { index: 6, parser: parseU16 },
 });
 
 export const parseDodgedObstacle = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
   id: { index: 1, parser: parseU8 },
   level: { index: 2, parser: parseU8 },
-  damageTaken: { index: 1, parser: parseU16 },
-  damageLocation: { index: 2, parser: parseU8 },
-  xpEarnedAdventurer: { index: 1, parser: parseU16 },
-  xpEarnedItems: { index: 1, parser: parseU16 },
+  damageTaken: { index: 3, parser: parseU16 },
+  damageLocation: { index: 4, parser: parseU8 },
+  xpEarnedAdventurer: { index: 5, parser: parseU16 },
+  xpEarnedItems: { index: 6, parser: parseU16 },
 });
 
 export const parseFleeFailed = combineParsers({
