@@ -210,6 +210,7 @@ export default function transform({ header, events }: Block) {
         const { value } = parseItemsLeveledUp(event.data, 0);
         const as = value.adventurerState;
         console.log("ITEMS_LEVELED_UP", "->", "ITEMS UPDATES");
+        console.log(value);
         const result = value.items.map((item) => ({
           entity: {
             item: checkExistsInt(BigInt(item.itemId)),
@@ -217,6 +218,8 @@ export default function transform({ header, events }: Block) {
           },
           update: {
             $set: {
+              item: checkExistsInt(BigInt(item.itemId)),
+              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
               special1: checkExistsInt(BigInt(item.specials.special1)),
               special2: checkExistsInt(BigInt(item.specials.special2)),
               special3: checkExistsInt(BigInt(item.specials.special3)),
