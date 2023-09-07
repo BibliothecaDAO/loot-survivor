@@ -471,7 +471,7 @@ export function syscalls({
           );
         }
         setScreen("start");
-        setStartOption("create adventurer")
+        setStartOption("create adventurer");
       }
 
       const idleDeathPenaltyEvents = events.filter(
@@ -645,6 +645,8 @@ export function syscalls({
         }
       }
 
+      const reversedBattles = battles.slice().reverse();
+
       const adventurerDiedExists = events.some((event) => {
         if (event.name === "AdventurerDied") {
           return true;
@@ -673,11 +675,11 @@ export function syscalls({
         if (killedByBeast || killedByPenalty) {
           setDeathNotification(
             "Attack",
-            battles.reverse(),
+            reversedBattles,
             adventurerDiedEvent.data[0]
           );
         }
-        setScreen("start")
+        setScreen("start");
         setStartOption("create adventurer");
       }
 
@@ -741,10 +743,10 @@ export function syscalls({
         ],
       });
       setData("battlesByTxHashQuery", {
-        battles: [...battles.reverse()],
+        battles: reversedBattles,
       });
 
-      stopLoading(battles.reverse());
+      stopLoading(reversedBattles);
       setEquipItems([]);
       setDropItems([]);
       setMintAdventurer(false);
@@ -851,7 +853,7 @@ export function syscalls({
             adventurerDiedEvent.data[0]
           );
         }
-        setScreen("start")
+        setScreen("start");
         setStartOption("create adventurer");
       }
 
@@ -1154,7 +1156,7 @@ export function syscalls({
             ["You equipped"],
             adventurerDiedEvent.data[0]
           );
-          setScreen("start")
+          setScreen("start");
           setStartOption("create adventurer");
         }
       }
