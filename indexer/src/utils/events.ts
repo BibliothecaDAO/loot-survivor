@@ -41,7 +41,7 @@ export const PURCHASED_ITEMS = eventKey("PurchasedItems");
 export const NEW_ITEMS_AVAILABLE = eventKey("NewItemsAvailable");
 export const EQUIPPED_ITEMS = eventKey("EquippedItems");
 export const DROPPED_ITEMS = eventKey("DroppedItems");
-export const ITEM_SPECIAL_UNLOCKED = eventKey("ItemSpecialUnlocked");
+export const ITEMS_LEVELED_UP = eventKey("ItemsLeveledUp");
 
 export const NEW_HIGH_SCORE = eventKey("NewHighScore");
 export const REWARD_DISTRIBUTION = eventKey("RewardDistribution");
@@ -284,16 +284,23 @@ export const parseDroppedItems = combineParsers({
   itemIds: { index: 1, parser: parseArray(parseU8) },
 });
 
-export const parseItemSpecialUnlocked = combineParsers({
-  adventurerState: { index: 0, parser: parseAdventurerState },
-  id: { index: 1, parser: parseU8 },
-  level: { index: 2, parser: parseU8 },
-  specials: { index: 3, parser: parseSpecialPowers },
-});
-
 export const parseNewItemsAvailable = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
   items: { index: 1, parser: parseArray(parseU8) },
+});
+
+export const parseItemLeveledUp = combineParsers({
+  itemId: { index: 0, parser: parseU8 },
+  previousLevel: { index: 1, parser: parseU8 },
+  newLevel: { index: 2, parser: parseU8 },
+  suffixUnlocked: { index: 3, parser: parseBoolean },
+  prefixesUnlocked: { index: 4, parser: parseBoolean },
+  specials: { index: 5, parser: parseSpecialPowers },
+});
+
+export const parseItemsLeveledUp = combineParsers({
+  adventurerState: { index: 0, parser: parseAdventurerState },
+  items: { index: 1, parser: parseArray(parseItemLeveledUp) },
 });
 
 export const parsePlayerReward = combineParsers({

@@ -8,15 +8,15 @@ import {
   DROPPED_ITEMS,
   EQUIPPED_ITEMS,
   HIT_BY_OBSTACLE,
-  ITEM_SPECIAL_UNLOCKED,
+  ITEMS_LEVELED_UP,
   NEW_ITEMS_AVAILABLE,
   parseAdventurerUpgraded,
   parseDodgedObstacle,
   parseDroppedItems,
   parseEquippedItems,
   parseHitByObstacle,
-  parseItemSpecialUnlocked,
   parseNewItemsAvailable,
+  parseItemsLeveledUp,
   parsePurchasedItems,
   parseSlayedBeast,
   parseStartGame,
@@ -40,7 +40,7 @@ const filter = {
     { fromAddress: GAME, keys: [HIT_BY_OBSTACLE] },
     { fromAddress: GAME, keys: [DODGED_OBSTACLE] },
     { fromAddress: GAME, keys: [SLAYED_BEAST] },
-    { fromAddress: GAME, keys: [ITEM_SPECIAL_UNLOCKED] },
+    { fromAddress: GAME, keys: [ITEMS_LEVELED_UP] },
     { fromAddress: GAME, keys: [NEW_ITEMS_AVAILABLE] },
     { fromAddress: GAME, keys: [ADVENTURER_UPGRADED] },
   ],
@@ -206,11 +206,24 @@ export default function transform({ header, events }: Block) {
         console.log("SLAYED_BEAST", "->", "ITEMS UPDATES");
         return updateItemsXP({ adventurerState: as });
       }
-      case ITEM_SPECIAL_UNLOCKED: {
-        const { value } = parseItemSpecialUnlocked(event.data, 0);
+      case ITEMS_LEVELED_UP: {
+        const { value } = parseItemsLeveledUp(event.data, 0);
         const as = value.adventurerState;
-        console.log("ITEM_SPECIAL_UNLOCKED", "->", "ITEMS UPDATES");
-        return updateItemsXP({ adventurerState: as });
+        console.log("ITEMS_LEVELED_UP", "->", "ITEMS UPDATES");
+        const result = value.items.map((item) => ({
+          entity: {
+            item: checkExistsInt(BigInt(item.itemId)),
+            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+          },
+          update: {
+            $set: {
+              special1: checkExistsInt(BigInt(item.specials.special1)),
+              special2: checkExistsInt(BigInt(item.specials.special2)),
+              special3: checkExistsInt(BigInt(item.specials.special3)),
+            },
+          },
+        }));
+        return result;
       }
       case NEW_ITEMS_AVAILABLE: {
         const { value } = parseNewItemsAvailable(event.data, 0);
