@@ -4,8 +4,6 @@ import type { Mongo } from "https://esm.sh/@apibara/indexer/sink/mongo";
 import type { Console } from "https://esm.sh/@apibara/indexer/sink/console";
 import {
   AMBUSHED_BY_BEAST,
-  ATTACKED_BEAST,
-  ATTACKED_BY_BEAST,
   DISCOVERED_BEAST,
   DISCOVERED_GOLD,
   DISCOVERED_HEALTH,
@@ -18,9 +16,8 @@ import {
   parseDiscoveredHealth,
   parseDiscoveredXp,
   parseHitByObstacle,
-  SLAYED_BEAST,
-} from "./utils/events.js";
-import { insertDiscovery } from "./utils/helpers.js";
+} from "./utils/events.ts";
+import { insertDiscovery } from "./utils/helpers.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);

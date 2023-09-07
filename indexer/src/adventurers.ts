@@ -28,8 +28,8 @@ import {
   parseFleeFailed,
   FLEE_SUCCEEDED,
   parseFleeSucceeded,
-  ITEM_SPECIAL_UNLOCKED,
-  parseItemSpecialUnlocked,
+  ITEMS_LEVELED_UP,
+  parseItemsLeveledUp,
   EQUIPPED_ITEMS,
   parsePurchasedItems,
   parseEquippedItems,
@@ -71,7 +71,7 @@ const filter = {
     { fromAddress: GAME, keys: [ADVENTURER_DIED] },
     { fromAddress: GAME, keys: [FLEE_FAILED] },
     { fromAddress: GAME, keys: [FLEE_SUCCEEDED] },
-    { fromAddress: GAME, keys: [ITEM_SPECIAL_UNLOCKED] },
+    { fromAddress: GAME, keys: [ITEMS_LEVELED_UP] },
     { fromAddress: GAME, keys: [NEW_ITEMS_AVAILABLE] },
   ],
 };
@@ -315,9 +315,9 @@ export default function transform({ header, events }: Block) {
           }),
         ];
       }
-      case ITEM_SPECIAL_UNLOCKED: {
-        const { value } = parseItemSpecialUnlocked(event.data, 0);
-        console.log("ITEM_SPECIAL_UNLOCKED", "->", "ADVENTURER UPDATES");
+      case ITEMS_LEVELED_UP: {
+        const { value } = parseItemsLeveledUp(event.data, 0);
+        console.log("ITEMS_LEVELED_UP", "->", "ADVENTURER UPDATES");
         return [
           updateAdventurer({
             timestamp: new Date().toISOString(),

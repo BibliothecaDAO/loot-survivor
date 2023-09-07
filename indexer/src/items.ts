@@ -25,7 +25,7 @@ import {
   START_GAME,
 } from "./utils/events.ts";
 import { insertItem, updateItemsXP } from "./utils/helpers.ts";
-import { checkExistsInt, encodeIntAsBytes } from "./utils/encode.ts";
+import { checkExistsInt } from "./utils/encode.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
