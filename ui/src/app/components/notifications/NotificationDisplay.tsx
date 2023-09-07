@@ -27,6 +27,7 @@ export const NotificationDisplay = () => {
       )
     : [];
   console.log(notificationData);
+  console.log(notifications);
 
   const [setSound, setSoundState] = useState(soundSelector.click);
 

@@ -16,6 +16,8 @@ const NotificationComponent = ({
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const showNotification = useLoadingStore((state) => state.showNotification);
 
+  console.log(notifications);
+
   useEffect(() => {
     if (currentIndex < notifications.length - 1) {
       const timer = setTimeout(() => {

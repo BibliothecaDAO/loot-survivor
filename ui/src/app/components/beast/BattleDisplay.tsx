@@ -251,7 +251,12 @@ export const NotificationBattleDisplay = ({
 
   const renderBattleNotification = () => {
     if (BeastFled) {
-      return <p>Fled the {beastName || ""}!</p>;
+      return (
+        <span className="flex flex-row items-center justify-between">
+          <p>Fled the {beastName || ""}!</p>
+          <GiWalkingBootIcon />
+        </span>
+      );
     } else if (FailedToFlee) {
       return (
         <span className="flex flex-row items-center justify-between">
@@ -267,7 +272,7 @@ export const NotificationBattleDisplay = ({
               !
             </p>
           </span>
-          <GiWalkingBootIcon />
+          <GiFootTripIcon />
         </span>
       );
     } else if (KilledTryingToFlee) {

@@ -385,7 +385,7 @@ export default function Home() {
                   disabled={isWrongNetwork}
                 >
                   <ArcadeIcon className="w-4 sm:w-8 justify-center" />
-                  arcade account
+                  <span className="hidden sm:block">arcade account</span>
                 </Button>
                 <Button
                   onClick={() => {
