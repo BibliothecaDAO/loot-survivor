@@ -1,5 +1,5 @@
-import { parseAdventurerState } from "./events.ts";
-import { encodeIntAsBytes, checkExistsInt } from "./encode.ts";
+import { parseAdventurerState } from "./events.js";
+import { encodeIntAsBytes, checkExistsInt } from "./encode.js";
 
 export function insertAdventurer({
   id,

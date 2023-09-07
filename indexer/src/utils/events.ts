@@ -9,7 +9,7 @@ import {
   parseU16,
   parseU256,
   parseU8,
-} from "./parser.ts";
+} from "./parser.js";
 
 // Get hash of name, and zero-pad it to 32 bytes.
 function eventKey(name: string) {

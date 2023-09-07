@@ -19,8 +19,8 @@ import {
   parseDiscoveredXp,
   parseHitByObstacle,
   SLAYED_BEAST,
-} from "./utils/events.ts";
-import { insertDiscovery } from "./utils/helpers.ts";
+} from "./utils/events.js";
+import { insertDiscovery } from "./utils/helpers.js";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);

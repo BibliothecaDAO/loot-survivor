@@ -8,7 +8,6 @@ import aiohttp_cors
 from aiohttp import web
 from pymongo import MongoClient
 from strawberry.aiohttp.views import GraphQLView
-from indexer.indexer import LootSurvivorIndexer
 from indexer.utils import felt_to_str, str_to_felt, get_key_by_value
 from indexer.config import Config
 
