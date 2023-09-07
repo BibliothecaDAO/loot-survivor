@@ -43,6 +43,9 @@ export const EQUIPPED_ITEMS = eventKey("EquippedItems");
 export const DROPPED_ITEMS = eventKey("DroppedItems");
 export const ITEM_SPECIAL_UNLOCKED = eventKey("ItemSpecialUnlocked");
 
+export const NEW_HIGH_SCORE = eventKey("NewHighScore");
+export const REWARD_DISTRIBUTION = eventKey("RewardDistribution");
+
 export const parseStats = combineParsers({
   strength: { index: 0, parser: parseU8 },
   dexterity: { index: 1, parser: parseU8 },
@@ -291,4 +294,29 @@ export const parseItemSpecialUnlocked = combineParsers({
 export const parseNewItemsAvailable = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
   items: { index: 1, parser: parseArray(parseU8) },
+});
+
+export const parsePlayerReward = combineParsers({
+  adventurerId: { index: 0, parser: parseU256 },
+  rank: { index: 1, parser: parseU8 },
+  amount: { index: 2, parser: parseU256 },
+  address: { index: 3, parser: parseFelt252 },
+});
+
+export const parseClientReward = combineParsers({
+  amount: { index: 0, parser: parseU256 },
+  address: { index: 0, parser: parseFelt252 },
+});
+
+export const parseRewardDistribution = combineParsers({
+  firstPlace: { index: 0, parser: parsePlayerReward },
+  secondPlace: { index: 1, parser: parsePlayerReward },
+  thirdPlace: { index: 2, parser: parsePlayerReward },
+  client: { index: 3, parser: parseClientReward },
+  dao: { index: 4, parser: parseU256 },
+});
+
+export const parseNewHighScore = combineParsers({
+  adventurer_state: { index: 0, parser: parseAdventurerState },
+  rank: { index: 1, parser: parseU8 },
 });

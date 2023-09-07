@@ -465,3 +465,61 @@ export function updateItemSpecials({
     },
   };
 }
+
+export function insertHighScore({
+  adventurerId,
+  owner,
+  rank,
+  xp,
+  txHash,
+  scoreTime,
+  timestamp,
+  totalPayout,
+}: any) {
+  const entity = {
+    adventurerId: checkExistsInt(BigInt(adventurerId)),
+    owner: checkExistsInt(BigInt(owner)),
+    rank: checkExistsInt(BigInt(rank)),
+  };
+
+  return {
+    entity,
+    update: {
+      $set: {
+        ...entity,
+        xp: encodeIntAsBytes(BigInt(xp)),
+        txHash: checkExistsInt(BigInt(txHash)),
+        scoreTime,
+        timestamp,
+        totalPayout: totalPayout,
+      },
+    },
+  };
+}
+
+export function updateTotalPayout({
+  adventurerId,
+  owner,
+  rank,
+  timestamp,
+  newPayout,
+}: any) {
+  const entity = {
+    adventurerId: checkExistsInt(BigInt(adventurerId)),
+    owner: checkExistsInt(BigInt(owner)),
+    rank: checkExistsInt(BigInt(rank)),
+  };
+
+  return {
+    entity,
+    update: {
+      $set: {
+        ...entity,
+        timestamp,
+      },
+      $inc: {
+        totalPayout: BigInt(newPayout),
+      },
+    },
+  };
+}

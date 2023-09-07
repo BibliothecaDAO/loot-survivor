@@ -647,8 +647,9 @@ class ScoresFilter:
     rank: Optional[FeltValueFilter] = None
     xp: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
-    blockTime: Optional[DateTimeFilter] = None
+    scoreTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
+    totalPayout: Optional[FeltValueFilter] = None
 
 
 @strawberry.input
@@ -775,8 +776,9 @@ class ScoresOrderByInput:
     rank: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
-    blockTime: Optional[OrderByInput] = None
+    scoreTime: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
+    totalPayout: Optional[OrderByInput] = None
 
 
 @strawberry.input
@@ -936,8 +938,9 @@ class Score:
     rank: Optional[FeltValue]
     xp: Optional[FeltValue]
     txHash: Optional[HexValue]
-    blockTime: Optional[str]
+    scoreTime: Optional[str]
     timestamp: Optional[str]
+    totalPayout: Optional[FeltValue]
 
     @classmethod
     def from_mongo(cls, data):
@@ -947,8 +950,9 @@ class Score:
             rank=data["rank"],
             xp=data["xp"],
             txHash=data["txHash"],
-            blockTime=data["blockTime"],
+            scoreTime=data["scoreTime"],
             timestamp=data["timestamp"],
+            totalPayout=data["totalPayout"],
         )
 
 
