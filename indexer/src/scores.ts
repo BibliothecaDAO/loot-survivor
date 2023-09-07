@@ -7,8 +7,8 @@ import {
   parseRewardDistribution,
   NEW_HIGH_SCORE,
   parseNewHighScore,
-} from "./utils/events.js";
-import { insertHighScore, updateTotalPayout } from "./utils/helpers.js";
+} from "./utils/events.ts";
+import { insertHighScore, updateTotalPayout } from "./utils/helpers.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
