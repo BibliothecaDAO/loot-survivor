@@ -254,91 +254,107 @@ export const NotificationBattleDisplay = ({
       return <p>Fled the {beastName || ""}!</p>;
     } else if (FailedToFlee) {
       return (
-        <span className="flex flex-col gap-1">
-          <p>Failed to flee the {beastName || ""}.</p>
-          <p>
-            {beastName || ""} dealt {battleData[1]?.damageTaken} damage
-            {battleData[1]?.criticalHit && (
-              <>
-                , a <span className="text-terminal-yellow">critical hit</span>
-              </>
-            )}
-            !
-          </p>
+        <span className="flex flex-row items-center justify-between">
+          <span className="flex flex-col gap-1">
+            <p>Failed to flee the {beastName || ""}.</p>
+            <p>
+              {beastName || ""} dealt {battleData[1]?.damageTaken} damage
+              {battleData[1]?.criticalHit && (
+                <>
+                  , a <span className="text-terminal-yellow">critical hit</span>
+                </>
+              )}
+              !
+            </p>
+          </span>
+          <GiWalkingBootIcon />
         </span>
       );
     } else if (KilledTryingToFlee) {
       return (
-        <span className="flex flex-col gap-1">
-          <p>Failed to flee the {beastName || ""}.</p>
-          <p>
-            Killed by the {beastName || ""} from {battleData[1]?.damageTaken}{" "}
-            damage
-            {battleData[1]?.criticalHit && (
-              <>
-                , a <span className="text-terminal-yellow">critical hit</span>
-              </>
-            )}
-            !
-          </p>
+        <span className="flex flex-row items-center justify-between">
+          <span className="flex flex-col gap-1">
+            <p>Failed to flee the {beastName || ""}.</p>
+            <p>
+              Killed by the {beastName || ""} from {battleData[1]?.damageTaken}{" "}
+              damage
+              {battleData[1]?.criticalHit && (
+                <>
+                  , a <span className="text-terminal-yellow">critical hit</span>
+                </>
+              )}
+              !
+            </p>
+          </span>
+          <SkullCrossedBonesIcon />
         </span>
       );
     } else if (Attacked) {
       return (
-        <span className="flex flex-col gap-1">
-          <p>
-            Attacked the {beastName || ""} for {battleData[0]?.damageDealt}{" "}
-            damage
-            {battleData[0]?.criticalHit && (
-              <>
-                , a <span className="text-terminal-yellow">critical hit</span>
-              </>
-            )}
-            !
-          </p>
-          <p>
-            {beastName || ""} counterattacked for {battleData[1]?.damageTaken}{" "}
-            damage
-            {battleData[1]?.criticalHit && ", a critical hit"}!
-          </p>
+        <span className="flex flex-row items-center justify-between">
+          <span className="flex flex-col gap-1">
+            <p>
+              Attacked the {beastName || ""} for {battleData[0]?.damageDealt}{" "}
+              damage
+              {battleData[0]?.criticalHit && (
+                <>
+                  , a <span className="text-terminal-yellow">critical hit</span>
+                </>
+              )}
+              !
+            </p>
+            <p>
+              {beastName || ""} counterattacked for {battleData[1]?.damageTaken}{" "}
+              damage
+              {battleData[1]?.criticalHit && ", a critical hit"}!
+            </p>
+          </span>
+          <GiBattleGearIcon />
         </span>
       );
     } else if (KilledByBeast) {
       return (
-        <span className="flex flex-col gap-1">
-          <p>
-            With a last breath you strike the {beastName || ""} for{" "}
-            {battleData[0]?.damageDealt} damage
-            {battleData[0]?.criticalHit && (
-              <>
-                , a <span className="text-terminal-yellow">critical hit</span>
-              </>
-            )}
-            !
-          </p>
-          <p>
-            Killed by the {beastName || ""} taking {""}
-            {battleData[1]?.damageTaken} damage
-            {battleData[0]?.criticalHit && (
-              <>
-                , a <span className="text-terminal-yellow">critical hit</span>
-              </>
-            )}
-          </p>
+        <span className="flex flex-row items-center justify-between">
+          <span className="flex flex-col gap-1">
+            <p>
+              With a last breath you strike the {beastName || ""} for{" "}
+              {battleData[0]?.damageDealt} damage
+              {battleData[0]?.criticalHit && (
+                <>
+                  , a <span className="text-terminal-yellow">critical hit</span>
+                </>
+              )}
+              !
+            </p>
+            <p>
+              Killed by the {beastName || ""} taking {""}
+              {battleData[1]?.damageTaken} damage
+              {battleData[0]?.criticalHit && (
+                <>
+                  , a <span className="text-terminal-yellow">critical hit</span>
+                </>
+              )}
+            </p>
+          </span>
+          <SkullCrossedBonesIcon />
         </span>
       );
     } else if (Slayed) {
       return (
         <div className="flex flex-col gap-2 items-center justify-center">
-          <p>
-            Slayed the {beastName || ""} for {battleData[0]?.damageDealt} damage
-            {battleData[0]?.criticalHit && (
-              <>
-                , a <span className="text-terminal-yellow">critical hit</span>
-              </>
-            )}
-            !
-          </p>
+          <span className="flex flex-row items-center justify-between">
+            <p>
+              Slayed the {beastName || ""} for {battleData[0]?.damageDealt}{" "}
+              damage
+              {battleData[0]?.criticalHit && (
+                <>
+                  , a <span className="text-terminal-yellow">critical hit</span>
+                </>
+              )}
+              !
+            </p>
+            <GiBattleGearIcon />
+          </span>
           {/* <TwitterShareButton
             text={`My adventurer just slew a level ${beastLevel} ${beastName} (Tier ${tier}) on #LootSurvivor.\n\n${adventurer?.name} is currently ${ordinalRank} place on the leaderboard.\n\nThink you can out-survive me?\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
           /> */}
@@ -348,13 +364,17 @@ export const NotificationBattleDisplay = ({
         </div>
       );
     } else if (IdleDeathPenalty) {
-      return <p>You were killed from the idle death penalty!</p>;
+      return (
+        <span className="flex flex-row items-center justify-between">
+          <p>You were killed from the idle death penalty!</p>
+          <SkullCrossedBonesIcon />
+        </span>
+      );
     }
   };
   return (
-    <div className="flex flex-row items-center justify-between">
+    <div className="flex flex-row items-center">
       {renderBattleNotification()}
-      <SkullCrossedBonesIcon />
     </div>
   );
 };
