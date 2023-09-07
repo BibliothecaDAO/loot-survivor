@@ -44,6 +44,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
     (state) => state.removeEntrypointFromCalls
@@ -258,6 +259,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
 
   const handleSubmitUpgradeTx = async () => {
     renderSummary();
+    resetNotification();
     await upgrade(upgrades, purchaseItems, potionAmount);
     setPotionAmount(0);
     setPurchaseItems([]);

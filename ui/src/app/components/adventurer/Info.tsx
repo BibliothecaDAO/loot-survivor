@@ -106,9 +106,9 @@ export default function Info({
     "Weapon",
     "Chest",
     "Head",
-    "Hand",
     "Waist",
     "Foot",
+    "Hand",
     "Neck",
     "Ring",
   ];
@@ -117,7 +117,19 @@ export default function Info({
 
   const totalVitality = (formatAdventurer.vitality ?? 0) + vitalitySelected;
 
-  const totalHealth = (formatAdventurer.health ?? 0) + vitalitySelected * 10;
+  const maxHealth = Math.min(100 + totalVitality * 10, 720);
+
+  const healthPlus = Math.min(
+    (vitalitySelected + potionAmount) * 10,
+    maxHealth - (formatAdventurer.health ?? 0)
+  );
+
+  const maxHealthPlus = vitalitySelected * 10;
+
+  const totalHealth = Math.min(
+    (formatAdventurer.health ?? 0) + healthPlus,
+    maxHealth
+  );
 
   return (
     <>
@@ -125,7 +137,7 @@ export default function Info({
         <div className="border border-terminal-green xl:h-[500px] 2xl:h-full">
           <div className="flex flex-row flex-wrap gap-2 p-1 xl:h-full">
             <div className="flex flex-col w-full sm:p-2 uppercase xl:h-full">
-              <div className="flex justify-between w-full text-xl sm:text-2xl lg:text-3xl border-b border-terminal-green">
+              <div className="relative flex justify-between w-full text-xl sm:text-2xl lg:text-3xl border-b border-terminal-green">
                 {formatAdventurer.name}
                 <span className="flex items-center text-terminal-yellow">
                   <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
@@ -138,22 +150,21 @@ export default function Info({
                 <BagIcon className="self-center w-4 h-4 fill-current" />{" "}
                 {`${items.length}/${19}`}
               </span> */}
-                <span className="relative flex items-center ">
+                <span className="flex items-center ">
                   <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
                   <HealthCountDown health={totalHealth || 0} />
-                  {`/${Math.min(100 + totalVitality * 10, 720)}`}
-                  {/* {(potionAmount || vitalitySelected) && (
-                    <p className="absolute top-[-10px] left-[30px] text-sm">
-                      +{(vitalitySelected + potionAmount) * 10}
-                    </p>
-                  )}
-                   */}{" "}
-                  {/* {vitalitySelected && (
-                    <p className="absolute top-[-10px] left-[60px] text-sm">
-                      +{vitalitySelected * 10}
-                    </p>
-                  )} */}
+                  {`/${maxHealth}`}
                 </span>
+                {(potionAmount > 0 || vitalitySelected > 0) && (
+                  <p className="absolute top-[-5px] sm:top-[-10px] right-[30px] sm:right-[40px] text-xs sm:text-sm">
+                    +{healthPlus}
+                  </p>
+                )}
+                {vitalitySelected > 0 && (
+                  <p className="absolute top-[-5px] sm:top-[-10px] right-0 text-xs sm:text-sm">
+                    +{maxHealthPlus}
+                  </p>
+                )}
               </div>
               <div className="flex justify-between w-full text-sm sm:text-base">
                 {formatAdventurer.classType}{" "}

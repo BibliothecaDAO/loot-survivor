@@ -141,6 +141,7 @@ export default function Home() {
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
+  const setStartOption = useUIStore((state) => state.setStartOption);
 
   const lordsBalance = useBalance({
     token: lordsContract?.address,
@@ -181,6 +182,7 @@ export default function Home() {
     setScreen,
     setAdventurer,
     setMintAdventurer,
+    setStartOption,
   });
 
   const playState = useMemo(
@@ -400,6 +402,7 @@ export default function Home() {
                   disabled={isWrongNetwork}
                 >
                   <ArcadeIcon className="w-4 sm:w-8 justify-center" />
+                  <span className="hidden sm:block">arcade account</span>
                 </Button>
                 <Button
                   onClick={() => {

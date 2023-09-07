@@ -21,6 +21,7 @@ interface BeastScreenProps {
 export default function BeastScreen({ attack, flee }: BeastScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
   const [showBattleLog, setShowBattleLog] = useState(false);
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
@@ -50,6 +51,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       id: 1,
       label: "SINGLE",
       action: async () => {
+        resetNotification();
         await attack(false, beastData);
       },
       disabled:
@@ -64,6 +66,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       mouseEnter: handleMouseEnter,
       mouseLeave: handleMouseLeave,
       action: async () => {
+        resetNotification();
         await attack(true, beastData);
       },
       disabled:
@@ -79,6 +82,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       id: 1,
       label: adventurer?.dexterity === 0 ? "DEX TOO LOW" : "SINGLE",
       action: async () => {
+        resetNotification();
         await flee(false, beastData);
       },
       disabled:
@@ -95,6 +99,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       mouseEnter: handleMouseEnter,
       mouseLeave: handleMouseLeave,
       action: async () => {
+        resetNotification();
         await flee(true, beastData);
       },
       disabled:

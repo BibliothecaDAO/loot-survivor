@@ -32,7 +32,7 @@ export default function ActionsScreen({
   const [selected, setSelected] = useState<string>("");
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
-
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
   const latestDiscoveries = useQueriesStore((state) =>
     state.data.latestDiscoveriesQuery
       ? state.data.latestDiscoveriesQuery.discoveries
@@ -73,6 +73,7 @@ export default function ActionsScreen({
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
+        resetNotification();
         await explore(false);
       },
       disabled: hasBeast || loading || !adventurer?.id,
@@ -88,6 +89,7 @@ export default function ActionsScreen({
       icon: <MistIcon />,
       value: "explore",
       action: async () => {
+        resetNotification();
         await explore(true);
       },
       disabled: hasBeast || loading || !adventurer?.id,

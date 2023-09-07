@@ -8,6 +8,7 @@ use array::ArrayTrait;
 use super::{
     item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials}, adventurer_stats::Stats,
     item_primitive::ItemPrimitive, adventurer_utils::{AdventurerUtils}, exploration::ExploreUtils,
+    bag::{Bag, IBag, ImplBag},
     constants::{
         adventurer_constants::{
             STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
@@ -346,27 +347,21 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    // Calculates the adventurer's luck based on the greatness of their equipped necklace and ring
+    // @notice Calculates the adventurer's luck based on the greatness of their jewelry
+    // @dev Adventurer gets luck from three sources:
+    //      1. Greatness of equipped jewlery
+    //      2. Greatness of bagged jewlery
+    //      3. Bonus luck, currently an equipped G20 Silver Ring
     // @param self: Adventurer to calculate luck for
+    // @param bag: Bag to calculate luck for
     // @return The adventurer's luck.
     #[inline(always)]
-    fn get_luck(self: Adventurer) -> u8 {
-        let mut necklace_greatness = self.neck.get_greatness();
-        if (self.neck.id == 0) {
-            necklace_greatness = 0;
-        }
-
-        // @dev: the ring's luck bonus is only applied if the ring is a silver ring
-        //       if gas weren't a concern, we would have item_luck_bonus take in adventurer
-        //       and call it at the end of this function to make it more generalizable
-        //       but since for LS we know silver ring is only ring with luck bonus, we can
-        //       just hardcode it here
-        let mut ring_greatness = self.ring.get_greatness() + self.ring.item_luck_bonus();
-        if (self.ring.id == 0) {
-            ring_greatness = 0;
-        }
-
-        necklace_greatness + ring_greatness
+    fn get_luck(self: Adventurer, bag: Bag) -> u8 {
+        let equipped_necklace_luck = self.neck.get_greatness();
+        let equipped_ring_luck = self.ring.get_greatness();
+        let bonus_luck = self.get_bonus_luck();
+        let bagged_jewelry_luck = bag.get_jewelry_greatness();
+        equipped_necklace_luck + equipped_ring_luck + bonus_luck + bagged_jewelry_luck
     }
 
     // in_battle returns true if the adventurer is in battle
@@ -408,8 +403,8 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 
-    // Adds a specified amount of health to the adventurer, preventing overflow and capping at max health.
-    // @param self: Adventurer to add health to
+    // @notice Adds health to the adventurer, preventing overflow and capping at max health.
+    // @param self a reference to the Adventurer to increase health.
     // @param amount: Amount of health to add to the adventurer
     #[inline(always)]
     fn increase_health(ref self: Adventurer, amount: u16) {
@@ -424,35 +419,35 @@ impl ImplAdventurer of IAdventurer {
         self.health = AdventurerUtils::get_max_health(self.stats.vitality)
     }
 
-    // @notice Decreases the health of an Adventurer by the given value, with underflow protection.
-    // @dev If the value to deduct is greater than the current health, it sets the health to zero.
+    // @notice Decreases health of Adventurer with underflow protection.
+    // @param self a reference to the Adventurer to deduct health from.
     // @param value The amount of health to be deducted from the Adventurer.
     #[inline(always)]
-    fn decrease_health(ref self: u16, value: u16) {
+    fn decrease_health(ref self: Adventurer, value: u16) {
         // underflow protection
-        if value > self {
-            self = 0;
+        if value > self.health {
+            self.health = 0;
         } else {
-            self -= value;
+            self.health -= value;
         }
     }
 
     // @notice Increases the Adventurer's gold by the given value, with overflow protection.
     // @param amount The amount of gold to add as a u16.
     #[inline(always)]
-    fn increase_gold(ref self: u16, amount: u16) {
+    fn increase_gold(ref self: Adventurer, amount: u16) {
         // Check if adding gold would result in overflow
-        if (u16_overflowing_add(self, amount).is_ok()) {
+        if (u16_overflowing_add(self.gold, amount).is_ok()) {
             // If it does not cause overflow, check if adding this amount would exceed max gold limit
-            if (self + amount <= MAX_GOLD) {
+            if (self.gold + amount <= MAX_GOLD) {
                 // If it does not exceed, add gold to the adventurer balance
-                self += amount;
+                self.gold += amount;
                 return;
             }
         }
 
         // In the case of potential overflow or exceeding max gold, set gold to max gold
-        self = MAX_GOLD;
+        self.gold = MAX_GOLD;
     }
 
     // @notice Increases the Adventurer's experience points by the given value and returns the previous and new level.
@@ -1284,74 +1279,109 @@ impl ImplAdventurer of IAdventurer {
         self = (current_block % MAX_BLOCK_COUNT).try_into().unwrap();
     }
 
-    // @notice gets stat bonus for an item
-    // @dev this is currently used for the pendant which grants +1 stat point at greatness 20
-    // @param item the ItemPrimitive to check if it qualifies for bonus stat points
-    // @return u8: the stat bonus, 0 if none 
+    // @notice gets a multplier bonus for discoveries based on the Adventurer
+    // @dev Equipped Platinum Ring provides 2x and then 4x gold at greatness 20
+    //      if no platinum ring is equipped, the gold multiplier is 1x
+    // @param self: The Adventurer to get the gold multplier for
+    // @return u8: the gold multiplier 
     #[inline(always)]
-    fn item_stat_bonus(self: ItemPrimitive) -> u8 {
-        if self.id == ItemId::Necklace {
-            NECKLACE_G20_BONUS_STATS
-        } else {
-            0
+    fn discovery_bonus_multplier(self: Adventurer) -> u8 {
+        if (self.ring.id == ItemId::PlatinumRing) {
+            if (self.ring.get_greatness() == 20) {
+                return 4;
+            } else {
+                return 2;
+            }
         }
+        return 1;
     }
 
-    // @notice checks if adventurer has double health discoveries unlocked
-    // @param adventurer the Adventurer to check if double health discovery is unlocked
-    // @return bool: true if double health discoveries is unlocked, false otherwise
+    // @notice gets gold multplier bonus when discovering an obstacle
+    // @dev Equipped TItanium Ring provides 1x and then 2x gold at greatness 20
+    //      if no titanium ring is equipped, the gold multiplier is 0x
+    // @param self: The Adventurer to get the gold multplier for
+    // @return u8: the gold multiplier
     #[inline(always)]
-    fn double_health_discovery_unlocked(self: Adventurer) -> bool {
-        self.neck.id == ItemId::Amulet && self.neck.get_greatness() == 20
-    }
-
-    // @notice checks if adventurer has double gold discovery ability unlocked
-    // @dev unlock is the pendant with greatness 20
-    // @param adventurer the Adventurer to check if double gold discovery is unlocked
-    // @return bool: true if double gold discoveries is unlocked, false otherwise
-    #[inline(always)]
-    fn double_gold_discovery_unlocked(self: Adventurer) -> bool {
-        self.neck.id == ItemId::Pendant && self.neck.get_greatness() == 20
+    fn obstacle_gold_reward_multplier(self: Adventurer) -> u8 {
+        if (self.ring.id == ItemId::TitaniumRing) {
+            if (self.ring.get_greatness() == 20) {
+                return 2;
+            } else {
+                return 1;
+            }
+        }
+        return 0;
     }
 
     // @notice gets luck bonus for an item
     // @dev this is currently used for the silver ring which grants +20 luck at greatness 20
-    // @param item the ItemPrimitive to check if it qualifies for double luck
+    // @param the Adventurer to check if it qualifies for bonus luck
     // @return u8 the luck bonus, 0 if none
     #[inline(always)]
-    fn item_luck_bonus(self: ItemPrimitive) -> u8 {
-        if (self.id == ItemId::SilverRing && self.get_greatness() == 20) {
-            SILVER_RING_G20_LUCK_BONUS
-        } else {
-            0
+    fn get_bonus_luck(self: Adventurer) -> u8 {
+        if (self.ring.id == ItemId::SilverRing) {
+            if (self.ring.get_greatness() == 20) {
+                return SILVER_RING_G20_LUCK_BONUS;
+            }
         }
+        return 0;
     }
 
-    // @notice checks if adventurer has double gold from beasts ability unlocked
-    // @dev unlock is the gold ring with greatness 20
-    // @param adventurer the Adventurer to check if double gold from beasts is unlocked
-    // @return bool: true if double gold from beasts is unlocked, false otherwise
+    // @notice returns the gold multplier bonus when defeating a beast
+    // @dev Equipped Gold Ring provides 2x and then 4x gold at greatness 20
+    //      if no gold ring is equipped, the gold multiplier is 1x
+    // @param self: The Adventurer to get the gold multplier for
+    // @return u8: the gold multiplier
     #[inline(always)]
-    fn double_gold_from_beasts_unlocked(self: Adventurer) -> bool {
-        self.ring.id == ItemId::GoldRing && self.ring.get_greatness() == 20
+    fn beast_gold_reward_multiplier(self: Adventurer) -> u8 {
+        if (self.ring.id == ItemId::GoldRing) {
+            if (self.ring.get_greatness() == 20) {
+                return 4;
+            } else {
+                return 2;
+            }
+        }
+
+        return 1;
     }
 
     // @notice checks if adventurer has double critical hit ability unlocked
-    // @dev unlock is the platinum ring with greatness 20
+    // @dev unlock is an equipped Pendant with greatness 20
     // @param adventurer the Adventurer to check if double critical hit is unlocked
-    // @return bool: true if double critical hit is unlocked, false otherwise
+    // @return u8 the critical hit bonus multplier
     #[inline(always)]
-    fn double_critical_hit_unlocked(self: Adventurer) -> bool {
-        self.ring.id == ItemId::PlatinumRing && self.ring.get_greatness() == 20
+    fn critical_hit_bonus_multplier(self: Adventurer) -> u8 {
+        if (self.neck.id == ItemId::Pendant && self.neck.get_greatness() == 20) {
+            2
+        } else {
+            1
+        }
+    }
+
+    // @notice gets armor defense bonus multiplier for the adventurer
+    // @players  Equipped Amulet with greatness 20 grants 2x armor defense, otherwise 1
+    // @param adventurer the Adventurer to check if double armor defense is unlocked
+    // @return u8 the armor defense bonus multiplier
+    #[inline(always)]
+    fn critical_hit_bonus_multiplier(self: Adventurer) -> u8 {
+        if (self.neck.id == ItemId::Amulet && self.neck.get_greatness() == 20) {
+            2
+        } else {
+            1
+        }
     }
 
     // @notice checks if adventurer has double special name damage ability unlocked
-    // @dev unlock is the titanium ring with greatness 20
+    // @dev unlock is an equipped Necklace with greatness 20
     // @param adventurer the Adventurer to check if double special name damage is unlocked
     // @return bool: true if double special name damage is unlocked, false otherwise
     #[inline(always)]
-    fn double_special_name_damage_unlocked(self: Adventurer) -> bool {
-        self.ring.id == ItemId::TitaniumRing && self.ring.get_greatness() == 20
+    fn name_match_bonus_damage_multiplier(self: Adventurer) -> u8 {
+        if (self.neck.id == ItemId::Necklace && self.neck.get_greatness() == 20) {
+            2
+        } else {
+            1
+        }
     }
 
     // @notice increases the xp of an item at a given slot
@@ -1427,7 +1457,7 @@ mod tests {
     use survivor::{
         adventurer::{IAdventurer, ImplAdventurer, Adventurer},
         item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials}, adventurer_stats::Stats,
-        item_primitive::ItemPrimitive, adventurer_utils::{AdventurerUtils},
+        item_primitive::ItemPrimitive, adventurer_utils::{AdventurerUtils}, bag::{Bag, ImplBag},
         constants::{
             adventurer_constants::{
                 STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH,
@@ -1440,6 +1470,172 @@ mod tests {
         }
     };
     use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
+
+    #[test]
+    #[available_gas(28390)]
+    fn test_beast_gold_reward_multiplier_gas() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+        let reward = adventurer.beast_gold_reward_multiplier();
+    }
+
+
+    #[test]
+    #[available_gas(48470)]
+    fn test_beast_gold_reward_multiplier() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+
+        assert(adventurer.beast_gold_reward_multiplier() == 1, 'no gold reward');
+
+        // equip gold ring
+        let gold_ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 1 };
+        adventurer.ring = gold_ring;
+        assert(adventurer.beast_gold_reward_multiplier() == 2, '2x gold reward');
+
+        // increase greatness of gold ring to G20
+        adventurer.ring.xp = 400;
+        assert(adventurer.beast_gold_reward_multiplier() == 4, '4x gold reward');
+
+        // change to platinum ring
+        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 1, metadata: 1 };
+        adventurer.ring = platinum_ring;
+        assert(adventurer.beast_gold_reward_multiplier() == 1, 'removed gold reward');
+    }
+
+    #[test]
+    #[available_gas(28390)]
+    fn test_get_bonus_luck_gas() {
+        let adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+            }
+        );
+
+        let bonus_luck = adventurer.get_bonus_luck();
+    }
+
+    #[test]
+    #[available_gas(48470)]
+    fn test_get_bonus_luck() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+            }
+        );
+
+        assert(adventurer.get_bonus_luck() == 0, 'no bonus luck');
+
+        // equip silver ring
+        let silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 1, metadata: 1 };
+        adventurer.ring = silver_ring;
+        assert(adventurer.get_bonus_luck() == 0, 'no bonus luck at G1');
+
+        // increase greatness to 20
+        adventurer.ring.xp = 400;
+        assert(adventurer.get_bonus_luck() == SILVER_RING_G20_LUCK_BONUS, 'bonus luck at G20');
+
+        // switch to platinum ring
+        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 1, metadata: 1 };
+        adventurer.ring = platinum_ring;
+        assert(adventurer.get_bonus_luck() == 0, 'no bonus luck after swap');
+    }
+
+    #[test]
+    #[available_gas(28390)]
+    fn test_obstacle_gold_reward_multplier_gas() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+        let reward = adventurer.obstacle_gold_reward_multplier();
+    }
+
+    #[test]
+    #[available_gas(2811390)]
+    fn test_obstacle_gold_reward_multplier() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+
+        assert(adventurer.obstacle_gold_reward_multplier() == 0, 'no obstacle gold reward');
+
+        // equip Titanium ring
+        let titanium_ring = ItemPrimitive { id: ItemId::TitaniumRing, xp: 1, metadata: 1 };
+        adventurer.ring = titanium_ring;
+        assert(adventurer.obstacle_gold_reward_multplier() == 1, '1x obstacle gold reward');
+
+        // increase greatness of Titanium ring to G20
+        adventurer.ring.xp = 400;
+        assert(adventurer.obstacle_gold_reward_multplier() == 2, '2x obstacle gold reward');
+
+        // change to platinum ring
+        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 1, metadata: 1 };
+        adventurer.ring = platinum_ring;
+        assert(adventurer.obstacle_gold_reward_multplier() == 0, 'removed obstacle gold reward');
+    }
+
+    #[test]
+    #[available_gas(28390)]
+    fn test_discovery_bonus_multplier_gas() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+
+        let discovery_bonus = adventurer.discovery_bonus_multplier();
+    }
+    #[test]
+    #[available_gas(48470)]
+    fn test_discovery_bonus_multplier() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+
+        assert(adventurer.discovery_bonus_multplier() == 1, 'start with 1x discovery bonus');
+
+        // equip platinum ring
+        let platinum_ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 1, metadata: 1 };
+        adventurer.ring = platinum_ring;
+        assert(adventurer.discovery_bonus_multplier() == 2, '2x discovery with platinum ring');
+
+        // increase greatness of platinum ring to G20
+        adventurer.ring.xp = 400;
+        assert(adventurer.discovery_bonus_multplier() == 4, '4x discovery with platinum ring');
+
+        // switch to titanium ring
+        let titanium_ring = ItemPrimitive { id: ItemId::TitaniumRing, xp: 1, metadata: 1 };
+        adventurer.ring = titanium_ring;
+        assert(adventurer.discovery_bonus_multplier() == 1, '1x discovery with titanium ring');
+    }
 
     #[test]
     #[available_gas(44860)]
@@ -1946,7 +2142,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(28390)]
+    #[available_gas(35290)]
     fn test_double_gold_from_beasts_unlocked_gas() {
         let adventurer = ImplAdventurer::new(
             12,
@@ -1955,11 +2151,26 @@ mod tests {
                 strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
             }
         );
-        ImplAdventurer::double_gold_from_beasts_unlocked(adventurer);
+        let bag = Bag {
+            item_1: ItemPrimitive { id: ItemId::Katana, xp: 0, metadata: 9 },
+            item_2: ItemPrimitive { id: ItemId::Crown, xp: 0, metadata: 10 },
+            item_3: ItemPrimitive { id: ItemId::Shirt, xp: 0, metadata: 11 },
+            item_4: ItemPrimitive { id: ItemId::Shoes, xp: 0, metadata: 12 },
+            item_5: ItemPrimitive { id: ItemId::GoldRing, xp: 0, metadata: 13 },
+            item_6: ItemPrimitive { id: 0, xp: 0, metadata: 14 },
+            item_7: ItemPrimitive { id: 0, xp: 0, metadata: 15 },
+            item_8: ItemPrimitive { id: 0, xp: 0, metadata: 16 },
+            item_9: ItemPrimitive { id: 0, xp: 0, metadata: 17 },
+            item_10: ItemPrimitive { id: 0, xp: 0, metadata: 18 },
+            item_11: ItemPrimitive { id: 0, xp: 0, metadata: 19 },
+            mutated: false,
+        };
+
+        ImplAdventurer::beast_gold_reward_multiplier(adventurer);
     }
 
     #[test]
-    #[available_gas(74050)]
+    #[available_gas(99050)]
     fn test_double_gold_from_beasts_unlocked() {
         let mut adventurer = ImplAdventurer::new(
             12,
@@ -1969,58 +2180,120 @@ mod tests {
             }
         );
 
+        let bag = Bag {
+            item_1: ItemPrimitive { id: ItemId::Katana, xp: 0, metadata: 9 },
+            item_2: ItemPrimitive { id: ItemId::Crown, xp: 0, metadata: 10 },
+            item_3: ItemPrimitive { id: ItemId::Shirt, xp: 0, metadata: 11 },
+            item_4: ItemPrimitive { id: ItemId::Shoes, xp: 0, metadata: 12 },
+            item_5: ItemPrimitive { id: 0, xp: 0, metadata: 13 },
+            item_6: ItemPrimitive { id: 0, xp: 0, metadata: 14 },
+            item_7: ItemPrimitive { id: 0, xp: 0, metadata: 15 },
+            item_8: ItemPrimitive { id: 0, xp: 0, metadata: 16 },
+            item_9: ItemPrimitive { id: 0, xp: 0, metadata: 17 },
+            item_10: ItemPrimitive { id: 0, xp: 0, metadata: 18 },
+            item_11: ItemPrimitive { id: 0, xp: 0, metadata: 19 },
+            mutated: false,
+        };
+
         // verify new adventurers don't have double gold discovery unlocked
         assert(
-            !ImplAdventurer::double_gold_from_beasts_unlocked(adventurer),
+            ImplAdventurer::beast_gold_reward_multiplier(adventurer) == 1,
             'double beast gold not unlocked'
         );
 
         // equip an amulet and verify result doesn't change
         adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
         assert(
-            !ImplAdventurer::double_gold_from_beasts_unlocked(adventurer),
+            ImplAdventurer::beast_gold_reward_multiplier(adventurer) == 1,
             'amulet not unlock beast 2xgold'
         );
 
         // equip a pendant and verify result doesn't change
         adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 2 };
         assert(
-            !ImplAdventurer::double_gold_from_beasts_unlocked(adventurer),
+            ImplAdventurer::beast_gold_reward_multiplier(adventurer) == 1,
             'pendant not unlock beast 2xgold'
         );
 
         // equip a necklace and verify result doesn't change
         adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 3 };
         assert(
-            !ImplAdventurer::double_gold_from_beasts_unlocked(adventurer),
+            ImplAdventurer::beast_gold_reward_multiplier(adventurer) == 1,
             'necklace not beast 2xgold'
         );
 
         // equip a bronze ring and verify result doesn't change
         adventurer.ring = ItemPrimitive { id: ItemId::BronzeRing, xp: 400, metadata: 4 };
         assert(
-            !ImplAdventurer::double_gold_from_beasts_unlocked(adventurer),
+            ImplAdventurer::beast_gold_reward_multiplier(adventurer) == 1,
             'brnze ring ! unlck beast 2xgold'
         );
 
-        // equip a gold ring with 399 xp (greatness 19) and verifyh result doesn't change
-        adventurer.ring = ItemPrimitive { id: ItemId::GoldRing, xp: 399, metadata: 5 };
+        // equip a gold ring with 1xp (greatness 2) and verify it yields 2x gold reward
+        adventurer.ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 5 };
         assert(
-            !ImplAdventurer::double_gold_from_beasts_unlocked(adventurer),
-            'G19 gold ring ! beast 2xgold'
+            ImplAdventurer::beast_gold_reward_multiplier(adventurer) == 2,
+            'G1 gold ring gives 2x reward'
         );
 
         // equip a gold ring with 400 xp (greatness 20) and verify result is true
         adventurer.ring = ItemPrimitive { id: ItemId::GoldRing, xp: 400, metadata: 6 };
         assert(
-            ImplAdventurer::double_gold_from_beasts_unlocked(adventurer),
-            'G20 gold ring ! beast 2xgold'
+            ImplAdventurer::beast_gold_reward_multiplier(adventurer) == 4,
+            'G20 gold ring gives 4xgold'
         );
     }
 
     #[test]
-    #[available_gas(29090)]
-    fn test_double_critical_hit_unlocked_gas() {
+    #[available_gas(28390)]
+    fn test_critical_hit_bonus_multiplier_gas() {
+        let adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+
+        let armor_bonus = ImplAdventurer::critical_hit_bonus_multiplier(adventurer);
+    }
+
+    #[test]
+    #[available_gas(40910)]
+    fn test_critical_hit_bonus_multiplier() {
+        let mut adventurer = ImplAdventurer::new(
+            12,
+            0,
+            Stats {
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+            }
+        );
+
+        // verify no armor bonus multplier at start
+        assert(
+            ImplAdventurer::critical_hit_bonus_multiplier(adventurer) == 1,
+            'start with no armor bonus'
+        );
+
+        // equip a greatness 1 Amulet
+        adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 1 };
+        // verify there is still no armor bonus
+        assert(
+            ImplAdventurer::critical_hit_bonus_multiplier(adventurer) == 1, 'no amulet till g20'
+        );
+
+        // increase greatness of amulet to g20
+        adventurer.neck.xp = 400;
+        // verify there is now an armor bonus
+        assert(
+            ImplAdventurer::critical_hit_bonus_multiplier(adventurer) == 2,
+            'amulet gives 20% armor bonus'
+        );
+    }
+
+    #[test]
+    #[available_gas(28790)]
+    fn test_critical_hit_bonus_multplier_gas() {
         let mut adventurer = ImplAdventurer::new(
             12,
             0,
@@ -2031,12 +2304,12 @@ mod tests {
 
         // equip a Platinum Ring ring with 400xp (greatness 20)
         adventurer.ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400, metadata: 6 };
-        ImplAdventurer::double_critical_hit_unlocked(adventurer);
+        ImplAdventurer::critical_hit_bonus_multplier(adventurer);
     }
 
     #[test]
-    #[available_gas(67690)]
-    fn test_double_critical_hit_unlocked() {
+    #[available_gas(44910)]
+    fn test_critical_hit_bonus_multplier() {
         let mut adventurer = ImplAdventurer::new(
             12,
             0,
@@ -2045,49 +2318,36 @@ mod tests {
             }
         );
 
-        // verify starting state (no ring)
-        assert(adventurer.ring.id == 0, 'start without a ring');
+        // verify starting state (no necklace)
+        assert(adventurer.neck.id == 0, 'start without a neck');
 
-        // verify no double critical hit unlocked without a ring
+        // verify no critical hit damage multiplier at start
         assert(
-            !ImplAdventurer::double_critical_hit_unlocked(adventurer), 'no crit hit without ring'
+            ImplAdventurer::critical_hit_bonus_multplier(adventurer) == 1,
+            'no starting crit hit multi'
         );
 
-        // equip a bronze ring and verify result doesn't change
-        adventurer.ring = ItemPrimitive { id: ItemId::BronzeRing, xp: 400, metadata: 4 };
+        // equip a greatness 1 pendant
+        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 1, metadata: 2 };
+        // verify critical damage isn't unlocked
         assert(
-            !ImplAdventurer::double_critical_hit_unlocked(adventurer), 'brnze ring ! 2x crit dmg'
+            ImplAdventurer::critical_hit_bonus_multplier(adventurer) == 1,
+            '< g20 pendant ! unlck 2xdmg'
         );
 
-        // equip a silver ring with 400 xp (greatness 20) and verify result is false
-        adventurer.ring = ItemPrimitive { id: ItemId::SilverRing, xp: 400, metadata: 6 };
+        // increase pendant to G20
+        adventurer.neck.xp = 400;
+        // verify critical damage is unlocked
         assert(
-            !ImplAdventurer::double_critical_hit_unlocked(adventurer), 'silver ring ! 2x crit dmg'
-        );
-
-        // equip a gold ring with 400 xp (greatness 20) and verify result is false
-        adventurer.ring = ItemPrimitive { id: ItemId::GoldRing, xp: 400, metadata: 6 };
-        assert(
-            !ImplAdventurer::double_critical_hit_unlocked(adventurer), 'gold ring ! 2x crit dmg'
-        );
-
-        // equip a titanium ring with 400xp (greatness 20) and verify result is false
-        adventurer.ring = ItemPrimitive { id: ItemId::TitaniumRing, xp: 400, metadata: 6 };
-        assert(
-            !ImplAdventurer::double_critical_hit_unlocked(adventurer), 'titanium ring ! unlck 2xdmg'
-        );
-
-        // equip a platiniun ring with 400xp (greatness 20) and verify result is true
-        adventurer.ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400, metadata: 6 };
-        assert(
-            ImplAdventurer::double_critical_hit_unlocked(adventurer), 'platinum ring ! unlck 2xdmg'
+            ImplAdventurer::critical_hit_bonus_multplier(adventurer) == 2,
+            'G20 pendant unlcks 2x crit dmg'
         );
     }
 
     // gas baseline
     #[test]
-    #[available_gas(29090)]
-    fn test_double_special_name_damage_unlocked_gas() {
+    #[available_gas(28790)]
+    fn test_name_match_bonus_damage_multiplier_gas() {
         let mut adventurer = ImplAdventurer::new(
             12,
             0,
@@ -2098,12 +2358,12 @@ mod tests {
 
         // equip a titanium ring with 400xp (greatness 20)
         adventurer.ring = ItemPrimitive { id: ItemId::TitaniumRing, xp: 400, metadata: 6 };
-        ImplAdventurer::double_special_name_damage_unlocked(adventurer);
+        ImplAdventurer::name_match_bonus_damage_multiplier(adventurer);
     }
 
     #[test]
-    #[available_gas(67690)]
-    fn test_double_special_name_damage_unlocked() {
+    #[available_gas(44910)]
+    fn test_name_match_bonus_damage_multiplier() {
         let mut adventurer = ImplAdventurer::new(
             12,
             0,
@@ -2112,176 +2372,29 @@ mod tests {
             }
         );
 
-        // verify starting state (no ring)
-        assert(adventurer.ring.id == 0, 'start without a ring');
+        // verify starting state (no necklace)
+        assert(adventurer.neck.id == 0, 'start without a ring');
 
         // verify no double critical hit unlocked without a ring
         assert(
-            !ImplAdventurer::double_special_name_damage_unlocked(adventurer),
-            'no double name dmg without ring'
+            ImplAdventurer::name_match_bonus_damage_multiplier(adventurer) == 1,
+            'no name match bonus multi'
         );
 
-        // equip a bronze ring and verify result doesn't change
-        adventurer.ring = ItemPrimitive { id: ItemId::BronzeRing, xp: 400, metadata: 4 };
+        // equip a G1 necklace
+        adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 1, metadata: 7 };
+        // verify double name damage is still false
         assert(
-            !ImplAdventurer::double_special_name_damage_unlocked(adventurer),
-            'brnze ring ! 2x name dmg'
+            ImplAdventurer::name_match_bonus_damage_multiplier(adventurer) == 1,
+            '< g20 necklace ! 2x name dmg'
         );
 
-        // equip a silver ring with 400 xp (greatness 20) and verify result is false
-        adventurer.ring = ItemPrimitive { id: ItemId::SilverRing, xp: 400, metadata: 6 };
+        // increase necklace to G20
+        adventurer.neck.xp = 400;
+        // verify double name damage is true
         assert(
-            !ImplAdventurer::double_special_name_damage_unlocked(adventurer),
-            'silver ring ! 2x name dmg'
-        );
-
-        // equip a gold ring with 400 xp (greatness 20) and verify result is false
-        adventurer.ring = ItemPrimitive { id: ItemId::GoldRing, xp: 400, metadata: 6 };
-        assert(
-            !ImplAdventurer::double_special_name_damage_unlocked(adventurer),
-            'gold ring ! 2x name dmg'
-        );
-
-        // equip a platiniun ring with 400xp (greatness 20) and verify result is false
-        adventurer.ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400, metadata: 6 };
-        assert(
-            !ImplAdventurer::double_special_name_damage_unlocked(adventurer),
-            'platinum ring ! 2x name dmg'
-        );
-
-        // equip a titanium ring with 400xp (greatness 20) and verify result is true
-        adventurer.ring = ItemPrimitive { id: ItemId::TitaniumRing, xp: 400, metadata: 6 };
-        assert(
-            ImplAdventurer::double_special_name_damage_unlocked(adventurer),
-            'g20 titanium ring unlcks 2xdmg'
-        );
-    }
-
-    #[test]
-    #[available_gas(3300)]
-    fn test_item_stat_bonus() {
-        let amulet = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
-        let pendant = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 1 };
-        let necklace = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 1 };
-
-        assert(amulet.item_stat_bonus() == 0, 'amulet gets no stat bonus');
-        assert(pendant.item_stat_bonus() == 0, 'pendant gets no stat bonus');
-        assert(necklace.item_stat_bonus() == 1, 'necklace gets a stat bonus');
-    }
-
-    #[test]
-    #[available_gas(32690)]
-    fn test_double_gold_discovery_unlocked_gas() {
-        let adventurer = ImplAdventurer::new(
-            12,
-            0,
-            Stats {
-                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
-            }
-        );
-        ImplAdventurer::double_gold_discovery_unlocked(adventurer);
-    }
-
-    #[test]
-    #[available_gas(66630)]
-    fn test_double_gold_discovery_unlocked() {
-        let mut adventurer = ImplAdventurer::new(
-            12,
-            0,
-            Stats {
-                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
-            }
-        );
-
-        // verify new adventurers don't have double gold discovery unlocked
-        assert(
-            !ImplAdventurer::double_gold_discovery_unlocked(adventurer), 'double gold not unlocked'
-        );
-
-        // equip an amulet and verify result doesn't change
-        adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
-        assert(
-            !ImplAdventurer::double_gold_discovery_unlocked(adventurer),
-            'amulet does not unlock 2xgold'
-        );
-
-        // lastly we equip a necklace that is greatness 20 and verify result is true
-        adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 1 };
-        assert(
-            !ImplAdventurer::double_gold_discovery_unlocked(adventurer),
-            'necklace does not unlock 2xgold'
-        );
-
-        // equip a pendant with 399 xp (greatness 19) and verify result doesn't change
-        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 399, metadata: 1 };
-        assert(
-            !ImplAdventurer::double_gold_discovery_unlocked(adventurer),
-            'G19 pendant ! unlock 2xgold'
-        );
-
-        // equip a pendant and verify result doesn't change
-        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 1 };
-        assert(
-            ImplAdventurer::double_gold_discovery_unlocked(adventurer), 'g20 pendant unlocks 2xgold'
-        );
-    }
-
-    #[test]
-    #[available_gas(32690)]
-    fn test_double_health_discovery_unlocked_gas() {
-        let adventurer = ImplAdventurer::new(
-            12,
-            0,
-            Stats {
-                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
-            }
-        );
-        ImplAdventurer::double_health_discovery_unlocked(adventurer);
-    }
-
-    #[test]
-    #[available_gas(66630)]
-    fn test_double_health_discovery_unlocked() {
-        let mut adventurer = ImplAdventurer::new(
-            12,
-            0,
-            Stats {
-                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
-            }
-        );
-
-        // verify new adventurers don't have double gold discovery unlocked
-        assert(
-            ImplAdventurer::double_health_discovery_unlocked(adventurer) == false,
-            'started with 2xhealth'
-        );
-
-        // equip a pendant and verify result doesn't change
-        adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 400, metadata: 1 };
-        assert(
-            ImplAdventurer::double_health_discovery_unlocked(adventurer) == false,
-            'pendant unlocked 2xhealth'
-        );
-
-        // equip a necklace and verify result doesn't change
-        adventurer.neck = ItemPrimitive { id: ItemId::Necklace, xp: 400, metadata: 1 };
-        assert(
-            ImplAdventurer::double_health_discovery_unlocked(adventurer) == false,
-            'necklace unlocked 2xhealth'
-        );
-
-        // equip a g19 amulet and verify result doesn't change
-        adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 399, metadata: 1 };
-        assert(
-            ImplAdventurer::double_health_discovery_unlocked(adventurer) == false,
-            'G19 amulet not unlock 2xgold'
-        );
-
-        // equip a g20 amulet and verify double health discovery is unlocked
-        adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 400, metadata: 1 };
-        assert(
-            ImplAdventurer::double_health_discovery_unlocked(adventurer) == true,
-            'g20 amulet unlocks 2xhealth'
+            ImplAdventurer::name_match_bonus_damage_multiplier(adventurer) == 2,
+            'G20 necklace unlcks 2x name dmg'
         );
     }
 
@@ -2768,11 +2881,11 @@ mod tests {
         assert(adventurer.gold == STARTING_GOLD, 'wrong advntr starting gold');
 
         // base case
-        adventurer.gold.increase_gold(5);
+        adventurer.increase_gold(5);
         assert(adventurer.gold == STARTING_GOLD + 5, 'gold should be +5');
 
         // at max value case
-        adventurer.gold.increase_gold(MAX_GOLD);
+        adventurer.increase_gold(MAX_GOLD);
         assert(adventurer.gold == MAX_GOLD, 'gold should be max');
 
         // pack and unpack adventurer to test overflow in packing
@@ -2781,12 +2894,12 @@ mod tests {
 
         // extreme/overflow case
         adventurer.gold = 65535;
-        adventurer.gold.increase_gold(65535);
+        adventurer.increase_gold(65535);
         assert(adventurer.gold == MAX_GOLD, 'gold overflow check');
     }
 
     #[test]
-    #[available_gas(36810)]
+    #[available_gas(50610)]
     fn test_decrease_health() {
         let starting_stats = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
@@ -2796,11 +2909,11 @@ mod tests {
         let deduct_amount = 5;
 
         // base case
-        adventurer.health.decrease_health(deduct_amount);
+        adventurer.decrease_health(deduct_amount);
         assert(adventurer.health == starting_health - deduct_amount, 'wrong health');
 
         // underflow case
-        adventurer.health.decrease_health(65535);
+        adventurer.decrease_health(65535);
         assert(adventurer.health == 0, 'health should be 0');
     }
 
@@ -4172,7 +4285,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(140000)]
+    #[available_gas(161530)]
     fn test_get_luck_gas_no_luck() {
         let mut adventurer = ImplAdventurer::new(
             12,
@@ -4181,11 +4294,12 @@ mod tests {
                 strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
             }
         );
-        assert(adventurer.get_luck() == 0, 'start with no luck');
+        let bag = ImplBag::new();
+        assert(adventurer.get_luck(bag) == 2, 'start with 2 luck');
     }
 
     #[test]
-    #[available_gas(140000)]
+    #[available_gas(161530)]
     fn test_get_luck_gas_with_luck() {
         let mut adventurer = ImplAdventurer::new(
             12,
@@ -4194,15 +4308,17 @@ mod tests {
                 strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
             }
         );
+        let bag = ImplBag::new();
+
         let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
         adventurer.equip_necklace(neck);
         let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
         adventurer.equip_ring(ring);
-        assert(adventurer.get_luck() == 2, 'start with no luck');
+        assert(adventurer.get_luck(bag) == 2, 'start with 2 luck');
     }
 
     #[test]
-    #[available_gas(240000)]
+    #[available_gas(983740)]
     fn test_get_luck() {
         let mut adventurer = ImplAdventurer::new(
             12,
@@ -4211,33 +4327,34 @@ mod tests {
                 strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
             }
         );
-        assert(adventurer.get_luck() == 0, 'start with no luck');
+        let bag = ImplBag::new();
+        assert(adventurer.get_luck(bag) == 2, 'start with 2 luck');
 
         // equip a greatness 1 necklace
         let neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 7 };
         adventurer.equip_necklace(neck);
-        assert(adventurer.get_luck() == 1, 'should be 1 luck');
+        assert(adventurer.get_luck(bag) == 2, 'still 2 luck');
 
         // equip a greatness 1 ring
         let ring = ItemPrimitive { id: ItemId::GoldRing, xp: 1, metadata: 8 };
         adventurer.equip_ring(ring);
-        assert(adventurer.get_luck() == 2, 'should be 2 luck');
+        assert(adventurer.get_luck(bag) == 2, 'still 2 luck');
 
         // equip a greatness 19 silver ring
         let mut silver_ring = ItemPrimitive { id: ItemId::SilverRing, xp: 399, metadata: 8 };
         adventurer.equip_ring(silver_ring);
-        assert(adventurer.get_luck() == 20, 'should be 20 luck');
+        assert(adventurer.get_luck(bag) == 20, 'should be 20 luck');
 
         // increase silver ring to greatness 20 to unlock extra 20 luck
         adventurer.ring.xp = 400;
-        assert(adventurer.get_luck() == 41, 'should be 41 luck');
+        assert(adventurer.get_luck(bag) == 41, 'should be 41 luck');
 
         // overflow case
         adventurer.ring.xp = 65535;
         adventurer.neck.xp = 65535;
-        let luck = adventurer.get_luck();
+        let luck = adventurer.get_luck(bag);
         assert(
-            adventurer.get_luck() == (ITEM_MAX_GREATNESS * 2) + SILVER_RING_G20_LUCK_BONUS,
+            adventurer.get_luck(bag) == (ITEM_MAX_GREATNESS * 2) + SILVER_RING_G20_LUCK_BONUS,
             'should be 60 luck'
         );
     }

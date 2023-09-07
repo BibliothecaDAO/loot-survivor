@@ -77,6 +77,7 @@ const LiveLeaderboardRow = ({
     >
       <td>{rank}</td>
       <td>{`${adventurer.name} - ${adventurer.id}`}</td>
+      {/* <td>{adventurer.classType}</td> */}
       <td>
         <span className="flex justify-center text-terminal-yellow">
           <CoinIcon className="self-center w-4 h-4 sm:w-6 sm:h-6 fill-current" />

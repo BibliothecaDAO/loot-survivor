@@ -37,8 +37,9 @@ impl ImplCombat of ICombat {
     // @param minimum_damage: the minimum damage that can be done
     // @param strength_boost: the strength boost of the attacker
     // @param is_critical_hit: whether or not the attack was a critical hit
-    // @param double_critical_hit_damage: whether or not the critical hit damage is doubled
-    // @param double_name_bonus_damage: whether or not the name bonus damage is doubled
+    // @param critical_hit_damage_multiplier: optional critical hit damage multiplier
+    // @param name_bonus_damage_multplier: optional name bonus damage multiplier
+    // @param armor_defense_multiplier: optional armor defense multiplier
     // @param weapon_effectiveness: the effectiveness of the weapon against the armor
     // @param entropy: the entropy used to calculate critical hit bonus and name prefix bonus
     // @return u16: the damage done by the attacker
@@ -48,13 +49,14 @@ impl ImplCombat of ICombat {
         minimum_damage: u16,
         strength_boost: u16,
         is_critical_hit: bool,
-        double_critical_hit_damage: bool,
-        double_name_bonus_damage: bool,
+        critical_hit_damage_multiplier: u8,
+        name_bonus_damage_multplier: u8,
+        armor_defense_multiplier: u8,
         entropy: u128,
     ) -> u16 {
         // get base damage
         let base_attack_hp = ImplCombat::get_attack_hp(weapon);
-        let armor_hp = ImplCombat::get_armor_hp(armor);
+        let armor_hp = ImplCombat::get_armor_hp(armor) * armor_defense_multiplier.into();
 
         let weapon_effectiveness = ImplCombat::get_weapon_effectiveness(
             weapon.item_type, armor.item_type
@@ -65,23 +67,15 @@ impl ImplCombat of ICombat {
             base_attack_hp, weapon_effectiveness
         );
 
-        // if attack was critical hit
-        let mut critical_hit_bonus = 0;
-        if is_critical_hit {
-            // add critical hit bonus
-            critical_hit_bonus = ImplCombat::critical_hit_bonus(base_attack_hp, entropy);
-            // if double critical hit damage is unlocked
-            if double_critical_hit_damage {
-                // double damage
-                critical_hit_bonus *= 2;
-            }
-        }
+        // get critical hit bonus
+        let critical_hit_bonus = ImplCombat::critical_hit_bonus(
+            is_critical_hit, critical_hit_damage_multiplier, base_attack_hp, entropy
+        );
 
         // get special name damage bonus
         let item_specials_bonus = ImplCombat::get_name_damage_bonus(
-            base_attack_hp, weapon.specials, armor.specials, double_name_bonus_damage, entropy
+            base_attack_hp, weapon.specials, armor.specials, name_bonus_damage_multplier, entropy
         );
-
 
         // get adventurer strength bonus
         let strength_bonus = ImplCombat::get_strength_bonus(base_attack_hp, strength_boost);
@@ -296,18 +290,26 @@ impl ImplCombat of ICombat {
     }
 
     // get_critical_hit_damage_bonus returns the bonus damage done by a critical hit
+    // @param is_critical_hit: whether or not the attack was a critical hit
+    // @param damage_multiplier: an optional damage multiplier
     // @param base_damage: the base damage done by the attacker
     // @param entropy: entropy for randomizing critical hit damage bonus
     // @return u16: the bonus damage done by a critical hit
-    fn critical_hit_bonus(damage: u16, entropy: u128) -> u16 {
+    fn critical_hit_bonus(
+        is_critical_hit: bool, damage_multiplier: u8, damage: u16, entropy: u128
+    ) -> u16 {
+        if (!is_critical_hit) {
+            return 0;
+        }
+
         // divide base damage by 4 to get 25% of original damage
         let damage_boost_base = damage / 4;
 
-        // damage multplier is 1-4 which will equate to a 25-100% damage boost
+        // damage multplier is 1-4 which will equate to a critical hit range of 25-100% of base damage
         let damage_multplier = (entropy % 4).try_into().unwrap();
 
-        // multiply base damage boost (25% of original damage) by damage multiplier (1-4)
-        damage_boost_base * (damage_multplier + 1)
+        // multiply base damage boost by random multiplier and then by critical hit damage multiplier 
+        damage_boost_base * (damage_multplier + 1) * damage_multiplier.into()
     }
 
     // get_special2_bonus returns the bonus damage done by a weapon as a result of the weapon special2
@@ -361,11 +363,15 @@ impl ImplCombat of ICombat {
     // @param base_damage: the base damage done by the attacker
     // @param weapon_name: the name of the weapon used by the attacker
     // @param armor_name: the name of the armor worn by the defender
-    // @param double_damage: whether or not the damage is doubled
+    // @param damage_multiplier: an optional damage multplier
     // @param entropy: entropy for randomizing special item damage bonus
     // @return u16: the bonus damage done by a special item
     fn get_name_damage_bonus(
-        base_damage: u16, weapon_name: SpecialPowers, armor_name: SpecialPowers, double_damage: bool, entropy: u128
+        base_damage: u16,
+        weapon_name: SpecialPowers,
+        armor_name: SpecialPowers,
+        damage_multiplier: u8,
+        entropy: u128
     ) -> u16 {
         let special2_bonus = ImplCombat::get_special2_bonus(
             base_damage, weapon_name.special2, armor_name.special2, entropy
@@ -375,13 +381,7 @@ impl ImplCombat of ICombat {
             base_damage, weapon_name.special3, armor_name.special3, entropy
         );
 
-        // if double damage is unlocked
-        if double_damage {
-            // double 
-            2 * (special2_bonus + special3_bonus)
-        } else {
-            special2_bonus + special3_bonus
-        }
+        (special2_bonus + special3_bonus) * damage_multiplier.into()
     }
 
     // get_adventurer_strength_bonus returns the bonus damage for adventurer strength
@@ -997,29 +997,45 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(90000)]
+    #[available_gas(102450)]
     fn test_critical_hit_bonus() {
         let base_damage = 100;
+        let mut damage_multiplier = 1;
 
         // low critical hit damage (25)
         let mut entropy = 0;
-        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
+        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(
+            true, damage_multiplier, base_damage, entropy
+        );
         assert(critical_hit_damage_bonus == 25, 'should be 25hp bonus');
 
         // medium-low critical hit damage (50)
         entropy = 1;
-        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
+        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(
+            true, damage_multiplier, base_damage, entropy
+        );
         assert(critical_hit_damage_bonus == 50, 'should be 50 crit hit bonus');
 
         // medium-high critical hit damage (75)
         entropy = 2;
-        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
+        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(
+            true, damage_multiplier, base_damage, entropy
+        );
         assert(critical_hit_damage_bonus == 75, 'should be 75 crit hit bonus');
 
         // high critical hit damage (100)
         entropy = 3;
-        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(base_damage, entropy);
+        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(
+            true, damage_multiplier, base_damage, entropy
+        );
         assert(critical_hit_damage_bonus == 100, 'should be 100 crit hit bonus');
+
+        // double previous critical hit using the damage multplier
+        damage_multiplier = 2;
+        let critical_hit_damage_bonus = ImplCombat::critical_hit_bonus(
+            true, damage_multiplier, base_damage, entropy
+        );
+        assert(critical_hit_damage_bonus == 200, 'should be 200 crit hit bonus');
     }
 
     #[test]
@@ -1261,7 +1277,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(1100000)]
+    #[available_gas(1105100)]
     fn test_calculate_damage() {
         // initialize weapon
         let weapon_specials = SpecialPowers { special1: 0, special2: 0, special3: 0 };
@@ -1298,7 +1314,7 @@ mod tests {
         armor.level = 1;
 
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, 1, 1, 1, entropy
         );
 
         // adventurer isn't able to deal any damage to the beast (not good)
@@ -1307,7 +1323,7 @@ mod tests {
         // client can use minimum damage setting to ensure adventurer always does at least some damage
         minimum_damage = 2;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, 1, 1, 1, entropy
         );
         assert(damage == 2, 'minimum damage: 2hp');
 
@@ -1315,7 +1331,7 @@ mod tests {
         // and encounters another T5 beast wearing cloth
         weapon.level = 4;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, 1, 1, 1, entropy
         );
 
         // they can now deal more than the minimum damage
@@ -1325,7 +1341,7 @@ mod tests {
         weapon.tier = Tier::T1(());
         weapon.level = 1;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, 1, 1, 1, entropy
         );
         // even on level 1, it deals more damage than their starter short sword
         assert(damage == 4, 'upgrade to katana: 6HP');
@@ -1333,7 +1349,7 @@ mod tests {
         // enable critical hit for that last attack
         is_critical_hit = true;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, 1, 1, 1, entropy
         );
         // user picks up a critical hit but gets minimum bonus of 1
         assert(damage == 5, 'critical hit min bonus: 5HP');
@@ -1342,7 +1358,7 @@ mod tests {
         // entropy 3 will produce max bonus of 100% of the base damage (5)
         entropy = 3;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, 1, 1, 1, entropy
         );
         assert(damage == 8, 'good critical hit: 8HP');
 
@@ -1350,7 +1366,7 @@ mod tests {
         weapon.item_type = Type::Blade_or_Hide(());
         armor.item_type = Type::Bludgeon_or_Metal(());
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, 1, 1, 1, entropy
         );
         // verify damage drops by ~50%
         assert(damage == 6, 'weak elemental penalty: 6HP');
@@ -1358,7 +1374,7 @@ mod tests {
         // adventurer invests in two strength stat points to get a 40% bonus on base damage (5)
         strength_boost = 2;
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, 1, 1, 1, entropy
         );
         // verify damage drops by ~50%
         assert(damage == 8, 'attack should be 9HP');
@@ -1370,7 +1386,7 @@ mod tests {
         armor.level = 40;
         armor.tier = Tier::T2(());
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, 1, 1, 1, entropy
         );
         assert(damage == 30, 'T1 G20 vs T3 G30: 30hp');
 
@@ -1378,7 +1394,7 @@ mod tests {
         weapon.item_type = Type::Blade_or_Hide(());
         armor.item_type = Type::Magic_or_Cloth(());
         let damage = ImplCombat::calculate_damage(
-            weapon, armor, minimum_damage, strength_boost, is_critical_hit, false, false, entropy
+            weapon, armor, minimum_damage, strength_boost, is_critical_hit, 1, 1, 1, entropy
         );
         // deals significantly more damage because elemental is applied
         // to raw attack damage

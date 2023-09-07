@@ -110,7 +110,8 @@ mod Game {
         AdventurerLeveledUp: AdventurerLeveledUp,
         NewItemsAvailable: NewItemsAvailable,
         IdleDeathPenalty: IdleDeathPenalty,
-        AdventurerUpgraded: AdventurerUpgraded
+        AdventurerUpgraded: AdventurerUpgraded,
+        RewardDistribution: RewardDistribution,
     }
 
     #[constructor]
@@ -886,10 +887,8 @@ mod Game {
         // get_base_reward from Combat module. Should refactor this to only make that call once and have
         // get_gold_reward and get_xp_reward operator on the base reward
         let mut gold_reward = beast.get_gold_reward(beast_seed);
-        if adventurer.double_gold_from_beasts_unlocked() {
-            gold_reward *= 2;
-        }
-        adventurer.gold.increase_gold(gold_reward);
+        let bag = _bag_unpacked(@self, adventurer_id);
+        adventurer.increase_gold(gold_reward * adventurer.beast_gold_reward_multiplier().into());
 
         // grant adventuer xp
         let adventurer_xp_reward = beast.get_xp_reward();
@@ -980,10 +979,17 @@ mod Game {
         ref self: ContractState,
         caller: ContractAddress,
         block_number: u64,
-        interface: ContractAddress
+        client_address: ContractAddress
     ) {
         let lords = self._lords.read();
         let genesis_block = self._genesis_block.read();
+        let dao_address = self._dao.read();
+        let first_place_adventurer_id = self._scoreboard.read(1);
+        let first_place_address = self._owner.read(first_place_adventurer_id);
+        let second_place_adventurer_id = self._scoreboard.read(2);
+        let second_place_address = self._owner.read(second_place_adventurer_id);
+        let third_place_adventurer_id = self._scoreboard.read(3);
+        let third_place_address = self._owner.read(third_place_adventurer_id);
 
         let mut week = Week {
             DAO: _to_ether(WEEK_2::DAO),
@@ -1000,7 +1006,24 @@ mod Game {
             // without this, there would be an incentive to start and die immediately after contract is deployed
             // to capture the rewards from the launch hype
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, self._dao.read(), _to_ether(week.DAO));
+                .transferFrom(caller, dao_address, _to_ether(COST_TO_PLAY));
+
+            __event_RewardDistribution(
+                ref self,
+                RewardDistribution {
+                    first_place: PlayerReward {
+                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
+                    },
+                    second_place: PlayerReward {
+                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
+                    },
+                    third_place: PlayerReward {
+                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
+                    },
+                    client: ClientReward { amount: 0, address: dao_address },
+                    dao: COST_TO_PLAY
+                }
+            );
             return;
         }
 
@@ -1032,26 +1055,52 @@ mod Game {
         // DAO
         if (week.DAO != 0) {
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, self._dao.read(), week.DAO);
+                .transferFrom(caller, dao_address, week.DAO);
         }
 
         // interface
         if (week.INTERFACE != 0) {
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, interface, week.INTERFACE);
+                .transferFrom(caller, client_address, week.INTERFACE);
         }
 
         // first place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, self._owner.read(self._scoreboard.read(1)), week.FIRST_PLACE);
+            .transferFrom(caller, first_place_address, week.FIRST_PLACE);
 
         // second place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, self._owner.read(self._scoreboard.read(2)), week.SECOND_PLACE);
+            .transferFrom(caller, second_place_address, week.SECOND_PLACE);
 
         // third place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, self._owner.read(self._scoreboard.read(3)), week.THIRD_PLACE);
+            .transferFrom(caller, third_place_address, week.THIRD_PLACE);
+
+        __event_RewardDistribution(
+            ref self,
+            RewardDistribution {
+                first_place: PlayerReward {
+                    adventurer_id: first_place_adventurer_id,
+                    rank: 1,
+                    amount: week.FIRST_PLACE,
+                    address: first_place_address
+                },
+                second_place: PlayerReward {
+                    adventurer_id: second_place_adventurer_id,
+                    rank: 2,
+                    amount: week.SECOND_PLACE,
+                    address: second_place_address
+                },
+                third_place: PlayerReward {
+                    adventurer_id: third_place_adventurer_id,
+                    rank: 3,
+                    amount: week.THIRD_PLACE,
+                    address: third_place_address
+                },
+                client: ClientReward { amount: week.INTERFACE, address: client_address },
+                dao: week.DAO
+            }
+        );
     }
 
     fn _start(
@@ -1125,7 +1174,7 @@ mod Game {
         );
 
         // spoof a beast ambush by deducting health from the adventurer
-        adventurer.health.decrease_health(STARTER_BEAST_ATTACK_DAMAGE);
+        adventurer.decrease_health(STARTER_BEAST_ATTACK_DAMAGE);
 
         // and emitting an AmbushedByBeast event
         __event_AmbushedByBeast(
@@ -1226,12 +1275,15 @@ mod Game {
                 // TODO: Consider passing in adventurer ref into discover_treasure and handling
                 //       adventurer mutations within lib functions. The lib functions could return
                 //       a generic Discovery event which would be emitted here
-                let (treasure_type, amount) = adventurer.discover_treasure(sub_explore_rnd);
+                let (treasure_type, mut amount) = adventurer.discover_treasure(sub_explore_rnd);
+
+                // apply discover bonus based on adventurer
+                amount *= adventurer.discovery_bonus_multplier().into();
 
                 match treasure_type {
                     TreasureDiscovery::Gold(()) => {
                         // add gold to adventurer
-                        adventurer.gold.increase_gold(amount);
+                        adventurer.increase_gold(amount);
                         // emit discovered gold event
                         __event_DiscoveredGold(
                             ref self,
@@ -1278,7 +1330,7 @@ mod Game {
                             adventurer.health, adventurer.stats.vitality
                         )) {
                             // adventurer gets gold instead of health
-                            adventurer.gold.increase_gold(amount);
+                            adventurer.increase_gold(amount);
                             // emit discovered gold event
                             __event_DiscoveredGold(
                                 ref self,
@@ -1355,16 +1407,28 @@ mod Game {
         // get the xp reward for the obstacle
         let adventurer_xp_reward = obstacle.get_xp_reward();
         let item_xp_reward = adventurer_xp_reward * ITEM_XP_MULTIPLIER_OBSTACLES;
+
+        // if the adventurer has unlocked obstalce gold reward multplier
+        let obstacle_gold_reward_multiplier = adventurer.obstacle_gold_reward_multplier();
+        if (obstacle_gold_reward_multiplier != 0) {
+            // adventurer gets gold
+            adventurer.increase_gold(adventurer_xp_reward * obstacle_gold_reward_multiplier.into());
+        }
         // increase adventurer xp and check for level up
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(adventurer_xp_reward);
 
+        // get armor defense bonus for adventurer
+        let armor_defense_bonus = adventurer.critical_hit_bonus_multiplier();
+
         // calculate damage from the obstacle
-        let damage_taken = ImplObstacle::get_damage(obstacle, armor_combat_spec, entropy);
+        let (damage_taken, critical_hit) = ImplObstacle::get_damage(
+            obstacle, armor_combat_spec, armor_defense_bonus, entropy
+        );
 
         // if the obstalce was not dodged
         if (!dodged) {
             // adventurer takes this damage
-            adventurer.health.decrease_health(damage_taken);
+            adventurer.decrease_health(damage_taken);
         }
 
         // grant XP to equipped items
@@ -1372,45 +1436,23 @@ mod Game {
             ref self, ref adventurer, adventurer_id, item_xp_reward, entropy
         );
 
-        // if the obstacle was not dodged
-        if (!dodged) {
-            // emit obstacle discover event
-            // items only earn XP when damage is taken
-            __event_HitByObstacle(
-                ref self,
-                HitByObstacle {
-                    adventurer_state: AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    },
-                    id: obstacle.id,
-                    level: obstacle.combat_specs.level,
-                    damage_taken: damage_taken,
-                    damage_location: damage_location,
-                    xp_earned_adventurer: adventurer_xp_reward,
-                    xp_earned_items: item_xp_reward
-                }
-            );
+        let obstacle_event = ObstacleEvent {
+            adventurer_state: AdventurerState {
+                owner: get_caller_address(), adventurer_id: adventurer_id, adventurer: adventurer
+            },
+            id: obstacle.id,
+            level: obstacle.combat_specs.level,
+            damage_taken,
+            damage_location,
+            critical_hit,
+            adventurer_xp_reward,
+            item_xp_reward
+        };
+
+        if (dodged) {
+            __event_DodgedObstacle(ref self, DodgedObstacle { obstacle_event });
         } else {
-            // emit obstacle discover event
-            // items do not earn XP from obstacles
-            __event_DodgedObstacle(
-                ref self,
-                DodgedObstacle {
-                    adventurer_state: AdventurerState {
-                        owner: get_caller_address(),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    },
-                    id: obstacle.id,
-                    level: obstacle.combat_specs.level,
-                    damage_taken: damage_taken,
-                    damage_location: damage_location,
-                    xp_earned_adventurer: adventurer_xp_reward,
-                    xp_earned_items: item_xp_reward
-                }
-            );
+            __event_HitByObstacle(ref self, HitByObstacle { obstacle_event });
         }
 
         // if obstacle killed adventurer
@@ -1431,9 +1473,7 @@ mod Game {
             );
             // and return as game is now over
             return;
-        }
-
-        if (adventurer.stat_points_available > 0) {
+        } else if (adventurer.stat_points_available > 0) {
             // if adventurer leveled up, process level up
             _emit_level_up_events(ref self, adventurer, adventurer_id, previous_level, new_level);
         }
@@ -1530,7 +1570,7 @@ mod Game {
             // if so, adventurer gets bonus stat points (currently just 1)
             adventurer
                 .stat_points_available
-                .increase_stat_points_available(MAX_GREATNESS_STAT_BONUS + item.item_stat_bonus());
+                .increase_stat_points_available(MAX_GREATNESS_STAT_BONUS);
         }
 
         // check if item unlocked any specials as part of level up
@@ -1613,15 +1653,19 @@ mod Game {
         // get the damage dealt to the beast
         // TODO: Consider returning a tuple with detailed damage info (total_damage, base_damage, critical_hit_damage, name_bonus_damage)
         let weapon_combat_spec = _get_combat_spec(@self, adventurer_id, adventurer.weapon);
-        let double_critical_hit = adventurer.double_critical_hit_unlocked();
-        let double_name_bonus_damage = adventurer.double_special_name_damage_unlocked();
+        let critical_hit_damage_multiplier = adventurer.critical_hit_bonus_multplier();
+        let name_bonus_damage_multplier = adventurer.name_match_bonus_damage_multiplier();
+        let armor_defense_multiplier = adventurer.critical_hit_bonus_multiplier();
+        let bag = _bag_unpacked(@self, adventurer_id);
+        let adventurer_luck = adventurer.get_luck(bag);
         let (damage_dealt, critical_hit) = beast
             .attack(
                 weapon_combat_spec,
-                adventurer.get_luck(),
+                adventurer_luck,
                 adventurer.stats.strength,
-                double_critical_hit,
-                double_name_bonus_damage,
+                critical_hit_damage_multiplier,
+                name_bonus_damage_multplier,
+                armor_defense_multiplier,
                 attack_rnd_1
             );
 
@@ -1719,7 +1763,7 @@ mod Game {
         let (damage, critical_hit) = beast.counter_attack(armor_combat_spec, critical_hit_rnd);
 
         // deduct the damage dealt
-        adventurer.health.decrease_health(damage);
+        adventurer.decrease_health(damage);
 
         // if counter attack was result of an ambush
         // emit ambushed by beast event
@@ -2020,10 +2064,13 @@ mod Game {
             let item_id = *items.at(i);
             if adventurer.is_equipped(item_id) {
                 adventurer.drop_item(item_id);
-            } else if bag.contains(item_id) {
-                bag.remove_item(item_id);
             } else {
-                panic_with_felt252('Item not owned by adventurer');
+                let (item_in_bag, _) = bag.contains(item_id);
+                if item_in_bag {
+                    bag.remove_item(item_id);
+                } else {
+                    panic_with_felt252('Item not owned by adventurer');
+                }
             }
 
             i += 1;
@@ -2417,8 +2464,9 @@ mod Game {
     }
     #[inline(always)]
     fn _assert_item_not_owned(adventurer: Adventurer, bag: Bag, item_id: u8) {
+        let (item_in_bag, _) = bag.contains(item_id);
         assert(
-            adventurer.is_equipped(item_id) == false && bag.contains(item_id) == false,
+            adventurer.is_equipped(item_id) == false && item_in_bag == false,
             messages::ITEM_ALREADY_OWNED
         );
     }
@@ -2808,26 +2856,26 @@ mod Game {
         discovery: Discovery
     }
 
-    #[derive(Drop, starknet::Event)]
-    struct DodgedObstacle {
+    #[derive(Drop, Serde)]
+    struct ObstacleEvent {
         adventurer_state: AdventurerState,
         id: u8,
         level: u16,
         damage_taken: u16,
         damage_location: u8,
-        xp_earned_adventurer: u16,
-        xp_earned_items: u16,
+        critical_hit: bool,
+        adventurer_xp_reward: u16,
+        item_xp_reward: u16,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct DodgedObstacle {
+        obstacle_event: ObstacleEvent
     }
 
     #[derive(Drop, starknet::Event)]
     struct HitByObstacle {
-        adventurer_state: AdventurerState,
-        id: u8,
-        level: u16,
-        damage_taken: u16,
-        damage_location: u8,
-        xp_earned_adventurer: u16,
-        xp_earned_items: u16,
+        obstacle_event: ObstacleEvent
     }
 
     #[derive(Drop, starknet::Event)]
@@ -3004,6 +3052,34 @@ mod Game {
         charisma_increase: u8,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct RewardDistribution {
+        first_place: PlayerReward,
+        second_place: PlayerReward,
+        third_place: PlayerReward,
+        client: ClientReward,
+        dao: u256,
+    }
+
+    #[derive(Drop, Serde)]
+    struct PlayerReward {
+        adventurer_id: u256,
+        rank: u8,
+        amount: u256,
+        address: ContractAddress,
+    }
+
+    #[derive(Drop, Serde)]
+    struct ClientReward {
+        amount: u256,
+        address: ContractAddress,
+    }
+
+    #[inline(always)]
+    fn __event_RewardDistribution(ref self: ContractState, event: RewardDistribution) {
+        self.emit(Event::RewardDistribution(event));
+    }
+
     #[inline(always)]
     fn __event_AdventurerUpgraded(ref self: ContractState, event: AdventurerUpgraded) {
         self.emit(Event::AdventurerUpgraded(event));
@@ -3025,8 +3101,8 @@ mod Game {
         self.emit(event);
     }
     #[inline(always)]
-    fn __event_DodgedObstacle(ref self: ContractState, dodged_obstacle: DodgedObstacle) {
-        self.emit(Event::DodgedObstacle(dodged_obstacle));
+    fn __event_DodgedObstacle(ref self: ContractState, event: DodgedObstacle) {
+        self.emit(Event::DodgedObstacle(event));
     }
     #[inline(always)]
     fn __event_HitByObstacle(ref self: ContractState, hit_by_obstacle: HitByObstacle) {
