@@ -186,8 +186,6 @@ export function syscalls({
   };
 
   const spawn = async (formData: FormData) => {
-    resetNotification();
-
     const mintLords = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "mint",
@@ -306,8 +304,6 @@ export function syscalls({
   };
 
   const explore = async (till_beast: boolean) => {
-    resetNotification();
-
     addToCalls({
       contractAddress: gameContract?.address ?? "",
       entrypoint: "explore",
@@ -533,6 +529,7 @@ export function syscalls({
 
       setEquipItems([]);
       setDropItems([]);
+      console.log(discoveries);
       stopLoading(discoveries);
       setMintAdventurer(false);
     } catch (e) {
@@ -541,8 +538,6 @@ export function syscalls({
   };
 
   const attack = async (tillDeath: boolean, beastData: any) => {
-    resetNotification();
-
     resetData("latestMarketItemsQuery");
     addToCalls({
       contractAddress: gameContract?.address ?? "",
@@ -746,6 +741,7 @@ export function syscalls({
         battles: reversedBattles,
       });
 
+      console.log(reversedBattles);
       stopLoading(reversedBattles);
       setEquipItems([]);
       setDropItems([]);
@@ -756,8 +752,6 @@ export function syscalls({
   };
 
   const flee = async (tillDeath: boolean, beastData: any) => {
-    resetNotification();
-
     addToCalls({
       contractAddress: gameContract?.address ?? "",
       entrypoint: "flee",
@@ -821,6 +815,8 @@ export function syscalls({
         battles.unshift(fleeSucceededEvent.data[1]);
       }
 
+      const reversedBattles = battles.slice().reverse();
+
       const adventurerDiedExists = events.some((event) => {
         if (event.name === "AdventurerDied") {
           return true;
@@ -849,7 +845,7 @@ export function syscalls({
         if (killedByBeast || killedByPenalty) {
           setDeathNotification(
             "Flee",
-            battles.reverse(),
+            reversedBattles,
             adventurerDiedEvent.data[0]
           );
         }
@@ -913,9 +909,10 @@ export function syscalls({
         ],
       });
       setData("battlesByTxHashQuery", {
-        battles: [...battles.reverse()],
+        battles: reversedBattles,
       });
-      stopLoading(battles);
+      console.log(reversedBattles);
+      stopLoading(reversedBattles);
       setEquipItems([]);
       setDropItems([]);
       setMintAdventurer(false);
@@ -929,8 +926,6 @@ export function syscalls({
     purchaseItems: any[],
     potionAmount: number
   ) => {
-    resetNotification();
-
     startLoading("Upgrade", "Upgrading", "adventurerByIdQuery", adventurer?.id);
     try {
       const tx = await handleSubmitCalls(writeAsync);
@@ -1028,8 +1023,6 @@ export function syscalls({
     loadingQuery: QueryKey | null,
     notification: string[]
   ) => {
-    resetNotification();
-
     const items: string[] = [];
 
     for (const dict of calls) {

@@ -22,6 +22,7 @@ import { soundSelector } from "../../hooks/useUiSound";
 import { Item, NullItem, Call, ItemPurchase, ZeroUpgrade } from "../../types";
 import { GameData } from "../GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
+import useLoadingStore from "@/app/hooks/useLoadingStore";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
@@ -54,6 +55,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const setUpgrades = useUIStore((state) => state.setUpgrades);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
 
   const items = data.latestMarketItemsQuery
     ? data.latestMarketItemsQuery.items
@@ -364,6 +366,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
           <div className="flex flex-row gap-2 absolute bottom-4">
             <Button
               onClick={async () => {
+                resetNotification();
                 await multicall(loadingMessage, loadingQuery, notification);
                 handleResetCalls();
               }}

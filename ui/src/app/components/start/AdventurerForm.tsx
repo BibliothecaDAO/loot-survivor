@@ -47,7 +47,7 @@ export const AdventurerForm = ({
     startingCharisma: "0",
   });
   const loading = useLoadingStore((state) => state.loading);
-
+  const resetNotification = useLoadingStore((state) => state.resetNotification);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [step, setStep] = useState(1);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
@@ -110,6 +110,7 @@ export const AdventurerForm = ({
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    resetNotification();
     await spawn(formData);
   };
 

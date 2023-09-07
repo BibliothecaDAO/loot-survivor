@@ -252,14 +252,14 @@ export const NotificationBattleDisplay = ({
   const renderBattleNotification = () => {
     if (BeastFled) {
       return (
-        <span className="flex flex-row items-center justify-between">
+        <span className="flex flex-row items-center justify-between w-full">
           <p>Fled the {beastName || ""}!</p>
           <GiWalkingBootIcon />
         </span>
       );
     } else if (FailedToFlee) {
       return (
-        <span className="flex flex-row items-center justify-between">
+        <span className="flex flex-row items-center justify-between w-full">
           <span className="flex flex-col gap-1">
             <p>Failed to flee the {beastName || ""}.</p>
             <p>
@@ -277,7 +277,7 @@ export const NotificationBattleDisplay = ({
       );
     } else if (KilledTryingToFlee) {
       return (
-        <span className="flex flex-row items-center justify-between">
+        <span className="flex flex-row items-center justify-between w-full">
           <span className="flex flex-col gap-1">
             <p>Failed to flee the {beastName || ""}.</p>
             <p>
@@ -296,7 +296,7 @@ export const NotificationBattleDisplay = ({
       );
     } else if (Attacked) {
       return (
-        <span className="flex flex-row items-center justify-between">
+        <span className="flex flex-row items-center justify-between w-full">
           <span className="flex flex-col gap-1">
             <p>
               Attacked the {beastName || ""} for {battleData[0]?.damageDealt}{" "}
@@ -319,7 +319,7 @@ export const NotificationBattleDisplay = ({
       );
     } else if (KilledByBeast) {
       return (
-        <span className="flex flex-row items-center justify-between">
+        <span className="flex flex-row items-center justify-between w-full">
           <span className="flex flex-col gap-1">
             <p>
               With a last breath you strike the {beastName || ""} for{" "}
@@ -346,7 +346,7 @@ export const NotificationBattleDisplay = ({
       );
     } else if (Slayed) {
       return (
-        <div className="flex flex-col gap-2 items-center justify-center">
+        <div className="flex flex-col gap-2 items-center justify-center w-full">
           <span className="flex flex-row items-center justify-between">
             <p>
               Slayed the {beastName || ""} for {battleData[0]?.damageDealt}{" "}
@@ -370,7 +370,7 @@ export const NotificationBattleDisplay = ({
       );
     } else if (IdleDeathPenalty) {
       return (
-        <span className="flex flex-row items-center justify-between">
+        <span className="flex flex-row items-center justify-between w-full">
           <p>You were killed from the idle death penalty!</p>
           <SkullCrossedBonesIcon />
         </span>
