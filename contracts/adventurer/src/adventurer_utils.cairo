@@ -223,7 +223,7 @@ mod tests {
         );
 
         // deduct 1 health
-        adventurer.health.decrease_health(1);
+        adventurer.decrease_health(1);
         assert(
             AdventurerUtils::is_health_full(adventurer.health, adventurer.stats.vitality) == false,
             'health should not be full'

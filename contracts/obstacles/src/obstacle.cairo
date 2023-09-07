@@ -114,24 +114,26 @@ impl ImplObstacle of IObstacle {
     // @param obstacle The obstacle whose damage is being calculated.
     // @param armor_combat_spec The combat specifications of the armor.
     // @param entropy A value used to introduce randomness in the damage calculation.
-    // @return The calculated damage as a 16-bit unsigned integer.
+    // @return The calculated damage as a 16-bit unsigned integer and boolean indicating if the damage was a critical hit.
     // @dev Note that critical hits are not considered for obstacles in this calculation.
-    fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, entropy: u128) -> u16 {
+    fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, armor_defense_bonus: u8, entropy: u128) -> (u16, bool) {
         // obstacle critical hit is always 1/6
         let is_critical_hit = (entropy % 6) == 0;
-        let double_critical_hit_damage = false;
-        let double_name_damage = false;
+        let critical_hit_damage_multplier = 1;
+        let name_bonus_damage_multplier = 1;
+        let armor_defense_multplier = 1;
 
-        ImplCombat::calculate_damage(
+        (ImplCombat::calculate_damage(
             obstacle.combat_specs,
             armor_combat_spec,
             ObstacleSettings::MINIMUM_DAMAGE,
             ObstacleSettings::DAMAGE_BOOST,
             is_critical_hit,
-            double_critical_hit_damage,
-            double_name_damage,
+            critical_hit_damage_multplier,
+            name_bonus_damage_multplier,
+            armor_defense_multplier,
             entropy
-        )
+        ), is_critical_hit)
     }
 
     // @notice get_xp_reward returns the xp reward from encountering the obstacle

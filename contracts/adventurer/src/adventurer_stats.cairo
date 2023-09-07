@@ -18,16 +18,8 @@ struct Stats { // 5 bits each
 #[generate_trait]
 impl StatUtils of IStat {
     fn new() -> Stats {
-        Stats {
-            strength: 0,
-            dexterity: 0,
-            vitality: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 0
-        }
+        Stats { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0 }
     }
-
 }
 
 impl StatsPacking of Packing<Stats> {
@@ -89,50 +81,63 @@ impl StatsPacking of Packing<Stats> {
     }
 }
 
-#[test]
-#[available_gas(1500000)]
-fn test_stats_packing() {
-    // zero case
-    let stats = Stats {
-        strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0
-    };
+// ---------------------------
+// ---------- Tests ----------
+// ---------------------------
+#[cfg(test)]
+mod tests {
+    use survivor::{constants::adventurer_constants::MAX_STAT_VALUE, adventurer_stats::{Stats, StatsPacking}};
+    
+    #[test]
+    #[available_gas(1500000)]
+    fn test_stats_packing() {
+        // zero case
+        let stats = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0
+        };
 
-    let packed = stats.pack();
-    let unpacked = StatsPacking::unpack(packed);
-    assert(stats.strength == unpacked.strength, 'strength zero case');
-    assert(stats.dexterity == unpacked.dexterity, 'dexterity zero case');
-    assert(stats.vitality == unpacked.vitality, 'vitality zero case');
-    assert(stats.intelligence == unpacked.intelligence, 'intelligence zero case');
-    assert(stats.wisdom == unpacked.wisdom, 'wisdom zero case');
-    assert(stats.charisma == unpacked.charisma, 'charisma zero case');
+        let packed = stats.pack();
+        let unpacked = StatsPacking::unpack(packed);
+        assert(stats.strength == unpacked.strength, 'strength zero case');
+        assert(stats.dexterity == unpacked.dexterity, 'dexterity zero case');
+        assert(stats.vitality == unpacked.vitality, 'vitality zero case');
+        assert(stats.intelligence == unpacked.intelligence, 'intelligence zero case');
+        assert(stats.wisdom == unpacked.wisdom, 'wisdom zero case');
+        assert(stats.charisma == unpacked.charisma, 'charisma zero case');
 
-    // storage limit test (2^5 - 1 = 31)
-    let stats = Stats {
-        strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 31
-    };
+        // storage limit test (2^5 - 1 = 31)
+        let stats = Stats {
+            strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 31
+        };
 
-    let packed = stats.pack();
-    let unpacked = StatsPacking::unpack(packed);
-    assert(stats.strength == unpacked.strength, 'strength storage limit');
-    assert(stats.dexterity == unpacked.dexterity, 'dexterity storage limit');
-    assert(stats.vitality == unpacked.vitality, 'vitality storage limit');
-    assert(stats.intelligence == unpacked.intelligence, 'intelligence storage limit');
-    assert(stats.wisdom == unpacked.wisdom, 'wisdom storage limit');
-    assert(stats.charisma == unpacked.charisma, 'charisma storage limit');
+        let packed = stats.pack();
+        let unpacked = StatsPacking::unpack(packed);
+        assert(stats.strength == unpacked.strength, 'strength storage limit');
+        assert(stats.dexterity == unpacked.dexterity, 'dexterity storage limit');
+        assert(stats.vitality == unpacked.vitality, 'vitality storage limit');
+        assert(stats.intelligence == unpacked.intelligence, 'intelligence storage limit');
+        assert(stats.wisdom == unpacked.wisdom, 'wisdom storage limit');
+        assert(stats.charisma == unpacked.charisma, 'charisma storage limit');
 
-    // overflow storage limit using max u8
-    let stats = Stats {
-        strength: 255, dexterity: 255, vitality: 255, intelligence: 255, wisdom: 255, charisma: 255
-    };
+        // overflow storage limit using max u8
+        let stats = Stats {
+            strength: 255,
+            dexterity: 255,
+            vitality: 255,
+            intelligence: 255,
+            wisdom: 255,
+            charisma: 255
+        };
 
-    let packed = stats.pack();
-    let unpacked = StatsPacking::unpack(packed);
+        let packed = stats.pack();
+        let unpacked = StatsPacking::unpack(packed);
 
-    // assert packing function prevented overflow
-    assert(unpacked.strength == MAX_STAT_VALUE, 'strength pack overflow');
-    assert(unpacked.dexterity == MAX_STAT_VALUE, 'dexterity pack overflow');
-    assert(unpacked.vitality == MAX_STAT_VALUE, 'vitality pack overflow');
-    assert(unpacked.intelligence == MAX_STAT_VALUE, 'intelligence pack overflow');
-    assert(unpacked.wisdom == MAX_STAT_VALUE, 'wisdom pack overflow');
-    assert(unpacked.charisma == MAX_STAT_VALUE, 'charisma pack overflow');
+        // assert packing function prevented overflow
+        assert(unpacked.strength == MAX_STAT_VALUE, 'strength pack overflow');
+        assert(unpacked.dexterity == MAX_STAT_VALUE, 'dexterity pack overflow');
+        assert(unpacked.vitality == MAX_STAT_VALUE, 'vitality pack overflow');
+        assert(unpacked.intelligence == MAX_STAT_VALUE, 'intelligence pack overflow');
+        assert(unpacked.wisdom == MAX_STAT_VALUE, 'wisdom pack overflow');
+        assert(unpacked.charisma == MAX_STAT_VALUE, 'charisma pack overflow');
+    }
 }
