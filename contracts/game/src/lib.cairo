@@ -110,7 +110,8 @@ mod Game {
         AdventurerLeveledUp: AdventurerLeveledUp,
         NewItemsAvailable: NewItemsAvailable,
         IdleDeathPenalty: IdleDeathPenalty,
-        AdventurerUpgraded: AdventurerUpgraded
+        AdventurerUpgraded: AdventurerUpgraded,
+        RewardDistribution: RewardDistribution,
     }
 
     #[constructor]
@@ -978,10 +979,17 @@ mod Game {
         ref self: ContractState,
         caller: ContractAddress,
         block_number: u64,
-        interface: ContractAddress
+        client_address: ContractAddress
     ) {
         let lords = self._lords.read();
         let genesis_block = self._genesis_block.read();
+        let dao_address = self._dao.read();
+        let first_place_adventurer_id = self._scoreboard.read(1);
+        let first_place_address = self._owner.read(first_place_adventurer_id);
+        let second_place_adventurer_id = self._scoreboard.read(2);
+        let second_place_address = self._owner.read(second_place_adventurer_id);
+        let third_place_adventurer_id = self._scoreboard.read(3);
+        let third_place_address = self._owner.read(third_place_adventurer_id);
 
         let mut week = Week {
             DAO: _to_ether(WEEK_2::DAO),
@@ -998,7 +1006,24 @@ mod Game {
             // without this, there would be an incentive to start and die immediately after contract is deployed
             // to capture the rewards from the launch hype
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, self._dao.read(), _to_ether(week.DAO));
+                .transferFrom(caller, dao_address, _to_ether(COST_TO_PLAY));
+
+            __event_RewardDistribution(
+                ref self,
+                RewardDistribution {
+                    first_place: PlayerReward {
+                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
+                    },
+                    second_place: PlayerReward {
+                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
+                    },
+                    third_place: PlayerReward {
+                        adventurer_id: 0, rank: 0, amount: 0, address: dao_address,
+                    },
+                    client: ClientReward { amount: 0, address: dao_address },
+                    dao: COST_TO_PLAY
+                }
+            );
             return;
         }
 
@@ -1030,26 +1055,52 @@ mod Game {
         // DAO
         if (week.DAO != 0) {
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, self._dao.read(), week.DAO);
+                .transferFrom(caller, dao_address, week.DAO);
         }
 
         // interface
         if (week.INTERFACE != 0) {
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, interface, week.INTERFACE);
+                .transferFrom(caller, client_address, week.INTERFACE);
         }
 
         // first place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, self._owner.read(self._scoreboard.read(1)), week.FIRST_PLACE);
+            .transferFrom(caller, first_place_address, week.FIRST_PLACE);
 
         // second place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, self._owner.read(self._scoreboard.read(2)), week.SECOND_PLACE);
+            .transferFrom(caller, second_place_address, week.SECOND_PLACE);
 
         // third place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, self._owner.read(self._scoreboard.read(3)), week.THIRD_PLACE);
+            .transferFrom(caller, third_place_address, week.THIRD_PLACE);
+
+        __event_RewardDistribution(
+            ref self,
+            RewardDistribution {
+                first_place: PlayerReward {
+                    adventurer_id: first_place_adventurer_id,
+                    rank: 1,
+                    amount: week.FIRST_PLACE,
+                    address: first_place_address
+                },
+                second_place: PlayerReward {
+                    adventurer_id: second_place_adventurer_id,
+                    rank: 2,
+                    amount: week.SECOND_PLACE,
+                    address: second_place_address
+                },
+                third_place: PlayerReward {
+                    adventurer_id: third_place_adventurer_id,
+                    rank: 3,
+                    amount: week.THIRD_PLACE,
+                    address: third_place_address
+                },
+                client: ClientReward { amount: week.INTERFACE, address: client_address },
+                dao: week.DAO
+            }
+        );
     }
 
     fn _start(
@@ -1399,9 +1450,9 @@ mod Game {
         };
 
         if (dodged) {
-            __event_DodgedObstacle(ref self, DodgedObstacle{obstacle_event});
+            __event_DodgedObstacle(ref self, DodgedObstacle { obstacle_event });
         } else {
-            __event_HitByObstacle(ref self, HitByObstacle{obstacle_event});
+            __event_HitByObstacle(ref self, HitByObstacle { obstacle_event });
         }
 
         // if obstacle killed adventurer
@@ -2999,6 +3050,34 @@ mod Game {
         intelligence_increase: u8,
         wisdom_increase: u8,
         charisma_increase: u8,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    struct RewardDistribution {
+        first_place: PlayerReward,
+        second_place: PlayerReward,
+        third_place: PlayerReward,
+        client: ClientReward,
+        dao: u256,
+    }
+
+    #[derive(Drop, Serde)]
+    struct PlayerReward {
+        adventurer_id: u256,
+        rank: u8,
+        amount: u256,
+        address: ContractAddress,
+    }
+
+    #[derive(Drop, Serde)]
+    struct ClientReward {
+        amount: u256,
+        address: ContractAddress,
+    }
+
+    #[inline(always)]
+    fn __event_RewardDistribution(ref self: ContractState, event: RewardDistribution) {
+        self.emit(Event::RewardDistribution(event));
     }
 
     #[inline(always)]
