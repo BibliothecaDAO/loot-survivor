@@ -1,3 +1,3 @@
 GAME="0x06978f89a5d09becff86692e44ab10201dc2e5fbd93ab3da86113dfc61496580"
 START=857900
-MONGO_CONNECTION_STRING="mongodb://apibara:apibara@localhost:27017"
+MONGO_CONNECTION_STRING="mongodb://goerli-main:justlive@loot-survivor-mongo-goerli-new:27017"
