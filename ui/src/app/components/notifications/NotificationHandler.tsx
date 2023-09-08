@@ -294,6 +294,51 @@ export const processNotifications = (
           ),
           animation: gameData.ADVENTURER_ANIMATIONS["PurchaseItem"],
         });
+        // Check if at least one item was equipped
+        if (
+          notificationData["Items"].some(
+            (item: ItemPurchase) => item.equip === "1"
+          )
+        ) {
+          notifications.push({
+            message: (
+              <div className="flex flex-col items-center">
+                <p>Equipped:</p>
+                {notificationData["Items"].map(
+                  (item: ItemPurchase, index: number) => {
+                    if (item.equip === "1") {
+                      const { slot } = getItemData(
+                        getValueFromKey(gameData.ITEMS, parseInt(item.item)) ??
+                          ""
+                      );
+                      return (
+                        <div
+                          className="flex flex-row gap-2 items-center"
+                          key={index}
+                        >
+                          <LootIcon size={"w-4"} type={slot} />
+                          <p>
+                            {getValueFromKey(
+                              gameData.ITEMS,
+                              parseInt(item.item)
+                            )}
+                          </p>
+                        </div>
+                      );
+                    }
+                  }
+                )}
+                {notificationData["Potions"] > 0 && (
+                  <div className="flex flex-row gap-2 items-center">
+                    <HealthPotionIcon />
+                    <p>{`Health Potions x ${notificationData["Potions"]}`}</p>
+                  </div>
+                )}
+              </div>
+            ),
+            animation: gameData.ADVENTURER_ANIMATIONS["PurchaseItem"],
+          });
+        }
       }
     }
   } else {

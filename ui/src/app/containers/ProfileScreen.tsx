@@ -25,7 +25,7 @@ export default function Profile() {
 
   return (
     <div className="w-full">
-      <div className="flex flex-col sm:flex-row gap-2 sm:gap-10 items-center sm:items-start justify-center">
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-5 items-center sm:items-start justify-center">
         <Button
           className="animate-pulse hidden sm:block"
           onClick={() => setScreen("leaderboard")}
@@ -39,13 +39,13 @@ export default function Profile() {
           {encounters ? "Player" : "Encounters"}
         </Button>
         {!encounters ? (
-          <div className="w-full sm:w-1/3 sm:ml-4">
+          <div className="w-full sm:w-1/3">
             <Info adventurer={adventurer} profileExists={true} />
           </div>
         ) : (
           <EncountersScreen profile={profile} />
         )}
-        <div className="hidden sm:block xl:w-full">
+        <div className="hidden sm:block w-2/3">
           <EncountersScreen profile={profile} />
         </div>
       </div>
