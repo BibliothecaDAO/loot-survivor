@@ -71,7 +71,7 @@ export default function transform({ header, events }: Block) {
               adventurerId: fp.adventurerId,
               owner: fp.address,
               rank: fp.rank,
-              timestamp,
+              timestamp: new Date(),
               newPayout: fp.amount,
             })
           );
@@ -82,7 +82,7 @@ export default function transform({ header, events }: Block) {
               adventurerId: sp.adventurerId,
               owner: sp.address,
               rank: sp.rank,
-              timestamp,
+              timestamp: new Date(),
               newPayout: sp.amount,
             })
           );
@@ -93,7 +93,7 @@ export default function transform({ header, events }: Block) {
               adventurerId: tp.adventurerId,
               owner: tp.address,
               rank: tp.rank,
-              timestamp,
+              timestamp: new Date(),
               newPayout: tp.amount,
             })
           );
