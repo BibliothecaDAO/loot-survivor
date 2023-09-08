@@ -34,17 +34,13 @@ const ScoreLeaderboardTable = ({
 
   console.log(scoreIds);
 
-  useCustomQuery("topScoresQuery", getScoresInList, {
+  const scoresData = useCustomQuery("topScoresQuery", getScoresInList, {
     ids: scoreIds,
   });
 
-  const scoresData = data.topScoresQuery?.scores
-    ? data.topScoresQuery?.scores
-    : [];
-
   const mergedScores = displayScores.map((item1) => {
-    const matchingItem2 = scoresData.find(
-      (item2) => item2.adventurerId === item1.id
+    const matchingItem2 = scoresData?.scores.find(
+      (item2: any) => item2.adventurerId === item1.id
     );
 
     return {

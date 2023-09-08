@@ -27,7 +27,16 @@ const ScoreRow = ({
       <td>{rank}</td>
       <td>{`${adventurer.name} - ${adventurer.id}`}</td>
       <td>{adventurer.xp}</td>
-      <td>{adventurer.totalPayout}</td>
+      <td>
+        {adventurer.totalPayout > 0 ? (
+          <span className="flex flex-row gap-1 items-center justify-center">
+            <Lords className="h-4 w-4 sm:w-5 sm:h-5 fill-current" />
+            {adventurer.totalPayout}
+          </span>
+        ) : (
+          "-"
+        )}
+      </td>
       {/* <td>
         <div className="flex flex-row items-center justify-center gap-2">
           <span
