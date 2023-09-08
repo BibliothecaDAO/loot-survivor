@@ -19,7 +19,7 @@ import {
   EquippedItemsEvent,
   DroppedItemsEvent,
   GreatnessIncreasedEvent,
-  ItemSpecialUnlockedEvent,
+  ItemsLeveledUpEvent,
   NewHighScoreEvent,
   AdventurerDiedEvent,
   AdventurerLeveledUpEvent,
@@ -51,7 +51,7 @@ type EventData =
   | EquippedItemsEvent
   | DroppedItemsEvent
   | GreatnessIncreasedEvent
-  | ItemSpecialUnlockedEvent
+  | ItemsLeveledUpEvent
   | NewHighScoreEvent
   | AdventurerDiedEvent
   | AdventurerLeveledUpEvent
@@ -151,6 +151,23 @@ export function processItemsXP(data: any) {
     data.adventurerState["adventurer"]["ring"]["xp"],
   ];
   return itemsXP;
+}
+
+export function processItemLevels(data: any) {
+  const gameData = new GameData();
+  const itemLevels = [];
+  const items = data.items;
+  for (let item of items) {
+    itemLevels.push({
+      item: gameData.ITEMS[item.itemId],
+      suffixUnlocked: item.suffixUnlocked,
+      prefixesUnlocked: item.prefixesUnlocked,
+      special1: gameData.ITEM_SUFFIXES[item.specials.special1],
+      special2: gameData.ITEM_NAME_PREFIXES[item.specials.special2],
+      special3: gameData.ITEM_NAME_SUFFIXES[item.specials.special3],
+    });
+  }
+  return itemLevels;
 }
 
 export function processData(
@@ -844,27 +861,14 @@ export function processData(
     case "GreatnessIncreased":
       const greatnessIncreasedEvent = event as GreatnessIncreasedEvent;
       return processAdventurerState(greatnessIncreasedEvent, currentAdventurer);
-    case "ItemSpecialUnlocked":
-      const itemsSpecialUnlockedEvent = event as ItemSpecialUnlockedEvent;
+    case "ItemsLeveledUp":
+      const itemsLeveledUpEvent = event as ItemsLeveledUpEvent;
       const itemSpecialUnlockedAdventurerData = processAdventurerState(
-        itemsSpecialUnlockedEvent,
+        itemsLeveledUpEvent,
         currentAdventurer
       );
-      const itemData = {
-        item: gameData.ITEMS[itemsSpecialUnlockedEvent.id],
-        special1:
-          gameData.ITEM_SUFFIXES[itemsSpecialUnlockedEvent.specials.special1],
-        special2:
-          gameData.ITEM_NAME_PREFIXES[
-            itemsSpecialUnlockedEvent.specials.special2
-          ],
-        special3:
-          gameData.ITEM_NAME_SUFFIXES[
-            itemsSpecialUnlockedEvent.specials.special3
-          ],
-        timestamp: new Date(),
-      };
-      return [itemSpecialUnlockedAdventurerData, itemData];
+      const itemLevels = processItemLevels(itemsLeveledUpEvent);
+      return [itemSpecialUnlockedAdventurerData, itemLevels];
     case "NewHighScore":
       const newHishScoreEvent = event as NewHighScoreEvent;
       return processAdventurerState(newHishScoreEvent, currentAdventurer);

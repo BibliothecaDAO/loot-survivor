@@ -28,11 +28,6 @@ type LootStatistics = {
   metadata: u8;
 };
 
-type ItemPurchase = {
-  itemId: u8;
-  equip: boolean;
-};
-
 type Adventurer = {
   lastAction: u16;
   health: u16;
@@ -279,11 +274,18 @@ export type GreatnessIncreasedEvent = {
   newLevel: u8;
 };
 
-export type ItemSpecialUnlockedEvent = {
+export type ItemLeveledUp = {
+  itemId: u8;
+  previousLevel: u8;
+  newLevel: u8;
+  suffixUnlocked: boolean;
+  prefixesUnlocked: boolean;
+  specials: SpecialPowers;
+};
+
+export type ItemsLeveledUpEvent = {
   adventurerState: AdventurerState;
-  id: u8;
-  level: u8;
-  specials: ItemSpecials;
+  items: ItemLeveledUp[];
 };
 
 export type NewHighScoreEvent = {
