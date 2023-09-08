@@ -35,7 +35,8 @@ export const ArcadeDialog = () => {
       <div className="fixed text-center top-1/8 left-1/8 sm:left-1/4 w-3/4 sm:w-1/2 h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
         <h3 className="mt-4">Arcade Accounts</h3>
         <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
-          Go deep into the mist with signature free gameplay!
+          Go deep into the mist with signature free gameplay! Simply connect
+          your wallet and create a free arcade account.
         </p>
 
         <div className="flex justify-center mb-1">
@@ -43,7 +44,7 @@ export const ArcadeDialog = () => {
             (connector?.options as any)?.id == "braavos") && (
             <div>
               <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                Note: This will initiate a 0.01 ETH transaction from your
+                Note: This will initiate a transfer of 0.01 ETH from your
                 connected wallet to the arcade account. <br />
                 You may need to refresh after the account has been created!
               </p>
