@@ -12,34 +12,31 @@ export interface NotificationComponentProps {
 const NotificationComponent = ({
   notifications,
 }: NotificationComponentProps) => {
-  const notificationIndex = useLoadingStore((state) => state.notificationIndex);
-  const setNotificationIndex = useLoadingStore(
-    (state) => state.setNotificationIndex
-  );
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const showNotification = useLoadingStore((state) => state.showNotification);
-
-  const prevIndex = useRef<number>();
-  useEffect(() => {
-    prevIndex.current = notificationIndex;
-  }, [notificationIndex]);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    if (notificationIndex < notifications.length - 1) {
+    if (currentIndex < notifications.length - 1) {
       const timer = setTimeout(() => {
-        setNotificationIndex(prevIndex.current ?? 0);
+        setCurrentIndex((prev) => prev + 1);
       }, 2000);
       return () => {
         clearTimeout(timer);
       };
-    } else if (notificationIndex === notifications.length - 1) {
+    } else if (currentIndex === notifications.length - 1) {
       const timer = setTimeout(() => {
         resetNotification();
-        setNotificationIndex(0);
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [showNotification, notificationIndex]);
+  }, [showNotification, currentIndex]);
+
+  useEffect(() => {
+    if (showNotification) {
+      setCurrentIndex(0);
+    }
+  }, [showNotification]);
 
   return (
     <CSSTransition
@@ -47,7 +44,7 @@ const NotificationComponent = ({
       timeout={300}
       classNames="notification"
       unmountOnExit
-      key={notificationIndex}
+      key={currentIndex}
     >
       <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border-4 border-terminal-green bg-terminal-black z-50 shadow-xl">
         <div className="flex flex-row w-full gap-5 sm:p-2">
@@ -59,7 +56,7 @@ const NotificationComponent = ({
               rows={16}
               frameRate={5}
               animations={notificationAnimations}
-              currentAnimation={notifications[notificationIndex]?.animation}
+              currentAnimation={notifications[currentIndex]?.animation}
             />
           </div>
           <div className="w-1/6 sm:w-1/4 hidden sm:block">
@@ -70,11 +67,11 @@ const NotificationComponent = ({
               rows={16}
               frameRate={5}
               animations={notificationAnimations}
-              currentAnimation={notifications[notificationIndex]?.animation}
+              currentAnimation={notifications[currentIndex]?.animation}
             />
           </div>
           <div className="w-5/6 sm:w-3/4 m-auto text-sm sm:text-lg">
-            {notifications[notificationIndex]?.message}
+            {notifications[currentIndex]?.message}
           </div>
         </div>
       </div>
