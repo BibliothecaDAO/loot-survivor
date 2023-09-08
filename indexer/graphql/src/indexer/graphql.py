@@ -396,6 +396,17 @@ class DateTimeFilter:
 
 
 @strawberry.input
+class IntFilter:
+    eq: Optional[int] = None
+    _in: Optional[List[int]] = None
+    notIn: Optional[List[int]] = None
+    lt: Optional[int] = None
+    lte: Optional[int] = None
+    gt: Optional[int] = None
+    gte: Optional[int] = None
+
+
+@strawberry.input
 class BooleanFilter:
     eq: Optional[bool] = None
 
@@ -648,7 +659,7 @@ class ScoresFilter:
     txHash: Optional[HexValueFilter] = None
     scoreTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
-    totalPayout: Optional[FeltValueFilter] = None
+    totalPayout: Optional[IntFilter] = None
 
 
 @strawberry.input
@@ -939,7 +950,7 @@ class Score:
     txHash: Optional[HexValue]
     scoreTime: Optional[str]
     timestamp: Optional[str]
-    totalPayout: Optional[FeltValue]
+    totalPayout: Optional[int]
 
     @classmethod
     def from_mongo(cls, data):

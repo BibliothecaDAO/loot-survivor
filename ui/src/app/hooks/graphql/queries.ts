@@ -149,6 +149,7 @@ const SCORE_FIELDS = `
   txHash
   blockTime
   timestamp
+  totalPayout
 `;
 
 const SCORES_FRAGMENT = `
@@ -462,6 +463,19 @@ const getTopScores = gql`
   }
 `;
 
+const getScoresInList = gql`
+  ${SCORES_FRAGMENT}
+  query get_top_scores($ids: [FeltValue!]) {
+    scores(
+      where: { adventurerId: { In: $ids } }
+      orderBy: { xp: { desc: true } }
+      limit: 10000000
+    ) {
+      ...ScoreFields
+    }
+  }
+`;
+
 export {
   getAdventurer,
   getDiscoveries,
@@ -489,4 +503,5 @@ export {
   getAdventurerByXP,
   getAdventurersByXPPaginated,
   getTopScores,
+  getScoresInList,
 };
