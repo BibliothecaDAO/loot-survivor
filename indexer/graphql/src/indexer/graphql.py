@@ -219,11 +219,8 @@ def parse_slot(value):
 
 
 def serialize_slot(value):
-    print(value)
     bytes = base64.b64decode(value)
-    print(bytes)
     felt = int.from_bytes(bytes, "big")
-    print(felt)
     return config.SLOTS.get(felt)
 
 

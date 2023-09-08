@@ -4,7 +4,7 @@ import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
 
 interface ScoreLeaderboardRowProps {
   index: number;
-  adventurer: Adventurer;
+  adventurer: any;
   rank: number;
   handleRowSelected: (id: number) => void;
 }
@@ -27,6 +27,7 @@ const ScoreRow = ({
       <td>{rank}</td>
       <td>{`${adventurer.name} - ${adventurer.id}`}</td>
       <td>{adventurer.xp}</td>
+      <td>{adventurer.totalPayout}</td>
       {/* <td>
         <div className="flex flex-row items-center justify-center gap-2">
           <span

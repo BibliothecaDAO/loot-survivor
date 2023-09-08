@@ -147,7 +147,7 @@ const SCORE_FIELDS = `
   rank
   xp
   txHash
-  blockTime
+  scoreTime
   timestamp
   totalPayout
 `;

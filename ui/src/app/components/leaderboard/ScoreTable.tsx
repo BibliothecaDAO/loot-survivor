@@ -32,6 +32,8 @@ const ScoreLeaderboardTable = ({
 
   const scoreIds = scores?.map((score) => score.id ?? 0);
 
+  console.log(scoreIds);
+
   useCustomQuery("topScoresQuery", getScoresInList, {
     ids: scoreIds,
   });
@@ -40,6 +42,20 @@ const ScoreLeaderboardTable = ({
     ? data.topScoresQuery?.scores
     : [];
 
+  const mergedScores = displayScores.map((item1) => {
+    const matchingItem2 = scoresData.find(
+      (item2) => item2.adventurerId === item1.id
+    );
+
+    return {
+      ...item1,
+      ...matchingItem2,
+    };
+  });
+
+  const scoresWithLords = mergedScores;
+
+  console.log(scoresWithLords);
   console.log(scoresData);
 
   const totalPages = Math.ceil(scores.length / itemsPerPage);
@@ -88,13 +104,11 @@ const ScoreLeaderboardTable = ({
                 <th className="p-1">Rank</th>
                 <th className="p-1">Adventurer</th>
                 <th className="p-1">XP</th>
-                {/* <th className="p-1">
-                Prize <span className="text-sm">(per mint)</span>
-              </th> */}
+                <th className="p-1">Payout</th>
               </tr>
             </thead>
             <tbody>
-              {displayScores.map((adventurer: Adventurer, index: number) => (
+              {scoresWithLords.map((adventurer: any, index: number) => (
                 <ScoreRow
                   key={index}
                   index={index}
