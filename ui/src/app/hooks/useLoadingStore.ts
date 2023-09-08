@@ -10,8 +10,6 @@ type LoadingState = {
   txAccepted: boolean;
   pendingMessage: string | string[];
   showNotification: boolean;
-  notificationIndex: number;
-  setNotificationIndex: (notificationIndex: number) => void;
   notificationData: any;
   adventurer: number | undefined;
   history: any[];
@@ -37,8 +35,6 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   pendingMessage: "",
   loadingQuery: null,
   showNotification: false,
-  notificationIndex: 0,
-  setNotificationIndex: (notificationIndex) => set({ notificationIndex }),
   notificationData: undefined,
   adventurer: undefined,
   history: [],
@@ -74,7 +70,6 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   resetNotification: () =>
     set({
       type: "",
-      notificationIndex: 0,
       notificationData: undefined,
       showNotification: false,
     }),
