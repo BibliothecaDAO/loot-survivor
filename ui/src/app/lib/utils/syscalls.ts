@@ -362,10 +362,6 @@ export function syscalls({
               (event) => event.name === "ItemsLeveledUp"
             );
             for (let itemsLeveledUpEvent of itemsLeveledUpEvents) {
-              setData("adventurerByIdQuery", {
-                adventurers: [itemsLeveledUpEvent.data[0]],
-              });
-              setAdventurer(itemsLeveledUpEvent.data[0]);
               for (let itemLeveled of itemsLeveledUpEvent.data[1]) {
                 const ownedItemIndex =
                   queryData.itemsByAdventurerQuery?.items.findIndex(
@@ -615,10 +611,6 @@ export function syscalls({
           (event) => event.name === "ItemsLeveledUp"
         );
         for (let itemsLeveledUpEvent of itemsLeveledUpEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [itemsLeveledUpEvent.data[0]],
-          });
-          setAdventurer(itemsLeveledUpEvent.data[0]);
           for (let itemLeveled of itemsLeveledUpEvent.data[1]) {
             const ownedItemIndex =
               queryData.itemsByAdventurerQuery?.items.findIndex(
