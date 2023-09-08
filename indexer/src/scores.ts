@@ -52,8 +52,8 @@ export default function transform({ header, events }: Block) {
             rank: value.rank,
             xp: as.adventurer.xp,
             txHash: receipt.transactionHash,
-            scoreTime: new Date(),
-            timestamp: new Date(),
+            scoreTime: new Date().toISOString(),
+            timestamp: new Date().toISOString(),
             totalPayout: 0,
           }),
         ];
@@ -71,7 +71,7 @@ export default function transform({ header, events }: Block) {
               adventurerId: fp.adventurerId,
               owner: fp.address,
               rank: fp.rank,
-              timestamp: new Date(),
+              timestamp: new Date().toISOString(),
               newPayout: fp.amount,
             })
           );
@@ -82,7 +82,7 @@ export default function transform({ header, events }: Block) {
               adventurerId: sp.adventurerId,
               owner: sp.address,
               rank: sp.rank,
-              timestamp: new Date(),
+              timestamp: new Date().toISOString(),
               newPayout: sp.amount,
             })
           );
@@ -93,7 +93,7 @@ export default function transform({ header, events }: Block) {
               adventurerId: tp.adventurerId,
               owner: tp.address,
               rank: tp.rank,
-              timestamp: new Date(),
+              timestamp: new Date().toISOString(),
               newPayout: tp.amount,
             })
           );
