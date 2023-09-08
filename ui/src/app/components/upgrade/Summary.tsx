@@ -1,4 +1,8 @@
-import { getValueFromKey, getItemData } from "@/app/lib/utils";
+import {
+  getValueFromKey,
+  getItemData,
+  convertToBoolean,
+} from "@/app/lib/utils";
 import { ItemPurchase, UpgradeSummary } from "@/app/types";
 import { GameData } from "../GameData";
 import { HealthPotionIcon } from "../icons/Icons";
@@ -46,6 +50,9 @@ const Summary = ({ summary, attributes }: UpgradeSummaryProps) => {
                 </div>
                 <p className="text-lg">
                   {getValueFromKey(gameData.ITEMS, parseInt(item.item))}
+                </p>
+                <p>
+                  {convertToBoolean(parseInt(item.equip)) ? " - Equipping" : ""}
                 </p>
               </div>
             );

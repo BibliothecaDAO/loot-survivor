@@ -1,13 +1,13 @@
 import { useState, useMemo } from "react";
 import MarketplaceRow from "../../components/marketplace/MarketplaceRow";
 import { Item, UpgradeStats, ItemPurchase } from "@/app/types";
-import { getItemData } from "@/app/lib/utils";
+import { getItemData, getKeyFromValue } from "@/app/lib/utils";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import LootIconLoader from "../../components/icons/Loader";
+import { Button } from "../buttons/Button";
+import { GameData } from "../../components/GameData";
 
 export interface MarketplaceTableProps {
-  showEquipQ: number | null;
-  setShowEquipQ: (value: number | null) => void;
   purchaseItems: ItemPurchase[];
   setPurchaseItems: (value: ItemPurchase[]) => void;
   upgradeHandler: (
@@ -20,8 +20,6 @@ export interface MarketplaceTableProps {
 }
 
 const MarketplaceTable = ({
-  showEquipQ,
-  setShowEquipQ,
   purchaseItems,
   setPurchaseItems,
   upgradeHandler,
@@ -31,6 +29,9 @@ const MarketplaceTable = ({
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
+  const [showEquipQ, setShowEquipQ] = useState<number | null>(null);
+
+  const gameData = new GameData();
 
   const { isLoading } = useQueriesStore();
 
@@ -100,47 +101,112 @@ const MarketplaceTable = ({
   }, [marketLatestItems, sortField, sortDirection]);
 
   return (
-    <table className="w-full sm:border sm:border-terminal-green">
-      <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
-        <tr className="">
-          {headings.map((heading, index) => (
-            <th
-              key={index}
-              className="px-2.5 sm:px-3 cursor-pointer"
-              onClick={() => handleSort(heading)}
+    <>
+      <div>
+        <table
+          className={`w-full sm:border sm:border-terminal-green ${
+            showEquipQ === null ? "" : "hidden sm:table"
+          }`}
+        >
+          <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
+            <tr className="">
+              {headings.map((heading, index) => (
+                <th
+                  key={index}
+                  className="px-2.5 sm:px-3 cursor-pointer"
+                  onClick={() => handleSort(heading)}
+                >
+                  {heading}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="text-xs sm:text-base">
+            {!isLoading.latestMarketItemsQuery ? (
+              sortedMarketLatestItems.map((item: Item, index: number) => (
+                <MarketplaceRow
+                  item={item}
+                  index={index}
+                  selectedIndex={selectedIndex}
+                  adventurers={adventurers}
+                  activeMenu={showEquipQ}
+                  setActiveMenu={setShowEquipQ}
+                  calculatedNewGold={calculatedNewGold}
+                  ownedItems={adventurerItems}
+                  purchaseItems={purchaseItems}
+                  setPurchaseItems={setPurchaseItems}
+                  upgradeHandler={upgradeHandler}
+                  totalCharisma={totalCharisma}
+                  key={index}
+                />
+              ))
+            ) : (
+              <div className="h-full w-full flex justify-center p-10 align-center">
+                Generating Loot{" "}
+                <LootIconLoader className="self-center ml-3" size={"w-4"} />
+              </div>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="sm:hidden h-full">
+        {(() => {
+          const item = sortedMarketLatestItems[showEquipQ ?? 0];
+          return (
+            <div
+              className={`${
+                showEquipQ !== null ? "" : "hidden"
+              } w-full m-auto h-full flex flex-row items-center justify-center gap-2`}
             >
-              {heading}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody className="text-xs sm:text-base">
-        {!isLoading.latestMarketItemsQuery ? (
-          sortedMarketLatestItems.map((item: Item, index: number) => (
-            <MarketplaceRow
-              item={item}
-              index={index}
-              selectedIndex={selectedIndex}
-              adventurers={adventurers}
-              activeMenu={showEquipQ}
-              setActiveMenu={setShowEquipQ}
-              calculatedNewGold={calculatedNewGold}
-              ownedItems={adventurerItems}
-              purchaseItems={purchaseItems}
-              setPurchaseItems={setPurchaseItems}
-              upgradeHandler={upgradeHandler}
-              totalCharisma={totalCharisma}
-              key={index}
-            />
-          ))
-        ) : (
-          <div className="h-full w-full flex justify-center p-10 align-center">
-            Generating Loot{" "}
-            <LootIconLoader className="self-center ml-3" size={"w-4"} />
-          </div>
-        )}
-      </tbody>
-    </table>
+              <p>{`Equip ${item?.item} ?`}</p>
+              <Button
+                onClick={() => {
+                  const newPurchases = [
+                    ...purchaseItems,
+                    {
+                      item:
+                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
+                        "0",
+                      equip: "1",
+                    },
+                  ];
+                  setPurchaseItems(newPurchases);
+                  upgradeHandler(undefined, undefined, newPurchases);
+                  setShowEquipQ(null);
+                }}
+              >
+                Yes
+              </Button>
+              <Button
+                onClick={() => {
+                  const newPurchases = [
+                    ...purchaseItems,
+                    {
+                      item:
+                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
+                        "0",
+                      equip: "0",
+                    },
+                  ];
+                  setPurchaseItems(newPurchases);
+                  upgradeHandler(undefined, undefined, newPurchases);
+                  setShowEquipQ(null);
+                }}
+              >
+                No
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowEquipQ(null);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          );
+        })()}
+      </div>
+    </>
   );
 };
 

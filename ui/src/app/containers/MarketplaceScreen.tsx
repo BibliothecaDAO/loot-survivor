@@ -43,72 +43,11 @@ export default function MarketplaceScreen({
   const [activeMenu, setActiveMenu] = useState<number | undefined>();
   const rowRefs = useRef<(HTMLTableRowElement | null)[]>([]);
   const [itemsCount, setItemsCount] = useState(0);
-  const [sortField, setSortField] = useState<string | null>(null);
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const { isLoading } = useQueriesStore();
-  const [showEquipQ, setShowEquipQ] = useState<number | null>(null);
 
-  const gameData = new GameData();
-
-  const marketLatestItems = useQueriesStore(
-    (state) => state.data.latestMarketItemsQuery?.items || []
-  );
   const adventurerItems = useQueriesStore(
     (state) => state.data.itemsByAdventurerQuery?.items || []
   );
-
-  const headingToKeyMapping: { [key: string]: string } = {
-    Item: "item",
-    Tier: "tier",
-    Slot: "slot",
-    Type: "type",
-    Cost: "cost",
-  };
-
-  const handleSort = (heading: string) => {
-    const mappedField = headingToKeyMapping[heading];
-    if (!mappedField) return;
-
-    if (sortField === mappedField) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
-    } else {
-      setSortField(mappedField);
-      setSortDirection("asc");
-    }
-  };
-
-  const sortedMarketLatestItems = useMemo(() => {
-    if (!sortField) return marketLatestItems;
-    const sortedItems = [...marketLatestItems].sort((a, b) => {
-      let aItemData = getItemData(a.item ?? ""); // get item data for a
-      let bItemData = getItemData(b.item ?? ""); // get item data for b
-      let aValue, bValue;
-
-      if (
-        sortField === "tier" ||
-        sortField === "type" ||
-        sortField === "slot"
-      ) {
-        aValue = aItemData[sortField];
-        bValue = bItemData[sortField];
-      } else {
-        aValue = a[sortField];
-        bValue = b[sortField];
-      }
-
-      if (typeof aValue === "string" && !isNaN(Number(aValue))) {
-        aValue = Number(aValue);
-        bValue = Number(bValue);
-      }
-
-      if ((aValue ?? "") < (bValue ?? ""))
-        return sortDirection === "asc" ? -1 : 1;
-      if ((aValue ?? "") > (bValue ?? ""))
-        return sortDirection === "asc" ? 1 : -1;
-      return 0;
-    });
-    return sortedItems;
-  }, [marketLatestItems, sortField, sortDirection]);
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
@@ -169,78 +108,13 @@ export default function MarketplaceScreen({
               <LootIconLoader />
             </div>
           )}
-          <div className={showEquipQ === null ? "" : "hidden sm:block"}>
-            <MarketplaceTable
-              showEquipQ={showEquipQ}
-              setShowEquipQ={setShowEquipQ}
-              purchaseItems={purchaseItems}
-              setPurchaseItems={setPurchaseItems}
-              upgradeHandler={upgradeHandler}
-              totalCharisma={totalCharisma}
-              calculatedNewGold={calculatedNewGold}
-            />
-          </div>
-          <>
-            {(() => {
-              const item = sortedMarketLatestItems[showEquipQ ?? 0];
-              const { tier, type, slot } = getItemData(item?.item ?? "");
-              return (
-                <div
-                  className={`${
-                    showEquipQ !== null ? "sm:hidden" : "hidden"
-                  } w-full m-auto h-full flex flex-row items-center justify-center gap-2`}
-                >
-                  <p>{`Equip ${item?.item} ?`}</p>
-                  <Button
-                    onClick={() => {
-                      const newPurchases = [
-                        ...purchaseItems,
-                        {
-                          item:
-                            getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
-                            "0",
-                          equip: "1",
-                        },
-                      ];
-                      setPurchaseItems(newPurchases);
-                      upgradeHandler(undefined, undefined, newPurchases);
-                      setShowEquipQ(null);
-                      setActiveMenu(0);
-                    }}
-                  >
-                    Yes
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      const newPurchases = [
-                        ...purchaseItems,
-                        {
-                          item:
-                            getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
-                            "0",
-                          equip: "0",
-                        },
-                      ];
-                      setPurchaseItems(newPurchases);
-                      upgradeHandler(undefined, undefined, newPurchases);
-                      setShowEquipQ(null);
-                      setActiveMenu(0);
-                    }}
-                  >
-                    No
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setShowEquipQ(null);
-                      setActiveMenu(0);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              );
-            })()}
-          </>
+          <MarketplaceTable
+            purchaseItems={purchaseItems}
+            setPurchaseItems={setPurchaseItems}
+            upgradeHandler={upgradeHandler}
+            totalCharisma={totalCharisma}
+            calculatedNewGold={calculatedNewGold}
+          />
         </div>
       ) : (
         <div className="flex w-full h-64">
