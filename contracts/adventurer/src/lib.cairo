@@ -6,4 +6,7 @@ mod item_primitive;
 mod item_meta;
 mod exploration;
 mod bag;
-mod constants;
+mod constants {
+    mod discovery_constants;
+    mod adventurer_constants;
+}

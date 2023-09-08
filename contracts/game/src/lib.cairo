@@ -1,5 +1,10 @@
-mod game;
-mod tests;
+mod game {
+    mod constants;
+    mod interfaces;
+}
+mod tests {
+    mod test_game;
+}
 
 #[starknet::contract]
 mod Game {
