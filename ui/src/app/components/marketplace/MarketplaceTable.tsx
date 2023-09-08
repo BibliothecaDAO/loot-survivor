@@ -102,58 +102,60 @@ const MarketplaceTable = ({
 
   return (
     <>
-      <table
-        className={`w-full sm:border sm:border-terminal-green ${
-          showEquipQ === null ? "" : "hidden sm:block"
-        }`}
-      >
-        <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
-          <tr className="">
-            {headings.map((heading, index) => (
-              <th
-                key={index}
-                className="px-2.5 sm:px-3 cursor-pointer"
-                onClick={() => handleSort(heading)}
-              >
-                {heading}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="text-xs sm:text-base">
-          {!isLoading.latestMarketItemsQuery ? (
-            sortedMarketLatestItems.map((item: Item, index: number) => (
-              <MarketplaceRow
-                item={item}
-                index={index}
-                selectedIndex={selectedIndex}
-                adventurers={adventurers}
-                activeMenu={showEquipQ}
-                setActiveMenu={setShowEquipQ}
-                calculatedNewGold={calculatedNewGold}
-                ownedItems={adventurerItems}
-                purchaseItems={purchaseItems}
-                setPurchaseItems={setPurchaseItems}
-                upgradeHandler={upgradeHandler}
-                totalCharisma={totalCharisma}
-                key={index}
-              />
-            ))
-          ) : (
-            <div className="h-full w-full flex justify-center p-10 align-center">
-              Generating Loot{" "}
-              <LootIconLoader className="self-center ml-3" size={"w-4"} />
-            </div>
-          )}
-        </tbody>
-      </table>
-      <>
+      <div>
+        <table
+          className={`w-full sm:border sm:border-terminal-green ${
+            showEquipQ === null ? "" : "hidden sm:table"
+          }`}
+        >
+          <thead className="sticky top-0 sm:border z-5 sm:border-terminal-green bg-terminal-black sm:text-xl">
+            <tr className="">
+              {headings.map((heading, index) => (
+                <th
+                  key={index}
+                  className="px-2.5 sm:px-3 cursor-pointer"
+                  onClick={() => handleSort(heading)}
+                >
+                  {heading}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="text-xs sm:text-base">
+            {!isLoading.latestMarketItemsQuery ? (
+              sortedMarketLatestItems.map((item: Item, index: number) => (
+                <MarketplaceRow
+                  item={item}
+                  index={index}
+                  selectedIndex={selectedIndex}
+                  adventurers={adventurers}
+                  activeMenu={showEquipQ}
+                  setActiveMenu={setShowEquipQ}
+                  calculatedNewGold={calculatedNewGold}
+                  ownedItems={adventurerItems}
+                  purchaseItems={purchaseItems}
+                  setPurchaseItems={setPurchaseItems}
+                  upgradeHandler={upgradeHandler}
+                  totalCharisma={totalCharisma}
+                  key={index}
+                />
+              ))
+            ) : (
+              <div className="h-full w-full flex justify-center p-10 align-center">
+                Generating Loot{" "}
+                <LootIconLoader className="self-center ml-3" size={"w-4"} />
+              </div>
+            )}
+          </tbody>
+        </table>
+      </div>
+      <div className="sm:hidden h-full">
         {(() => {
           const item = sortedMarketLatestItems[showEquipQ ?? 0];
           return (
             <div
               className={`${
-                showEquipQ !== null ? "sm:hidden" : "hidden"
+                showEquipQ !== null ? "" : "hidden"
               } w-full m-auto h-full flex flex-row items-center justify-center gap-2`}
             >
               <p>{`Equip ${item?.item} ?`}</p>
@@ -203,7 +205,7 @@ const MarketplaceTable = ({
             </div>
           );
         })()}
-      </>
+      </div>
     </>
   );
 };

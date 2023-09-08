@@ -143,7 +143,7 @@ const MarketplaceRow = ({
   return (
     <tr
       className={
-        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black" +
+        "border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black w-full" +
         (selectedIndex === index + 1 ? " bg-terminal-black" : "")
       }
     >
