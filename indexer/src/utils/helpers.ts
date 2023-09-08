@@ -363,16 +363,18 @@ export function updateItemXP({ item, adventurerId, xp }: any) {
     adventurerId: checkExistsInt(BigInt(adventurerId)),
   };
 
-  return {
-    entity,
-    update: {
-      $set: {
-        ...entity,
-        xp: encodeIntAsBytes(BigInt(xp)),
-        timestamp: new Date().toISOString(),
+  if (entity.item) {
+    return {
+      entity,
+      update: {
+        $set: {
+          ...entity,
+          xp: encodeIntAsBytes(BigInt(xp)),
+          timestamp: new Date().toISOString(),
+        },
       },
-    },
-  };
+    };
+  }
 }
 
 export function updateItemsXP({
@@ -438,7 +440,8 @@ export function updateItemsXP({
       xp: adventurer.ring.xp,
     })
   );
-  return itemUpdates;
+  const filteredUpdates = itemUpdates.filter((value) => value !== undefined);
+  return filteredUpdates;
 }
 
 export function updateItemSpecials({

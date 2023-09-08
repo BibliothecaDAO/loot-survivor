@@ -106,7 +106,6 @@ export default function transform({ header, events }: Block) {
             },
           },
         };
-
         return [...itemInserts, starterWeapon];
       }
       case PURCHASED_ITEMS: {
@@ -243,7 +242,8 @@ export default function transform({ header, events }: Block) {
             };
           }
         });
-        return result;
+        const filteredResult = result.filter((value) => value !== undefined);
+        return filteredResult;
       }
       case NEW_ITEMS_AVAILABLE: {
         const { value } = parseNewItemsAvailable(event.data, 0);
