@@ -23,7 +23,7 @@ export default function GuideScreen() {
     { weapon: "Bludgeon", item: "Maul", rank: 3 },
     { weapon: "Bludgeon", item: "Mace", rank: 4 },
     { weapon: "Bludgeon", item: "Club", rank: 5 },
-    { weapon: "Magic", item: "Ghost Wand", rank: 2 },
+    { weapon: "Magic", item: "Ghost Wand", rank: 1 },
     { weapon: "Magic", item: "Grave Wand", rank: 2 },
     { weapon: "Magic", item: "Bone Wand", rank: 3 },
     { weapon: "Magic", item: "Wand", rank: 4 },
