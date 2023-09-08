@@ -45,7 +45,9 @@ export const ArcadeDialog = () => {
             <div>
               <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
                 Note: This will initiate a transfer of 0.01 ETH from your
-                connected wallet to the arcade account. <br />
+                connected wallet to the arcade account to cover your transaction
+                costs from normal gameplay.
+                <br />
                 You may need to refresh after the account has been created!
               </p>
               <Button onClick={() => create()} disabled={isWrongNetwork}>
