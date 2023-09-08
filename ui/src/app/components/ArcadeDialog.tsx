@@ -139,7 +139,7 @@ export const ArcadeAccountCard = ({
     <div className="border border-terminal-green p-3 hover:bg-terminal-green hover:text-terminal-black items-center">
       <div className="text-left flex flex-col text-sm sm:text-xl mb-0 sm:mb-4 items-center">
         <span
-          onClick={() => copyToClipboard(account.id)}
+          onClick={() => copyToClipboard(account.name)}
           style={{ cursor: "pointer" }}
         >
           {account.id}
