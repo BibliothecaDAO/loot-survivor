@@ -367,6 +367,8 @@ export function syscalls({
                   queryData.itemsByAdventurerQuery?.items.findIndex(
                     (item: any) => item.item == itemLeveled.item
                   );
+                console.log(ownedItemIndex);
+                console.log(itemLeveled);
                 if (itemLeveled.suffixUnlocked) {
                   setData(
                     "itemsByAdventurerQuery",
@@ -616,6 +618,8 @@ export function syscalls({
               queryData.itemsByAdventurerQuery?.items.findIndex(
                 (item: any) => item.item == itemLeveled.item
               );
+            console.log(ownedItemIndex);
+            console.log(itemLeveled);
             if (itemLeveled.suffixUnlocked) {
               setData(
                 "itemsByAdventurerQuery",
