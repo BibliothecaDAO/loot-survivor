@@ -1152,7 +1152,7 @@ export class GameData {
       EquippedItems: hash.getSelectorFromName("EquippedItems"),
       DroppedItems: hash.getSelectorFromName("DroppedItems"),
       GreatnessIncreased: hash.getSelectorFromName("GreatnessIncreased"),
-      ItemSpecialUnlocked: hash.getSelectorFromName("ItemSpecialUnlocked"),
+      ItemsLeveledUp: hash.getSelectorFromName("ItemsLeveledUp"),
       NewHighScore: hash.getSelectorFromName("NewHighScore"),
       AdventurerDied: hash.getSelectorFromName("AdventurerDied"),
       AdventurerLeveledUp: hash.getSelectorFromName("AdventurerLeveledUp"),

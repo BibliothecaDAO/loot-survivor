@@ -612,6 +612,8 @@ export function syscalls({
         const itemsLeveledUpEvents = events.filter(
           (event) => event.name === "ItemsLeveledUp"
         );
+        console.log("Leveled Up Event");
+        console.log(itemsLeveledUpEvents);
         for (let itemsLeveledUpEvent of itemsLeveledUpEvents) {
           for (let itemLeveled of itemsLeveledUpEvent.data[1]) {
             const ownedItemIndex =
