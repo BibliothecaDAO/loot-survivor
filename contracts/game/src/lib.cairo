@@ -26,6 +26,18 @@ mod Game {
     use openzeppelin::token::erc20::interface::{
         IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
     };
+    use openzeppelin::introspection::interface::{ISRC5Dispatcher, ISRC5DispatcherTrait};
+
+    use goldenToken::ERC721::{
+        GoldenToken, GoldenTokenDispatcher, GoldenTokenDispatcherTrait, GoldenTokenLibraryDispatcher
+    };
+
+    use arcade_account::{
+        account::interface::{
+            IMasterControl, IMasterControlDispatcher, IMasterControlDispatcherTrait
+        },
+        Account, ARCADE_ACCOUNT_ID
+    };
 
     use super::game::{
         interfaces::{IGame},
@@ -74,10 +86,11 @@ mod Game {
         _game_counter: felt252,
         _game_entropy: GameEntropy,
         _genesis_block: u64,
+        _golden_token: ContractAddress,
+        _item_specials: LegacyMap::<(felt252, u8), ItemSpecialsStorage>,
         _leaderboard: Leaderboard,
         _lords: ContractAddress,
         _owner: LegacyMap::<felt252, ContractAddress>,
-        _item_specials: LegacyMap::<(felt252, u8), ItemSpecialsStorage>,
     }
 
     #[event]
@@ -115,7 +128,8 @@ mod Game {
         ref self: ContractState,
         lords: ContractAddress,
         dao: ContractAddress,
-        collectible_beasts: ContractAddress
+        collectible_beasts: ContractAddress,
+        golden_token: ContractAddress,
     ) {
         // set the contract addresses
         self._lords.write(lords);
@@ -124,6 +138,9 @@ mod Game {
 
         // set the genesis block
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
+
+        // set golden token address
+        self._golden_token.write(golden_token);
 
         // initialize game entropy
         let current_block_info = starknet::get_block_info().unbox();
@@ -152,13 +169,23 @@ mod Game {
         /// @param weapon A u8 representing the weapon to start the game with. Valid options are: {wand: 12, book: 17, short sword: 46, club: 76}
         /// @param name A u128 value representing the player's name.
         fn new_game(
-            ref self: ContractState, client_reward_address: ContractAddress, weapon: u8, name: u128,
+            ref self: ContractState,
+            client_reward_address: ContractAddress,
+            weapon: u8,
+            name: u128,
+            golden_token_id: u256
         ) {
             // assert provided weapon
             _assert_valid_starter_weapon(weapon);
 
-            // process payment for game and distribute rewards
-            _process_payment_and_distribute_rewards(ref self, client_reward_address);
+            // if player has a golden token
+            let golden_token = _golden_token_dispatcher(ref self);
+            if (golden_token.can_play(golden_token_id) && golden_token_id != 0) {
+                // pay with the golden token
+                golden_token.play(golden_token_id);
+            } else {
+                _process_payment_and_distribute_rewards(ref self, client_reward_address);
+            }
 
             // start the game
             _start_game(ref self, weapon, name);
@@ -211,7 +238,12 @@ mod Game {
             // process explore or apply idle penalty
             if !idle {
                 _explore(
-                    ref self, ref adventurer, adventurer_id, adventurer_entropy, game_entropy.hash, till_beast
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    adventurer_entropy,
+                    game_entropy.hash,
+                    till_beast
                 );
             } else {
                 _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
@@ -1030,13 +1062,19 @@ mod Game {
         amount * 10 ^ 18
     }
 
+    fn _golden_token_dispatcher(ref self: ContractState) -> GoldenTokenDispatcher {
+        GoldenTokenDispatcher { contract_address: self._golden_token.read() }
+    }
+
+    fn _lords_dispatcher(ref self: ContractState) -> IERC20CamelDispatcher {
+        IERC20CamelDispatcher { contract_address: self._lords.read() }
+    }
     fn _process_payment_and_distribute_rewards(
         ref self: ContractState, client_address: ContractAddress
     ) {
         let caller = get_caller_address();
         let block_number = starknet::get_block_info().unbox().block_number;
 
-        let lords = self._lords.read();
         let genesis_block = self._genesis_block.read();
         let dao_address = self._dao.read();
 
@@ -1051,7 +1089,7 @@ mod Game {
             // the purpose of this is to let a decent set of top scores get set before payouts begin
             // without this, there would be an incentive to start and die immediately after contract is deployed
             // to capture the rewards from the launch hype
-            IERC20CamelDispatcher { contract_address: lords }
+            _lords_dispatcher(ref self)
                 .transferFrom(caller, dao_address, _to_ether(COST_TO_PLAY.into()));
 
             __event_RewardDistribution(
@@ -1108,53 +1146,22 @@ mod Game {
 
         // DAO
         if (week.DAO != 0) {
-            IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, dao_address, _to_ether(week.DAO));
+            _lords_dispatcher(ref self).transferFrom(caller, self._dao.read(), week.DAO);
         }
 
         // interface
         if (week.INTERFACE != 0) {
-            IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, client_address, _to_ether(week.INTERFACE));
+            _lords_dispatcher(ref self).transferFrom(caller, client_address, week.INTERFACE);
         }
 
         // first place
-        IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, first_place_address, _to_ether(week.FIRST_PLACE));
+        _lords_dispatcher(ref self).transferFrom(caller, first_place_address, week.FIRST_PLACE);
 
         // second place
-        IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, second_place_address, _to_ether(week.SECOND_PLACE));
+        _lords_dispatcher(ref self).transferFrom(caller, second_place_address, week.SECOND_PLACE);
 
         // third place
-        IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, third_place_address, _to_ether(week.THIRD_PLACE));
-
-        __event_RewardDistribution(
-            ref self,
-            RewardDistribution {
-                first_place: PlayerReward {
-                    adventurer_id: leaderboard.first.adventurer_id.into(),
-                    rank: 1,
-                    amount: week.FIRST_PLACE,
-                    address: first_place_address
-                },
-                second_place: PlayerReward {
-                    adventurer_id: leaderboard.second.adventurer_id.into(),
-                    rank: 2,
-                    amount: week.SECOND_PLACE,
-                    address: second_place_address
-                },
-                third_place: PlayerReward {
-                    adventurer_id: leaderboard.third.adventurer_id.into(),
-                    rank: 3,
-                    amount: week.THIRD_PLACE,
-                    address: third_place_address
-                },
-                client: ClientReward { amount: week.INTERFACE, address: client_address },
-                dao: week.DAO
-            }
-        );
+        _lords_dispatcher(ref self).transferFrom(caller, third_place_address, week.THIRD_PLACE);
     }
 
     fn _start_game(ref self: ContractState, weapon: u8, name: u128) {
@@ -2563,6 +2570,17 @@ mod Game {
     ) {
         // get current leaderboard which will be mutated as part of this function
         let mut leaderboard = self._leaderboard.read();
+
+        // if the player scored a highscore using an Arcade account, we change the owner of the
+        // adventurer_id they played with to the master account since the arcade account is intended to be disposable.
+        // By doing this, when rewards are later distributed to that adventurer_id, we'll send them to primary account instead of arcade account
+        let caller = get_caller_address();
+        let account = ISRC5Dispatcher { contract_address: caller };
+        if account.supports_interface(ARCADE_ACCOUNT_ID) {
+            let primary_account = IMasterControlDispatcher { contract_address: caller }
+                .get_master_account();
+            self._owner.write(adventurer_id, primary_account);
+        };
 
         // create a score struct for the players score
         let player_score = Score {
