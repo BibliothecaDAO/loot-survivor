@@ -18,7 +18,7 @@ export const mainnet_addr = "https://alpha-mainnet.starknet.io";
 export function getGraphQLUrl() {
   switch (process.env.NEXT_PUBLIC_NETWORK) {
     case "dev":
-      return "https://p01--loot-survivor-graphql-new--cwpz4gs4p7vn.code.run/goerli-graphql";
+      return "https://ec2-34-255-200-178.eu-west-1.compute.amazonaws.com/goerli-graphql";
     case "production":
       return "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/graphql";
     default:
