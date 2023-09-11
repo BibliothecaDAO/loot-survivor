@@ -17,7 +17,7 @@ RUN curl -sL https://install.apibara.com | bash && \
 WORKDIR /app
 
 COPY src ./src
-COPY env .
+COPY env-goerli .
 COPY deno.json .
 
 # Copy scripts folder into the container
