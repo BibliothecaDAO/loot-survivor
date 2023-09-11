@@ -45,6 +45,7 @@ import {
   parseDiscoveredBeast,
 } from "./utils/events.ts";
 import { insertAdventurer, updateAdventurer } from "./utils/helpers.ts";
+import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
@@ -84,6 +85,7 @@ export const config: Config<Starknet, Mongo | Console> = {
   finality: "DATA_STATUS_PENDING",
   sinkType: "mongo",
   sinkOptions: {
+    connectionString: MONGO_CONNECTION_STRING,
     database: "mongo_goerli",
     collectionName: "adventurers",
     // @ts-ignore - indexer package not updated
@@ -92,8 +94,6 @@ export const config: Config<Starknet, Mongo | Console> = {
 };
 
 export default function transform({ header, events }: Block) {
-  const { timestamp } = header!;
-
   return events.flatMap(({ event }) => {
     switch (event.keys[0]) {
       case START_GAME: {

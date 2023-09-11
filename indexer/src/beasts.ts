@@ -14,6 +14,7 @@ import {
   SLAYED_BEAST,
 } from "./utils/events.ts";
 import { insertBeast, updateBeastHealth } from "./utils/helpers.ts";
+import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
@@ -36,6 +37,7 @@ export const config: Config<Starknet, Mongo | Console> = {
   finality: "DATA_STATUS_PENDING",
   sinkType: "mongo",
   sinkOptions: {
+    connectionString: MONGO_CONNECTION_STRING,
     database: "mongo_goerli",
     collectionName: "beasts",
     // @ts-ignore - indexer package not updated
