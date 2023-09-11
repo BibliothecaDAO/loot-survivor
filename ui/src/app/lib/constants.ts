@@ -18,7 +18,7 @@ export const mainnet_addr = "https://alpha-mainnet.starknet.io";
 export function getGraphQLUrl() {
   switch (process.env.NEXT_PUBLIC_NETWORK) {
     case "dev":
-      return "https://ec2-34-255-200-178.eu-west-1.compute.amazonaws.com/goerli-graphql";
+      return "https://p01--loot-survivor-graphql-new--cwpz4gs4p7vn.code.run/goerli-graphql";
     case "production":
       return "https://p01--loot-survivor-graphql--cwpz4gs4p7vn.code.run/graphql";
     default:
@@ -33,7 +33,7 @@ export const contracts = {
       "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
   },
   goerli: {
-    game: "0x029eea6beaee6cfd02456e6172441f967a3808f5474921549cb3bafdb1cc32d0",
+    game: "0x0779ac9aea39f0a6d8e8b4eb64c5195e910a95475fcda291a1b93469dfed95ba",
     lords_erc20_mintable:
       "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
   },
