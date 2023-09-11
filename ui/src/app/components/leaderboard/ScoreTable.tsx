@@ -4,6 +4,8 @@ import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { Adventurer } from "@/app/types";
 import ScoreRow from "./ScoreRow";
 import useUIStore from "@/app/hooks/useUIStore";
+import { getScoresInList } from "@/app/hooks/graphql/queries";
+import useCustomQuery from "@/app/hooks/useCustomQuery";
 
 export interface ScoreLeaderboardTableProps {
   itemsPerPage: number;
@@ -27,6 +29,31 @@ const ScoreLeaderboardTable = ({
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  const scoreIds = scores?.map((score) => score.id ?? 0);
+
+  console.log(scoreIds);
+
+  const scoresData = useCustomQuery("topScoresQuery", getScoresInList, {
+    ids: scoreIds,
+  });
+
+  const mergedScores = displayScores.map((item1) => {
+    const matchingItem2 = scoresData?.scores.find(
+      (item2: any) => item2.adventurerId === item1.id
+    );
+
+    return {
+      ...item1,
+      ...matchingItem2,
+    };
+  });
+
+  const scoresWithLords = mergedScores;
+
+  console.log(scoresWithLords);
+  console.log(scoresData);
+
   const totalPages = Math.ceil(scores.length / itemsPerPage);
 
   let previousXp = -1;
@@ -73,13 +100,11 @@ const ScoreLeaderboardTable = ({
                 <th className="p-1">Rank</th>
                 <th className="p-1">Adventurer</th>
                 <th className="p-1">XP</th>
-                {/* <th className="p-1">
-                Prize <span className="text-sm">(per mint)</span>
-              </th> */}
+                <th className="p-1">Payout</th>
               </tr>
             </thead>
             <tbody>
-              {displayScores.map((adventurer: Adventurer, index: number) => (
+              {scoresWithLords.map((adventurer: any, index: number) => (
                 <ScoreRow
                   key={index}
                   index={index}

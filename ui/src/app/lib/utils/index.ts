@@ -16,6 +16,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function formatNumber(num: number): string {
+  if (Math.abs(num) >= 1000000) {
+    return parseFloat((num / 1000000).toFixed(2)) + "m";
+  } else if (Math.abs(num) >= 1000) {
+    return parseFloat((num / 1000).toFixed(2)) + "k";
+  } else {
+    return num.toFixed(0);
+  }
+}
+
 export function indexAddress(address: string) {
   const newHex =
     address.substring(0, 2) + address.substring(3).replace(/^0+/, "");

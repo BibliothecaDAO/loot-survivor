@@ -7,6 +7,8 @@ import { Button } from "../buttons/Button";
 import { useBlock } from "@starknet-react/core";
 import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import useUIStore from "@/app/hooks/useUIStore";
+import { chunkArray } from "@/app/lib/utils";
 
 interface LiveLeaderboardRowProps {
   index: number;
@@ -32,6 +34,8 @@ const LiveLeaderboardRow = ({
   const adventurersByOwner = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers ?? []
   );
+  const slayAdventurers = useUIStore((state) => state.slayAdventurers);
+  const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
 
   const ownedAdventurer = adventurersByOwner.some(
     (a) => a.id === adventurer.id
@@ -41,16 +45,30 @@ const LiveLeaderboardRow = ({
     (a, b) => (b.xp ?? 0) - (a.xp ?? 0)
   );
   const topScoreAdventurer = topScores[0]?.id === adventurer.id;
-
-  const slayIdleAdventurerTx = {
-    contractAddress: gameContract?.address ?? "",
-    entrypoint: "slay_idle_adventurer",
-    calldata: [adventurer.id ?? 0, "0"],
-    metadata: `Slaying ${adventurer.name}`,
-  };
-
   const handleSlayAdventurer = async () => {
-    addToCalls(slayIdleAdventurerTx);
+    setSlayAdventurers([
+      ...slayAdventurers,
+      adventurer?.id?.toString() ?? "0",
+      "0",
+    ]);
+    const formattedSlayedAdventurers = chunkArray(
+      [...slayAdventurers, adventurer?.id?.toString() ?? "0", "0"],
+      2
+    );
+    const slayIdleAdventurerTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "slay_idle_adventurers",
+      calldata: [
+        formattedSlayedAdventurers.length.toString(),
+        ...slayAdventurers,
+        adventurer?.id?.toString() ?? "0",
+        "0",
+      ],
+      metadata: `Slaying ${adventurer.name}`,
+    };
+    if (gameContract) {
+      addToCalls(slayIdleAdventurerTx);
+    }
   };
 
   const formatLastActionBlock = (adventurer?.lastAction ?? 0) % 512;
@@ -106,6 +124,7 @@ const LiveLeaderboardRow = ({
           }}
           className="xl:h-2 2xl:h-full"
           disabled={
+            slayAdventurers.includes(adventurer?.id?.toString() ?? "0") ||
             idleTime < idleDeathPenaltyBlocks ||
             adventurer?.health === 0 ||
             !adventurer?.id

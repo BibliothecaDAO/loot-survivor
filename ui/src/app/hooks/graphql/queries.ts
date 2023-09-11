@@ -147,8 +147,9 @@ const SCORE_FIELDS = `
   rank
   xp
   txHash
-  blockTime
+  scoreTime
   timestamp
+  totalPayout
 `;
 
 const SCORES_FRAGMENT = `
@@ -209,7 +210,7 @@ const getLastBeastDiscovery = gql`
   ${DISCOVERIES_FRAGMENT}
   query get_last_beast_query($id: FeltValue) {
     discoveries(
-      where: { adventurerId: { eq: $id }, entity: { gt: 0 } }
+      where: { adventurerId: { eq: $id }, entityLevel: { gt: 0 } }
       limit: 1
       orderBy: { timestamp: { desc: true } }
     ) {
@@ -462,6 +463,19 @@ const getTopScores = gql`
   }
 `;
 
+const getScoresInList = gql`
+  ${SCORES_FRAGMENT}
+  query get_top_scores($ids: [FeltValue!]) {
+    scores(
+      where: { adventurerId: { In: $ids } }
+      orderBy: { xp: { desc: true } }
+      limit: 10000000
+    ) {
+      ...ScoreFields
+    }
+  }
+`;
+
 export {
   getAdventurer,
   getDiscoveries,
@@ -489,4 +503,5 @@ export {
   getAdventurerByXP,
   getAdventurersByXPPaginated,
   getTopScores,
+  getScoresInList,
 };

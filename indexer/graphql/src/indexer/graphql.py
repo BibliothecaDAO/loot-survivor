@@ -1,15 +1,13 @@
 import asyncio
 from datetime import datetime
 from typing import List, NewType, Optional, Dict
-import socket
-import ssl
+import base64
 
 import strawberry
 import aiohttp_cors
 from aiohttp import web
 from pymongo import MongoClient
 from strawberry.aiohttp.views import GraphQLView
-from indexer.indexer import LootSurvivorIndexer
 from indexer.utils import felt_to_str, str_to_felt, get_key_by_value
 from indexer.config import Config
 
@@ -19,116 +17,140 @@ config = Config()
 def parse_hex(value):
     if not value.startswith("0x"):
         raise ValueError("invalid Hex value")
-    return bytes.fromhex(value.replace("0x", ""))
+    bytesValue = bytes.fromhex(value.replace("0x", ""))
+    return base64.b64encode(bytesValue).decode("utf-8")
 
 
 def serialize_hex(value):
-    return "0x" + value.hex()
+    bytes = base64.b64decode(value)
+    return "0x" + bytes.hex()
 
 
 def parse_felt(value):
-    return value.to_bytes(32, "big")
+    bytes = value.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_felt(value):
-    return int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    return int.from_bytes(bytes, "big")
 
 
 def parse_string(value):
-    return value.encode("utf-8")
+    bytes = value.encode("utf-8")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_string(value):
-    return value.decode("utf-8").replace("\u0000", "")
+    bytes = base64.b64decode(value)
+    return bytes.decode("utf-8").replace("\u0000", "")
 
 
 def parse_class(value):
     felt = get_key_by_value(value, config.CLASSES)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_class(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.CLASSES.get(felt)
 
 
 def parse_beast(value):
     felt = get_key_by_value(value, config.BEASTS)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_beast(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.BEASTS.get(felt)
 
 
 def parse_adventurer_status(value):
     felt = get_key_by_value(value, config.ADVENTURER_STATUS)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_adventurer_status(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.ADVENTURER_STATUS.get(felt)
 
 
 def parse_discovery(value):
     felt = get_key_by_value(value, config.DISCOVERY_TYPES)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_discovery(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.DISCOVERY_TYPES.get(felt)
 
 
 def parse_sub_discovery(value):
     felt = get_key_by_value(value, config.SUB_DISCOVERY_TYPES)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_sub_discovery(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.SUB_DISCOVERY_TYPES.get(felt)
 
 
 def parse_obstacle(value):
     felt = get_key_by_value(value, config.OBSTACLES)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_obstacle(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.OBSTACLES.get(felt)
 
 
 def parse_attacker(value):
     felt = get_key_by_value(value, config.ATTACKERS)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_attacker(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.ATTACKERS.get(felt)
 
 
 def parse_item(value):
     felt = get_key_by_value(value, config.ITEMS)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_item(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.ITEMS.get(felt)
 
 
 def parse_material(value):
     felt = get_key_by_value(value, config.MATERIALS)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_material(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.MATERIALS.get(felt)
 
 
@@ -144,64 +166,73 @@ def serialize_item_type(value):
 
 def parse_special_2(value):
     felt = get_key_by_value(value, config.ITEM_NAME_PREFIXES)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_special_2(value):
-    felt = int.from_bytes(value, "big")
-    if felt == 0:
-        return None
-    else:
-        return config.ITEM_NAME_PREFIXES.get(felt)
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
+    return config.ITEM_NAME_PREFIXES.get(felt)
 
 
 def parse_special_3(value):
     felt = get_key_by_value(value, config.ITEM_NAME_SUFFIXES)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_special_3(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.ITEM_NAME_SUFFIXES.get(felt)
 
 
 def parse_special_1(value):
     felt = get_key_by_value(value, config.ITEM_SUFFIXES)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_special_1(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.ITEM_SUFFIXES.get(felt)
 
 
 def parse_item_status(value):
     felt = get_key_by_value(value, config.ITEM_STATUS)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_item_status(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.ITEM_STATUS.get(felt)
 
 
 def parse_slot(value):
     felt = get_key_by_value(value, config.SLOTS)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_slot(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.SLOTS.get(felt)
 
 
 def parse_adventurer(value):
     felt = get_key_by_value(value, config.ATTACKERS)
-    return felt.to_bytes(32, "big")
+    bytes = felt.to_bytes(32, "big")
+    return base64.b64encode(bytes).decode("utf-8")
 
 
 def serialize_adventurer(value):
-    felt = int.from_bytes(value, "big")
+    bytes = base64.b64decode(value)
+    felt = int.from_bytes(bytes, "big")
     return config.ATTACKERS.get(felt)
 
 
@@ -352,13 +383,24 @@ class FeltValueFilter:
 
 @strawberry.input
 class DateTimeFilter:
-    eq: Optional[datetime] = None
-    _in: Optional[List[datetime]] = None
-    notIn: Optional[List[datetime]] = None
-    lt: Optional[datetime] = None
-    lte: Optional[datetime] = None
-    gt: Optional[datetime] = None
-    gte: Optional[datetime] = None
+    eq: Optional[str] = None
+    _in: Optional[List[str]] = None
+    notIn: Optional[List[str]] = None
+    lt: Optional[str] = None
+    lte: Optional[str] = None
+    gt: Optional[str] = None
+    gte: Optional[str] = None
+
+
+@strawberry.input
+class IntFilter:
+    eq: Optional[int] = None
+    _in: Optional[List[int]] = None
+    notIn: Optional[List[int]] = None
+    lt: Optional[int] = None
+    lte: Optional[int] = None
+    gt: Optional[int] = None
+    gte: Optional[int] = None
 
 
 @strawberry.input
@@ -612,8 +654,9 @@ class ScoresFilter:
     rank: Optional[FeltValueFilter] = None
     xp: Optional[FeltValueFilter] = None
     txHash: Optional[HexValueFilter] = None
-    blockTime: Optional[DateTimeFilter] = None
+    scoreTime: Optional[DateTimeFilter] = None
     timestamp: Optional[DateTimeFilter] = None
+    totalPayout: Optional[IntFilter] = None
 
 
 @strawberry.input
@@ -740,8 +783,9 @@ class ScoresOrderByInput:
     rank: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
     txHash: Optional[OrderByInput] = None
-    blockTime: Optional[OrderByInput] = None
+    scoreTime: Optional[OrderByInput] = None
     timestamp: Optional[OrderByInput] = None
+    totalPayout: Optional[OrderByInput] = None
 
 
 @strawberry.input
@@ -856,9 +900,9 @@ class Adventurer:
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
     gold: Optional[FeltValue]
-    createdTime: Optional[datetime]
-    lastUpdatedTime: Optional[datetime]
-    timestamp: Optional[datetime]
+    createdTime: Optional[str]
+    lastUpdatedTime: Optional[str]
+    timestamp: Optional[str]
 
     @classmethod
     def from_mongo(cls, data):
@@ -901,8 +945,9 @@ class Score:
     rank: Optional[FeltValue]
     xp: Optional[FeltValue]
     txHash: Optional[HexValue]
-    blockTime: Optional[datetime]
-    timestamp: Optional[datetime]
+    scoreTime: Optional[str]
+    timestamp: Optional[str]
+    totalPayout: Optional[int]
 
     @classmethod
     def from_mongo(cls, data):
@@ -912,8 +957,9 @@ class Score:
             rank=data["rank"],
             xp=data["xp"],
             txHash=data["txHash"],
-            blockTime=data["blockTime"],
+            scoreTime=data["scoreTime"],
             timestamp=data["timestamp"],
+            totalPayout=data["totalPayout"],
         )
 
 
@@ -938,8 +984,8 @@ class Discovery:
     special2: Optional[Special2Value]
     special3: Optional[Special3Value]
     ambushed: Optional[bool]
-    discoveryTime: Optional[datetime]
-    timestamp: Optional[datetime]
+    discoveryTime: Optional[str]
+    timestamp: Optional[str]
     seed: Optional[HexValue]
     txHash: Optional[HexValue]
 
@@ -982,10 +1028,10 @@ class Beast:
     special3: Optional[Special3Value] = None
     health: Optional[FeltValue] = None
     level: Optional[FeltValue] = None
-    slainOnTime: Optional[datetime] = None
-    createdTime: Optional[datetime] = None
-    lastUpdatedTime: Optional[datetime] = None
-    timestamp: Optional[datetime] = None
+    slainOnTime: Optional[str] = None
+    createdTime: Optional[str] = None
+    lastUpdatedTime: Optional[str] = None
+    timestamp: Optional[str] = None
 
     @classmethod
     def from_mongo(cls, data):
@@ -1017,7 +1063,7 @@ class Battle:
     special3: Optional[Special3Value]
     seed: Optional[HexValue]
     attacker: Optional[AttackerValue]
-    fled: Optional[BooleanValue]
+    fled: Optional[bool]
     damageDealt: Optional[FeltValue]
     criticalHit: Optional[bool]
     damageTaken: Optional[FeltValue]
@@ -1026,9 +1072,9 @@ class Battle:
     xpEarnedItems: Optional[FeltValue]
     goldEarned: Optional[FeltValue]
     txHash: Optional[HexValue]
-    discoveryTime: Optional[datetime]
-    blockTime: Optional[datetime]
-    timestamp: Optional[datetime]
+    discoveryTime: Optional[str]
+    blockTime: Optional[str]
+    timestamp: Optional[str]
 
     @classmethod
     def from_mongo(cls, data):
@@ -1065,13 +1111,13 @@ class Item:
     ownerAddress: Optional[HexValue]
     owner: Optional[bool]
     equipped: Optional[bool]
-    purchasedTime: Optional[datetime]
+    purchasedTime: Optional[str]
     special1: Optional[Special1Value]
     special2: Optional[Special2Value]
     special3: Optional[Special3Value]
     xp: Optional[FeltValue]
     isAvailable: Optional[bool]
-    timestamp: Optional[datetime]
+    timestamp: Optional[str]
 
     @classmethod
     def from_mongo(cls, data):
@@ -1202,7 +1248,7 @@ def get_adventurers(
 ) -> List[Adventurer]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"_cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)
@@ -1253,7 +1299,7 @@ def get_scores(
 ) -> List[Score]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"_cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)
@@ -1296,7 +1342,7 @@ def get_discoveries(
 ) -> List[Discovery]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)
@@ -1346,7 +1392,7 @@ def get_beasts(
 ) -> List[Discovery]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"_cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)
@@ -1395,7 +1441,7 @@ def get_battles(
 ) -> List[Battle]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"_cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)
@@ -1440,7 +1486,7 @@ def get_items(
 ) -> List[Item]:
     db = info.context["db"]
 
-    filter = {"_chain.valid_to": None}
+    filter = {"_cursor.to": None}
 
     if where:
         processed_filters = process_filters(where)

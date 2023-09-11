@@ -1,43 +1,67 @@
-# Web3 Indexer with Apibara
+# Loot Survivor Indexer
 
-This repository uses [Apibara](https://github.com/apibara/apibara) to index web3 data.
+Getting started:
 
-
-## Getting Started
-
-Create a new virtual environment for this project. While this step is not required, it is _highly recommended_ to avoid conflicts between different installed packages.
-
-    python3 -m venv venv
-
-Then activate the virtual environment.
-
-    source venv/bin/activate
-
-Then install `poetry` and use it to install the package dependencies.
-
-    python3 -m pip install poetry
-    poetry install
-
-Start MongoDB using the provided `docker-compose` file:
-
-    docker-compose up
-
-Notice that you can use any managed MongoDB like MongoDB Atlas.
-
-Then start the indexer by running the `indexer start` command. The `indexer` command runs the cli application defined in `src/indexer/main.py`. This is a standard Click application.
-
-Notice that by default the indexer will start indexing from where it left off in the previous run. If you want restart, use the `--restart` flag.
-
-    indexer start --restart
-
-Notice that will also delete the database with the indexer's data.
+ - Install the Apibara CLI ([see this page for instructions](https://www.apibara.com/docs/getting-started))
+ - Install the `sink-mongo` and `sink-console` plugins.
+   * `apibara plugins install sink-mongo`
+   * `apibara plugins install sink-console`
+ - Verify they are installed with `apibara plugins list`
 
 
-## Customizing the template
+## Organization
 
-You can change the id of the indexer by changing the value of the `indexer_id` variable in `src/indexer/indexer.py`. This id is also used as the name of the Mongo database where the indexer data is stored.
+We divide indexers based on which collection they are going to update:
+
+ - adventurers
+ - bags
+ - beasts
+ - battles
+ - discoveries
+ - items
+ - scores
 
 
-## Running in production
+## Adding an indexer
 
-This template includes a `Dockerfile` that you can use to package the indexer for production usage.
+Indexers can work in two modes:
+
+ - default: append the values returned by the transform function to the table. This is useful if you're storing a list of things.
+ - entities: update the state of an item. This is called [entity mode](https://www.apibara.com/docs/integrations/mongo#entity-storage)
+ and it basically leverages MongoDB update operations.
+
+
+## Running
+
+My advice is to run using `sinkType: console` while debugging since it simply prints values to console.
+Change to `sinkType: mongo` once you're ready to store data in Mongo.
+
+Run an indexer with:
+
+```
+apibara run --allow-env=env src/<indexer>.ts -A dna_XXX
+```
+
+If storing data in MongoDB:
+
+```
+apibara run --allow-env=env src/<indexer>.ts -A dna_XXX --connection-string "mongodb://..."
+```
+
+or set the `MONGO_CONNECTION_STRING` environment variable.
+
+
+## Indexer state persistence
+
+To persist state between runs, add the following options:
+
+```
+--persist-to-fs=.apibara --sink-id=<my-indexer>
+```
+
+Then you will find the indexer state in the `.apibara` folder.
+
+
+## Editor Setup
+
+[See guide linked here](https://www.apibara.com/docs/getting-started#setting-up-your-environment)

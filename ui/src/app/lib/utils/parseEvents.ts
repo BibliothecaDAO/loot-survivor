@@ -21,7 +21,7 @@ import {
   EquippedItemsEvent,
   DroppedItemsEvent,
   GreatnessIncreasedEvent,
-  ItemSpecialUnlockedEvent,
+  ItemsLeveledUpEvent,
   NewHighScoreEvent,
   AdventurerDiedEvent,
   AdventurerLeveledUpEvent,
@@ -173,6 +173,26 @@ function parseItems(data: string[]) {
     });
   }
   return purchases;
+}
+
+function parseItemLevels(data: string[]) {
+  const itemLevels = [];
+  const chunkedArray = chunkArray(data, 8);
+  for (let i = 0; i < chunkedArray.length; i++) {
+    itemLevels.push({
+      itemId: parseInt(chunkedArray[i][0]),
+      previousLevel: parseInt(chunkedArray[i][1]),
+      newLevel: parseInt(chunkedArray[i][2]),
+      suffixUnlocked: convertToBoolean(parseInt(chunkedArray[i][3])),
+      prefixesUnlocked: convertToBoolean(parseInt(chunkedArray[i][4])),
+      specials: {
+        special1: parseInt(chunkedArray[i][5]),
+        special2: parseInt(chunkedArray[i][6]),
+        special3: parseInt(chunkedArray[i][7]),
+      },
+    });
+  }
+  return itemLevels;
 }
 
 function parseEquippedItems(data: string[]) {
@@ -580,24 +600,19 @@ export async function parseEvents(
         );
         events.push({ name: eventName, data: greatnessIncreasedEvent });
         break;
-      case "ItemSpecialUnlocked":
-        const itemSpecialsUnlockedData: ItemSpecialUnlockedEvent = {
+      case "ItemsLeveledUp":
+        const itemsLeveledUpData: ItemsLeveledUpEvent = {
           adventurerState: parseAdventurerState(raw.data.slice(0, 39)),
-          id: parseInt(raw.data[40]),
-          level: parseInt(raw.data[41]),
-          specials: {
-            special1: parseInt(raw.data[42]),
-            special2: parseInt(raw.data[43]),
-            special3: parseInt(raw.data[44]),
-          },
+          // Skip items length
+          items: parseItemLevels(raw.data.slice(41)),
         };
-        const itemSpecialsUnlockedEvent = processData(
-          itemSpecialsUnlockedData,
+        const itemsLeveledUpEvent = processData(
+          itemsLeveledUpData,
           eventName,
           receipt.transaction_hash,
           currentAdventurer
         );
-        events.push({ name: eventName, data: itemSpecialsUnlockedEvent });
+        events.push({ name: eventName, data: itemsLeveledUpEvent });
         break;
       case "NewHighScore":
         const newHighScoreData: NewHighScoreEvent = {

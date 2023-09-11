@@ -18,7 +18,7 @@ import LeaderboardScreen from "./containers/LeaderboardScreen";
 import EncountersScreen from "./containers/EncountersScreen";
 import GuideScreen from "./containers/GuideScreen";
 import UpgradeScreen from "./containers/UpgradeScreen";
-import { displayAddress, padAddress } from "./lib/utils";
+import { displayAddress, padAddress, formatNumber } from "./lib/utils";
 import TransactionHistory from "./components/navigation/TransactionHistory";
 import TransactionCart from "./components/navigation/TransactionCart";
 import Intro from "./components/intro/Intro";
@@ -43,6 +43,7 @@ import {
   CartIconSimple,
   ArcadeIcon,
 } from "./components/icons/Icons";
+import Lords from "../../public/lords.svg";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
 import Player from "./components/adventurer/Player";
@@ -67,6 +68,7 @@ import { useContracts } from "./hooks/useContracts";
 import { Maintenance } from "./components/archived/Maintenance";
 import { set } from "lodash";
 import LootIconLoader from "./components/icons/Loader";
+import { useBalance } from "@starknet-react/core";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -93,7 +95,7 @@ export default function Home() {
   const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
-  const { account, status, isConnected } = useAccount();
+  const { account, address, status, isConnected } = useAccount();
   const isMuted = useUIStore((state) => state.isMuted);
   const setIsMuted = useUIStore((state) => state.setIsMuted);
   const [introComplete, setIntroComplete] = useState(false);
@@ -140,6 +142,11 @@ export default function Home() {
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const setStartOption = useUIStore((state) => state.setStartOption);
+
+  const lordsBalance = useBalance({
+    token: lordsContract?.address,
+    address,
+  });
 
   const {
     data,
@@ -380,6 +387,16 @@ export default function Home() {
                 )}
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
+                <button className="flex items-center sm:h-10 sm:w-20 px-1 py-1 sm:py-2 text-xs sm:text-lg bg-terminal-black border border-terminal-green hover:bg-terminal-green/20 hover:animate-pulse text-terminal-green">
+                  <span className="flex flex-row items-center justify-between w-full">
+                    <Lords className="self-center h-4 w-4 sm:w-6 sm:h-6 fill-current" />
+                    <p>
+                      {formatNumber(
+                        parseInt(lordsBalance.data?.formatted ?? "0")
+                      )}
+                    </p>
+                  </span>
+                </button>
                 <Button
                   onClick={() => showArcadeDialog(!arcadeDialog)}
                   disabled={isWrongNetwork}
