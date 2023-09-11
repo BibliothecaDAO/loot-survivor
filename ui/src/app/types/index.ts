@@ -423,3 +423,8 @@ export const ZeroUpgrade: UpgradeStats = {
   Wisdom: 0,
   Charisma: 0,
 };
+
+export type u256 = {
+  low: string;
+  high: string;
+};

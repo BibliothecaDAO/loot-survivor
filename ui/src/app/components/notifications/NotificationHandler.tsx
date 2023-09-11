@@ -115,6 +115,14 @@ const processAnimation = (
   } else if (type == "Multicall") {
     if ((adventurer.beastHealth ?? 0) > 0) {
       return gameData.ADVENTURER_ANIMATIONS["HitByBeast"];
+    } else if (notificationData.startsWith("You equipped")) {
+      return gameData.ADVENTURER_ANIMATIONS["Equip"];
+    } else if (notificationData.startsWith("You slayed")) {
+      return getRandomElement([
+        gameData.ADVENTURER_ANIMATIONS["Attack1"],
+        gameData.ADVENTURER_ANIMATIONS["Attack2"],
+        gameData.ADVENTURER_ANIMATIONS["Attack3"],
+      ]);
     } else {
       return gameData.ADVENTURER_ANIMATIONS[type];
     }

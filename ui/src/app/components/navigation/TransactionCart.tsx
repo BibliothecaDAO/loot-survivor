@@ -23,6 +23,7 @@ import { Item, NullItem, Call, ItemPurchase, ZeroUpgrade } from "../../types";
 import { GameData } from "../GameData";
 import useOnClickOutside from "@/app/hooks/useOnClickOutside";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
+import { chunkArray } from "../../lib/utils";
 
 export interface TransactionCartProps {
   buttonRef: RefObject<HTMLElement>;
@@ -53,6 +54,8 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const upgrades = useUIStore((state) => state.upgrades);
   const setUpgrades = useUIStore((state) => state.setUpgrades);
+  const slayAdventurers = useUIStore((state) => state.slayAdventurers);
+  const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
   const wrapperRef = useRef<HTMLDivElement>(null);
   useOnClickOutside(wrapperRef, () => setDisplayCart(false), buttonRef);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
@@ -115,14 +118,12 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
     setLoadingMessage((messages) => [...messages, "Purchasing Health"]);
   }, []);
 
-  const handleSlayIdleAdventurer = useCallback((call: any) => {
+  const handleSlayIdleAdventurers = useCallback((call: any) => {
     setNotification((notifications) => [
       ...notifications,
       `You slayed ${
-        Array.isArray(call.calldata) &&
-        call.calldata[0] &&
-        parseInt(call.calldata[0].toString())
-      }`,
+        Array.isArray(call.calldata) && call.calldata[0]
+      } Adventurers`,
     ]);
     setLoadingQuery("adventurerByIdQuery");
     setLoadingMessage((messages) => [...messages, "Slaying Adventurer"]);
@@ -143,8 +144,8 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
         case "purchase_health":
           handlePurchaseHealth(call);
           break;
-        case "slay_idle_adventurer":
-          handleSlayIdleAdventurer(call);
+        case "slay_idle_adventurers":
+          handleSlayIdleAdventurers(call);
           break;
         default:
           break;
@@ -156,7 +157,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
     handleEquipItem,
     handleDropItems,
     handlePurchaseHealth,
-    handleSlayIdleAdventurer,
+    handleSlayIdleAdventurers,
   ]);
 
   useEffect(() => {
@@ -170,11 +171,14 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
     setPotionAmount(0);
     setPurchaseItems([]);
     setUpgrades({ ...ZeroUpgrade });
+    setSlayAdventurers([]);
   };
 
   const filteredStats = Object.entries(upgrades).filter(
     (stat: any) => stat[1] !== 0
   );
+
+  const formattedSlayedAdventurers = chunkArray(slayAdventurers, 2);
 
   return (
     <>
@@ -335,6 +339,31 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                             )
                           )}
                         </div>
+                      ) : call.entrypoint === "slay_idle_adventurers" ? (
+                        <div className="flex flex-col">
+                          {formattedSlayedAdventurers.map(
+                            (adventurer: string[], index: number) => (
+                              <div className="flex flex-row gap-1" key={index}>
+                                <p className="text-sm">Slay {adventurer[0]}</p>
+                                <button
+                                  onClick={() => {
+                                    clickPlay();
+                                    const newSlayAdventurers =
+                                      formattedSlayedAdventurers.filter(
+                                        (adv) => adv[0] !== adventurer[0]
+                                      );
+                                    setSlayAdventurers(
+                                      newSlayAdventurers.flat()
+                                    );
+                                  }}
+                                  className="text-red-500 hover:text-red-700"
+                                >
+                                  <MdClose size={20} />
+                                </button>
+                              </div>
+                            )
+                          )}
+                        </div>
                       ) : (
                         <p>{call.metadata}</p>
                       )}
@@ -351,6 +380,9 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                           if (call.entrypoint === "upgrade_adventurer") {
                             setUpgrades({ ...ZeroUpgrade });
                             setPurchaseItems([]);
+                          }
+                          if (call.entrypoint === "slay_idle_adventurers") {
+                            setSlayAdventurers([]);
                           }
                         }}
                         className="text-red-500 hover:text-red-700"
