@@ -26,8 +26,8 @@ const WalletSelect = ({}: WalletSelectProps) => {
     );
 
   return (
-    <div className="flex flex-col p-8 mt-56">
-      <div className="flex flex-col self-center ">
+    <div className="min-h-screen container flex justify-center items-center m-auto p-4 pt-8 sm:p-8 lg:p-10 2xl:p-20">
+      <div className="flex flex-col justify-center h-full">
         {screen === "wallet" ? (
           <>
             <div className="fixed inset-y-0 left-0 z-[-1]">
@@ -43,25 +43,27 @@ const WalletSelect = ({}: WalletSelectProps) => {
               <h3 className="mb-10">Time to Survive</h3>
             </div>
 
-            <div className="flex flex-col gap-2 m-auto overflow-y-auto">
-              <Button onClick={() => setScreen("tutorial")}>
-                I don&apos;t have a wallet
-              </Button>
-              {walletConnectors().map((connector, index) => (
-                <Button
-                  onClick={() => connect(connector)}
-                  key={index}
-                  className="w-full"
-                >
-                  {connector.id === "braavos" || connector.id === "argentX"
-                    ? `Connect ${connector.id}`
-                    : "Login With Email"}
+            <div className="flex flex-col gap-2 m-auto items-center justify-center overflow-y-auto">
+              <div className="flex flex-col gap-2 sm:w-1/4">
+                <Button onClick={() => setScreen("tutorial")}>
+                  I don&apos;t have a wallet
                 </Button>
-              ))}
+                {walletConnectors().map((connector, index) => (
+                  <Button
+                    onClick={() => connect(connector)}
+                    key={index}
+                    className="w-full"
+                  >
+                    {connector.id === "braavos" || connector.id === "argentX"
+                      ? `Connect ${connector.id}`
+                      : "Login With Email"}
+                  </Button>
+                ))}
+              </div>
               {arcadeConnectors().length ? (
                 <>
                   <h5 className="text-center">Arcade Accounts</h5>
-                  <div className="flex flex-row gap-2 overflow-auto">
+                  <div className="flex flex-col sm:flex-row gap-2 overflow-auto h-[300px] sm:h-full sm:w-1/4  sm:h-20">
                     {arcadeConnectors().map((connector, index) => (
                       <Button
                         onClick={() => connect(connector)}
@@ -76,7 +78,7 @@ const WalletSelect = ({}: WalletSelectProps) => {
               ) : (
                 ""
               )}
-              <div className="fixed inset-y-0 right-0 z-[-1]">
+              <div className="hidden sm:block fixed inset-y-0 right-0 z-[-1]">
                 <Image
                   className="mx-auto p-10 animate-pulse object-cover "
                   src={"/monsters/dragon.png"}
