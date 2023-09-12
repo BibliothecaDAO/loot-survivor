@@ -67,7 +67,8 @@ export default function Info({
 
   const luck =
     (neckItem.item ? calculateLevel(neckItem.xp ?? 0) : 0) +
-    (ringItem.item ? calculateLevel(ringItem.xp ?? 0) : 0);
+    (ringItem.item ? calculateLevel(ringItem.xp ?? 0) : 0) +
+    (ringItem.item === "Silver Ring" && ringItem.xp === 400 ? 20 : 0);
 
   const handleDropItems = (item: string) => {
     const newDropItems = [

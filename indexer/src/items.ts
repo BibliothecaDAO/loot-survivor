@@ -26,7 +26,7 @@ import {
 } from "./utils/events.ts";
 import { insertItem, updateItemsXP } from "./utils/helpers.ts";
 import { checkExistsInt } from "./utils/encode.ts";
-import { MONGO_CONNECTION_STRING } from "./utils/constants.ts";
+import { MONGO_CONNECTION_STRING, ITEMS_NUMBER } from "./utils/constants.ts";
 
 const GAME = Deno.env.get("GAME");
 const START = +(Deno.env.get("START") || 0);
@@ -73,7 +73,7 @@ export default function transform({ header, events }: Block) {
         const as = value.adventurerState;
         const itemInserts: any[] = [];
         console.log("START_GAME", "->", "ITEMS UPDATES");
-        for (let i = 1; i < 102; i++) {
+        for (let i = 1; i < ITEMS_NUMBER; i++) {
           itemInserts.push(
             insertItem({
               item: i,
@@ -271,24 +271,18 @@ export default function transform({ header, events }: Block) {
         const { value } = parseAdventurerUpgraded(event.data, 0);
         const as = value.adventurerStateWithBag.adventurerState;
         console.log("ADVENTURER_UPGRADED", "->", "ITEMS UPDATES");
-        const itemUpdates: any[] = [];
-        for (let i = 1; i < 102; i++) {
-          itemUpdates.push({
-            entity: {
-              item: checkExistsInt(BigInt(i)),
+        return {
+          entity: {
+            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+          },
+          update: {
+            $set: {
               adventurerId: checkExistsInt(BigInt(as.adventurerId)),
+              isAvailable: false,
+              timestamp: new Date().toISOString(),
             },
-            update: {
-              $set: {
-                item: checkExistsInt(BigInt(i)),
-                adventurerId: checkExistsInt(BigInt(as.adventurerId)),
-                isAvailable: false,
-                timestamp: new Date().toISOString(),
-              },
-            },
-          });
-        }
-        return itemUpdates;
+          },
+        };
       }
       default: {
         console.warn("Unknown event", event.keys[0]);

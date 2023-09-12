@@ -8,21 +8,18 @@ import Link from "next/link";
 import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
 
 const buttonVariants = cva(
-  "active:scale-95 inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-offset-2 dark:hover:bg-slate-800 dark:hover:text-slate-100 disabled:bg-terminal-black disabled:text-terminal-green dark:focus:ring-slate-400 disabled:pointer-events-none dark:focus:ring-offset-slate-900 data-[state=open]:bg-slate-100 dark:data-[state=open]:bg-slate-800 uppercase font-sans-serif border border-transparent disabled:text-slate-600",
+  "active:scale-95 inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-offset-2 disabled:bg-terminal-black disabled:text-terminal-green disabled:pointer-events-none data-[state=open]:bg-slate-100  uppercase font-sans-serif border border-transparent disabled:text-slate-600",
   {
     variants: {
       variant: {
         default:
           "bg-terminal-green text-black hover:bg-terminal-green/80 hover:animate-pulse shadow-inner text-center ",
-        destructive:
-          "bg-red-500 text-white hover:bg-red-600 dark:hover:bg-red-600",
-        outline:
-          "bg-transparent hover:bg-terminal-black dark:border-slate-700 dark:text-slate-100 text-center",
-        subtle:
-          "bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-100",
+        destructive: "bg-red-500 text-white hover:bg-red-600",
+        outline: "bg-transparent hover:bg-terminal-black text-center",
+        subtle: "bg-slate-100 text-slate-900 hover:bg-slate-200",
         ghost:
           "bg-transparent hover:border-terminal-green hover:border text-center",
-        link: "bg-transparent dark:bg-transparent underline-offset-4 hover:underline text-slate-900 dark:text-slate-100 hover:bg-transparent dark:hover:bg-transparent",
+        link: "bg-transparent underline-offset-4 hover:underline text-slate-900 hover:bg-transparent",
         contrast:
           "bg-black/70 text-terminal-green hover:bg-black/80 hover:animate-pulse text-center disabled:text-slate-300",
         token:
