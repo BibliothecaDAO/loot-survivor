@@ -1350,7 +1350,7 @@ impl ImplAdventurer of IAdventurer {
     // @param adventurer the Adventurer to check if double critical hit is unlocked
     // @return u8 the critical hit bonus multplier
     #[inline(always)]
-    fn critical_hit_bonus_multplier(self: Adventurer) -> u8 {
+    fn critical_hit_bonus_multiplier(self: Adventurer) -> u8 {
         if (self.neck.id == ItemId::Pendant && self.neck.get_greatness() == 20) {
             2
         } else {
@@ -1363,7 +1363,7 @@ impl ImplAdventurer of IAdventurer {
     // @param adventurer the Adventurer to check if double armor defense is unlocked
     // @return u8 the armor defense bonus multiplier
     #[inline(always)]
-    fn critical_hit_bonus_multiplier(self: Adventurer) -> u8 {
+    fn armor_bonus_multiplier(self: Adventurer) -> u8 {
         if (self.neck.id == ItemId::Amulet && self.neck.get_greatness() == 20) {
             2
         } else {
@@ -2246,7 +2246,7 @@ mod tests {
 
     #[test]
     #[available_gas(28390)]
-    fn test_critical_hit_bonus_multiplier_gas() {
+    fn test_armor_bonus_multiplier_gas() {
         let adventurer = ImplAdventurer::new(
             12,
             0,
@@ -2255,12 +2255,12 @@ mod tests {
             }
         );
 
-        let armor_bonus = ImplAdventurer::critical_hit_bonus_multiplier(adventurer);
+        let armor_bonus = ImplAdventurer::armor_bonus_multiplier(adventurer);
     }
 
     #[test]
     #[available_gas(40910)]
-    fn test_critical_hit_bonus_multiplier() {
+    fn test_armor_bonus_multiplier() {
         let mut adventurer = ImplAdventurer::new(
             12,
             0,
@@ -2271,7 +2271,7 @@ mod tests {
 
         // verify no armor bonus multplier at start
         assert(
-            ImplAdventurer::critical_hit_bonus_multiplier(adventurer) == 1,
+            ImplAdventurer::armor_bonus_multiplier(adventurer) == 1,
             'start with no armor bonus'
         );
 
@@ -2279,21 +2279,21 @@ mod tests {
         adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 1 };
         // verify there is still no armor bonus
         assert(
-            ImplAdventurer::critical_hit_bonus_multiplier(adventurer) == 1, 'no amulet till g20'
+            ImplAdventurer::armor_bonus_multiplier(adventurer) == 1, 'no amulet till g20'
         );
 
         // increase greatness of amulet to g20
         adventurer.neck.xp = 400;
         // verify there is now an armor bonus
         assert(
-            ImplAdventurer::critical_hit_bonus_multiplier(adventurer) == 2,
+            ImplAdventurer::armor_bonus_multiplier(adventurer) == 2,
             'amulet gives 20% armor bonus'
         );
     }
 
     #[test]
     #[available_gas(28790)]
-    fn test_critical_hit_bonus_multplier_gas() {
+    fn test_critical_hit_bonus_multiplier_gas() {
         let mut adventurer = ImplAdventurer::new(
             12,
             0,
@@ -2304,12 +2304,12 @@ mod tests {
 
         // equip a Platinum Ring ring with 400xp (greatness 20)
         adventurer.ring = ItemPrimitive { id: ItemId::PlatinumRing, xp: 400, metadata: 6 };
-        ImplAdventurer::critical_hit_bonus_multplier(adventurer);
+        ImplAdventurer::critical_hit_bonus_multiplier(adventurer);
     }
 
     #[test]
     #[available_gas(44910)]
-    fn test_critical_hit_bonus_multplier() {
+    fn test_critical_hit_bonus_multiplier() {
         let mut adventurer = ImplAdventurer::new(
             12,
             0,
@@ -2323,7 +2323,7 @@ mod tests {
 
         // verify no critical hit damage multiplier at start
         assert(
-            ImplAdventurer::critical_hit_bonus_multplier(adventurer) == 1,
+            ImplAdventurer::critical_hit_bonus_multiplier(adventurer) == 1,
             'no starting crit hit multi'
         );
 
@@ -2331,7 +2331,7 @@ mod tests {
         adventurer.neck = ItemPrimitive { id: ItemId::Pendant, xp: 1, metadata: 2 };
         // verify critical damage isn't unlocked
         assert(
-            ImplAdventurer::critical_hit_bonus_multplier(adventurer) == 1,
+            ImplAdventurer::critical_hit_bonus_multiplier(adventurer) == 1,
             '< g20 pendant ! unlck 2xdmg'
         );
 
@@ -2339,7 +2339,7 @@ mod tests {
         adventurer.neck.xp = 400;
         // verify critical damage is unlocked
         assert(
-            ImplAdventurer::critical_hit_bonus_multplier(adventurer) == 2,
+            ImplAdventurer::critical_hit_bonus_multiplier(adventurer) == 2,
             'G20 pendant unlcks 2x crit dmg'
         );
     }

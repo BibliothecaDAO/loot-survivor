@@ -1423,7 +1423,7 @@ mod Game {
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(adventurer_xp_reward);
 
         // get armor defense bonus for adventurer
-        let armor_defense_bonus = adventurer.critical_hit_bonus_multiplier();
+        let armor_defense_bonus = adventurer.armor_bonus_multiplier();
 
         // calculate damage from the obstacle
         let (damage_taken, critical_hit) = ImplObstacle::get_damage(
@@ -1658,9 +1658,8 @@ mod Game {
         // get the damage dealt to the beast
         // TODO: Consider returning a tuple with detailed damage info (total_damage, base_damage, critical_hit_damage, name_bonus_damage)
         let weapon_combat_spec = _get_combat_spec(@self, adventurer_id, adventurer.weapon);
-        let critical_hit_damage_multiplier = adventurer.critical_hit_bonus_multplier();
+        let critical_hit_damage_multiplier = adventurer.critical_hit_bonus_multiplier();
         let name_bonus_damage_multplier = adventurer.name_match_bonus_damage_multiplier();
-        let armor_defense_multiplier = adventurer.critical_hit_bonus_multiplier();
         let bag = _bag_unpacked(@self, adventurer_id);
         let adventurer_luck = adventurer.get_luck(bag);
         let (damage_dealt, critical_hit) = beast
@@ -1670,7 +1669,6 @@ mod Game {
                 adventurer.stats.strength,
                 critical_hit_damage_multiplier,
                 name_bonus_damage_multplier,
-                armor_defense_multiplier,
                 attack_rnd_1
             );
 
@@ -1764,8 +1762,12 @@ mod Game {
         // convert get combat spec of the armor
         let armor_combat_spec = _get_combat_spec(@self, adventurer_id, armor);
 
+        // get armor defense multplier for adventurer
+        let armor_defense_multplier = adventurer.armor_bonus_multiplier();
+
         // process beast counter attack
-        let (damage, critical_hit) = beast.counter_attack(armor_combat_spec, critical_hit_rnd);
+        let (damage, critical_hit) = beast
+            .counter_attack(armor_combat_spec, armor_defense_multplier, critical_hit_rnd);
 
         // deduct the damage dealt
         adventurer.decrease_health(damage);
