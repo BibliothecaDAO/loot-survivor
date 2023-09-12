@@ -900,7 +900,7 @@ export function syscalls({
       setData("battlesByBeastQuery", {
         battles: [
           ...battles,
-          ...(queryData.battlesByAdventurerQuery?.battles ?? []),
+          ...(queryData.battlesByBeastQuery?.battles ?? []),
         ],
       });
       setData("battlesByAdventurerQuery", {
