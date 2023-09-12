@@ -367,8 +367,6 @@ export function syscalls({
                   queryData.itemsByAdventurerQuery?.items.findIndex(
                     (item: any) => item.item == itemLeveled.item
                   );
-                console.log(ownedItemIndex);
-                console.log(itemLeveled);
                 if (itemLeveled.suffixUnlocked) {
                   setData(
                     "itemsByAdventurerQuery",
@@ -434,6 +432,19 @@ export function syscalls({
         }
       }
 
+      const idleDeathPenaltyEvents = events.filter(
+        (event) => event.name === "IdleDeathPenalty"
+      );
+      if (idleDeathPenaltyEvents.length > 0) {
+        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
+          setData("adventurerByIdQuery", {
+            adventurers: [idleDeathPenaltyEvent.data[0]],
+          });
+          setAdventurer(idleDeathPenaltyEvent.data[0]);
+          discoveries.unshift(idleDeathPenaltyEvent.data[2]);
+        }
+      }
+
       const adventurerDiedExists = events.some((event) => {
         if (event.name === "AdventurerDied") {
           return true;
@@ -471,19 +482,6 @@ export function syscalls({
         }
         setScreen("start");
         setStartOption("create adventurer");
-      }
-
-      const idleDeathPenaltyEvents = events.filter(
-        (event) => event.name === "IdleDeathPenalty"
-      );
-      if (idleDeathPenaltyEvents.length > 0) {
-        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [idleDeathPenaltyEvent.data[0]],
-          });
-          setAdventurer(idleDeathPenaltyEvent.data[0]);
-          discoveries.unshift(idleDeathPenaltyEvent.data[2]);
-        }
       }
 
       const newItemsAvailableEvents = events.filter(
@@ -612,16 +610,12 @@ export function syscalls({
         const itemsLeveledUpEvents = events.filter(
           (event) => event.name === "ItemsLeveledUp"
         );
-        console.log("Leveled Up Event");
-        console.log(itemsLeveledUpEvents);
         for (let itemsLeveledUpEvent of itemsLeveledUpEvents) {
           for (let itemLeveled of itemsLeveledUpEvent.data[1]) {
             const ownedItemIndex =
               queryData.itemsByAdventurerQuery?.items.findIndex(
                 (item: any) => item.item == itemLeveled.item
               );
-            console.log(ownedItemIndex);
-            console.log(itemLeveled);
             if (itemLeveled.suffixUnlocked) {
               setData(
                 "itemsByAdventurerQuery",
@@ -645,6 +639,19 @@ export function syscalls({
               );
             }
           }
+        }
+      }
+
+      const idleDeathPenaltyEvents = events.filter(
+        (event) => event.name === "IdleDeathPenalty"
+      );
+      if (idleDeathPenaltyEvents.length > 0) {
+        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
+          setData("adventurerByIdQuery", {
+            adventurers: [idleDeathPenaltyEvent.data[0]],
+          });
+          setAdventurer(idleDeathPenaltyEvent.data[0]);
+          battles.unshift(idleDeathPenaltyEvent.data[1]);
         }
       }
 
@@ -684,19 +691,6 @@ export function syscalls({
         }
         setScreen("start");
         setStartOption("create adventurer");
-      }
-
-      const idleDeathPenaltyEvents = events.filter(
-        (event) => event.name === "IdleDeathPenalty"
-      );
-      if (idleDeathPenaltyEvents.length > 0) {
-        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [idleDeathPenaltyEvent.data[0]],
-          });
-          setAdventurer(idleDeathPenaltyEvent.data[0]);
-          battles.unshift(idleDeathPenaltyEvent.data[1]);
-        }
       }
 
       const newItemsAvailableEvents = events.filter(
@@ -749,7 +743,6 @@ export function syscalls({
         battles: reversedBattles,
       });
 
-      console.log(reversedBattles);
       stopLoading(reversedBattles);
       setEquipItems([]);
       setDropItems([]);
@@ -823,6 +816,19 @@ export function syscalls({
         battles.unshift(fleeSucceededEvent.data[1]);
       }
 
+      const idleDeathPenaltyEvents = events.filter(
+        (event) => event.name === "IdleDeathPenalty"
+      );
+      if (idleDeathPenaltyEvents.length > 0) {
+        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
+          setData("adventurerByIdQuery", {
+            adventurers: [idleDeathPenaltyEvent.data[0]],
+          });
+          setAdventurer(idleDeathPenaltyEvent.data[0]);
+          battles.unshift(idleDeathPenaltyEvent.data[1]);
+        }
+      }
+
       const reversedBattles = battles.slice().reverse();
 
       const adventurerDiedExists = events.some((event) => {
@@ -859,19 +865,6 @@ export function syscalls({
         }
         setScreen("start");
         setStartOption("create adventurer");
-      }
-
-      const idleDeathPenaltyEvents = events.filter(
-        (event) => event.name === "IdleDeathPenalty"
-      );
-      if (idleDeathPenaltyEvents.length > 0) {
-        for (let idleDeathPenaltyEvent of idleDeathPenaltyEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [idleDeathPenaltyEvent.data[0]],
-          });
-          setAdventurer(idleDeathPenaltyEvent.data[0]);
-          battles.unshift(idleDeathPenaltyEvent.data[1]);
-        }
       }
 
       const newItemsAvailableEvents = events.filter(
@@ -919,7 +912,6 @@ export function syscalls({
       setData("battlesByTxHashQuery", {
         battles: reversedBattles,
       });
-      console.log(reversedBattles);
       stopLoading(reversedBattles);
       setEquipItems([]);
       setDropItems([]);
