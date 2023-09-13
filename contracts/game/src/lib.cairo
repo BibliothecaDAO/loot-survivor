@@ -860,15 +860,13 @@ mod Game {
         // handle adventurer death
         _process_adventurer_death(
             ref self,
-            AdventurerDied {
-                adventurer_state: AdventurerState {
-                    owner: self._owner.read(adventurer_id),
-                    adventurer_id: adventurer_id,
-                    adventurer: adventurer
-                },
-                killed_by_beast: 0,
-                killed_by_obstacle: 0,
-                caller_address: get_caller_address()
+            AdventurerState {
+                owner: self._owner.read(adventurer_id),
+                adventurer_id: adventurer_id,
+                adventurer: adventurer
+            },
+            DeathDetails {
+                killed_by_beast: 0, killed_by_obstacle: 0, caller_address: get_caller_address()
             }
         );
 
@@ -964,17 +962,16 @@ mod Game {
         }
     }
 
-    fn _process_adventurer_death(ref self: ContractState, adventurer_died_event: AdventurerDied) {
+    fn _process_adventurer_death(
+        ref self: ContractState, adventurer_state: AdventurerState, death_details: DeathDetails
+    ) {
         // emit adventurer died event
-        __event_AdventurerDied(ref self, adventurer_died_event.clone());
+        __event_AdventurerDied(ref self, AdventurerDied { adventurer_state, death_details });
 
         // if game was a top score
-        let adventurer_score = adventurer_died_event.adventurer_state.adventurer.xp;
-        if _is_top_score(@self, adventurer_score) {
+        if _is_top_score(@self, adventurer_state.adventurer.xp) {
             // update leaderboard
-            _update_leaderboard(
-                ref self, adventurer_died_event.adventurer_state.adventurer_id, adventurer_score
-            );
+            _update_leaderboard(ref self, adventurer_state);
         }
     }
 
@@ -1286,7 +1283,7 @@ mod Game {
 
                 // apply discover bonus based on adventurer
                 amount *= adventurer.discovery_bonus_multplier().into();
-                
+
                 // Grant adventurer XP to ensure entropy changes
                 let (previous_level, new_level) = adventurer
                     .increase_adventurer_xp(XP_FOR_HEALTH_AND_GOLD_DISCOVERIES);
@@ -1432,12 +1429,12 @@ mod Game {
             // process adventurer death
             _process_adventurer_death(
                 ref self,
-                AdventurerDied {
-                    adventurer_state: AdventurerState {
-                        owner: self._owner.read(adventurer_id),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    },
+                AdventurerState {
+                    owner: self._owner.read(adventurer_id),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                DeathDetails {
                     killed_by_beast: 0,
                     killed_by_obstacle: obstacle.id,
                     caller_address: get_caller_address()
@@ -1794,12 +1791,12 @@ mod Game {
             // process adventurer death
             _process_adventurer_death(
                 ref self,
-                AdventurerDied {
-                    adventurer_state: AdventurerState {
-                        owner: self._owner.read(adventurer_id),
-                        adventurer_id: adventurer_id,
-                        adventurer: adventurer
-                    },
+                AdventurerState {
+                    owner: self._owner.read(adventurer_id),
+                    adventurer_id: adventurer_id,
+                    adventurer: adventurer
+                },
+                DeathDetails {
                     killed_by_beast: beast.id,
                     killed_by_obstacle: 0,
                     caller_address: get_caller_address()
@@ -2527,15 +2524,13 @@ mod Game {
         // process adventurer death
         _process_adventurer_death(
             ref self,
-            AdventurerDied {
-                adventurer_state: AdventurerState {
-                    owner: self._owner.read(adventurer_id),
-                    adventurer_id: adventurer_id,
-                    adventurer: adventurer
-                },
-                killed_by_beast: 0,
-                killed_by_obstacle: 0,
-                caller_address: get_caller_address()
+            AdventurerState {
+                owner: self._owner.read(adventurer_id),
+                adventurer_id: adventurer_id,
+                adventurer: adventurer
+            },
+            DeathDetails {
+                killed_by_beast: 0, killed_by_obstacle: 0, caller_address: get_caller_address()
             }
         );
     }
@@ -2722,44 +2717,40 @@ mod Game {
         self._scores.read(adventurer_id)
     }
 
+    #[inline(always)]
     fn _is_top_score(self: @ContractState, score: u16) -> bool {
         if score.into() > self._scores.read(3) {
-            return true;
+            true
+        } else {
+            false
         }
-        false
     }
 
 
     // sets the scoreboard
     // we set the adventurer id in the scoreboard as we already store the owners address
-    fn _update_leaderboard(ref self: ContractState, adventurer_id: u256, score: u16) {
+    fn _update_leaderboard(ref self: ContractState, adventurer_state: AdventurerState) {
+        let score = adventurer_state.adventurer.xp;
         let second_place = self._scoreboard.read(2);
         let first_place = self._scoreboard.read(1);
-
-        let adventurer = _unpack_adventurer(@self, adventurer_id);
-        let adventurer_state = AdventurerState {
-            owner: self._owner.read(adventurer_id),
-            adventurer_id: adventurer_id,
-            adventurer: adventurer
-        };
 
         if score.into() > self._scores.read(1) {
             __event_NewHighScore(ref self, adventurer_state, 1);
             self._scoreboard.write(3, second_place);
             self._scoreboard.write(2, first_place);
-            self._scoreboard.write(1, adventurer_id);
+            self._scoreboard.write(1, adventurer_state.adventurer_id);
             self._scores.write(3, self._scores.read(2));
             self._scores.write(2, self._scores.read(1));
             self._scores.write(1, score.into());
         } else if score.into() > self._scores.read(2) {
             __event_NewHighScore(ref self, adventurer_state, 2);
             self._scoreboard.write(3, second_place);
-            self._scoreboard.write(2, adventurer_id);
+            self._scoreboard.write(2, adventurer_state.adventurer_id);
             self._scores.write(3, self._scores.read(2));
             self._scores.write(2, score.into());
         } else if score.into() > self._scores.read(3) {
             __event_NewHighScore(ref self, adventurer_state, 3);
-            self._scoreboard.write(3, adventurer_id);
+            self._scoreboard.write(3, adventurer_state.adventurer_id);
             self._scores.write(3, score.into());
         }
     }
@@ -2961,6 +2952,11 @@ mod Game {
     #[derive(Clone, Drop, starknet::Event)]
     struct AdventurerDied {
         adventurer_state: AdventurerState,
+        death_details: DeathDetails
+    }
+
+    #[derive(Clone, Drop, Serde)]
+    struct DeathDetails {
         killed_by_beast: u8,
         killed_by_obstacle: u8,
         caller_address: ContractAddress,
