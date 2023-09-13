@@ -9,7 +9,6 @@ mod DiscoveryEnums {
     #[derive(Copy, Drop, PartialEq)]
     enum TreasureDiscovery {
         Gold: (),
-        XP: (),
         Health: (),
     }
 }

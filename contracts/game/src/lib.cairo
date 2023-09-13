@@ -10,10 +10,10 @@ mod tests {
 mod Game {
     // TODO: TESTING CONFIGS 
     // ADJUST THESE BEFORE DEPLOYMENT
-    const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 8;
-    const IDLE_DEATH_PENALTY_BLOCKS: u16 = 16;
+    const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 25;
+    const IDLE_DEATH_PENALTY_BLOCKS: u16 = 12;
     const TEST_ENTROPY: u64 = 12303548;
-    const MINIMUM_SCORE_FOR_PAYOUTS: u256 = 300;
+    const MINIMUM_SCORE_FOR_PAYOUTS: u256 = 100;
     const LOOT_NAME_STORAGE_INDEX_1: u256 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
 
@@ -35,8 +35,9 @@ mod Game {
     use super::game::{
         interfaces::{IGame},
         constants::{
-            messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
-            U128_MAX, STARTER_BEAST_ATTACK_DAMAGE, STARTING_STATS
+            messages, Week, REWARD_DISTRIBUTIONS_PHASE1, REWARD_DISTRIBUTIONS_PHASE2,
+            REWARD_DISTRIBUTIONS_PHASE3, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
+            STARTER_BEAST_ATTACK_DAMAGE, STARTING_STATS
         }
     };
     use lootitems::{
@@ -52,7 +53,8 @@ mod Game {
             adventurer_constants::{
                 POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER_BEASTS, ITEM_XP_MULTIPLIER_OBSTACLES,
                 ITEM_MAX_GREATNESS, MAX_GREATNESS_STAT_BONUS, StatisticIndex,
-                VITALITY_INSTANT_HEALTH_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK
+                VITALITY_INSTANT_HEALTH_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK,
+                XP_FOR_HEALTH_AND_GOLD_DISCOVERIES
             }
         },
         item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
@@ -374,8 +376,8 @@ mod Game {
                 let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
 
                 // get two random numbers from entropy sources
-                let (attack_rnd_1, attack_rnd_2) = _get_live_entropy(
-                    adventurer_entropy, global_entropy.into(), adventurer
+                let (attack_rnd_1, attack_rnd_2) = AdventurerUtils::get_randomness(
+                    adventurer.xp, adventurer_entropy, global_entropy.into()
                 );
 
                 // process beast counter attacks
@@ -996,14 +998,6 @@ mod Game {
         let third_place_adventurer_id = self._scoreboard.read(3);
         let third_place_address = self._owner.read(third_place_adventurer_id);
 
-        let mut week = Week {
-            DAO: _to_ether(WEEK_2::DAO),
-            INTERFACE: _to_ether(WEEK_2::INTERFACE),
-            FIRST_PLACE: _to_ether(WEEK_2::FIRST_PLACE),
-            SECOND_PLACE: _to_ether(WEEK_2::SECOND_PLACE),
-            THIRD_PLACE: _to_ether(WEEK_2::THIRD_PLACE)
-        };
-
         // if third place score is less than minimum score for payouts
         if (self._scores.read(3) < MINIMUM_SCORE_FOR_PAYOUTS) {
             // all rewards go to the DAO
@@ -1032,54 +1026,62 @@ mod Game {
             return;
         }
 
-        // once reasonable scores have been set
-        // we start doing payouts
+        // First phase all rewards go to players
+        let mut week = Week {
+            DAO: REWARD_DISTRIBUTIONS_PHASE1::DAO,
+            INTERFACE: REWARD_DISTRIBUTIONS_PHASE1::INTERFACE,
+            FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE1::FIRST_PLACE,
+            SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE1::SECOND_PLACE,
+            THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE1::THIRD_PLACE
+        };
 
-        // for the first eight weeks, the majority go to the top three score
-        week =
-            Week {
-                DAO: _to_ether(WEEK_4::DAO),
-                INTERFACE: _to_ether(WEEK_4::INTERFACE),
-                FIRST_PLACE: _to_ether(WEEK_4::FIRST_PLACE),
-                SECOND_PLACE: _to_ether(WEEK_4::SECOND_PLACE),
-                THIRD_PLACE: _to_ether(WEEK_4::THIRD_PLACE)
-            };
+        // after 2 weeks, the DAO gets a share of rewards
+        if (BLOCKS_IN_A_WEEK * 2 + genesis_block) > block_number {
+            week =
+                Week {
+                    DAO: REWARD_DISTRIBUTIONS_PHASE2::DAO,
+                    INTERFACE: REWARD_DISTRIBUTIONS_PHASE2::INTERFACE,
+                    FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE2::FIRST_PLACE,
+                    SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE2::SECOND_PLACE,
+                    THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE2::THIRD_PLACE
+                };
+        }
 
-        // after 8 weeks, the client providers start getting a share
+        // after 8 weeks, client builders start getting rewards
         if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
             week =
                 Week {
-                    DAO: _to_ether(WEEK_8::DAO),
-                    INTERFACE: _to_ether(WEEK_8::INTERFACE),
-                    FIRST_PLACE: _to_ether(WEEK_8::FIRST_PLACE),
-                    SECOND_PLACE: _to_ether(WEEK_8::SECOND_PLACE),
-                    THIRD_PLACE: _to_ether(WEEK_8::THIRD_PLACE)
+                    DAO: REWARD_DISTRIBUTIONS_PHASE3::DAO,
+                    INTERFACE: REWARD_DISTRIBUTIONS_PHASE3::INTERFACE,
+                    FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE3::FIRST_PLACE,
+                    SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE3::SECOND_PLACE,
+                    THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE3::THIRD_PLACE
                 }
         }
 
         // DAO
         if (week.DAO != 0) {
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, dao_address, week.DAO);
+                .transferFrom(caller, dao_address, _to_ether(week.DAO));
         }
 
         // interface
         if (week.INTERFACE != 0) {
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, client_address, week.INTERFACE);
+                .transferFrom(caller, client_address, _to_ether(week.INTERFACE));
         }
 
         // first place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, first_place_address, week.FIRST_PLACE);
+            .transferFrom(caller, first_place_address, _to_ether(week.FIRST_PLACE));
 
         // second place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, second_place_address, week.SECOND_PLACE);
+            .transferFrom(caller, second_place_address, _to_ether(week.SECOND_PLACE));
 
         // third place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, third_place_address, week.THIRD_PLACE);
+            .transferFrom(caller, third_place_address, _to_ether(week.THIRD_PLACE));
 
         __event_RewardDistribution(
             ref self,
@@ -1220,8 +1222,8 @@ mod Game {
         till_beast: bool
     ) {
         // use entropy sources to generate random exploration
-        let (main_explore_rnd, sub_explore_rnd) = _get_live_entropy(
-            adventurer_entropy, global_entropy, adventurer
+        let (main_explore_rnd, sub_explore_rnd) = AdventurerUtils::get_randomness(
+            adventurer.xp, adventurer_entropy, global_entropy
         );
 
         // get a random explore result
@@ -1284,6 +1286,10 @@ mod Game {
 
                 // apply discover bonus based on adventurer
                 amount *= adventurer.discovery_bonus_multplier().into();
+                
+                // Grant adventurer XP to ensure entropy changes
+                let (previous_level, new_level) = adventurer
+                    .increase_adventurer_xp(XP_FOR_HEALTH_AND_GOLD_DISCOVERIES);
 
                 match treasure_type {
                     TreasureDiscovery::Gold(()) => {
@@ -1304,13 +1310,12 @@ mod Game {
                             }
                         );
                     },
-                    TreasureDiscovery::XP(()) => {
-                        // apply XP to adventurer
-                        let (previous_level, new_level) = adventurer.increase_adventurer_xp(amount);
-                        // emit discovered xp event
-                        __event_DiscoveredXP(
+                    TreasureDiscovery::Health(()) => {
+                        // otherwise add health
+                        adventurer.increase_health(amount);
+                        __event_DiscoveredHealth(
                             ref self,
-                            DiscoveredXP {
+                            DiscoveredHealth {
                                 discovery: Discovery {
                                     adventurer_state: AdventurerState {
                                         owner: get_caller_address(),
@@ -1321,53 +1326,15 @@ mod Game {
                                 }
                             }
                         );
-                        // check for level up
-                        if (adventurer.stat_points_available > 0) {
-                            // process level up
-                            _emit_level_up_events(
-                                ref self, adventurer, adventurer_id, previous_level, new_level
-                            );
-                        }
-                    },
-                    TreasureDiscovery::Health(()) => {
-                        // if adventurer's health is already full
-                        if (AdventurerUtils::is_health_full(
-                            adventurer.health, adventurer.stats.vitality
-                        )) {
-                            // adventurer gets gold instead of health
-                            adventurer.increase_gold(amount);
-                            // emit discovered gold event
-                            __event_DiscoveredGold(
-                                ref self,
-                                DiscoveredGold {
-                                    discovery: Discovery {
-                                        adventurer_state: AdventurerState {
-                                            owner: get_caller_address(),
-                                            adventurer_id: adventurer_id,
-                                            adventurer: adventurer
-                                        },
-                                        amount: amount
-                                    }
-                                }
-                            );
-                        } else {
-                            // otherwise add health
-                            adventurer.increase_health(amount);
-                            __event_DiscoveredHealth(
-                                ref self,
-                                DiscoveredHealth {
-                                    discovery: Discovery {
-                                        adventurer_state: AdventurerState {
-                                            owner: get_caller_address(),
-                                            adventurer_id: adventurer_id,
-                                            adventurer: adventurer
-                                        },
-                                        amount: amount
-                                    }
-                                }
-                            );
-                        }
                     }
+                }
+
+                // check for level up
+                if (adventurer.stat_points_available > 0) {
+                    // process level up
+                    _emit_level_up_events(
+                        ref self, adventurer, adventurer_id, previous_level, new_level
+                    );
                 }
             }
         }
@@ -1651,8 +1618,8 @@ mod Game {
         // When generating the beast, we need to ensure entropy remains fixed for the battle
         // for attacking however, we should change the entropy during battle so we use adventurer and beast health
         // to accomplish this
-        let (attack_rnd_1, attack_rnd_2) = _get_live_entropy(
-            adventurer_entropy, global_entropy, adventurer
+        let (attack_rnd_1, attack_rnd_2) = AdventurerUtils::get_randomness(
+            adventurer.xp, adventurer_entropy, global_entropy
         );
 
         // get the damage dealt to the beast
@@ -1861,8 +1828,8 @@ mod Game {
         flee_to_the_death: bool
     ) {
         // get flee and ambush entropy seeds
-        let (flee_entropy, ambush_entropy) = _get_live_entropy(
-            adventurer_entropy, global_entropy, adventurer
+        let (flee_entropy, ambush_entropy) = AdventurerUtils::get_randomness(
+            adventurer.xp, adventurer_entropy, global_entropy
         );
 
         // attempt to flee
@@ -2287,29 +2254,6 @@ mod Game {
 
         // return item with price
         LootWithPrice { item: item, price: charisma_adjusted_price }
-    }
-
-    // _get_live_entropy generates entropy for exploration
-    // @param adventurer_entropy - entropy from adventurer
-    // @param global_entropy - entropy from game
-    // @param adventurer - the adventurer
-    // @return u128 - entropy to be used for exploration
-    // TODOs:
-    // 1. Move this to Adventurer lib
-    fn _get_live_entropy(
-        adventurer_entropy: u128, global_entropy: u128, adventurer: Adventurer
-    ) -> (u128, u128) {
-        let mut hash_span = ArrayTrait::<felt252>::new();
-        hash_span.append(adventurer.xp.into());
-        hash_span.append(adventurer.gold.into());
-        hash_span.append(adventurer.health.into());
-        hash_span.append(adventurer_entropy.into());
-        hash_span.append(adventurer.last_action.into());
-        hash_span.append(global_entropy.into());
-
-        let poseidon = poseidon_hash_span(hash_span.span());
-        let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
-        return (r.try_into().unwrap(), d.try_into().unwrap());
     }
 
     // ------------------------------------------ //
