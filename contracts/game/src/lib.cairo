@@ -13,7 +13,7 @@ mod Game {
     const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u64 = 8;
     const IDLE_DEATH_PENALTY_BLOCKS: u16 = 16;
     const TEST_ENTROPY: u64 = 12303548;
-    const MINIMUM_SCORE_FOR_PAYOUTS: u256 = 300;
+    const MINIMUM_SCORE_FOR_PAYOUTS: u256 = 4;
     const LOOT_NAME_STORAGE_INDEX_1: u256 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
 
@@ -35,8 +35,9 @@ mod Game {
     use super::game::{
         interfaces::{IGame},
         constants::{
-            messages, Week, WEEK_2, WEEK_4, WEEK_8, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX,
-            U128_MAX, STARTER_BEAST_ATTACK_DAMAGE, STARTING_STATS
+            messages, Week, REWARD_DISTRIBUTIONS_PHASE1, REWARD_DISTRIBUTIONS_PHASE2,
+            REWARD_DISTRIBUTIONS_PHASE3, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
+            STARTER_BEAST_ATTACK_DAMAGE, STARTING_STATS
         }
     };
     use lootitems::{
@@ -977,7 +978,7 @@ mod Game {
     }
 
     fn _to_ether(amount: u256) -> u256 {
-        amount * 10 ^ 18
+        amount * (10 ^ 18)
     }
 
     fn _payout(
@@ -995,14 +996,6 @@ mod Game {
         let second_place_address = self._owner.read(second_place_adventurer_id);
         let third_place_adventurer_id = self._scoreboard.read(3);
         let third_place_address = self._owner.read(third_place_adventurer_id);
-
-        let mut week = Week {
-            DAO: _to_ether(WEEK_2::DAO),
-            INTERFACE: _to_ether(WEEK_2::INTERFACE),
-            FIRST_PLACE: _to_ether(WEEK_2::FIRST_PLACE),
-            SECOND_PLACE: _to_ether(WEEK_2::SECOND_PLACE),
-            THIRD_PLACE: _to_ether(WEEK_2::THIRD_PLACE)
-        };
 
         // if third place score is less than minimum score for payouts
         if (self._scores.read(3) < MINIMUM_SCORE_FOR_PAYOUTS) {
@@ -1032,54 +1025,72 @@ mod Game {
             return;
         }
 
-        // once reasonable scores have been set
-        // we start doing payouts
+        // First phase all rewards go to players
+        let mut week = Week {
+            DAO: REWARD_DISTRIBUTIONS_PHASE1::DAO,
+            INTERFACE: REWARD_DISTRIBUTIONS_PHASE1::INTERFACE,
+            FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE1::FIRST_PLACE,
+            SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE1::SECOND_PLACE,
+            THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE1::THIRD_PLACE
+        };
 
-        // for the first eight weeks, the majority go to the top three score
-        week =
-            Week {
-                DAO: _to_ether(WEEK_4::DAO),
-                INTERFACE: _to_ether(WEEK_4::INTERFACE),
-                FIRST_PLACE: _to_ether(WEEK_4::FIRST_PLACE),
-                SECOND_PLACE: _to_ether(WEEK_4::SECOND_PLACE),
-                THIRD_PLACE: _to_ether(WEEK_4::THIRD_PLACE)
-            };
+        // after 2 weeks, the DAO gets a share of rewards
+        if (BLOCKS_IN_A_WEEK * 2 + genesis_block) > block_number {
+            week =
+                Week {
+                    DAO: REWARD_DISTRIBUTIONS_PHASE2::DAO,
+                    INTERFACE: REWARD_DISTRIBUTIONS_PHASE2::INTERFACE,
+                    FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE2::FIRST_PLACE,
+                    SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE2::SECOND_PLACE,
+                    THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE2::THIRD_PLACE
+                };
+        }
 
-        // after 8 weeks, the client providers start getting a share
+        // after 8 weeks, the client providers start getting a share (get to building)
         if (BLOCKS_IN_A_WEEK * 8 + genesis_block) > block_number {
             week =
                 Week {
-                    DAO: _to_ether(WEEK_8::DAO),
-                    INTERFACE: _to_ether(WEEK_8::INTERFACE),
-                    FIRST_PLACE: _to_ether(WEEK_8::FIRST_PLACE),
-                    SECOND_PLACE: _to_ether(WEEK_8::SECOND_PLACE),
-                    THIRD_PLACE: _to_ether(WEEK_8::THIRD_PLACE)
+                    DAO: REWARD_DISTRIBUTIONS_PHASE3::DAO,
+                    INTERFACE: REWARD_DISTRIBUTIONS_PHASE3::INTERFACE,
+                    FIRST_PLACE: REWARD_DISTRIBUTIONS_PHASE3::FIRST_PLACE,
+                    SECOND_PLACE: REWARD_DISTRIBUTIONS_PHASE3::SECOND_PLACE,
+                    THIRD_PLACE: REWARD_DISTRIBUTIONS_PHASE3::THIRD_PLACE
                 }
         }
+
+        // assert the sum of all the week is 25
+        assert(
+            week.DAO
+                + week.INTERFACE
+                + week.FIRST_PLACE
+                + week.SECOND_PLACE
+                + week.THIRD_PLACE == COST_TO_PLAY,
+            'Reward total incorrect'
+        );
 
         // DAO
         if (week.DAO != 0) {
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, dao_address, week.DAO);
+                .transferFrom(caller, dao_address, _to_ether(week.DAO));
         }
 
         // interface
         if (week.INTERFACE != 0) {
             IERC20CamelDispatcher { contract_address: lords }
-                .transferFrom(caller, client_address, week.INTERFACE);
+                .transferFrom(caller, client_address, _to_ether(week.INTERFACE));
         }
 
         // first place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, first_place_address, week.FIRST_PLACE);
+            .transferFrom(caller, first_place_address, _to_ether(week.FIRST_PLACE));
 
         // second place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, second_place_address, week.SECOND_PLACE);
+            .transferFrom(caller, second_place_address, _to_ether(week.SECOND_PLACE));
 
         // third place
         IERC20CamelDispatcher { contract_address: lords }
-            .transferFrom(caller, third_place_address, week.THIRD_PLACE);
+            .transferFrom(caller, third_place_address, _to_ether(week.THIRD_PLACE));
 
         __event_RewardDistribution(
             ref self,

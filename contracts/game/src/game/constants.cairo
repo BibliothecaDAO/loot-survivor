@@ -24,7 +24,7 @@ mod messages {
     const MUST_USE_ALL_STATS: felt252 = 'Must use all stats';
 }
 
-const BLOCKS_IN_A_WEEK: u64 = 3360;
+const BLOCKS_IN_A_WEEK: u64 = 1;
 const COST_TO_PLAY: u256 = 25;
 const STARTING_STATS: u8 = 6;
 
@@ -40,28 +40,28 @@ struct Week {
     THIRD_PLACE: u256,
 }
 
-mod WEEK_2 {
-    const DAO: u256 = 0; // 0
-    const INTERFACE: u256 = 0; // 0
-    const FIRST_PLACE: u256 = 13; // 13
-    const SECOND_PLACE: u256 = 8; // 8
-    const THIRD_PLACE: u256 = 4; // 4
+mod REWARD_DISTRIBUTIONS_PHASE1 {
+    const DAO: u256 = 0;
+    const INTERFACE: u256 = 0;
+    const FIRST_PLACE: u256 = 12;
+    const SECOND_PLACE: u256 = 8;
+    const THIRD_PLACE: u256 = 5;
 }
 
-mod WEEK_4 {
-    const DAO: u256 = 4; // 4
-    const INTERFACE: u256 = 0; // 0
-    const FIRST_PLACE: u256 = 11; // 11
-    const SECOND_PLACE: u256 = 7; // 7
-    const THIRD_PLACE: u256 = 3; // 3
+mod REWARD_DISTRIBUTIONS_PHASE2 {
+    const DAO: u256 = 5;
+    const INTERFACE: u256 = 0;
+    const FIRST_PLACE: u256 = 10;
+    const SECOND_PLACE: u256 = 6;
+    const THIRD_PLACE: u256 = 4;
 }
 
-mod WEEK_8 {
-    const DAO: u256 = 5; // 5
-    const INTERFACE: u256 = 5; // 5
-    const FIRST_PLACE: u256 = 9; // 9
-    const SECOND_PLACE: u256 = 4; // 4
-    const THIRD_PLACE: u256 = 2; // 2
+mod REWARD_DISTRIBUTIONS_PHASE3 {
+    const DAO: u256 = 5;
+    const INTERFACE: u256 = 4;
+    const FIRST_PLACE: u256 = 9;
+    const SECOND_PLACE: u256 = 4;
+    const THIRD_PLACE: u256 = 3;
 }
 
 const STARTER_BEAST_ATTACK_DAMAGE: u16 = 10;
