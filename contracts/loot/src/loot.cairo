@@ -1301,7 +1301,7 @@ mod tests {
 
         let necklace_id = ItemId::Necklace;
         let necklace_item = ImplLoot::get_item(necklace_id);
-        assert(necklace_item.tier == Tier::T2(()), 'necklace is T2');
+        assert(necklace_item.tier == Tier::T1(()), 'necklace is T1');
         assert(necklace_item.item_type == Type::Necklace(()), 'necklace is necklace');
         assert(necklace_item.slot == Slot::Neck(()), 'necklace is neck slot');
 
@@ -2244,7 +2244,7 @@ mod tests {
 
         let necklace = ItemId::Necklace;
         let necklace_tier = ImplLoot::get_tier(necklace);
-        assert(necklace_tier == Tier::T2(()), 'necklace is T2');
+        assert(necklace_tier == Tier::T1(()), 'necklace is T1');
 
         let amulet = ItemId::Amulet;
         let amulet_tier = ImplLoot::get_tier(amulet);
@@ -2731,6 +2731,7 @@ mod tests {
     #[available_gas(2772740)]
     fn test_get_item_verify_tier() {
         let t1_items = array![
+            ItemId::Necklace,
             ItemId::Pendant,
             ItemId::Amulet,
             ItemId::PlatinumRing,
@@ -2768,7 +2769,6 @@ mod tests {
         };
 
         let t2_items = array![
-            ItemId::Necklace,
             ItemId::SilverRing,
             ItemId::Falchion,
             ItemId::Quarterstaff,
