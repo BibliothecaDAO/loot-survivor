@@ -15,13 +15,11 @@ impl ExploreUtils of Explore {
     // @param entropy: Entropy to use for random discovery
     // @return TreasureDiscovery: The type of discovery
     fn get_random_discovery(entropy: u128) -> TreasureDiscovery {
-        let discovery_type = entropy % 3;
+        let discovery_type = entropy % 2;
         if (discovery_type == 0) {
             TreasureDiscovery::Gold(())
-        } else if (discovery_type == 1) {
-            TreasureDiscovery::Health(())
         } else {
-            TreasureDiscovery::XP(())
+            TreasureDiscovery::Health(())
         }
     }
 

@@ -174,6 +174,30 @@ impl AdventurerUtils of IAdventurerUtils {
     fn is_health_full(health: u16, vitality: u8) -> bool {
         health == AdventurerUtils::get_max_health(vitality)
     }
+
+    // @notice gets randomness for adventurer
+    // @param adventurer_xp: adventurer xp
+    // @param adventurer_entropy: adventurer entropy
+    // @param global_entropy: global entropy
+    // @return (u128, u128): tuple of randomness
+    fn get_randomness(adventurer_xp: u16,
+        adventurer_entropy: u128, global_entropy: u128
+    ) -> (u128, u128) {
+        let mut hash_span = ArrayTrait::<felt252>::new();
+        hash_span.append(adventurer_xp.into());
+        hash_span.append(adventurer_entropy.into());
+        hash_span.append(global_entropy.into());
+        let poseidon = poseidon_hash_span(hash_span.span());
+        AdventurerUtils::split_hash(poseidon)
+    }
+
+    // @notice splits hash into two u128s
+    // @param felt_to_split: felt to split
+    // @return (u128, u128): tuple of u128s
+    fn split_hash(felt_to_split: felt252) -> (u128, u128) {
+        let (d, r) = rshift_split(felt_to_split.into(), U128_MAX.into());
+        (r.try_into().unwrap(), d.try_into().unwrap())
+    }
 }
 
 // ---------------------------
