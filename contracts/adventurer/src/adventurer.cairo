@@ -16,7 +16,7 @@ use super::{
             MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS,
             ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, ClassStatBoosts,
             MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, NECKLACE_G20_BONUS_STATS,
-            SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK
+            SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, U128_MAX
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
     }
@@ -335,10 +335,6 @@ impl ImplAdventurer of IAdventurer {
             TreasureDiscovery::Gold(()) => {
                 // return discovery type and amount
                 (TreasureDiscovery::Gold(()), ExploreUtils::get_gold_discovery(self, entropy))
-            },
-            TreasureDiscovery::XP(()) => {
-                // return discovery type and amount
-                (TreasureDiscovery::XP(()), ExploreUtils::get_xp_discovery(self, entropy))
             },
             TreasureDiscovery::Health(()) => {
                 // return discovery type and amount
@@ -1433,6 +1429,19 @@ impl ImplAdventurer of IAdventurer {
             equipped_items.append(self.ring);
         }
         equipped_items
+    }
+
+    fn get_randomness(self: Adventurer,
+        adventurer_entropy: u128, global_entropy: u128
+    ) -> (u128, u128) {
+        let mut hash_span = ArrayTrait::<felt252>::new();
+        hash_span.append(self.xp.into());
+        hash_span.append(adventurer_entropy.into());
+        hash_span.append(global_entropy.into());
+
+        let poseidon = poseidon_hash_span(hash_span.span());
+        let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
+        return (r.try_into().unwrap(), d.try_into().unwrap());
     }
 }
 
@@ -4277,11 +4286,6 @@ mod tests {
         let (discovery_type, amount) = adventurer.discover_treasure(1);
         assert(discovery_type == TreasureDiscovery::Health(()), 'should have found health');
         assert(amount != 0, 'health should be non-zero');
-
-        // discover xp
-        let (discovery_type, amount) = adventurer.discover_treasure(2);
-        assert(discovery_type == TreasureDiscovery::XP(()), 'should have found xp');
-        assert(amount != 0, 'xp should be non-zero');
     }
 
     #[test]
