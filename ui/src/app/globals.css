@@ -212,6 +212,29 @@ body::-webkit-scrollbar-thumb,
   transition: opacity 500ms, transform 500ms;
 }
 
+.notification-content-enter {
+  opacity  : 0;
+  transform: translateX(-100%);
+}
+
+.notification-content-enter-active {
+  opacity   : 1;
+  transform : translateX(0);
+  transition: opacity 300ms, transform 300ms;
+}
+
+.notification-content-exit {
+  opacity  : 1;
+  transform: translateX(0);
+}
+
+.notification-content-exit-active {
+  opacity   : 0;
+  transform : translateX(-100%);
+  transition: opacity 300ms, transform 300ms;
+}
+
+
 @keyframes flash {
 
   0%,
@@ -240,6 +263,17 @@ body::-webkit-scrollbar-thumb,
   left     : 0;
   width    : 100vw;
   height   : 100vh;
+  z-index  : 100;
+}
+
+.notification-flash {
+  @apply bg-terminal-green bg-opacity-50;
+  animation: flash 1s ease-in-out;
+  position : absolute;
+  top      : 0;
+  left     : 0;
+  width    : 100%;
+  height   : 100%;
   z-index  : 100;
 }
 

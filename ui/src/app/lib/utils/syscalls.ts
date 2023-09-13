@@ -1170,6 +1170,77 @@ export function syscalls({
         battles: [...battles.reverse()],
       });
 
+      // Handle upgrade
+      const upgradeEvents = events.filter(
+        (event) => event.name === "AdventurerUpgraded"
+      );
+      for (let upgradeEvent of upgradeEvents) {
+        // Update adventurer
+        setData("adventurerByIdQuery", {
+          adventurers: [upgradeEvent.data],
+        });
+        setAdventurer(upgradeEvent.data);
+        // If there are any equip or drops, do them first
+        handleEquip(events, setData, setAdventurer, queryData);
+        handleDrop(events, setData, setAdventurer, queryData);
+
+        // Add purchased items
+        const purchaseItemsEvents = events.filter(
+          (event) => event.name === "PurchasedItems"
+        );
+        const purchasedItems = [];
+        for (let purchasedItemEvent of purchaseItemsEvents) {
+          for (let purchasedItem of purchasedItemEvent.data[1]) {
+            purchasedItems.push(purchasedItem);
+          }
+        }
+        const equippedItemsEvents = events.filter(
+          (event) => event.name === "EquippedItems"
+        );
+        for (let equippedItemsEvent of equippedItemsEvents) {
+          for (let equippedItem of equippedItemsEvent.data[1]) {
+            let item = purchasedItems.find(
+              (item) => item.item === equippedItem
+            );
+            item.equipped = true;
+          }
+        }
+        let unequipIndexes = [];
+        for (let equippedItemsEvent of equippedItemsEvents) {
+          for (let unequippedItem of equippedItemsEvent.data[2]) {
+            const ownedItemIndex =
+              queryData.itemsByAdventurerQuery?.items.findIndex(
+                (item: any) => item.item == unequippedItem
+              );
+            let item = purchasedItems.find(
+              (item) => item.item === unequippedItem
+            );
+            if (item) {
+              item.equipped = false;
+            } else {
+              unequipIndexes.push(ownedItemIndex);
+            }
+          }
+        }
+        setData("itemsByAdventurerQuery", {
+          items: [
+            ...(queryData.itemsByAdventurerQuery?.items ?? []),
+            ...purchasedItems,
+          ],
+        });
+        for (let i = 0; i < unequipIndexes.length; i++) {
+          setData(
+            "itemsByAdventurerQuery",
+            false,
+            "equipped",
+            unequipIndexes[i]
+          );
+        }
+        // Reset items to no availability
+        setData("latestMarketItemsQuery", null);
+        setScreen("play");
+      }
+
       stopLoading(notification);
       setMintAdventurer(false);
     } catch (e) {

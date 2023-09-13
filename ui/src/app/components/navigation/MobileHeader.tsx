@@ -1,8 +1,8 @@
-import { useState } from "react";
 import { Button } from "../buttons/Button";
 import { ControllerIcon, TrophyIcon } from "../icons/Icons";
 import useUIStore from "../../hooks/useUIStore";
 import { capitalizeFirstLetter } from "../../lib/utils";
+import Image from "next/image";
 
 export default function MobileHeader() {
   const screen = useUIStore((state) => state.screen);
@@ -15,8 +15,8 @@ export default function MobileHeader() {
           variant={screen === "player" ? "default" : "ghost"}
         >
           <div className="flex flex-row items-center gap-2">
-            <div className="flex items-center w-6 h-6">
-              <ControllerIcon />
+            <div className="relative flex items-center w-6 h-5">
+              <Image src={"/icons/controller.png"} alt="controller" fill />
             </div>
             <p>Profile</p>
           </div>
@@ -33,8 +33,8 @@ export default function MobileHeader() {
           variant={screen === "leaderboard" ? "default" : "ghost"}
         >
           <div className="flex flex-row items-center gap-2">
-            <div className="flex items-center w-6 h-6">
-              <TrophyIcon />
+            <div className="relative flex items-center w-6 h-5">
+              <Image src={"/icons/trophy.png"} alt="trophy" fill />
             </div>
             <p>Leaderboard</p>
           </div>

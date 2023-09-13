@@ -15,6 +15,7 @@ const NotificationComponent = ({
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const showNotification = useLoadingStore((state) => state.showNotification);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [flash, setFlash] = useState(false);
 
   useEffect(() => {
     if (currentIndex < notifications.length - 1) {
@@ -33,6 +34,14 @@ const NotificationComponent = ({
   }, [showNotification, currentIndex]);
 
   useEffect(() => {
+    setFlash(true);
+    const timer = setTimeout(() => {
+      setFlash(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [currentIndex]);
+
+  useEffect(() => {
     if (showNotification) {
       setCurrentIndex(0);
     }
@@ -44,10 +53,10 @@ const NotificationComponent = ({
       timeout={300}
       classNames="notification"
       unmountOnExit
-      key={currentIndex}
     >
       <div className="fixed top-1/16 left-auto w-[90%] sm:left-3/8 sm:w-1/4 border-4 border-terminal-green bg-terminal-black z-50 shadow-xl">
-        <div className="flex flex-row w-full gap-5 sm:p-2">
+        <div className="relative flex flex-row w-full gap-5 sm:p-2">
+          {flash && <div className="notification-flash" />}
           <div className="sm:hidden w-1/6 sm:w-1/4">
             <SpriteAnimation
               frameWidth={80}

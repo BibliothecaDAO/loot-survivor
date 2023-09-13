@@ -35,24 +35,5 @@ export const NotificationDisplay = () => {
     play();
   }, [play]);
 
-  // useEffect(() => {
-  //   if (animation) {
-  //     const animationKey = Object.keys(gameData.ADVENTURER_ANIMATIONS).find(
-  //       (key) => gameData.ADVENTURER_ANIMATIONS[key] === animation
-  //     );
-  //     if (animationKey && gameData.ADVENTURER_SOUNDS[animationKey]) {
-  //       setSoundState(gameData.ADVENTURER_SOUNDS[animationKey]);
-  //     }
-  //     playSound();
-  //   }
-  // }, [
-  //   animation,
-  //   gameData.ADVENTURER_ANIMATIONS,
-  //   gameData.ADVENTURER_SOUNDS,
-  //   playSound,
-  // ]);
-
-  // const notifications = [{ message: <p>Hello</p>, animation: "die" }];
-
   return <NotificationComponent notifications={notifications} />;
 };

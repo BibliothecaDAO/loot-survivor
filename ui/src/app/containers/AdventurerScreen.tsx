@@ -108,7 +108,6 @@ export default function AdventurerScreen({
           <CreateAdventurer
             isActive={activeMenu == 1}
             onEscape={() => setActiveMenu(0)}
-            adventurers={adventurers}
             spawn={spawn}
           />
         </div>

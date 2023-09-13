@@ -37,7 +37,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
     (state) => state.removeFromCalls
   );
   const resetCalls = useTransactionCartStore((state) => state.resetCalls);
-  const [notification, setNotification] = useState<string[]>([]);
+  const [notification, setNotification] = useState<any[]>([]);
   const [loadingMessage, setLoadingMessage] = useState<string[]>([]);
   const [loadingQuery, setLoadingQuery] = useState<QueryKey | null>(null);
   const { data } = useQueriesStore();
@@ -81,7 +81,6 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
           adventurer?.charisma ?? 0
         )} gold`,
       ]);
-      setLoadingQuery("latestMarketItemsQuery");
       setLoadingMessage((messages) => [...messages, "Purchasing"]);
     },
     [items]
@@ -92,7 +91,6 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
       ...notifications,
       `You equipped ${equipItems.length} items!`,
     ]);
-    setLoadingQuery("adventurerByIdQuery");
     setLoadingMessage((messages) => [...messages, "Equipping"]);
   };
 
@@ -101,22 +99,20 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
       ...notifications,
       `You dropped ${dropItems.length} items!`,
     ]);
-    setLoadingQuery("itemsByAdventurerQuery");
     setLoadingMessage((messages) => [...messages, "Dropping"]);
   };
 
-  const handlePurchaseHealth = useCallback((call: any) => {
+  const handleUpgradeAdventurer = () => {
     setNotification((notifications) => [
       ...notifications,
-      `You purchased ${
-        Array.isArray(call.calldata) &&
-        call.calldata[2] &&
-        parseInt(call.calldata[2].toString()) * 10
-      } health!`,
+      {
+        Stats: upgrades,
+        Items: purchaseItems,
+        Potions: potionAmount,
+      },
     ]);
-    setLoadingQuery("adventurerByIdQuery");
-    setLoadingMessage((messages) => [...messages, "Purchasing Health"]);
-  }, []);
+    setLoadingMessage((messages) => [...messages, "Upgrading"]);
+  };
 
   const handleSlayIdleAdventurers = useCallback((call: any) => {
     setNotification((notifications) => [
@@ -125,7 +121,6 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
         Array.isArray(call.calldata) && call.calldata[0]
       } Adventurers`,
     ]);
-    setLoadingQuery("adventurerByIdQuery");
     setLoadingMessage((messages) => [...messages, "Slaying Adventurer"]);
   }, []);
 
@@ -141,8 +136,8 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
         case "drop_items":
           handleDropItems();
           break;
-        case "purchase_health":
-          handlePurchaseHealth(call);
+        case "upgrade_adventurer":
+          handleUpgradeAdventurer();
           break;
         case "slay_idle_adventurers":
           handleSlayIdleAdventurers(call);
@@ -156,7 +151,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
     handleBuyItem,
     handleEquipItem,
     handleDropItems,
-    handlePurchaseHealth,
+    handleUpgradeAdventurer,
     handleSlayIdleAdventurers,
   ]);
 

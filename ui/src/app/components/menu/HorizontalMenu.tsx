@@ -13,14 +13,14 @@ export interface ButtonData {
 
 interface HorizontalKeyboardControlProps {
   buttonsData: Menu[];
-  disabled? : boolean[];
+  disabled?: boolean[];
   onButtonClick: (value: any) => void;
 }
 
 const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
   buttonsData,
   onButtonClick,
-  disabled
+  disabled,
 }) => {
   const { play } = useUiSounds(soundSelector.click);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -46,6 +46,14 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
 
         return newIndex;
       };
+      // Adding a null check for e.target
+      if (!event.target) return;
+      const target = event.target as HTMLElement;
+      // Check if the target is an input element
+      if (target.tagName.toLowerCase() === "input") {
+        // If it's an input element, allow default behavior (moving cursor within the input)
+        return;
+      }
 
       switch (event.key) {
         case "ArrowLeft":

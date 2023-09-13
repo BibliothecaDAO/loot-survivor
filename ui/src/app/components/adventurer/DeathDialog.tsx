@@ -14,11 +14,13 @@ import {
   getAdventurerById,
 } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
+import { NullAdventurer } from "@/app/types";
 
 export const DeathDialog = () => {
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
+  const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const { data, isLoading, refetch, setData, setIsLoading, setNotLoading } =
     useQueriesStore();
@@ -60,16 +62,17 @@ export const DeathDialog = () => {
               score. Continue the journey with another adventurer:{" "}
             </p>
           </div>
-          {/* <TwitterShareButton
-            text={`RIP ${adventurer?.name}, who died at ${ordinalRank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
-          /> */}
           <TwitterShareButton
-            text={`RIP ${adventurer?.name}.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+            text={`RIP ${adventurer?.name}, who died at ${ordinalRank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
           />
+          {/* <TwitterShareButton
+            text={`RIP ${adventurer?.name}.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+          /> */}
           <Button
             onClick={() => {
               showDeathDialog(false);
               setDeathMessage(null);
+              setAdventurer(NullAdventurer);
             }}
             className="z-10"
           >
