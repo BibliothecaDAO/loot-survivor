@@ -147,10 +147,6 @@ export default function Info({
                     : 0}
                   {formatAdventurer.gold === 511 ? "Full" : ""}
                 </span>
-                {/* <span className="flex text-lg items-center sm:text-3xl">
-                <BagIcon className="self-center w-4 h-4 fill-current" />{" "}
-                {`${items.length}/${19}`}
-              </span> */}
                 <span className="flex items-center ">
                   <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
                   <HealthCountDown health={totalHealth || 0} />
