@@ -1,13 +1,12 @@
 import LootIcon from "../icons/LootIcon";
 import Efficacyicon from "../icons/EfficacyIcon";
-import { Item, Call } from "@/app/types";
+import { Item } from "@/app/types";
 import {
   getItemData,
   processItemName,
   calculateLevel,
   getKeyFromValue,
 } from "@/app/lib/utils";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { MdClose } from "react-icons/md";
 import { Button } from "../buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
@@ -15,8 +14,6 @@ import { GameData } from "../GameData";
 import { useContracts } from "@/app/hooks/useContracts";
 import useAdventurerStore from "@/app/hooks/useAdventurerStore";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
-import { useEffect } from "react";
-import { set } from "lodash";
 
 interface InventoryDisplayProps {
   itemsOwnedInSlot: Item[];
@@ -82,18 +79,17 @@ export const InventoryCard = ({
       ...equipItems,
       getKeyFromValue(gameData.ITEMS, item) ?? "",
     ];
-    setEquipItems(newEquipItems);
+    const formattedNewEquipItems = handleCheckSameSlot(slot);
+    setEquipItems(formattedNewEquipItems);
     if (gameContract) {
-      if (handleCheckSameSlot(slot)) {
-      }
       const equipItemTx = {
         contractAddress: gameContract?.address,
         entrypoint: "equip",
         calldata: [
           adventurer?.id?.toString() ?? "",
           "0",
-          newEquipItems.length.toString(),
-          ...newEquipItems,
+          formattedNewEquipItems.length.toString(),
+          ...formattedNewEquipItems,
         ],
         metadata: `Equipping ${item}!`,
       };
@@ -105,10 +101,10 @@ export const InventoryCard = ({
   const itemId = getKeyFromValue(gameData.ITEMS, item?.item ?? "") ?? "";
 
   const handleCheckSameSlot = (itemSlot: string) => {
-    return equipItems.some((item) => {
+    return equipItems.filter((item) => {
       const itemName = gameData.ITEMS[parseInt(item)];
       const { slot } = getItemData(itemName ?? "");
-      return slot === itemSlot;
+      return slot !== itemSlot;
     });
   };
 
