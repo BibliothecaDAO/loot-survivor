@@ -784,7 +784,8 @@ export function syscalls({
       const battles = [];
 
       const fleeFailedEvents = events.filter(
-        (event) => event.name === "FleeFailed"
+        (event) =>
+          event.name === "FleeFailed" || event.name === "AttackedByBeast"
       );
       for (let fleeFailedEvent of fleeFailedEvents) {
         setData("adventurerByIdQuery", {
@@ -792,17 +793,6 @@ export function syscalls({
         });
         setAdventurer(fleeFailedEvent.data[0]);
         battles.unshift(fleeFailedEvent.data[1]);
-      }
-
-      const attackedByBeastEvents = events.filter(
-        (event) => event.name === "AttackedByBeast"
-      );
-      for (let attackedByBeastEvent of attackedByBeastEvents) {
-        setData("adventurerByIdQuery", {
-          adventurers: [attackedByBeastEvent.data[0]],
-        });
-        setAdventurer(attackedByBeastEvent.data[0]);
-        battles.unshift(attackedByBeastEvent.data[1]);
       }
 
       const fleeSucceededEvents = events.filter(
