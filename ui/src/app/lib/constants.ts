@@ -57,7 +57,7 @@ export const notificationAnimations = [
 
 // ---- CONTRACT PARAMS
 // Penalty time is 8 blocks, where each block is ~ 3 minutes
-export const penaltyTime = 16 * (3 * 60);
+export const penaltyTime = 12 * (3 * 60);
 export const itemCharismaDiscount = 1;
 export const itemBasePrice = 4;
 export const itemMinimumPrice = 1;
