@@ -33,7 +33,7 @@ export const contracts = {
       "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
   },
   goerli: {
-    game: "0x0762ec580a15ce69fa7d5c6279030a248824cf64f0f871e691b081a71e7e86fc",
+    game: "0x03cb8df2d37ca9e1d6eb77f9251ee7effd53fd7d776bf4ef5d375d23c790856c",
     lords_erc20_mintable:
       "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
   },
@@ -57,7 +57,7 @@ export const notificationAnimations = [
 
 // ---- CONTRACT PARAMS
 // Penalty time is 8 blocks, where each block is ~ 3 minutes
-export const penaltyTime = 16 * (3 * 60);
+export const penaltyTime = 12 * (3 * 60);
 export const itemCharismaDiscount = 1;
 export const itemBasePrice = 4;
 export const itemMinimumPrice = 1;
