@@ -161,7 +161,7 @@ mod ItemUtils {
     fn get_necklace() -> Loot {
         Loot {
             id: ItemId::Necklace,
-            tier: Tier::T2(()),
+            tier: Tier::T1(()),
             item_type: Type::Necklace(()),
             slot: Slot::Neck(())
         }
