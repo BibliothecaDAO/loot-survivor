@@ -140,12 +140,14 @@ export default function Info({
             <div className="flex flex-col w-full sm:p-2 uppercase xl:h-full">
               <div className="relative flex justify-between w-full text-xl sm:text-2xl lg:text-3xl border-b border-terminal-green">
                 {formatAdventurer.name}
-                <span className="flex items-center text-terminal-yellow">
+                <span className="relative flex items-center text-terminal-yellow">
                   <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
                   {formatAdventurer.gold
                     ? formatAdventurer.gold - (upgradeCost ?? 0)
                     : 0}
-                  {formatAdventurer.gold === 511 ? "Full" : ""}
+                  <span className="absolute top-0 right-[-20px] text-xs">
+                    {formatAdventurer.gold === 511 ? "Full" : ""}
+                  </span>
                 </span>
                 <span className="flex items-center ">
                   <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
