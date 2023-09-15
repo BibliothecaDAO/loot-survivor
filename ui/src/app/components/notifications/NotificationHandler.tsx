@@ -341,7 +341,11 @@ export const processNotifications = (
             animation: animation ?? "",
           });
         }
-      } else if ("Stats" in (notificationData[i] as UpgradeSummary)) {
+      } else if (
+        typeof notificationData[i] === "object" &&
+        notificationData[i] !== null &&
+        "Stats" in (notificationData[i] as UpgradeSummary)
+      ) {
         handleUpgrade(notificationData[i], notifications);
       } else {
         notifications.push({
