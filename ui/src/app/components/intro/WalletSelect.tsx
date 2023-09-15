@@ -26,7 +26,7 @@ const WalletSelect = ({}: WalletSelectProps) => {
     );
 
   return (
-    <div className="min-h-screen container flex justify-center items-center m-auto p-4 pt-8 sm:p-8 lg:p-10 2xl:p-20">
+    <div className="min-h-screen container flex justify-center items-center m-auto p-4 pt-8 sm:w-1/2 sm:p-8 lg:p-10 2xl:p-20">
       <div className="flex flex-col justify-center h-full">
         {screen === "wallet" ? (
           <>
@@ -44,7 +44,7 @@ const WalletSelect = ({}: WalletSelectProps) => {
             </div>
 
             <div className="flex flex-col gap-2 m-auto items-center justify-center overflow-y-auto">
-              <div className="flex flex-col gap-2 sm:w-1/4">
+              <div className="flex flex-col gap-2 w-full">
                 <Button onClick={() => setScreen("tutorial")}>
                   I don&apos;t have a wallet
                 </Button>
@@ -63,7 +63,7 @@ const WalletSelect = ({}: WalletSelectProps) => {
               {arcadeConnectors().length ? (
                 <>
                   <h5 className="text-center">Arcade Accounts</h5>
-                  <div className="flex flex-col sm:flex-row gap-2 overflow-auto h-[300px] sm:h-full sm:w-1/4  sm:h-20">
+                  <div className="flex flex-col sm:flex-row gap-2 overflow-auto h-[300px] sm:h-full w-full  sm:h-20">
                     {arcadeConnectors().map((connector, index) => (
                       <Button
                         onClick={() => connect(connector)}

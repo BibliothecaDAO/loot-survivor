@@ -334,7 +334,6 @@ export default function InventoryScreen() {
                         }}
                         equipped={item.equipped}
                         disabled={
-                          singleEquipExists(item.item ?? "") ||
                           item.equipped ||
                           checkTransacting(item.item ?? "") ||
                           equipItems.includes(itemId)

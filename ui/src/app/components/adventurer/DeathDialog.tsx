@@ -37,7 +37,11 @@ export const DeathDialog = () => {
     adventurersByXPdata?.adventurers ?? []
   );
 
+  console.log(adventurersByXPdata);
+  console.log(rank);
+
   const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
+  console.log(ordinalRank);
 
   return (
     <>
@@ -56,11 +60,16 @@ export const DeathDialog = () => {
             <span className="text-lg sm:text-2xl text-terminal-yellow">
               {deathMessage}
             </span>
-            <p className="sm:text-2xl">
-              {adventurer?.name} died level {adventurer?.level} with {""}
-              {adventurer?.xp} XP, a valiant effort! Make sure to share your
-              score. Continue the journey with another adventurer:{" "}
-            </p>
+            <span className="flex flex-col gap-1 sm:text-2xl">
+              <p>
+                {adventurer?.name} died at {ordinalRank} on the leaderboard with{" "}
+                {adventurer?.xp} XP, a valiant effort!
+              </p>{" "}
+              <p>
+                Make sure to share your score. Continue the journey with another
+                adventurer.
+              </p>
+            </span>
           </div>
           <TwitterShareButton
             text={`RIP ${adventurer?.name}, who died at ${ordinalRank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
