@@ -32,11 +32,12 @@ export const InventoryDisplay = ({
     <div className="flex flex-row items-center justify-between w-full">
       {itemsOwnedInSlot.length > 0 ? (
         <div className="flex flex-row gap-1 overflow-x-auto">
-          {itemsOwnedInSlot.map((item) => (
+          {itemsOwnedInSlot.map((item, index) => (
             <InventoryCard
               itemSlot={itemSlot}
               item={item}
               equipItems={equipItems}
+              key={index}
             />
           ))}
         </div>
