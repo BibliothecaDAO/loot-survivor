@@ -426,7 +426,7 @@ export default function Home() {
                       setDisplayCart(!displayCart);
                       clickPlay();
                     }}
-                    className="relative flex flex-row items-center justify-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base w-9"
+                    className="relative flex flex-row items-center justify-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base w-9 sm:w-fit"
                   >
                     <CartIconSimple className="w-4 h-4" />
                     <p className="hidden sm:block">
