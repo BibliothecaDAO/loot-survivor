@@ -75,12 +75,13 @@ export const InventoryCard = ({
   const gameData = new GameData();
 
   const handleEquipItems = (item: string) => {
+    const formattedNewEquipItems = handleCheckSameSlot(slot, equipItems);
+    console.log(equipItems);
     const newEquipItems = [
-      ...equipItems,
+      ...formattedNewEquipItems,
       getKeyFromValue(gameData.ITEMS, item) ?? "",
     ];
-    const formattedNewEquipItems = handleCheckSameSlot(slot);
-    setEquipItems(formattedNewEquipItems);
+    setEquipItems(newEquipItems);
     if (gameContract) {
       const equipItemTx = {
         contractAddress: gameContract?.address,
@@ -88,8 +89,8 @@ export const InventoryCard = ({
         calldata: [
           adventurer?.id?.toString() ?? "",
           "0",
-          formattedNewEquipItems.length.toString(),
-          ...formattedNewEquipItems,
+          newEquipItems.length.toString(),
+          ...newEquipItems,
         ],
         metadata: `Equipping ${item}!`,
       };
@@ -100,7 +101,7 @@ export const InventoryCard = ({
 
   const itemId = getKeyFromValue(gameData.ITEMS, item?.item ?? "") ?? "";
 
-  const handleCheckSameSlot = (itemSlot: string) => {
+  const handleCheckSameSlot = (itemSlot: string, equipItems: string[]) => {
     return equipItems.filter((item) => {
       const itemName = gameData.ITEMS[parseInt(item)];
       const { slot } = getItemData(itemName ?? "");

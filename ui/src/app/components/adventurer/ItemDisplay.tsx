@@ -139,7 +139,7 @@ export const ItemDisplay = ({
     if (slotEquipped) {
       setShowInventoryItems(false);
     }
-  }, [slotEquipped]);
+  }, [slotEquipped, equipItems]);
 
   return (
     <>
