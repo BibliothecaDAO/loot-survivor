@@ -387,7 +387,7 @@ export default function Home() {
                 )}
               </span>
               <div className="flex flex-row items-center self-end gap-1 flex-wrap">
-                <button className="flex items-center sm:h-10 sm:w-20 px-1 py-1 sm:py-2 text-xs sm:text-lg bg-terminal-black border border-terminal-green hover:bg-terminal-green/20 hover:animate-pulse text-terminal-green">
+                <button className="flex items-center sm:h-10 sm:w-20 px-1 py-1 sm:py-2 text-xs sm:text-lg bg-terminal-black border border-terminal-green hover:bg-terminal-green/20 sm:hover:animate-pulse text-terminal-green">
                   <span className="flex flex-row items-center justify-between w-full">
                     <Lords className="self-center h-4 w-4 sm:w-6 sm:h-6 fill-current" />
                     <p>
@@ -426,7 +426,7 @@ export default function Home() {
                       setDisplayCart(!displayCart);
                       clickPlay();
                     }}
-                    className="relative flex flex-row items-center justify-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base"
+                    className="relative flex flex-row items-center justify-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base w-9"
                   >
                     <CartIconSimple className="w-4 h-4" />
                     <p className="hidden sm:block">

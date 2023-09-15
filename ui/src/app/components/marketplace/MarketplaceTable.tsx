@@ -149,63 +149,65 @@ const MarketplaceTable = ({
           </tbody>
         </table>
       </div>
-      <div className="sm:hidden h-full">
-        {(() => {
-          const item = sortedMarketLatestItems[showEquipQ ?? 0];
-          return (
-            <div
-              className={`${
-                showEquipQ !== null ? "" : "hidden"
-              } w-full m-auto h-full flex flex-row items-center justify-center gap-2`}
-            >
-              <p>{`Equip ${item?.item} ?`}</p>
-              <Button
-                onClick={() => {
-                  const newPurchases = [
-                    ...purchaseItems,
-                    {
-                      item:
-                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
-                        "0",
-                      equip: "1",
-                    },
-                  ];
-                  setPurchaseItems(newPurchases);
-                  upgradeHandler(undefined, undefined, newPurchases);
-                  setShowEquipQ(null);
-                }}
+      {showEquipQ && (
+        <div className="sm:hidden h-full">
+          {(() => {
+            const item = sortedMarketLatestItems[showEquipQ ?? 0];
+            return (
+              <div
+                className={`${
+                  showEquipQ !== null ? "" : "hidden"
+                } w-full m-auto h-full flex flex-row items-center justify-center gap-2`}
               >
-                Yes
-              </Button>
-              <Button
-                onClick={() => {
-                  const newPurchases = [
-                    ...purchaseItems,
-                    {
-                      item:
-                        getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
-                        "0",
-                      equip: "0",
-                    },
-                  ];
-                  setPurchaseItems(newPurchases);
-                  upgradeHandler(undefined, undefined, newPurchases);
-                  setShowEquipQ(null);
-                }}
-              >
-                No
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowEquipQ(null);
-                }}
-              >
-                Cancel
-              </Button>
-            </div>
-          );
-        })()}
-      </div>
+                <p>{`Equip ${item?.item} ?`}</p>
+                <Button
+                  onClick={() => {
+                    const newPurchases = [
+                      ...purchaseItems,
+                      {
+                        item:
+                          getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
+                          "0",
+                        equip: "1",
+                      },
+                    ];
+                    setPurchaseItems(newPurchases);
+                    upgradeHandler(undefined, undefined, newPurchases);
+                    setShowEquipQ(null);
+                  }}
+                >
+                  Yes
+                </Button>
+                <Button
+                  onClick={() => {
+                    const newPurchases = [
+                      ...purchaseItems,
+                      {
+                        item:
+                          getKeyFromValue(gameData.ITEMS, item?.item ?? "") ??
+                          "0",
+                        equip: "0",
+                      },
+                    ];
+                    setPurchaseItems(newPurchases);
+                    upgradeHandler(undefined, undefined, newPurchases);
+                    setShowEquipQ(null);
+                  }}
+                >
+                  No
+                </Button>
+                <Button
+                  onClick={() => {
+                    setShowEquipQ(null);
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            );
+          })()}
+        </div>
+      )}
     </>
   );
 };

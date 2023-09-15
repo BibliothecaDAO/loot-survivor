@@ -76,7 +76,7 @@ export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
         </span>
 
         {!isWrongNetwork && (
-          <div className="absolute text-xs sm:text-xl leading-normal sm:leading-loose z-10 top-1/4">
+          <div className="absolute text-xs text-center sm:text-start sm:text-xl leading-normal sm:leading-loose z-10 top-1/4">
             <TypeAnimation
               sequence={[battle]}
               wrapper="span"
@@ -130,7 +130,7 @@ export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
           )}
         </div>
         <div className="absolute bottom-10 left-0 right-0 flex flex-col items-center gap-4 z-10 pb-8">
-          <Button size={"xs"} variant={"default"} onClick={handleBack}>
+          <Button size={"sm"} variant={"default"} onClick={handleBack}>
             Back
           </Button>
         </div>
