@@ -76,7 +76,6 @@ mod Game {
         _adventurer: LegacyMap::<u256, felt252>,
         _owner: LegacyMap::<u256, ContractAddress>,
         _adventurer_meta: LegacyMap::<u256, felt252>,
-        _loot: LegacyMap::<u256, felt252>,
         _loot_special_names: LegacyMap::<(u256, u256), felt252>,
         _bag: LegacyMap::<u256, felt252>,
         _counter: u256,
@@ -945,6 +944,8 @@ mod Game {
             contract_address: self._collectible_beasts.read()
         };
 
+        let allow_list = collectible_beasts_contract.getWhitelist();
+
         let is_beast_minted = collectible_beasts_contract
             .isMinted(
                 beast.id, beast.combat_spec.specials.special2, beast.combat_spec.specials.special3
@@ -1615,8 +1616,8 @@ mod Game {
         // When generating the beast, we need to ensure entropy remains fixed for the battle
         // for attacking however, we should change the entropy during battle so we use adventurer and beast health
         // to accomplish this
-        let (attack_rnd_1, attack_rnd_2) = AdventurerUtils::get_randomness(
-            adventurer.xp, adventurer_entropy, global_entropy
+        let (attack_rnd_1, attack_rnd_2) = AdventurerUtils::get_randomness_with_health(
+            adventurer.xp, adventurer.health, adventurer_entropy, global_entropy
         );
 
         // get the damage dealt to the beast
@@ -1825,8 +1826,8 @@ mod Game {
         flee_to_the_death: bool
     ) {
         // get flee and ambush entropy seeds
-        let (flee_entropy, ambush_entropy) = AdventurerUtils::get_randomness(
-            adventurer.xp, adventurer_entropy, global_entropy
+        let (flee_entropy, ambush_entropy) = AdventurerUtils::get_randomness_with_health(
+            adventurer.xp, adventurer.health, adventurer_entropy, global_entropy
         );
 
         // attempt to flee
@@ -3177,5 +3178,6 @@ mod Game {
             ref self: T, to: ContractAddress, beast: u8, prefix: u8, suffix: u8, level: felt252
         );
         fn isMinted(ref self: T, beast: u8, prefix: u8, suffix: u8) -> bool;
+        fn getWhitelist(self: @T) -> ContractAddress;
     }
 }
