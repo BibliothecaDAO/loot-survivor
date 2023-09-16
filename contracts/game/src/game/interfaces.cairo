@@ -26,15 +26,11 @@ trait IGame<TContractState> {
         ref self: TContractState,
         adventurer_id: u256,
         potions: u8,
-        strength: u8,
-        dexterity: u8,
-        vitality: u8,
-        intelligence: u8,
-        wisdom: u8,
-        charisma: u8,
+        stat_upgrades: Stats,
         items: Array<ItemPurchase>,
     );
     fn slay_idle_adventurers(ref self: TContractState, adventurer_ids: Array<u256>);
+    fn rotate_global_entropy(ref self: TContractState);
 
     // --------- view functions ---------
 
@@ -112,14 +108,12 @@ trait IGame<TContractState> {
     fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;
 
     // TODO: Game settings
+    fn next_global_entropy_rotation(self: @TContractState) -> felt252;
 
     // contract details
     fn get_dao_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;
-    fn get_entropy(self: @TContractState) -> u64;
-
-    // setters ---------------------------------------------------
-    fn set_entropy(ref self: TContractState);
+    fn get_entropy(self: @TContractState) -> u64;    
 
     // checks ----------------------------------------------------
     fn owner_of(self: @TContractState, adventurer_id: u256) -> ContractAddress;

@@ -3,11 +3,11 @@ mod DiscoveryEnums {
     enum ExploreResult {
         Beast: (),
         Obstacle: (),
-        Treasure: (),
+        Discovery: (),
     }
 
     #[derive(Copy, Drop, PartialEq)]
-    enum TreasureDiscovery {
+    enum DiscoveryType {
         Gold: (),
         Health: (),
     }

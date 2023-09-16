@@ -4,7 +4,7 @@ use core::traits::{Into, TryInto};
 use survivor::{
     adventurer::{Adventurer, ImplAdventurer, ItemPrimitive},
     constants::discovery_constants::{
-        DiscoveryEnums::TreasureDiscovery, DiscoveryEnums::ExploreResult
+        DiscoveryEnums::DiscoveryType, DiscoveryEnums::ExploreResult
     }
 };
 use lootitems::constants::ItemId;
@@ -13,13 +13,13 @@ use lootitems::constants::ItemId;
 impl ExploreUtils of Explore {
     // @notice: generates a random discovery {Gold, Health, XP} based on provided entropy
     // @param entropy: Entropy to use for random discovery
-    // @return TreasureDiscovery: The type of discovery
-    fn get_random_discovery(entropy: u128) -> TreasureDiscovery {
+    // @return DiscoveryType: The type of discovery
+    fn get_random_discovery(entropy: u128) -> DiscoveryType {
         let discovery_type = entropy % 2;
         if (discovery_type == 0) {
-            TreasureDiscovery::Gold(())
+            DiscoveryType::Gold(())
         } else {
-            TreasureDiscovery::Health(())
+            DiscoveryType::Health(())
         }
     }
 
