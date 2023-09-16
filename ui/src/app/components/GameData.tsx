@@ -523,7 +523,7 @@ export class GameData {
 
     this.ITEM_TIERS = {
       Pendant: 1,
-      Necklace: 2,
+      Necklace: 1,
       Amulet: 1,
       SilverRing: 2,
       BronzeRing: 3,
