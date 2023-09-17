@@ -38,7 +38,7 @@ export const FLEE_SUCCEEDED = eventKey("FleeSucceeded");
 
 export const PURCHASED_POTIONS = eventKey("PurchasedPotions");
 export const PURCHASED_ITEMS = eventKey("PurchasedItems");
-export const NEW_ITEMS_AVAILABLE = eventKey("NewItemsAvailable");
+export const UPGRADES_AVAILABLE = eventKey("UpgradesAvailable");
 export const EQUIPPED_ITEMS = eventKey("EquippedItems");
 export const DROPPED_ITEMS = eventKey("DroppedItems");
 export const ITEMS_LEVELED_UP = eventKey("ItemsLeveledUp");
@@ -53,6 +53,7 @@ export const parseStats = combineParsers({
   intelligence: { index: 3, parser: parseU8 },
   wisdom: { index: 4, parser: parseU8 },
   charisma: { index: 5, parser: parseU8 },
+  luck: { index: 6, parser: parseU8 },
 });
 
 export const parseLootStatistics = combineParsers({
@@ -284,7 +285,7 @@ export const parseDroppedItems = combineParsers({
   itemIds: { index: 1, parser: parseArray(parseU8) },
 });
 
-export const parseNewItemsAvailable = combineParsers({
+export const parseUpgradesAvailable = combineParsers({
   adventurerState: { index: 0, parser: parseAdventurerState },
   items: { index: 1, parser: parseArray(parseU8) },
 });

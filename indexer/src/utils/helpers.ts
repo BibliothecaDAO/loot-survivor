@@ -179,6 +179,7 @@ export function updateAdventurer({
         intelligence: encodeIntAsBytes(BigInt(adventurer.stats.intelligence)),
         wisdom: encodeIntAsBytes(BigInt(adventurer.stats.wisdom)),
         charisma: encodeIntAsBytes(BigInt(adventurer.stats.charisma)),
+        luck: encodeIntAsBytes(BigInt(adventurer.stats.luck)),
         gold: encodeIntAsBytes(BigInt(adventurer.gold)),
         weapon: checkExistsInt(BigInt(adventurer.weapon.id)),
         chest: checkExistsInt(BigInt(adventurer.chest.id)),
