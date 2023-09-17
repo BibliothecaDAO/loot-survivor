@@ -22,6 +22,7 @@ import {
   LightbulbIcon,
   ScrollIcon,
   HealthPotionIcon,
+  HeartIcon,
 } from "../components/icons/Icons";
 import PurchaseHealth from "../components/actions/PurchaseHealth";
 import MarketplaceScreen from "./MarketplaceScreen";
@@ -30,6 +31,7 @@ import { StatAttribute } from "../components/upgrade/StatAttribute";
 import useUIStore from "../hooks/useUIStore";
 import { UpgradeStats, ZeroUpgrade, UpgradeSummary } from "../types";
 import Summary from "../components/upgrade/Summary";
+import { HealthCountDown } from "../components/CountDown";
 
 interface UpgradeScreenProps {
   upgrade: (...args: any[]) => any;
@@ -53,7 +55,8 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
     (state) => state.computed.hasStatUpgrades
   );
   const [selected, setSelected] = useState("");
-  const [upgradeScreen, setUpgradeScreen] = useState(1);
+  const upgradeScreen = useUIStore((state) => state.upgradeScreen);
+  const setUpgradeScreen = useUIStore((state) => state.setUpgradeScreen);
   const potionAmount = useUIStore((state) => state.potionAmount);
   const setPotionAmount = useUIStore((state) => state.setPotionAmount);
   const upgrades = useUIStore((state) => state.upgrades);
@@ -288,6 +291,20 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
 
   const totalStatUpgrades = (adventurer?.statUpgrades ?? 0) - upgradesTotal;
 
+  const maxHealth = Math.min(100 + totalVitality * 10, 720);
+
+  const healthPlus = Math.min(
+    (selectedVitality + potionAmount) * 10,
+    maxHealth - (adventurer?.health ?? 0)
+  );
+
+  const maxHealthPlus = selectedVitality * 10;
+
+  const totalHealth = Math.min(
+    (adventurer?.health ?? 0) + healthPlus,
+    maxHealth
+  );
+
   return (
     <>
       {hasStatUpgrades ? (
@@ -298,7 +315,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
           {!checkTransacting ? (
             <div className="w-full sm:w-2/3 xl:h-[500px] xl:overflow-y-auto 2xl:h-full">
               <div className="flex flex-col gap-2 xl:gap-0 xl:h-[300px] 2xl:h-full">
-                <div className="justify-center text-terminal-green space-x-3">
+                <div className="justify-center text-terminal-green">
                   <div className="text-center text-2xl 2xl:text-4xl xl:text-xl sm:p-2 xl:p-0 animate-pulse uppercase">
                     Level up!
                   </div>
@@ -310,7 +327,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                     </span>
                   </div>
                   <UpgradeNav activeSection={upgradeScreen} />
-                  <div className="flex flex-row gap-3 text-sm sm:text-base justify-center">
+                  <div className="flex flex-col text-sm sm:text-base items-center justify-center">
                     <div className="flex flex-row gap-3">
                       <span className="flex flex-row gap-1 items-center">
                         <p className="uppercase">Cost:</p>
@@ -340,15 +357,39 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                         </span>
                       </span>
                     </div>
+                    <div className="sm:hidden flex flex-row gap-3 items-center text-lg">
+                      <span className="flex flex-row">
+                        Gold:{" "}
+                        <span className="flex flex-row text-terminal-yellow">
+                          <CoinIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
+                          {(adventurer?.gold ?? 0) - upgradeTotalCost}
+                        </span>
+                      </span>
+                      <span className="relative flex flex-row items-center">
+                        Health:{" "}
+                        <span className="flex items-center ">
+                          <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
+                          <HealthCountDown health={totalHealth || 0} />
+                          {`/${maxHealth}`}
+                        </span>
+                        {(potionAmount > 0 || selectedVitality > 0) && (
+                          <p className="absolute top-[-5px] sm:top-[-10px] right-[30px] sm:right-[40px] text-xs sm:text-sm">
+                            +{healthPlus}
+                          </p>
+                        )}
+                        {selectedVitality > 0 && (
+                          <p className="absolute top-[-5px] sm:top-[-10px] right-0 text-xs sm:text-sm">
+                            +{maxHealthPlus}
+                          </p>
+                        )}
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-2">
                   {upgradeScreen === 1 && (
                     <div className="flex flex-col sm:gap-2 items-center w-full">
-                      <p className="text-lg lg:text-2xl sm:hidden">
-                        Stat Upgrades
-                      </p>
                       <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border sm:items-center">
                         {renderContent()}
                         {renderVerticalKeyboardControl()}
@@ -420,6 +461,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                       } w-1/2`}
                       onClick={() => {
                         handleSubmitUpgradeTx();
+                        setUpgradeScreen(1);
                       }}
                       disabled={nextDisabled || loading}
                     >
