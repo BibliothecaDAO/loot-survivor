@@ -9,13 +9,13 @@ import {
   EQUIPPED_ITEMS,
   HIT_BY_OBSTACLE,
   ITEMS_LEVELED_UP,
-  NEW_ITEMS_AVAILABLE,
+  UPGRADES_AVAILABLE,
   parseAdventurerUpgraded,
   parseDodgedObstacle,
   parseDroppedItems,
   parseEquippedItems,
   parseHitByObstacle,
-  parseNewItemsAvailable,
+  parseUpgradesAvailable,
   parseItemsLeveledUp,
   parsePurchasedItems,
   parseSlayedBeast,
@@ -42,7 +42,7 @@ const filter = {
     { fromAddress: GAME, keys: [DODGED_OBSTACLE] },
     { fromAddress: GAME, keys: [SLAYED_BEAST] },
     { fromAddress: GAME, keys: [ITEMS_LEVELED_UP] },
-    { fromAddress: GAME, keys: [NEW_ITEMS_AVAILABLE] },
+    { fromAddress: GAME, keys: [UPGRADES_AVAILABLE] },
     { fromAddress: GAME, keys: [ADVENTURER_UPGRADED] },
   ],
 };
@@ -247,8 +247,8 @@ export default function transform({ header, events }: Block) {
         const filteredResult = result.filter((value) => value !== undefined);
         return filteredResult;
       }
-      case NEW_ITEMS_AVAILABLE: {
-        const { value } = parseNewItemsAvailable(event.data, 0);
+      case UPGRADES_AVAILABLE: {
+        const { value } = parseUpgradesAvailable(event.data, 0);
         const as = value.adventurerState;
         console.log("NEW_ITEMS_AVAILABLE", "->", "ITEMS UPDATES");
         const newResult = value.items.map((item) => ({

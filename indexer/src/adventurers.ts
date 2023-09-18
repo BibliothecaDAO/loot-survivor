@@ -114,6 +114,7 @@ export default function transform({ header, events }: Block) {
             intelligence: as.adventurer.stats.intelligence,
             wisdom: as.adventurer.stats.wisdom,
             charisma: as.adventurer.stats.charisma,
+            luck: as.adventurer.stats.luck,
             gold: as.adventurer.gold,
             weapon: as.adventurer.weapon.id,
             chest: as.adventurer.chest.id,
