@@ -77,20 +77,17 @@ function handleDrop(
   const droppedItemsEvents = events.filter(
     (event) => event.name === "DroppedItems"
   );
+  let droppedItems: any[] = [];
   for (let droppedItemsEvent of droppedItemsEvents) {
     setData("adventurerByIdQuery", {
       adventurers: [droppedItemsEvent.data[0]],
     });
     setAdventurer(droppedItemsEvent.data[0]);
-    let droppedItems: any[] = [];
     for (let droppedItem of droppedItemsEvent.data[1]) {
       droppedItems.push(droppedItem);
     }
-    const newItems = queryData.itemsByAdventurerQuery?.items.filter(
-      (item: any) => !droppedItems.includes(item.item)
-    );
-    setData("itemsByAdventurerQuery", { items: newItems });
   }
+  return droppedItems;
 }
 
 export function syscalls({
@@ -445,16 +442,10 @@ export function syscalls({
         }
       }
 
-      const adventurerDiedExists = events.some((event) => {
-        if (event.name === "AdventurerDied") {
-          return true;
-        }
-        return false;
-      });
-      if (adventurerDiedExists) {
-        const adventurerDiedEvent = events.find(
-          (event) => event.name === "AdventurerDied"
-        );
+      const adventurerDiedEvents = events.filter(
+        (event) => event.name === "AdventurerDied"
+      );
+      for (let adventurerDiedEvent of adventurerDiedEvents) {
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
@@ -657,16 +648,10 @@ export function syscalls({
 
       const reversedBattles = battles.slice().reverse();
 
-      const adventurerDiedExists = events.some((event) => {
-        if (event.name === "AdventurerDied") {
-          return true;
-        }
-        return false;
-      });
-      if (adventurerDiedExists) {
-        const adventurerDiedEvent = events.find(
-          (event) => event.name === "AdventurerDied"
-        );
+      const adventurerDiedEvents = events.filter(
+        (event) => event.name === "AdventurerDied"
+      );
+      for (let adventurerDiedEvent of adventurerDiedEvents) {
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
@@ -821,16 +806,10 @@ export function syscalls({
 
       const reversedBattles = battles.slice().reverse();
 
-      const adventurerDiedExists = events.some((event) => {
-        if (event.name === "AdventurerDied") {
-          return true;
-        }
-        return false;
-      });
-      if (adventurerDiedExists) {
-        const adventurerDiedEvent = events.find(
-          (event) => event.name === "AdventurerDied"
-        );
+      const adventurerDiedEvents = events.filter(
+        (event) => event.name === "AdventurerDied"
+      );
+      for (let adventurerDiedEvent of adventurerDiedEvents) {
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });
@@ -938,7 +917,12 @@ export function syscalls({
 
       // If there are any equip or drops, do them first
       handleEquip(events, setData, setAdventurer, queryData);
-      handleDrop(events, setData, setAdventurer, queryData);
+      const droppedItems = handleDrop(
+        events,
+        setData,
+        setAdventurer,
+        queryData
+      );
 
       // Update adventurer
       setData("adventurerByIdQuery", {
@@ -985,11 +969,11 @@ export function syscalls({
           }
         }
       }
+      const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
+        (item: any) => !droppedItems.includes(item.item)
+      );
       setData("itemsByAdventurerQuery", {
-        items: [
-          ...(queryData.itemsByAdventurerQuery?.items ?? []),
-          ...purchasedItems,
-        ],
+        items: [...(filteredDrops ?? []), ...purchasedItems],
       });
       for (let i = 0; i < unequipIndexes.length; i++) {
         setData("itemsByAdventurerQuery", false, "equipped", unequipIndexes[i]);
@@ -1112,16 +1096,10 @@ export function syscalls({
         setData("itemsByAdventurerQuery", { items: newItems });
       }
 
-      const adventurerDiedExists = events.some((event) => {
-        if (event.name === "AdventurerDied") {
-          return true;
-        }
-        return false;
-      });
-      if (adventurerDiedExists) {
-        const adventurerDiedEvent = events.find(
-          (event) => event.name === "AdventurerDied"
-        );
+      const adventurerDiedEvents = events.filter(
+        (event) => event.name === "AdventurerDied"
+      );
+      for (let adventurerDiedEvent of adventurerDiedEvents) {
         setData("adventurerByIdQuery", {
           adventurers: [adventurerDiedEvent.data[0]],
         });

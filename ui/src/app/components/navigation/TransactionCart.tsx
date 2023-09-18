@@ -54,6 +54,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
   const upgrades = useUIStore((state) => state.upgrades);
   const setUpgrades = useUIStore((state) => state.setUpgrades);
+  const setUpgradeScreen = useUIStore((state) => state.setUpgradeScreen);
   const slayAdventurers = useUIStore((state) => state.slayAdventurers);
   const setSlayAdventurers = useUIStore((state) => state.setSlayAdventurers);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -112,6 +113,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
       },
     ]);
     setLoadingMessage((messages) => [...messages, "Upgrading"]);
+    setUpgradeScreen(1);
   };
 
   const handleSlayIdleAdventurers = useCallback((call: any) => {

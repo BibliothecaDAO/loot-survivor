@@ -57,6 +57,8 @@ type State = {
   setMintAdventurer: (value: boolean) => void;
   inventorySelected: number | null;
   setInventorySelected: (value: number) => void;
+  upgradeScreen: number;
+  setUpgradeScreen: (value: number) => void;
   startOption: string | null;
   setStartOption: (value: string) => void;
   arcadeDialog: boolean;
@@ -106,6 +108,8 @@ const useUIStore = create<State>((set) => ({
   setMintAdventurer: (value) => set({ mintAdventurer: value }),
   inventorySelected: null,
   setInventorySelected: (value) => set({ inventorySelected: value }),
+  upgradeScreen: 1,
+  setUpgradeScreen: (value) => set({ upgradeScreen: value }),
   startOption: "",
   setStartOption: (value) => set({ startOption: value }),
   arcadeDialog: false,
