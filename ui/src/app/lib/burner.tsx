@@ -7,13 +7,16 @@ import {
   hash,
   Provider,
   stark,
-  TransactionStatus,
+  TransactionFinalityStatus,
+  json,
 } from "starknet";
 import Storage from "./storage";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { ArcadeConnector } from "./arcade";
+import ArcadeAccount from "../abi/arcade_account_Account.sierra.json";
+import ArcadeAccountCasm from "../abi/arcade_account_Account.casm.json";
 
-export const PREFUND_AMOUNT = "0x2386f26fc10000"; // 0.001ETH
+export const PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
 
 const provider = new Provider({
   sequencer: {
@@ -114,16 +117,26 @@ export const useBurner = () => {
     setIsDeploying(true);
     const privateKey = stark.randomAddress();
     const publicKey = ec.starkCurve.getStarkKey(privateKey);
-    const address = hash.calculateContractAddressFromHash(
-      publicKey,
-      process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
-      CallData.compile({ publicKey }),
-      0
-    );
 
     if (!walletAccount) {
       throw new Error("wallet account not found");
     }
+
+    const AAccountSierra = ArcadeAccount;
+
+    const calldataAA: CallData = new CallData(AAccountSierra.abi);
+
+    const constructorAACalldata = calldataAA.compile("constructor", {
+      _public_key: publicKey,
+      _master_account: walletAccount.address,
+    });
+
+    const address = hash.calculateContractAddressFromHash(
+      publicKey,
+      process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
+      constructorAACalldata,
+      0
+    );
 
     try {
       await prefundAccount(address, walletAccount);
@@ -132,11 +145,15 @@ export const useBurner = () => {
     }
 
     // deploy burner
-    const burner = new Account(provider, address, privateKey);
+    const burner = new Account(provider, address, privateKey, "1");
 
-    const { transaction_hash: deployTx } = await burner.deployAccount({
+    const {
+      transaction_hash: deployTx,
+      contract_address: accountAAFinalAdress,
+    } = await burner.deployAccount({
       classHash: process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
-      constructorCalldata: CallData.compile({ publicKey }),
+      constructorCalldata: constructorAACalldata,
+      contractAddress: address,
       addressSalt: publicKey,
     });
 
@@ -206,7 +223,7 @@ const prefundAccount = async (address: string, account: AccountInterface) => {
 
     const result = await account.waitForTransaction(transaction_hash, {
       retryInterval: 1000,
-      successStates: [TransactionStatus.ACCEPTED_ON_L2],
+      successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
     });
 
     if (!result) {

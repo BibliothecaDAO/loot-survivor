@@ -113,7 +113,7 @@ export default function InventoryScreen() {
   };
 
   const checkTransacting = (item: string) => {
-    if (txData?.status == "RECEIVED" || txData?.status == "PENDING") {
+    if (txData?.status == "RECEIVED") {
       return transactingItemIds?.includes(item);
     } else {
       return false;

@@ -9,7 +9,11 @@ import {
   useBalance,
   useConnectors,
 } from "@starknet-react/core";
-import { AccountInterface, CallData, TransactionStatus } from "starknet";
+import {
+  AccountInterface,
+  CallData,
+  TransactionFinalityStatus,
+} from "starknet";
 import { useCallback } from "react";
 
 export const ArcadeDialog = () => {
@@ -114,7 +118,7 @@ export const ArcadeAccountCard = ({
 
       const result = await account.waitForTransaction(transaction_hash, {
         retryInterval: 1000,
-        successStates: [TransactionStatus.ACCEPTED_ON_L2],
+        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
       });
 
       if (!result) {
@@ -149,13 +153,21 @@ export const ArcadeAccountCard = ({
         </span>
         <span className="text-lg">{balance}ETH</span>{" "}
       </div>
-      <div className="flex justify-center">
+      <div className="flex flex-row justify-center">
         <Button
           variant={connected ? "default" : "ghost"}
           onClick={() => onClick(account)}
         >
           {connected ? "connected" : "connect"}
         </Button>
+        {account.name !== masterAccount.address && (
+          <Button
+            variant={connected ? "default" : "ghost"}
+            onClick={() => transfer(account.name, masterAccount)}
+          >
+            Top Up 0.01Eth
+          </Button>
+        )}
       </div>
 
       {isCopied && <span>Copied!</span>}
