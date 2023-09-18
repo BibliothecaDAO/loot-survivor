@@ -1604,7 +1604,7 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
         },
     )
 
-    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
     ssl_context.load_cert_chain(
         "/etc/letsencrypt/live/survivor-indexer.realms.world/fullchain.pem",
         "/etc/letsencrypt/live/survivor-indexer.realms.world/privkey.pem",
