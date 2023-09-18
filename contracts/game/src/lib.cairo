@@ -1906,7 +1906,7 @@ mod Game {
         }
         if stat_upgrades.vitality != 0 {
             adventurer.stats.increase_vitality(stat_upgrades.vitality);
-            adventurer.increase_health(VITALITY_INSTANT_HEALTH_BONUS);
+            adventurer.increase_health(VITALITY_INSTANT_HEALTH_BONUS * stat_upgrades.vitality.into());
         }
         if stat_upgrades.intelligence != 0 {
             adventurer.stats.increase_intelligence(stat_upgrades.intelligence);
