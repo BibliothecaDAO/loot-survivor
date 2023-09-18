@@ -18,7 +18,7 @@ use super::{
             MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, NECKLACE_G20_BONUS_STATS,
             SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, U128_MAX
         },
-        discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
+        discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
     }
 };
 use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
@@ -325,20 +325,20 @@ impl ImplAdventurer of IAdventurer {
     // Possible discoveries include gold, XP, and health.
     // @param self: Adventurer to discover treasure for
     // @param entropy: Entropy for generating treasure
-    // @return TreasureDiscovery: The type of treasure discovered.
+    // @return DiscoveryType: The type of treasure discovered.
     // @return u16: The amount of treasure discovered.
-    fn discover_treasure(self: Adventurer, entropy: u128) -> (TreasureDiscovery, u16) {
+    fn discover_treasure(self: Adventurer, entropy: u128) -> (DiscoveryType, u16) {
         // generate random item discovery
         let item_type = ExploreUtils::get_random_discovery(entropy);
 
         match item_type {
-            TreasureDiscovery::Gold(()) => {
+            DiscoveryType::Gold(()) => {
                 // return discovery type and amount
-                (TreasureDiscovery::Gold(()), ExploreUtils::get_gold_discovery(self, entropy))
+                (DiscoveryType::Gold(()), ExploreUtils::get_gold_discovery(self, entropy))
             },
-            TreasureDiscovery::Health(()) => {
+            DiscoveryType::Health(()) => {
                 // return discovery type and amount
-                (TreasureDiscovery::Health(()), ExploreUtils::get_health_discovery(self, entropy))
+                (DiscoveryType::Health(()), ExploreUtils::get_health_discovery(self, entropy))
             }
         }
     }
@@ -477,7 +477,7 @@ impl ImplAdventurer of IAdventurer {
         if (new_level > previous_level) {
             // add stat upgrade points
             let stat_upgrade_points = (new_level - previous_level) * STAT_UPGRADE_POINTS_PER_LEVEL;
-            self.stat_points_available.increase_stat_points_available(stat_upgrade_points);
+            self.increase_stat_points_available(stat_upgrade_points);
         }
 
         // return the previous and new levels
@@ -487,14 +487,15 @@ impl ImplAdventurer of IAdventurer {
     // @notice Grants stat upgrades to the Adventurer.
     // @dev The function will add the specified value to the stat_points_available up to the maximum limit of MAX_STAT_UPGRADES.
     // @param value The amount of stat points to be added to the Adventurer.
-    fn increase_stat_points_available(ref self: u8, amount: u8) {
+    #[inline(always)]
+    fn increase_stat_points_available(ref self: Adventurer, amount: u8) {
         // check for u8 overflow
-        if (u8_overflowing_add(self, amount).is_ok()) {
+        if (u8_overflowing_add(self.stat_points_available, amount).is_ok()) {
             // if overflow is ok
             // check if added amount is less than or equal to max upgrade points
-            if (self + amount <= MAX_STAT_UPGRADES) {
+            if (self.stat_points_available + amount <= MAX_STAT_UPGRADES) {
                 // if it is, add upgrade points to adventurer and return
-                self += amount;
+                self.stat_points_available += amount;
                 return;
             }
         }
@@ -502,7 +503,7 @@ impl ImplAdventurer of IAdventurer {
         // fall through is to return MAX_STAT_UPGRADES
         // this will happen either in a u8 overflow case
         // or if the upgrade points being added exceeds max upgrade points
-        self = MAX_STAT_UPGRADES
+        self.stat_points_available = MAX_STAT_UPGRADES
     }
 
     // @notice Increase the Adventurer's strength stat.
@@ -1271,8 +1272,8 @@ impl ImplAdventurer of IAdventurer {
     // @param self A reference to the Adventurer instance.
     // @param current_block The current block number.
     #[inline(always)]
-    fn set_last_action(ref self: u16, current_block: u64) {
-        self = (current_block % MAX_BLOCK_COUNT).try_into().unwrap();
+    fn set_last_action(ref self: Adventurer, current_block: u64) {
+        self.last_action = (current_block % MAX_BLOCK_COUNT).try_into().unwrap();
     }
 
     // @notice gets a multplier bonus for discoveries based on the Adventurer
@@ -1431,8 +1432,8 @@ impl ImplAdventurer of IAdventurer {
         equipped_items
     }
 
-    fn get_randomness(self: Adventurer,
-        adventurer_entropy: u128, global_entropy: u128
+    fn get_randomness(
+        self: Adventurer, adventurer_entropy: u128, global_entropy: u128
     ) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(self.xp.into());
@@ -1442,6 +1443,11 @@ impl ImplAdventurer of IAdventurer {
         let poseidon = poseidon_hash_span(hash_span.span());
         let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
         return (r.try_into().unwrap(), d.try_into().unwrap());
+    }
+
+    #[inline(always)]
+    fn can_explore(self: Adventurer) -> bool {
+        self.health != 0 && self.beast_health == 0 && self.stat_points_available == 0
     }
 }
 
@@ -1475,7 +1481,7 @@ mod tests {
                 MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH,
                 CHARISMA_ITEM_DISCOUNT, ClassStatBoosts, MAX_BLOCK_COUNT, SILVER_RING_G20_LUCK_BONUS
             },
-            discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
+            discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
         }
     };
     use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
@@ -2280,23 +2286,19 @@ mod tests {
 
         // verify no armor bonus multplier at start
         assert(
-            ImplAdventurer::armor_bonus_multiplier(adventurer) == 1,
-            'start with no armor bonus'
+            ImplAdventurer::armor_bonus_multiplier(adventurer) == 1, 'start with no armor bonus'
         );
 
         // equip a greatness 1 Amulet
         adventurer.neck = ItemPrimitive { id: ItemId::Amulet, xp: 1, metadata: 1 };
         // verify there is still no armor bonus
-        assert(
-            ImplAdventurer::armor_bonus_multiplier(adventurer) == 1, 'no amulet till g20'
-        );
+        assert(ImplAdventurer::armor_bonus_multiplier(adventurer) == 1, 'no amulet till g20');
 
         // increase greatness of amulet to g20
         adventurer.neck.xp = 400;
         // verify there is now an armor bonus
         assert(
-            ImplAdventurer::armor_bonus_multiplier(adventurer) == 2,
-            'amulet gives 20% armor bonus'
+            ImplAdventurer::armor_bonus_multiplier(adventurer) == 2, 'amulet gives 20% armor bonus'
         );
     }
 
@@ -2611,7 +2613,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(55630)]
+    #[available_gas(70930)]
     fn test_set_last_action() {
         let mut adventurer = ImplAdventurer::new(
             12,
@@ -2620,15 +2622,15 @@ mod tests {
                 strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
             }
         );
-        adventurer.last_action.set_last_action(0);
+        adventurer.set_last_action(0);
         assert(adventurer.last_action == 0, 'last action should be 0');
-        adventurer.last_action.set_last_action(511);
+        adventurer.set_last_action(511);
         assert(adventurer.last_action == 511, 'last action should be 511');
-        adventurer.last_action.set_last_action(512);
+        adventurer.set_last_action(512);
         assert(adventurer.last_action == 0, 'last action should be 0');
-        adventurer.last_action.set_last_action(1023);
+        adventurer.set_last_action(1023);
         assert(adventurer.last_action == 511, 'last action should be 511');
-        adventurer.last_action.set_last_action(1024);
+        adventurer.set_last_action(1024);
         assert(adventurer.last_action == 0, 'last action should be 0');
     }
 
@@ -2986,20 +2988,20 @@ mod tests {
         let original_stat_points = adventurer.stat_points_available;
 
         // zero case
-        adventurer.stat_points_available.increase_stat_points_available(0);
+        adventurer.increase_stat_points_available(0);
         assert(
             adventurer.stat_points_available == original_stat_points,
             'stat points should not change'
         );
 
         // base case - adding 1 stat point (no need to pack and unpack this test case)
-        adventurer.stat_points_available.increase_stat_points_available(1);
+        adventurer.increase_stat_points_available(1);
         assert(
             adventurer.stat_points_available == 1 + original_stat_points, 'stat points should be +1'
         );
 
         // max stat upgrade value case
-        adventurer.stat_points_available.increase_stat_points_available(MAX_STAT_UPGRADES);
+        adventurer.increase_stat_points_available(MAX_STAT_UPGRADES);
         assert(adventurer.stat_points_available == MAX_STAT_UPGRADES, 'stat points should be max');
 
         // pack and unpack at max value to ensure our max values are correct for packing
@@ -3010,7 +3012,7 @@ mod tests {
 
         // extreme/overflow case
         adventurer.stat_points_available = 255;
-        adventurer.stat_points_available.increase_stat_points_available(255);
+        adventurer.increase_stat_points_available(255);
         assert(adventurer.stat_points_available == MAX_STAT_UPGRADES, 'stat points should be max');
     }
 
@@ -4279,12 +4281,12 @@ mod tests {
 
         // disover gold
         let (discovery_type, amount) = adventurer.discover_treasure(0);
-        assert(discovery_type == TreasureDiscovery::Gold(()), 'should have found gold');
+        assert(discovery_type == DiscoveryType::Gold(()), 'should have found gold');
         assert(amount != 0, 'gold should be non-zero');
 
         // discover health
         let (discovery_type, amount) = adventurer.discover_treasure(1);
-        assert(discovery_type == TreasureDiscovery::Health(()), 'should have found health');
+        assert(discovery_type == DiscoveryType::Health(()), 'should have found health');
         assert(amount != 0, 'health should be non-zero');
     }
 
