@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime
 from typing import List, NewType, Optional, Dict
 import base64
+import ssl
 
 import strawberry
 import aiohttp_cors
@@ -1603,9 +1604,15 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
         },
     )
 
+    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    ssl_context.load_cert_chain(
+        "/etc/letsencrypt/live/survivor-indexer.realms.world/fullchain.pem",
+        "/etc/letsencrypt/live/survivor-indexer.realms.world/privkey.pem",
+    )
+
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", int(port))
+    site = web.TCPSite(runner, "0.0.0.0", int(port), ssl_context=ssl_context)
     await site.start()
 
     print(f"GraphQL server started on port {port}")
