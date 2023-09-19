@@ -40,7 +40,7 @@ export const useBurner = () => {
   const { account: walletAccount } = useAccount();
   const [account, setAccount] = useState<Account>();
   const [isDeploying, setIsDeploying] = useState(false);
-  const { gameContract } = useContracts();
+  const { gameContract, lordsContract } = useContracts();
 
   // init
   useEffect(() => {
@@ -194,7 +194,13 @@ export const useBurner = () => {
         {
           contractAddress: accountAAFinalAdress,
           entrypoint: "update_whitelisted_contracts",
-          calldata: ["1", gameContract?.address ?? "", "1"],
+          calldata: [
+            "2",
+            gameContract?.address ?? "",
+            "1",
+            lordsContract?.address ?? "",
+            "1",
+          ],
         },
         {
           contractAddress: accountAAFinalAdress,
