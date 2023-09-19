@@ -84,7 +84,7 @@ const NotificationComponent = ({
               currentAnimation={notifications[currentIndex]?.animation}
             />
           </div>
-          <div className="w-5/6 sm:w-3/4 m-auto text-sm sm:text-lg">
+          <div className="w-2/3 sm:w-3/4 m-auto text-sm sm:text-lg">
             {notifications[currentIndex]?.message}
           </div>
         </div>

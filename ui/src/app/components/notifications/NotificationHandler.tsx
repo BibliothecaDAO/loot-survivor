@@ -246,15 +246,27 @@ export const processNotifications = (
     return processAnimation(type, data, adventurer ?? NullAdventurer);
   };
   const isArray = Array.isArray(notificationData);
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
   // handle error first
   if (error) {
     const error = notificationData as Error;
     notifications.push({
       animation: "damage",
       message: (
-        <div className="flex flex-col">
+        <div className="flex flex-col break-words">
           <p className="text-red-600">{error.name}</p>
-          <p className="text-red-600">{error.message}</p>
+          <span
+            onClick={() => copyToClipboard(error.message)}
+            style={{ cursor: "pointer" }}
+          >
+            <p className="text-red-600">{error.message}</p>
+          </span>
         </div>
       ),
     });

@@ -224,13 +224,6 @@ export function syscalls({
       undefined
     );
     try {
-      // simulate error
-      throw new Error(
-        "A very long error message that goes on and on. " +
-          "It includes lots of details about what went wrong, " +
-          "potentially with some suggestions for how to fix the issue, " +
-          "as well as information about where in the code the error occurred."
-      );
       const tx = await handleSubmitCalls(writeAsync);
       setTxHash(tx.transaction_hash);
       addTransaction({
