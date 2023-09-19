@@ -9,7 +9,11 @@ import {
   useBalance,
   useConnectors,
 } from "@starknet-react/core";
-import { AccountInterface, CallData, TransactionStatus } from "starknet";
+import {
+  AccountInterface,
+  CallData,
+  TransactionFinalityStatus,
+} from "starknet";
 import { useCallback } from "react";
 
 export const ArcadeDialog = () => {
@@ -114,7 +118,7 @@ export const ArcadeAccountCard = ({
 
       const result = await account.waitForTransaction(transaction_hash, {
         retryInterval: 1000,
-        successStates: [TransactionStatus.ACCEPTED_ON_L2],
+        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
       });
 
       if (!result) {

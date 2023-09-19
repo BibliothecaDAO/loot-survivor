@@ -7,7 +7,7 @@ import {
   hash,
   Provider,
   stark,
-  TransactionStatus,
+  TransactionFinalityStatus,
 } from "starknet";
 import Storage from "./storage";
 import { useAccount, useConnectors } from "@starknet-react/core";
@@ -206,7 +206,7 @@ const prefundAccount = async (address: string, account: AccountInterface) => {
 
     const result = await account.waitForTransaction(transaction_hash, {
       retryInterval: 1000,
-      successStates: [TransactionStatus.ACCEPTED_ON_L2],
+      successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
     });
 
     if (!result) {
