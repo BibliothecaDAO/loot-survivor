@@ -147,6 +147,8 @@ export const useBurner = () => {
     // deploy burner
     const burner = new Account(provider, address, privateKey, "1");
 
+    console.log(process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!);
+
     const {
       transaction_hash: deployTx,
       contract_address: accountAAFinalAdress,
