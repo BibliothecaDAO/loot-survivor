@@ -12,6 +12,7 @@ type LoadingState = {
   showNotification: boolean;
   notificationData: any;
   error: boolean;
+  errorMessage: string | undefined;
   adventurer: number | undefined;
   history: any[];
   startLoading: (
@@ -38,6 +39,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
   showNotification: false,
   notificationData: undefined,
   error: false,
+  errorMessage: undefined,
   adventurer: undefined,
   history: [],
   startLoading: (type, pendingMessage, loadingQuery, adventurer) => {
@@ -55,6 +57,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       showNotification: notificationData ? true : false,
       notificationData: notificationData || undefined,
       error: error ?? false,
+      errorMessage: error ? notificationData.message : undefined,
       loading: false,
       pendingMessage: undefined,
       history: [
@@ -75,6 +78,7 @@ const useLoadingStore = create<LoadingState>((set, get) => ({
       type: "",
       notificationData: undefined,
       error: false,
+      errorMessage: undefined,
       showNotification: false,
     }),
   deathMessage: null,

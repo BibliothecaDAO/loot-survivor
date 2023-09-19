@@ -4,6 +4,7 @@ import { useMediaQuery } from "react-responsive";
 import { notificationAnimations } from "@/app/lib/constants";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { CSSTransition } from "react-transition-group";
+import { Button } from "../buttons/Button";
 
 export interface NotificationComponentProps {
   notifications: any[];
@@ -15,6 +16,7 @@ const NotificationComponent = ({
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const showNotification = useLoadingStore((state) => state.showNotification);
   const error = useLoadingStore((state) => state.error);
+  const errorMessage = useLoadingStore((state) => state.errorMessage);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [flash, setFlash] = useState(false);
 
@@ -47,6 +49,14 @@ const NotificationComponent = ({
       setCurrentIndex(0);
     }
   }, [showNotification]);
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
 
   return (
     <CSSTransition
@@ -87,6 +97,11 @@ const NotificationComponent = ({
           <div className="w-2/3 sm:w-3/4 m-auto text-sm sm:text-lg">
             {notifications[currentIndex]?.message}
           </div>
+          {error && (
+            <Button onClick={() => copyToClipboard(errorMessage ?? "")}>
+              Copy Error
+            </Button>
+          )}
         </div>
       </div>
     </CSSTransition>
