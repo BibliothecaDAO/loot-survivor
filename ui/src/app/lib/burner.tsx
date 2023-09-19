@@ -14,7 +14,6 @@ import Storage from "./storage";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { ArcadeConnector } from "./arcade";
 import ArcadeAccount from "../abi/arcade_account_Account.sierra.json";
-import ArcadeAccountCasm from "../abi/arcade_account_Account.casm.json";
 
 export const PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
 
