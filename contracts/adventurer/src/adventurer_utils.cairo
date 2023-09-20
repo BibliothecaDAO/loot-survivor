@@ -239,7 +239,7 @@ mod tests {
     #[available_gas(150000)]
     fn test_is_health_full() {
         let starting_stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
@@ -276,7 +276,7 @@ mod tests {
     #[available_gas(200000)]
     fn test_get_max_health() {
         let starting_stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
