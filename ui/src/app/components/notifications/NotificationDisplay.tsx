@@ -14,6 +14,7 @@ export const NotificationDisplay = () => {
   const { data } = useQueriesStore();
   const type = useLoadingStore((state) => state.type);
   const notificationData = useLoadingStore((state) => state.notificationData);
+  const error = useLoadingStore((state) => state.error);
   const battles = data.lastBeastBattleQuery
     ? data.lastBeastBattleQuery.battles
     : [];
@@ -23,7 +24,8 @@ export const NotificationDisplay = () => {
         notificationData,
         adventurer ?? NullAdventurer,
         hasBeast,
-        battles
+        battles,
+        error
       )
     : [];
 

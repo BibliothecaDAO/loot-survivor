@@ -233,10 +233,12 @@ export const processNotifications = (
     | string
     | string[]
     | UpgradeSummary
+    | Error
     | any[],
   adventurer: Adventurer,
   hasBeast?: boolean,
-  battles?: Battle[]
+  battles?: Battle[],
+  error?: boolean
 ) => {
   const gameData = new GameData();
   const notifications: Notification[] = [];
@@ -244,7 +246,19 @@ export const processNotifications = (
     return processAnimation(type, data, adventurer ?? NullAdventurer);
   };
   const isArray = Array.isArray(notificationData);
-  if ((type == "Attack" || type == "Flee") && isArray) {
+  // handle error first
+  if (error) {
+    const error = notificationData as Error;
+    notifications.push({
+      animation: "damage",
+      message: (
+        <div className="flex flex-col break-words">
+          <p className="text-red-600">{error.name}</p>
+          <p className="text-red-600">{error.message}</p>
+        </div>
+      ),
+    });
+  } else if ((type == "Attack" || type == "Flee") && isArray) {
     const battleScenarios = chunkArray(notificationData as Battle[], 2);
     for (let i = 0; i < battleScenarios.length; i++) {
       const animation = handleAnimation(battleScenarios[i] as Battle[]);
