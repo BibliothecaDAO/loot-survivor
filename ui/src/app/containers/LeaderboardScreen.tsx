@@ -62,10 +62,19 @@ export default function LeaderboardScreen() {
     setNotLoading();
   };
 
+  const copiedAdventurersByXpData = adventurersByXPdata?.adventurers.slice();
+
+  const sortedAdventurersByXPArray = copiedAdventurersByXpData?.sort(
+    (a: Adventurer, b: Adventurer) => (b.xp ?? 0) - (a.xp ?? 0)
+  );
+
+  const sortedAdventurersByXP = { adventurers: sortedAdventurersByXPArray };
+
   useEffect(() => {
     if (adventurersByXPdata) {
       setIsLoading();
-      setData("adventurersByXPQuery", adventurersByXPdata);
+      console.log("setting");
+      setData("adventurersByXPQuery", sortedAdventurersByXP);
       setNotLoading();
     }
   }, [adventurersByXPdata]);
