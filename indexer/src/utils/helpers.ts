@@ -343,15 +343,55 @@ export function insertItem({
     update: {
       $set: {
         ...entity,
-        owner: checkExistsInt(BigInt(owner)),
-        equipped,
-        ownerAddress: checkExistsInt(BigInt(ownerAddress)),
-        xp: encodeIntAsBytes(BigInt(xp)),
-        special1: checkExistsInt(BigInt(special1)),
-        special2: checkExistsInt(BigInt(special2)),
-        special3: checkExistsInt(BigInt(special3)),
+        owner: {
+          $cond: [
+            { $not: ["$owner"] },
+            checkExistsInt(BigInt(owner)),
+            "$owner",
+          ],
+        },
+        equipped: {
+          $cond: [
+            { $not: ["$owner"] },
+            checkExistsInt(BigInt(equipped)),
+            "$equipped",
+          ],
+        },
+        ownerAddress: {
+          $cond: [
+            { $not: ["$owner"] },
+            checkExistsInt(BigInt(ownerAddress)),
+            "$ownerAddress",
+          ],
+        },
+        xp: {
+          $cond: [{ $not: ["$owner"] }, encodeIntAsBytes(BigInt(xp)), "$xp"],
+        },
+        special1: {
+          $cond: [
+            { $not: ["$owner"] },
+            checkExistsInt(BigInt(special1)),
+            "$special1",
+          ],
+        },
+        special2: {
+          $cond: [
+            { $not: ["$owner"] },
+            checkExistsInt(BigInt(special2)),
+            "$special2",
+          ],
+        },
+        special3: {
+          $cond: [
+            { $not: ["$owner"] },
+            checkExistsInt(BigInt(special3)),
+            "$special3",
+          ],
+        },
         isAvailable,
-        purchasedTime,
+        purchasedTime: {
+          $cond: [{ $not: ["$owner"] }, purchasedTime, "$purchasedTime"],
+        },
         timestamp,
       },
     },

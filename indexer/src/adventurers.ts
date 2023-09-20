@@ -39,8 +39,8 @@ import {
   parseHitByObstacle,
   DODGED_OBSTACLE,
   parseDodgedObstacle,
-  NEW_ITEMS_AVAILABLE,
-  parseNewItemsAvailable,
+  UPGRADES_AVAILABLE,
+  parseUpgradesAvailable,
   DISCOVERED_BEAST,
   parseDiscoveredBeast,
 } from "./utils/events.ts";
@@ -73,7 +73,7 @@ const filter = {
     { fromAddress: GAME, keys: [FLEE_FAILED] },
     { fromAddress: GAME, keys: [FLEE_SUCCEEDED] },
     { fromAddress: GAME, keys: [ITEMS_LEVELED_UP] },
-    { fromAddress: GAME, keys: [NEW_ITEMS_AVAILABLE] },
+    { fromAddress: GAME, keys: [UPGRADES_AVAILABLE] },
   ],
 };
 
@@ -326,9 +326,9 @@ export default function transform({ header, events }: Block) {
           }),
         ];
       }
-      case NEW_ITEMS_AVAILABLE: {
-        const { value } = parseNewItemsAvailable(event.data, 0);
-        console.log("NEW_ITEMS_AVAILABLE", "->", "ADVENTURER UPDATES");
+      case UPGRADES_AVAILABLE: {
+        const { value } = parseUpgradesAvailable(event.data, 0);
+        console.log("UPGRADES_AVAILABLE", "->", "ADVENTURER UPDATES");
         return [
           updateAdventurer({
             timestamp: new Date().toISOString(),

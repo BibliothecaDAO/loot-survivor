@@ -12,110 +12,110 @@ services:
       MONGO_INITDB_ROOT_USERNAME: mongo
       MONGO_INITDB_ROOT_PASSWORD: mongo
 
-  etcd:
-    image: docker.io/bitnami/etcd:3.5
-    environment:
-      ALLOW_NONE_AUTHENTICATION: "yes"
-    volumes:
-      - etcd_data:/bitnami/etcd
+  # etcd:
+  #   image: docker.io/bitnami/etcd:3.5
+  #   environment:
+  #     ALLOW_NONE_AUTHENTICATION: "yes"
+  #   volumes:
+  #     - etcd_data:/bitnami/etcd
 
 
-  adventurers_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
-    depends_on:
-      - etcd
-    restart: always
-    command:
-      - run
-      - --allow-env=/data/env-goerli
-      - /data/src/adventurers.ts
-    volumes:
-      - ./:/data/
-    environment:
-      PERSIST_TO_ETCD: http://etcd:2379
-      SINK_ID: adventurers
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
+  # adventurers_indexer:
+  #   image: quay.io/apibara/sink-mongo:0.3
+  #   depends_on:
+  #     - etcd
+  #   restart: always
+  #   command:
+  #     - run
+  #     - --allow-env=/data/env-goerli
+  #     - /data/src/adventurers.ts
+  #   volumes:
+  #     - ./:/data/
+  #   environment:
+  #     PERSIST_TO_ETCD: http://etcd:2379
+  #     SINK_ID: adventurers
+  #     AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
-  battles_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
-    depends_on:
-      - etcd
-    restart: always
-    command:
-      - run
-      - --allow-env=/data/env-goerli
-      - /data/src/battles.ts
-    volumes:
-      - ./:/data/
-    environment:
-      PERSIST_TO_ETCD: http://etcd:2379
-      SINK_ID: battles
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
+  # battles_indexer:
+  #   image: quay.io/apibara/sink-mongo:0.3
+  #   depends_on:
+  #     - etcd
+  #   restart: always
+  #   command:
+  #     - run
+  #     - --allow-env=/data/env-goerli
+  #     - /data/src/battles.ts
+  #   volumes:
+  #     - ./:/data/
+  #   environment:
+  #     PERSIST_TO_ETCD: http://etcd:2379
+  #     SINK_ID: battles
+  #     AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
-  beasts_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
-    depends_on:
-      - etcd
-    restart: always
-    command:
-      - run
-      - --allow-env=/data/env-goerli
-      - /data/src/beasts.ts
-    volumes:
-      - ./:/data/
-    environment:
-      PERSIST_TO_ETCD: http://etcd:2379
-      SINK_ID: beasts
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
+  # beasts_indexer:
+  #   image: quay.io/apibara/sink-mongo:0.3
+  #   depends_on:
+  #     - etcd
+  #   restart: always
+  #   command:
+  #     - run
+  #     - --allow-env=/data/env-goerli
+  #     - /data/src/beasts.ts
+  #   volumes:
+  #     - ./:/data/
+  #   environment:
+  #     PERSIST_TO_ETCD: http://etcd:2379
+  #     SINK_ID: beasts
+  #     AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
-  discoveries_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
-    depends_on:
-      - etcd
-    restart: always
-    command:
-      - run
-      - --allow-env=/data/env-goerli
-      - /data/src/discoveries.ts
-    volumes:
-      - ./:/data/
-    environment:
-      PERSIST_TO_ETCD: http://etcd:2379
-      SINK_ID: discoveries
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
+  # discoveries_indexer:
+  #   image: quay.io/apibara/sink-mongo:0.3
+  #   depends_on:
+  #     - etcd
+  #   restart: always
+  #   command:
+  #     - run
+  #     - --allow-env=/data/env-goerli
+  #     - /data/src/discoveries.ts
+  #   volumes:
+  #     - ./:/data/
+  #   environment:
+  #     PERSIST_TO_ETCD: http://etcd:2379
+  #     SINK_ID: discoveries
+  #     AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
-  items_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
-    depends_on:
-      - etcd
-    restart: always
-    command:
-      - run
-      - --allow-env=/data/env-goerli
-      - /data/src/items.ts
-    volumes:
-      - ./:/data/
-    environment:
-      PERSIST_TO_ETCD: http://etcd:2379
-      SINK_ID: items
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
+  # items_indexer:
+  #   image: quay.io/apibara/sink-mongo:0.3
+  #   depends_on:
+  #     - etcd
+  #   restart: always
+  #   command:
+  #     - run
+  #     - --allow-env=/data/env-goerli
+  #     - /data/src/items.ts
+  #   volumes:
+  #     - ./:/data/
+  #   environment:
+  #     PERSIST_TO_ETCD: http://etcd:2379
+  #     SINK_ID: items
+  #     AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
-  scores_indexer:
-    image: quay.io/apibara/sink-mongo:0.3
-    depends_on:
-      - etcd
-    restart: always
-    command:
-      - run
-      - --allow-env=/data/env-goerli
-      - /data/src/scores.ts
-    volumes:
-      - ./:/data/
-    environment:
-      PERSIST_TO_ETCD: http://etcd:2379
-      SINK_ID: scores
-      AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
+  # scores_indexer:
+  #   image: quay.io/apibara/sink-mongo:0.3
+  #   depends_on:
+  #     - etcd
+  #   restart: always
+  #   command:
+  #     - run
+  #     - --allow-env=/data/env-goerli
+  #     - /data/src/scores.ts
+  #   volumes:
+  #     - ./:/data/
+  #   environment:
+  #     PERSIST_TO_ETCD: http://etcd:2379
+  #     SINK_ID: scores
+  #     AUTH_TOKEN: dna_jX3t04zs9zywBnHWVmUq
 
 volumes:
-  etcd_data:
+  # etcd_data:
   mongo_data:

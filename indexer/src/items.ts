@@ -73,24 +73,24 @@ export default function transform({ header, events }: Block) {
         const as = value.adventurerState;
         const itemInserts: any[] = [];
         console.log("START_GAME", "->", "ITEMS UPDATES");
-        for (let i = 1; i < ITEMS_NUMBER; i++) {
-          itemInserts.push(
-            insertItem({
-              item: i,
-              adventurerId: as.adventurerId,
-              owner: false,
-              equipped: false,
-              ownerAddress: 0,
-              xp: 0,
-              special1: 0,
-              special2: 0,
-              special3: 0,
-              isAvailable: false,
-              purchasedTime: 0,
-              timestamp: new Date().toISOString(),
-            })
-          );
-        }
+        // for (let i = 1; i < ITEMS_NUMBER; i++) {
+        //   itemInserts.push(
+        //     insertItem({
+        //       item: i,
+        //       adventurerId: as.adventurerId,
+        //       owner: false,
+        //       equipped: false,
+        //       ownerAddress: 0,
+        //       xp: 0,
+        //       special1: 0,
+        //       special2: 0,
+        //       special3: 0,
+        //       isAvailable: false,
+        //       purchasedTime: 0,
+        //       timestamp: new Date().toISOString(),
+        //     })
+        //   );
+        // }
 
         const starterWeapon = {
           entity: {
@@ -108,7 +108,7 @@ export default function transform({ header, events }: Block) {
             },
           },
         };
-        return [...itemInserts, starterWeapon];
+        return starterWeapon;
       }
       case PURCHASED_ITEMS: {
         const { value } = parsePurchasedItems(event.data, 0);
@@ -250,21 +250,23 @@ export default function transform({ header, events }: Block) {
       case UPGRADES_AVAILABLE: {
         const { value } = parseUpgradesAvailable(event.data, 0);
         const as = value.adventurerState;
-        console.log("NEW_ITEMS_AVAILABLE", "->", "ITEMS UPDATES");
-        const newResult = value.items.map((item) => ({
-          entity: {
-            item: checkExistsInt(BigInt(item)),
-            adventurerId: checkExistsInt(BigInt(as.adventurerId)),
-          },
-          update: {
-            $set: {
-              item: checkExistsInt(BigInt(item)),
-              adventurerId: checkExistsInt(BigInt(as.adventurerId)),
-              isAvailable: true,
-              timestamp: new Date().toISOString(),
-            },
-          },
-        }));
+        console.log("UPGRADES_AVAILABLE", "->", "ITEMS UPDATES");
+        const newResult = value.items.map((item) =>
+          insertItem({
+            item: item,
+            adventurerId: as.adventurerId,
+            owner: false,
+            equipped: false,
+            ownerAddress: 0,
+            xp: 0,
+            special1: 0,
+            special2: 0,
+            special3: 0,
+            isAvailable: true,
+            purchasedTime: 0,
+            timestamp: new Date().toISOString(),
+          })
+        );
         return newResult;
       }
       case ADVENTURER_UPGRADED: {
