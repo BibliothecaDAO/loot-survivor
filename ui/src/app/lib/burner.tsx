@@ -125,13 +125,8 @@ export const useBurner = () => {
       throw new Error("wallet account not found");
     }
 
-    const AAccountSierra = ArcadeAccount;
-
-    const calldataAA: CallData = new CallData(AAccountSierra.abi);
-
-    const constructorAACalldata = calldataAA.compile("constructor", {
+    const constructorAACalldata = CallData.compile({
       _public_key: publicKey,
-      _master_account: walletAccount.address,
     });
 
     const address = hash.calculateContractAddressFromHash(
@@ -160,12 +155,12 @@ export const useBurner = () => {
       addressSalt: publicKey,
     });
 
-    await delay(5000);
+    await delay(10000);
 
-    const setPermissionsTx = await setPermissions(
-      accountAAFinalAdress,
-      walletAccount
-    );
+    // const setPermissionsTx = await setPermissions(
+    //   accountAAFinalAdress,
+    //   walletAccount
+    // );
 
     // save burner
     let storage = Storage.get("burners") || {};
@@ -177,7 +172,7 @@ export const useBurner = () => {
       privateKey,
       publicKey,
       deployTx,
-      setPermissionsTx,
+      // setPermissionsTx,
       active: true,
     };
 
