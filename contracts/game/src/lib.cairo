@@ -173,8 +173,8 @@ mod Game {
         //@param adventurer_id The unique identifier of the adventurer.
         //@param till_beast Indicates if the adventurer will explore until encountering a beast.
         fn explore(ref self: ContractState, adventurer_id: u256, till_beast: bool) {
-            // unpack adventurer from storage and apply item stat boosts
-            let (mut adventurer, stat_boosts) = _unpack_adventurer_with_stat_boosts(
+            // get adventurer from storage with stat boosts applied
+            let (mut adventurer, stat_boosts, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 @self, adventurer_id
             );
 
@@ -217,8 +217,8 @@ mod Game {
         //@param adventurer_id The unique identifier of the adventurer
         //@param to_the_death a bool which if true will result in recursively attacking till beast or adventurer is dead
         fn attack(ref self: ContractState, adventurer_id: u256, to_the_death: bool) {
-            // unpack adventurer from storage and apply item stat boosts
-            let (mut adventurer, stat_boosts) = _unpack_adventurer_with_stat_boosts(
+            // get adventurer from storage with stat boosts applied
+            let (mut adventurer, stat_boosts, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 @self, adventurer_id
             );
 
@@ -253,8 +253,8 @@ mod Game {
         //@param adventurer_id The unique identifier of the adventurer
         //@param to_the_death a bool which if true will result in recursively fleeing till success or death
         fn flee(ref self: ContractState, adventurer_id: u256, to_the_death: bool) {
-            // unpack adventurer from storage and apply item stat boosts
-            let (mut adventurer, stat_boosts) = _unpack_adventurer_with_stat_boosts(
+            // get adventurer from storage with stat boosts applied
+            let (mut adventurer, stat_boosts, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 @self, adventurer_id
             );
 
@@ -314,13 +314,11 @@ mod Game {
         //@param adventurer_id The ID of the adventurer to equip.
         //@param items An array of items to equip the adventurer with.
         fn equip(ref self: ContractState, adventurer_id: u256, items: Array<u8>) {
-            // unpack adventurer from storage and apply item stat boosts
-            let (mut adventurer, stat_boosts) = _unpack_adventurer_with_stat_boosts(
+            // get adventurer and bag from storage with stat boosts applied
+            let (mut adventurer, stat_boosts, mut bag) =
+                _unpack_adventurer_and_bag_with_stat_boosts(
                 @self, adventurer_id
             );
-
-            // get adventurers bag
-            let mut bag = _bag_unpacked(@self, adventurer_id);
 
             // assert action is valid
             _assert_ownership(@self, adventurer_id);
@@ -380,13 +378,11 @@ mod Game {
         // @param adventurer_id The ID of the adventurer dropping the items
         // @param items A Array of item ids to be dropped
         fn drop_items(ref self: ContractState, adventurer_id: u256, items: Array<u8>) {
-            // unpack adventurer from storage (no need to apply stat boosts)
-            let (mut adventurer, stat_boosts) = _unpack_adventurer_with_stat_boosts(
+            // get adventurer and bag from storage with stat boosts applied
+            let (mut adventurer, stat_boosts, mut bag) =
+                _unpack_adventurer_and_bag_with_stat_boosts(
                 @self, adventurer_id
             );
-
-            // get bag from storage
-            let mut bag = _bag_unpacked(@self, adventurer_id);
 
             // assert action is valid (ownership of item is handled in internal function when we iterate over items)
             _assert_ownership(@self, adventurer_id);
@@ -430,13 +426,11 @@ mod Game {
             stat_upgrades: Stats,
             items: Array<ItemPurchase>,
         ) {
-            // get adventurer from storage and apply stat boosts
-            let (mut adventurer, stat_boosts) = _unpack_adventurer_with_stat_boosts(
+            // get adventurer and bag from storage with stat boosts applied
+            let (mut adventurer, stat_boosts, mut bag) =
+                _unpack_adventurer_and_bag_with_stat_boosts(
                 @self, adventurer_id
             );
-
-            // get bag from storage
-            let mut bag = _bag_unpacked(@self, adventurer_id);
 
             // assert action is valid
             _assert_ownership(@self, adventurer_id);
@@ -517,7 +511,9 @@ mod Game {
         // view functions
         //
         fn get_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
-            let (adventurer, _) = _unpack_adventurer_with_stat_boosts(self, adventurer_id);
+            let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
+                self, adventurer_id
+            );
             adventurer
         }
         fn get_adventurer_no_boosts(self: @ContractState, adventurer_id: u256) -> Adventurer {
@@ -527,7 +523,7 @@ mod Game {
             _adventurer_meta_unpacked(self, adventurer_id)
         }
         fn get_bag(self: @ContractState, adventurer_id: u256) -> Bag {
-            _bag_unpacked(self, adventurer_id)
+            _unpacked_bag(self, adventurer_id)
         }
         fn get_weapon_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
@@ -697,49 +693,63 @@ mod Game {
             _unpack_adventurer(self, adventurer_id).stats
         }
         fn get_stats(self: @ContractState, adventurer_id: u256) -> Stats {
-            let (adventurer, _) = _unpack_adventurer_with_stat_boosts(self, adventurer_id);
+            let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
+                self, adventurer_id
+            );
             adventurer.stats
         }
         fn get_base_strength(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.strength
         }
         fn get_strength(self: @ContractState, adventurer_id: u256) -> u8 {
-            let (adventurer, _) = _unpack_adventurer_with_stat_boosts(self, adventurer_id);
+            let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
+                self, adventurer_id
+            );
             adventurer.stats.strength
         }
         fn get_base_dexterity(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.dexterity
         }
         fn get_dexterity(self: @ContractState, adventurer_id: u256) -> u8 {
-            let (adventurer, _) = _unpack_adventurer_with_stat_boosts(self, adventurer_id);
+            let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
+                self, adventurer_id
+            );
             adventurer.stats.dexterity
         }
         fn get_base_vitality(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.vitality
         }
         fn get_vitality(self: @ContractState, adventurer_id: u256) -> u8 {
-            let (adventurer, _) = _unpack_adventurer_with_stat_boosts(self, adventurer_id);
+            let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
+                self, adventurer_id
+            );
             adventurer.stats.vitality
         }
         fn get_base_intelligence(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.intelligence
         }
         fn get_intelligence(self: @ContractState, adventurer_id: u256) -> u8 {
-            let (adventurer, _) = _unpack_adventurer_with_stat_boosts(self, adventurer_id);
+            let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
+                self, adventurer_id
+            );
             adventurer.stats.intelligence
         }
         fn get_base_wisdom(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.wisdom
         }
         fn get_wisdom(self: @ContractState, adventurer_id: u256) -> u8 {
-            let (adventurer, _,) = _unpack_adventurer_with_stat_boosts(self, adventurer_id);
+            let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
+                self, adventurer_id
+            );
             adventurer.stats.wisdom
         }
         fn get_base_charisma(self: @ContractState, adventurer_id: u256) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.charisma
         }
         fn get_charisma(self: @ContractState, adventurer_id: u256) -> u8 {
-            let (adventurer, _) = _unpack_adventurer_with_stat_boosts(self, adventurer_id);
+            let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
+                self, adventurer_id
+            );
             adventurer.stats.charisma
         }
         fn get_special_storage(
@@ -821,7 +831,7 @@ mod Game {
         // get_base_reward from Combat module. Should refactor this to only make that call once and have
         // get_gold_reward and get_xp_reward operator on the base reward
         let mut gold_earned = beast.get_gold_reward(beast_seed);
-        let bag = _bag_unpacked(@self, adventurer_id);
+        let bag = _unpacked_bag(@self, adventurer_id);
         adventurer.increase_gold(gold_earned * adventurer.beast_gold_reward_multiplier().into());
 
         // grant adventuer xp
@@ -1474,12 +1484,11 @@ mod Game {
         let weapon_combat_spec = _get_combat_spec(@self, adventurer_id, adventurer.weapon);
         let critical_hit_damage_multiplier = adventurer.critical_hit_bonus_multiplier();
         let name_bonus_damage_multplier = adventurer.name_match_bonus_damage_multiplier();
-        let bag = _bag_unpacked(@self, adventurer_id);
-        let adventurer_luck = adventurer.get_luck(bag);
+        let bag = _unpacked_bag(@self, adventurer_id);
         let (damage_dealt, critical_hit) = beast
             .attack(
                 weapon_combat_spec,
-                adventurer_luck,
+                adventurer.stats.luck,
                 adventurer.stats.strength,
                 critical_hit_damage_multiplier,
                 name_bonus_damage_multplier,
@@ -1906,7 +1915,8 @@ mod Game {
         }
         if stat_upgrades.vitality != 0 {
             adventurer.stats.increase_vitality(stat_upgrades.vitality);
-            adventurer.increase_health(VITALITY_INSTANT_HEALTH_BONUS * stat_upgrades.vitality.into());
+            adventurer
+                .increase_health(VITALITY_INSTANT_HEALTH_BONUS * stat_upgrades.vitality.into());
         }
         if stat_upgrades.intelligence != 0 {
             adventurer.stats.increase_intelligence(stat_upgrades.intelligence);
@@ -1957,9 +1967,9 @@ mod Game {
     fn _unpack_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
         Packing::unpack(self._adventurer.read(adventurer_id))
     }
-    fn _unpack_adventurer_with_stat_boosts(
+    fn _unpack_adventurer_and_bag_with_stat_boosts(
         self: @ContractState, adventurer_id: u256
-    ) -> (Adventurer, Stats) {
+    ) -> (Adventurer, Stats, Bag) {
         // unpack adventurer
         let mut adventurer: Adventurer = Packing::unpack(self._adventurer.read(adventurer_id));
         // start with no stat boosts
@@ -1974,8 +1984,13 @@ mod Game {
             adventurer.apply_stat_boosts(stat_boosts);
         }
 
+        let bag = _unpacked_bag(self, adventurer_id);
+
+        // luck isn't stored, it is calculated dynamically
+        adventurer.set_luck(bag);
+
         // return adventurer with stat boosts
-        (adventurer, stat_boosts)
+        (adventurer, stat_boosts, bag)
     }
 
     #[inline(always)]
@@ -2029,7 +2044,7 @@ mod Game {
         __event_UpgradesAvailable(ref self, adventurer_state, available_items);
     }
     #[inline(always)]
-    fn _bag_unpacked(self: @ContractState, adventurer_id: u256) -> Bag {
+    fn _unpacked_bag(self: @ContractState, adventurer_id: u256) -> Bag {
         Packing::unpack(self._bag.read(adventurer_id))
     }
     #[inline(always)]
@@ -2250,12 +2265,12 @@ mod Game {
 
     #[inline(always)]
     fn _get_potion_price(self: @ContractState, adventurer_id: u256) -> u16 {
-        let (adventurer, _) = _unpack_adventurer_with_stat_boosts(self, adventurer_id);
+        let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(self, adventurer_id);
         adventurer.charisma_adjusted_potion_price()
     }
 
     fn _get_item_price(self: @ContractState, adventurer_id: u256, item_id: u8) -> u16 {
-        let (adventurer, _) = _unpack_adventurer_with_stat_boosts(self, adventurer_id);
+        let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(self, adventurer_id);
         let base_item_price = ImplMarket::get_price(ImplLoot::get_tier(item_id));
         let charisma_adjusted_price = adventurer.charisma_adjusted_item_price(base_item_price);
 

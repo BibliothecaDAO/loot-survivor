@@ -12,13 +12,17 @@ struct Stats { // 5 bits each
     // Mental
     intelligence: u8, // 5 bits
     wisdom: u8, // 5 bits
-    charisma: u8 // 5 bits
+    charisma: u8, // 5 bits
+    // Metaphysical
+    luck: u8 // dynamically generated (not stored)
 }
 
 #[generate_trait]
 impl StatUtils of IStat {
     fn new() -> Stats {
-        Stats { strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0 }
+        Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+        }
     }
 }
 
@@ -51,7 +55,8 @@ impl StatsPacking of Packing<Stats> {
             vitality: vitality.try_into().expect('unpack Stats vitality'),
             intelligence: intelligence.try_into().expect('unpack Stats intelligence'),
             wisdom: wisdom.try_into().expect('unpack Stats wisdom'),
-            charisma: charisma.try_into().expect('unpack Stats charisma')
+            charisma: charisma.try_into().expect('unpack Stats charisma'),
+            luck: 0
         }
     }
 
@@ -86,14 +91,16 @@ impl StatsPacking of Packing<Stats> {
 // ---------------------------
 #[cfg(test)]
 mod tests {
-    use survivor::{constants::adventurer_constants::MAX_STAT_VALUE, adventurer_stats::{Stats, StatsPacking}};
-    
+    use survivor::{
+        constants::adventurer_constants::MAX_STAT_VALUE, adventurer_stats::{Stats, StatsPacking}
+    };
+
     #[test]
-    #[available_gas(1500000)]
+    #[available_gas(1039260)]
     fn test_stats_packing() {
         // zero case
         let stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
 
         let packed = stats.pack();
@@ -104,10 +111,17 @@ mod tests {
         assert(stats.intelligence == unpacked.intelligence, 'intelligence zero case');
         assert(stats.wisdom == unpacked.wisdom, 'wisdom zero case');
         assert(stats.charisma == unpacked.charisma, 'charisma zero case');
+        assert(unpacked.luck == 0, 'luck is zero from storage');
 
         // storage limit test (2^5 - 1 = 31)
         let stats = Stats {
-            strength: 31, dexterity: 31, vitality: 31, intelligence: 31, wisdom: 31, charisma: 31
+            strength: 31,
+            dexterity: 31,
+            vitality: 31,
+            intelligence: 31,
+            wisdom: 31,
+            charisma: 31,
+            luck: 31
         };
 
         let packed = stats.pack();
@@ -118,6 +132,7 @@ mod tests {
         assert(stats.intelligence == unpacked.intelligence, 'intelligence storage limit');
         assert(stats.wisdom == unpacked.wisdom, 'wisdom storage limit');
         assert(stats.charisma == unpacked.charisma, 'charisma storage limit');
+        assert(unpacked.luck == 0, 'luck is zero from storage');
 
         // overflow storage limit using max u8
         let stats = Stats {
@@ -126,7 +141,8 @@ mod tests {
             vitality: 255,
             intelligence: 255,
             wisdom: 255,
-            charisma: 255
+            charisma: 255,
+            luck: 255
         };
 
         let packed = stats.pack();
@@ -139,5 +155,6 @@ mod tests {
         assert(unpacked.intelligence == MAX_STAT_VALUE, 'intelligence pack overflow');
         assert(unpacked.wisdom == MAX_STAT_VALUE, 'wisdom pack overflow');
         assert(unpacked.charisma == MAX_STAT_VALUE, 'charisma pack overflow');
+        assert(unpacked.luck == 0, 'luck is zero from storage');
     }
 }

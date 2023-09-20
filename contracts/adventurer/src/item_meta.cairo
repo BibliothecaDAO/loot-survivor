@@ -543,7 +543,7 @@ mod tests {
             12,
             1,
             Stats {
-                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1, luck: 1
             }
         );
 
