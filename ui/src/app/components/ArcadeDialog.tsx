@@ -50,7 +50,7 @@ export const ArcadeDialog = () => {
             (connector?.options as any)?.id == "braavos") && (
             <div>
               <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                Note: This will initiate a transfer of 0.01 ETH from your
+                Note: This will initiate a transfer of 0.001 ETH from your
                 connected wallet to the arcade account to cover your transaction
                 costs from normal gameplay.
                 <br />
@@ -178,7 +178,7 @@ export const ArcadeAccountCard = ({
             variant={connected ? "default" : "ghost"}
             onClick={() => transfer(account.name, masterAccount)}
           >
-            Top Up 0.01Eth
+            Top Up 0.001Eth
           </Button>
         )}
       </div>
