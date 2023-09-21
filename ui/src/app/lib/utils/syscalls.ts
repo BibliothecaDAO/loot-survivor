@@ -1,4 +1,9 @@
-import { InvokeTransactionReceiptResponse, CallData } from "starknet";
+import {
+  InvokeTransactionReceiptResponse,
+  CallData,
+  Call,
+  Account,
+} from "starknet";
 import { GameData } from "@/app/components/GameData";
 import {
   Adventurer,
@@ -38,6 +43,12 @@ export interface SyscallsProps {
   setStartOption: (...args: any[]) => any;
 }
 
+async function estimateFee(account: Account, calls: Call[]) {
+  const { suggestedMaxFee: estimatedFee } = await account.estimateFee(calls);
+  console.log("estimatedFee", estimatedFee);
+  return estimateFee;
+}
+
 function handleEquip(
   events: any[],
   setData: (...args: any[]) => any,
@@ -71,8 +82,7 @@ function handleEquip(
 function handleDrop(
   events: any[],
   setData: (...args: any[]) => any,
-  setAdventurer: (...args: any[]) => any,
-  queryData: any
+  setAdventurer: (...args: any[]) => any
 ) {
   const droppedItemsEvents = events.filter(
     (event) => event.name === "DroppedItems"
@@ -217,6 +227,12 @@ export function syscalls({
     };
 
     addToCalls(mintAdventurerTx);
+    const fee = await estimateFee(account, [
+      mintLords,
+      approveLordsTx,
+      mintAdventurerTx,
+    ]);
+    console.log(fee);
     startLoading(
       "Create",
       "Spawning Adventurer",
@@ -332,7 +348,7 @@ export function syscalls({
 
       // If there are any equip or drops, do them first
       handleEquip(events, setData, setAdventurer, queryData);
-      handleDrop(events, setData, setAdventurer, queryData);
+      handleDrop(events, setData, setAdventurer);
 
       const discoveries = [];
 
@@ -562,7 +578,7 @@ export function syscalls({
 
       // If there are any equip or drops, do them first
       handleEquip(events, setData, setAdventurer, queryData);
-      handleDrop(events, setData, setAdventurer, queryData);
+      handleDrop(events, setData, setAdventurer);
 
       const battles = [];
 
@@ -767,7 +783,7 @@ export function syscalls({
 
       // If there are any equip or drops, do them first
       handleEquip(events, setData, setAdventurer, queryData);
-      handleDrop(events, setData, setAdventurer, queryData);
+      handleDrop(events, setData, setAdventurer);
 
       const battles = [];
 
@@ -921,12 +937,7 @@ export function syscalls({
 
       // If there are any equip or drops, do them first
       handleEquip(events, setData, setAdventurer, queryData);
-      const droppedItems = handleDrop(
-        events,
-        setData,
-        setAdventurer,
-        queryData
-      );
+      const droppedItems = handleDrop(events, setData, setAdventurer);
 
       // Update adventurer
       setData("adventurerByIdQuery", {
@@ -1155,7 +1166,7 @@ export function syscalls({
         setAdventurer(upgradeEvent.data);
         // If there are any equip or drops, do them first
         handleEquip(events, setData, setAdventurer, queryData);
-        handleDrop(events, setData, setAdventurer, queryData);
+        handleDrop(events, setData, setAdventurer);
 
         // Add purchased items
         const purchaseItemsEvents = events.filter(
