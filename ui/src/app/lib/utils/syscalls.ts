@@ -297,6 +297,7 @@ export function syscalls({
       setMintAdventurer(true);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 
@@ -525,6 +526,7 @@ export function syscalls({
       setMintAdventurer(false);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 
@@ -734,6 +736,7 @@ export function syscalls({
       setMintAdventurer(false);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 
@@ -887,6 +890,7 @@ export function syscalls({
       setMintAdventurer(false);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 
@@ -989,6 +993,7 @@ export function syscalls({
       setMintAdventurer(false);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 
@@ -1213,6 +1218,7 @@ export function syscalls({
       setMintAdventurer(false);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 

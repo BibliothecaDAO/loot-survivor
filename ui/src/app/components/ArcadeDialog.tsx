@@ -31,6 +31,8 @@ export const ArcadeDialog = () => {
     );
   }, [available]);
 
+  console.log(arcadeConnectors());
+
   if (!connectors) return <div></div>;
 
   return (
@@ -69,6 +71,7 @@ export const ArcadeDialog = () => {
                 onClick={connect}
                 address={address!}
                 masterAccount={MasterAccount!}
+                arcadeConnectors={arcadeConnectors()}
               />
             );
           })}
@@ -91,6 +94,7 @@ interface ArcadeAccountCardProps {
   onClick: (conn: Connector<any>) => void;
   address: string;
   masterAccount: AccountInterface;
+  arcadeConnectors: any[];
 }
 
 export const ArcadeAccountCard = ({
@@ -98,6 +102,7 @@ export const ArcadeAccountCard = ({
   onClick,
   address,
   masterAccount,
+  arcadeConnectors,
 }: ArcadeAccountCardProps) => {
   const { data } = useBalance({
     address: account.name,
@@ -142,6 +147,12 @@ export const ArcadeAccountCard = ({
     }
   };
 
+  console.log(
+    arcadeConnectors.some(
+      (conn) => conn.options.options.id == masterAccount.address
+    )
+  );
+
   return (
     <div className="border border-terminal-green p-3 hover:bg-terminal-green hover:text-terminal-black items-center">
       <div className="text-left flex flex-col text-sm sm:text-xl mb-0 sm:mb-4 items-center">
@@ -160,7 +171,9 @@ export const ArcadeAccountCard = ({
         >
           {connected ? "connected" : "connect"}
         </Button>
-        {account.name !== masterAccount.address && (
+        {!arcadeConnectors.some(
+          (conn) => conn.options.options.id == masterAccount.address
+        ) && (
           <Button
             variant={connected ? "default" : "ghost"}
             onClick={() => transfer(account.name, masterAccount)}

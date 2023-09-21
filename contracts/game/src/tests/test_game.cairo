@@ -103,7 +103,7 @@ mod tests {
         };
 
         let starting_stats = Stats {
-            strength: 0, dexterity: 2, vitality: 0, intelligence: 2, wisdom: 2, charisma: 0,
+            strength: 0, dexterity: 2, vitality: 0, intelligence: 2, wisdom: 2, charisma: 0, luck: 0
         };
 
         game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta, starting_stats);
@@ -129,7 +129,7 @@ mod tests {
         };
 
         let starting_stats = Stats {
-            strength: 0, dexterity: 2, vitality: 0, intelligence: 2, wisdom: 2, charisma: 0,
+            strength: 0, dexterity: 2, vitality: 0, intelligence: 2, wisdom: 2, charisma: 0, luck: 0
         };
 
         game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta, starting_stats);
@@ -152,7 +152,7 @@ mod tests {
     fn new_adventurer_max_charisma() -> IGameDispatcher {
         let mut game = setup(1000);
         let starting_stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 6,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 6, luck: 0
         };
 
         game
@@ -230,7 +230,7 @@ mod tests {
 
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -257,7 +257,7 @@ mod tests {
         // upgrade charisma
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -280,7 +280,7 @@ mod tests {
         // upgrade charisma
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -341,7 +341,7 @@ mod tests {
         // upgrade stats
 
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -360,7 +360,7 @@ mod tests {
         let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -378,7 +378,7 @@ mod tests {
         let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -396,7 +396,7 @@ mod tests {
         let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -414,7 +414,7 @@ mod tests {
         let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -435,7 +435,7 @@ mod tests {
         let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -588,7 +588,7 @@ mod tests {
         // TODO: use cheat codes to make this less fragile
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
 
@@ -652,7 +652,7 @@ mod tests {
         // attempt to buy item during battle - should_panic with message 'Action not allowed in battle'
         // this test is annotated to expect a panic so if it doesn't, this test will fail
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
     }
@@ -674,7 +674,7 @@ mod tests {
         // upgrade adventurer and don't buy anything
         let mut empty_shoppping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, empty_shoppping_cart.clone());
 
@@ -702,7 +702,7 @@ mod tests {
         // submit an upgrade with duplicate items in the shopping cart
         // 'Item already owned' which is annotated in the test
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
     }
@@ -725,7 +725,7 @@ mod tests {
 
         // should throw 'Item already owned' panic
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
     }
@@ -738,7 +738,7 @@ mod tests {
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
         shopping_cart.append(ItemPurchase { item_id: 255, equip: false });
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
     }
@@ -752,7 +752,7 @@ mod tests {
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
         shopping_cart.append(ItemPurchase { item_id: item_id, equip: false });
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
         let bag = game.get_bag(ADVENTURER_ID);
@@ -826,7 +826,7 @@ mod tests {
 
         // buy items in shopping cart
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
 
@@ -998,7 +998,7 @@ mod tests {
         assert(shopping_cart.len() >= 2, 'insufficient item purchase');
         // buy items
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -1059,7 +1059,7 @@ mod tests {
         let number_of_potions = 1;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: 1, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+            strength: 1, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, number_of_potions, stat_upgrades, shopping_cart);
 
@@ -1101,7 +1101,7 @@ mod tests {
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let potions = potions_to_full_health + 1;
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, potions, stat_upgrades, shopping_cart);
     }
@@ -1116,7 +1116,7 @@ mod tests {
         // upgrade adventurer
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
 
@@ -1138,7 +1138,7 @@ mod tests {
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let potions = 1;
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, potions, stat_upgrades, shopping_cart);
     }
@@ -1295,7 +1295,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(137891870)]
+    #[available_gas(141506980)]
     fn test_multi_slay_adventurers() {
         let STARTING_BLOCK_NUMBER = 512;
 
@@ -1661,7 +1661,7 @@ mod tests {
 
         // buy first item on market and bag it
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -1731,7 +1731,7 @@ mod tests {
         // because we need a multi-level or G20 stat unlocks
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -1758,7 +1758,7 @@ mod tests {
         // try to upgrade charisma x2 with only 1 stat available
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 2,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 2, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
     }
@@ -1794,7 +1794,7 @@ mod tests {
 
         // purchase potions, items, and upgrade stat in single call
         let stat_upgrades = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade_adventurer(ADVENTURER_ID, potions, stat_upgrades, items_to_purchase);
 
