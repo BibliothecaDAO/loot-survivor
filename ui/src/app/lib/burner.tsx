@@ -146,25 +146,15 @@ export const useBurner = () => {
     // deploy burner
     const burner = new Account(provider, address, privateKey, "1");
 
-    const { suggestedMaxFee: estimatedFee1 } =
-      await burner.estimateAccountDeployFee({
-        classHash: process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
-        addressSalt: publicKey,
-        constructorCalldata: constructorAACalldata,
-      });
-
     const {
       transaction_hash: deployTx,
       contract_address: accountAAFinalAdress,
-    } = await burner.deployAccount(
-      {
-        classHash: process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
-        constructorCalldata: constructorAACalldata,
-        contractAddress: address,
-        addressSalt: publicKey,
-      },
-      { maxFee: estimatedFee1 * (BigInt(11) / BigInt(10)) }
-    );
+    } = await burner.deployAccount({
+      classHash: process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
+      constructorCalldata: constructorAACalldata,
+      contractAddress: address,
+      addressSalt: publicKey,
+    });
 
     await provider.waitForTransaction(deployTx);
 
