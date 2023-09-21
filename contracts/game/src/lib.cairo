@@ -156,7 +156,7 @@ mod Game {
             starting_stats: Stats,
         ) {
             _assert_valid_starter_weapon(starting_weapon);
-            _assert_starting_stat_count(starting_stats);
+            _assert_starting_stats(starting_stats);
 
             let caller = get_caller_address();
             let block_number = starknet::get_block_info().unbox().block_number;
@@ -178,15 +178,18 @@ mod Game {
                 @self, adventurer_id
             );
 
+            // use an immutable adventurer copy for assertions to reduce stack overhead
+            let immutable_adventurer = adventurer.clone();
+
             // assert action is valid
             _assert_ownership(@self, adventurer_id);
-            _assert_not_dead(adventurer);
-            _assert_no_stat_upgrades_available(adventurer);
-            _assert_not_in_battle(adventurer);
+            _assert_not_dead(immutable_adventurer);
+            _assert_no_stat_upgrades_available(immutable_adventurer);
+            _assert_not_in_battle(immutable_adventurer);
 
             // get number of blocks between actions
             let (exceeded_idle_threshold, num_blocks) = _idle_longer_than_penalty_threshold(
-                adventurer
+                immutable_adventurer
             );
 
             // process explore or apply idle penalty
@@ -222,14 +225,17 @@ mod Game {
                 @self, adventurer_id
             );
 
+            // use an immutable adventurer copy for assertions to reduce stack overhead
+            let immutable_adventurer = adventurer.clone();
+
             // assert action is valid
             _assert_ownership(@self, adventurer_id);
-            _assert_not_dead(adventurer);
-            _assert_in_battle(adventurer);
+            _assert_not_dead(immutable_adventurer);
+            _assert_in_battle(immutable_adventurer);
 
             // get number of blocks between actions
             let (exceeded_idle_threshold, num_blocks) = _idle_longer_than_penalty_threshold(
-                adventurer
+                immutable_adventurer
             );
 
             // process attack or apply idle penalty
@@ -258,16 +264,19 @@ mod Game {
                 @self, adventurer_id
             );
 
+            // use an immutable adventurer copy for assertions to reduce stack overhead
+            let immutable_adventurer = adventurer.clone();
+
             // assert action is valid
             _assert_ownership(@self, adventurer_id);
-            _assert_not_dead(adventurer);
-            _assert_in_battle(adventurer);
-            _assert_not_starter_beast(adventurer);
-            _assert_dexterity_not_zero(adventurer);
+            _assert_not_dead(immutable_adventurer);
+            _assert_in_battle(immutable_adventurer);
+            _assert_not_starter_beast(immutable_adventurer);
+            _assert_dexterity_not_zero(immutable_adventurer);
 
             // get number of blocks between actions
             let (exceeded_idle_threshold, num_blocks) = _idle_longer_than_penalty_threshold(
-                adventurer
+                immutable_adventurer
             );
 
             // process flee or apply idle penalty
@@ -432,16 +441,17 @@ mod Game {
                 @self, adventurer_id
             );
 
+            let immutable_adventurer = adventurer.clone();
+
             // assert action is valid
             _assert_ownership(@self, adventurer_id);
-            _assert_not_dead(adventurer);
-            _assert_not_in_battle(adventurer);
-            _assert_upgrades_available(adventurer);
-            _assert_stat_balance(adventurer, stat_upgrades);
+            _assert_not_dead(immutable_adventurer);
+            _assert_not_in_battle(immutable_adventurer);
+            _assert_valid_stat_selection(immutable_adventurer, stat_upgrades);
 
             // get number of blocks between actions
             let (exceeded_idle_threshold, num_blocks) = _idle_longer_than_penalty_threshold(
-                adventurer
+                immutable_adventurer
             );
 
             // if adventurer exceeded idle penalty threshold
@@ -2150,15 +2160,19 @@ mod Game {
             ImplLoot::is_starting_weapon(starting_weapon) == true, messages::INVALID_STARTING_WEAPON
         );
     }
-    fn _assert_starting_stat_count(starting_stats: Stats) {
+    fn _assert_starting_stats(starting_stats: Stats) {
         let total_stats = starting_stats.strength
             + starting_stats.dexterity
             + starting_stats.vitality
             + starting_stats.intelligence
             + starting_stats.wisdom
             + starting_stats.charisma;
-
         assert(total_stats == STARTING_STATS, messages::WRONG_STARTING_STATS);
+        _assert_zero_luck(starting_stats);
+    }
+
+    fn _assert_zero_luck(stats: Stats) {
+        assert(stats.luck == 0, messages::NON_ZERO_STARTING_LUCK);
     }
     fn _assert_has_enough_gold(adventurer: Adventurer, cost: u16) {
         assert(adventurer.gold >= cost, messages::NOT_ENOUGH_GOLD);
@@ -2174,23 +2188,25 @@ mod Game {
             messages::HEALTH_FULL
         );
     }
-    fn _assert_stat_balance(adventurer: Adventurer, stat_upgrades: Stats) {
-        let stat_count = stat_upgrades.strength
+
+    fn _assert_stat_balance(stat_upgrades: Stats, stat_points_available: u8) {
+        let stat_upgrade_count = stat_upgrades.strength
             + stat_upgrades.dexterity
             + stat_upgrades.vitality
             + stat_upgrades.intelligence
             + stat_upgrades.wisdom
             + stat_upgrades.charisma;
 
-        // if adventurer has less than the number of stats they are trying to upgrade
-        if adventurer.stat_points_available.into() < stat_count {
-            // panic with insufficient stat upgrades message
+        if stat_points_available < stat_upgrade_count {
             panic_with_felt252(messages::INSUFFICIENT_STAT_UPGRADES);
-        } else if adventurer.stat_points_available.into() > stat_count {
-            // if the adventurer has more than the number of stats they are trying to upgrade
-            // panic with must use all stats message
+        } else if stat_points_available > stat_upgrade_count {
             panic_with_felt252(messages::MUST_USE_ALL_STATS);
         }
+    }
+    fn _assert_valid_stat_selection(adventurer: Adventurer, stat_upgrades: Stats) {
+        _assert_upgrades_available(adventurer);
+        _assert_stat_balance(stat_upgrades, adventurer.stat_points_available);
+        _assert_zero_luck(stat_upgrades);
     }
 
     fn _assert_is_idle(adventurer: Adventurer) {
