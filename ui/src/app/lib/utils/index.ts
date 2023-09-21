@@ -339,3 +339,7 @@ export function isObject(value: any): value is object {
 export function convertToBoolean(value: number): boolean {
   return value === 1;
 }
+
+export function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
