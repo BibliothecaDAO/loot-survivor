@@ -25,7 +25,8 @@ mod messages {
     const NO_ITEMS: felt252 = 'Must provide item ids';
 }
 
-const BLOCKS_IN_A_WEEK: u64 = 1;
+// TODO: Update for mainnet
+const BLOCKS_IN_A_WEEK: u64 = 1000;
 const COST_TO_PLAY: u8 = 25;
 const STARTING_STATS: u8 = 6;
 const IDLE_DEATH_PENALTY_BLOCKS: u8 = 12;
