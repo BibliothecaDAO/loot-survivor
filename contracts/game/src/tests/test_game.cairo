@@ -1295,7 +1295,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(141506980)]
+    #[available_gas(141507880)]
     fn test_multi_slay_adventurers() {
         let STARTING_BLOCK_NUMBER = 512;
 
