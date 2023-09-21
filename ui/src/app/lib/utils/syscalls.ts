@@ -183,48 +183,40 @@ export function syscalls({
   };
 
   const spawn = async (formData: FormData) => {
-    // const mintLords = {
-    //   contractAddress: lordsContract?.address ?? "",
-    //   entrypoint: "mint",
-    //   calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
-    // };
-    // addToCalls(mintLords);
+    const mintLords = {
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "mint",
+      calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
+    };
+    addToCalls(mintLords);
 
-    const calldata = CallData.compile({
-      to: formatAddress,
-      amount: [(100 * 10 ** 18).toString(), "0"],
-    });
+    const approveLordsTx = {
+      contractAddress: lordsContract?.address ?? "",
+      entrypoint: "approve",
+      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
+    };
+    addToCalls(approveLordsTx);
 
-    const call = lordsContract.populate("mint", calldata);
-    console.log(call);
+    const mintAdventurerTx = {
+      contractAddress: gameContract?.address ?? "",
+      entrypoint: "start",
+      calldata: [
+        "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
+        getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
+        stringToFelt(formData.name).toString(),
+        getRandomNumber(8000),
+        getKeyFromValue(gameData.CLASSES, formData.class) ?? "",
+        "1",
+        formData.startingStrength,
+        formData.startingDexterity,
+        formData.startingVitality,
+        formData.startingIntelligence,
+        formData.startingWisdom,
+        formData.startingCharisma,
+      ],
+    };
 
-    // const approveLordsTx = {
-    //   contractAddress: lordsContract?.address ?? "",
-    //   entrypoint: "approve",
-    //   calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
-    // };
-    // addToCalls(approveLordsTx);
-
-    // const mintAdventurerTx = {
-    //   contractAddress: gameContract?.address ?? "",
-    //   entrypoint: "start",
-    //   calldata: [
-    //     "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
-    //     getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
-    //     stringToFelt(formData.name).toString(),
-    //     getRandomNumber(8000),
-    //     getKeyFromValue(gameData.CLASSES, formData.class) ?? "",
-    //     "1",
-    //     formData.startingStrength,
-    //     formData.startingDexterity,
-    //     formData.startingVitality,
-    //     formData.startingIntelligence,
-    //     formData.startingWisdom,
-    //     formData.startingCharisma,
-    //   ],
-    // };
-
-    // addToCalls(mintAdventurerTx);
+    addToCalls(mintAdventurerTx);
     startLoading(
       "Create",
       "Spawning Adventurer",
@@ -232,16 +224,16 @@ export function syscalls({
       undefined
     );
     try {
-      // const tx = await handleSubmitCalls(writeAsync);
-      const { transaction_hash } = account.execute(call);
-      setTxHash(transaction_hash);
+      const tx = await handleSubmitCalls(writeAsync);
+      // const { transaction_hash } = account.execute(call);
+      setTxHash(tx?.transaction_hash);
       addTransaction({
-        hash: transaction_hash,
+        hash: tx?.transaction_hash,
         metadata: {
           method: `Spawn ${formData.name}`,
         },
       });
-      const receipt = await account?.waitForTransaction(transaction_hash, {
+      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: 2000,
       });
       const events = await parseEvents(

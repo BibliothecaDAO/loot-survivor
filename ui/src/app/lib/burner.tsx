@@ -111,7 +111,7 @@ export const useBurner = () => {
         throw new Error("burner not found");
       }
 
-      return new Account(provider, address, storage[address].privateKey);
+      return new Account(provider, address, storage[address].privateKey, "1");
     },
     [walletAccount]
   );
@@ -126,7 +126,8 @@ export const useBurner = () => {
     }
 
     const constructorAACalldata = CallData.compile({
-      publicKey: publicKey,
+      _public_key: publicKey,
+      _master_account: walletAccount.address,
     });
 
     const address = hash.calculateContractAddressFromHash(
@@ -165,12 +166,14 @@ export const useBurner = () => {
       { maxFee: estimatedFee1 * (BigInt(11) / BigInt(10)) }
     );
 
-    await delay(10000);
+    await provider.waitForTransaction(deployTx);
 
-    // const setPermissionsTx = await setPermissions(
-    //   accountAAFinalAdress,
-    //   walletAccount
-    // );
+    const setPermissionsTx = await setPermissions(
+      accountAAFinalAdress,
+      walletAccount
+    );
+
+    await provider.waitForTransaction(setPermissionsTx);
 
     // save burner
     let storage = Storage.get("burners") || {};
@@ -182,7 +185,7 @@ export const useBurner = () => {
       privateKey,
       publicKey,
       deployTx,
-      // setPermissionsTx,
+      setPermissionsTx,
       active: true,
     };
 
