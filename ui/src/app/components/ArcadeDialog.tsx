@@ -22,7 +22,7 @@ export const ArcadeDialog = () => {
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const { connect, connectors, available } = useConnectors();
-  const { create, isDeploying } = useBurner();
+  const { create, isDeploying, isSettingPermissions } = useBurner();
 
   const arcadeConnectors = useCallback(() => {
     return available.filter(
@@ -30,8 +30,6 @@ export const ArcadeDialog = () => {
         typeof connector.id === "string" && connector.id.includes("0x")
     );
   }, [available]);
-
-  console.log(arcadeConnectors());
 
   if (!connectors) return <div></div>;
 
@@ -75,16 +73,23 @@ export const ArcadeDialog = () => {
               />
             );
           })}
-          {isDeploying && (
+          {/* {isDeploying && (
             <div className="flex justify-center border-terminal-green border">
               <p className="self-center">Deploying Account...</p>
             </div>
-          )}
+          )} */}
         </div>
         <div>
           <Button onClick={() => showArcadeDialog(!arcadeDialog)}>close</Button>
         </div>
       </div>
+      {isDeploying && (
+        <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full flex justify-center items-center">
+          <h3 className="loading-ellipsis">
+            {isSettingPermissions ? "Setting Permissions" : "Deploying Account"}
+          </h3>
+        </div>
+      )}
     </>
   );
 };

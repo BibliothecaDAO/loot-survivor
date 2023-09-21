@@ -40,6 +40,7 @@ export const useBurner = () => {
   const { account: walletAccount } = useAccount();
   const [account, setAccount] = useState<Account>();
   const [isDeploying, setIsDeploying] = useState(false);
+  const [isSettingPermissions, setIsSettingPermissions] = useState(false);
   const { gameContract, lordsContract } = useContracts();
 
   // init
@@ -158,6 +159,8 @@ export const useBurner = () => {
 
     await provider.waitForTransaction(deployTx);
 
+    setIsSettingPermissions(true);
+
     const setPermissionsTx = await setPermissions(
       accountAAFinalAdress,
       walletAccount
@@ -180,9 +183,11 @@ export const useBurner = () => {
     };
 
     setAccount(burner);
-    setIsDeploying(false);
     Storage.set("burners", storage);
+    setIsSettingPermissions(false);
+    setIsDeploying(false);
     refresh();
+    window.location.reload();
     return burner;
   }, [walletAccount]);
 
@@ -253,6 +258,7 @@ export const useBurner = () => {
     create,
     account,
     isDeploying,
+    isSettingPermissions,
     listConnectors,
   };
 };
