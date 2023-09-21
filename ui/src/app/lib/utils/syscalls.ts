@@ -1,4 +1,4 @@
-import { InvokeTransactionReceiptResponse } from "starknet";
+import { InvokeTransactionReceiptResponse, CallData } from "starknet";
 import { GameData } from "@/app/components/GameData";
 import {
   Adventurer,
@@ -183,12 +183,20 @@ export function syscalls({
   };
 
   const spawn = async (formData: FormData) => {
-    const mintLords = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(mintLords);
+    // const mintLords = {
+    //   contractAddress: lordsContract?.address ?? "",
+    //   entrypoint: "mint",
+    //   calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
+    // };
+    // addToCalls(mintLords);
+
+    const calldata = CallData.compile({
+      to: formatAddress,
+      amount: [(100 * 10 ** 18).toString(), "0"],
+    });
+
+    const call = lordsContract.populate("mint", calldata);
+    console.log(call);
 
     // const approveLordsTx = {
     //   contractAddress: lordsContract?.address ?? "",
@@ -224,15 +232,16 @@ export function syscalls({
       undefined
     );
     try {
-      const tx = await handleSubmitCalls(writeAsync);
-      setTxHash(tx.transaction_hash);
+      // const tx = await handleSubmitCalls(writeAsync);
+      const { transaction_hash } = account.execute(call);
+      setTxHash(transaction_hash);
       addTransaction({
-        hash: tx?.transaction_hash,
+        hash: transaction_hash,
         metadata: {
           method: `Spawn ${formData.name}`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx.transaction_hash, {
+      const receipt = await account?.waitForTransaction(transaction_hash, {
         retryInterval: 2000,
       });
       const events = await parseEvents(
