@@ -190,33 +190,33 @@ export function syscalls({
     };
     addToCalls(mintLords);
 
-    const approveLordsTx = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(approveLordsTx);
+    // const approveLordsTx = {
+    //   contractAddress: lordsContract?.address ?? "",
+    //   entrypoint: "approve",
+    //   calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
+    // };
+    // addToCalls(approveLordsTx);
 
-    const mintAdventurerTx = {
-      contractAddress: gameContract?.address ?? "",
-      entrypoint: "start",
-      calldata: [
-        "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
-        getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
-        stringToFelt(formData.name).toString(),
-        getRandomNumber(8000),
-        getKeyFromValue(gameData.CLASSES, formData.class) ?? "",
-        "1",
-        formData.startingStrength,
-        formData.startingDexterity,
-        formData.startingVitality,
-        formData.startingIntelligence,
-        formData.startingWisdom,
-        formData.startingCharisma,
-      ],
-    };
+    // const mintAdventurerTx = {
+    //   contractAddress: gameContract?.address ?? "",
+    //   entrypoint: "start",
+    //   calldata: [
+    //     "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
+    //     getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
+    //     stringToFelt(formData.name).toString(),
+    //     getRandomNumber(8000),
+    //     getKeyFromValue(gameData.CLASSES, formData.class) ?? "",
+    //     "1",
+    //     formData.startingStrength,
+    //     formData.startingDexterity,
+    //     formData.startingVitality,
+    //     formData.startingIntelligence,
+    //     formData.startingWisdom,
+    //     formData.startingCharisma,
+    //   ],
+    // };
 
-    addToCalls(mintAdventurerTx);
+    // addToCalls(mintAdventurerTx);
     startLoading(
       "Create",
       "Spawning Adventurer",
