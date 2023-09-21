@@ -23,6 +23,7 @@ mod messages {
     const WRONG_STARTING_STATS: felt252 = 'Wrong starting stat count';
     const MUST_USE_ALL_STATS: felt252 = 'Must use all stats';
     const NO_ITEMS: felt252 = 'Must provide item ids';
+    const NON_ZERO_STARTING_LUCK: felt252 = 'Luck must be zero';
 }
 
 // TODO: Update for mainnet

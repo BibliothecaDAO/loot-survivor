@@ -156,7 +156,7 @@ mod Game {
             starting_stats: Stats,
         ) {
             _assert_valid_starter_weapon(starting_weapon);
-            _assert_starting_stat_count(starting_stats);
+            _assert_starting_stats(starting_stats);
 
             let caller = get_caller_address();
             let block_number = starknet::get_block_info().unbox().block_number;
@@ -2150,15 +2150,15 @@ mod Game {
             ImplLoot::is_starting_weapon(starting_weapon) == true, messages::INVALID_STARTING_WEAPON
         );
     }
-    fn _assert_starting_stat_count(starting_stats: Stats) {
+    fn _assert_starting_stats(starting_stats: Stats) {
         let total_stats = starting_stats.strength
             + starting_stats.dexterity
             + starting_stats.vitality
             + starting_stats.intelligence
             + starting_stats.wisdom
             + starting_stats.charisma;
-
         assert(total_stats == STARTING_STATS, messages::WRONG_STARTING_STATS);
+        assert(starting_stats.luck == 0, messages::NON_ZERO_STARTING_LUCK);
     }
     fn _assert_has_enough_gold(adventurer: Adventurer, cost: u16) {
         assert(adventurer.gold >= cost, messages::NOT_ENOUGH_GOLD);
