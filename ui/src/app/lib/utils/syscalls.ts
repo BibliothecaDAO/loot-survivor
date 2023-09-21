@@ -225,7 +225,6 @@ export function syscalls({
     );
     try {
       const tx = await handleSubmitCalls(writeAsync);
-      // const { transaction_hash } = account.execute(call);
       setTxHash(tx?.transaction_hash);
       addTransaction({
         hash: tx?.transaction_hash,
