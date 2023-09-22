@@ -25,7 +25,7 @@ export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
   const resetNotification = useLoadingStore((state) => state.resetNotification);
 
   useEffect(() => {
-    if (formData.startingStrength && formData.name && formData.startingWeapon) {
+    if (formData.name && formData.startingWeapon) {
       setFormFilled(true);
     } else {
       setFormFilled(false);

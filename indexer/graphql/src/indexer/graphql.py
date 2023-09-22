@@ -631,6 +631,7 @@ class AdventurersFilter:
     intelligence: Optional[FeltValueFilter] = None
     wisdom: Optional[FeltValueFilter] = None
     charisma: Optional[FeltValueFilter] = None
+    luck: Optional[FeltValueFilter] = None
     xp: Optional[FeltValueFilter] = None
     weapon: Optional[FeltValueFilter] = None
     chest: Optional[FeltValueFilter] = None
@@ -760,6 +761,7 @@ class AdventurersOrderByInput:
     intelligence: Optional[OrderByInput] = None
     wisdom: Optional[OrderByInput] = None
     charisma: Optional[OrderByInput] = None
+    luck: Optional[OrderByInput] = None
     xp: Optional[OrderByInput] = None
     weapon: Optional[OrderByInput] = None
     chest: Optional[OrderByInput] = None
@@ -889,6 +891,7 @@ class Adventurer:
     intelligence: Optional[FeltValue]
     wisdom: Optional[FeltValue]
     charisma: Optional[FeltValue]
+    luck: Optional[FeltValue]
     xp: Optional[FeltValue]
     weapon: Optional[ItemValue]
     chest: Optional[ItemValue]
@@ -921,6 +924,7 @@ class Adventurer:
             intelligence=data["intelligence"],
             wisdom=data["wisdom"],
             charisma=data["charisma"],
+            luck=data["luck"],
             xp=data["xp"],
             weapon=data["weapon"],
             chest=data["chest"],
@@ -1608,15 +1612,15 @@ async def run_graphql_api(mongo_goerli=None, mongo_mainnet=None, port="8080"):
         },
     )
 
-    ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    ssl_context.load_cert_chain(
-        "/etc/letsencrypt/live/survivor-indexer.realms.world/fullchain.pem",
-        "/etc/letsencrypt/live/survivor-indexer.realms.world/privkey.pem",
-    )
+    # ssl_context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    # ssl_context.load_cert_chain(
+    #     "/etc/letsencrypt/live/survivor-indexer.realms.world/fullchain.pem",
+    #     "/etc/letsencrypt/live/survivor-indexer.realms.world/privkey.pem",
+    # )
 
     runner = web.AppRunner(app)
     await runner.setup()
-    site = web.TCPSite(runner, "0.0.0.0", int(port), ssl_context=ssl_context)
+    site = web.TCPSite(runner, "0.0.0.0", int(port))
     await site.start()
 
     print(f"GraphQL server started on port {port}")

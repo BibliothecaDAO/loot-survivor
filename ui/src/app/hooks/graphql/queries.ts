@@ -14,6 +14,7 @@ const ADVENTURER_FIELDS = `
   intelligence
   wisdom
   charisma
+  luck
   xp
   weapon
   chest

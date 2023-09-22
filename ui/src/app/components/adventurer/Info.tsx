@@ -55,21 +55,6 @@ export default function Info({
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  const neckItem =
-    items.find(
-      (item: Item) => item.item == formatAdventurer.neck && item.equipped
-    ) || NullItem;
-
-  const ringItem =
-    items.find(
-      (item: Item) => item.item == formatAdventurer.ring && item.equipped
-    ) || NullItem;
-
-  const luck =
-    (neckItem.item ? calculateLevel(neckItem.xp ?? 0) : 0) +
-    (ringItem.item ? calculateLevel(ringItem.xp ?? 0) : 0) +
-    (ringItem.item === "Silver Ring" && ringItem.xp === 400 ? 20 : 0);
-
   const handleDropItems = (item: string) => {
     const newDropItems = [
       ...dropItems,
@@ -100,7 +85,7 @@ export default function Info({
     { key: "VIT", value: formatAdventurer.vitality ?? 0 },
     { key: "WIS", value: formatAdventurer.wisdom ?? 0 },
     { key: "CHA", value: formatAdventurer.charisma ?? 0 },
-    { key: "LUCK", value: luck },
+    { key: "LUCK", value: formatAdventurer.luck ?? 0 },
   ];
 
   const bodyParts = [

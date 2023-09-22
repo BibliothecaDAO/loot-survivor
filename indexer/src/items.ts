@@ -25,7 +25,7 @@ import {
   START_GAME,
 } from "./utils/events.ts";
 import { insertItem, updateItemsXP } from "./utils/helpers.ts";
-import { checkExistsInt } from "./utils/encode.ts";
+import { checkExistsInt, encodeIntAsBytes } from "./utils/encode.ts";
 import { MONGO_CONNECTION_STRING, ITEMS_NUMBER } from "./utils/constants.ts";
 
 const GAME = Deno.env.get("GAME");
@@ -73,25 +73,6 @@ export default function transform({ header, events }: Block) {
         const as = value.adventurerState;
         const itemInserts: any[] = [];
         console.log("START_GAME", "->", "ITEMS UPDATES");
-        // for (let i = 1; i < ITEMS_NUMBER; i++) {
-        //   itemInserts.push(
-        //     insertItem({
-        //       item: i,
-        //       adventurerId: as.adventurerId,
-        //       owner: false,
-        //       equipped: false,
-        //       ownerAddress: 0,
-        //       xp: 0,
-        //       special1: 0,
-        //       special2: 0,
-        //       special3: 0,
-        //       isAvailable: false,
-        //       purchasedTime: 0,
-        //       timestamp: new Date().toISOString(),
-        //     })
-        //   );
-        // }
-
         const starterWeapon = {
           entity: {
             item: checkExistsInt(BigInt(as.adventurer.weapon.id)),
@@ -104,6 +85,12 @@ export default function transform({ header, events }: Block) {
               owner: true,
               equipped: true,
               ownerAddress: checkExistsInt(BigInt(as.owner)),
+              xp: encodeIntAsBytes(BigInt(0)),
+              special1: null,
+              special2: null,
+              special3: null,
+              isAvailable: false,
+              purchasedTime: null,
               timestamp: new Date().toISOString(),
             },
           },

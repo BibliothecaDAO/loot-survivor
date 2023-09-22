@@ -205,14 +205,8 @@ export function syscalls({
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name).toString(),
         getRandomNumber(8000),
-        getKeyFromValue(gameData.CLASSES, formData.class) ?? "",
         "1",
-        formData.startingStrength,
-        formData.startingDexterity,
-        formData.startingVitality,
-        formData.startingIntelligence,
-        formData.startingWisdom,
-        formData.startingCharisma,
+        "1",
       ],
     };
 
@@ -476,24 +470,24 @@ export function syscalls({
         setStartOption("create adventurer");
       }
 
-      const newItemsAvailableEvents = events.filter(
-        (event) => event.name === "NewItemsAvailable"
+      const upgradesAvailableEvents = events.filter(
+        (event) => event.name === "UpgradesAvailable"
       );
-      if (newItemsAvailableEvents.length > 0) {
-        for (let newItemsAvailableEvent of newItemsAvailableEvents) {
+      if (upgradesAvailableEvents.length > 0) {
+        for (let upgradesAvailableEvent of upgradesAvailableEvents) {
           setData("adventurerByIdQuery", {
-            adventurers: [newItemsAvailableEvent.data[0]],
+            adventurers: [upgradesAvailableEvent.data[0]],
           });
-          setAdventurer(newItemsAvailableEvent.data[0]);
-          const newItems = newItemsAvailableEvent.data[1];
+          setAdventurer(upgradesAvailableEvent.data[0]);
+          const newItems = upgradesAvailableEvent.data[1];
           const itemData = [];
           for (let newItem of newItems) {
             itemData.unshift({
               item: newItem,
-              adventurerId: newItemsAvailableEvent.data[0]["id"],
+              adventurerId: upgradesAvailableEvent.data[0]["id"],
               owner: false,
               equipped: false,
-              ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+              ownerAddress: upgradesAvailableEvent.data[0]["owner"],
               xp: 0,
               special1: null,
               special2: null,
@@ -680,24 +674,24 @@ export function syscalls({
         setStartOption("create adventurer");
       }
 
-      const newItemsAvailableEvents = events.filter(
-        (event) => event.name === "NewItemsAvailable"
+      const upgradesAvailableEvents = events.filter(
+        (event) => event.name === "UpgradesAvailable"
       );
-      if (newItemsAvailableEvents.length > 0) {
-        for (let newItemsAvailableEvent of newItemsAvailableEvents) {
+      if (upgradesAvailableEvents.length > 0) {
+        for (let upgradesAvailableEvent of upgradesAvailableEvents) {
           setData("adventurerByIdQuery", {
-            adventurers: [newItemsAvailableEvent.data[0]],
+            adventurers: [upgradesAvailableEvent.data[0]],
           });
-          setAdventurer(newItemsAvailableEvent.data[0]);
-          const newItems = newItemsAvailableEvent.data[1];
+          setAdventurer(upgradesAvailableEvent.data[0]);
+          const newItems = upgradesAvailableEvent.data[1];
           const itemData = [];
           for (let newItem of newItems) {
             itemData.unshift({
               item: newItem,
-              adventurerId: newItemsAvailableEvent.data[0]["id"],
+              adventurerId: upgradesAvailableEvent.data[0]["id"],
               owner: false,
               equipped: false,
-              ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+              ownerAddress: upgradesAvailableEvent.data[0]["owner"],
               xp: 0,
               special1: null,
               special2: null,
@@ -839,20 +833,20 @@ export function syscalls({
         setStartOption("create adventurer");
       }
 
-      const newItemsAvailableEvents = events.filter(
-        (event) => event.name === "NewItemsAvailable"
+      const upgradesAvailableEvents = events.filter(
+        (event) => event.name === "UpgradesAvailable"
       );
-      if (newItemsAvailableEvents.length > 0) {
-        for (let newItemsAvailableEvent of newItemsAvailableEvents) {
-          const newItems = newItemsAvailableEvent.data[1];
+      if (upgradesAvailableEvents.length > 0) {
+        for (let upgradesAvailableEvent of upgradesAvailableEvents) {
+          const newItems = upgradesAvailableEvent.data[1];
           const itemData = [];
           for (let newItem of newItems) {
             itemData.unshift({
               item: newItem,
-              adventurerId: newItemsAvailableEvent.data[0]["id"],
+              adventurerId: upgradesAvailableEvent.data[0]["id"],
               owner: false,
               equipped: false,
-              ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+              ownerAddress: upgradesAvailableEvent.data[0]["owner"],
               xp: 0,
               special1: null,
               special2: null,

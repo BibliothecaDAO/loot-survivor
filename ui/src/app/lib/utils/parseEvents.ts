@@ -219,10 +219,13 @@ export async function parseEvents(
   }
   const gameData = new GameData();
 
+  console.log(receipt, currentAdventurer);
+
   let events: Array<any> = [];
 
   for (let raw of receipt.events) {
     const eventName = getKeyFromValue(gameData.SELECTOR_KEYS, raw.keys[0]);
+    console.log(eventName);
 
     switch (eventName) {
       case "StartGame":
