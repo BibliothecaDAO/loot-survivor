@@ -49,8 +49,8 @@ export const WeaponSelect = ({
     setStep(step + 1);
   };
   return (
-    <div className="w-full sm:p-8 md:p-4 2xl:flex 2xl:flex-col 2xl:gap-20 2xl:h-[700px]">
-      <h3 className="uppercase text-center 2xl:text-5xl">Choose your weapon</h3>
+    <div className="w-full p-4 sm:p-8 md:p-4 2xl:flex 2xl:flex-col 2xl:gap-20 2xl:h-[700px]">
+      <h3 className="uppercase text-center 2xl:text-5xl mb-3">Choose your weapon</h3>
       <div className="grid grid-cols-2 sm:flex flex-wrap sm:flex-row sm:justify-between gap-2 sm:gap-20 md:gap-5">
         {weapons.map((weapon) => (
           <div

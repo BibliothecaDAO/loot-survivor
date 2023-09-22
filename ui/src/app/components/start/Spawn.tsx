@@ -63,9 +63,9 @@ export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
           <WalletTutorial />
         </div>
       )}
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full p-2">
         <Image
-          className="mx-auto border border-terminal-green absolute  object-cover sm:py-4 sm:px-8"
+          className="mx-auto border border-terminal-green absolute object-cover sm:py-4 sm:px-8"
           src={"/scenes/intro/beast.png"}
           alt="adventurer facing beast"
           fill

@@ -99,7 +99,7 @@ export default function AdventurerScreen({
           onSelected={(value) => setStartOption(value)}
           isActive={activeMenu == 0}
           setActiveMenu={setActiveMenu}
-          size={"lg"}
+          size={"xs"}
         />
       </div>
 
