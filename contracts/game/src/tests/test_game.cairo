@@ -102,18 +102,10 @@ mod tests {
             name: 'loothero'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
         };
 
-        let starting_stats = Stats {
-            strength: 0, dexterity: 2, vitality: 0, intelligence: 2, wisdom: 2, charisma: 0, luck: 0
-        };
-
-        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta, starting_stats);
+        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta);
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
-        assert(
-            original_adventurer.health == STARTING_HEALTH - STARTER_BEAST_ATTACK_DAMAGE,
-            'wrong starting health'
-        );
         assert(original_adventurer.weapon.id == ItemId::Wand, 'wrong starting weapon');
         assert(
             original_adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
@@ -128,18 +120,10 @@ mod tests {
             name: 'Loaf'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
         };
 
-        let starting_stats = Stats {
-            strength: 0, dexterity: 2, vitality: 0, intelligence: 2, wisdom: 2, charisma: 0, luck: 0
-        };
-
-        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta, starting_stats);
+        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta);
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
-        assert(
-            original_adventurer.health == STARTING_HEALTH - STARTER_BEAST_ATTACK_DAMAGE,
-            'wrong starting health'
-        );
         assert(original_adventurer.weapon.id == ItemId::Wand, 'wrong starting weapon');
         assert(
             original_adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
@@ -151,9 +135,6 @@ mod tests {
 
     fn new_adventurer_max_charisma() -> IGameDispatcher {
         let mut game = setup(1000);
-        let starting_stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 6, luck: 0
-        };
 
         game
             .start(
@@ -161,8 +142,7 @@ mod tests {
                 ItemId::Wand,
                 AdventurerMetadata {
                     name: 'loothero'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
-                },
-                starting_stats
+                }
             );
 
         game
@@ -1295,7 +1275,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(141535180)]
+    #[available_gas(142346872)]
     fn test_multi_slay_adventurers() {
         let STARTING_BLOCK_NUMBER = 512;
 

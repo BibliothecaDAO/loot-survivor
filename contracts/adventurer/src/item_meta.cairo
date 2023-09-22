@@ -476,8 +476,8 @@ mod tests {
     use pack::pack::{Packing};
     use lootitems::constants::{ItemId};
     use survivor::{
-        adventurer::{ImplAdventurer}, item_primitive::ItemPrimitive,
-        adventurer_stats::Stats, bag::{Bag, IBag},
+        adventurer::{ImplAdventurer}, item_primitive::ItemPrimitive, adventurer_stats::Stats,
+        bag::{Bag, IBag},
         item_meta::{
             ImplItemSpecials, ItemSpecialsStorage, ItemSpecials, MAX_SPECIAL1, MAX_SPECIAL2,
             MAX_SPECIAL3, STORAGE
@@ -539,13 +539,7 @@ mod tests {
     #[available_gas(4000000)]
     fn test_set_metadata_id() {
         // start test with a new adventurer wielding a wand
-        let mut adventurer = ImplAdventurer::new(
-            12,
-            1,
-            Stats {
-                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1, luck: 1
-            }
-        );
+        let mut adventurer = ImplAdventurer::new(12, 6, 1, 0);
 
         // assert adventurer starter weapon has meta data id 1
         assert(adventurer.weapon.metadata == 1, 'advntr wpn meta data shld be 1');

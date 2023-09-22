@@ -12,10 +12,9 @@ trait IGame<TContractState> {
     // actions ---------------------------------------------------
     fn start(
         ref self: TContractState,
-        interface_id: ContractAddress,
+        client_reward_address: ContractAddress,
         starting_weapon: u8,
-        adventurer_meta: AdventurerMetadata,
-        starting_stats: Stats
+        adventurer_meta: AdventurerMetadata
     );
     fn explore(ref self: TContractState, adventurer_id: u256, till_beast: bool);
     fn attack(ref self: TContractState, adventurer_id: u256, to_the_death: bool);
@@ -113,7 +112,7 @@ trait IGame<TContractState> {
     // contract details
     fn get_dao_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;
-    fn get_entropy(self: @TContractState) -> u64;    
+    fn get_entropy(self: @TContractState) -> u64;
 
     // checks ----------------------------------------------------
     fn owner_of(self: @TContractState, adventurer_id: u256) -> ContractAddress;
