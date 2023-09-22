@@ -130,10 +130,31 @@ mod mask {
 }
 
 const MASK_63: u256 = 0x7FFFFFFFFFFFFFFF;
+const MASK_3: u256 = 0b111;
 const MASK_6: u256 = 0x3F;
 const MASK_8: u256 = 0xFF; // Mask for 8-bit values: id, prefix1, prefix2, suffix
+const U128_MASK_8: u128 = 0xFF;
+
 const MASK_16: u256 = 0xFFFF; // Mask for 16-bit values: xp
 const MASK_BOOL: u256 = 0x1; // Mask for boolean values: isEquipped
+
+mod u128_pow {
+    const _8: u128 = 0x100;
+    const _16: u128 = 0x10000;
+    const _24: u128 = 0x1000000;
+    const _32: u128 = 0x100000000;
+    const _40: u128 = 0x10000000000;
+    const _48: u128 = 0x1000000000000;
+    const _56: u128 = 0x100000000000000;
+    const _64: u128 = 0x10000000000000000;
+    const _72: u128 = 0x1000000000000000000;
+    const _80: u128 = 0x100000000000000000000;
+    const _88: u128 = 0x10000000000000000000000;
+    const _96: u128 = 0x1000000000000000000000000;
+    const _104: u128 = 0x100000000000000000000000000;
+    const _112: u128 = 0x10000000000000000000000000000;
+    const _120: u128 = 0x1000000000000000000000000000000;
+}
 
 mod pow {
     const TWO_POW_1: u256 = 0x2; // 2^1

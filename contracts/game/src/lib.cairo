@@ -35,7 +35,7 @@ mod Game {
         constants::{
             messages, Week, REWARD_DISTRIBUTIONS_PHASE1, REWARD_DISTRIBUTIONS_PHASE2,
             REWARD_DISTRIBUTIONS_PHASE3, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
-            STARTER_BEAST_ATTACK_DAMAGE, STARTING_STATS, IDLE_DEATH_PENALTY_BLOCKS,
+            STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS, IDLE_DEATH_PENALTY_BLOCKS,
             MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE
         }
     };
@@ -150,22 +150,18 @@ mod Game {
         //@dev Ensures that the chosen starting weapon and stats are valid before beginning the adventure.
         fn start(
             ref self: ContractState,
-            interface_id: ContractAddress,
+            client_reward_address: ContractAddress,
             starting_weapon: u8,
             adventurer_meta: AdventurerMetadata,
-            starting_stats: Stats,
         ) {
             _assert_valid_starter_weapon(starting_weapon);
-            _assert_starting_stats(starting_stats);
 
             let caller = get_caller_address();
             let block_number = starknet::get_block_info().unbox().block_number;
 
-            _start(
-                ref self, block_number, caller, starting_weapon, adventurer_meta, starting_stats
-            );
+            _start(ref self, block_number, caller, starting_weapon, adventurer_meta);
 
-            _payout(ref self, caller, block_number, interface_id);
+            _payout(ref self, caller, block_number, client_reward_address);
         }
 
         //@notice Sends an adventurer to explore.
@@ -1061,20 +1057,17 @@ mod Game {
         block_number: u64,
         caller: ContractAddress,
         starting_weapon: u8,
-        adventurer_meta: AdventurerMetadata,
-        starting_stats: Stats,
+        adventurer_meta: AdventurerMetadata
     ) {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._counter.read() + 1;
 
-        // generate a new adventurer using the provided started weapon and current block number
-        let mut new_adventurer: Adventurer = ImplAdventurer::new(
-            starting_weapon, block_number, starting_stats
-        );
-
         let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
             block_number, adventurer_id
         );
+
+        // generate a new adventurer using the provided started weapon and current block number
+        let mut new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, NUM_STARTING_STATS, block_number, adventurer_entropy);
 
         // set entropy on adventurer metadata
         let adventurer_meta = AdventurerMetadata {
@@ -2167,7 +2160,7 @@ mod Game {
             + starting_stats.intelligence
             + starting_stats.wisdom
             + starting_stats.charisma;
-        assert(total_stats == STARTING_STATS, messages::WRONG_STARTING_STATS);
+        assert(total_stats == NUM_STARTING_STATS, messages::WRONG_NUM_STARTING_STATS);
         _assert_zero_luck(starting_stats);
     }
 
