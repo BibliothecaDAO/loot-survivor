@@ -20,7 +20,6 @@ export default function KillAdventurer() {
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const { data: blockData } = useBlock({
     refetchInterval: false,
-    blockIdentifier: "latest",
   });
   const { data, isLoading } = useQueriesStore();
 

@@ -9,7 +9,11 @@ import {
   useBalance,
   useConnectors,
 } from "@starknet-react/core";
-import { AccountInterface, CallData, TransactionStatus } from "starknet";
+import {
+  AccountInterface,
+  CallData,
+  TransactionFinalityStatus,
+} from "starknet";
 import { useCallback } from "react";
 
 export const ArcadeDialog = () => {
@@ -18,7 +22,7 @@ export const ArcadeDialog = () => {
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const { connect, connectors, available } = useConnectors();
-  const { create, isDeploying } = useBurner();
+  const { create, isDeploying, isSettingPermissions } = useBurner();
 
   const arcadeConnectors = useCallback(() => {
     return available.filter(
@@ -44,7 +48,7 @@ export const ArcadeDialog = () => {
             (connector?.options as any)?.id == "braavos") && (
             <div>
               <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                Note: This will initiate a transfer of 0.01 ETH from your
+                Note: This will initiate a transfer of 0.001 ETH from your
                 connected wallet to the arcade account to cover your transaction
                 costs from normal gameplay.
                 <br />
@@ -65,19 +69,27 @@ export const ArcadeDialog = () => {
                 onClick={connect}
                 address={address!}
                 masterAccount={MasterAccount!}
+                arcadeConnectors={arcadeConnectors()}
               />
             );
           })}
-          {isDeploying && (
+          {/* {isDeploying && (
             <div className="flex justify-center border-terminal-green border">
               <p className="self-center">Deploying Account...</p>
             </div>
-          )}
+          )} */}
         </div>
         <div>
           <Button onClick={() => showArcadeDialog(!arcadeDialog)}>close</Button>
         </div>
       </div>
+      {isDeploying && (
+        <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full flex justify-center items-center">
+          <h3 className="loading-ellipsis">
+            {isSettingPermissions ? "Setting Permissions" : "Deploying Account"}
+          </h3>
+        </div>
+      )}
     </>
   );
 };
@@ -87,6 +99,7 @@ interface ArcadeAccountCardProps {
   onClick: (conn: Connector<any>) => void;
   address: string;
   masterAccount: AccountInterface;
+  arcadeConnectors: any[];
 }
 
 export const ArcadeAccountCard = ({
@@ -94,6 +107,7 @@ export const ArcadeAccountCard = ({
   onClick,
   address,
   masterAccount,
+  arcadeConnectors,
 }: ArcadeAccountCardProps) => {
   const { data } = useBalance({
     address: account.name,
@@ -114,7 +128,7 @@ export const ArcadeAccountCard = ({
 
       const result = await account.waitForTransaction(transaction_hash, {
         retryInterval: 1000,
-        successStates: [TransactionStatus.ACCEPTED_ON_L2],
+        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
       });
 
       if (!result) {
@@ -138,6 +152,12 @@ export const ArcadeAccountCard = ({
     }
   };
 
+  console.log(
+    arcadeConnectors.some(
+      (conn) => conn.options.options.id == masterAccount.address
+    )
+  );
+
   return (
     <div className="border border-terminal-green p-3 hover:bg-terminal-green hover:text-terminal-black items-center">
       <div className="text-left flex flex-col text-sm sm:text-xl mb-0 sm:mb-4 items-center">
@@ -149,13 +169,23 @@ export const ArcadeAccountCard = ({
         </span>
         <span className="text-lg">{balance}ETH</span>{" "}
       </div>
-      <div className="flex justify-center">
+      <div className="flex flex-row justify-center">
         <Button
           variant={connected ? "default" : "ghost"}
           onClick={() => onClick(account)}
         >
           {connected ? "connected" : "connect"}
         </Button>
+        {!arcadeConnectors.some(
+          (conn) => conn.options.options.id == masterAccount.address
+        ) && (
+          <Button
+            variant={connected ? "default" : "ghost"}
+            onClick={() => transfer(account.name, masterAccount)}
+          >
+            Top Up 0.001Eth
+          </Button>
+        )}
       </div>
 
       {isCopied && <span>Copied!</span>}

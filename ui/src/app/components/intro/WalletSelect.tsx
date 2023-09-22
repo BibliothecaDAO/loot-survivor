@@ -63,7 +63,7 @@ const WalletSelect = ({}: WalletSelectProps) => {
               {arcadeConnectors().length ? (
                 <>
                   <h5 className="text-center">Arcade Accounts</h5>
-                  <div className="flex flex-col sm:flex-row gap-2 overflow-auto h-[300px] sm:h-full w-full  sm:h-20">
+                  <div className="flex flex-col sm:flex-row gap-2 overflow-auto h-[300px] sm:h-full w-full sm:w-[400px]">
                     {arcadeConnectors().map((connector, index) => (
                       <Button
                         onClick={() => connect(connector)}

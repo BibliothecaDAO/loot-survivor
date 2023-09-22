@@ -1275,11 +1275,15 @@ def get_adventurers(
     sort_dir = -1
 
     for key, value in sort_options.items():
-        if value.asc:
+        if getattr(
+            value, "asc", False
+        ):  # Use getattr to safely access attribute and provide a default value
             sort_var = key
             sort_dir = 1
             break
-        if value.desc:
+        if getattr(
+            value, "desc", False
+        ):  # Use getattr to safely access attribute and provide a default value
             sort_var = key
             sort_dir = -1
             break

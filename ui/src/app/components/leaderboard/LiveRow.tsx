@@ -28,7 +28,6 @@ const LiveLeaderboardRow = ({
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const { data: blockData } = useBlock({
     refetchInterval: false,
-    blockIdentifier: "latest",
   });
   const dead = (adventurer.health ?? 0) <= 0;
   const adventurersByOwner = useQueriesStore(

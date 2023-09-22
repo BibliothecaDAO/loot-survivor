@@ -10,7 +10,7 @@ use super::{
             MAX_STAT_VALUE, U128_MAX, ClassStatBoosts, STARTING_HEALTH,
             HEALTH_INCREASE_PER_VITALITY, MAX_ADVENTURER_HEALTH
         },
-        discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
+        discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
     },
     adventurer_stats::Stats, adventurer::{Adventurer, ImplAdventurer, IAdventurer},
 };
@@ -54,7 +54,7 @@ impl AdventurerUtils of IAdventurerUtils {
         } else if (result == 1) {
             ExploreResult::Obstacle(())
         } else {
-            ExploreResult::Treasure(())
+            ExploreResult::Discovery(())
         }
     }
 
@@ -229,7 +229,7 @@ mod tests {
                 MAX_STAT_VALUE, U128_MAX, ClassStatBoosts, STARTING_HEALTH,
                 HEALTH_INCREASE_PER_VITALITY, MAX_ADVENTURER_HEALTH
             },
-            discovery_constants::DiscoveryEnums::{ExploreResult, TreasureDiscovery}
+            discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
         },
         adventurer_stats::Stats, adventurer::{Adventurer, ImplAdventurer, IAdventurer},
         adventurer_utils::AdventurerUtils
@@ -239,7 +239,7 @@ mod tests {
     #[available_gas(150000)]
     fn test_is_health_full() {
         let starting_stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
@@ -276,7 +276,7 @@ mod tests {
     #[available_gas(200000)]
     fn test_get_max_health() {
         let starting_stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0,
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
         let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
 
@@ -349,7 +349,7 @@ mod tests {
 
         let entropy = 2;
         let discovery = AdventurerUtils::get_random_explore(entropy);
-        assert(discovery == ExploreResult::Treasure(()), 'adventurer should find treasure');
+        assert(discovery == ExploreResult::Discovery(()), 'adventurer should find treasure');
 
         // rollover and verify beast discovery
         let entropy = 3;

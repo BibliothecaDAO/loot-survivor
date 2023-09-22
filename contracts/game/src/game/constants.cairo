@@ -22,11 +22,16 @@ mod messages {
     const ZERO_DEXTERITY: felt252 = 'Cant flee, no dexterity';
     const WRONG_STARTING_STATS: felt252 = 'Wrong starting stat count';
     const MUST_USE_ALL_STATS: felt252 = 'Must use all stats';
+    const NO_ITEMS: felt252 = 'Must provide item ids';
+    const NON_ZERO_STARTING_LUCK: felt252 = 'Luck must be zero';
 }
 
-const BLOCKS_IN_A_WEEK: u64 = 1;
-const COST_TO_PLAY: u256 = 25;
+// TODO: Update for mainnet
+const BLOCKS_IN_A_WEEK: u64 = 1000;
+const COST_TO_PLAY: u8 = 25;
 const STARTING_STATS: u8 = 6;
+const IDLE_DEATH_PENALTY_BLOCKS: u8 = 12;
+const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u8 = 25;
 
 const U64_MAX: u64 = 18446744073709551615;
 const U128_MAX: u128 = 340282366920938463463374607431768211455;

@@ -1,4 +1,4 @@
-import { InvokeTransactionReceiptResponse } from "starknet";
+import { InvokeTransactionReceiptResponse, CallData } from "starknet";
 import { GameData } from "@/app/components/GameData";
 import {
   Adventurer,
@@ -225,14 +225,14 @@ export function syscalls({
     );
     try {
       const tx = await handleSubmitCalls(writeAsync);
-      setTxHash(tx.transaction_hash);
+      setTxHash(tx?.transaction_hash);
       addTransaction({
         hash: tx?.transaction_hash,
         metadata: {
           method: `Spawn ${formData.name}`,
         },
       });
-      const receipt = await account?.waitForTransaction(tx.transaction_hash, {
+      const receipt = await account?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: 2000,
       });
       const events = await parseEvents(
@@ -297,6 +297,7 @@ export function syscalls({
       setMintAdventurer(true);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 
@@ -525,6 +526,7 @@ export function syscalls({
       setMintAdventurer(false);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 
@@ -734,6 +736,7 @@ export function syscalls({
       setMintAdventurer(false);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 
@@ -887,6 +890,7 @@ export function syscalls({
       setMintAdventurer(false);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 
@@ -989,6 +993,7 @@ export function syscalls({
       setMintAdventurer(false);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 
@@ -1213,6 +1218,7 @@ export function syscalls({
       setMintAdventurer(false);
     } catch (e) {
       console.log(e);
+      stopLoading(e, true);
     }
   };
 

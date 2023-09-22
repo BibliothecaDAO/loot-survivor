@@ -115,8 +115,6 @@ export default function Home() {
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
   );
-  const isAlive = useAdventurerStore((state) => state.computed.isAlive);
-  const hasNoXp = useAdventurerStore((state) => state.computed.hasNoXp);
   const owner = account?.address ? padAddress(account.address) : "";
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);

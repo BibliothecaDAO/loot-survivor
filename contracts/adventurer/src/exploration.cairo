@@ -4,7 +4,7 @@ use core::traits::{Into, TryInto};
 use survivor::{
     adventurer::{Adventurer, ImplAdventurer, ItemPrimitive},
     constants::discovery_constants::{
-        DiscoveryEnums::TreasureDiscovery, DiscoveryEnums::ExploreResult
+        DiscoveryEnums::DiscoveryType, DiscoveryEnums::ExploreResult
     }
 };
 use lootitems::constants::ItemId;
@@ -13,13 +13,13 @@ use lootitems::constants::ItemId;
 impl ExploreUtils of Explore {
     // @notice: generates a random discovery {Gold, Health, XP} based on provided entropy
     // @param entropy: Entropy to use for random discovery
-    // @return TreasureDiscovery: The type of discovery
-    fn get_random_discovery(entropy: u128) -> TreasureDiscovery {
+    // @return DiscoveryType: The type of discovery
+    fn get_random_discovery(entropy: u128) -> DiscoveryType {
         let discovery_type = entropy % 2;
         if (discovery_type == 0) {
-            TreasureDiscovery::Gold(())
+            DiscoveryType::Gold(())
         } else {
-            TreasureDiscovery::Health(())
+            DiscoveryType::Health(())
         }
     }
 
@@ -73,13 +73,13 @@ mod tests {
     use lootitems::constants::ItemId;
 
     #[test]
-    #[available_gas(55560)]
+    #[available_gas(55960)]
     fn test_get_gold_discovery_gas() {
         let adventurer = ImplAdventurer::new(
             12,
             0,
             Stats {
-                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1, luck: 1
             }
         );
         let entropy = 0;
@@ -87,13 +87,13 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(56060)]
+    #[available_gas(56460)]
     fn test_get_gold_discovery() {
         let mut adventurer = ImplAdventurer::new(
             12,
             0,
             Stats {
-                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1, luck: 1
             }
         );
 
@@ -104,13 +104,13 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(55560)]
+    #[available_gas(55960)]
     fn test_get_health_discovery_gas() {
         let adventurer = ImplAdventurer::new(
             12,
             0,
             Stats {
-                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1, luck: 1
             }
         );
         let entropy = 12345;
@@ -118,13 +118,13 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(56060)]
+    #[available_gas(56460)]
     fn test_get_health_discovery() {
         let mut adventurer = ImplAdventurer::new(
             12,
             0,
             Stats {
-                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1,
+                strength: 1, dexterity: 1, vitality: 1, intelligence: 1, wisdom: 1, charisma: 1, luck: 1
             }
         );
 

@@ -7,13 +7,18 @@ import {
   hash,
   Provider,
   stark,
-  TransactionStatus,
+  TransactionFinalityStatus,
+  Call,
+  selector,
 } from "starknet";
 import Storage from "./storage";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { ArcadeConnector } from "./arcade";
+import ArcadeAccount from "../abi/arcade_account_Account.sierra.json";
+import { useContracts } from "../hooks/useContracts";
+import { delay } from "./utils";
 
-export const PREFUND_AMOUNT = "0x2386f26fc10000"; // 0.001ETH
+export const PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
 
 const provider = new Provider({
   sequencer: {
@@ -35,6 +40,8 @@ export const useBurner = () => {
   const { account: walletAccount } = useAccount();
   const [account, setAccount] = useState<Account>();
   const [isDeploying, setIsDeploying] = useState(false);
+  const [isSettingPermissions, setIsSettingPermissions] = useState(false);
+  const { gameContract, lordsContract } = useContracts();
 
   // init
   useEffect(() => {
@@ -105,7 +112,7 @@ export const useBurner = () => {
         throw new Error("burner not found");
       }
 
-      return new Account(provider, address, storage[address].privateKey);
+      return new Account(provider, address, storage[address].privateKey, "1");
     },
     [walletAccount]
   );
@@ -114,16 +121,22 @@ export const useBurner = () => {
     setIsDeploying(true);
     const privateKey = stark.randomAddress();
     const publicKey = ec.starkCurve.getStarkKey(privateKey);
-    const address = hash.calculateContractAddressFromHash(
-      publicKey,
-      process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
-      CallData.compile({ publicKey }),
-      0
-    );
 
     if (!walletAccount) {
       throw new Error("wallet account not found");
     }
+
+    const constructorAACalldata = CallData.compile({
+      _public_key: publicKey,
+      _master_account: walletAccount.address,
+    });
+
+    const address = hash.calculateContractAddressFromHash(
+      publicKey,
+      process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
+      constructorAACalldata,
+      0
+    );
 
     try {
       await prefundAccount(address, walletAccount);
@@ -132,13 +145,28 @@ export const useBurner = () => {
     }
 
     // deploy burner
-    const burner = new Account(provider, address, privateKey);
+    const burner = new Account(provider, address, privateKey, "1");
 
-    const { transaction_hash: deployTx } = await burner.deployAccount({
+    const {
+      transaction_hash: deployTx,
+      contract_address: accountAAFinalAdress,
+    } = await burner.deployAccount({
       classHash: process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
-      constructorCalldata: CallData.compile({ publicKey }),
+      constructorCalldata: constructorAACalldata,
+      contractAddress: address,
       addressSalt: publicKey,
     });
+
+    await provider.waitForTransaction(deployTx);
+
+    setIsSettingPermissions(true);
+
+    const setPermissionsTx = await setPermissions(
+      accountAAFinalAdress,
+      walletAccount
+    );
+
+    await provider.waitForTransaction(setPermissionsTx);
 
     // save burner
     let storage = Storage.get("burners") || {};
@@ -150,15 +178,53 @@ export const useBurner = () => {
       privateKey,
       publicKey,
       deployTx,
+      setPermissionsTx,
       active: true,
     };
 
     setAccount(burner);
-    setIsDeploying(false);
     Storage.set("burners", storage);
+    setIsSettingPermissions(false);
+    setIsDeploying(false);
     refresh();
+    window.location.reload();
     return burner;
   }, [walletAccount]);
+
+  const setPermissions = useCallback(
+    async (accountAAFinalAdress: any, walletAccount: any) => {
+      const permissions: Call[] = [
+        {
+          contractAddress: accountAAFinalAdress,
+          entrypoint: "update_whitelisted_contracts",
+          calldata: [
+            "2",
+            gameContract?.address ?? "",
+            "1",
+            lordsContract?.address ?? "",
+            "1",
+          ],
+        },
+        {
+          contractAddress: accountAAFinalAdress,
+          entrypoint: "update_whitelisted_calls",
+          calldata: [
+            "1",
+            gameContract?.address ?? "",
+            selector.getSelectorFromName("transfer"),
+            "1",
+          ],
+        },
+      ];
+
+      const { transaction_hash: permissionsTx } = await walletAccount.execute(
+        permissions
+      );
+
+      return permissionsTx;
+    },
+    []
+  );
 
   const listConnectors = useCallback(() => {
     const arcadeAccounts = [];
@@ -192,6 +258,7 @@ export const useBurner = () => {
     create,
     account,
     isDeploying,
+    isSettingPermissions,
     listConnectors,
   };
 };
@@ -206,7 +273,7 @@ const prefundAccount = async (address: string, account: AccountInterface) => {
 
     const result = await account.waitForTransaction(transaction_hash, {
       retryInterval: 1000,
-      successStates: [TransactionStatus.ACCEPTED_ON_L2],
+      successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
     });
 
     if (!result) {
