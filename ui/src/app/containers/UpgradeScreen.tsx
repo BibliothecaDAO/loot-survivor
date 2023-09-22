@@ -221,7 +221,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
   const upgradeTotalCost = purchaseGoldAmount + itemsGoldSum;
 
   const handleAddUpgradeTx = (
-    currenUpgrades?: UpgradeStats,
+    currentUpgrades?: UpgradeStats,
     potions?: number,
     items?: any[]
   ) => {
@@ -233,24 +233,25 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
         adventurer?.id?.toString() ?? "",
         "0",
         potions ? potions.toString() : potionAmount.toString(),
-        currenUpgrades
-          ? currenUpgrades["Strength"].toString()
+        currentUpgrades
+          ? currentUpgrades["Strength"].toString()
           : upgrades["Strength"].toString(),
-        currenUpgrades
-          ? currenUpgrades["Dexterity"].toString()
+        currentUpgrades
+          ? currentUpgrades["Dexterity"].toString()
           : upgrades["Dexterity"].toString(),
-        currenUpgrades
-          ? currenUpgrades["Vitality"].toString()
+        currentUpgrades
+          ? currentUpgrades["Vitality"].toString()
           : upgrades["Vitality"].toString(),
-        currenUpgrades
-          ? currenUpgrades["Intelligence"].toString()
+        currentUpgrades
+          ? currentUpgrades["Intelligence"].toString()
           : upgrades["Intelligence"].toString(),
-        currenUpgrades
-          ? currenUpgrades["Wisdom"].toString()
+        currentUpgrades
+          ? currentUpgrades["Wisdom"].toString()
           : upgrades["Wisdom"].toString(),
-        currenUpgrades
-          ? currenUpgrades["Charisma"].toString()
+        currentUpgrades
+          ? currentUpgrades["Charisma"].toString()
           : upgrades["Charisma"].toString(),
+        "0",
         items ? items.length.toString() : purchaseItems.length.toString(),
         ...(items
           ? items.flatMap(Object.values)

@@ -3,7 +3,6 @@ import {
   DiscoveredHealthEvent,
   DiscoveredGoldEvent,
   StartGameEvent,
-  UpgradeAvailableEvent,
   DiscoveredXPEvent,
   DodgedObstacleEvent,
   HitByObstacleEvent,
@@ -23,7 +22,7 @@ import {
   NewHighScoreEvent,
   AdventurerDiedEvent,
   AdventurerLeveledUpEvent,
-  NewItemsAvailableEvent,
+  UpgradesAvailableEvent,
   IdleDeathPenaltyEvent,
   AdventurerUpgradedEvent,
   AdventurerState,
@@ -35,7 +34,6 @@ type EventData =
   | DiscoveredHealthEvent
   | DiscoveredGoldEvent
   | StartGameEvent
-  | UpgradeAvailableEvent
   | DiscoveredXPEvent
   | DodgedObstacleEvent
   | HitByObstacleEvent
@@ -55,31 +53,9 @@ type EventData =
   | NewHighScoreEvent
   | AdventurerDiedEvent
   | AdventurerLeveledUpEvent
-  | NewItemsAvailableEvent
+  | UpgradesAvailableEvent
   | IdleDeathPenaltyEvent
   | AdventurerUpgradedEvent;
-
-function createBaseItems(data: AdventurerState) {
-  const gameData = new GameData();
-  let items = [];
-  for (let i = 1; i <= 101; i++) {
-    items.push({
-      item: gameData.ITEMS[i],
-      adventurerId: data.adventurerId,
-      owner: false,
-      equipped: false,
-      ownerAddress: data.owner,
-      xp: 0,
-      special1: null,
-      special2: null,
-      special3: null,
-      isAvailable: false,
-      purchasedTime: 0,
-      timestamp: new Date(),
-    });
-  }
-  return items;
-}
 
 function processAdventurerState(data: any, currentAdventurer?: any) {
   const gameData = new GameData();
@@ -95,6 +71,7 @@ function processAdventurerState(data: any, currentAdventurer?: any) {
     intelligence: data.adventurerState["adventurer"]["stats"]["intelligence"],
     wisdom: data.adventurerState["adventurer"]["stats"]["wisdom"],
     charisma: data.adventurerState["adventurer"]["stats"]["charisma"],
+    luck: data.adventurerState["adventurer"]["stats"]["luck"],
     gold: data.adventurerState["adventurer"]["gold"],
     weapon: gameData.ITEMS[data.adventurerState["adventurer"]["weapon"]["id"]],
     chest: gameData.ITEMS[data.adventurerState["adventurer"]["chest"]["id"]],
@@ -197,6 +174,7 @@ export function processData(
         wisdom: startGameEvent.adventurerState["adventurer"]["stats"]["wisdom"],
         charisma:
           startGameEvent.adventurerState["adventurer"]["stats"]["charisma"],
+        luck: startGameEvent.adventurerState["adventurer"]["stats"]["luck"],
         gold: startGameEvent.adventurerState["adventurer"]["gold"],
         weapon:
           gameData.ITEMS[
@@ -237,11 +215,13 @@ export function processData(
         lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
         timestamp: new Date(),
       };
-      const items = createBaseItems(startGameEvent.adventurerState);
-      return [updateAdventurerDoc, items];
+      return [updateAdventurerDoc];
     case "AdventurerUpgraded":
       const adventurerUpgradedEvent = event as AdventurerUpgradedEvent;
-      return processAdventurerState(adventurerUpgradedEvent, currentAdventurer);
+      return processAdventurerState(
+        adventurerUpgradedEvent.adventurerStateWithBag,
+        currentAdventurer
+      );
     case "DiscoveredHealth":
       const discoveredHealthEvent = event as DiscoveredHealthEvent;
       const discoveredHealthAdventurerData = processAdventurerState(
@@ -890,17 +870,17 @@ export function processData(
         adventurerLeveledUpEvent,
         currentAdventurer
       );
-    case "NewItemsAvailable":
-      const newItemsAvailableEvent = event as NewItemsAvailableEvent;
-      const newItemsAvailableAdventurerData = processAdventurerState(
-        newItemsAvailableEvent,
+    case "UpgradesAvailable":
+      const upgradesAvailableEvent = event as UpgradesAvailableEvent;
+      const upgradesAvailableData = processAdventurerState(
+        upgradesAvailableEvent,
         currentAdventurer
       );
       const formattedNewItems = [];
-      for (let i = 0; i < newItemsAvailableEvent.items.length; i++) {
-        formattedNewItems.push(gameData.ITEMS[newItemsAvailableEvent.items[i]]);
+      for (let i = 0; i < upgradesAvailableEvent.items.length; i++) {
+        formattedNewItems.push(gameData.ITEMS[upgradesAvailableEvent.items[i]]);
       }
-      return [newItemsAvailableAdventurerData, formattedNewItems];
+      return [upgradesAvailableData, formattedNewItems];
     case "IdleDeathPenalty":
       const idleDeathPenaltyEvent = event as IdleDeathPenaltyEvent;
       const penaltyAdventurerData = processAdventurerState(

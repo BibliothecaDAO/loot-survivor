@@ -20,6 +20,7 @@ type Stats = {
   intelligence: u8;
   wisdom: u8;
   charisma: u8;
+  luck: u8;
 };
 
 type LootStatistics = {
@@ -140,10 +141,6 @@ type AdventurerStateWithBag = {
 export type StartGameEvent = {
   adventurerState: AdventurerState;
   adventurerMeta: AdventurerMetadata;
-};
-
-export type UpgradeAvailableEvent = {
-  adventurerState: AdventurerState;
 };
 
 export type DiscoveredHealthEvent = {
@@ -306,7 +303,7 @@ export type AdventurerLeveledUpEvent = {
   newLevel: u8;
 };
 
-export type NewItemsAvailableEvent = {
+export type UpgradesAvailableEvent = {
   adventurerState: AdventurerState;
   items: number[];
 };

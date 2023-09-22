@@ -165,12 +165,6 @@ export type FormData = {
   name: string;
   homeRealmId: string;
   class: string;
-  startingStrength: any;
-  startingDexterity: any;
-  startingVitality: any;
-  startingIntelligence: any;
-  startingWisdom: any;
-  startingCharisma: any;
 };
 
 export interface Call {
