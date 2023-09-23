@@ -331,7 +331,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
 
                     {upgradeScreen != 3 && <div className="sm:hidden flex-grow text-center uppercase text-2xl self-center">Level up!</div>}
 
-                    {upgradeScreen != 3 && upgradeScreen != 2 && <div className=" flex-grow text-center uppercase text-2xl self-center">Level up!</div>}
+                    {upgradeScreen != 3 && upgradeScreen != 2 && <div className=" flex-grow text-center uppercase text-2xl self-center hidden sm:block">Level up!</div>}
 
                     <Button
                       className={` ${upgradeScreen == 2

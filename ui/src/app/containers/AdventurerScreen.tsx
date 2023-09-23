@@ -100,6 +100,7 @@ export default function AdventurerScreen({
           isActive={activeMenu == 0}
           setActiveMenu={setActiveMenu}
           size={"xs"}
+          className="sm:flex-col"
         />
       </div>
 

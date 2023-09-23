@@ -368,7 +368,7 @@ export default function Home() {
             </div>
             <div className="flex flex-row justify-between px-1  ">
               <div className="flex flex-row items-center gap-2 sm:gap-5">
-                <h1 className="m-0 text-2xl sm:text-4xl">
+                <h1 className="m-0 text-xl sm:text-4xl">
                   Loot Survivor
                 </h1>
 
@@ -490,7 +490,7 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="w-full h-1 sm:h-3 sm:my-2 bg-terminal-green text-terminal-black px-4">
+          <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
             <div className="hidden sm:block">
               <TxActivity />
             </div>

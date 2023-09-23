@@ -47,7 +47,7 @@ export const TxActivity = () => {
   return (
     <>
       {loading ? (
-        <div className="flex flex-row absolute sm:top-0 sm:relative items-center gap-5 justify-between text-xs sm:text-base p-2 w-full bg-terminal-black z-40">
+        <div className="flex flex-row absolute sm:top-0 sm:relative items-center gap-5 justify-between text-xs sm:text-base p-2 sm:p-0 w-full bg-terminal-black sm:bg-transparent z-40">
           {hash && (
             <div className="flex flex-row gap-2">
               <span className="hidden sm:block">Hash:</span>
