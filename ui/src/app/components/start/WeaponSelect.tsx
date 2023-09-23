@@ -60,11 +60,10 @@ export const WeaponSelect = ({
             <div className="relative w-28 h-28 sm:w-40 sm:h-40 md:w-52 md:h-52 2xl:h-64 2xl:w-64">
               <Image
                 src={weapon.image}
-                fill={true}
+                width={200}
+                height={200}
                 alt={weapon.name}
-                style={{
-                  objectFit: "contain",
-                }}
+                className="object-cover"
               />
             </div>
             <div className="flex items-center pb-2 sm:pb-2 md:pb-4 text-base sm:text-md">

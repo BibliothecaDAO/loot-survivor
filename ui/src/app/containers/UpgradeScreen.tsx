@@ -318,9 +318,56 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
             <div className="w-full sm:w-2/3 xl:h-[500px] xl:overflow-y-auto 2xl:h-full">
               <div className="flex flex-col gap-2 xl:gap-0 xl:h-[300px] 2xl:h-full">
                 <div className="justify-center text-terminal-green">
-                  <div className="text-center text-2xl 2xl:text-4xl xl:text-xl sm:p-2 xl:p-0 animate-pulse uppercase">
-                    Level up!
+
+
+                  <div className="w-full flex flex-row gap-2 mx-auto border border-terminal-green justify-between">
+                    <Button
+                      variant={"outline"}
+                      onClick={() => setUpgradeScreen(upgradeScreen - 1)}
+                      disabled={upgradeScreen == 1}
+                    >
+                      {"<"} Back
+                    </Button>
+
+                    {upgradeScreen != 3 && <div className="sm:hidden flex-grow text-center uppercase text-2xl self-center">Level up!</div>}
+
+                    {upgradeScreen != 3 && upgradeScreen != 2 && <div className=" flex-grow text-center uppercase text-2xl self-center">Level up!</div>}
+
+                    <Button
+                      className={` ${upgradeScreen == 2
+                        ? "hidden sm:block"
+                        : upgradeScreen == 3
+                          ? "sm:hidden"
+                          : "hidden"
+                        } w-full`}
+                      onClick={() => {
+                        handleSubmitUpgradeTx();
+                        setUpgradeScreen(1);
+                      }}
+                      disabled={nextDisabled || loading}
+                    >
+                      {loading ? (
+                        <span>Upgrading...</span>
+                      ) : (
+                        <span>Upgrade</span>
+                      )}
+                    </Button>
+                    <Button
+                      className={` ${upgradeScreen == 2
+                        ? "sm:hidden"
+                        : upgradeScreen == 3
+                          ? "hidden"
+                          : ""
+                        }`}
+                      onClick={() => {
+                        setUpgradeScreen(upgradeScreen + 1);
+                      }}
+                      disabled={nextDisabled || loading}
+                    >
+                      <span>Next {">"}</span>
+                    </Button>
                   </div>
+
                   <div className="flex flex-row gap-2 xl:gap-0 justify-center text-lg 2xl:text-2xl text-shadow-none">
                     <span>
                       {totalStatUpgrades > 0
@@ -402,9 +449,9 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                   {upgradeScreen === 2 && (
                     <div
                       className="flex flex-col gap-5 sm:gap-2
-                     sm:flex-row items-center justify-center flex-wrap border border-terminal-green"
+                     sm:flex-row items-center justify-center flex-wrap border border-terminal-green p-4"
                     >
-                      <p className="text-2xl">Potions</p>
+                      {/* <h4>Potions</h4> */}
                       <PurchaseHealth
                         upgradeTotalCost={upgradeTotalCost}
                         potionAmount={potionAmount}
@@ -432,9 +479,6 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                   )}
                   {upgradeScreen === 3 && (
                     <div className="sm:hidden flex-col items-center sm:gap-2 w-full">
-                      {/* <p className="text-xl text-center lg:text-2xl sm:hidden">
-                        Loot Fountain
-                      </p> */}
                       <MarketplaceScreen
                         upgradeTotalCost={upgradeTotalCost}
                         purchaseItems={purchaseItems}
@@ -444,49 +488,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                       />
                     </div>
                   )}
-                  <div className="w-1/2 flex flex-row gap-2 mx-auto">
-                    <Button
-                      className="w-1/2"
-                      variant={"outline"}
-                      onClick={() => setUpgradeScreen(upgradeScreen - 1)}
-                      disabled={upgradeScreen == 1}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      className={` ${upgradeScreen == 2
-                        ? "hidden sm:block"
-                        : upgradeScreen == 3
-                          ? "sm:hidden"
-                          : "hidden"
-                        } w-1/2`}
-                      onClick={() => {
-                        handleSubmitUpgradeTx();
-                        setUpgradeScreen(1);
-                      }}
-                      disabled={nextDisabled || loading}
-                    >
-                      {loading ? (
-                        <span>Upgrading...</span>
-                      ) : (
-                        <span>Upgrade</span>
-                      )}
-                    </Button>
-                    <Button
-                      className={` ${upgradeScreen == 2
-                        ? "sm:hidden"
-                        : upgradeScreen == 3
-                          ? "hidden"
-                          : ""
-                        } w-1/2`}
-                      onClick={() => {
-                        setUpgradeScreen(upgradeScreen + 1);
-                      }}
-                      disabled={nextDisabled || loading}
-                    >
-                      <span>Next</span>
-                    </Button>
-                  </div>
+
                 </div>
               </div>
             </div>

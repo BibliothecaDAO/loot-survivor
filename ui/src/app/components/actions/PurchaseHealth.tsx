@@ -1,11 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import QuantityButtons from "../buttons/QuantityButtons";
 import { Button } from "../buttons/Button";
-import { useContracts } from "../../hooks/useContracts";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
-import useTransactionCartStore from "../../hooks/useTransactionCartStore";
 import { CoinIcon } from "../icons/Icons";
-import useUIStore from "@/app/hooks/useUIStore";
 import { getPotionPrice } from "@/app/lib/utils";
 import { UpgradeStats } from "@/app/types";
 
@@ -69,31 +66,23 @@ const PurchaseHealth = ({
     }
   }, [potionAmount, buttonClicked]);
 
-  // const handleKeyDown = useCallback(
-  //   (event: KeyboardEvent) => {
-  //     switch (event.key) {
-  //       case "ArrowRight":
-  //         setPotionAmount((prev) => {
-  //           const newAmount = Math.min(prev + 1, 10);
-  //           return newAmount;
-  //         });
-  //         break;
-  //       case "ArrowLeft":
-  //         setPotionAmount((prev) => {
-  //           const newAmount = Math.max(prev - 1, 1);
-  //           return newAmount;
-  //         });
-  //         break;
-  //       case "Enter":
-  //         handlePurchaseHealth();
-  //         break;
-  //     }
-  //   },
-  //   [potionAmount]
-  // );
 
   return (
-    <div className="flex flex-col sm:flex-row sm:p-2 2xl:p-0 items-center">
+    <div className="flex flex-col sm:flex-row items-center">
+      <div className="flex flex-col text-sm text-center items-center">
+        <span className="flex flex-row gap-1 2xl:text-lg">
+          <p>
+            Purchasing{" "}
+            <strong className="text-terminal-yellow">{potionAmount}</strong>{" "}
+            potion(s) for{" "}
+          </p>
+          <span className="flex flex-row">
+            <CoinIcon className="mt-1 w-5 h-5 fill-current text-terminal-yellow" />
+            <p className="text-terminal-yellow">{purchaseGoldAmount}</p>
+          </span>
+        </span>
+
+      </div>
       <QuantityButtons
         amount={potionAmount}
         min={0}
@@ -116,27 +105,16 @@ const PurchaseHealth = ({
         Fill to Max
       </Button>
       <div className="flex flex-col gap-2 sm:flex-row items-center p-4">
-        <div className="flex flex-col text-sm text-center items-center">
-          <span className="flex flex-row gap-1 2xl:text-lg">
-            <p>
-              Purchasing{" "}
-              <strong className="text-terminal-yellow">{potionAmount}</strong>{" "}
-              potion(s) for{" "}
-            </p>
-            <span className="flex flex-row">
-              <CoinIcon className="mt-1 w-5 h-5 fill-current text-terminal-yellow" />
-              <p className="text-terminal-yellow">{purchaseGoldAmount}</p>
-            </span>
-          </span>
-          <p className="pr-4 xl:text-xs">
-            {" "}
-            You can only buy up to Max Health! 1 Potion = 10 Health
-          </p>
-        </div>
+
         {!hasBalance && (
           <p className="m-auto text-red-600">Not enough gold to purchase!</p>
         )}
+        <p className="xl:text-xs text-center">
+          {" "}
+          You can only buy up to Max Health! 1 Potion = 10 Health
+        </p>
       </div>
+
     </div>
   );
 };

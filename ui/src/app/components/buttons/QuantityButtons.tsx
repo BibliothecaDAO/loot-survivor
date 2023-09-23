@@ -27,19 +27,19 @@ const HealthButtons: React.FC<ButtonProps> = ({
   };
 
   return (
-    <div>
+    <div className="text-xl">
       <Button
-        className="text-base sm:text-2xl"
-        size={"sm"}
+        size={"xs"}
+        variant={"outline"}
         onClick={handleDecrement}
         disabled={amount <= min}
       >
         -
       </Button>
-      <span className="text-xl p-2">{amount}</span>
+      <span className=" p-2">{amount}</span>
       <Button
-        className="text-2xl mr-1"
         size={"sm"}
+        variant={"outline"}
         onClick={handleIncrement}
         disabled={amount >= max}
       >
