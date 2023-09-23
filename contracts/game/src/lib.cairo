@@ -832,21 +832,18 @@ mod Game {
         // zero out beast health
         adventurer.beast_health = 0;
 
-        // give adventurer gold reward
-        // TODO Gas Optimization: beast.get_gold_reward and get_xp_reward both call the same 
-        // get_base_reward from Combat module. Should refactor this to only make that call once and have
-        // get_gold_reward and get_xp_reward operator on the base reward
-        let mut gold_earned = beast.get_gold_reward(beast_seed);
-        let bag = _unpacked_bag(@self, adventurer_id);
+        // get gold reward and increase adventurers gold
+        let gold_earned = beast.get_gold_reward(beast_seed);
         adventurer.increase_gold(gold_earned * adventurer.beast_gold_reward_multiplier().into());
 
-        // grant adventuer xp
+        // get xp reward and increase adventurers xp
         let xp_earned_adventurer = beast.get_xp_reward();
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_earned_adventurer);
 
-        // grant equipped items xp, items level faster than Adventurers
+        // items use adventurer xp with an item multplier so they level faster than Adventurer
         let xp_earned_items = xp_earned_adventurer * ITEM_XP_MULTIPLIER_BEASTS;
-        _grant_xp_to_equipped_items(
+        // assigning xp to items is more complex so we delegate to an internal function
+        let items_leveled_up = _grant_xp_to_equipped_items(
             ref self, ref adventurer, adventurer_id, xp_earned_items, attack_rnd_2
         );
 
@@ -864,12 +861,21 @@ mod Game {
             gold_earned
         );
 
-        // if adventurers new level is greater than previous level
+        // if any items leveled up
+        if items_leveled_up.len() != 0 {
+            // emit event
+            __event_ItemsLeveledUp(ref self, adventurer, adventurer_id, items_leveled_up);
+        }
+
+        // if adventurer gained stat points
         if (adventurer.stat_points_available != 0) {
+            // emit events
             _emit_level_up_events(ref self, adventurer, adventurer_id, previous_level, new_level);
         }
 
+        // if beast beast level is above collectible threshold
         if beast.combat_spec.level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK {
+            // adventurers gets the beast
             _mint_beast(@self, beast);
         }
     }
@@ -1067,7 +1073,9 @@ mod Game {
         );
 
         // generate a new adventurer using the provided started weapon and current block number
-        let mut new_adventurer: Adventurer = ImplAdventurer::new(starting_weapon, NUM_STARTING_STATS, block_number, adventurer_entropy);
+        let mut new_adventurer: Adventurer = ImplAdventurer::new(
+            starting_weapon, NUM_STARTING_STATS, block_number, adventurer_entropy
+        );
 
         // set entropy on adventurer metadata
         let adventurer_meta = AdventurerMetadata {
