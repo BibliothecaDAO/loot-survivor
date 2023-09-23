@@ -88,11 +88,11 @@ export const PenaltyCountDown = ({
   };
 
   return (
-    <div className="text-xs sm:text-lg mt-2 sm:mt-4">
+    <div className="text-xs sm:text-lg self-center border px-1 border border-terminal-green">
       {!dataLoading ? (
         seconds > 0 ? (
           <span className="flex flex-row gap-1 items-center">
-            <p>{countingMessage}</p>
+            <p className="hidden sm:block">{countingMessage}</p>
             <p className="animate-pulse">{formatTime(seconds)}</p>
           </span>
         ) : (

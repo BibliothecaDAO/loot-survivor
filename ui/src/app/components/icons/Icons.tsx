@@ -25,6 +25,8 @@ import { GiPowderBag } from "react-icons/gi";
 import { RiShoppingCartFill } from "react-icons/ri";
 import { TbArrowBigRight } from "react-icons/tb";
 import { TbArrowBigDownFilled } from "react-icons/tb";
+import { MdToken } from "react-icons/md";
+
 import HealthPotions from "../../../../public/icons/health-potions.svg";
 import Twitter from "../../../../public/icons/twitter.svg";
 import Trophy from "../../../../public/icons/trophy.svg";
@@ -117,6 +119,8 @@ const GithubIcon = Github;
 const ArcadeIcon = Arcade;
 const QuestionMarkIcon = QuestionMark;
 
+const MdTokenIcon = MdToken;
+
 export {
   ClothIcon,
   HideIcon,
@@ -176,4 +180,5 @@ export {
   GithubIcon,
   ArcadeIcon,
   QuestionMarkIcon,
+  MdTokenIcon,
 };

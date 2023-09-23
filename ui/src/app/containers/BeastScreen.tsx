@@ -164,17 +164,17 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       <div className="flex flex-col gap-1 sm:gap-0 items-center sm:w-1/2 sm:p-4 order-1 text-lg">
         {isAlive && (
           <>
-            <div className="sm:hidden flex flex-row gap-2 sm:flex-col items-center justify-center">
-              <div className="flex flex-col items-center">
-                <p className="uppercase sm:text-2xl">Attack</p>
+            <div className="sm:hidden flex flex-row sm:flex-col items-center w-full">
+              <div className="flex flex-col items-center border border-terminal-green w-full">
+                <p className="uppercase sm:text-2xl mb-2">Attack</p>
                 <KeyboardControl
                   buttonsData={attackButtonsData}
                   size={"sm"}
                   direction="row"
                 />
               </div>
-              <div className="flex flex-col items-center">
-                <p className="uppercase sm:text-2xl">Flee</p>
+              <div className="flex flex-col items-center border border-terminal-green w-full">
+                <p className="uppercase sm:text-2xl mb-2">Flee</p>
                 <KeyboardControl
                   buttonsData={fleeButtonsData}
                   size={"sm"}

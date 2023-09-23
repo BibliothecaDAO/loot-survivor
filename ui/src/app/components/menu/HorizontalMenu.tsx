@@ -83,7 +83,7 @@ const HorizontalKeyboardControl: React.FC<HorizontalKeyboardControlProps> = ({
   }, [selectedIndex, handleKeyDown]);
 
   return (
-    <div>
+    <div className="flex justify-between sm:justify-start w-full">
       {buttonsData.map((buttonData, index) => (
         <Button
           className="px-2.5 sm:px-3"

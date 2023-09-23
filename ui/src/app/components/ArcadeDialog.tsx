@@ -35,8 +35,8 @@ export const ArcadeDialog = () => {
 
   return (
     <>
-      <div className="fixed inset-0 opacity-80 bg-terminal-black z-40 m-2" />
-      <div className="fixed text-center top-1/8 left-1/8 sm:left-1/4 w-3/4 sm:w-1/2 h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
+      <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
+      <div className="fixed text-center sm:top-1/8 sm:left-1/8 sm:left-1/4 sm:w-3/4 sm:w-1/2 h-3/4 border-4 bg-terminal-black z-50 border-terminal-green p-4 overflow-y-auto">
         <h3 className="mt-4">Arcade Accounts</h3>
         <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">
           Go deep into the mist with signature free gameplay! Simply connect
@@ -46,19 +46,19 @@ export const ArcadeDialog = () => {
         <div className="flex justify-center mb-1">
           {((connector?.options as any)?.id == "argentX" ||
             (connector?.options as any)?.id == "braavos") && (
-            <div>
-              <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                Note: This will initiate a transfer of 0.001 ETH from your
-                connected wallet to the arcade account to cover your transaction
-                costs from normal gameplay.
-                <br />
-                You may need to refresh after the account has been created!
-              </p>
-              <Button onClick={() => create()} disabled={isWrongNetwork}>
-                create arcade account
-              </Button>
-            </div>
-          )}
+              <div>
+                <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
+                  Note: This will initiate a transfer of 0.001 ETH from your
+                  connected wallet to the arcade account to cover your transaction
+                  costs from normal gameplay.
+                  <br />
+                  You may need to refresh after the account has been created!
+                </p>
+                <Button onClick={() => create()} disabled={isWrongNetwork}>
+                  create arcade account
+                </Button>
+              </div>
+            )}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 overflow-hidden my-6">
           {arcadeConnectors().map((account, index) => {
@@ -179,13 +179,13 @@ export const ArcadeAccountCard = ({
         {!arcadeConnectors.some(
           (conn) => conn.options.options.id == masterAccount.address
         ) && (
-          <Button
-            variant={connected ? "default" : "ghost"}
-            onClick={() => transfer(account.name, masterAccount)}
-          >
-            Top Up 0.001Eth
-          </Button>
-        )}
+            <Button
+              variant={connected ? "default" : "ghost"}
+              onClick={() => transfer(account.name, masterAccount)}
+            >
+              Top Up 0.001Eth
+            </Button>
+          )}
       </div>
 
       {isCopied && <span>Copied!</span>}

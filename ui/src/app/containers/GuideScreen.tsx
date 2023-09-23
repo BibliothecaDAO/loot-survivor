@@ -1,10 +1,6 @@
 import React from "react";
 import { Button } from "../components/buttons/Button";
 
-/**
- * @container
- * @description Provides the guide screen for the adventurer.
- */
 export default function GuideScreen() {
   const efficacyData = [
     { weapon: "Blade", metal: "Weak", hide: "Fair", cloth: "Strong" },
@@ -93,9 +89,9 @@ export default function GuideScreen() {
   ];
 
   return (
-    <div className="h-[500px] overflow-y-auto 2xl:h-[650px] p-2 table-scroll text-xs sm:text-base text-center sm:text-left">
+    <div className="h-[500px] overflow-y-auto 2xl:h-[650px] p-2 table-scroll text-xs sm:text-base sm:text-left">
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4">
-        <h1>Loot Survivor: A Saga of Fortitude and Death</h1>
+        <h1>Loot Survivor</h1>
         <a
           href="https://discord.gg/bibliothecadao"
           target="_blank"
@@ -106,43 +102,6 @@ export default function GuideScreen() {
           </Button>
         </a>
       </div>
-      <p>
-        Your journey in Loot Survivor will take you through perilous trials, as
-        part of the renowned Adventurers series. This tale unfolds in the Loot
-        realm, a world where brave heroes strive to defeat monstrous creatures,
-        surmount formidable challenges, hone their skills, and gather valuable
-        loot to make progress in their grand adventure.
-      </p>
-
-      <h3 className="mb-2">Embarking on Your Quest</h3>
-      <p>Choose your Class: Each class starts with Stat Boosts. </p>
-      <p>Choose your Weapon: Four weapons... a Book, Wand, Sword and Club. </p>
-      <p>
-        Enter adventurer&apos;s Name. You only have one life. Remember, there is
-        no limit to the number of adventurers you can spawn!
-      </p>
-
-      <h3 className="mb-2">The Trials</h3>
-      <p>
-        During your exploration, you may stumble upon a Beast, an Obstacle, or
-        Treasure such as Gold, Health or XP.
-      </p>
-      <p>
-        Keep an eye on your estimated penalty time. Go idle for too long and you
-        will be killed!
-      </p>
-
-      <h3 className="mb-2">Beasts</h3>
-      <p>
-        If you encounter a beast, ready yourself for a potential ambush
-        onslaught! Assess the beast&apos;s armor and method of attack. Prepare
-        your offense, or choose to flee if you are not prepared for battle!
-      </p>
-      <h3 className="mb-2">Weapons and Armor</h3>
-      <p className="mb-2">
-        There are three types of weapons: Blade, Bludgeon, Magic and three types
-        of armor materials: Cloth, Hide and Metal. Tier 1 is the highest tier.
-      </p>
       <div className="">
         <h3 className="text-center text-l mb-2">
           Efficacy Chart of Weapon and Armor Interactions
