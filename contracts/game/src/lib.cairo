@@ -890,7 +890,9 @@ mod Game {
                 beast.id, beast.combat_spec.specials.special2, beast.combat_spec.specials.special3
             );
 
-        if !is_beast_minted {
+        let beasts_minter = collectible_beasts_contract.getMinter();
+
+        if !is_beast_minted && beasts_minter == starknet::get_contract_address() {
             collectible_beasts_contract
                 .mint(
                     get_caller_address(),
@@ -3040,6 +3042,7 @@ mod Game {
         fn mint(
             ref self: T, to: ContractAddress, beast: u8, prefix: u8, suffix: u8, level: felt252
         );
-        fn isMinted(ref self: T, beast: u8, prefix: u8, suffix: u8) -> bool;
+        fn isMinted(self: @T, beast: u8, prefix: u8, suffix: u8) -> bool;
+        fn getMinter(self: @T) -> ContractAddress;
     }
 }
