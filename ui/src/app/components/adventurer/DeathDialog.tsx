@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import TwitterShareButton from "../buttons/TwitterShareButtons";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
@@ -8,13 +8,9 @@ import Image from "next/image";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
 import { appUrl } from "@/app/lib/constants";
-import {
-  getAdventurersInListByXp,
-  getAdventurerByXP,
-  getAdventurerById,
-} from "@/app/hooks/graphql/queries";
+import { getAdventurerByXP } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
-import { NullAdventurer } from "@/app/types";
+import { NullAdventurer, Adventurer } from "@/app/types";
 
 export const DeathDialog = () => {
   const deathMessage = useLoadingStore((state) => state.deathMessage);
@@ -30,18 +26,26 @@ export const DeathDialog = () => {
     getAdventurerByXP,
     undefined
   );
-  console.log(adventurersByXPdata?.adventurers);
 
-  const rank = getRankFromList(
-    adventurer?.id ?? 0,
-    adventurersByXPdata?.adventurers ?? []
+  const copiedAdventurersByXpData = adventurersByXPdata?.adventurers.slice();
+
+  const sortedAdventurersByXPArray = copiedAdventurersByXpData?.sort(
+    (a: Adventurer, b: Adventurer) => (b.xp ?? 0) - (a.xp ?? 0)
   );
 
-  console.log(adventurersByXPdata);
-  console.log(rank);
+  const sortedAdventurersByXP = { adventurers: sortedAdventurersByXPArray };
 
-  const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
-  console.log(ordinalRank);
+  const handleRank = () => {
+    const rank = getRankFromList(
+      adventurer?.id ?? 0,
+      sortedAdventurersByXP?.adventurers ?? []
+    );
+
+    const ordinalRank = getOrdinalSuffix(rank + 1 ?? 0);
+    return ordinalRank;
+  };
+
+  const rank = handleRank();
 
   return (
     <>
@@ -62,7 +66,7 @@ export const DeathDialog = () => {
             </span>
             <span className="flex flex-col gap-1 sm:text-2xl">
               <p>
-                {adventurer?.name} died at {ordinalRank} on the leaderboard with{" "}
+                {adventurer?.name} died at {rank} on the leaderboard with{" "}
                 {adventurer?.xp} XP, a valiant effort!
               </p>{" "}
               <p>
@@ -72,7 +76,7 @@ export const DeathDialog = () => {
             </span>
           </div>
           <TwitterShareButton
-            text={`RIP ${adventurer?.name}, who died at ${ordinalRank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+            text={`RIP ${adventurer?.name}, who died at ${rank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
           />
           {/* <TwitterShareButton
             text={`RIP ${adventurer?.name}.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}

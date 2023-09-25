@@ -71,10 +71,6 @@ export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
           fill
         />
 
-        {/* <span className="absolute sm:hidden top-0">
-          <TxActivity />
-        </span> */}
-
         {!isWrongNetwork && (
           <div className="absolute text-xs text-center sm:text-start sm:text-xl leading-normal sm:leading-loose z-10 top-1/4">
             <TypeAnimation

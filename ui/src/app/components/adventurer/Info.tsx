@@ -121,8 +121,8 @@ export default function Info({
     <>
       {adventurer?.id ? (
         <div className="border border-terminal-green xl:h-[500px] 2xl:h-full">
-          <div className="flex flex-row flex-wrap gap-2 p-1 xl:h-full">
-            <div className="flex flex-col w-full sm:p-2 uppercase xl:h-full">
+          <div className="flex flex-row flex-wrap gap-2 p-2 xl:h-full">
+            <div className="flex flex-col w-full uppercase xl:h-full">
               <div className="relative flex justify-between w-full text-xl sm:text-2xl lg:text-3xl border-b border-terminal-green">
                 {formatAdventurer.name}
                 <span className="relative flex items-center text-terminal-yellow">

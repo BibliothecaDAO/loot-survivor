@@ -10,7 +10,8 @@ export const chapter4 =
   "They find golden coins in their pocket, glimmering in the dim light - an enigma wrapped in the shroud of the unexpected.";
 export const battle = "A beast lurks in the shadow, prepare for battle!";
 
-export const mainnet_addr = process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://alpha-mainnet.starknet.io";
+export const mainnet_addr =
+  process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://alpha-mainnet.starknet.io";
 
 export function getGraphQLUrl() {
   switch (process.env.NEXT_PUBLIC_NETWORK) {
@@ -53,8 +54,8 @@ export const notificationAnimations = [
 ];
 
 // ---- CONTRACT PARAMS
-// Penalty time is 8 blocks, where each block is ~ 3 minutes
-export const penaltyTime = 12 * (3 * 60);
+// Penalty time is 12 blocks, where each block is ~ 15 seconds
+export const penaltyTime = 12 * 15;
 export const itemCharismaDiscount = 1;
 export const itemBasePrice = 4;
 export const itemMinimumPrice = 1;

@@ -922,15 +922,18 @@ export function syscalls({
         queryData
       );
 
-      // Update adventurer
-      setData("adventurerByIdQuery", {
-        adventurers: [
-          events.find((event) => event.name === "AdventurerUpgraded").data,
-        ],
-      });
-      setAdventurer(
-        events.find((event) => event.name === "AdventurerUpgraded").data
+      const adventurerUpgradedEvents = events.filter(
+        (event) => event.name === "AdventurerUpgraded"
       );
+      if (adventurerUpgradedEvents.length > 0) {
+        for (let adventurerUpgradedEvent of adventurerUpgradedEvents) {
+          setData("adventurerByIdQuery", {
+            adventurers: [adventurerUpgradedEvent.data],
+          });
+          setAdventurer(adventurerUpgradedEvent.data);
+        }
+      }
+
       // Add purchased items
       const purchaseItemsEvents = events.filter(
         (event) => event.name === "PurchasedItems"
@@ -967,6 +970,7 @@ export function syscalls({
           }
         }
       }
+
       const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
         (item: any) => !droppedItems.includes(item.item)
       );
@@ -976,15 +980,45 @@ export function syscalls({
       for (let i = 0; i < unequipIndexes.length; i++) {
         setData("itemsByAdventurerQuery", false, "equipped", unequipIndexes[i]);
       }
+
+      console.log("adventurer death");
+
+      const adventurerDiedEvents = events.filter(
+        (event) => event.name === "AdventurerDied"
+      );
+      if (adventurerDiedEvents.length > 0) {
+        for (let adventurerDiedEvent of adventurerDiedEvents) {
+          setData("adventurerByIdQuery", {
+            adventurers: [adventurerDiedEvent.data[0]],
+          });
+          const deadAdventurerIndex =
+            queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+              (adventurer: any) =>
+                adventurer.id == adventurerDiedEvent.data[0].id
+            );
+          setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
+          setAdventurer(adventurerDiedEvent.data[0]);
+          setDeathNotification("Upgrade", "Death Penalty", []);
+          setScreen("start");
+          setStartOption("create adventurer");
+        }
+      }
+
       // Reset items to no availability
       setData("latestMarketItemsQuery", null);
-      stopLoading({
-        Stats: upgrades,
-        Items: purchaseItems,
-        Potions: potionAmount,
-      });
-      setScreen("play");
-      setMintAdventurer(false);
+      if (events.some((event) => event.name === "AdventurerDied")) {
+        setScreen("start");
+        setStartOption("create adventurer");
+        stopLoading("Death Penalty");
+      } else {
+        stopLoading({
+          Stats: upgrades,
+          Items: purchaseItems,
+          Potions: potionAmount,
+        });
+        setScreen("play");
+        setMintAdventurer(false);
+      }
     } catch (e) {
       console.log(e);
       stopLoading(e, true);

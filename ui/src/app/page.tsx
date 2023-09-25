@@ -42,7 +42,7 @@ import {
   RefreshIcon,
   CartIconSimple,
   ArcadeIcon,
-  MdTokenIcon
+  MdTokenIcon,
 } from "./components/icons/Icons";
 import Lords from "../../public/lords.svg";
 import Settings from "./components/navigation/Settings";
@@ -130,6 +130,7 @@ export default function Home() {
   );
   const startLoading = useLoadingStore((state) => state.startLoading);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
+  const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const { writeAsync } = useContractWrite({ calls });
   const setEquipItems = useUIStore((state) => state.setEquipItems);
@@ -354,6 +355,11 @@ export default function Home() {
     return <WalletSelect />;
   }
 
+  const spawnLoader =
+    pendingMessage &&
+    (pendingMessage === "Spawning Adventurer" ||
+      pendingMessage.includes("Spawning Adventurer"));
+
   return (
     // <Maintenance />
     <main
@@ -363,15 +369,14 @@ export default function Home() {
         <>
           <div className="flex flex-col w-full">
             <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
-            <div className="sm:hidden">
-              <TxActivity />
-            </div>
+            {!spawnLoader && (
+              <div className="sm:hidden">
+                <TxActivity />
+              </div>
+            )}
             <div className="flex flex-row justify-between px-1  ">
               <div className="flex flex-row items-center gap-2 sm:gap-5">
-                <h1 className="m-0 text-xl sm:text-4xl">
-                  Loot Survivor
-                </h1>
-
+                <h1 className="m-0 text-xl sm:text-4xl">Loot Survivor</h1>
               </div>
               <div className="flex flex-row items-center self-end sm:gap-1 space-x-1 self-center">
                 {adventurer?.id && (
@@ -383,7 +388,7 @@ export default function Home() {
                     dataLoading={isLoading.global}
                   />
                 )}
-                <Button size={'xs'} variant={"outline"} className="self-center">
+                <Button size={"xs"} variant={"outline"} className="self-center">
                   <span className="flex flex-row items-center justify-between w-full">
                     <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
                     <p>
@@ -394,7 +399,7 @@ export default function Home() {
                   </span>
                 </Button>
                 <Button
-                  size={'xs'}
+                  size={"xs"}
                   variant={"outline"}
                   onClick={() => showArcadeDialog(!arcadeDialog)}
                   disabled={isWrongNetwork}
@@ -403,7 +408,7 @@ export default function Home() {
                   <span className="hidden sm:block">arcade account</span>
                 </Button>
                 <Button
-                  size={'xs'}
+                  size={"xs"}
                   variant={"outline"}
                   onClick={() => {
                     setIsMuted(!isMuted);
@@ -422,7 +427,7 @@ export default function Home() {
                 {account && (
                   <Button
                     variant={"outline"}
-                    size={'xs'}
+                    size={"xs"}
                     ref={displayCartButtonRef}
                     onClick={() => {
                       setDisplayCart(!displayCart);
@@ -440,7 +445,7 @@ export default function Home() {
                 )}
                 <div className="flex items-center sm:hidden">
                   <Button
-                    size={'xs'}
+                    size={"xs"}
                     variant={"outline"}
                     onClick={() => {
                       setScreen("settings");
@@ -454,8 +459,8 @@ export default function Home() {
                   {account && (
                     <>
                       <Button
-                        variant={'outline'}
-                        size={'xs'}
+                        variant={"outline"}
+                        size={"xs"}
                         ref={displayHistoryButtonRef}
                         onClick={() => {
                           setDisplayHistory(!displayHistory);
@@ -467,8 +472,8 @@ export default function Home() {
                   )}
 
                   <Button
-                    variant={'outline'}
-                    size={'sm'}
+                    variant={"outline"}
+                    size={"sm"}
                     onClick={() => {
                       disconnect();
                       resetData();
@@ -479,8 +484,11 @@ export default function Home() {
                     {account ? displayAddress(account.address) : "Connect"}
                   </Button>
 
-                  <Button variant={'outline'}
-                    size={'sm'} href="https://github.com/BibliothecaDAO/loot-survivor">
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    href="https://github.com/BibliothecaDAO/loot-survivor"
+                  >
                     <GithubIcon className="w-6" />
                   </Button>
                 </div>
@@ -491,9 +499,11 @@ export default function Home() {
             </div>
           </div>
           <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
-            <div className="hidden sm:block">
-              <TxActivity />
-            </div>
+            {!spawnLoader && (
+              <div className="hidden sm:block">
+                <TxActivity />
+              </div>
+            )}
           </div>
           <NotificationDisplay />
 
