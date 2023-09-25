@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "./buttons/Button";
@@ -13,11 +13,18 @@ import {
   AccountInterface,
   CallData,
   TransactionFinalityStatus,
+  uint256,
+  Call,
 } from "starknet";
 import { useCallback } from "react";
+import { useContracts } from "../hooks/useContracts";
+import { balanceSchema } from "../lib/utils";
+
+const MAX_RETRIES = 10;
+const RETRY_DELAY = 2000; // 2 seconds
 
 export const ArcadeDialog = () => {
-  const { account: MasterAccount, address, connector } = useAccount();
+  const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
@@ -30,6 +37,8 @@ export const ArcadeDialog = () => {
     genNewKey,
     isGeneratingNewKey,
   } = useBurner();
+  const { ethContract } = useContracts();
+  const [balances, setBalances] = useState<Record<string, bigint>>({});
 
   const arcadeConnectors = useCallback(() => {
     return available.filter(
@@ -37,6 +46,45 @@ export const ArcadeDialog = () => {
         typeof connector.id === "string" && connector.id.includes("0x")
     );
   }, [available]);
+
+  const fetchBalanceWithRetry = async (
+    accountName: string,
+    retryCount: number = 0
+  ): Promise<bigint> => {
+    try {
+      const result = await ethContract!.call(
+        "balanceOf",
+        CallData.compile({ account: accountName })
+      );
+      return uint256.uint256ToBN(balanceSchema.parse(result).balance);
+    } catch (error) {
+      if (retryCount < MAX_RETRIES) {
+        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY)); // delay before retry
+        return fetchBalanceWithRetry(accountName, retryCount + 1);
+      } else {
+        throw new Error(
+          `Failed to fetch balance after ${MAX_RETRIES} retries.`
+        );
+      }
+    }
+  };
+
+  const getBalances = async () => {
+    const localBalances: Record<string, bigint> = {};
+    const balancePromises = arcadeConnectors().map((account) => {
+      return fetchBalanceWithRetry(account.name).then((balance) => {
+        localBalances[account.name] = balance;
+        return balance;
+      });
+    });
+    console.log(balancePromises);
+    await Promise.all(balancePromises);
+    setBalances(localBalances);
+  };
+
+  useEffect(() => {
+    getBalances();
+  }, [arcadeConnectors]);
 
   if (!connectors) return <div></div>;
 
@@ -76,10 +124,11 @@ export const ArcadeDialog = () => {
                 account={account}
                 onClick={connect}
                 address={address!}
-                walletAccount={MasterAccount!}
+                walletAccount={walletAccount!}
                 masterAccountAddress={masterAccount}
                 arcadeConnectors={arcadeConnectors()}
                 genNewKey={genNewKey}
+                balance={balances[account.name]}
               />
             );
           })}
@@ -111,6 +160,7 @@ interface ArcadeAccountCardProps {
   masterAccountAddress: string;
   arcadeConnectors: any[];
   genNewKey: (address: string) => void;
+  balance: bigint;
 }
 
 export const ArcadeAccountCard = ({
@@ -121,18 +171,19 @@ export const ArcadeAccountCard = ({
   masterAccountAddress,
   arcadeConnectors,
   genNewKey,
+  balance,
 }: ArcadeAccountCardProps) => {
-  const { data } = useBalance({
-    address: account.name,
-  });
   const [isCopied, setIsCopied] = useState(false);
+  const [isToppingUp, setIsToppingUp] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const connected = address == account.name;
 
-  const balance = parseFloat(data?.formatted!).toFixed(4);
+  const formatted = (Number(balance) / 10 ** 18).toFixed(4);
 
   const transfer = async (address: string, account: AccountInterface) => {
     try {
+      setIsToppingUp(true);
       const { transaction_hash } = await account.execute({
         contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
         entrypoint: "transfer",
@@ -147,7 +198,42 @@ export const ArcadeAccountCard = ({
       if (!result) {
         throw new Error("Transaction did not complete successfully.");
       }
+      setIsToppingUp(false);
+      return result;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
 
+  const withdraw = async (
+    masterAccountAddress: string,
+    account: AccountInterface
+  ) => {
+    try {
+      setIsWithdrawing(true);
+
+      // First we need to calculate the fee from withdrawing
+
+      const { transaction_hash } = await account.execute({
+        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        entrypoint: "transfer",
+        calldata: CallData.compile([
+          masterAccountAddress,
+          balance ?? "0x0",
+          "0x0",
+        ]),
+      });
+
+      const result = await account.waitForTransaction(transaction_hash, {
+        retryInterval: 1000,
+        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
+      });
+
+      if (!result) {
+        throw new Error("Transaction did not complete successfully.");
+      }
+      setIsWithdrawing(false);
       return result;
     } catch (error) {
       console.error(error);
@@ -174,7 +260,13 @@ export const ArcadeAccountCard = ({
         >
           {account.id}
         </span>
-        <span className="text-lg">{balance}ETH</span>{" "}
+        <span className="text-lg">
+          {formatted === "NaN" ? (
+            <span className="loading-ellipsis">Loading</span>
+          ) : (
+            `${formatted}ETH`
+          )}
+        </span>{" "}
       </div>
       <div className="hidden sm:flex flex-row justify-center">
         <Button
@@ -189,13 +281,31 @@ export const ArcadeAccountCard = ({
           <Button
             variant={"ghost"}
             onClick={() => transfer(account.name, walletAccount)}
+            disabled={isToppingUp}
           >
-            Top Up 0.001Eth
+            {isToppingUp ? (
+              <span className="loading-ellipsis">Topping Up</span>
+            ) : (
+              "Top Up 0.001Eth"
+            )}
           </Button>
         )}
         {masterAccountAddress == walletAccount.address && (
           <Button variant={"ghost"} onClick={() => genNewKey(account.name)}>
             Gen New Key
+          </Button>
+        )}
+        {connected && (
+          <Button
+            variant={"ghost"}
+            onClick={() => withdraw(masterAccountAddress, walletAccount)}
+            disabled={isWithdrawing}
+          >
+            {isWithdrawing ? (
+              <span className="loading-ellipsis">Withdrawing</span>
+            ) : (
+              "Withdraw"
+            )}
           </Button>
         )}
       </div>
@@ -213,8 +323,13 @@ export const ArcadeAccountCard = ({
             <Button
               variant={"ghost"}
               onClick={() => transfer(account.name, walletAccount)}
+              disabled={isToppingUp}
             >
-              Top Up 0.001Eth
+              {isToppingUp ? (
+                <span className="loading-ellipsis">Topping Up</span>
+              ) : (
+                "Top Up 0.001Eth"
+              )}
             </Button>
           )}
         </div>
@@ -222,6 +337,19 @@ export const ArcadeAccountCard = ({
           {masterAccountAddress == walletAccount.address && (
             <Button variant={"ghost"} onClick={() => genNewKey(account.name)}>
               Gen New Key
+            </Button>
+          )}
+          {connected && (
+            <Button
+              variant={"ghost"}
+              onClick={() => withdraw(masterAccountAddress, walletAccount)}
+              disabled={isWithdrawing}
+            >
+              {isWithdrawing ? (
+                <span className="loading-ellipsis">Withdrawing</span>
+              ) : (
+                "Withdraw"
+              )}
             </Button>
           )}
         </div>

@@ -224,7 +224,7 @@ export const useBurner = () => {
           entrypoint: "update_whitelisted_calls",
           calldata: [
             "1",
-            gameContract?.address ?? "",
+            process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
             selector.getSelectorFromName("transfer"),
             "1",
           ],
