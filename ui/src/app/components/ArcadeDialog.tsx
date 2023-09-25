@@ -318,48 +318,7 @@ export const ArcadeAccountCard = ({
           )}
         </span>{" "}
       </div>
-      <div className="hidden sm:flex flex-row justify-center">
-        <Button
-          variant={connected ? "default" : "ghost"}
-          onClick={() => onClick(account)}
-        >
-          {connected ? "connected" : "connect"}
-        </Button>
-        {!arcadeConnectors.some(
-          (conn) => conn.options.options.id == walletAccount.address
-        ) && (
-          <Button
-            variant={"ghost"}
-            onClick={() => transfer(account.name, walletAccount)}
-            disabled={isToppingUp}
-          >
-            {isToppingUp ? (
-              <span className="loading-ellipsis">Topping Up</span>
-            ) : (
-              "Top Up 0.001Eth"
-            )}
-          </Button>
-        )}
-        {masterAccountAddress == walletAccount.address && (
-          <Button variant={"ghost"} onClick={() => genNewKey(account.name)}>
-            Gen New Key
-          </Button>
-        )}
-        {connected && (
-          <Button
-            variant={"ghost"}
-            onClick={() => withdraw(masterAccountAddress, walletAccount)}
-            disabled={isWithdrawing || minimalBalance}
-          >
-            {isWithdrawing ? (
-              <span className="loading-ellipsis">Withdrawing</span>
-            ) : (
-              "Withdraw"
-            )}
-          </Button>
-        )}
-      </div>
-      <div className="sm:hidden flex flex-col">
+      <div className="flex flex-col items-center">
         <div className="flex flex-row">
           <Button
             variant={connected ? "default" : "ghost"}
@@ -378,7 +337,9 @@ export const ArcadeAccountCard = ({
               {isToppingUp ? (
                 <span className="loading-ellipsis">Topping Up</span>
               ) : (
-                "Top Up 0.001Eth"
+                <span className="flex flex-col">
+                  <span>Top Up</span> <span>(0.001Eth)</span>
+                </span>
               )}
             </Button>
           )}
@@ -386,7 +347,7 @@ export const ArcadeAccountCard = ({
         <div className="flex flex-row">
           {masterAccountAddress == walletAccount.address && (
             <Button variant={"ghost"} onClick={() => genNewKey(account.name)}>
-              Gen New Key
+              Create New Keys
             </Button>
           )}
           {connected && (
