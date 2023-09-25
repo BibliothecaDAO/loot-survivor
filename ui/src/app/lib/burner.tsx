@@ -40,6 +40,7 @@ export const useBurner = () => {
   const { account: walletAccount } = useAccount();
   const [account, setAccount] = useState<Account>();
   const [isDeploying, setIsDeploying] = useState(false);
+  const [isGeneratingNewKey, setIsGeneratingNewKey] = useState(false);
   const [isSettingPermissions, setIsSettingPermissions] = useState(false);
   const { gameContract, lordsContract } = useContracts();
 
@@ -117,6 +118,18 @@ export const useBurner = () => {
     [walletAccount]
   );
 
+  const getMasterAccount = useCallback(
+    (address: string) => {
+      let storage = Storage.get("burners") || {};
+      if (!storage[address]) {
+        throw new Error("burner not found");
+      }
+
+      return storage[address].masterAccount;
+    },
+    [walletAccount]
+  );
+
   const create = useCallback(async () => {
     setIsDeploying(true);
     const privateKey = stark.randomAddress();
@@ -179,6 +192,7 @@ export const useBurner = () => {
       publicKey,
       deployTx,
       setPermissionsTx,
+      masterAccount: walletAccount.address,
       active: true,
     };
 
@@ -226,6 +240,46 @@ export const useBurner = () => {
     []
   );
 
+  const genNewKey = useCallback(
+    async (burnerAddress: string) => {
+      setIsGeneratingNewKey(true);
+      const privateKey = stark.randomAddress();
+      const publicKey = ec.starkCurve.getStarkKey(privateKey);
+
+      if (!walletAccount) {
+        throw new Error("wallet account not found");
+      }
+
+      let storage = Storage.get("burners") || {};
+
+      if (!storage[burnerAddress]) {
+        throw new Error("burner doesn't exist");
+      }
+
+      const { transaction_hash } = await walletAccount.execute({
+        contractAddress: burnerAddress,
+        entrypoint: "set_public_key",
+        calldata: [publicKey],
+      });
+
+      await provider.waitForTransaction(transaction_hash);
+
+      // save new keys
+      for (let address in storage) {
+        storage[address].active = false;
+      }
+
+      storage[burnerAddress].privateKey = privateKey;
+      storage[burnerAddress].publicKey = publicKey;
+
+      Storage.set("burners", storage);
+      setIsGeneratingNewKey(false);
+      refresh();
+      window.location.reload();
+    },
+    [walletAccount]
+  );
+
   const listConnectors = useCallback(() => {
     const arcadeAccounts = [];
     const burners = list();
@@ -253,12 +307,15 @@ export const useBurner = () => {
 
   return {
     get,
+    getMasterAccount,
     list,
     select,
     create,
+    genNewKey,
     account,
     isDeploying,
     isSettingPermissions,
+    isGeneratingNewKey,
     listConnectors,
   };
 };

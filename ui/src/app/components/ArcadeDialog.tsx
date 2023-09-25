@@ -22,7 +22,14 @@ export const ArcadeDialog = () => {
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const { connect, connectors, available } = useConnectors();
-  const { create, isDeploying, isSettingPermissions } = useBurner();
+  const {
+    getMasterAccount,
+    create,
+    isDeploying,
+    isSettingPermissions,
+    genNewKey,
+    isGeneratingNewKey,
+  } = useBurner();
 
   const arcadeConnectors = useCallback(() => {
     return available.filter(
@@ -46,47 +53,49 @@ export const ArcadeDialog = () => {
         <div className="flex justify-center mb-1">
           {((connector?.options as any)?.id == "argentX" ||
             (connector?.options as any)?.id == "braavos") && (
-              <div>
-                <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                  Note: This will initiate a transfer of 0.001 ETH from your
-                  connected wallet to the arcade account to cover your transaction
-                  costs from normal gameplay.
-                  <br />
-                  You may need to refresh after the account has been created!
-                </p>
-                <Button onClick={() => create()} disabled={isWrongNetwork}>
-                  create arcade account
-                </Button>
-              </div>
-            )}
+            <div>
+              <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
+                Note: This will initiate a transfer of 0.001 ETH from your
+                connected wallet to the arcade account to cover your transaction
+                costs from normal gameplay.
+                <br />
+                You may need to refresh after the account has been created!
+              </p>
+              <Button onClick={() => create()} disabled={isWrongNetwork}>
+                create arcade account
+              </Button>
+            </div>
+          )}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 overflow-hidden my-6">
           {arcadeConnectors().map((account, index) => {
+            const masterAccount = getMasterAccount(account.name);
             return (
               <ArcadeAccountCard
                 key={index}
                 account={account}
                 onClick={connect}
                 address={address!}
-                masterAccount={MasterAccount!}
+                walletAccount={MasterAccount!}
+                masterAccountAddress={masterAccount}
                 arcadeConnectors={arcadeConnectors()}
+                genNewKey={genNewKey}
               />
             );
           })}
-          {/* {isDeploying && (
-            <div className="flex justify-center border-terminal-green border">
-              <p className="self-center">Deploying Account...</p>
-            </div>
-          )} */}
         </div>
         <div>
           <Button onClick={() => showArcadeDialog(!arcadeDialog)}>close</Button>
         </div>
       </div>
-      {isDeploying && (
+      {(isDeploying || isGeneratingNewKey) && (
         <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full flex justify-center items-center">
           <h3 className="loading-ellipsis">
-            {isSettingPermissions ? "Setting Permissions" : "Deploying Account"}
+            {isSettingPermissions
+              ? "Setting Permissions"
+              : isGeneratingNewKey
+              ? "Generating New Key"
+              : "Deploying Account"}
           </h3>
         </div>
       )}
@@ -98,16 +107,20 @@ interface ArcadeAccountCardProps {
   account: Connector;
   onClick: (conn: Connector<any>) => void;
   address: string;
-  masterAccount: AccountInterface;
+  walletAccount: AccountInterface;
+  masterAccountAddress: string;
   arcadeConnectors: any[];
+  genNewKey: (address: string) => void;
 }
 
 export const ArcadeAccountCard = ({
   account,
   onClick,
   address,
-  masterAccount,
+  walletAccount,
+  masterAccountAddress,
   arcadeConnectors,
+  genNewKey,
 }: ArcadeAccountCardProps) => {
   const { data } = useBalance({
     address: account.name,
@@ -152,12 +165,6 @@ export const ArcadeAccountCard = ({
     }
   };
 
-  console.log(
-    arcadeConnectors.some(
-      (conn) => conn.options.options.id == masterAccount.address
-    )
-  );
-
   return (
     <div className="border border-terminal-green p-3 hover:bg-terminal-green hover:text-terminal-black items-center">
       <div className="text-left flex flex-col text-sm sm:text-xl mb-0 sm:mb-4 items-center">
@@ -177,15 +184,20 @@ export const ArcadeAccountCard = ({
           {connected ? "connected" : "connect"}
         </Button>
         {!arcadeConnectors.some(
-          (conn) => conn.options.options.id == masterAccount.address
+          (conn) => conn.options.options.id == walletAccount.address
         ) && (
-            <Button
-              variant={connected ? "default" : "ghost"}
-              onClick={() => transfer(account.name, masterAccount)}
-            >
-              Top Up 0.001Eth
-            </Button>
-          )}
+          <Button
+            variant={"ghost"}
+            onClick={() => transfer(account.name, walletAccount)}
+          >
+            Top Up 0.001Eth
+          </Button>
+        )}
+        {masterAccountAddress == walletAccount.address && (
+          <Button variant={"ghost"} onClick={() => genNewKey(account.name)}>
+            Gen New Key
+          </Button>
+        )}
       </div>
 
       {isCopied && <span>Copied!</span>}
