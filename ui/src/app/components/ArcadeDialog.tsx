@@ -214,6 +214,9 @@ export const ArcadeAccountCard = ({
       if (!result) {
         throw new Error("Transaction did not complete successfully.");
       }
+
+      // Get the new balance of the account
+      getBalance(account.address);
       setIsToppingUp(false);
       return result;
     } catch (error) {
