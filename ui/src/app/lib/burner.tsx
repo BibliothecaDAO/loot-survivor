@@ -250,12 +250,6 @@ export const useBurner = () => {
         throw new Error("wallet account not found");
       }
 
-      let storage = Storage.get("burners") || {};
-
-      if (!storage[burnerAddress]) {
-        throw new Error("burner doesn't exist");
-      }
-
       const { transaction_hash } = await walletAccount.execute({
         contractAddress: burnerAddress,
         entrypoint: "set_public_key",
@@ -265,12 +259,17 @@ export const useBurner = () => {
       await provider.waitForTransaction(transaction_hash);
 
       // save new keys
+      let storage = Storage.get("burners") || {};
       for (let address in storage) {
         storage[address].active = false;
       }
 
-      storage[burnerAddress].privateKey = privateKey;
-      storage[burnerAddress].publicKey = publicKey;
+      storage[burnerAddress] = {
+        privateKey,
+        publicKey,
+        masterAccount: walletAccount.address,
+        active: true,
+      };
 
       Storage.set("burners", storage);
       setIsGeneratingNewKey(false);
