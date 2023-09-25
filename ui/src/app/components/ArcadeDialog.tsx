@@ -176,7 +176,7 @@ export const ArcadeAccountCard = ({
         </span>
         <span className="text-lg">{balance}ETH</span>{" "}
       </div>
-      <div className="flex flex-row justify-center">
+      <div className="hidden sm:flex flex-row justify-center">
         <Button
           variant={connected ? "default" : "ghost"}
           onClick={() => onClick(account)}
@@ -198,6 +198,33 @@ export const ArcadeAccountCard = ({
             Gen New Key
           </Button>
         )}
+      </div>
+      <div className="sm:hidden flex flex-col">
+        <div className="flex flex-row">
+          <Button
+            variant={connected ? "default" : "ghost"}
+            onClick={() => onClick(account)}
+          >
+            {connected ? "connected" : "connect"}
+          </Button>
+          {!arcadeConnectors.some(
+            (conn) => conn.options.options.id == walletAccount.address
+          ) && (
+            <Button
+              variant={"ghost"}
+              onClick={() => transfer(account.name, walletAccount)}
+            >
+              Top Up 0.001Eth
+            </Button>
+          )}
+        </div>
+        <div className="flex flex-row">
+          {masterAccountAddress == walletAccount.address && (
+            <Button variant={"ghost"} onClick={() => genNewKey(account.name)}>
+              Gen New Key
+            </Button>
+          )}
+        </div>
       </div>
 
       {isCopied && <span>Copied!</span>}
