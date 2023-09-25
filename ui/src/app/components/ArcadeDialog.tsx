@@ -15,6 +15,8 @@ import {
   TransactionFinalityStatus,
   uint256,
   Call,
+  Account,
+  Provider,
 } from "starknet";
 import { useCallback } from "react";
 import { useContracts } from "../hooks/useContracts";
@@ -22,6 +24,12 @@ import { balanceSchema } from "../lib/utils";
 
 const MAX_RETRIES = 10;
 const RETRY_DELAY = 2000; // 2 seconds
+
+const provider = new Provider({
+  sequencer: {
+    baseUrl: "https://alpha4.starknet.io",
+  },
+});
 
 export const ArcadeDialog = () => {
   const { account: walletAccount, address, connector } = useAccount();
@@ -82,6 +90,11 @@ export const ArcadeDialog = () => {
     setBalances(localBalances);
   };
 
+  const getBalance = async (account: string) => {
+    const balance = await fetchBalanceWithRetry(account);
+    setBalances({ ...balances, [account]: balance });
+  };
+
   useEffect(() => {
     getBalances();
   }, [arcadeConnectors]);
@@ -129,6 +142,7 @@ export const ArcadeDialog = () => {
                 arcadeConnectors={arcadeConnectors()}
                 genNewKey={genNewKey}
                 balance={balances[account.name]}
+                getBalance={getBalance}
               />
             );
           })}
@@ -161,6 +175,7 @@ interface ArcadeAccountCardProps {
   arcadeConnectors: any[];
   genNewKey: (address: string) => void;
   balance: bigint;
+  getBalance: (address: string) => void;
 }
 
 export const ArcadeAccountCard = ({
@@ -172,6 +187,7 @@ export const ArcadeAccountCard = ({
   arcadeConnectors,
   genNewKey,
   balance,
+  getBalance,
 }: ArcadeAccountCardProps) => {
   const [isCopied, setIsCopied] = useState(false);
   const [isToppingUp, setIsToppingUp] = useState(false);
@@ -215,12 +231,38 @@ export const ArcadeAccountCard = ({
 
       // First we need to calculate the fee from withdrawing
 
-      const { transaction_hash } = await account.execute({
+      const mainAccount = new Account(
+        provider,
+        account.address,
+        account.signer,
+        account.cairoVersion
+      );
+
+      const call = {
         contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
         entrypoint: "transfer",
         calldata: CallData.compile([
           masterAccountAddress,
           balance ?? "0x0",
+          "0x0",
+        ]),
+      };
+
+      const { suggestedMaxFee: estimatedFee } = await mainAccount.estimateFee(
+        call
+      );
+
+      // Now we negate the fee from balance to withdraw (+10% for safety)
+
+      const newBalance =
+        BigInt(balance) - estimatedFee * (BigInt(11) / BigInt(10));
+
+      const { transaction_hash } = await account.execute({
+        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        entrypoint: "transfer",
+        calldata: CallData.compile([
+          masterAccountAddress,
+          newBalance ?? "0x0",
           "0x0",
         ]),
       });
@@ -233,6 +275,8 @@ export const ArcadeAccountCard = ({
       if (!result) {
         throw new Error("Transaction did not complete successfully.");
       }
+      // Get the new balance of the account
+      getBalance(account.address);
       setIsWithdrawing(false);
       return result;
     } catch (error) {
