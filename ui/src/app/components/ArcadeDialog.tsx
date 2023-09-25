@@ -24,6 +24,7 @@ import { balanceSchema } from "../lib/utils";
 
 const MAX_RETRIES = 10;
 const RETRY_DELAY = 2000; // 2 seconds
+const MIN_BALANCE = 10000000000000; // 0.00001ETH or $0.015
 
 const provider = new Provider({
   sequencer: {
@@ -298,6 +299,8 @@ export const ArcadeAccountCard = ({
     }
   };
 
+  const minimalBalance = balance < BigInt(MIN_BALANCE);
+
   return (
     <div className="border border-terminal-green p-3 hover:bg-terminal-green hover:text-terminal-black items-center">
       <div className="text-left flex flex-col text-sm sm:text-xl mb-0 sm:mb-4 items-center">
@@ -346,7 +349,7 @@ export const ArcadeAccountCard = ({
           <Button
             variant={"ghost"}
             onClick={() => withdraw(masterAccountAddress, walletAccount)}
-            disabled={isWithdrawing}
+            disabled={isWithdrawing || minimalBalance}
           >
             {isWithdrawing ? (
               <span className="loading-ellipsis">Withdrawing</span>
@@ -390,7 +393,7 @@ export const ArcadeAccountCard = ({
             <Button
               variant={"ghost"}
               onClick={() => withdraw(masterAccountAddress, walletAccount)}
-              disabled={isWithdrawing}
+              disabled={isWithdrawing || minimalBalance}
             >
               {isWithdrawing ? (
                 <span className="loading-ellipsis">Withdrawing</span>
