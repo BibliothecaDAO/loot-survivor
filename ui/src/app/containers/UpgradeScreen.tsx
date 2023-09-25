@@ -196,6 +196,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
           buttonsData={upgradeMenu}
           onSelected={setSelected}
           onEnterAction={true}
+          className="flex-col"
         />
       </div>
     );
@@ -221,7 +222,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
   const upgradeTotalCost = purchaseGoldAmount + itemsGoldSum;
 
   const handleAddUpgradeTx = (
-    currenUpgrades?: UpgradeStats,
+    currentUpgrades?: UpgradeStats,
     potions?: number,
     items?: any[]
   ) => {
@@ -233,24 +234,25 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
         adventurer?.id?.toString() ?? "",
         "0",
         potions ? potions.toString() : potionAmount.toString(),
-        currenUpgrades
-          ? currenUpgrades["Strength"].toString()
+        currentUpgrades
+          ? currentUpgrades["Strength"].toString()
           : upgrades["Strength"].toString(),
-        currenUpgrades
-          ? currenUpgrades["Dexterity"].toString()
+        currentUpgrades
+          ? currentUpgrades["Dexterity"].toString()
           : upgrades["Dexterity"].toString(),
-        currenUpgrades
-          ? currenUpgrades["Vitality"].toString()
+        currentUpgrades
+          ? currentUpgrades["Vitality"].toString()
           : upgrades["Vitality"].toString(),
-        currenUpgrades
-          ? currenUpgrades["Intelligence"].toString()
+        currentUpgrades
+          ? currentUpgrades["Intelligence"].toString()
           : upgrades["Intelligence"].toString(),
-        currenUpgrades
-          ? currenUpgrades["Wisdom"].toString()
+        currentUpgrades
+          ? currentUpgrades["Wisdom"].toString()
           : upgrades["Wisdom"].toString(),
-        currenUpgrades
-          ? currenUpgrades["Charisma"].toString()
+        currentUpgrades
+          ? currentUpgrades["Charisma"].toString()
           : upgrades["Charisma"].toString(),
+        "0",
         items ? items.length.toString() : purchaseItems.length.toString(),
         ...(items
           ? items.flatMap(Object.values)
@@ -316,9 +318,56 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
             <div className="w-full sm:w-2/3 xl:h-[500px] xl:overflow-y-auto 2xl:h-full">
               <div className="flex flex-col gap-2 xl:gap-0 xl:h-[300px] 2xl:h-full">
                 <div className="justify-center text-terminal-green">
-                  <div className="text-center text-2xl 2xl:text-4xl xl:text-xl sm:p-2 xl:p-0 animate-pulse uppercase">
-                    Level up!
+
+
+                  <div className="w-full flex flex-row gap-2 mx-auto border border-terminal-green justify-between">
+                    <Button
+                      variant={"outline"}
+                      onClick={() => setUpgradeScreen(upgradeScreen - 1)}
+                      disabled={upgradeScreen == 1}
+                    >
+                      {"<"} Back
+                    </Button>
+
+                    {upgradeScreen != 3 && <div className="sm:hidden flex-grow text-center uppercase text-2xl self-center">Level up!</div>}
+
+                    {upgradeScreen != 3 && upgradeScreen != 2 && <div className=" flex-grow text-center uppercase text-2xl self-center hidden sm:block">Level up!</div>}
+
+                    <Button
+                      className={` ${upgradeScreen == 2
+                        ? "hidden sm:block"
+                        : upgradeScreen == 3
+                          ? "sm:hidden"
+                          : "hidden"
+                        } w-full`}
+                      onClick={() => {
+                        handleSubmitUpgradeTx();
+                        setUpgradeScreen(1);
+                      }}
+                      disabled={nextDisabled || loading}
+                    >
+                      {loading ? (
+                        <span>Upgrading...</span>
+                      ) : (
+                        <span>Upgrade</span>
+                      )}
+                    </Button>
+                    <Button
+                      className={` ${upgradeScreen == 2
+                        ? "sm:hidden"
+                        : upgradeScreen == 3
+                          ? "hidden"
+                          : ""
+                        }`}
+                      onClick={() => {
+                        setUpgradeScreen(upgradeScreen + 1);
+                      }}
+                      disabled={nextDisabled || loading}
+                    >
+                      <span>Next {">"}</span>
+                    </Button>
                   </div>
+
                   <div className="flex flex-row gap-2 xl:gap-0 justify-center text-lg 2xl:text-2xl text-shadow-none">
                     <span>
                       {totalStatUpgrades > 0
@@ -327,12 +376,12 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                     </span>
                   </div>
                   <UpgradeNav activeSection={upgradeScreen} />
-                  <div className="flex flex-col text-sm sm:text-base items-center justify-center">
-                    <div className="flex flex-row gap-3">
+                  <div className="flex flex-col text-sm sm:text-base items-center justify-center border border-terminal-green">
+                    <div className="flex flex-row gap-3 border-b border-terminal-green w-full justify-center">
                       <span className="flex flex-row gap-1 items-center">
-                        <p className="uppercase">Cost:</p>
+                        <p>Cost:</p>
                         <span className="flex flex-row items-center text-xl">
-                          <CoinIcon className="self-center w-5 h-5 fill-current text-terminal-yellow" />
+                          <CoinIcon className="self-center w-5 h-5 fill-current text-terminal-yellow self-center ml-1" />
                           <p
                             className={
                               upgradeTotalCost > (adventurer?.gold ?? 0)
@@ -345,13 +394,13 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                         </span>
                       </span>
                       <span className="flex flex-row gap-1 items-center">
-                        <p className="uppercase">Potions:</p>
+                        <p>Potions:</p>
                         <span className="flex text-xl text-terminal-yellow">
                           {potionAmount?.toString() ?? 0}
                         </span>
                       </span>
                       <span className="flex flex-row gap-1 items-center">
-                        <p className="uppercase text-lg">Items:</p>
+                        <p>Items:</p>
                         <span className="flex text-xl text-terminal-yellow">
                           {purchaseItems?.length}
                         </span>
@@ -366,7 +415,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                         </span>
                       </span>
                       <span className="relative flex flex-row items-center">
-                        Health:{" "}
+
                         <span className="flex items-center ">
                           <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
                           <HealthCountDown health={totalHealth || 0} />
@@ -400,9 +449,9 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                   {upgradeScreen === 2 && (
                     <div
                       className="flex flex-col gap-5 sm:gap-2
-                     sm:flex-row items-center justify-center flex-wrap"
+                     sm:flex-row items-center justify-center flex-wrap border border-terminal-green p-4"
                     >
-                      <p className="text-sm 2xl:text-2xl">Potions</p>
+                      {/* <h4>Potions</h4> */}
                       <PurchaseHealth
                         upgradeTotalCost={upgradeTotalCost}
                         potionAmount={potionAmount}
@@ -430,9 +479,6 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                   )}
                   {upgradeScreen === 3 && (
                     <div className="sm:hidden flex-col items-center sm:gap-2 w-full">
-                      {/* <p className="text-xl text-center lg:text-2xl sm:hidden">
-                        Loot Fountain
-                      </p> */}
                       <MarketplaceScreen
                         upgradeTotalCost={upgradeTotalCost}
                         purchaseItems={purchaseItems}
@@ -442,51 +488,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                       />
                     </div>
                   )}
-                  <div className="w-1/2 flex flex-row gap-2 mx-auto">
-                    <Button
-                      className="w-1/2"
-                      variant={"outline"}
-                      onClick={() => setUpgradeScreen(upgradeScreen - 1)}
-                      disabled={upgradeScreen == 1}
-                    >
-                      Back
-                    </Button>
-                    <Button
-                      className={` ${
-                        upgradeScreen == 2
-                          ? "hidden sm:block"
-                          : upgradeScreen == 3
-                          ? "sm:hidden"
-                          : "hidden"
-                      } w-1/2`}
-                      onClick={() => {
-                        handleSubmitUpgradeTx();
-                        setUpgradeScreen(1);
-                      }}
-                      disabled={nextDisabled || loading}
-                    >
-                      {loading ? (
-                        <span>Upgrading...</span>
-                      ) : (
-                        <span>Upgrade</span>
-                      )}
-                    </Button>
-                    <Button
-                      className={` ${
-                        upgradeScreen == 2
-                          ? "sm:hidden"
-                          : upgradeScreen == 3
-                          ? "hidden"
-                          : ""
-                      } w-1/2`}
-                      onClick={() => {
-                        setUpgradeScreen(upgradeScreen + 1);
-                      }}
-                      disabled={nextDisabled || loading}
-                    >
-                      <span>Next</span>
-                    </Button>
-                  </div>
+
                 </div>
               </div>
             </div>

@@ -58,9 +58,9 @@ const Intro: React.FC<IntroProps> = ({ onIntroComplete }) => {
   }, [screen]);
 
   const renderScreen = (src: string, alt: string, sequence: any) => (
-    <div className="flex w-full h-full">
+    <div className="flex w-full h-full p-2">
       <Image
-        className=" absolute object-cover animate-pulse"
+        className="absolute object-cover animate-pulse"
         src={src}
         alt={alt}
         fill

@@ -215,14 +215,8 @@ export function syscalls({
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name).toString(),
         getRandomNumber(8000),
-        getKeyFromValue(gameData.CLASSES, formData.class) ?? "",
         "1",
-        formData.startingStrength,
-        formData.startingDexterity,
-        formData.startingVitality,
-        formData.startingIntelligence,
-        formData.startingWisdom,
-        formData.startingCharisma,
+        "1",
       ],
     };
 
@@ -492,24 +486,24 @@ export function syscalls({
         setStartOption("create adventurer");
       }
 
-      const newItemsAvailableEvents = events.filter(
-        (event) => event.name === "NewItemsAvailable"
+      const upgradesAvailableEvents = events.filter(
+        (event) => event.name === "UpgradesAvailable"
       );
-      if (newItemsAvailableEvents.length > 0) {
-        for (let newItemsAvailableEvent of newItemsAvailableEvents) {
+      if (upgradesAvailableEvents.length > 0) {
+        for (let upgradesAvailableEvent of upgradesAvailableEvents) {
           setData("adventurerByIdQuery", {
-            adventurers: [newItemsAvailableEvent.data[0]],
+            adventurers: [upgradesAvailableEvent.data[0]],
           });
-          setAdventurer(newItemsAvailableEvent.data[0]);
-          const newItems = newItemsAvailableEvent.data[1];
+          setAdventurer(upgradesAvailableEvent.data[0]);
+          const newItems = upgradesAvailableEvent.data[1];
           const itemData = [];
           for (let newItem of newItems) {
             itemData.unshift({
               item: newItem,
-              adventurerId: newItemsAvailableEvent.data[0]["id"],
+              adventurerId: upgradesAvailableEvent.data[0]["id"],
               owner: false,
               equipped: false,
-              ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+              ownerAddress: upgradesAvailableEvent.data[0]["owner"],
               xp: 0,
               special1: null,
               special2: null,
@@ -696,24 +690,24 @@ export function syscalls({
         setStartOption("create adventurer");
       }
 
-      const newItemsAvailableEvents = events.filter(
-        (event) => event.name === "NewItemsAvailable"
+      const upgradesAvailableEvents = events.filter(
+        (event) => event.name === "UpgradesAvailable"
       );
-      if (newItemsAvailableEvents.length > 0) {
-        for (let newItemsAvailableEvent of newItemsAvailableEvents) {
+      if (upgradesAvailableEvents.length > 0) {
+        for (let upgradesAvailableEvent of upgradesAvailableEvents) {
           setData("adventurerByIdQuery", {
-            adventurers: [newItemsAvailableEvent.data[0]],
+            adventurers: [upgradesAvailableEvent.data[0]],
           });
-          setAdventurer(newItemsAvailableEvent.data[0]);
-          const newItems = newItemsAvailableEvent.data[1];
+          setAdventurer(upgradesAvailableEvent.data[0]);
+          const newItems = upgradesAvailableEvent.data[1];
           const itemData = [];
           for (let newItem of newItems) {
             itemData.unshift({
               item: newItem,
-              adventurerId: newItemsAvailableEvent.data[0]["id"],
+              adventurerId: upgradesAvailableEvent.data[0]["id"],
               owner: false,
               equipped: false,
-              ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+              ownerAddress: upgradesAvailableEvent.data[0]["owner"],
               xp: 0,
               special1: null,
               special2: null,
@@ -855,20 +849,20 @@ export function syscalls({
         setStartOption("create adventurer");
       }
 
-      const newItemsAvailableEvents = events.filter(
-        (event) => event.name === "NewItemsAvailable"
+      const upgradesAvailableEvents = events.filter(
+        (event) => event.name === "UpgradesAvailable"
       );
-      if (newItemsAvailableEvents.length > 0) {
-        for (let newItemsAvailableEvent of newItemsAvailableEvents) {
-          const newItems = newItemsAvailableEvent.data[1];
+      if (upgradesAvailableEvents.length > 0) {
+        for (let upgradesAvailableEvent of upgradesAvailableEvents) {
+          const newItems = upgradesAvailableEvent.data[1];
           const itemData = [];
           for (let newItem of newItems) {
             itemData.unshift({
               item: newItem,
-              adventurerId: newItemsAvailableEvent.data[0]["id"],
+              adventurerId: upgradesAvailableEvent.data[0]["id"],
               owner: false,
               equipped: false,
-              ownerAddress: newItemsAvailableEvent.data[0]["owner"],
+              ownerAddress: upgradesAvailableEvent.data[0]["owner"],
               xp: 0,
               special1: null,
               special2: null,
@@ -939,15 +933,18 @@ export function syscalls({
       handleEquip(events, setData, setAdventurer, queryData);
       const droppedItems = handleDrop(events, setData, setAdventurer);
 
-      // Update adventurer
-      setData("adventurerByIdQuery", {
-        adventurers: [
-          events.find((event) => event.name === "AdventurerUpgraded").data,
-        ],
-      });
-      setAdventurer(
-        events.find((event) => event.name === "AdventurerUpgraded").data
+      const adventurerUpgradedEvents = events.filter(
+        (event) => event.name === "AdventurerUpgraded"
       );
+      if (adventurerUpgradedEvents.length > 0) {
+        for (let adventurerUpgradedEvent of adventurerUpgradedEvents) {
+          setData("adventurerByIdQuery", {
+            adventurers: [adventurerUpgradedEvent.data],
+          });
+          setAdventurer(adventurerUpgradedEvent.data);
+        }
+      }
+
       // Add purchased items
       const purchaseItemsEvents = events.filter(
         (event) => event.name === "PurchasedItems"
@@ -984,6 +981,7 @@ export function syscalls({
           }
         }
       }
+
       const filteredDrops = queryData.itemsByAdventurerQuery?.items.filter(
         (item: any) => !droppedItems.includes(item.item)
       );
@@ -993,15 +991,45 @@ export function syscalls({
       for (let i = 0; i < unequipIndexes.length; i++) {
         setData("itemsByAdventurerQuery", false, "equipped", unequipIndexes[i]);
       }
+
+      console.log("adventurer death");
+
+      const adventurerDiedEvents = events.filter(
+        (event) => event.name === "AdventurerDied"
+      );
+      if (adventurerDiedEvents.length > 0) {
+        for (let adventurerDiedEvent of adventurerDiedEvents) {
+          setData("adventurerByIdQuery", {
+            adventurers: [adventurerDiedEvent.data[0]],
+          });
+          const deadAdventurerIndex =
+            queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+              (adventurer: any) =>
+                adventurer.id == adventurerDiedEvent.data[0].id
+            );
+          setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
+          setAdventurer(adventurerDiedEvent.data[0]);
+          setDeathNotification("Upgrade", "Death Penalty", []);
+          setScreen("start");
+          setStartOption("create adventurer");
+        }
+      }
+
       // Reset items to no availability
       setData("latestMarketItemsQuery", null);
-      stopLoading({
-        Stats: upgrades,
-        Items: purchaseItems,
-        Potions: potionAmount,
-      });
-      setScreen("play");
-      setMintAdventurer(false);
+      if (events.some((event) => event.name === "AdventurerDied")) {
+        setScreen("start");
+        setStartOption("create adventurer");
+        stopLoading("Death Penalty");
+      } else {
+        stopLoading({
+          Stats: upgrades,
+          Items: purchaseItems,
+          Potions: potionAmount,
+        });
+        setScreen("play");
+        setMintAdventurer(false);
+      }
     } catch (e) {
       console.log(e);
       stopLoading(e, true);

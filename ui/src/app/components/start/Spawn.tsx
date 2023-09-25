@@ -25,7 +25,7 @@ export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
   const resetNotification = useLoadingStore((state) => state.resetNotification);
 
   useEffect(() => {
-    if (formData.startingStrength && formData.name && formData.startingWeapon) {
+    if (formData.name && formData.startingWeapon) {
       setFormFilled(true);
     } else {
       setFormFilled(false);
@@ -63,17 +63,13 @@ export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
           <WalletTutorial />
         </div>
       )}
-      <div className="flex flex-col h-full">
+      <div className="flex flex-col h-full p-2">
         <Image
-          className="mx-auto border border-terminal-green absolute  object-cover sm:py-4 sm:px-8"
+          className="mx-auto absolute object-cover sm:py-4 sm:px-8"
           src={"/scenes/intro/beast.png"}
           alt="adventurer facing beast"
           fill
         />
-
-        <span className="absolute sm:hidden top-0">
-          <TxActivity />
-        </span>
 
         {!isWrongNetwork && (
           <div className="absolute text-xs text-center sm:text-start sm:text-xl leading-normal sm:leading-loose z-10 top-1/4">

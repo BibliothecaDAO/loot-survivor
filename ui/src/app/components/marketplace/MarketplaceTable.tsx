@@ -100,6 +100,8 @@ const MarketplaceTable = ({
     return sortedItems;
   }, [marketLatestItems, sortField, sortDirection]);
 
+  console.log(showEquipQ);
+
   return (
     <>
       <div>
@@ -149,7 +151,7 @@ const MarketplaceTable = ({
           </tbody>
         </table>
       </div>
-      {showEquipQ && (
+      {showEquipQ! >= 0 && (
         <div className="sm:hidden h-full">
           {(() => {
             const item = sortedMarketLatestItems[showEquipQ ?? 0];

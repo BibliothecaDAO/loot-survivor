@@ -35,7 +35,7 @@ mod Game {
         constants::{
             messages, Week, REWARD_DISTRIBUTIONS_PHASE1, REWARD_DISTRIBUTIONS_PHASE2,
             REWARD_DISTRIBUTIONS_PHASE3, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
-            STARTER_BEAST_ATTACK_DAMAGE, STARTING_STATS, IDLE_DEATH_PENALTY_BLOCKS,
+            STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS, IDLE_DEATH_PENALTY_BLOCKS,
             MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE
         }
     };
@@ -150,22 +150,18 @@ mod Game {
         //@dev Ensures that the chosen starting weapon and stats are valid before beginning the adventure.
         fn start(
             ref self: ContractState,
-            interface_id: ContractAddress,
+            client_reward_address: ContractAddress,
             starting_weapon: u8,
             adventurer_meta: AdventurerMetadata,
-            starting_stats: Stats,
         ) {
             _assert_valid_starter_weapon(starting_weapon);
-            _assert_starting_stat_count(starting_stats);
 
             let caller = get_caller_address();
             let block_number = starknet::get_block_info().unbox().block_number;
 
-            _start(
-                ref self, block_number, caller, starting_weapon, adventurer_meta, starting_stats
-            );
+            _start(ref self, block_number, caller, starting_weapon, adventurer_meta);
 
-            _payout(ref self, caller, block_number, interface_id);
+            _payout(ref self, caller, block_number, client_reward_address);
         }
 
         //@notice Sends an adventurer to explore.
@@ -178,15 +174,18 @@ mod Game {
                 @self, adventurer_id
             );
 
+            // use an immutable adventurer copy for assertions to reduce stack overhead
+            let immutable_adventurer = adventurer.clone();
+
             // assert action is valid
             _assert_ownership(@self, adventurer_id);
-            _assert_not_dead(adventurer);
-            _assert_no_stat_upgrades_available(adventurer);
-            _assert_not_in_battle(adventurer);
+            _assert_not_dead(immutable_adventurer);
+            _assert_no_stat_upgrades_available(immutable_adventurer);
+            _assert_not_in_battle(immutable_adventurer);
 
             // get number of blocks between actions
             let (exceeded_idle_threshold, num_blocks) = _idle_longer_than_penalty_threshold(
-                adventurer
+                immutable_adventurer
             );
 
             // process explore or apply idle penalty
@@ -222,14 +221,17 @@ mod Game {
                 @self, adventurer_id
             );
 
+            // use an immutable adventurer copy for assertions to reduce stack overhead
+            let immutable_adventurer = adventurer.clone();
+
             // assert action is valid
             _assert_ownership(@self, adventurer_id);
-            _assert_not_dead(adventurer);
-            _assert_in_battle(adventurer);
+            _assert_not_dead(immutable_adventurer);
+            _assert_in_battle(immutable_adventurer);
 
             // get number of blocks between actions
             let (exceeded_idle_threshold, num_blocks) = _idle_longer_than_penalty_threshold(
-                adventurer
+                immutable_adventurer
             );
 
             // process attack or apply idle penalty
@@ -258,16 +260,19 @@ mod Game {
                 @self, adventurer_id
             );
 
+            // use an immutable adventurer copy for assertions to reduce stack overhead
+            let immutable_adventurer = adventurer.clone();
+
             // assert action is valid
             _assert_ownership(@self, adventurer_id);
-            _assert_not_dead(adventurer);
-            _assert_in_battle(adventurer);
-            _assert_not_starter_beast(adventurer);
-            _assert_dexterity_not_zero(adventurer);
+            _assert_not_dead(immutable_adventurer);
+            _assert_in_battle(immutable_adventurer);
+            _assert_not_starter_beast(immutable_adventurer);
+            _assert_dexterity_not_zero(immutable_adventurer);
 
             // get number of blocks between actions
             let (exceeded_idle_threshold, num_blocks) = _idle_longer_than_penalty_threshold(
-                adventurer
+                immutable_adventurer
             );
 
             // process flee or apply idle penalty
@@ -432,16 +437,17 @@ mod Game {
                 @self, adventurer_id
             );
 
+            let immutable_adventurer = adventurer.clone();
+
             // assert action is valid
             _assert_ownership(@self, adventurer_id);
-            _assert_not_dead(adventurer);
-            _assert_not_in_battle(adventurer);
-            _assert_upgrades_available(adventurer);
-            _assert_stat_balance(adventurer, stat_upgrades);
+            _assert_not_dead(immutable_adventurer);
+            _assert_not_in_battle(immutable_adventurer);
+            _assert_valid_stat_selection(immutable_adventurer, stat_upgrades);
 
             // get number of blocks between actions
             let (exceeded_idle_threshold, num_blocks) = _idle_longer_than_penalty_threshold(
-                adventurer
+                immutable_adventurer
             );
 
             // if adventurer exceeded idle penalty threshold
@@ -826,21 +832,18 @@ mod Game {
         // zero out beast health
         adventurer.beast_health = 0;
 
-        // give adventurer gold reward
-        // TODO Gas Optimization: beast.get_gold_reward and get_xp_reward both call the same 
-        // get_base_reward from Combat module. Should refactor this to only make that call once and have
-        // get_gold_reward and get_xp_reward operator on the base reward
-        let mut gold_earned = beast.get_gold_reward(beast_seed);
-        let bag = _unpacked_bag(@self, adventurer_id);
+        // get gold reward and increase adventurers gold
+        let gold_earned = beast.get_gold_reward(beast_seed);
         adventurer.increase_gold(gold_earned * adventurer.beast_gold_reward_multiplier().into());
 
-        // grant adventuer xp
+        // get xp reward and increase adventurers xp
         let xp_earned_adventurer = beast.get_xp_reward();
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(xp_earned_adventurer);
 
-        // grant equipped items xp, items level faster than Adventurers
+        // items use adventurer xp with an item multplier so they level faster than Adventurer
         let xp_earned_items = xp_earned_adventurer * ITEM_XP_MULTIPLIER_BEASTS;
-        _grant_xp_to_equipped_items(
+        // assigning xp to items is more complex so we delegate to an internal function
+        let items_leveled_up = _grant_xp_to_equipped_items(
             ref self, ref adventurer, adventurer_id, xp_earned_items, attack_rnd_2
         );
 
@@ -858,12 +861,21 @@ mod Game {
             gold_earned
         );
 
-        // if adventurers new level is greater than previous level
+        // if any items leveled up
+        if items_leveled_up.len() != 0 {
+            // emit event
+            __event_ItemsLeveledUp(ref self, adventurer, adventurer_id, items_leveled_up);
+        }
+
+        // if adventurer gained stat points
         if (adventurer.stat_points_available != 0) {
+            // emit events
             _emit_level_up_events(ref self, adventurer, adventurer_id, previous_level, new_level);
         }
 
+        // if beast beast level is above collectible threshold
         if beast.combat_spec.level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK {
+            // adventurers gets the beast
             _mint_beast(@self, beast);
         }
     }
@@ -878,7 +890,9 @@ mod Game {
                 beast.id, beast.combat_spec.specials.special2, beast.combat_spec.specials.special3
             );
 
-        if !is_beast_minted {
+        let beasts_minter = collectible_beasts_contract.getMinter();
+
+        if !is_beast_minted && beasts_minter == starknet::get_contract_address() {
             collectible_beasts_contract
                 .mint(
                     get_caller_address(),
@@ -1051,19 +1065,18 @@ mod Game {
         block_number: u64,
         caller: ContractAddress,
         starting_weapon: u8,
-        adventurer_meta: AdventurerMetadata,
-        starting_stats: Stats,
+        adventurer_meta: AdventurerMetadata
     ) {
         // increment adventurer id (first adventurer is id 1)
         let adventurer_id = self._counter.read() + 1;
 
-        // generate a new adventurer using the provided started weapon and current block number
-        let mut new_adventurer: Adventurer = ImplAdventurer::new(
-            starting_weapon, block_number, starting_stats
-        );
-
         let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
             block_number, adventurer_id
+        );
+
+        // generate a new adventurer using the provided started weapon and current block number
+        let mut new_adventurer: Adventurer = ImplAdventurer::new(
+            starting_weapon, NUM_STARTING_STATS, block_number, adventurer_entropy
         );
 
         // set entropy on adventurer metadata
@@ -2150,15 +2163,19 @@ mod Game {
             ImplLoot::is_starting_weapon(starting_weapon) == true, messages::INVALID_STARTING_WEAPON
         );
     }
-    fn _assert_starting_stat_count(starting_stats: Stats) {
+    fn _assert_starting_stats(starting_stats: Stats) {
         let total_stats = starting_stats.strength
             + starting_stats.dexterity
             + starting_stats.vitality
             + starting_stats.intelligence
             + starting_stats.wisdom
             + starting_stats.charisma;
+        assert(total_stats == NUM_STARTING_STATS, messages::WRONG_NUM_STARTING_STATS);
+        _assert_zero_luck(starting_stats);
+    }
 
-        assert(total_stats == STARTING_STATS, messages::WRONG_STARTING_STATS);
+    fn _assert_zero_luck(stats: Stats) {
+        assert(stats.luck == 0, messages::NON_ZERO_STARTING_LUCK);
     }
     fn _assert_has_enough_gold(adventurer: Adventurer, cost: u16) {
         assert(adventurer.gold >= cost, messages::NOT_ENOUGH_GOLD);
@@ -2174,23 +2191,25 @@ mod Game {
             messages::HEALTH_FULL
         );
     }
-    fn _assert_stat_balance(adventurer: Adventurer, stat_upgrades: Stats) {
-        let stat_count = stat_upgrades.strength
+
+    fn _assert_stat_balance(stat_upgrades: Stats, stat_points_available: u8) {
+        let stat_upgrade_count = stat_upgrades.strength
             + stat_upgrades.dexterity
             + stat_upgrades.vitality
             + stat_upgrades.intelligence
             + stat_upgrades.wisdom
             + stat_upgrades.charisma;
 
-        // if adventurer has less than the number of stats they are trying to upgrade
-        if adventurer.stat_points_available.into() < stat_count {
-            // panic with insufficient stat upgrades message
+        if stat_points_available < stat_upgrade_count {
             panic_with_felt252(messages::INSUFFICIENT_STAT_UPGRADES);
-        } else if adventurer.stat_points_available.into() > stat_count {
-            // if the adventurer has more than the number of stats they are trying to upgrade
-            // panic with must use all stats message
+        } else if stat_points_available > stat_upgrade_count {
             panic_with_felt252(messages::MUST_USE_ALL_STATS);
         }
+    }
+    fn _assert_valid_stat_selection(adventurer: Adventurer, stat_upgrades: Stats) {
+        _assert_upgrades_available(adventurer);
+        _assert_stat_balance(stat_upgrades, adventurer.stat_points_available);
+        _assert_zero_luck(stat_upgrades);
     }
 
     fn _assert_is_idle(adventurer: Adventurer) {
@@ -3023,6 +3042,7 @@ mod Game {
         fn mint(
             ref self: T, to: ContractAddress, beast: u8, prefix: u8, suffix: u8, level: felt252
         );
-        fn isMinted(ref self: T, beast: u8, prefix: u8, suffix: u8) -> bool;
+        fn isMinted(self: @T, beast: u8, prefix: u8, suffix: u8) -> bool;
+        fn getMinter(self: @T) -> ContractAddress;
     }
 }

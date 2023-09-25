@@ -40,6 +40,8 @@ export const useBurner = () => {
   const { account: walletAccount } = useAccount();
   const [account, setAccount] = useState<Account>();
   const [isDeploying, setIsDeploying] = useState(false);
+  const [isGeneratingNewKey, setIsGeneratingNewKey] = useState(false);
+  const [isSettingPermissions, setIsSettingPermissions] = useState(false);
   const { gameContract, lordsContract } = useContracts();
 
   // init
@@ -116,6 +118,18 @@ export const useBurner = () => {
     [walletAccount]
   );
 
+  const getMasterAccount = useCallback(
+    (address: string) => {
+      let storage = Storage.get("burners") || {};
+      if (!storage[address]) {
+        throw new Error("burner not found");
+      }
+
+      return storage[address].masterAccount;
+    },
+    [walletAccount]
+  );
+
   const create = useCallback(async () => {
     setIsDeploying(true);
     const privateKey = stark.randomAddress();
@@ -146,27 +160,19 @@ export const useBurner = () => {
     // deploy burner
     const burner = new Account(provider, address, privateKey, "1");
 
-    const { suggestedMaxFee: estimatedFee1 } =
-      await burner.estimateAccountDeployFee({
-        classHash: process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
-        addressSalt: publicKey,
-        constructorCalldata: constructorAACalldata,
-      });
-
     const {
       transaction_hash: deployTx,
       contract_address: accountAAFinalAdress,
-    } = await burner.deployAccount(
-      {
-        classHash: process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
-        constructorCalldata: constructorAACalldata,
-        contractAddress: address,
-        addressSalt: publicKey,
-      },
-      { maxFee: estimatedFee1 * (BigInt(11) / BigInt(10)) }
-    );
+    } = await burner.deployAccount({
+      classHash: process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
+      constructorCalldata: constructorAACalldata,
+      contractAddress: address,
+      addressSalt: publicKey,
+    });
 
     await provider.waitForTransaction(deployTx);
+
+    setIsSettingPermissions(true);
 
     const setPermissionsTx = await setPermissions(
       accountAAFinalAdress,
@@ -186,13 +192,16 @@ export const useBurner = () => {
       publicKey,
       deployTx,
       setPermissionsTx,
+      masterAccount: walletAccount.address,
       active: true,
     };
 
     setAccount(burner);
-    setIsDeploying(false);
     Storage.set("burners", storage);
+    setIsSettingPermissions(false);
+    setIsDeploying(false);
     refresh();
+    window.location.reload();
     return burner;
   }, [walletAccount]);
 
@@ -215,7 +224,7 @@ export const useBurner = () => {
           entrypoint: "update_whitelisted_calls",
           calldata: [
             "1",
-            gameContract?.address ?? "",
+            process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
             selector.getSelectorFromName("transfer"),
             "1",
           ],
@@ -229,6 +238,45 @@ export const useBurner = () => {
       return permissionsTx;
     },
     []
+  );
+
+  const genNewKey = useCallback(
+    async (burnerAddress: string) => {
+      setIsGeneratingNewKey(true);
+      const privateKey = stark.randomAddress();
+      const publicKey = ec.starkCurve.getStarkKey(privateKey);
+
+      if (!walletAccount) {
+        throw new Error("wallet account not found");
+      }
+
+      const { transaction_hash } = await walletAccount.execute({
+        contractAddress: burnerAddress,
+        entrypoint: "set_public_key",
+        calldata: [publicKey],
+      });
+
+      await provider.waitForTransaction(transaction_hash);
+
+      // save new keys
+      let storage = Storage.get("burners") || {};
+      for (let address in storage) {
+        storage[address].active = false;
+      }
+
+      storage[burnerAddress] = {
+        privateKey,
+        publicKey,
+        masterAccount: walletAccount.address,
+        active: true,
+      };
+
+      Storage.set("burners", storage);
+      setIsGeneratingNewKey(false);
+      refresh();
+      window.location.reload();
+    },
+    [walletAccount]
   );
 
   const listConnectors = useCallback(() => {
@@ -258,11 +306,15 @@ export const useBurner = () => {
 
   return {
     get,
+    getMasterAccount,
     list,
     select,
     create,
+    genNewKey,
     account,
     isDeploying,
+    isSettingPermissions,
+    isGeneratingNewKey,
     listConnectors,
   };
 };

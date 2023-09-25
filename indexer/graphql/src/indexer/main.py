@@ -33,7 +33,7 @@ async def graphql(mongo_goerli, mongo_mainnet, port):
     if port is None:
         port = "8080"
     if mongo_goerli is None:
-        mongo_goerli = "mongodb://apibara:apibara@localhost:27017"
+        mongo_goerli = "mongodb://mongo:mongo@localhost:27017"
     if mongo_mainnet is None:
         mongo_mainnet = "mongodb://apibara:apibara@localhost:27018"
 

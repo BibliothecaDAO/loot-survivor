@@ -42,6 +42,7 @@ import {
   RefreshIcon,
   CartIconSimple,
   ArcadeIcon,
+  MdTokenIcon,
 } from "./components/icons/Icons";
 import Lords from "../../public/lords.svg";
 import Settings from "./components/navigation/Settings";
@@ -65,9 +66,6 @@ import { ArcadeDialog } from "./components/ArcadeDialog";
 import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
 import { syscalls } from "./lib/utils/syscalls";
 import { useContracts } from "./hooks/useContracts";
-import { Maintenance } from "./components/archived/Maintenance";
-import { set } from "lodash";
-import LootIconLoader from "./components/icons/Loader";
 import { useBalance } from "@starknet-react/core";
 
 const allMenuItems: Menu[] = [
@@ -132,6 +130,7 @@ export default function Home() {
   );
   const startLoading = useLoadingStore((state) => state.startLoading);
   const stopLoading = useLoadingStore((state) => state.stopLoading);
+  const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
   const { writeAsync } = useContractWrite({ calls });
   const setEquipItems = useUIStore((state) => state.setEquipItems);
@@ -356,24 +355,30 @@ export default function Home() {
     return <WalletSelect />;
   }
 
+  const spawnLoader =
+    pendingMessage &&
+    (pendingMessage === "Spawning Adventurer" ||
+      pendingMessage.includes("Spawning Adventurer"));
+
   return (
     // <Maintenance />
     <main
-      className={`min-h-screen container mx-auto flex flex-col p-4 pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
+      className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
     >
       {introComplete ? (
         <>
           <div className="flex flex-col w-full">
             <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
-
-            <div className="sm:hidden">
-              <TxActivity />
-            </div>
-            <div className="flex flex-row justify-between">
-              <span className="flex flex-row items-center gap-2 sm:gap-5">
-                <h1 className="glitch m-0 text-lg sm:text-4xl">
-                  Loot Survivor
-                </h1>
+            {!spawnLoader && (
+              <div className="sm:hidden">
+                <TxActivity />
+              </div>
+            )}
+            <div className="flex flex-row justify-between px-1  ">
+              <div className="flex flex-row items-center gap-2 sm:gap-5">
+                <h1 className="m-0 text-xl sm:text-4xl">Loot Survivor</h1>
+              </div>
+              <div className="flex flex-row items-center self-end sm:gap-1 space-x-1 self-center">
                 {adventurer?.id && (
                   <PenaltyCountDown
                     lastDiscoveryTime={
@@ -383,26 +388,28 @@ export default function Home() {
                     dataLoading={isLoading.global}
                   />
                 )}
-              </span>
-              <div className="flex flex-row items-center self-end gap-1 flex-wrap">
-                <button className="flex items-center sm:h-10 sm:w-20 px-1 py-1 sm:py-2 text-xs sm:text-lg bg-terminal-black border border-terminal-green hover:bg-terminal-green/20 sm:hover:animate-pulse text-terminal-green">
+                <Button size={"xs"} variant={"outline"} className="self-center">
                   <span className="flex flex-row items-center justify-between w-full">
-                    <Lords className="self-center h-4 w-4 sm:w-6 sm:h-6 fill-current" />
+                    <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
                     <p>
                       {formatNumber(
                         parseInt(lordsBalance.data?.formatted ?? "0")
                       )}
                     </p>
                   </span>
-                </button>
+                </Button>
                 <Button
+                  size={"xs"}
+                  variant={"outline"}
                   onClick={() => showArcadeDialog(!arcadeDialog)}
                   disabled={isWrongNetwork}
                 >
-                  <ArcadeIcon className="w-4 sm:w-8 justify-center" />
+                  <MdTokenIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
                   <span className="hidden sm:block">arcade account</span>
                 </Button>
                 <Button
+                  size={"xs"}
+                  variant={"outline"}
                   onClick={() => {
                     setIsMuted(!isMuted);
                     clickPlay();
@@ -411,26 +418,24 @@ export default function Home() {
                 >
                   <div className="flex items-center justify-center">
                     {isMuted ? (
-                      <MuteIcon className="w-4 h-4 sm:w-6 sm:h-6" />
+                      <MuteIcon className="sm:w-5 sm:h-5  h-3 w-3" />
                     ) : (
-                      <VolumeIcon className="w-4 h-4 sm:w-6 sm:h-6" />
+                      <VolumeIcon className="sm:w-5 sm:h-5  h-3 w-3" />
                     )}
                   </div>
                 </Button>
-                {account && calls.length > 0 && (
-                  <button
+                {account && (
+                  <Button
+                    variant={"outline"}
+                    size={"xs"}
                     ref={displayCartButtonRef}
                     onClick={() => {
                       setDisplayCart(!displayCart);
                       clickPlay();
                     }}
-                    className="relative flex flex-row items-center justify-center gap-2 p-1 sm:p-2 bg-black border border-terminal-green text-xs sm:text-base w-9 sm:w-fit"
                   >
-                    <CartIconSimple className="w-4 h-4" />
-                    <p className="hidden sm:block">
-                      {displayCart ? "Hide Cart" : "Show Cart"}
-                    </p>
-                  </button>
+                    <CartIconSimple className="sm:w-5 sm:h-5  h-3 w-3" />
+                  </Button>
                 )}
                 {displayCart && (
                   <TransactionCart
@@ -439,20 +444,23 @@ export default function Home() {
                   />
                 )}
                 <div className="flex items-center sm:hidden">
-                  <button
-                    className="w-6 h-6"
+                  <Button
+                    size={"xs"}
+                    variant={"outline"}
                     onClick={() => {
                       setScreen("settings");
                       clickPlay();
                     }}
                   >
-                    <CogIcon />
-                  </button>
+                    <CogIcon className="fill-current stroke-current h-3 w-3" />
+                  </Button>
                 </div>
                 <div className="hidden sm:block sm:flex sm:flex-row sm:items-center sm:gap-1">
                   {account && (
                     <>
                       <Button
+                        variant={"outline"}
+                        size={"xs"}
                         ref={displayHistoryButtonRef}
                         onClick={() => {
                           setDisplayHistory(!displayHistory);
@@ -464,6 +472,8 @@ export default function Home() {
                   )}
 
                   <Button
+                    variant={"outline"}
+                    size={"sm"}
                     onClick={() => {
                       disconnect();
                       resetData();
@@ -474,7 +484,11 @@ export default function Home() {
                     {account ? displayAddress(account.address) : "Connect"}
                   </Button>
 
-                  <Button href="https://github.com/BibliothecaDAO/loot-survivor">
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    href="https://github.com/BibliothecaDAO/loot-survivor"
+                  >
                     <GithubIcon className="w-6" />
                   </Button>
                 </div>
@@ -484,10 +498,12 @@ export default function Home() {
               </div>
             </div>
           </div>
-          <div className="w-full h-4 sm:h-6 my-2 bg-terminal-green text-terminal-black px-4">
-            <div className="hidden sm:block">
-              <TxActivity />
-            </div>
+          <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
+            {!spawnLoader && (
+              <div className="hidden sm:block">
+                <TxActivity />
+              </div>
+            )}
           </div>
           <NotificationDisplay />
 
@@ -495,12 +511,10 @@ export default function Home() {
 
           {status == "connected" && arcadeDialog && <ArcadeDialog />}
 
-          {/* {!onboarded && tutorialDialog && <TutorialDialog />} */}
-
           {introComplete ? (
             <div className="flex flex-col w-full">
               <>
-                <div className="sm:hidden flex justify-center sm:justify-normal sm:pb-2">
+                <div className="sm:hidden flex  sm:justify-normal sm:pb-2">
                   <HorizontalKeyboardControl
                     buttonsData={mobileMenuItems}
                     onButtonClick={(value) => {
@@ -522,13 +536,6 @@ export default function Home() {
                 <div className="sm:hidden">
                   <MobileHeader />
                 </div>
-
-                {/* <div className="overflow-y-auto h-[460px] sm:h-full"> */}
-                {/* {isLoading.global ? (
-                  <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <LootIconLoader size="w-10" />
-                  </div>
-                ) : ( */}
                 <>
                   {screen === "start" && (
                     <AdventurerScreen
@@ -553,8 +560,6 @@ export default function Home() {
                   {screen === "player" && <Player />}
                   {screen === "wallet" && <WalletSelect />}
                 </>
-                {/* )} */}
-                {/* </div> */}
               </>
             </div>
           ) : null}

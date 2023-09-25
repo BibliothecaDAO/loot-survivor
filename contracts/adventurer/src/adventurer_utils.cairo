@@ -23,7 +23,10 @@ use lootitems::constants::{
     }
 };
 use combat::constants::CombatEnums::{Type, Tier, Slot};
-use pack::pack::{rshift_split};
+use pack::{
+    pack::{rshift_split},
+    constants::{MASK_16, pow, MASK_8, MASK_3, MASK_BOOL, mask, U128_MASK_8, u128_pow}
+};
 
 #[generate_trait]
 impl AdventurerUtils of IAdventurerUtils {
@@ -216,6 +219,72 @@ impl AdventurerUtils of IAdventurerUtils {
         let (d, r) = rshift_split(felt_to_split.into(), U128_MAX.into());
         (r.try_into().unwrap(), d.try_into().unwrap())
     }
+
+    fn generate_starting_stats(entropy: u128, starting_stat_count: u8) -> Stats {
+        let mut starting_stats = Stats {
+            strength: 0,
+            dexterity: 0,
+            vitality: 0,
+            charisma: 0,
+            intelligence: 0,
+            wisdom: 0,
+            luck: 0,
+        };
+
+        let random_outcomes = AdventurerUtils::u128_to_u8_array(entropy);
+
+        // TODO: Use conditional compilation to only run this check in debug mode as not to waste gas in production
+        assert(starting_stat_count.into() < random_outcomes.len(), 'stat count out of bounds');
+
+        let mut i = 0;
+        loop {
+            if i == starting_stat_count.into() {
+                break;
+            }
+            let random_u8 = *random_outcomes.at(i);
+            let random_stat_index = random_u8 % 6;
+            if random_stat_index == 0 {
+                starting_stats.strength += 1;
+            } else if random_stat_index == 1 {
+                starting_stats.dexterity += 1;
+            } else if random_stat_index == 2 {
+                starting_stats.vitality += 1;
+            } else if random_stat_index == 3 {
+                starting_stats.charisma += 1;
+            } else if random_stat_index == 4 {
+                starting_stats.intelligence += 1;
+            } else if random_stat_index == 5 {
+                starting_stats.wisdom += 1;
+            } else {
+                panic_with_felt252('stat out of range');
+            }
+
+            i += 1;
+        };
+
+        starting_stats
+    }
+
+    fn u128_to_u8_array(value: u128) -> Array<u8> {
+        let mut result = ArrayTrait::<u8>::new();
+        result.append((value & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_8) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_16) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_24) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_32) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_40) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_48) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_56) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_64) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_72) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_80) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_88) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_96) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_104) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_112) & U128_MASK_8).try_into().unwrap());
+        result.append(((value / u128_pow::_120) & U128_MASK_8).try_into().unwrap());
+        result
+    }
 }
 
 // ---------------------------
@@ -223,6 +292,7 @@ impl AdventurerUtils of IAdventurerUtils {
 // ---------------------------
 #[cfg(test)]
 mod tests {
+    use poseidon::poseidon_hash_span;
     use survivor::{
         constants::{
             adventurer_constants::{
@@ -235,13 +305,167 @@ mod tests {
         adventurer_utils::AdventurerUtils
     };
     use combat::constants::CombatEnums::{Type, Tier, Slot};
+        #[test]
+    #[available_gas(166544)]
+    fn test_generate_starting_stats_gas() {
+        AdventurerUtils::generate_starting_stats(0, 1);
+    }
+
     #[test]
-    #[available_gas(150000)]
-    fn test_is_health_full() {
-        let starting_stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
+    #[available_gas(166544)]
+    #[should_panic(expected: ('stat count out of bounds',))]
+    fn test_generate_starting_stats_fail_out_of_bounds() {
+        AdventurerUtils::generate_starting_stats(0, 20);
+    }
+
+    #[test]
+    #[available_gas(1924040)]
+    fn test_generate_starting_stats() {
+        let starting_stat_count = 9;
+
+        // zero case
+        let entropy = 0;
+        let stats = AdventurerUtils::generate_starting_stats(entropy, starting_stat_count);
+        let stat_count = stats.strength
+            + stats.dexterity
+            + stats.vitality
+            + stats.intelligence
+            + stats.wisdom
+            + stats.charisma;
+        assert(stat_count == starting_stat_count, 'wrong stat total');
+        assert(stats.strength == 9, 'strength should be 9');
+        assert(stats.dexterity == 0, 'dexterity should be 0');
+        assert(stats.vitality == 0, 'vitality should be 0');
+        assert(stats.intelligence == 0, 'intelligence should be 0');
+        assert(stats.wisdom == 0, 'wisdom should be 0');
+        assert(stats.charisma == 0, 'charisma should be 0');
+
+        // max u128 case
+        let entropy = 0xffffffffffffffffffffffffffffffff;
+        let stats = AdventurerUtils::generate_starting_stats(entropy, starting_stat_count);
+        let stat_count = stats.strength
+            + stats.dexterity
+            + stats.vitality
+            + stats.intelligence
+            + stats.wisdom
+            + stats.charisma;
+        assert(stat_count == starting_stat_count, 'wrong stat total');
+        assert(stats.strength == 0, 'strength should be 0');
+        assert(stats.dexterity == 0, 'dexterity should be 0');
+        assert(stats.vitality == 0, 'vitality should be 0');
+        assert(stats.intelligence == 0, 'intelligence should be 0');
+        assert(stats.wisdom == 0, 'wisdom should be 0');
+        assert(stats.charisma == 9, 'charisma should be 9');
+
+        let mut hash_span = ArrayTrait::new();
+        hash_span.append(241);
+        hash_span.append(14212);
+        let poseidon = poseidon_hash_span(hash_span.span());
+        let (rnd1, rnd2) = AdventurerUtils::split_hash(poseidon);
+        let stats = AdventurerUtils::generate_starting_stats(rnd1, starting_stat_count);
+        let stat_count = stats.strength
+            + stats.dexterity
+            + stats.vitality
+            + stats.intelligence
+            + stats.wisdom
+            + stats.charisma;
+        assert(stat_count == starting_stat_count, 'wrong stat total');
+        assert(stats.strength == 1, 'strength should be 1');
+        assert(stats.dexterity == 1, 'dexterity should be 1');
+        assert(stats.vitality == 2, 'vitality should be 2');
+        assert(stats.intelligence == 1, 'intelligence should be 1');
+        assert(stats.wisdom == 4, 'wisdom should be 4');
+        assert(stats.charisma == 0, 'charisma should be 0');
+
+        let stats = AdventurerUtils::generate_starting_stats(rnd2, starting_stat_count);
+        let stat_count = stats.strength
+            + stats.dexterity
+            + stats.vitality
+            + stats.intelligence
+            + stats.wisdom
+            + stats.charisma;
+        assert(stat_count == starting_stat_count, 'wrong stat total');
+        assert(stats.strength == 0, 'strength should be 0');
+        assert(stats.dexterity == 1, 'dexterity should be 1');
+        assert(stats.vitality == 3, 'vitality should be 3');
+        assert(stats.intelligence == 4, 'intelligence should be 4');
+        assert(stats.wisdom == 1, 'wisdom should be 1');
+        assert(stats.charisma == 0, 'charisma should be 0');
+
+        let stats = AdventurerUtils::generate_starting_stats(rnd2, starting_stat_count + 5);
+        let stat_count = stats.strength
+            + stats.dexterity
+            + stats.vitality
+            + stats.intelligence
+            + stats.wisdom
+            + stats.charisma;
+        assert(stat_count == starting_stat_count + 5, 'wrong stat total');
+        assert(stats.strength == 0, 'strength should be 0');
+        assert(stats.dexterity == 3, 'dexterity should be 3');
+        assert(stats.vitality == 4, 'vitality should be 4');
+        assert(stats.intelligence == 5, 'intelligence should be 5');
+        assert(stats.wisdom == 1, 'wisdom should be 1');
+        assert(stats.charisma == 1, 'charisma should be 1');
+    }
+
+    #[test]
+    #[available_gas(1448412)]
+    fn test_u128_to_u8_array() {
+        // zero case
+        let value = 0;
+        let values = AdventurerUtils::u128_to_u8_array(value);
+        let mut i = 0;
+        loop {
+            if i == values.len() {
+                break;
+            }
+
+            let value = *values.at(i);
+            assert(value == 0, 'all values should be 0');
+            i += 1;
         };
-        let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
+
+        // max u128 case
+        let value = 0xffffffffffffffffffffffffffffffff;
+        let values = AdventurerUtils::u128_to_u8_array(value);
+        let mut i = 0;
+        loop {
+            if i == values.len() {
+                break;
+            }
+
+            let value = *values.at(i);
+            assert(value == 255, 'all values should be 1');
+            i += 1;
+        };
+
+        // random case
+        let value =
+            0b00000110110100110000110010010111000001000110111100110010001111010010000001111110000110100111101100010101000000001111111101100101;
+
+        let values = AdventurerUtils::u128_to_u8_array(value);
+        assert(*values.at(15) == 6, 'rand15 should be 6');
+        assert(*values.at(14) == 211, 'rand14 should be 211');
+        assert(*values.at(13) == 12, 'rand13 should be 12');
+        assert(*values.at(12) == 151, 'rand12 should be 151');
+        assert(*values.at(11) == 4, 'rand11 should be 4');
+        assert(*values.at(10) == 111, 'rand10 should be 111');
+        assert(*values.at(9) == 50, 'rand9 should be 50');
+        assert(*values.at(8) == 61, 'rand8 should be 61');
+        assert(*values.at(7) == 32, 'rand7 should be 32');
+        assert(*values.at(6) == 126, 'rand6 should be 126');
+        assert(*values.at(5) == 26, 'rand5 should be 26');
+        assert(*values.at(4) == 123, 'rand4 should be 123');
+        assert(*values.at(3) == 21, 'rand3 should be 21');
+        assert(*values.at(2) == 0, 'rand2 should be 0');
+        assert(*values.at(1) == 255, 'rand1 should be 255');
+        assert(*values.at(0) == 101, 'rand0 should be 101');
+    }
+
+    #[test]
+    #[available_gas(259044)]
+    fn test_is_health_full() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
 
         // adventurers should start with full health
         assert(
@@ -273,12 +497,9 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(200000)]
+    #[available_gas(204804)]
     fn test_get_max_health() {
-        let starting_stats = Stats {
-            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
-        };
-        let mut adventurer = ImplAdventurer::new(12, 0, starting_stats);
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
 
         // assert starting state
         assert(

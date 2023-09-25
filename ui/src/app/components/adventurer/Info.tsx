@@ -55,21 +55,6 @@ export default function Info({
     ? data.itemsByAdventurerQuery.items
     : [];
 
-  const neckItem =
-    items.find(
-      (item: Item) => item.item == formatAdventurer.neck && item.equipped
-    ) || NullItem;
-
-  const ringItem =
-    items.find(
-      (item: Item) => item.item == formatAdventurer.ring && item.equipped
-    ) || NullItem;
-
-  const luck =
-    (neckItem.item ? calculateLevel(neckItem.xp ?? 0) : 0) +
-    (ringItem.item ? calculateLevel(ringItem.xp ?? 0) : 0) +
-    (ringItem.item === "Silver Ring" && ringItem.xp === 400 ? 20 : 0);
-
   const handleDropItems = (item: string) => {
     const newDropItems = [
       ...dropItems,
@@ -100,7 +85,7 @@ export default function Info({
     { key: "VIT", value: formatAdventurer.vitality ?? 0 },
     { key: "WIS", value: formatAdventurer.wisdom ?? 0 },
     { key: "CHA", value: formatAdventurer.charisma ?? 0 },
-    { key: "LUCK", value: luck },
+    { key: "LUCK", value: formatAdventurer.luck ?? 0 },
   ];
 
   const bodyParts = [
@@ -136,8 +121,8 @@ export default function Info({
     <>
       {adventurer?.id ? (
         <div className="border border-terminal-green xl:h-[500px] 2xl:h-full">
-          <div className="flex flex-row flex-wrap gap-2 p-1 xl:h-full">
-            <div className="flex flex-col w-full sm:p-2 uppercase xl:h-full">
+          <div className="flex flex-row flex-wrap gap-2 p-2 xl:h-full">
+            <div className="flex flex-col w-full uppercase xl:h-full">
               <div className="relative flex justify-between w-full text-xl sm:text-2xl lg:text-3xl border-b border-terminal-green">
                 {formatAdventurer.name}
                 <span className="relative flex items-center text-terminal-yellow">

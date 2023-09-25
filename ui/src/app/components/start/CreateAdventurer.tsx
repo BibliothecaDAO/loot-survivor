@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { FormData, Adventurer } from "@/app/types";
+import { FormData } from "@/app/types";
 import { AdventurerName } from "./AdventurerName";
 import { WeaponSelect } from "./WeaponSelect";
-import { ClassSelect } from "./ClassSelect";
 import { Spawn } from "./Spawn";
 
 export interface CreateAdventurerProps {
@@ -21,12 +20,6 @@ export const CreateAdventurer = ({
     name: "",
     homeRealmId: "",
     class: "",
-    startingStrength: "0",
-    startingDexterity: "0",
-    startingVitality: "0",
-    startingIntelligence: "0",
-    startingWisdom: "0",
-    startingCharisma: "0",
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [step, setStep] = useState(1);
@@ -75,15 +68,6 @@ export const CreateAdventurer = ({
 
   if (step === 1) {
     return (
-      <ClassSelect
-        setFormData={setFormData}
-        formData={formData}
-        step={step}
-        setStep={setStep}
-      />
-    );
-  } else if (step === 2) {
-    return (
       <WeaponSelect
         setFormData={setFormData}
         formData={formData}
@@ -92,7 +76,7 @@ export const CreateAdventurer = ({
         setStep={setStep}
       />
     );
-  } else if (step === 3) {
+  } else if (step === 2) {
     return (
       <AdventurerName
         setFormData={setFormData}
@@ -102,7 +86,7 @@ export const CreateAdventurer = ({
         setStep={setStep}
       />
     );
-  } else if (step === 4) {
+  } else if (step === 3) {
     return <Spawn formData={formData} spawn={spawn} handleBack={handleBack} />;
   } else {
     return null;

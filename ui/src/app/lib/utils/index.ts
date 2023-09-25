@@ -11,6 +11,7 @@ import {
   itemMinimumPrice,
   potionBasePrice,
 } from "../constants";
+import { z } from "zod";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -343,3 +344,12 @@ export function convertToBoolean(value: number): boolean {
 export function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export const uint256Schema = z.object({
+  low: z.bigint(),
+  high: z.bigint(),
+});
+
+export const balanceSchema = z.object({
+  balance: uint256Schema,
+});

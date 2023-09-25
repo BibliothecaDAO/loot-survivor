@@ -1156,7 +1156,7 @@ export class GameData {
       NewHighScore: hash.getSelectorFromName("NewHighScore"),
       AdventurerDied: hash.getSelectorFromName("AdventurerDied"),
       AdventurerLeveledUp: hash.getSelectorFromName("AdventurerLeveledUp"),
-      NewItemsAvailable: hash.getSelectorFromName("NewItemsAvailable"),
+      UpgradesAvailable: hash.getSelectorFromName("UpgradesAvailable"),
       IdleDeathPenalty: hash.getSelectorFromName("IdleDeathPenalty"),
     };
 

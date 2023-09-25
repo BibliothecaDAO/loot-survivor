@@ -22,26 +22,24 @@ export const BeastDisplay = ({ beastData }: BeastDisplayProps) => {
 
   return (
     <div className="relative flex flex-col items-center h-full xl:h-[500px] 2xl:h-full  border-2 border-terminal-green">
-      <div className="flex flex-col w-full h-full p-1 sm:p-3 uppercase">
-        <div className="flex justify-between py-1 sm:py-3 text-xl sm:text-4xl border-b border-terminal-green">
+      <div className="flex flex-col w-full h-full sm:p-3 uppercase">
+        <div className="flex justify-between py-1 sm:py-3 text-2xl sm:text-4xl border-b border-terminal-green  px-2 ">
           {beastName}
           <div
-            className={`text-4xl flex ${
-              beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
-            }`}
+            className={`text-4xl flex ${beastData?.health === 0 ? "text-red-600" : "text-terminal-green"
+              }`}
           >
-            <HeartIcon className="self-center w-6 h-6 fill-current" />{" "}
+            <HeartIcon className="self-center w-4 h-4 fill-current mr-1" />{" "}
             <div className="self-center text-xl sm:text-4xl">
               <HealthCountDown health={beastData?.health || 0} />
             </div>
           </div>
         </div>
-        <div className="flex justify-between w-full sm:py-2 ">
-          <p className="text-xl sm:text-3xl text-terminal-yellow">
+        <div className="flex justify-between w-full p-2 text-lg sm:text-3xl text-terminal-yellow">
+          <p>
             Level {beastData?.level}
           </p>
-          {/* <p className="text-3xl text-terminal-yellow">XP {beastData?.xp}</p> */}
-          <p className="text-xl sm:text-3xl text-terminal-yellow">
+          <p>
             Tier {tier}
           </p>
         </div>

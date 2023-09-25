@@ -1,7 +1,7 @@
 export default function Head() {
   return (
     <>
-      <title>Loot Survivor 💀 </title>
+      <title>Loot Survivor 💀</title>
 
       <meta charSet="utf-8" />
       <meta content="width=device-width, initial-scale=1" name="viewport" />
@@ -20,8 +20,17 @@ export default function Head() {
         property="og:description"
         content="Loot Survivor is the first Play2Die game from Realms on Starknet."
       />
-      <meta property="og:url" content="%PUBLIC_URL%" />
-      <meta property="og:image" content="%PUBLIC_URL%/logo.svg" />
+      <meta property="og:url" content="https://survivor.realms.world" />
+      <meta property="og:image" content="/scenes/intro/skulls.png" />
+
+      {/* Twitter Card data */}
+      <meta name="twitter:card" content="/scenes/intro/skulls.png" />
+      <meta name="twitter:title" content="Loot Survivor" />
+      <meta
+        name="twitter:description"
+        content="Loot Survivor is the first Play2Die game from Realms on Starknet."
+      />
+      <meta name="twitter:image" content="/scenes/intro/skulls.png" />
     </>
   );
 }

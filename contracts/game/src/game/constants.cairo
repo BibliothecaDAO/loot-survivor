@@ -20,15 +20,16 @@ mod messages {
     const ITEM_ALREADY_OWNED: felt252 = 'Item already owned';
     const ADVENTURER_DOESNT_OWN_ITEM: felt252 = 'Adventurer doesnt own item';
     const ZERO_DEXTERITY: felt252 = 'Cant flee, no dexterity';
-    const WRONG_STARTING_STATS: felt252 = 'Wrong starting stat count';
+    const WRONG_NUM_STARTING_STATS: felt252 = 'Wrong starting stat count';
     const MUST_USE_ALL_STATS: felt252 = 'Must use all stats';
     const NO_ITEMS: felt252 = 'Must provide item ids';
+    const NON_ZERO_STARTING_LUCK: felt252 = 'Luck must be zero';
 }
 
 // TODO: Update for mainnet
 const BLOCKS_IN_A_WEEK: u64 = 1000;
 const COST_TO_PLAY: u8 = 25;
-const STARTING_STATS: u8 = 6;
+const NUM_STARTING_STATS: u8 = 9;
 const IDLE_DEATH_PENALTY_BLOCKS: u8 = 12;
 const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u8 = 25;
 

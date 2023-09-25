@@ -49,7 +49,7 @@ const KeyboardControl = ({ buttonsData, size, direction }: ButtonProps) => {
 
   return (
     <div
-      className={`flex ${direction === "row" ? "flex-row" : "flex-col"} w-full`}
+      className={`flex ${direction === "row" ? "flex-row" : "flex-col"} w-full justify-between`}
     >
       {buttonsData.map((buttonData, index) => (
         <Button
@@ -57,7 +57,7 @@ const KeyboardControl = ({ buttonsData, size, direction }: ButtonProps) => {
           onMouseLeave={buttonData.mouseLeave}
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
-          className={selectedIndex === index ? "animate-pulse" : ""}
+          className={`w-full ${selectedIndex === index ? "animate-pulse" : ""}`}
           variant={selectedIndex === index ? "default" : "outline"}
           onClick={() => {
             buttonData.action();
