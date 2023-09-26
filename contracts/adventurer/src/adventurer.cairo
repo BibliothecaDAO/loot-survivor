@@ -1513,8 +1513,8 @@ impl ImplAdventurer of IAdventurer {
 
         // calculate damage
         let mut combat_result = ImplCombat::calculate_damage(
-            armor_combat_spec,
             beast.combat_spec,
+            armor_combat_spec,
             MINIMUM_DAMAGE_FROM_BEASTS,
             attacker_strength,
             beast_strength,
@@ -1582,8 +1582,8 @@ impl ImplAdventurer of IAdventurer {
 
         // calculate damage
         let mut combat_result = ImplCombat::calculate_damage(
-            armor_combat_spec,
             obstacle.combat_spec,
+            armor_combat_spec,
             MINIMUM_DAMAGE_FROM_OBSTACLES,
             attacker_strength,
             beast_strength,
