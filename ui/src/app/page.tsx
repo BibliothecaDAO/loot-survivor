@@ -123,6 +123,7 @@ export default function Home() {
   const topUpDialog = useUIStore((state) => state.topUpDialog);
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
+  const setEstimatingFee = useUIStore((state) => state.setEstimatingFee);
   const { gameContract, lordsContract, ethContract } = useContracts();
   const { addTransaction } = useTransactionManager();
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -189,6 +190,7 @@ export default function Home() {
     ethBalance: ethBalance.data?.value ?? BigInt(0),
     showTopUpDialog,
     setTopUpAccount,
+    setEstimatingFee,
   });
 
   const playState = useMemo(

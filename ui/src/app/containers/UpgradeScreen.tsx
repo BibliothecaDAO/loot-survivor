@@ -45,6 +45,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
   const { gameContract, lordsContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
+  const estimatingFee = useUIStore((state) => state.estimatingFee);
   const txAccepted = useLoadingStore((state) => state.txAccepted);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
@@ -318,8 +319,6 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
             <div className="w-full sm:w-2/3 xl:h-[500px] xl:overflow-y-auto 2xl:h-full">
               <div className="flex flex-col gap-2 xl:gap-0 xl:h-[300px] 2xl:h-full">
                 <div className="justify-center text-terminal-green">
-
-
                   <div className="w-full flex flex-row gap-2 mx-auto border border-terminal-green justify-between">
                     <Button
                       variant={"outline"}
@@ -329,22 +328,31 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                       {"<"} Back
                     </Button>
 
-                    {upgradeScreen != 3 && <div className="sm:hidden flex-grow text-center uppercase text-2xl self-center">Level up!</div>}
+                    {upgradeScreen != 3 && (
+                      <div className="sm:hidden flex-grow text-center uppercase text-2xl self-center">
+                        Level up!
+                      </div>
+                    )}
 
-                    {upgradeScreen != 3 && upgradeScreen != 2 && <div className=" flex-grow text-center uppercase text-2xl self-center hidden sm:block">Level up!</div>}
+                    {upgradeScreen != 3 && upgradeScreen != 2 && (
+                      <div className=" flex-grow text-center uppercase text-2xl self-center hidden sm:block">
+                        Level up!
+                      </div>
+                    )}
 
                     <Button
-                      className={` ${upgradeScreen == 2
-                        ? "hidden sm:block"
-                        : upgradeScreen == 3
+                      className={` ${
+                        upgradeScreen == 2
+                          ? "hidden sm:block"
+                          : upgradeScreen == 3
                           ? "sm:hidden"
                           : "hidden"
-                        } w-full`}
+                      } w-full`}
                       onClick={() => {
                         handleSubmitUpgradeTx();
                         setUpgradeScreen(1);
                       }}
-                      disabled={nextDisabled || loading}
+                      disabled={nextDisabled || loading || estimatingFee}
                     >
                       {loading ? (
                         <span>Upgrading...</span>
@@ -353,16 +361,17 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                       )}
                     </Button>
                     <Button
-                      className={` ${upgradeScreen == 2
-                        ? "sm:hidden"
-                        : upgradeScreen == 3
+                      className={` ${
+                        upgradeScreen == 2
+                          ? "sm:hidden"
+                          : upgradeScreen == 3
                           ? "hidden"
                           : ""
-                        }`}
+                      }`}
                       onClick={() => {
                         setUpgradeScreen(upgradeScreen + 1);
                       }}
-                      disabled={nextDisabled || loading}
+                      disabled={nextDisabled || loading || estimatingFee}
                     >
                       <span>Next {">"}</span>
                     </Button>
@@ -415,7 +424,6 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                         </span>
                       </span>
                       <span className="relative flex flex-row items-center">
-
                         <span className="flex items-center ">
                           <HeartIcon className="self-center mt-1 w-5 h-5 fill-current" />{" "}
                           <HealthCountDown health={totalHealth || 0} />
@@ -488,7 +496,6 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                       />
                     </div>
                   )}
-
                 </div>
               </div>
             </div>

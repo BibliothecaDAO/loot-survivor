@@ -7,8 +7,8 @@ import Discovery from "../components/actions/Discovery";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { MistIcon } from "../components/icons/Icons";
 import BeastScreen from "./BeastScreen";
-import { NullDiscovery } from "../types";
 import MazeLoader from "../components/icons/MazeLoader";
+import useUIStore from "../hooks/useUIStore";
 
 interface ActionsScreenProps {
   explore: (...args: any[]) => any;
@@ -27,8 +27,7 @@ export default function ActionsScreen({
 }: ActionsScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
-  const hash = useLoadingStore((state) => state.hash);
+  const estimatingFee = useUIStore((state) => state.estimatingFee);
   const [selected, setSelected] = useState<string>("");
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
@@ -38,33 +37,6 @@ export default function ActionsScreen({
       ? state.data.latestDiscoveriesQuery.discoveries
       : []
   );
-  const lastBeast = useQueriesStore(
-    (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
-  );
-
-  // useCustomQuery("discoveryByTxHashQuery", getDiscoveryByTxHash, {
-  //   txHash: padAddress(hash),
-  // });
-
-  // useCustomQuery("latestDiscoveriesQuery", getLatestDiscoveries, {
-  //   adventurerId: adventurer?.id ?? 0,
-  // });
-
-  // useCustomQuery("lastBeastQuery", getLastBeastDiscovery, {
-  //   adventurerId: adventurer?.id ?? 0,
-  // });
-
-  // useCustomQuery("beastQuery", getBeast, {
-  //   adventurerId: adventurer?.id ?? 0,
-  //   beast: lastBeast?.entity,
-  //   seed: lastBeast?.seed,
-  // });
-
-  // useCustomQuery("battlesByBeastQuery", getBattlesByBeast, {
-  //   adventurerId: adventurer?.id ?? 0,
-  //   beast: lastBeast?.entity,
-  //   seed: lastBeast?.seed,
-  // });
 
   const buttonsData = [
     {
@@ -76,7 +48,7 @@ export default function ActionsScreen({
         resetNotification();
         await explore(false);
       },
-      disabled: hasBeast || loading || !adventurer?.id,
+      disabled: hasBeast || loading || !adventurer?.id || estimatingFee,
       loading: loading,
     },
     {
@@ -92,7 +64,7 @@ export default function ActionsScreen({
         resetNotification();
         await explore(true);
       },
-      disabled: hasBeast || loading || !adventurer?.id,
+      disabled: hasBeast || loading || !adventurer?.id || estimatingFee,
       loading: loading,
     },
   ];

@@ -12,7 +12,7 @@ import { getKeyFromValue, stringToFelt, getRandomNumber } from ".";
 import { parseEvents } from "./parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
 import Storage from "../storage";
-import { MIN_BALANCE } from "../constants";
+import { FEE_CHECK_BALANCE } from "../constants";
 
 export interface SyscallsProps {
   gameContract: any;
@@ -42,6 +42,7 @@ export interface SyscallsProps {
   ethBalance: bigint;
   showTopUpDialog: (...args: any[]) => any;
   setTopUpAccount: (...args: any[]) => any;
+  setEstimatingFee: (...args: any[]) => any;
 }
 
 async function checkArcadeBalance(
@@ -49,17 +50,20 @@ async function checkArcadeBalance(
   calls: Call[],
   ethBalance: bigint,
   showTopUpDialog: (...args: any[]) => any,
-  setTopUpAccount: (...args: any[]) => any
+  setTopUpAccount: (...args: any[]) => any,
+  setEstimatingFee: (...args: any[]) => any
 ) {
-  if (ethBalance < MIN_BALANCE) {
+  if (ethBalance < FEE_CHECK_BALANCE) {
     const storage: BurnerStorage = Storage.get("burners");
     if (account.address in storage) {
+      setEstimatingFee(true);
       const { suggestedMaxFee: estimatedFee } = await account.estimateFee(
         calls
       );
       console.log("estimatedFee", estimatedFee);
       // Add 10% to fee for safety
       const formattedFee = estimatedFee * (BigInt(11) / BigInt(10));
+      setEstimatingFee(false);
       if (ethBalance < formattedFee) {
         showTopUpDialog(true);
         setTopUpAccount(account.address);
@@ -152,6 +156,7 @@ export function syscalls({
   ethBalance,
   showTopUpDialog,
   setTopUpAccount,
+  setEstimatingFee,
 }: SyscallsProps) {
   const gameData = new GameData();
 
@@ -253,7 +258,8 @@ export function syscalls({
       [...calls, mintLords, approveLordsTx, mintAdventurerTx],
       ethBalance,
       showTopUpDialog,
-      setTopUpAccount
+      setTopUpAccount,
+      setEstimatingFee
     );
 
     if (!balanceEmpty) {
@@ -358,7 +364,8 @@ export function syscalls({
       [...calls, exploreTx],
       ethBalance,
       showTopUpDialog,
-      setTopUpAccount
+      setTopUpAccount,
+      setEstimatingFee
     );
 
     if (!balanceEmpty) {
@@ -604,7 +611,8 @@ export function syscalls({
       [...calls, attackTx],
       ethBalance,
       showTopUpDialog,
-      setTopUpAccount
+      setTopUpAccount,
+      setEstimatingFee
     );
 
     if (!balanceEmpty) {
@@ -835,7 +843,8 @@ export function syscalls({
       [...calls, fleeTx],
       ethBalance,
       showTopUpDialog,
-      setTopUpAccount
+      setTopUpAccount,
+      setEstimatingFee
     );
 
     if (!balanceEmpty) {
@@ -1003,7 +1012,8 @@ export function syscalls({
       calls,
       ethBalance,
       showTopUpDialog,
-      setTopUpAccount
+      setTopUpAccount,
+      setEstimatingFee
     );
 
     if (!balanceEmpty) {
@@ -1165,7 +1175,8 @@ export function syscalls({
       calls,
       ethBalance,
       showTopUpDialog,
-      setTopUpAccount
+      setTopUpAccount,
+      setEstimatingFee
     );
 
     if (!balanceEmpty) {
