@@ -14,9 +14,8 @@ import {
 import Storage from "./storage";
 import { useAccount, useConnectors } from "@starknet-react/core";
 import { ArcadeConnector } from "./arcade";
-import ArcadeAccount from "../abi/arcade_account_Account.sierra.json";
 import { useContracts } from "../hooks/useContracts";
-import { delay } from "./utils";
+import { BurnerStorage } from "../types";
 
 export const PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
 
@@ -26,15 +25,6 @@ const provider = new Provider({
   },
 });
 
-type BurnerStorage = {
-  [address: string]: {
-    privateKey: string;
-    publicKey: string;
-    deployTx: string;
-    active: boolean;
-  };
-};
-
 export const useBurner = () => {
   const { refresh } = useConnectors();
   const { account: walletAccount } = useAccount();
@@ -42,6 +32,8 @@ export const useBurner = () => {
   const [isDeploying, setIsDeploying] = useState(false);
   const [isGeneratingNewKey, setIsGeneratingNewKey] = useState(false);
   const [isSettingPermissions, setIsSettingPermissions] = useState(false);
+  const [isToppingUp, setIsToppingUp] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
   const { gameContract, lordsContract } = useContracts();
 
   // init
@@ -240,6 +232,95 @@ export const useBurner = () => {
     []
   );
 
+  const topUp = async (address: string, account: AccountInterface) => {
+    try {
+      setIsToppingUp(true);
+      const { transaction_hash } = await account.execute({
+        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        entrypoint: "transfer",
+        calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
+      });
+
+      const result = await account.waitForTransaction(transaction_hash, {
+        retryInterval: 1000,
+        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
+      });
+
+      if (!result) {
+        throw new Error("Transaction did not complete successfully.");
+      }
+
+      setIsToppingUp(false);
+      return result;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
+  const withdraw = async (
+    masterAccountAddress: string,
+    account: AccountInterface,
+    balance: bigint
+  ) => {
+    try {
+      setIsWithdrawing(true);
+
+      // First we need to calculate the fee from withdrawing
+
+      const mainAccount = new Account(
+        provider,
+        account.address,
+        account.signer,
+        account.cairoVersion
+      );
+
+      const call = {
+        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        entrypoint: "transfer",
+        calldata: CallData.compile([
+          masterAccountAddress,
+          balance ?? "0x0",
+          "0x0",
+        ]),
+      };
+
+      const { suggestedMaxFee: estimatedFee } = await mainAccount.estimateFee(
+        call
+      );
+
+      // Now we negate the fee from balance to withdraw (+10% for safety)
+
+      const newBalance =
+        BigInt(balance) - estimatedFee * (BigInt(11) / BigInt(10));
+
+      const { transaction_hash } = await account.execute({
+        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        entrypoint: "transfer",
+        calldata: CallData.compile([
+          masterAccountAddress,
+          newBalance ?? "0x0",
+          "0x0",
+        ]),
+      });
+
+      const result = await account.waitForTransaction(transaction_hash, {
+        retryInterval: 1000,
+        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
+      });
+
+      if (!result) {
+        throw new Error("Transaction did not complete successfully.");
+      }
+
+      setIsWithdrawing(false);
+      return result;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
   const genNewKey = useCallback(
     async (burnerAddress: string) => {
       setIsGeneratingNewKey(true);
@@ -310,11 +391,15 @@ export const useBurner = () => {
     list,
     select,
     create,
+    topUp,
+    withdraw,
     genNewKey,
     account,
     isDeploying,
     isSettingPermissions,
     isGeneratingNewKey,
+    isToppingUp,
+    isWithdrawing,
     listConnectors,
   };
 };
