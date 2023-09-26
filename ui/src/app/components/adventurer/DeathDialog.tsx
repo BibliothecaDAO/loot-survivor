@@ -5,7 +5,6 @@ import useLoadingStore from "../../hooks/useLoadingStore";
 import { Button } from "../buttons/Button";
 import useUIStore from "../../hooks/useUIStore";
 import Image from "next/image";
-import { useQueriesStore } from "../../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
 import { appUrl } from "@/app/lib/constants";
 import { getAdventurerByXP } from "@/app/hooks/graphql/queries";
@@ -18,8 +17,6 @@ export const DeathDialog = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const { data, isLoading, refetch, setData, setIsLoading, setNotLoading } =
-    useQueriesStore();
 
   const adventurersByXPdata = useCustomQuery(
     "adventurersByXPQuery",

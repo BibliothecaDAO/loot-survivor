@@ -5,6 +5,7 @@ export default function Head() {
 
       <meta charSet="utf-8" />
       <meta content="width=device-width, initial-scale=1" name="viewport" />
+      <meta name="author" content="Bibliothecadao" />
       <link
         rel="icon"
         href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪦</text></svg>"
@@ -24,7 +25,7 @@ export default function Head() {
       <meta property="og:image" content="/scenes/intro/skulls.png" />
 
       {/* Twitter Card data */}
-      <meta name="twitter:card" content="/scenes/intro/skulls.png" />
+      <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:title" content="Loot Survivor" />
       <meta
         name="twitter:description"
