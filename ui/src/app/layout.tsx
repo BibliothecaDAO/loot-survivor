@@ -81,9 +81,6 @@ export default function RootLayout({
   });
   return (
     <html lang="en">
-      <head>
-        <title>Loot Survivor</title>
-      </head>
       <body
         suppressHydrationWarning={true}
         className="min-h-screen overflow-hidden text-terminal-green bg-conic-to-br to-terminal-black from-terminal-black bezel-container"
