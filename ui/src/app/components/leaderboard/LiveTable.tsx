@@ -16,13 +16,16 @@ const LiveLeaderboardTable = ({
 }: LiveLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [loading, setLoading] = useState(false);
-  const { data, isLoading, refetch } = useQueriesStore();
+  const { data } = useQueriesStore();
   const adventurers = data.adventurersByXPQuery?.adventurers
     ? data.adventurersByXPQuery?.adventurers
     : [];
   const setScreen = useUIStore((state) => state.setScreen);
   const setProfile = useUIStore((state) => state.setProfile);
-  const displayAdventurers = adventurers?.slice(
+  const aliveAdventurers = adventurers.filter(
+    (adventurer) => (adventurer.health ?? 0) > 0
+  );
+  const displayAdventurers = aliveAdventurers?.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -64,14 +67,14 @@ const LiveLeaderboardTable = ({
   return (
     <div className="flex flex-col gap-5 sm:gap-0 sm:flex-row justify-between w-full">
       <div className="flex flex-col w-full sm:mr-4 flex-grow-2 p-2 gap-2">
-        <h4 className="text-center text-2xl m-0">Live Leaderboard</h4>
+        <h4 className="text-center text-2xl m-0">Active Games</h4>
         <table className="w-full xl:text-lg 2xl:text-xl border border-terminal-green">
           <thead className="border border-terminal-green">
             <tr>
-              <th className="p-1">Rank</th>
               <th className="p-1">Adventurer</th>
               <th className="p-1">Gold</th>
               <th className="p-1">XP</th>
+              <th className="p-1">Level</th>
               <th className="p-1">Health</th>
               <th className="p-1">Idle</th>
             </tr>
@@ -90,7 +93,7 @@ const LiveLeaderboardTable = ({
             )}
           </tbody>
         </table>
-        {adventurers?.length > 10 && (
+        {aliveAdventurers?.length > 10 && (
           <div className="flex justify-center sm:mt-8 xl:mt-2">
             <Button
               variant={"outline"}

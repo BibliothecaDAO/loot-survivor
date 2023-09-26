@@ -928,11 +928,11 @@ export function syscalls({
             );
           setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
           setAdventurer(adventurerDiedEvent.data[0]);
-          const killedByBeast = events.some(
+          const killedByBeast = battles.some(
             (battle) =>
               battle.attacker == "Beast" && battle.adventurerHealth == 0
           );
-          const killedByPenalty = events.some(
+          const killedByPenalty = battles.some(
             (battle) => !battle.attacker && battle.adventurerHealth == 0
           );
           if (killedByBeast || killedByPenalty) {

@@ -32,6 +32,9 @@ export const DeathDialog = () => {
 
   const sortedAdventurersByXP = { adventurers: sortedAdventurersByXPArray };
 
+  console.log(adventurersByXPdata);
+  console.log(sortedAdventurersByXP);
+
   const handleRank = () => {
     const rank = getRankFromList(
       adventurer?.id ?? 0,

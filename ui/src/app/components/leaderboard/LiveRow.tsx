@@ -8,7 +8,7 @@ import { useBlock } from "@starknet-react/core";
 import { idleDeathPenaltyBlocks } from "@/app/lib/constants";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import useUIStore from "@/app/hooks/useUIStore";
-import { chunkArray } from "@/app/lib/utils";
+import { chunkArray, calculateLevel } from "@/app/lib/utils";
 
 interface LiveLeaderboardRowProps {
   index: number;
@@ -92,7 +92,6 @@ const LiveLeaderboardRow = ({
         clickPlay();
       }}
     >
-      <td>{rank}</td>
       <td>{`${adventurer.name} - ${adventurer.id}`}</td>
       {/* <td>{adventurer.classType}</td> */}
       <td>
@@ -104,6 +103,7 @@ const LiveLeaderboardRow = ({
       <td>
         <span className="flex justify-center">{adventurer.xp}</span>
       </td>
+      <td>{calculateLevel(adventurer.xp ?? 0)}</td>
       <td>
         <span
           className={`flex justify-center ${

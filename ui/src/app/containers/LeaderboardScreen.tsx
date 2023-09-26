@@ -1,21 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
-  getAdventurersInListByXp,
-  getTopScores,
   getAdventurerByXP,
   getAdventurerById,
   getItemsByAdventurer,
 } from "../hooks/graphql/queries";
 import { Button } from "../components/buttons/Button";
-import { CoinIcon } from "../components/icons/Icons";
-import Lords from "../../../public/lords.svg";
-import LootIconLoader from "../components/icons/Loader";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import useUIStore from "../hooks/useUIStore";
 import useCustomQuery from "../hooks/useCustomQuery";
-import { Score, Adventurer } from "../types";
-import { useUiSounds, soundSelector } from "../hooks/useUiSound";
-import KillAdventurer from "../components/actions/KillAdventurer";
+import { Adventurer } from "../types";
 import ScoreTable from "../components/leaderboard/ScoreTable";
 import LiveTable from "../components/leaderboard/LiveTable";
 import useLoadingStore from "../hooks/useLoadingStore";
@@ -26,12 +19,9 @@ import useLoadingStore from "../hooks/useLoadingStore";
  */
 export default function LeaderboardScreen() {
   const itemsPerPage = 10;
-  const [loading, setLoading] = useState(false);
   const [showScores, setShowScores] = useState(false);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
 
-  const { data, isLoading, refetch, setData, setIsLoading, setNotLoading } =
-    useQueriesStore();
+  const { refetch, setData, setIsLoading, setNotLoading } = useQueriesStore();
 
   const adventurersByXPdata = useCustomQuery(
     "adventurersByXPQuery",
