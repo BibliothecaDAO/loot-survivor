@@ -41,16 +41,19 @@ mod CombatEnums {
 }
 
 mod CombatSettings {
-    // ELEMENTAL_DAMAGE_BONUS controls the intensity of elemental damage
+    const MINIMUM_BASE_DAMAGE: u8 = 2;
+    // ELEMENTAL_DAMAGE_BONUS controls the impact of elemental damage
     // 0 = disables elemental
-    // 1 = elemental has maximum effect (0x, 1x, 2x)
-    // 2 = elemental bonus is half of base damage (-0.5x, 1x, 1.5x)
-    // 3 = elemental bonus is 1/3 of base damage (-0.66x, 1x, 1.66x)
-    const ELEMENTAL_DAMAGE_BONUS: u16 = 2; // u16 because this is used with other u16s
+    // 1 = max effect (0x, 1x, 2x)
+    // 2 = half of base damage (-0.5x, 1x, 1.5x)
+    // 3 = 1/3 of base damage (-0.66x, 1x, 1.66x)
+    const ELEMENTAL_DAMAGE_BONUS: u8 = 2;
+
+    // controls impact of strength on damage
+    const STRENGTH_DAMAGE_BONUS: u8 = 10;
 
     // controls the minimum damage bonus for elemental damage
     const STRONG_ELEMENTAL_BONUS_MIN: u16 = 10; // u16 because this is used with other u16s
-    const MAX_CRITICAL_HIT_LUCK: u8 = 100; // max luck for critical hit. Will produce 50% chance
 
     enum Difficulty {
         Easy: (),

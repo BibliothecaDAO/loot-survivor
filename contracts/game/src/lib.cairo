@@ -36,7 +36,7 @@ mod Game {
             messages, Week, REWARD_DISTRIBUTIONS_PHASE1, REWARD_DISTRIBUTIONS_PHASE2,
             REWARD_DISTRIBUTIONS_PHASE3, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
             STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS, IDLE_DEATH_PENALTY_BLOCKS,
-            MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE
+            MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE, MINIMUM_DAMAGE_FROM_BEASTS
         }
     };
     use lootitems::{
@@ -236,7 +236,44 @@ mod Game {
 
             // process attack or apply idle penalty
             if (!exceeded_idle_threshold) {
-                _attack(ref self, ref adventurer, adventurer_id, to_the_death);
+                // get adventurer entropy from storage
+                let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
+                    .entropy
+                    .into();
+
+                // get weapon specials
+                let weapon_specials = _get_item_specials(@self, adventurer_id, adventurer.weapon);
+
+                // get game entropy from storage
+                let global_entropy: u128 = _get_global_entropy(@self).into();
+
+                // get beast and beast seed
+                let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
+
+                // get weapon details
+                let weapon = ImplLoot::get_item(adventurer.weapon.id);
+                let weapon_combat_spec = CombatSpec {
+                    tier: weapon.tier,
+                    item_type: weapon.item_type,
+                    level: adventurer.weapon.get_greatness().into(),
+                    specials: SpecialPowers {
+                        special1: weapon_specials.special1,
+                        special2: weapon_specials.special2,
+                        special3: weapon_specials.special3
+                    }
+                };
+
+                _attack(
+                    ref self,
+                    ref adventurer,
+                    weapon_combat_spec,
+                    adventurer_id,
+                    adventurer_entropy,
+                    beast,
+                    beast_seed,
+                    global_entropy,
+                    to_the_death
+                );
             } else {
                 _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
             }
@@ -348,7 +385,7 @@ mod Game {
                     adventurer.xp, adventurer_entropy, global_entropy.into()
                 );
 
-                let beast_battle_details = _beast_counter_attack(
+                let beast_battle_details = _beast_attack(
                     ref self,
                     ref adventurer,
                     adventurer_id,
@@ -834,7 +871,8 @@ mod Game {
 
         // get gold reward and increase adventurers gold
         let gold_earned = beast.get_gold_reward(beast_seed);
-        adventurer.increase_gold(gold_earned * adventurer.beast_gold_reward_multiplier().into());
+        let ring_bonus = adventurer.ring.jewelry_gold_bonus(gold_earned);
+        adventurer.increase_gold(gold_earned + ring_bonus);
 
         // get xp reward and increase adventurers xp
         let xp_earned_adventurer = beast.get_xp_reward();
@@ -1193,9 +1231,6 @@ mod Game {
         //       a generic Discovery event which would be emitted here
         let (treasure_type, mut amount) = adventurer.discover_treasure(entropy);
 
-        // apply discover bonus based on adventurer
-        amount *= adventurer.discovery_bonus_multplier().into();
-
         // Grant adventurer XP to ensure entropy changes
         let (previous_level, new_level) = adventurer.increase_adventurer_xp(XP_FOR_DISCOVERIES);
 
@@ -1238,7 +1273,7 @@ mod Game {
         // if adventurer was ambushed
         if (is_ambushed) {
             // process beast attack
-            let beast_battle_details = _beast_counter_attack(
+            let beast_battle_details = _beast_attack(
                 ref self, ref adventurer, adventurer_id, beast, beast_seed, entropy, entropy
             );
             __event_AmbushedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
@@ -1255,55 +1290,47 @@ mod Game {
     fn _obstacle_encounter(
         ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, entropy: u128
     ) {
-        // get obstacle from obstacle lib and check if it was dodged
-        let (obstacle, dodged) = ImplObstacle::obstacle_encounter(
-            adventurer.get_level(), adventurer.stats.intelligence, entropy
-        );
+        // get random obstacle
+        let obstacle = adventurer.get_random_obstacle(entropy);
 
         // get a random attack location for the obstacle
         let damage_slot = AdventurerUtils::get_random_attack_location(entropy);
 
-        // get adventurer armor at attack location
-        let damage_location = ImplCombat::slot_to_u8(damage_slot);
+        // get armor at the location being attacked
+        let armor = adventurer.get_item_at_slot(damage_slot);
 
-        // get combat spec for the armor
-        let armor_combat_spec = _get_combat_spec(
-            @self, adventurer_id, adventurer.get_item_at_slot(damage_slot)
-        );
+        // get damage from obstalce
+        let (combat_result, jewlery_armor_bonus) = adventurer
+            .get_obstacle_damage(obstacle, armor, entropy);
 
-        // get armor defense bonus for adventurer
-        let armor_defense_bonus = adventurer.armor_bonus_multiplier();
+        // pull damage taken out of combat result for easy access
+        let damage_taken = combat_result.total_damage;
 
-        // calculate damage from the obstacle
-        let (damage_taken, critical_hit) = ImplObstacle::get_damage(
-            obstacle, armor_combat_spec, armor_defense_bonus, entropy
-        );
-
-        // get adventurer and item xp reward for the obstacle
-        let adventurer_xp_reward = obstacle.get_xp_reward();
-        let item_xp_reward = adventurer_xp_reward * ITEM_XP_MULTIPLIER_OBSTACLES;
-
-        // adventurer may receive gold from obstacle if they have this ability unlocked
-        adventurer
-            .increase_gold(
-                adventurer_xp_reward * adventurer.obstacle_gold_reward_multplier().into()
-            );
-
-        // increase adventurer xp and check for level up
-        let (previous_level, new_level) = adventurer.increase_adventurer_xp(adventurer_xp_reward);
-
-        // if the obstalce was not dodged
+        // attempt to dodge obstacle
+        let dodged = adventurer.dodge_obstacle(entropy);
         if (!dodged) {
-            // adventurer takes this damage
+            // if not dodged, adventurer takes damage
             adventurer.decrease_health(damage_taken);
         }
 
-        // grant XP to equipped items
+        // get base xp reward for obstacle
+        let base_reward = obstacle.get_xp_reward();
+
+        // get item xp reward for obstacle
+        let item_xp_reward = base_reward * ITEM_XP_MULTIPLIER_OBSTACLES;
+
+        // grant adventurer xp and get previous and new level
+        let (previous_level, new_level) = adventurer.increase_adventurer_xp(base_reward);
+
+        // grant items xp and get array of items that leveled up
         let items_leveled_up = _grant_xp_to_equipped_items(
             ref self, ref adventurer, adventurer_id, item_xp_reward, entropy
         );
 
-        // emit obstacle encounter event
+        // event vars
+        let critical_hit = combat_result.critical_hit_bonus > 0;
+        let damage_location = ImplCombat::slot_to_u8(damage_slot);
+
         __event_ObstacleEncounter(
             ref self,
             adventurer,
@@ -1311,11 +1338,11 @@ mod Game {
             dodged,
             ObstacleDetails {
                 id: obstacle.id,
-                level: obstacle.combat_specs.level,
+                level: obstacle.combat_spec.level,
                 damage_taken,
                 damage_location,
                 critical_hit,
-                adventurer_xp_reward,
+                adventurer_xp_reward: base_reward,
                 item_xp_reward
             }
         );
@@ -1463,62 +1490,41 @@ mod Game {
         }
     }
 
-    // @notice Simulates an attack by the adventurer on a beast.
-    // @param self The contract's state.
-    // @param adventurer The adventurer who is attacking.
-    // @param adventurer_id The unique ID of the adventurer.
-    // @param fight_to_the_death Flag to indicate if the fight should continue until either the adventurer or the beast is defeated.
+    /// @notice Executes an adventurer's attack on a beast and manages the consequences of the combat
+    /// @dev This function covers the entire combat process between an adventurer and a beast, including generating randomness for combat, handling the aftermath of the attack, and any subsequent counter-attacks by the beast.
+    /// @param self The current contract state
+    /// @param adventurer The attacking adventurer
+    /// @param weapon_combat_spec The combat specifications of the adventurer's weapon
+    /// @param adventurer_id The unique identifier of the adventurer
+    /// @param adventurer_entropy A random value tied to the adventurer to aid in determining certain random aspects of the combat
+    /// @param beast The defending beast
+    /// @param beast_seed The seed associated with the beast
+    /// @param global_entropy A random value used globally in determining certain random aspects of the combat
+    /// @param fight_to_the_death Flag to indicate whether the adventurer should continue attacking until either they or the beast is defeated
     fn _attack(
         ref self: ContractState,
         ref adventurer: Adventurer,
+        weapon_combat_spec: CombatSpec,
         adventurer_id: u256,
+        adventurer_entropy: u128,
+        beast: Beast,
+        beast_seed: u128,
+        global_entropy: u128,
         fight_to_the_death: bool,
     ) {
-        // get adventurer entropy from storage
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
-            .entropy
-            .into();
-
-        // get game entropy from storage
-        let global_entropy: u128 = _get_global_entropy(@self).into();
-
-        // get beast and beast seed
-        let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
-
-        // When generating the beast, we need to ensure entropy remains fixed for the battle
-        // for attacking however, we should change the entropy during battle so we use adventurer and beast health
-        // to accomplish this
-        let (attack_rnd_1, attack_rnd_2) = AdventurerUtils::get_randomness_with_health(
+        // get two random numbers using adventurer xp and health as part of entropy
+        let (rnd1, rnd2) = AdventurerUtils::get_randomness_with_health(
             adventurer.xp, adventurer.health, adventurer_entropy, global_entropy
         );
 
-        // get the damage dealt to the beast
-        // TODO: Consider returning a tuple with detailed damage info (total_damage, base_damage, critical_hit_damage, name_bonus_damage)
-        let weapon_combat_spec = _get_combat_spec(@self, adventurer_id, adventurer.weapon);
-        let critical_hit_damage_multiplier = adventurer.critical_hit_bonus_multiplier();
-        let name_bonus_damage_multplier = adventurer.name_match_bonus_damage_multiplier();
-        let bag = _unpacked_bag(@self, adventurer_id);
-        let (damage_dealt, critical_hit) = beast
-            .attack(
-                weapon_combat_spec,
-                adventurer.stats.luck,
-                adventurer.stats.strength,
-                critical_hit_damage_multiplier,
-                name_bonus_damage_multplier,
-                attack_rnd_1
-            );
+        // attack beast and get combat result that provides damage breakdown
+        let combat_result = adventurer.attack(weapon_combat_spec, beast, rnd1);
 
-        let attacked_beast_details = BattleDetails {
-            seed: beast_seed,
-            id: beast.id,
-            beast_specs: beast.combat_spec,
-            damage: damage_dealt,
-            critical_hit: critical_hit,
-            location: ImplCombat::slot_to_u8(Slot::None(())),
-        };
+        // provide critical hit as a boolean for events
+        let is_critical_hit = combat_result.critical_hit_bonus > 0;
 
         // if the damage dealt exceeds the beasts health
-        if (damage_dealt >= adventurer.beast_health) {
+        if (combat_result.total_damage >= adventurer.beast_health) {
             // process beast death
             _process_beast_death(
                 ref self,
@@ -1526,29 +1532,36 @@ mod Game {
                 adventurer_id,
                 beast,
                 beast_seed,
-                attack_rnd_2,
-                damage_dealt,
-                critical_hit
+                rnd2,
+                combat_result.total_damage,
+                is_critical_hit
             );
         } else {
-            // if beast is still alive
+            // if beast survived the attack, deduct damage dealt
+            adventurer.beast_health -= combat_result.total_damage;
 
-            // deduct the damage dealt from their health
-            adventurer.beast_health -= damage_dealt;
-
-            // beast counter attacks
-            let attacked_by_beast_details = _beast_counter_attack(
-                ref self,
-                ref adventurer,
-                adventurer_id,
-                beast,
-                beast_seed,
-                attack_rnd_1,
-                attack_rnd_2,
+            // process beast counter attack
+            let attacked_by_beast_details = _beast_attack(
+                ref self, ref adventurer, adventurer_id, beast, beast_seed, rnd1, rnd2,
             );
 
-            __event_AttackedBeast(ref self, adventurer, adventurer_id, attacked_beast_details);
+            // emit events
+            __event_AttackedBeast(
+                ref self,
+                adventurer,
+                adventurer_id,
+                BattleDetails {
+                    seed: beast_seed,
+                    id: beast.id,
+                    beast_specs: beast.combat_spec,
+                    damage: combat_result.total_damage,
+                    critical_hit: is_critical_hit,
+                    location: ImplCombat::slot_to_u8(Slot::None(())),
+                }
+            );
             __event_AttackedByBeast(ref self, adventurer, adventurer_id, attacked_by_beast_details);
+
+            // if adventurer is dead
             if (adventurer.health == 0) {
                 _process_adventurer_death(ref self, adventurer, adventurer_id, beast.id, 0);
                 return;
@@ -1557,55 +1570,63 @@ mod Game {
             // if the adventurer is still alive and fighting to the death
             if fight_to_the_death {
                 // attack again
-                _attack(ref self, ref adventurer, adventurer_id, true);
+                _attack(
+                    ref self,
+                    ref adventurer,
+                    weapon_combat_spec,
+                    adventurer_id,
+                    adventurer_entropy,
+                    beast,
+                    beast_seed,
+                    global_entropy,
+                    true
+                );
             }
         }
     }
 
-    // @notice Handles a counter-attack by a beast after an adventurer's attack or flee attempt.
-    // @param self The contract's state.
-    // @param adventurer The adventurer who is being counter-attacked.
-    // @param adventurer_id The unique ID of the adventurer.
-    // @param attack_location The location of the attack on the adventurer.
-    // @param beast The beast that is counter-attacking.
-    // @param beast_seed The seed related to the beast.
-    // @param critical_hit_rnd The random value used to determine if the beast's counter-attack is a critical hit.
-    // @param attack_location_rnd The random value used to determine the location of the beast's counter-attack.
-    fn _beast_counter_attack(
+    /// @notice Simulates an attack by a beast on an adventurer
+    /// @dev This function determines a random attack location on the adventurer, retrieves armor and specials from that location, processes the beast attack, and deducts the damage from the adventurer's health.
+    /// @param self The current contract state
+    /// @param adventurer The adventurer being attacked
+    /// @param adventurer_id The unique identifier of the adventurer
+    /// @param beast The beast that is attacking
+    /// @param beast_seed The seed associated with the beast
+    /// @param entropy A random value to determine certain random aspects of the combat
+    /// @param attack_location_rnd A random value used to determine the attack location on the adventurer
+    /// @return Returns a BattleDetails object containing details of the beast's attack, including the seed, beast ID, combat specifications of the beast, total damage dealt, whether a critical hit was made, and the location of the attack on the adventurer.
+    fn _beast_attack(
         ref self: ContractState,
         ref adventurer: Adventurer,
         adventurer_id: u256,
         beast: Beast,
         beast_seed: u128,
-        critical_hit_rnd: u128,
+        entropy: u128,
         attack_location_rnd: u128,
     ) -> BattleDetails {
-        // get the location of the beast attack
+        // beasts attack random location on adventurer
         let attack_location = AdventurerUtils::get_random_attack_location(attack_location_rnd);
 
-        // get adventurer armor at that location
+        // get armor at attack location
         let armor = adventurer.get_item_at_slot(attack_location);
 
-        // convert get combat spec of the armor
-        let armor_combat_spec = _get_combat_spec(@self, adventurer_id, armor);
+        // get armor specials
+        let armor_specials = _get_item_specials(@self, adventurer_id, armor);
 
-        // get armor defense multplier for adventurer
-        let armor_defense_multplier = adventurer.armor_bonus_multiplier();
+        // process beast attack
+        let (combat_result, jewlery_armor_bonus) = adventurer
+            .defend(beast, armor, armor_specials, entropy);
 
-        // process beast counter attack
-        let (damage, critical_hit) = beast
-            .counter_attack(armor_combat_spec, armor_defense_multplier, critical_hit_rnd);
-
-        // deduct the damage dealt
-        adventurer.decrease_health(damage);
+        // deduct damage taken from adventurer's health
+        adventurer.decrease_health(combat_result.total_damage);
 
         // return beast battle details
         BattleDetails {
             seed: beast_seed,
             id: beast.id,
             beast_specs: beast.combat_spec,
-            damage: damage,
-            critical_hit: critical_hit,
+            damage: combat_result.total_damage,
+            critical_hit: combat_result.critical_hit_bonus > 0,
             location: ImplCombat::slot_to_u8(attack_location),
         }
     }
@@ -1658,7 +1679,7 @@ mod Game {
             }
         } else {
             // if the flee attempt failed, beast counter attacks
-            let beast_battle_details = _beast_counter_attack(
+            let beast_battle_details = _beast_attack(
                 ref self,
                 ref adventurer,
                 adventurer_id,
@@ -2104,10 +2125,14 @@ mod Game {
     fn _get_item_specials(
         self: @ContractState, adventurer_id: u256, item: ItemPrimitive
     ) -> ItemSpecials {
-        ImplItemSpecials::get_specials(
-            _get_specials_storage(self, adventurer_id, _get_storage_index(self, item.metadata)),
-            item
-        )
+        if (item.get_greatness() >= 15) {
+            ImplItemSpecials::get_specials(
+                _get_specials_storage(self, adventurer_id, _get_storage_index(self, item.metadata)),
+                item
+            )
+        } else {
+            ItemSpecials { special1: 0, special2: 0, special3: 0 }
+        }
     }
     #[inline(always)]
     fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
