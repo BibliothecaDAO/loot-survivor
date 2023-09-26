@@ -22,7 +22,7 @@ export default function Head() {
         content="Loot Survivor is the first Play2Die game from Realms on Starknet."
       />
       <meta property="og:url" content="https://survivor.realms.world" />
-      <meta property="og:image" content="/scenes/intro/skulls.png" />
+      <meta property="og:image" content="/scenes/intro/beast.png" />
 
       {/* Twitter Card data */}
       <meta name="twitter:card" content="summary_large_image" />
@@ -31,7 +31,10 @@ export default function Head() {
         name="twitter:description"
         content="Loot Survivor is the first Play2Die game from Realms on Starknet."
       />
-      <meta name="twitter:image" content="/scenes/intro/skulls.png" />
+      <meta name="twitter:siteId" content="1467726470533754880" />
+      <meta name="twitter:creator" content="@bibliothecadao" />
+      <meta name="twitter:creatorId" content="1467726470533754880" />
+      <meta name="twitter:image" content="/scenes/intro/beast.png" />
     </>
   );
 }
