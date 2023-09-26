@@ -65,4 +65,4 @@ export const idleDeathPenaltyBlocks = 300;
 
 // UI PARAMS
 export const MIN_BALANCE = 10000000000000; // 0.00001ETH or $0.015
-export const FEE_CHECK_BALANCE = 1000000000000; // 0.0001ETH or $0.15
+export const FEE_CHECK_BALANCE = 100000000000000; // 0.0001ETH or $0.15
