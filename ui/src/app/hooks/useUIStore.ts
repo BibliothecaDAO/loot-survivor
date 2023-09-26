@@ -63,6 +63,12 @@ type State = {
   setStartOption: (value: string) => void;
   arcadeDialog: boolean;
   showArcadeDialog: (value: boolean) => void;
+  topUpDialog: boolean;
+  showTopUpDialog: (value: boolean) => void;
+  topUpAccount: string;
+  setTopUpAccount: (value: string) => void;
+  estimatingFee: boolean;
+  setEstimatingFee: (value: boolean) => void;
   switchAdventurer: boolean;
   setSwitchAdventurer: (value: boolean) => void;
 };
@@ -114,6 +120,12 @@ const useUIStore = create<State>((set) => ({
   setStartOption: (value) => set({ startOption: value }),
   arcadeDialog: false,
   showArcadeDialog: (value) => set({ arcadeDialog: value }),
+  topUpDialog: false,
+  showTopUpDialog: (value) => set({ topUpDialog: value }),
+  topUpAccount: "",
+  setTopUpAccount: (value) => set({ topUpAccount: value }),
+  estimatingFee: false,
+  setEstimatingFee: (value) => set({ estimatingFee: value }),
   switchAdventurer: false,
   setSwitchAdventurer: (value) => set({ switchAdventurer: value }),
 }));

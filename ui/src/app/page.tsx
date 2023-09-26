@@ -8,7 +8,7 @@ import {
   useTransactionManager,
 } from "@starknet-react/core";
 import { constants } from "starknet";
-import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { Button } from "./components/buttons/Button";
 import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
 import ActionsScreen from "./containers/ActionsScreen";
@@ -29,7 +29,7 @@ import useUIStore from "./hooks/useUIStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
-import { Menu, NullAdventurer, NullDiscovery } from "./types";
+import { Menu, NullAdventurer } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
@@ -39,9 +39,7 @@ import {
   MuteIcon,
   VolumeIcon,
   GithubIcon,
-  RefreshIcon,
   CartIconSimple,
-  ArcadeIcon,
   MdTokenIcon,
 } from "./components/icons/Icons";
 import Lords from "../../public/lords.svg";
@@ -63,6 +61,7 @@ import {
   getLatestMarketItems,
 } from "./hooks/graphql/queries";
 import { ArcadeDialog } from "./components/ArcadeDialog";
+import { TopUpDialog } from "./components/TopUpDialog";
 import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
 import { syscalls } from "./lib/utils/syscalls";
 import { useContracts } from "./hooks/useContracts";
@@ -88,7 +87,7 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Home() {
-  const { disconnect, connectors } = useConnectors();
+  const { disconnect } = useConnectors();
   const { chain } = useNetwork();
   const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
@@ -121,8 +120,11 @@ export default function Home() {
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
-
-  const { gameContract, lordsContract } = useContracts();
+  const topUpDialog = useUIStore((state) => state.topUpDialog);
+  const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
+  const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
+  const setEstimatingFee = useUIStore((state) => state.setEstimatingFee);
+  const { gameContract, lordsContract, ethContract } = useContracts();
   const { addTransaction } = useTransactionManager();
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const handleSubmitCalls = useTransactionCartStore(
@@ -142,6 +144,11 @@ export default function Home() {
 
   const lordsBalance = useBalance({
     token: lordsContract?.address,
+    address,
+  });
+
+  const ethBalance = useBalance({
+    token: ethContract?.address,
     address,
   });
 
@@ -180,6 +187,10 @@ export default function Home() {
     setAdventurer,
     setMintAdventurer,
     setStartOption,
+    ethBalance: ethBalance.data?.value ?? BigInt(0),
+    showTopUpDialog,
+    setTopUpAccount,
+    setEstimatingFee,
   });
 
   const playState = useMemo(
@@ -510,6 +521,7 @@ export default function Home() {
           {deathDialog && <DeathDialog />}
 
           {status == "connected" && arcadeDialog && <ArcadeDialog />}
+          {status == "connected" && topUpDialog && <TopUpDialog />}
 
           {introComplete ? (
             <div className="flex flex-col w-full">

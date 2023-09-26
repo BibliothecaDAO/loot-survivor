@@ -21,10 +21,10 @@ import {
 import { useCallback } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { balanceSchema } from "../lib/utils";
+import { MIN_BALANCE } from "../lib/constants";
 
 const MAX_RETRIES = 10;
 const RETRY_DELAY = 2000; // 2 seconds
-const MIN_BALANCE = 10000000000000; // 0.00001ETH or $0.015
 
 const provider = new Provider({
   sequencer: {
@@ -45,6 +45,8 @@ export const ArcadeDialog = () => {
     isSettingPermissions,
     genNewKey,
     isGeneratingNewKey,
+    topUp,
+    withdraw,
   } = useBurner();
   const { ethContract } = useContracts();
   const [balances, setBalances] = useState<Record<string, bigint>>({});
@@ -120,8 +122,6 @@ export const ArcadeDialog = () => {
                 Note: This will initiate a transfer of 0.001 ETH from your
                 connected wallet to the arcade account to cover your transaction
                 costs from normal gameplay.
-                <br />
-                You may need to refresh after the account has been created!
               </p>
               <Button onClick={() => create()} disabled={isWrongNetwork}>
                 create arcade account
@@ -144,6 +144,8 @@ export const ArcadeDialog = () => {
                 genNewKey={genNewKey}
                 balance={balances[account.name]}
                 getBalance={getBalance}
+                topUp={topUp}
+                withdraw={withdraw}
               />
             );
           })}
@@ -177,6 +179,12 @@ interface ArcadeAccountCardProps {
   genNewKey: (address: string) => void;
   balance: bigint;
   getBalance: (address: string) => void;
+  topUp: (address: string, account: AccountInterface) => void;
+  withdraw: (
+    masterAccountAddress: string,
+    account: AccountInterface,
+    balance: bigint
+  ) => void;
 }
 
 export const ArcadeAccountCard = ({
@@ -189,6 +197,8 @@ export const ArcadeAccountCard = ({
   genNewKey,
   balance,
   getBalance,
+  topUp,
+  withdraw,
 }: ArcadeAccountCardProps) => {
   const [isCopied, setIsCopied] = useState(false);
   const [isToppingUp, setIsToppingUp] = useState(false);
@@ -197,97 +207,6 @@ export const ArcadeAccountCard = ({
   const connected = address == account.name;
 
   const formatted = (Number(balance) / 10 ** 18).toFixed(4);
-
-  const transfer = async (address: string, account: AccountInterface) => {
-    try {
-      setIsToppingUp(true);
-      const { transaction_hash } = await account.execute({
-        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
-        entrypoint: "transfer",
-        calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
-      });
-
-      const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 1000,
-        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
-      });
-
-      if (!result) {
-        throw new Error("Transaction did not complete successfully.");
-      }
-
-      // Get the new balance of the account
-      getBalance(account.address);
-      setIsToppingUp(false);
-      return result;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  };
-
-  const withdraw = async (
-    masterAccountAddress: string,
-    account: AccountInterface
-  ) => {
-    try {
-      setIsWithdrawing(true);
-
-      // First we need to calculate the fee from withdrawing
-
-      const mainAccount = new Account(
-        provider,
-        account.address,
-        account.signer,
-        account.cairoVersion
-      );
-
-      const call = {
-        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
-        entrypoint: "transfer",
-        calldata: CallData.compile([
-          masterAccountAddress,
-          balance ?? "0x0",
-          "0x0",
-        ]),
-      };
-
-      const { suggestedMaxFee: estimatedFee } = await mainAccount.estimateFee(
-        call
-      );
-
-      // Now we negate the fee from balance to withdraw (+10% for safety)
-
-      const newBalance =
-        BigInt(balance) - estimatedFee * (BigInt(11) / BigInt(10));
-
-      const { transaction_hash } = await account.execute({
-        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
-        entrypoint: "transfer",
-        calldata: CallData.compile([
-          masterAccountAddress,
-          newBalance ?? "0x0",
-          "0x0",
-        ]),
-      });
-
-      const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 1000,
-        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
-      });
-
-      if (!result) {
-        throw new Error("Transaction did not complete successfully.");
-      }
-      // Get the new balance of the account
-      getBalance(account.address);
-      setIsWithdrawing(false);
-      return result;
-    } catch (error) {
-      console.error(error);
-      throw error;
-    }
-  };
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -331,7 +250,10 @@ export const ArcadeAccountCard = ({
           ) && (
             <Button
               variant={"ghost"}
-              onClick={() => transfer(account.name, walletAccount)}
+              onClick={() => {
+                topUp(account.name, walletAccount);
+                getBalance(account.name);
+              }}
               disabled={isToppingUp}
             >
               {isToppingUp ? (
@@ -353,7 +275,10 @@ export const ArcadeAccountCard = ({
           {connected && (
             <Button
               variant={"ghost"}
-              onClick={() => withdraw(masterAccountAddress, walletAccount)}
+              onClick={() => {
+                withdraw(masterAccountAddress, walletAccount, balance);
+                getBalance(account.name);
+              }}
               disabled={isWithdrawing || minimalBalance}
             >
               {isWithdrawing ? (

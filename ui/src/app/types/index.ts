@@ -422,3 +422,13 @@ export type u256 = {
   low: string;
   high: string;
 };
+
+export type BurnerStorage = {
+  [address: string]: {
+    privateKey: string;
+    publicKey: string;
+    deployTx: string;
+    active: boolean;
+    masterAccount: string;
+  };
+};

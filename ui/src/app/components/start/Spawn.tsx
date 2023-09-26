@@ -22,6 +22,7 @@ export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
   const [formFilled, setFormFilled] = useState(false);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const loading = useLoadingStore((state) => state.loading);
+  const estimatingFee = useUIStore((state) => state.estimatingFee);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
 
   useEffect(() => {
@@ -118,7 +119,13 @@ export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
               <Button
                 type="submit"
                 size={"xl"}
-                disabled={!formFilled || !account || isWrongNetwork || loading}
+                disabled={
+                  !formFilled ||
+                  !account ||
+                  isWrongNetwork ||
+                  loading ||
+                  estimatingFee
+                }
               >
                 {formFilled ? "Start Game!!" : "Fill details"}
               </Button>

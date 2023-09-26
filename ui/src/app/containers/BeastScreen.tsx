@@ -8,6 +8,7 @@ import React, { useState } from "react";
 import { processBeastName } from "../lib/utils";
 import { Battle, NullDiscovery, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
+import useUIStore from "../hooks/useUIStore";
 
 interface BeastScreenProps {
   attack: (...args: any[]) => any;
@@ -21,6 +22,7 @@ interface BeastScreenProps {
 export default function BeastScreen({ attack, flee }: BeastScreenProps) {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
+  const estimatingFee = useUIStore((state) => state.estimatingFee);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const [showBattleLog, setShowBattleLog] = useState(false);
 
@@ -57,7 +59,8 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       disabled:
         adventurer?.beastHealth == undefined ||
         adventurer?.beastHealth == 0 ||
-        loading,
+        loading ||
+        estimatingFee,
       loading: loading,
     },
     {
@@ -72,7 +75,8 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
       disabled:
         adventurer?.beastHealth == undefined ||
         adventurer?.beastHealth == 0 ||
-        loading,
+        loading ||
+        estimatingFee,
       loading: loading,
     },
   ];
