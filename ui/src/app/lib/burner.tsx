@@ -68,10 +68,12 @@ export const useBurner = () => {
   const list = useCallback(() => {
     let storage = Storage.get("burners") || {};
     return Object.keys(storage).map((address) => {
-      return {
-        address,
-        active: storage[address].active,
-      };
+      if (storage[address].gameContract === gameContract?.address) {
+        return {
+          address,
+          active: storage[address].active,
+        };
+      }
     });
   }, [walletAccount]);
 
@@ -185,6 +187,7 @@ export const useBurner = () => {
       deployTx,
       setPermissionsTx,
       masterAccount: walletAccount.address,
+      gameContract: gameContract?.address,
       active: true,
     };
 
@@ -349,6 +352,7 @@ export const useBurner = () => {
         privateKey,
         publicKey,
         masterAccount: walletAccount.address,
+        gameContract: gameContract?.address,
         active: true,
       };
 
@@ -365,16 +369,18 @@ export const useBurner = () => {
     const burners = list();
 
     for (const burner of burners) {
-      const arcadeConnector = new ArcadeConnector(
-        {
-          options: {
-            id: burner.address,
+      if (burner) {
+        const arcadeConnector = new ArcadeConnector(
+          {
+            options: {
+              id: burner.address,
+            },
           },
-        },
-        get(burner.address)
-      );
+          get(burner.address)
+        );
 
-      arcadeAccounts.push(arcadeConnector);
+        arcadeAccounts.push(arcadeConnector);
+      }
     }
 
     return arcadeAccounts;
