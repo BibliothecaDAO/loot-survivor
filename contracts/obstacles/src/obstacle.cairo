@@ -9,27 +9,11 @@ use combat::{
 #[derive(Drop, Copy)]
 struct Obstacle {
     id: u8,
-    combat_specs: CombatSpec,
+    combat_spec: CombatSpec,
 }
 
 #[generate_trait]
 impl ImplObstacle of IObstacle {
-    // obstacle_encounter returns a random obstacle based on the adventurer level and entropy
-    // @param adventurer_level: u8 - the adventurer level
-    // @param entropy: u128 - entropy for level generation
-    fn obstacle_encounter(
-        adventurer_level: u8, adventurer_intelligence: u8, entropy: u128
-    ) -> (Obstacle, bool) {
-        // get random obstacle id
-        let obstacle_id = ImplObstacle::get_random_id(entropy);
-        // get random obstacle level
-        let obstacle_level = ImplObstacle::get_random_level(adventurer_level, entropy);
-        // return obstacle
-        let obstacle = ImplObstacle::get_obstacle(obstacle_id, obstacle_level);
-        let dodged = ImplObstacle::dodged(adventurer_level, adventurer_intelligence, entropy);
-        (obstacle, dodged)
-    }
-
     // @notice returns a random obstacle id based on the provided entropy
     // @param entropy: u128 - entropy from random id generation
     // @return u8 - the obstacle id
@@ -45,14 +29,14 @@ impl ImplObstacle of IObstacle {
     // @param level: u16 - the obstacle level
     // @return Obstacle - the obstacle
     fn get_obstacle(id: u8, _level: u16) -> Obstacle {
-        let combat_specs = CombatSpec {
+        let combat_spec = CombatSpec {
             tier: ImplObstacle::get_tier(id),
             item_type: ImplObstacle::get_type(id),
             level: _level,
             specials: SpecialPowers { special1: 0, special2: 0, special3: 0, }
         };
 
-        Obstacle { id: id, combat_specs: combat_specs }
+        Obstacle { id: id, combat_spec: combat_spec }
     }
 
     // @notice uses the combat lib to generate a random level scoped for the adventurer level
@@ -110,53 +94,16 @@ impl ImplObstacle of IObstacle {
         }
     }
 
-    // @notice Calculates the damage dealt by an obstacle to an armor based on specific combat specifications.
-    // @param obstacle The obstacle whose damage is being calculated.
-    // @param armor_combat_spec The combat specifications of the armor.
-    // @param entropy A value used to introduce randomness in the damage calculation.
-    // @return The calculated damage as a 16-bit unsigned integer and boolean indicating if the damage was a critical hit.
-    // @dev Note that critical hits are not considered for obstacles in this calculation.
-    fn get_damage(obstacle: Obstacle, armor_combat_spec: CombatSpec, armor_defense_bonus: u8, entropy: u128) -> (u16, bool) {
-        // obstacle critical hit is always 1/6
-        let is_critical_hit = (entropy % 6) == 0;
-        let critical_hit_damage_multplier = 1;
-        let name_bonus_damage_multplier = 1;
-        let armor_defense_multplier = 1;
-
-        (ImplCombat::calculate_damage(
-            obstacle.combat_specs,
-            armor_combat_spec,
-            ObstacleSettings::MINIMUM_DAMAGE,
-            ObstacleSettings::DAMAGE_BOOST,
-            is_critical_hit,
-            critical_hit_damage_multplier,
-            name_bonus_damage_multplier,
-            armor_defense_multplier,
-            entropy
-        ), is_critical_hit)
-    }
-
     // @notice get_xp_reward returns the xp reward from encountering the obstacle
     // @param obstacle: Obstacle - the obstacle
     // @return u16 - the xp reward
     fn get_xp_reward(self: Obstacle) -> u16 {
-        let xp_reward = self.combat_specs.get_base_reward();
+        let xp_reward = self.combat_spec.get_base_reward();
         if (xp_reward < ObstacleSettings::MINIMUM_XP_REWARD) {
             ObstacleSettings::MINIMUM_XP_REWARD
         } else {
             xp_reward
         }
-    }
-
-    // @notice dodged returns true if the adventurer dodged the obstacle
-    // @param adventurer_level: u8 - the adventurer level
-    // @param adventurer_intelligence: u8 - the adventurer intelligence
-    // @param entropy: u128 - the entropy
-    // @return bool - true if the adventurer dodged the obstacle
-    fn dodged(adventurer_level: u8, adventurer_intelligence: u8, entropy: u128) -> bool {
-        // Delegate ambushed calculation to combat system
-        // avoiding beast ambush requires wisdom
-        ImplCombat::ability_based_avoid_threat(adventurer_level, adventurer_intelligence, entropy)
     }
 }
 

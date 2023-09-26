@@ -1,6 +1,6 @@
 mod BeastSettings {
     // Controls the health of the first beast in the game
-    const STARTER_BEAST_HEALTH: u16 = 5;
+    const STARTER_BEAST_HEALTH: u16 = 3;
 
     // Controls the level of the first beast in the game
     const STARTER_BEAST_LEVEL: u16 = 1;
