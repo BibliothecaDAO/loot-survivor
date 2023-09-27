@@ -147,7 +147,7 @@ mod Game {
         /// @dev The function asserts the provided weapon's validity, starts the game, and distributes rewards.
         ///
         /// @param client_reward_address Address where client rewards should be sent.
-        /// @param weapon A u8 representing the weapon to start the game with. Valid options are: {wand: 12, book: 17,  short sword: 46, club: 76}
+        /// @param weapon A u8 representing the weapon to start the game with. Valid options are: {wand: 12, book: 17, short sword: 46, club: 76}
         /// @param name A u128 value representing the player's name.
         fn new_game(
             ref self: ContractState, client_reward_address: ContractAddress, weapon: u8, name: u128,
