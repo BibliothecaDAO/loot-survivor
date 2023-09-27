@@ -11,6 +11,7 @@ import { getAdventurerByXP } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { NullAdventurer, Adventurer } from "@/app/types";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import GlitchEffect from "../animations/GlitchEffect";
 
 export const DeathDialog = () => {
   const deathMessage = useLoadingStore((state) => state.deathMessage);
@@ -71,7 +72,7 @@ export const DeathDialog = () => {
 
         <div className="flex flex-col gap-4 sm:gap-10 items-center justify-center z-10 p-20 h-full">
           <div className="flex flex-col gap-5 items-center justify-center z-10 self-center ">
-            <h1 className="text-red-500 text-6xl">YOU DIED!</h1>
+            <GlitchEffect />
             <span className="text-lg sm:text-2xl text-terminal-yellow">
               {deathMessage}
             </span>
