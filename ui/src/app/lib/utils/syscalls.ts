@@ -60,7 +60,6 @@ async function checkArcadeBalance(
       const { suggestedMaxFee: estimatedFee } = await account.estimateFee(
         calls
       );
-      console.log("estimatedFee", estimatedFee);
       // Add 10% to fee for safety
       const formattedFee = estimatedFee * (BigInt(11) / BigInt(10));
       setEstimatingFee(false);
@@ -1115,8 +1114,6 @@ export function syscalls({
           );
         }
 
-        console.log("adventurer death");
-
         const adventurerDiedEvents = events.filter(
           (event) => event.name === "AdventurerDied"
         );
@@ -1294,28 +1291,29 @@ export function syscalls({
           setData("adventurerByIdQuery", {
             adventurers: [adventurerDiedEvent.data[0]],
           });
-          if (adventurerDiedEvent.data[1].callerAddress === account?.address) {
-            const deadAdventurerIndex =
-              queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-                (adventurer: any) =>
-                  adventurer.id == adventurerDiedEvent.data[0].id
-              );
-            setData(
-              "adventurersByOwnerQuery",
-              0,
-              "health",
-              deadAdventurerIndex
+          const deadAdventurerIndex =
+            queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+              (adventurer: any) =>
+                adventurer.id == adventurerDiedEvent.data[0].id
             );
-          } else {
-            setAdventurer(adventurerDiedEvent.data[0]);
+          setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
+          setAdventurer(adventurerDiedEvent.data[0]);
+          const killedByBeast = battles.some(
+            (battle) =>
+              battle.attacker == "Beast" && battle.adventurerHealth == 0
+          );
+          // In a multicall someone can either die from swapping inventory or the death penalty. Here we handle those cases
+          if (killedByBeast) {
             setDeathNotification(
               "Multicall",
               ["You equipped"],
               adventurerDiedEvent.data[0]
             );
-            setScreen("start");
-            setStartOption("create adventurer");
+          } else {
+            setDeathNotification("Upgrade", "Death Penalty", []);
           }
+          setScreen("start");
+          setStartOption("create adventurer");
         }
 
         setData("battlesByBeastQuery", {

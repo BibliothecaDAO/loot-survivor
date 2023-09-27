@@ -104,13 +104,7 @@ const LiveLeaderboardRow = ({
       </td>
       <td>{calculateLevel(adventurer.xp ?? 0)}</td>
       <td>
-        <span
-          className={`flex justify-center ${
-            !dead ? " text-terminal-green" : "text-red-800"
-          }`}
-        >
-          {adventurer.health}
-        </span>
+        <span className="flex justify-center">{adventurer.health}</span>
       </td>
       <td>
         {" "}
