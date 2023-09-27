@@ -80,7 +80,7 @@ const LiveLeaderboardRow = ({
 
   return (
     <tr
-      className={`text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer xl:h-2 xl:text-lg 2xl:text-xl 2xl:h-full ${
+      className={`text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer xl:h-2 xl:text-lg 2xl:text-xl 2xl:h-10 ${
         topScoreAdventurer
           ? "bg-terminal-yellow-50"
           : ownedAdventurer
@@ -93,7 +93,6 @@ const LiveLeaderboardRow = ({
       }}
     >
       <td>{`${adventurer.name} - ${adventurer.id}`}</td>
-      {/* <td>{adventurer.classType}</td> */}
       <td>
         <span className="flex justify-center text-terminal-yellow">
           <CoinIcon className="self-center w-4 h-4 sm:w-6 sm:h-6 fill-current" />

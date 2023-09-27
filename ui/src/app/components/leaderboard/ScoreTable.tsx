@@ -18,7 +18,7 @@ const ScoreLeaderboardTable = ({
 }: ScoreLeaderboardTableProps) => {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [loading, setLoading] = useState(false);
-  const { data, isLoading, refetch } = useQueriesStore();
+  const { data } = useQueriesStore();
   const adventurers = data.adventurersByXPQuery?.adventurers
     ? data.adventurersByXPQuery?.adventurers
     : [];
@@ -76,6 +76,7 @@ const ScoreLeaderboardTable = ({
     try {
       setProfile(adventurerId);
       setScreen("profile");
+      await handleFetchProfileData(adventurerId);
     } catch (error) {
       console.error(error);
     } finally {
@@ -90,11 +91,11 @@ const ScoreLeaderboardTable = ({
   };
 
   return (
-    <div className="flex flex-col items-center py-2 gap-2">
+    <div className="flex flex-col items-center p-2 gap-2">
       <h4 className="text-2xl text-center sm:text-2xl m-0">Submitted Scores</h4>
       {scores.length > 0 ? (
         <div className="flex flex-col w-full gap-5">
-          <table className="w-full text-lg sm:text-xl border border-terminal-green">
+          <table className="w-full sm:text-lg xl:text-xl border border-terminal-green">
             <thead className="border border-terminal-green">
               <tr>
                 <th className="p-1">Rank</th>

@@ -11,7 +11,7 @@ import useCustomQuery from "../hooks/useCustomQuery";
 import { Adventurer } from "../types";
 import ScoreTable from "../components/leaderboard/ScoreTable";
 import LiveTable from "../components/leaderboard/LiveTable";
-import useLoadingStore from "../hooks/useLoadingStore";
+import { RefreshIcon } from "../components/icons/Icons";
 
 /**
  * @container
@@ -52,36 +52,57 @@ export default function LeaderboardScreen() {
     setNotLoading();
   };
 
-  const copiedAdventurersByXpData = adventurersByXPdata?.adventurers.slice();
+  const handleSortXp = (xpData: any) => {
+    const copiedAdventurersByXpData = xpData?.adventurers.slice();
 
-  const sortedAdventurersByXPArray = copiedAdventurersByXpData?.sort(
-    (a: Adventurer, b: Adventurer) => (b.xp ?? 0) - (a.xp ?? 0)
-  );
+    const sortedAdventurersByXPArray = copiedAdventurersByXpData?.sort(
+      (a: Adventurer, b: Adventurer) => (b.xp ?? 0) - (a.xp ?? 0)
+    );
 
-  const sortedAdventurersByXP = { adventurers: sortedAdventurersByXPArray };
+    const sortedAdventurersByXP = { adventurers: sortedAdventurersByXPArray };
+    return sortedAdventurersByXP;
+  };
 
   useEffect(() => {
     if (adventurersByXPdata) {
       setIsLoading();
-      console.log("setting");
+      const sortedAdventurersByXP = handleSortXp(adventurersByXPdata);
       setData("adventurersByXPQuery", sortedAdventurersByXP);
       setNotLoading();
     }
   }, [adventurersByXPdata]);
 
   return (
-    <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden">
-      <div className={`${showScores ? "hidden " : ""}sm:block w-full sm:w-1/2`}>
-        <LiveTable
-          itemsPerPage={itemsPerPage}
-          handleFetchProfileData={handlefetchProfileData}
-        />
-      </div>
-      <div className={`${showScores ? "" : "hidden "}sm:block w-full sm:w-1/2`}>
-        <ScoreTable
-          itemsPerPage={itemsPerPage}
-          handleFetchProfileData={handlefetchProfileData}
-        />
+    <div className="flex flex-col items-center justify-between xl:h-[500px] xl:overflow-y-auto 2xl:h-full 2xl:overflow-hidden mt-5 sm:mt-0">
+      <Button
+        onClick={async () => {
+          const adventurersByXPdata = await refetch(
+            "adventurersByXPQuery",
+            undefined
+          );
+          const sortedAdventurersByXP = handleSortXp(adventurersByXPdata);
+          setData("adventurersByXPQuery", sortedAdventurersByXP);
+        }}
+      >
+        <RefreshIcon className="w-8 h-8" />
+      </Button>
+      <div className="flex flex-row w-full">
+        <div
+          className={`${showScores ? "hidden " : ""}sm:block w-full sm:w-1/2`}
+        >
+          <LiveTable
+            itemsPerPage={itemsPerPage}
+            handleFetchProfileData={handlefetchProfileData}
+          />
+        </div>
+        <div
+          className={`${showScores ? "" : "hidden "}sm:block w-full sm:w-1/2`}
+        >
+          <ScoreTable
+            itemsPerPage={itemsPerPage}
+            handleFetchProfileData={handlefetchProfileData}
+          />
+        </div>
       </div>
       <Button
         onClick={() =>

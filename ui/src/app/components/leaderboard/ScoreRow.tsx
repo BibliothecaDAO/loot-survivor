@@ -18,7 +18,7 @@ const ScoreRow = ({
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   return (
     <tr
-      className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer"
+      className="text-center border-b border-terminal-green hover:bg-terminal-green hover:text-terminal-black cursor-pointer xl:h-2 xl:text-lg 2xl:text-xl 2xl:h-10"
       onClick={() => {
         handleRowSelected(adventurer.id ?? 0);
         clickPlay();
@@ -37,25 +37,6 @@ const ScoreRow = ({
           "-"
         )}
       </td>
-      {/* <td>
-        <div className="flex flex-row items-center justify-center gap-2">
-          <span
-            className={` ${
-              index == 0
-                ? "text-gold"
-                : index == 1
-                ? "text-silver"
-                : index == 2
-                ? "text-bronze"
-                : ""
-            }`}
-          >
-            {index == 0 ? 13 : index == 1 ? 8 : index == 2 ? 4 : ""}
-          </span>
-
-          <Lords className="self-center w-6 h-6 ml-4 fill-current" />
-        </div>
-      </td> */}
     </tr>
   );
 };
