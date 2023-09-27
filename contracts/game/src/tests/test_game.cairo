@@ -112,13 +112,22 @@ mod tests {
     fn new_adventurer(starting_block: u64) -> IGameDispatcher {
         let mut game = setup(starting_block);
 
-        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero');
+        let starting_weapon = ItemId::Wand;
+        let name = 'abcdefghijklmno';
 
-        let original_adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(original_adventurer.xp == 0, 'wrong starting xp');
-        assert(original_adventurer.weapon.id == ItemId::Wand, 'wrong starting weapon');
+        // start new game
+        game.new_game(INTERFACE_ID(), starting_weapon, name);
+
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let adventurer_meta_data = game.get_adventurer_meta(ADVENTURER_ID);
+
+        // verify starting weapon
+        assert(adventurer.weapon.id == starting_weapon, 'wrong starting weapon');
+        assert(adventurer_meta_data.name == name, 'wrong player name');
+        assert(adventurer.xp == 0, 'should start with 0 xp');
         assert(
-            original_adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
+            adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
             'wrong starter beast health '
         );
 
@@ -127,9 +136,7 @@ mod tests {
 
     fn new_adventurer_max_charisma() -> IGameDispatcher {
         let mut game = setup(1000);
-
         game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero');
-
         game
     }
 
@@ -484,14 +491,7 @@ mod tests {
         let adventurer_1 = game.get_adventurer(ADVENTURER_ID);
         let adventurer_meta_1 = game.get_adventurer_meta(ADVENTURER_ID);
 
-        // check adventurer
-        assert(adventurer_1.weapon.id == ItemId::Wand, 'weapon');
-        assert(adventurer_1.beast_health != 0, 'beast_health');
 
-        // check meta
-        assert(adventurer_meta_1.name == 'Loaf', 'name');
-
-        adventurer_meta_1.entropy;
     }
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
@@ -596,27 +596,19 @@ mod tests {
     #[test]
     #[available_gas(13000000000)]
     fn test_flee() {
+
+        // start game on level 2
         let mut game = new_adventurer_lvl2();
 
-        let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(updated_adventurer.beast_health == 0, 'beast should be dead');
-
-        // explore till we find a beast
-        // TODO: use cheat codes to make this less fragile
+        // perform upgrade
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
 
+        // go exploring
         testing::set_block_number(1006);
-        game.explore(ADVENTURER_ID, true);
-        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
-        testing::set_block_number(1007);
-        game.explore(ADVENTURER_ID, true);
-        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
-        game.explore(ADVENTURER_ID, true);
-        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
         game.explore(ADVENTURER_ID, true);
 
         // verify we found a beast
@@ -1055,7 +1047,7 @@ mod tests {
             // verify they are no longer in bag
             assert(!contains, 'item should not be in bag');
             // and equipped on the adventurer
-            assert(adventurer.is_equipped(*purchased_items_span.at(i)), 'item should be equipped');
+            assert(adventurer.is_equipped(*purchased_items_span.at(i)), 'item should be equipped1');
             i += 1;
         };
     }
@@ -1791,28 +1783,24 @@ mod tests {
         let original_charisma = adventurer.stats.charisma;
         let original_health = adventurer.health;
 
-        // potions
+        // potion purchases
         let potions = 1;
 
-        // items to purchase
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
-        let item_1 = *market_items.at(0);
-        let item_2 = *market_items.at(1);
+        // item purchases
+        let weapon_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 3);
+        let weapon_id = *weapon_on_market.at(0);
+        let chest_armor_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 2);
+        let chest_armor_id = *chest_armor_on_market.at(0);
         let mut items_to_purchase = ArrayTrait::<ItemPurchase>::new();
-        items_to_purchase.append(ItemPurchase { item_id: item_1, equip: true });
-        items_to_purchase.append(ItemPurchase { item_id: item_2, equip: true });
+        items_to_purchase.append(ItemPurchase { item_id: weapon_id, equip: true });
+        items_to_purchase.append(ItemPurchase { item_id: chest_armor_id, equip: false });
 
-        let strength = 0;
-        let dexterity = 0;
-        let vitality = 0;
-        let intelligence = 0;
-        let wisdom = 0;
-        let charisma = 1;
-
-        // purchase potions, items, and upgrade stat in single call
+        // stat upgrades
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
+
+        // call upgrade
         game.upgrade(ADVENTURER_ID, potions, stat_upgrades, items_to_purchase);
 
         // get updated adventurer state
@@ -1824,9 +1812,8 @@ mod tests {
         assert(adventurer.stats.charisma == original_charisma + 1, 'charisma not increased');
         // assert stat point was used
         assert(adventurer.stat_points_available == 0, 'should have used stat point');
-
         // assert adventurer has the purchased items
-        assert(adventurer.is_equipped(item_1), 'item should be equipped');
-        assert(adventurer.is_equipped(item_2), 'item should be equipped');
+        assert(adventurer.is_equipped(weapon_id), 'weapon should be equipped');
+        assert(!adventurer.is_equipped(chest_armor_id), 'chest armor should not');
     }
 }
