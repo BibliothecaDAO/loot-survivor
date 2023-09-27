@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import TwitterShareButton from "../buttons/TwitterShareButtons";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
@@ -10,6 +10,7 @@ import { appUrl } from "@/app/lib/constants";
 import { getAdventurerByXP } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { NullAdventurer, Adventurer } from "@/app/types";
+import { useQueriesStore } from "@/app/hooks/useQueryStore";
 
 export const DeathDialog = () => {
   const deathMessage = useLoadingStore((state) => state.deathMessage);
@@ -18,24 +19,23 @@ export const DeathDialog = () => {
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
 
-  const adventurersByXPdata = useCustomQuery(
-    "adventurersByXPQuery",
-    getAdventurerByXP,
-    undefined
-  );
+  const { data, refetch, setData } = useQueriesStore();
 
-  const copiedAdventurersByXpData = adventurersByXPdata?.adventurers.slice();
+  useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
 
-  const sortedAdventurersByXPArray = copiedAdventurersByXpData?.sort(
-    (a: Adventurer, b: Adventurer) => (b.xp ?? 0) - (a.xp ?? 0)
-  );
+  const handleSortXp = (xpData: any) => {
+    const copiedAdventurersByXpData = xpData?.adventurers.slice();
 
-  const sortedAdventurersByXP = { adventurers: sortedAdventurersByXPArray };
+    const sortedAdventurersByXPArray = copiedAdventurersByXpData?.sort(
+      (a: Adventurer, b: Adventurer) => (b.xp ?? 0) - (a.xp ?? 0)
+    );
 
-  console.log(adventurersByXPdata);
-  console.log(sortedAdventurersByXP);
+    const sortedAdventurersByXP = { adventurers: sortedAdventurersByXPArray };
+    return sortedAdventurersByXP;
+  };
 
   const handleRank = () => {
+    const sortedAdventurersByXP = data.adventurersByXPQuery;
     const rank = getRankFromList(
       adventurer?.id ?? 0,
       sortedAdventurersByXP?.adventurers ?? []
@@ -46,6 +46,17 @@ export const DeathDialog = () => {
   };
 
   const rank = handleRank();
+
+  useEffect(() => {
+    refetch("adventurersByXPQuery", undefined)
+      .then((adventurersByXPdata) => {
+        const sortedAdventurersByXP = handleSortXp(adventurersByXPdata);
+        setData("adventurersByXPQuery", sortedAdventurersByXP);
+      })
+      .catch((error) => console.error("Error refetching data:", error));
+  }, []);
+
+  console.log(data.adventurersByXPQuery);
 
   return (
     <>

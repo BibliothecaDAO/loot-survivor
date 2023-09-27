@@ -100,8 +100,6 @@ const MarketplaceTable = ({
     return sortedItems;
   }, [marketLatestItems, sortField, sortDirection]);
 
-  console.log(showEquipQ);
-
   return (
     <>
       <div>

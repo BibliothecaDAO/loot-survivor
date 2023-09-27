@@ -327,16 +327,6 @@ export default function Home() {
     }
   }, [adventurersData]);
 
-  // useEffect(() => {
-  //   if ((isAlive && !hasStatUpgrades) || (isAlive && hasNoXp)) {
-  //     setScreen("play");
-  //   } else if (hasStatUpgrades) {
-  //     setScreen("upgrade");
-  //   } else if (!adventurer || !isAlive) {
-  //     setScreen("start");
-  //   }
-  // }, [hasStatUpgrades, isAlive, hasNoXp, adventurer]);
-
   const mobileMenuDisabled = [
     false,
     hasStatUpgrades,
