@@ -956,18 +956,15 @@ impl ImplAdventurer of IAdventurer {
         specials
     }
 
-    // @notice get_beast_seed provides an entropy source that is fixed during battle
-    // it intentionally does not use global_entropy as that could change during battle and this
-    // entropy allows us to simulate a persistent battle without having to store beast
-    // details on-chain.
-    // @param self A reference to the Adventurer object which represents the adventurer.
-    // @param adventurer_entropy A number used for randomization.
+    // @notice provides a a beast seed that is fixed during battle. This function does not use 
+    // game entropy as that could change during battle resulting in the beast changing
+    // @param self A reference to the Adventurer to get the beast seed for.
+    // @param adventurer_entropy A u128 used to randomize the beast seed
     // @return Returns a number used for generated a random beast.
     fn get_beast_seed(self: Adventurer, adventurer_entropy: u128) -> u128 {
         if self.get_level() > 1 {
             let mut hash_span = ArrayTrait::new();
             hash_span.append(self.xp.into());
-            hash_span.append(self.gold.into());
             hash_span.append(adventurer_entropy.into());
             let poseidon = poseidon_hash_span(hash_span.span());
             let (d, r) = rshift_split(poseidon.into(), 340282366920938463463374607431768211455);
@@ -1409,12 +1406,12 @@ impl ImplAdventurer of IAdventurer {
     }
 
     fn get_randomness(
-        self: Adventurer, adventurer_entropy: u128, global_entropy: u128
+        self: Adventurer, adventurer_entropy: u128, game_entropy: u128
     ) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(self.xp.into());
         hash_span.append(adventurer_entropy.into());
-        hash_span.append(global_entropy.into());
+        hash_span.append(game_entropy.into());
 
         let poseidon = poseidon_hash_span(hash_span.span());
         let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());

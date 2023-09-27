@@ -98,11 +98,7 @@ mod tests {
     }
 
     fn add_adventurer_to_game(ref game: IGameDispatcher) {
-        let adventurer_meta = AdventurerMetadata {
-            name: 'loothero'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
-        };
-
-        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta);
+        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero');
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -116,17 +112,22 @@ mod tests {
     fn new_adventurer(starting_block: u64) -> IGameDispatcher {
         let mut game = setup(starting_block);
 
-        let adventurer_meta = AdventurerMetadata {
-            name: 'Loaf'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
-        };
+        let starting_weapon = ItemId::Wand;
+        let name = 'abcdefghijklmno';
 
-        game.start(INTERFACE_ID(), ItemId::Wand, adventurer_meta);
+        // start new game
+        game.new_game(INTERFACE_ID(), starting_weapon, name);
 
-        let original_adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(original_adventurer.xp == 0, 'wrong starting xp');
-        assert(original_adventurer.weapon.id == ItemId::Wand, 'wrong starting weapon');
+        // get adventurer state
+        let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let adventurer_meta_data = game.get_adventurer_meta(ADVENTURER_ID);
+
+        // verify starting weapon
+        assert(adventurer.weapon.id == starting_weapon, 'wrong starting weapon');
+        assert(adventurer_meta_data.name == name, 'wrong player name');
+        assert(adventurer.xp == 0, 'should start with 0 xp');
         assert(
-            original_adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
+            adventurer.beast_health == BeastSettings::STARTER_BEAST_HEALTH,
             'wrong starter beast health '
         );
 
@@ -135,16 +136,7 @@ mod tests {
 
     fn new_adventurer_max_charisma() -> IGameDispatcher {
         let mut game = setup(1000);
-
-        game
-            .start(
-                INTERFACE_ID(),
-                ItemId::Wand,
-                AdventurerMetadata {
-                    name: 'loothero'.try_into().unwrap(), home_realm: 1, class: 1, entropy: 1
-                }
-            );
-
+        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero');
         game
     }
 
@@ -210,9 +202,15 @@ mod tests {
 
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+            strength: stat,
+            dexterity: 0,
+            vitality: 0,
+            intelligence: 0,
+            wisdom: 0,
+            charisma: 1,
+            luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // go explore
         game.explore(ADVENTURER_ID, true);
@@ -237,9 +235,15 @@ mod tests {
         // upgrade charisma
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+            strength: stat,
+            dexterity: 0,
+            vitality: 0,
+            intelligence: 0,
+            wisdom: 0,
+            charisma: 1,
+            luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // go explore
         game.explore(ADVENTURER_ID, true);
@@ -260,9 +264,15 @@ mod tests {
         // upgrade charisma
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+            strength: stat,
+            dexterity: 0,
+            vitality: 0,
+            intelligence: 0,
+            wisdom: 0,
+            charisma: 1,
+            luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // go explore
         game.explore(ADVENTURER_ID, true);
@@ -321,9 +331,15 @@ mod tests {
         // upgrade stats
 
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+            strength: stat,
+            dexterity: 0,
+            vitality: 0,
+            intelligence: 0,
+            wisdom: 0,
+            charisma: 1,
+            luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // go explore
         game.explore(ADVENTURER_ID, true);
@@ -340,9 +356,15 @@ mod tests {
         let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+            strength: stat,
+            dexterity: 0,
+            vitality: 0,
+            intelligence: 0,
+            wisdom: 0,
+            charisma: 1,
+            luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // go explore
         game.explore(ADVENTURER_ID, true);
@@ -358,9 +380,15 @@ mod tests {
         let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+            strength: stat,
+            dexterity: 0,
+            vitality: 0,
+            intelligence: 0,
+            wisdom: 0,
+            charisma: 1,
+            luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // go explore
         game.explore(ADVENTURER_ID, true);
@@ -376,9 +404,15 @@ mod tests {
         let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+            strength: stat,
+            dexterity: 0,
+            vitality: 0,
+            intelligence: 0,
+            wisdom: 0,
+            charisma: 1,
+            luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // go explore
         game.explore(ADVENTURER_ID, true);
@@ -394,9 +428,15 @@ mod tests {
         let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+            strength: stat,
+            dexterity: 0,
+            vitality: 0,
+            intelligence: 0,
+            wisdom: 0,
+            charisma: 1,
+            luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // go explore
         game.explore(ADVENTURER_ID, true);
@@ -415,9 +455,15 @@ mod tests {
         let STRENGTH: u8 = 0;
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+            strength: stat,
+            dexterity: 0,
+            vitality: 0,
+            intelligence: 0,
+            wisdom: 0,
+            charisma: 1,
+            luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // go explore
         game.explore(ADVENTURER_ID, true);
@@ -445,16 +491,7 @@ mod tests {
         let adventurer_1 = game.get_adventurer(ADVENTURER_ID);
         let adventurer_meta_1 = game.get_adventurer_meta(ADVENTURER_ID);
 
-        // check adventurer
-        assert(adventurer_1.weapon.id == ItemId::Wand, 'weapon');
-        assert(adventurer_1.beast_health != 0, 'beast_health');
 
-        // check meta
-        assert(adventurer_meta_1.name == 'Loaf', 'name');
-        assert(adventurer_meta_1.home_realm == 1, 'home_realm');
-        assert(adventurer_meta_1.class == 1, 'class');
-
-        adventurer_meta_1.entropy;
     }
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
@@ -559,27 +596,19 @@ mod tests {
     #[test]
     #[available_gas(13000000000)]
     fn test_flee() {
+
+        // start game on level 2
         let mut game = new_adventurer_lvl2();
 
-        let updated_adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(updated_adventurer.beast_health == 0, 'beast should be dead');
-
-        // explore till we find a beast
-        // TODO: use cheat codes to make this less fragile
+        // perform upgrade
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
 
+        // go exploring
         testing::set_block_number(1006);
-        game.explore(ADVENTURER_ID, true);
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
-        testing::set_block_number(1007);
-        game.explore(ADVENTURER_ID, true);
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
-        game.explore(ADVENTURER_ID, true);
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
         game.explore(ADVENTURER_ID, true);
 
         // verify we found a beast
@@ -634,7 +663,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
     }
 
     #[test]
@@ -656,11 +685,11 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, empty_shoppping_cart.clone());
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, empty_shoppping_cart.clone());
 
         // after upgrade try to buy item
         // should panic with message 'Market is closed'
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shoppping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shoppping_cart);
     }
 
     #[test]
@@ -684,7 +713,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
     }
 
     #[test]
@@ -707,7 +736,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
     }
 
     #[test]
@@ -720,7 +749,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
     }
 
     #[test]
@@ -734,7 +763,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
         let bag = game.get_bag(ADVENTURER_ID);
         assert(bag.item_1.id == *market_items.at(0), 'item should be in bag');
     }
@@ -808,7 +837,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
 
         // get updated adventurer and bag state
         let bag = game.get_bag(ADVENTURER_ID);
@@ -980,7 +1009,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // get bag from storage
         let bag = game.get_bag(ADVENTURER_ID);
@@ -1018,7 +1047,7 @@ mod tests {
             // verify they are no longer in bag
             assert(!contains, 'item should not be in bag');
             // and equipped on the adventurer
-            assert(adventurer.is_equipped(*purchased_items_span.at(i)), 'item should be equipped');
+            assert(adventurer.is_equipped(*purchased_items_span.at(i)), 'item should be equipped1');
             i += 1;
         };
     }
@@ -1041,7 +1070,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 1, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 0, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, number_of_potions, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, number_of_potions, stat_upgrades, shopping_cart);
 
         // get updated adventurer stat
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1083,7 +1112,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, potions, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, potions, stat_upgrades, shopping_cart);
     }
 
     #[test]
@@ -1098,11 +1127,11 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
 
         // then try to buy potions (should panic with 'Market is closed')
         let potions = 1;
-        game.upgrade_adventurer(ADVENTURER_ID, potions, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, potions, stat_upgrades, shopping_cart);
     }
 
     #[test]
@@ -1120,7 +1149,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, potions, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, potions, stat_upgrades, shopping_cart);
     }
 
     #[test]
@@ -1643,7 +1672,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1662,7 +1691,7 @@ mod tests {
         drop_list.append(purchased_item_id);
 
         // call contract drop
-        game.drop_items(ADVENTURER_ID, drop_list);
+        game.drop(ADVENTURER_ID, drop_list);
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1692,7 +1721,7 @@ mod tests {
         // try to drop an item the adventurer doesn't own
         // this should result in a panic 'Item not owned by adventurer'
         // this test is annotated to expect that panic
-        game.drop_items(ADVENTURER_ID, drop_list);
+        game.drop(ADVENTURER_ID, drop_list);
     }
 
     #[test]
@@ -1713,7 +1742,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
         // get update adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1740,7 +1769,7 @@ mod tests {
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 2, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
     }
 
     #[test]
@@ -1754,29 +1783,25 @@ mod tests {
         let original_charisma = adventurer.stats.charisma;
         let original_health = adventurer.health;
 
-        // potions
+        // potion purchases
         let potions = 1;
 
-        // items to purchase
-        let market_items = @game.get_items_on_market(ADVENTURER_ID);
-        let item_1 = *market_items.at(0);
-        let item_2 = *market_items.at(1);
+        // item purchases
+        let weapon_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 3);
+        let weapon_id = *weapon_on_market.at(0);
+        let chest_armor_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 2);
+        let chest_armor_id = *chest_armor_on_market.at(0);
         let mut items_to_purchase = ArrayTrait::<ItemPurchase>::new();
-        items_to_purchase.append(ItemPurchase { item_id: item_1, equip: true });
-        items_to_purchase.append(ItemPurchase { item_id: item_2, equip: true });
+        items_to_purchase.append(ItemPurchase { item_id: weapon_id, equip: true });
+        items_to_purchase.append(ItemPurchase { item_id: chest_armor_id, equip: false });
 
-        let strength = 0;
-        let dexterity = 0;
-        let vitality = 0;
-        let intelligence = 0;
-        let wisdom = 0;
-        let charisma = 1;
-
-        // purchase potions, items, and upgrade stat in single call
+        // stat upgrades
         let stat_upgrades = Stats {
             strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
-        game.upgrade_adventurer(ADVENTURER_ID, potions, stat_upgrades, items_to_purchase);
+
+        // call upgrade
+        game.upgrade(ADVENTURER_ID, potions, stat_upgrades, items_to_purchase);
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1787,9 +1812,8 @@ mod tests {
         assert(adventurer.stats.charisma == original_charisma + 1, 'charisma not increased');
         // assert stat point was used
         assert(adventurer.stat_points_available == 0, 'should have used stat point');
-
         // assert adventurer has the purchased items
-        assert(adventurer.is_equipped(item_1), 'item should be equipped');
-        assert(adventurer.is_equipped(item_2), 'item should be equipped');
+        assert(adventurer.is_equipped(weapon_id), 'weapon should be equipped');
+        assert(!adventurer.is_equipped(chest_armor_id), 'chest armor should not');
     }
 }

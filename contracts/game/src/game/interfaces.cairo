@@ -1,27 +1,24 @@
 use starknet::ContractAddress;
+use market::market::{ItemPurchase};
+use beasts::beast::Beast;
 use survivor::{
     bag::Bag, adventurer::{Adventurer, Stats}, adventurer_meta::AdventurerMetadata,
     item_meta::{ItemSpecials, ItemSpecialsStorage}
 };
-use lootitems::loot::{Loot};
-use market::market::{ItemPurchase};
-use beasts::beast::Beast;
+
 
 #[starknet::interface]
 trait IGame<TContractState> {
-    // actions ---------------------------------------------------
-    fn start(
-        ref self: TContractState,
-        client_reward_address: ContractAddress,
-        starting_weapon: u8,
-        adventurer_meta: AdventurerMetadata
+    // ------ Game Actions ------
+    fn new_game(
+        ref self: TContractState, client_reward_address: ContractAddress, weapon: u8, name: u128
     );
     fn explore(ref self: TContractState, adventurer_id: u256, till_beast: bool);
     fn attack(ref self: TContractState, adventurer_id: u256, to_the_death: bool);
     fn flee(ref self: TContractState, adventurer_id: u256, to_the_death: bool);
     fn equip(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
-    fn drop_items(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
-    fn upgrade_adventurer(
+    fn drop(ref self: TContractState, adventurer_id: u256, items: Array<u8>);
+    fn upgrade(
         ref self: TContractState,
         adventurer_id: u256,
         potions: u8,
@@ -29,9 +26,9 @@ trait IGame<TContractState> {
         items: Array<ItemPurchase>,
     );
     fn slay_idle_adventurers(ref self: TContractState, adventurer_ids: Array<u256>);
-    fn rotate_global_entropy(ref self: TContractState);
+    fn rotate_game_entropy(ref self: TContractState);
 
-    // --------- view functions ---------
+    // ------ View Functions ------
 
     // adventurer details
     fn get_adventurer(self: @TContractState, adventurer_id: u256) -> Adventurer;
@@ -54,7 +51,6 @@ trait IGame<TContractState> {
     fn get_charisma(self: @TContractState, adventurer_id: u256) -> u8;
 
     // item stats
-    // TODO: get_equipped_items(self: @TContractState, adventurer_id: u256) -> Array<u8>;
     fn get_weapon_greatness(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_chest_greatness(self: @TContractState, adventurer_id: u256) -> u8;
     fn get_head_greatness(self: @TContractState, adventurer_id: u256) -> u8;
@@ -106,14 +102,12 @@ trait IGame<TContractState> {
     fn get_beast_type(self: @TContractState, beast_id: u8) -> u8;
     fn get_beast_tier(self: @TContractState, beast_id: u8) -> u8;
 
-    // TODO: Game settings
-    fn next_global_entropy_rotation(self: @TContractState) -> felt252;
+    // game settings
+    fn next_game_entropy_rotation(self: @TContractState) -> felt252;
 
     // contract details
+    fn owner_of(self: @TContractState, adventurer_id: u256) -> ContractAddress;
     fn get_dao_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;
     fn get_entropy(self: @TContractState) -> u64;
-
-    // checks ----------------------------------------------------
-    fn owner_of(self: @TContractState, adventurer_id: u256) -> ContractAddress;
 }
