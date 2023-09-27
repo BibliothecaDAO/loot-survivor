@@ -7,13 +7,9 @@ trait Packing<T> {
     fn unpack(packed: felt252) -> T;
 }
 
-//#[inline(always)]
+#[inline(always)]
 fn rshift_split(value: u256, bits: u256) -> (u256, u256) {
-    // temporary commented out until 0.12.1 when u256_safe_divmod is an allowed libfunc
-    // integer::U256DivRem::div_rem(value, bits.try_into().expect('0 bits'))
-    let value = integer::u512 { limb0: value.low, limb1: value.high, limb2: 0, limb3: 0 };
-    let (q, r) = integer::u512_safe_div_rem_by_u256(value, bits.try_into().expect('0 bits'));
-    (u256 { low: q.limb0, high: q.limb1 }, r)
+    integer::U256DivRem::div_rem(value, bits.try_into().expect('0 bits'))
 }
 
 #[cfg(test)]
@@ -22,7 +18,7 @@ mod tests {
     use pack::constants::pow;
 
     #[test]
-    #[available_gas(10000000)]
+    #[available_gas(81450)]
     fn test_rshift_split_pass() {
         let v = 0b11010101;
 
@@ -48,7 +44,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(10000000)]
+    #[available_gas(11750)]
     #[should_panic]
     fn test_rshift_split_0() {
         rshift_split(0b1101, 0);

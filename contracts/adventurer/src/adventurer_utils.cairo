@@ -86,10 +86,13 @@ impl AdventurerUtils of IAdventurerUtils {
     // @param block_number The block number used in generating the entropy
     // @param adventurer_id The ID of the adventurer used in generating the entropy
     // @return A u128 type entropy unique to the block number and adventurer ID
-    fn generate_adventurer_entropy(block_number: u64, adventurer_id: u256) -> u128 {
+    fn generate_adventurer_entropy(
+        adventurer_id: u256, block_number: u64, block_timestamp: u64
+    ) -> u128 {
         let mut hash_span = ArrayTrait::<felt252>::new();
-        hash_span.append(block_number.into());
         hash_span.append(adventurer_id.try_into().unwrap());
+        hash_span.append(block_number.into());
+        hash_span.append(block_timestamp.into());
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
         let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
         r.try_into().unwrap()
@@ -181,15 +184,15 @@ impl AdventurerUtils of IAdventurerUtils {
     // @notice gets randomness for adventurer
     // @param adventurer_xp: adventurer xp
     // @param adventurer_entropy: adventurer entropy
-    // @param global_entropy: global entropy
+    // @param game_entropy: game entropy
     // @return (u128, u128): tuple of randomness
     fn get_randomness(
-        adventurer_xp: u16, adventurer_entropy: u128, global_entropy: u128
+        adventurer_xp: u16, adventurer_entropy: u128, game_entropy: u128
     ) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(adventurer_xp.into());
         hash_span.append(adventurer_entropy.into());
-        hash_span.append(global_entropy.into());
+        hash_span.append(game_entropy.into());
         let poseidon = poseidon_hash_span(hash_span.span());
         AdventurerUtils::split_hash(poseidon)
     }
@@ -198,16 +201,16 @@ impl AdventurerUtils of IAdventurerUtils {
     // @param adventurer_xp: adventurer xp
     // @param adventurer_entropy: adventurer entropy
     // @param adventurer_health: adventurer health
-    // @param global_entropy: global entropy
+    // @param game_entropy: game entropy
     // @return (u128, u128): tuple of randomness
     fn get_randomness_with_health(
-        adventurer_xp: u16, adventurer_health: u16, adventurer_entropy: u128, global_entropy: u128
+        adventurer_xp: u16, adventurer_health: u16, adventurer_entropy: u128, game_entropy: u128
     ) -> (u128, u128) {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(adventurer_xp.into());
         hash_span.append(adventurer_health.into());
         hash_span.append(adventurer_entropy.into());
-        hash_span.append(global_entropy.into());
+        hash_span.append(game_entropy.into());
         let poseidon = poseidon_hash_span(hash_span.span());
         AdventurerUtils::split_hash(poseidon)
     }
@@ -305,7 +308,7 @@ mod tests {
         adventurer_utils::AdventurerUtils
     };
     use combat::constants::CombatEnums::{Type, Tier, Slot};
-        #[test]
+    #[test]
     #[available_gas(166544)]
     fn test_generate_starting_stats_gas() {
         AdventurerUtils::generate_starting_stats(0, 1);
@@ -535,8 +538,9 @@ mod tests {
             }
             let adventurer_id: u256 = i;
             let block_number = 839152;
+            let block_timestamp = 53289712;
             let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(
-                block_number, adventurer_id
+                adventurer_id, block_number, block_timestamp
             );
             i += 1;
         };
