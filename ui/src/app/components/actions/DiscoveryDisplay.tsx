@@ -34,7 +34,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
             <span className="flex flex-row items-center justify-between">
               <p>
                 YIKES! Ambushed by a {beastName} for {discoveryData.damageTaken}{" "}
-                damage to {discoveryData.damageLocation}{" "}
+                damage to {discoveryData.damageLocation} !
               </p>
               <GiBruteIcon />
             </span>
@@ -45,7 +45,7 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
               <p>
                 YIKES! Killed by a {beastName} from an ambush of{" "}
                 {discoveryData.damageTaken} damage to{" "}
-                {discoveryData.damageLocation}
+                {discoveryData.damageLocation}!
               </p>
               <SkullCrossedBonesIcon />
             </span>
@@ -83,7 +83,8 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
               {discoveryData?.obstacle?.endsWith("s")
                 ? `a ${discoveryData?.obstacle}`
                 : discoveryData?.obstacle}{" "}
-              with {discoveryData?.damageTaken} damage!
+              with {discoveryData?.damageTaken} damage to{" "}
+              {discoveryData.damageLocation}!
             </p>
             <SkullCrossedBonesIcon />
           </span>
@@ -96,7 +97,8 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
               {discoveryData?.obstacle?.endsWith("s")
                 ? discoveryData?.obstacle
                 : `A ${discoveryData?.obstacle}`}{" "}
-              inflicted {discoveryData?.damageTaken} damage!
+              inflicted {discoveryData?.damageTaken} damage to{" "}
+              {discoveryData.damageLocation}!
             </p>
             <SpikedWallIcon />
           </span>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import TwitterShareButton from "../buttons/TwitterShareButtons";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useLoadingStore from "../../hooks/useLoadingStore";
@@ -16,6 +16,7 @@ import { getDeathMessageByRank } from "../../lib/utils";
 import Image from "next/image";
 
 export const DeathDialog = () => {
+  const messageRef = useRef<HTMLSpanElement>(null);
   const [rank, setRank] = useState<number | null>(null);
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
@@ -74,7 +75,7 @@ export const DeathDialog = () => {
             ) : (
               <h1 className="text-red-500 text-6xl">YOU DIED!</h1>
             )}
-            <span className="text-lg sm:text-3xl text-red-500">
+            <span ref={messageRef} className="text-lg sm:text-3xl text-red-500">
               {deathMessage}
             </span>
             <span className="flex flex-col gap-2 text-lg sm:text-4xl">
@@ -98,7 +99,11 @@ export const DeathDialog = () => {
             </span>
           </div>
           <TwitterShareButton
-            text={`RIP ${adventurer?.name}, who died at ${rank} place on the #LootSurvivor leaderboard.\n\nThink you can beat ${adventurer?.xp} XP? Enter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+            text={`RIP ${adventurer?.name}, who died at ${getOrdinalSuffix(
+              rank! ?? 0
+            )} place on #LootSurvivor.\n\nGravestone bears the inscription: ${
+              messageRef.current?.innerText
+            }🪦\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
           />
           <Button
             onClick={() => {
