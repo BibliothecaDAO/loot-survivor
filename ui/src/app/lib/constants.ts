@@ -66,3 +66,24 @@ export const idleDeathPenaltyBlocks = 300;
 // UI PARAMS
 export const MIN_BALANCE = 10000000000000; // 0.00001ETH or $0.015
 export const FEE_CHECK_BALANCE = 100000000000000; // 0.0001ETH or $0.15
+
+export const deathMessages = [
+  {
+    rank: 3,
+    message: "Supreme Conqueror! - Unrivaled mastery of survival!",
+  },
+  {
+    rank: 10,
+    message: "Glorious Victor! - A testament to your indomitable spirit!",
+  },
+  {
+    rank: 25,
+    message: "Heroic Endurance! - Legends will speak of your bravery!",
+  },
+  {
+    rank: 50,
+    message: "Valiant Survivor! - A remarkable display of fortitude!",
+  },
+  { rank: 100, message: "Brave Combatant! - A commendable effort!" },
+  { rank: 250, message: "Daring Challenger! - A brave stand!" },
+];
