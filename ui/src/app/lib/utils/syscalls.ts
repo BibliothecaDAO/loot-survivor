@@ -507,6 +507,8 @@ export function syscalls({
           }
         }
 
+        const reversedDiscoveries = discoveries.slice().reverse();
+
         const adventurerDiedEvents = events.filter(
           (event) => event.name === "AdventurerDied"
         );
@@ -522,14 +524,14 @@ export function syscalls({
           setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
           setAdventurer(adventurerDiedEvent.data[0]);
           const killedByObstacle =
-            discoveries.reverse()[0]?.discoveryType == "Obstacle" &&
-            discoveries.reverse()[0]?.adventurerHealth == 0;
+            reversedDiscoveries[0]?.discoveryType == "Obstacle" &&
+            reversedDiscoveries[0]?.adventurerHealth == 0;
           const killedByPenalty =
-            !discoveries.reverse()[0]?.discoveryType &&
-            discoveries.reverse()[0]?.adventurerHealth == 0;
+            !reversedDiscoveries[0]?.discoveryType &&
+            reversedDiscoveries[0]?.adventurerHealth == 0;
           const killedByAmbush =
-            discoveries.reverse()[0]?.ambushed &&
-            discoveries.reverse()[0]?.adventurerHealth == 0;
+            reversedDiscoveries[0]?.ambushed &&
+            reversedDiscoveries[0]?.adventurerHealth == 0;
           if (killedByObstacle || killedByPenalty || killedByAmbush) {
             setDeathNotification(
               "Explore",
@@ -587,7 +589,7 @@ export function syscalls({
 
         setEquipItems([]);
         setDropItems([]);
-        stopLoading(discoveries);
+        stopLoading(reversedDiscoveries);
         setMintAdventurer(false);
       } catch (e) {
         console.log(e);

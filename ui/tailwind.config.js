@@ -59,6 +59,9 @@ module.exports = {
       textShadow: {
         'none': 'none',  // This line removes the text shadow
       },
+      animation: {
+        pulseFast: 'pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+      }
     },
   },
   plugins: [

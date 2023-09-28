@@ -23,6 +23,7 @@ export const DeathDialog = () => {
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
+  const [imageLoading, setImageLoading] = useState(false);
 
   const { data, refetch, setData } = useQueriesStore();
 
@@ -55,68 +56,83 @@ export const DeathDialog = () => {
 
   return (
     <>
-      <div className="top-0 left-0 fixed text-center h-full w-full z-40">
-        {rank! <= 50 ? (
-          <PixelatedImage src={"/scenes/intro/skulls.png"} pixelSize={10} />
-        ) : (
-          <Image
+      {rank && (
+        <div className="top-0 left-0 fixed text-center h-full w-full z-40">
+          <PixelatedImage
             src={"/scenes/intro/skulls.png"}
-            alt="skull"
-            className="absolute object-cover"
-            fill
+            pixelSize={rank <= 100 ? 10 : 20}
+            setImageLoading={setImageLoading}
           />
-        )}
-        <div className="absolute inset-0 bg-black opacity-50"></div>
 
-        <div className="flex flex-col gap-4 sm:gap-10 items-center justify-center z-10 p-10 sm:p-20 h-full">
-          <div className="flex flex-col gap-5 items-center justify-center z-10 self-center ">
-            {rank! <= 50 ? (
-              <GlitchEffect />
-            ) : (
-              <h1 className="text-red-500 text-6xl">YOU DIED!</h1>
-            )}
-            <span ref={messageRef} className="text-lg sm:text-3xl text-red-500">
-              {deathMessage}
-            </span>
-            <span className="flex flex-col gap-2 text-lg sm:text-4xl">
-              <span className="text-terminal-yellow">
-                {getDeathMessageByRank(rank!)}
-              </span>{" "}
-              <span className="text-4xl">
-                <span className="text-terminal-yellow">{adventurer?.name}</span>{" "}
-                died{" "}
-                <span className="text-terminal-yellow">
-                  {getOrdinalSuffix(rank! ?? 0)}
-                </span>{" "}
-                with{" "}
-                <span className="text-terminal-yellow">
-                  {adventurer?.xp} XP
+          <div className="absolute inset-0 bg-black opacity-50"></div>
+
+          {!imageLoading && (
+            <div className="flex flex-col gap-4 sm:gap-10 items-center justify-center z-10 p-10 sm:p-20 h-full">
+              <div className="flex flex-col gap-5 items-center justify-center z-10 self-center ">
+                {rank! <= 3 &&
+                  rank! > 0 &&
+                  (rank === 1 ? (
+                    <h1 className="text-6xl animate-pulseFast">
+                      NEW HIGH SCORE
+                    </h1>
+                  ) : (
+                    <h1 className="text-6xl animate-pulseFast">TOP 3 SCORE</h1>
+                  ))}
+                {rank! <= 50 ? (
+                  <GlitchEffect />
+                ) : (
+                  <h1 className="text-red-500 text-6xl">YOU DIED!</h1>
+                )}
+                <span
+                  ref={messageRef}
+                  className="text-lg sm:text-3xl text-red-500"
+                >
+                  {deathMessage}
                 </span>
-              </span>
-            </span>
-            <span className="sm:text-2xl">
-              Share your score. Continue the journey with another adventurer.
-            </span>
-          </div>
-          <TwitterShareButton
-            text={`RIP ${adventurer?.name}, who died at ${getOrdinalSuffix(
-              rank! ?? 0
-            )} place on #LootSurvivor.\n\nGravestone bears the inscription: ${
-              messageRef.current?.innerText
-            }🪦\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
-          />
-          <Button
-            onClick={() => {
-              showDeathDialog(false);
-              setDeathMessage(null);
-              setAdventurer(NullAdventurer);
-            }}
-            className="z-10"
-          >
-            Play Again
-          </Button>
+                <span className="flex flex-col gap-2 text-lg sm:text-4xl">
+                  <span className="text-terminal-yellow">
+                    {getDeathMessageByRank(rank!)}
+                  </span>{" "}
+                  <span className="text-4xl">
+                    <span className="text-terminal-yellow">
+                      {adventurer?.name}
+                    </span>{" "}
+                    died{" "}
+                    <span className="text-terminal-yellow">
+                      {getOrdinalSuffix(rank! ?? 0)}
+                    </span>{" "}
+                    with{" "}
+                    <span className="text-terminal-yellow">
+                      {adventurer?.xp} XP
+                    </span>
+                  </span>
+                </span>
+                <span className="sm:text-2xl">
+                  Share your score. Continue the journey with another
+                  adventurer.
+                </span>
+              </div>
+              <TwitterShareButton
+                text={`RIP ${adventurer?.name}, who died at ${getOrdinalSuffix(
+                  rank! ?? 0
+                )} place on #LootSurvivor.\n\nGravestone bears the inscription: "${
+                  messageRef.current?.innerText
+                }"🪦\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+              />
+              <Button
+                onClick={() => {
+                  showDeathDialog(false);
+                  setDeathMessage(null);
+                  setAdventurer(NullAdventurer);
+                }}
+                className="z-10"
+              >
+                Play Again
+              </Button>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </>
   );
 };
