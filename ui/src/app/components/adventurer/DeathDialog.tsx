@@ -16,8 +16,7 @@ import { getDeathMessageByRank } from "../../lib/utils";
 import Image from "next/image";
 
 export const DeathDialog = () => {
-  // const [rank, setRank] = useState<number | null>(null);
-  const rank = 1;
+  const [rank, setRank] = useState<number | null>(null);
   const deathMessage = useLoadingStore((state) => state.deathMessage);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -48,7 +47,7 @@ export const DeathDialog = () => {
           adventurer?.id ?? 0,
           sortedAdventurersByXP?.adventurers ?? []
         );
-        // setRank(rank + 1);
+        setRank(rank + 1);
       })
       .catch((error) => console.error("Error refetching data:", error));
   }, []);
