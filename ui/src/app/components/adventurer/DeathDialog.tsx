@@ -76,7 +76,7 @@ export const DeathDialog = () => {
                       NEW HIGH SCORE
                     </h1>
                   ) : (
-                    <h1 className="text-6xl animate-pulseFast">TOP 3 SCORE</h1>
+                    <h1 className="text-6xl animate-pulseFast">TOP 3 SCORES</h1>
                   ))}
                 {rank! <= 50 ? (
                   <GlitchEffect />
