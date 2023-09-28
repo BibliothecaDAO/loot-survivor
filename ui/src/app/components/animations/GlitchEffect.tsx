@@ -31,7 +31,7 @@ const GlitchEffect: React.FC = () => {
   return (
     <div
       ref={textRef}
-      className="glitch text-red-500"
+      className="glitch text-red-500 text-4xl sm:text-6xl"
       data-text="YOU DIED!"
       style={
         {

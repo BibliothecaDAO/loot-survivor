@@ -32,14 +32,21 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
         if (AdventurerHealthExists) {
           return (
             <span className="flex flex-row items-center justify-between">
-              <p>YIKES! Ambushed by a {beastName}</p>
+              <p>
+                YIKES! Ambushed by a {beastName} for {discoveryData.damageTaken}{" "}
+                damage to {discoveryData.damageLocation}{" "}
+              </p>
               <GiBruteIcon />
             </span>
           );
         } else {
           return (
             <span className="flex flex-row items-center justify-between">
-              <p>YIKES! Killed by a {beastName} from an ambush</p>
+              <p>
+                YIKES! Killed by a {beastName} from an ambush of{" "}
+                {discoveryData.damageTaken} damage to{" "}
+                {discoveryData.damageLocation}
+              </p>
               <SkullCrossedBonesIcon />
             </span>
           );

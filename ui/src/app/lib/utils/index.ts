@@ -12,6 +12,7 @@ import {
   potionBasePrice,
 } from "../constants";
 import { z } from "zod";
+import { deathMessages } from "../constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -353,3 +354,14 @@ export const uint256Schema = z.object({
 export const balanceSchema = z.object({
   balance: uint256Schema,
 });
+
+export function getDeathMessageByRank(rank: number): string {
+  // The || {} is to prevent destructure error in case find returns undefined
+  if (rank === 0) {
+    return "Better luck next time - You can improve!";
+  }
+
+  const { message } = deathMessages.find((item) => rank <= item.rank) || {};
+
+  return message || "Better luck next time - You can improve!";
+}

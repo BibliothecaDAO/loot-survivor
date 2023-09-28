@@ -1,7 +1,5 @@
 .glitch {
     position       : relative;
-    font-size      : 100px;
-    color          : white;
     --clip-top     : 0%;
     --clip-bottom  : 100%;
     --anim-duration: 0ms;
