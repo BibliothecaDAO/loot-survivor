@@ -73,7 +73,7 @@ impl BagPacking of Packing<Bag> {
         }
     }
 
-    // TODO: add overflow pack protection
+    // Not used for bag
     fn overflow_pack_protection(self: Bag) -> Bag {
         self
     }
