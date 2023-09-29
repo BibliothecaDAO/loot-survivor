@@ -305,7 +305,7 @@ export default function InventoryScreen() {
             <span className="flex flex-row justify-between">
               <h4 className="m-0">{selected} Loot</h4>{" "}
               <span className="flex text-lg items-center sm:text-3xl">
-                <BagIcon className="self-center w-4 h-4 fill-current" />{" "}
+                <BagIcon className="self-center w-6 h-6 fill-current" />{" "}
                 {`${items.length}/${19}`}
               </span>
             </span>

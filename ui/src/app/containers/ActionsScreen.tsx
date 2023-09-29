@@ -1,11 +1,10 @@
 import { useState } from "react";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
-import VerticalKeyboardControl from "../components/menu/VerticalMenu";
+import ButtonMenu from "../components/menu/ButtonMenu";
 import Info from "../components/adventurer/Info";
 import Discovery from "../components/actions/Discovery";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import { MistIcon } from "../components/icons/Icons";
 import BeastScreen from "./BeastScreen";
 import MazeLoader from "../components/icons/MazeLoader";
 import useUIStore from "../hooks/useUIStore";
@@ -42,7 +41,6 @@ export default function ActionsScreen({
     {
       id: 1,
       label: loading ? "Exploring..." : hasBeast ? "Beast found!!" : "Explore",
-      icon: <MistIcon />,
       value: "explore",
       action: async () => {
         resetNotification();
@@ -58,7 +56,6 @@ export default function ActionsScreen({
         : hasBeast
         ? "Beast found!!"
         : "Till Beast",
-      icon: <MistIcon />,
       value: "explore",
       action: async () => {
         resetNotification();
@@ -93,7 +90,7 @@ export default function ActionsScreen({
           <div className="flex flex-col items-center sm:w-1/3 m-auto my-4 w-full px-4 sm:order-1">
             {loading && <MazeLoader />}
             <p className="uppercase text-2xl">Into the Mist</p>
-            <VerticalKeyboardControl
+            <ButtonMenu
               buttonsData={buttonsData}
               onSelected={(value) => setSelected(value)}
               onEnterAction={true}

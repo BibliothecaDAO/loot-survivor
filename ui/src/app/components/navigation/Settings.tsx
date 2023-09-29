@@ -1,6 +1,6 @@
-import VerticalKeyboardControl from "../menu//VerticalMenu";
-import { MuteIcon, VolumeIcon, LedgerIcon } from "../icons/Icons";
-import { ChatIcon } from "../icons/Icons";
+import Menu from "../menu/ButtonMenu";
+import { SoundOnIcon, SoundOffIcon, LedgerIcon } from "../icons/Icons";
+import { DiscordIcon } from "../icons/Icons";
 import useUIStore from "../../hooks/useUIStore";
 import { displayAddress } from "@/app/lib/utils";
 import { useConnectors } from "@starknet-react/core";
@@ -27,47 +27,20 @@ export default function Settings() {
       icon: <LedgerIcon />,
       action: () => setDisplayHistory(!displayHistory),
     },
-    // {
-    //   id: 2,
-    //   label: "Encounters",
-    //   icon: <EncountersIcon />,
-    //   action: () => setScreen("encounters"),
-    // },
-    // {
-    //   id: 3,
-    //   label: "Guide",
-    //   icon: <GuideIcon />,
-    //   action: () => setScreen("guide"),
-    // },
-    //   <Button
-    //   onClick={() => {
-    //     setIsMuted(!isMuted);
-    //     clickPlay();
-    //   }}
-    //   className="hidden sm:block"
-    // >
-    //   <div className="flex items-center justify-center">
-    //     {isMuted ? (
-    //       <MuteIcon className="w-4 h-4 sm:w-6 sm:h-6" />
-    //     ) : (
-    //       <VolumeIcon className="w-4 h-4 sm:w-6 sm:h-6" />
-    //     )}
-    //   </div>
-    // </Button>
     {
       id: 3,
       label: isMuted ? "Unmute" : "Mute",
       icon: isMuted ? (
-        <VolumeIcon className="w-6 h-6" />
+        <SoundOnIcon className="fill-current" />
       ) : (
-        <MuteIcon className="w-6 h-6" />
+        <SoundOffIcon className="fill-current" />
       ),
       action: () => setIsMuted(!isMuted),
     },
     {
       id: 4,
       label: "Discord",
-      icon: <ChatIcon />,
+      icon: <DiscordIcon className="fill-current" />,
       action: () => window.open("https://discord.gg/bibliothecadao", "_blank"),
     },
     {
@@ -86,18 +59,12 @@ export default function Settings() {
   return (
     <div className="flex flex-row  flex-wrap">
       <div className="flex flex-col sm:w-1/3 m-auto my-4 w-full px-8">
-        <VerticalKeyboardControl
+        <Menu
           buttonsData={buttonsData}
           onSelected={(value) => null}
           onEnterAction={true}
+          className="flex-col"
         />
-        {/* <a
-          href="https://discord.gg/bibliothecadao"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Button>Discord</Button>
-        </a> */}
       </div>
     </div>
   );

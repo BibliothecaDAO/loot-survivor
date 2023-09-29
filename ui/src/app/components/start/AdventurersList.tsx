@@ -103,9 +103,7 @@ export const AdventurersList = ({
                 <div className="flex flex-row items-center text-center gap-5">
                   <p>{`${adventurer.name} - ${adventurer.id}`}</p>
                   {adventurer?.health === 0 && (
-                    <div className="w-4">
-                      <SkullIcon />
-                    </div>
+                    <SkullIcon className="w-3 fill-current" />
                   )}
                 </div>
               </Button>

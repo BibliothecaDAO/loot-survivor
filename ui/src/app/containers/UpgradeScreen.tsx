@@ -7,7 +7,7 @@ import {
   getPotionPrice,
 } from "../lib/utils";
 import { GameData } from "../components/GameData";
-import VerticalKeyboardControl from "../components/menu/VerticalMenu";
+import ButtonMenu from "../components/menu/ButtonMenu";
 import useLoadingStore from "../hooks/useLoadingStore";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
@@ -140,7 +140,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
     );
   }
 
-  function renderVerticalKeyboardControl() {
+  function renderButtonMenu() {
     const upgradeMenu = [
       {
         id: 1,
@@ -193,7 +193,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
     ];
     return (
       <div className="order-2 sm:order-1 sm:w-1/3 sm:border-r sm:border-terminal-green">
-        <VerticalKeyboardControl
+        <ButtonMenu
           buttonsData={upgradeMenu}
           onSelected={setSelected}
           onEnterAction={true}
@@ -449,7 +449,7 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
                     <div className="flex flex-col sm:gap-2 items-center w-full">
                       <div className="flex flex-col gap-0 sm:flex-row w-full border-terminal-green border sm:items-center">
                         {renderContent()}
-                        {renderVerticalKeyboardControl()}
+                        {renderButtonMenu()}
                       </div>
                     </div>
                   )}

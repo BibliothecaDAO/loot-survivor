@@ -84,7 +84,7 @@ export default function LeaderboardScreen() {
           setData("adventurersByXPQuery", sortedAdventurersByXP);
         }}
       >
-        <RefreshIcon className="w-8 h-8" />
+        <RefreshIcon className="w-8" />
       </Button>
       <div className="flex flex-row w-full">
         <div

@@ -5,13 +5,9 @@ import { GiCurvyKnife } from "react-icons/gi";
 import { GiWoodClub } from "react-icons/gi";
 import { BsMagic } from "react-icons/bs";
 import { IoMdSwap } from "react-icons/io";
-import { IoMdRefresh } from "react-icons/io";
-import { ImVolumeHigh } from "react-icons/im";
-import { ImVolumeMute2 } from "react-icons/im";
 import { GiSwapBag } from "react-icons/gi";
 import { GiSpikedWall } from "react-icons/gi";
 import { GiSkullCrossedBones } from "react-icons/gi";
-import { GiDeathSkull } from "react-icons/gi";
 import { GiHealthPotion } from "react-icons/gi";
 import { GiTwoCoins } from "react-icons/gi";
 import { GiStarsStack } from "react-icons/gi";
@@ -22,17 +18,14 @@ import { GiFootTrip } from "react-icons/gi";
 import { GiBrute } from "react-icons/gi";
 import { GiBattleGear } from "react-icons/gi";
 import { GiPowderBag } from "react-icons/gi";
-import { RiShoppingCartFill } from "react-icons/ri";
 import { TbArrowBigRight } from "react-icons/tb";
 import { TbArrowBigDownFilled } from "react-icons/tb";
-import { MdToken } from "react-icons/md";
 
 import HealthPotions from "../../../../public/icons/health-potions.svg";
 import Twitter from "../../../../public/icons/twitter.svg";
 import Trophy from "../../../../public/icons/trophy.svg";
 import Mist from "../../../../public/icons/mist.svg";
-import Cog from "../../../../public/icons/cog.svg";
-import Controller from "../../../../public/icons/controller.svg";
+import Profile from "../../../../public/icons/profile.svg";
 import Attack from "../../../../public/icons/attack.svg";
 import Flag from "../../../../public/icons/flag.svg";
 import Ledger from "../../../../public/icons/ledger.svg";
@@ -58,6 +51,11 @@ import Arrow from "../../../../public/icons/arrow.svg";
 import Github from "../../../../public/icons/github.svg";
 import Arcade from "../../../../public/icons/arcade.svg";
 import QuestionMark from "../../../../public/icons/question-mark.svg";
+import SoundOn from "../../../../public/icons/sound_on.svg";
+import SoundOff from "../../../../public/icons/sound_off.svg";
+import Discord from "../../../../public/icons/discord.svg";
+import Refresh from "../../../../public/icons/refresh.svg";
+import Settings from "../../../../public/icons/settings.svg";
 
 const ClothIcon = GiRolledCloth;
 const HideIcon = GiAnimalHide;
@@ -66,13 +64,12 @@ const BladeIcon = GiCurvyKnife;
 const BludgeonIcon = GiWoodClub;
 const MagicIcon = BsMagic;
 const SwapIcon = IoMdSwap;
-const RefreshIcon = IoMdRefresh;
-const VolumeIcon = ImVolumeHigh;
-const MuteIcon = ImVolumeMute2;
+const RefreshIcon = Refresh;
+const SoundOnIcon = SoundOn;
+const SoundOffIcon = SoundOff;
 const LootBagIcon = GiSwapBag;
 const SpikedWallIcon = GiSpikedWall;
 const SkullCrossedBonesIcon = GiSkullCrossedBones;
-const DeathSkullIcon = GiDeathSkull;
 const HealthPotionIcon = GiHealthPotion;
 const TwoCoinIcon = GiTwoCoins;
 const GiStarsStackIcon = GiStarsStack;
@@ -83,15 +80,13 @@ const GiFootTripIcon = GiFootTrip;
 const GiBruteIcon = GiBrute;
 const GiBattleGearIcon = GiBattleGear;
 const PowderBagIcon = GiPowderBag;
-const CartIconSimple = RiShoppingCartFill;
 const RightArrowIcon = TbArrowBigRight;
 const DownArrowIcon = TbArrowBigDownFilled;
 const HealthPotionsIcon = HealthPotions;
 const TwitterIcon = Twitter;
 const TrophyIcon = Trophy;
 const MistIcon = Mist;
-const CogIcon = Cog;
-const ControllerIcon = Controller;
+const ProfileIcon = Profile;
 const AttackIcon = Attack;
 const FlagIcon = Flag;
 const LedgerIcon = Ledger;
@@ -116,10 +111,10 @@ const DoubleArrowIcon = DoubleArrow;
 const ArrowIcon = Arrow;
 
 const GithubIcon = Github;
+const DiscordIcon = Discord;
 const ArcadeIcon = Arcade;
 const QuestionMarkIcon = QuestionMark;
-
-const MdTokenIcon = MdToken;
+const SettingsIcon = Settings;
 
 export {
   ClothIcon,
@@ -133,7 +128,6 @@ export {
   LootBagIcon,
   SpikedWallIcon,
   SkullCrossedBonesIcon,
-  DeathSkullIcon,
   HealthPotionIcon,
   TwoCoinIcon,
   GiStarsStackIcon,
@@ -144,17 +138,16 @@ export {
   GiBruteIcon,
   GiBattleGearIcon,
   PowderBagIcon,
-  CartIconSimple,
   RightArrowIcon,
   DownArrowIcon,
   HealthPotionsIcon,
   TwitterIcon,
-  VolumeIcon,
-  MuteIcon,
+  SoundOnIcon,
+  SoundOffIcon,
   TrophyIcon,
   MistIcon,
-  CogIcon,
-  ControllerIcon,
+  SettingsIcon,
+  ProfileIcon,
   AttackIcon,
   FlagIcon,
   LedgerIcon,
@@ -178,7 +171,7 @@ export {
   DoubleArrowIcon,
   ArrowIcon,
   GithubIcon,
+  DiscordIcon,
   ArcadeIcon,
   QuestionMarkIcon,
-  MdTokenIcon,
 };

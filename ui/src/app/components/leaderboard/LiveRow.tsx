@@ -1,6 +1,6 @@
 import { Adventurer } from "@/app/types";
 import { useUiSounds, soundSelector } from "@/app/hooks/useUiSound";
-import { CoinIcon, DeathSkullIcon } from "../icons/Icons";
+import { CoinIcon, SkullIcon } from "../icons/Icons";
 import { useContracts } from "@/app/hooks/useContracts";
 import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { Button } from "../buttons/Button";
@@ -122,7 +122,7 @@ const LiveLeaderboardRow = ({
             !adventurer?.id
           }
         >
-          <DeathSkullIcon />
+          <SkullIcon className="w-3" />
         </Button>
       </td>
     </tr>
