@@ -378,7 +378,7 @@ export default function Home() {
             )}
             <div className="flex flex-row justify-between px-1  ">
               <div className="flex flex-row items-center gap-2 sm:gap-5">
-                <Logo className="fill-current w-24 sm:w-64" />
+                <Logo className="fill-current w-24 md:w-32 xl:w-40 2xl:w-64" />
               </div>
               <div className="flex flex-row items-center self-end sm:gap-1 space-x-1 self-center">
                 {adventurer?.id && (
