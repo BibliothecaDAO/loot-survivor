@@ -66,6 +66,7 @@ import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
 import { syscalls } from "./lib/utils/syscalls";
 import { useContracts } from "./hooks/useContracts";
 import { useBalance } from "@starknet-react/core";
+import { ArcadeIntro } from "./components/intro/ArcadeIntro";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -120,6 +121,8 @@ export default function Home() {
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
+  const arcadeIntro = useUIStore((state) => state.arcadeIntro);
+  const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
   const topUpDialog = useUIStore((state) => state.topUpDialog);
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
@@ -402,7 +405,7 @@ export default function Home() {
                 <Button
                   size={"xs"}
                   variant={"outline"}
-                  onClick={() => showArcadeDialog(!arcadeDialog)}
+                  onClick={() => showArcadeIntro(!arcadeIntro)}
                   disabled={isWrongNetwork}
                 >
                   <MdTokenIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
@@ -509,7 +512,7 @@ export default function Home() {
           <NotificationDisplay />
 
           {deathDialog && <DeathDialog />}
-
+          {status == "connected" && arcadeIntro && <ArcadeIntro />}
           {status == "connected" && arcadeDialog && <ArcadeDialog />}
           {status == "connected" && topUpDialog && <TopUpDialog />}
 
