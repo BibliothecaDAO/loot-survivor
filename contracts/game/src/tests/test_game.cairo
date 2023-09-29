@@ -608,7 +608,9 @@ mod tests {
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
 
         // go exploring
-        testing::set_block_number(1006);
+        testing::set_block_number(1008);
+        game.explore(ADVENTURER_ID, true);
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
         game.explore(ADVENTURER_ID, true);
 
         // verify we found a beast
@@ -1360,10 +1362,11 @@ mod tests {
 
     #[test]
     #[available_gas(20000000)]
-    fn test_entropy() {
+    fn test_get_game_entropy() {
         let mut game = new_adventurer(1000);
-
-        game.get_entropy();
+        let game_entropy = game.get_game_entropy();
+        assert(game_entropy.entropy == 0x612220ba39bfbf46a1851365c9bd0a8a, 'wrong game entropy');
+        assert(game_entropy.last_updated == 0x3e8, 'wrong game entropy last update');
     }
 
     #[test]

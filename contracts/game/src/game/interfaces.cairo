@@ -5,6 +5,7 @@ use survivor::{
     bag::Bag, adventurer::{Adventurer, Stats}, adventurer_meta::AdventurerMetadata,
     item_meta::{ItemSpecials, ItemSpecialsStorage}
 };
+use game::game::game_entropy::{GameEntropy};
 
 
 #[starknet::interface]
@@ -109,5 +110,5 @@ trait IGame<TContractState> {
     fn owner_of(self: @TContractState, adventurer_id: u256) -> ContractAddress;
     fn get_dao_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;
-    fn get_entropy(self: @TContractState) -> u64;
+    fn get_game_entropy(self: @TContractState) -> GameEntropy;
 }

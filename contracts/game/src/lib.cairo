@@ -1,6 +1,7 @@
 mod game {
     mod constants;
     mod interfaces;
+    mod game_entropy;
 }
 mod tests {
     mod test_game;
@@ -37,7 +38,8 @@ mod Game {
             REWARD_DISTRIBUTIONS_PHASE3, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
             STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS, IDLE_DEATH_PENALTY_BLOCKS,
             MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE, MINIMUM_DAMAGE_FROM_BEASTS
-        }
+        },
+        game_entropy::{GameEntropy}
     };
     use lootitems::{
         loot::{ILoot, Loot, ImplLoot}, constants::{ItemId, NamePrefixLength, NameSuffixLength}
@@ -69,8 +71,7 @@ mod Game {
 
     #[storage]
     struct Storage {
-        _game_entropy: u64,
-        _last_game_entropy_block: felt252,
+        _game_entropy: felt252,
         _adventurer: LegacyMap::<u256, felt252>,
         _owner: LegacyMap::<u256, ContractAddress>,
         _adventurer_meta: LegacyMap::<u256, felt252>,
@@ -174,9 +175,6 @@ mod Game {
                 @self, adventurer_id
             );
 
-            let adventurer_entropy = _adventurer_meta_unpacked(@self, adventurer_id).entropy;
-            let game_entropy = _get_game_entropy(@self).into();
-
             // use an immutable adventurer for assertions
             let immutable_adventurer = adventurer.clone();
 
@@ -185,6 +183,11 @@ mod Game {
             _assert_not_dead(immutable_adventurer);
             _assert_no_stat_upgrades_available(immutable_adventurer);
             _assert_not_in_battle(immutable_adventurer);
+
+            // get adventurer and game entropy
+            let (adventurer_entropy, game_entropy) = _get_adventurer_and_game_entropy(
+                @self, adventurer_id
+            );
 
             // get number of blocks between actions
             let (idle, num_blocks) = _is_idle(immutable_adventurer);
@@ -237,16 +240,13 @@ mod Game {
 
             // process attack or apply idle penalty
             if !idle {
-                // get adventurer entropy from storage
-                let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
-                    .entropy
-                    .into();
+                // get adventurer and game entropy
+                let (adventurer_entropy, game_entropy) = _get_adventurer_and_game_entropy(
+                    @self, adventurer_id
+                );
 
                 // get weapon specials
                 let weapon_specials = _get_item_specials(@self, adventurer_id, adventurer.weapon);
-
-                // get game entropy from storage
-                let game_entropy: u128 = _get_game_entropy(@self).into();
 
                 // get beast and beast seed
                 let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
@@ -329,7 +329,7 @@ mod Game {
                     ref adventurer,
                     adventurer_id,
                     adventurer_entropy,
-                    game_entropy.into(),
+                    game_entropy,
                     beast_seed,
                     beast,
                     to_the_death
@@ -376,47 +376,42 @@ mod Game {
             // equip items, passing in items as a clone so we can maintain ownership of original for event
             _equip_items(ref self, ref adventurer, ref bag, adventurer_id, items.clone(), false);
 
-            // if the adventurer is equipping an item during battle
+            // if the adventurer is equipping an item during battle, the beast will counter attack
             if (adventurer.in_battle()) {
-                // the beast counter attacks
-
+                // get adventurer and game entropy
                 let (adventurer_entropy, game_entropy) = _get_adventurer_and_game_entropy(
                     @self, adventurer_id
                 );
 
+                // get beast and beast seed
                 let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
 
-                let (attack_rnd_1, attack_rnd_2) = AdventurerUtils::get_randomness(
+                // get two random numbers
+                let (rnd1, rnd2) = AdventurerUtils::get_randomness(
                     adventurer.xp, adventurer_entropy, game_entropy.into()
                 );
 
+                // process beast attack
                 let beast_battle_details = _beast_attack(
-                    ref self,
-                    ref adventurer,
-                    adventurer_id,
-                    beast,
-                    beast_seed,
-                    attack_rnd_1,
-                    attack_rnd_2,
+                    ref self, ref adventurer, adventurer_id, beast, beast_seed, rnd1, rnd2,
                 );
 
                 // emit event
                 __event_AttackedByBeast(ref self, adventurer, adventurer_id, beast_battle_details);
 
-                // if adventurer died from counter attack
+                // if adventurer died from counter attack, process death
                 if (adventurer.health == 0) {
                     _process_adventurer_death(ref self, adventurer, adventurer_id, beast.id, 0);
                 }
             }
 
-            // remove stats, pack, and save adventurer 
+            // pack and save adventurer 
             _pack_adventurer_remove_stat_boost(
                 ref self, ref adventurer, adventurer_id, stat_boosts
             );
 
-            // if the bag was mutated
+            // if the bag was mutated, pack and save it
             if bag.mutated {
-                // pack and save it
                 _pack_bag(ref self, adventurer_id, bag);
             }
         }
@@ -442,17 +437,15 @@ mod Game {
             // drop items
             _drop(ref self, ref adventurer, ref bag, adventurer_id, items.clone());
 
-            // if the adventurer was mutated
+            // if the adventurer was mutated, pack and save it
             if (adventurer.mutated) {
-                // pack and save it
                 _pack_adventurer_remove_stat_boost(
                     ref self, ref adventurer, adventurer_id, stat_boosts
                 );
             }
 
-            // if the bag was mutated
+            // if the bag was mutated, pack and save it
             if (bag.mutated) {
-                // pack and save it
                 _pack_bag(ref self, adventurer_id, bag);
             }
 
@@ -492,9 +485,8 @@ mod Game {
             // get number of blocks between actions
             let (idle, num_blocks) = _is_idle(immutable_adventurer);
 
-            // if adventurer exceeded idle penalty threshold
+            // if adventurer exceeded idle penalty threshold, apply penalty and return
             if idle {
-                // apply penalty and return
                 _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
                 return;
             }
@@ -510,9 +502,8 @@ mod Game {
                 _buy_potions(ref self, ref adventurer, adventurer_id, potions);
             }
 
-            // if the player is buying items as part of the upgrade
+            // if the player is buying items, process purchases
             if (items.len() != 0) {
-                // process item purchases
                 _buy_items(
                     ref self,
                     ref adventurer,
@@ -579,7 +570,7 @@ mod Game {
             _unpack_adventurer(self, adventurer_id)
         }
         fn get_adventurer_meta(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
-            _adventurer_meta_unpacked(self, adventurer_id)
+            _unpack_adventurer_meta(self, adventurer_id)
         }
         fn get_bag(self: @ContractState, adventurer_id: u256) -> Bag {
             _unpacked_bag(self, adventurer_id)
@@ -619,7 +610,7 @@ mod Game {
         fn get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _assert_upgrades_available(adventurer);
-            let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
+            let adventurer_entropy: u128 = _unpack_adventurer_meta(self, adventurer_id)
                 .entropy
                 .into();
             _get_items_on_market(
@@ -631,7 +622,7 @@ mod Game {
         ) -> Array<u8> {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _assert_upgrades_available(adventurer);
-            let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
+            let adventurer_entropy: u128 = _unpack_adventurer_meta(self, adventurer_id)
                 .entropy
                 .into();
             _get_items_on_market_by_slot(
@@ -647,7 +638,7 @@ mod Game {
         ) -> Array<u8> {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _assert_upgrades_available(adventurer);
-            let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
+            let adventurer_entropy: u128 = _unpack_adventurer_meta(self, adventurer_id)
                 .entropy
                 .into();
 
@@ -828,8 +819,8 @@ mod Game {
         fn get_lords_address(self: @ContractState) -> ContractAddress {
             _lords_address(self)
         }
-        fn get_entropy(self: @ContractState) -> u64 {
-            _get_game_entropy(self)
+        fn get_game_entropy(self: @ContractState) -> GameEntropy {
+            _unpack_game_entropy(self)
         }
         fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
             _owner_of(self, adventurer_id)
@@ -1850,17 +1841,14 @@ mod Game {
         items_to_purchase: Array<ItemPurchase>,
     ) {
         // get adventurer entropy
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
-            .entropy
-            .into();
-
-        let mut purchases = ArrayTrait::<LootWithPrice>::new();
+        let adventurer_entropy: u128 = _unpack_adventurer_meta(@self, adventurer_id).entropy.into();
 
         // mutable array for returning items that need to be equipped as part of this purchase
         let mut unequipped_items = ArrayTrait::<u8>::new();
         let mut items_to_equip = ArrayTrait::<u8>::new();
 
-        // for each item being purchased
+        // iterate over item ids to purchase and store results in purchases array
+        let mut purchases = ArrayTrait::<LootWithPrice>::new();
         let mut item_number: u32 = 0;
         loop {
             if item_number == items_to_purchase.len() {
@@ -2045,6 +2033,33 @@ mod Game {
         self._adventurer.write(adventurer_id, adventurer.pack());
     }
 
+    #[inline(always)]
+    fn _unpacked_bag(self: @ContractState, adventurer_id: u256) -> Bag {
+        Packing::unpack(self._bag.read(adventurer_id))
+    }
+    #[inline(always)]
+    fn _pack_bag(ref self: ContractState, adventurer_id: u256, bag: Bag) {
+        self._bag.write(adventurer_id, bag.pack());
+    }
+    #[inline(always)]
+    fn _unpack_adventurer_meta(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
+        Packing::unpack(self._adventurer_meta.read(adventurer_id))
+    }
+    #[inline(always)]
+    fn _pack_adventurer_meta(
+        ref self: ContractState, adventurer_id: u256, adventurer_meta: AdventurerMetadata
+    ) {
+        self._adventurer_meta.write(adventurer_id, adventurer_meta.pack());
+    }
+    #[inline(always)]
+    fn _unpack_game_entropy(self: @ContractState) -> GameEntropy {
+        Packing::unpack(self._game_entropy.read())
+    }
+    #[inline(always)]
+    fn _pack_game_entropy(ref self: ContractState, game_entropy: GameEntropy) {
+        self._game_entropy.write(game_entropy.pack());
+    }
+
     /// @title Internal Rotate Game Entropy Function
     ///
     /// @notice Rotates the game's entropy based on the current block information.
@@ -2054,21 +2069,25 @@ mod Game {
         let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
         let timestamp: u64 = starknet::get_block_info().unbox().block_timestamp.into();
 
+        // assert game entropy is eligible to be rotated
         assert(
-            blocknumber >= (self._last_game_entropy_block.read().try_into().unwrap()
+            blocknumber >= (_unpack_game_entropy(@self).last_updated
                 + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()),
             messages::BLOCK_NUMBER_ERROR
         );
 
+        // generate new game entropy using timestamp and block number
         let mut hash_span = ArrayTrait::<felt252>::new();
-        hash_span.append(blocknumber.into());
         hash_span.append(timestamp.into());
-
+        hash_span.append(blocknumber.into());
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
-        let (d, r) = rshift_split(poseidon.into(), U64_MAX.into());
+        let (_, entropy) = rshift_split(poseidon.into(), U128_MAX.into());
 
-        self._game_entropy.write(r.try_into().unwrap());
-        self._last_game_entropy_block.write(blocknumber.into());
+        // set new game entropy and block number of update
+        let updated_game_entropy = GameEntropy {
+            entropy: entropy.try_into().unwrap(), last_updated: blocknumber
+        };
+        _pack_game_entropy(ref self, updated_game_entropy);
     }
 
     // @notice This function emits events relevant to adventurer leveling up
@@ -2088,9 +2107,7 @@ mod Game {
         let adventurer_state = AdventurerState {
             owner: get_caller_address(), adventurer_id, adventurer
         };
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(@self, adventurer_id)
-            .entropy
-            .into();
+        let adventurer_entropy: u128 = _unpack_adventurer_meta(@self, adventurer_id).entropy.into();
 
         // emit level up event
         if (new_level > previous_level) {
@@ -2102,20 +2119,6 @@ mod Game {
         );
 
         __event_UpgradesAvailable(ref self, adventurer_state, available_items);
-    }
-    #[inline(always)]
-    fn _unpacked_bag(self: @ContractState, adventurer_id: u256) -> Bag {
-        Packing::unpack(self._bag.read(adventurer_id))
-    }
-    #[inline(always)]
-    fn _pack_bag(ref self: ContractState, adventurer_id: u256, bag: Bag) {
-        self._bag.write(adventurer_id, bag.pack());
-    }
-    #[inline(always)]
-    fn _pack_adventurer_meta(
-        ref self: ContractState, adventurer_id: u256, adventurer_meta: AdventurerMetadata
-    ) {
-        self._adventurer_meta.write(adventurer_id, adventurer_meta.pack());
     }
 
     #[inline(always)]
@@ -2166,7 +2169,7 @@ mod Game {
     }
     #[inline(always)]
     fn _next_game_entropy_rotation(self: @ContractState) -> felt252 {
-        self._last_game_entropy_block.read() + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()
+        _unpack_game_entropy(self).last_updated.into() + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()
     }
     fn _assert_ownership(self: @ContractState, adventurer_id: u256) {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
@@ -2355,9 +2358,7 @@ mod Game {
         assert(adventurer.beast_health != 0, messages::NOT_IN_BATTLE);
 
         // get adventurer entropy
-        let adventurer_entropy: u128 = _adventurer_meta_unpacked(self, adventurer_id)
-            .entropy
-            .into();
+        let adventurer_entropy: u128 = _unpack_adventurer_meta(self, adventurer_id).entropy.into();
 
         // get beast and beast seed
         let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
@@ -2428,13 +2429,8 @@ mod Game {
     }
 
     #[inline(always)]
-    fn _get_game_entropy(self: @ContractState) -> u64 {
-        self._game_entropy.read()
-    }
-
-    #[inline(always)]
     fn _get_adventurer_entropy(self: @ContractState, adventurer_id: u256) -> u128 {
-        _adventurer_meta_unpacked(self, adventurer_id).entropy.into()
+        _unpack_adventurer_meta(self, adventurer_id).entropy
     }
 
     // @notice _get_adventurer_and_game_entropy returns the adventurer entropy and game entropy
@@ -2442,13 +2438,8 @@ mod Game {
     // @param adventurer_id - the id of the adventurer
     // @return (u128, u64) - adventurer entropy and game entropy
     #[inline(always)]
-    fn _get_adventurer_and_game_entropy(self: @ContractState, adventurer_id: u256) -> (u128, u64) {
-        (_get_adventurer_entropy(self, adventurer_id), _get_game_entropy(self))
-    }
-
-    #[inline(always)]
-    fn _adventurer_meta_unpacked(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
-        Packing::unpack(self._adventurer_meta.read(adventurer_id))
+    fn _get_adventurer_and_game_entropy(self: @ContractState, adventurer_id: u256) -> (u128, u128) {
+        (_get_adventurer_entropy(self, adventurer_id), _unpack_game_entropy(self).entropy)
     }
 
     #[inline(always)]
