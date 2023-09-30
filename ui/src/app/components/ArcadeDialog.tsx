@@ -26,12 +26,6 @@ import { MIN_BALANCE } from "../lib/constants";
 const MAX_RETRIES = 10;
 const RETRY_DELAY = 2000; // 2 seconds
 
-const provider = new Provider({
-  sequencer: {
-    baseUrl: "https://alpha4.starknet.io",
-  },
-});
-
 export const ArcadeDialog = () => {
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
@@ -117,17 +111,17 @@ export const ArcadeDialog = () => {
         <div className="flex justify-center mb-1">
           {((connector?.options as any)?.id == "argentX" ||
             (connector?.options as any)?.id == "braavos") && (
-            <div>
-              <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
-                Note: This will initiate a transfer of 0.001 ETH from your
-                connected wallet to the arcade account to cover your transaction
-                costs from normal gameplay.
-              </p>
-              <Button onClick={() => create()} disabled={isWrongNetwork}>
-                create arcade account
-              </Button>
-            </div>
-          )}
+              <div>
+                <p className="my-2 text-sm sm:text-base text-terminal-yellow p-2 border border-terminal-yellow">
+                  Note: This will initiate a transfer of 0.001 ETH from your
+                  connected wallet to the arcade account to cover your transaction
+                  costs from normal gameplay.
+                </p>
+                <Button onClick={() => create()} disabled={isWrongNetwork}>
+                  create arcade account
+                </Button>
+              </div>
+            )}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 overflow-hidden my-6">
           {arcadeConnectors().map((account, index) => {
@@ -160,8 +154,8 @@ export const ArcadeDialog = () => {
             {isSettingPermissions
               ? "Setting Permissions"
               : isGeneratingNewKey
-              ? "Generating New Key"
-              : "Deploying Account"}
+                ? "Generating New Key"
+                : "Deploying Account"}
           </h3>
         </div>
       )}
@@ -248,23 +242,23 @@ export const ArcadeAccountCard = ({
           {!arcadeConnectors.some(
             (conn) => conn.options.options.id == walletAccount.address
           ) && (
-            <Button
-              variant={"ghost"}
-              onClick={() => {
-                topUp(account.name, walletAccount);
-                getBalance(account.name);
-              }}
-              disabled={isToppingUp}
-            >
-              {isToppingUp ? (
-                <span className="loading-ellipsis">Topping Up</span>
-              ) : (
-                <span className="flex flex-col">
-                  <span>Top Up</span> <span>(0.001Eth)</span>
-                </span>
-              )}
-            </Button>
-          )}
+              <Button
+                variant={"ghost"}
+                onClick={() => {
+                  topUp(account.name, walletAccount);
+                  getBalance(account.name);
+                }}
+                disabled={isToppingUp}
+              >
+                {isToppingUp ? (
+                  <span className="loading-ellipsis">Topping Up</span>
+                ) : (
+                  <span className="flex flex-col">
+                    <span>Top Up</span> <span>(0.001Eth)</span>
+                  </span>
+                )}
+              </Button>
+            )}
         </div>
         <div className="flex flex-row">
           {masterAccountAddress == walletAccount.address && (
