@@ -2069,20 +2069,20 @@ mod Game {
     /// @dev This function checks that the minimum blocks have elapsed since the last rotation before proceeding.
     /// Uses the Poseidon hash function for the entropy generation.
     fn _rotate_game_entropy(ref self: ContractState) {
-        let blocknumber: u64 = starknet::get_block_info().unbox().block_number.into();
-        let timestamp: u64 = starknet::get_block_info().unbox().block_timestamp.into();
+        let block_number: u64 = starknet::get_block_info().unbox().block_number.into();
+        let block_timestamp: u64 = starknet::get_block_info().unbox().block_timestamp.into();
 
         // assert game entropy is eligible to be rotated
         assert(
-            blocknumber >= (_unpack_game_entropy(@self).last_updated
+            block_number >= (_unpack_game_entropy(@self).last_updated_block
                 + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()),
             messages::BLOCK_NUMBER_ERROR
         );
 
         // generate new game entropy using timestamp and block number
         let mut hash_span = ArrayTrait::<felt252>::new();
-        hash_span.append(timestamp.into());
-        hash_span.append(blocknumber.into());
+        hash_span.append(block_timestamp.into());
+        hash_span.append(block_number.into());
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
         let (_, entropy) = integer::U256DivRem::div_rem(
             poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
@@ -2090,7 +2090,9 @@ mod Game {
 
         // set new game entropy and block number of update
         let updated_game_entropy = GameEntropy {
-            entropy: entropy.try_into().unwrap(), last_updated: blocknumber
+            entropy: entropy.try_into().unwrap(),
+            last_updated_block: block_number,
+            last_updated_time: block_timestamp
         };
         _pack_game_entropy(ref self, updated_game_entropy);
     }
@@ -2172,7 +2174,8 @@ mod Game {
     }
     #[inline(always)]
     fn _next_game_entropy_rotation(self: @ContractState) -> felt252 {
-        _unpack_game_entropy(self).last_updated.into() + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()
+        _unpack_game_entropy(self).last_updated_block.into()
+            + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()
     }
     fn _assert_ownership(self: @ContractState, adventurer_id: felt252) {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);

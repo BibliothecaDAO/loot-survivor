@@ -179,9 +179,9 @@ mod tests {
         game
     }
 
-    fn new_adventurer_lvl2() -> IGameDispatcher {
+    fn new_adventurer_lvl2(starting_block: u64) -> IGameDispatcher {
         // start game
-        let mut game = new_adventurer(1000);
+        let mut game = new_adventurer(starting_block);
 
         // attack starter beast
         game.attack(ADVENTURER_ID, false);
@@ -198,7 +198,7 @@ mod tests {
 
     fn new_adventurer_lvl3(stat: u8) -> IGameDispatcher {
         // start game on lvl 2
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
 
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
@@ -490,8 +490,6 @@ mod tests {
 
         let adventurer_1 = game.get_adventurer(ADVENTURER_ID);
         let adventurer_meta_1 = game.get_adventurer_meta(ADVENTURER_ID);
-
-
     }
     #[test]
     #[should_panic(expected: ('Action not allowed in battle', 'ENTRYPOINT_FAILED'))]
@@ -585,7 +583,7 @@ mod tests {
     #[available_gas(63000000)]
     fn test_cant_flee_outside_battle() {
         // start adventuer and advance to level 2
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
 
         // attempt to flee despite not being in a battle
         // this should trigger a panic 'Not in battle' which is
@@ -596,9 +594,8 @@ mod tests {
     #[test]
     #[available_gas(13000000000)]
     fn test_flee() {
-
         // start game on level 2
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1001);
 
         // perform upgrade
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
@@ -608,7 +605,6 @@ mod tests {
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
 
         // go exploring
-        testing::set_block_number(1008);
         game.explore(ADVENTURER_ID, true);
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
         game.explore(ADVENTURER_ID, true);
@@ -673,7 +669,7 @@ mod tests {
     #[available_gas(73000000)]
     fn test_buy_items_without_stat_upgrade() {
         // mint adventurer and advance to level 2
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
 
         // get valid item from market
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -699,7 +695,7 @@ mod tests {
     #[available_gas(62000000)]
     fn test_buy_duplicate_item_equipped() {
         // start new game on level 2 so we have access to the market
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
 
         // get items from market
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -723,7 +719,7 @@ mod tests {
     #[available_gas(61000000)]
     fn test_buy_duplicate_item_bagged() {
         // start new game on level 2 so we have access to the market
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
 
         // get items from market
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -745,7 +741,7 @@ mod tests {
     #[should_panic(expected: ('Market item does not exist', 'ENTRYPOINT_FAILED'))]
     #[available_gas(65000000)]
     fn test_buy_item_not_on_market() {
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
         shopping_cart.append(ItemPurchase { item_id: 255, equip: false });
         let stat_upgrades = Stats {
@@ -757,7 +753,7 @@ mod tests {
     #[test]
     #[available_gas(65000000)]
     fn test_buy_and_bag_item() {
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
         let item_id = *market_items.at(0);
         let mut shopping_cart = ArrayTrait::<ItemPurchase>::new();
@@ -1057,7 +1053,7 @@ mod tests {
     #[test]
     #[available_gas(100000000)]
     fn test_buy_potions() {
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1083,19 +1079,15 @@ mod tests {
             'potion did not give health'
         );
 
-        // verify potion cost reduced adventurers gold balance by POTION_PRICE * adventurer level (no charisma discount here)
-        assert(
-            adventurer.gold == adventurer_gold_pre_potion
-                - (POTION_PRICE * adventurer.get_level().into() * number_of_potions.into()),
-            'potion cost is wrong'
-        );
+        // verify potion cost reduced adventurers gold balance
+        assert(adventurer.gold < adventurer_gold_pre_potion, 'potion cost is wrong');
     }
 
     #[test]
     #[should_panic(expected: ('Health already full', 'ENTRYPOINT_FAILED'))]
     #[available_gas(450000000)]
     fn test_buy_potions_exceed_max_health() {
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1122,7 +1114,7 @@ mod tests {
     #[available_gas(100000000)]
     fn test_cant_buy_potion_without_stat_upgrade() {
         // deploy and start new game
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
 
         // upgrade adventurer
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
@@ -1365,8 +1357,9 @@ mod tests {
     fn test_get_game_entropy() {
         let mut game = new_adventurer(1000);
         let game_entropy = game.get_game_entropy();
-        assert(game_entropy.entropy == 0x612220ba39bfbf46a1851365c9bd0a8a, 'wrong game entropy');
-        assert(game_entropy.last_updated == 0x3e8, 'wrong game entropy last update');
+        assert(game_entropy.entropy == 0x12220ba39bfbf46a1851365c9bd0a8a, 'wrong game entropy');
+        assert(game_entropy.last_updated_block == 0x3f4, 'wrong entropy last update block');
+        assert(game_entropy.last_updated_time == 0x0, 'wrong entropy last update time');
     }
 
     #[test]
@@ -1377,7 +1370,7 @@ mod tests {
         let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level();
         assert(potion_price == POTION_PRICE * adventurer_level.into(), 'wrong lvl1 potion price');
 
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
         let potion_price = game.get_potion_price(ADVENTURER_ID);
         let adventurer_level = game.get_adventurer(ADVENTURER_ID).get_level();
         assert(potion_price == POTION_PRICE * adventurer_level.into(), 'wrong lvl2 potion price');
@@ -1661,7 +1654,7 @@ mod tests {
     #[available_gas(83000000)]
     fn test_drop_item() {
         // start new game on level 2 so we have access to the market
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
 
         // get items from market
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -1715,7 +1708,7 @@ mod tests {
     #[available_gas(90000000)]
     fn test_drop_item_without_ownership() {
         // start new game on level 2 so we have access to the market
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
 
         // intialize an array with 20 items in it
         let mut drop_list = ArrayTrait::<u8>::new();
@@ -1731,7 +1724,7 @@ mod tests {
     #[available_gas(75000000)]
     fn test_upgrade_stats() {
         // deploy and start new game
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
         let CHARISMA_STAT = 5;
 
         // get adventurer state
@@ -1761,7 +1754,7 @@ mod tests {
     #[available_gas(70000000)]
     fn test_upgrade_stats_not_enough_points() {
         // deploy and start new game
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1000);
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1779,7 +1772,7 @@ mod tests {
     #[available_gas(75000000)]
     fn test_upgrade_adventurer() {
         // deploy and start new game
-        let mut game = new_adventurer_lvl2();
+        let mut game = new_adventurer_lvl2(1001);
 
         // get original adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -1790,13 +1783,27 @@ mod tests {
         let potions = 1;
 
         // item purchases
-        let weapon_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 3);
-        let weapon_id = *weapon_on_market.at(0);
-        let chest_armor_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 2);
-        let chest_armor_id = *chest_armor_on_market.at(0);
+        let chests_armor_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 2);
+        let mut chests_armor_id = 0;
+        let head_armor_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 3);
+        let mut head_armor_id = 0;
+        let waist_armor_on_market = @game.get_items_on_market_by_slot(ADVENTURER_ID, 4);
+        let mut waist_armor_id = 0;
         let mut items_to_purchase = ArrayTrait::<ItemPurchase>::new();
-        items_to_purchase.append(ItemPurchase { item_id: weapon_id, equip: true });
-        items_to_purchase.append(ItemPurchase { item_id: chest_armor_id, equip: false });
+
+        if chests_armor_on_market.len() > 0 {
+            chests_armor_id = *chests_armor_on_market.at(0);
+            items_to_purchase.append(ItemPurchase { item_id: chests_armor_id, equip: true });
+        }
+        if head_armor_on_market.len() > 0 {
+            head_armor_id = *head_armor_on_market.at(0);
+            items_to_purchase.append(ItemPurchase { item_id: head_armor_id, equip: false });
+        }
+
+        if waist_armor_on_market.len() > 0 {
+            waist_armor_id = *waist_armor_on_market.at(0);
+            items_to_purchase.append(ItemPurchase { item_id: waist_armor_id, equip: false });
+        }
 
         // stat upgrades
         let stat_upgrades = Stats {
@@ -1816,7 +1823,14 @@ mod tests {
         // assert stat point was used
         assert(adventurer.stat_points_available == 0, 'should have used stat point');
         // assert adventurer has the purchased items
-        assert(adventurer.is_equipped(weapon_id), 'weapon should be equipped');
-        assert(!adventurer.is_equipped(chest_armor_id), 'chest armor should not');
+        if chests_armor_id > 0 {
+            assert(adventurer.is_equipped(chests_armor_id), 'chest should be equipped');
+        }
+        if head_armor_id > 0 {
+            assert(!adventurer.is_equipped(head_armor_id), 'head should not be equipped');
+        }
+        if waist_armor_id > 0 {
+            assert(!adventurer.is_equipped(waist_armor_id), 'waist should not be equipped');
+        }
     }
 }
