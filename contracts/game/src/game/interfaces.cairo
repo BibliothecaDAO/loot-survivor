@@ -3,7 +3,8 @@ use market::market::{ItemPurchase};
 use beasts::beast::Beast;
 use survivor::{
     bag::Bag, adventurer::{Adventurer, Stats}, adventurer_meta::AdventurerMetadata,
-    item_meta::{ItemSpecials, ItemSpecialsStorage}
+    item_meta::{ItemSpecials, ItemSpecialsStorage},
+    leaderboard::Leaderboard,
 };
 use game::game::game_entropy::{GameEntropy};
 
@@ -111,4 +112,5 @@ trait IGame<TContractState> {
     fn get_dao_address(self: @TContractState) -> ContractAddress;
     fn get_lords_address(self: @TContractState) -> ContractAddress;
     fn get_game_entropy(self: @TContractState) -> GameEntropy;
+    fn get_leaderboard(self: @TContractState) -> Leaderboard;
 }

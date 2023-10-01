@@ -815,6 +815,9 @@ mod Game {
         fn get_game_entropy(self: @ContractState) -> GameEntropy {
             _unpack_game_entropy(self)
         }
+        fn get_leaderboard(self: @ContractState) -> Leaderboard {
+            self._leaderboard.read()
+        }
         fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
             _owner_of(self, adventurer_id)
         }

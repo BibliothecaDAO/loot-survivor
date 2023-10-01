@@ -1,13 +1,13 @@
 use starknet::StorePacking;
 
-#[derive(Drop, Copy)]
+#[derive(Drop, Copy, Serde)]
 struct Leaderboard { // 242 bits of storage
     first: Score, // 83 bits
     second: Score, // 83 bits
     third: Score, // 83 bits
 }
 
-#[derive(Drop, Copy)]
+#[derive(Drop, Copy, Serde)]
 struct Score { // 83 bits of storage
     adventurer_id: u64, // 61 bits
     xp: u16, // 13 bits
