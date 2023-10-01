@@ -83,10 +83,10 @@ impl AdventurerUtils of IAdventurerUtils {
     // @param adventurer_id The ID of the adventurer used in generating the entropy
     // @return A u128 type entropy unique to the block number and adventurer ID
     fn generate_adventurer_entropy(
-        adventurer_id: u256, block_number: u64, block_timestamp: u64
+        adventurer_id: felt252, block_number: u64, block_timestamp: u64
     ) -> u128 {
         let mut hash_span = ArrayTrait::<felt252>::new();
-        hash_span.append(adventurer_id.try_into().unwrap());
+        hash_span.append(adventurer_id);
         hash_span.append(block_number.into());
         hash_span.append(block_timestamp.into());
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
@@ -549,12 +549,12 @@ mod tests {
     #[test]
     #[available_gas(6482260)]
     fn test_generate_adventurer_entropy() {
-        let mut i: u256 = 1;
+        let mut i: u8 = 1;
         loop {
             if (i >= 100) {
                 break;
             }
-            let adventurer_id: u256 = i;
+            let adventurer_id = i.into();
             let block_number = 839152;
             let block_timestamp = 53289712;
             let adventurer_entropy = AdventurerUtils::generate_adventurer_entropy(

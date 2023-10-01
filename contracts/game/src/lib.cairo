@@ -13,8 +13,8 @@ mod Game {
     // ADJUST THESE BEFORE DEPLOYMENT
     const TEST_ENTROPY: u64 = 12303548;
     const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 100;
-    const LOOT_NAME_STORAGE_INDEX_1: u256 = 0;
-    const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
+    const LOOT_NAME_STORAGE_INDEX_1: u8 = 0;
+    const LOOT_NAME_STORAGE_INDEX_2: u8 = 1;
 
     use core::{
         array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
@@ -67,18 +67,18 @@ mod Game {
 
     #[storage]
     struct Storage {
-        _adventurer: LegacyMap::<u256, Adventurer>,
-        _adventurer_meta: LegacyMap::<u256, AdventurerMetadata>,
-        _bag: LegacyMap::<u256, Bag>,
+        _adventurer: LegacyMap::<felt252, Adventurer>,
+        _adventurer_meta: LegacyMap::<felt252, AdventurerMetadata>,
+        _bag: LegacyMap::<felt252, Bag>,
         _collectible_beasts: ContractAddress,
         _dao: ContractAddress,
-        _game_counter: u256,
+        _game_counter: felt252,
         _game_entropy: GameEntropy,
         _genesis_block: u64,
         _leaderboard: Leaderboard,
         _lords: ContractAddress,
-        _owner: LegacyMap::<u256, ContractAddress>,
-        _item_specials: LegacyMap::<(u256, u256), ItemSpecialsStorage>,
+        _owner: LegacyMap::<felt252, ContractAddress>,
+        _item_specials: LegacyMap::<(felt252, u8), ItemSpecialsStorage>,
     }
 
     #[event]
@@ -162,7 +162,7 @@ mod Game {
         ///
         /// @param adventurer_id A u256 representing the ID of the adventurer.
         /// @param till_beast A boolean flag indicating if the exploration continues until encountering a beast.
-        fn explore(ref self: ContractState, adventurer_id: u256, till_beast: bool) {
+        fn explore(ref self: ContractState, adventurer_id: felt252, till_beast: bool) {
             // get adventurer from storage with stat boosts applied
             let (mut adventurer, stat_boosts, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 @self, adventurer_id
@@ -214,7 +214,7 @@ mod Game {
         ///
         /// @param adventurer_id A u256 representing the ID of the adventurer.
         /// @param to_the_death A boolean flag indicating if the attack should continue until either the adventurer or the beast is defeated.
-        fn attack(ref self: ContractState, adventurer_id: u256, to_the_death: bool) {
+        fn attack(ref self: ContractState, adventurer_id: felt252, to_the_death: bool) {
             // get adventurer from storage with stat boosts applied
             let (mut adventurer, stat_boosts, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 @self, adventurer_id
@@ -287,7 +287,7 @@ mod Game {
         ///
         /// @param adventurer_id A u256 representing the unique ID of the adventurer.
         /// @param to_the_death A boolean flag indicating if the flee attempt should continue until either the adventurer escapes or is defeated.
-        fn flee(ref self: ContractState, adventurer_id: u256, to_the_death: bool) {
+        fn flee(ref self: ContractState, adventurer_id: felt252, to_the_death: bool) {
             // get adventurer from storage with stat boosts applied
             let (mut adventurer, stat_boosts, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 @self, adventurer_id
@@ -353,7 +353,7 @@ mod Game {
         ///
         /// @param adventurer_id A u256 representing the unique ID of the adventurer.
         /// @param items A u8 array representing the item IDs to equip.
-        fn equip(ref self: ContractState, adventurer_id: u256, items: Array<u8>) {
+        fn equip(ref self: ContractState, adventurer_id: felt252, items: Array<u8>) {
             // get adventurer and bag from storage with stat boosts applied
             let (mut adventurer, stat_boosts, mut bag) =
                 _unpack_adventurer_and_bag_with_stat_boosts(
@@ -415,7 +415,7 @@ mod Game {
         ///
         /// @param adventurer_id A u256 representing the unique ID of the adventurer.
         /// @param items A u8 Array representing the IDs of the items to drop.
-        fn drop(ref self: ContractState, adventurer_id: u256, items: Array<u8>) {
+        fn drop(ref self: ContractState, adventurer_id: felt252, items: Array<u8>) {
             // get adventurer and bag from storage with stat boosts applied
             let (mut adventurer, stat_boosts, mut bag) =
                 _unpack_adventurer_and_bag_with_stat_boosts(
@@ -456,7 +456,7 @@ mod Game {
         /// @param items An array of ItemPurchase detailing the items the adventurer wishes to purchase during the upgrade.
         fn upgrade(
             ref self: ContractState,
-            adventurer_id: u256,
+            adventurer_id: felt252,
             potions: u8,
             stat_upgrades: Stats,
             items: Array<ItemPurchase>,
@@ -529,7 +529,7 @@ mod Game {
         /// @notice Allows anyone to slay idle adventurers
         ///
         /// @param adventurer_ids: A u256 array representing the IDs of adventurers to slay
-        fn slay_idle_adventurers(ref self: ContractState, adventurer_ids: Array<u256>) {
+        fn slay_idle_adventurers(ref self: ContractState, adventurer_ids: Array<felt252>) {
             let mut adventurer_index: u32 = 0;
             loop {
                 if adventurer_index == adventurer_ids.len() {
@@ -553,54 +553,54 @@ mod Game {
         //
         // view functions
         //
-        fn get_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
+        fn get_adventurer(self: @ContractState, adventurer_id: felt252) -> Adventurer {
             let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 self, adventurer_id
             );
             adventurer
         }
-        fn get_adventurer_no_boosts(self: @ContractState, adventurer_id: u256) -> Adventurer {
+        fn get_adventurer_no_boosts(self: @ContractState, adventurer_id: felt252) -> Adventurer {
             _unpack_adventurer(self, adventurer_id)
         }
-        fn get_adventurer_meta(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
+        fn get_adventurer_meta(self: @ContractState, adventurer_id: felt252) -> AdventurerMetadata {
             _unpack_adventurer_meta(self, adventurer_id)
         }
-        fn get_bag(self: @ContractState, adventurer_id: u256) -> Bag {
+        fn get_bag(self: @ContractState, adventurer_id: felt252) -> Bag {
             _unpacked_bag(self, adventurer_id)
         }
-        fn get_weapon_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_weapon_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_item_specials(self, adventurer_id, adventurer.weapon)
         }
-        fn get_chest_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_chest_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_item_specials(self, adventurer_id, adventurer.chest)
         }
-        fn get_head_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_head_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_item_specials(self, adventurer_id, adventurer.head)
         }
-        fn get_waist_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_waist_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_item_specials(self, adventurer_id, adventurer.waist)
         }
-        fn get_foot_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_foot_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_item_specials(self, adventurer_id, adventurer.foot)
         }
-        fn get_hand_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_hand_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_item_specials(self, adventurer_id, adventurer.hand)
         }
-        fn get_necklace_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_necklace_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_item_specials(self, adventurer_id, adventurer.neck)
         }
-        fn get_ring_specials(self: @ContractState, adventurer_id: u256) -> ItemSpecials {
+        fn get_ring_specials(self: @ContractState, adventurer_id: felt252) -> ItemSpecials {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _get_item_specials(self, adventurer_id, adventurer.ring)
         }
-        fn get_items_on_market(self: @ContractState, adventurer_id: u256) -> Array<u8> {
+        fn get_items_on_market(self: @ContractState, adventurer_id: felt252) -> Array<u8> {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _assert_upgrades_available(adventurer);
             let adventurer_entropy: u128 = _unpack_adventurer_meta(self, adventurer_id)
@@ -611,7 +611,7 @@ mod Game {
             )
         }
         fn get_items_on_market_by_slot(
-            self: @ContractState, adventurer_id: u256, slot: u8
+            self: @ContractState, adventurer_id: felt252, slot: u8
         ) -> Array<u8> {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _assert_upgrades_available(adventurer);
@@ -627,7 +627,7 @@ mod Game {
             )
         }
         fn get_items_on_market_by_tier(
-            self: @ContractState, adventurer_id: u256, tier: u8
+            self: @ContractState, adventurer_id: felt252, tier: u8
         ) -> Array<u8> {
             let adventurer = _unpack_adventurer(self, adventurer_id);
             _assert_upgrades_available(adventurer);
@@ -678,125 +678,125 @@ mod Game {
             }
         }
 
-        fn get_potion_price(self: @ContractState, adventurer_id: u256) -> u16 {
+        fn get_potion_price(self: @ContractState, adventurer_id: felt252) -> u16 {
             _get_potion_price(self, adventurer_id)
         }
-        fn get_item_price(self: @ContractState, adventurer_id: u256, item_id: u8) -> u16 {
+        fn get_item_price(self: @ContractState, adventurer_id: felt252, item_id: u8) -> u16 {
             _get_item_price(self, adventurer_id, item_id)
         }
-        fn get_attacking_beast(self: @ContractState, adventurer_id: u256) -> Beast {
+        fn get_attacking_beast(self: @ContractState, adventurer_id: felt252) -> Beast {
             _get_attacking_beast(self, adventurer_id)
         }
-        fn get_health(self: @ContractState, adventurer_id: u256) -> u16 {
+        fn get_health(self: @ContractState, adventurer_id: felt252) -> u16 {
             _unpack_adventurer(self, adventurer_id).health
         }
-        fn get_xp(self: @ContractState, adventurer_id: u256) -> u16 {
+        fn get_xp(self: @ContractState, adventurer_id: felt252) -> u16 {
             _unpack_adventurer(self, adventurer_id).xp
         }
-        fn get_level(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_level(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).get_level()
         }
-        fn get_gold(self: @ContractState, adventurer_id: u256) -> u16 {
+        fn get_gold(self: @ContractState, adventurer_id: felt252) -> u16 {
             _unpack_adventurer(self, adventurer_id).gold
         }
-        fn get_beast_health(self: @ContractState, adventurer_id: u256) -> u16 {
+        fn get_beast_health(self: @ContractState, adventurer_id: felt252) -> u16 {
             _unpack_adventurer(self, adventurer_id).beast_health
         }
-        fn get_stat_upgrades_available(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_stat_upgrades_available(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).stat_points_available
         }
-        fn get_last_action(self: @ContractState, adventurer_id: u256) -> u16 {
+        fn get_last_action(self: @ContractState, adventurer_id: felt252) -> u16 {
             _unpack_adventurer(self, adventurer_id).last_action
         }
-        fn get_weapon_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_weapon_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).weapon.get_greatness()
         }
-        fn get_chest_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_chest_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).chest.get_greatness()
         }
-        fn get_head_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_head_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).head.get_greatness()
         }
-        fn get_waist_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_waist_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).waist.get_greatness()
         }
-        fn get_foot_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_foot_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).foot.get_greatness()
         }
-        fn get_hand_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_hand_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).hand.get_greatness()
         }
-        fn get_necklace_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_necklace_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).neck.get_greatness()
         }
-        fn get_ring_greatness(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_ring_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).ring.get_greatness()
         }
-        fn get_base_stats(self: @ContractState, adventurer_id: u256) -> Stats {
+        fn get_base_stats(self: @ContractState, adventurer_id: felt252) -> Stats {
             _unpack_adventurer(self, adventurer_id).stats
         }
-        fn get_stats(self: @ContractState, adventurer_id: u256) -> Stats {
+        fn get_stats(self: @ContractState, adventurer_id: felt252) -> Stats {
             let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 self, adventurer_id
             );
             adventurer.stats
         }
-        fn get_base_strength(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_base_strength(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.strength
         }
-        fn get_strength(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_strength(self: @ContractState, adventurer_id: felt252) -> u8 {
             let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 self, adventurer_id
             );
             adventurer.stats.strength
         }
-        fn get_base_dexterity(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_base_dexterity(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.dexterity
         }
-        fn get_dexterity(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_dexterity(self: @ContractState, adventurer_id: felt252) -> u8 {
             let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 self, adventurer_id
             );
             adventurer.stats.dexterity
         }
-        fn get_base_vitality(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_base_vitality(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.vitality
         }
-        fn get_vitality(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_vitality(self: @ContractState, adventurer_id: felt252) -> u8 {
             let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 self, adventurer_id
             );
             adventurer.stats.vitality
         }
-        fn get_base_intelligence(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_base_intelligence(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.intelligence
         }
-        fn get_intelligence(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_intelligence(self: @ContractState, adventurer_id: felt252) -> u8 {
             let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 self, adventurer_id
             );
             adventurer.stats.intelligence
         }
-        fn get_base_wisdom(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_base_wisdom(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.wisdom
         }
-        fn get_wisdom(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_wisdom(self: @ContractState, adventurer_id: felt252) -> u8 {
             let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 self, adventurer_id
             );
             adventurer.stats.wisdom
         }
-        fn get_base_charisma(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_base_charisma(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).stats.charisma
         }
-        fn get_charisma(self: @ContractState, adventurer_id: u256) -> u8 {
+        fn get_charisma(self: @ContractState, adventurer_id: felt252) -> u8 {
             let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(
                 self, adventurer_id
             );
             adventurer.stats.charisma
         }
         fn get_special_storage(
-            self: @ContractState, adventurer_id: u256, storage_index: u256
+            self: @ContractState, adventurer_id: felt252, storage_index: u8
         ) -> ItemSpecialsStorage {
             self._item_specials.read((adventurer_id, storage_index))
         }
@@ -818,7 +818,7 @@ mod Game {
         fn get_leaderboard(self: @ContractState) -> Leaderboard {
             self._leaderboard.read()
         }
-        fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
+        fn owner_of(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
             _owner_of(self, adventurer_id)
         }
         fn next_game_entropy_rotation(self: @ContractState) -> felt252 {
@@ -830,7 +830,7 @@ mod Game {
     // ------------ Internal Functions ---------- //
     // ------------------------------------------ //
 
-    fn _slay_idle_adventurer(ref self: ContractState, adventurer_id: u256) {
+    fn _slay_idle_adventurer(ref self: ContractState, adventurer_id: felt252) {
         // unpack adventurer from storage (no need for stat boosts)
         let mut adventurer = _unpack_adventurer(@self, adventurer_id);
 
@@ -853,7 +853,7 @@ mod Game {
     fn _process_beast_death(
         ref self: ContractState,
         ref adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         beast: Beast,
         beast_seed: u128,
         attack_rnd_2: u128,
@@ -939,7 +939,7 @@ mod Game {
     fn _process_adventurer_death(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         beast_id: u8,
         obstacle_id: u8
     ) {
@@ -1133,7 +1133,7 @@ mod Game {
 
     fn _starter_beast_ambush(
         ref adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         starting_weapon: u8,
         adventurer_entropy: u128
     ) -> BattleDetails {
@@ -1163,11 +1163,11 @@ mod Game {
     // _explore is called by the adventurer to explore the world
     // @param self: ContractState
     // @param adventurer: Adventurer
-    // @param adventurer_id: u256
+    // @param adventurer_id: felt252
     fn _explore(
         ref self: ContractState,
         ref adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         adventurer_entropy: u128,
         game_entropy: u128,
         explore_till_beast: bool
@@ -1209,7 +1209,7 @@ mod Game {
     }
 
     fn _process_discovery(
-        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, entropy: u128
+        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: felt252, entropy: u128
     ) {
         // TODO: Consider passing in adventurer ref into discover_treasure and handling
         //       adventurer mutations within lib functions. The lib functions could return
@@ -1243,7 +1243,7 @@ mod Game {
         ref self: ContractState,
         ref adventurer: Adventurer,
         adventurer_entropy: u128,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         entropy: u128
     ) {
         // get beast and beast seed
@@ -1273,7 +1273,7 @@ mod Game {
     }
 
     fn _obstacle_encounter(
-        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, entropy: u128
+        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: felt252, entropy: u128
     ) {
         // get random obstacle
         let obstacle = adventurer.get_random_obstacle(entropy);
@@ -1367,7 +1367,7 @@ mod Game {
     fn _grant_xp_to_equipped_items(
         ref self: ContractState,
         ref adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         xp_amount: u16,
         entropy: u128
     ) -> Array<ItemLeveledUp> {
@@ -1490,7 +1490,7 @@ mod Game {
         ref self: ContractState,
         ref adventurer: Adventurer,
         weapon_combat_spec: CombatSpec,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         adventurer_entropy: u128,
         beast: Beast,
         beast_seed: u128,
@@ -1583,7 +1583,7 @@ mod Game {
     fn _beast_attack(
         ref self: ContractState,
         ref adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         beast: Beast,
         beast_seed: u128,
         entropy: u128,
@@ -1628,7 +1628,7 @@ mod Game {
     fn _flee(
         ref self: ContractState,
         ref adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         adventurer_entropy: u128,
         game_entropy: u128,
         beast_seed: u128,
@@ -1727,7 +1727,7 @@ mod Game {
         ref self: ContractState,
         ref adventurer: Adventurer,
         ref bag: Bag,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         items_to_equip: Array<u8>,
         is_newly_purchased: bool
     ) {
@@ -1792,7 +1792,7 @@ mod Game {
         ref self: ContractState,
         ref adventurer: Adventurer,
         ref bag: Bag,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         items: Array<u8>,
     ) {
         // for each item
@@ -1830,7 +1830,7 @@ mod Game {
         ref self: ContractState,
         ref adventurer: Adventurer,
         ref bag: Bag,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         stat_points_available: u8,
         items_to_purchase: Array<ItemPurchase>,
     ) {
@@ -1892,7 +1892,7 @@ mod Game {
     // @dev Emits a `PurchasedPotions` event
     // @dev Panics if the adventurer does not have enough gold or is buying more health than they can use.
     fn _buy_potions(
-        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, quantity: u8
+        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: felt252, quantity: u8
     ) {
         let cost = adventurer.charisma_adjusted_potion_price() * quantity.into();
         let health = POTION_HEALTH_AMOUNT * quantity.into();
@@ -1980,16 +1980,19 @@ mod Game {
     // ------------------------------------------ //
     // ------------ Helper Functions ------------ //
     // ------------------------------------------ //
-    fn _unpack_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
-        self._adventurer.read(adventurer_id)
+    fn _unpack_adventurer(self: @ContractState, adventurer_id: felt252) -> Adventurer {
+        let adventurer = self._adventurer.read(adventurer_id);
+        adventurer
     }
     fn _unpack_adventurer_and_bag_with_stat_boosts(
-        self: @ContractState, adventurer_id: u256
+        self: @ContractState, adventurer_id: felt252
     ) -> (Adventurer, Stats, Bag) {
         // unpack adventurer
         let mut adventurer: Adventurer = self._adventurer.read(adventurer_id);
+
         // start with no stat boosts
         let mut stat_boosts = StatUtils::new();
+
         // if adventurer has item specials
         if adventurer.has_item_specials() {
             // get specials from storage
@@ -2000,6 +2003,7 @@ mod Game {
             adventurer.apply_stat_boosts(stat_boosts);
         }
 
+        // get bag from storage
         let bag = _unpacked_bag(self, adventurer_id);
 
         // luck isn't stored, it is calculated dynamically
@@ -2010,7 +2014,7 @@ mod Game {
     }
 
     #[inline(always)]
-    fn _pack_adventurer(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {
+    fn _pack_adventurer(ref self: ContractState, adventurer_id: felt252, adventurer: Adventurer) {
         self._adventurer.write(adventurer_id, adventurer);
     }
     // @dev Packs and saves an adventurer after removing stat boosts.
@@ -2018,7 +2022,10 @@ mod Game {
     // @param adventurer The adventurer to be modified.
     // @param stat_boosts The stat boosts to be removed.
     fn _pack_adventurer_remove_stat_boost(
-        ref self: ContractState, ref adventurer: Adventurer, adventurer_id: u256, stat_boosts: Stats
+        ref self: ContractState,
+        ref adventurer: Adventurer,
+        adventurer_id: felt252,
+        stat_boosts: Stats
     ) {
         // remove stat boosts
         adventurer.remove_stat_boosts(stat_boosts);
@@ -2028,20 +2035,20 @@ mod Game {
     }
 
     #[inline(always)]
-    fn _unpacked_bag(self: @ContractState, adventurer_id: u256) -> Bag {
+    fn _unpacked_bag(self: @ContractState, adventurer_id: felt252) -> Bag {
         self._bag.read(adventurer_id)
     }
     #[inline(always)]
-    fn _pack_bag(ref self: ContractState, adventurer_id: u256, bag: Bag) {
+    fn _pack_bag(ref self: ContractState, adventurer_id: felt252, bag: Bag) {
         self._bag.write(adventurer_id, bag);
     }
     #[inline(always)]
-    fn _unpack_adventurer_meta(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
+    fn _unpack_adventurer_meta(self: @ContractState, adventurer_id: felt252) -> AdventurerMetadata {
         self._adventurer_meta.read(adventurer_id)
     }
     #[inline(always)]
     fn _pack_adventurer_meta(
-        ref self: ContractState, adventurer_id: u256, adventurer_meta: AdventurerMetadata
+        ref self: ContractState, adventurer_id: felt252, adventurer_meta: AdventurerMetadata
     ) {
         self._adventurer_meta.write(adventurer_id, adventurer_meta);
     }
@@ -2098,7 +2105,7 @@ mod Game {
     fn _emit_level_up_events(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         previous_level: u8,
         new_level: u8,
     ) {
@@ -2122,8 +2129,8 @@ mod Game {
     #[inline(always)]
     fn _pack_loot_special_names_storage(
         ref self: ContractState,
-        adventurer_id: u256,
-        storage_index: u256,
+        adventurer_id: felt252,
+        storage_index: u8,
         loot_special_names_storage: ItemSpecialsStorage,
     ) {
         self._item_specials.write((adventurer_id, storage_index), loot_special_names_storage);
@@ -2131,7 +2138,7 @@ mod Game {
 
     #[inline(always)]
     fn _get_special_storages(
-        self: @ContractState, adventurer_id: u256
+        self: @ContractState, adventurer_id: felt252
     ) -> (ItemSpecialsStorage, ItemSpecialsStorage) {
         (
             _get_specials_storage(self, adventurer_id, LOOT_NAME_STORAGE_INDEX_1),
@@ -2141,14 +2148,14 @@ mod Game {
 
     #[inline(always)]
     fn _get_specials_storage(
-        self: @ContractState, adventurer_id: u256, storage_index: u256
+        self: @ContractState, adventurer_id: felt252, storage_index: u8
     ) -> ItemSpecialsStorage {
         self._item_specials.read((adventurer_id, storage_index))
     }
 
     #[inline(always)]
     fn _get_item_specials(
-        self: @ContractState, adventurer_id: u256, item: ItemPrimitive
+        self: @ContractState, adventurer_id: felt252, item: ItemPrimitive
     ) -> ItemSpecials {
         if (item.get_greatness() >= 15) {
             ImplItemSpecials::get_specials(
@@ -2160,14 +2167,14 @@ mod Game {
         }
     }
     #[inline(always)]
-    fn _owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
+    fn _owner_of(self: @ContractState, adventurer_id: felt252) -> ContractAddress {
         self._owner.read(adventurer_id)
     }
     #[inline(always)]
     fn _next_game_entropy_rotation(self: @ContractState) -> felt252 {
         _unpack_game_entropy(self).last_updated.into() + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()
     }
-    fn _assert_ownership(self: @ContractState, adventurer_id: u256) {
+    fn _assert_ownership(self: @ContractState, adventurer_id: felt252) {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
     }
     fn _assert_in_battle(adventurer: Adventurer) {
@@ -2278,7 +2285,10 @@ mod Game {
     //          while this may seem harsh, Loot Survivor is modeled after an arcade game. You can't
     //          walk away from a game of Galaga for 10 minutes and come back expecting to still be alive
     fn _apply_idle_penalty(
-        ref self: ContractState, adventurer_id: u256, ref adventurer: Adventurer, idle_blocks: u16
+        ref self: ContractState,
+        adventurer_id: felt252,
+        ref adventurer: Adventurer,
+        idle_blocks: u16
     ) {
         // deduct it from adventurer's health
         adventurer.health = 0;
@@ -2333,12 +2343,12 @@ mod Game {
     }
 
     #[inline(always)]
-    fn _get_potion_price(self: @ContractState, adventurer_id: u256) -> u16 {
+    fn _get_potion_price(self: @ContractState, adventurer_id: felt252) -> u16 {
         let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(self, adventurer_id);
         adventurer.charisma_adjusted_potion_price()
     }
 
-    fn _get_item_price(self: @ContractState, adventurer_id: u256, item_id: u8) -> u16 {
+    fn _get_item_price(self: @ContractState, adventurer_id: felt252, item_id: u8) -> u16 {
         let (adventurer, _, _) = _unpack_adventurer_and_bag_with_stat_boosts(self, adventurer_id);
         let base_item_price = ImplMarket::get_price(ImplLoot::get_tier(item_id));
         let charisma_adjusted_price = adventurer.charisma_adjusted_item_price(base_item_price);
@@ -2346,7 +2356,7 @@ mod Game {
         charisma_adjusted_price
     }
 
-    fn _get_attacking_beast(self: @ContractState, adventurer_id: u256) -> Beast {
+    fn _get_attacking_beast(self: @ContractState, adventurer_id: felt252) -> Beast {
         // get adventurer
         let adventurer = _unpack_adventurer(self, adventurer_id);
 
@@ -2364,7 +2374,7 @@ mod Game {
     }
 
     #[inline(always)]
-    fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u256 {
+    fn _get_storage_index(self: @ContractState, meta_data_id: u8) -> u8 {
         if (meta_data_id <= 10) {
             LOOT_NAME_STORAGE_INDEX_1
         } else {
@@ -2377,7 +2387,7 @@ mod Game {
     // @param adventurer_id - the id of the adventurer
     // @param item - the item to get the combat spec for
     fn _get_combat_spec(
-        self: @ContractState, adventurer_id: u256, item: ItemPrimitive
+        self: @ContractState, adventurer_id: felt252, item: ItemPrimitive
     ) -> CombatSpec {
         // if item is 0, return a default combat spec
         if (item.id == 0) {
@@ -2425,7 +2435,7 @@ mod Game {
     }
 
     #[inline(always)]
-    fn _get_adventurer_entropy(self: @ContractState, adventurer_id: u256) -> u128 {
+    fn _get_adventurer_entropy(self: @ContractState, adventurer_id: felt252) -> u128 {
         _unpack_adventurer_meta(self, adventurer_id).entropy
     }
 
@@ -2434,7 +2444,9 @@ mod Game {
     // @param adventurer_id - the id of the adventurer
     // @return (u128, u64) - adventurer entropy and game entropy
     #[inline(always)]
-    fn _get_adventurer_and_game_entropy(self: @ContractState, adventurer_id: u256) -> (u128, u128) {
+    fn _get_adventurer_and_game_entropy(
+        self: @ContractState, adventurer_id: felt252
+    ) -> (u128, u128) {
         (_get_adventurer_entropy(self, adventurer_id), _unpack_game_entropy(self).entropy)
     }
 
@@ -2451,7 +2463,9 @@ mod Game {
     //
     // @param adventurer_id The unique identifier of the adventurer
     // @param adventurer The adventurer that scored a new high score
-    fn _update_leaderboard(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {
+    fn _update_leaderboard(
+        ref self: ContractState, adventurer_id: felt252, adventurer: Adventurer
+    ) {
         // get current leaderboard which will be mutated as part of this function
         let mut leaderboard = self._leaderboard.read();
 
@@ -2490,7 +2504,7 @@ mod Game {
     #[derive(Copy, Drop, Serde, starknet::Event)]
     struct AdventurerState {
         owner: ContractAddress,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         adventurer: Adventurer
     }
 
@@ -2729,7 +2743,7 @@ mod Game {
 
     #[derive(Drop, Serde)]
     struct PlayerReward {
-        adventurer_id: u256,
+        adventurer_id: felt252,
         rank: u8,
         amount: u256,
         address: ContractAddress,
@@ -2748,7 +2762,7 @@ mod Game {
     fn __event_AdventurerUpgraded(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         bag: Bag,
         stat_upgrades: Stats
     ) {
@@ -2773,7 +2787,7 @@ mod Game {
     fn __event_StartGame(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         adventurer_meta: AdventurerMetadata
     ) {
         let adventurer_state = AdventurerState {
@@ -2785,7 +2799,7 @@ mod Game {
     fn __event_Discovery(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         amount: u16,
         discovery_type: DiscoveryType
     ) {
@@ -2808,7 +2822,7 @@ mod Game {
     fn __event_ObstacleEncounter(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         dodged: bool,
         obstacle_details: ObstacleDetails,
     ) {
@@ -2828,7 +2842,7 @@ mod Game {
     fn __event_DiscoveredBeast(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         seed: u128,
         beast: Beast
     ) {
@@ -2845,7 +2859,7 @@ mod Game {
     fn __event_AttackedBeast(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         beast_battle_details: BattleDetails
     ) {
         let adventurer_state = AdventurerState {
@@ -2857,7 +2871,7 @@ mod Game {
     fn __event_AttackedByBeast(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         beast_battle_details: BattleDetails
     ) {
         let adventurer_state = AdventurerState {
@@ -2869,7 +2883,7 @@ mod Game {
     fn __event_AmbushedByBeast(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         beast_battle_details: BattleDetails
     ) {
         let adventurer_state = AdventurerState {
@@ -2881,7 +2895,7 @@ mod Game {
     fn __event_SlayedBeast(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         seed: u128,
         beast: Beast,
         damage_dealt: u16,
@@ -2910,7 +2924,7 @@ mod Game {
     fn __event_FleeFailed(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         seed: u128,
         beast: Beast
     ) {
@@ -2926,7 +2940,7 @@ mod Game {
     fn __event_FleeSucceeded(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         seed: u128,
         beast: Beast
     ) {
@@ -2942,7 +2956,7 @@ mod Game {
     fn __event_EquippedItems(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         bag: Bag,
         equipped_items: Array<u8>,
         unequipped_items: Array<u8>,
@@ -2960,7 +2974,7 @@ mod Game {
     fn __event_DroppedItems(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         bag: Bag,
         item_ids: Array<u8>,
     ) {
@@ -2974,7 +2988,7 @@ mod Game {
     fn __event_ItemsLeveledUp(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         items: Array<ItemLeveledUp>,
     ) {
         let adventurer_state = AdventurerState {
@@ -2984,7 +2998,7 @@ mod Game {
     }
 
     fn __event_NewHighScore(
-        ref self: ContractState, adventurer_id: u256, adventurer: Adventurer, rank: u8
+        ref self: ContractState, adventurer_id: felt252, adventurer: Adventurer, rank: u8
     ) {
         let adventurer_state = AdventurerState {
             owner: get_caller_address(), adventurer_id, adventurer
@@ -3006,7 +3020,7 @@ mod Game {
     }
 
     fn __event_IdleDeathPenalty(
-        ref self: ContractState, adventurer: Adventurer, adventurer_id: u256, idle_blocks: u16,
+        ref self: ContractState, adventurer: Adventurer, adventurer_id: felt252, idle_blocks: u16,
     ) {
         // intentionally read storage for owner instead of using get_caller_address()
         // because non-owner can result in this function being emitted via `slay_idle_adventurer`
@@ -3033,7 +3047,7 @@ mod Game {
     fn __event_PurchasedItems(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         bag: Bag,
         purchases: Array<LootWithPrice>
     ) {
@@ -3047,7 +3061,7 @@ mod Game {
     fn __event_PurchasedPotions(
         ref self: ContractState,
         adventurer: Adventurer,
-        adventurer_id: u256,
+        adventurer_id: felt252,
         quantity: u8,
         cost: u16,
         health: u16
