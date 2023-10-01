@@ -1357,7 +1357,7 @@ mod tests {
     fn test_get_game_entropy() {
         let mut game = new_adventurer(1000);
         let game_entropy = game.get_game_entropy();
-        assert(game_entropy.entropy == 0x12220ba39bfbf46a1851365c9bd0a8a, 'wrong game entropy');
+        assert(game_entropy.hash == 0x12220ba39bfbf46a1851365c9bd0a8a, 'wrong game entropy');
         assert(game_entropy.last_updated_block == 0x3f4, 'wrong entropy last update block');
         assert(game_entropy.last_updated_time == 0x0, 'wrong entropy last update time');
     }

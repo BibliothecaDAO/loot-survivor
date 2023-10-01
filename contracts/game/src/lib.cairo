@@ -36,7 +36,7 @@ mod Game {
             STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS, IDLE_DEATH_PENALTY_BLOCKS,
             MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE, MINIMUM_DAMAGE_FROM_BEASTS
         },
-        game_entropy::{GameEntropy}
+        game_entropy::{GameEntropy, ImplGameEntropy}
     };
     use lootitems::{
         loot::{ILoot, Loot, ImplLoot}, constants::{ItemId, NamePrefixLength, NameSuffixLength}
@@ -813,7 +813,7 @@ mod Game {
             _lords_address(self)
         }
         fn get_game_entropy(self: @ContractState) -> GameEntropy {
-            _unpack_game_entropy(self)
+            _load_game_entropy(self)
         }
         fn get_leaderboard(self: @ContractState) -> Leaderboard {
             self._leaderboard.read()
@@ -2053,13 +2053,11 @@ mod Game {
         self._adventurer_meta.write(adventurer_id, adventurer_meta);
     }
     #[inline(always)]
-    fn _unpack_game_entropy(self: @ContractState) -> GameEntropy {
-        //Packing::unpack(self._game_entropy.read())
+    fn _load_game_entropy(self: @ContractState) -> GameEntropy {
         self._game_entropy.read()
     }
     #[inline(always)]
-    fn _pack_game_entropy(ref self: ContractState, game_entropy: GameEntropy) {
-        //self._game_entropy.write(game_entropy.pack());
+    fn _save_game_entropy(ref self: ContractState, game_entropy: GameEntropy) {
         self._game_entropy.write(game_entropy);
     }
 
@@ -2069,32 +2067,31 @@ mod Game {
     /// @dev This function checks that the minimum blocks have elapsed since the last rotation before proceeding.
     /// Uses the Poseidon hash function for the entropy generation.
     fn _rotate_game_entropy(ref self: ContractState) {
-        let block_number: u64 = starknet::get_block_info().unbox().block_number.into();
-        let block_timestamp: u64 = starknet::get_block_info().unbox().block_timestamp.into();
+        // load current game entropy
+        let mut game_entropy = _load_game_entropy(@self);
 
-        // assert game entropy is eligible to be rotated
+        // get current block data
+        let current_block_info = starknet::get_block_info().unbox();
+
+        // assert enough time has elapsed to rotate game entropy
         assert(
-            block_number >= (_unpack_game_entropy(@self).last_updated_block
-                + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()),
+            current_block_info.block_number >= game_entropy.last_updated_block
+                + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into(),
             messages::BLOCK_NUMBER_ERROR
         );
 
-        // generate new game entropy using timestamp and block number
-        let mut hash_span = ArrayTrait::<felt252>::new();
-        hash_span.append(block_timestamp.into());
-        hash_span.append(block_number.into());
-        let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
-        let (_, entropy) = integer::U256DivRem::div_rem(
-            poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
+        // compute new entropy hash
+        let new_entropy_hash = ImplGameEntropy::generate_entropy(
+            current_block_info.block_number, current_block_info.block_timestamp
         );
 
-        // set new game entropy and block number of update
-        let updated_game_entropy = GameEntropy {
-            entropy: entropy.try_into().unwrap(),
-            last_updated_block: block_number,
-            last_updated_time: block_timestamp
-        };
-        _pack_game_entropy(ref self, updated_game_entropy);
+        // update game entropy
+        game_entropy.hash = new_entropy_hash;
+        game_entropy.last_updated_block = current_block_info.block_number;
+        game_entropy.last_updated_time = current_block_info.block_timestamp;
+
+        // save game entropy
+        _save_game_entropy(ref self, game_entropy);
     }
 
     // @notice This function emits events relevant to adventurer leveling up
@@ -2174,7 +2171,7 @@ mod Game {
     }
     #[inline(always)]
     fn _next_game_entropy_rotation(self: @ContractState) -> felt252 {
-        _unpack_game_entropy(self).last_updated_block.into()
+        _load_game_entropy(self).last_updated_block.into()
             + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()
     }
     fn _assert_ownership(self: @ContractState, adventurer_id: felt252) {
@@ -2450,7 +2447,10 @@ mod Game {
     fn _get_adventurer_and_game_entropy(
         self: @ContractState, adventurer_id: felt252
     ) -> (u128, u128) {
-        (_get_adventurer_entropy(self, adventurer_id), _unpack_game_entropy(self).entropy)
+        (
+            _get_adventurer_entropy(self, adventurer_id),
+            _load_game_entropy(self).hash.try_into().unwrap()
+        )
     }
 
     #[inline(always)]
