@@ -28,7 +28,7 @@ mod tests {
     use openzeppelin::tests::utils;
     use combat::{constants::CombatEnums::{Slot, Tier}, combat::ImplCombat};
     use survivor::{
-        adventurer_stats::Stats, adventurer_meta::{AdventurerMetadata},
+        stats::Stats, adventurer_meta::{AdventurerMetadata},
         constants::adventurer_constants::{
             STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, ClassStatBoosts,
             MAX_BLOCK_COUNT

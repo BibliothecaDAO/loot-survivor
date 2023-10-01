@@ -2,7 +2,7 @@ use starknet::{StorePacking};
 use lootitems::constants::{ItemId, ItemSuffix};
 use super::{
     adventurer::{Adventurer, IAdventurer, ImplAdventurer}, item_primitive::ItemPrimitive,
-    adventurer_stats::Stats, bag::{Bag, IBag}
+    stats::Stats, bag::{Bag, IBag}
 };
 
 #[derive(PartialEq, Drop, Copy, Serde)]
@@ -426,7 +426,7 @@ const TWO_POW_144: u256 = 0x1000000000000000000000000000000000000;
 mod tests {
     use lootitems::constants::{ItemId};
     use survivor::{
-        adventurer::{ImplAdventurer}, item_primitive::ItemPrimitive, adventurer_stats::Stats,
+        adventurer::{ImplAdventurer}, item_primitive::ItemPrimitive, stats::Stats,
         bag::{Bag, IBag},
         item_meta::{
             ImplItemSpecials, ItemSpecialsStorage, ItemSpecials, ItemSpecialsStoragePacking, STORAGE

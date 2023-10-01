@@ -66,7 +66,7 @@ impl ExploreUtils of Explore {
 mod tests {
     use survivor::{
         exploration::ExploreUtils, adventurer::{ImplAdventurer, ItemPrimitive},
-        adventurer_stats::Stats
+        stats::Stats
     };
     use lootitems::constants::ItemId;
 

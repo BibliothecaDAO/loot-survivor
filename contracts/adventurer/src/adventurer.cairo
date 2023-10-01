@@ -6,9 +6,9 @@ use core::{
 };
 
 use super::{
-    item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials},
-    adventurer_stats::{Stats, StatsPacking}, item_primitive::{ItemPrimitive, ItemPrimitivePacking},
-    adventurer_utils::{AdventurerUtils}, exploration::ExploreUtils, bag::{Bag, IBag, ImplBag},
+    item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials}, stats::{Stats, StatsPacking},
+    item_primitive::{ItemPrimitive, ItemPrimitivePacking}, adventurer_utils::{AdventurerUtils},
+    exploration::ExploreUtils, bag::{Bag, IBag, ImplBag},
     constants::{
         adventurer_constants::{
             STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
@@ -63,17 +63,17 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
             + value.health.into() * TWO_POW_9
             + value.xp.into() * TWO_POW_18
             + StatsPacking::pack(value.stats).into() * TWO_POW_31
-            + value.gold.into() * TWO_POW_61
-            + ItemPrimitivePacking::pack(value.weapon).into() * TWO_POW_70
-            + ItemPrimitivePacking::pack(value.chest).into() * TWO_POW_91
-            + ItemPrimitivePacking::pack(value.head).into() * TWO_POW_112
-            + ItemPrimitivePacking::pack(value.waist).into() * TWO_POW_133
-            + ItemPrimitivePacking::pack(value.foot).into() * TWO_POW_154
-            + ItemPrimitivePacking::pack(value.hand).into() * TWO_POW_175
-            + ItemPrimitivePacking::pack(value.neck).into() * TWO_POW_196
-            + ItemPrimitivePacking::pack(value.ring).into() * TWO_POW_217
-            + value.beast_health.into() * TWO_POW_238
-            + value.stat_points_available.into() * TWO_POW_247)
+            + value.gold.into() * TWO_POW_55
+            + ItemPrimitivePacking::pack(value.weapon).into() * TWO_POW_64
+            + ItemPrimitivePacking::pack(value.chest).into() * TWO_POW_85
+            + ItemPrimitivePacking::pack(value.head).into() * TWO_POW_106
+            + ItemPrimitivePacking::pack(value.waist).into() * TWO_POW_127
+            + ItemPrimitivePacking::pack(value.foot).into() * TWO_POW_148
+            + ItemPrimitivePacking::pack(value.hand).into() * TWO_POW_169
+            + ItemPrimitivePacking::pack(value.neck).into() * TWO_POW_190
+            + ItemPrimitivePacking::pack(value.ring).into() * TWO_POW_211
+            + value.beast_health.into() * TWO_POW_232
+            + value.stat_points_available.into() * TWO_POW_241)
             .try_into()
             .unwrap()
     }
@@ -85,7 +85,7 @@ impl AdventurerPacking of StorePacking<Adventurer, felt252> {
         );
         let (packed, health) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
         let (packed, xp) = integer::U256DivRem::div_rem(packed, TWO_POW_13.try_into().unwrap());
-        let (packed, stats) = integer::U256DivRem::div_rem(packed, TWO_POW_30.try_into().unwrap());
+        let (packed, stats) = integer::U256DivRem::div_rem(packed, TWO_POW_24.try_into().unwrap());
         let (packed, gold) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
         let (packed, weapon) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
         let (packed, chest) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
@@ -1681,19 +1681,19 @@ const TWO_POW_9: u256 = 0x200;
 const TWO_POW_13: u256 = 0x2000;
 const TWO_POW_18: u256 = 0x40000;
 const TWO_POW_21: u256 = 0x200000;
-const TWO_POW_30: u256 = 0x40000000;
+const TWO_POW_24: u256 = 0x1000000;
 const TWO_POW_31: u256 = 0x80000000;
-const TWO_POW_61: u256 = 0x2000000000000000;
-const TWO_POW_70: u256 = 0x400000000000000000;
-const TWO_POW_91: u256 = 0x80000000000000000000000;
-const TWO_POW_112: u256 = 0x10000000000000000000000000000;
-const TWO_POW_133: u256 = 0x2000000000000000000000000000000000;
-const TWO_POW_154: u256 = 0x400000000000000000000000000000000000000;
-const TWO_POW_175: u256 = 0x80000000000000000000000000000000000000000000;
-const TWO_POW_196: u256 = 0x10000000000000000000000000000000000000000000000000;
-const TWO_POW_217: u256 = 0x2000000000000000000000000000000000000000000000000000000;
-const TWO_POW_238: u256 = 0x400000000000000000000000000000000000000000000000000000000000;
-const TWO_POW_247: u256 = 0x80000000000000000000000000000000000000000000000000000000000000;
+const TWO_POW_55: u256 = 0x80000000000000;
+const TWO_POW_64: u256 = 0x10000000000000000;
+const TWO_POW_85: u256 = 0x2000000000000000000000;
+const TWO_POW_106: u256 = 0x400000000000000000000000000;
+const TWO_POW_127: u256 = 0x80000000000000000000000000000000;
+const TWO_POW_148: u256 = 0x10000000000000000000000000000000000000;
+const TWO_POW_169: u256 = 0x2000000000000000000000000000000000000000000;
+const TWO_POW_190: u256 = 0x400000000000000000000000000000000000000000000000;
+const TWO_POW_211: u256 = 0x80000000000000000000000000000000000000000000000000000;
+const TWO_POW_232: u256 = 0x10000000000000000000000000000000000000000000000000000000000;
+const TWO_POW_241: u256 = 0x2000000000000000000000000000000000000000000000000000000000000;
 
 // ---------------------------
 // ---------- Tests ----------
@@ -1712,7 +1712,7 @@ mod tests {
     use beasts::{beast::{ImplBeast, Beast}, constants::BeastSettings};
     use survivor::{
         adventurer::{IAdventurer, ImplAdventurer, Adventurer, AdventurerPacking},
-        item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials}, adventurer_stats::Stats,
+        item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials}, stats::Stats,
         item_primitive::ItemPrimitive, adventurer_utils::{AdventurerUtils}, bag::{Bag, ImplBag},
         constants::{
             adventurer_constants::{
@@ -2732,13 +2732,13 @@ mod tests {
             health: 511,
             xp: 8191,
             stats: Stats {
-                strength: 31,
-                dexterity: 31,
-                vitality: 31,
-                intelligence: 31,
-                wisdom: 31,
-                charisma: 31,
-                luck: 31
+                strength: 15,
+                dexterity: 15,
+                vitality: 15,
+                intelligence: 15,
+                wisdom: 15,
+                charisma: 15,
+                luck: 15
             },
             gold: 511,
             weapon: ItemPrimitive { id: 127, xp: 511, metadata: 31, },

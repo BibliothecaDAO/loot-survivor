@@ -14,7 +14,7 @@ use super::{
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
     },
-    adventurer_stats::Stats, adventurer::{Adventurer, ImplAdventurer, IAdventurer},
+    stats::Stats, adventurer::{Adventurer, ImplAdventurer, IAdventurer},
 };
 use lootitems::constants::{
     NUM_ITEMS,
@@ -322,7 +322,7 @@ mod tests {
             },
             discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
         },
-        adventurer_stats::Stats, adventurer::{Adventurer, ImplAdventurer, IAdventurer},
+        stats::Stats, adventurer::{Adventurer, ImplAdventurer, IAdventurer},
         adventurer_utils::AdventurerUtils
     };
     use combat::constants::CombatEnums::{Type, Tier, Slot};

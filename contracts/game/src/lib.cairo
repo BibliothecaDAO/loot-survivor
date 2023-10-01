@@ -42,7 +42,7 @@ mod Game {
         loot::{ILoot, Loot, ImplLoot}, constants::{ItemId, NamePrefixLength, NameSuffixLength}
     };
     use survivor::{
-        adventurer::{Adventurer, ImplAdventurer, IAdventurer}, adventurer_stats::{Stats, StatUtils},
+        adventurer::{Adventurer, ImplAdventurer, IAdventurer}, stats::{Stats, StatUtils},
         item_primitive::{ImplItemPrimitive, ItemPrimitive}, bag::{Bag, IBag, ImplBag},
         adventurer_meta::{AdventurerMetadata}, exploration::ExploreUtils,
         constants::{
