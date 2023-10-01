@@ -1,20 +1,14 @@
-use starknet::{StorePacking};
-use option::OptionTrait;
-use traits::{TryInto, Into};
-use survivor::constants::adventurer_constants::MAX_STAT_VALUE;
+use core::{option::OptionTrait, starknet::{StorePacking}, traits::{TryInto, Into}};
 
 #[derive(Drop, Copy, Serde)]
-struct Stats { // 5 bits each
-    // Physical
+struct Stats { // 30 storage bits
     strength: u8, // 5 bits
     dexterity: u8, // 5 bits
     vitality: u8, // 5 bits
-    // Mental
     intelligence: u8, // 5 bits
     wisdom: u8, // 5 bits
     charisma: u8, // 5 bits
-    // Metaphysical
-    luck: u8 // // not stored - dynamically generated
+    luck: u8 // // dynamically generated, not stored.
 }
 
 #[generate_trait]
@@ -25,12 +19,6 @@ impl StatUtils of IStat {
         }
     }
 }
-
-const TWO_POW_5: u256 = 0x20;
-const TWO_POW_10: u256 = 0x400;
-const TWO_POW_15: u256 = 0x8000;
-const TWO_POW_20: u256 = 0x100000;
-const TWO_POW_25: u256 = 0x2000000;
 
 impl StatsPacking of StorePacking<Stats, felt252> {
     fn pack(value: Stats) -> felt252 {
@@ -73,14 +61,18 @@ impl StatsPacking of StorePacking<Stats, felt252> {
     }
 }
 
+const TWO_POW_5: u256 = 0x20;
+const TWO_POW_10: u256 = 0x400;
+const TWO_POW_15: u256 = 0x8000;
+const TWO_POW_20: u256 = 0x100000;
+const TWO_POW_25: u256 = 0x2000000;
+
 // ---------------------------
 // ---------- Tests ----------
 // ---------------------------
 #[cfg(test)]
 mod tests {
-    use survivor::{
-        constants::adventurer_constants::MAX_STAT_VALUE, adventurer_stats::{Stats, StatsPacking}
-    };
+    use survivor::adventurer_stats::{Stats, StatsPacking};
 
     #[test]
     #[available_gas(1039260)]

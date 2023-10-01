@@ -1,6 +1,4 @@
-use core::option::OptionTrait;
-use integer::{u16_sqrt};
-use core::traits::{TryInto, Into, DivEq};
+use core::{integer::u16_sqrt, option::OptionTrait, traits::{TryInto, Into}};
 use super::constants::{
     CombatEnums::{Tier, Type, Slot, WeaponEffectiveness},
     CombatSettings::{
@@ -10,7 +8,7 @@ use super::constants::{
     }
 };
 
-// SpecialPowers contains special names for combat items
+// For providing special item abilities
 #[derive(Drop, Copy, Serde)]
 struct SpecialPowers {
     special1: u8,
@@ -18,7 +16,7 @@ struct SpecialPowers {
     special3: u8
 }
 
-// CombatSpec is used for performing combat calculations 
+// Used for combat calculations 
 #[derive(Drop, Copy, Serde)]
 struct CombatSpec {
     tier: Tier,
@@ -27,7 +25,7 @@ struct CombatSpec {
     specials: SpecialPowers,
 }
 
-// CombatResult is used for providing combat results
+// Used for providing combat results
 #[derive(Drop, Serde)]
 struct CombatResult {
     base_attack: u16,
@@ -647,7 +645,7 @@ impl ImplCombat of ICombat {
 mod tests {
     use core::option::OptionTrait;
     use integer::{u16_sqrt};
-    use core::traits::{TryInto, Into, DivEq};
+    use core::traits::{TryInto, Into};
     use combat::{
         combat::{ImplCombat, ICombat, CombatSpec, SpecialPowers},
         constants::{

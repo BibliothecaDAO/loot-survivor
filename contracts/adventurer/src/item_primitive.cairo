@@ -1,24 +1,18 @@
-use starknet::{StorePacking};
-use option::OptionTrait;
-use traits::{TryInto, Into};
+use core::{option::OptionTrait, starknet::StorePacking, traits::{TryInto, Into}};
 use lootitems::loot::{ItemId};
 
-#[derive(Drop, Copy, PartialEq, Serde)] // 21 bits
-struct ItemPrimitive {
+#[derive(Drop, Copy, PartialEq, Serde)]
+struct ItemPrimitive { // 21 storage bits
     id: u8, // 7 bits
     xp: u16, // 9 bits
     metadata: u8, // 5 bits
 }
 
-const TWO_POW_5: u256 = 0x20;
-const TWO_POW_7: u256 = 0x80;
-const TWO_POW_9: u256 = 0x200;
-const TWO_POW_16: u256 = 0x10000;
-
 impl ItemPrimitivePacking of StorePacking<ItemPrimitive, felt252> {
     fn pack(value: ItemPrimitive) -> felt252 {
         (value.id.into() + value.xp.into() * TWO_POW_7 + value.metadata.into() * TWO_POW_16)
-            .try_into().unwrap()
+            .try_into()
+            .unwrap()
     }
 
     fn unpack(value: felt252) -> ItemPrimitive {
@@ -67,6 +61,11 @@ impl ImplItemPrimitive of IItemPrimitive {
         }
     }
 }
+
+const TWO_POW_5: u256 = 0x20;
+const TWO_POW_7: u256 = 0x80;
+const TWO_POW_9: u256 = 0x200;
+const TWO_POW_16: u256 = 0x10000;
 
 // ---------------------------
 // ---------- Tests ----------

@@ -5,39 +5,6 @@ use super::{
     adventurer_stats::Stats, bag::{Bag, IBag}
 };
 
-mod STORAGE {
-    // First 10 indexes are stored in storage 1
-    const INDEX_1: u8 = 1;
-    const INDEX_2: u8 = 2;
-    const INDEX_3: u8 = 3;
-    const INDEX_4: u8 = 4;
-    const INDEX_5: u8 = 5;
-    const INDEX_6: u8 = 6;
-    const INDEX_7: u8 = 7;
-    const INDEX_8: u8 = 8;
-    const INDEX_9: u8 = 9;
-    const INDEX_10: u8 = 10;
-
-    // next 9 indexes are stored in storage 2
-    const INDEX_11: u8 = 11;
-    const INDEX_12: u8 = 12;
-    const INDEX_13: u8 = 13;
-    const INDEX_14: u8 = 14;
-    const INDEX_15: u8 = 15;
-    const INDEX_16: u8 = 16;
-    const INDEX_17: u8 = 17;
-    const INDEX_18: u8 = 18;
-    const INDEX_19: u8 = 19;
-
-    // make sure to update this if you add more storage slots
-    const MAX_TOTAL_STORAGE_SPECIALS: u8 = 19;
-    const MAX_SPECIALS_PER_STORAGE: u8 = 10;
-}
-
-const MAX_SPECIAL1: u8 = 15;
-const MAX_SPECIAL2: u8 = 127;
-const MAX_SPECIAL3: u8 = 31;
-
 #[derive(PartialEq, Drop, Copy, Serde)]
 struct ItemSpecials {
     special1: u8, // 4 bits in storage
@@ -45,7 +12,7 @@ struct ItemSpecials {
     special3: u8, // 5 bits in storage
 }
 
-// Player can have a total of 20 items. We map the items index to a slot in the metadata
+// Fixed size to fit optimally in felt252
 #[derive(Drop, Copy, Serde)]
 struct ItemSpecialsStorage {
     item_1: ItemSpecials,
@@ -60,37 +27,6 @@ struct ItemSpecialsStorage {
     item_10: ItemSpecials,
     mutated: bool,
 }
-
-// TODO: Meta data storage can be simplified and more easily extended by meta data storage by switching to the below
-//       data structure. This data structure will allow us to identify the storage id when
-//       it is being operated on and also to flag the storage as modified when it is altered
-//       so that the top-level contract code knows when it needs to write it to storage.
-//       currently the "has been modified" flows back down the stack in a relatively obscure way
-//       that results in a lot of code that is hard to follow and understand. This will make it
-//       much easier to follow and understand. Furthermore by using an array of structs we can
-//       make it easier to add more storage slots in the future. 
-// #[derive(Drop, Copy, Serde)]
-// struct NewSpecialPowerStorage {
-//     id: u8, // provide storage id (1 or 2 for current game)
-//     size: u8, // size of the storage (10 for storage 1, 9 for storage 2 in current game)
-//     modified: bool, // a modified flag to make it easy to know when we need to write to storage
-//     item_specials: Array<ItemSpecials>,
-// }
-
-const TWO_POW_4: u256 = 0x10;
-const TWO_POW_5: u256 = 0x20;
-const TWO_POW_7: u256 = 0x80;
-const TWO_POW_12: u256 = 0x1000;
-const TWO_POW_16: u256 = 0x10000; // 2^16
-const TWO_POW_32: u256 = 0x100000000; // 2^32
-const TWO_POW_48: u256 = 0x1000000000000; // 2^48
-const TWO_POW_64: u256 = 0x10000000000000000; // 2^64
-const TWO_POW_80: u256 = 0x100000000000000000000; // 2^80
-const TWO_POW_96: u256 = 0x1000000000000000000000000; // 2^96
-const TWO_POW_112: u256 = 0x10000000000000000000000000000; // 2^112
-const TWO_POW_128: u256 = 0x100000000000000000000000000000000; // 2^128
-const TWO_POW_144: u256 = 0x1000000000000000000000000000000000000; // 2^144
-
 
 impl ItemSpecialsPacking of StorePacking<ItemSpecials, felt252> {
     fn pack(value: ItemSpecials) -> felt252 {
@@ -174,16 +110,13 @@ impl ImplItemSpecials of IItemSpecials {
     fn get_specials(self: ItemSpecialsStorage, item: ItemPrimitive) -> ItemSpecials {
         // @dev Since this function doesn't know which name storage it has been given
         // it needs to consider both storage 1 and storage 2. In the current system
-        // which is relatively rigid (wip), name storage 1 is used for the first 10 items
+        // which is rigid because it's highly gas optimized, storage 1 is used for the first 10 items
         // and name storage 2 is used for the next 9 items. As such, if this function
-        // is called for an item with meta data is 1, it will be in the first slot of
+        // is called for an item with meta data 1, it will be in the first slot of
         // storage. Similarly, if this function is called with an item with meta data 11
         // it will be in the first slot of storage 2. This is why we need to check for
-        // both storage 1 and storage 2. If we add more storage slots in the future
-        // we will need to update this function to check for those as well.
-        // I have a TODO at the top to restructure our ItemSpecialStorage struct to include
-        // an explicit storage id and size so we can provide a more flexible and robust
-        // solution to this problem.
+        // both storage 1 and storage 2. If you add more storage slots, you will need
+        // to update this function accordingly
         if item.metadata == STORAGE::INDEX_1 || item.metadata == STORAGE::INDEX_11 {
             self.item_1
         } else if item.metadata == STORAGE::INDEX_2 || item.metadata == STORAGE::INDEX_12 {
@@ -443,6 +376,49 @@ impl ImplItemSpecials of IItemSpecials {
     }
 }
 
+mod STORAGE {
+    // First 10 indexes are stored in storage 1
+    const INDEX_1: u8 = 1;
+    const INDEX_2: u8 = 2;
+    const INDEX_3: u8 = 3;
+    const INDEX_4: u8 = 4;
+    const INDEX_5: u8 = 5;
+    const INDEX_6: u8 = 6;
+    const INDEX_7: u8 = 7;
+    const INDEX_8: u8 = 8;
+    const INDEX_9: u8 = 9;
+    const INDEX_10: u8 = 10;
+
+    // next 9 indexes are stored in storage 2
+    const INDEX_11: u8 = 11;
+    const INDEX_12: u8 = 12;
+    const INDEX_13: u8 = 13;
+    const INDEX_14: u8 = 14;
+    const INDEX_15: u8 = 15;
+    const INDEX_16: u8 = 16;
+    const INDEX_17: u8 = 17;
+    const INDEX_18: u8 = 18;
+    const INDEX_19: u8 = 19;
+
+    // make sure to update this if you add more storage slots
+    const MAX_TOTAL_STORAGE_SPECIALS: u8 = 19;
+    const MAX_SPECIALS_PER_STORAGE: u8 = 10;
+}
+
+const TWO_POW_4: u256 = 0x10;
+const TWO_POW_5: u256 = 0x20;
+const TWO_POW_7: u256 = 0x80;
+const TWO_POW_12: u256 = 0x1000;
+const TWO_POW_16: u256 = 0x10000;
+const TWO_POW_32: u256 = 0x100000000;
+const TWO_POW_48: u256 = 0x1000000000000;
+const TWO_POW_64: u256 = 0x10000000000000000;
+const TWO_POW_80: u256 = 0x100000000000000000000;
+const TWO_POW_96: u256 = 0x1000000000000000000000000;
+const TWO_POW_112: u256 = 0x10000000000000000000000000000;
+const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
+const TWO_POW_144: u256 = 0x1000000000000000000000000000000000000;
+
 // ---------------------------
 // ---------- Tests ----------
 // ---------------------------
@@ -453,8 +429,7 @@ mod tests {
         adventurer::{ImplAdventurer}, item_primitive::ItemPrimitive, adventurer_stats::Stats,
         bag::{Bag, IBag},
         item_meta::{
-            ImplItemSpecials, ItemSpecialsStorage, ItemSpecials, ItemSpecialsStoragePacking,
-            MAX_SPECIAL1, MAX_SPECIAL2, MAX_SPECIAL3, STORAGE
+            ImplItemSpecials, ItemSpecialsStorage, ItemSpecials, ItemSpecialsStoragePacking, STORAGE
         },
     };
 
