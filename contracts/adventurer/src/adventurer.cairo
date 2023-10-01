@@ -1,10 +1,8 @@
 use core::{
     array::ArrayTrait,
     integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub, u256_try_as_non_zero},
-    option::OptionTrait,
-    poseidon::poseidon_hash_span,
-    result::ResultTrait, starknet::{StorePacking},
-    traits::{TryInto, Into}
+    option::OptionTrait, poseidon::poseidon_hash_span, result::ResultTrait,
+    starknet::{StorePacking}, traits::{TryInto, Into}
 };
 
 use super::{
