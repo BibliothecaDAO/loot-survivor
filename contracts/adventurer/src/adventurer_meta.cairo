@@ -26,7 +26,7 @@ const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
 #[cfg(test)]
 #[test]
 #[available_gas(116600)]
-fn test_pack_unpack_adventurer_meta() {
+fn test_adventurer_metadata_packing() {
     // max value case
     let max_u128 = 340282366920938463463374607431768211455;
     let name_length = 'abcdefghijklmno';

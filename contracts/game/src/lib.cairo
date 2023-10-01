@@ -12,7 +12,7 @@ mod Game {
     // TODO: TESTING CONFIGS 
     // ADJUST THESE BEFORE DEPLOYMENT
     const TEST_ENTROPY: u64 = 12303548;
-    const MINIMUM_SCORE_FOR_PAYOUTS: u256 = 100;
+    const MINIMUM_SCORE_FOR_PAYOUTS: u16 = 100;
     const LOOT_NAME_STORAGE_INDEX_1: u256 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
 
@@ -54,7 +54,7 @@ mod Game {
             }
         },
         item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
-        adventurer_utils::AdventurerUtils
+        adventurer_utils::AdventurerUtils, leaderboard::{Score, Leaderboard},
     };
     use market::{
         market::{ImplMarket, LootWithPrice, ItemPurchase}, constants::{NUMBER_OF_ITEMS_PER_LEVEL}
@@ -67,20 +67,18 @@ mod Game {
 
     #[storage]
     struct Storage {
-        _game_entropy: GameEntropy,
         _adventurer: LegacyMap::<u256, Adventurer>,
-        _owner: LegacyMap::<u256, ContractAddress>,
         _adventurer_meta: LegacyMap::<u256, AdventurerMetadata>,
-        _item_specials: LegacyMap::<(u256, u256), ItemSpecialsStorage>,
         _bag: LegacyMap::<u256, Bag>,
-        _counter: u256,
-        _lords: ContractAddress,
-        _dao: ContractAddress,
         _collectible_beasts: ContractAddress,
-        // 1,2,3 // Survivor ID
-        _scoreboard: LegacyMap::<u256, u256>,
-        _scores: LegacyMap::<u256, u256>,
+        _dao: ContractAddress,
+        _game_counter: u256,
+        _game_entropy: GameEntropy,
         _genesis_block: u64,
+        _leaderboard: Leaderboard,
+        _lords: ContractAddress,
+        _owner: LegacyMap::<u256, ContractAddress>,
+        _item_specials: LegacyMap::<(u256, u256), ItemSpecialsStorage>,
     }
 
     #[event]
@@ -817,6 +815,9 @@ mod Game {
         fn get_game_entropy(self: @ContractState) -> GameEntropy {
             _unpack_game_entropy(self)
         }
+        fn get_leaderboard(self: @ContractState) -> Leaderboard {
+            self._leaderboard.read()
+        }
         fn owner_of(self: @ContractState, adventurer_id: u256) -> ContractAddress {
             _owner_of(self, adventurer_id)
         }
@@ -955,7 +956,7 @@ mod Game {
         __event_AdventurerDied(ref self, AdventurerDied { adventurer_state, death_details });
 
         if _is_top_score(@self, adventurer.xp) {
-            _update_leaderboard(ref self, adventurer_state);
+            _update_leaderboard(ref self, adventurer_id, adventurer);
         }
     }
 
@@ -973,15 +974,13 @@ mod Game {
         let genesis_block = self._genesis_block.read();
         let dao_address = self._dao.read();
 
-        let first_place_adventurer_id = self._scoreboard.read(1);
-        let first_place_address = self._owner.read(first_place_adventurer_id);
-        let second_place_adventurer_id = self._scoreboard.read(2);
-        let second_place_address = self._owner.read(second_place_adventurer_id);
-        let third_place_adventurer_id = self._scoreboard.read(3);
-        let third_place_address = self._owner.read(third_place_adventurer_id);
+        let leaderboard = self._leaderboard.read();
+        let first_place_address = self._owner.read(leaderboard.first.adventurer_id.into());
+        let second_place_address = self._owner.read(leaderboard.second.adventurer_id.into());
+        let third_place_address = self._owner.read(leaderboard.third.adventurer_id.into());
 
         // if third place score is less than minimum score for payouts
-        if (self._scores.read(3) < MINIMUM_SCORE_FOR_PAYOUTS) {
+        if (leaderboard.third.xp < MINIMUM_SCORE_FOR_PAYOUTS) {
             // all rewards go to the DAO
             // the purpose of this is to let a decent set of top scores get set before payouts begin
             // without this, there would be an incentive to start and die immediately after contract is deployed
@@ -1069,19 +1068,19 @@ mod Game {
             ref self,
             RewardDistribution {
                 first_place: PlayerReward {
-                    adventurer_id: first_place_adventurer_id,
+                    adventurer_id: leaderboard.first.adventurer_id.into(),
                     rank: 1,
                     amount: week.FIRST_PLACE,
                     address: first_place_address
                 },
                 second_place: PlayerReward {
-                    adventurer_id: second_place_adventurer_id,
+                    adventurer_id: leaderboard.second.adventurer_id.into(),
                     rank: 2,
                     amount: week.SECOND_PLACE,
                     address: second_place_address
                 },
                 third_place: PlayerReward {
-                    adventurer_id: third_place_adventurer_id,
+                    adventurer_id: leaderboard.third.adventurer_id.into(),
                     rank: 3,
                     amount: week.THIRD_PLACE,
                     address: third_place_address
@@ -1094,7 +1093,7 @@ mod Game {
 
     fn _start_game(ref self: ContractState, weapon: u8, name: u128) {
         // increment adventurer id (first adventurer is id 1)
-        let adventurer_id = self._counter.read() + 1;
+        let adventurer_id = self._game_counter.read() + 1;
 
         // use current starknet block number and timestamp as entropy sources
         let block_number = starknet::get_block_info().unbox().block_number;
@@ -1126,7 +1125,7 @@ mod Game {
         _pack_adventurer_meta(ref self, adventurer_id, adventurer_meta);
 
         // increment the adventurer id counter
-        self._counter.write(adventurer_id);
+        self._game_counter.write(adventurer_id);
 
         // set caller as owner
         self._owner.write(adventurer_id, get_caller_address());
@@ -2440,51 +2439,54 @@ mod Game {
     }
 
     #[inline(always)]
-    fn _get_score_for_adventurer(self: @ContractState, adventurer_id: u256) -> u256 {
-        self._scores.read(adventurer_id)
-    }
-
-    #[inline(always)]
     fn _is_top_score(self: @ContractState, score: u16) -> bool {
-        if score.into() > self._scores.read(3) {
+        if score > self._leaderboard.read().third.xp {
             true
         } else {
             false
         }
     }
 
+    // @title Update Leaderboard Function
+    //
+    // @param adventurer_id The unique identifier of the adventurer
+    // @param adventurer The adventurer that scored a new high score
+    fn _update_leaderboard(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {
+        // get current leaderboard which will be mutated as part of this function
+        let mut leaderboard = self._leaderboard.read();
 
-    // sets the scoreboard
-    // we set the adventurer id in the scoreboard as we already store the owners address
-    fn _update_leaderboard(ref self: ContractState, adventurer_state: AdventurerState) {
-        let score = adventurer_state.adventurer.xp;
-        let second_place = self._scoreboard.read(2);
-        let first_place = self._scoreboard.read(1);
+        // create a score struct for the players score
+        let player_score = Score {
+            adventurer_id: adventurer_id.try_into().unwrap(),
+            xp: adventurer.xp,
+            gold: adventurer.gold
+        };
 
-        if score.into() > self._scores.read(1) {
-            __event_NewHighScore(ref self, adventurer_state, 1);
-            self._scoreboard.write(3, second_place);
-            self._scoreboard.write(2, first_place);
-            self._scoreboard.write(1, adventurer_state.adventurer_id);
-            self._scores.write(3, self._scores.read(2));
-            self._scores.write(2, self._scores.read(1));
-            self._scores.write(1, score.into());
-        } else if score.into() > self._scores.read(2) {
-            __event_NewHighScore(ref self, adventurer_state, 2);
-            self._scoreboard.write(3, second_place);
-            self._scoreboard.write(2, adventurer_state.adventurer_id);
-            self._scores.write(3, self._scores.read(2));
-            self._scores.write(2, score.into());
-        } else if score.into() > self._scores.read(3) {
-            __event_NewHighScore(ref self, adventurer_state, 3);
-            self._scoreboard.write(3, adventurer_state.adventurer_id);
-            self._scores.write(3, score.into());
+        let mut player_rank = 0;
+
+        // shift leaderboard based on players placement
+        if player_score.xp > leaderboard.first.xp {
+            leaderboard.third = leaderboard.second;
+            leaderboard.second = leaderboard.first;
+            leaderboard.first = player_score;
+            player_rank = 1;
+        } else if player_score.xp > leaderboard.second.xp {
+            leaderboard.third = leaderboard.second;
+            leaderboard.second = player_score;
+            player_rank = 2;
+        } else if player_score.xp > leaderboard.third.xp {
+            leaderboard.third = player_score;
+            player_rank = 3;
         }
+
+        // emit new high score event
+        __event_NewHighScore(ref self, adventurer_id, adventurer, player_rank);
+
+        // save leaderboard
+        self._leaderboard.write(leaderboard);
     }
 
-
-    // EVENTS ------------------------------------ //
-
+    // ---------- EVENTS ---------- //
     #[derive(Copy, Drop, Serde, starknet::Event)]
     struct AdventurerState {
         owner: ContractAddress,
@@ -2981,7 +2983,12 @@ mod Game {
         self.emit(ItemsLeveledUp { adventurer_state, items });
     }
 
-    fn __event_NewHighScore(ref self: ContractState, adventurer_state: AdventurerState, rank: u8) {
+    fn __event_NewHighScore(
+        ref self: ContractState, adventurer_id: u256, adventurer: Adventurer, rank: u8
+    ) {
+        let adventurer_state = AdventurerState {
+            owner: get_caller_address(), adventurer_id, adventurer
+        };
         self.emit(NewHighScore { adventurer_state, rank });
     }
 
