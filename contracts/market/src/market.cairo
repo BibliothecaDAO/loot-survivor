@@ -580,7 +580,7 @@ mod tests {
             if (i == 100) {
                 break;
             }
-            let adventurer_id: u256 = 1;
+            let adventurer_id: felt252 = 1;
             let block_number = 839152;
             let xp: u16 = 3;
             let stats_points_available: u8 = 4;

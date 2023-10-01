@@ -50,7 +50,7 @@ mod tests {
         contract_address_const::<1>()
     }
 
-    const ADVENTURER_ID: u256 = 1;
+    const ADVENTURER_ID: felt252 = 1;
 
     const MAX_LORDS: u256 = 500000000000000000000;
     const APPROVE: u256 = 50000000000000000000;
