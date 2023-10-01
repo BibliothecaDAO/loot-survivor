@@ -2444,9 +2444,10 @@ mod Game {
         }
     }
 
-
-    // sets the scoreboard
-    // we set the adventurer id in the scoreboard as we already store the owners address
+    // @title Update Leaderboard Function
+    //
+    // @param adventurer_id The unique identifier of the adventurer
+    // @param adventurer The adventurer that scored a new high score
     fn _update_leaderboard(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {
         // get current leaderboard which will be mutated as part of this function
         let mut leaderboard = self._leaderboard.read();
@@ -2476,15 +2477,13 @@ mod Game {
         }
 
         // emit new high score event
-        __event_NewHighScore(ref self, adventurer_id, adventurer, 3);
+        __event_NewHighScore(ref self, adventurer_id, adventurer, player_rank);
 
         // save leaderboard
         self._leaderboard.write(leaderboard);
     }
 
-
-    // EVENTS ------------------------------------ //
-
+    // ---------- EVENTS ---------- //
     #[derive(Copy, Drop, Serde, starknet::Event)]
     struct AdventurerState {
         owner: ContractAddress,
