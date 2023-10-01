@@ -1,4 +1,4 @@
-use pack::{pack::{Packing, rshift_split}, constants::pow};
+use starknet::{StorePacking};
 use lootitems::constants::{ItemId, ItemSuffix};
 use super::{
     adventurer::{Adventurer, IAdventurer, ImplAdventurer}, item_primitive::ItemPrimitive,
@@ -61,7 +61,7 @@ struct ItemSpecialsStorage {
     mutated: bool,
 }
 
-// TODO: We can greatly simplify and harden our meta data storage by switching to the below
+// TODO: Meta data storage can be simplified and more easily extended by meta data storage by switching to the below
 //       data structure. This data structure will allow us to identify the storage id when
 //       it is being operated on and also to flag the storage as modified when it is altered
 //       so that the top-level contract code knows when it needs to write it to storage.
@@ -77,22 +77,39 @@ struct ItemSpecialsStorage {
 //     item_specials: Array<ItemSpecials>,
 // }
 
-impl ItemSpecialsPacking of Packing<ItemSpecials> {
-    fn pack(self: ItemSpecials) -> felt252 {
-        let overflow_protected = self.overflow_pack_protection();
+const TWO_POW_4: u256 = 0x10;
+const TWO_POW_5: u256 = 0x20;
+const TWO_POW_7: u256 = 0x80;
+const TWO_POW_12: u256 = 0x1000;
+const TWO_POW_16: u256 = 0x10000; // 2^16
+const TWO_POW_32: u256 = 0x100000000; // 2^32
+const TWO_POW_48: u256 = 0x1000000000000; // 2^48
+const TWO_POW_64: u256 = 0x10000000000000000; // 2^64
+const TWO_POW_80: u256 = 0x100000000000000000000; // 2^80
+const TWO_POW_96: u256 = 0x1000000000000000000000000; // 2^96
+const TWO_POW_112: u256 = 0x10000000000000000000000000000; // 2^112
+const TWO_POW_128: u256 = 0x100000000000000000000000000000000; // 2^128
+const TWO_POW_144: u256 = 0x1000000000000000000000000000000000000; // 2^144
 
-        (overflow_protected.special2.into()
-            + overflow_protected.special3.into() * pow::TWO_POW_7
-            + overflow_protected.special1.into() * pow::TWO_POW_12)
+
+impl ItemSpecialsPacking of StorePacking<ItemSpecials, felt252> {
+    fn pack(value: ItemSpecials) -> felt252 {
+        (value.special2.into()
+            + value.special3.into() * TWO_POW_7
+            + value.special1.into() * TWO_POW_12)
             .try_into()
-            .expect('pack ItemSpecials')
+            .unwrap()
     }
 
-    fn unpack(packed: felt252) -> ItemSpecials {
-        let packed = packed.into();
-        let (packed, special2) = rshift_split(packed, pow::TWO_POW_7);
-        let (packed, special3) = rshift_split(packed, pow::TWO_POW_5);
-        let (_, special1) = rshift_split(packed, pow::TWO_POW_4);
+    fn unpack(value: felt252) -> ItemSpecials {
+        let packed = value.into();
+        let (packed, special2) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_7.try_into().unwrap()
+        );
+        let (packed, special3) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_5.try_into().unwrap()
+        );
+        let (_, special1) = integer::U256DivRem::div_rem(packed, TWO_POW_4.try_into().unwrap());
 
         ItemSpecials {
             special2: special2.try_into().expect('unpack LISN special2'),
@@ -100,92 +117,50 @@ impl ItemSpecialsPacking of Packing<ItemSpecials> {
             special1: special1.try_into().expect('unpack LISN special1')
         }
     }
-
-    // @dev This function applies an overflow protection mechanism to the item's specials.
-    //
-    // @notice The function receives an instance of ItemSpecials and checks if any of the specials
-    // exceed their respective max limit values (MAX_SPECIAL1, MAX_SPECIAL2, and MAX_SPECIAL3). 
-    // If a special exceeds its limit, it is reset to the maximum allowable value. 
-    // This way, the function ensures that none of the specials go beyond the predefined limits.
-    // The function then returns the updated ItemSpecials object.
-    //
-    // @param self An instance of ItemSpecials that is to be checked and potentially adjusted for overflow.
-    //
-    // @return An instance of ItemSpecials where all the specials are ensured to be within their respective maximum limits.
-    fn overflow_pack_protection(self: ItemSpecials) -> ItemSpecials {
-        // Create a mutable copy of self to apply overflow protection
-        let mut overflow_protected_specials = self;
-
-        // Check if special1 exceeds its max limit
-        if self.special1 > MAX_SPECIAL1 {
-            // If special1 overflows, reset it to its max value
-            overflow_protected_specials.special1 = MAX_SPECIAL1;
-        };
-
-        // Check if special2 exceeds its max limit
-        if self.special2 > MAX_SPECIAL2 {
-            // If special2 overflows, reset it to its max value
-            overflow_protected_specials.special2 = MAX_SPECIAL2;
-        };
-
-        // Check if special3 exceeds its max limit
-        if self.special3 > MAX_SPECIAL3 {
-            // If special3 overflows, reset it to its max value
-            overflow_protected_specials.special3 = MAX_SPECIAL3;
-        };
-
-        // Return the updated ItemSpecials object with overflow protection
-        overflow_protected_specials
-    }
 }
 
-impl ItemSpecialsStoragePacking of Packing<ItemSpecialsStorage> {
-    fn pack(self: ItemSpecialsStorage) -> felt252 {
-        (self.item_1.pack().into()
-            + self.item_2.pack().into() * pow::TWO_POW_16
-            + self.item_3.pack().into() * pow::TWO_POW_32
-            + self.item_4.pack().into() * pow::TWO_POW_48
-            + self.item_5.pack().into() * pow::TWO_POW_64
-            + self.item_6.pack().into() * pow::TWO_POW_80
-            + self.item_7.pack().into() * pow::TWO_POW_96
-            + self.item_8.pack().into() * pow::TWO_POW_112
-            + self.item_9.pack().into() * pow::TWO_POW_128
-            + self.item_10.pack().into() * pow::TWO_POW_144)
+impl ItemSpecialsStoragePacking of StorePacking<ItemSpecialsStorage, felt252> {
+    fn pack(value: ItemSpecialsStorage) -> felt252 {
+        (ItemSpecialsPacking::pack(value.item_1).into()
+            + ItemSpecialsPacking::pack(value.item_2).into() * TWO_POW_16
+            + ItemSpecialsPacking::pack(value.item_3).into() * TWO_POW_32
+            + ItemSpecialsPacking::pack(value.item_4).into() * TWO_POW_48
+            + ItemSpecialsPacking::pack(value.item_5).into() * TWO_POW_64
+            + ItemSpecialsPacking::pack(value.item_6).into() * TWO_POW_80
+            + ItemSpecialsPacking::pack(value.item_7).into() * TWO_POW_96
+            + ItemSpecialsPacking::pack(value.item_8).into() * TWO_POW_112
+            + ItemSpecialsPacking::pack(value.item_9).into() * TWO_POW_128
+            + ItemSpecialsPacking::pack(value.item_10).into() * TWO_POW_144)
             .try_into()
-            .expect('pack LISNS')
+            .unwrap()
     }
 
-    fn unpack(packed: felt252) -> ItemSpecialsStorage {
-        let packed = packed.into();
-        let (packed, item_1) = rshift_split(packed, pow::TWO_POW_16);
-        let (packed, item_2) = rshift_split(packed, pow::TWO_POW_16);
-        let (packed, item_3) = rshift_split(packed, pow::TWO_POW_16);
-        let (packed, item_4) = rshift_split(packed, pow::TWO_POW_16);
-        let (packed, item_5) = rshift_split(packed, pow::TWO_POW_16);
-        let (packed, item_6) = rshift_split(packed, pow::TWO_POW_16);
-        let (packed, item_7) = rshift_split(packed, pow::TWO_POW_16);
-        let (packed, item_8) = rshift_split(packed, pow::TWO_POW_16);
-        let (packed, item_9) = rshift_split(packed, pow::TWO_POW_16);
-        let (_, item_10) = rshift_split(packed, pow::TWO_POW_16);
+    fn unpack(value: felt252) -> ItemSpecialsStorage {
+        let packed = value.into();
+        let (packed, item_1) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_2) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_3) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_4) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_5) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_6) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_7) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_8) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (packed, item_9) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
+        let (_, item_10) = integer::U256DivRem::div_rem(packed, TWO_POW_16.try_into().unwrap());
 
         ItemSpecialsStorage {
-            item_1: Packing::unpack(item_1.try_into().expect('unpack LISNS item_1')),
-            item_2: Packing::unpack(item_2.try_into().expect('unpack LISNS item_2')),
-            item_3: Packing::unpack(item_3.try_into().expect('unpack LISNS item_3')),
-            item_4: Packing::unpack(item_4.try_into().expect('unpack LISNS item_4')),
-            item_5: Packing::unpack(item_5.try_into().expect('unpack LISNS item_5')),
-            item_6: Packing::unpack(item_6.try_into().expect('unpack LISNS item_6')),
-            item_7: Packing::unpack(item_7.try_into().expect('unpack LISNS item_7')),
-            item_8: Packing::unpack(item_8.try_into().expect('unpack LISNS item_8')),
-            item_9: Packing::unpack(item_9.try_into().expect('unpack LISNS item_9')),
-            item_10: Packing::unpack(item_10.try_into().expect('unpack LISNS item_10')),
+            item_1: ItemSpecialsPacking::unpack(item_1.try_into().unwrap()),
+            item_2: ItemSpecialsPacking::unpack(item_2.try_into().unwrap()),
+            item_3: ItemSpecialsPacking::unpack(item_3.try_into().unwrap()),
+            item_4: ItemSpecialsPacking::unpack(item_4.try_into().unwrap()),
+            item_5: ItemSpecialsPacking::unpack(item_5.try_into().unwrap()),
+            item_6: ItemSpecialsPacking::unpack(item_6.try_into().unwrap()),
+            item_7: ItemSpecialsPacking::unpack(item_7.try_into().unwrap()),
+            item_8: ItemSpecialsPacking::unpack(item_8.try_into().unwrap()),
+            item_9: ItemSpecialsPacking::unpack(item_9.try_into().unwrap()),
+            item_10: ItemSpecialsPacking::unpack(item_10.try_into().unwrap()),
             mutated: false,
         }
-    }
-
-    // TODO: add overflow pack protection
-    fn overflow_pack_protection(self: ItemSpecialsStorage) -> ItemSpecialsStorage {
-        self
     }
 }
 
@@ -473,14 +448,13 @@ impl ImplItemSpecials of IItemSpecials {
 // ---------------------------
 #[cfg(test)]
 mod tests {
-    use pack::pack::{Packing};
     use lootitems::constants::{ItemId};
     use survivor::{
         adventurer::{ImplAdventurer}, item_primitive::ItemPrimitive, adventurer_stats::Stats,
         bag::{Bag, IBag},
         item_meta::{
-            ImplItemSpecials, ItemSpecialsStorage, ItemSpecials, MAX_SPECIAL1, MAX_SPECIAL2,
-            MAX_SPECIAL3, STORAGE
+            ImplItemSpecials, ItemSpecialsStorage, ItemSpecials, ItemSpecialsStoragePacking,
+            MAX_SPECIAL1, MAX_SPECIAL2, MAX_SPECIAL3, STORAGE
         },
     };
 
@@ -498,41 +472,31 @@ mod tests {
             item_4: ItemSpecials {
                 special1: 15, special2: 127, special3: 31 // max packable values
             },
-            item_5: ItemSpecials { special1: 255, special2: 255, special3: 255 // max u8 values
-             },
-            item_6: ItemSpecials { special1: 5, special2: 5, special3: 5 // dnc
-             },
-            item_7: ItemSpecials { special1: 6, special2: 6, special3: 6 // dnc
-             },
-            item_8: ItemSpecials { special1: 7, special2: 7, special3: 7 // dnc
-             },
-            item_9: ItemSpecials { special1: 8, special2: 8, special3: 8 // dnc
-             },
-            item_10: ItemSpecials { special1: 9, special2: 9, special3: 9 // dnc
-             },
+            item_5: ItemSpecials { special1: 4, special2: 23, special3: 2 },
+            item_6: ItemSpecials { special1: 5, special2: 5, special3: 5 },
+            item_7: ItemSpecials { special1: 6, special2: 6, special3: 6 },
+            item_8: ItemSpecials { special1: 7, special2: 7, special3: 7 },
+            item_9: ItemSpecials { special1: 8, special2: 8, special3: 8 },
+            item_10: ItemSpecials { special1: 9, special2: 9, special3: 9 },
             mutated: false,
         };
 
         // pack and then unpack the specials
-        let unpacked: ItemSpecialsStorage = Packing::unpack(storage.pack());
+        let unpacked: ItemSpecialsStorage = ItemSpecialsStoragePacking::unpack(
+            ItemSpecialsStoragePacking::pack(storage)
+        );
 
         // assert the values were not altered using PartialEq
         assert(unpacked.item_1 == storage.item_1, 'item 1 packing error');
         assert(unpacked.item_2 == storage.item_2, 'item 2 packing error');
         assert(unpacked.item_3 == storage.item_3, 'item 3 packing error');
         assert(unpacked.item_4 == storage.item_4, 'item 4 packing error');
+        assert(unpacked.item_5 == storage.item_5, 'item 5 packing error');
         assert(unpacked.item_6 == storage.item_6, 'item 6 packing error');
         assert(unpacked.item_7 == storage.item_7, 'item 7 packing error');
         assert(unpacked.item_8 == storage.item_8, 'item 8 packing error');
         assert(unpacked.item_9 == storage.item_9, 'item 9 packing error');
         assert(unpacked.item_10 == storage.item_10, 'item 10 packing error');
-
-        // item 5 is special in that it attempts to overflow the packing
-        // assert the packing overflow protection works and instead of
-        // overflowing, sets these values to max
-        assert(unpacked.item_5.special1 == MAX_SPECIAL1, 'special1 max u8 check');
-        assert(unpacked.item_5.special2 == MAX_SPECIAL2, 'special2 max u8 check');
-        assert(unpacked.item_5.special3 == MAX_SPECIAL3, 'special3 max u8 check');
     }
 
     #[test]

@@ -1,11 +1,10 @@
-use traits::{TryInto, Into};
-use option::OptionTrait;
-use pack::{pack::{Packing, rshift_split}, constants::pow};
-use super::{
-    adventurer::{Adventurer, ImplAdventurer, IAdventurer},
-    item_primitive::{ItemPrimitive, ImplItemPrimitive}, item_meta::{ImplItemSpecials, IItemSpecials}
-};
+use starknet::{StorePacking};
 use lootitems::constants::ItemId;
+use super::{
+    adventurer::{Adventurer, ImplAdventurer},
+    item_primitive::{ItemPrimitive, ImplItemPrimitive, ItemPrimitivePacking},
+    item_meta::{ImplItemSpecials}
+};
 
 // Bag is used for storing gear not equipped to the adventurer
 // TODO: Change this to an Array<ItemPrimitive> with id: u8, size: u8, and modified: bool
@@ -26,56 +25,64 @@ struct Bag {
     mutated: bool,
 }
 
-impl BagPacking of Packing<Bag> {
-    fn pack(self: Bag) -> felt252 {
-        (self.item_1.pack().into()
-            + self.item_2.pack().into() * pow::TWO_POW_21
-            + self.item_3.pack().into() * pow::TWO_POW_42
-            + self.item_4.pack().into() * pow::TWO_POW_63
-            + self.item_5.pack().into() * pow::TWO_POW_84
-            + self.item_6.pack().into() * pow::TWO_POW_105
-            + self.item_7.pack().into() * pow::TWO_POW_126
-            + self.item_8.pack().into() * pow::TWO_POW_147
-            + self.item_9.pack().into() * pow::TWO_POW_168
-            + self.item_10.pack().into() * pow::TWO_POW_189
-            + self.item_11.pack().into() * pow::TWO_POW_210)
+const TWO_POW_21: u256 = 0x200000;
+const TWO_POW_42: u256 = 0x40000000000;
+const TWO_POW_63: u256 = 0x8000000000000000;
+const TWO_POW_84: u256 = 0x1000000000000000000000;
+const TWO_POW_105: u256 = 0x200000000000000000000000000;
+const TWO_POW_126: u256 = 0x40000000000000000000000000000000;
+const TWO_POW_147: u256 = 0x8000000000000000000000000000000000000;
+const TWO_POW_168: u256 = 0x1000000000000000000000000000000000000000000;
+const TWO_POW_189: u256 = 0x200000000000000000000000000000000000000000000000;
+const TWO_POW_210: u256 = 0x40000000000000000000000000000000000000000000000000000;
+
+impl BagPacking of StorePacking<Bag, felt252> {
+    fn pack(value: Bag) -> felt252 {
+        (ItemPrimitivePacking::pack(value.item_1).into()
+            + ItemPrimitivePacking::pack(value.item_2).into() * TWO_POW_21
+            + ItemPrimitivePacking::pack(value.item_3).into() * TWO_POW_42
+            + ItemPrimitivePacking::pack(value.item_4).into() * TWO_POW_63
+            + ItemPrimitivePacking::pack(value.item_5).into() * TWO_POW_84
+            + ItemPrimitivePacking::pack(value.item_6).into() * TWO_POW_105
+            + ItemPrimitivePacking::pack(value.item_7).into() * TWO_POW_126
+            + ItemPrimitivePacking::pack(value.item_8).into() * TWO_POW_147
+            + ItemPrimitivePacking::pack(value.item_9).into() * TWO_POW_168
+            + ItemPrimitivePacking::pack(value.item_10).into() * TWO_POW_189
+            + ItemPrimitivePacking::pack(value.item_11).into() * TWO_POW_210)
             .try_into()
-            .expect('pack Bag')
+            .unwrap()
     }
 
-    fn unpack(packed: felt252) -> Bag {
-        let packed = packed.into();
-        let (packed, item_1) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, item_2) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, item_3) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, item_4) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, item_5) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, item_6) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, item_7) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, item_8) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, item_9) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, item_10) = rshift_split(packed, pow::TWO_POW_21);
-        let (_, item_11) = rshift_split(packed, pow::TWO_POW_21);
+    fn unpack(value: felt252) -> Bag {
+        let packed = value.into();
+        let (packed, item_1) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, item_2) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, item_3) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, item_4) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, item_5) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, item_6) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, item_7) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, item_8) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, item_9) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, item_10) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_21.try_into().unwrap()
+        );
+        let (_, item_11) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
 
         Bag {
-            item_1: Packing::unpack(item_1.try_into().expect('unpack Bag item_1')),
-            item_2: Packing::unpack(item_2.try_into().expect('unpack Bag item_2')),
-            item_3: Packing::unpack(item_3.try_into().expect('unpack Bag item_3')),
-            item_4: Packing::unpack(item_4.try_into().expect('unpack Bag item_4')),
-            item_5: Packing::unpack(item_5.try_into().expect('unpack Bag item_5')),
-            item_6: Packing::unpack(item_6.try_into().expect('unpack Bag item_6')),
-            item_7: Packing::unpack(item_7.try_into().expect('unpack Bag item_7')),
-            item_8: Packing::unpack(item_8.try_into().expect('unpack Bag item_8')),
-            item_9: Packing::unpack(item_9.try_into().expect('unpack Bag item_9')),
-            item_10: Packing::unpack(item_10.try_into().expect('unpack Bag item_10')),
-            item_11: Packing::unpack(item_11.try_into().expect('unpack Bag item_11')),
+            item_1: ItemPrimitivePacking::unpack(item_1.try_into().unwrap()),
+            item_2: ItemPrimitivePacking::unpack(item_2.try_into().unwrap()),
+            item_3: ItemPrimitivePacking::unpack(item_3.try_into().unwrap()),
+            item_4: ItemPrimitivePacking::unpack(item_4.try_into().unwrap()),
+            item_5: ItemPrimitivePacking::unpack(item_5.try_into().unwrap()),
+            item_6: ItemPrimitivePacking::unpack(item_6.try_into().unwrap()),
+            item_7: ItemPrimitivePacking::unpack(item_7.try_into().unwrap()),
+            item_8: ItemPrimitivePacking::unpack(item_8.try_into().unwrap()),
+            item_9: ItemPrimitivePacking::unpack(item_9.try_into().unwrap()),
+            item_10: ItemPrimitivePacking::unpack(item_10.try_into().unwrap()),
+            item_11: ItemPrimitivePacking::unpack(item_11.try_into().unwrap()),
             mutated: false
         }
-    }
-
-    // Not used for bag
-    fn overflow_pack_protection(self: Bag) -> Bag {
-        self
     }
 }
 
@@ -374,9 +381,8 @@ impl ImplBag of IBag {
 // ---------------------------
 #[cfg(test)]
 mod tests {
-    use survivor::{bag::{Bag, ImplBag, IBag}, item_primitive::{ItemPrimitive}};
+    use survivor::{bag::{Bag, ImplBag, IBag, BagPacking}, item_primitive::{ItemPrimitive}};
     use lootitems::{constants::ItemId};
-    use pack::{pack::{Packing}};
 
     #[test]
     #[available_gas(94030)]
@@ -613,7 +619,7 @@ mod tests {
             mutated: false,
         };
 
-        let packed_bag: Bag = Packing::unpack(bag.pack());
+        let packed_bag: Bag = BagPacking::unpack(BagPacking::pack(bag));
 
         assert(packed_bag.item_1.id == 127, 'Loot 1 ID is not 127');
         assert(packed_bag.item_1.xp == 511, 'Loot 1 XP is not 511');

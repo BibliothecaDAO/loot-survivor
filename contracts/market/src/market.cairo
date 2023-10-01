@@ -4,13 +4,12 @@ use array::{ArrayTrait, SpanTrait};
 use option::OptionTrait;
 use core::clone::Clone;
 use poseidon::poseidon_hash_span;
+use integer::u256_try_as_non_zero;
 
 use lootitems::{loot::{Loot, ILoot, ImplLoot}, constants::{ItemId, NUM_ITEMS}};
 
 use combat::constants::CombatEnums::{Tier, Slot};
 use super::constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE};
-use pack::pack::{rshift_split};
-
 
 #[derive(Drop, Serde)]
 struct LootWithPrice {
@@ -147,7 +146,9 @@ impl ImplMarket of IMarket {
     // @param seed a 256-bit unsigned integer representing a unique identifier for the seed.
     // @return a u8 representing the item ID.
     fn get_id(seed: u256) -> u8 {
-        let (_, item_id) = rshift_split(seed, NUM_ITEMS.into());
+        let (_, item_id) = integer::U256DivRem::div_rem(
+            seed, u256_try_as_non_zero(NUM_ITEMS.into()).unwrap()
+        );
         1 + item_id.try_into().unwrap()
     }
 
@@ -220,7 +221,9 @@ impl ImplMarket of IMarket {
     // market seed and the second element is an 8-bit unsigned integer that represents the market offset.
     fn split_hash_into_seed_and_offset(poseidon_hash: felt252) -> (u256, u8) {
         // split hash into two u128s, one for market seed, one for offset
-        let (market_seed, offset) = rshift_split(poseidon_hash.into(), NUM_ITEMS.into() - 1);
+        let (market_seed, offset) = integer::U256DivRem::div_rem(
+            poseidon_hash.into(), u256_try_as_non_zero(NUM_ITEMS.into() - 1).unwrap()
+        );
 
         // return market seed and market offset
         (market_seed, 1 + offset.try_into().unwrap())
@@ -241,8 +244,6 @@ mod tests {
     use market::{
         market::ImplMarket, constants::{NUM_LOOT_ITEMS, NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE}
     };
-    use pack::pack::{rshift_split};
-
     const TEST_MARKET_SEED: u256 = 515;
     const TEST_OFFSET: u8 = 3;
 

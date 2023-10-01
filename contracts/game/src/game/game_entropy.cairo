@@ -1,4 +1,4 @@
-use pack::{constants::pow, pack::{Packing, rshift_split}};
+use starknet::{StorePacking};
 
 #[derive(Drop, Copy, Serde)]
 struct GameEntropy {
@@ -6,26 +6,22 @@ struct GameEntropy {
     last_updated: u64,
 }
 
-impl GameEntropyPacking of Packing<GameEntropy> {
-    fn pack(self: GameEntropy) -> felt252 {
-        (self.entropy.into()
-            + self.last_updated.into() * pow::TWO_POW_128)
-            .try_into()
-            .expect('pack GameEntropy')
+const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
+
+impl GameEntropyPacking of StorePacking<GameEntropy, felt252> {
+    fn pack(value: GameEntropy) -> felt252 {
+        (value.entropy.into() + (value.last_updated.into() * TWO_POW_128)).try_into().unwrap()
     }
 
-    fn unpack(packed: felt252) -> GameEntropy {
-        let packed = packed.into();
-        let (packed, entropy) = rshift_split(packed, pow::TWO_POW_128);
-        let (_, last_updated) = rshift_split(packed, pow::TWO_POW_128);
+    fn unpack(value: felt252) -> GameEntropy {
+        let packed = value.into();
+        let (packed, entropy) = integer::U256DivRem::div_rem(packed, TWO_POW_128.try_into().unwrap());
+        let (_, last_updated) = integer::U256DivRem::div_rem(packed, TWO_POW_128.try_into().unwrap());
 
         GameEntropy {
-            entropy: entropy.try_into().unwrap(), last_updated: last_updated.try_into().unwrap(),
+            entropy: entropy.try_into().unwrap(), 
+            last_updated: last_updated.try_into().unwrap(),
         }
-    }
-    // Not used for game entropy
-    fn overflow_pack_protection(self: GameEntropy) -> GameEntropy {
-        self
     }
 }
 
@@ -35,19 +31,20 @@ impl GameEntropyPacking of Packing<GameEntropy> {
 #[cfg(test)]
 mod tests {
     use game::game::game_entropy::{GameEntropy, GameEntropyPacking};
-    use pack::{pack::{Packing}};
 
     #[test]
     #[available_gas(3000000)]
     fn test_packing_and_unpacking_game_entropy() {
+        // max value case
         let game_entropy = GameEntropy { entropy: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF, last_updated: 0xFFFFFFFFFFFFFFFF };
-        let unpacked: GameEntropy = Packing::unpack(game_entropy.pack());
+        let unpacked: GameEntropy = GameEntropyPacking::unpack(GameEntropyPacking::pack(game_entropy));
 
         assert(unpacked.entropy == game_entropy.entropy, 'wrong entropy max value');
         assert(unpacked.last_updated == game_entropy.last_updated, 'wrong last_updated max value');
 
+        // zero case
         let game_entropy = GameEntropy { entropy: 0, last_updated: 0 };
-        let unpacked: GameEntropy = Packing::unpack(game_entropy.pack());
+        let unpacked: GameEntropy = GameEntropyPacking::unpack(GameEntropyPacking::pack(game_entropy));
 
         assert(unpacked.entropy == game_entropy.entropy, 'wrong entropy zero');
         assert(unpacked.last_updated == game_entropy.last_updated, 'wrong last_updated zero');

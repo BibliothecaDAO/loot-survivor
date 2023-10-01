@@ -3,7 +3,9 @@ use core::{result::ResultTrait, traits::{TryInto, Into}};
 use poseidon::poseidon_hash_span;
 use option::OptionTrait;
 use array::ArrayTrait;
-use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub, U128IntoU256};
+use integer::{
+    u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub, U128IntoU256, u256_try_as_non_zero
+};
 use super::{
     constants::{
         adventurer_constants::{
@@ -23,10 +25,6 @@ use lootitems::constants::{
     }
 };
 use combat::constants::CombatEnums::{Type, Tier, Slot};
-use pack::{
-    pack::{rshift_split},
-    constants::{MASK_16, pow, MASK_8, MASK_3, MASK_BOOL, mask, U128_MASK_8, u128_pow}
-};
 
 #[generate_trait]
 impl AdventurerUtils of IAdventurerUtils {
@@ -94,7 +92,9 @@ impl AdventurerUtils of IAdventurerUtils {
         hash_span.append(block_number.into());
         hash_span.append(block_timestamp.into());
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
-        let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
+        let (d, r) = integer::U256DivRem::div_rem(
+            poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
+        );
         r.try_into().unwrap()
     }
 
@@ -107,7 +107,9 @@ impl AdventurerUtils of IAdventurerUtils {
         hash_span.append(entropy.into());
         hash_span.append(item_id.into());
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
-        let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
+        let (d, r) = integer::U256DivRem::div_rem(
+            poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
+        );
         (r.try_into().unwrap(), d.try_into().unwrap())
     }
 
@@ -219,7 +221,9 @@ impl AdventurerUtils of IAdventurerUtils {
     // @param felt_to_split: felt to split
     // @return (u128, u128): tuple of u128s
     fn split_hash(felt_to_split: felt252) -> (u128, u128) {
-        let (d, r) = rshift_split(felt_to_split.into(), U128_MAX.into());
+        let (d, r) = integer::U256DivRem::div_rem(
+            felt_to_split.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
+        );
         (r.try_into().unwrap(), d.try_into().unwrap())
     }
 
@@ -270,25 +274,41 @@ impl AdventurerUtils of IAdventurerUtils {
 
     fn u128_to_u8_array(value: u128) -> Array<u8> {
         let mut result = ArrayTrait::<u8>::new();
-        result.append((value & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_8) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_16) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_24) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_32) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_40) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_48) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_56) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_64) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_72) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_80) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_88) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_96) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_104) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_112) & U128_MASK_8).try_into().unwrap());
-        result.append(((value / u128_pow::_120) & U128_MASK_8).try_into().unwrap());
+        result.append((value & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_8) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_16) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_24) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_32) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_40) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_48) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_56) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_64) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_72) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_80) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_88) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_96) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_104) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_112) & MASK_8).try_into().unwrap());
+        result.append(((value / TWO_POW_120) & MASK_8).try_into().unwrap());
         result
     }
 }
+const MASK_8: u128 = 0xFF;
+const TWO_POW_8: u128 = 0x100;
+const TWO_POW_16: u128 = 0x10000;
+const TWO_POW_24: u128 = 0x1000000;
+const TWO_POW_32: u128 = 0x100000000;
+const TWO_POW_40: u128 = 0x10000000000;
+const TWO_POW_48: u128 = 0x1000000000000;
+const TWO_POW_56: u128 = 0x100000000000000;
+const TWO_POW_64: u128 = 0x10000000000000000;
+const TWO_POW_72: u128 = 0x1000000000000000000;
+const TWO_POW_80: u128 = 0x100000000000000000000;
+const TWO_POW_88: u128 = 0x10000000000000000000000;
+const TWO_POW_96: u128 = 0x1000000000000000000000000;
+const TWO_POW_104: u128 = 0x100000000000000000000000000;
+const TWO_POW_112: u128 = 0x10000000000000000000000000000;
+const TWO_POW_120: u128 = 0x1000000000000000000000000000000;
 
 // ---------------------------
 // ---------- Tests ----------

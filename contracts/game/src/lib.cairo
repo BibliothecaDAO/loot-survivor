@@ -16,16 +16,13 @@ mod Game {
     const LOOT_NAME_STORAGE_INDEX_1: u256 = 0;
     const LOOT_NAME_STORAGE_INDEX_2: u256 = 1;
 
-    use option::OptionTrait;
-    use box::BoxTrait;
-    use core::array::SpanTrait;
-    use starknet::{
-        get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const
+    use core::{
+        array::{SpanTrait, ArrayTrait}, integer::u256_try_as_non_zero, traits::{TryInto, Into},
+        clone::Clone, poseidon::poseidon_hash_span, option::OptionTrait, box::BoxTrait,
+        starknet::{
+            get_caller_address, ContractAddress, ContractAddressIntoFelt252, contract_address_const
+        },
     };
-    use core::traits::{TryInto, Into};
-    use core::clone::Clone;
-    use array::ArrayTrait;
-    use poseidon::poseidon_hash_span;
 
     use openzeppelin::token::erc20::interface::{
         IERC20Camel, IERC20CamelDispatcher, IERC20CamelDispatcherTrait, IERC20CamelLibraryDispatcher
@@ -44,7 +41,6 @@ mod Game {
     use lootitems::{
         loot::{ILoot, Loot, ImplLoot}, constants::{ItemId, NamePrefixLength, NameSuffixLength}
     };
-    use pack::{pack::{Packing, rshift_split}, constants::{MASK_16, pow, MASK_8, MASK_BOOL, mask}};
     use survivor::{
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, adventurer_stats::{Stats, StatUtils},
         item_primitive::{ImplItemPrimitive, ItemPrimitive}, bag::{Bag, IBag, ImplBag},
@@ -71,13 +67,12 @@ mod Game {
 
     #[storage]
     struct Storage {
-        _game_entropy: felt252,
-        _adventurer: LegacyMap::<u256, felt252>,
+        _game_entropy: GameEntropy,
+        _adventurer: LegacyMap::<u256, Adventurer>,
         _owner: LegacyMap::<u256, ContractAddress>,
-        _adventurer_meta: LegacyMap::<u256, felt252>,
-        _loot: LegacyMap::<u256, felt252>,
-        _loot_special_names: LegacyMap::<(u256, u256), felt252>,
-        _bag: LegacyMap::<u256, felt252>,
+        _adventurer_meta: LegacyMap::<u256, AdventurerMetadata>,
+        _item_specials: LegacyMap::<(u256, u256), ItemSpecialsStorage>,
+        _bag: LegacyMap::<u256, Bag>,
         _counter: u256,
         _lords: ContractAddress,
         _dao: ContractAddress,
@@ -805,7 +800,7 @@ mod Game {
         fn get_special_storage(
             self: @ContractState, adventurer_id: u256, storage_index: u256
         ) -> ItemSpecialsStorage {
-            Packing::unpack(self._loot_special_names.read((adventurer_id, storage_index)))
+            self._item_specials.read((adventurer_id, storage_index))
         }
         fn get_beast_type(self: @ContractState, beast_id: u8) -> u8 {
             ImplCombat::type_to_u8(ImplBeast::get_type(beast_id))
@@ -1987,13 +1982,13 @@ mod Game {
     // ------------ Helper Functions ------------ //
     // ------------------------------------------ //
     fn _unpack_adventurer(self: @ContractState, adventurer_id: u256) -> Adventurer {
-        Packing::unpack(self._adventurer.read(adventurer_id))
+        self._adventurer.read(adventurer_id)
     }
     fn _unpack_adventurer_and_bag_with_stat_boosts(
         self: @ContractState, adventurer_id: u256
     ) -> (Adventurer, Stats, Bag) {
         // unpack adventurer
-        let mut adventurer: Adventurer = Packing::unpack(self._adventurer.read(adventurer_id));
+        let mut adventurer: Adventurer = self._adventurer.read(adventurer_id);
         // start with no stat boosts
         let mut stat_boosts = StatUtils::new();
         // if adventurer has item specials
@@ -2017,7 +2012,7 @@ mod Game {
 
     #[inline(always)]
     fn _pack_adventurer(ref self: ContractState, adventurer_id: u256, adventurer: Adventurer) {
-        self._adventurer.write(adventurer_id, adventurer.pack());
+        self._adventurer.write(adventurer_id, adventurer);
     }
     // @dev Packs and saves an adventurer after removing stat boosts.
     // @param adventurer_id The ID of the adventurer to be modified.
@@ -2029,35 +2024,37 @@ mod Game {
         // remove stat boosts
         adventurer.remove_stat_boosts(stat_boosts);
 
-        // pack and save
-        self._adventurer.write(adventurer_id, adventurer.pack());
+        // save adventurer
+        self._adventurer.write(adventurer_id, adventurer);
     }
 
     #[inline(always)]
     fn _unpacked_bag(self: @ContractState, adventurer_id: u256) -> Bag {
-        Packing::unpack(self._bag.read(adventurer_id))
+        self._bag.read(adventurer_id)
     }
     #[inline(always)]
     fn _pack_bag(ref self: ContractState, adventurer_id: u256, bag: Bag) {
-        self._bag.write(adventurer_id, bag.pack());
+        self._bag.write(adventurer_id, bag);
     }
     #[inline(always)]
     fn _unpack_adventurer_meta(self: @ContractState, adventurer_id: u256) -> AdventurerMetadata {
-        Packing::unpack(self._adventurer_meta.read(adventurer_id))
+        self._adventurer_meta.read(adventurer_id)
     }
     #[inline(always)]
     fn _pack_adventurer_meta(
         ref self: ContractState, adventurer_id: u256, adventurer_meta: AdventurerMetadata
     ) {
-        self._adventurer_meta.write(adventurer_id, adventurer_meta.pack());
+        self._adventurer_meta.write(adventurer_id, adventurer_meta);
     }
     #[inline(always)]
     fn _unpack_game_entropy(self: @ContractState) -> GameEntropy {
-        Packing::unpack(self._game_entropy.read())
+        //Packing::unpack(self._game_entropy.read())
+        self._game_entropy.read()
     }
     #[inline(always)]
     fn _pack_game_entropy(ref self: ContractState, game_entropy: GameEntropy) {
-        self._game_entropy.write(game_entropy.pack());
+        //self._game_entropy.write(game_entropy.pack());
+        self._game_entropy.write(game_entropy);
     }
 
     /// @title Internal Rotate Game Entropy Function
@@ -2081,7 +2078,9 @@ mod Game {
         hash_span.append(timestamp.into());
         hash_span.append(blocknumber.into());
         let poseidon: felt252 = poseidon_hash_span(hash_span.span()).into();
-        let (_, entropy) = rshift_split(poseidon.into(), U128_MAX.into());
+        let (_, entropy) = integer::U256DivRem::div_rem(
+            poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
+        );
 
         // set new game entropy and block number of update
         let updated_game_entropy = GameEntropy {
@@ -2128,9 +2127,7 @@ mod Game {
         storage_index: u256,
         loot_special_names_storage: ItemSpecialsStorage,
     ) {
-        self
-            ._loot_special_names
-            .write((adventurer_id, storage_index), loot_special_names_storage.pack());
+        self._item_specials.write((adventurer_id, storage_index), loot_special_names_storage);
     }
 
     #[inline(always)]
@@ -2147,7 +2144,7 @@ mod Game {
     fn _get_specials_storage(
         self: @ContractState, adventurer_id: u256, storage_index: u256
     ) -> ItemSpecialsStorage {
-        Packing::unpack(self._loot_special_names.read((adventurer_id, storage_index)))
+        self._item_specials.read((adventurer_id, storage_index))
     }
 
     #[inline(always)]
