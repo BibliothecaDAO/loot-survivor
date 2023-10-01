@@ -1,7 +1,6 @@
-use starknet::{StorePacking};
-use traits::{TryInto, Into};
-use option::OptionTrait;
-use core::{serde::Serde, clone::Clone};
+use core::{
+    serde::Serde, clone::Clone, option::OptionTrait, starknet::StorePacking, traits::{TryInto, Into}
+};
 
 use combat::{combat::ImplCombat, constants::CombatEnums::{Type, Tier, Slot}};
 use super::{
@@ -24,6 +23,39 @@ struct Loot {
     tier: Tier,
     item_type: Type,
     slot: Slot,
+}
+
+impl LootPacking of StorePacking<Loot, felt252> {
+    fn pack(value: Loot) -> felt252 {
+        let item_tier = ImplCombat::tier_to_u8(value.tier);
+        let item_type = ImplCombat::type_to_u8(value.item_type);
+        let item_slot = ImplCombat::slot_to_u8(value.slot);
+
+        (value.id.into()
+            + item_tier.into() * TWO_POW_8
+            + item_type.into() * TWO_POW_16
+            + item_slot.into() * TWO_POW_24)
+            .try_into()
+            .unwrap()
+    }
+    fn unpack(value: felt252) -> Loot {
+        let packed = value.into();
+        let (packed, item_id) = integer::U256DivRem::div_rem(packed, TWO_POW_8.try_into().unwrap());
+        let (packed, item_tier) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_8.try_into().unwrap()
+        );
+        let (packed, item_type) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_8.try_into().unwrap()
+        );
+        let (_, item_slot) = integer::U256DivRem::div_rem(packed, TWO_POW_8.try_into().unwrap());
+
+        Loot {
+            id: item_id.try_into().unwrap(),
+            tier: ImplCombat::u8_to_tier(item_tier.try_into().unwrap()),
+            item_type: ImplCombat::u8_to_type(item_type.try_into().unwrap()),
+            slot: ImplCombat::u8_to_slot(item_slot.try_into().unwrap())
+        }
+    }
 }
 
 #[generate_trait]
@@ -509,7 +541,7 @@ impl ImplLoot of ILoot {
         }
     }
 
-    // @notice getts the slot for a Loot item
+    // @notice gets the slot for a Loot item
     // @param id the id of the Loot item to get slot for
     // @return Slot the slot of the Loot item
     fn get_slot(id: u8) -> Slot {
@@ -947,39 +979,6 @@ impl ImplLoot of ILoot {
 const TWO_POW_8: u256 = 0x100;
 const TWO_POW_16: u256 = 0x10000;
 const TWO_POW_24: u256 = 0x1000000;
-
-impl LootPacking of StorePacking<Loot, felt252> {
-    fn pack(value: Loot) -> felt252 {
-        let item_tier = ImplCombat::tier_to_u8(value.tier);
-        let item_type = ImplCombat::type_to_u8(value.item_type);
-        let item_slot = ImplCombat::slot_to_u8(value.slot);
-
-        (value.id.into()
-            + item_tier.into() * TWO_POW_8
-            + item_type.into() * TWO_POW_16
-            + item_slot.into() * TWO_POW_24)
-            .try_into()
-            .unwrap()
-    }
-    fn unpack(value: felt252) -> Loot {
-        let packed = value.into();
-        let (packed, item_id) = integer::U256DivRem::div_rem(packed, TWO_POW_8.try_into().unwrap());
-        let (packed, item_tier) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_8.try_into().unwrap()
-        );
-        let (packed, item_type) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_8.try_into().unwrap()
-        );
-        let (_, item_slot) = integer::U256DivRem::div_rem(packed, TWO_POW_8.try_into().unwrap());
-
-        Loot {
-            id: item_id.try_into().unwrap(),
-            tier: ImplCombat::u8_to_tier(item_tier.try_into().unwrap()),
-            item_type: ImplCombat::u8_to_type(item_type.try_into().unwrap()),
-            slot: ImplCombat::u8_to_slot(item_slot.try_into().unwrap())
-        }
-    }
-}
 
 // ---------------------------
 // ---------- Tests ----------

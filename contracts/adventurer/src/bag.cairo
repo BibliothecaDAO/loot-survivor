@@ -7,8 +7,7 @@ use super::{
 };
 
 // Bag is used for storing gear not equipped to the adventurer
-// TODO: Change this to an Array<ItemPrimitive> with id: u8, size: u8, and modified: bool
-// this will make the Bag more extensible and easier to work with in code
+// Bag is a fixed size array of 11 items so it fits optimally in a felt252
 #[derive(Drop, Copy, Serde)]
 struct Bag {
     item_1: ItemPrimitive,
@@ -24,17 +23,6 @@ struct Bag {
     item_11: ItemPrimitive,
     mutated: bool,
 }
-
-const TWO_POW_21: u256 = 0x200000;
-const TWO_POW_42: u256 = 0x40000000000;
-const TWO_POW_63: u256 = 0x8000000000000000;
-const TWO_POW_84: u256 = 0x1000000000000000000000;
-const TWO_POW_105: u256 = 0x200000000000000000000000000;
-const TWO_POW_126: u256 = 0x40000000000000000000000000000000;
-const TWO_POW_147: u256 = 0x8000000000000000000000000000000000000;
-const TWO_POW_168: u256 = 0x1000000000000000000000000000000000000000000;
-const TWO_POW_189: u256 = 0x200000000000000000000000000000000000000000000000;
-const TWO_POW_210: u256 = 0x40000000000000000000000000000000000000000000000000000;
 
 impl BagPacking of StorePacking<Bag, felt252> {
     fn pack(value: Bag) -> felt252 {
@@ -375,6 +363,17 @@ impl ImplBag of IBag {
         total_greatness
     }
 }
+
+const TWO_POW_21: u256 = 0x200000;
+const TWO_POW_42: u256 = 0x40000000000;
+const TWO_POW_63: u256 = 0x8000000000000000;
+const TWO_POW_84: u256 = 0x1000000000000000000000;
+const TWO_POW_105: u256 = 0x200000000000000000000000000;
+const TWO_POW_126: u256 = 0x40000000000000000000000000000000;
+const TWO_POW_147: u256 = 0x8000000000000000000000000000000000000;
+const TWO_POW_168: u256 = 0x1000000000000000000000000000000000000000000;
+const TWO_POW_189: u256 = 0x200000000000000000000000000000000000000000000000;
+const TWO_POW_210: u256 = 0x40000000000000000000000000000000000000000000000000000;
 
 // ---------------------------
 // ---------- Tests ----------

@@ -7,8 +7,6 @@ struct AdventurerMetadata {
     entropy: u128,
 }
 
-const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
-
 impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
     fn pack(value: AdventurerMetadata) -> felt252 {
         (value.entropy.into() + value.name.into() * TWO_POW_128).try_into().unwrap()
@@ -22,6 +20,8 @@ impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
         AdventurerMetadata { name: name.try_into().unwrap(), entropy: entropy.try_into().unwrap() }
     }
 }
+
+const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
 
 #[cfg(test)]
 #[test]

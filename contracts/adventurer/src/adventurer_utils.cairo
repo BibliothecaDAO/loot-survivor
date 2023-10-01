@@ -1,10 +1,10 @@
-use core::array::SpanTrait;
-use core::{result::ResultTrait, traits::{TryInto, Into}};
-use poseidon::poseidon_hash_span;
-use option::OptionTrait;
-use array::ArrayTrait;
-use integer::{
-    u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub, U128IntoU256, u256_try_as_non_zero
+use core::{
+    array::{ArrayTrait, SpanTrait},
+    integer::{
+        u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub, U128IntoU256,
+        u256_try_as_non_zero
+    },
+    option::OptionTrait, poseidon::poseidon_hash_span, result::ResultTrait, traits::{TryInto, Into}
 };
 use super::{
     constants::{
@@ -30,9 +30,7 @@ use combat::constants::CombatEnums::{Type, Tier, Slot};
 impl AdventurerUtils of IAdventurerUtils {
     // @dev Provides overflow protected stat increase.
     //      This function protects against u8 overflow but allows stat
-    //      to exceed MAX_STAT_VALUE as adventurers live stats are expected
-    //      to exceed MAX_STAT_VALUE. Ensuring a stat does not overflow adventurer packing
-    //      code is the responsibility of the adventurer packing code
+    //      to exceed MAX_STAT_VALUE as adventurers live stats can exceed this threshold
     // @param current_stat The current value of the stat.
     // @param increase_amount The amount by which to increase the stat.
     // @return The increased stat value, or `MAX_STAT_VALUE` if an increase would cause an overflow.

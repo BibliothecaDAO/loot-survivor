@@ -1,12 +1,11 @@
-use starknet::{StorePacking};
-use core::result::ResultTrait;
-use core::integer::u256_try_as_non_zero;
-use zeroable::NonZeroIntoImpl;
-use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub};
-use traits::{TryInto, Into};
-use option::OptionTrait;
-use poseidon::poseidon_hash_span;
-use array::ArrayTrait;
+use core::{
+    array::ArrayTrait,
+    integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub, u256_try_as_non_zero},
+    option::OptionTrait,
+    poseidon::poseidon_hash_span,
+    result::ResultTrait, starknet::{StorePacking},
+    traits::{TryInto, Into}
+};
 
 use super::{
     item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials},
@@ -59,25 +58,6 @@ struct Adventurer {
     stat_points_available: u8, // 3 bits
     mutated: bool, // not packed
 }
-
-const TWO_POW_3: u256 = 0x8;
-const TWO_POW_9: u256 = 0x200;
-const TWO_POW_13: u256 = 0x2000;
-const TWO_POW_18: u256 = 0x40000;
-const TWO_POW_21: u256 = 0x200000;
-const TWO_POW_30: u256 = 0x40000000;
-const TWO_POW_31: u256 = 0x80000000;
-const TWO_POW_61: u256 = 0x2000000000000000;
-const TWO_POW_70: u256 = 0x400000000000000000;
-const TWO_POW_91: u256 = 0x80000000000000000000000;
-const TWO_POW_112: u256 = 0x10000000000000000000000000000;
-const TWO_POW_133: u256 = 0x2000000000000000000000000000000000;
-const TWO_POW_154: u256 = 0x400000000000000000000000000000000000000;
-const TWO_POW_175: u256 = 0x80000000000000000000000000000000000000000000;
-const TWO_POW_196: u256 = 0x10000000000000000000000000000000000000000000000000;
-const TWO_POW_217: u256 = 0x2000000000000000000000000000000000000000000000000000000;
-const TWO_POW_238: u256 = 0x400000000000000000000000000000000000000000000000000000000000;
-const TWO_POW_247: u256 = 0x80000000000000000000000000000000000000000000000000000000000000;
 
 impl AdventurerPacking of StorePacking<Adventurer, felt252> {
     fn pack(value: Adventurer) -> felt252 {
@@ -985,7 +965,9 @@ impl ImplAdventurer of IAdventurer {
             hash_span.append(self.xp.into());
             hash_span.append(adventurer_entropy.into());
             let poseidon = poseidon_hash_span(hash_span.span());
-            let (d, r) = integer::U256DivRem::div_rem(poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap());
+            let (d, r) = integer::U256DivRem::div_rem(
+                poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
+            );
             r.try_into().unwrap()
         } else {
             0
@@ -1432,7 +1414,9 @@ impl ImplAdventurer of IAdventurer {
         hash_span.append(game_entropy.into());
 
         let poseidon = poseidon_hash_span(hash_span.span());
-        let (d, r) = integer::U256DivRem::div_rem(poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap());
+        let (d, r) = integer::U256DivRem::div_rem(
+            poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap()
+        );
         return (r.try_into().unwrap(), d.try_into().unwrap());
     }
 
@@ -1693,6 +1677,25 @@ impl ImplAdventurer of IAdventurer {
         }
     }
 }
+
+const TWO_POW_3: u256 = 0x8;
+const TWO_POW_9: u256 = 0x200;
+const TWO_POW_13: u256 = 0x2000;
+const TWO_POW_18: u256 = 0x40000;
+const TWO_POW_21: u256 = 0x200000;
+const TWO_POW_30: u256 = 0x40000000;
+const TWO_POW_31: u256 = 0x80000000;
+const TWO_POW_61: u256 = 0x2000000000000000;
+const TWO_POW_70: u256 = 0x400000000000000000;
+const TWO_POW_91: u256 = 0x80000000000000000000000;
+const TWO_POW_112: u256 = 0x10000000000000000000000000000;
+const TWO_POW_133: u256 = 0x2000000000000000000000000000000000;
+const TWO_POW_154: u256 = 0x400000000000000000000000000000000000000;
+const TWO_POW_175: u256 = 0x80000000000000000000000000000000000000000000;
+const TWO_POW_196: u256 = 0x10000000000000000000000000000000000000000000000000;
+const TWO_POW_217: u256 = 0x2000000000000000000000000000000000000000000000000000000;
+const TWO_POW_238: u256 = 0x400000000000000000000000000000000000000000000000000000000000;
+const TWO_POW_247: u256 = 0x80000000000000000000000000000000000000000000000000000000000000;
 
 // ---------------------------
 // ---------- Tests ----------
@@ -2794,7 +2797,7 @@ mod tests {
             'stat_points_available'
         );
     }
-    
+
     #[test]
     #[available_gas(2000000)]
     fn test_new_adventurer() {
