@@ -79,7 +79,6 @@ mod Game {
         _lords: ContractAddress,
         _owner: LegacyMap::<u256, ContractAddress>,
         _item_specials: LegacyMap::<(u256, u256), ItemSpecialsStorage>,
-        
     }
 
     #[event]
