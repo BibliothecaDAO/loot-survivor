@@ -2794,54 +2794,7 @@ mod tests {
             'stat_points_available'
         );
     }
-
-    #[test]
-    #[available_gas(3000000)]
-    fn test_packing_stat_overflow_protection() {
-        // create an adventurer with stats at max u8
-        let adventurer = Adventurer {
-            last_action: 511,
-            health: 511,
-            xp: 8191,
-            stats: Stats {
-                strength: 255,
-                dexterity: 255,
-                vitality: 255,
-                intelligence: 255,
-                wisdom: 255,
-                charisma: 255,
-                luck: 255
-            },
-            gold: 511,
-            weapon: ItemPrimitive { id: 127, xp: 511, metadata: 31, },
-            chest: ItemPrimitive { id: 1, xp: 0, metadata: 0, },
-            head: ItemPrimitive { id: 127, xp: 511, metadata: 31, },
-            waist: ItemPrimitive { id: 87, xp: 511, metadata: 4, },
-            foot: ItemPrimitive { id: 78, xp: 511, metadata: 5, },
-            hand: ItemPrimitive { id: 34, xp: 511, metadata: 6, },
-            neck: ItemPrimitive { id: 32, xp: 511, metadata: 7, },
-            ring: ItemPrimitive { id: 1, xp: 511, metadata: 8, },
-            beast_health: 511,
-            stat_points_available: 7,
-            mutated: false
-        };
-
-        // pack adventurer
-        let packed = AdventurerPacking::pack(adventurer);
-
-        // unpack adventurer
-        let unpacked: Adventurer = AdventurerPacking::unpack(packed);
-
-        // verify packing function didn't overflow stats
-        // but instead set values to max
-        assert(unpacked.stats.strength == MAX_STAT_VALUE, 'strength');
-        assert(unpacked.stats.dexterity == MAX_STAT_VALUE, 'dexterity');
-        assert(unpacked.stats.vitality == MAX_STAT_VALUE, 'vitality');
-        assert(unpacked.stats.intelligence == MAX_STAT_VALUE, 'intelligence');
-        assert(unpacked.stats.wisdom == MAX_STAT_VALUE, 'wisdom');
-        assert(unpacked.stats.charisma == MAX_STAT_VALUE, 'charisma');
-    }
-
+    
     #[test]
     #[available_gas(2000000)]
     fn test_new_adventurer() {

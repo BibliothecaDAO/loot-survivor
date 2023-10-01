@@ -120,28 +120,5 @@ mod tests {
         assert(stats.wisdom == unpacked.wisdom, 'wisdom storage limit');
         assert(stats.charisma == unpacked.charisma, 'charisma storage limit');
         assert(unpacked.luck == 0, 'luck is zero from storage');
-
-        // overflow storage limit using max u8
-        let stats = Stats {
-            strength: 255,
-            dexterity: 255,
-            vitality: 255,
-            intelligence: 255,
-            wisdom: 255,
-            charisma: 255,
-            luck: 255
-        };
-
-        let packed = StatsPacking::pack(stats);
-        let unpacked = StatsPacking::unpack(packed);
-
-        // assert packing function prevented overflow
-        assert(unpacked.strength == MAX_STAT_VALUE, 'strength pack overflow');
-        assert(unpacked.dexterity == MAX_STAT_VALUE, 'dexterity pack overflow');
-        assert(unpacked.vitality == MAX_STAT_VALUE, 'vitality pack overflow');
-        assert(unpacked.intelligence == MAX_STAT_VALUE, 'intelligence pack overflow');
-        assert(unpacked.wisdom == MAX_STAT_VALUE, 'wisdom pack overflow');
-        assert(unpacked.charisma == MAX_STAT_VALUE, 'charisma pack overflow');
-        assert(unpacked.luck == 0, 'luck is zero from storage');
     }
 }

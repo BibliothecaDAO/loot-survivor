@@ -274,7 +274,7 @@ impl AdventurerUtils of IAdventurerUtils {
 
     fn u128_to_u8_array(value: u128) -> Array<u8> {
         let mut result = ArrayTrait::<u8>::new();
-        result.append((value & TWO_POW_8).try_into().unwrap());
+        result.append((value & MASK_8).try_into().unwrap());
         result.append(((value / TWO_POW_8) & MASK_8).try_into().unwrap());
         result.append(((value / TWO_POW_16) & MASK_8).try_into().unwrap());
         result.append(((value / TWO_POW_24) & MASK_8).try_into().unwrap());

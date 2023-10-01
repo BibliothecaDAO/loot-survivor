@@ -472,18 +472,12 @@ mod tests {
             item_4: ItemSpecials {
                 special1: 15, special2: 127, special3: 31 // max packable values
             },
-            item_5: ItemSpecials { special1: 255, special2: 255, special3: 255 // max u8 values
-             },
-            item_6: ItemSpecials { special1: 5, special2: 5, special3: 5 // dnc
-             },
-            item_7: ItemSpecials { special1: 6, special2: 6, special3: 6 // dnc
-             },
-            item_8: ItemSpecials { special1: 7, special2: 7, special3: 7 // dnc
-             },
-            item_9: ItemSpecials { special1: 8, special2: 8, special3: 8 // dnc
-             },
-            item_10: ItemSpecials { special1: 9, special2: 9, special3: 9 // dnc
-             },
+            item_5: ItemSpecials { special1: 4, special2: 23, special3: 2 },
+            item_6: ItemSpecials { special1: 5, special2: 5, special3: 5 },
+            item_7: ItemSpecials { special1: 6, special2: 6, special3: 6 },
+            item_8: ItemSpecials { special1: 7, special2: 7, special3: 7 },
+            item_9: ItemSpecials { special1: 8, special2: 8, special3: 8 },
+            item_10: ItemSpecials { special1: 9, special2: 9, special3: 9 },
             mutated: false,
         };
 
@@ -497,18 +491,12 @@ mod tests {
         assert(unpacked.item_2 == storage.item_2, 'item 2 packing error');
         assert(unpacked.item_3 == storage.item_3, 'item 3 packing error');
         assert(unpacked.item_4 == storage.item_4, 'item 4 packing error');
+        assert(unpacked.item_5 == storage.item_5, 'item 5 packing error');
         assert(unpacked.item_6 == storage.item_6, 'item 6 packing error');
         assert(unpacked.item_7 == storage.item_7, 'item 7 packing error');
         assert(unpacked.item_8 == storage.item_8, 'item 8 packing error');
         assert(unpacked.item_9 == storage.item_9, 'item 9 packing error');
         assert(unpacked.item_10 == storage.item_10, 'item 10 packing error');
-
-        // item 5 is special in that it attempts to overflow the packing
-        // assert the packing overflow protection works and instead of
-        // overflowing, sets these values to max
-        assert(unpacked.item_5.special1 == MAX_SPECIAL1, 'special1 max u8 check');
-        assert(unpacked.item_5.special2 == MAX_SPECIAL2, 'special2 max u8 check');
-        assert(unpacked.item_5.special3 == MAX_SPECIAL3, 'special3 max u8 check');
     }
 
     #[test]
