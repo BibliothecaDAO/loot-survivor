@@ -1,9 +1,9 @@
+use starknet::{StorePacking};
 use traits::{TryInto, Into};
 use option::OptionTrait;
 use core::{serde::Serde, clone::Clone};
 
 use combat::{combat::ImplCombat, constants::CombatEnums::{Type, Tier, Slot}};
-use pack::{pack::{Packing, rshift_split}, constants::pow};
 use super::{
     constants::{
         NamePrefixLength, ItemNameSuffix, ItemId, ItemNamePrefix, NameSuffixLength,
@@ -944,45 +944,40 @@ impl ImplLoot of ILoot {
         }
     }
 }
+const TWO_POW_8: u256 = 0x100;
+const TWO_POW_16: u256 = 0x10000;
+const TWO_POW_24: u256 = 0x1000000;
 
-impl PackingLoot of Packing<Loot> {
-    // pack an item for storage
-    // @param item The item to pack.
-    // @return The packed item in a felt252
-    fn pack(self: Loot) -> felt252 {
-        let item_tier = ImplCombat::tier_to_u8(self.tier);
-        let item_type = ImplCombat::type_to_u8(self.item_type);
-        let item_slot = ImplCombat::slot_to_u8(self.slot);
+impl LootPacking of StorePacking<Loot, felt252> {
+    fn pack(value: Loot) -> felt252 {
+        let item_tier = ImplCombat::tier_to_u8(value.tier);
+        let item_type = ImplCombat::type_to_u8(value.item_type);
+        let item_slot = ImplCombat::slot_to_u8(value.slot);
 
-        (self.id.into()
-            + item_tier.into() * pow::TWO_POW_8
-            + item_type.into() * pow::TWO_POW_16
-            + item_slot.into() * pow::TWO_POW_24)
+        (value.id.into()
+            + item_tier.into() * TWO_POW_8
+            + item_type.into() * TWO_POW_16
+            + item_slot.into() * TWO_POW_24)
             .try_into()
-            .expect('pack Loot')
+            .unwrap()
     }
-
-    // unpack an item from storage
-    // @param packed The item packed as a felt252
-    // @return The unpacked item
-    fn unpack(packed: felt252) -> Loot {
-        let packed = packed.into();
-        let (packed, item_id) = rshift_split(packed, pow::TWO_POW_8);
-        let (packed, item_tier) = rshift_split(packed, pow::TWO_POW_8);
-        let (packed, item_type) = rshift_split(packed, pow::TWO_POW_8);
-        let (_, item_slot) = rshift_split(packed, pow::TWO_POW_8);
+    fn unpack(value: felt252) -> Loot {
+        let packed = value.into();
+        let (packed, item_id) = integer::U256DivRem::div_rem(packed, TWO_POW_8.try_into().unwrap());
+        let (packed, item_tier) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_8.try_into().unwrap()
+        );
+        let (packed, item_type) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_8.try_into().unwrap()
+        );
+        let (_, item_slot) = integer::U256DivRem::div_rem(packed, TWO_POW_8.try_into().unwrap());
 
         Loot {
-            id: item_id.try_into().expect('unpack Loot id'),
-            tier: ImplCombat::u8_to_tier(item_tier.try_into().expect('unpack Loot tier')),
-            item_type: ImplCombat::u8_to_type(item_type.try_into().expect('unpack Loot item type')),
-            slot: ImplCombat::u8_to_slot(item_slot.try_into().expect('unpack Loot slot'))
+            id: item_id.try_into().unwrap(),
+            tier: ImplCombat::u8_to_tier(item_tier.try_into().unwrap()),
+            item_type: ImplCombat::u8_to_type(item_type.try_into().unwrap()),
+            slot: ImplCombat::u8_to_slot(item_slot.try_into().unwrap())
         }
-    }
-
-    // TODO: add overflow pack protection
-    fn overflow_pack_protection(self: Loot) -> Loot {
-        self
     }
 }
 
@@ -996,9 +991,8 @@ mod tests {
     use core::{serde::Serde, clone::Clone};
 
     use combat::{combat::ImplCombat, constants::CombatEnums::{Type, Tier, Slot}};
-    use pack::{pack::{Packing, rshift_split}, constants::pow};
     use lootitems::{
-        loot::{ImplLoot, ILoot, PackingLoot, Loot},
+        loot::{ImplLoot, ILoot, LootPacking, Loot},
         constants::{
             NamePrefixLength, ItemNameSuffix, ItemId, ItemNamePrefix, NameSuffixLength,
             ItemSuffixLength, ItemSuffix, NUM_ITEMS,
@@ -1271,7 +1265,7 @@ mod tests {
             id: 1, tier: Tier::T1(()), item_type: Type::Bludgeon_or_Metal(()), slot: Slot::Waist(())
         };
 
-        let unpacked: Loot = Packing::unpack(loot.pack());
+        let unpacked: Loot = LootPacking::unpack(LootPacking::pack(loot));
         assert(loot.id == unpacked.id, 'id');
         assert(loot.tier == unpacked.tier, 'tier');
         assert(loot.item_type == unpacked.item_type, 'item_type');

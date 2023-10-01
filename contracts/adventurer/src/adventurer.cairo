@@ -1,4 +1,7 @@
+use starknet::{StorePacking};
 use core::result::ResultTrait;
+use core::integer::u256_try_as_non_zero;
+use zeroable::NonZeroIntoImpl;
 use integer::{u8_overflowing_add, u16_overflowing_add, u16_overflowing_sub};
 use traits::{TryInto, Into};
 use option::OptionTrait;
@@ -6,9 +9,9 @@ use poseidon::poseidon_hash_span;
 use array::ArrayTrait;
 
 use super::{
-    item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials}, adventurer_stats::Stats,
-    item_primitive::ItemPrimitive, adventurer_utils::{AdventurerUtils}, exploration::ExploreUtils,
-    bag::{Bag, IBag, ImplBag},
+    item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials},
+    adventurer_stats::{Stats, StatsPacking}, item_primitive::{ItemPrimitive, ItemPrimitivePacking},
+    adventurer_utils::{AdventurerUtils}, exploration::ExploreUtils, bag::{Bag, IBag, ImplBag},
     constants::{
         adventurer_constants::{
             STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
@@ -20,14 +23,11 @@ use super::{
             JEWELRY_BONUS_BEAST_GOLD_PERCENT, JEWELRY_BONUS_CRITICAL_HIT_PERCENT_PER_GREATNESS,
             JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS, NECKLACE_ARMOR_BONUS,
             MINIMUM_DAMAGE_FROM_BEASTS, OBSTACLE_CRITICAL_HIT_CHANCE, BEAST_CRITICAL_HIT_CHANCE,
-            SILVER_RING_LUCK_BONUS_PER_GREATNESS, MINIMUM_DAMAGE_FROM_OBSTACLES, MINIMUM_DAMAGE_TO_BEASTS
+            SILVER_RING_LUCK_BONUS_PER_GREATNESS, MINIMUM_DAMAGE_FROM_OBSTACLES,
+            MINIMUM_DAMAGE_TO_BEASTS
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
     }
-};
-use pack::{
-    pack::{Packing, rshift_split}, constants,
-    constants::{MASK_16, pow, MASK_8, MASK_3, MASK_BOOL, mask, U128_MASK_8, u128_pow}
 };
 use lootitems::{
     loot::{Loot, ILoot, ImplLoot},
@@ -60,70 +60,88 @@ struct Adventurer {
     mutated: bool, // not packed
 }
 
-impl AdventurerPacking of Packing<Adventurer> {
-    fn pack(self: Adventurer) -> felt252 {
-        (self.last_action.into()
-            + self.health.into() * pow::TWO_POW_9
-            + self.xp.into() * pow::TWO_POW_18
-            + self.stats.pack().into() * pow::TWO_POW_31
-            + self.gold.into() * pow::TWO_POW_61
-            + self.weapon.pack().into() * pow::TWO_POW_70
-            + self.chest.pack().into() * pow::TWO_POW_91
-            + self.head.pack().into() * pow::TWO_POW_112
-            + self.waist.pack().into() * pow::TWO_POW_133
-            + self.foot.pack().into() * pow::TWO_POW_154
-            + self.hand.pack().into() * pow::TWO_POW_175
-            + self.neck.pack().into() * pow::TWO_POW_196
-            + self.ring.pack().into() * pow::TWO_POW_217
-            + self.beast_health.into() * pow::TWO_POW_238
-            + self.stat_points_available.into() * pow::TWO_POW_247)
+const TWO_POW_3: u256 = 0x8;
+const TWO_POW_9: u256 = 0x200;
+const TWO_POW_13: u256 = 0x2000;
+const TWO_POW_18: u256 = 0x40000;
+const TWO_POW_21: u256 = 0x200000;
+const TWO_POW_30: u256 = 0x40000000;
+const TWO_POW_31: u256 = 0x80000000;
+const TWO_POW_61: u256 = 0x2000000000000000;
+const TWO_POW_70: u256 = 0x400000000000000000;
+const TWO_POW_91: u256 = 0x80000000000000000000000;
+const TWO_POW_112: u256 = 0x10000000000000000000000000000;
+const TWO_POW_133: u256 = 0x2000000000000000000000000000000000;
+const TWO_POW_154: u256 = 0x400000000000000000000000000000000000000;
+const TWO_POW_175: u256 = 0x80000000000000000000000000000000000000000000;
+const TWO_POW_196: u256 = 0x10000000000000000000000000000000000000000000000000;
+const TWO_POW_217: u256 = 0x2000000000000000000000000000000000000000000000000000000;
+const TWO_POW_238: u256 = 0x400000000000000000000000000000000000000000000000000000000000;
+const TWO_POW_247: u256 = 0x80000000000000000000000000000000000000000000000000000000000000;
+
+impl AdventurerPacking of StorePacking<Adventurer, felt252> {
+    fn pack(value: Adventurer) -> felt252 {
+        (value.last_action.into()
+            + value.health.into() * TWO_POW_9
+            + value.xp.into() * TWO_POW_18
+            + StatsPacking::pack(value.stats).into() * TWO_POW_31
+            + value.gold.into() * TWO_POW_61
+            + ItemPrimitivePacking::pack(value.weapon).into() * TWO_POW_70
+            + ItemPrimitivePacking::pack(value.chest).into() * TWO_POW_91
+            + ItemPrimitivePacking::pack(value.head).into() * TWO_POW_112
+            + ItemPrimitivePacking::pack(value.waist).into() * TWO_POW_133
+            + ItemPrimitivePacking::pack(value.foot).into() * TWO_POW_154
+            + ItemPrimitivePacking::pack(value.hand).into() * TWO_POW_175
+            + ItemPrimitivePacking::pack(value.neck).into() * TWO_POW_196
+            + ItemPrimitivePacking::pack(value.ring).into() * TWO_POW_217
+            + value.beast_health.into() * TWO_POW_238
+            + value.stat_points_available.into() * TWO_POW_247)
             .try_into()
-            .expect('pack Adventurer')
+            .unwrap()
     }
 
-    fn unpack(packed: felt252) -> Adventurer {
-        let packed = packed.into();
-        let (packed, last_action) = rshift_split(packed, pow::TWO_POW_9);
-        let (packed, health) = rshift_split(packed, pow::TWO_POW_9);
-        let (packed, xp) = rshift_split(packed, pow::TWO_POW_13);
-        let (packed, stats) = rshift_split(packed, pow::TWO_POW_30);
-        let (packed, gold) = rshift_split(packed, pow::TWO_POW_9);
-        let (packed, weapon) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, chest) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, head) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, waist) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, foot) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, hand) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, neck) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, ring) = rshift_split(packed, pow::TWO_POW_21);
-        let (packed, beast_health) = rshift_split(packed, pow::TWO_POW_9);
-        let (_, stat_points_available) = rshift_split(packed, pow::TWO_POW_3);
+    fn unpack(value: felt252) -> Adventurer {
+        let packed = value.into();
+        let (packed, last_action) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_9.try_into().unwrap()
+        );
+        let (packed, health) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
+        let (packed, xp) = integer::U256DivRem::div_rem(packed, TWO_POW_13.try_into().unwrap());
+        let (packed, stats) = integer::U256DivRem::div_rem(packed, TWO_POW_30.try_into().unwrap());
+        let (packed, gold) = integer::U256DivRem::div_rem(packed, TWO_POW_9.try_into().unwrap());
+        let (packed, weapon) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, chest) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, head) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, waist) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, foot) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, hand) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, neck) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, ring) = integer::U256DivRem::div_rem(packed, TWO_POW_21.try_into().unwrap());
+        let (packed, beast_health) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_9.try_into().unwrap()
+        );
+        let (_, stat_points_available) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_3.try_into().unwrap()
+        );
 
         Adventurer {
-            last_action: last_action.try_into().expect('unpack Adventurer last_action'),
-            health: health.try_into().expect('unpack Adventurer health'),
-            xp: xp.try_into().expect('unpack Adventurer xp'),
-            stats: Packing::unpack(stats.try_into().expect('unpack Adventurer stats')),
-            gold: gold.try_into().expect('unpack Adventurer gold'),
-            weapon: Packing::unpack(weapon.try_into().expect('unpack Adventurer weapon')),
-            chest: Packing::unpack(chest.try_into().expect('unpack Adventurer chest')),
-            head: Packing::unpack(head.try_into().expect('unpack Adventurer head')),
-            waist: Packing::unpack(waist.try_into().expect('unpack Adventurer waist')),
-            foot: Packing::unpack(foot.try_into().expect('unpack Adventurer foot')),
-            hand: Packing::unpack(hand.try_into().expect('unpack Adventurer hand')),
-            neck: Packing::unpack(neck.try_into().expect('unpack Adventurer neck')),
-            ring: Packing::unpack(ring.try_into().expect('unpack Adventurer ring')),
-            beast_health: beast_health.try_into().expect('unpack Adventurer beast_health'),
-            stat_points_available: stat_points_available
-                .try_into()
-                .expect('unpack Adventurer stat_upgrade'),
+            last_action: last_action.try_into().unwrap(),
+            health: health.try_into().unwrap(),
+            xp: xp.try_into().unwrap(),
+            stats: StatsPacking::unpack(stats.try_into().unwrap()),
+            gold: gold.try_into().unwrap(),
+            weapon: ItemPrimitivePacking::unpack(weapon.try_into().unwrap()),
+            chest: ItemPrimitivePacking::unpack(chest.try_into().unwrap()),
+            head: ItemPrimitivePacking::unpack(head.try_into().unwrap()),
+            waist: ItemPrimitivePacking::unpack(waist.try_into().unwrap()),
+            foot: ItemPrimitivePacking::unpack(foot.try_into().unwrap()),
+            hand: ItemPrimitivePacking::unpack(hand.try_into().unwrap()),
+            neck: ItemPrimitivePacking::unpack(neck.try_into().unwrap()),
+            ring: ItemPrimitivePacking::unpack(ring.try_into().unwrap()),
+            beast_health: beast_health.try_into().unwrap(),
+            stat_points_available: stat_points_available.try_into().unwrap(),
             mutated: false,
         }
-    }
-
-    // TODO: add overflow pack protection
-    fn overflow_pack_protection(self: Adventurer) -> Adventurer {
-        self
     }
 }
 
@@ -967,7 +985,7 @@ impl ImplAdventurer of IAdventurer {
             hash_span.append(self.xp.into());
             hash_span.append(adventurer_entropy.into());
             let poseidon = poseidon_hash_span(hash_span.span());
-            let (d, r) = rshift_split(poseidon.into(), 340282366920938463463374607431768211455);
+            let (d, r) = integer::U256DivRem::div_rem(poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap());
             r.try_into().unwrap()
         } else {
             0
@@ -1414,7 +1432,7 @@ impl ImplAdventurer of IAdventurer {
         hash_span.append(game_entropy.into());
 
         let poseidon = poseidon_hash_span(hash_span.span());
-        let (d, r) = rshift_split(poseidon.into(), U128_MAX.into());
+        let (d, r) = integer::U256DivRem::div_rem(poseidon.into(), u256_try_as_non_zero(U128_MAX.into()).unwrap());
         return (r.try_into().unwrap(), d.try_into().unwrap());
     }
 
@@ -1594,7 +1612,8 @@ impl ImplAdventurer of IAdventurer {
             .jewelry_armor_bonus(armor_details.item_type, combat_result.base_armor);
 
         // adjust damage for jewelry armor bonus
-        if combat_result.total_damage > (jewelry_armor_bonus + MINIMUM_DAMAGE_FROM_OBSTACLES.into()) {
+        if combat_result
+            .total_damage > (jewelry_armor_bonus + MINIMUM_DAMAGE_FROM_OBSTACLES.into()) {
             combat_result.total_damage -= jewelry_armor_bonus;
         } else {
             combat_result.total_damage = MINIMUM_DAMAGE_FROM_OBSTACLES.into();
@@ -1691,7 +1710,7 @@ mod tests {
     use combat::{constants::CombatEnums::{Slot, Type}};
     use beasts::{beast::{ImplBeast, Beast}, constants::BeastSettings};
     use survivor::{
-        adventurer::{IAdventurer, ImplAdventurer, Adventurer},
+        adventurer::{IAdventurer, ImplAdventurer, Adventurer, AdventurerPacking},
         item_meta::{ItemSpecials, ItemSpecialsStorage, ImplItemSpecials}, adventurer_stats::Stats,
         item_primitive::ItemPrimitive, adventurer_utils::{AdventurerUtils}, bag::{Bag, ImplBag},
         constants::{
@@ -1706,9 +1725,6 @@ mod tests {
             },
             discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
         }
-    };
-    use pack::{
-        pack::{Packing, rshift_split}, constants, constants::{MASK_8, pow, MASK_3, MASK_BOOL, mask}
     };
 
     #[test]
@@ -2736,8 +2752,8 @@ mod tests {
             stat_points_available: 7,
             mutated: false
         };
-        let packed = adventurer.pack();
-        let unpacked: Adventurer = Packing::unpack(packed);
+        let packed = AdventurerPacking::pack(adventurer);
+        let unpacked: Adventurer = AdventurerPacking::unpack(packed);
         assert(adventurer.last_action == unpacked.last_action, 'last_action');
         assert(adventurer.health == unpacked.health, 'health');
         assert(adventurer.xp == unpacked.xp, 'xp');
@@ -2811,10 +2827,10 @@ mod tests {
         };
 
         // pack adventurer
-        let packed = adventurer.pack();
+        let packed = AdventurerPacking::pack(adventurer);
 
         // unpack adventurer
-        let unpacked: Adventurer = Packing::unpack(packed);
+        let unpacked: Adventurer = AdventurerPacking::unpack(packed);
 
         // verify packing function didn't overflow stats
         // but instead set values to max
@@ -2830,7 +2846,7 @@ mod tests {
     #[available_gas(2000000)]
     fn test_new_adventurer() {
         let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
-        adventurer.pack();
+        AdventurerPacking::pack(adventurer);
         assert(adventurer.health == STARTING_HEALTH, 'wrong starting health');
         assert(adventurer.gold == STARTING_GOLD, 'wrong starting gold');
         assert(adventurer.xp == 0, 'wrong starting xp');
@@ -2882,7 +2898,7 @@ mod tests {
         assert(adventurer.gold == MAX_GOLD, 'gold should be max');
 
         // pack and unpack adventurer to test overflow in packing
-        let unpacked: Adventurer = Packing::unpack(adventurer.pack());
+        let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
         assert(unpacked.gold == MAX_GOLD, 'should still be max gold');
 
         // extreme/overflow case
@@ -2974,7 +2990,7 @@ mod tests {
         assert(adventurer.stat_points_available == MAX_STAT_UPGRADES, 'stat points should be max');
 
         // pack and unpack at max value to ensure our max values are correct for packing
-        let unpacked: Adventurer = Packing::unpack(adventurer.pack());
+        let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
         assert(
             unpacked.stat_points_available == MAX_STAT_UPGRADES, 'stat point should still be max'
         );
