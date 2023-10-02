@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+    use game_entropy::game_entropy::IGameEntropy;
     use debug::PrintTrait;
     use array::ArrayTrait;
     use core::{result::ResultTrait, traits::Into, array::SpanTrait, serde::Serde, clone::Clone};
@@ -75,6 +76,7 @@ mod tests {
 
     fn setup(starting_block: u64) -> IGameDispatcher {
         testing::set_block_number(starting_block);
+        testing::set_block_timestamp(1696201757);
 
         let lords = deploy_lords();
 
@@ -134,36 +136,12 @@ mod tests {
         game
     }
 
-    fn new_adventurer_max_charisma() -> IGameDispatcher {
-        let mut game = setup(1000);
-        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero');
-        game
-    }
-
-    fn new_adventurer_max_charisma_level2() -> IGameDispatcher {
-        // start game
-        let mut game = new_adventurer_max_charisma();
-
-        // attack starter beast
-        game.attack(ADVENTURER_ID, false);
-
-        // assert starter beast is dead
-        let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.beast_health == 0, 'should not be in battle');
-        assert(adventurer.get_level() == 2, 'should be level 2');
-        assert(adventurer.stat_points_available == 1, 'should have 1 stat available');
-
-        // return game
-        game
-    }
-
     fn new_adventurer_lvl2_with_idle_penalty() -> IGameDispatcher {
         // start game on block number 1
-        testing::set_block_number(1);
         let mut game = new_adventurer(1000);
 
         // fast forward chain to block number 400
-        testing::set_block_number(400);
+        testing::set_block_number(1002);
 
         // double attack beast
         // this will trigger idle penalty which will deal extra
@@ -595,7 +573,7 @@ mod tests {
     #[available_gas(13000000000)]
     fn test_flee() {
         // start game on level 2
-        let mut game = new_adventurer_lvl2(1001);
+        let mut game = new_adventurer_lvl2(1003);
 
         // perform upgrade
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
@@ -605,8 +583,6 @@ mod tests {
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
 
         // go exploring
-        game.explore(ADVENTURER_ID, true);
-        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart.clone());
         game.explore(ADVENTURER_ID, true);
 
         // verify we found a beast
@@ -770,7 +746,7 @@ mod tests {
     #[available_gas(71000000)]
     fn test_buy_items() {
         // start game on level 2 so we have access to the market
-        let mut game = new_adventurer_max_charisma_level2();
+        let mut game = new_adventurer_lvl2(1000);
 
         // get items from market
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -917,7 +893,7 @@ mod tests {
     #[available_gas(92000000)]
     fn test_equip() {
         // start game on level 2 so we have access to the market
-        let mut game = new_adventurer_max_charisma_level2();
+        let mut game = new_adventurer_lvl2(1001);
 
         // get items from market
         let market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -1150,17 +1126,21 @@ mod tests {
     #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
     #[available_gas(300000000)]
     fn test_cant_slay_non_idle_adventurer_no_rollover() {
-        let STARTING_BLOCK_NUMBER = 513;
-        let LESS_THAN_IDLE_THRESHOLD_BLOCKS: u64 = Game::IDLE_DEATH_PENALTY_BLOCKS.into() - 1;
+        let starting_block_number = 513;
 
         // deploy and start new game
-        let mut game = new_adventurer(STARTING_BLOCK_NUMBER);
+        let mut game = new_adventurer(starting_block_number);
+
+        // get game entropy
+        let game_entropy = game.get_game_entropy();
 
         // attack starter beast, resulting in adventurer last action block number being 1
         game.attack(ADVENTURER_ID, false);
 
-        // roll forward blockchain but not enough to qualify for idle death penalty
-        testing::set_block_number(STARTING_BLOCK_NUMBER + LESS_THAN_IDLE_THRESHOLD_BLOCKS);
+        // roll forward block chain but not enough to qualify for idle death penalty
+        testing::set_block_number(
+            starting_block_number + game_entropy.get_idle_penalty_blocks() - 1
+        );
 
         // try to slay adventurer for being idle
         // this should result in contract throwing a panic 'Adventurer is not idle'
@@ -1174,19 +1154,18 @@ mod tests {
     #[should_panic(expected: ('Adventurer is not idle', 'ENTRYPOINT_FAILED'))]
     #[available_gas(300000000)]
     fn test_cant_slay_non_idle_adventurer_with_rollover() {
-        // set starting block to just before the rollover at 511
-        let STARTING_BLOCK_NUMBER = 510;
-        // adventurer will be idle for one less than the idle death penalty blocks
-        let LESS_THAN_IDLE_THRESHOLD_BLOCKS: u64 = Game::IDLE_DEATH_PENALTY_BLOCKS.into() - 1;
+        let starting_block_number = 510;
+        let mut game = new_adventurer(starting_block_number);
 
-        // deploy and start new game
-        let mut game = new_adventurer(STARTING_BLOCK_NUMBER);
+        let game_entropy = game.get_game_entropy();
 
         // attack beast to set adventurer last action block number
         game.attack(ADVENTURER_ID, false);
 
         // roll forward block chain but not enough to qualify for idle death penalty
-        testing::set_block_number(STARTING_BLOCK_NUMBER + LESS_THAN_IDLE_THRESHOLD_BLOCKS);
+        testing::set_block_number(
+            starting_block_number + game_entropy.get_idle_penalty_blocks() - 1
+        );
 
         // try to slay adventurer for being idle
         // this should result in contract throwing a panic 'Adventurer is not idle'
@@ -1214,6 +1193,7 @@ mod tests {
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let game_entropy = game.get_game_entropy();
 
         // verify last action block number is correct
         assert(
@@ -1223,7 +1203,7 @@ mod tests {
 
         // roll forward blockchain to make adventurer idle
         testing::set_block_number(
-            adventurer.last_action.into() + Game::IDLE_DEATH_PENALTY_BLOCKS.into()
+            adventurer.last_action.into() + game_entropy.get_idle_penalty_blocks() + 1
         );
 
         // get current block number
@@ -1269,10 +1249,11 @@ mod tests {
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let game_entropy = game.get_game_entropy();
 
         // roll forward blockchain to make adventurer idle
         testing::set_block_number(
-            adventurer.last_action.into() + Game::IDLE_DEATH_PENALTY_BLOCKS.into()
+            adventurer.last_action.into() + game_entropy.get_idle_penalty_blocks() + 1
         );
 
         // get current block number
@@ -1320,10 +1301,11 @@ mod tests {
 
         // get updated adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let game_entropy = game.get_game_entropy();
 
         // roll forward blockchain to make adventurer idle
         testing::set_block_number(
-            adventurer.last_action.into() + Game::IDLE_DEATH_PENALTY_BLOCKS.into()
+            adventurer.last_action.into() + game_entropy.get_idle_penalty_blocks() + 1
         );
 
         // get current block number
@@ -1357,9 +1339,9 @@ mod tests {
     fn test_get_game_entropy() {
         let mut game = new_adventurer(1000);
         let game_entropy = game.get_game_entropy();
-        assert(game_entropy.hash == 0x12220ba39bfbf46a1851365c9bd0a8a, 'wrong game entropy');
-        assert(game_entropy.last_updated_block == 0x3f4, 'wrong entropy last update block');
-        assert(game_entropy.last_updated_time == 0x0, 'wrong entropy last update time');
+        assert(game_entropy.last_updated_block == 0x3e8, 'wrong entropy last update block');
+        assert(game_entropy.last_updated_time == 0x6519fc1d, 'wrong entropy last update time');
+        assert(game_entropy.next_update_block == 0x3ee, 'wrong entropy next update block');
     }
 
     #[test]
@@ -1528,7 +1510,7 @@ mod tests {
     // #[available_gas(80000000000)]
     // fn test_max_items() {
     //     // start game on level 2 so we have access to the market
-    //     let mut game = new_adventurer_max_charisma_level2();
+    //     let mut game = new_adventurer_lvl2(1000);
 
     //     // get items from market
     //     let mut market_items = @game.get_items_on_market(ADVENTURER_ID);
@@ -1772,7 +1754,7 @@ mod tests {
     #[available_gas(75000000)]
     fn test_upgrade_adventurer() {
         // deploy and start new game
-        let mut game = new_adventurer_lvl2(1001);
+        let mut game = new_adventurer_lvl2(1004);
 
         // get original adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);

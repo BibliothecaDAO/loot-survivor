@@ -5,8 +5,8 @@ use survivor::{
     bag::Bag, adventurer::{Adventurer, Stats}, adventurer_meta::AdventurerMetadata,
     item_meta::{ItemSpecials, ItemSpecialsStorage}, leaderboard::Leaderboard,
 };
-use game::game::game_entropy::{GameEntropy};
 
+use game_entropy::game_entropy::{GameEntropy};
 
 #[starknet::interface]
 trait IGame<TContractState> {

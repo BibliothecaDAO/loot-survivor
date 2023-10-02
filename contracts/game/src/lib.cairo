@@ -1,7 +1,6 @@
 mod game {
     mod constants;
     mod interfaces;
-    mod game_entropy;
 }
 mod tests {
     mod test_game;
@@ -33,10 +32,9 @@ mod Game {
         constants::{
             messages, Week, REWARD_DISTRIBUTIONS_PHASE1, REWARD_DISTRIBUTIONS_PHASE2,
             REWARD_DISTRIBUTIONS_PHASE3, BLOCKS_IN_A_WEEK, COST_TO_PLAY, U64_MAX, U128_MAX,
-            STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS, IDLE_DEATH_PENALTY_BLOCKS,
-            MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE, MINIMUM_DAMAGE_FROM_BEASTS
-        },
-        game_entropy::{GameEntropy, ImplGameEntropy}
+            STARTER_BEAST_ATTACK_DAMAGE, NUM_STARTING_STATS,
+            STARTING_GAME_ENTROPY_ROTATION_INTERVAL, MINIMUM_DAMAGE_FROM_BEASTS
+        }
     };
     use lootitems::{
         loot::{ILoot, Loot, ImplLoot}, constants::{ItemId, NamePrefixLength, NameSuffixLength}
@@ -64,6 +62,7 @@ mod Game {
         combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums::{Slot, Tier, Type}
     };
     use beasts::beast::{Beast, IBeast, ImplBeast};
+    use game_entropy::game_entropy::{GameEntropy, ImplGameEntropy};
 
     #[storage]
     struct Storage {
@@ -107,7 +106,8 @@ mod Game {
         AdventurerDied: AdventurerDied,
         NewHighScore: NewHighScore,
         IdleDeathPenalty: IdleDeathPenalty,
-        RewardDistribution: RewardDistribution
+        RewardDistribution: RewardDistribution,
+        GameEntropyRotatedEvent: GameEntropyRotatedEvent,
     }
 
     #[constructor]
@@ -125,8 +125,16 @@ mod Game {
         // set the genesis block
         self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
 
-        // set global game entropy
-        _rotate_game_entropy(ref self);
+        // initialize game entropy
+        let current_block_info = starknet::get_block_info().unbox();
+        let new_game_entropy = ImplGameEntropy::new(
+            current_block_info.block_number,
+            current_block_info.block_timestamp,
+            current_block_info.block_number + STARTING_GAME_ENTROPY_ROTATION_INTERVAL.into()
+        );
+
+        // save game entropy
+        _save_game_entropy(ref self, new_game_entropy);
     }
 
     // ------------------------------------------ //
@@ -183,7 +191,7 @@ mod Game {
             );
 
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(immutable_adventurer);
+            let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
 
             // process explore or apply idle penalty
             if !idle {
@@ -229,7 +237,7 @@ mod Game {
             _assert_in_battle(immutable_adventurer);
 
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(immutable_adventurer);
+            let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
 
             // process attack or apply idle penalty
             if !idle {
@@ -304,7 +312,7 @@ mod Game {
             _assert_dexterity_not_zero(immutable_adventurer);
 
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(immutable_adventurer);
+            let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
 
             // if adventurer is not idle
             if !idle {
@@ -476,7 +484,7 @@ mod Game {
             _assert_valid_stat_selection(immutable_adventurer, stat_upgrades);
 
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(immutable_adventurer);
+            let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
 
             // if adventurer exceeded idle penalty threshold, apply penalty and return
             if idle {
@@ -838,7 +846,7 @@ mod Game {
         _assert_not_dead(adventurer);
 
         // assert adventurer is idle
-        _assert_is_idle(adventurer);
+        _assert_is_idle(@self, adventurer);
 
         // slay adventurer by setting health to 0
         adventurer.health = 0;
@@ -1169,7 +1177,7 @@ mod Game {
         ref adventurer: Adventurer,
         adventurer_id: felt252,
         adventurer_entropy: u128,
-        game_entropy: u128,
+        game_entropy: felt252,
         explore_till_beast: bool
     ) {
         // generate randomenss for exploration
@@ -1494,7 +1502,7 @@ mod Game {
         adventurer_entropy: u128,
         beast: Beast,
         beast_seed: u128,
-        game_entropy: u128,
+        game_entropy: felt252,
         fight_to_the_death: bool,
     ) {
         // get two random numbers using adventurer xp and health as part of entropy
@@ -1630,7 +1638,7 @@ mod Game {
         ref adventurer: Adventurer,
         adventurer_id: felt252,
         adventurer_entropy: u128,
-        game_entropy: u128,
+        game_entropy: felt252,
         beast_seed: u128,
         beast: Beast,
         flee_to_the_death: bool
@@ -2068,30 +2076,54 @@ mod Game {
     /// Uses the Poseidon hash function for the entropy generation.
     fn _rotate_game_entropy(ref self: ContractState) {
         // load current game entropy
-        let mut game_entropy = _load_game_entropy(@self);
+        let prev_game_entropy = _load_game_entropy(@self);
 
         // get current block data
         let current_block_info = starknet::get_block_info().unbox();
 
-        // assert enough time has elapsed to rotate game entropy
+        // assert game entropy is eligible to be rotated
         assert(
-            current_block_info.block_number >= game_entropy.last_updated_block
-                + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into(),
+            current_block_info.block_number >= prev_game_entropy.next_update_block,
             messages::BLOCK_NUMBER_ERROR
         );
 
-        // compute new entropy hash
-        let new_entropy_hash = ImplGameEntropy::generate_entropy(
-            current_block_info.block_number, current_block_info.block_timestamp
+        // calculate the blocks per hour over the last entropy rotation period
+        let blocks_per_hour = ImplGameEntropy::calculate_blocks_per_hour(
+            prev_game_entropy.last_updated_block,
+            prev_game_entropy.last_updated_time,
+            current_block_info.block_number,
+            current_block_info.block_timestamp
         );
 
-        // update game entropy
-        game_entropy.hash = new_entropy_hash;
-        game_entropy.last_updated_block = current_block_info.block_number;
-        game_entropy.last_updated_time = current_block_info.block_timestamp;
+        // use the block speed to dynamically set the next block eligible for rotation
+        // @dev this ensures game can handle starknet changing block times
+        let next_update_block = ImplGameEntropy::calculate_next_update_block(
+            current_block_info.block_number, blocks_per_hour
+        );
+
+        // generate new game entropy
+        let new_game_entropy = ImplGameEntropy::new(
+            current_block_info.block_number, current_block_info.block_timestamp, next_update_block
+        );
 
         // save game entropy
-        _save_game_entropy(ref self, game_entropy);
+        _save_game_entropy(ref self, new_game_entropy);
+
+        // emit event
+        __event_GameEntropyRotated(
+            ref self,
+            GameEntropyRotatedEvent {
+                prev_hash: prev_game_entropy.get_hash(),
+                prev_block_number: prev_game_entropy.last_updated_block,
+                prev_block_timestamp: prev_game_entropy.last_updated_time,
+                prev_next_rotation_block: prev_game_entropy.next_update_block,
+                new_hash: new_game_entropy.get_hash(),
+                new_block_number: new_game_entropy.last_updated_block,
+                new_block_timestamp: new_game_entropy.last_updated_time,
+                new_next_rotation_block: new_game_entropy.next_update_block,
+                blocks_per_hour,
+            }
+        );
     }
 
     // @notice This function emits events relevant to adventurer leveling up
@@ -2172,7 +2204,7 @@ mod Game {
     #[inline(always)]
     fn _next_game_entropy_rotation(self: @ContractState) -> felt252 {
         _load_game_entropy(self).last_updated_block.into()
-            + MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE.into()
+            + STARTING_GAME_ENTROPY_ROTATION_INTERVAL.into()
     }
     fn _assert_ownership(self: @ContractState, adventurer_id: felt252) {
         assert(self._owner.read(adventurer_id) == get_caller_address(), messages::NOT_OWNER);
@@ -2269,16 +2301,21 @@ mod Game {
         _assert_zero_luck(stat_upgrades);
     }
 
-    fn _assert_is_idle(adventurer: Adventurer) {
-        let (is_idle, _) = _is_idle(adventurer);
+    fn _assert_is_idle(self: @ContractState, adventurer: Adventurer) {
+        let (is_idle, _) = _is_idle(self, adventurer);
         assert(is_idle, messages::ADVENTURER_NOT_IDLE);
     }
 
-    fn _is_idle(adventurer: Adventurer) -> (bool, u16) {
+    fn _is_idle(self: @ContractState, adventurer: Adventurer) -> (bool, u16) {
+        // get number of blocks since the players last turn
         let idle_blocks = adventurer
             .get_idle_blocks(starknet::get_block_info().unbox().block_number);
 
-        (idle_blocks >= IDLE_DEATH_PENALTY_BLOCKS.into(), idle_blocks)
+        // load game entropy and calculate the live entropy rotation interval
+        let game_entropy = _load_game_entropy(self);
+
+        // return if player is idle along with number of blocks
+        (game_entropy.is_adventurer_idle(idle_blocks.into()), idle_blocks)
     }
 
     // @notice: The idle penalty in Loot Survivor is death to protect the game against bots
@@ -2446,11 +2483,8 @@ mod Game {
     #[inline(always)]
     fn _get_adventurer_and_game_entropy(
         self: @ContractState, adventurer_id: felt252
-    ) -> (u128, u128) {
-        (
-            _get_adventurer_entropy(self, adventurer_id),
-            _load_game_entropy(self).hash.try_into().unwrap()
-        )
+    ) -> (u128, felt252) {
+        (_get_adventurer_entropy(self, adventurer_id), _load_game_entropy(self).get_hash())
     }
 
     #[inline(always)]
@@ -2714,7 +2748,7 @@ mod Game {
     struct IdleDeathPenalty {
         adventurer_state: AdventurerState,
         idle_blocks: u16, // number of blocks adventurer was idle
-        penalty_threshold: u16, // idle penalty threshold setting
+        penalty_threshold: u64, // idle penalty threshold setting
         caller: ContractAddress // address of caller
     }
 
@@ -2744,6 +2778,19 @@ mod Game {
         dao: u256,
     }
 
+    #[derive(Drop, starknet::Event)]
+    struct GameEntropyRotatedEvent {
+        prev_hash: felt252,
+        prev_block_number: u64,
+        prev_block_timestamp: u64,
+        prev_next_rotation_block: u64,
+        new_hash: felt252,
+        new_block_number: u64,
+        new_block_timestamp: u64,
+        new_next_rotation_block: u64,
+        blocks_per_hour: u64,
+    }
+
     #[derive(Drop, Serde)]
     struct PlayerReward {
         adventurer_id: felt252,
@@ -2759,6 +2806,10 @@ mod Game {
     }
 
     fn __event_RewardDistribution(ref self: ContractState, event: RewardDistribution) {
+        self.emit(event);
+    }
+
+    fn __event_GameEntropyRotated(ref self: ContractState, event: GameEntropyRotatedEvent) {
         self.emit(event);
     }
 
@@ -3031,10 +3082,12 @@ mod Game {
             owner: self._owner.read(adventurer_id), adventurer_id, adventurer
         };
 
+        let game_entropy = _load_game_entropy(@self);
+
         let idle_death_penalty_event = IdleDeathPenalty {
             adventurer_state,
             idle_blocks,
-            penalty_threshold: IDLE_DEATH_PENALTY_BLOCKS.into(),
+            penalty_threshold: game_entropy.get_idle_penalty_blocks().into(),
             caller: get_caller_address()
         };
 
