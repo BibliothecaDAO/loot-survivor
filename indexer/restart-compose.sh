@@ -27,7 +27,7 @@ check_container_activity() {
     if (( CURRENT_EPOCH - LAST_EPOCH > INTERVAL )); then
         return 1
     else
-        return 1
+        return 0
     fi
 }
 
