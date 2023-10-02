@@ -12,8 +12,8 @@ INTERVAL=300
 # Check if a block has been processed in the last minute
 check_container_activity() {
     local CONTAINER_NAME="$1"
-    LAST_LOG=$(docker logs "$CONTAINER_NAME" 2>&1 | grep "Processed block at" | tail -1)
-    echo "Extracted timestamp: $LAST_LOG"  # Print timestamp for verification
+    LAST_LOG=$(docker logs "$CONTAINER_NAME" 2>&1 | tail -1)  # Assuming you want the last log entry
+    echo "Extracted log: $LAST_LOG"  # Print timestamp for verification
     LAST_TIMESTAMP=$(echo "$LAST_LOG" | awk '{print $1}' | tr -d 'T')
     echo "Extracted timestamp: $LAST_TIMESTAMP"  # Print timestamp for verification
 
