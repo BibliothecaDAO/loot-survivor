@@ -27,7 +27,7 @@ check_container_activity() {
     if (( CURRENT_EPOCH - LAST_EPOCH > INTERVAL )); then
         return 1
     else
-        return 0
+        return 1
     fi
 }
 
@@ -35,8 +35,8 @@ while true; do
     for CONTAINER_NAME in "${CONTAINER_NAMES[@]}"; do
         if ! check_container_activity "$CONTAINER_NAME"; then
             echo "Container $CONTAINER_NAME seems to be stuck. Restarting..."
-            # docker-compose -f $COMPOSE_PATH stop "$CONTAINER_NAME"
-            # docker-compose -f $COMPOSE_PATH up -d "$CONTAINER_NAME"
+            docker-compose -f $COMPOSE_PATH stop "$CONTAINER_NAME"
+            docker-compose -f $COMPOSE_PATH up -d "$CONTAINER_NAME"
             # # Add a notification mechanism here if needed
         fi
     done
