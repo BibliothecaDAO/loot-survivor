@@ -21,6 +21,7 @@ check_container_activity() {
     # Convert timestamp to epoch (seconds since 1970)
     LAST_EPOCH=$(date -d "$LAST_TIMESTAMP" +%s)
     CURRENT_EPOCH=$(date +%s)
+    echo "Current time difference: $((CURRENT_EPOCH - LAST_EPOCH)) seconds"
 
     # If the difference is more than the interval, return 1 (unhealthy)
     if (( CURRENT_EPOCH - LAST_EPOCH > INTERVAL )); then
