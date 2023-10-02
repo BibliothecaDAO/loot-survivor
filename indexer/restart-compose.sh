@@ -14,7 +14,7 @@ check_container_activity() {
     local CONTAINER_NAME="$1"
     LAST_LOG=$(docker logs "$CONTAINER_NAME" 2>&1 | tail -1)  # Assuming you want the last log entry
     echo "Extracted log: $LAST_LOG"  # Print timestamp for verification
-    LAST_TIMESTAMP=$(echo "$LAST_LOG" | sed -E 's/\x1B\[[0-9;]*[JKmsu]//g' | awk -F' ' '{print $1" "$2}' | tr -d 'T')
+    LAST_TIMESTAMP=$(echo "$LAST_LOG" | sed -E 's/\x1B\[[0-9;]*[JKmsu]//g' | awk -F' ' '{print $1}' | tr -d 'T')
     echo "Extracted timestamp: $LAST_TIMESTAMP"  # Print timestamp for verification
 
     # Convert timestamp to epoch (seconds since 1970)
