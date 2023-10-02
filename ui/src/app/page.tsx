@@ -66,6 +66,8 @@ import { syscalls } from "./lib/utils/syscalls";
 import { useContracts } from "./hooks/useContracts";
 import { useBalance } from "@starknet-react/core";
 import { ArcadeIntro } from "./components/intro/ArcadeIntro";
+import Logo from "../../public/icons/logo.svg";
+import ScreenMenu from "./components/menu/ScreenMenu";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
