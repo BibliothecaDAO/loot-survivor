@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Path to your docker-compose.yml file
-COMPOSE_PATH="/indexer/goerli-compose.yml"
+COMPOSE_PATH="~/loot-survivor/indexer/goerli-compose.yml"
 
 # Container names (as specified in docker-compose.yml)
 CONTAINER_NAMES=("indexer-adventurers_indexer-1" "indexer-battles_indexer-1" "indexer-beasts_indexer-1" "indexer-discoveries_indexer-1" "indexer-items_indexer-1" "indexer-scores_indexer-1")
