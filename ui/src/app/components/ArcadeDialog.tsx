@@ -26,12 +26,6 @@ import { MIN_BALANCE } from "../lib/constants";
 const MAX_RETRIES = 10;
 const RETRY_DELAY = 2000; // 2 seconds
 
-const provider = new Provider({
-  sequencer: {
-    baseUrl: "https://alpha4.starknet.io",
-  },
-});
-
 export const ArcadeDialog = () => {
   const { account: walletAccount, address, connector } = useAccount();
   const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);

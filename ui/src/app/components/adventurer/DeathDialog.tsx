@@ -115,7 +115,9 @@ export const DeathDialog = () => {
               <TwitterShareButton
                 text={`RIP ${adventurer?.name}, who died at ${getOrdinalSuffix(
                   rank! ?? 0
-                )} place on #LootSurvivor.\n\nGravestone bears the inscription: "${
+                )} place on #LootSurvivor with ${
+                  adventurer?.xp
+                } XP.\n\nGravestone bears the inscription:\n\n"${
                   messageRef.current?.innerText
                 }"🪦\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
               />
