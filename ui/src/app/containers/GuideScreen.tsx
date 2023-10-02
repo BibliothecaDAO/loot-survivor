@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "../components/buttons/Button";
+import { DiscordIcon } from "../components/icons/Icons";
 
 export default function GuideScreen() {
   const efficacyData = [
@@ -97,8 +98,8 @@ export default function GuideScreen() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          <Button className="py-2 px-4 animate-pulse hidden sm:block">
-            Join the Discord
+          <Button className="py-2 px-4 animate-pulse hidden sm:flex flex-row gap-2">
+            Join the Discord <DiscordIcon className="w-5" />
           </Button>
         </a>
       </div>

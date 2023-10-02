@@ -10,7 +10,6 @@ import {
 import { constants } from "starknet";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { Button } from "./components/buttons/Button";
-import HorizontalKeyboardControl from "./components/menu/HorizontalMenu";
 import ActionsScreen from "./containers/ActionsScreen";
 import AdventurerScreen from "./containers/AdventurerScreen";
 import InventoryScreen from "./containers/InventoryScreen";
@@ -35,14 +34,14 @@ import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
 import WalletSelect from "./components/intro/WalletSelect";
 import {
-  CogIcon,
-  MuteIcon,
-  VolumeIcon,
+  SettingsIcon,
+  SoundOnIcon,
+  SoundOffIcon,
   GithubIcon,
-  CartIconSimple,
-  MdTokenIcon,
+  CartIcon,
+  ArcadeIcon,
 } from "./components/icons/Icons";
-import Lords from "../../public/lords.svg";
+import Lords from "../../public/icons/lords.svg";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
 import Player from "./components/adventurer/Player";
@@ -380,7 +379,7 @@ export default function Home() {
             )}
             <div className="flex flex-row justify-between px-1  ">
               <div className="flex flex-row items-center gap-2 sm:gap-5">
-                <h1 className="m-0 text-xl sm:text-4xl">Loot Survivor</h1>
+                <Logo className="fill-current w-24 md:w-32 xl:w-40 2xl:w-64" />
               </div>
               <div className="flex flex-row items-center self-end sm:gap-1 space-x-1 self-center">
                 {adventurer?.id && (
@@ -408,7 +407,7 @@ export default function Home() {
                   onClick={() => showArcadeIntro(!arcadeIntro)}
                   disabled={isWrongNetwork}
                 >
-                  <MdTokenIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
+                  <ArcadeIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
                   <span className="hidden sm:block">arcade account</span>
                 </Button>
                 <Button
@@ -420,13 +419,11 @@ export default function Home() {
                   }}
                   className="hidden sm:block"
                 >
-                  <div className="flex items-center justify-center">
-                    {isMuted ? (
-                      <MuteIcon className="sm:w-5 sm:h-5  h-3 w-3" />
-                    ) : (
-                      <VolumeIcon className="sm:w-5 sm:h-5  h-3 w-3" />
-                    )}
-                  </div>
+                  {isMuted ? (
+                    <SoundOffIcon className="sm:w-5 sm:h-5 h-3 w-3 justify-center fill-current" />
+                  ) : (
+                    <SoundOnIcon className="sm:w-5 sm:h-5 h-3 w-3 justify-center fill-current" />
+                  )}
                 </Button>
                 {account && (
                   <Button
@@ -438,7 +435,7 @@ export default function Home() {
                       clickPlay();
                     }}
                   >
-                    <CartIconSimple className="sm:w-5 sm:h-5  h-3 w-3" />
+                    <CartIcon className="sm:w-5 sm:h-5 h-3 w-3 fill-current" />
                   </Button>
                 )}
                 {displayCart && (
@@ -456,7 +453,7 @@ export default function Home() {
                       clickPlay();
                     }}
                   >
-                    <CogIcon className="fill-current stroke-current h-3 w-3" />
+                    <SettingsIcon className="fill-current h-3 w-3" />
                   </Button>
                 </div>
                 <div className="hidden sm:block sm:flex sm:flex-row sm:items-center sm:gap-1">
@@ -493,7 +490,7 @@ export default function Home() {
                     size={"sm"}
                     href="https://github.com/BibliothecaDAO/loot-survivor"
                   >
-                    <GithubIcon className="w-6" />
+                    <GithubIcon className="w-6 fill-current" />
                   </Button>
                 </div>
                 {account && displayHistory && (
@@ -520,7 +517,7 @@ export default function Home() {
             <div className="flex flex-col w-full">
               <>
                 <div className="sm:hidden flex  sm:justify-normal sm:pb-2">
-                  <HorizontalKeyboardControl
+                  <ScreenMenu
                     buttonsData={mobileMenuItems}
                     onButtonClick={(value) => {
                       setScreen(value);
@@ -529,7 +526,7 @@ export default function Home() {
                   />
                 </div>
                 <div className="hidden sm:block flex justify-center sm:justify-normal sm:pb-2">
-                  <HorizontalKeyboardControl
+                  <ScreenMenu
                     buttonsData={allMenuItems}
                     onButtonClick={(value) => {
                       setScreen(value);

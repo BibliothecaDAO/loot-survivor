@@ -1,15 +1,9 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  ReactElement,
-  useCallback,
-} from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { Button } from "../buttons/Button";
 import { soundSelector, useUiSounds } from "../../hooks/useUiSound";
 import { ButtonData } from "@/app/types";
 
-interface VerticalKeyboardControlProps {
+interface ButtonMenuProps {
   buttonsData: ButtonData[];
   onSelected: (value: string) => void;
   onEnterAction?: boolean;
@@ -19,14 +13,14 @@ interface VerticalKeyboardControlProps {
   className?: string;
 }
 
-const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
+const ButtonMenu: React.FC<ButtonMenuProps> = ({
   buttonsData,
   onSelected,
   onEnterAction,
   isActive = true,
   setActiveMenu,
   size,
-  className
+  className,
 }) => {
   const { play } = useUiSounds(soundSelector.click);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -100,8 +94,8 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
             buttonData.variant
               ? buttonData.variant
               : selectedIndex === index
-                ? "default"
-                : "outline"
+              ? "default"
+              : "outline"
           }
           size={size}
           onClick={() => {
@@ -118,4 +112,4 @@ const VerticalKeyboardControl: React.FC<VerticalKeyboardControlProps> = ({
   );
 };
 
-export default VerticalKeyboardControl;
+export default ButtonMenu;

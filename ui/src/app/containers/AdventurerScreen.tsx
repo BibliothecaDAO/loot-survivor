@@ -3,7 +3,7 @@ import { useAccount } from "@starknet-react/core";
 // import { getAdventurersByOwner } from "../hooks/graphql/queries";
 import { AdventurersList } from "../components/start/AdventurersList";
 import { CreateAdventurer } from "../components/start/CreateAdventurer";
-import VerticalKeyboardControl from "../components/menu/VerticalMenu";
+import ButtonMenu from "../components/menu/ButtonMenu";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import LootIconLoader from "../components/icons/Loader";
 import useLoadingStore from "../hooks/useLoadingStore";
@@ -94,7 +94,7 @@ export default function AdventurerScreen({
   return (
     <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap">
       <div className="w-full sm:w-2/12">
-        <VerticalKeyboardControl
+        <ButtonMenu
           buttonsData={menu}
           onSelected={(value) => setStartOption(value)}
           isActive={activeMenu == 0}
