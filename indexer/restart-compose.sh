@@ -13,6 +13,7 @@ INTERVAL=300
 check_container_activity() {
     local CONTAINER_NAME="$1"
     LAST_LOG=$(docker logs "$CONTAINER_NAME" 2>&1 | grep "Processed block at" | tail -1)
+    echo "Extracted timestamp: $LAST_LOG"  # Print timestamp for verification
     LAST_TIMESTAMP=$(echo "$LAST_LOG" | awk '{print $1}' | tr -d 'T')
     echo "Extracted timestamp: $LAST_TIMESTAMP"  # Print timestamp for verification
 
