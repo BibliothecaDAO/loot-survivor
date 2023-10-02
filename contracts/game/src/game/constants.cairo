@@ -24,6 +24,7 @@ mod messages {
     const MUST_USE_ALL_STATS: felt252 = 'Must use all stats';
     const NO_ITEMS: felt252 = 'Must provide item ids';
     const NON_ZERO_STARTING_LUCK: felt252 = 'Luck must be zero';
+    const RATE_LIMIT_EXCEEDED: felt252 = 'rate limit exceeded';
 }
 
 // TODO: Update for mainnet

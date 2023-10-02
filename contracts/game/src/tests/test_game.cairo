@@ -1197,13 +1197,13 @@ mod tests {
 
         // verify last action block number is correct
         assert(
-            adventurer.last_action == STARTING_BLOCK_NUMBER.try_into().unwrap(),
+            adventurer.last_action_block == STARTING_BLOCK_NUMBER.try_into().unwrap(),
             'unexpected last action block'
         );
 
         // roll forward blockchain to make adventurer idle
         testing::set_block_number(
-            adventurer.last_action.into() + game_entropy.get_idle_penalty_blocks() + 1
+            adventurer.last_action_block.into() + game_entropy.get_idle_penalty_blocks() + 1
         );
 
         // get current block number
@@ -1213,7 +1213,7 @@ mod tests {
         // this is imperative because this test is testing the case where the adventurer last action block number
         // is less than (current_block_number % MAX_BLOCK_COUNT)
         assert(
-            (current_block_number % MAX_BLOCK_COUNT) < adventurer.last_action.into(),
+            (current_block_number % MAX_BLOCK_COUNT) < adventurer.last_action_block.into(),
             'last action !> current block'
         );
 
@@ -1253,7 +1253,7 @@ mod tests {
 
         // roll forward blockchain to make adventurer idle
         testing::set_block_number(
-            adventurer.last_action.into() + game_entropy.get_idle_penalty_blocks() + 1
+            adventurer.last_action_block.into() + game_entropy.get_idle_penalty_blocks() + 1
         );
 
         // get current block number
@@ -1263,7 +1263,7 @@ mod tests {
         // this is imperative because this test is testing the case where the adventurer last action block number
         // is greater than the (current_block_number % MAX_BLOCK_COUNT)
         assert(
-            (current_block_number % MAX_BLOCK_COUNT) > adventurer.last_action.into(),
+            (current_block_number % MAX_BLOCK_COUNT) > adventurer.last_action_block.into(),
             'last action !> current block'
         );
 
@@ -1305,7 +1305,7 @@ mod tests {
 
         // roll forward blockchain to make adventurer idle
         testing::set_block_number(
-            adventurer.last_action.into() + game_entropy.get_idle_penalty_blocks() + 1
+            adventurer.last_action_block.into() + game_entropy.get_idle_penalty_blocks() + 1
         );
 
         // get current block number
@@ -1315,7 +1315,7 @@ mod tests {
         // this is imperative because this test is testing the case where the adventurer last action block number
         // is greater than the (current_block_number % MAX_BLOCK_COUNT)
         assert(
-            (current_block_number % MAX_BLOCK_COUNT) > adventurer.last_action.into(),
+            (current_block_number % MAX_BLOCK_COUNT) > adventurer.last_action_block.into(),
             'last action !> current block'
         );
 
@@ -1417,10 +1417,10 @@ mod tests {
     }
     #[test]
     #[available_gas(20000000)]
-    fn test_get_last_action() {
+    fn test_get_last_action_block() {
         let mut game = new_adventurer(1000);
         let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.last_action == game.get_last_action(ADVENTURER_ID), 'wrong last action');
+        assert(adventurer.last_action_block == game.get_last_action_block(ADVENTURER_ID), 'wrong last action');
     }
     #[test]
     #[available_gas(20000000)]

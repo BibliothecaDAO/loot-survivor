@@ -40,7 +40,7 @@ trait IGame<TContractState> {
     fn get_level(self: @TContractState, adventurer_id: felt252) -> u8;
     fn get_gold(self: @TContractState, adventurer_id: felt252) -> u16;
     fn get_stat_upgrades_available(self: @TContractState, adventurer_id: felt252) -> u8;
-    fn get_last_action(self: @TContractState, adventurer_id: felt252) -> u16;
+    fn get_last_action_block(self: @TContractState, adventurer_id: felt252) -> u16;
 
     // adventurer stats (includes boost)
     fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;

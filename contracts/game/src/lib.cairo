@@ -190,6 +190,13 @@ mod Game {
                 @self, adventurer_id
             );
 
+            // ensure player is not exceeding the rate limit
+            // @player this is to protect you from bots
+            _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+
+            // update actions per block
+            adventurer.update_actions_per_block(starknet::get_block_info().unbox().block_number);
+
             // get number of blocks between actions
             let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
 
@@ -200,7 +207,7 @@ mod Game {
                     ref adventurer,
                     adventurer_id,
                     adventurer_entropy,
-                    game_entropy,
+                    game_entropy.get_hash(),
                     till_beast
                 );
             } else {
@@ -208,7 +215,7 @@ mod Game {
             }
 
             // update players last action block number to reset idle counter
-            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
+            adventurer.set_last_action_block(starknet::get_block_info().unbox().block_number);
 
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -236,16 +243,23 @@ mod Game {
             _assert_not_dead(immutable_adventurer);
             _assert_in_battle(immutable_adventurer);
 
+            // get adventurer and game entropy
+            let (adventurer_entropy, game_entropy) = _get_adventurer_and_game_entropy(
+                @self, adventurer_id
+            );
+
+            // ensure player is not exceeding the rate limit
+            // @player this is to protect you from bots
+            _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+
+            // update actions per block
+            adventurer.update_actions_per_block(starknet::get_block_info().unbox().block_number);
+
             // get number of blocks between actions
             let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
 
             // process attack or apply idle penalty
             if !idle {
-                // get adventurer and game entropy
-                let (adventurer_entropy, game_entropy) = _get_adventurer_and_game_entropy(
-                    @self, adventurer_id
-                );
-
                 // get weapon specials
                 let weapon_specials = _get_item_specials(@self, adventurer_id, adventurer.weapon);
 
@@ -273,7 +287,7 @@ mod Game {
                     adventurer_entropy,
                     beast,
                     beast_seed,
-                    game_entropy,
+                    game_entropy.get_hash(),
                     to_the_death
                 );
             } else {
@@ -281,7 +295,7 @@ mod Game {
             }
 
             // update players last action block
-            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
+            adventurer.set_last_action_block(starknet::get_block_info().unbox().block_number);
 
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -311,16 +325,23 @@ mod Game {
             _assert_not_starter_beast(immutable_adventurer);
             _assert_dexterity_not_zero(immutable_adventurer);
 
+            // get adventurer and game entropy
+            let (adventurer_entropy, game_entropy) = _get_adventurer_and_game_entropy(
+                @self, adventurer_id
+            );
+
+            // ensure player is not exceeding the rate limit
+            // @player this is to protect you from bots
+            _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+
+            // update actions per block
+            adventurer.update_actions_per_block(starknet::get_block_info().unbox().block_number);
+
             // get number of blocks between actions
             let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
 
             // if adventurer is not idle
             if !idle {
-                // get adventurer and game entropy
-                let (adventurer_entropy, game_entropy) = _get_adventurer_and_game_entropy(
-                    @self, adventurer_id
-                );
-
                 // get beast and beast seed
                 let (beast, beast_seed) = adventurer.get_beast(adventurer_entropy);
 
@@ -330,7 +351,7 @@ mod Game {
                     ref adventurer,
                     adventurer_id,
                     adventurer_entropy,
-                    game_entropy,
+                    game_entropy.get_hash(),
                     beast_seed,
                     beast,
                     to_the_death
@@ -346,7 +367,7 @@ mod Game {
             }
 
             // update players last action block number
-            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
+            adventurer.set_last_action_block(starknet::get_block_info().unbox().block_number);
 
             // pack and save adventurer
             _pack_adventurer_remove_stat_boost(
@@ -389,7 +410,7 @@ mod Game {
 
                 // get two random numbers
                 let (rnd1, rnd2) = AdventurerUtils::get_randomness(
-                    adventurer.xp, adventurer_entropy, game_entropy.into()
+                    adventurer.xp, adventurer_entropy, game_entropy.get_hash()
                 );
 
                 // process beast attack
@@ -483,6 +504,16 @@ mod Game {
             _assert_not_in_battle(immutable_adventurer);
             _assert_valid_stat_selection(immutable_adventurer, stat_upgrades);
 
+            // load game entropy
+            let game_entropy = _load_game_entropy(@self);
+
+            // ensure player is not exceeding the rate limit
+            // @player this is to protect you from bots
+            _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+
+            // update actions per block
+            adventurer.update_actions_per_block(starknet::get_block_info().unbox().block_number);
+
             // get number of blocks between actions
             let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
 
@@ -516,7 +547,7 @@ mod Game {
             }
 
             // update players last action block number
-            adventurer.set_last_action(starknet::get_block_info().unbox().block_number);
+            adventurer.set_last_action_block(starknet::get_block_info().unbox().block_number);
 
             // emit adventurer upgraded event
             __event_AdventurerUpgraded(ref self, adventurer, adventurer_id, bag, stat_upgrades);
@@ -713,8 +744,8 @@ mod Game {
         fn get_stat_upgrades_available(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).stat_points_available
         }
-        fn get_last_action(self: @ContractState, adventurer_id: felt252) -> u16 {
-            _unpack_adventurer(self, adventurer_id).last_action
+        fn get_last_action_block(self: @ContractState, adventurer_id: felt252) -> u16 {
+            _unpack_adventurer(self, adventurer_id).last_action_block
         }
         fn get_weapon_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).weapon.get_greatness()
@@ -2306,6 +2337,10 @@ mod Game {
         assert(is_idle, messages::ADVENTURER_NOT_IDLE);
     }
 
+    fn _assert_rate_limit(actions_per_block: u8, rate_limit: u64) {
+        assert(actions_per_block.into() > rate_limit, messages::RATE_LIMIT_EXCEEDED);
+    }
+
     fn _is_idle(self: @ContractState, adventurer: Adventurer) -> (bool, u16) {
         // get number of blocks since the players last turn
         let idle_blocks = adventurer
@@ -2483,8 +2518,8 @@ mod Game {
     #[inline(always)]
     fn _get_adventurer_and_game_entropy(
         self: @ContractState, adventurer_id: felt252
-    ) -> (u128, felt252) {
-        (_get_adventurer_entropy(self, adventurer_id), _load_game_entropy(self).get_hash())
+    ) -> (u128, GameEntropy) {
+        (_get_adventurer_entropy(self, adventurer_id), _load_game_entropy(self))
     }
 
     #[inline(always)]

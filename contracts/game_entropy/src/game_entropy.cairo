@@ -9,7 +9,9 @@ struct GameEntropy {
 }
 
 impl GameEntropyPacking of StorePacking<GameEntropy, felt252> {
+    // @notice: packs a GameEntropy struct into a felt252
     // @dev: we don't store hash since it can be calculated dynamically
+    // @param value: the GameEntropy struct to pack
     fn pack(value: GameEntropy) -> felt252 {
         (value.last_updated_block.into()
             + (value.last_updated_time.into() * TWO_POW_64)
@@ -18,7 +20,9 @@ impl GameEntropyPacking of StorePacking<GameEntropy, felt252> {
             .unwrap()
     }
 
+    // @notice: unpacks a felt252 into a GameEntropy struct
     // @dev: entropy hash is calculated during unpack
+    // @param value: the felt252 to unpack
     fn unpack(value: felt252) -> GameEntropy {
         let packed = value.into();
         let (packed, last_updated_block) = integer::U256DivRem::div_rem(
@@ -40,9 +44,17 @@ impl GameEntropyPacking of StorePacking<GameEntropy, felt252> {
 
 #[generate_trait]
 impl ImplGameEntropy of IGameEntropy {
+    /// @notice Create a new instance of the GameEntropy struct
+    /// @param last_updated_block The block number when the game was last updated.
+    /// @param last_updated_time The timestamp when the game was last updated.
+    /// @param next_update_block The block number for the next scheduled update.
+    /// @return A new instance of GameEntropy.
     fn new(last_updated_block: u64, last_updated_time: u64, next_update_block: u64) -> GameEntropy {
         GameEntropy { last_updated_block, last_updated_time, next_update_block }
     }
+
+    /// @notice Calculate a hash based on the properties of the GameEntropy struct
+    /// @return A 252-bit hash value
     fn get_hash(self: GameEntropy) -> felt252 {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(self.last_updated_block.into());
@@ -51,32 +63,63 @@ impl ImplGameEntropy of IGameEntropy {
         poseidon_hash_span(hash_span.span())
     }
 
+    /// @notice Calculate the number of blocks produced per hour
+    /// @param previous_block_number The previous block's number.
+    /// @param previous_block_timestamp The timestamp of the previous block.
+    /// @param current_block_number The current block's number.
+    /// @param current_block_timestamp The timestamp of the current block.
+    /// @return The number of blocks produced per hour.
     fn calculate_blocks_per_hour(
         previous_block_number: u64,
         previous_block_timestamp: u64,
         current_block_number: u64,
         current_block_timestamp: u64
     ) -> u64 {
-        let failsafe: u64 = 1;
         let block_number_diff = current_block_number - previous_block_number;
         let block_timestamp_diff = current_block_timestamp - previous_block_timestamp;
         block_number_diff * 3600 / block_timestamp_diff
     }
 
+    /// @notice Calculate the current rate of blocks produced per hour, based on a ten-minute window.
+    /// @return The number of blocks produced per hour.
+    #[inline(always)]
+    fn current_blocks_per_hour(self: GameEntropy) -> u64 {
+        let blocks_per_ten_minutes = self.next_update_block - self.last_updated_block;
+        blocks_per_ten_minutes * 6
+    }
+
+    /// @notice Calculate the next scheduled update block based on the current block and block production rate.
+    /// @param current_block The current block number.
+    /// @param blocks_per_hour The estimated block production rate per hour.
+    /// @return The block number for the next update.
+    #[inline(always)]
     fn calculate_next_update_block(current_block: u64, blocks_per_hour: u64) -> u64 {
         let blocks_per_ten_mins = blocks_per_hour / 6;
         current_block + blocks_per_ten_mins
     }
 
-    // @dev player idleness is based on the game entropy rotation interval
-    // this interval dynamically adjusts to the blockspeed of starknet.
-    // Players must act within the interval to avoid being able to let entropy rotate and change their outcome.
+    /// @notice Get the rate limit based on the current block production rate.
+    /// @return The rate limit.
+    #[inline(always)]
+    fn get_rate_limit(self: GameEntropy) -> u64 {
+        let blocks_per_hour = self.current_blocks_per_hour();
+        if blocks_per_hour < 120 {
+            return (120 / blocks_per_hour);
+        } else {
+            return 1;
+        }
+    }
+
+    /// @notice Determine if an adventurer is idle based on the number of idle blocks.
+    /// @param idle_blocks The number of blocks the adventurer has been idle.
+    /// @return True if the adventurer is idle, false otherwise.
     #[inline(always)]
     fn is_adventurer_idle(self: GameEntropy, idle_blocks: u64) -> bool {
         idle_blocks > self.get_idle_penalty_blocks()
     }
 
-    // @dev idle penalty is one less than the game entropy rotation interval
+    /// @notice Get the number of penalty blocks for being idle.
+    /// @return The number of penalty blocks.
     #[inline(always)]
     fn get_idle_penalty_blocks(self: GameEntropy) -> u64 {
         self.next_update_block - self.last_updated_block - 1
@@ -139,6 +182,16 @@ mod tests {
         );
         // after this blockspeed, ten minutes is now 20 blocks in the future
         assert(next_entropy_rotation == 21, 'wrong rotation, fast speed');
+    }
+
+    #[test]
+    #[available_gas(8350)]
+    fn test_current_blocks_per_hour() {
+        let game_entropy = GameEntropy {
+            last_updated_block: 282465, last_updated_time: 1696214108, next_update_block: 282481,
+        };
+        let blocks_per_hour = game_entropy.current_blocks_per_hour();
+        assert(blocks_per_hour == 96, 'wrong blocks per hour')
     }
 
     #[test]

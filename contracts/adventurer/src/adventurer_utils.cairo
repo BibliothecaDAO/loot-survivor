@@ -484,7 +484,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(259044)]
+    #[available_gas(259644)]
     fn test_is_health_full() {
         let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
 
@@ -518,7 +518,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(204804)]
+    #[available_gas(205004)]
     fn test_get_max_health() {
         let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
 
