@@ -1815,7 +1815,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(57077884)]
+    #[available_gas(570778841)]
     #[should_panic(expected: ('rate limit exceeded', 'ENTRYPOINT_FAILED'))]
     fn test_exceed_rate_limit() {
         let starting_block = 1000;
@@ -1827,12 +1827,13 @@ mod tests {
 
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
         game.explore(ADVENTURER_ID, false);
+        game.explore(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
     }
 
     #[test]
-    #[available_gas(94441784)]
+    #[available_gas(944417814)]
     fn test_exceed_rate_limit_block_rotation() {
         let starting_block = 1000;
         let mut game = new_adventurer_lvl2(starting_block);
@@ -1843,7 +1844,7 @@ mod tests {
 
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
         game.explore(ADVENTURER_ID, false);
-        game.attack(ADVENTURER_ID, false);
+        game.explore(ADVENTURER_ID, false);
 
         // advancing block resets players action per block
         starknet::testing::set_block_number(starting_block + 1);
@@ -1853,6 +1854,5 @@ mod tests {
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
-
     }
 }
