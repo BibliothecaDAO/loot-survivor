@@ -24,14 +24,14 @@ mod messages {
     const MUST_USE_ALL_STATS: felt252 = 'Must use all stats';
     const NO_ITEMS: felt252 = 'Must provide item ids';
     const NON_ZERO_STARTING_LUCK: felt252 = 'Luck must be zero';
+    const RATE_LIMIT_EXCEEDED: felt252 = 'rate limit exceeded';
 }
 
 // TODO: Update for mainnet
 const BLOCKS_IN_A_WEEK: u64 = 1000;
 const COST_TO_PLAY: u8 = 25;
 const NUM_STARTING_STATS: u8 = 9;
-const IDLE_DEATH_PENALTY_BLOCKS: u8 = 12;
-const MIN_BLOCKS_FOR_GAME_ENTROPY_CHANGE: u8 = 25;
+const STARTING_GAME_ENTROPY_ROTATION_INTERVAL: u8 = 6;
 const MINIMUM_DAMAGE_FROM_BEASTS: u8 = 2;
 
 const U64_MAX: u64 = 18446744073709551615;

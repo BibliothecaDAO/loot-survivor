@@ -1,13 +1,13 @@
 use core::{option::OptionTrait, starknet::{StorePacking}, traits::{TryInto, Into}};
 
 #[derive(Drop, Copy, Serde)]
-struct Stats { // 30 storage bits
-    strength: u8, // 5 bits
-    dexterity: u8, // 5 bits
-    vitality: u8, // 5 bits
-    intelligence: u8, // 5 bits
-    wisdom: u8, // 5 bits
-    charisma: u8, // 5 bits
+struct Stats { // 24 storage bits
+    strength: u8, // 4 bits
+    dexterity: u8, // 4 bits
+    vitality: u8, // 4 bits
+    intelligence: u8, // 4 bits
+    wisdom: u8, // 4 bits
+    charisma: u8, // 4 bits
     luck: u8 // // dynamically generated, not stored.
 }
 
@@ -23,11 +23,11 @@ impl StatUtils of IStat {
 impl StatsPacking of StorePacking<Stats, felt252> {
     fn pack(value: Stats) -> felt252 {
         (value.strength.into()
-            + value.dexterity.into() * TWO_POW_5
-            + value.vitality.into() * TWO_POW_10
-            + value.intelligence.into() * TWO_POW_15
-            + value.wisdom.into() * TWO_POW_20
-            + value.charisma.into() * TWO_POW_25)
+            + value.dexterity.into() * TWO_POW_4
+            + value.vitality.into() * TWO_POW_8
+            + value.intelligence.into() * TWO_POW_12
+            + value.wisdom.into() * TWO_POW_16
+            + value.charisma.into() * TWO_POW_20)
             .try_into()
             .unwrap()
     }
@@ -35,19 +35,19 @@ impl StatsPacking of StorePacking<Stats, felt252> {
     fn unpack(value: felt252) -> Stats {
         let packed = value.into();
         let (packed, strength) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_5.try_into().unwrap()
+            packed, TWO_POW_4.try_into().unwrap()
         );
         let (packed, dexterity) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_5.try_into().unwrap()
+            packed, TWO_POW_4.try_into().unwrap()
         );
         let (packed, vitality) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_5.try_into().unwrap()
+            packed, TWO_POW_4.try_into().unwrap()
         );
         let (packed, intelligence) = integer::U256DivRem::div_rem(
-            packed, TWO_POW_5.try_into().unwrap()
+            packed, TWO_POW_4.try_into().unwrap()
         );
-        let (packed, wisdom) = integer::U256DivRem::div_rem(packed, TWO_POW_5.try_into().unwrap());
-        let (_, charisma) = integer::U256DivRem::div_rem(packed, TWO_POW_5.try_into().unwrap());
+        let (packed, wisdom) = integer::U256DivRem::div_rem(packed, TWO_POW_4.try_into().unwrap());
+        let (_, charisma) = integer::U256DivRem::div_rem(packed, TWO_POW_4.try_into().unwrap());
 
         Stats {
             strength: strength.try_into().unwrap(),
@@ -61,18 +61,19 @@ impl StatsPacking of StorePacking<Stats, felt252> {
     }
 }
 
-const TWO_POW_5: u256 = 0x20;
-const TWO_POW_10: u256 = 0x400;
-const TWO_POW_15: u256 = 0x8000;
+const TWO_POW_4: u256 = 0x10;
+const TWO_POW_8: u256 = 0x100;
+const TWO_POW_12: u256 = 0x1000;
+const TWO_POW_16: u256 = 0x10000;
 const TWO_POW_20: u256 = 0x100000;
-const TWO_POW_25: u256 = 0x2000000;
+const TWO_POW_24: u256 = 0x1000000;
 
 // ---------------------------
 // ---------- Tests ----------
 // ---------------------------
 #[cfg(test)]
 mod tests {
-    use survivor::adventurer_stats::{Stats, StatsPacking};
+    use survivor::stats::{Stats, StatsPacking};
 
     #[test]
     #[available_gas(1039260)]
@@ -92,15 +93,15 @@ mod tests {
         assert(stats.charisma == unpacked.charisma, 'charisma zero case');
         assert(unpacked.luck == 0, 'luck is zero from storage');
 
-        // storage limit test (2^5 - 1 = 31)
+        // storage limit test (2^4 - 1 = 15)
         let stats = Stats {
-            strength: 31,
-            dexterity: 31,
-            vitality: 31,
-            intelligence: 31,
-            wisdom: 31,
-            charisma: 31,
-            luck: 31
+            strength: 15,
+            dexterity: 15,
+            vitality: 15,
+            intelligence: 15,
+            wisdom: 15,
+            charisma: 15,
+            luck: 15
         };
 
         let packed = StatsPacking::pack(stats);
