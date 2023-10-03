@@ -207,7 +207,7 @@ mod Game {
                     ref adventurer,
                     adventurer_id,
                     adventurer_entropy,
-                    game_entropy.get_hash(),
+                    123,
                     till_beast
                 );
             } else {
@@ -248,9 +248,12 @@ mod Game {
                 @self, adventurer_id
             );
 
+            let block_number = starknet::get_block_info().unbox().block_number;
             // ensure player is not exceeding the rate limit
             // @player this is to protect you from bots
-            _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+            if !adventurer.block_changed_since_last_action(block_number) {
+                _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+            }
 
             // update actions per block
             adventurer.update_actions_per_block(starknet::get_block_info().unbox().block_number);
@@ -287,7 +290,7 @@ mod Game {
                     adventurer_entropy,
                     beast,
                     beast_seed,
-                    game_entropy.get_hash(),
+                    game_entropy.hash,
                     to_the_death
                 );
             } else {
@@ -351,7 +354,7 @@ mod Game {
                     ref adventurer,
                     adventurer_id,
                     adventurer_entropy,
-                    game_entropy.get_hash(),
+                    game_entropy.hash,
                     beast_seed,
                     beast,
                     to_the_death
@@ -410,7 +413,7 @@ mod Game {
 
                 // get two random numbers
                 let (rnd1, rnd2) = AdventurerUtils::get_randomness(
-                    adventurer.xp, adventurer_entropy, game_entropy.get_hash()
+                    adventurer.xp, adventurer_entropy, game_entropy.hash
                 );
 
                 // process beast attack
@@ -2144,11 +2147,11 @@ mod Game {
         __event_GameEntropyRotated(
             ref self,
             GameEntropyRotatedEvent {
-                prev_hash: prev_game_entropy.get_hash(),
+                prev_hash: prev_game_entropy.hash,
                 prev_block_number: prev_game_entropy.last_updated_block,
                 prev_block_timestamp: prev_game_entropy.last_updated_time,
                 prev_next_rotation_block: prev_game_entropy.next_update_block,
-                new_hash: new_game_entropy.get_hash(),
+                new_hash: new_game_entropy.hash,
                 new_block_number: new_game_entropy.last_updated_block,
                 new_block_timestamp: new_game_entropy.last_updated_time,
                 new_next_rotation_block: new_game_entropy.next_update_block,
@@ -2338,7 +2341,7 @@ mod Game {
     }
 
     fn _assert_rate_limit(actions_per_block: u8, rate_limit: u64) {
-        assert(actions_per_block.into() > rate_limit, messages::RATE_LIMIT_EXCEEDED);
+        assert(actions_per_block.into() <= rate_limit, messages::RATE_LIMIT_EXCEEDED);
     }
 
     fn _is_idle(self: @ContractState, adventurer: Adventurer) -> (bool, u16) {

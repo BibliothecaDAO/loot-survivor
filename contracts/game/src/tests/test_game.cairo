@@ -174,19 +174,13 @@ mod tests {
         game
     }
 
-    fn new_adventurer_lvl3(stat: u8) -> IGameDispatcher {
+    fn new_adventurer_lvl3(starting_block: u64) -> IGameDispatcher {
         // start game on lvl 2
-        let mut game = new_adventurer_lvl2(1000);
+        let mut game = new_adventurer_lvl2(starting_block);
 
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
         let stat_upgrades = Stats {
-            strength: stat,
-            dexterity: 0,
-            vitality: 0,
-            intelligence: 0,
-            wisdom: 0,
-            charisma: 1,
-            luck: 0
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
         };
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
 
@@ -208,7 +202,7 @@ mod tests {
 
     fn new_adventurer_lvl4(stat: u8) -> IGameDispatcher {
         // start game on lvl 2
-        let mut game = new_adventurer_lvl3(stat);
+        let mut game = new_adventurer_lvl3(123);
 
         // upgrade charisma
         let shopping_cart = ArrayTrait::<ItemPurchase>::new();
@@ -1420,7 +1414,10 @@ mod tests {
     fn test_get_last_action_block() {
         let mut game = new_adventurer(1000);
         let adventurer = game.get_adventurer(ADVENTURER_ID);
-        assert(adventurer.last_action_block == game.get_last_action_block(ADVENTURER_ID), 'wrong last action');
+        assert(
+            adventurer.last_action_block == game.get_last_action_block(ADVENTURER_ID),
+            'wrong last action'
+        );
     }
     #[test]
     #[available_gas(20000000)]
@@ -1758,6 +1755,7 @@ mod tests {
 
         // get original adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
+        let game_entropy = game.get_game_entropy();
         let original_charisma = adventurer.stats.charisma;
         let original_health = adventurer.health;
 
@@ -1814,5 +1812,47 @@ mod tests {
         if waist_armor_id > 0 {
             assert(!adventurer.is_equipped(waist_armor_id), 'waist should not be equipped');
         }
+    }
+
+    #[test]
+    #[available_gas(57023944)]
+    #[should_panic(expected: ('rate limit exceeded', 'ENTRYPOINT_FAILED'))]
+    fn test_exceed_rate_limit() {
+        let starting_block = 1000;
+        let mut game = new_adventurer_lvl2(starting_block);
+        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+        let stat_upgrades = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+        };
+
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.explore(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
+    }
+
+    #[test]
+    #[available_gas(944417840)]
+    fn test_exceed_rate_limit_block_rotation() {
+        let starting_block = 1000;
+        let mut game = new_adventurer_lvl2(starting_block);
+        let shopping_cart = ArrayTrait::<ItemPurchase>::new();
+        let stat_upgrades = Stats {
+            strength: 0, dexterity: 0, vitality: 0, intelligence: 0, wisdom: 0, charisma: 1, luck: 0
+        };
+
+        game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
+        game.explore(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
+
+        // advancing block resets players action per block
+        starknet::testing::set_block_number(starting_block + 1);
+
+        // player can continue playing
+        game.attack(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
+
     }
 }

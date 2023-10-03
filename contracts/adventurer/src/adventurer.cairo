@@ -1693,7 +1693,7 @@ impl ImplAdventurer of IAdventurer {
 
     #[inline(always)]
     fn block_changed_since_last_action(self: Adventurer, block_number: u64) -> bool {
-        self.last_action_block == (block_number % MAX_ADVENTURER_BLOCKS.into()).try_into().unwrap()
+        self.last_action_block != (block_number % MAX_ADVENTURER_BLOCKS.into()).try_into().unwrap()
     }
 
     #[inline(always)]

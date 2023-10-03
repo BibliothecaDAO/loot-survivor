@@ -1,11 +1,13 @@
+use debug::PrintTrait;
 use poseidon::poseidon_hash_span;
 use starknet::{StorePacking};
 
 #[derive(Drop, Copy, Serde)]
 struct GameEntropy {
-    last_updated_block: u64,
-    last_updated_time: u64,
-    next_update_block: u64,
+    hash: felt252, // not stored
+    last_updated_block: u64, // 64 bits in storage
+    last_updated_time: u64, // 64 bits in storage
+    next_update_block: u64, // 64 bits in storage
 }
 
 impl GameEntropyPacking of StorePacking<GameEntropy, felt252> {
@@ -38,7 +40,7 @@ impl GameEntropyPacking of StorePacking<GameEntropy, felt252> {
         let last_updated_block = last_updated_block.try_into().unwrap();
         let last_updated_time = last_updated_time.try_into().unwrap();
         let next_update_block = next_update_block.try_into().unwrap();
-        GameEntropy { last_updated_block, last_updated_time, next_update_block }
+        ImplGameEntropy::new(last_updated_block, last_updated_time, next_update_block)
     }
 }
 
@@ -50,16 +52,17 @@ impl ImplGameEntropy of IGameEntropy {
     /// @param next_update_block The block number for the next scheduled update.
     /// @return A new instance of GameEntropy.
     fn new(last_updated_block: u64, last_updated_time: u64, next_update_block: u64) -> GameEntropy {
-        GameEntropy { last_updated_block, last_updated_time, next_update_block }
+        let hash = ImplGameEntropy::get_hash(last_updated_block, last_updated_time, next_update_block);
+        GameEntropy { hash, last_updated_block, last_updated_time, next_update_block }
     }
 
     /// @notice Calculate a hash based on the properties of the GameEntropy struct
     /// @return A 252-bit hash value
-    fn get_hash(self: GameEntropy) -> felt252 {
+    fn get_hash(last_updated_block: u64, last_updated_time: u64, next_update_block: u64) -> felt252 {
         let mut hash_span = ArrayTrait::<felt252>::new();
-        hash_span.append(self.last_updated_block.into());
-        hash_span.append(self.last_updated_time.into());
-        hash_span.append(self.next_update_block.into());
+        hash_span.append(last_updated_block.into());
+        hash_span.append(last_updated_time.into());
+        hash_span.append(next_update_block.into());
         poseidon_hash_span(hash_span.span())
     }
 
@@ -138,16 +141,40 @@ const U128_MAX: u128 = 340282366920938463463374607431768211455;
 #[cfg(test)]
 mod tests {
     use game_entropy::game_entropy::{GameEntropy, ImplGameEntropy, GameEntropyPacking};
+    #[test]
+    #[available_gas(22080)]
+    fn test_new_entropy() {
+        let last_updated_block = 282360;
+        let last_updated_time = 1696209920;
+        let next_update_block = 282364;
+
+        let game_entropy = ImplGameEntropy::new(last_updated_block, last_updated_time, next_update_block);
+        assert(game_entropy.hash != 0, 'hash should be set');
+        assert(game_entropy.last_updated_block == last_updated_block, 'wrong last_updated_block');
+        assert(game_entropy.last_updated_time == last_updated_time, 'wrong last_updated_time');
+        assert(game_entropy.next_update_block == next_update_block, 'wrong next_update_block');
+    }
 
     #[test]
-    #[available_gas(14180)]
+    #[available_gas(18580)]
+    fn test_get_hash() {
+        // zero case
+        let last_updated_block = 0;
+        let last_updated_time = 0;
+        let next_update_block = 0;
+        let hash = ImplGameEntropy::get_hash(last_updated_block, last_updated_time, next_update_block);
+    }
+
+    #[test]
+    #[available_gas(14280)]
     fn test_is_adventurer_idle() {
+        let hash = 0x123;
         let last_updated_block = 282360;
         let last_updated_time = 1696209920;
         let next_update_block = 282364;
 
         let game_entropy = GameEntropy {
-            last_updated_block, last_updated_time, next_update_block,
+            hash, last_updated_block, last_updated_time, next_update_block,
         };
 
         let adventurer_idle_blocks = 3;
@@ -160,7 +187,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(19360)]
+    #[available_gas(15960)]
     fn test_calculate_next_update_block() {
         let current_block = 1;
 
@@ -185,17 +212,17 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(8350)]
+    #[available_gas(6350)]
     fn test_current_blocks_per_hour() {
         let game_entropy = GameEntropy {
-            last_updated_block: 282465, last_updated_time: 1696214108, next_update_block: 282481,
+            hash: 0x123, last_updated_block: 282465, last_updated_time: 1696214108, next_update_block: 282481,
         };
         let blocks_per_hour = game_entropy.current_blocks_per_hour();
         assert(blocks_per_hour == 96, 'wrong blocks per hour')
     }
 
     #[test]
-    #[available_gas(30680)]
+    #[available_gas(29280)]
     fn test_calculate_blocks_per_hour() {
         // normal case using current starknet goerli data
         let previous_block_number = 876324;
@@ -226,12 +253,12 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(240920)]
+    #[available_gas(243220)]
     fn test_game_entropy_packing() {
         // max value case
 
-        // hash is calculated during unpack so this value does not matter
         let game_entropy = GameEntropy {
+            hash: 0x123,
             last_updated_block: 0xFFFFFFFFFFFFFFFF,
             last_updated_time: 0xFFFFFFFFFFFFFFFF,
             next_update_block: 0xFFFFFFFFFFFFFFFF,
@@ -254,7 +281,7 @@ mod tests {
 
         // zero case
         let game_entropy = GameEntropy {
-            last_updated_block: 0, last_updated_time: 0, next_update_block: 0
+            hash: 0, last_updated_block: 0, last_updated_time: 0, next_update_block: 0
         };
         let unpacked: GameEntropy = GameEntropyPacking::unpack(
             GameEntropyPacking::pack(game_entropy)
