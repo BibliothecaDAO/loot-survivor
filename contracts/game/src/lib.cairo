@@ -192,23 +192,26 @@ mod Game {
 
             // ensure player is not exceeding the rate limit
             // @player this is to protect you from bots
-            _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+            let block_number = starknet::get_block_info().unbox().block_number;
+            if !adventurer.block_changed_since_last_action(block_number) {
+                _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+            }
+
+            // if game entropy is eligible to be rotated, rotate it
+            if block_number > game_entropy.next_update_block {
+                _rotate_game_entropy(ref self);
+            }
 
             // update actions per block
-            adventurer.update_actions_per_block(starknet::get_block_info().unbox().block_number);
+            adventurer.update_actions_per_block(block_number);
 
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
+            let (idle, num_blocks) = _is_idle(immutable_adventurer, game_entropy);
 
             // process explore or apply idle penalty
             if !idle {
                 _explore(
-                    ref self,
-                    ref adventurer,
-                    adventurer_id,
-                    adventurer_entropy,
-                    123,
-                    till_beast
+                    ref self, ref adventurer, adventurer_id, adventurer_entropy, game_entropy.hash, till_beast
                 );
             } else {
                 _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
@@ -248,9 +251,9 @@ mod Game {
                 @self, adventurer_id
             );
 
-            let block_number = starknet::get_block_info().unbox().block_number;
             // ensure player is not exceeding the rate limit
             // @player this is to protect you from bots
+            let block_number = starknet::get_block_info().unbox().block_number;
             if !adventurer.block_changed_since_last_action(block_number) {
                 _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
             }
@@ -258,8 +261,13 @@ mod Game {
             // update actions per block
             adventurer.update_actions_per_block(starknet::get_block_info().unbox().block_number);
 
+            // if game entropy is eligible to be rotated, rotate it
+            if block_number > game_entropy.next_update_block {
+                _rotate_game_entropy(ref self);
+            }
+
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
+            let (idle, num_blocks) = _is_idle(immutable_adventurer, game_entropy);
 
             // process attack or apply idle penalty
             if !idle {
@@ -335,13 +343,21 @@ mod Game {
 
             // ensure player is not exceeding the rate limit
             // @player this is to protect you from bots
-            _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+            let block_number = starknet::get_block_info().unbox().block_number;
+            if !adventurer.block_changed_since_last_action(block_number) {
+                _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+            }
 
             // update actions per block
-            adventurer.update_actions_per_block(starknet::get_block_info().unbox().block_number);
+            adventurer.update_actions_per_block(block_number);
+
+            // if game entropy is eligible to be rotated, rotate it
+            if block_number > game_entropy.next_update_block {
+                _rotate_game_entropy(ref self);
+            }
 
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
+            let (idle, num_blocks) = _is_idle(immutable_adventurer, game_entropy);
 
             // if adventurer is not idle
             if !idle {
@@ -512,13 +528,21 @@ mod Game {
 
             // ensure player is not exceeding the rate limit
             // @player this is to protect you from bots
-            _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+            let block_number = starknet::get_block_info().unbox().block_number;
+            if !adventurer.block_changed_since_last_action(block_number) {
+                _assert_rate_limit(adventurer.actions_per_block, game_entropy.get_rate_limit());
+            }
 
             // update actions per block
-            adventurer.update_actions_per_block(starknet::get_block_info().unbox().block_number);
+            adventurer.update_actions_per_block(block_number);
+
+            // if game entropy is eligible to be rotated, rotate it
+            if block_number > game_entropy.next_update_block {
+                _rotate_game_entropy(ref self);
+            }
 
             // get number of blocks between actions
-            let (idle, num_blocks) = _is_idle(@self, immutable_adventurer);
+            let (idle, num_blocks) = _is_idle(immutable_adventurer, game_entropy);
 
             // if adventurer exceeded idle penalty threshold, apply penalty and return
             if idle {
@@ -2335,22 +2359,18 @@ mod Game {
         _assert_zero_luck(stat_upgrades);
     }
 
-    fn _assert_is_idle(self: @ContractState, adventurer: Adventurer) {
-        let (is_idle, _) = _is_idle(self, adventurer);
-        assert(is_idle, messages::ADVENTURER_NOT_IDLE);
-    }
-
     fn _assert_rate_limit(actions_per_block: u8, rate_limit: u64) {
         assert(actions_per_block.into() <= rate_limit, messages::RATE_LIMIT_EXCEEDED);
     }
 
-    fn _is_idle(self: @ContractState, adventurer: Adventurer) -> (bool, u16) {
-        // get number of blocks since the players last turn
-        let idle_blocks = adventurer
-            .get_idle_blocks(starknet::get_block_info().unbox().block_number);
-
-        // load game entropy and calculate the live entropy rotation interval
+    fn _assert_is_idle(self: @ContractState, adventurer: Adventurer) {
         let game_entropy = _load_game_entropy(self);
+        let (is_idle, _) = _is_idle(adventurer, game_entropy);
+        assert(is_idle, messages::ADVENTURER_NOT_IDLE);
+    }
+    fn _is_idle(self: Adventurer, game_entropy: GameEntropy) -> (bool, u16) {
+        // get number of blocks since the players last turn
+        let idle_blocks = self.get_idle_blocks(starknet::get_block_info().unbox().block_number);
 
         // return if player is idle along with number of blocks
         (game_entropy.is_adventurer_idle(idle_blocks.into()), idle_blocks)
