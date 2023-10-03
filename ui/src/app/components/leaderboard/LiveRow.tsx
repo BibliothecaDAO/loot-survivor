@@ -26,10 +26,12 @@ const LiveLeaderboardRow = ({
   const { gameContract } = useContracts();
   const { play: clickPlay } = useUiSounds(soundSelector.click);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const removeEntrypointFromCalls = useTransactionCartStore(
+    (state) => state.removeEntrypointFromCalls
+  );
   const { data: blockData } = useBlock({
     refetchInterval: false,
   });
-  const dead = (adventurer.health ?? 0) <= 0;
   const adventurersByOwner = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers ?? []
   );
@@ -45,6 +47,7 @@ const LiveLeaderboardRow = ({
   );
   const topScoreAdventurer = topScores[0]?.id === adventurer.id;
   const handleSlayAdventurer = async () => {
+    removeEntrypointFromCalls("slay_idle_adventurers");
     setSlayAdventurers([
       ...slayAdventurers,
       adventurer?.id?.toString() ?? "0",
@@ -93,16 +96,16 @@ const LiveLeaderboardRow = ({
       }}
     >
       <td>{`${adventurer.name} - ${adventurer.id}`}</td>
+      <td>{calculateLevel(adventurer.xp ?? 0)}</td>
+      <td>
+        <span className="flex justify-center">{adventurer.xp}</span>
+      </td>
       <td>
         <span className="flex justify-center text-terminal-yellow">
           <CoinIcon className="self-center w-4 h-4 sm:w-6 sm:h-6 fill-current" />
           {adventurer.gold ? adventurer.gold : 0}
         </span>
       </td>
-      <td>
-        <span className="flex justify-center">{adventurer.xp}</span>
-      </td>
-      <td>{calculateLevel(adventurer.xp ?? 0)}</td>
       <td>
         <span className="flex justify-center">{adventurer.health}</span>
       </td>
