@@ -75,7 +75,7 @@ export const ArcadeIntro = () => {
             unleashing a 10x surge in your gameplay speed.
           </p>
           <p className="text-sm xl:text-xl 2xl:text-2xl">
-            Stored in the browser but fear not, for they're guarded by a
+            Stored in the browser but fear not, for they&apos;re guarded by a
             labyrinth of security features, fit for even the wiliest of
             adventurers!
           </p>
