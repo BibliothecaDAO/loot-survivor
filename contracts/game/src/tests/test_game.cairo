@@ -1815,7 +1815,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(57023944)]
+    #[available_gas(57077884)]
     #[should_panic(expected: ('rate limit exceeded', 'ENTRYPOINT_FAILED'))]
     fn test_exceed_rate_limit() {
         let starting_block = 1000;
@@ -1832,7 +1832,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(944417840)]
+    #[available_gas(94441784)]
     fn test_exceed_rate_limit_block_rotation() {
         let starting_block = 1000;
         let mut game = new_adventurer_lvl2(starting_block);
