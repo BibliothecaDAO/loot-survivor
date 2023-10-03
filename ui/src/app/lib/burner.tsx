@@ -17,7 +17,8 @@ import { ArcadeConnector } from "./arcade";
 import { useContracts } from "../hooks/useContracts";
 import { BurnerStorage } from "../types";
 
-export const PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
+export const ETH_PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
+export const LORDS_PREFUND_AMOUNT = "0x0d8d726b7177a80000"; // 250LORDS
 
 const provider = new Provider({
   sequencer: {
@@ -124,6 +125,40 @@ export const useBurner = () => {
     [walletAccount]
   );
 
+  const prefundAccount = async (address: string, account: AccountInterface) => {
+    try {
+      const transferEthTx = {
+        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        entrypoint: "transfer",
+        calldata: CallData.compile([address, ETH_PREFUND_AMOUNT, "0x0"]),
+      };
+
+      const transferLordsTx = {
+        contractAddress: lordsContract?.address ?? "0x0",
+        entrypoint: "transfer",
+        calldata: CallData.compile([address, LORDS_PREFUND_AMOUNT, "0x0"]),
+      };
+
+      const { transaction_hash } = await account.execute([
+        transferEthTx,
+        transferLordsTx,
+      ]);
+
+      const result = await account.waitForTransaction(transaction_hash, {
+        retryInterval: 2000,
+      });
+
+      if (!result) {
+        throw new Error("Transaction did not complete successfully.");
+      }
+
+      return result;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
   const create = useCallback(async () => {
     setIsDeploying(true);
     const privateKey = stark.randomAddress();
@@ -168,12 +203,12 @@ export const useBurner = () => {
 
     setIsSettingPermissions(true);
 
-    const setPermissionsTx = await setPermissions(
+    const setPermissionsAndApprovalTx = await setPermissionsAndApproval(
       accountAAFinalAdress,
       walletAccount
     );
 
-    await provider.waitForTransaction(setPermissionsTx);
+    await provider.waitForTransaction(setPermissionsAndApprovalTx);
 
     // save burner
     let storage = Storage.get("burners") || {};
@@ -185,7 +220,7 @@ export const useBurner = () => {
       privateKey,
       publicKey,
       deployTx,
-      setPermissionsTx,
+      setPermissionsAndApprovalTx,
       masterAccount: walletAccount.address,
       gameContract: gameContract?.address,
       active: true,
@@ -200,7 +235,7 @@ export const useBurner = () => {
     return burner;
   }, [walletAccount]);
 
-  const setPermissions = useCallback(
+  const setPermissionsAndApproval = useCallback(
     async (accountAAFinalAdress: any, walletAccount: any) => {
       const permissions: Call[] = [
         {
@@ -226,9 +261,16 @@ export const useBurner = () => {
         },
       ];
 
-      const { transaction_hash: permissionsTx } = await walletAccount.execute(
-        permissions
-      );
+      // Approve 250 LORDS
+      const approveLordsSpendingTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "approve",
+        calldata: [gameContract?.address ?? "", LORDS_PREFUND_AMOUNT, "0"],
+      };
+      const { transaction_hash: permissionsTx } = await walletAccount.execute([
+        ...permissions,
+        approveLordsSpendingTx,
+      ]);
 
       return permissionsTx;
     },
@@ -241,12 +283,11 @@ export const useBurner = () => {
       const { transaction_hash } = await account.execute({
         contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
         entrypoint: "transfer",
-        calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
+        calldata: CallData.compile([address, ETH_PREFUND_AMOUNT, "0x0"]),
       });
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 1000,
-        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
+        retryInterval: 2000,
       });
 
       if (!result) {
@@ -308,8 +349,7 @@ export const useBurner = () => {
       });
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 1000,
-        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
+        retryInterval: 2000,
       });
 
       if (!result) {
@@ -408,28 +448,4 @@ export const useBurner = () => {
     isWithdrawing,
     listConnectors,
   };
-};
-
-const prefundAccount = async (address: string, account: AccountInterface) => {
-  try {
-    const { transaction_hash } = await account.execute({
-      contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
-      entrypoint: "transfer",
-      calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
-    });
-
-    const result = await account.waitForTransaction(transaction_hash, {
-      retryInterval: 1000,
-      successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
-    });
-
-    if (!result) {
-      throw new Error("Transaction did not complete successfully.");
-    }
-
-    return result;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
 };

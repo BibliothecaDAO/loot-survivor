@@ -1,18 +1,68 @@
 import { useState } from "react";
-import { useAccount, useConnectors } from "@starknet-react/core";
+import {
+  useAccount,
+  useConnectors,
+  useContractWrite,
+  useBalance,
+} from "@starknet-react/core";
 import { useBurner } from "@/app/lib/burner";
 import { Button } from "../buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import PixelatedImage from "../animations/PixelatedImage";
 import { getWalletConnectors } from "@/app/lib/connectors";
+import Lords from "../../../../public/icons/lords.svg";
+import { useContracts } from "@/app/hooks/useContracts";
+import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
+import { Call } from "@/app/types";
 
 export const ArcadeIntro = () => {
-  const { address } = useAccount();
+  const { account, address } = useAccount();
   const { connect, available } = useConnectors();
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const { getMasterAccount, create, isDeploying, isSettingPermissions } =
     useBurner();
   const walletConnectors = getWalletConnectors(available);
+  const { lordsContract } = useContracts();
+  const calls = useTransactionCartStore((state) => state.calls);
+  const addToCalls = useTransactionCartStore((state) => state.addToCalls);
+  const handleSubmitCalls = useTransactionCartStore(
+    (state) => state.handleSubmitCalls
+  );
+  const { writeAsync } = useContractWrite({ calls });
+  const { data: lordsBalance, refetch: refetchLordsBalance } = useBalance({
+    token: lordsContract?.address,
+    address,
+  });
+  const lords = parseInt(lordsBalance?.formatted ?? "0");
+  const [isMintingLords, setIsMintingLords] = useState(false);
+
+  const mintLords = async () => {
+    try {
+      setIsMintingLords(true);
+      // Mint 250 LORDS
+      const mintLords: Call = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "mint",
+        calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+      };
+      addToCalls(mintLords);
+      const tx = await handleSubmitCalls(writeAsync);
+      const result = await account?.waitForTransaction(tx?.transaction_hash, {
+        retryInterval: 2000,
+      });
+
+      if (!result) {
+        throw new Error("Lords Mint did not complete successfully.");
+      }
+
+      setIsMintingLords(false);
+      refetchLordsBalance();
+    } catch (e) {
+      setIsMintingLords(false);
+      console.log(e);
+    }
+  };
+
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
@@ -25,13 +75,14 @@ export const ArcadeIntro = () => {
             unleashing a 10x surge in your gameplay speed.
           </p>
           <p className="text-sm xl:text-xl 2xl:text-2xl">
-            Fear not, for they're guarded by a labyrinth of security features,
-            fit for even the wiliest of adventurers!
+            Stored in the browser but fear not, for they're guarded by a
+            labyrinth of security features, fit for even the wiliest of
+            adventurers!
           </p>
-          <p className=" text-sm xl:text-xl 2xl:text-2xl">
+          <p className="text-sm xl:text-xl 2xl:text-2xl">
             Connect using a wallet provider.
           </p>
-          <div className="flex flex-col w-1/4">
+          <div className="flex flex-col gap-2 w-1/4">
             {walletConnectors.map((connector, index) => (
               <Button
                 disabled={address !== undefined}
@@ -44,12 +95,26 @@ export const ArcadeIntro = () => {
               </Button>
             ))}
           </div>
-          <p className=" text-sm xl:text-xl 2xl:text-2xl">
-            Create Arcade Account (Fund, deploy & initiate security permissions)
+          <p className="text-sm xl:text-xl 2xl:text-2xl">Mint Some Lords</p>
+          <Button
+            onClick={() => mintLords()}
+            disabled={isWrongNetwork || isMintingLords || lords !== 0}
+            className="flex flex-row w-1/4"
+          >
+            <Lords className="sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />{" "}
+            {isMintingLords ? (
+              <p className="loading-ellipsis">Minting Lords</p>
+            ) : (
+              "Mint"
+            )}
+          </Button>
+          <p className="text-sm xl:text-xl 2xl:text-2xl">
+            Create Arcade Account (Fund ETH + LORDS, deploy, set permissions and
+            approvals)
           </p>
           <Button
             onClick={() => create()}
-            disabled={isWrongNetwork}
+            disabled={isWrongNetwork || lords === 0}
             className="w-1/4"
           >
             CREATE

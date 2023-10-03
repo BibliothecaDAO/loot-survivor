@@ -27,13 +27,11 @@ export function getGraphQLUrl() {
 export const contracts = {
   mainnet: {
     game: "0x0",
-    lords_erc20_mintable:
-      "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
+    lords: "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
   },
   goerli: {
     game: "0x01263ecbc05e28d1e99f531894838db10b90cfcdd39d020642da1747a733a37a",
-    lords_erc20_mintable:
-      "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
+    lords: "0x02a4174abc7c953030401679bde67e560b9e2724d5d71ffbaa488965dd36137a",
   },
 };
 
