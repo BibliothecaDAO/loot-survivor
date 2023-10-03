@@ -62,6 +62,7 @@ export const DeathDialog = () => {
             src={"/scenes/intro/skulls.png"}
             pixelSize={rank <= 100 ? 10 : 20}
             setImageLoading={setImageLoading}
+            fill={true}
           />
 
           <div className="absolute inset-0 bg-black opacity-50"></div>

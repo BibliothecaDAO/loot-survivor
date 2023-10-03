@@ -68,6 +68,7 @@ import { useBalance } from "@starknet-react/core";
 import { ArcadeIntro } from "./components/intro/ArcadeIntro";
 import Logo from "../../public/icons/logo.svg";
 import ScreenMenu from "./components/menu/ScreenMenu";
+import { getArcadeConnectors } from "./lib/connectors";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -89,7 +90,7 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Home() {
-  const { disconnect } = useConnectors();
+  const { disconnect, available } = useConnectors();
   const { chain } = useNetwork();
   const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
@@ -145,6 +146,8 @@ export default function Home() {
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const setStartOption = useUIStore((state) => state.setStartOption);
+
+  const arcadeConnectors = getArcadeConnectors(available);
 
   const lordsBalance = useBalance({
     token: lordsContract?.address,
@@ -356,6 +359,14 @@ export default function Home() {
     }
   }, [isConnected]);
 
+  useEffect(() => {
+    if (arcadeConnectors.length === 0) {
+      showArcadeIntro(true);
+    } else {
+      showArcadeIntro(false);
+    }
+  }, [arcadeConnectors]);
+
   if (!isConnected && introComplete && disconnected) {
     return <WalletSelect />;
   }
@@ -406,7 +417,7 @@ export default function Home() {
                 <Button
                   size={"xs"}
                   variant={"outline"}
-                  onClick={() => showArcadeIntro(!arcadeIntro)}
+                  onClick={() => showArcadeDialog(!arcadeDialog)}
                   disabled={isWrongNetwork}
                 >
                   <ArcadeIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
@@ -511,7 +522,7 @@ export default function Home() {
           <NotificationDisplay />
 
           {deathDialog && <DeathDialog />}
-          {status == "connected" && arcadeIntro && <ArcadeIntro />}
+          {arcadeIntro && <ArcadeIntro />}
           {status == "connected" && arcadeDialog && <ArcadeDialog />}
           {status == "connected" && topUpDialog && <TopUpDialog />}
 

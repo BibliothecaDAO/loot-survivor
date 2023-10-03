@@ -5,36 +5,25 @@ import { useConnectors } from "@starknet-react/core";
 import Storage from "../lib/storage";
 import { BurnerStorage } from "../types";
 import { useBurner } from "../lib/burner";
+import { getArcadeConnectors, getWalletConnectors } from "../lib/connectors";
 
 export const TopUpDialog = () => {
   const { account: walletAccount, address, connector } = useAccount();
-  const { connect, connectors } = useConnectors();
+  const { connect, available } = useConnectors();
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const topUpAccount = useUIStore((state) => state.topUpAccount);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
   const { topUp, isToppingUp } = useBurner();
 
-  const arcadeConnectors = () =>
-    connectors.filter(
-      (connector) =>
-        typeof connector.id === "string" && connector.id.includes("0x")
-    );
-
-  const walletConnectors = () =>
-    connectors.filter(
-      (connector) =>
-        typeof connector.id !== "string" || !connector.id.includes("0x")
-    );
+  const arcadeConnectors = getArcadeConnectors(available);
+  const walletConnectors = getWalletConnectors(available);
 
   let storage: BurnerStorage = Storage.get("burners") || {};
   const masterConnected = address === storage[topUpAccount]?.masterAccount;
 
-  const arcadeConnector = arcadeConnectors().find(
+  const arcadeConnector = arcadeConnectors.find(
     (connector) => connector.name === topUpAccount
   );
-
-  console.log(arcadeConnector);
-  console.log(masterConnected);
 
   return (
     <>
@@ -47,7 +36,7 @@ export const TopUpDialog = () => {
         </p>
         <div className="flex flex-col items-center gap-5">
           <p className="m-2 text-sm xl:text-xl 2xl:text-2xl">Connect Master</p>
-          {walletConnectors().map((connector, index) => (
+          {walletConnectors.map((connector, index) => (
             <Button
               disabled={masterConnected}
               onClick={() => connect(connector)}

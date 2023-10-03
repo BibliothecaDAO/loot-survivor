@@ -2,26 +2,15 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import useUIStore from "@/app/hooks/useUIStore";
 import { Button } from "./buttons/Button";
-import { PREFUND_AMOUNT, useBurner } from "../lib/burner";
-import {
-  Connector,
-  useAccount,
-  useBalance,
-  useConnectors,
-} from "@starknet-react/core";
-import {
-  AccountInterface,
-  CallData,
-  TransactionFinalityStatus,
-  uint256,
-  Call,
-  Account,
-  Provider,
-} from "starknet";
+import { useBurner } from "../lib/burner";
+import { Connector, useAccount, useConnectors } from "@starknet-react/core";
+import { AccountInterface, CallData, uint256 } from "starknet";
 import { useCallback } from "react";
 import { useContracts } from "../hooks/useContracts";
 import { balanceSchema } from "../lib/utils";
 import { MIN_BALANCE } from "../lib/constants";
+import PixelatedImage from "./animations/PixelatedImage";
+import { getArcadeConnectors } from "../lib/connectors";
 
 const MAX_RETRIES = 10;
 const RETRY_DELAY = 2000; // 2 seconds
@@ -45,12 +34,7 @@ export const ArcadeDialog = () => {
   const { ethContract } = useContracts();
   const [balances, setBalances] = useState<Record<string, bigint>>({});
 
-  const arcadeConnectors = useCallback(() => {
-    return available.filter(
-      (connector) =>
-        typeof connector.id === "string" && connector.id.includes("0x")
-    );
-  }, [available]);
+  const arcadeConnectors = getArcadeConnectors(available);
 
   const fetchBalanceWithRetry = async (
     accountName: string,
@@ -76,13 +60,12 @@ export const ArcadeDialog = () => {
 
   const getBalances = async () => {
     const localBalances: Record<string, bigint> = {};
-    const balancePromises = arcadeConnectors().map((account) => {
+    const balancePromises = arcadeConnectors.map((account) => {
       return fetchBalanceWithRetry(account.name).then((balance) => {
         localBalances[account.name] = balance;
         return balance;
       });
     });
-    console.log(balancePromises);
     await Promise.all(balancePromises);
     setBalances(localBalances);
   };
@@ -124,7 +107,7 @@ export const ArcadeDialog = () => {
           )}
         </div>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 overflow-hidden my-6">
-          {arcadeConnectors().map((account, index) => {
+          {arcadeConnectors.map((account, index) => {
             const masterAccount = getMasterAccount(account.name);
             return (
               <ArcadeAccountCard
@@ -134,7 +117,7 @@ export const ArcadeDialog = () => {
                 address={address!}
                 walletAccount={walletAccount!}
                 masterAccountAddress={masterAccount}
-                arcadeConnectors={arcadeConnectors()}
+                arcadeConnectors={arcadeConnectors}
                 genNewKey={genNewKey}
                 balance={balances[account.name]}
                 getBalance={getBalance}
@@ -149,13 +132,17 @@ export const ArcadeDialog = () => {
         </div>
       </div>
       {(isDeploying || isGeneratingNewKey) && (
-        <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full flex justify-center items-center">
-          <h3 className="loading-ellipsis">
+        <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full">
+          <PixelatedImage
+            src={"/scenes/intro/arcade-account.png"}
+            pixelSize={5}
+          />
+          <h3 className="loading-ellipsis absolute top-1/2 right-1/3">
             {isSettingPermissions
               ? "Setting Permissions"
               : isGeneratingNewKey
               ? "Generating New Key"
-              : "Deploying Account"}
+              : "Deploying Arcade Account"}
           </h3>
         </div>
       )}
