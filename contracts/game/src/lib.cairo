@@ -126,24 +126,24 @@ mod Game {
     #[constructor]
     fn constructor(
         ref self: ContractState,
-        lords: ContractAddress,
-        dao: ContractAddress,
-        collectible_beasts: ContractAddress,
-        golden_token: ContractAddress,
+        lords_address: ContractAddress,
+        dao_address: ContractAddress,
+        beasts_address: ContractAddress,
+        golden_token_address: ContractAddress,
     ) {
         // set the contract addresses
-        self._lords.write(lords);
-        self._dao.write(dao);
-        self._collectible_beasts.write(collectible_beasts);
+        self._lords.write(lords_address);
+        self._dao.write(dao_address);
+        self._collectible_beasts.write(beasts_address);
 
-        // set the genesis block
-        self._genesis_block.write(starknet::get_block_info().unbox().block_number.into());
+        // set the genesis block number
+        let current_block_info = starknet::get_block_info().unbox();
+        self._genesis_block.write(current_block_info.block_number);
 
         // set golden token address
-        self._golden_token.write(golden_token);
+        self._golden_token.write(golden_token_address);
 
         // initialize game entropy
-        let current_block_info = starknet::get_block_info().unbox();
         let new_game_entropy = ImplGameEntropy::new(
             current_block_info.block_number,
             current_block_info.block_timestamp,
@@ -180,7 +180,7 @@ mod Game {
 
             // if player has a golden token
             let golden_token = _golden_token_dispatcher(ref self);
-            if (golden_token.can_play(golden_token_id) && golden_token_id != 0) {
+            if (golden_token_id != 0 && golden_token.can_play(golden_token_id)) {
                 // pay with the golden token
                 golden_token.play(golden_token_id);
             } else {
@@ -1146,7 +1146,7 @@ mod Game {
 
         // DAO
         if (week.DAO != 0) {
-            _lords_dispatcher(ref self).transferFrom(caller, self._dao.read(), week.DAO);
+            _lords_dispatcher(ref self).transferFrom(caller, dao_address, week.DAO);
         }
 
         // interface
@@ -1162,6 +1162,33 @@ mod Game {
 
         // third place
         _lords_dispatcher(ref self).transferFrom(caller, third_place_address, week.THIRD_PLACE);
+
+        // emit reward distribution event
+        __event_RewardDistribution(
+            ref self,
+            RewardDistribution {
+                first_place: PlayerReward {
+                    adventurer_id: leaderboard.first.adventurer_id.into(),
+                    rank: 1,
+                    amount: week.FIRST_PLACE,
+                    address: first_place_address
+                },
+                second_place: PlayerReward {
+                    adventurer_id: leaderboard.second.adventurer_id.into(),
+                    rank: 2,
+                    amount: week.SECOND_PLACE,
+                    address: second_place_address
+                },
+                third_place: PlayerReward {
+                    adventurer_id: leaderboard.third.adventurer_id.into(),
+                    rank: 3,
+                    amount: week.THIRD_PLACE,
+                    address: third_place_address
+                },
+                client: ClientReward { amount: week.INTERFACE, address: client_address },
+                dao: week.DAO
+            }
+        );
     }
 
     fn _start_game(ref self: ContractState, weapon: u8, name: u128) {

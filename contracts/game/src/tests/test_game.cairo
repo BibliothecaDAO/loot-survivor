@@ -51,6 +51,10 @@ mod tests {
         contract_address_const::<1>()
     }
 
+    fn GOLDEN_TOKEN_ADDRESS() -> ContractAddress {
+        contract_address_const::<1>()
+    }
+
     const ADVENTURER_ID: felt252 = 1;
 
     const MAX_LORDS: u256 = 500000000000000000000;
@@ -84,6 +88,7 @@ mod tests {
         calldata.append(lords.into());
         calldata.append(DAO().into());
         calldata.append(COLLECTIBLE_BEASTS().into());
+        calldata.append(GOLDEN_TOKEN_ADDRESS().into());
 
         let (address0, _) = deploy_syscall(
             Game::TEST_CLASS_HASH.try_into().unwrap(), 0, calldata.span(), false
@@ -100,7 +105,9 @@ mod tests {
     }
 
     fn add_adventurer_to_game(ref game: IGameDispatcher) {
-        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', 0);
+        let golden_token_id: u256 = 0;
+
+        game.new_game(INTERFACE_ID(), ItemId::Wand, 'loothero', golden_token_id);
 
         let original_adventurer = game.get_adventurer(ADVENTURER_ID);
         assert(original_adventurer.xp == 0, 'wrong starting xp');
@@ -116,9 +123,10 @@ mod tests {
 
         let starting_weapon = ItemId::Wand;
         let name = 'abcdefghijklmno';
+        let golden_token_id: u256 = 0;
 
         // start new game
-        game.new_game(INTERFACE_ID(), starting_weapon, name, 0);
+        game.new_game(INTERFACE_ID(), starting_weapon, name, golden_token_id);
 
         // get adventurer state
         let adventurer = game.get_adventurer(ADVENTURER_ID);
@@ -454,6 +462,12 @@ mod tests {
     // fn test_full_game() {
     //     let mut game = new_adventurer_lvl11_equipped(5);
     // }
+
+    #[test]
+    #[available_gas(3000000000000)]
+    fn test_setup() {
+        setup(1000);
+    }
 
     #[test]
     #[available_gas(300000000000)]
