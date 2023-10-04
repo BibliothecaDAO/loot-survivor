@@ -10,8 +10,9 @@ export const chapter4 =
   "They find golden coins in their pocket, glimmering in the dim light - an enigma wrapped in the shroud of the unexpected.";
 export const battle = "A beast lurks in the shadow, prepare for battle!";
 
-export const mainnet_addr =
-  process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://alpha-mainnet.starknet.io";
+export const rpc_addr =
+  process.env.NEXT_PUBLIC_RPC_GOERLI_ENDPOINT ||
+  "https://alpha-mainnet.starknet.io";
 
 export function getGraphQLUrl() {
   switch (process.env.NEXT_PUBLIC_NETWORK) {
