@@ -10,8 +10,6 @@
 #[starknet::contract]
 mod ERC20 {
     use integer::BoundedInt;
-    use openzeppelin::token::erc20::interface::IERC20;
-    use openzeppelin::token::erc20::interface::IERC20CamelOnly;
     use starknet::ContractAddress;
     use starknet::get_caller_address;
 
@@ -80,140 +78,83 @@ mod ERC20 {
     //
 
     #[external(v0)]
-    impl ERC20Impl of IERC20<ContractState> {
-        /// Returns the name of the token.
-        fn name(self: @ContractState) -> felt252 {
-            self.ERC20_name.read()
-        }
-
-        /// Returns the ticker symbol of the token, usually a shorter version of the name.
-        fn symbol(self: @ContractState) -> felt252 {
-            self.ERC20_symbol.read()
-        }
-
-        /// Returns the number of decimals used to get its user representation.
-        fn decimals(self: @ContractState) -> u8 {
-            18
-        }
-
-        /// Returns the value of tokens in existence.
-        fn total_supply(self: @ContractState) -> u256 {
-            self.ERC20_total_supply.read()
-        }
-
-        /// Returns the amount of tokens owned by `account`.
-        fn balance_of(self: @ContractState, account: ContractAddress) -> u256 {
-            self.ERC20_balances.read(account)
-        }
-
-        /// Returns the remaining number of tokens that `spender` is
-        /// allowed to spend on behalf of `owner` through [transfer_from](transfer_from).
-        /// This is zero by default.
-        /// This value changes when [approve](approve) or [transfer_from](transfer_from)
-        /// are called.
-        fn allowance(
-            self: @ContractState, owner: ContractAddress, spender: ContractAddress
-        ) -> u256 {
-            self.ERC20_allowances.read((owner, spender))
-        }
-
-        /// Moves `amount` tokens from the caller's token balance to `to`.
-        /// Emits a [Transfer](Transfer) event.
-        fn transfer(ref self: ContractState, recipient: ContractAddress, amount: u256) -> bool {
-            let sender = get_caller_address();
-            self._transfer(sender, recipient, amount);
-            true
-        }
-
-        /// Moves `amount` tokens from `from` to `to` using the allowance mechanism.
-        /// `amount` is then deducted from the caller's allowance.
-        /// Emits a [Transfer](Transfer) event.
-        fn transfer_from(
-            ref self: ContractState,
-            sender: ContractAddress,
-            recipient: ContractAddress,
-            amount: u256
-        ) -> bool {
-            let caller = get_caller_address();
-            self._spend_allowance(sender, caller, amount);
-            self._transfer(sender, recipient, amount);
-            true
-        }
-
-        /// Sets `amount` as the allowance of `spender` over the caller’s tokens.
-        fn approve(ref self: ContractState, spender: ContractAddress, amount: u256) -> bool {
-            let caller = get_caller_address();
-            self._approve(caller, spender, amount);
-            true
-        }
+    fn name(self: @ContractState) -> felt252 {
+        self.ERC20_name.read()
     }
 
-    /// Increases the allowance granted from the caller to `spender` by `added_value`.
-    /// Emits an [Approval](Approval) event indicating the updated allowance.
     #[external(v0)]
-    fn increase_allowance(
-        ref self: ContractState, spender: ContractAddress, added_value: u256
-    ) -> bool {
-        self._increase_allowance(spender, added_value)
+    /// Returns the ticker symbol of the token, usually a shorter version of the name.
+    fn symbol(self: @ContractState) -> felt252 {
+        self.ERC20_symbol.read()
     }
 
-    /// Decreases the allowance granted from the caller to `spender` by `subtracted_value`.
-    /// Emits an [Approval](Approval) event indicating the updated allowance.
     #[external(v0)]
-    fn decrease_allowance(
-        ref self: ContractState, spender: ContractAddress, subtracted_value: u256
+    /// Returns the number of decimals used to get its user representation.
+    fn decimals(self: @ContractState) -> u8 {
+        18
+    }
+
+    #[external(v0)]
+    /// Returns the value of tokens in existence.
+    fn total_supply(self: @ContractState) -> u256 {
+        self.ERC20_total_supply.read()
+    }
+
+    #[external(v0)]
+    /// Returns the amount of tokens owned by `account`.
+    fn balance_of(self: @ContractState, account: ContractAddress) -> u256 {
+        self.ERC20_balances.read(account)
+    }
+
+    #[external(v0)]
+    /// Returns the remaining number of tokens that `spender` is
+    /// allowed to spend on behalf of `owner` through [transfer_from](transfer_from).
+    /// This is zero by default.
+    /// This value changes when [approve](approve) or [transfer_from](transfer_from)
+    /// are called.
+    fn allowance(
+        self: @ContractState, owner: ContractAddress, spender: ContractAddress
+    ) -> u256 {
+        self.ERC20_allowances.read((owner, spender))
+    }
+
+    #[external(v0)]
+    /// Moves `amount` tokens from the caller's token balance to `to`.
+    /// Emits a [Transfer](Transfer) event.
+    fn transfer(ref self: ContractState, recipient: ContractAddress, amount: u256) -> bool {
+        let sender = get_caller_address();
+        self._transfer(sender, recipient, amount);
+        true
+    }
+
+    #[external(v0)]
+    /// Moves `amount` tokens from `from` to `to` using the allowance mechanism.
+    /// `amount` is then deducted from the caller's allowance.
+    /// Emits a [Transfer](Transfer) event.
+    fn transfer_from(
+        ref self: ContractState,
+        sender: ContractAddress,
+        recipient: ContractAddress,
+        amount: u256
     ) -> bool {
-        self._decrease_allowance(spender, subtracted_value)
+        let caller = get_caller_address();
+        self._spend_allowance(sender, caller, amount);
+        self._transfer(sender, recipient, amount);
+        true
+    }
+
+    #[external(v0)]
+    /// Sets `amount` as the allowance of `spender` over the caller’s tokens.
+    fn approve(ref self: ContractState, spender: ContractAddress, amount: u256) -> bool {
+        let caller = get_caller_address();
+        self._approve(caller, spender, amount);
+        true
     }
 
     /// TEST: Mint function that allows anyone to mint test LORDS
     #[external(v0)]
     fn mint(ref self: ContractState, recipient: ContractAddress, amount: u256) {
         self._mint(recipient, amount);
-    }
-
-    #[external(v0)]
-    impl ERC20CamelOnlyImpl of IERC20CamelOnly<ContractState> {
-        /// Camel case support.
-        /// See [total_supply](total-supply).
-        fn totalSupply(self: @ContractState) -> u256 {
-            ERC20Impl::total_supply(self)
-        }
-
-        /// Camel case support.
-        /// See [balance_of](balance_of).
-        fn balanceOf(self: @ContractState, account: ContractAddress) -> u256 {
-            ERC20Impl::balance_of(self, account)
-        }
-
-        /// Camel case support.
-        /// See [transfer_from](transfer_from).
-        fn transferFrom(
-            ref self: ContractState,
-            sender: ContractAddress,
-            recipient: ContractAddress,
-            amount: u256
-        ) -> bool {
-            ERC20Impl::transfer_from(ref self, sender, recipient, amount)
-        }
-    }
-
-    /// Camel case support.
-    /// See [increase_allowance](increase_allowance).
-    #[external(v0)]
-    fn increaseAllowance(
-        ref self: ContractState, spender: ContractAddress, addedValue: u256
-    ) -> bool {
-        increase_allowance(ref self, spender, addedValue)
-    }
-
-    /// Camel case support.
-    /// See [decrease_allowance](decrease_allowance).
-    #[external(v0)]
-    fn decreaseAllowance(
-        ref self: ContractState, spender: ContractAddress, subtractedValue: u256
-    ) -> bool {
-        decrease_allowance(ref self, spender, subtractedValue)
     }
 
     //
