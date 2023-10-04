@@ -1290,32 +1290,42 @@ export function syscalls({
           (event) => event.name === "AdventurerDied"
         );
         for (let adventurerDiedEvent of adventurerDiedEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [adventurerDiedEvent.data[0]],
-          });
-          const deadAdventurerIndex =
-            queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-              (adventurer: any) =>
-                adventurer.id == adventurerDiedEvent.data[0].id
+          if (
+            adventurerDiedEvent.data[1].callerAddress ===
+            adventurerDiedEvent.data[0].owner
+          ) {
+            setData("adventurerByIdQuery", {
+              adventurers: [adventurerDiedEvent.data[0]],
+            });
+            const deadAdventurerIndex =
+              queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+                (adventurer: any) =>
+                  adventurer.id == adventurerDiedEvent.data[0].id
+              );
+            setData(
+              "adventurersByOwnerQuery",
+              0,
+              "health",
+              deadAdventurerIndex
             );
-          setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
-          setAdventurer(adventurerDiedEvent.data[0]);
-          const killedByBeast = battles.some(
-            (battle) =>
-              battle.attacker == "Beast" && battle.adventurerHealth == 0
-          );
-          // In a multicall someone can either die from swapping inventory or the death penalty. Here we handle those cases
-          if (killedByBeast) {
-            setDeathNotification(
-              "Multicall",
-              ["You equipped"],
-              adventurerDiedEvent.data[0]
+            setAdventurer(adventurerDiedEvent.data[0]);
+            const killedByBeast = battles.some(
+              (battle) =>
+                battle.attacker == "Beast" && battle.adventurerHealth == 0
             );
-          } else {
-            setDeathNotification("Upgrade", "Death Penalty", []);
+            // In a multicall someone can either die from swapping inventory or the death penalty. Here we handle those cases
+            if (killedByBeast) {
+              setDeathNotification(
+                "Multicall",
+                ["You equipped"],
+                adventurerDiedEvent.data[0]
+              );
+            } else {
+              setDeathNotification("Upgrade", "Death Penalty", []);
+            }
+            setScreen("start");
+            setStartOption("create adventurer");
           }
-          setScreen("start");
-          setStartOption("create adventurer");
         }
 
         setData("battlesByBeastQuery", {
