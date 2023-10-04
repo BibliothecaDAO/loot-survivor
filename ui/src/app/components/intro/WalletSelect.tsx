@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "../buttons/Button";
-import { useConnectors, useAccount } from "@starknet-react/core";
+import { useConnectors } from "@starknet-react/core";
 import useUIStore from "../../hooks/useUIStore";
 import Image from "next/image";
 import { WalletTutorial } from "../tutorial/WalletTutorial";

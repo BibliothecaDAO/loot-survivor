@@ -1,19 +1,10 @@
-import { useMemo } from "react";
 import { Adventurer, NullAdventurer, NullItem } from "../../types";
-import { getItemsByAdventurer } from "../../hooks/graphql/queries";
-import { HeartIcon, CoinIcon, BagIcon, QuestionMarkIcon } from "../icons/Icons";
+import { HeartIcon, CoinIcon, QuestionMarkIcon } from "../icons/Icons";
 import { ItemDisplay } from "./ItemDisplay";
 import LevelBar from "./LevelBar";
-import {
-  calculateLevel,
-  getRealmNameById,
-  getKeyFromValue,
-  countOccurrences,
-} from "../../lib/utils";
+import { getRealmNameById, getKeyFromValue } from "../../lib/utils";
 import { useQueriesStore } from "../../hooks/useQueryStore";
-import useCustomQuery from "../../hooks/useCustomQuery";
 import useUIStore from "../../hooks/useUIStore";
-import useLoadingStore from "../../hooks/useLoadingStore";
 import { Item } from "@/app/types";
 import { HealthCountDown } from "../CountDown";
 import { GameData } from "../GameData";
@@ -32,9 +23,7 @@ export default function Info({
   upgradeCost,
 }: InfoProps) {
   const formatAdventurer = adventurer ? adventurer : NullAdventurer;
-  const profile = useUIStore((state) => state.profile);
-  const { data, isLoading, data: storeData } = useQueriesStore();
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
+  const { data } = useQueriesStore();
   const dropItems = useUIStore((state) => state.dropItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
   const potionAmount = useUIStore((state) => state.potionAmount);

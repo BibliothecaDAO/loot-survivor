@@ -25,7 +25,6 @@ import {
   UpgradesAvailableEvent,
   IdleDeathPenaltyEvent,
   AdventurerUpgradedEvent,
-  AdventurerState,
 } from "../../types/events";
 import { Adventurer } from "@/app/types";
 import { feltToString } from ".";

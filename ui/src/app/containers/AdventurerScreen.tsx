@@ -1,6 +1,5 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useAccount } from "@starknet-react/core";
-// import { getAdventurersByOwner } from "../hooks/graphql/queries";
 import { AdventurersList } from "../components/start/AdventurersList";
 import { CreateAdventurer } from "../components/start/CreateAdventurer";
 import ButtonMenu from "../components/menu/ButtonMenu";
@@ -26,37 +25,13 @@ export default function AdventurerScreen({
 }: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
   const [loading, setLoading] = useState(false);
-  const { account } = useAccount();
-  const adventurer = useAdventurerStore((state) => state.adventurer);
-
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
-  const { data } = useQueriesStore();
   const adventurers = useQueriesStore(
     (state) => state.data.adventurersByOwnerQuery?.adventurers || []
-  );
-  const queryAdventurer = useQueriesStore(
-    (state) => state.data.adventurerByIdQuery?.adventurers[0] || NullAdventurer
   );
   const resetData = useQueriesStore((state) => state.resetData);
   const startOption = useUIStore((state) => state.startOption);
   const setStartOption = useUIStore((state) => state.setStartOption);
-
-  console.log(startOption);
-
-  // const owner = account?.address ? padAddress(account.address) : "";
-
-  // const ownerVariables = useMemo(() => {
-  //   return {
-  //     owner: owner,
-  //   };
-  // }, [owner]);
-
-  // useCustomQuery(
-  //   "adventurersByOwnerQuery",
-  //   getAdventurersByOwner,
-  //   ownerVariables
-  // );
 
   const menu = [
     {

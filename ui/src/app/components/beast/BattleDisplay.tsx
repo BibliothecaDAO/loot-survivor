@@ -3,19 +3,18 @@ import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { useQueriesStore } from "../../hooks/useQueryStore";
 import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
 import { processBeastName, getBeastData } from "../../lib/utils";
-import { Adventurer, Battle, Discovery } from "@/app/types";
+import { Battle } from "@/app/types";
 import Head from "../../../../public/icons/loot/head.svg";
 import Hand from "../../../../public/icons/loot/hand.svg";
 import Chest from "../../../../public/icons/loot/chest.svg";
 import Waist from "../../../../public/icons/loot/waist.svg";
 import Foot from "../../../../public/icons/loot/foot.svg";
-import { appUrl, battle } from "@/app/lib/constants";
+import { appUrl } from "@/app/lib/constants";
 import {
   GiWalkingBootIcon,
   GiFootTripIcon,
   GiBattleGearIcon,
   SkullCrossedBonesIcon,
-  GiSandsOfTimeIcon,
 } from "../icons/Icons";
 
 interface BattleDisplayProps {

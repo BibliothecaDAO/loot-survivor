@@ -51,9 +51,6 @@ const ScoreLeaderboardTable = ({
 
   const scoresWithLords = mergedScores;
 
-  console.log(scoresWithLords);
-  console.log(scoresData);
-
   const totalPages = Math.ceil(scores.length / itemsPerPage);
 
   let previousXp = -1;
@@ -108,7 +105,6 @@ const ScoreLeaderboardTable = ({
               {scoresWithLords.map((adventurer: any, index: number) => (
                 <ScoreRow
                   key={index}
-                  index={index}
                   adventurer={adventurer}
                   rank={rankXp(adventurer, index)}
                   handleRowSelected={handleRowSelected}

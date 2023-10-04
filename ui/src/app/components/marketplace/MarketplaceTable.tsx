@@ -128,7 +128,6 @@ const MarketplaceTable = ({
                   item={item}
                   index={index}
                   selectedIndex={selectedIndex}
-                  adventurers={adventurers}
                   activeMenu={showEquipQ}
                   setActiveMenu={setShowEquipQ}
                   calculatedNewGold={calculatedNewGold}

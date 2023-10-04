@@ -13,7 +13,6 @@ import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import GlitchEffect from "../animations/GlitchEffect";
 import PixelatedImage from "../animations/PixelatedImage";
 import { getDeathMessageByRank } from "../../lib/utils";
-import Image from "next/image";
 
 export const DeathDialog = () => {
   const messageRef = useRef<HTMLSpanElement>(null);
@@ -25,7 +24,7 @@ export const DeathDialog = () => {
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const [imageLoading, setImageLoading] = useState(false);
 
-  const { data, refetch, setData } = useQueriesStore();
+  const { refetch, setData } = useQueriesStore();
 
   useCustomQuery("adventurersByXPQuery", getAdventurerByXP, undefined);
 

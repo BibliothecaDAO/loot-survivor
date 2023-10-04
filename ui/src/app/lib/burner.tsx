@@ -7,7 +7,6 @@ import {
   hash,
   Provider,
   stark,
-  TransactionFinalityStatus,
   Call,
   selector,
 } from "starknet";
