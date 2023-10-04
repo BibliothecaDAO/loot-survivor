@@ -72,9 +72,9 @@ const LiveLeaderboardTable = ({
           <thead className="border border-terminal-green">
             <tr>
               <th className="p-1">Adventurer</th>
-              <th className="p-1">Gold</th>
-              <th className="p-1">XP</th>
               <th className="p-1">Level</th>
+              <th className="p-1">XP</th>
+              <th className="p-1">Gold</th>
               <th className="p-1">Health</th>
               <th className="p-1">Idle</th>
             </tr>
