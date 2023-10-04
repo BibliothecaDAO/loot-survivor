@@ -1,6 +1,5 @@
+use starknet::{StorePacking};
 use traits::{TryInto, Into};
-use pack::constants::pow;
-use pack::pack::{Packing, rshift_split};
 
 #[derive(Drop, Copy, Serde)]
 struct AdventurerMetadata {
@@ -8,40 +7,41 @@ struct AdventurerMetadata {
     entropy: u128,
 }
 
-impl PackingAdventurerMetadata of Packing<AdventurerMetadata> {
-    fn pack(self: AdventurerMetadata) -> felt252 {
-        (self.entropy.into()
-            + self.name.into() * pow::TWO_POW_128)
-            .try_into()
-            .expect('pack AdventurerMetadata')
+impl PackingAdventurerMetadata of StorePacking<AdventurerMetadata, felt252> {
+    fn pack(value: AdventurerMetadata) -> felt252 {
+        (value.entropy.into() + value.name.into() * TWO_POW_128).try_into().unwrap()
     }
-    fn unpack(packed: felt252) -> AdventurerMetadata {
-        let packed = packed.into();
-        let (packed, entropy) = rshift_split(packed, pow::TWO_POW_128);
-        let (_, name) = rshift_split(packed, pow::TWO_POW_128);
-        AdventurerMetadata {
-            name: name.try_into().expect('unpack AdvMetadata name'),
-            entropy: entropy.try_into().expect('unpack AdvMetadata entropy')
-        }
-    }
-
-    // TODO: add overflow pack protection
-    fn overflow_pack_protection(self: AdventurerMetadata) -> AdventurerMetadata {
-        self
+    fn unpack(value: felt252) -> AdventurerMetadata {
+        let packed = value.into();
+        let (packed, entropy) = integer::U256DivRem::div_rem(
+            packed, TWO_POW_128.try_into().unwrap()
+        );
+        let (_, name) = integer::U256DivRem::div_rem(packed, TWO_POW_128.try_into().unwrap());
+        AdventurerMetadata { name: name.try_into().unwrap(), entropy: entropy.try_into().unwrap() }
     }
 }
 
+const TWO_POW_128: u256 = 0x100000000000000000000000000000000;
+
 #[cfg(test)]
 #[test]
-#[available_gas(96380)]
-fn test_pack_unpack_adventurer_meta() {
-    let meta = AdventurerMetadata {
-        name: 'abcdefghijklmno',
-        entropy: 340282366920938463463374607431768211455
-    };
+#[available_gas(116600)]
+fn test_adventurer_metadata_packing() {
+    // max value case
+    let max_u128 = 340282366920938463463374607431768211455;
+    let name_length = 'abcdefghijklmno';
 
-    let packed = meta.pack();
-    let unpacked: AdventurerMetadata = Packing::unpack(packed);
-    assert(meta.name == unpacked.name, 'name');
-    assert(meta.entropy == unpacked.entropy, 'entropy');
+    let meta = AdventurerMetadata { name: name_length, entropy: max_u128 };
+    
+    let packed = PackingAdventurerMetadata::pack(meta);
+    let unpacked: AdventurerMetadata = PackingAdventurerMetadata::unpack(packed);
+    assert(meta.name == unpacked.name, 'name should be max');
+    assert(meta.entropy == unpacked.entropy, 'entropy should be max u128');
+
+    // zero case
+    let meta = AdventurerMetadata { name: 0, entropy: 0 };
+    let packed = PackingAdventurerMetadata::pack(meta);
+    let unpacked: AdventurerMetadata = PackingAdventurerMetadata::unpack(packed);
+    assert(unpacked.name == 0, 'name should be 0');
+    assert(unpacked.entropy == 0, 'entropy should be 0');
 }

@@ -113,7 +113,6 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
       },
     ]);
     setLoadingMessage((messages) => [...messages, "Upgrading"]);
-    setUpgradeScreen(1);
   };
 
   const handleSlayIdleAdventurers = useCallback((call: any) => {

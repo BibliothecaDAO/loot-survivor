@@ -66,12 +66,12 @@ impl ExploreUtils of Explore {
 mod tests {
     use survivor::{
         exploration::ExploreUtils, adventurer::{ImplAdventurer, ItemPrimitive},
-        adventurer_stats::Stats
+        stats::Stats
     };
     use lootitems::constants::ItemId;
 
     #[test]
-    #[available_gas(328154)]
+    #[available_gas(328654)]
     fn test_get_gold_discovery_gas() {
         let adventurer = ImplAdventurer::new(12, 6, 0, 0);
         let entropy = 0;
@@ -79,7 +79,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(328654)]
+    #[available_gas(329054)]
     fn test_get_gold_discovery() {
         let mut adventurer = ImplAdventurer::new(12, 6, 0, 0);
 
@@ -90,7 +90,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(328154)]
+    #[available_gas(328854)]
     fn test_get_health_discovery_gas() {
         let adventurer = ImplAdventurer::new(12, 6, 0, 0);
         let entropy = 12345;
@@ -98,7 +98,7 @@ mod tests {
     }
 
     #[test]
-    #[available_gas(328654)]
+    #[available_gas(329054)]
     fn test_get_health_discovery() {
         let mut adventurer = ImplAdventurer::new(12, 6, 0, 0);
 

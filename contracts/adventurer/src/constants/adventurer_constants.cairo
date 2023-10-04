@@ -45,6 +45,7 @@ const MAX_ADVENTURER_BLOCKS: u16 = 512; // 2^9
 const STAT_UPGRADE_POINTS_PER_LEVEL: u8 = 1;
 const BEAST_SPECIAL_NAME_LEVEL_UNLOCK: u16 = 19;
 const XP_FOR_DISCOVERIES: u16 = 1;
+const MAX_ACTIONS_PER_BLOCK: u8 = 15;
 
 // controls how much faster items level up compared to the player
 const ITEM_XP_MULTIPLIER_BEASTS: u16 = 2;
