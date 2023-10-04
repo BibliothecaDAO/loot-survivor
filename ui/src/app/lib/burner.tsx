@@ -16,11 +16,14 @@ import { useAccount, useConnectors } from "@starknet-react/core";
 import { ArcadeConnector } from "./arcade";
 import { useContracts } from "../hooks/useContracts";
 import { BurnerStorage } from "../types";
-import { mainnet_addr } from "./constants";
 
 export const PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
 
-const provider = new Provider({ rpc: { nodeUrl: mainnet_addr }, sequencer: { baseUrl: mainnet_addr } });
+const provider = new Provider({
+  sequencer: {
+    baseUrl: "https://alpha4.starknet.io",
+  },
+});
 
 export const useBurner = () => {
   const { refresh } = useConnectors();
