@@ -33,7 +33,8 @@ export const useBurner = () => {
   const [isDeploying, setIsDeploying] = useState(false);
   const [isGeneratingNewKey, setIsGeneratingNewKey] = useState(false);
   const [isSettingPermissions, setIsSettingPermissions] = useState(false);
-  const [isToppingUp, setIsToppingUp] = useState(false);
+  const [isToppingUpEth, setIsToppingUpEth] = useState(false);
+  const [isToppingUpLords, setIsToppingUpLords] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const { gameContract, lordsContract } = useContracts();
 
@@ -277,9 +278,9 @@ export const useBurner = () => {
     []
   );
 
-  const topUp = async (address: string, account: AccountInterface) => {
+  const topUpEth = async (address: string, account: AccountInterface) => {
     try {
-      setIsToppingUp(true);
+      setIsToppingUpEth(true);
       const { transaction_hash } = await account.execute({
         contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
         entrypoint: "transfer",
@@ -294,11 +295,59 @@ export const useBurner = () => {
         throw new Error("Transaction did not complete successfully.");
       }
 
-      setIsToppingUp(false);
+      setIsToppingUpEth(false);
       return result;
-    } catch (error) {
-      console.error(error);
-      throw error;
+    } catch (e) {
+      setIsToppingUpEth(false);
+      console.log(e);
+    }
+  };
+
+  const topUpLords = async (
+    address: string,
+    account: AccountInterface,
+    lordsAmount: number,
+    lordsGameAllowance: number
+  ) => {
+    try {
+      setIsToppingUpLords(true);
+      const lordsTransferTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "transfer",
+        calldata: CallData.compile([
+          address,
+          (lordsAmount * 10 ** 18).toString(),
+          "0x0",
+        ]),
+      };
+      const increasedAllowance = lordsAmount * 10 ** 18 + lordsGameAllowance;
+      const lordsGameApprovalTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "approve",
+        calldata: CallData.compile([
+          gameContract?.address ?? "",
+          increasedAllowance,
+          "0x0",
+        ]),
+      };
+      const { transaction_hash } = await account.execute([
+        lordsTransferTx,
+        lordsGameApprovalTx,
+      ]);
+
+      const result = await account.waitForTransaction(transaction_hash, {
+        retryInterval: 2000,
+      });
+
+      if (!result) {
+        throw new Error("Transaction did not complete successfully.");
+      }
+
+      setIsToppingUpLords(false);
+      return result;
+    } catch (e) {
+      setIsToppingUpLords(false);
+      console.log(e);
     }
   };
 
@@ -366,40 +415,45 @@ export const useBurner = () => {
 
   const genNewKey = useCallback(
     async (burnerAddress: string) => {
-      setIsGeneratingNewKey(true);
-      const privateKey = stark.randomAddress();
-      const publicKey = ec.starkCurve.getStarkKey(privateKey);
+      try {
+        setIsGeneratingNewKey(true);
+        const privateKey = stark.randomAddress();
+        const publicKey = ec.starkCurve.getStarkKey(privateKey);
 
-      if (!walletAccount) {
-        throw new Error("wallet account not found");
+        if (!walletAccount) {
+          throw new Error("wallet account not found");
+        }
+
+        const { transaction_hash } = await walletAccount.execute({
+          contractAddress: burnerAddress,
+          entrypoint: "set_public_key",
+          calldata: [publicKey],
+        });
+
+        await provider.waitForTransaction(transaction_hash);
+
+        // save new keys
+        let storage = Storage.get("burners") || {};
+        for (let address in storage) {
+          storage[address].active = false;
+        }
+
+        storage[burnerAddress] = {
+          privateKey,
+          publicKey,
+          masterAccount: walletAccount.address,
+          gameContract: gameContract?.address,
+          active: true,
+        };
+
+        Storage.set("burners", storage);
+        setIsGeneratingNewKey(false);
+        refresh();
+        window.location.reload();
+      } catch (e) {
+        setIsGeneratingNewKey(false);
+        console.log(e);
       }
-
-      const { transaction_hash } = await walletAccount.execute({
-        contractAddress: burnerAddress,
-        entrypoint: "set_public_key",
-        calldata: [publicKey],
-      });
-
-      await provider.waitForTransaction(transaction_hash);
-
-      // save new keys
-      let storage = Storage.get("burners") || {};
-      for (let address in storage) {
-        storage[address].active = false;
-      }
-
-      storage[burnerAddress] = {
-        privateKey,
-        publicKey,
-        masterAccount: walletAccount.address,
-        gameContract: gameContract?.address,
-        active: true,
-      };
-
-      Storage.set("burners", storage);
-      setIsGeneratingNewKey(false);
-      refresh();
-      window.location.reload();
     },
     [walletAccount]
   );
@@ -437,14 +491,16 @@ export const useBurner = () => {
     list,
     select,
     create,
-    topUp,
+    topUpEth,
+    topUpLords,
     withdraw,
     genNewKey,
     account,
     isDeploying,
     isSettingPermissions,
     isGeneratingNewKey,
-    isToppingUp,
+    isToppingUpEth,
+    isToppingUpLords,
     isWithdrawing,
     listConnectors,
   };

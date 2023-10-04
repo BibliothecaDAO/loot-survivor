@@ -28,7 +28,7 @@ import useUIStore from "./hooks/useUIStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
-import { Menu, NullAdventurer } from "./types";
+import { Menu, NullAdventurer, Call } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
@@ -90,6 +90,9 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Home() {
+  // TEMPORARY
+  const [isMintingLords, setIsMintingLords] = useState(false);
+
   const { disconnect, available } = useConnectors();
   const { chain } = useNetwork();
   const { provider } = useProvider();
@@ -376,6 +379,34 @@ export default function Home() {
     (pendingMessage === "Spawning Adventurer" ||
       pendingMessage.includes("Spawning Adventurer"));
 
+  // TEMPORARY FOR TESTING
+  const mintLords = async () => {
+    try {
+      setIsMintingLords(true);
+      // Mint 250 LORDS
+      const mintLords: Call = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "mint",
+        calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+      };
+      addToCalls(mintLords);
+      const tx = await handleSubmitCalls(writeAsync);
+      const result = await account?.waitForTransaction(tx?.transaction_hash, {
+        retryInterval: 2000,
+      });
+
+      if (!result) {
+        throw new Error("Lords Mint did not complete successfully.");
+      }
+
+      setIsMintingLords(false);
+      lordsBalance.refetch();
+    } catch (e) {
+      setIsMintingLords(false);
+      console.log(e);
+    }
+  };
+
   return (
     // <Maintenance />
     <main
@@ -404,14 +435,24 @@ export default function Home() {
                     dataLoading={isLoading.global}
                   />
                 )}
-                <Button size={"xs"} variant={"outline"} className="self-center">
+                <Button
+                  size={"xs"}
+                  variant={"outline"}
+                  className="self-center"
+                  onClick={() => mintLords()}
+                  disabled={isMintingLords}
+                >
                   <span className="flex flex-row items-center justify-between w-full">
                     <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
-                    <p>
-                      {formatNumber(
-                        parseInt(lordsBalance.data?.formatted ?? "0")
-                      )}
-                    </p>
+                    {!isMintingLords ? (
+                      <p>
+                        {formatNumber(
+                          parseInt(lordsBalance.data?.formatted ?? "0")
+                        )}
+                      </p>
+                    ) : (
+                      <p className="loading-ellipsis">Minting Lords</p>
+                    )}
                   </span>
                 </Button>
                 <Button
@@ -524,7 +565,7 @@ export default function Home() {
           {deathDialog && <DeathDialog />}
           {arcadeIntro && <ArcadeIntro />}
           {status == "connected" && arcadeDialog && <ArcadeDialog />}
-          {status == "connected" && topUpDialog && <TopUpDialog />}
+          {status == "connected" && topUpDialog && <TopUpDialog token="ETH" />}
 
           {introComplete ? (
             <div className="flex flex-col w-full">

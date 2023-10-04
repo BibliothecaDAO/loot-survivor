@@ -5,7 +5,11 @@ import {
   useContractWrite,
   useBalance,
 } from "@starknet-react/core";
-import { useBurner } from "@/app/lib/burner";
+import {
+  ETH_PREFUND_AMOUNT,
+  LORDS_PREFUND_AMOUNT,
+  useBurner,
+} from "@/app/lib/burner";
 import { Button } from "../buttons/Button";
 import useUIStore from "@/app/hooks/useUIStore";
 import PixelatedImage from "../animations/PixelatedImage";
@@ -22,18 +26,23 @@ export const ArcadeIntro = () => {
   const { getMasterAccount, create, isDeploying, isSettingPermissions } =
     useBurner();
   const walletConnectors = getWalletConnectors(available);
-  const { lordsContract } = useContracts();
+  const { lordsContract, ethContract } = useContracts();
   const calls = useTransactionCartStore((state) => state.calls);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const handleSubmitCalls = useTransactionCartStore(
     (state) => state.handleSubmitCalls
   );
   const { writeAsync } = useContractWrite({ calls });
+  const { data: ethBalance } = useBalance({
+    token: ethContract?.address,
+    address,
+  });
   const { data: lordsBalance, refetch: refetchLordsBalance } = useBalance({
     token: lordsContract?.address,
     address,
   });
-  const lords = parseInt(lordsBalance?.formatted ?? "0");
+  const lords = Number(lordsBalance?.value);
+  const eth = Number(ethBalance?.value);
   const [isMintingLords, setIsMintingLords] = useState(false);
 
   const mintLords = async () => {
@@ -98,7 +107,11 @@ export const ArcadeIntro = () => {
           <p className="text-sm xl:text-xl 2xl:text-2xl">Mint Some Lords</p>
           <Button
             onClick={() => mintLords()}
-            disabled={isWrongNetwork || isMintingLords || lords !== 0}
+            disabled={
+              isWrongNetwork ||
+              isMintingLords ||
+              lords >= parseInt(LORDS_PREFUND_AMOUNT)
+            }
             className="flex flex-row w-1/4"
           >
             <Lords className="sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />{" "}
@@ -114,10 +127,14 @@ export const ArcadeIntro = () => {
           </p>
           <Button
             onClick={() => create()}
-            disabled={isWrongNetwork || lords === 0}
+            disabled={
+              isWrongNetwork ||
+              eth < parseInt(ETH_PREFUND_AMOUNT) ||
+              lords < parseInt(LORDS_PREFUND_AMOUNT)
+            }
             className="w-1/4"
           >
-            CREATE
+            {eth < parseInt(ETH_PREFUND_AMOUNT) ? "NOT ENOUGH ETH" : "CREATE"}
           </Button>
           {isDeploying && (
             <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full">
@@ -125,7 +142,7 @@ export const ArcadeIntro = () => {
                 src={"/scenes/intro/arcade-account.png"}
                 pixelSize={5}
               />
-              <h3 className="loading-ellipsis absolute top-1/2 right-1/3">
+              <h3 className="text-lg sm:text-3xl loading-ellipsis absolute top-2/3 sm:top-1/2 flex items-center justify-center w-full">
                 {isSettingPermissions
                   ? "Setting Permissions"
                   : "Deploying Arcade Account"}

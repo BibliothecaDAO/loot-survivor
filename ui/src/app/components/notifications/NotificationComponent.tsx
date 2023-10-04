@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import SpriteAnimation from "./SpriteAnimation";
-import { useMediaQuery } from "react-responsive";
+import SpriteAnimation from "../animations/SpriteAnimation";
 import { notificationAnimations } from "@/app/lib/constants";
 import useLoadingStore from "@/app/hooks/useLoadingStore";
 import { CSSTransition } from "react-transition-group";
@@ -81,6 +80,8 @@ const NotificationComponent = ({
               frameRate={5}
               animations={notificationAnimations}
               currentAnimation={notifications[currentIndex]?.animation}
+              className="notification-sprite"
+              adjustment={10}
             />
           </div>
           <div className="w-1/6 sm:w-1/4 hidden sm:block">
@@ -92,6 +93,8 @@ const NotificationComponent = ({
               frameRate={5}
               animations={notificationAnimations}
               currentAnimation={notifications[currentIndex]?.animation}
+              className="notification-sprite"
+              adjustment={10}
             />
           </div>
           <div className="w-2/3 sm:w-3/4 m-auto text-sm sm:text-lg">

@@ -50,7 +50,9 @@ const PixelatedImage: React.FC<PixelatedImageProps> = ({
 
         const aspectRatio = image.width / image.height;
 
-        const newHeight = fill ? height : Math.min(height, image.width);
+        // Unless fill is true, from the smallest dimension calculate the width and height of the image
+        const minDimension = Math.min(width, height);
+        const newHeight = fill ? height : Math.min(minDimension, image.width);
         const newWidth = fill ? width : newHeight / aspectRatio;
 
         ctx.fillStyle = "black";

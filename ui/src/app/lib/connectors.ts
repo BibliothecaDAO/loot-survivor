@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { InjectedConnector, Connector } from "@starknet-react/core";
 // import { WebWalletConnector } from "@argent/starknet-react-webwallet-connector";
 

@@ -7,13 +7,18 @@ import { BurnerStorage } from "../types";
 import { useBurner } from "../lib/burner";
 import { getArcadeConnectors, getWalletConnectors } from "../lib/connectors";
 
-export const TopUpDialog = () => {
+interface TopUpDialogProps {
+  token: "ETH" | "LORDS";
+}
+
+export const TopUpDialog = ({ token }: TopUpDialogProps) => {
   const { account: walletAccount, address, connector } = useAccount();
   const { connect, available } = useConnectors();
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const topUpAccount = useUIStore((state) => state.topUpAccount);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
-  const { topUp, isToppingUp } = useBurner();
+  const { topUpEth, isToppingUpEth, topUpLords, isToppingUpLords } =
+    useBurner();
 
   const arcadeConnectors = getArcadeConnectors(available);
   const walletConnectors = getWalletConnectors(available);
@@ -51,16 +56,16 @@ export const TopUpDialog = () => {
             Top Up (0.001ETH)
           </p>
           <Button
-            disabled={!masterConnected || isToppingUp}
+            disabled={!masterConnected || isToppingUpEth}
             onClick={async () => {
-              await topUp(topUpAccount, walletAccount!);
+              await topUpEth(topUpAccount, walletAccount!);
               setTopUpAccount("");
               connect(arcadeConnector!);
               showTopUpDialog(false);
             }}
           >
             {masterConnected ? (
-              isToppingUp ? (
+              isToppingUpEth ? (
                 <span className="loading-ellipsis">Topping Up</span>
               ) : (
                 "Top Up"
