@@ -157,6 +157,32 @@ mod ERC20 {
         self._mint(recipient, amount);
     }
 
+    /// Camel case support.
+    /// See [total_supply](total-supply).
+    #[external(v0)]
+    fn totalSupply(self: @ContractState) -> u256 {
+        total_supply(self)
+    }
+
+    /// Camel case support.
+    /// See [balance_of](balance_of).
+    #[external(v0)]
+    fn balanceOf(self: @ContractState, account: ContractAddress) -> u256 {
+        balance_of(self, account)
+    }
+
+    /// Camel case support.
+    /// See [transfer_from](transfer_from).
+    #[external(v0)]
+    fn transferFrom(
+        ref self: ContractState,
+        sender: ContractAddress,
+        recipient: ContractAddress,
+        amount: u256
+    ) -> bool {
+        transfer_from(ref self, sender, recipient, amount)
+    }
+
     //
     // Internal
     //
