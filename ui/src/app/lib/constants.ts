@@ -38,7 +38,7 @@ export function getContracts() {
       return {
         eth: process.env.NEXT_PUBLIC_GOERLI_ETH_CONTRACT_ADDRESS,
         game: process.env.NEXT_PUBLIC_GOERLI_GAME_CONTRACT_ADDRESS,
-        lords: process.env.NEXT_PUBLIC_GOERLI_GAME_CONTRACT_ADDRESS,
+        lords: process.env.NEXT_PUBLIC_GOERLI_LORDS_CONTRACT_ADDRESS,
       };
     case "mainnet":
       return {
@@ -52,9 +52,9 @@ export function getContracts() {
 export function getArcadeClassHash() {
   switch (process.env.NEXT_PUBLIC_NETWORK) {
     case "goerli":
-      return process.env.NEXT_PUBLIC_GOERLI_ARCADE_CLASS_HASH;
+      return process.env.NEXT_PUBLIC_GOERLI_ARCADE_ACCOUNT_CLASS_HASH;
     case "mainnet":
-      return process.env.NEXT_PUBLIC_MAINNET_ARCADE_CLASS_HASH;
+      return process.env.NEXT_PUBLIC_MAINNET_ARCADE_ACCOUNT_CLASS_HASH;
   }
 }
 
