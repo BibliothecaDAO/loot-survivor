@@ -49,6 +49,15 @@ export function getContracts() {
   }
 }
 
+export function getArcadeClassHash() {
+  switch (process.env.NEXT_PUBLIC_NETWORK) {
+    case "goerli":
+      return process.env.NEXT_PUBLIC_GOERLI_ARCADE_CLASS_HASH;
+    case "mainnet":
+      return process.env.NEXT_PUBLIC_MAINNET_ARCADE_CLASS_HASH;
+  }
+}
+
 export function getAppUrl() {
   switch (process.env.NEXT_PUBLIC_NETWORK) {
     case "goerli":

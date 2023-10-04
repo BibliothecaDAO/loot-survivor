@@ -16,11 +16,15 @@ import { useAccount, useConnectors } from "@starknet-react/core";
 import { ArcadeConnector } from "./arcade";
 import { useContracts } from "../hooks/useContracts";
 import { BurnerStorage } from "../types";
-import { mainnet_addr } from "./constants";
+import { getRPCUrl, getArcadeClassHash } from "./constants";
 
 export const PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
 
-const provider = new Provider({ rpc: { nodeUrl: mainnet_addr }, sequencer: { baseUrl: mainnet_addr } });
+const rpc_addr = getRPCUrl();
+const provider = new Provider({
+  rpc: { nodeUrl: rpc_addr! },
+  sequencer: { baseUrl: rpc_addr! },
+});
 
 export const useBurner = () => {
   const { refresh } = useConnectors();
@@ -31,7 +35,8 @@ export const useBurner = () => {
   const [isSettingPermissions, setIsSettingPermissions] = useState(false);
   const [isToppingUp, setIsToppingUp] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const { gameContract, lordsContract } = useContracts();
+  const { gameContract, lordsContract, ethContract } = useContracts();
+  const arcadeClassHash = getArcadeClassHash();
 
   // init
   useEffect(() => {
@@ -121,6 +126,30 @@ export const useBurner = () => {
     [walletAccount]
   );
 
+  const prefundAccount = async (address: string, account: AccountInterface) => {
+    try {
+      const { transaction_hash } = await account.execute({
+        contractAddress: ethContract?.address ?? "",
+        entrypoint: "transfer",
+        calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
+      });
+
+      const result = await account.waitForTransaction(transaction_hash, {
+        retryInterval: 1000,
+        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
+      });
+
+      if (!result) {
+        throw new Error("Transaction did not complete successfully.");
+      }
+
+      return result;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
   const create = useCallback(async () => {
     setIsDeploying(true);
     const privateKey = stark.randomAddress();
@@ -137,7 +166,7 @@ export const useBurner = () => {
 
     const address = hash.calculateContractAddressFromHash(
       publicKey,
-      process.env.NEXT_PUBLIC_GOERLI_ARCADE_ACCOUNT_CLASS_HASH!,
+      arcadeClassHash!,
       constructorAACalldata,
       0
     );
@@ -155,7 +184,7 @@ export const useBurner = () => {
       transaction_hash: deployTx,
       contract_address: accountAAFinalAdress,
     } = await burner.deployAccount({
-      classHash: process.env.NEXT_PUBLIC_GOERLI_ARCADE_ACCOUNT_CLASS_HASH!,
+      classHash: arcadeClassHash!,
       constructorCalldata: constructorAACalldata,
       contractAddress: address,
       addressSalt: publicKey,
@@ -216,7 +245,7 @@ export const useBurner = () => {
           entrypoint: "update_whitelisted_calls",
           calldata: [
             "1",
-            process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+            ethContract?.address ?? "",
             selector.getSelectorFromName("transfer"),
             "1",
           ],
@@ -236,7 +265,7 @@ export const useBurner = () => {
     try {
       setIsToppingUp(true);
       const { transaction_hash } = await account.execute({
-        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        contractAddress: ethContract?.address ?? "",
         entrypoint: "transfer",
         calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
       });
@@ -276,7 +305,7 @@ export const useBurner = () => {
       );
 
       const call = {
-        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        contractAddress: ethContract?.address ?? "",
         entrypoint: "transfer",
         calldata: CallData.compile([
           masterAccountAddress,
@@ -295,7 +324,7 @@ export const useBurner = () => {
         BigInt(balance) - estimatedFee * (BigInt(11) / BigInt(10));
 
       const { transaction_hash } = await account.execute({
-        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        contractAddress: ethContract?.address ?? "",
         entrypoint: "transfer",
         calldata: CallData.compile([
           masterAccountAddress,
@@ -405,28 +434,4 @@ export const useBurner = () => {
     isWithdrawing,
     listConnectors,
   };
-};
-
-const prefundAccount = async (address: string, account: AccountInterface) => {
-  try {
-    const { transaction_hash } = await account.execute({
-      contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
-      entrypoint: "transfer",
-      calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
-    });
-
-    const result = await account.waitForTransaction(transaction_hash, {
-      retryInterval: 1000,
-      successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
-    });
-
-    if (!result) {
-      throw new Error("Transaction did not complete successfully.");
-    }
-
-    return result;
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
 };
