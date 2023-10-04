@@ -140,7 +140,7 @@ export const useBurner = () => {
 
     const address = hash.calculateContractAddressFromHash(
       publicKey,
-      process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
+      process.env.NEXT_PUBLIC_GOERLI_ARCADE_ACCOUNT_CLASS_HASH!,
       constructorAACalldata,
       0
     );
@@ -158,7 +158,7 @@ export const useBurner = () => {
       transaction_hash: deployTx,
       contract_address: accountAAFinalAdress,
     } = await burner.deployAccount({
-      classHash: process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
+      classHash: process.env.NEXT_PUBLIC_GOERLI_ARCADE_ACCOUNT_CLASS_HASH!,
       constructorCalldata: constructorAACalldata,
       contractAddress: address,
       addressSalt: publicKey,
