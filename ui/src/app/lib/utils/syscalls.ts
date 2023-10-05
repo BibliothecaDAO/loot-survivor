@@ -263,24 +263,56 @@ export function syscalls({
       goldenTokenContract,
       account!
     );
-    // if (!hasGoldenToken) {
-    //   const approve
-    //   addToCalls()
-    // }
-    const mintLords = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(mintLords);
+    let spawnCalls = [];
+    if (hasGoldenToken) {
+      const tokenIds: string[] = []; // TODO: Implement indexer/api fetch to get tokenIds of account
+      // loop through tokenIds
+      for (let tokenId in tokenIds) {
+        const gameApproved = await goldenTokenContract.call(
+          "can_play",
+          CallData.compile({ token_id: tokenId })
+        ); // check whether player can use the current token
+        if (gameApproved) {
+          // check whether the game contract is whitelisted
+          const gameWhitelisted = await goldenTokenContract.call(
+            "caller_approved",
+            CallData.compile({
+              token_id: tokenId,
+              contract: gameContract?.address,
+            })
+          );
+          if (!gameWhitelisted) {
+            const whitelistGameToGoldenTokenTx = {
+              contractAddress: goldenTokenContract?.address ?? "",
+              entrypoint: "set_approved_to_call",
+              calldata: [tokenId, "0", gameContract?.address, "1"], // Approve the game contract for this tokenId
+            };
+            addToCalls(whitelistGameToGoldenTokenTx);
+            spawnCalls.push(whitelistGameToGoldenTokenTx);
+            break;
+          }
+        }
+      }
+    } else {
+      const mintLords = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "mint",
+        calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
+      };
+      addToCalls(mintLords);
 
-    const approveLordsTx = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(approveLordsTx);
-
+      const approveLordsTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "approve",
+        calldata: [
+          gameContract?.address ?? "",
+          (100 * 10 ** 18).toString(),
+          "0",
+        ],
+      };
+      addToCalls(approveLordsTx);
+      spawnCalls.push(mintLords, approveLordsTx);
+    }
     const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "start",
@@ -295,8 +327,9 @@ export function syscalls({
     };
 
     addToCalls(mintAdventurerTx);
+    spawnCalls.push(mintAdventurerTx);
     const balanceEmpty = await checkArcadeBalance(
-      [...calls, mintLords, approveLordsTx, mintAdventurerTx],
+      [...calls, ...spawnCalls],
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
@@ -312,12 +345,7 @@ export function syscalls({
         undefined
       );
       try {
-        const tx = await handleSubmitCalls(account, [
-          ...calls,
-          mintLords,
-          approveLordsTx,
-          mintAdventurerTx,
-        ]);
+        const tx = await handleSubmitCalls(account, [...calls, ...spawnCalls]);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
