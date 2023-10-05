@@ -78,7 +78,7 @@ export default function Header({ multicall }: HeaderProps) {
         <Button
           size={"xs"}
           variant={"outline"}
-          className="self-center xl:px-5"
+          className="hidden sm:block self-center xl:px-5"
           disabled={true}
         >
           Play For Real
