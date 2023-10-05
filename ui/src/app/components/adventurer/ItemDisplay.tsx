@@ -145,7 +145,7 @@ export const ItemDisplay = ({
     <>
       {!showInventoryItems ? (
         <div
-          className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-10 sm:h-10 md:h-full  ${
+          className={`flex flex-row items-center mb-1 text-sm sm:text-base w-full h-[8rem] sm:h-10 md:h-full  ${
             item.item
               ? "bg-terminal-green text-terminal-black 2xl:overflow-x-auto 2xl:overflow-y-hidden"
               : ""
@@ -153,12 +153,12 @@ export const ItemDisplay = ({
           ref={scrollableRef}
         >
           <div className="sm:hidden flex flex-col items-center justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
-            <LootIcon size={"w-3"} type={itemSlot ? itemSlot : slot} />
-            <Efficacyicon size={"w-4"} type={type} />
+            <LootIcon size={"w-5"} type={itemSlot ? itemSlot : slot} />
+            <Efficacyicon size={"w-5"} type={type} />
           </div>
           <div className="hidden sm:flex flex-col justify-center border-r-2 border-terminal-black p-1 sm:p-2 gap-2">
-            <LootIcon size={"w-4"} type={itemSlot ? itemSlot : slot} />
-            <Efficacyicon size={"w-4"} type={type} />
+            <LootIcon size={"w-5"} type={itemSlot ? itemSlot : slot} />
+            <Efficacyicon size={"w-5"} type={type} />
           </div>
 
           {item.item ? (

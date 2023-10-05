@@ -115,7 +115,7 @@ export default function AdventurerScreen({
       )}
 
       {startOption === "choose adventurer" && (
-        <div className="flex flex-col sm:w-5/6 h-[575px] sm:h-full">
+        <div className="flex flex-col sm:w-5/6 h-[500px] sm:h-full">
           <p className="text-center text-xl sm:hidden uppercase">Adventurers</p>
 
           <AdventurersList

@@ -6,9 +6,7 @@ export default function Player() {
   return (
     <>
       {adventurer?.id ? (
-        <div className="w-full">
-          <Info adventurer={adventurer} />
-        </div>
+        <Info adventurer={adventurer} />
       ) : (
         <div className="flex items-center justify-center">
           <p>Please select an adventurer!</p>

@@ -27,7 +27,9 @@ export interface ItemDisplayProps {
 }
 
 const ItemDisplay = ({ type, size = "w-5", className }: ItemDisplayProps) => {
-  const classes = `fill-current ${size} ${className}`;
+  const classes = `fill-current ${size} ${
+    size == "w-8" ? "h-8" : ""
+  } ${className}`;
   const Components: { [key in string]: ReactElement } = {
     chest: <Chest className={classes} />,
     weapon: <Weapon className={classes} />,

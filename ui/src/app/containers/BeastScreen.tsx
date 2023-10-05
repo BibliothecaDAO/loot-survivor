@@ -151,11 +151,9 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
 
   return (
     <div className="sm:w-2/3 flex flex-col sm:flex-row h-full">
-      <div className="sm:w-1/2 order-1 sm:order-2 h-full">
+      <div className="sm:w-1/2 order-1 sm:order-2">
         {hasBeast ? (
-          <>
-            <BeastDisplay beastData={beastData} />
-          </>
+          <BeastDisplay beastData={beastData} />
         ) : (
           <div className="flex flex-col items-center border-2 border-terminal-green">
             <p className="m-auto text-lg uppercase text-terminal-green">
