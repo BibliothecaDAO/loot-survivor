@@ -73,9 +73,10 @@ export const TxActivity = () => {
                 : pendingMessage
               : "Confirming Tx"}
           </div>
-          {data && hash && (
+          {hash && (
             <div className="flex flex-row gap-2">
-              <span className="hidden sm:block">Status:</span> {data.status}
+              <span className="hidden sm:block">Status:</span>{" "}
+              {data?.finality_status ?? "PENDING"}
             </div>
           )}
         </div>
