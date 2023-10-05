@@ -10,34 +10,62 @@ export const chapter4 =
   "They find golden coins in their pocket, glimmering in the dim light - an enigma wrapped in the shroud of the unexpected.";
 export const battle = "A beast lurks in the shadow, prepare for battle!";
 
-export const mainnet_addr =
-  process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://alpha-mainnet.starknet.io";
+export function getRPCUrl() {
+  switch (process.env.NEXT_PUBLIC_NETWORK) {
+    case "goerli":
+      return process.env.NEXT_PUBLIC_RPC_GOERLI_ENDPOINT;
+    case "mainnet":
+      return process.env.NEXT_PUBLIC_RPC_MAINNET_ENDPOINT;
+    default:
+      return "http://localhost:8000/graphql";
+  }
+}
 
 export function getGraphQLUrl() {
   switch (process.env.NEXT_PUBLIC_NETWORK) {
-    case "dev":
+    case "goerli":
       return "https://survivor-indexer.realms.world/goerli-graphql";
-    case "production":
+    case "mainnet":
       return "https://survivor-indexer.realms.world/graphql";
     default:
       return "http://localhost:8000/graphql";
   }
 }
 
-export const contracts = {
-  mainnet: {
-    game: "0x0",
-    lords_erc20_mintable:
-      "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
-  },
-  goerli: {
-    game: "0x01263ecbc05e28d1e99f531894838db10b90cfcdd39d020642da1747a733a37a",
-    lords_erc20_mintable:
-      "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
-  },
-};
+export function getContracts() {
+  switch (process.env.NEXT_PUBLIC_NETWORK) {
+    case "goerli":
+      return {
+        eth: process.env.NEXT_PUBLIC_GOERLI_ETH_CONTRACT_ADDRESS,
+        game: process.env.NEXT_PUBLIC_GOERLI_GAME_CONTRACT_ADDRESS,
+        lords: process.env.NEXT_PUBLIC_GOERLI_LORDS_CONTRACT_ADDRESS,
+      };
+    case "mainnet":
+      return {
+        eth: process.env.NEXT_PUBLIC_MAINNET_ETH_CONTRACT_ADDRESS,
+        game: process.env.NEXT_PUBLIC_MAINNET_GAME_CONTRACT_ADDRESS,
+        lords: process.env.NEXT_PUBLIC_MAINNET_LORDS_CONTRACT_ADDRESS,
+      };
+  }
+}
 
-export const appUrl = "https://survivor.realms.world/";
+export function getArcadeClassHash() {
+  switch (process.env.NEXT_PUBLIC_NETWORK) {
+    case "goerli":
+      return process.env.NEXT_PUBLIC_GOERLI_ARCADE_ACCOUNT_CLASS_HASH;
+    case "mainnet":
+      return process.env.NEXT_PUBLIC_MAINNET_ARCADE_ACCOUNT_CLASS_HASH;
+  }
+}
+
+export function getAppUrl() {
+  switch (process.env.NEXT_PUBLIC_NETWORK) {
+    case "goerli":
+      return process.env.NEXT_PUBLIC_GOERLI_APP_URL;
+    case "mainnet":
+      return process.env.NEXT_PUBLIC_MAINNET_APP_URL;
+  }
+}
 
 export const notificationAnimations = [
   { name: "idle", startFrame: 0, frameCount: 4 },

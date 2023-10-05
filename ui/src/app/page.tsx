@@ -4,12 +4,10 @@ import {
   useConnectors,
   useNetwork,
   useProvider,
-  useContractWrite,
   useTransactionManager,
 } from "@starknet-react/core";
 import { constants } from "starknet";
 import { useState, useEffect, useMemo, useRef } from "react";
-import { Button } from "./components/buttons/Button";
 import ActionsScreen from "./containers/ActionsScreen";
 import AdventurerScreen from "./containers/AdventurerScreen";
 import InventoryScreen from "./containers/InventoryScreen";
@@ -17,9 +15,7 @@ import LeaderboardScreen from "./containers/LeaderboardScreen";
 import EncountersScreen from "./containers/EncountersScreen";
 import GuideScreen from "./containers/GuideScreen";
 import UpgradeScreen from "./containers/UpgradeScreen";
-import { displayAddress, padAddress, formatNumber } from "./lib/utils";
-import TransactionHistory from "./components/navigation/TransactionHistory";
-import TransactionCart from "./components/navigation/TransactionCart";
+import { padAddress } from "./lib/utils";
 import Intro from "./components/intro/Intro";
 import { TxActivity } from "./components/navigation/TxActivity";
 import useLoadingStore from "./hooks/useLoadingStore";
@@ -28,26 +24,16 @@ import useUIStore from "./hooks/useUIStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
-import { Menu, NullAdventurer } from "./types";
+import { Menu } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
 import WalletSelect from "./components/intro/WalletSelect";
-import {
-  SettingsIcon,
-  SoundOnIcon,
-  SoundOffIcon,
-  GithubIcon,
-  CartIcon,
-  ArcadeIcon,
-} from "./components/icons/Icons";
-import Lords from "../../public/icons/lords.svg";
 import Settings from "./components/navigation/Settings";
 import MobileHeader from "./components/navigation/MobileHeader";
 import Player from "./components/adventurer/Player";
 import { useUiSounds } from "./hooks/useUiSound";
 import { soundSelector } from "./hooks/useUiSound";
-import { PenaltyCountDown } from "./components/CountDown";
 import useCustomQuery from "./hooks/useCustomQuery";
 import {
   getAdventurerById,
@@ -65,8 +51,8 @@ import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
 import { syscalls } from "./lib/utils/syscalls";
 import { useContracts } from "./hooks/useContracts";
 import { useBalance } from "@starknet-react/core";
-import Logo from "../../public/icons/logo.svg";
 import ScreenMenu from "./components/menu/ScreenMenu";
+import Header from "./components/navigation/Header";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -88,14 +74,12 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Home() {
-  const { disconnect } = useConnectors();
   const { chain } = useNetwork();
   const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
   const setDisconnected = useUIStore((state) => state.setDisconnected);
   const { account, address, status, isConnected } = useAccount();
   const isMuted = useUIStore((state) => state.isMuted);
-  const setIsMuted = useUIStore((state) => state.setIsMuted);
   const [introComplete, setIntroComplete] = useState(false);
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const setAdventurer = useAdventurerStore((state) => state.setAdventurer);
@@ -103,12 +87,7 @@ export default function Home() {
   const screen = useUIStore((state) => state.screen);
   const setScreen = useUIStore((state) => state.setScreen);
   const deathDialog = useUIStore((state) => state.deathDialog);
-  const displayHistory = useUIStore((state) => state.displayHistory);
-  const setDisplayHistory = useUIStore((state) => state.setDisplayHistory);
-  const displayCart = useUIStore((state) => state.displayCart);
-  const setDisplayCart = useUIStore((state) => state.setDisplayCart);
   const setMintAdventurer = useUIStore((state) => state.setMintAdventurer);
-  const { play: clickPlay } = useUiSounds(soundSelector.click);
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const hasStatUpgrades = useAdventurerStore(
     (state) => state.computed.hasStatUpgrades
@@ -116,11 +95,8 @@ export default function Home() {
   const owner = account?.address ? padAddress(account.address) : "";
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
-  const displayHistoryButtonRef = useRef<HTMLButtonElement>(null);
-  const displayCartButtonRef = useRef<HTMLButtonElement>(null);
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
-  const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
   const topUpDialog = useUIStore((state) => state.topUpDialog);
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
@@ -135,12 +111,10 @@ export default function Home() {
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { writeAsync } = useContractWrite({ calls });
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const resetNotification = useLoadingStore((state) => state.resetNotification);
   const setStartOption = useUIStore((state) => state.setStartOption);
 
   const lordsBalance = useBalance({
@@ -153,21 +127,13 @@ export default function Home() {
     address,
   });
 
-  const {
-    data,
-    refetch,
-    resetData,
-    setData,
-    isLoading,
-    setIsLoading,
-    setNotLoading,
-  } = useQueriesStore();
+  const { data, refetch, resetData, setData, setIsLoading, setNotLoading } =
+    useQueriesStore();
 
   const { spawn, explore, attack, flee, upgrade, multicall } = syscalls({
     gameContract,
     lordsContract,
     addTransaction,
-    account,
     queryData: data,
     resetData,
     setData,
@@ -178,12 +144,10 @@ export default function Home() {
     startLoading,
     stopLoading,
     setTxHash,
-    writeAsync,
     setEquipItems,
     setDropItems,
     setDeathMessage,
     showDeathDialog,
-    resetNotification,
     setScreen,
     setAdventurer,
     setMintAdventurer,
@@ -192,6 +156,7 @@ export default function Home() {
     showTopUpDialog,
     setTopUpAccount,
     setEstimatingFee,
+    account,
   });
 
   const playState = useMemo(
@@ -376,127 +341,7 @@ export default function Home() {
                 <TxActivity />
               </div>
             )}
-            <div className="flex flex-row justify-between px-1  ">
-              <div className="flex flex-row items-center gap-2 sm:gap-5">
-                <Logo className="fill-current w-24 md:w-32 xl:w-40 2xl:w-64" />
-              </div>
-              <div className="flex flex-row items-center self-end sm:gap-1 space-x-1 self-center">
-                {adventurer?.id && (
-                  <PenaltyCountDown
-                    lastDiscoveryTime={
-                      data.latestDiscoveriesQuery?.discoveries[0]?.timestamp
-                    }
-                    lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
-                    dataLoading={isLoading.global}
-                  />
-                )}
-                <Button size={"xs"} variant={"outline"} className="self-center">
-                  <span className="flex flex-row items-center justify-between w-full">
-                    <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
-                    <p>
-                      {formatNumber(
-                        parseInt(lordsBalance.data?.formatted ?? "0")
-                      )}
-                    </p>
-                  </span>
-                </Button>
-                <Button
-                  size={"xs"}
-                  variant={"outline"}
-                  onClick={() => showArcadeDialog(!arcadeDialog)}
-                  disabled={isWrongNetwork}
-                >
-                  <ArcadeIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
-                  <span className="hidden sm:block">arcade account</span>
-                </Button>
-                <Button
-                  size={"xs"}
-                  variant={"outline"}
-                  onClick={() => {
-                    setIsMuted(!isMuted);
-                    clickPlay();
-                  }}
-                  className="hidden sm:block"
-                >
-                  {isMuted ? (
-                    <SoundOffIcon className="sm:w-5 sm:h-5 h-3 w-3 justify-center fill-current" />
-                  ) : (
-                    <SoundOnIcon className="sm:w-5 sm:h-5 h-3 w-3 justify-center fill-current" />
-                  )}
-                </Button>
-                {account && (
-                  <Button
-                    variant={"outline"}
-                    size={"xs"}
-                    ref={displayCartButtonRef}
-                    onClick={() => {
-                      setDisplayCart(!displayCart);
-                      clickPlay();
-                    }}
-                  >
-                    <CartIcon className="sm:w-5 sm:h-5 h-3 w-3 fill-current" />
-                  </Button>
-                )}
-                {displayCart && (
-                  <TransactionCart
-                    buttonRef={displayCartButtonRef}
-                    multicall={multicall}
-                  />
-                )}
-                <div className="flex items-center sm:hidden">
-                  <Button
-                    size={"xs"}
-                    variant={"outline"}
-                    onClick={() => {
-                      setScreen("settings");
-                      clickPlay();
-                    }}
-                  >
-                    <SettingsIcon className="fill-current h-3 w-3" />
-                  </Button>
-                </div>
-                <div className="hidden sm:block sm:flex sm:flex-row sm:items-center sm:gap-1">
-                  {account && (
-                    <>
-                      <Button
-                        variant={"outline"}
-                        size={"xs"}
-                        ref={displayHistoryButtonRef}
-                        onClick={() => {
-                          setDisplayHistory(!displayHistory);
-                        }}
-                      >
-                        {displayHistory ? "Hide Ledger" : "Show Ledger"}
-                      </Button>
-                    </>
-                  )}
-
-                  <Button
-                    variant={"outline"}
-                    size={"sm"}
-                    onClick={() => {
-                      disconnect();
-                      resetData();
-                      setAdventurer(NullAdventurer);
-                      setDisconnected(true);
-                    }}
-                  >
-                    {account ? displayAddress(account.address) : "Connect"}
-                  </Button>
-
-                  <Button
-                    variant={"outline"}
-                    size={"sm"}
-                    href="https://github.com/BibliothecaDAO/loot-survivor"
-                  >
-                    <GithubIcon className="w-6 fill-current" />
-                  </Button>
-                </div>
-                {account && displayHistory && (
-                  <TransactionHistory buttonRef={displayHistoryButtonRef} />
-                )}
-              </div>
-            </div>
+            <Header multicall={multicall} />
           </div>
           <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
             {!spawnLoader && (

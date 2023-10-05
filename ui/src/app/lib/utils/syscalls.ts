@@ -1,4 +1,10 @@
-import { InvokeTransactionReceiptResponse, Call, Account } from "starknet";
+import {
+  InvokeTransactionReceiptResponse,
+  Call,
+  Account,
+  AccountInterface,
+  provider,
+} from "starknet";
 import { GameData } from "@/app/components/GameData";
 import {
   Adventurer,
@@ -18,7 +24,6 @@ export interface SyscallsProps {
   gameContract: any;
   lordsContract: any;
   addTransaction: any;
-  account: any;
   queryData: any;
   resetData: (...args: any[]) => any;
   setData: (...args: any[]) => any;
@@ -29,12 +34,10 @@ export interface SyscallsProps {
   startLoading: (...args: any[]) => any;
   stopLoading: (...args: any[]) => any;
   setTxHash: (...args: any[]) => any;
-  writeAsync: (...args: any[]) => any;
   setEquipItems: (...args: any[]) => any;
   setDropItems: (...args: any[]) => any;
   setDeathMessage: (...args: any[]) => any;
   showDeathDialog: (...args: any[]) => any;
-  resetNotification: (...args: any[]) => any;
   setScreen: (...args: any[]) => any;
   setAdventurer: (...args: any[]) => any;
   setMintAdventurer: (...args: any[]) => any;
@@ -43,21 +46,28 @@ export interface SyscallsProps {
   showTopUpDialog: (...args: any[]) => any;
   setTopUpAccount: (...args: any[]) => any;
   setEstimatingFee: (...args: any[]) => any;
+  account?: AccountInterface;
 }
 
 async function checkArcadeBalance(
-  account: Account,
   calls: Call[],
   ethBalance: bigint,
   showTopUpDialog: (...args: any[]) => any,
   setTopUpAccount: (...args: any[]) => any,
-  setEstimatingFee: (...args: any[]) => any
+  setEstimatingFee: (...args: any[]) => any,
+  account?: AccountInterface
 ) {
   if (ethBalance < FEE_CHECK_BALANCE) {
     const storage: BurnerStorage = Storage.get("burners");
-    if (account.address in storage) {
+    if (account && (account?.address ?? "0x0") in storage) {
       setEstimatingFee(true);
-      const { suggestedMaxFee: estimatedFee } = await account.estimateFee(
+      const newAccount = new Account(
+        account,
+        account?.address,
+        storage[account?.address]["privateKey"],
+        "1"
+      );
+      const { suggestedMaxFee: estimatedFee } = await newAccount.estimateFee(
         calls
       );
       // Add 10% to fee for safety
@@ -65,7 +75,7 @@ async function checkArcadeBalance(
       setEstimatingFee(false);
       if (ethBalance < formattedFee) {
         showTopUpDialog(true);
-        setTopUpAccount(account.address);
+        setTopUpAccount(account?.address);
         return true;
       } else {
         return false;
@@ -142,12 +152,10 @@ export function syscalls({
   startLoading,
   stopLoading,
   setTxHash,
-  writeAsync,
   setEquipItems,
   setDropItems,
   setDeathMessage,
   showDeathDialog,
-  resetNotification,
   setScreen,
   setAdventurer,
   setMintAdventurer,
@@ -253,12 +261,12 @@ export function syscalls({
 
     addToCalls(mintAdventurerTx);
     const balanceEmpty = await checkArcadeBalance(
-      account,
       [...calls, mintLords, approveLordsTx, mintAdventurerTx],
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee
+      setEstimatingFee,
+      account
     );
 
     if (!balanceEmpty) {
@@ -269,7 +277,12 @@ export function syscalls({
         undefined
       );
       try {
-        const tx = await handleSubmitCalls(writeAsync);
+        const tx = await handleSubmitCalls(account, [
+          ...calls,
+          mintLords,
+          approveLordsTx,
+          mintAdventurerTx,
+        ]);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -359,12 +372,12 @@ export function syscalls({
     addToCalls(exploreTx);
 
     const balanceEmpty = await checkArcadeBalance(
-      account,
       [...calls, exploreTx],
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee
+      setEstimatingFee,
+      account
     );
 
     if (!balanceEmpty) {
@@ -375,7 +388,7 @@ export function syscalls({
         adventurer?.id
       );
       try {
-        const tx = await handleSubmitCalls(writeAsync);
+        const tx = await handleSubmitCalls(account, [...calls, exploreTx]);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -608,12 +621,12 @@ export function syscalls({
     addToCalls(attackTx);
 
     const balanceEmpty = await checkArcadeBalance(
-      account,
       [...calls, attackTx],
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee
+      setEstimatingFee,
+      account
     );
 
     if (!balanceEmpty) {
@@ -624,7 +637,7 @@ export function syscalls({
         adventurer?.id
       );
       try {
-        const tx = await handleSubmitCalls(writeAsync);
+        const tx = await handleSubmitCalls(account, [...calls, attackTx]);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -840,18 +853,18 @@ export function syscalls({
     addToCalls(fleeTx);
 
     const balanceEmpty = await checkArcadeBalance(
-      account,
       [...calls, fleeTx],
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee
+      setEstimatingFee,
+      account
     );
 
     if (!balanceEmpty) {
       startLoading("Flee", "Fleeing", "battlesByTxHashQuery", adventurer?.id);
       try {
-        const tx = await handleSubmitCalls(writeAsync);
+        const tx = await handleSubmitCalls(account, [...calls, fleeTx]);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -1009,12 +1022,12 @@ export function syscalls({
     potionAmount: number
   ) => {
     const balanceEmpty = await checkArcadeBalance(
-      account,
       calls,
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee
+      setEstimatingFee,
+      account
     );
 
     if (!balanceEmpty) {
@@ -1025,7 +1038,7 @@ export function syscalls({
         adventurer?.id
       );
       try {
-        const tx = await handleSubmitCalls(writeAsync);
+        const tx = await handleSubmitCalls(account, calls);
         setTxHash(tx?.transaction_hash);
         addTransaction({
           hash: tx?.transaction_hash,
@@ -1170,12 +1183,12 @@ export function syscalls({
     notification: string[]
   ) => {
     const balanceEmpty = await checkArcadeBalance(
-      account,
       calls,
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
-      setEstimatingFee
+      setEstimatingFee,
+      account
     );
 
     if (!balanceEmpty) {
@@ -1199,7 +1212,7 @@ export function syscalls({
       }
       startLoading("Multicall", loadingMessage, loadingQuery, adventurer?.id);
       try {
-        const tx = await handleSubmitCalls(writeAsync);
+        const tx = await handleSubmitCalls(account, calls);
         const receipt = await account?.waitForTransaction(
           tx?.transaction_hash,
           {
@@ -1290,32 +1303,42 @@ export function syscalls({
           (event) => event.name === "AdventurerDied"
         );
         for (let adventurerDiedEvent of adventurerDiedEvents) {
-          setData("adventurerByIdQuery", {
-            adventurers: [adventurerDiedEvent.data[0]],
-          });
-          const deadAdventurerIndex =
-            queryData.adventurersByOwnerQuery?.adventurers.findIndex(
-              (adventurer: any) =>
-                adventurer.id == adventurerDiedEvent.data[0].id
+          if (
+            adventurerDiedEvent.data[1].callerAddress ===
+            adventurerDiedEvent.data[0].owner
+          ) {
+            setData("adventurerByIdQuery", {
+              adventurers: [adventurerDiedEvent.data[0]],
+            });
+            const deadAdventurerIndex =
+              queryData.adventurersByOwnerQuery?.adventurers.findIndex(
+                (adventurer: any) =>
+                  adventurer.id == adventurerDiedEvent.data[0].id
+              );
+            setData(
+              "adventurersByOwnerQuery",
+              0,
+              "health",
+              deadAdventurerIndex
             );
-          setData("adventurersByOwnerQuery", 0, "health", deadAdventurerIndex);
-          setAdventurer(adventurerDiedEvent.data[0]);
-          const killedByBeast = battles.some(
-            (battle) =>
-              battle.attacker == "Beast" && battle.adventurerHealth == 0
-          );
-          // In a multicall someone can either die from swapping inventory or the death penalty. Here we handle those cases
-          if (killedByBeast) {
-            setDeathNotification(
-              "Multicall",
-              ["You equipped"],
-              adventurerDiedEvent.data[0]
+            setAdventurer(adventurerDiedEvent.data[0]);
+            const killedByBeast = battles.some(
+              (battle) =>
+                battle.attacker == "Beast" && battle.adventurerHealth == 0
             );
-          } else {
-            setDeathNotification("Upgrade", "Death Penalty", []);
+            // In a multicall someone can either die from swapping inventory or the death penalty. Here we handle those cases
+            if (killedByBeast) {
+              setDeathNotification(
+                "Multicall",
+                ["You equipped"],
+                adventurerDiedEvent.data[0]
+              );
+            } else {
+              setDeathNotification("Upgrade", "Death Penalty", []);
+            }
+            setScreen("start");
+            setStartOption("create adventurer");
           }
-          setScreen("start");
-          setStartOption("create adventurer");
         }
 
         setData("battlesByBeastQuery", {

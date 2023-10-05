@@ -1448,10 +1448,10 @@
     react "^18.2.0"
     starknet "^4.22.0"
 
-"@starknet-react/core@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@starknet-react/core/-/core-1.0.3.tgz#61d812c1117bd375745cd13cd633bbce399af041"
-  integrity sha512-ZbSe56INmCqqAC+6HEtjYBPP+inBvZb8ce1dCAP+ymZ+YbGCZff1QwGqg2qmWn7VzDjZf0vLEzEuvMMuAUnUqA==
+"@starknet-react/core@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@starknet-react/core/-/core-1.0.4.tgz#08ed280382621cc78d031095a4293f043dbadc98"
+  integrity sha512-TQiRnb0moqim6+HqioGGzd3FgjPVJFMdMH8Q5AQlJ7oEUNprKkFyHlVGJJlcwvdRaCPD5BQuD2WUL2rQfgMRuw==
   dependencies:
     "@tanstack/react-query" "^4.29.12"
     immutable "^4.3.0"
@@ -4958,9 +4958,9 @@ zen-observable@0.8.15:
   integrity sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==
 
 zod@^3.21.4:
-  version "3.21.4"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-3.21.4.tgz#10882231d992519f0a10b5dd58a38c9dabbb64db"
-  integrity sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==
+  version "3.22.4"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.22.4.tgz#f31c3a9386f61b1f228af56faa9255e845cf3fff"
+  integrity sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==
 
 zustand@^4.3.7:
   version "4.3.8"
