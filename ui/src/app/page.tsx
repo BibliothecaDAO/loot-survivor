@@ -68,6 +68,7 @@ import { useBalance } from "@starknet-react/core";
 import Logo from "../../public/icons/logo.svg";
 import ScreenMenu from "./components/menu/ScreenMenu";
 import { Maintenance } from "./components/archived/Maintenance";
+import { MainnetDialog } from "./components/MainnetDialog";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
@@ -360,211 +361,212 @@ export default function Home() {
       pendingMessage.includes("Spawning Adventurer"));
 
   return (
-    <Maintenance />
-    // <main
-    //   className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
-    // >
-    //   {introComplete ? (
-    //     <>
-    //       <div className="flex flex-col w-full">
-    //         <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
-    //         {!spawnLoader && (
-    //           <div className="sm:hidden">
-    //             <TxActivity />
-    //           </div>
-    //         )}
-    //         <div className="flex flex-row justify-between px-1  ">
-    //           <div className="flex flex-row items-center gap-2 sm:gap-5">
-    //             <Logo className="fill-current w-24 md:w-32 xl:w-40 2xl:w-64" />
-    //           </div>
-    //           <div className="flex flex-row items-center self-end sm:gap-1 space-x-1 self-center">
-    //             {adventurer?.id && (
-    //               <PenaltyCountDown
-    //                 lastDiscoveryTime={
-    //                   data.latestDiscoveriesQuery?.discoveries[0]?.timestamp
-    //                 }
-    //                 lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
-    //                 dataLoading={isLoading.global}
-    //               />
-    //             )}
-    //             <Button size={"xs"} variant={"outline"} className="self-center">
-    //               <span className="flex flex-row items-center justify-between w-full">
-    //                 <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
-    //                 <p>
-    //                   {formatNumber(
-    //                     parseInt(lordsBalance.data?.formatted ?? "0")
-    //                   )}
-    //                 </p>
-    //               </span>
-    //             </Button>
-    //             <Button
-    //               size={"xs"}
-    //               variant={"outline"}
-    //               onClick={() => showArcadeDialog(!arcadeDialog)}
-    //               disabled={isWrongNetwork}
-    //             >
-    //               <ArcadeIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
-    //               <span className="hidden sm:block">arcade account</span>
-    //             </Button>
-    //             <Button
-    //               size={"xs"}
-    //               variant={"outline"}
-    //               onClick={() => {
-    //                 setIsMuted(!isMuted);
-    //                 clickPlay();
-    //               }}
-    //               className="hidden sm:block"
-    //             >
-    //               {isMuted ? (
-    //                 <SoundOffIcon className="sm:w-5 sm:h-5 h-3 w-3 justify-center fill-current" />
-    //               ) : (
-    //                 <SoundOnIcon className="sm:w-5 sm:h-5 h-3 w-3 justify-center fill-current" />
-    //               )}
-    //             </Button>
-    //             {account && (
-    //               <Button
-    //                 variant={"outline"}
-    //                 size={"xs"}
-    //                 ref={displayCartButtonRef}
-    //                 onClick={() => {
-    //                   setDisplayCart(!displayCart);
-    //                   clickPlay();
-    //                 }}
-    //               >
-    //                 <CartIcon className="sm:w-5 sm:h-5 h-3 w-3 fill-current" />
-    //               </Button>
-    //             )}
-    //             {displayCart && (
-    //               <TransactionCart
-    //                 buttonRef={displayCartButtonRef}
-    //                 multicall={multicall}
-    //               />
-    //             )}
-    //             <div className="flex items-center sm:hidden">
-    //               <Button
-    //                 size={"xs"}
-    //                 variant={"outline"}
-    //                 onClick={() => {
-    //                   setScreen("settings");
-    //                   clickPlay();
-    //                 }}
-    //               >
-    //                 <SettingsIcon className="fill-current h-3 w-3" />
-    //               </Button>
-    //             </div>
-    //             <div className="hidden sm:block sm:flex sm:flex-row sm:items-center sm:gap-1">
-    //               {account && (
-    //                 <>
-    //                   <Button
-    //                     variant={"outline"}
-    //                     size={"xs"}
-    //                     ref={displayHistoryButtonRef}
-    //                     onClick={() => {
-    //                       setDisplayHistory(!displayHistory);
-    //                     }}
-    //                   >
-    //                     {displayHistory ? "Hide Ledger" : "Show Ledger"}
-    //                   </Button>
-    //                 </>
-    //               )}
+    // <Maintenance />
+    <main
+      className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
+    >
+      <MainnetDialog />
+      {introComplete ? (
+        <>
+          <div className="flex flex-col w-full">
+            <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
+            {!spawnLoader && (
+              <div className="sm:hidden">
+                <TxActivity />
+              </div>
+            )}
+            <div className="flex flex-row justify-between px-1  ">
+              <div className="flex flex-row items-center gap-2 sm:gap-5">
+                <Logo className="fill-current w-24 md:w-32 xl:w-40 2xl:w-64" />
+              </div>
+              <div className="flex flex-row items-center self-end sm:gap-1 space-x-1 self-center">
+                {adventurer?.id && (
+                  <PenaltyCountDown
+                    lastDiscoveryTime={
+                      data.latestDiscoveriesQuery?.discoveries[0]?.timestamp
+                    }
+                    lastBattleTime={data.lastBattleQuery?.battles[0]?.timestamp}
+                    dataLoading={isLoading.global}
+                  />
+                )}
+                <Button size={"xs"} variant={"outline"} className="self-center">
+                  <span className="flex flex-row items-center justify-between w-full">
+                    <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
+                    <p>
+                      {formatNumber(
+                        parseInt(lordsBalance.data?.formatted ?? "0")
+                      )}
+                    </p>
+                  </span>
+                </Button>
+                <Button
+                  size={"xs"}
+                  variant={"outline"}
+                  onClick={() => showArcadeDialog(!arcadeDialog)}
+                  disabled={isWrongNetwork}
+                >
+                  <ArcadeIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
+                  <span className="hidden sm:block">arcade account</span>
+                </Button>
+                <Button
+                  size={"xs"}
+                  variant={"outline"}
+                  onClick={() => {
+                    setIsMuted(!isMuted);
+                    clickPlay();
+                  }}
+                  className="hidden sm:block"
+                >
+                  {isMuted ? (
+                    <SoundOffIcon className="sm:w-5 sm:h-5 h-3 w-3 justify-center fill-current" />
+                  ) : (
+                    <SoundOnIcon className="sm:w-5 sm:h-5 h-3 w-3 justify-center fill-current" />
+                  )}
+                </Button>
+                {account && (
+                  <Button
+                    variant={"outline"}
+                    size={"xs"}
+                    ref={displayCartButtonRef}
+                    onClick={() => {
+                      setDisplayCart(!displayCart);
+                      clickPlay();
+                    }}
+                  >
+                    <CartIcon className="sm:w-5 sm:h-5 h-3 w-3 fill-current" />
+                  </Button>
+                )}
+                {displayCart && (
+                  <TransactionCart
+                    buttonRef={displayCartButtonRef}
+                    multicall={multicall}
+                  />
+                )}
+                <div className="flex items-center sm:hidden">
+                  <Button
+                    size={"xs"}
+                    variant={"outline"}
+                    onClick={() => {
+                      setScreen("settings");
+                      clickPlay();
+                    }}
+                  >
+                    <SettingsIcon className="fill-current h-3 w-3" />
+                  </Button>
+                </div>
+                <div className="hidden sm:block sm:flex sm:flex-row sm:items-center sm:gap-1">
+                  {account && (
+                    <>
+                      <Button
+                        variant={"outline"}
+                        size={"xs"}
+                        ref={displayHistoryButtonRef}
+                        onClick={() => {
+                          setDisplayHistory(!displayHistory);
+                        }}
+                      >
+                        {displayHistory ? "Hide Ledger" : "Show Ledger"}
+                      </Button>
+                    </>
+                  )}
 
-    //               <Button
-    //                 variant={"outline"}
-    //                 size={"sm"}
-    //                 onClick={() => {
-    //                   disconnect();
-    //                   resetData();
-    //                   setAdventurer(NullAdventurer);
-    //                   setDisconnected(true);
-    //                 }}
-    //               >
-    //                 {account ? displayAddress(account.address) : "Connect"}
-    //               </Button>
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    onClick={() => {
+                      disconnect();
+                      resetData();
+                      setAdventurer(NullAdventurer);
+                      setDisconnected(true);
+                    }}
+                  >
+                    {account ? displayAddress(account.address) : "Connect"}
+                  </Button>
 
-    //               <Button
-    //                 variant={"outline"}
-    //                 size={"sm"}
-    //                 href="https://github.com/BibliothecaDAO/loot-survivor"
-    //               >
-    //                 <GithubIcon className="w-6 fill-current" />
-    //               </Button>
-    //             </div>
-    //             {account && displayHistory && (
-    //               <TransactionHistory buttonRef={displayHistoryButtonRef} />
-    //             )}
-    //           </div>
-    //         </div>
-    //       </div>
-    //       <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
-    //         {!spawnLoader && (
-    //           <div className="hidden sm:block">
-    //             <TxActivity />
-    //           </div>
-    //         )}
-    //       </div>
-    //       <NotificationDisplay />
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    href="https://github.com/BibliothecaDAO/loot-survivor"
+                  >
+                    <GithubIcon className="w-6 fill-current" />
+                  </Button>
+                </div>
+                {account && displayHistory && (
+                  <TransactionHistory buttonRef={displayHistoryButtonRef} />
+                )}
+              </div>
+            </div>
+          </div>
+          <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
+            {!spawnLoader && (
+              <div className="hidden sm:block">
+                <TxActivity />
+              </div>
+            )}
+          </div>
+          <NotificationDisplay />
 
-    //       {deathDialog && <DeathDialog />}
+          {deathDialog && <DeathDialog />}
 
-    //       {status == "connected" && arcadeDialog && <ArcadeDialog />}
-    //       {status == "connected" && topUpDialog && <TopUpDialog />}
+          {status == "connected" && arcadeDialog && <ArcadeDialog />}
+          {status == "connected" && topUpDialog && <TopUpDialog />}
 
-    //       {introComplete ? (
-    //         <div className="flex flex-col w-full">
-    //           <>
-    //             <div className="sm:hidden flex  sm:justify-normal sm:pb-2">
-    //               <ScreenMenu
-    //                 buttonsData={mobileMenuItems}
-    //                 onButtonClick={(value) => {
-    //                   setScreen(value);
-    //                 }}
-    //                 disabled={mobileMenuDisabled}
-    //               />
-    //             </div>
-    //             <div className="hidden sm:block flex justify-center sm:justify-normal sm:pb-2">
-    //               <ScreenMenu
-    //                 buttonsData={allMenuItems}
-    //                 onButtonClick={(value) => {
-    //                   setScreen(value);
-    //                 }}
-    //                 disabled={allMenuDisabled}
-    //               />
-    //             </div>
+          {introComplete ? (
+            <div className="flex flex-col w-full">
+              <>
+                <div className="sm:hidden flex  sm:justify-normal sm:pb-2">
+                  <ScreenMenu
+                    buttonsData={mobileMenuItems}
+                    onButtonClick={(value) => {
+                      setScreen(value);
+                    }}
+                    disabled={mobileMenuDisabled}
+                  />
+                </div>
+                <div className="hidden sm:block flex justify-center sm:justify-normal sm:pb-2">
+                  <ScreenMenu
+                    buttonsData={allMenuItems}
+                    onButtonClick={(value) => {
+                      setScreen(value);
+                    }}
+                    disabled={allMenuDisabled}
+                  />
+                </div>
 
-    //             <div className="sm:hidden">
-    //               <MobileHeader />
-    //             </div>
-    //             <>
-    //               {screen === "start" && (
-    //                 <AdventurerScreen
-    //                   spawn={spawn}
-    //                   handleSwitchAdventurer={handleSwitchAdventurer}
-    //                 />
-    //               )}
-    //               {screen === "play" && (
-    //                 <ActionsScreen
-    //                   explore={explore}
-    //                   attack={attack}
-    //                   flee={flee}
-    //                 />
-    //               )}
-    //               {screen === "inventory" && <InventoryScreen />}
-    //               {screen === "leaderboard" && <LeaderboardScreen />}
-    //               {screen === "upgrade" && <UpgradeScreen upgrade={upgrade} />}
-    //               {screen === "profile" && <Profile />}
-    //               {screen === "encounters" && <EncountersScreen />}
-    //               {screen === "guide" && <GuideScreen />}
-    //               {screen === "settings" && <Settings />}
-    //               {screen === "player" && <Player />}
-    //               {screen === "wallet" && <WalletSelect />}
-    //             </>
-    //           </>
-    //         </div>
-    //       ) : null}
-    //     </>
-    //   ) : (
-    //     <Intro onIntroComplete={handleIntroComplete} />
-    //   )}
-    // </main>
+                <div className="sm:hidden">
+                  <MobileHeader />
+                </div>
+                <>
+                  {screen === "start" && (
+                    <AdventurerScreen
+                      spawn={spawn}
+                      handleSwitchAdventurer={handleSwitchAdventurer}
+                    />
+                  )}
+                  {screen === "play" && (
+                    <ActionsScreen
+                      explore={explore}
+                      attack={attack}
+                      flee={flee}
+                    />
+                  )}
+                  {screen === "inventory" && <InventoryScreen />}
+                  {screen === "leaderboard" && <LeaderboardScreen />}
+                  {screen === "upgrade" && <UpgradeScreen upgrade={upgrade} />}
+                  {screen === "profile" && <Profile />}
+                  {screen === "encounters" && <EncountersScreen />}
+                  {screen === "guide" && <GuideScreen />}
+                  {screen === "settings" && <Settings />}
+                  {screen === "player" && <Player />}
+                  {screen === "wallet" && <WalletSelect />}
+                </>
+              </>
+            </div>
+          ) : null}
+        </>
+      ) : (
+        <Intro onIntroComplete={handleIntroComplete} />
+      )}
+    </main>
   );
 }
