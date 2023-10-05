@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { Call } from "../types";
+import { AccountInterface } from "starknet";
 
 type TransactionCartState = {
   error: boolean;
   setError: (error: boolean) => void;
-  handleSubmitCalls: (writeAsync: () => Promise<any>) => Promise<any>;
+  handleSubmitCalls: (account: AccountInterface, calls: Call[]) => Promise<any>;
   calls: Call[];
   addToCalls: (value: Call) => void;
   removeFromCalls: (value: Call) => void;
@@ -36,9 +37,15 @@ const useTransactionCartStore = create<TransactionCartState>((set) => {
     }));
   };
 
-  const handleSubmitCalls = async (writeAsync: () => Promise<any>) => {
+  const handleSubmitCalls = async (
+    account: AccountInterface,
+    calls: Call[]
+  ) => {
     try {
-      const tx = await writeAsync();
+      // const tx = await writeAsync();
+      const tx = await account.execute(calls, undefined, {
+        maxFee: "100000000000000", // currently setting to 0.0001ETH
+      });
       set({ calls: [], error: false });
       return tx;
     } catch (error) {

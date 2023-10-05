@@ -135,12 +135,10 @@ export default function Home() {
   const stopLoading = useLoadingStore((state) => state.stopLoading);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const setTxHash = useLoadingStore((state) => state.setTxHash);
-  const { writeAsync } = useContractWrite({ calls });
   const setEquipItems = useUIStore((state) => state.setEquipItems);
   const setDropItems = useUIStore((state) => state.setDropItems);
   const setDeathMessage = useLoadingStore((state) => state.setDeathMessage);
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
-  const resetNotification = useLoadingStore((state) => state.resetNotification);
   const setStartOption = useUIStore((state) => state.setStartOption);
 
   const lordsBalance = useBalance({
@@ -167,7 +165,6 @@ export default function Home() {
     gameContract,
     lordsContract,
     addTransaction,
-    account,
     queryData: data,
     resetData,
     setData,
@@ -178,12 +175,10 @@ export default function Home() {
     startLoading,
     stopLoading,
     setTxHash,
-    writeAsync,
     setEquipItems,
     setDropItems,
     setDeathMessage,
     showDeathDialog,
-    resetNotification,
     setScreen,
     setAdventurer,
     setMintAdventurer,
@@ -192,6 +187,7 @@ export default function Home() {
     showTopUpDialog,
     setTopUpAccount,
     setEstimatingFee,
+    account,
   });
 
   const playState = useMemo(

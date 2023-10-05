@@ -9,7 +9,10 @@ import { mainnet_addr } from "./lib/constants";
 export default function Template({ children }: { children: React.ReactNode }) {
   const { listConnectors } = useBurner();
 
-  const provider = new Provider({ rpc: { nodeUrl: mainnet_addr }, sequencer: { baseUrl: mainnet_addr } })
+  const provider = new Provider({
+    rpc: { nodeUrl: mainnet_addr },
+    sequencer: { baseUrl: mainnet_addr },
+  });
 
   return (
     <StarknetConfig
