@@ -75,7 +75,15 @@ export default function Header({ multicall }: HeaderProps) {
             dataLoading={isLoading.global}
           />
         )}
-        <Button size={"xs"} variant={"outline"} className="self-center">
+        <Button
+          size={"xs"}
+          variant={"outline"}
+          className="self-center xl:px-5"
+          disabled={true}
+        >
+          Play For Real
+        </Button>
+        <Button size={"xs"} variant={"outline"} className="self-center xl:px-5">
           <span className="flex flex-row items-center justify-between w-full">
             <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
             <p>{formatNumber(parseInt(lordsBalance.data?.formatted ?? "0"))}</p>
@@ -86,6 +94,7 @@ export default function Header({ multicall }: HeaderProps) {
           variant={"outline"}
           onClick={() => showArcadeDialog(!arcadeDialog)}
           disabled={isWrongNetwork}
+          className="xl:px-5"
         >
           <ArcadeIcon className="sm:w-5 sm:h-5  h-3 w-3 justify-center fill-current mr-2" />
           <span className="hidden sm:block">arcade account</span>
@@ -97,7 +106,7 @@ export default function Header({ multicall }: HeaderProps) {
             setIsMuted(!isMuted);
             clickPlay();
           }}
-          className="hidden sm:block"
+          className="hidden sm:block xl:px-5"
         >
           {isMuted ? (
             <SoundOffIcon className="sm:w-5 sm:h-5 h-3 w-3 justify-center fill-current" />
@@ -114,6 +123,7 @@ export default function Header({ multicall }: HeaderProps) {
               setDisplayCart(!displayCart);
               clickPlay();
             }}
+            className="xl:px-5"
           >
             <CartIcon className="sm:w-5 sm:h-5 h-3 w-3 fill-current" />
           </Button>
@@ -132,6 +142,7 @@ export default function Header({ multicall }: HeaderProps) {
               setScreen("settings");
               clickPlay();
             }}
+            className="xl:px-5"
           >
             <SettingsIcon className="fill-current h-3 w-3" />
           </Button>
@@ -146,6 +157,7 @@ export default function Header({ multicall }: HeaderProps) {
                 onClick={() => {
                   setDisplayHistory(!displayHistory);
                 }}
+                className="xl:px-5"
               >
                 {displayHistory ? "Hide Ledger" : "Show Ledger"}
               </Button>
@@ -161,6 +173,7 @@ export default function Header({ multicall }: HeaderProps) {
               setAdventurer(NullAdventurer);
               setDisconnected(true);
             }}
+            className="xl:px-5"
           >
             {account ? displayAddress(account.address) : "Connect"}
           </Button>
@@ -169,6 +182,7 @@ export default function Header({ multicall }: HeaderProps) {
             variant={"outline"}
             size={"sm"}
             href="https://github.com/BibliothecaDAO/loot-survivor"
+            className="xl:px-5"
           >
             <GithubIcon className="w-6 fill-current" />
           </Button>
