@@ -81,9 +81,15 @@ export const useContracts = () => {
     abi: ethBalanceABIFragment,
   });
 
+  const { contract: goldenTokenContract } = useContract({
+    address: contracts?.goldenToken,
+    abi: Adventurer, // TODO: change to golden token bi
+  });
+
   return {
     gameContract,
     lordsContract,
     ethContract,
+    goldenTokenContract,
   };
 };

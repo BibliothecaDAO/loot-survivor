@@ -4,6 +4,9 @@ import {
   Account,
   AccountInterface,
   provider,
+  CallData,
+  Contract,
+  uint256,
 } from "starknet";
 import { GameData } from "@/app/components/GameData";
 import {
@@ -19,10 +22,12 @@ import { parseEvents } from "./parseEvents";
 import { processNotifications } from "@/app/components/notifications/NotificationHandler";
 import Storage from "../storage";
 import { FEE_CHECK_BALANCE } from "../constants";
+import { fetchBalanceWithRetry } from "../balances";
 
 export interface SyscallsProps {
   gameContract: any;
   lordsContract: any;
+  goldenTokenContract: Contract;
   addTransaction: any;
   queryData: any;
   resetData: (...args: any[]) => any;
@@ -86,6 +91,26 @@ async function checkArcadeBalance(
   }
 }
 
+async function checkGoldenToken(
+  goldenToken: Contract,
+  account: AccountInterface
+) {
+  const storage: BurnerStorage = Storage.get("burners");
+  let accountAddress = "";
+  if (account && (account?.address ?? "0x0") in storage) {
+    const masterAddress = storage[account?.address]["masterAccount"];
+    accountAddress = masterAddress;
+  } else {
+    accountAddress = account?.address ?? "0x0";
+  }
+  const balance = await fetchBalanceWithRetry(goldenToken, accountAddress);
+  if (balance >= BigInt(1)) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 function handleEquip(
   events: any[],
   setData: (...args: any[]) => any,
@@ -140,6 +165,7 @@ function handleDrop(
 export function syscalls({
   gameContract,
   lordsContract,
+  goldenTokenContract,
   addTransaction,
   account,
   queryData,
@@ -232,6 +258,15 @@ export function syscalls({
   };
 
   const spawn = async (formData: FormData) => {
+    // First check if the account (master account) has a golden token
+    const hasGoldenToken = await checkGoldenToken(
+      goldenTokenContract,
+      account!
+    );
+    // if (!hasGoldenToken) {
+    //   const approve
+    //   addToCalls()
+    // }
     const mintLords = {
       contractAddress: lordsContract?.address ?? "",
       entrypoint: "mint",

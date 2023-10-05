@@ -20,11 +20,8 @@ import {
 } from "starknet";
 import { useCallback } from "react";
 import { useContracts } from "../hooks/useContracts";
-import { balanceSchema } from "../lib/utils";
 import { MIN_BALANCE } from "../lib/constants";
-
-const MAX_RETRIES = 10;
-const RETRY_DELAY = 2000; // 2 seconds
+import { fetchBalanceWithRetry } from "../lib/balances";
 
 export const ArcadeDialog = () => {
   const { account: walletAccount, address, connector } = useAccount();
@@ -52,43 +49,22 @@ export const ArcadeDialog = () => {
     );
   }, [available]);
 
-  const fetchBalanceWithRetry = async (
-    accountName: string,
-    retryCount: number = 0
-  ): Promise<bigint> => {
-    try {
-      const result = await ethContract!.call(
-        "balanceOf",
-        CallData.compile({ account: accountName })
-      );
-      return uint256.uint256ToBN(balanceSchema.parse(result).balance);
-    } catch (error) {
-      if (retryCount < MAX_RETRIES) {
-        await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY)); // delay before retry
-        return fetchBalanceWithRetry(accountName, retryCount + 1);
-      } else {
-        throw new Error(
-          `Failed to fetch balance after ${MAX_RETRIES} retries.`
-        );
-      }
-    }
-  };
-
   const getBalances = async () => {
     const localBalances: Record<string, bigint> = {};
     const balancePromises = arcadeConnectors().map((account) => {
-      return fetchBalanceWithRetry(account.name).then((balance) => {
-        localBalances[account.name] = balance;
-        return balance;
-      });
+      return fetchBalanceWithRetry(ethContract!, account.name).then(
+        (balance) => {
+          localBalances[account.name] = balance;
+          return balance;
+        }
+      );
     });
-    console.log(balancePromises);
     await Promise.all(balancePromises);
     setBalances(localBalances);
   };
 
   const getBalance = async (account: string) => {
-    const balance = await fetchBalanceWithRetry(account);
+    const balance = await fetchBalanceWithRetry(ethContract!, account);
     setBalances({ ...balances, [account]: balance });
   };
 

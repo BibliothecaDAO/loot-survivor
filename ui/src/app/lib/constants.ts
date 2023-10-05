@@ -39,12 +39,16 @@ export function getContracts() {
         eth: process.env.NEXT_PUBLIC_GOERLI_ETH_CONTRACT_ADDRESS,
         game: process.env.NEXT_PUBLIC_GOERLI_GAME_CONTRACT_ADDRESS,
         lords: process.env.NEXT_PUBLIC_GOERLI_LORDS_CONTRACT_ADDRESS,
+        goldenToken:
+          process.env.NEXT_PUBLIC_GOERLI_GOLDEN_TOKEN_CONTRACT_ADDRESS,
       };
     case "mainnet":
       return {
         eth: process.env.NEXT_PUBLIC_MAINNET_ETH_CONTRACT_ADDRESS,
         game: process.env.NEXT_PUBLIC_MAINNET_GAME_CONTRACT_ADDRESS,
         lords: process.env.NEXT_PUBLIC_MAINNET_LORDS_CONTRACT_ADDRESS,
+        goldenToken:
+          process.env.NEXT_PUBLIC_MAINNET_GOLDEN_TOKEN_CONTRACT_ADDRESS,
       };
   }
 }

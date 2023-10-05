@@ -101,7 +101,8 @@ export default function Home() {
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
   const setEstimatingFee = useUIStore((state) => state.setEstimatingFee);
-  const { gameContract, lordsContract, ethContract } = useContracts();
+  const { gameContract, lordsContract, ethContract, goldenTokenContract } =
+    useContracts();
   const { addTransaction } = useTransactionManager();
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const handleSubmitCalls = useTransactionCartStore(
@@ -133,6 +134,7 @@ export default function Home() {
   const { spawn, explore, attack, flee, upgrade, multicall } = syscalls({
     gameContract,
     lordsContract,
+    goldenTokenContract: goldenTokenContract!,
     addTransaction,
     queryData: data,
     resetData,
