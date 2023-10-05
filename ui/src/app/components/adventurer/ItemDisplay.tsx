@@ -192,12 +192,12 @@ export const ItemDisplay = ({
                         <Button
                           variant={"contrast"}
                           size={"xxs"}
-                          className="p-1"
+                          className="p-1 xl:p-0 2xl:h-5 2xl:w-6"
                           onClick={() => {
                             setShowInventoryItems(true);
                           }}
                         >
-                          <SwapIcon className="w-3 h-3 lg:w-4 lg:h-4" />
+                          <SwapIcon className="w-2 h-2 lg:w-3 lg:h-3" />
                         </Button>
                       )}
                       {inventory && (
@@ -237,7 +237,7 @@ export const ItemDisplay = ({
                         <Button
                           variant={"contrast"}
                           size={"xxs"}
-                          className="p-1"
+                          className="p-1 xl:p-0 2xl:h-5 2xl:w-6"
                           onClick={() => handleDrop(item.item ?? "")}
                           disabled={checkDropping(item.item ?? "")}
                         >

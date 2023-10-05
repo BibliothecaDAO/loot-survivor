@@ -358,7 +358,7 @@ export default function Home() {
           {status == "connected" && topUpDialog && <TopUpDialog />}
 
           {introComplete ? (
-            <div className="flex flex-col w-full">
+            <div className="flex flex-col w-full h-[625px]">
               <>
                 <div className="sm:hidden flex  sm:justify-normal sm:pb-2">
                   <ScreenMenu
@@ -382,7 +382,7 @@ export default function Home() {
                 <div className="sm:hidden">
                   <MobileHeader />
                 </div>
-                <>
+                <div className="h-[600px]">
                   {screen === "start" && (
                     <AdventurerScreen
                       spawn={spawn}
@@ -405,7 +405,7 @@ export default function Home() {
                   {screen === "settings" && <Settings />}
                   {screen === "player" && <Player />}
                   {screen === "wallet" && <WalletSelect />}
-                </>
+                </div>
               </>
             </div>
           ) : null}

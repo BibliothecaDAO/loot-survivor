@@ -176,7 +176,7 @@ export default function InventoryScreen() {
   const selectedItems = groupedItems[selected || "Weapon"] || [];
 
   return (
-    <div className="flex flex-row sm:gap-5">
+    <div className="flex flex-row sm:gap-5 h-full">
       <div className="hidden sm:block sm:w-1/2 lg:w-1/3">
         <Info adventurer={adventurer} />
       </div>
