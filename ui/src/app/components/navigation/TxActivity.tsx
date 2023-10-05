@@ -14,7 +14,6 @@ export const TxActivity = () => {
   const setTxAccepted = useLoadingStore((state) => state.setTxAccepted);
   const error = useTransactionCartStore((state) => state.error);
   const setError = useTransactionCartStore((state) => state.setError);
-  console.log(hash);
   const { data } = useWaitForTransaction({
     hash,
     watch: true,
