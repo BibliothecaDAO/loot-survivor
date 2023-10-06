@@ -4,6 +4,7 @@ use beasts::beast::Beast;
 use survivor::{
     bag::Bag, adventurer::{Adventurer, Stats}, adventurer_meta::AdventurerMetadata,
     item_meta::{ItemSpecials, ItemSpecialsStorage}, leaderboard::Leaderboard,
+    item_primitive::{ItemPrimitive},
 };
 
 use game_entropy::game_entropy::{GameEntropy};
@@ -33,14 +34,13 @@ trait IGame<TContractState> {
 
     // adventurer details
     fn get_adventurer(self: @TContractState, adventurer_id: felt252) -> Adventurer;
-    fn get_adventurer_no_boosts(self: @TContractState, adventurer_id: felt252) -> Adventurer;
-    fn get_adventurer_meta(self: @TContractState, adventurer_id: felt252) -> AdventurerMetadata;
     fn get_health(self: @TContractState, adventurer_id: felt252) -> u16;
     fn get_xp(self: @TContractState, adventurer_id: felt252) -> u16;
     fn get_level(self: @TContractState, adventurer_id: felt252) -> u8;
     fn get_gold(self: @TContractState, adventurer_id: felt252) -> u16;
     fn get_stat_upgrades_available(self: @TContractState, adventurer_id: felt252) -> u8;
     fn get_last_action_block(self: @TContractState, adventurer_id: felt252) -> u16;
+    fn get_actions_per_block(self: @TContractState, adventurer_id: felt252) -> u8;
 
     // adventurer stats (includes boost)
     fn get_stats(self: @TContractState, adventurer_id: felt252) -> Stats;
@@ -50,6 +50,17 @@ trait IGame<TContractState> {
     fn get_intelligence(self: @TContractState, adventurer_id: felt252) -> u8;
     fn get_wisdom(self: @TContractState, adventurer_id: felt252) -> u8;
     fn get_charisma(self: @TContractState, adventurer_id: felt252) -> u8;
+
+    // item details
+    fn get_equipped_items(self: @TContractState, adventurer_id: felt252) -> Array<ItemPrimitive>;
+    fn get_equipped_weapon(self: @TContractState, adventurer_id: felt252) -> ItemPrimitive;
+    fn get_equipped_chest(self: @TContractState, adventurer_id: felt252) -> ItemPrimitive;
+    fn get_equipped_head(self: @TContractState, adventurer_id: felt252) -> ItemPrimitive;
+    fn get_equipped_waist(self: @TContractState, adventurer_id: felt252) -> ItemPrimitive;
+    fn get_equipped_foot(self: @TContractState, adventurer_id: felt252) -> ItemPrimitive;
+    fn get_equipped_hand(self: @TContractState, adventurer_id: felt252) -> ItemPrimitive;
+    fn get_equipped_necklace(self: @TContractState, adventurer_id: felt252) -> ItemPrimitive;
+    fn get_equipped_ring(self: @TContractState, adventurer_id: felt252) -> ItemPrimitive;
 
     // item stats
     fn get_weapon_greatness(self: @TContractState, adventurer_id: felt252) -> u8;
@@ -97,6 +108,10 @@ trait IGame<TContractState> {
     fn get_base_wisdom(self: @TContractState, adventurer_id: felt252) -> u8;
     fn get_base_charisma(self: @TContractState, adventurer_id: felt252) -> u8;
 
+    // Adventurer Misc
+    fn get_adventurer_no_boosts(self: @TContractState, adventurer_id: felt252) -> Adventurer;
+    fn get_adventurer_meta(self: @TContractState, adventurer_id: felt252) -> AdventurerMetadata;
+
     // beast details
     fn get_attacking_beast(self: @TContractState, adventurer_id: felt252) -> Beast;
     fn get_beast_health(self: @TContractState, adventurer_id: felt252) -> u16;
@@ -105,6 +120,26 @@ trait IGame<TContractState> {
 
     // game settings
     fn next_game_entropy_rotation(self: @TContractState) -> felt252;
+    fn game_rate_limit(self: @TContractState) -> u64;    
+    fn starting_gold(self: @TContractState) -> u16;
+    fn starting_health(self: @TContractState) -> u16;
+    fn base_potion_price(self: @TContractState) -> u16;
+    fn potion_health_amount(self: @TContractState) -> u16;
+    fn minimum_potion_price(self: @TContractState) -> u16;
+    fn charisma_potion_discount(self: @TContractState) -> u16;
+    fn items_per_stat_upgrade(self: @TContractState) -> u8;
+    fn item_tier_price_multiplier(self: @TContractState) -> u16;
+    fn charisma_item_discount(self: @TContractState) -> u16;
+    fn minimum_item_price(self: @TContractState) -> u16;
+    fn minimum_damage_to_beasts(self: @TContractState) -> u8;
+    fn minimum_damage_from_beasts(self: @TContractState) -> u8;
+    fn minimum_damage_from_obstacles(self: @TContractState) -> u8;
+    fn obstacle_critical_hit_chance(self: @TContractState) -> u8;
+    fn stat_upgrades_per_level(self: @TContractState) -> u8;
+    fn beast_special_name_unlock_level(self: @TContractState) -> u8;
+    fn item_xp_multiplier_beasts(self: @TContractState) -> u8;
+    fn item_xp_multiplier_obstacles(self: @TContractState) -> u8;
+    fn strength_bonus_damage(self: @TContractState) -> u8;
 
     // contract details
     fn owner_of(self: @TContractState, adventurer_id: felt252) -> ContractAddress;

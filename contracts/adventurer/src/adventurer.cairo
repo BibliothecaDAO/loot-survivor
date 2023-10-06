@@ -13,9 +13,9 @@ use super::{
         adventurer_constants::{
             STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
             MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, HEALTH_INCREASE_PER_VITALITY, MAX_GOLD,
-            MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS,
-            ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, ClassStatBoosts,
-            MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, NECKLACE_G20_BONUS_STATS,
+            MAX_STAT_VALUE, MAX_STAT_UPGRADES_AVAILABLE, MAX_XP, MAX_ADVENTURER_BLOCKS,
+            ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT,
+            MAX_BLOCK_COUNT, STAT_UPGRADES_PER_LEVEL, NECKLACE_G20_BONUS_STATS,
             SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, U128_MAX,
             JEWELRY_BONUS_BEAST_GOLD_PERCENT, JEWELRY_BONUS_CRITICAL_HIT_PERCENT_PER_GREATNESS,
             JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS, NECKLACE_ARMOR_BONUS,
@@ -295,7 +295,7 @@ impl ImplAdventurer of IAdventurer {
             let beast_level = ImplBeast::get_level(adventurer_level, beast_seed);
             let mut special_names = SpecialPowers { special1: 0, special2: 0, special3: 0 };
 
-            if (beast_level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK) {
+            if (beast_level >= BEAST_SPECIAL_NAME_LEVEL_UNLOCK.into()) {
                 special_names =
                     ImplBeast::get_special_names(
                         adventurer_level,
@@ -492,7 +492,7 @@ impl ImplAdventurer of IAdventurer {
         // if adventurer reached a new level
         if (new_level > previous_level) {
             // add stat upgrade points
-            let stat_upgrade_points = (new_level - previous_level) * STAT_UPGRADE_POINTS_PER_LEVEL;
+            let stat_upgrade_points = (new_level - previous_level) * STAT_UPGRADES_PER_LEVEL;
             self.increase_stat_points_available(stat_upgrade_points);
         }
 
@@ -501,7 +501,7 @@ impl ImplAdventurer of IAdventurer {
     }
 
     // @notice Grants stat upgrades to the Adventurer.
-    // @dev The function will add the specified value to the stat_points_available up to the maximum limit of MAX_STAT_UPGRADES.
+    // @dev The function will add the specified value to the stat_points_available up to the maximum limit of MAX_STAT_UPGRADES_AVAILABLE.
     // @param value The amount of stat points to be added to the Adventurer.
     #[inline(always)]
     fn increase_stat_points_available(ref self: Adventurer, amount: u8) {
@@ -509,17 +509,17 @@ impl ImplAdventurer of IAdventurer {
         if (u8_overflowing_add(self.stat_points_available, amount).is_ok()) {
             // if overflow is ok
             // check if added amount is less than or equal to max upgrade points
-            if (self.stat_points_available + amount <= MAX_STAT_UPGRADES) {
+            if (self.stat_points_available + amount <= MAX_STAT_UPGRADES_AVAILABLE) {
                 // if it is, add upgrade points to adventurer and return
                 self.stat_points_available += amount;
                 return;
             }
         }
 
-        // fall through is to return MAX_STAT_UPGRADES
+        // fall through is to return MAX_STAT_UPGRADES_AVAILABLE
         // this will happen either in a u8 overflow case
         // or if the upgrade points being added exceeds max upgrade points
-        self.stat_points_available = MAX_STAT_UPGRADES
+        self.stat_points_available = MAX_STAT_UPGRADES_AVAILABLE
     }
 
     // @notice Increase the Adventurer's strength stat.
@@ -1753,9 +1753,9 @@ mod tests {
             adventurer_constants::{
                 STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH,
                 CHARISMA_POTION_DISCOUNT, MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE,
-                HEALTH_INCREASE_PER_VITALITY, MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP,
-                MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH,
-                CHARISMA_ITEM_DISCOUNT, ClassStatBoosts, MAX_BLOCK_COUNT,
+                HEALTH_INCREASE_PER_VITALITY, MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADES_AVAILABLE,
+                MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS, ITEM_MAX_XP,
+                MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, MAX_BLOCK_COUNT,
                 SILVER_RING_G20_LUCK_BONUS, JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS,
                 NECKLACE_ARMOR_BONUS, SILVER_RING_LUCK_BONUS_PER_GREATNESS
             },
@@ -2976,19 +2976,26 @@ mod tests {
         );
 
         // max stat upgrade value case
-        adventurer.increase_stat_points_available(MAX_STAT_UPGRADES);
-        assert(adventurer.stat_points_available == MAX_STAT_UPGRADES, 'stat points should be max');
+        adventurer.increase_stat_points_available(MAX_STAT_UPGRADES_AVAILABLE);
+        assert(
+            adventurer.stat_points_available == MAX_STAT_UPGRADES_AVAILABLE,
+            'stat points should be max'
+        );
 
         // pack and unpack at max value to ensure our max values are correct for packing
         let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
         assert(
-            unpacked.stat_points_available == MAX_STAT_UPGRADES, 'stat point should still be max'
+            unpacked.stat_points_available == MAX_STAT_UPGRADES_AVAILABLE,
+            'stat point should still be max'
         );
 
         // extreme/overflow case
         adventurer.stat_points_available = 255;
         adventurer.increase_stat_points_available(255);
-        assert(adventurer.stat_points_available == MAX_STAT_UPGRADES, 'stat points should be max');
+        assert(
+            adventurer.stat_points_available == MAX_STAT_UPGRADES_AVAILABLE,
+            'stat points should be max'
+        );
     }
 
     #[test]

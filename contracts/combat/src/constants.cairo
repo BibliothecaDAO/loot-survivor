@@ -52,9 +52,6 @@ mod CombatSettings {
     // controls impact of strength on damage
     const STRENGTH_DAMAGE_BONUS: u8 = 10;
 
-    // controls the minimum damage bonus for elemental damage
-    const STRONG_ELEMENTAL_BONUS_MIN: u16 = 10; // u16 because this is used with other u16s
-
     enum Difficulty {
         Easy: (),
         Normal: (),
