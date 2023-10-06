@@ -168,7 +168,7 @@ export function updateAdventurer({
       $set: {
         id: checkExistsInt(BigInt(adventurerState.adventurerId)),
         owner: checkExistsInt(BigInt(adventurerState.owner)),
-        lastAction: encodeIntAsBytes(BigInt(adventurer.lastAction)),
+        lastAction: encodeIntAsBytes(BigInt(adventurer.lastActionBlock)),
         health: encodeIntAsBytes(BigInt(adventurer.health)),
         xp: encodeIntAsBytes(BigInt(adventurer.xp)),
         strength: encodeIntAsBytes(BigInt(adventurer.stats.strength)),

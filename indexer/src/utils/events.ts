@@ -75,7 +75,7 @@ export const parseLootWithPrice = combineParsers({
 });
 
 export const parseAdventurer = combineParsers({
-  lastAction: { index: 0, parser: parseU16 },
+  lastActionBlock: { index: 0, parser: parseU16 },
   health: { index: 1, parser: parseU16 },
   xp: { index: 2, parser: parseU16 },
   stats: { index: 3, parser: parseStats },
@@ -96,7 +96,7 @@ export const parseAdventurer = combineParsers({
 
 export const parseAdventurerState = combineParsers({
   owner: { index: 0, parser: parseFelt252 },
-  adventurerId: { index: 1, parser: parseU256 },
+  adventurerId: { index: 1, parser: parseFelt252 },
   adventurer: { index: 2, parser: parseAdventurer },
 });
 
@@ -171,7 +171,7 @@ export const parseAdventurerDied = combineParsers({
 
 export const parseAdventurerMetadata = combineParsers({
   name: { index: 0, parser: parseU128 },
-  entropy: { index: 3, parser: parseU128 },
+  entropy: { index: 1, parser: parseU128 },
 });
 
 export const parseStartGame = combineParsers({

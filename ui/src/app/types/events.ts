@@ -1,8 +1,4 @@
 type u128 = number;
-type u256 = {
-  low: u128;
-  high: u128;
-};
 type u16 = number;
 type u8 = number;
 
@@ -108,7 +104,7 @@ type ContractAddress = any; // This needs to be defined or imported from its sou
 
 export type AdventurerState = {
   owner: ContractAddress;
-  adventurerId: u256;
+  adventurerId: u128;
   adventurer: Adventurer;
 };
 
