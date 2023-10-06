@@ -10,19 +10,21 @@ export const chapter4 =
   "They find golden coins in their pocket, glimmering in the dim light - an enigma wrapped in the shroud of the unexpected.";
 export const battle = "A beast lurks in the shadow, prepare for battle!";
 
+export const NETWORK: "goerli" | "mainnet" = "goerli";
+
 export function getRPCUrl() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
+  switch (NETWORK) {
     case "goerli":
-      return process.env.NEXT_PUBLIC_RPC_GOERLI_ENDPOINT;
+      return "https://starknet-goerli.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
     case "mainnet":
-      return process.env.NEXT_PUBLIC_RPC_MAINNET_ENDPOINT;
+      return "https://starknet-mainnet.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
     default:
       return "http://localhost:8000/graphql";
   }
 }
 
 export function getGraphQLUrl() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
+  switch (NETWORK) {
     case "goerli":
       return "https://survivor-indexer.realms.world/goerli-graphql";
     case "mainnet":
@@ -33,39 +35,98 @@ export function getGraphQLUrl() {
 }
 
 export function getContracts() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
+  switch (NETWORK) {
     case "goerli":
       return {
-        eth: process.env.NEXT_PUBLIC_GOERLI_ETH_CONTRACT_ADDRESS,
-        game: process.env.NEXT_PUBLIC_GOERLI_GAME_CONTRACT_ADDRESS,
-        lords: process.env.NEXT_PUBLIC_GOERLI_LORDS_CONTRACT_ADDRESS,
+        eth: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        game: "0x0229a6f42ae0bc258acf91b6e6d7f50e77608dbfb5a42e1c362f2041f9333fb5",
+        lords:
+          "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
       };
     case "mainnet":
       return {
-        eth: process.env.NEXT_PUBLIC_MAINNET_ETH_CONTRACT_ADDRESS,
-        game: process.env.NEXT_PUBLIC_MAINNET_GAME_CONTRACT_ADDRESS,
-        lords: process.env.NEXT_PUBLIC_MAINNET_LORDS_CONTRACT_ADDRESS,
+        eth: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        game: "0x0",
+        lords:
+          "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
       };
   }
 }
 
 export function getArcadeClassHash() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
+  switch (NETWORK) {
     case "goerli":
-      return process.env.NEXT_PUBLIC_GOERLI_ARCADE_ACCOUNT_CLASS_HASH;
+      return "0x0715b5e10bf63c36e69c402a81e1eb96b9107ef56eb5e821b00893e39bdcf545";
     case "mainnet":
-      return process.env.NEXT_PUBLIC_MAINNET_ARCADE_ACCOUNT_CLASS_HASH;
+      return "0x0";
   }
 }
 
 export function getAppUrl() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
+  switch (NETWORK) {
     case "goerli":
-      return process.env.NEXT_PUBLIC_GOERLI_APP_URL;
+      return "https://starknet-goerli.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
     case "mainnet":
-      return process.env.NEXT_PUBLIC_MAINNET_APP_URL;
+      return "https://starknet-mainnet.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
   }
 }
+
+// export function getRPCUrl() {
+//   switch (process.env.NEXT_PUBLIC_NETWORK) {
+//     case "goerli":
+//       return process.env.NEXT_PUBLIC_RPC_GOERLI_ENDPOINT;
+//     case "mainnet":
+//       return process.env.NEXT_PUBLIC_RPC_MAINNET_ENDPOINT;
+//     default:
+//       return "http://localhost:8000/graphql";
+//   }
+// }
+
+// export function getGraphQLUrl() {
+//   switch (process.env.NEXT_PUBLIC_NETWORK) {
+//     case "goerli":
+//       return "https://survivor-indexer.realms.world/goerli-graphql";
+//     case "mainnet":
+//       return "https://survivor-indexer.realms.world/graphql";
+//     default:
+//       return "http://localhost:8000/graphql";
+//   }
+// }
+
+// export function getContracts() {
+//   switch (process.env.NEXT_PUBLIC_NETWORK) {
+//     case "goerli":
+//       return {
+//         eth: process.env.NEXT_PUBLIC_GOERLI_ETH_CONTRACT_ADDRESS,
+//         game: process.env.NEXT_PUBLIC_GOERLI_GAME_CONTRACT_ADDRESS,
+//         lords: process.env.NEXT_PUBLIC_GOERLI_LORDS_CONTRACT_ADDRESS,
+//       };
+//     case "mainnet":
+//       return {
+//         eth: process.env.NEXT_PUBLIC_MAINNET_ETH_CONTRACT_ADDRESS,
+//         game: process.env.NEXT_PUBLIC_MAINNET_GAME_CONTRACT_ADDRESS,
+//         lords: process.env.NEXT_PUBLIC_MAINNET_LORDS_CONTRACT_ADDRESS,
+//       };
+//   }
+// }
+
+// export function getArcadeClassHash() {
+//   switch (process.env.NEXT_PUBLIC_NETWORK) {
+//     case "goerli":
+//       return process.env.NEXT_PUBLIC_GOERLI_ARCADE_ACCOUNT_CLASS_HASH;
+//     case "mainnet":
+//       return process.env.NEXT_PUBLIC_MAINNET_ARCADE_ACCOUNT_CLASS_HASH;
+//   }
+// }
+
+// export function getAppUrl() {
+//   switch (process.env.NEXT_PUBLIC_NETWORK) {
+//     case "goerli":
+//       return process.env.NEXT_PUBLIC_GOERLI_APP_URL;
+//     case "mainnet":
+//       return process.env.NEXT_PUBLIC_MAINNET_APP_URL;
+//   }
+// }
 
 export const notificationAnimations = [
   { name: "idle", startFrame: 0, frameCount: 4 },
