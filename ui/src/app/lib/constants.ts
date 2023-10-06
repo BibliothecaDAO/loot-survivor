@@ -10,7 +10,7 @@ export const chapter4 =
   "They find golden coins in their pocket, glimmering in the dim light - an enigma wrapped in the shroud of the unexpected.";
 export const battle = "A beast lurks in the shadow, prepare for battle!";
 
-export const NETWORK: "goerli" | "mainnet" = "goerli";
+export const NETWORK: "goerli" | "mainnet" = "mainnet";
 
 export function getRPCUrl() {
   switch (NETWORK) {
@@ -39,7 +39,7 @@ export function getContracts() {
     case "goerli":
       return {
         eth: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-        game: "0x0229a6f42ae0bc258acf91b6e6d7f50e77608dbfb5a42e1c362f2041f9333fb5",
+        game: "0x01263ecbc05e28d1e99f531894838db10b90cfcdd39d020642da1747a733a37a",
         lords:
           "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
       };
