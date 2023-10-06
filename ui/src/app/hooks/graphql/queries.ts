@@ -4,8 +4,6 @@ const ADVENTURER_FIELDS = `
   id
   lastAction
   owner
-  classType
-  homeRealm
   name
   health
   strength
@@ -26,6 +24,7 @@ const ADVENTURER_FIELDS = `
   ring
   beastHealth
   statUpgrades
+  actionsPerBlock
   gold
   createdTime
   lastUpdatedTime

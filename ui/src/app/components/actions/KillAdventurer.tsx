@@ -30,7 +30,7 @@ export default function KillAdventurer() {
   const slayIdleAdventurerTx = {
     contractAddress: gameContract?.address ?? "",
     entrypoint: "slay_idle_adventurer",
-    calldata: [adventurerTarget, "0"],
+    calldata: [adventurerTarget],
     metadata: `Slaying ${adventurerTarget}`,
   };
 

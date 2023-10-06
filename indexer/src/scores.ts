@@ -72,7 +72,6 @@ export default function transform({ header, events }: Block) {
             updateTotalPayout({
               adventurerId: fp.adventurerId,
               owner: fp.address,
-              rank: fp.rank,
               timestamp: new Date().toISOString(),
               newPayout: fp.amount,
             })
@@ -83,7 +82,6 @@ export default function transform({ header, events }: Block) {
             updateTotalPayout({
               adventurerId: sp.adventurerId,
               owner: sp.address,
-              rank: sp.rank,
               timestamp: new Date().toISOString(),
               newPayout: sp.amount,
             })
@@ -94,7 +92,6 @@ export default function transform({ header, events }: Block) {
             updateTotalPayout({
               adventurerId: tp.adventurerId,
               owner: tp.address,
-              rank: tp.rank,
               timestamp: new Date().toISOString(),
               newPayout: tp.amount,
             })

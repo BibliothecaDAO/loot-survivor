@@ -83,9 +83,8 @@ function processAdventurerState(data: any, currentAdventurer?: any) {
     ring: gameData.ITEMS[data.adventurerState["adventurer"]["ring"]["id"]],
     beastHealth: data.adventurerState["adventurer"]["beastHealth"],
     statUpgrades: data.adventurerState["adventurer"]["statPointsAvailable"],
+    actionsPerBlock: data.adventurerState["adventurer"]["actionsPerBlock"],
     name: currentAdventurer["name"],
-    homeRealm: currentAdventurer["homeRealm"],
-    classType: currentAdventurer["classType"],
     entropy: currentAdventurer["entropy"],
     createdTime: currentAdventurer.createdTime,
     lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer
@@ -207,9 +206,9 @@ export function processData(
           startGameEvent.adventurerState["adventurer"]["beastHealth"],
         statUpgrades:
           startGameEvent.adventurerState["adventurer"]["statPointsAvailable"],
+        actionsPerBlock:
+          startGameEvent.adventurerState["adventurer"]["actionsPerBlock"],
         name: feltToString(startGameEvent.adventurerMeta["name"]),
-        homeRealm: startGameEvent.adventurerMeta["homeRealm"],
-        classType: gameData.CLASSES[startGameEvent.adventurerMeta["class"]],
         entropy: startGameEvent.adventurerMeta["entropy"],
         createdTime: new Date(),
         lastUpdatedTime: new Date(), // Use this date for now though it is block_timestamp in indexer

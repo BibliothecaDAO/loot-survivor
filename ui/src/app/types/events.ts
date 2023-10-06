@@ -8,8 +8,6 @@ type u8 = number;
 
 type AdventurerMetadata = {
   name: u128;
-  homeRealm: u16;
-  class: u8;
   entropy: u128;
 };
 
@@ -45,6 +43,7 @@ type Adventurer = {
   ring: LootStatistics;
   beastHealth: u16;
   statPointsAvailable: u8;
+  actionsPerBlock: u8;
   mutated: boolean;
 };
 

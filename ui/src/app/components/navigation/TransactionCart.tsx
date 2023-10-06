@@ -134,10 +134,10 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
         case "equip":
           handleEquipItem();
           break;
-        case "drop_items":
+        case "drop":
           handleDropItems();
           break;
-        case "upgrade_adventurer":
+        case "upgrade":
           handleUpgradeAdventurer();
           break;
         case "slay_idle_adventurers":
@@ -235,7 +235,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                             </div>
                           ))}
                         </div>
-                      ) : call.entrypoint === "drop_items" ? (
+                      ) : call.entrypoint === "drop" ? (
                         <div className="flex flex-col">
                           {dropItems.map((item: string, index: number) => (
                             <div className="flex flex-row" key={index}>
@@ -263,7 +263,7 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                             </div>
                           ))}
                         </div>
-                      ) : call.entrypoint === "upgrade_adventurer" ? (
+                      ) : call.entrypoint === "upgrade" ? (
                         <div className="flex flex-col">
                           {filteredStats.map(
                             ([string, number], index: number) => (
@@ -370,10 +370,10 @@ const TransactionCart = ({ buttonRef, multicall }: TransactionCartProps) => {
                           if (call.entrypoint === "equip") {
                             setEquipItems([]);
                           }
-                          if (call.entrypoint === "drop_items") {
+                          if (call.entrypoint === "drop") {
                             setDropItems([]);
                           }
-                          if (call.entrypoint === "upgrade_adventurer") {
+                          if (call.entrypoint === "upgrade") {
                             setUpgrades({ ...ZeroUpgrade });
                             setPurchaseItems([]);
                           }

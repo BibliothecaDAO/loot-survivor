@@ -90,7 +90,8 @@ export const parseAdventurer = combineParsers({
   ring: { index: 12, parser: parseLootStatistics },
   beastHealth: { index: 13, parser: parseU16 },
   statsPointsAvailable: { index: 14, parser: parseU8 },
-  mutated: { index: 15, parser: parseBoolean },
+  actionsPerBlock: { index: 15, parser: parseU8 },
+  mutated: { index: 16, parser: parseBoolean },
 });
 
 export const parseAdventurerState = combineParsers({
@@ -170,8 +171,6 @@ export const parseAdventurerDied = combineParsers({
 
 export const parseAdventurerMetadata = combineParsers({
   name: { index: 0, parser: parseU128 },
-  homeRealm: { index: 1, parser: parseU16 },
-  class: { index: 2, parser: parseU8 },
   entropy: { index: 3, parser: parseU128 },
 });
 

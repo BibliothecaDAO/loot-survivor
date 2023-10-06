@@ -93,7 +93,8 @@ function parseAdventurerState(data: string[]) {
       },
       beastHealth: parseInt(data[38]),
       statPointsAvailable: parseInt(data[39]),
-      mutated: convertToBoolean(parseInt(data[40])),
+      actionsPerBlock: parseInt(data[40]),
+      mutated: convertToBoolean(parseInt(data[41])),
     },
   };
 }
@@ -230,12 +231,10 @@ export async function parseEvents(
     switch (eventName) {
       case "StartGame":
         const startGameData: StartGameEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
           adventurerMeta: {
-            name: parseInt(raw.data[41]),
-            homeRealm: parseInt(raw.data[42]),
-            class: parseInt(raw.data[43]),
-            entropy: parseInt(raw.data[44]),
+            name: parseInt(raw.data[42]),
+            entropy: parseInt(raw.data[43]),
           },
         };
         const startGameEvent = processData(
@@ -248,15 +247,15 @@ export async function parseEvents(
       case "AdventurerUpgraded":
         const upgradeAvailableData: AdventurerUpgradedEvent = {
           adventurerStateWithBag: {
-            adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-            bag: parseBag(raw.data.slice(41, 74)),
+            adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+            bag: parseBag(raw.data.slice(42, 75)),
           },
-          strengthIncrease: parseInt(raw.data[75]),
-          dexterityIncrease: parseInt(raw.data[76]),
-          vitalityIncrease: parseInt(raw.data[77]),
-          intelligenceIncrease: parseInt(raw.data[78]),
-          wisdomIncrease: parseInt(raw.data[79]),
-          charismaIncrease: parseInt(raw.data[80]),
+          strengthIncrease: parseInt(raw.data[76]),
+          dexterityIncrease: parseInt(raw.data[77]),
+          vitalityIncrease: parseInt(raw.data[78]),
+          intelligenceIncrease: parseInt(raw.data[79]),
+          wisdomIncrease: parseInt(raw.data[80]),
+          charismaIncrease: parseInt(raw.data[81]),
         };
         const upgradeAvailableEvent = processData(
           upgradeAvailableData,
@@ -268,8 +267,8 @@ export async function parseEvents(
         break;
       case "DiscoveredHealth":
         const discoveredHealthData: DiscoveredHealthEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          healthAmount: parseInt(raw.data[41]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          healthAmount: parseInt(raw.data[42]),
         };
         const discoveredHealthEvent = processData(
           discoveredHealthData,
@@ -281,8 +280,8 @@ export async function parseEvents(
         break;
       case "DiscoveredGold":
         const discoveredGoldData: DiscoveredGoldEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          goldAmount: parseInt(raw.data[41]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          goldAmount: parseInt(raw.data[42]),
         };
         const discoveredGoldEvent = processData(
           discoveredGoldData,
@@ -294,8 +293,8 @@ export async function parseEvents(
         break;
       case "DiscoveredXP":
         const discoveredXPData: DiscoveredXPEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          xpAmount: parseInt(raw.data[41]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          xpAmount: parseInt(raw.data[42]),
         };
         const discoveredXPEvent = processData(
           discoveredXPData,
@@ -307,13 +306,13 @@ export async function parseEvents(
         break;
       case "DodgedObstacle":
         const dodgedObstacleData: DodgedObstacleEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          id: parseInt(raw.data[41]),
-          level: parseInt(raw.data[42]),
-          damageTaken: parseInt(raw.data[43]),
-          damageLocation: parseInt(raw.data[44]),
-          xpEarnedAdventurer: parseInt(raw.data[45]),
-          xpEarnedItems: parseInt(raw.data[46]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          id: parseInt(raw.data[42]),
+          level: parseInt(raw.data[43]),
+          damageTaken: parseInt(raw.data[44]),
+          damageLocation: parseInt(raw.data[45]),
+          xpEarnedAdventurer: parseInt(raw.data[46]),
+          xpEarnedItems: parseInt(raw.data[47]),
         };
         const dodgedObstacleEvent = processData(
           dodgedObstacleData,
@@ -325,13 +324,13 @@ export async function parseEvents(
         break;
       case "HitByObstacle":
         const hitByObstacleData: HitByObstacleEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          id: parseInt(raw.data[41]),
-          level: parseInt(raw.data[42]),
-          damageTaken: parseInt(raw.data[43]),
-          damageLocation: parseInt(raw.data[44]),
-          xpEarnedAdventurer: parseInt(raw.data[45]),
-          xpEarnedItems: parseInt(raw.data[46]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          id: parseInt(raw.data[42]),
+          level: parseInt(raw.data[43]),
+          damageTaken: parseInt(raw.data[44]),
+          damageLocation: parseInt(raw.data[45]),
+          xpEarnedAdventurer: parseInt(raw.data[46]),
+          xpEarnedItems: parseInt(raw.data[47]),
         };
         const hitByObstacleEvent = processData(
           hitByObstacleData,
@@ -343,17 +342,17 @@ export async function parseEvents(
         break;
       case "DiscoveredBeast":
         const discoveredBeastData: DiscoveredBeastEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          seed: parseInt(raw.data[41]),
-          id: parseInt(raw.data[42]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          seed: parseInt(raw.data[42]),
+          id: parseInt(raw.data[43]),
           beastSpecs: {
-            tier: parseInt(raw.data[43]),
-            itemType: parseInt(raw.data[44]),
-            level: parseInt(raw.data[45]),
+            tier: parseInt(raw.data[44]),
+            itemType: parseInt(raw.data[45]),
+            level: parseInt(raw.data[46]),
             specials: {
-              special1: parseInt(raw.data[46]),
-              special2: parseInt(raw.data[47]),
-              special3: parseInt(raw.data[48]),
+              special1: parseInt(raw.data[47]),
+              special2: parseInt(raw.data[48]),
+              special3: parseInt(raw.data[49]),
             },
           },
         };
@@ -367,22 +366,22 @@ export async function parseEvents(
         break;
       case "AmbushedByBeast":
         const ambushedByBeastData: AmbushedByBeastEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          seed: parseInt(raw.data[41]),
-          id: parseInt(raw.data[42]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          seed: parseInt(raw.data[42]),
+          id: parseInt(raw.data[43]),
           beastSpecs: {
-            tier: parseInt(raw.data[43]),
-            itemType: parseInt(raw.data[44]),
-            level: parseInt(raw.data[45]),
+            tier: parseInt(raw.data[44]),
+            itemType: parseInt(raw.data[45]),
+            level: parseInt(raw.data[46]),
             specials: {
-              special1: parseInt(raw.data[46]),
-              special2: parseInt(raw.data[47]),
-              special3: parseInt(raw.data[48]),
+              special1: parseInt(raw.data[47]),
+              special2: parseInt(raw.data[48]),
+              special3: parseInt(raw.data[49]),
             },
           },
-          damage: parseInt(raw.data[49]),
-          criticalHit: convertToBoolean(parseInt(raw.data[50])),
-          location: parseInt(raw.data[51]),
+          damage: parseInt(raw.data[50]),
+          criticalHit: convertToBoolean(parseInt(raw.data[51])),
+          location: parseInt(raw.data[52]),
         };
         const ambushedByBeastEvent = processData(
           ambushedByBeastData,
@@ -394,22 +393,22 @@ export async function parseEvents(
         break;
       case "AttackedBeast":
         const attackedBeastData: AttackedBeastEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          seed: parseInt(raw.data[41]),
-          id: parseInt(raw.data[42]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          seed: parseInt(raw.data[42]),
+          id: parseInt(raw.data[43]),
           beastSpecs: {
-            tier: parseInt(raw.data[43]),
-            itemType: parseInt(raw.data[44]),
-            level: parseInt(raw.data[45]),
+            tier: parseInt(raw.data[44]),
+            itemType: parseInt(raw.data[45]),
+            level: parseInt(raw.data[46]),
             specials: {
-              special1: parseInt(raw.data[46]),
-              special2: parseInt(raw.data[47]),
-              special3: parseInt(raw.data[48]),
+              special1: parseInt(raw.data[47]),
+              special2: parseInt(raw.data[48]),
+              special3: parseInt(raw.data[49]),
             },
           },
-          damage: parseInt(raw.data[49]),
-          criticalHit: convertToBoolean(parseInt(raw.data[50])),
-          location: parseInt(raw.data[51]),
+          damage: parseInt(raw.data[50]),
+          criticalHit: convertToBoolean(parseInt(raw.data[51])),
+          location: parseInt(raw.data[52]),
         };
         const attackedBeastEvent = processData(
           attackedBeastData,
@@ -421,22 +420,22 @@ export async function parseEvents(
         break;
       case "AttackedByBeast":
         const attackedByBeastData: AttackedByBeastEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          seed: parseInt(raw.data[41]),
-          id: parseInt(raw.data[42]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          seed: parseInt(raw.data[42]),
+          id: parseInt(raw.data[43]),
           beastSpecs: {
-            tier: parseInt(raw.data[43]),
-            itemType: parseInt(raw.data[44]),
-            level: parseInt(raw.data[45]),
+            tier: parseInt(raw.data[44]),
+            itemType: parseInt(raw.data[45]),
+            level: parseInt(raw.data[46]),
             specials: {
-              special1: parseInt(raw.data[46]),
-              special2: parseInt(raw.data[47]),
-              special3: parseInt(raw.data[48]),
+              special1: parseInt(raw.data[47]),
+              special2: parseInt(raw.data[48]),
+              special3: parseInt(raw.data[49]),
             },
           },
-          damage: parseInt(raw.data[49]),
-          criticalHit: convertToBoolean(parseInt(raw.data[50])),
-          location: parseInt(raw.data[51]),
+          damage: parseInt(raw.data[50]),
+          criticalHit: convertToBoolean(parseInt(raw.data[51])),
+          location: parseInt(raw.data[52]),
         };
         const attackedByBeastEvent = processData(
           attackedByBeastData,
@@ -448,24 +447,24 @@ export async function parseEvents(
         break;
       case "SlayedBeast":
         const slayedBeastData: SlayedBeastEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          seed: parseInt(raw.data[41]),
-          id: parseInt(raw.data[42]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          seed: parseInt(raw.data[42]),
+          id: parseInt(raw.data[43]),
           beastSpecs: {
-            tier: parseInt(raw.data[43]),
-            itemType: parseInt(raw.data[44]),
-            level: parseInt(raw.data[45]),
+            tier: parseInt(raw.data[44]),
+            itemType: parseInt(raw.data[45]),
+            level: parseInt(raw.data[46]),
             specials: {
-              special1: parseInt(raw.data[46]),
-              special2: parseInt(raw.data[47]),
-              special3: parseInt(raw.data[48]),
+              special1: parseInt(raw.data[47]),
+              special2: parseInt(raw.data[48]),
+              special3: parseInt(raw.data[49]),
             },
           },
-          damageDealt: parseInt(raw.data[49]),
-          criticalHit: convertToBoolean(parseInt(raw.data[50])),
-          xpEarnedAdventurer: parseInt(raw.data[51]),
-          xpEarnedItems: parseInt(raw.data[52]),
-          goldEarned: parseInt(raw.data[53]),
+          damageDealt: parseInt(raw.data[50]),
+          criticalHit: convertToBoolean(parseInt(raw.data[51])),
+          xpEarnedAdventurer: parseInt(raw.data[52]),
+          xpEarnedItems: parseInt(raw.data[53]),
+          goldEarned: parseInt(raw.data[54]),
         };
         const slayedBeastEvent = processData(
           slayedBeastData,
@@ -477,17 +476,17 @@ export async function parseEvents(
         break;
       case "FleeFailed":
         const fleeFailedData: FleeFailedEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          seed: parseInt(raw.data[41]),
-          id: parseInt(raw.data[42]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          seed: parseInt(raw.data[42]),
+          id: parseInt(raw.data[43]),
           beastSpecs: {
-            tier: parseInt(raw.data[43]),
-            itemType: parseInt(raw.data[44]),
-            level: parseInt(raw.data[45]),
+            tier: parseInt(raw.data[44]),
+            itemType: parseInt(raw.data[45]),
+            level: parseInt(raw.data[46]),
             specials: {
-              special1: parseInt(raw.data[46]),
-              special2: parseInt(raw.data[47]),
-              special3: parseInt(raw.data[48]),
+              special1: parseInt(raw.data[47]),
+              special2: parseInt(raw.data[48]),
+              special3: parseInt(raw.data[49]),
             },
           },
         };
@@ -501,17 +500,17 @@ export async function parseEvents(
         break;
       case "FleeSucceeded":
         const fleeSucceededData: FleeSucceededEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          seed: parseInt(raw.data[41]),
-          id: parseInt(raw.data[42]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          seed: parseInt(raw.data[42]),
+          id: parseInt(raw.data[43]),
           beastSpecs: {
-            tier: parseInt(raw.data[43]),
-            itemType: parseInt(raw.data[44]),
-            level: parseInt(raw.data[45]),
+            tier: parseInt(raw.data[44]),
+            itemType: parseInt(raw.data[45]),
+            level: parseInt(raw.data[46]),
             specials: {
-              special1: parseInt(raw.data[46]),
-              special2: parseInt(raw.data[47]),
-              special3: parseInt(raw.data[48]),
+              special1: parseInt(raw.data[47]),
+              special2: parseInt(raw.data[48]),
+              special3: parseInt(raw.data[49]),
             },
           },
         };
@@ -526,11 +525,11 @@ export async function parseEvents(
       case "PurchasedItems":
         const purchasedItemsData: PurchasedItemsEvent = {
           adventurerStateWithBag: {
-            adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-            bag: parseBag(raw.data.slice(41, 74)),
+            adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+            bag: parseBag(raw.data.slice(42, 75)),
           },
           // Skip array length
-          purchases: parseItems(raw.data.slice(76)),
+          purchases: parseItems(raw.data.slice(77)),
         };
         const purchasedItemsEvent = processData(
           purchasedItemsData,
@@ -542,10 +541,10 @@ export async function parseEvents(
         break;
       case "PurchasedPotions":
         const purchasedPotionsData: PurchasedPotionsEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          quantity: parseInt(raw.data[41]),
-          cost: parseInt(raw.data[42]),
-          health: parseInt(raw.data[43]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          quantity: parseInt(raw.data[42]),
+          cost: parseInt(raw.data[43]),
+          health: parseInt(raw.data[44]),
         };
         const purchasedPotionsEvent = processData(
           purchasedPotionsData,
@@ -562,8 +561,8 @@ export async function parseEvents(
         );
         const equippedItemsData: EquippedItemsEvent = {
           adventurerStateWithBag: {
-            adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-            bag: parseBag(raw.data.slice(41, 74)),
+            adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+            bag: parseBag(raw.data.slice(42, 75)),
           },
           equippedItems: equippedItems,
           unequippedItems: unequippedItems,
@@ -579,14 +578,14 @@ export async function parseEvents(
       case "DroppedItems":
         const itemIds = [];
         // Skip array length
-        const itemsData = raw.data.slice(76);
+        const itemsData = raw.data.slice(77);
         for (let i = 0; i < itemsData.length; i++) {
           itemIds.push(parseInt(itemsData[i]));
         }
         const droppedItemsData: DroppedItemsEvent = {
           adventurerStateWithBag: {
-            adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-            bag: parseBag(raw.data.slice(41, 74)),
+            adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+            bag: parseBag(raw.data.slice(42, 75)),
           },
           itemIds: itemIds,
         };
@@ -600,10 +599,10 @@ export async function parseEvents(
         break;
       case "GreatnessIncreased":
         const greatnessIncreasedData: GreatnessIncreasedEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          itemId: parseInt(raw.data[41]),
-          previousLevel: parseInt(raw.data[42]),
-          newLevel: parseInt(raw.data[43]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          itemId: parseInt(raw.data[42]),
+          previousLevel: parseInt(raw.data[43]),
+          newLevel: parseInt(raw.data[44]),
         };
         const greatnessIncreasedEvent = processData(
           greatnessIncreasedData,
@@ -615,9 +614,9 @@ export async function parseEvents(
         break;
       case "ItemsLeveledUp":
         const itemsLeveledUpData: ItemsLeveledUpEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
           // Skip items length
-          items: parseItemLevels(raw.data.slice(42)),
+          items: parseItemLevels(raw.data.slice(43)),
         };
         const itemsLeveledUpEvent = processData(
           itemsLeveledUpData,
@@ -629,8 +628,8 @@ export async function parseEvents(
         break;
       case "NewHighScore":
         const newHighScoreData: NewHighScoreEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          rank: parseInt(raw.data[41]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          rank: parseInt(raw.data[42]),
         };
         const newHighScoreEvent = processData(
           newHighScoreData,
@@ -642,10 +641,10 @@ export async function parseEvents(
         break;
       case "AdventurerDied":
         const adventurerDiedData: AdventurerDiedEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          killedByBeast: parseInt(raw.data[41]),
-          killedByObstacle: parseInt(raw.data[42]),
-          callerAddress: raw.data[43],
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          killedByBeast: parseInt(raw.data[42]),
+          killedByObstacle: parseInt(raw.data[43]),
+          callerAddress: raw.data[44],
         };
         const adventurerDiedEvent = processData(
           adventurerDiedData,
@@ -657,9 +656,9 @@ export async function parseEvents(
         break;
       case "AdventurerLeveledUp":
         const adventurerLeveledUpData: AdventurerLeveledUpEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          previousLevel: parseInt(raw.data[41]),
-          newLevel: parseInt(raw.data[42]),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          previousLevel: parseInt(raw.data[42]),
+          newLevel: parseInt(raw.data[43]),
         };
         const adventurerLeveledUpEvent = processData(
           adventurerLeveledUpData,
@@ -671,13 +670,13 @@ export async function parseEvents(
         break;
       case "UpgradesAvailable":
         // Skip array length
-        const newItems = raw.data.slice(42);
+        const newItems = raw.data.slice(43);
         const newItemsIds = [];
         for (let i = 0; i < newItems.length; i++) {
           newItemsIds.push(parseInt(newItems[i]));
         }
         const upgradesAvailableData: UpgradesAvailableEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
           // Skip array length
           items: newItemsIds,
         };
@@ -691,10 +690,10 @@ export async function parseEvents(
         break;
       case "IdleDeathPenalty":
         const idleDeathPenaltyData: IdleDeathPenaltyEvent = {
-          adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
-          idleBlocks: parseInt(raw.data[41]),
-          penaltyThreshold: parseInt(raw.data[42]),
-          caller: raw.data[43],
+          adventurerState: parseAdventurerState(raw.data.slice(0, 41)),
+          idleBlocks: parseInt(raw.data[42]),
+          penaltyThreshold: parseInt(raw.data[43]),
+          caller: raw.data[44],
         };
         const idleDeathPenaltyEvent = processData(
           idleDeathPenaltyData,
