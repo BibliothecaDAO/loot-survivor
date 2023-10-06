@@ -329,91 +329,91 @@ export default function Home() {
       pendingMessage.includes("Spawning Adventurer"));
 
   return (
-    <Maintenance />
-    // <main
-    //   className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
-    // >
-    //   {introComplete ? (
-    //     <>
-    //       <div className="flex flex-col w-full">
-    //         <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
-    //         {!spawnLoader && (
-    //           <div className="sm:hidden">
-    //             <TxActivity />
-    //           </div>
-    //         )}
-    //         <Header multicall={multicall} />
-    //       </div>
-    //       <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
-    //         {!spawnLoader && (
-    //           <div className="hidden sm:block">
-    //             <TxActivity />
-    //           </div>
-    //         )}
-    //       </div>
-    //       <NotificationDisplay />
+    // <Maintenance />
+    <main
+      className={`min-h-screen container mx-auto flex flex-col sm:pt-8 sm:p-8 lg:p-10 2xl:p-20 `}
+    >
+      {introComplete ? (
+        <>
+          <div className="flex flex-col w-full">
+            <NetworkSwitchError isWrongNetwork={isWrongNetwork} />
+            {!spawnLoader && (
+              <div className="sm:hidden">
+                <TxActivity />
+              </div>
+            )}
+            <Header multicall={multicall} />
+          </div>
+          <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
+            {!spawnLoader && (
+              <div className="hidden sm:block">
+                <TxActivity />
+              </div>
+            )}
+          </div>
+          <NotificationDisplay />
 
-    //       {deathDialog && <DeathDialog />}
+          {deathDialog && <DeathDialog />}
 
-    //       {status == "connected" && arcadeDialog && <ArcadeDialog />}
-    //       {status == "connected" && topUpDialog && <TopUpDialog />}
+          {status == "connected" && arcadeDialog && <ArcadeDialog />}
+          {status == "connected" && topUpDialog && <TopUpDialog />}
 
-    //       {introComplete ? (
-    //         <div className="flex flex-col w-full">
-    //           <>
-    //             <div className="sm:hidden flex  sm:justify-normal sm:pb-2">
-    //               <ScreenMenu
-    //                 buttonsData={mobileMenuItems}
-    //                 onButtonClick={(value) => {
-    //                   setScreen(value);
-    //                 }}
-    //                 disabled={mobileMenuDisabled}
-    //               />
-    //             </div>
-    //             <div className="hidden sm:block flex justify-center sm:justify-normal sm:pb-2">
-    //               <ScreenMenu
-    //                 buttonsData={allMenuItems}
-    //                 onButtonClick={(value) => {
-    //                   setScreen(value);
-    //                 }}
-    //                 disabled={allMenuDisabled}
-    //               />
-    //             </div>
+          {introComplete ? (
+            <div className="flex flex-col w-full">
+              <>
+                <div className="sm:hidden flex  sm:justify-normal sm:pb-2">
+                  <ScreenMenu
+                    buttonsData={mobileMenuItems}
+                    onButtonClick={(value) => {
+                      setScreen(value);
+                    }}
+                    disabled={mobileMenuDisabled}
+                  />
+                </div>
+                <div className="hidden sm:block flex justify-center sm:justify-normal sm:pb-2">
+                  <ScreenMenu
+                    buttonsData={allMenuItems}
+                    onButtonClick={(value) => {
+                      setScreen(value);
+                    }}
+                    disabled={allMenuDisabled}
+                  />
+                </div>
 
-    //             <div className="sm:hidden">
-    //               <MobileHeader />
-    //             </div>
-    //             <>
-    //               {screen === "start" && (
-    //                 <AdventurerScreen
-    //                   spawn={spawn}
-    //                   handleSwitchAdventurer={handleSwitchAdventurer}
-    //                 />
-    //               )}
-    //               {screen === "play" && (
-    //                 <ActionsScreen
-    //                   explore={explore}
-    //                   attack={attack}
-    //                   flee={flee}
-    //                 />
-    //               )}
-    //               {screen === "inventory" && <InventoryScreen />}
-    //               {screen === "leaderboard" && <LeaderboardScreen />}
-    //               {screen === "upgrade" && <UpgradeScreen upgrade={upgrade} />}
-    //               {screen === "profile" && <Profile />}
-    //               {screen === "encounters" && <EncountersScreen />}
-    //               {screen === "guide" && <GuideScreen />}
-    //               {screen === "settings" && <Settings />}
-    //               {screen === "player" && <Player />}
-    //               {screen === "wallet" && <WalletSelect />}
-    //             </>
-    //           </>
-    //         </div>
-    //       ) : null}
-    //     </>
-    //   ) : (
-    //     <Intro onIntroComplete={handleIntroComplete} />
-    //   )}
-    // </main>
+                <div className="sm:hidden">
+                  <MobileHeader />
+                </div>
+                <>
+                  {screen === "start" && (
+                    <AdventurerScreen
+                      spawn={spawn}
+                      handleSwitchAdventurer={handleSwitchAdventurer}
+                    />
+                  )}
+                  {screen === "play" && (
+                    <ActionsScreen
+                      explore={explore}
+                      attack={attack}
+                      flee={flee}
+                    />
+                  )}
+                  {screen === "inventory" && <InventoryScreen />}
+                  {screen === "leaderboard" && <LeaderboardScreen />}
+                  {screen === "upgrade" && <UpgradeScreen upgrade={upgrade} />}
+                  {screen === "profile" && <Profile />}
+                  {screen === "encounters" && <EncountersScreen />}
+                  {screen === "guide" && <GuideScreen />}
+                  {screen === "settings" && <Settings />}
+                  {screen === "player" && <Player />}
+                  {screen === "wallet" && <WalletSelect />}
+                </>
+              </>
+            </div>
+          ) : null}
+        </>
+      ) : (
+        <Intro onIntroComplete={handleIntroComplete} />
+      )}
+    </main>
   );
 }
