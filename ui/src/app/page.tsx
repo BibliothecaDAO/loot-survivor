@@ -53,6 +53,7 @@ import { useContracts } from "./hooks/useContracts";
 import { useBalance } from "@starknet-react/core";
 import ScreenMenu from "./components/menu/ScreenMenu";
 import Header from "./components/navigation/Header";
+import { Maintenance } from "./components/archived/Maintenance";
 
 const allMenuItems: Menu[] = [
   { id: 1, label: "Start", screen: "start", disabled: false },
