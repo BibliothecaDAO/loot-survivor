@@ -52,18 +52,20 @@ mod Game {
                 STARTING_GOLD, STARTING_HEALTH, POTION_PRICE, MINIMUM_POTION_PRICE,
                 CHARISMA_POTION_DISCOUNT, CHARISMA_ITEM_DISCOUNT, MINIMUM_ITEM_PRICE,
                 MINIMUM_DAMAGE_TO_BEASTS, MINIMUM_DAMAGE_FROM_OBSTACLES,
-                OBSTACLE_CRITICAL_HIT_CHANCE, MAX_STAT_UPGRADES
+                OBSTACLE_CRITICAL_HIT_CHANCE, MAX_STAT_UPGRADE_POINTS
             }
         },
         item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
         adventurer_utils::AdventurerUtils, leaderboard::{Score, Leaderboard},
     };
     use market::{
-        market::{ImplMarket, LootWithPrice, ItemPurchase}, constants::{NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE},
+        market::{ImplMarket, LootWithPrice, ItemPurchase},
+        constants::{NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE},
     };
     use obstacles::obstacle::{ImplObstacle, IObstacle};
     use combat::{
-        combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::{CombatSettings::STRENGTH_DAMAGE_BONUS, CombatEnums::{Slot, Tier, Type}}
+        combat::{CombatSpec, SpecialPowers, ImplCombat},
+        constants::{CombatSettings::STRENGTH_DAMAGE_BONUS, CombatEnums::{Slot, Tier, Type}}
     };
     use beasts::beast::{Beast, IBeast, ImplBeast};
     use game_entropy::game_entropy::{GameEntropy, ImplGameEntropy};
@@ -215,7 +217,12 @@ mod Game {
             // process explore or apply idle penalty
             if !idle {
                 _explore(
-                    ref self, ref adventurer, adventurer_id, adventurer_entropy, game_entropy.hash, till_beast
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    adventurer_entropy,
+                    game_entropy.hash,
+                    till_beast
                 );
             } else {
                 _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
@@ -982,7 +989,7 @@ mod Game {
             OBSTACLE_CRITICAL_HIT_CHANCE
         }
         fn stat_upgrades_per_level(self: @ContractState) -> u8 {
-            MAX_STAT_UPGRADES
+            MAX_STAT_UPGRADE_POINTS
         }
         fn beast_special_name_unlock_level(self: @ContractState) -> u16 {
             BEAST_SPECIAL_NAME_LEVEL_UNLOCK
