@@ -58,7 +58,7 @@ export const PenaltyCountDown = ({
       ? formatDiscoveryTime
       : formatBattleTime;
 
-  const formatLastAction = convertTime(lastAction);
+  const formatLastAction = lastAction;
   const targetTime = formatLastAction + penaltyTime * 1000;
 
   useEffect(() => {
@@ -86,6 +86,8 @@ export const PenaltyCountDown = ({
       .toString()
       .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   };
+
+  console.log(seconds);
 
   return (
     <div className="text-xs sm:text-lg self-center border px-1 border border-terminal-green">
