@@ -31,8 +31,7 @@ mod tests {
     use survivor::{
         stats::Stats, adventurer_meta::{AdventurerMetadata},
         constants::adventurer_constants::{
-            STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, ClassStatBoosts,
-            MAX_BLOCK_COUNT
+            STARTING_GOLD, POTION_HEALTH_AMOUNT, POTION_PRICE, STARTING_HEALTH, MAX_BLOCK_COUNT
         },
         adventurer::{Adventurer, ImplAdventurer, IAdventurer}, item_primitive::ItemPrimitive,
         bag::{Bag, IBag}, adventurer_utils::AdventurerUtils
@@ -1828,6 +1827,7 @@ mod tests {
         game.upgrade(ADVENTURER_ID, 0, stat_upgrades, shopping_cart);
         game.explore(ADVENTURER_ID, false);
         game.explore(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
     }
