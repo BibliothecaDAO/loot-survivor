@@ -1829,6 +1829,7 @@ mod tests {
         game.explore(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
         game.attack(ADVENTURER_ID, false);
+        game.attack(ADVENTURER_ID, false);
     }
 
     #[test]
