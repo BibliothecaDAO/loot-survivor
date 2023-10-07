@@ -41,7 +41,7 @@ export function getContracts() {
         eth: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
         game: "0x01263ecbc05e28d1e99f531894838db10b90cfcdd39d020642da1747a733a37a",
         lords:
-          "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
+          "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
       };
     case "mainnet":
       return {
