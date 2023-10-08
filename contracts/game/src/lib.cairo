@@ -2473,7 +2473,7 @@ mod Game {
     }
 
     fn _assert_rate_limit(actions_per_block: u8, rate_limit: u64) {
-        assert(actions_per_block.into() <= rate_limit, messages::RATE_LIMIT_EXCEEDED);
+        assert(actions_per_block.into() < rate_limit, messages::RATE_LIMIT_EXCEEDED);
     }
 
     fn _assert_is_idle(self: @ContractState, adventurer: Adventurer) {
