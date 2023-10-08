@@ -1708,7 +1708,7 @@ impl ImplAdventurer of IAdventurer {
 
     #[inline(always)]
     fn reset_actions_per_block(ref self: Adventurer) {
-        self.actions_per_block = 1;
+        self.actions_per_block = 0;
     }
 
     #[inline(always)]
