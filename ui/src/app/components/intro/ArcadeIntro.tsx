@@ -72,6 +72,9 @@ export const ArcadeIntro = () => {
     }
   };
 
+  const checkNotEnoughPrefundEth = eth < parseInt(ETH_PREFUND_AMOUNT);
+  const checkAnyETh = eth === 0;
+
   return (
     <>
       <div className="fixed inset-0 opacity-80 bg-terminal-black z-40" />
@@ -106,7 +109,11 @@ export const ArcadeIntro = () => {
           </div>
           <p className="text-sm xl:text-xl 2xl:text-2xl">Mint Some Lords</p>
           <Button
-            onClick={() => mintLords()}
+            onClick={() =>
+              checkAnyETh
+                ? window.open("https://faucet.goerli.starknet.io/", "_blank")
+                : mintLords()
+            }
             disabled={
               isWrongNetwork ||
               isMintingLords ||
@@ -117,6 +124,8 @@ export const ArcadeIntro = () => {
             <Lords className="sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />{" "}
             {isMintingLords ? (
               <p className="loading-ellipsis">Minting Lords</p>
+            ) : checkAnyETh ? (
+              "GET GOERLI ETH"
             ) : (
               "Mint"
             )}
@@ -126,15 +135,15 @@ export const ArcadeIntro = () => {
             approvals)
           </p>
           <Button
-            onClick={() => create()}
-            disabled={
-              isWrongNetwork ||
-              eth < parseInt(ETH_PREFUND_AMOUNT) ||
-              lords < parseInt(LORDS_PREFUND_AMOUNT)
+            onClick={() =>
+              checkNotEnoughPrefundEth
+                ? window.open("https://faucet.goerli.starknet.io/", "_blank")
+                : create()
             }
+            disabled={isWrongNetwork || lords < parseInt(LORDS_PREFUND_AMOUNT)}
             className="w-1/4"
           >
-            {eth < parseInt(ETH_PREFUND_AMOUNT) ? "NOT ENOUGH ETH" : "CREATE"}
+            {checkNotEnoughPrefundEth ? "GET GOERLI ETH" : "CREATE"}
           </Button>
           {isDeploying && (
             <div className="fixed inset-0 opacity-80 bg-terminal-black z-50 m-2 w-full h-full">
