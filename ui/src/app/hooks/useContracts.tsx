@@ -69,11 +69,11 @@ export const useContracts = () => {
 
   const { contract: gameContract } = useContract({
     address: contracts?.game,
-    abi: Adventurer,
+    abi: Game,
   });
   const { contract: lordsContract } = useContract({
     address: contracts?.lords,
-    abi: Lords_ERC20_Mintable,
+    abi: Lords,
   });
 
   const { contract: ethContract } = useContract({
