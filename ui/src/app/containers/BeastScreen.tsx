@@ -91,7 +91,8 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
         adventurer?.beastHealth == 0 ||
         loading ||
         adventurer?.level == 1 ||
-        adventurer.dexterity === 0,
+        adventurer.dexterity === 0 ||
+        estimatingFee,
       loading: loading,
     },
     {
@@ -108,7 +109,8 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
         adventurer?.beastHealth == 0 ||
         loading ||
         adventurer?.level == 1 ||
-        adventurer.dexterity === 0,
+        adventurer.dexterity === 0 ||
+        estimatingFee,
       loading: loading,
     },
   ];
