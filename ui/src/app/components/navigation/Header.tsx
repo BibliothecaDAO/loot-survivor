@@ -25,9 +25,10 @@ import { NullAdventurer } from "@/app/types";
 
 export interface HeaderProps {
   multicall: (...args: any[]) => any;
+  mintLords: (...args: any[]) => any;
 }
 
-export default function Header({ multicall }: HeaderProps) {
+export default function Header({ multicall, mintLords }: HeaderProps) {
   const { account, address } = useAccount();
   const { disconnect } = useConnectors();
   const adventurer = useAdventurerStore((state) => state.adventurer);
@@ -83,7 +84,12 @@ export default function Header({ multicall }: HeaderProps) {
         >
           Play For Real
         </Button>
-        <Button size={"xs"} variant={"outline"} className="self-center xl:px-5">
+        <Button
+          size={"xs"}
+          variant={"outline"}
+          className="self-center xl:px-5"
+          onClick={mintLords}
+        >
           <span className="flex flex-row items-center justify-between w-full">
             <Lords className="self-center sm:w-5 sm:h-5  h-3 w-3 fill-current mr-1" />
             <p>{formatNumber(parseInt(lordsBalance.data?.formatted ?? "0"))}</p>

@@ -130,7 +130,7 @@ export const useBurner = () => {
   const prefundAccount = async (address: string, account: AccountInterface) => {
     try {
       const transferEthTx = {
-        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        contractAddress: ethContract?.address ?? "0x0",
         entrypoint: "transfer",
         calldata: CallData.compile([address, ETH_PREFUND_AMOUNT, "0x0"]),
       };
@@ -141,10 +141,13 @@ export const useBurner = () => {
         calldata: CallData.compile([address, LORDS_PREFUND_AMOUNT, "0x0"]),
       };
 
-      const { transaction_hash } = await account.execute([
-        transferEthTx,
-        transferLordsTx,
-      ]);
+      const { transaction_hash } = await account.execute(
+        [transferEthTx, transferLordsTx],
+        undefined,
+        {
+          maxFee: "100000000000000", // currently setting to 0.0001ETH
+        }
+      );
 
       const result = await account.waitForTransaction(transaction_hash, {
         retryInterval: 2000,
@@ -194,12 +197,17 @@ export const useBurner = () => {
     const {
       transaction_hash: deployTx,
       contract_address: accountAAFinalAdress,
-    } = await burner.deployAccount({
-      classHash: arcadeClassHash!,
-      constructorCalldata: constructorAACalldata,
-      contractAddress: address,
-      addressSalt: publicKey,
-    });
+    } = await burner.deployAccount(
+      {
+        classHash: arcadeClassHash!,
+        constructorCalldata: constructorAACalldata,
+        contractAddress: address,
+        addressSalt: publicKey,
+      },
+      {
+        maxFee: "100000000000000", // currently setting to 0.0001ETH
+      }
+    );
 
     await provider.waitForTransaction(deployTx);
 
@@ -269,10 +277,13 @@ export const useBurner = () => {
         entrypoint: "approve",
         calldata: [gameContract?.address ?? "", LORDS_PREFUND_AMOUNT, "0"],
       };
-      const { transaction_hash: permissionsTx } = await walletAccount.execute([
-        ...permissions,
-        approveLordsSpendingTx,
-      ]);
+      const { transaction_hash: permissionsTx } = await walletAccount.execute(
+        [...permissions, approveLordsSpendingTx],
+        undefined,
+        {
+          maxFee: "100000000000000", // currently setting to 0.0001ETH
+        }
+      );
 
       return permissionsTx;
     },
@@ -355,7 +366,8 @@ export const useBurner = () => {
   const withdraw = async (
     masterAccountAddress: string,
     account: AccountInterface,
-    balance: bigint
+    ethBalance: bigint,
+    lordsBalance: bigint
   ) => {
     try {
       setIsWithdrawing(true);
@@ -374,7 +386,7 @@ export const useBurner = () => {
         entrypoint: "transfer",
         calldata: CallData.compile([
           masterAccountAddress,
-          balance ?? "0x0",
+          ethBalance ?? "0x0",
           "0x0",
         ]),
       };
@@ -385,18 +397,36 @@ export const useBurner = () => {
 
       // Now we negate the fee from balance to withdraw (+10% for safety)
 
-      const newBalance =
-        BigInt(balance) - estimatedFee * (BigInt(11) / BigInt(10));
+      const newEthBalance =
+        BigInt(ethBalance) - estimatedFee * (BigInt(11) / BigInt(10));
 
-      const { transaction_hash } = await account.execute({
+      const transferEthTx = {
         contractAddress: ethContract?.address ?? "",
         entrypoint: "transfer",
         calldata: CallData.compile([
           masterAccountAddress,
-          newBalance ?? "0x0",
+          newEthBalance ?? "0x0",
           "0x0",
         ]),
-      });
+      };
+
+      const transferLordsTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "transfer",
+        calldata: CallData.compile([
+          masterAccountAddress,
+          lordsBalance ?? "0x0",
+          "0x0",
+        ]),
+      };
+
+      // If they have Lords also withdraw
+      const calls =
+        lordsBalance > BigInt(0)
+          ? [transferEthTx, transferLordsTx]
+          : [transferEthTx];
+
+      const { transaction_hash } = await account.execute(calls);
 
       const result = await account.waitForTransaction(transaction_hash, {
         retryInterval: 2000,

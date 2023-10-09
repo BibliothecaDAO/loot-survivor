@@ -107,8 +107,9 @@ export const ArcadeDialog = () => {
     setArcadeBalances(localBalances);
   };
 
-  const getEthBalance = async (account: string) => {
+  const getAccountBalances = async (account: string) => {
     const balances = await fetchBalanceWithRetry(account);
+    console.log(balances);
     setArcadeBalances({
       ...arcadebalances,
       [account]: {
@@ -164,7 +165,7 @@ export const ArcadeDialog = () => {
                 arcadeConnectors={arcadeConnectors()}
                 genNewKey={genNewKey}
                 balances={arcadebalances[account.name]}
-                getEthBalance={getEthBalance}
+                getAccountBalances={getAccountBalances}
                 topUpEth={topUpEth}
                 isToppingUpEth={isToppingUpEth}
                 topUpLords={topUpLords}
@@ -243,23 +244,24 @@ interface ArcadeAccountCardProps {
   walletAccount: AccountInterface;
   masterAccountAddress: string;
   arcadeConnectors: any[];
-  genNewKey: (address: string) => void;
+  genNewKey: (address: string) => Promise<void>;
   balances: { eth: bigint; lords: bigint; lordsGameAllowance: bigint };
-  getEthBalance: (address: string) => void;
-  topUpEth: (address: string, account: AccountInterface) => void;
+  getAccountBalances: (address: string) => Promise<void>;
+  topUpEth: (address: string, account: AccountInterface) => Promise<any>;
   isToppingUpEth: boolean;
   topUpLords: (
     address: string,
     account: AccountInterface,
     lordsAmount: number,
     lordsGameAllowance: number
-  ) => void;
+  ) => Promise<any>;
   isToppingUpLords: boolean;
   withdraw: (
     masterAccountAddress: string,
     account: AccountInterface,
-    balance: bigint
-  ) => void;
+    ethBalance: bigint,
+    lordsBalance: bigint
+  ) => Promise<any>;
   isWithdrawing: boolean;
 }
 
@@ -272,7 +274,7 @@ export const ArcadeAccountCard = ({
   arcadeConnectors,
   genNewKey,
   balances,
-  getEthBalance,
+  getAccountBalances,
   topUpEth,
   isToppingUpEth,
   topUpLords,
@@ -332,10 +334,10 @@ export const ArcadeAccountCard = ({
               >
                 {connected ? "connected" : "connect"}
               </Button>
-              {masterAccountAddress == walletAccount.address && (
+              {masterAccountAddress == walletAccount?.address && (
                 <Button
                   variant={"ghost"}
-                  onClick={() => genNewKey(account.name)}
+                  onClick={async () => await genNewKey(account.name)}
                 >
                   Create New Keys
                 </Button>
@@ -357,9 +359,9 @@ export const ArcadeAccountCard = ({
             ) && (
               <Button
                 variant={"ghost"}
-                onClick={() => {
-                  topUpEth(account.name, walletAccount);
-                  getEthBalance(account.name);
+                onClick={async () => {
+                  await topUpEth(account.name, walletAccount);
+                  await getAccountBalances(account.name);
                 }}
                 disabled={isToppingUpEth}
               >
@@ -384,14 +386,14 @@ export const ArcadeAccountCard = ({
                     />
                     <Button
                       variant={"ghost"}
-                      onClick={() => {
-                        topUpLords(
+                      onClick={async () => {
+                        await topUpLords(
                           account.name,
                           walletAccount,
                           parseInt(lordsAmount),
                           Number(balances?.lordsGameAllowance)
                         );
-                        getEthBalance(account.name);
+                        await getAccountBalances(account.name);
                       }}
                       disabled={isToppingUpLords}
                     >
@@ -409,9 +411,14 @@ export const ArcadeAccountCard = ({
         {connected && (
           <Button
             variant={"ghost"}
-            onClick={() => {
-              withdraw(masterAccountAddress, walletAccount, balances?.eth);
-              getEthBalance(account.name);
+            onClick={async () => {
+              await withdraw(
+                masterAccountAddress,
+                walletAccount,
+                balances?.eth,
+                balances?.lords
+              );
+              await getAccountBalances(account.name);
             }}
             disabled={isWithdrawing || minimalBalance}
           >

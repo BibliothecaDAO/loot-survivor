@@ -129,7 +129,7 @@ export default function Home() {
   const setStartOption = useUIStore((state) => state.setStartOption);
 
   const arcadeConnectors = getArcadeConnectors(available);
-
+  console.log(arcadeConnectors);
   const lordsBalance = useBalance({
     token: lordsContract?.address,
     address,
@@ -359,7 +359,7 @@ export default function Home() {
         calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
       };
       addToCalls(mintLords);
-      const tx = await handleSubmitCalls(writeAsync);
+      const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
       const result = await account?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: 2000,
       });
@@ -390,7 +390,10 @@ export default function Home() {
                 <TxActivity />
               </div>
             )}
-            <Header multicall={multicall} />
+            <Header
+              multicall={multicall}
+              mintLords={async () => await mintLords()}
+            />
           </div>
           <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
             {!spawnLoader && (

@@ -55,7 +55,7 @@ export const ArcadeIntro = () => {
         calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
       };
       addToCalls(mintLords);
-      const tx = await handleSubmitCalls(writeAsync);
+      const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
       const result = await account?.waitForTransaction(tx?.transaction_hash, {
         retryInterval: 2000,
       });
