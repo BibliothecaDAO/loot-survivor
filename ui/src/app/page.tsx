@@ -129,7 +129,6 @@ export default function Home() {
   const setStartOption = useUIStore((state) => state.setStartOption);
 
   const arcadeConnectors = getArcadeConnectors(available);
-  console.log(arcadeConnectors);
   const lordsBalance = useBalance({
     token: lordsContract?.address,
     address,
@@ -439,6 +438,8 @@ export default function Home() {
                     <AdventurerScreen
                       spawn={spawn}
                       handleSwitchAdventurer={handleSwitchAdventurer}
+                      lordsBalance={lordsBalance.data?.value}
+                      mintLords={async () => await mintLords()}
                     />
                   )}
                   {screen === "play" && (

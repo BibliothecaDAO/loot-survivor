@@ -252,6 +252,8 @@ export function syscalls({
       account
     );
 
+    console.log(balanceEmpty);
+
     if (!balanceEmpty) {
       startLoading(
         "Create",

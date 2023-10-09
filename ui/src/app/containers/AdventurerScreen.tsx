@@ -13,6 +13,8 @@ import useUIStore from "../hooks/useUIStore";
 interface AdventurerScreenProps {
   spawn: (...args: any[]) => any;
   handleSwitchAdventurer: (...args: any[]) => any;
+  lordsBalance?: bigint;
+  mintLords: (...args: any[]) => any;
 }
 
 /**
@@ -22,6 +24,8 @@ interface AdventurerScreenProps {
 export default function AdventurerScreen({
   spawn,
   handleSwitchAdventurer,
+  lordsBalance,
+  mintLords,
 }: AdventurerScreenProps) {
   const [activeMenu, setActiveMenu] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -85,6 +89,8 @@ export default function AdventurerScreen({
             isActive={activeMenu == 1}
             onEscape={() => setActiveMenu(0)}
             spawn={spawn}
+            lordsBalance={lordsBalance}
+            mintLords={mintLords}
           />
         </div>
       )}
