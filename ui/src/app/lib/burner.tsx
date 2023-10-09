@@ -7,7 +7,6 @@ import {
   hash,
   Provider,
   stark,
-  TransactionFinalityStatus,
   Call,
   selector,
 } from "starknet";
@@ -18,7 +17,8 @@ import { useContracts } from "../hooks/useContracts";
 import { BurnerStorage } from "../types";
 import { getRPCUrl, getArcadeClassHash } from "./constants";
 
-export const PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
+export const ETH_PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
+export const LORDS_PREFUND_AMOUNT = "0x0d8d726b7177a80000"; // 250LORDS
 
 const rpc_addr = getRPCUrl();
 const provider = new Provider({
@@ -33,7 +33,8 @@ export const useBurner = () => {
   const [isDeploying, setIsDeploying] = useState(false);
   const [isGeneratingNewKey, setIsGeneratingNewKey] = useState(false);
   const [isSettingPermissions, setIsSettingPermissions] = useState(false);
-  const [isToppingUp, setIsToppingUp] = useState(false);
+  const [isToppingUpEth, setIsToppingUpEth] = useState(false);
+  const [isToppingUpLords, setIsToppingUpLords] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const { gameContract, lordsContract, ethContract } = useContracts();
   const arcadeClassHash = getArcadeClassHash();
@@ -128,15 +129,28 @@ export const useBurner = () => {
 
   const prefundAccount = async (address: string, account: AccountInterface) => {
     try {
-      const { transaction_hash } = await account.execute({
-        contractAddress: ethContract?.address ?? "",
+      const transferEthTx = {
+        contractAddress: ethContract?.address ?? "0x0",
         entrypoint: "transfer",
-        calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
-      });
+        calldata: CallData.compile([address, ETH_PREFUND_AMOUNT, "0x0"]),
+      };
+
+      const transferLordsTx = {
+        contractAddress: lordsContract?.address ?? "0x0",
+        entrypoint: "transfer",
+        calldata: CallData.compile([address, LORDS_PREFUND_AMOUNT, "0x0"]),
+      };
+
+      const { transaction_hash } = await account.execute(
+        [transferEthTx, transferLordsTx],
+        undefined,
+        {
+          maxFee: "100000000000000", // currently setting to 0.0001ETH
+        }
+      );
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 1000,
-        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
+        retryInterval: 2000,
       });
 
       if (!result) {
@@ -183,23 +197,28 @@ export const useBurner = () => {
     const {
       transaction_hash: deployTx,
       contract_address: accountAAFinalAdress,
-    } = await burner.deployAccount({
-      classHash: arcadeClassHash!,
-      constructorCalldata: constructorAACalldata,
-      contractAddress: address,
-      addressSalt: publicKey,
-    });
+    } = await burner.deployAccount(
+      {
+        classHash: arcadeClassHash!,
+        constructorCalldata: constructorAACalldata,
+        contractAddress: address,
+        addressSalt: publicKey,
+      },
+      {
+        maxFee: "100000000000000", // currently setting to 0.0001ETH
+      }
+    );
 
     await provider.waitForTransaction(deployTx);
 
     setIsSettingPermissions(true);
 
-    const setPermissionsTx = await setPermissions(
+    const setPermissionsAndApprovalTx = await setPermissionsAndApproval(
       accountAAFinalAdress,
       walletAccount
     );
 
-    await provider.waitForTransaction(setPermissionsTx);
+    await provider.waitForTransaction(setPermissionsAndApprovalTx);
 
     // save burner
     let storage = Storage.get("burners") || {};
@@ -211,7 +230,7 @@ export const useBurner = () => {
       privateKey,
       publicKey,
       deployTx,
-      setPermissionsTx,
+      setPermissionsAndApprovalTx,
       masterAccount: walletAccount.address,
       gameContract: gameContract?.address,
       active: true,
@@ -226,7 +245,7 @@ export const useBurner = () => {
     return burner;
   }, [walletAccount]);
 
-  const setPermissions = useCallback(
+  const setPermissionsAndApproval = useCallback(
     async (accountAAFinalAdress: any, walletAccount: any) => {
       const permissions: Call[] = [
         {
@@ -252,8 +271,18 @@ export const useBurner = () => {
         },
       ];
 
+      // Approve 250 LORDS
+      const approveLordsSpendingTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "approve",
+        calldata: [gameContract?.address ?? "", LORDS_PREFUND_AMOUNT, "0"],
+      };
       const { transaction_hash: permissionsTx } = await walletAccount.execute(
-        permissions
+        [...permissions, approveLordsSpendingTx],
+        undefined,
+        {
+          maxFee: "100000000000000", // currently setting to 0.0001ETH
+        }
       );
 
       return permissionsTx;
@@ -261,36 +290,84 @@ export const useBurner = () => {
     []
   );
 
-  const topUp = async (address: string, account: AccountInterface) => {
+  const topUpEth = async (address: string, account: AccountInterface) => {
     try {
-      setIsToppingUp(true);
+      setIsToppingUpEth(true);
       const { transaction_hash } = await account.execute({
         contractAddress: ethContract?.address ?? "",
         entrypoint: "transfer",
-        calldata: CallData.compile([address, PREFUND_AMOUNT, "0x0"]),
+        calldata: CallData.compile([address, ETH_PREFUND_AMOUNT, "0x0"]),
       });
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 1000,
-        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
+        retryInterval: 2000,
       });
 
       if (!result) {
         throw new Error("Transaction did not complete successfully.");
       }
 
-      setIsToppingUp(false);
+      setIsToppingUpEth(false);
       return result;
-    } catch (error) {
-      console.error(error);
-      throw error;
+    } catch (e) {
+      setIsToppingUpEth(false);
+      console.log(e);
+    }
+  };
+
+  const topUpLords = async (
+    address: string,
+    account: AccountInterface,
+    lordsAmount: number,
+    lordsGameAllowance: number
+  ) => {
+    try {
+      setIsToppingUpLords(true);
+      const lordsTransferTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "transfer",
+        calldata: CallData.compile([
+          address,
+          (lordsAmount * 10 ** 18).toString(),
+          "0x0",
+        ]),
+      };
+      const increasedAllowance = lordsAmount * 10 ** 18 + lordsGameAllowance;
+      const lordsGameApprovalTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "approve",
+        calldata: CallData.compile([
+          gameContract?.address ?? "",
+          increasedAllowance,
+          "0x0",
+        ]),
+      };
+      const { transaction_hash } = await account.execute([
+        lordsTransferTx,
+        lordsGameApprovalTx,
+      ]);
+
+      const result = await account.waitForTransaction(transaction_hash, {
+        retryInterval: 2000,
+      });
+
+      if (!result) {
+        throw new Error("Transaction did not complete successfully.");
+      }
+
+      setIsToppingUpLords(false);
+      return result;
+    } catch (e) {
+      setIsToppingUpLords(false);
+      console.log(e);
     }
   };
 
   const withdraw = async (
     masterAccountAddress: string,
     account: AccountInterface,
-    balance: bigint
+    ethBalance: bigint,
+    lordsBalance: bigint
   ) => {
     try {
       setIsWithdrawing(true);
@@ -309,33 +386,51 @@ export const useBurner = () => {
         entrypoint: "transfer",
         calldata: CallData.compile([
           masterAccountAddress,
-          balance ?? "0x0",
+          ethBalance ?? "0x0",
           "0x0",
         ]),
       };
 
-      const { suggestedMaxFee: estimatedFee } = await mainAccount.estimateFee(
-        call
-      );
+      const transferLordsTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "transfer",
+        calldata: CallData.compile([
+          masterAccountAddress,
+          lordsBalance ?? "0x0",
+          "0x0",
+        ]),
+      };
+
+      const { suggestedMaxFee: estimatedFee } = await mainAccount.estimateFee([
+        call,
+        transferLordsTx,
+      ]);
 
       // Now we negate the fee from balance to withdraw (+10% for safety)
 
-      const newBalance =
-        BigInt(balance) - estimatedFee * (BigInt(11) / BigInt(10));
+      const newEthBalance =
+        BigInt(ethBalance) - estimatedFee * (BigInt(11) / BigInt(10));
 
-      const { transaction_hash } = await account.execute({
+      const transferEthTx = {
         contractAddress: ethContract?.address ?? "",
         entrypoint: "transfer",
         calldata: CallData.compile([
           masterAccountAddress,
-          newBalance ?? "0x0",
+          newEthBalance ?? "0x0",
           "0x0",
         ]),
-      });
+      };
+
+      // If they have Lords also withdraw
+      const calls =
+        lordsBalance > BigInt(0)
+          ? [transferEthTx, transferLordsTx]
+          : [transferEthTx];
+
+      const { transaction_hash } = await account.execute(calls);
 
       const result = await account.waitForTransaction(transaction_hash, {
-        retryInterval: 1000,
-        successStates: [TransactionFinalityStatus.ACCEPTED_ON_L2],
+        retryInterval: 2000,
       });
 
       if (!result) {
@@ -352,40 +447,45 @@ export const useBurner = () => {
 
   const genNewKey = useCallback(
     async (burnerAddress: string) => {
-      setIsGeneratingNewKey(true);
-      const privateKey = stark.randomAddress();
-      const publicKey = ec.starkCurve.getStarkKey(privateKey);
+      try {
+        setIsGeneratingNewKey(true);
+        const privateKey = stark.randomAddress();
+        const publicKey = ec.starkCurve.getStarkKey(privateKey);
 
-      if (!walletAccount) {
-        throw new Error("wallet account not found");
+        if (!walletAccount) {
+          throw new Error("wallet account not found");
+        }
+
+        const { transaction_hash } = await walletAccount.execute({
+          contractAddress: burnerAddress,
+          entrypoint: "set_public_key",
+          calldata: [publicKey],
+        });
+
+        await provider.waitForTransaction(transaction_hash);
+
+        // save new keys
+        let storage = Storage.get("burners") || {};
+        for (let address in storage) {
+          storage[address].active = false;
+        }
+
+        storage[burnerAddress] = {
+          privateKey,
+          publicKey,
+          masterAccount: walletAccount.address,
+          gameContract: gameContract?.address,
+          active: true,
+        };
+
+        Storage.set("burners", storage);
+        setIsGeneratingNewKey(false);
+        refresh();
+        window.location.reload();
+      } catch (e) {
+        setIsGeneratingNewKey(false);
+        console.log(e);
       }
-
-      const { transaction_hash } = await walletAccount.execute({
-        contractAddress: burnerAddress,
-        entrypoint: "set_public_key",
-        calldata: [publicKey],
-      });
-
-      await provider.waitForTransaction(transaction_hash);
-
-      // save new keys
-      let storage = Storage.get("burners") || {};
-      for (let address in storage) {
-        storage[address].active = false;
-      }
-
-      storage[burnerAddress] = {
-        privateKey,
-        publicKey,
-        masterAccount: walletAccount.address,
-        gameContract: gameContract?.address,
-        active: true,
-      };
-
-      Storage.set("burners", storage);
-      setIsGeneratingNewKey(false);
-      refresh();
-      window.location.reload();
     },
     [walletAccount]
   );
@@ -423,14 +523,16 @@ export const useBurner = () => {
     list,
     select,
     create,
-    topUp,
+    topUpEth,
+    topUpLords,
     withdraw,
     genNewKey,
     account,
     isDeploying,
     isSettingPermissions,
     isGeneratingNewKey,
-    isToppingUp,
+    isToppingUpEth,
+    isToppingUpLords,
     isWithdrawing,
     listConnectors,
   };

@@ -1,7 +1,5 @@
-import useAdventurerStore from "../../hooks/useAdventurerStore";
 import { processBeastName } from "../../lib/utils";
 import {
-  HeartIcon,
   CoinIcon,
   GiBruteIcon,
   SkullCrossedBonesIcon,
@@ -140,15 +138,6 @@ export const DiscoveryDisplay = ({ discoveryData }: DiscoveryProps) => {
               <p>GREAT! Discovered {discoveryData?.outputAmount} health! </p>
             </div>
             <HealthPotionIcon />
-          </span>
-        );
-      }
-
-      if (discoveryData?.subDiscoveryType === "XP") {
-        return (
-          <span className="flex flex-row items-center justify-between">
-            <p>NICE! Discovered {discoveryData.outputAmount} XP!</p>
-            <GiStarsStackIcon />
           </span>
         );
       }

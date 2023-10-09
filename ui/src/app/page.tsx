@@ -24,7 +24,7 @@ import useUIStore from "./hooks/useUIStore";
 import useTransactionCartStore from "./hooks/useTransactionCartStore";
 import { NotificationDisplay } from "./components/notifications/NotificationDisplay";
 import { useMusic } from "./hooks/useMusic";
-import { Menu } from "./types";
+import { Menu, NullAdventurer, Call } from "./types";
 import { useQueriesStore } from "./hooks/useQueryStore";
 import Profile from "./containers/ProfileScreen";
 import { DeathDialog } from "./components/adventurer/DeathDialog";
@@ -51,7 +51,10 @@ import NetworkSwitchError from "./components/navigation/NetworkSwitchError";
 import { syscalls } from "./lib/utils/syscalls";
 import { useContracts } from "./hooks/useContracts";
 import { useBalance } from "@starknet-react/core";
+import { ArcadeIntro } from "./components/intro/ArcadeIntro";
+import Logo from "../../public/icons/logo.svg";
 import ScreenMenu from "./components/menu/ScreenMenu";
+import { getArcadeConnectors } from "./lib/connectors";
 import Header from "./components/navigation/Header";
 import { Maintenance } from "./components/archived/Maintenance";
 
@@ -75,6 +78,10 @@ const mobileMenuItems: Menu[] = [
 ];
 
 export default function Home() {
+  // TEMPORARY
+  const [isMintingLords, setIsMintingLords] = useState(false);
+
+  const { disconnect, available } = useConnectors();
   const { chain } = useNetwork();
   const { provider } = useProvider();
   const disconnected = useUIStore((state) => state.disconnected);
@@ -98,6 +105,9 @@ export default function Home() {
   const setIsWrongNetwork = useUIStore((state) => state.setIsWrongNetwork);
 
   const arcadeDialog = useUIStore((state) => state.arcadeDialog);
+  const showArcadeDialog = useUIStore((state) => state.showArcadeDialog);
+  const arcadeIntro = useUIStore((state) => state.arcadeIntro);
+  const showArcadeIntro = useUIStore((state) => state.showArcadeIntro);
   const topUpDialog = useUIStore((state) => state.topUpDialog);
   const showTopUpDialog = useUIStore((state) => state.showTopUpDialog);
   const setTopUpAccount = useUIStore((state) => state.setTopUpAccount);
@@ -118,6 +128,7 @@ export default function Home() {
   const showDeathDialog = useUIStore((state) => state.showDeathDialog);
   const setStartOption = useUIStore((state) => state.setStartOption);
 
+  const arcadeConnectors = getArcadeConnectors(available);
   const lordsBalance = useBalance({
     token: lordsContract?.address,
     address,
@@ -319,6 +330,14 @@ export default function Home() {
     }
   }, [isConnected]);
 
+  useEffect(() => {
+    if (arcadeConnectors.length === 0) {
+      showArcadeIntro(true);
+    } else {
+      showArcadeIntro(false);
+    }
+  }, [arcadeConnectors]);
+
   if (!isConnected && introComplete && disconnected) {
     return <WalletSelect />;
   }
@@ -327,6 +346,34 @@ export default function Home() {
     pendingMessage &&
     (pendingMessage === "Spawning Adventurer" ||
       pendingMessage.includes("Spawning Adventurer"));
+
+  // TEMPORARY FOR TESTING
+  const mintLords = async () => {
+    try {
+      setIsMintingLords(true);
+      // Mint 250 LORDS
+      const mintLords: Call = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "mint",
+        calldata: [address ?? "0x0", (250 * 10 ** 18).toString(), "0"],
+      };
+      addToCalls(mintLords);
+      const tx = await handleSubmitCalls(account!, [...calls, mintLords]);
+      const result = await account?.waitForTransaction(tx?.transaction_hash, {
+        retryInterval: 2000,
+      });
+
+      if (!result) {
+        throw new Error("Lords Mint did not complete successfully.");
+      }
+
+      setIsMintingLords(false);
+      lordsBalance.refetch();
+    } catch (e) {
+      setIsMintingLords(false);
+      console.log(e);
+    }
+  };
 
   return (
     // <Maintenance />
@@ -342,7 +389,10 @@ export default function Home() {
                 <TxActivity />
               </div>
             )}
-            <Header multicall={multicall} />
+            <Header
+              multicall={multicall}
+              mintLords={async () => await mintLords()}
+            />
           </div>
           <div className="w-full h-1 sm:h-6 sm:my-2 bg-terminal-green text-terminal-black px-4">
             {!spawnLoader && (
@@ -354,9 +404,9 @@ export default function Home() {
           <NotificationDisplay />
 
           {deathDialog && <DeathDialog />}
-
+          {arcadeIntro && <ArcadeIntro />}
           {status == "connected" && arcadeDialog && <ArcadeDialog />}
-          {status == "connected" && topUpDialog && <TopUpDialog />}
+          {status == "connected" && topUpDialog && <TopUpDialog token="ETH" />}
 
           {introComplete ? (
             <div className="flex flex-col w-full">
@@ -388,6 +438,8 @@ export default function Home() {
                     <AdventurerScreen
                       spawn={spawn}
                       handleSwitchAdventurer={handleSwitchAdventurer}
+                      lordsBalance={lordsBalance.data?.value}
+                      mintLords={async () => await mintLords()}
                     />
                   )}
                   {screen === "play" && (

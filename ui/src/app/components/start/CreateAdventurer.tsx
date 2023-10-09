@@ -8,12 +8,16 @@ export interface CreateAdventurerProps {
   isActive: boolean;
   onEscape: () => void;
   spawn: (...args: any[]) => any;
+  lordsBalance?: bigint;
+  mintLords: (...args: any[]) => any;
 }
 
 export const CreateAdventurer = ({
   isActive,
   onEscape,
   spawn,
+  lordsBalance,
+  mintLords,
 }: CreateAdventurerProps) => {
   const [formData, setFormData] = useState<FormData>({
     startingWeapon: "",
@@ -87,7 +91,15 @@ export const CreateAdventurer = ({
       />
     );
   } else if (step === 3) {
-    return <Spawn formData={formData} spawn={spawn} handleBack={handleBack} />;
+    return (
+      <Spawn
+        formData={formData}
+        spawn={spawn}
+        handleBack={handleBack}
+        lordsBalance={lordsBalance}
+        mintLords={mintLords}
+      />
+    );
   } else {
     return null;
   }

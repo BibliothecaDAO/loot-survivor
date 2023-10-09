@@ -232,20 +232,6 @@ export function syscalls({
   };
 
   const spawn = async (formData: FormData) => {
-    const mintLords = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(mintLords);
-
-    const approveLordsTx = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(approveLordsTx);
-
     const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "new_game",
@@ -258,13 +244,15 @@ export function syscalls({
 
     addToCalls(mintAdventurerTx);
     const balanceEmpty = await checkArcadeBalance(
-      [...calls, mintLords, approveLordsTx, mintAdventurerTx],
+      [...calls, mintAdventurerTx],
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
       setEstimatingFee,
       account
     );
+
+    console.log(balanceEmpty);
 
     if (!balanceEmpty) {
       startLoading(
@@ -276,8 +264,6 @@ export function syscalls({
       try {
         const tx = await handleSubmitCalls(account, [
           ...calls,
-          mintLords,
-          approveLordsTx,
           mintAdventurerTx,
         ]);
         setTxHash(tx?.transaction_hash);

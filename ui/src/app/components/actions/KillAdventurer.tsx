@@ -5,7 +5,6 @@ import useTransactionCartStore from "@/app/hooks/useTransactionCartStore";
 import { useUiSounds, soundSelector } from "../../hooks/useUiSound";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { getAdventurerById } from "../../hooks/graphql/queries";
-import useLoadingStore from "@/app/hooks/useLoadingStore";
 import TopInfo from "../adventurer/TopInfo";
 import { useQueriesStore } from "@/app/hooks/useQueryStore";
 import { useBlock } from "@starknet-react/core";
@@ -17,7 +16,6 @@ export default function KillAdventurer() {
   const [adventurerTarget, setAdventurerTarget] = useState("");
   const addToCalls = useTransactionCartStore((s) => s.addToCalls);
   const { play: clickPlay } = useUiSounds(soundSelector.click);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
   const { data: blockData } = useBlock({
     refetchInterval: false,
   });

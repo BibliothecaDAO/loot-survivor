@@ -49,11 +49,6 @@ export default function TopInfo({ adventurer }: InfoProps) {
                 <LevelBar xp={formatAdventurer.xp ?? 0} />
               </div>
             </div>
-            {/* {0 === 0 && (
-          <div className="absolute w-full h-full flex items-center justify-center backdrop-blur-[1px]">
-            <p className="text-6xl font-bold text-red-600 uppercase">DEAD</p>
-          </div>
-        )} */}
           </div>
         </div>
       ) : (
