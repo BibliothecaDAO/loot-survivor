@@ -391,9 +391,20 @@ export const useBurner = () => {
         ]),
       };
 
-      const { suggestedMaxFee: estimatedFee } = await mainAccount.estimateFee(
-        call
-      );
+      const transferLordsTx = {
+        contractAddress: lordsContract?.address ?? "",
+        entrypoint: "transfer",
+        calldata: CallData.compile([
+          masterAccountAddress,
+          lordsBalance ?? "0x0",
+          "0x0",
+        ]),
+      };
+
+      const { suggestedMaxFee: estimatedFee } = await mainAccount.estimateFee([
+        call,
+        transferLordsTx,
+      ]);
 
       // Now we negate the fee from balance to withdraw (+10% for safety)
 
@@ -406,16 +417,6 @@ export const useBurner = () => {
         calldata: CallData.compile([
           masterAccountAddress,
           newEthBalance ?? "0x0",
-          "0x0",
-        ]),
-      };
-
-      const transferLordsTx = {
-        contractAddress: lordsContract?.address ?? "",
-        entrypoint: "transfer",
-        calldata: CallData.compile([
-          masterAccountAddress,
-          lordsBalance ?? "0x0",
           "0x0",
         ]),
       };
