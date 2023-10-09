@@ -147,12 +147,10 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
   }
 
   return (
-    <div className="sm:w-2/3 sm:h-2/3 flex flex-col sm:flex-row">
+    <div className="sm:w-2/3 flex flex-col sm:flex-row h-full">
       <div className="sm:w-1/2 order-1 sm:order-2">
         {hasBeast ? (
-          <>
-            <BeastDisplay beastData={beastData} />
-          </>
+          <BeastDisplay beastData={beastData} />
         ) : (
           <div className="flex flex-col items-center border-2 border-terminal-green">
             <p className="m-auto text-lg uppercase text-terminal-green">
@@ -206,7 +204,7 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
           </>
         )}
 
-        <div className="hidden sm:block xl:h-[500px] 2xl:h-full">
+        <div className="hidden sm:block">
           {(hasBeast || formatBattles.length > 0) && <BattleLog />}
         </div>
 

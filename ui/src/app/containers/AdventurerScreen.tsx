@@ -71,7 +71,7 @@ export default function AdventurerScreen({
   }
 
   return (
-    <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap">
+    <div className="flex flex-col gap-2 sm:gap-0 sm:flex-row flex-wrap h-full">
       <div className="w-full sm:w-2/12">
         <ButtonMenu
           buttonsData={menu}
@@ -96,7 +96,7 @@ export default function AdventurerScreen({
       )}
 
       {startOption === "choose adventurer" && (
-        <div className="flex flex-col sm:w-5/6">
+        <div className="flex flex-col sm:w-5/6 h-[500px] sm:h-full">
           <p className="text-center text-xl sm:hidden uppercase">Adventurers</p>
 
           <AdventurersList
