@@ -60,7 +60,6 @@ const LiveLeaderboardRow = ({
         formattedSlayedAdventurers.length.toString(),
         ...slayAdventurers,
         adventurer?.id?.toString() ?? "0",
-        "0",
       ],
       metadata: `Slaying ${adventurer.name}`,
     };

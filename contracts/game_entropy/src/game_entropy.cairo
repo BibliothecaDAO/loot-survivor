@@ -1,6 +1,6 @@
-use debug::PrintTrait;
 use poseidon::poseidon_hash_span;
 use starknet::{StorePacking};
+use super::constants;
 
 #[derive(Drop, Copy, Serde)]
 struct GameEntropy {
@@ -52,13 +52,17 @@ impl ImplGameEntropy of IGameEntropy {
     /// @param next_update_block The block number for the next scheduled update.
     /// @return A new instance of GameEntropy.
     fn new(last_updated_block: u64, last_updated_time: u64, next_update_block: u64) -> GameEntropy {
-        let hash = ImplGameEntropy::get_hash(last_updated_block, last_updated_time, next_update_block);
+        let hash = ImplGameEntropy::get_hash(
+            last_updated_block, last_updated_time, next_update_block
+        );
         GameEntropy { hash, last_updated_block, last_updated_time, next_update_block }
     }
 
     /// @notice Calculate a hash based on the properties of the GameEntropy struct
     /// @return A 252-bit hash value
-    fn get_hash(last_updated_block: u64, last_updated_time: u64, next_update_block: u64) -> felt252 {
+    fn get_hash(
+        last_updated_block: u64, last_updated_time: u64, next_update_block: u64
+    ) -> felt252 {
         let mut hash_span = ArrayTrait::<felt252>::new();
         hash_span.append(last_updated_block.into());
         hash_span.append(last_updated_time.into());
@@ -106,10 +110,12 @@ impl ImplGameEntropy of IGameEntropy {
     #[inline(always)]
     fn get_rate_limit(self: GameEntropy) -> u64 {
         let blocks_per_hour = self.current_blocks_per_hour();
-        if blocks_per_hour < 120 {
-            return (120 / blocks_per_hour);
+        if blocks_per_hour < constants::RATE_LIMIT_ACTIONS_PER_HOUR.into() {
+            constants::RATE_LIMIT_ACTIONS_PER_HOUR.into() / blocks_per_hour
         } else {
-            return 1;
+            // if the current blocks per hour exceeds the rate limit, we return 1
+            // which means 1 action per block
+            1
         }
     }
 
@@ -148,7 +154,9 @@ mod tests {
         let last_updated_time = 1696209920;
         let next_update_block = 282364;
 
-        let game_entropy = ImplGameEntropy::new(last_updated_block, last_updated_time, next_update_block);
+        let game_entropy = ImplGameEntropy::new(
+            last_updated_block, last_updated_time, next_update_block
+        );
         assert(game_entropy.hash != 0, 'hash should be set');
         assert(game_entropy.last_updated_block == last_updated_block, 'wrong last_updated_block');
         assert(game_entropy.last_updated_time == last_updated_time, 'wrong last_updated_time');
@@ -162,7 +170,9 @@ mod tests {
         let last_updated_block = 0;
         let last_updated_time = 0;
         let next_update_block = 0;
-        let hash = ImplGameEntropy::get_hash(last_updated_block, last_updated_time, next_update_block);
+        let hash = ImplGameEntropy::get_hash(
+            last_updated_block, last_updated_time, next_update_block
+        );
     }
 
     #[test]
@@ -215,7 +225,10 @@ mod tests {
     #[available_gas(6350)]
     fn test_current_blocks_per_hour() {
         let game_entropy = GameEntropy {
-            hash: 0x123, last_updated_block: 282465, last_updated_time: 1696214108, next_update_block: 282481,
+            hash: 0x123,
+            last_updated_block: 282465,
+            last_updated_time: 1696214108,
+            next_update_block: 282481,
         };
         let blocks_per_hour = game_entropy.current_blocks_per_hour();
         assert(blocks_per_hour == 96, 'wrong blocks per hour')

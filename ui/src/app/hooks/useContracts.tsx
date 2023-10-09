@@ -1,7 +1,7 @@
-import { useContract, useAccount } from "@starknet-react/core";
+import { useContract } from "@starknet-react/core";
 import Game from "../abi/Game.json";
 import Lords from "../abi/Lords.json";
-import { contracts, mainnet_addr } from "../lib/constants";
+import { getContracts } from "../lib/constants";
 
 const ethBalanceABIFragment = [
   {
@@ -65,28 +65,20 @@ const ethBalanceABIFragment = [
 ];
 
 export const useContracts = () => {
-  const { account } = useAccount();
+  const contracts = getContracts();
 
   const { contract: gameContract } = useContract({
-    address:
-      (account as any)?.provider?.baseUrl == mainnet_addr ||
-      (account as any)?.baseUrl == mainnet_addr
-        ? contracts.mainnet.game
-        : contracts.goerli.game,
-    abi: Game,
+    address: contracts?.game,
+    abi: Adventurer,
   });
   const { contract: lordsContract } = useContract({
-    address:
-      (account as any)?.provider?.baseUrl == mainnet_addr ||
-      (account as any)?.baseUrl == mainnet_addr
-        ? contracts.mainnet.lords
-        : contracts.goerli.lords,
-    abi: Lords,
+    address: contracts?.lords,
+    abi: Lords_ERC20_Mintable,
   });
 
   const { contract: ethContract } = useContract({
+    address: contracts?.eth,
     abi: ethBalanceABIFragment,
-    address: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
   });
 
   return {

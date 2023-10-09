@@ -15,14 +15,15 @@ import { useAccount, useConnectors } from "@starknet-react/core";
 import { ArcadeConnector } from "./arcade";
 import { useContracts } from "../hooks/useContracts";
 import { BurnerStorage } from "../types";
+import { getRPCUrl, getArcadeClassHash } from "./constants";
 
 export const ETH_PREFUND_AMOUNT = "0x38D7EA4C68000"; // 0.001ETH
 export const LORDS_PREFUND_AMOUNT = "0x0d8d726b7177a80000"; // 250LORDS
 
+const rpc_addr = getRPCUrl();
 const provider = new Provider({
-  sequencer: {
-    baseUrl: "https://alpha4.starknet.io",
-  },
+  rpc: { nodeUrl: rpc_addr! },
+  sequencer: { baseUrl: rpc_addr! },
 });
 
 export const useBurner = () => {
@@ -35,7 +36,8 @@ export const useBurner = () => {
   const [isToppingUpEth, setIsToppingUpEth] = useState(false);
   const [isToppingUpLords, setIsToppingUpLords] = useState(false);
   const [isWithdrawing, setIsWithdrawing] = useState(false);
-  const { gameContract, lordsContract } = useContracts();
+  const { gameContract, lordsContract, ethContract } = useContracts();
+  const arcadeClassHash = getArcadeClassHash();
 
   // init
   useEffect(() => {
@@ -175,7 +177,7 @@ export const useBurner = () => {
 
     const address = hash.calculateContractAddressFromHash(
       publicKey,
-      process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
+      arcadeClassHash!,
       constructorAACalldata,
       0
     );
@@ -193,7 +195,7 @@ export const useBurner = () => {
       transaction_hash: deployTx,
       contract_address: accountAAFinalAdress,
     } = await burner.deployAccount({
-      classHash: process.env.NEXT_PUBLIC_ACCOUNT_CLASS_HASH!,
+      classHash: arcadeClassHash!,
       constructorCalldata: constructorAACalldata,
       contractAddress: address,
       addressSalt: publicKey,
@@ -254,7 +256,7 @@ export const useBurner = () => {
           entrypoint: "update_whitelisted_calls",
           calldata: [
             "1",
-            process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+            ethContract?.address ?? "",
             selector.getSelectorFromName("transfer"),
             "1",
           ],
@@ -281,7 +283,7 @@ export const useBurner = () => {
     try {
       setIsToppingUpEth(true);
       const { transaction_hash } = await account.execute({
-        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        contractAddress: ethContract?.address ?? "",
         entrypoint: "transfer",
         calldata: CallData.compile([address, ETH_PREFUND_AMOUNT, "0x0"]),
       });
@@ -368,7 +370,7 @@ export const useBurner = () => {
       );
 
       const call = {
-        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        contractAddress: ethContract?.address ?? "",
         entrypoint: "transfer",
         calldata: CallData.compile([
           masterAccountAddress,
@@ -387,7 +389,7 @@ export const useBurner = () => {
         BigInt(balance) - estimatedFee * (BigInt(11) / BigInt(10));
 
       const { transaction_hash } = await account.execute({
-        contractAddress: process.env.NEXT_PUBLIC_ETH_CONTRACT_ADDRESS!,
+        contractAddress: ethContract?.address ?? "",
         entrypoint: "transfer",
         calldata: CallData.compile([
           masterAccountAddress,

@@ -28,9 +28,9 @@ export const getWalletConnectors = (available: Connector[]) =>
 
 function argentWebWalletUrl() {
   switch (process.env.NEXT_PUBLIC_NETWORK) {
-    case "dev":
+    case "goerli":
       return "https://web.hydrogen.argent47.net";
-    case "production":
+    case "mainnet":
       return "https://web.argent.xyz/";
     default:
       return "https://web.hydrogen.argent47.net";

@@ -621,8 +621,6 @@ class AdventurersFilter:
     id: Optional[FeltValueFilter] = None
     lastAction: Optional[FeltValueFilter] = None
     owner: Optional[HexValueFilter] = None
-    classType: Optional[ClassFilter] = None
-    homeRealm: Optional[FeltValueFilter] = None
     name: Optional[StringFilter] = None
     health: Optional[FeltValueFilter] = None
     strength: Optional[FeltValueFilter] = None
@@ -643,6 +641,7 @@ class AdventurersFilter:
     ring: Optional[FeltValueFilter] = None
     beastHealth: Optional[FeltValueFilter] = None
     statUpgrades: Optional[FeltValueFilter] = None
+    actionsPerBlock: Optional[FeltValueFilter] = None
     gold: Optional[FeltValueFilter] = None
     createdTime: Optional[OrderByInput] = None
     lastUpdatedTime: Optional[DateTimeFilter] = None
@@ -750,8 +749,6 @@ class AdventurersOrderByInput:
     id: Optional[OrderByInput] = None
     lastAction: Optional[OrderByInput] = None
     owner: Optional[OrderByInput] = None
-    classType: Optional[OrderByInput] = None
-    homeRealm: Optional[OrderByInput] = None
     name: Optional[OrderByInput] = None
     health: Optional[OrderByInput] = None
     level: Optional[OrderByInput] = None
@@ -773,6 +770,7 @@ class AdventurersOrderByInput:
     ring: Optional[OrderByInput] = None
     beastHealth: Optional[OrderByInput] = None
     statUpgrades: Optional[OrderByInput] = None
+    actionsPerBlock: Optional[OrderByInput] = None
     gold: Optional[OrderByInput] = None
     createdTime: Optional[OrderByInput] = None
     lastUpdatedTime: Optional[OrderByInput] = None
@@ -881,8 +879,6 @@ class Adventurer:
     id: Optional[FeltValue]
     lastAction: Optional[FeltValue]
     owner: Optional[HexValue]
-    classType: Optional[ClassValue]
-    homeRealm: Optional[FeltValue]
     name: Optional[StringValue]
     health: Optional[FeltValue]
     strength: Optional[FeltValue]
@@ -903,6 +899,7 @@ class Adventurer:
     ring: Optional[ItemValue]
     beastHealth: Optional[FeltValue]
     statUpgrades: Optional[FeltValue]
+    actionsPerBlock: Optional[FeltValue]
     gold: Optional[FeltValue]
     createdTime: Optional[str]
     lastUpdatedTime: Optional[str]
@@ -914,8 +911,6 @@ class Adventurer:
             id=data["id"],
             lastAction=data["lastAction"],
             owner=data["owner"],
-            classType=data["classType"],
-            homeRealm=data["homeRealm"],
             name=data["name"],
             health=data["health"],
             strength=data["strength"],
@@ -936,6 +931,7 @@ class Adventurer:
             ring=data["ring"],
             beastHealth=data["beastHealth"],
             statUpgrades=data["statUpgrades"],
+            actionsPerBlock=data["actionsPerBlock"],
             gold=data["gold"],
             createdTime=data["createdTime"],
             lastUpdatedTime=data["lastUpdatedTime"],

@@ -53,10 +53,9 @@ export default function Info({
     if (gameContract) {
       const dropItemsTx = {
         contractAddress: gameContract?.address,
-        entrypoint: "drop_items",
+        entrypoint: "drop",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           newDropItems.length.toString(),
           ...newDropItems,
         ],
@@ -138,15 +137,6 @@ export default function Info({
                     +{maxHealthPlus}
                   </p>
                 )}
-              </div>
-              <div className="flex justify-between w-full text-sm sm:text-base">
-                {formatAdventurer.classType}{" "}
-                <span>
-                  {
-                    getRealmNameById(formatAdventurer.homeRealm ?? 0)
-                      ?.properties.name
-                  }
-                </span>
               </div>
               <hr className="border-terminal-green" />
               <div className="flex justify-between w-full sm:text-sm lg:text-xl pb-1">

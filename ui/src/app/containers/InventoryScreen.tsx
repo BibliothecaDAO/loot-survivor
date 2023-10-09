@@ -63,7 +63,6 @@ export default function InventoryScreen() {
         entrypoint: "equip",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           newEquipItems.length.toString(),
           ...newEquipItems,
         ],
@@ -83,10 +82,9 @@ export default function InventoryScreen() {
     if (gameContract) {
       const dropItemsTx = {
         contractAddress: gameContract?.address,
-        entrypoint: "drop_items",
+        entrypoint: "drop",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           newDropItems.length.toString(),
           ...newDropItems,
         ],

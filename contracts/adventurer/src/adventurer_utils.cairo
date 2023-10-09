@@ -9,8 +9,8 @@ use core::{
 use super::{
     constants::{
         adventurer_constants::{
-            MAX_STAT_VALUE, U128_MAX, ClassStatBoosts, STARTING_HEALTH,
-            HEALTH_INCREASE_PER_VITALITY, MAX_ADVENTURER_HEALTH
+            MAX_STAT_VALUE, U128_MAX, STARTING_HEALTH, HEALTH_INCREASE_PER_VITALITY,
+            MAX_ADVENTURER_HEALTH
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
     },
@@ -317,8 +317,8 @@ mod tests {
     use survivor::{
         constants::{
             adventurer_constants::{
-                MAX_STAT_VALUE, U128_MAX, ClassStatBoosts, STARTING_HEALTH,
-                HEALTH_INCREASE_PER_VITALITY, MAX_ADVENTURER_HEALTH
+                MAX_STAT_VALUE, U128_MAX, STARTING_HEALTH, HEALTH_INCREASE_PER_VITALITY,
+                MAX_ADVENTURER_HEALTH
             },
             discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
         },

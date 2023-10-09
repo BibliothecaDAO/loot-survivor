@@ -5,7 +5,7 @@ import useLoadingStore from "../../hooks/useLoadingStore";
 import { Button } from "../buttons/Button";
 import useUIStore from "../../hooks/useUIStore";
 import { getRankFromList, getOrdinalSuffix } from "../../lib/utils";
-import { appUrl } from "@/app/lib/constants";
+import { getAppUrl } from "@/app/lib/constants";
 import { getAdventurerByXP } from "@/app/hooks/graphql/queries";
 import useCustomQuery from "@/app/hooks/useCustomQuery";
 import { NullAdventurer, Adventurer } from "@/app/types";
@@ -119,7 +119,7 @@ export const DeathDialog = () => {
                   adventurer?.xp
                 } XP.\n\nGravestone bears the inscription:\n\n"${
                   messageRef.current?.innerText
-                }"🪦\n\nEnter here and try to survive: ${appUrl}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
+                }"🪦\n\nEnter here and try to survive: ${getAppUrl()}\n\n@lootrealms #Starknet #Play2Die #LootSurvivor`}
               />
               <Button
                 onClick={() => {

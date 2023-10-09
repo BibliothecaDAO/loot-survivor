@@ -13,15 +13,16 @@ use super::{
         adventurer_constants::{
             STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH, CHARISMA_POTION_DISCOUNT,
             MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE, HEALTH_INCREASE_PER_VITALITY, MAX_GOLD,
-            MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS,
-            ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, ClassStatBoosts,
+            MAX_STAT_VALUE, MAX_STAT_UPGRADE_POINTS, MAX_XP, MAX_ADVENTURER_BLOCKS,
+            ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT,
             MAX_BLOCK_COUNT, STAT_UPGRADE_POINTS_PER_LEVEL, NECKLACE_G20_BONUS_STATS,
             SILVER_RING_G20_LUCK_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, U128_MAX,
             JEWELRY_BONUS_BEAST_GOLD_PERCENT, JEWELRY_BONUS_CRITICAL_HIT_PERCENT_PER_GREATNESS,
             JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS, NECKLACE_ARMOR_BONUS,
             MINIMUM_DAMAGE_FROM_BEASTS, OBSTACLE_CRITICAL_HIT_CHANCE, BEAST_CRITICAL_HIT_CHANCE,
             SILVER_RING_LUCK_BONUS_PER_GREATNESS, MINIMUM_DAMAGE_FROM_OBSTACLES,
-            MINIMUM_DAMAGE_TO_BEASTS, MAX_ACTIONS_PER_BLOCK
+            MINIMUM_DAMAGE_TO_BEASTS, MAX_ACTIONS_PER_BLOCK, MAX_PACKABLE_ITEM_XP,
+            MAX_PACKABLE_BEAST_HEALTH, MAX_LAST_ACTION_BLOCK
         },
         discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
     }
@@ -60,6 +61,8 @@ struct Adventurer {
 
 impl AdventurerPacking of StorePacking<Adventurer, felt252> {
     fn pack(value: Adventurer) -> felt252 {
+        value.prepack_overflow_assertions();
+
         (value.last_action_block.into()
             + value.health.into() * TWO_POW_9
             + value.xp.into() * TWO_POW_18
@@ -501,7 +504,7 @@ impl ImplAdventurer of IAdventurer {
     }
 
     // @notice Grants stat upgrades to the Adventurer.
-    // @dev The function will add the specified value to the stat_points_available up to the maximum limit of MAX_STAT_UPGRADES.
+    // @dev The function will add the specified value to the stat_points_available up to the maximum limit of MAX_STAT_UPGRADE_POINTS.
     // @param value The amount of stat points to be added to the Adventurer.
     #[inline(always)]
     fn increase_stat_points_available(ref self: Adventurer, amount: u8) {
@@ -509,17 +512,17 @@ impl ImplAdventurer of IAdventurer {
         if (u8_overflowing_add(self.stat_points_available, amount).is_ok()) {
             // if overflow is ok
             // check if added amount is less than or equal to max upgrade points
-            if (self.stat_points_available + amount <= MAX_STAT_UPGRADES) {
+            if (self.stat_points_available + amount <= MAX_STAT_UPGRADE_POINTS) {
                 // if it is, add upgrade points to adventurer and return
                 self.stat_points_available += amount;
                 return;
             }
         }
 
-        // fall through is to return MAX_STAT_UPGRADES
+        // fall through is to return MAX_STAT_UPGRADE_POINTS
         // this will happen either in a u8 overflow case
         // or if the upgrade points being added exceeds max upgrade points
-        self.stat_points_available = MAX_STAT_UPGRADES
+        self.stat_points_available = MAX_STAT_UPGRADE_POINTS
     }
 
     // @notice Increase the Adventurer's strength stat.
@@ -1705,7 +1708,32 @@ impl ImplAdventurer of IAdventurer {
 
     #[inline(always)]
     fn reset_actions_per_block(ref self: Adventurer) {
-        self.actions_per_block = 1;
+        self.actions_per_block = 0;
+    }
+
+    #[inline(always)]
+    fn prepack_overflow_assertions(self: Adventurer) {
+        assert(self.health <= MAX_ADVENTURER_HEALTH, 'health overflow');
+        assert(self.xp <= MAX_XP, 'xp overflow');
+        assert(self.gold <= MAX_GOLD, 'gold overflow');
+        assert(self.stats.strength <= MAX_STAT_VALUE, 'strength overflow');
+        assert(self.stats.dexterity <= MAX_STAT_VALUE, 'dexterity overflow');
+        assert(self.stats.vitality <= MAX_STAT_VALUE, 'vitality overflow');
+        assert(self.stats.charisma <= MAX_STAT_VALUE, 'charisma overflow');
+        assert(self.stats.intelligence <= MAX_STAT_VALUE, 'intelligence overflow');
+        assert(self.stats.wisdom <= MAX_STAT_VALUE, 'wisdom overflow');
+        assert(self.weapon.xp <= MAX_PACKABLE_ITEM_XP, 'weapon xp overflow');
+        assert(self.chest.xp <= MAX_PACKABLE_ITEM_XP, 'chest xp overflow');
+        assert(self.head.xp <= MAX_PACKABLE_ITEM_XP, 'head xp overflow');
+        assert(self.waist.xp <= MAX_PACKABLE_ITEM_XP, 'waist xp overflow');
+        assert(self.foot.xp <= MAX_PACKABLE_ITEM_XP, 'foot xp overflow');
+        assert(self.hand.xp <= MAX_PACKABLE_ITEM_XP, 'hand xp overflow');
+        assert(self.neck.xp <= MAX_PACKABLE_ITEM_XP, 'neck xp overflow');
+        assert(self.ring.xp <= MAX_PACKABLE_ITEM_XP, 'ring xp overflow');
+        assert(self.beast_health <= MAX_PACKABLE_BEAST_HEALTH, 'beast health overflow');
+        assert(self.stat_points_available <= MAX_STAT_UPGRADE_POINTS, 'stat points avail overflow');
+        assert(self.last_action_block <= MAX_LAST_ACTION_BLOCK, 'last action block overflow');
+        assert(self.actions_per_block <= MAX_ACTIONS_PER_BLOCK, 'actions per block overflow');
     }
 }
 
@@ -1753,11 +1781,12 @@ mod tests {
             adventurer_constants::{
                 STARTING_GOLD, StatisticIndex, POTION_PRICE, STARTING_HEALTH,
                 CHARISMA_POTION_DISCOUNT, MINIMUM_ITEM_PRICE, MINIMUM_POTION_PRICE,
-                HEALTH_INCREASE_PER_VITALITY, MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADES, MAX_XP,
-                MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS, ITEM_MAX_XP, MAX_ADVENTURER_HEALTH,
-                CHARISMA_ITEM_DISCOUNT, ClassStatBoosts, MAX_BLOCK_COUNT,
+                HEALTH_INCREASE_PER_VITALITY, MAX_GOLD, MAX_STAT_VALUE, MAX_STAT_UPGRADE_POINTS,
+                MAX_XP, MAX_ADVENTURER_BLOCKS, ITEM_MAX_GREATNESS, ITEM_MAX_XP,
+                MAX_ADVENTURER_HEALTH, CHARISMA_ITEM_DISCOUNT, MAX_BLOCK_COUNT,
                 SILVER_RING_G20_LUCK_BONUS, JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS,
-                NECKLACE_ARMOR_BONUS, SILVER_RING_LUCK_BONUS_PER_GREATNESS
+                NECKLACE_ARMOR_BONUS, SILVER_RING_LUCK_BONUS_PER_GREATNESS, MAX_ACTIONS_PER_BLOCK,
+                MAX_PACKABLE_ITEM_XP, MAX_PACKABLE_BEAST_HEALTH, MAX_LAST_ACTION_BLOCK
             },
             discovery_constants::DiscoveryEnums::{ExploreResult, DiscoveryType}
         }
@@ -2833,6 +2862,186 @@ mod tests {
     }
 
     #[test]
+    #[should_panic(expected: ('health overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_health() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.health = MAX_ADVENTURER_HEALTH + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('gold overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_gold() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.gold = MAX_GOLD + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('xp overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_xp() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.xp = MAX_XP + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('strength overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_strength() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.stats.strength = MAX_STAT_VALUE + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('dexterity overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_dexterity() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.stats.dexterity = MAX_STAT_VALUE + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('vitality overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_vitality() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.stats.vitality = MAX_STAT_VALUE + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('intelligence overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_intelligence() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.stats.intelligence = MAX_STAT_VALUE + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('wisdom overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_wisdom() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.stats.wisdom = MAX_STAT_VALUE + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('weapon xp overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_weapon_xp() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.weapon.xp = MAX_PACKABLE_ITEM_XP + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('chest xp overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_chest_xp() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.chest.xp = MAX_PACKABLE_ITEM_XP + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('head xp overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_head_xp() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.head.xp = MAX_PACKABLE_ITEM_XP + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('waist xp overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_waist_xp() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.waist.xp = MAX_PACKABLE_ITEM_XP + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('foot xp overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_foot_xp() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.foot.xp = MAX_PACKABLE_ITEM_XP + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('hand xp overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_hand_xp() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.hand.xp = MAX_PACKABLE_ITEM_XP + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('neck xp overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_neck_xp() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.neck.xp = MAX_PACKABLE_ITEM_XP + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('ring xp overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_ring_xp() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.ring.xp = MAX_PACKABLE_ITEM_XP + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('beast health overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_beast_health() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.beast_health = MAX_PACKABLE_BEAST_HEALTH + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('stat points avail overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_stat_points_available() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.stat_points_available = MAX_STAT_UPGRADE_POINTS + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('actions per block overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_actions_per_block() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.actions_per_block = MAX_ACTIONS_PER_BLOCK + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
+    #[should_panic(expected: ('last action block overflow',))]
+    #[available_gas(3000000)]
+    fn test_pack_protection_overflow_last_action_block() {
+        let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
+        adventurer.last_action_block = MAX_LAST_ACTION_BLOCK + 1;
+        AdventurerPacking::pack(adventurer);
+    }
+
+    #[test]
     #[available_gas(2000000)]
     fn test_new_adventurer() {
         let mut adventurer = ImplAdventurer::new(12, 0, 0, 0);
@@ -2976,19 +3185,24 @@ mod tests {
         );
 
         // max stat upgrade value case
-        adventurer.increase_stat_points_available(MAX_STAT_UPGRADES);
-        assert(adventurer.stat_points_available == MAX_STAT_UPGRADES, 'stat points should be max');
+        adventurer.increase_stat_points_available(MAX_STAT_UPGRADE_POINTS);
+        assert(
+            adventurer.stat_points_available == MAX_STAT_UPGRADE_POINTS, 'stat points should be max'
+        );
 
         // pack and unpack at max value to ensure our max values are correct for packing
         let unpacked: Adventurer = AdventurerPacking::unpack(AdventurerPacking::pack(adventurer));
         assert(
-            unpacked.stat_points_available == MAX_STAT_UPGRADES, 'stat point should still be max'
+            unpacked.stat_points_available == MAX_STAT_UPGRADE_POINTS,
+            'stat point should still be max'
         );
 
         // extreme/overflow case
         adventurer.stat_points_available = 255;
         adventurer.increase_stat_points_available(255);
-        assert(adventurer.stat_points_available == MAX_STAT_UPGRADES, 'stat points should be max');
+        assert(
+            adventurer.stat_points_available == MAX_STAT_UPGRADE_POINTS, 'stat points should be max'
+        );
     }
 
     #[test]

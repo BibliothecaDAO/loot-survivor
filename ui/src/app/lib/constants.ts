@@ -10,32 +10,66 @@ export const chapter4 =
   "They find golden coins in their pocket, glimmering in the dim light - an enigma wrapped in the shroud of the unexpected.";
 export const battle = "A beast lurks in the shadow, prepare for battle!";
 
-export const mainnet_addr =
-  process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://alpha-mainnet.starknet.io";
+export const NETWORK: "goerli" | "mainnet" = "goerli";
+
+export function getRPCUrl() {
+  switch (NETWORK) {
+    case "goerli":
+      return "https://starknet-goerli.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
+    case "mainnet":
+      return "https://starknet-mainnet.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
+    default:
+      return "http://localhost:8000/graphql";
+  }
+}
 
 export function getGraphQLUrl() {
-  switch (process.env.NEXT_PUBLIC_NETWORK) {
-    case "dev":
+  switch (NETWORK) {
+    case "goerli":
       return "https://survivor-indexer.realms.world/goerli-graphql";
-    case "production":
+    case "mainnet":
       return "https://survivor-indexer.realms.world/graphql";
     default:
       return "http://localhost:8000/graphql";
   }
 }
 
-export const contracts = {
-  mainnet: {
-    game: "0x0",
-    lords: "0x067e87cea28bfd9314a1d3c41fb26a58ca1346ff0ea2452e59b9eeb2828692dc",
-  },
-  goerli: {
-    game: "0x01263ecbc05e28d1e99f531894838db10b90cfcdd39d020642da1747a733a37a",
-    lords: "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
-  },
-};
+export function getContracts() {
+  switch (NETWORK) {
+    case "goerli":
+      return {
+        eth: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        game: "0x03f2ac2c55abbf633123ddb72adc3472feefc4e962c4cedc16dda11a2ac8d1d4",
+        lords:
+          "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
+      };
+    case "mainnet":
+      return {
+        eth: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
+        game: "0x0",
+        lords:
+          "0x0124aeb495b947201f5fac96fd1138e326ad86195b98df6dec9009158a533b49",
+      };
+  }
+}
 
-export const appUrl = "https://survivor.realms.world/";
+export function getArcadeClassHash() {
+  switch (NETWORK) {
+    case "goerli":
+      return "0x0715b5e10bf63c36e69c402a81e1eb96b9107ef56eb5e821b00893e39bdcf545";
+    case "mainnet":
+      return "0x0";
+  }
+}
+
+export function getAppUrl() {
+  switch (NETWORK) {
+    case "goerli":
+      return "https://starknet-goerli.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
+    case "mainnet":
+      return "https://starknet-mainnet.infura.io/v3/6c536e8272f84d3ba63bf9f248c5e128";
+  }
+}
 
 export const notificationAnimations = [
   { name: "idle", startFrame: 0, frameCount: 4 },
@@ -53,7 +87,7 @@ export const notificationAnimations = [
 
 // ---- CONTRACT PARAMS
 // Penalty time is 12 blocks, where each block is ~ 15 seconds
-export const penaltyTime = 12 * 15;
+export const penaltyTime = 420;
 export const itemCharismaDiscount = 1;
 export const itemBasePrice = 4;
 export const itemMinimumPrice = 1;

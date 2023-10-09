@@ -219,13 +219,12 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
     potions?: number,
     items?: any[]
   ) => {
-    removeEntrypointFromCalls("upgrade_adventurer");
+    removeEntrypointFromCalls("upgrade");
     const upgradeTx = {
       contractAddress: gameContract?.address ?? "",
-      entrypoint: "upgrade_adventurer",
+      entrypoint: "upgrade",
       calldata: [
         adventurer?.id?.toString() ?? "",
-        "0",
         potions ? potions.toString() : potionAmount.toString(),
         currentUpgrades
           ? currentUpgrades["Strength"].toString()
