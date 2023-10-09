@@ -1,9 +1,19 @@
 // Starting Setting
 const STARTING_GOLD: u16 = 25;
-const MAX_GOLD: u16 = 511; // 2^9 - 1
-
 const STARTING_HEALTH: u16 = 100;
-const MAX_ADVENTURER_HEALTH: u16 = 511; // 2^9 - 1
+
+// Adventurer Max Values
+const MAX_ADVENTURER_HEALTH: u16 = 511; // 9 bits
+const MAX_XP: u16 = 8191; // 13 bits
+const MAX_STAT_VALUE: u8 = 15; // 4 bits
+const MAX_GOLD: u16 = 511; // 9 bits
+const MAX_PACKABLE_ITEM_XP: u16 = 511; // 9 bits
+const MAX_PACKABLE_BEAST_HEALTH: u16 = 511; // 9 bits
+const MAX_STAT_UPGRADE_POINTS: u8 = 7; // 3 bits
+const MAX_LAST_ACTION_BLOCK: u16 = 511; // 9 bits
+const MAX_ACTIONS_PER_BLOCK: u8 = 15; // 4 bits
+
+const ITEM_MAX_XP: u16 = 400;
 
 // Potion Settings
 const POTION_PRICE: u16 = 1;
@@ -15,7 +25,6 @@ const CHARISMA_POTION_DISCOUNT: u16 = 2;
 const CHARISMA_ITEM_DISCOUNT: u16 = 1;
 const MINIMUM_ITEM_PRICE: u16 = 1;
 const ITEM_MAX_GREATNESS: u8 = 20;
-const ITEM_MAX_XP: u16 = 400;
 const MAX_GREATNESS_STAT_BONUS: u8 = 1;
 const NECKLACE_G20_BONUS_STATS: u8 = 1;
 const SILVER_RING_G20_LUCK_BONUS: u8 = 20;
@@ -27,8 +36,6 @@ const JEWELRY_BONUS_NAME_MATCH_PERCENT_PER_GREATNESS: u8 = 3;
 const NECKLACE_ARMOR_BONUS: u8 = 3;
 
 // Stat Settings
-const MAX_STAT_VALUE: u8 = 31; // 2^5 - 1
-const MAX_STAT_UPGRADES: u8 = 7; // 2^3 - 1
 const HEALTH_INCREASE_PER_VITALITY: u8 = 10;
 const VITALITY_INSTANT_HEALTH_BONUS: u16 = 10;
 
@@ -40,12 +47,10 @@ const BEAST_CRITICAL_HIT_CHANCE: u8 = 10;
 const OBSTACLE_CRITICAL_HIT_CHANCE: u8 = 10;
 
 // Misc Settings
-const MAX_XP: u16 = 8191; // 2^13 - 1
 const MAX_ADVENTURER_BLOCKS: u16 = 512; // 2^9
 const STAT_UPGRADE_POINTS_PER_LEVEL: u8 = 1;
 const BEAST_SPECIAL_NAME_LEVEL_UNLOCK: u16 = 19;
 const XP_FOR_DISCOVERIES: u16 = 1;
-const MAX_ACTIONS_PER_BLOCK: u8 = 15;
 
 // controls how much faster items level up compared to the player
 const ITEM_XP_MULTIPLIER_BEASTS: u16 = 2;
@@ -62,41 +67,6 @@ mod StatisticIndex {
     const INTELLIGENCE: u8 = 3;
     const WISDOM: u8 = 4;
     const CHARISMA: u8 = 5;
-}
-
-mod ClassStatBoosts {
-    mod Cleric {
-        const STRENGTH: u8 = 0;
-        const DEXTERITY: u8 = 0;
-        const VITALITY: u8 = 3;
-        const INTELLIGENCE: u8 = 0;
-        const WISDOM: u8 = 0;
-        const CHARISMA: u8 = 3;
-    }
-    mod Scout {
-        const STRENGTH: u8 = 0;
-        const DEXTERITY: u8 = 2;
-        const VITALITY: u8 = 0;
-        const INTELLIGENCE: u8 = 2;
-        const WISDOM: u8 = 2;
-        const CHARISMA: u8 = 0;
-    }
-    mod Hunter {
-        const STRENGTH: u8 = 3;
-        const DEXTERITY: u8 = 0;
-        const VITALITY: u8 = 0;
-        const INTELLIGENCE: u8 = 3;
-        const WISDOM: u8 = 0;
-        const CHARISMA: u8 = 0;
-    }
-    mod Warrior {
-        const STRENGTH: u8 = 1;
-        const DEXTERITY: u8 = 1;
-        const VITALITY: u8 = 1;
-        const INTELLIGENCE: u8 = 1;
-        const WISDOM: u8 = 1;
-        const CHARISMA: u8 = 1;
-    }
 }
 
 const U128_MAX: u128 = 340282366920938463463374607431768211455;
