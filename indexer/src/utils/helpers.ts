@@ -160,14 +160,15 @@ export function updateAdventurer({
   timestamp: string;
 }) {
   const { adventurer } = adventurerState;
+  const entity = {
+    id: checkExistsInt(BigInt(adventurerState.adventurerId)),
+    owner: checkExistsInt(BigInt(adventurerState.owner)),
+  };
   return {
-    entity: {
-      id: checkExistsInt(BigInt(adventurerState.adventurerId)),
-    },
+    entity,
     update: {
       $set: {
-        id: checkExistsInt(BigInt(adventurerState.adventurerId)),
-        owner: checkExistsInt(BigInt(adventurerState.owner)),
+        ...entity,
         lastAction: encodeIntAsBytes(BigInt(adventurer.lastActionBlock)),
         health: encodeIntAsBytes(BigInt(adventurer.health)),
         xp: encodeIntAsBytes(BigInt(adventurer.xp)),
