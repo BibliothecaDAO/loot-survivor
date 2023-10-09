@@ -48,18 +48,24 @@ mod Game {
             adventurer_constants::{
                 POTION_HEALTH_AMOUNT, ITEM_XP_MULTIPLIER_BEASTS, ITEM_XP_MULTIPLIER_OBSTACLES,
                 ITEM_MAX_GREATNESS, MAX_GREATNESS_STAT_BONUS, StatisticIndex,
-                VITALITY_INSTANT_HEALTH_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, XP_FOR_DISCOVERIES
+                VITALITY_INSTANT_HEALTH_BONUS, BEAST_SPECIAL_NAME_LEVEL_UNLOCK, XP_FOR_DISCOVERIES,
+                STARTING_GOLD, STARTING_HEALTH, POTION_PRICE, MINIMUM_POTION_PRICE,
+                CHARISMA_POTION_DISCOUNT, CHARISMA_ITEM_DISCOUNT, MINIMUM_ITEM_PRICE,
+                MINIMUM_DAMAGE_TO_BEASTS, MINIMUM_DAMAGE_FROM_OBSTACLES,
+                OBSTACLE_CRITICAL_HIT_CHANCE, MAX_STAT_UPGRADE_POINTS
             }
         },
         item_meta::{ImplItemSpecials, ItemSpecials, IItemSpecials, ItemSpecialsStorage},
         adventurer_utils::AdventurerUtils, leaderboard::{Score, Leaderboard},
     };
     use market::{
-        market::{ImplMarket, LootWithPrice, ItemPurchase}, constants::{NUMBER_OF_ITEMS_PER_LEVEL}
+        market::{ImplMarket, LootWithPrice, ItemPurchase},
+        constants::{NUMBER_OF_ITEMS_PER_LEVEL, TIER_PRICE},
     };
     use obstacles::obstacle::{ImplObstacle, IObstacle};
     use combat::{
-        combat::{CombatSpec, SpecialPowers, ImplCombat}, constants::CombatEnums::{Slot, Tier, Type}
+        combat::{CombatSpec, SpecialPowers, ImplCombat},
+        constants::{CombatSettings::STRENGTH_DAMAGE_BONUS, CombatEnums::{Slot, Tier, Type}}
     };
     use beasts::beast::{Beast, IBeast, ImplBeast};
     use game_entropy::game_entropy::{GameEntropy, ImplGameEntropy};
@@ -211,7 +217,12 @@ mod Game {
             // process explore or apply idle penalty
             if !idle {
                 _explore(
-                    ref self, ref adventurer, adventurer_id, adventurer_entropy, game_entropy.hash, till_beast
+                    ref self,
+                    ref adventurer,
+                    adventurer_id,
+                    adventurer_entropy,
+                    game_entropy.hash,
+                    till_beast
                 );
             } else {
                 _apply_idle_penalty(ref self, adventurer_id, ref adventurer, num_blocks);
@@ -774,6 +785,48 @@ mod Game {
         fn get_last_action_block(self: @ContractState, adventurer_id: felt252) -> u16 {
             _unpack_adventurer(self, adventurer_id).last_action_block
         }
+        fn get_actions_per_block(self: @ContractState, adventurer_id: felt252) -> u8 {
+            _unpack_adventurer(self, adventurer_id).actions_per_block
+        }
+        fn get_equipped_items(
+            self: @ContractState, adventurer_id: felt252
+        ) -> Array<ItemPrimitive> {
+            let adventurer = _unpack_adventurer(self, adventurer_id);
+            let mut equipped_items = ArrayTrait::<ItemPrimitive>::new();
+            equipped_items.append(adventurer.weapon);
+            equipped_items.append(adventurer.chest);
+            equipped_items.append(adventurer.head);
+            equipped_items.append(adventurer.waist);
+            equipped_items.append(adventurer.foot);
+            equipped_items.append(adventurer.hand);
+            equipped_items.append(adventurer.neck);
+            equipped_items.append(adventurer.ring);
+            equipped_items
+        }
+        fn get_equipped_weapon(self: @ContractState, adventurer_id: felt252) -> ItemPrimitive {
+            _unpack_adventurer(self, adventurer_id).weapon
+        }
+        fn get_equipped_chest(self: @ContractState, adventurer_id: felt252) -> ItemPrimitive {
+            _unpack_adventurer(self, adventurer_id).chest
+        }
+        fn get_equipped_head(self: @ContractState, adventurer_id: felt252) -> ItemPrimitive {
+            _unpack_adventurer(self, adventurer_id).head
+        }
+        fn get_equipped_waist(self: @ContractState, adventurer_id: felt252) -> ItemPrimitive {
+            _unpack_adventurer(self, adventurer_id).waist
+        }
+        fn get_equipped_foot(self: @ContractState, adventurer_id: felt252) -> ItemPrimitive {
+            _unpack_adventurer(self, adventurer_id).foot
+        }
+        fn get_equipped_hand(self: @ContractState, adventurer_id: felt252) -> ItemPrimitive {
+            _unpack_adventurer(self, adventurer_id).hand
+        }
+        fn get_equipped_necklace(self: @ContractState, adventurer_id: felt252) -> ItemPrimitive {
+            _unpack_adventurer(self, adventurer_id).neck
+        }
+        fn get_equipped_ring(self: @ContractState, adventurer_id: felt252) -> ItemPrimitive {
+            _unpack_adventurer(self, adventurer_id).ring
+        }
         fn get_weapon_greatness(self: @ContractState, adventurer_id: felt252) -> u8 {
             _unpack_adventurer(self, adventurer_id).weapon.get_greatness()
         }
@@ -889,6 +942,66 @@ mod Game {
         }
         fn next_game_entropy_rotation(self: @ContractState) -> felt252 {
             _next_game_entropy_rotation(self)
+        }
+        fn game_rate_limit(self: @ContractState) -> u64 {
+            _load_game_entropy(self).get_rate_limit()
+        }
+        fn starting_gold(self: @ContractState) -> u16 {
+            STARTING_GOLD
+        }
+        fn starting_health(self: @ContractState) -> u16 {
+            STARTING_HEALTH
+        }
+        fn base_potion_price(self: @ContractState) -> u16 {
+            POTION_PRICE
+        }
+        fn potion_health_amount(self: @ContractState) -> u16 {
+            POTION_HEALTH_AMOUNT
+        }
+        fn minimum_potion_price(self: @ContractState) -> u16 {
+            MINIMUM_POTION_PRICE
+        }
+        fn charisma_potion_discount(self: @ContractState) -> u16 {
+            CHARISMA_POTION_DISCOUNT
+        }
+        fn items_per_stat_upgrade(self: @ContractState) -> u8 {
+            NUMBER_OF_ITEMS_PER_LEVEL
+        }
+        fn item_tier_price_multiplier(self: @ContractState) -> u16 {
+            TIER_PRICE
+        }
+        fn charisma_item_discount(self: @ContractState) -> u16 {
+            CHARISMA_ITEM_DISCOUNT
+        }
+        fn minimum_item_price(self: @ContractState) -> u16 {
+            MINIMUM_ITEM_PRICE
+        }
+        fn minimum_damage_to_beasts(self: @ContractState) -> u8 {
+            MINIMUM_DAMAGE_TO_BEASTS
+        }
+        fn minimum_damage_from_beasts(self: @ContractState) -> u8 {
+            MINIMUM_DAMAGE_FROM_BEASTS
+        }
+        fn minimum_damage_from_obstacles(self: @ContractState) -> u8 {
+            MINIMUM_DAMAGE_FROM_OBSTACLES
+        }
+        fn obstacle_critical_hit_chance(self: @ContractState) -> u8 {
+            OBSTACLE_CRITICAL_HIT_CHANCE
+        }
+        fn stat_upgrades_per_level(self: @ContractState) -> u8 {
+            MAX_STAT_UPGRADE_POINTS
+        }
+        fn beast_special_name_unlock_level(self: @ContractState) -> u16 {
+            BEAST_SPECIAL_NAME_LEVEL_UNLOCK
+        }
+        fn item_xp_multiplier_beasts(self: @ContractState) -> u16 {
+            ITEM_XP_MULTIPLIER_BEASTS
+        }
+        fn item_xp_multiplier_obstacles(self: @ContractState) -> u16 {
+            ITEM_XP_MULTIPLIER_OBSTACLES
+        }
+        fn strength_bonus_damage(self: @ContractState) -> u8 {
+            STRENGTH_DAMAGE_BONUS
         }
     }
 
@@ -2360,7 +2473,7 @@ mod Game {
     }
 
     fn _assert_rate_limit(actions_per_block: u8, rate_limit: u64) {
-        assert(actions_per_block.into() <= rate_limit, messages::RATE_LIMIT_EXCEEDED);
+        assert(actions_per_block.into() < rate_limit, messages::RATE_LIMIT_EXCEEDED);
     }
 
     fn _assert_is_idle(self: @ContractState, adventurer: Adventurer) {

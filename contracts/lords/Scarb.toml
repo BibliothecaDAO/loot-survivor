@@ -1,0 +1,11 @@
+[package]
+name = "lords"
+version = "0.1.0"
+
+[dependencies]
+starknet = "2.1.0"
+openzeppelin = { git = "https://github.com/OpenZeppelin/cairo-contracts.git", tag = "v0.7.0" }
+
+[[target.starknet-contract]]
+allowed-libfuncs-list.name = "experimental"
+allowed-libfuncs = true

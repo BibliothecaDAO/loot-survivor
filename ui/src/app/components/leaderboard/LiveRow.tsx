@@ -11,16 +11,12 @@ import useUIStore from "@/app/hooks/useUIStore";
 import { chunkArray, calculateLevel } from "@/app/lib/utils";
 
 interface LiveLeaderboardRowProps {
-  index: number;
   adventurer: Adventurer;
-  rank: number;
   handleRowSelected: (id: number) => void;
 }
 
 const LiveLeaderboardRow = ({
-  index,
   adventurer,
-  rank,
   handleRowSelected,
 }: LiveLeaderboardRowProps) => {
   const { gameContract } = useContracts();
@@ -64,7 +60,6 @@ const LiveLeaderboardRow = ({
         formattedSlayedAdventurers.length.toString(),
         ...slayAdventurers,
         adventurer?.id?.toString() ?? "0",
-        "0",
       ],
       metadata: `Slaying ${adventurer.name}`,
     };

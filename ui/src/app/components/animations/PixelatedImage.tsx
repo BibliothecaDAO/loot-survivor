@@ -3,13 +3,15 @@ import React, { useEffect, useRef, useState } from "react";
 interface PixelatedImageProps {
   src: string;
   pixelSize: number;
-  setImageLoading: (imageLoaded: boolean) => void;
+  setImageLoading?: (imageLoaded: boolean) => void;
+  fill?: boolean;
 }
 
 const PixelatedImage: React.FC<PixelatedImageProps> = ({
   src,
   pixelSize,
   setImageLoading,
+  fill,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -32,56 +34,66 @@ const PixelatedImage: React.FC<PixelatedImageProps> = ({
   }, []);
 
   useEffect(() => {
-    const image = new Image();
-    image.src = src;
+    const pixelateImage = () => {
+      const image = new Image();
+      image.src = src;
 
-    image.onload = () => {
-      setImageLoading(true);
-      const canvas = canvasRef.current;
-      if (!canvas) return;
+      image.onload = () => {
+        setImageLoading && setImageLoading(true);
+        const canvas = canvasRef.current;
+        if (!canvas) return;
 
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return;
 
-      const { width, height } = dimensions;
+        const { width, height } = dimensions;
 
-      ctx.fillStyle = "black";
-      ctx.fillRect(0, 0, width, height);
+        const aspectRatio = image.width / image.height;
 
-      const scaledWidth = Math.ceil(width / pixelSize);
-      const scaledHeight = Math.ceil(height / pixelSize);
-      let maxTimeout = 0;
+        // Unless fill is true, from the smallest dimension calculate the width and height of the image
+        const minDimension = Math.min(width, height);
+        const newHeight = fill ? height : Math.min(minDimension, image.width);
+        const newWidth = fill ? width : newHeight / aspectRatio;
 
-      for (let y = 0; y < scaledHeight; y++) {
-        for (let x = 0; x < scaledWidth; x++) {
-          const timeout = Math.random() * 100;
-          maxTimeout = Math.max(maxTimeout, timeout);
-          setTimeout(() => {
-            // Updated drawImage method to scale the image to the canvas size
-            ctx.drawImage(
-              image,
-              x * (image.width / scaledWidth),
-              y * (image.height / scaledHeight),
-              image.width / scaledWidth,
-              image.height / scaledHeight,
-              x * pixelSize,
-              y * pixelSize,
-              pixelSize,
-              pixelSize
-            );
-          }, timeout);
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, width, height);
+
+        const scaledWidth = Math.ceil(newWidth / pixelSize);
+        const scaledHeight = Math.ceil(newHeight / pixelSize);
+        let maxTimeout = 0;
+
+        for (let y = 0; y < scaledHeight; y++) {
+          for (let x = 0; x < scaledWidth; x++) {
+            const timeout = Math.random() * 100;
+            maxTimeout = Math.max(maxTimeout, timeout);
+            setTimeout(() => {
+              // Updated drawImage method to scale the image to the canvas size
+              ctx.drawImage(
+                image,
+                x * (image.width / scaledWidth),
+                y * (image.height / scaledHeight),
+                image.width / scaledWidth,
+                image.height / scaledHeight,
+                x * pixelSize,
+                y * pixelSize,
+                pixelSize,
+                pixelSize
+              );
+            }, timeout);
+          }
         }
-      }
 
-      setTimeout(() => {
-        setImageLoading(false);
-      }, maxTimeout);
+        setTimeout(() => {
+          setImageLoading && setImageLoading(true);
+        }, maxTimeout);
+      };
     };
+    pixelateImage();
   }, [src, pixelSize, dimensions]);
 
   return (
     <canvas
-      className="absolute"
+      className="absolute animate-pulse"
       ref={canvasRef}
       width={dimensions.width}
       height={dimensions.height}

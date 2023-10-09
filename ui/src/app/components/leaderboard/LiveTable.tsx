@@ -84,9 +84,7 @@ const LiveLeaderboardTable = ({
               (adventurer: Adventurer, index: number) => (
                 <LiveRow
                   key={index}
-                  index={index}
                   adventurer={adventurer}
-                  rank={rankXp(adventurer, index)}
                   handleRowSelected={handleRowSelected}
                 />
               )

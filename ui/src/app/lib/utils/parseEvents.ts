@@ -33,66 +33,64 @@ import { processData } from "./processData";
 function parseAdventurerState(data: string[]) {
   return {
     owner: data[0],
-    adventurerId: {
-      low: parseInt(data[1]),
-      high: parseInt(data[2]),
-    },
+    adventurerId: parseInt(data[1]),
     adventurer: {
-      lastAction: parseInt(data[3]),
-      health: parseInt(data[4]),
-      xp: parseInt(data[5]),
+      lastAction: parseInt(data[2]),
+      health: parseInt(data[3]),
+      xp: parseInt(data[4]),
       stats: {
-        strength: parseInt(data[6]),
-        dexterity: parseInt(data[7]),
-        vitality: parseInt(data[8]),
-        intelligence: parseInt(data[9]),
-        wisdom: parseInt(data[10]),
-        charisma: parseInt(data[11]),
-        luck: parseInt(data[12]),
+        strength: parseInt(data[5]),
+        dexterity: parseInt(data[6]),
+        vitality: parseInt(data[7]),
+        intelligence: parseInt(data[8]),
+        wisdom: parseInt(data[9]),
+        charisma: parseInt(data[10]),
+        luck: parseInt(data[11]),
       },
-      gold: parseInt(data[13]),
+      gold: parseInt(data[12]),
       weapon: {
-        id: parseInt(data[14]),
-        xp: parseInt(data[15]),
-        metadata: parseInt(data[16]),
+        id: parseInt(data[13]),
+        xp: parseInt(data[14]),
+        metadata: parseInt(data[15]),
       },
       chest: {
-        id: parseInt(data[17]),
-        xp: parseInt(data[18]),
-        metadata: parseInt(data[19]),
+        id: parseInt(data[16]),
+        xp: parseInt(data[17]),
+        metadata: parseInt(data[18]),
       },
       head: {
-        id: parseInt(data[20]),
-        xp: parseInt(data[21]),
-        metadata: parseInt(data[22]),
+        id: parseInt(data[19]),
+        xp: parseInt(data[20]),
+        metadata: parseInt(data[21]),
       },
       waist: {
-        id: parseInt(data[23]),
-        xp: parseInt(data[24]),
-        metadata: parseInt(data[25]),
+        id: parseInt(data[22]),
+        xp: parseInt(data[23]),
+        metadata: parseInt(data[24]),
       },
       foot: {
-        id: parseInt(data[26]),
-        xp: parseInt(data[27]),
-        metadata: parseInt(data[28]),
+        id: parseInt(data[25]),
+        xp: parseInt(data[26]),
+        metadata: parseInt(data[27]),
       },
       hand: {
-        id: parseInt(data[29]),
-        xp: parseInt(data[30]),
-        metadata: parseInt(data[31]),
+        id: parseInt(data[28]),
+        xp: parseInt(data[29]),
+        metadata: parseInt(data[30]),
       },
       neck: {
-        id: parseInt(data[32]),
-        xp: parseInt(data[33]),
-        metadata: parseInt(data[34]),
+        id: parseInt(data[31]),
+        xp: parseInt(data[32]),
+        metadata: parseInt(data[33]),
       },
       ring: {
-        id: parseInt(data[35]),
-        xp: parseInt(data[36]),
-        metadata: parseInt(data[37]),
+        id: parseInt(data[34]),
+        xp: parseInt(data[35]),
+        metadata: parseInt(data[36]),
       },
-      beastHealth: parseInt(data[38]),
-      statPointsAvailable: parseInt(data[39]),
+      beastHealth: parseInt(data[37]),
+      statPointsAvailable: parseInt(data[38]),
+      actionsPerBlock: parseInt(data[39]),
       mutated: convertToBoolean(parseInt(data[40])),
     },
   };
@@ -233,9 +231,7 @@ export async function parseEvents(
           adventurerState: parseAdventurerState(raw.data.slice(0, 40)),
           adventurerMeta: {
             name: parseInt(raw.data[41]),
-            homeRealm: parseInt(raw.data[42]),
-            class: parseInt(raw.data[43]),
-            entropy: parseInt(raw.data[44]),
+            entropy: parseInt(raw.data[42]),
           },
         };
         const startGameEvent = processData(
@@ -579,7 +575,7 @@ export async function parseEvents(
       case "DroppedItems":
         const itemIds = [];
         // Skip array length
-        const itemsData = raw.data.slice(76);
+        const itemsData = raw.data.slice(77);
         for (let i = 0; i < itemsData.length; i++) {
           itemIds.push(parseInt(itemsData[i]));
         }

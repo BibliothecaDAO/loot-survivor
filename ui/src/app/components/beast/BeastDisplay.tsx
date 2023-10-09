@@ -3,8 +3,7 @@ import { getBeastData } from "../../lib/utils";
 import { HeartIcon } from "../icons/Icons";
 import EfficacyIcon from "../icons/EfficacyIcon";
 import { processBeastName } from "../../lib/utils";
-import { Battle, Beast, Adventurer } from "@/app/types";
-import { useQueriesStore } from "@/app/hooks/useQueryStore";
+import { Beast } from "@/app/types";
 
 import { HealthCountDown } from "../CountDown";
 

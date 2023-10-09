@@ -21,7 +21,6 @@ import {
   HeartVitalityIcon,
   LightbulbIcon,
   ScrollIcon,
-  HealthPotionIcon,
   HeartIcon,
 } from "../components/icons/Icons";
 import PurchaseHealth from "../components/actions/PurchaseHealth";
@@ -42,11 +41,10 @@ interface UpgradeScreenProps {
  * @description Provides the upgrade screen for the adventurer.
  */
 export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
-  const { gameContract, lordsContract } = useContracts();
+  const { gameContract } = useContracts();
   const adventurer = useAdventurerStore((state) => state.adventurer);
   const loading = useLoadingStore((state) => state.loading);
   const estimatingFee = useUIStore((state) => state.estimatingFee);
-  const txAccepted = useLoadingStore((state) => state.txAccepted);
   const resetNotification = useLoadingStore((state) => state.resetNotification);
   const addToCalls = useTransactionCartStore((state) => state.addToCalls);
   const removeEntrypointFromCalls = useTransactionCartStore(
@@ -64,7 +62,6 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
   const setUpgrades = useUIStore((state) => state.setUpgrades);
   const purchaseItems = useUIStore((state) => state.purchaseItems);
   const setPurchaseItems = useUIStore((state) => state.setPurchaseItems);
-  const setScreen = useUIStore((state) => state.setScreen);
   const pendingMessage = useLoadingStore((state) => state.pendingMessage);
   const [summary, setSummary] = useState<UpgradeSummary>({
     Stats: { ...ZeroUpgrade },
@@ -73,11 +70,6 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
   });
 
   const gameData = new GameData();
-
-  // useCustomQuery("latestMarketItemsQuery", getLatestMarketItems, {
-  //   adventurerId: adventurer?.id,
-  //   limit: 20 * (adventurer?.statUpgrades ?? 0),
-  // });
 
   const checkTransacting =
     typeof pendingMessage === "string" &&
@@ -227,13 +219,12 @@ export default function UpgradeScreen({ upgrade }: UpgradeScreenProps) {
     potions?: number,
     items?: any[]
   ) => {
-    removeEntrypointFromCalls("upgrade_adventurer");
+    removeEntrypointFromCalls("upgrade");
     const upgradeTx = {
       contractAddress: gameContract?.address ?? "",
-      entrypoint: "upgrade_adventurer",
+      entrypoint: "upgrade",
       calldata: [
         adventurer?.id?.toString() ?? "",
-        "0",
         potions ? potions.toString() : potionAmount.toString(),
         currentUpgrades
           ? currentUpgrades["Strength"].toString()

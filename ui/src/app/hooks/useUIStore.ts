@@ -63,6 +63,8 @@ type State = {
   setStartOption: (value: string) => void;
   arcadeDialog: boolean;
   showArcadeDialog: (value: boolean) => void;
+  arcadeIntro: boolean;
+  showArcadeIntro: (value: boolean) => void;
   topUpDialog: boolean;
   showTopUpDialog: (value: boolean) => void;
   topUpAccount: string;
@@ -120,6 +122,8 @@ const useUIStore = create<State>((set) => ({
   setStartOption: (value) => set({ startOption: value }),
   arcadeDialog: false,
   showArcadeDialog: (value) => set({ arcadeDialog: value }),
+  arcadeIntro: false,
+  showArcadeIntro: (value) => set({ arcadeIntro: value }),
   topUpDialog: false,
   showTopUpDialog: (value) => set({ topUpDialog: value }),
   topUpAccount: "",

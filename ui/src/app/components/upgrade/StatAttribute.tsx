@@ -57,7 +57,7 @@ export const StatAttribute = ({
           if (
             Object.values(upgrades).filter((value) => value !== 0).length === 0
           ) {
-            removeEntrypointFromCalls("upgrade_adventurer");
+            removeEntrypointFromCalls("upgrade");
           }
         }
         setButtonClicked(false);

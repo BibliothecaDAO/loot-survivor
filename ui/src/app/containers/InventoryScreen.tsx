@@ -9,17 +9,13 @@ import { getKeyFromValue, groupBySlot } from "../lib/utils";
 import { InventoryRow } from "../components/inventory/InventoryRow";
 import Info from "../components/adventurer/Info";
 import { ItemDisplay } from "../components/adventurer/ItemDisplay";
-import { Button } from "../components/buttons/Button";
 import useAdventurerStore from "../hooks/useAdventurerStore";
 import useTransactionCartStore from "../hooks/useTransactionCartStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
-import useLoadingStore from "../hooks/useLoadingStore";
 import LootIcon from "../components/icons/LootIcon";
 import { InfoIcon, BagIcon } from "../components/icons/Icons";
 import { Call, Item, Metadata } from "../types";
 import { GameData } from "../components/GameData";
-import useCustomQuery from "../hooks/useCustomQuery";
-import { getAdventurerById } from "../hooks/graphql/queries";
 import useUIStore from "../hooks/useUIStore";
 
 /**
@@ -67,7 +63,6 @@ export default function InventoryScreen() {
         entrypoint: "equip",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           newEquipItems.length.toString(),
           ...newEquipItems,
         ],
@@ -87,10 +82,9 @@ export default function InventoryScreen() {
     if (gameContract) {
       const dropItemsTx = {
         contractAddress: gameContract?.address,
-        entrypoint: "drop_items",
+        entrypoint: "drop",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           newDropItems.length.toString(),
           ...newDropItems,
         ],
@@ -102,15 +96,6 @@ export default function InventoryScreen() {
   };
 
   const gameData = new GameData();
-
-  const singleEquipExists = (item: string) => {
-    return calls.some(
-      (call: Call) =>
-        call.entrypoint == "equip" &&
-        Array.isArray(call.calldata) &&
-        call.calldata[2] == getKeyFromValue(gameData.ITEMS, item)?.toString()
-    );
-  };
 
   const checkTransacting = (item: string) => {
     if (txData?.status == "RECEIVED") {
@@ -340,17 +325,6 @@ export default function InventoryScreen() {
                         }
                         handleDrop={handleDropItems}
                       />
-                      {/* <Button
-                      onClick={() => handleAddEquipItem(item.item ?? "")}
-                      disabled={
-                        singleEquipExists(item.item ?? "") ||
-                        item.equipped ||
-                        checkTransacting(item.item ?? "")
-                      }
-                      loading={loading}
-                    >
-                      {item.equipped ? "Eqipped" : "Equip"}
-                    </Button> */}
                     </div>
                   );
                 })

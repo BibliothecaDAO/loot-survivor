@@ -15,9 +15,17 @@ export interface SpawnProps {
   formData: FormData;
   spawn: (...args: any[]) => any;
   handleBack: () => void;
+  lordsBalance?: bigint;
+  mintLords: (...args: any[]) => any;
 }
 
-export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
+export const Spawn = ({
+  formData,
+  spawn,
+  handleBack,
+  lordsBalance,
+  mintLords,
+}: SpawnProps) => {
   const [showWalletTutorial, setShowWalletTutorial] = useState(false);
   const [formFilled, setFormFilled] = useState(false);
   const isWrongNetwork = useUIStore((state) => state.isWrongNetwork);
@@ -48,6 +56,8 @@ export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
     resetNotification();
     await spawn(formData);
   };
+
+  const checkEnoughLords = lordsBalance! >= BigInt(25000000000000000000);
 
   return (
     <div className="flex flex-col w-full h-full justify-center">
@@ -116,19 +126,29 @@ export const Spawn = ({ formData, spawn, handleBack }: SpawnProps) => {
                 }
               }}
             >
-              <Button
-                type="submit"
-                size={"xl"}
-                disabled={
-                  !formFilled ||
-                  !account ||
-                  isWrongNetwork ||
-                  loading ||
-                  estimatingFee
-                }
-              >
-                {formFilled ? "Start Game!!" : "Fill details"}
-              </Button>
+              <div className="flex flex-col gap-2">
+                <Button
+                  type="submit"
+                  size={"xl"}
+                  disabled={
+                    !formFilled ||
+                    !account ||
+                    isWrongNetwork ||
+                    loading ||
+                    estimatingFee ||
+                    !checkEnoughLords
+                  }
+                >
+                  {checkEnoughLords
+                    ? formFilled
+                      ? "Start Game!!"
+                      : "Fill details"
+                    : "Not enough Lords"}
+                </Button>
+                {!checkEnoughLords && (
+                  <Button onClick={mintLords}>Mint Lords</Button>
+                )}
+              </div>
             </form>
           )}
         </div>

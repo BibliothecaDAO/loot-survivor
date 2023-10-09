@@ -6,7 +6,7 @@ import useAdventurerStore from "../hooks/useAdventurerStore";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import React, { useState } from "react";
 import { processBeastName } from "../lib/utils";
-import { Battle, NullDiscovery, NullBeast } from "../types";
+import { Battle, NullBeast } from "../types";
 import { Button } from "../components/buttons/Button";
 import useUIStore from "../hooks/useUIStore";
 
@@ -28,9 +28,6 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
 
   const hasBeast = useAdventurerStore((state) => state.computed.hasBeast);
   const isAlive = useAdventurerStore((state) => state.computed.isAlive);
-  const lastBeast = useQueriesStore(
-    (state) => state.data.lastBeastQuery?.discoveries[0] || NullDiscovery
-  );
   const beastData = useQueriesStore(
     (state) => state.data.beastQuery?.beasts[0] || NullBeast
   );
@@ -38,14 +35,14 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
     (state) => state.data.battlesByBeastQuery?.battles || []
   );
 
-  const [buttonText, setButtonText] = useState("Flee!");
+  const [buttonText, setButtonText] = useState("Flee");
 
   const handleMouseEnter = () => {
-    setButtonText("you coward!");
+    setButtonText("You Coward!");
   };
 
   const handleMouseLeave = () => {
-    setButtonText("Flee!");
+    setButtonText("Flee");
   };
 
   const attackButtonsData: ButtonData[] = [
@@ -194,7 +191,9 @@ export default function BeastScreen({ attack, flee }: BeastScreenProps) {
                 />
               </div>
               <div className="flex flex-col items-center">
-                <p className="uppercase sm:text-xl 2xl:text-2xl">Flee</p>
+                <p className="uppercase sm:text-xl 2xl:text-2xl">
+                  {buttonText}
+                </p>
                 <KeyboardControl
                   buttonsData={fleeButtonsData}
                   size={"xl"}

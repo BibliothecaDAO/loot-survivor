@@ -2,14 +2,8 @@ import Info from "../components/adventurer/Info";
 import { useQueriesStore } from "../hooks/useQueryStore";
 import { Button } from "../components/buttons/Button";
 import useUIStore from "../hooks/useUIStore";
-import useCustomQuery from "../hooks/useCustomQuery";
-import {
-  getAdventurerById,
-  getItemsByAdventurer,
-} from "../hooks/graphql/queries";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import EncountersScreen from "./EncountersScreen";
-import { useMediaQuery } from "react-responsive";
 import { NullAdventurer } from "../types";
 
 export default function Profile() {

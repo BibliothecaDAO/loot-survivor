@@ -6,10 +6,15 @@
 
 body,
 input[type="text"] {
-  font-family: "VT323", monospace;
-  font-weight: 400;
-  text-shadow: rgb(39, 168, 115, 0.9) 1px 0 10px;
-  animation  : textShadow 0.3s infinite;
+  font-family  : "VT323", monospace;
+  font-weight  : 400;
+  text-shadow  : rgb(39, 168, 115, 0.9) 1px 0 10px;
+  animation    : textShadow 0.3s infinite;
+  outline-color: rgba(74, 246, 38, 1);
+}
+
+input:focus {
+  outline-style: solid;
 }
 
 ::selection {
@@ -285,4 +290,16 @@ body::-webkit-scrollbar-thumb,
   to {
     opacity: 1;
   }
+}
+
+.notification-sprite {
+  background-image : url("/adventurer-sprites.png");
+  display          : inline-block;
+  background-repeat: no-repeat;
+}
+
+.coin-sprite {
+  background-image : url("/coin-sprites.png");
+  display          : inline-block;
+  background-repeat: no-repeat;
 }

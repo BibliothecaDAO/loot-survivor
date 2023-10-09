@@ -1,10 +1,9 @@
-import { useEffect, useState, useRef, ReactElement, useCallback } from "react";
+import { useEffect, useState, ReactElement, useCallback } from "react";
 import { useContracts } from "../../hooks/useContracts";
 import { Button } from "../buttons/Button";
 import useAdventurerStore from "../../hooks/useAdventurerStore";
 import useTransactionCartStore from "../../hooks/useTransactionCartStore";
-import { useMediaQuery } from "react-responsive";
-import { Item, Menu, Metadata } from "@/app/types";
+import { Item } from "@/app/types";
 import { GameData } from "../GameData";
 import { getKeyFromValue } from "@/app/lib/utils";
 
@@ -50,7 +49,6 @@ export const InventoryRow = ({
         entrypoint: "equip",
         calldata: [
           adventurer?.id?.toString() ?? "",
-          "0",
           equipItems.length,
           ...equipItems,
           // getKeyFromValue(gameData.ITEMS, item) ?? "",

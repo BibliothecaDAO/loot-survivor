@@ -232,42 +232,27 @@ export function syscalls({
   };
 
   const spawn = async (formData: FormData) => {
-    const mintLords = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "mint",
-      calldata: [formatAddress, (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(mintLords);
-
-    const approveLordsTx = {
-      contractAddress: lordsContract?.address ?? "",
-      entrypoint: "approve",
-      calldata: [gameContract?.address ?? "", (100 * 10 ** 18).toString(), "0"],
-    };
-    addToCalls(approveLordsTx);
-
     const mintAdventurerTx = {
       contractAddress: gameContract?.address ?? "",
-      entrypoint: "start",
+      entrypoint: "new_game",
       calldata: [
         "0x0628d41075659afebfc27aa2aab36237b08ee0b112debd01e56d037f64f6082a",
         getKeyFromValue(gameData.ITEMS, formData.startingWeapon) ?? "",
         stringToFelt(formData.name).toString(),
-        getRandomNumber(8000),
-        "1",
-        "1",
       ],
     };
 
     addToCalls(mintAdventurerTx);
     const balanceEmpty = await checkArcadeBalance(
-      [...calls, mintLords, approveLordsTx, mintAdventurerTx],
+      [...calls, mintAdventurerTx],
       ethBalance,
       showTopUpDialog,
       setTopUpAccount,
       setEstimatingFee,
       account
     );
+
+    console.log(balanceEmpty);
 
     if (!balanceEmpty) {
       startLoading(
@@ -279,8 +264,6 @@ export function syscalls({
       try {
         const tx = await handleSubmitCalls(account, [
           ...calls,
-          mintLords,
-          approveLordsTx,
           mintAdventurerTx,
         ]);
         setTxHash(tx?.transaction_hash);
@@ -367,7 +350,7 @@ export function syscalls({
     const exploreTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "explore",
-      calldata: [adventurer?.id?.toString() ?? "", "0", till_beast ? "1" : "0"],
+      calldata: [adventurer?.id?.toString() ?? "", till_beast ? "1" : "0"],
     };
     addToCalls(exploreTx);
 
@@ -616,7 +599,7 @@ export function syscalls({
     const attackTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "attack",
-      calldata: [adventurer?.id?.toString() ?? "", "0", tillDeath ? "1" : "0"],
+      calldata: [adventurer?.id?.toString() ?? "", tillDeath ? "1" : "0"],
     };
     addToCalls(attackTx);
 
@@ -848,7 +831,7 @@ export function syscalls({
     const fleeTx = {
       contractAddress: gameContract?.address ?? "",
       entrypoint: "flee",
-      calldata: [adventurer?.id?.toString() ?? "", "0", tillDeath ? "1" : "0"],
+      calldata: [adventurer?.id?.toString() ?? "", tillDeath ? "1" : "0"],
     };
     addToCalls(fleeTx);
 

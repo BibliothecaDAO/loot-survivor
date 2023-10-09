@@ -1,5 +1,4 @@
 import { create } from "zustand";
-import { QueryKey } from "./useQueryStore";
 
 // TODO: Notification Data type
 
