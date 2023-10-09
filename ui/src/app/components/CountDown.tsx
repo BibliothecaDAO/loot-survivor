@@ -12,11 +12,6 @@ export const HealthCountDown = ({ health }: any) => {
     end: health,
     delay: 1000,
     duration: 5,
-    // onReset: () => console.log("Resetted!"),
-    // onUpdate: () => console.log("Updated!"),
-    // onPauseResume: () => console.log("Paused or resumed!"),
-    // onStart: ({ pauseResume }) => console.log(pauseResume),
-    // onEnd: ({ pauseResume }) => console.log(pauseResume),
   });
 
   useEffect(() => {
@@ -86,8 +81,6 @@ export const PenaltyCountDown = ({
       .toString()
       .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   };
-
-  console.log(seconds);
 
   return (
     <div className="text-xs sm:text-lg self-center border px-1 border border-terminal-green">
