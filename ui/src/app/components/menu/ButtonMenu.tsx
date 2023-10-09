@@ -85,18 +85,8 @@ const ButtonMenu: React.FC<ButtonMenuProps> = ({
         <Button
           key={buttonData.id}
           ref={(ref) => (buttonRefs.current[index] = ref)}
-          className={
-            selectedIndex === index && isActive
-              ? "flex flex-row gap-5 animate-pulse w-full"
-              : "flex flex-row gap-5 w-full"
-          }
-          variant={
-            buttonData.variant
-              ? buttonData.variant
-              : selectedIndex === index
-              ? "default"
-              : "outline"
-          }
+          className="flex flex-row gap-5 w-full"
+          variant="outline"
           size={size}
           onClick={() => {
             setSelectedIndex(index);
