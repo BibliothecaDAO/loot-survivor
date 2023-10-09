@@ -304,7 +304,7 @@ export const parseItemsLeveledUp = combineParsers({
 });
 
 export const parsePlayerReward = combineParsers({
-  adventurerId: { index: 0, parser: parseU256 },
+  adventurerId: { index: 0, parser: parseFelt252 },
   rank: { index: 1, parser: parseU8 },
   amount: { index: 2, parser: parseU256 },
   address: { index: 3, parser: parseFelt252 },
