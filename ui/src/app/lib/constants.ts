@@ -39,9 +39,9 @@ export function getContracts() {
     case "goerli":
       return {
         eth: "0x049d36570d4e46f48e99674bd3fcc84644ddd6b96f7c741b1562b82f9e004dc7",
-        game: "0x01263ecbc05e28d1e99f531894838db10b90cfcdd39d020642da1747a733a37a",
+        game: "0x03f2ac2c55abbf633123ddb72adc3472feefc4e962c4cedc16dda11a2ac8d1d4",
         lords:
-          "0x059dac5df32cbce17b081399e97d90be5fba726f97f00638f838613d088e5a47",
+          "0x05e367ac160e5f90c5775089b582dfc987dd148a5a2f977c49def2a6644f724b",
       };
     case "mainnet":
       return {
@@ -71,63 +71,6 @@ export function getAppUrl() {
   }
 }
 
-// export function getRPCUrl() {
-//   switch (process.env.NEXT_PUBLIC_NETWORK) {
-//     case "goerli":
-//       return process.env.NEXT_PUBLIC_RPC_GOERLI_ENDPOINT;
-//     case "mainnet":
-//       return process.env.NEXT_PUBLIC_RPC_MAINNET_ENDPOINT;
-//     default:
-//       return "http://localhost:8000/graphql";
-//   }
-// }
-
-// export function getGraphQLUrl() {
-//   switch (process.env.NEXT_PUBLIC_NETWORK) {
-//     case "goerli":
-//       return "https://survivor-indexer.realms.world/goerli-graphql";
-//     case "mainnet":
-//       return "https://survivor-indexer.realms.world/graphql";
-//     default:
-//       return "http://localhost:8000/graphql";
-//   }
-// }
-
-// export function getContracts() {
-//   switch (process.env.NEXT_PUBLIC_NETWORK) {
-//     case "goerli":
-//       return {
-//         eth: process.env.NEXT_PUBLIC_GOERLI_ETH_CONTRACT_ADDRESS,
-//         game: process.env.NEXT_PUBLIC_GOERLI_GAME_CONTRACT_ADDRESS,
-//         lords: process.env.NEXT_PUBLIC_GOERLI_LORDS_CONTRACT_ADDRESS,
-//       };
-//     case "mainnet":
-//       return {
-//         eth: process.env.NEXT_PUBLIC_MAINNET_ETH_CONTRACT_ADDRESS,
-//         game: process.env.NEXT_PUBLIC_MAINNET_GAME_CONTRACT_ADDRESS,
-//         lords: process.env.NEXT_PUBLIC_MAINNET_LORDS_CONTRACT_ADDRESS,
-//       };
-//   }
-// }
-
-// export function getArcadeClassHash() {
-//   switch (process.env.NEXT_PUBLIC_NETWORK) {
-//     case "goerli":
-//       return process.env.NEXT_PUBLIC_GOERLI_ARCADE_ACCOUNT_CLASS_HASH;
-//     case "mainnet":
-//       return process.env.NEXT_PUBLIC_MAINNET_ARCADE_ACCOUNT_CLASS_HASH;
-//   }
-// }
-
-// export function getAppUrl() {
-//   switch (process.env.NEXT_PUBLIC_NETWORK) {
-//     case "goerli":
-//       return process.env.NEXT_PUBLIC_GOERLI_APP_URL;
-//     case "mainnet":
-//       return process.env.NEXT_PUBLIC_MAINNET_APP_URL;
-//   }
-// }
-
 export const notificationAnimations = [
   { name: "idle", startFrame: 0, frameCount: 4 },
   { name: "run", startFrame: 9, frameCount: 5 },
@@ -144,7 +87,7 @@ export const notificationAnimations = [
 
 // ---- CONTRACT PARAMS
 // Penalty time is 12 blocks, where each block is ~ 15 seconds
-export const penaltyTime = 12 * 15;
+export const penaltyTime = 420;
 export const itemCharismaDiscount = 1;
 export const itemBasePrice = 4;
 export const itemMinimumPrice = 1;

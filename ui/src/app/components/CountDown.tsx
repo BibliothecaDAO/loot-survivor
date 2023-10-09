@@ -12,11 +12,6 @@ export const HealthCountDown = ({ health }: any) => {
     end: health,
     delay: 1000,
     duration: 5,
-    // onReset: () => console.log("Resetted!"),
-    // onUpdate: () => console.log("Updated!"),
-    // onPauseResume: () => console.log("Paused or resumed!"),
-    // onStart: ({ pauseResume }) => console.log(pauseResume),
-    // onEnd: ({ pauseResume }) => console.log(pauseResume),
   });
 
   useEffect(() => {
@@ -58,7 +53,7 @@ export const PenaltyCountDown = ({
       ? formatDiscoveryTime
       : formatBattleTime;
 
-  const formatLastAction = convertTime(lastAction);
+  const formatLastAction = lastAction;
   const targetTime = formatLastAction + penaltyTime * 1000;
 
   useEffect(() => {
