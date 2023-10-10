@@ -52,8 +52,8 @@ mod tests {
 
     const ADVENTURER_ID: felt252 = 1;
 
-    const MAX_LORDS: u256 = 500000000000000000000;
-    const APPROVE: u256 = 50000000000000000000;
+    const MAX_LORDS: u256 = 1000000000000000000000;
+    const APPROVE: u256 = 100000000000000000000;
     const NAME: felt252 = 111;
     const SYMBOL: felt252 = 222;
 
